@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : jeu. 28 juin 2012 21:03:10 CEST
+# * Last Modified : sam. 04 sept. 2010 23:10:12 CEST
 #
 # * Project : Autonomie
 #
@@ -25,10 +25,13 @@ def get_groups(login, request):
     dbsession = request.dbsession
     user = get_user(login, request)
     if user.is_admin():
+        log.debug(" + User is an admin")
         return ['group:admin']
     elif user.is_manager():
+        log.debug(" + User is a manager")
         return ['group:manager']
     else:
+        log.debug(" + User is a contractor")
         return ['group:entrepreneur']
 
 def get_avatar(request, dbsession=None):

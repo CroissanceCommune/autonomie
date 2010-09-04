@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : ven. 29 juin 2012 15:23:52 CEST
+# * Last Modified : sam. 04 sept. 2010 23:20:16 CEST
 #
 # * Project : autonomie
 #
@@ -66,8 +66,10 @@ class RootFactory(dict):
         """
             Default permissions
         """
+        log.debug("# Getting root acls : ")
         acl = DEFAULT_PERM[:]
         acl.append((Allow, Authenticated, 'view',))
+        log.debug(acl)
         return acl
 
     def __init__(self, request):
@@ -122,6 +124,8 @@ def get_client_or_project_acls(self):
     acl = DEFAULT_PERM[:]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.company.employees])
+    log.debug("# Getting acls for the current project or client : ")
+    log.debug(acl)
     return acl
 
 class ProjectFactory(BaseDBFactory):
@@ -177,6 +181,8 @@ def get_task_acl(self):
     acl = DEFAULT_PERM[:]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.project.company.employees])
+    log.debug("# Getting acls for the current task : ")
+    log.debug(acl)
     return acl
 
 class EstimationFactory(BaseDBFactory):

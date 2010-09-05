@@ -39,8 +39,11 @@ from autonomie.views.forms.admin import (
         PaymentModeConfig,
         WorkUnitConfig,
         ExpenseTypesConfig,
+        CAECONFIG,
         get_config_appstruct,
-        merge_dbdatas,)
+        get_config_dbdatas,
+        merge_config_datas,
+        )
 from autonomie.views.forms import BaseFormView
 from autonomie.utils.widgets import ViewLink
 from js.tinymce import tinymce
@@ -67,7 +70,11 @@ factures"))
 dans les formulaires"))
     request.actionmenu.add(ViewLink(u"Configuration des notes de frais",
         path="admin_expense",
-        title=u"Configuration des type de notes de frais"))
+        title=u"Configuration des types de notes de frais"))
+    request.actionmenu.add(ViewLink(u"Configuration des informations comptables\
+            de la CAE",
+        path="admin_cae",
+        title=u"Configuration des différents comptes analytiques de la CAE"))
     return dict(title=u"Administration du site")
 
 
@@ -106,7 +113,8 @@ class AdminMain(BaseFormView):
         # la table config étant un stockage clé valeur
         # le merge_session_with_post ne peut être utilisé
         dbdatas = self.dbsession.query(Config).all()
-        dbdatas = merge_dbdatas(dbdatas, appstruct)
+        appstruct = get_config_dbdatas(appstruct)
+        dbdatas = merge_config_datas(dbdatas, appstruct)
         for dbdata in dbdatas:
             self.dbsession.merge(dbdata)
         self.dbsession.flush()
@@ -280,6 +288,48 @@ ont été configurés"
         return HTTPFound(self.request.route_path("admin_expense"))
 
 
+class AdminCae(BaseFormView):
+    """
+        Cae information configuration
+    """
+    title = u"Configuration de la CAE"
+    validation_msg = u"Les informations ont bien été enregistrées"
+    schema = CAECONFIG
+    buttons = (submit_btn, )
+
+    def get_model(self):
+        return Cae.query().first()
+
+    def before(self, form):
+        """
+            Add the appstruct to the form
+        """
+        appstruct = self.request.config
+        form.set_appstruct(appstruct)
+        populate_actionmenu(self.request)
+
+    def submit_success(self, appstruct):
+        """
+            Insert config informations into database
+        """
+        # la table config étant un stockage clé valeur
+        # le merge_session_with_post ne peut être utilisé
+        dbdatas = self.dbsession.query(Config).all()
+        log.debug("appstruct")
+        log.debug(appstruct)
+        new_dbdatas = merge_config_datas(dbdatas, appstruct)
+        log.debug("New config")
+        for dbdata in new_dbdatas:
+            log.debug(dbdata.name)
+            if dbdata in dbdatas:
+                self.dbsession.merge(dbdata)
+            else:
+                self.dbsession.add(dbdata)
+        self.dbsession.flush()
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path("admin_cae"))
+
+
 def includeme(config):
     """
         Add module's views
@@ -291,6 +341,7 @@ def includeme(config):
     config.add_route("admin_paymentmode", "admin/paymentmode")
     config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_expense", "admin/expense")
+    config.add_route("admin_cae", "admin/cae")
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')
@@ -309,3 +360,6 @@ def includeme(config):
     config.add_view(AdminExpense, route_name='admin_expense',
                 renderer="admin/main.mako",
                 permission='admin')
+    config.add_view(AdminCae, route_name='admin_cae',
+            renderer="admin/main.mako",
+            permission="admin")

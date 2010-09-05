@@ -125,13 +125,11 @@ class CompanySchema(colander.MappingSchema):
     # Fields specific to the treasury
     code_compta = colander.SchemaNode(
             colander.String(),
-            widget=deferred_edit_adminonly_widget,
             title=u"Compte analytique",
             description=u"Compte analytique utilisé dans le logiciel de compta",
             missing="")
     compte_cg_banque = colander.SchemaNode(
             colander.String(),
-            widget=deferred_edit_adminonly_widget,
             title=u"Compte CG Banque",
             missing=u"",
             description=u"Compte CG Banque de l'entreprise")
@@ -148,12 +146,10 @@ class CompanySchema(colander.MappingSchema):
             description=u"Pourcentage que cette entreprise contribue à la CAE")
     RIB = colander.SchemaNode(
             colander.String(),
-            widget=deferred_edit_adminonly_widget,
             title=u'RIB',
             missing=u'')
     IBAN = colander.SchemaNode(
             colander.String(),
-            widget=deferred_edit_adminonly_widget,
             title=u'IBAN',
             missing=u'')
 

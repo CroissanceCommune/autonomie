@@ -8,7 +8,12 @@
         <div class='well'>
             <h3>Entreprise ${client.name.upper()}</h3>
             <dl>
-                % for label, value in ((u"Nom de l'entreprise", client.name), (u"Code", client.code), (u"TVA intracommunautaire", client.intraTVA)):
+                <% datas = ((u"Nom de l'entreprise", client.name),
+                            (u"Code", client.code),
+                            (u"TVA intracommunautaire", client.intraTVA),
+                            (u"Compte CG", client.compte_cg),
+                            (u"Compte Tiers", client.compte_tiers),) %>
+                 % for label, value in datas :
                     %if value:
                         <dt>${label}</dt>
                         <dd>${value}</dd>

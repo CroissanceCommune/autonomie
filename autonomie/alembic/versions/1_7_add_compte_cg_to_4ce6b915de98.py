@@ -19,9 +19,15 @@ def upgrade():
     op.add_column("company", sa.Column("compte_cg_banque", sa.String(125),
         default=""))
     op.add_column("company", sa.Column("contribution", sa.Integer, default=0))
+    op.add_column("customer",
+            sa.Column("compte_cg", sa.String(125), default=""))
+    op.add_column("customer",
+            sa.Column("compte_tiers", sa.String(125), default=""))
 
 
 def downgrade():
     op.drop_column("tva", "compte_cg")
     op.drop_column("company", "compte_cg_banque")
     op.drop_column("company", "contribution")
+    op.drop_column("customer", "compte_cg")
+    op.drop_column("customer", "compte_tiers")

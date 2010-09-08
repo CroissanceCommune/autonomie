@@ -18,7 +18,9 @@
     uses the sqlalchemy info attr to retrieve meta datas about the columns
 """
 import csv
+import cStringIO as StringIO
 from autonomie.utils.sqla import get_columns
+from autonomie.utils.ascii import force_ascii
 
 
 CSV_DELIMITER = ','
@@ -66,24 +68,10 @@ class SqlaToCsvWriter:
         fobj: the destination file object
         fieldnames: The fieldnames we have in our dest file
     """
-    def __init__(self, buf_f, model):
-        self.buf_f = buf_f
+    def __init__(self, model):
         self.model = model
-        self.fieldnames = list(collect_keys(self.model)) #collect_labels(self.model)
         self.keys = list(collect_keys(self.model))
-        self.outfile = csv.DictWriter(self.buf_f,
-                                      self.fieldnames,
-                                      delimiter=CSV_DELIMITER,
-                                      quotechar=CSV_QUOTECHAR,
-                                      quoting=csv.QUOTE_ALL)
         self._datas = []
-
-
-    def write_header(self):
-        """
-            Write the csv headers
-        """
-        self.outfile.writeheader()
 
     def subdict(self, dic):
         """
@@ -109,9 +97,36 @@ class SqlaToCsvWriter:
         """
         return row in self._datas
 
-    def save(self):
+    def render(self):
         """
             Write to the dest buffer
         """
-        self.write_header()
-        self.outfile.writerows(self._datas)
+        f_buf = StringIO.StringIO()
+        outfile = csv.DictWriter(f_buf,
+                                 self.keys,
+                                 delimiter=CSV_DELIMITER,
+                                 quotechar=CSV_QUOTECHAR,
+                                 quoting=csv.QUOTE_ALL)
+        outfile.writeheader()
+        outfile.writerows(self._datas)
+        return f_buf
+
+
+def write_csv_headers(request, filename):
+    """
+        write the headers of the csv file 'filename'
+    """
+    request.response.content_type = 'application/csv'
+    request.response.headerlist.append(
+            ('Content-Disposition',
+                'attachment; filename={0}'.format(force_ascii(filename))))
+    return request
+
+
+def write_csv_to_request(request, filename, buf):
+    """
+        write a csv buffer to the current request
+    """
+    request = write_csv_headers(request, filename)
+    request.response.write(buf.getvalue())
+    return request

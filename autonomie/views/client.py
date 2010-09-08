@@ -18,6 +18,7 @@
 import logging
 
 from sqlalchemy import or_
+from sqlalchemy.orm import undefer_group
 
 from deform import Form
 
@@ -34,7 +35,10 @@ from autonomie.utils.views import submit_btn
 from autonomie.views.forms import CLIENTSCHEMA
 from autonomie.views.forms import BaseFormView
 from autonomie.views.forms.client import ClientSearchSchema
-from .base import BaseListView
+from .base import (
+        BaseListView,
+        BaseCsvView,
+        )
 
 log = logging.getLogger(__name__)
 
@@ -77,6 +81,22 @@ class ClientsList(BaseListView):
         searchform = SearchForm(u"Entreprise ou contact principal")
         searchform.set_defaults(appstruct)
         self.request.actionmenu.add(searchform)
+
+
+class ClientsCsv(BaseCsvView):
+    """
+        Client csv view
+    """
+    model = Client
+
+    @property
+    def filename(self):
+        return "clients.csv"
+
+    def query(self):
+        company = self.request.context
+        return Client.query().options(undefer_group('edit'))\
+                .filter(Client.company_id == company.id)
 
 
 def client_view(request):
@@ -163,6 +183,7 @@ def get_edit_btn(client_id):
     return ViewLink(u"Éditer", "edit", path="client", id=client_id,
                                         _query=dict(action="edit"))
 
+
 def includeme(config):
     """
         Add module's views
@@ -170,9 +191,14 @@ def includeme(config):
     config.add_route('client',
                      '/clients/{id}',
                      traverse='/clients/{id}')
+
     config.add_route('company_clients',
                      '/company/{id:\d+}/clients',
                      traverse='/companies/{id}')
+    config.add_route('company_clients_csv',
+                     '/company/{id:\d+}/clients.csv',
+                     traverse='/companies/{id}')
+
     config.add_view(ClientAdd,
                     route_name='company_clients',
                     renderer='client.mako',
@@ -192,6 +218,11 @@ def includeme(config):
     config.add_view(ClientsList,
                     route_name='company_clients',
                     renderer='company_clients.mako',
+                    request_method='GET',
+                    permission='edit')
+
+    config.add_view(ClientsCsv,
+                    route_name='company_clients_csv',
                     request_method='GET',
                     permission='edit')
 

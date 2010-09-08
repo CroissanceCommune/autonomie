@@ -27,6 +27,10 @@ from webhelpers import paginate
 
 from autonomie.utils.views import get_page_url
 from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
+from autonomie.utils.csvtools import (
+        write_csv_to_request,
+        SqlaToCsvWriter,
+        )
 
 
 log = logging.getLogger(__name__)
@@ -182,3 +186,34 @@ class BaseListView(BaseView):
             of actionmenus in pages
         """
         pass
+
+
+class BaseCsvView(BaseView):
+    """
+        Base Csv view
+
+        Launches the appropriate query and store the whole stuff in a csv file
+    """
+    model = None
+    csvwriter = SqlaToCsvWriter
+
+    @property
+    def filename(self):
+        """
+            To be implemented by the subclasse
+        """
+        pass
+
+    def query(self):
+        """
+            To be implemented by the subclasse
+        """
+        pass
+
+    def __call__(self):
+        writer = self.csvwriter(self.model)
+        for item in self.query():
+            writer.add_row(item.appstruct())
+        write_csv_to_request(self.request, self.filename, writer.render())
+        return self.request.response
+

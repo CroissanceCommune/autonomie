@@ -284,10 +284,7 @@ ont été configurés"
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
                 if data['id'] is not None:
-                    type_ = factory.query()\
-                            .filter(factory.id==data['id'])\
-                            .filter(factory.active==True)\
-                            .one()
+                    type_ = factory.get(data['id'])
                     merge_session_with_post(type_, data)
                     self.dbsession.merge(type_)
                 else:

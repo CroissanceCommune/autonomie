@@ -26,18 +26,24 @@
 
 """
 import logging
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Text
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import deferred
+from sqlalchemy import (
+        Column,
+        Integer,
+        String,
+        Text,
+        ForeignKey,
+    )
+from sqlalchemy.orm import (
+        relationship,
+        deferred,
+        )
 
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+        DBBASE,
+        default_table_args,
+        )
 
 log = logging.getLogger(__name__)
 

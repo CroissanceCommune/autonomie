@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : dim. 12 sept. 2010 06:50:39 CEST
+# * Last Modified : dim. 12 sept. 2010 06:53:40 CEST
 #
 # * Project : autonomie
 #
@@ -129,13 +129,6 @@ def main(global_config, **settings):
                     "/cancelinvoices/{id:\d+}",
                     traverse='/cancelinvoices/{id}')
 
-    # Administration routes
-    config.add_route("admin_index",
-                     "/admin")
-    config.add_route("admin_main",
-                    "/admin/main")
-    config.add_route("admin_tva",
-                    "/admin/tva")
     config.include("autonomie.views.admin")
     config.include("autonomie.views.user")
 

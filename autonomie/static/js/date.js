@@ -23,6 +23,13 @@
  */
 
 
+function getOneMonthAgo(){
+  var today = new Date();
+  var year = today.getUTCFullYear();
+  var month = today.getUTCMonth() - 1;
+  var day = today.getUTCDate();
+  return new Date(year, month, day);
+}
 
 function parseDate(isoDate){
   /*

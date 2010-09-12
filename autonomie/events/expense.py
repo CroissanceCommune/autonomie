@@ -115,6 +115,7 @@ class StatusChanged(object):
                 addr=addr,
                 date=date,
                 status_verb=status_verb,
+                comment=self.comment,
                 )
 
     @staticmethod

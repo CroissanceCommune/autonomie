@@ -27,6 +27,7 @@
 """
 
 import itertools
+import logging
 import openpyxl
 from openpyxl.style import Color, Fill
 import cStringIO as StringIO
@@ -38,6 +39,8 @@ from autonomie.models.treasury import ExpenseType
 from autonomie.models.treasury import ExpenseKmType
 from autonomie.models.treasury import ExpenseTelType
 
+
+log = logging.getLogger(__name__)
 
 Color.LightCyan = "FFE0FFFF"
 Color.LightCoral = "FFF08080"
@@ -107,25 +110,33 @@ class ExcelExpense(object):
     def __init__(self, expensesheet):
         self.book = openpyxl.workbook.Workbook()
         self.model = expensesheet
-        self.internal_columns = self.get_columns()
-        self.activity_columns = self.get_columns(internal=False)
+        self.columns = self.get_columns()
         self.index = 2
 
     def get_tel_column(self):
         """
+        Return the columns associated to telephonic expenses
         """
         teltype = ExpenseTelType.query().first()
+        cols = []
         if teltype:
-            return [{'label':"Téléphonie", 'code':teltype.code}]
-        else:
-            return []
+            # Tel expenses should be visible
+            col = {
+                'label': "Téléphonie",
+                'code': teltype.code,
+                }
+            if teltype.initialize:
+                col['force_visible'] = True
+            cols.append(col)
+        return cols
 
     def get_km_column(self):
         """
+        Return the columns associated to km expenses
         """
         kmtype = ExpenseKmType.query().first()
         if kmtype:
-            return [{'label':"Frais de déplacement", 'code':kmtype.code}]
+            return [{'label': "Frais de déplacement", 'code': kmtype.code}]
         else:
             return []
 
@@ -144,7 +155,7 @@ class ExcelExpense(object):
                          'code':type_.code
                      }
 
-    def get_columns(self, internal=True):
+    def get_columns(self):
         """
             Retrieve all columns and define a global column attribute
             :param internal: are we asking columns for internal expenses
@@ -157,8 +168,7 @@ class ExcelExpense(object):
             'key':'description',
             'additional_cell_nb':3})
         # Telephonic fees are only available as internal expenses
-        if internal:
-            columns.extend(self.get_tel_column())
+        columns.extend(self.get_tel_column())
         km_columns = self.get_km_column()
         columns.extend(km_columns)
 
@@ -301,9 +311,10 @@ class ExcelExpense(object):
         if col_dim:
             if col_dim.width == -1 or force:
                 if width == 0:
-                    col_dim.visible=False
+                    col_dim.visible = False
                 else:
                     col_dim.width = width
+                    col_dim.visible = True
 
     def write_table(self, columns, lines):
         """
@@ -335,7 +346,7 @@ class ExcelExpense(object):
                         )
                 cell.value = integer_to_amount(val)
 
-                if val == 0:
+                if val == 0 and not column.get('force_visible', False):
                     col_width = 0
                 else:
                     col_width = 13
@@ -347,18 +358,14 @@ class ExcelExpense(object):
             elif column.get('key') == 'tva':
                 cell.value = integer_to_amount(
                         sum([getattr(line, 'tva', 0) for line in lines]))
-                # FIXME: already done above, outside of if?
-                cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
 
             elif column.get('key') == 'total':
                 cell.value = integer_to_amount(
                         sum([line.total for line in lines]))
-                # FIXME: already done above, outside of if?
-                cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
 
         self.index += 4
 
-    def write_expense_table(self, category, columns):
+    def write_expense_table(self, category):
         """
             write expenses tables for the given category
         """
@@ -367,7 +374,7 @@ class ExcelExpense(object):
         kmlines = [lin for lin in self.model.kmlines
                             if lin.category == category]
         lines.extend(kmlines)
-        self.write_table(columns, lines)
+        self.write_table(self.columns, lines)
         self.index += 2
 
     def write_full_line(self, txt, start="A", end="J"):
@@ -387,7 +394,7 @@ class ExcelExpense(object):
 PAR MOIS)"
         cell = self.write_full_line(txt)
         cell.style.font.color.index = Color.Crimson
-        self.write_expense_table('1', self.internal_columns)
+        self.write_expense_table('1')
 
     def write_activity_expenses(self):
         """
@@ -398,7 +405,7 @@ PAR MOIS)"
 CLIENTS"
         cell = self.write_full_line(txt)
         cell.style.font.color.index = Color.Crimson
-        self.write_expense_table('2', self.activity_columns)
+        self.write_expense_table('2')
 
     def write_total(self):
         """
@@ -462,6 +469,7 @@ CLIENTS"
         row_dim.height = 30
         self.index += 2
 
+
         self.write_code()
         self.write_user()
         self.write_period()
@@ -470,10 +478,10 @@ CLIENTS"
         self.write_total()
         self.write_accord()
 
-        # We set a width to all columns that have no width set (-1)
-        for let in ASCII_UPPERCASE:
-            self.set_col_width(let, 13)
-
+#        # We set a width to all columns that have no width set (-1)
+#        for let in ASCII_UPPERCASE:
+#            self.set_col_width(let, 13)
+#
         self.worksheet = self.book.create_sheet()
         self.worksheet.title = u"Journal de bord"
         self.write_km_book()

@@ -121,6 +121,13 @@ def includeme(config):
     """
         Add module's views
     """
+    # Administration routes
+    config.add_route("admin_index",
+                     "/admin")
+    config.add_route("admin_main",
+                    "/admin/main")
+    config.add_route("admin_tva",
+                    "/admin/tva")
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')

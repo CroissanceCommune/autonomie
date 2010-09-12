@@ -19,7 +19,6 @@
 import logging
 
 from sqlalchemy import and_
-from pyramid.view import view_config
 
 from autonomie.models.task.task import Task
 from autonomie.models.task.invoice import Invoice
@@ -30,7 +29,6 @@ from autonomie.models.project import Phase
 log = logging.getLogger(__name__)
 
 
-@view_config(route_name="manage", renderer="manage.mako", permission="manage")
 def manage(request):
     """
         The manage view
@@ -45,3 +43,11 @@ def manage(request):
     return dict(title=u"Documents en attente de validation",
                 tasks=documents,
                )
+
+def includeme(config):
+    config.add_route("manage",
+                    "/manage")
+    config.add_view(manage,
+                    route_name="manage",
+                    renderer="manage.mako",
+                    permission="manage")

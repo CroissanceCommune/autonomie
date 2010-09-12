@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : dim. 12 sept. 2010 06:53:40 CEST
+# * Last Modified : dim. 12 sept. 2010 06:56:51 CEST
 #
 # * Project : autonomie
 #
@@ -133,8 +133,7 @@ def main(global_config, **settings):
     config.include("autonomie.views.user")
 
     # Manage main view
-    config.add_route("manage",
-                    "/manage")
+    config.include("autonomie.views.manage")
 
     # Test javascript view
     config.add_route("testjs",

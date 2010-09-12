@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 22 oct. 2012 16:51:54 CEST
+# * Last Modified : dim. 12 sept. 2010 06:50:39 CEST
 #
 # * Project : autonomie
 #
@@ -137,13 +137,7 @@ def main(global_config, **settings):
     config.add_route("admin_tva",
                     "/admin/tva")
     config.include("autonomie.views.admin")
-
-    # Main routes
-    config.add_route("users",
-                    "/users")
-    config.add_route("user",
-                     "/users/{id:\d+}",
-                     traverse="/users/{id}")
+    config.include("autonomie.views.user")
 
     # Manage main view
     config.add_route("manage",

@@ -29,6 +29,7 @@
 from base import DBBASE
 from base import DBSESSION
 
+import activity
 import company
 import config
 import customer

@@ -96,7 +96,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
       this.listenTo(this.model, 'change', this.render, this);
     }
   },
-  setDatePicker: function(formName, tag, altFieldName){
+  setDatePicker: function(formName, tag, altFieldName, today){
     /*
      * Set datefields as a jquery datepicker
      */
@@ -107,9 +107,14 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
       dateFormat:"dd/mm/yy"
     });
     var date = this.model.get(altFieldName);
-    if ((date !== null) && (date !== undefined)){
+    if ((date !== null) && (! _.isUndefined(date))){
       date = parseDate(date);
       tag.datepicker('setDate', date);
+    }else{
+      if (! _.isUndefined(today)){
+        date = parseDate(today);
+        tag.datepicker('setDate', date);
+      }
     }
   },
   onBeforeClose:function(){

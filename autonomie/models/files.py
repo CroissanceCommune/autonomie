@@ -56,28 +56,16 @@ class File(Node):
     mimetype = Column(String(100))
     size = Column(Integer)
 
-    @classmethod
-    def from_field_storage(cls, fs):
-        """ Create and return an instance of this class from a file upload
-            through a webbrowser.
-
-        :param fs: FieldStorage instance as found in a
-                   :class:`pyramid.request.Request`'s ``POST`` MultiDict.
-        :type fs: :class:`cgi.FieldStorage`
-
-        :result: The created instance.
-        :rtype: :class:`kotti.resources.File`
-        """
-
-        data = fs.file.read()
-        filename = fs.filename
-        mimetype = fs.type
-        size = len(data)
-        return cls(data=data, filename=filename, mimetype=mimetype, size=size)
-
     def getvalue(self):
+        """
+        Method making our file object compatible with the common file rendering
+        utility
+        """
         return self.data
 
     @property
     def label(self):
+        """
+        Simple shortcut for getting a label for this file
+        """
         return self.description or self.name

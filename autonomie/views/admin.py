@@ -42,6 +42,7 @@ from autonomie.models.treasury import (
         ExpenseKmType,
         ExpenseTelType,
 )
+from autonomie.models.activity import ActivityType
 from autonomie.models.company import Company
 
 from autonomie.utils.views import submit_btn
@@ -51,6 +52,7 @@ from autonomie.views.forms.admin import (
         PaymentModeConfig,
         WorkUnitConfig,
         ExpenseTypesConfig,
+        ActivityTypesConfig,
         CAECONFIG,
         get_config_appstruct,
         get_config_dbdatas,
@@ -90,6 +92,9 @@ dans les formulaires"))
             de la CAE",
         path="admin_cae",
         title=u"Configuration des différents comptes analytiques de la CAE"))
+    request.actionmenu.add(ViewLink(u"Configuration du module accompagnement",
+        path="admin_activity",
+        title=u"Configuration des types d'activité du module accompagnement"))
     return dict(title=u"Administration du site")
 
 
@@ -349,6 +354,59 @@ ont été configurés"
         return HTTPFound(self.request.route_path("admin_expense"))
 
 
+
+class AdminActivities(BaseFormView):
+    """
+        Activity types config
+    """
+    title = u"Configuration des activités"
+    validation_msg = u"Les types d'activité ont bien été configurés"
+    schema = ActivityTypesConfig(title=u"Configuration des types d'activité")
+    buttons = (submit_btn,)
+
+    def before(self, form):
+        """
+            Add appstruct to the current form object
+        """
+        query = ActivityType.query()
+        query = query.filter(ActivityType.active==True)
+
+        appstruct = {'types': [type_.appstruct() for type_ in query]}
+        form.set_appstruct(appstruct)
+        populate_actionmenu(self.request)
+
+    def get_all_ids(self, appstruct):
+        """
+            Return the ids of the options still present in the submitted form
+        """
+        return [data['id'] for data in appstruct["types"]]
+
+    def submit_success(self, appstruct):
+        """
+            Handle successfull expense configuration
+        """
+        all_ids = self.get_all_ids(appstruct)
+
+        # We delete the elements that are no longer in the appstruct
+        for element in ActivityType.query():
+            if element.id not in all_ids:
+                element.active = False
+                self.dbsession.merge(element)
+        self.dbsession.flush()
+
+        for data in appstruct["types"]:
+            if data['id'] is not None:
+                type_ = ActivityType.get(data['id'])
+                merge_session_with_post(type_, data)
+                self.dbsession.merge(type_)
+            else:
+                type_ = ActivityType()
+                merge_session_with_post(type_, data)
+                self.dbsession.add(type_)
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path("admin_activity"))
+
+
 class AdminCae(BaseFormView):
     """
         Cae information configuration
@@ -412,6 +470,7 @@ def includeme(config):
     config.add_route("admin_paymentmode", "admin/paymentmode")
     config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_expense", "admin/expense")
+    config.add_route("admin_activity", "admin/activity")
     config.add_route("admin_cae", "admin/cae")
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
@@ -429,6 +488,9 @@ def includeme(config):
                 renderer="admin/main.mako",
                 permission='admin')
     config.add_view(AdminExpense, route_name='admin_expense',
+                renderer="admin/main.mako",
+                permission='admin')
+    config.add_view(AdminActivities, route_name='admin_activity',
                 renderer="admin/main.mako",
                 permission='admin')
     config.add_view(AdminCae, route_name='admin_cae',

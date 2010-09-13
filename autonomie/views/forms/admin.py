@@ -134,7 +134,7 @@ page des documents (devis/factures/avoirs)",
 class FileTypeConfig(colander.SequenceSchema):
     name = colander.SchemaNode(
             colander.String(),
-            title=u"Libellé du type de document",
+            title=u"Type de document",
             description=u"Le libellé permet d'identifier plus facilement les \
 documents attachés aux factures",
             )
@@ -271,6 +271,7 @@ class ExpenseConfig(colander.MappingSchema):
     code = colander.SchemaNode(colander.String(), title=u"Code analytique",
             validator=colander.Length(max=15))
 
+
 class ExpenseKmConfig(ExpenseConfig):
     """
         Schema for the configuration of vehicle related expenses
@@ -322,6 +323,35 @@ class ExpenseTypesConfig(colander.MappingSchema):
     expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
     expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
 
+
+class ActivityTypeConfig(colander.MappingSchema):
+    """
+        Schema for the configuration of different activity types
+    """
+    id = colander.SchemaNode(
+            colander.Integer(),
+            widget=widget.HiddenWidget(),
+            default=None,
+            missing=None
+            )
+    label = colander.SchemaNode(
+            colander.String(),
+            title=u"Libellé",
+            validator=colander.Length(max=100)
+            )
+
+class ActivityTypesSeqConfig(colander.SequenceSchema):
+    """
+        The sequence Schema associated with the ActivityTypeConfig
+    """
+    activity_type = ActivityTypeConfig(title=u"Type d'activité")
+
+
+class ActivityTypesConfig(colander.Schema):
+    """
+        The schema for activity types configuration
+    """
+    types = ActivityTypesSeqConfig(title=u"")
 
 class CaeConfig(colander.MappingSchema):
     """

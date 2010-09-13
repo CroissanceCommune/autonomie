@@ -613,13 +613,13 @@ var BaseExpenseFormView = BaseFormView.extend({
   },
   onShow: function(){
      //Called when added to the DOM by the région
-    this.setDatePicker(this.formname, this.ui.date, "date");
+    this.setDatePicker(this.formname, this.ui.date, "date", AppOptions['today']);
   },
   onRender: function(){
     // Called when rendered (the first time the setDatePicker doesn't work
     // because the datas is rendered but not added to the DOM, that's why the
     // call is also made in onShow)
-    this.setDatePicker(this.formname, this.ui.date, "date");
+    this.setDatePicker(this.formname, this.ui.date, "date", AppOptions['today']);
     if (!_.isUndefined(this.ui.bookmarks)){
       this.setBookMarkBehaviour();
     }
@@ -660,7 +660,6 @@ var BaseExpenseFormView = BaseFormView.extend({
     return true;
   },
   deleteBookmark: function(cid){
-    console.log("Ask for deleting the bookmark %s", cid);
     if (_.isUndefined(cid)){
       return false;
     }
@@ -803,7 +802,7 @@ MyApp.Controller = {
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
     var model = new ExpenseLine({"category": category, new_element: true});
-    expense_form = new ExpenseFormView({
+    var expense_form = new ExpenseFormView({
       title: "Ajouter",
       destCollection: MyApp.expense.lines,
       model: model
@@ -816,7 +815,7 @@ MyApp.Controller = {
      */
     this.initialize();
     var model = this._getExpenseLine(id);
-    expense_form = new ExpenseFormView({
+    var expense_form = new ExpenseFormView({
       title:"Éditer",
       destCollection: MyApp.expense.lines,
       model:model
@@ -847,8 +846,12 @@ MyApp.Controller = {
     this.initialize();
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
-    var model = new ExpenseLine({category: 1, new_element: true});
-    expensetel_form = new ExpenseTelFormView({
+    var model = new ExpenseLine({
+      category: 1,
+      new_element: true,
+      date: AppOptions['today']
+      });
+    var expensetel_form = new ExpenseTelFormView({
       title:'Ajouter des frais téléphoniques',
       destCollection:MyApp.expense.lines,
       model: model
@@ -860,7 +863,7 @@ MyApp.Controller = {
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
     var model = new ExpenseKmLine({new_element: true, category: category});
-    expensekm_form = new ExpenseKmFormView({
+    var expensekm_form = new ExpenseKmFormView({
       title:"Ajouter",
       destCollection:MyApp.expense.kmlines,
       model: model
@@ -870,7 +873,7 @@ MyApp.Controller = {
   editkm: function(id) {
     this.initialize();
     var model = this._getExpenseKmLine(id);
-    expensekm_form = new ExpenseKmFormView({
+    var expensekm_form = new ExpenseKmFormView({
       title:"Éditer",
       model:model
     });

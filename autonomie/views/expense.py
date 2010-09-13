@@ -195,6 +195,13 @@ clients"
 
     options['bookmarks'] = get_bookmarks(request)
 
+    expense_sheet = request.context
+    month = expense_sheet.month
+    year = expense_sheet.year
+
+    date = datetime.date(year, month, 1)
+    options['today'] = date
+
     return options
 
 

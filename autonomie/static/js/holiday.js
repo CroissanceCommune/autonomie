@@ -92,6 +92,13 @@ var HolidayView = BaseTableLineView.extend({
     'click a.remove':'_remove',
     "click a.edit" : "_edit"
   },
+  initialize: function(){
+    /*
+     * View constructor
+     */
+    // bind the model change to the view rendering
+    this.listenTo(this.model, 'change', this.render, this);
+  },
   _remove: function(){
     /*
      *  Delete the line
@@ -164,9 +171,6 @@ var HolidayForm = BaseFormView.extend({
      * Launched when the form is added to the dom
      * Make some js calls
      */
-    console.log(this.ui.start_date);
-    console.log(this.ui.end_date);
-
     this.setDatePicker("holidayForm", this.ui.start_date, "start_date");
     this.setDatePicker("holidayForm", this.ui.end_date, "end_date");
     this.ui.start_date.focus();

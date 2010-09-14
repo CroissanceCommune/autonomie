@@ -65,6 +65,9 @@ ACTIVITY_PARTICIPANT = Table(
     mysql_engine=default_table_args['mysql_engine'])
 
 
+ACTIVITY_MODES = (u"en direct", u"par mail", u"par courrier", u"par téléphone")
+
+
 class Event(Node):
     """
         An event model
@@ -87,7 +90,7 @@ class Activity(Event):
     id = Column(Integer, ForeignKey('event.id'), primary_key=True)
     conseiller_id = Column(ForeignKey('accounts.id'))
     type_id = Column(ForeignKey('activity_type.id'))
-    mode = Column(Enum(u"mail", u"courrier", u"téléphone", u"direct"))
+    mode = Column(Enum(*ACTIVITY_MODES))
     # Champ text multiligne pour les activités
     point = deferred(Column(Text()))
     objectifs = deferred(Column(Text()))

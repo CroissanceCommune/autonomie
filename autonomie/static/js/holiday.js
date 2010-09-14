@@ -195,11 +195,10 @@ MyApp.Controller = {
     this.initialize();
     if (this.addform !== null){
       this.addform.reset();
-    }else{
-      this.addform = new HolidayAdd({'title': "Ajouter",
-        modelObject: HolidayModel,
-        destCollection:MyApp.holidays});
     }
+    this.addform = new HolidayAdd({'title': "Ajouter",
+      modelObject: HolidayModel,
+      destCollection:MyApp.holidays});
     MyApp.formContainer.show(this.addform);
   },
   edit: function(id){

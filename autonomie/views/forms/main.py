@@ -36,6 +36,9 @@ from autonomie.views import render_api
 from autonomie.views.forms import widgets as custom_widgets
 
 
+MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
+
+
 def get_users_options(roles=None):
     """
     Return the list of active users from the database formatted as choices:
@@ -184,5 +187,17 @@ def deferred_year_select_widget(node, kw):
     years = get_years(kw['request'].dbsession)
     return widget.SelectWidget(values=zip(years, years),
                 css_class='input-small')
+
+
+def get_mail_input(**kw):
+    """
+        Return a generic customized mail input field
+    """
+    title = kw.pop('title', None) or u"Adresse e-mail"
+    return colander.SchemaNode(
+        colander.String(),
+        title=title,
+        validator=colander.Email(MAIL_ERROR_MESSAGE),
+        **kw)
 
 

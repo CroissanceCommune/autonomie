@@ -196,14 +196,6 @@ class CustomSequenceWidget(widget.SequenceWidget):
                               add_subitem_text=add_subitem_text)
 
 
-def get_date_input(**kw):
-    """
-        Return a date input displaying a french user friendly format
-    """
-    date_input = CustomDateInputWidget(**kw)
-    date_input.options['dateFormat'] = 'dd/mm/yy'
-    return date_input
-
 def get_fileupload_widget(store_url, store_path, session, filters=None):
     """
         return a file upload widget

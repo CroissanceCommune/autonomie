@@ -30,7 +30,7 @@ import logging
 
 from deform import widget
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
-from autonomie.views.forms.widgets import get_date_input
+from autonomie.views.forms import main
 from autonomie.models.user import User
 
 log = logging.getLogger(__name__)
@@ -66,9 +66,9 @@ def deferred_contractor_list(node, kw):
 
 class HolidaySchema(colander.MappingSchema):
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
-            widget=get_date_input())
+            widget=main.get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
-            widget=get_date_input())
+            widget=main.get_date_input())
 
 
 class HolidaysList(colander.SequenceSchema):
@@ -82,9 +82,9 @@ class HolidaysSchema(colander.MappingSchema):
 
 class SearchHolidaysSchema(colander.MappingSchema):
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
-            widget=get_date_input())
+            widget=main.get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
-            widget=get_date_input())
+            widget=main.get_date_input())
     user_id = colander.SchemaNode(colander.Integer(), title=u"Entrepreneur",
                        widget=deferred_contractor_list,
                        missing=None)

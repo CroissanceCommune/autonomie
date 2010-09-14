@@ -23,11 +23,14 @@
 Main deferreds functions used in autonomie
 """
 import colander
+from beaker.cache import cache_region
 from datetime import date
 from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
+from sqlalchemy import distinct
 
 from autonomie.models import user
+from autonomie.models.task import Invoice
 from autonomie.views import render_api
 
 from autonomie.views.forms import widgets as custom_widgets
@@ -72,7 +75,7 @@ def deferred_autocomplete_widget(node, kw):
     """
     choices = kw.get('choices')
     if choices:
-        wid = widget.ChosenSingleWidget(values=choices)
+        wid = ChosenSingleWidget(values=choices)
     else:
         wid = widget.TextInputWidget()
     return wid
@@ -138,8 +141,48 @@ def textarea_node(**kw):
     Return a node for storing Text objects
     """
     css_class = kw.pop('css_class', None) or 'span10'
+    if kw.pop('richwidget', None):
+        wid = widget.RichTextWidget(css_class=css_class, theme="advanced")
+    else:
+        wid = widget.TextAreaWidget(css_class=css_class)
     return colander.SchemaNode(
             colander.String(),
-            widget=widget.TextAreaWidget(css_class=css_class),
+            widget=wid,
             **kw
             )
+
+
+@colander.deferred
+def default_year(node, kw):
+    return date.today().year
+
+
+def get_years(dbsession):
+    """
+        Return a cached query for the available years
+    """
+    @cache_region("long_term", "taskdates")
+    def taskyears():
+        """
+            return the distinct financial years available in the database
+        """
+        years = dbsession.query(distinct(Invoice.financial_year))\
+                .order_by(Invoice.financial_year).all()
+        years = [year[0] for year in years]
+        now = date.today().year
+        if now not in years:
+            years.append(now)
+        return years
+    return taskyears()
+
+
+@colander.deferred
+def deferred_year_select_widget(node, kw):
+    """
+        Return a deferred year select widget
+    """
+    years = get_years(kw['request'].dbsession)
+    return widget.SelectWidget(values=zip(years, years),
+                css_class='input-small')
+
+

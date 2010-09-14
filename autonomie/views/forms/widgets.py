@@ -46,7 +46,6 @@ from autonomie.models.task import Invoice
 
 
 log = logging.getLogger(__name__)
-MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
 
 
 class DisabledInput(widget.Widget):
@@ -195,16 +194,6 @@ class CustomSequenceWidget(widget.SequenceWidget):
                               subfields=subfields,
                               item_field=item_field,
                               add_subitem_text=add_subitem_text)
-
-
-def get_mail_input(missing=None):
-    """
-        Return a generic customized mail input field
-    """
-    return colander.SchemaNode(colander.String(),
-                            title="Adresse e-mail",
-                            validator=colander.Email(MAIL_ERROR_MESSAGE),
-                            missing=missing)
 
 
 def get_date_input(**kw):

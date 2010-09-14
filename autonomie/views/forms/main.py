@@ -203,7 +203,7 @@ def year_select_node(**kw):
         )
 
 
-def get_mail_input(**kw):
+def mail_node(**kw):
     """
         Return a generic customized mail input field
     """

@@ -120,7 +120,7 @@ class CustomerSchema(colander.MappingSchema):
         missing=u"",
         validator=colander.Length(max=255),
         )
-    email = main.get_mail_input(missing=u'')
+    email = main.mail_node(missing=u'')
     phone = colander.SchemaNode(
         colander.String(),
         title=u'Téléphone',

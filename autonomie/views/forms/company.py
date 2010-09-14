@@ -35,7 +35,7 @@ from deform import widget
 from autonomie.views.forms.widgets import deferred_edit_widget
 from autonomie.views.forms.widgets import get_fileupload_widget
 from autonomie.views.forms.validators import validate_image_mime
-from autonomie.views.forms.widgets import get_mail_input
+from autonomie.views.forms import main
 from autonomie.utils.image import ImageResizer
 
 log = logging.getLogger(__name__)
@@ -120,7 +120,7 @@ class CompanySchema(colander.MappingSchema):
     goal = colander.SchemaNode(
             colander.String(),
             title=u'Activité')
-    email = get_mail_input(missing=u'')
+    email = main.mail_node(missing=u'')
     phone = colander.SchemaNode(
             colander.String(),
             title=u'Téléphone',

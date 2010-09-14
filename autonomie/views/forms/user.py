@@ -32,7 +32,7 @@ from deform import widget
 
 from autonomie.models.user import User
 from autonomie.models.company import Company
-from autonomie.views.forms.widgets import get_mail_input
+from autonomie.views.forms import main
 from autonomie.views.forms.widgets import deferred_edit_widget
 from autonomie.utils.security import MANAGER_ROLES
 from autonomie.utils.security import ADMIN_ROLES
@@ -200,7 +200,7 @@ class AccountSchema(colander.MappingSchema):
     lastname = colander.SchemaNode(
         colander.String(),
         title=u"Nom")
-    email = get_mail_input(missing=u"")
+    email = main.mail_node(missing=u"")
     primary_group = colander.SchemaNode(
         colander.String(),
         title=u"Rôle de l'utilisateur",

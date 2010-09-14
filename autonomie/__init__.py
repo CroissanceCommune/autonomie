@@ -53,6 +53,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.static",
     "autonomie.events.tasks",
     "autonomie.events.expense",
+    "autonomie.views.activity",
     "autonomie.views.auth",
     "autonomie.views.user",
     "autonomie.views.company",

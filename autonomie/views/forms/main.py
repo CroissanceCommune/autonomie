@@ -189,6 +189,20 @@ def deferred_year_select_widget(node, kw):
                 css_class='input-small')
 
 
+def year_select_node(**kw):
+    """
+    Return a year select node with defaults and missing values
+    """
+    title = kw.pop('title', None) or u''
+    return colander.SchemaNode(
+        colander.Integer(),
+        widget=deferred_year_select_widget,
+        default=default_year,
+        missing=default_year,
+        title=title
+        )
+
+
 def get_mail_input(**kw):
     """
         Return a generic customized mail input field

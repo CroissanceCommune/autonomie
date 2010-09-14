@@ -32,12 +32,7 @@ from autonomie.views.forms import main
 from .custom_types import AmountType
 
 class CommercialFormSchema(colander.MappingSchema):
-    year = colander.SchemaNode(
-            colander.Integer(),
-            widget=main.deferred_year_select_widget,
-            default=main.default_year,
-            missing=main.default_year,
-            title=u"")
+    year = main.year_select_node()
 
 
 class CommercialSetFormSchema(colander.MappingSchema):

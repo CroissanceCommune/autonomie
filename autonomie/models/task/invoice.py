@@ -584,7 +584,7 @@ class CancelInvoiceLine(DBBASE, LineCompute):
     unity = Column(String(100), default=None)
     product_id = Column(Integer)
     product = relationship("Product",
-            primaryjoin="Product.id==InvoiceLine.product_id",
+            primaryjoin="Product.id==CancelInvoiceLine.product_id",
             uselist=False,
             foreign_keys=product_id)
     task = relationship(

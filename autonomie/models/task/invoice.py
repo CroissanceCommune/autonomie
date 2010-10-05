@@ -430,6 +430,7 @@ class InvoiceLine(DBBASE, LineCompute):
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
+        newone.product_id = self.product_id
         return newone
 
     def __repr__(self):
@@ -604,6 +605,7 @@ class CancelInvoiceLine(DBBASE, LineCompute):
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
+        newone.product_id = self.product_id
         return newone
 
     def __repr__(self):

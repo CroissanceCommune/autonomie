@@ -28,27 +28,57 @@ from deform import Form
 
 from autonomie.views.mail import StatusChanged
 from autonomie.exception import Forbidden
-from autonomie.utils.widgets import Submit
-from autonomie.utils.widgets import ViewLink
-from autonomie.utils.widgets import PopUp
+from autonomie.utils.widgets import (
+        Submit,
+        ViewLink,
+        PopUp,
+        )
 from autonomie.models.client import Client
-from autonomie.models.project import Project
-from autonomie.models.project import Phase
+from autonomie.models.project import (
+        Project,
+        Phase,
+        )
 from autonomie.models.tva import Tva
 from autonomie.views.base import BaseView
-from autonomie.views.forms.duplicate import DuplicateSchema
-from autonomie.views.forms.duplicate import PhaseChangeSchema
-from autonomie.views.forms.task import FinancialYearSchema
-from autonomie.views.forms.task import PaymentSchema
+from autonomie.views.forms.duplicate import (
+        DuplicateSchema,
+        PhaseChangeSchema,
+        )
+from autonomie.views.forms.task import (
+        FinancialYearSchema,
+        PaymentSchema,
+        SetProductsSchema,
+        )
 from autonomie.views.forms import BaseFormView
-from autonomie.utils.pdf import write_pdf
-from autonomie.utils.pdf import render_html
-from autonomie.resources import task_js
-from autonomie.resources import duplicate as duplicate_js
+from autonomie.utils.pdf import (
+        write_pdf,
+        render_html,
+        )
+from autonomie.resources import (
+        task_js,
+        duplicate as duplicate_js,
+        )
 
 DOCUMENT_TYPES = ('estimation', 'invoice', 'cancelinvoice')
 
 log = logging.getLogger(__name__)
+
+
+def get_set_products_form(request, counter=None):
+    """
+        Return a form used to set products reference to :
+            * invoice lines
+            * cancelinvoice lines
+    """
+    schema = SetProductsSchema().bind(request=request)
+    action = request.route_path(request.context.__name__,
+            id=request.context.id,
+            _query=dict(action='status'))
+    valid_btn = Button(name='submit', value="set_products", type='submit',
+                        title=u"Valider")
+    form = Form(schema=schema, buttons=(valid_btn,), action=action,
+                counter=counter, formid="set_products")
+    return form
 
 
 def get_paid_form(request, counter=None):
@@ -278,6 +308,16 @@ class TaskFormActions(object):
         self.formcounter = form.counter
         return form
 
+    def _set_products_form(self):
+        """
+            Return the form for configuring the products for each lines
+        """
+        form = get_set_products_form(self.request, self.formcounter)
+        form.set_appstruct({'lines':[line.appstruct() \
+                for line in self.context.lines]})
+        self.formcounter = form.counter
+        return form
+
     def _set_financial_year_btn(self):
         """
             Return the button for the popup with the financial year set form
@@ -290,6 +330,17 @@ class TaskFormActions(object):
                                                         form.render())
             self.request.popups[popup.name] = popup
             yield popup.open_btn(css='btn btn-primary')
+
+    def _set_products_btn(self):
+        """
+            Popup fire button
+        """
+        title = u"Configuration des produits"
+        form = self._set_products_form()
+        popup = PopUp("set_products_form", title, form.render())
+        self.request.popups[popup.name] = popup
+        yield popup.open_btn(css='btn btn-primary')
+
 
     def get_next_actions(self):
         """
@@ -435,7 +486,7 @@ class StatusView(BaseView):
         """
             handle the status pre/set/post workflow
         """
-        pre_params = self._get_request_params()
+        pre_params = self.request.params
         params = self.pre_status_process(item, status, pre_params)
         post_params = self.status_process(params, status)
         self.post_status_process(item, status, post_params)

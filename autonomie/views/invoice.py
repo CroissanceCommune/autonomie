@@ -36,6 +36,7 @@ from autonomie.views.taskaction import (
         TaskFormView,
         get_paid_form,
         get_set_financial_year_form,
+        get_set_products_form,
         context_is_editable,
         TaskStatusView,
         populate_actionmenu,
@@ -191,6 +192,25 @@ class InvoiceStatus(TaskStatusView):
         project_id = self.request.context.project.id
         return HTTPFound(self.request.route_path('project', id=project_id))
 
+    def pre_set_products_process(self, task, status, params):
+        """
+            Pre processed method for product configuration
+        """
+        log.debug(u"+ Setting products for an invoice (pre-step)")
+        form = get_set_products_form(self.request)
+        appstruct = form.validate(params.items())
+        log.debug(appstruct)
+        return appstruct
+
+    def post_set_products_process(self, task, status, params):
+        log.debug(u"+ Setting products for an invoice (post-step)")
+        invoice = params
+        invoice = self.request.dbsession.merge(invoice)
+        log.debug(u"Configuring prodicts for invoice :{0}".format(invoice.id))
+        msg = u"Les codes produits ont bien été configurés"
+        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
+        self.request.session.flash(msg)
+
     def pre_set_financial_year_process(self, task, status, params):
         """
             Handle form validation before setting the financial year of
@@ -207,6 +227,7 @@ class InvoiceStatus(TaskStatusView):
         self.session.flash(msg.format(task.officialNumber))
 
     def pre_gencinv_process(self, task, status, params):
+        params = dict(params.items())
         params['user'] = self.request.user
         return params
 

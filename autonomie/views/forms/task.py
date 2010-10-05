@@ -54,6 +54,7 @@ import colander
 from deform import widget
 
 from autonomie.views.forms.widgets import (
+        DisabledInput,
         deferred_autocomplete_widget,
         deferred_today,
         get_date_input,
@@ -556,11 +557,10 @@ class TaskSchema(colander.MappingSchema):
     )
 
 
-def remove_admin_fiels(schema, kw):
+def remove_admin_fields(schema, kw):
     if kw['request'].user.is_contractor():
         # Non admin users doesn't edit products
         del schema['lines']['lines']['taskline']['product_id']
-        print schema['lines']
         schema['lines']['lines'].is_admin = False
         schema['lines']['lines']['taskline']['description'].css_class = 'span4'
         schema['lines']['lines']['taskline']['description'].widget.css_class = 'span4'
@@ -574,7 +574,7 @@ def remove_admin_fiels(schema, kw):
         schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span1'
 
 
-TASKSCHEMA = TaskSchema(after_bind=remove_admin_fiels)
+TASKSCHEMA = TaskSchema(after_bind=remove_admin_fields)
 
 
 class EstimationPaymentLine(colander.MappingSchema):
@@ -799,6 +799,51 @@ class FinancialYearSchema(colander.MappingSchema):
         colander Schema for financial year setting
     """
     financial_year = FINANCIAL_YEAR
+
+
+class ProductTaskLine(colander.MappingSchema):
+    """
+        A single estimation line
+    """
+    id = colander.SchemaNode(
+            colander.Integer(),
+            widget=widget.HiddenWidget(),
+            missing=u"",
+            css_class="span0")
+    description = colander.SchemaNode(
+        colander.String(),
+        widget=DisabledInput(),
+         missing=u'',
+         css_class='span3')
+    tva = colander.SchemaNode(
+        AmountType(),
+        widget=DisabledInput(),
+        css_class='span1',
+        title=u'TVA')
+    product_id = colander.SchemaNode(
+            colander.Integer(),
+            widget=deferred_product_widget,
+            validator=deferred_product_validator,
+            missing="",
+            css_class="span2",
+            title=u"Code produit")
+
+
+class ProductTaskLines(colander.SequenceSchema):
+    taskline = ProductTaskLine(missing="", title=u"")
+
+
+class SetProductsSchema(colander.MappingSchema):
+    """
+        Form schema used to configure Products
+    """
+    lines = ProductTaskLines(
+        widget=widget.SequenceWidget(
+            template=TEMPLATES_URL + 'product_tasklines.pt',
+            item_template=TEMPLATES_URL + 'product_tasklines_item.pt',
+            min_len=1),
+        missing="",
+        title=u'')
 
 
 #  Mapper tools used to move from dbdatas format to an appstruct fitting the

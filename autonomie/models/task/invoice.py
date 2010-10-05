@@ -93,8 +93,11 @@ class Invoice(Task, InvoiceCompute):
                        'polymorphic_identity': 'invoice',
                        }
     id = Column("id", ForeignKey('task.id'), primary_key=True)
+
+    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
     estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
     project_id = Column("project_id", ForeignKey('project.id'))
+
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     _number = Column("number", String(100), nullable=False)
     paymentConditions = deferred(
@@ -108,17 +111,17 @@ class Invoice(Task, InvoiceCompute):
         group='edit')
     officialNumber = Column("officialNumber", Integer)
     paymentMode = Column("paymentMode", String(10))
+    discountHT = Column('discountHT', Integer, default=0)
     displayedUnits = deferred(
         Column('displayedUnits', Integer, nullable=False, default=0),
         group='edit')
-    discountHT = Column('discountHT', Integer, default=0)
     expenses = deferred(Column('expenses', Integer, default=0), group='edit')
     expenses_ht = deferred(Column(Integer, default=0, nullable=False),
                         group='edit')
-    financial_year = deferred(Column(Integer, default=0), group='edit')
     address = Column("address", Text, default="")
+    financial_year = deferred(Column(Integer, default=0), group='edit')
+    exported = deferred(Column(Boolean(), default=False), group="edit")
 
-    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
     client = relationship(
         "Client",
         primaryjoin="Client.id==Invoice.client_id",
@@ -127,14 +130,10 @@ class Invoice(Task, InvoiceCompute):
     project = relationship(
         "Project",
         backref=backref('invoices', order_by='Invoice.taskDate'))
-    #phase =  relationship("Phase", backref=backref("invoices",
-    #                                            order_by='Invoice.taskDate'))
     estimation = relationship(
         "Estimation",
         backref="invoices",
         primaryjoin="Invoice.estimation_id==Estimation.id")
-
-    exported = deferred(Column(Boolean(), default=False), group="edit")
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
@@ -448,15 +447,11 @@ class CancelInvoice(Task, TaskCompute):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-
     invoice_id = Column(Integer, ForeignKey('invoice.id'),
                                                         default=None)
     project_id = Column(Integer, ForeignKey('project.id'))
     client_id = Column('client_id', Integer, ForeignKey('customer.id'))
-    client = relationship(
-        "Client",
-        primaryjoin="Client.id==CancelInvoice.client_id",
-        backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
+
     sequenceNumber = deferred(Column(Integer), group='edit')
     _number = Column("number", String(100))
     reimbursementConditions = deferred(
@@ -470,6 +465,7 @@ class CancelInvoice(Task, TaskCompute):
                                                             group='edit')
     address = Column("address", Text, default="")
     financial_year = deferred(Column(Integer, default=0), group='edit')
+    exported = deferred(Column(Boolean(), default=False), group="edit")
 
     project = relationship(
         "Project",
@@ -478,6 +474,10 @@ class CancelInvoice(Task, TaskCompute):
         "Invoice",
         backref=backref("cancelinvoice", uselist=False),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id")
+    client = relationship(
+        "Client",
+        primaryjoin="Client.id==CancelInvoice.client_id",
+        backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
@@ -576,17 +576,22 @@ class CancelInvoiceLine(DBBASE, LineCompute):
         DateTime,
         default=datetime.datetime.now,
         onupdate=datetime.datetime.now)
-    task = relationship(
-        "CancelInvoice",
-        backref=backref("lines",
-            order_by='CancelInvoiceLine.rowIndex',
-            cascade="all, delete-orphan"))
     rowIndex = Column(Integer)
     description = Column(Text, default="")
     cost = Column(Integer, default=0)
     tva = Column("tva", Integer, nullable=False, default=196)
     quantity = Column(DOUBLE, default=1)
     unity = Column(String(100), default=None)
+    product_id = Column(Integer)
+    product = relationship("Product",
+            primaryjoin="Product.id==InvoiceLine.product_id",
+            uselist=False,
+            foreign_keys=product_id)
+    task = relationship(
+        "CancelInvoice",
+        backref=backref("lines",
+            order_by='CancelInvoiceLine.rowIndex',
+            cascade="all, delete-orphan"))
 
     def duplicate(self):
         """

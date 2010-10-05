@@ -117,6 +117,24 @@ def set_financial_year(task, **kw):
     task.financial_year = kw['financial_year']
     return task
 
+def set_products(task, **kw):
+    """
+        Set the products to the lines of the current task
+    """
+    for line in kw.get('lines', []):
+        line_id = line.pop('id')
+        product_id = line.get('product_id')
+        if line_id is not None and product_id is not None:
+            for line_ in task.lines:
+                if line_.id == line_id:
+                    line_.product_id = product_id
+                else:
+                    log.warning(u"Unknow line number in form validation : {0}"\
+                            .format(line_id))
+        else:
+            log.warning(u"No line id was passed at form validation")
+    return task
+
 
 def get_base_state():
     """
@@ -176,16 +194,19 @@ def get_inv_state():
     resulted = ('resulted', MANAGER_PERMS,)
     financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
             False,)
+    products = ("set_products", MANAGER_PERMS, set_products,
+            False,)
     result = {}
     result['draft'] = ('draft', 'wait', delete, valid,)
     result['invalid'] = ('draft', 'wait', delete, )
     result['wait'] = (valid, invalid, duplicate, delete, financial_year,
             phasechange,)
     result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, mdelete,
-            phasechange, financial_year, )
+            phasechange, financial_year, products,)
     result['paid'] = (paid, resulted, gencinv, duplicate, financial_year,
-            phasechange,)
-    result['resulted'] = (gencinv, duplicate, financial_year, phasechange,)
+            phasechange, products, )
+    result['resulted'] = (gencinv, duplicate, financial_year, phasechange,
+            products,)
     result['aboinv'] = (delete, phasechange)
     return result
 
@@ -203,11 +224,14 @@ def get_cinv_state():
     invalid = ('invalid', MANAGER_PERMS,)
     financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
                         False,)
+    products = ("set_products", MANAGER_PERMS, set_products,
+            False,)
     result = {}
     result['draft'] = ('wait', 'delete', valid )
-    result['wait'] = (valid, invalid, 'delete', financial_year, phasechange,)
-    result['invalid'] = ('draft', 'wait', phasechange,)
-    result['valid'] = (financial_year, phasechange,)
+    result['wait'] = (valid, invalid, 'delete', financial_year, phasechange,
+        products, )
+    result['invalid'] = ('draft', 'wait', phasechange, products, )
+    result['valid'] = (financial_year, phasechange, products, )
     return result
 
 def get_maninv_state():

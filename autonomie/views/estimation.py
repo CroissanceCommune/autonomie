@@ -195,6 +195,7 @@ class EstimationStatus(TaskStatusView):
         """
             add a user param for invoice generation
         """
+        params = dict(params.items())
         params['user'] = self.request.user
         return params
 

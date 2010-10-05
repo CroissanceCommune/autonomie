@@ -2,7 +2,7 @@
 <div>
     <input type="hidden" name="__start__" value="${field.name}:sequence" class="deformProto" prototype="${field.widget.prototype(field)}">
     <div class='row linesblockheader'>
-        % if field.schema.is_admin:
+        % if field.schema.is_admin and field.schema.doctype is not 'estimation':
         <div class='span3'>Prestation</div>
         <div class='span1'>Prix/unité</div>
         <div class='span1'>Quantité</div>

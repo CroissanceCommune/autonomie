@@ -558,9 +558,11 @@ class TaskSchema(colander.MappingSchema):
 
 
 def remove_admin_fields(schema, kw):
+    doctype = schema['lines']['lines'].doctype
     if kw['request'].user.is_contractor():
         # Non admin users doesn't edit products
-        del schema['lines']['lines']['taskline']['product_id']
+        if doctype != 'estimation':
+            del schema['lines']['lines']['taskline']['product_id']
         schema['lines']['lines'].is_admin = False
         schema['lines']['lines']['taskline']['description'].css_class = 'span4'
         schema['lines']['lines']['taskline']['description'].widget.css_class = 'span4'
@@ -568,10 +570,16 @@ def remove_admin_fields(schema, kw):
         schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span2'
     else:
         schema['lines']['lines'].is_admin = True
-        schema['lines']['lines']['taskline']['description'].css_class = 'span3'
-        schema['lines']['lines']['taskline']['description'].widget.css_class = 'span3'
-        schema['lines']['lines']['taskline']['tva'].css_class = 'span1'
-        schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span1'
+        if doctype != 'estimation':
+            schema['lines']['lines']['taskline']['description'].css_class = 'span3'
+            schema['lines']['lines']['taskline']['description'].widget.css_class = 'span3'
+            schema['lines']['lines']['taskline']['tva'].css_class = 'span1'
+            schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span1'
+        else:
+            schema['lines']['lines']['taskline']['description'].css_class = 'span4'
+            schema['lines']['lines']['taskline']['description'].widget.css_class = 'span4'
+            schema['lines']['lines']['taskline']['tva'].css_class = 'span2'
+            schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span2'
 
 
 TASKSCHEMA = TaskSchema(after_bind=remove_admin_fields)
@@ -672,6 +680,7 @@ def get_estimation_schema():
         Return the schema for estimation add/edit
     """
     schema = TASKSCHEMA.clone()
+    schema['lines']['lines'].doctype = "estimation"
     tmpl = 'autonomie:deform_templates/paymentdetails_item.mako'
     schema.add(TaskNotes(title=u"Notes", name="notes"))
     schema.add(
@@ -683,6 +692,7 @@ def get_estimation_schema():
         TaskCommunication(title=u'Communication Entrepreneur/CAE',
                           name='communication')
     )
+    del schema['lines']['lines']['taskline']['product_id']
     return schema
 
 
@@ -697,6 +707,7 @@ def get_invoice_schema():
         Return the schema for invoice add/edit
     """
     schema = TASKSCHEMA.clone()
+    schema['lines']['lines'].doctype = "invoice"
     title = u"Phase où insérer la facture"
     schema['common']['phase_id'].title = title
     # Ref #689
@@ -719,6 +730,7 @@ def get_cancel_invoice_schema():
         return the cancel invoice form schema
     """
     schema = TASKSCHEMA.clone()
+    schema['lines']['lines'].doctype = "taskschema"
     title = u"Phase où insérer l'avoir"
     schema['common']['phase_id'].title = title
     # Ref #689

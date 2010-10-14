@@ -38,6 +38,9 @@
 <strong>Facture N°</strong>${task.officialNumber}<br />
 <strong>Libellé : </strong>${task.number}<br />
 <strong>Objet : </strong>${format_text(task.description)}<br />
+% if config.has_key('coop_invoiceheader'):
+    ${format_text(config['coop_invoiceheader'])}
+% endif
 </%block>
 <%block name="notes_and_conditions">
 %if task.paymentConditions:

@@ -52,6 +52,11 @@ class EstimationConfig(colander.MappingSchema):
     """
         Schema for estimation configuration
     """
+    header = colander.SchemaNode(
+            colander.String(),
+            title=u"Cadre d'information spécifique (en entête des devis)",
+            widget=widget.TextAreaWidget(cols=80, rows=2),
+            missing=u'')
     footer = colander.SchemaNode(
         colander.String(),
         title=u"Informations sur l'acceptation des devis",
@@ -63,6 +68,11 @@ class InvoiceConfig(colander.MappingSchema):
     """
         Schema for invoice configuration
     """
+    header = colander.SchemaNode(
+            colander.String(),
+            title=u"Cadre d'information spécifique (en entête des factures)",
+            widget=widget.TextAreaWidget(cols=80, rows=2),
+            missing=u'')
     payment = colander.SchemaNode(
         colander.String(),
         title=u"Information de paiement pour les factures",
@@ -247,8 +257,13 @@ def get_config_appstruct(config_dict):
     """
     appstruct = {
         'site':     {'welcome': None},
-        'document': {'estimation':  {'footer': None, },
-                     'invoice':     {'payment': None,
+        'document': {'estimation':  {
+                                    'header':None,
+                                    'footer': None,
+                                    },
+                     'invoice':     {
+                                    'header':None,
+                                    'payment': None,
                                      'late': None},
                      'footertitle': None,
                      'footercourse': None,
@@ -264,8 +279,13 @@ def get_config_appstruct(config_dict):
                                                         'coop_pdffootertext')
     appstruct['document']['cgv'] = config_dict.get('coop_cgv')
 
+    appstruct['document']['estimation']['header'] = config_dict.get(
+                                                        'coop_estimationheader')
     appstruct['document']['estimation']['footer'] = config_dict.get(
                                                        'coop_estimationfooter')
+
+    appstruct['document']['invoice']['header'] = config_dict.get(
+                                                        'coop_invoiceheader')
 
     appstruct['document']['invoice']['payment'] = config_dict.get(
                                                         'coop_invoicepayment')
@@ -287,9 +307,13 @@ def get_config_dbdatas(appstruct):
                                                              'footercontent')
     dbdatas['coop_cgv'] = appstruct.get('document', {}).get('cgv')
 
+    dbdatas['coop_estimationheader'] = appstruct.get('document', {}).get(
+                                           'estimation', {}).get('header')
     dbdatas['coop_estimationfooter'] = appstruct.get('document', {}).get(
                                                 'estimation', {}).get('footer')
 
+    dbdatas['coop_invoiceheader'] = appstruct.get('document', {}).get(
+                                           'invoice', {}).get('header')
     dbdatas['coop_invoicepayment'] = appstruct.get('document', {}).get(
                                                 'invoice', {}).get('payment')
     dbdatas['coop_invoicelate'] = appstruct.get('document', {}).get(

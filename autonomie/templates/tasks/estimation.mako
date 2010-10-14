@@ -38,6 +38,9 @@
 <%block name="information">
 <strong>DEVIS N° </strong>${task.number}<br />
 <strong>Objet : </strong>${format_text(task.description)}<br />
+% if config.has_key('coop_estimationheader'):
+    ${format_text(config['coop_estimationheader'])}
+% endif
 </%block>
 <%block name="notes_and_conditions">
 %if task.exclusions:

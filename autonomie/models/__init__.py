@@ -29,9 +29,9 @@
 from base import DBBASE
 from base import DBSESSION
 
-import client
 import company
 import config
+import customer
 import holiday
 import project
 import treasury

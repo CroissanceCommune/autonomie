@@ -23,11 +23,11 @@
 #
 
 """
-    Client model : represents customers
+    Customer model : represents customers
     Stores the company and its main contact
 
-    >>> from autonomie.models.client import Client
-    >>> c = Client()
+    >>> from autonomie.models.customer import Customer
+    >>> c = Customer()
     >>> c.contactLastName = u"Dupont"
     >>> c.contactFirstName = u"Jean"
     >>> c.name = u"Compagnie Dupont avec un t"
@@ -58,9 +58,9 @@ from autonomie.models.base import (
 log = logging.getLogger(__name__)
 
 
-class Client(DBBASE):
+class Customer(DBBASE):
     """
-        Client model
+        Customer model
         Stores the company and its main contact
         :param name: name of the company
         :param code: internal code of the customer (unique regarding the owner)
@@ -105,13 +105,13 @@ class Client(DBBASE):
 
     def get_company_id(self):
         """
-            :returns: the id of the company this client belongs to
+            :returns: the id of the company this customer belongs to
         """
         return self.company.id
 
     def todict(self):
         """
-            :returns: a dict version of the client object
+            :returns: a dict version of the customer object
         """
         projects = [project.todict() for project in self.projects]
         return dict(id=self.id,
@@ -134,7 +134,7 @@ class Client(DBBASE):
     @property
     def full_address(self):
         """
-            :returns: the client address formatted in french format
+            :returns: the customer address formatted in french format
         """
         address = u"{name}\n{address}\n{zipCode} {city}".format(name=self.name,
                 address=self.address, zipCode=self.zipCode, city=self.city)

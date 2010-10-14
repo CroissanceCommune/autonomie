@@ -93,7 +93,7 @@ class Estimation(Task, EstimationCompute):
         group='edit')
     exclusions = deferred(Column("exclusions", Text), group='edit')
     project_id = Column("project_id", ForeignKey('project.id'))
-    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
     manualDeliverables = deferred(
         Column("manualDeliverables", Integer),
         group='edit')
@@ -119,8 +119,8 @@ class Estimation(Task, EstimationCompute):
         backref=backref('estimations', order_by='Estimation.taskDate')
     )
     client = relationship(
-            "Client",
-            primaryjoin="Client.id==Estimation.client_id",
+            "Customer",
+            primaryjoin="Customer.id==Estimation.customer_id",
             backref=backref('estimations', order_by='Estimation.taskDate'))
 
     __mapper_args__ = {'polymorphic_identity': 'estimation', }
@@ -165,7 +165,7 @@ class Estimation(Task, EstimationCompute):
         estimation.set_sequenceNumber(seq_number)
         estimation.set_number()
         estimation.set_name()
-        if client.id == self.client_id:
+        if client.id == self.customer_id:
             estimation.address = self.address
         else:
             estimation.address = client.full_address

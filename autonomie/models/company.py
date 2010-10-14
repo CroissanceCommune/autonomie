@@ -81,8 +81,8 @@ class Company(DBBASE):
             group='edit')
     IBAN = deferred(Column("IBAN", String(255)),
             group='edit')
-    clients = relationship("Client",
-                            order_by="Client.code",
+    clients = relationship("Customer",
+                            order_by="Customer.code",
                             backref='company')
     projects = relationship("Project",
                             order_by="Project.id",

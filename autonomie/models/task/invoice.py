@@ -104,7 +104,7 @@ class Invoice(Task, InvoiceCompute):
                        }
     id = Column("id", ForeignKey('task.id'), primary_key=True)
 
-    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
     estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
     project_id = Column("project_id", ForeignKey('project.id'))
 
@@ -133,8 +133,8 @@ class Invoice(Task, InvoiceCompute):
     exported = deferred(Column(Boolean(), default=False), group="edit")
 
     client = relationship(
-        "Client",
-        primaryjoin="Client.id==Invoice.client_id",
+        "Customer",
+        primaryjoin="Customer.id==Invoice.customer_id",
         backref=backref('invoices', order_by='Invoice.taskDate'))
 
     project = relationship(
@@ -355,7 +355,7 @@ class Invoice(Task, InvoiceCompute):
         invoice.set_sequenceNumber(seq_number)
         invoice.set_number()
         invoice.set_name()
-        if client.id == self.client_id:
+        if client.id == self.customer_id:
             invoice.address = self.address
         else:
             invoice.address = client.full_address
@@ -461,7 +461,7 @@ class CancelInvoice(Task, TaskCompute):
     invoice_id = Column(Integer, ForeignKey('invoice.id'),
                                                         default=None)
     project_id = Column(Integer, ForeignKey('project.id'))
-    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
 
     sequenceNumber = deferred(Column(Integer), group='edit')
     _number = Column("number", String(100))
@@ -486,8 +486,8 @@ class CancelInvoice(Task, TaskCompute):
         backref=backref("cancelinvoice", uselist=False),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id")
     client = relationship(
-        "Client",
-        primaryjoin="Client.id==CancelInvoice.client_id",
+        "Customer",
+        primaryjoin="Customer.id==CancelInvoice.customer_id",
         backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
@@ -683,11 +683,11 @@ class ManualInvoice(Task):
         default=0)
     montant_ht = Column("montant_ht", Integer)
     tva = Column("tva", Integer)
-    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
     financial_year = Column(Integer, nullable=False)
     client = relationship(
-        "Client",
-        primaryjoin="Client.id==ManualInvoice.client_id",
+        "Customer",
+        primaryjoin="Customer.id==ManualInvoice.customer_id",
         backref='manual_invoices')
     company_id = Column(
         'compagnie_id',

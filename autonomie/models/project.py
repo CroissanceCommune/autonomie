@@ -39,9 +39,9 @@ from autonomie.models.types import CustomDateType
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
 
-ProjectClient = Table('project_client', DBBASE.metadata,
+ProjectCustomer = Table('project_customer', DBBASE.metadata,
         Column("project_id", Integer, ForeignKey('project.id')),
-        Column("client_id", Integer, ForeignKey('customer.id')),
+        Column("customer_id", Integer, ForeignKey('customer.id')),
         mysql_charset=default_table_args['mysql_charset'],
         mysql_engine=default_table_args['mysql_engine'])
 
@@ -53,7 +53,7 @@ class Project(DBBASE):
     __table_args__ = default_table_args
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(255))
-    client_id = Column("client_id", Integer,  ForeignKey('customer.id'))
+    customer_id = Column("customer_id", Integer,  ForeignKey('customer.id'))
     code = Column("code", String(4), nullable=False)
     definition = deferred(Column("definition", Text), group='edit')
 
@@ -72,8 +72,8 @@ class Project(DBBASE):
     type = deferred(Column('type', String(150)), group='edit')
     archived = Column("archived", String(255), default=0)
 
-    clients = relationship("Client",
-                            secondary=ProjectClient,
+    clients = relationship("Customer",
+                            secondary=ProjectCustomer,
                             backref='projects')
 
     def get_estimation(self, taskid):

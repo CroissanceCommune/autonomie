@@ -21,7 +21,7 @@ from sqlalchemy import or_
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.decorator import reify
-
+from webhelpers.html.builder import HTML
 from deform import Form
 
 from autonomie.models.user import User
@@ -29,6 +29,7 @@ from autonomie.models.company import Company
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
+from autonomie.utils.widgets import StaticWidget
 from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
 from autonomie.utils.views import cancel_btn
@@ -38,6 +39,7 @@ from autonomie.views.forms.user import UserListSchema
 from autonomie.views.forms.user import PASSWORDSCHEMA
 from autonomie.views.forms.user import UserDisableSchema
 from autonomie.views.forms.utils import BaseFormView
+from autonomie.views.company import company_enable
 
 from .base import BaseListView
 
@@ -64,7 +66,8 @@ class UserList(BaseListView):
         """
             Return the main query for our list view
         """
-        return User.query(ordered=False).outerjoin(User.companies)
+        return User.query(ordered=False, only_active=False)\
+                .outerjoin(User.companies)
 
     def filter_name_search(self, query, appstruct):
         """
@@ -78,6 +81,14 @@ class UserList(BaseListView):
                 User.companies.any(Company.name.like("%" + search + "%"))))
         return query
 
+    def filter_disabled(self, query, appstruct):
+        disabled = appstruct['disabled']
+        if disabled == '0':
+            val = 'Y'
+        else:
+            val = 'N'
+        return query.filter(User.active == val)
+
     def populate_actionmenu(self, appstruct):
         """
             Add items to the action menu (directory link,
@@ -89,9 +100,25 @@ class UserList(BaseListView):
             popup = PopUp("add", u'Ajouter un compte', form.render())
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
+            self.request.actionmenu.add(self._get_disabled_btn(appstruct))
         searchform = SearchForm(u"Nom ou entreprise")
         searchform.set_defaults(appstruct)
         self.request.actionmenu.add(searchform)
+
+    def _get_disabled_btn(self, appstruct):
+        """
+            return the button to show disabled users
+        """
+        disabled = appstruct['disabled']
+        if disabled == '0':
+            url = self.request.current_route_path(_query=dict(disabled="1"))
+            link = HTML.a(u"Afficher les comptes désactivés",  href=url)
+        else:
+            url = self.request.current_route_path(_query=dict(archived="0"))
+            link = HTML.a(u"Afficher uniquement les comptes actifs", href=url)
+        return StaticWidget(link)
+
+
 
 
 class UserAccount(BaseFormView):
@@ -141,6 +168,31 @@ def user_delete(request):
         err_msg = u"Erreur à la suppression du compte de '{0}'".format(
                                             format_account(account))
         request.session.flash(err_msg, 'error')
+    return HTTPFound(request.route_path("users"))
+
+
+def user_enable(request):
+    """
+        enable a user and its enterprise (if he has only one)
+    """
+    account = request.context
+    if not account.enabled():
+        try:
+            account.enable()
+            request.dbsession.merge(account)
+            log.info(u"The user {0} has been enabled".\
+                    format(format_account(account)))
+            message = u"L'utilisateur {0} a été (ré)activé.".\
+                    format(format_account(account))
+            request.session.flash(message)
+            if len(account.companies) == 1:
+                company = account.companies[0]
+                company_enable(request, company=company)
+        except:
+            log.exception(u"Erreur à l'activation du compte")
+            err_msg = u"Erreur à l'activation du compte de '{0}'".\
+                    format(format_account(account))
+            request.session.flash(err_msg, 'error')
     return HTTPFound(request.route_path("users"))
 
 
@@ -314,22 +366,32 @@ def populate_actionmenu(request, user=None):
             if user.enabled():
                 request.actionmenu.add(get_disable_btn(user.id))
             else:
+                request.actionmenu.add(get_enable_btn(user.id))
                 request.actionmenu.add(get_del_btn(user.id))
 
 
 def get_list_view_btn():
     return ViewLink(u"Annuaire", "view", path="users")
 
+
 def get_view_btn(user_id):
     return ViewLink(u"Voir", "view", path="user", id=user_id)
+
 
 def get_edit_btn(user_id):
     return ViewLink(u"Éditer", "edit", path="user", id=user_id,
                                         _query=dict(action="edit"))
 
+
+def get_enable_btn(user_id):
+    return ViewLink(u"Activer", "manage", path="user", id=user_id,
+                                        _query=dict(action="enable"))
+
+
 def get_disable_btn(user_id):
     return ViewLink(u"Désactiver", "manage", path="user", id=user_id,
                                         _query=dict(action="disable"))
+
 
 def get_del_btn(user_id):
     message = u"Êtes-vous sûr de vouloir supprimer ce compte ? \
@@ -369,6 +431,11 @@ def includeme(config):
                     route_name='user',
                     renderer='user_edit.mako',
                     request_param='action=disable',
+                    permission='edit')
+    config.add_view(user_enable,
+                    route_name='user',
+                    renderer='user_edit.mako',
+                    request_param='action=enable',
                     permission='edit')
     config.add_view(user_delete,
                     route_name='user',

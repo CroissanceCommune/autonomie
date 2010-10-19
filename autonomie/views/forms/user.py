@@ -298,4 +298,6 @@ def get_auth_schema():
     return AuthSchema(title=u"Authentification", validator=auth)
 
 class UserListSchema(BaseListsSchema):
-    pass
+    disabled = colander.SchemaNode(colander.String(),
+                                    missing="0",
+                                    validator=colander.OneOf(('0', '1')))

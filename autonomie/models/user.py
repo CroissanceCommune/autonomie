@@ -120,13 +120,13 @@ class User(DBBASE):
         return self.primary_group == CONTRACTOR_PRIMARY_GROUP
 
     @classmethod
-    def query(cls, ordered=True):
+    def query(cls, ordered=True, only_active=True):
         """
             Query users
-            Exclude archived users
         """
         query = super(User, cls).query()
-        query = query.filter(User.active == 'Y')
+        if only_active:
+            query = query.filter(User.active == 'Y')
 
         if ordered:
             query = query.order_by(User.lastname)
@@ -138,6 +138,12 @@ class User(DBBASE):
             disable a user
         """
         self.active = "N"
+
+    def enable(self):
+        """
+            enable a user
+        """
+        self.active = "Y"
 
     def enabled(self):
         """

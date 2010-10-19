@@ -133,6 +133,15 @@ class Company(DBBASE):
         """
         self.active = "N"
 
+    def enable(self):
+        """
+            enable a company
+        """
+        self.active = "Y"
+
+    def enabled(self):
+        return self.active == 'Y'
+
     def has_invoices(self):
         """
             return True if this company owns invoices

@@ -10,6 +10,9 @@
     <div class="span4 offset1">
         <div class='well'>
             ${format_company(company)}
+            % if not company.enabled():
+                <span class='label label-warning'>Cette entreprise a été désactivée</span>
+            % endif
         %for link in link_list:
             <p>${link.render(request)|n}</p>
         %endfor

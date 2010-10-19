@@ -84,6 +84,31 @@ def company_view(request):
                 company=company,
                 link_list=link_list)
 
+
+def company_enable(request, company=None):
+    """
+        Enable a company
+    """
+    if company is None:
+        company = request.context
+    if not company.enabled():
+        try:
+            company.enable()
+            request.dbsession.merge(company)
+            log.info(u"The company {0} has been enabled".\
+                    format(company.name))
+            message = u"L'entreprise {0} a été (ré)activée".\
+                    format(company.name)
+            request.session.flash(message)
+        except:
+            err_msg = u"Erreur à l'activation de l'entreprise {0}"\
+                    .format(company.name)
+            log.exception(err_msg)
+            request.session.flash(err_msg, "error")
+    if request.context.__name__ == 'company':
+        return HTTPFound(request.route_path("users"))
+
+
 class CompanyAdd(BaseFormView):
     """
         View class for company add
@@ -147,6 +172,7 @@ class CompanyEdit(BaseFormView):
         self.session.flash(message)
         return HTTPFound(self.request.route_path("company", id=company.id))
 
+
 def populate_actionmenu(request, company=None):
     """
         add item in the action menu
@@ -156,6 +182,9 @@ def populate_actionmenu(request, company=None):
         request.actionmenu.add(get_view_btn(company.id))
         if has_permission('edit', request.context, request):
             request.actionmenu.add(get_edit_btn(company.id))
+            if not company.enabled():
+                request.actionmenu.add(get_enable_btn(company.id))
+
 
 def get_list_view_btn():
     """
@@ -163,11 +192,13 @@ def get_list_view_btn():
     """
     return ViewLink(u"Annuaire", "view", path="users")
 
+
 def get_view_btn(company_id):
     """
         Return a link to the view page
     """
     return ViewLink(u"Voir", "view", path="company", id=company_id)
+
 
 def get_edit_btn(company_id):
     """
@@ -175,6 +206,15 @@ def get_edit_btn(company_id):
     """
     return ViewLink(u"Éditer", "edit", path="company", id=company_id,
                                             _query=dict(action="edit"))
+
+
+def get_enable_btn(company_id):
+    """
+        Return a link to the edition form
+    """
+    return ViewLink(u"Activer", "edit", path="company", id=company_id,
+                                            _query=dict(action="enable"))
+
 
 def includeme(config):
     """
@@ -195,4 +235,8 @@ def includeme(config):
                     renderer='company_edit.mako',
                     request_param='action=edit',
                     permission="edit")
-#    config.add_view(CompanyAdd,
+    config.add_view(company_enable,
+                    route_name='company',
+                    renderer='company_edit.mako',
+                    request_param='action=enable',
+                    permission="edit")

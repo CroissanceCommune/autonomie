@@ -24,17 +24,8 @@
 <%namespace file="/base/utils.mako" import="definition_list" />
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%block name="content">
+<a class='btn pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='icon-file'></i>PDF</a>
 <% activity = request.context %>
-<div class='row-fluid'>
-            <div class='section-header'>
-                <a href="#" data-toggle='collapse' data-target='#edition_form'>
-                    <i class="icon-arrow-down"></i>
-                </a>
-            </div>
-            <div class='section-content collapse' id='edition_form'>
-                        ${form|n}
-            </div>
-            </div>
 <div class='row-fluid'>
     <div class='span4'>
             <% companies = set() %>
@@ -79,22 +70,28 @@
                     (u"Mode d'entretien", activity.mode), \
                     )\
                 %>
-                ${definition_list(items)}
-                <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
-                    Editer
-                </button>
+                <div class='row-fluid'>
+                    <div class='span7'>
+                        ${definition_list(items)}
+                    </div>
+                    <div class='span5'>
+                        <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
+                            Editer
+                        </button>
+                        <button class="btn btn-primary" data-toggle='collapse' data-target='#next_activity_form_container'>
+                            Programmer un nouveau rendez-vous
+                        </button>
+                    </div>
+                </div>
+                <div class='section-content collapse' id='edition_form'>
+                    ${form|n}
+                </div>
+                <div class='section-content collapse' id='next_activity_form_container'>
+                    <div id="next_activity_message"></div>
+                    ${next_activity_form|n}
+                </div>
             </div>
         ${record_form|n}
-        <hr>
-        <div class='section-header'>
-            <a href="#" data-toggle='collapse' data-target='#next_activity_form_container'>
-                Programmer un nouveau rendez-vous <i class="icon-arrow-down"></i>
-            </a>
-        </div>
-        <div class='section-content collapse' id='next_activity_form_container'>
-            <div id="next_activity_message" />
-            ${next_activity_form|n}
-        </div>
     </div>
 </div>
 <div class='row-fluid'>

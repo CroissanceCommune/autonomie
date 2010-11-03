@@ -34,6 +34,10 @@ from pyramid.security import has_permission
 from sqlalchemy.orm import aliased
 
 from autonomie.utils.widgets import ViewLink
+from autonomie.utils.pdf import (
+        render_html,
+        write_pdf,
+        )
 from autonomie.views.base import BaseListView
 from autonomie.models.activity import Activity
 from autonomie.models import user
@@ -69,6 +73,16 @@ ACTIVITY_RECORD_BUTTON = deform.Button(
     name="submit",
     type="submit",
     title=u"Enregistrer et Terminer le rendez-vous")
+
+ACTIVITY_USER_EXCUSED = deform.Button(
+    name="excused",
+    type="submit",
+    title=u"Participant excusé")
+
+ACTIVITY_USER_ABSENT = deform.Button(
+    name="absent",
+    type="submit",
+    title=u"Participant excusé")
 
 
 def new_activity(request, appstruct):
@@ -293,7 +307,6 @@ class ActivityRecordView(BaseFormView):
         """
         Called when the record submit button is clicked
         """
-        self.request.context.status = 'closed'
         message = u"Les informations ont bien été enregistrées"
         return record_changes(self.request, appstruct, message)
 
@@ -412,6 +425,22 @@ def activity_delete_view(context, request):
     return HTTPFound(url)
 
 
+def activity_pdf_view(request):
+    """
+    Return a pdf output of the current activity
+    """
+    date = request.context.date.strftime("%e_%M_%Y")
+    filename = u"rdv_{0}.pdf".format(date)
+
+    template = u"autonomie:templates/activity_pdf.mako"
+    datas = dict(activity=request.context)
+    html_str = render_html(request, template, datas)
+
+    write_pdf(request, filename, html_str)
+
+    return request.response
+
+
 def includeme(config):
     """
     Add view to the pyramid registry
@@ -419,6 +448,11 @@ def includeme(config):
     config.add_route(
             'activity',
             "/activities/{id:\d+}",
+            traverse='/activities/{id}',
+            )
+    config.add_route(
+            'activity.pdf',
+            "/activities/{id:\d+}.pdf",
             traverse='/activities/{id}',
             )
     config.add_route('activities', "/activities")
@@ -459,6 +493,11 @@ def includeme(config):
             route_name='activity',
             permission='view',
             renderer="/activity.mako",
+            )
+    config.add_view(
+            activity_pdf_view,
+            route_name='activity.pdf',
+            permission='view',
             )
 
     config.add_view(

@@ -25,6 +25,7 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%block name="content">
+<a class='btn pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='icon-file'></i>PDF</a>
 <div class='row-fluid'>
     <div class='span8 offset2'>
                 <% items = (\
@@ -56,7 +57,6 @@
             </blockquote>
         % endfor
 
-        <h3>
     </div>
 </div>
 

@@ -106,12 +106,20 @@
     <div class='span4'>
         <table class='table table-bordered'>
             <tr>
-                <td class='invoice_resulted'><br /></td>
-                <td>Rendez-vous terminés</td>
+                <td class='white_tr'><br /></td>
+                <td>Rendez-vous programmés</td>
             </tr>
             <tr>
-                <td class='invoice_notpaid'><br /></td>
-                <td>Rendez-vous programmés</td>
+                <td class='green_tr'><br /></td>
+                <td>Participants présents</td>
+            </tr>
+            <tr>
+                <td class='orange_tr'><br /></td>
+                <td>Participants excusés</td>
+            </tr>
+            <tr>
+                <td class='red_tr'><br /></td>
+                <td>Participants absents</td>
             </tr>
         </table>
     </div>
@@ -135,33 +143,37 @@
             <% onclick = "document.location='{url}'".format(url=url) %>
             <%
 if activity.status == 'planned':
-    css = "invoice_notpaid"
+    css = "white_"
+elif activity.status == 'excused':
+    css = "orange_"
+elif activity.status == "absent":
+    css = "red_"
 else:
-    css = "invoice_resulted"
+    css = "green_"
 %>
-            <tr class='${css}_tr'>
-                <td onclick="${onclick}" class="rowlink ${css}">
+            <tr class='${css}tr'>
+                <td onclick="${onclick}" class="rowlink">
                     ${api.format_date(activity.date)}
                 </td>
-                <td onclick="${onclick}" class="rowlink ${css}">
+                <td onclick="${onclick}" class="rowlink">
                     ${api.format_account(activity.conseiller)}
                 </td>
-                <td onclick="${onclick}" class="rowlink ${css}">
+                <td onclick="${onclick}" class="rowlink">
                     <ul>
                     % for participant in activity.participants:
                         <li>${api.format_account(participant)}</li>
                     % endfor
                     </ul>
                 </td>
-                <td onclick="${onclick}" class="rowlink ${css}">
+                <td onclick="${onclick}" class="rowlink">
                     % if activity.type_object is not None:
                         ${activity.type_object.label}
                     % endif
                 </td>
-                <td onclick="${onclick}" class="rowlink ${css}">
+                <td onclick="${onclick}" class="rowlink">
                     ${activity.mode}
                 </td>
-                <td class="${css}">
+                <td>
                     % if request.user.is_contractor():
                         ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
                     % else:

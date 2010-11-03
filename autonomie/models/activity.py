@@ -65,7 +65,7 @@ ACTIVITY_PARTICIPANT = Table(
     mysql_engine=default_table_args['mysql_engine'])
 
 
-ACTIVITY_STATUS = (u"planned", u"closed", u"cancelled")
+ACTIVITY_STATUS = (u"planned", u"closed", u"excused", "absent")
 
 
 class Event(Node):

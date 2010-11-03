@@ -40,8 +40,16 @@ from autonomie.views.forms import (
 
 STATUS_OPTIONS = (
     (u"Tous les rendez-vous", "all"),
-    (u"Les rendez-vous planifiés", "planned"),
-    (u"Les rendez-vous terminés", "closed"),
+    (u"Planifiés", "planned"),
+    (u"Participants absents", "absent"),
+    (u"Participants excusés", "excused"),
+    (u"Participants présents", "closed"),
+    )
+
+STATUSCHOICES = (
+    ("closed", u"Participant(s) présents"),
+    ("excused", u"Participant(s) excusés"),
+    ("absent", u"Participant(s) absents"),
     )
 
 
@@ -129,6 +137,12 @@ class RecordActivitySchema(colander.Schema):
     """
     Schema for activity recording
     """
+    status = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in STATUSCHOICES]),
+        widget=deform_widget.RadioChoiceWidget(values=STATUSCHOICES),
+        title=u"Statut des participants",
+        default="closed")
     point = main.textarea_node(title=u"Point de suivi", missing='')
     objectifs = main.textarea_node(title=u"Définition des objectifs",
             missing='')

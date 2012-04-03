@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : lun. 02 avril 2012 11:26:39 CEST
+# * Last Modified : mar. 03 avril 2012 14:31:27 CEST
 #
 # * Project :
 #
@@ -26,7 +26,9 @@ from deform import Form
 from deform import Button
 from deform import ValidationFailure
 
+from autonomie.models import DBSESSION
 from autonomie.views.forms import authSchema
+from autonomie.views.forms import pwdSchema
 
 log = logging.getLogger(__name__)
 
@@ -92,3 +94,33 @@ def logout_view(request):
     headers = forget(request)
     loc = request.route_url('index')
     return HTTPFound(location=loc, headers=headers)
+
+@view_config(route_name='account', renderer='account.mako')
+def account(request):
+    """
+        Account handling page
+    """
+    avatar = request.session['user']
+    pwdformschema = pwdSchema.bind(check=True)
+    pwdform = Form(pwdformschema, buttons=("submit",))
+    html_form = pwdform.render({'login':avatar.login})
+    if "submit" in request.params:
+        controls = request.params.items()
+        try:
+            datas = pwdform.validate(controls)
+        except ValidationFailure, e:
+            log.debug("Erreur d'authentification")
+            html_form = e.render()
+        else:
+            dbsession = DBSESSION()
+            new_pass = datas['pwd']
+            avatar.set_password(new_pass)
+            dbsession.merge(avatar)
+            dbsession.flush()
+            request.session.flash(u"Votre mot de passe a bien été modifié",
+                                                                    'main')
+
+    return dict(title="Mon compte",
+                html_form=html_form,
+                account=avatar
+                )

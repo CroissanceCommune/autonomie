@@ -108,15 +108,7 @@
       </a>
     % endfor
     </%block>
-    <div class='row-fluid'>
-      <div class='span2'>
-        <%block name='rightbar' />
-      </div>
-
-      <div class='span10'>
         <%block name='content' />
-      </div>
-    </div>
     <%block name='footerjs' />
   </body>
 </html>

@@ -63,12 +63,14 @@ def company_clients(request):
         company = avatar.get_company(cid)
     except KeyError:
         raise HTTPForbidden()
+    toquery = (Client.id, Client.contactLastName, Client.contactFirstName,
+                        Client.name)
     if cid != -1:
-        clients = dbsession.query(Client).filter(Client.name.like(search+"%"),
+        clients = dbsession.query(*toquery).filter(Client.name.like(search+"%"),
                                                 Client.id_company == cid).\
             order_by(sort + " " + direction)
     else:
-        clients = dbsession.query(Client).filter(Client.name.like(search+"%")).\
+        clients = dbsession.query(*toquery).filter(Client.name.like(search+"%")).\
             order_by(sort + " " + direction)
 #    clients = company.clients
     form = get_client_form(path=route_path('company_clients', request,

@@ -4,10 +4,12 @@ import ConfigParser
 from sys import argv
 try:
     from setuptools import setup
+    from setuptools import Command
     use_setuptools = True
 except ImportError, err:
     from distutils.core import setup
     use_setuptools = False
+    from distutils.core import Command
 
 import os
 
@@ -29,6 +31,18 @@ MULTI = ("classifiers",
           "requires",
           "packages",
           "scripts")
+
+class PyTest(Command):
+    description = "Run tests"
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import sys,subprocess
+        errno = subprocess.call([sys.executable, 'runtest.py'])
+        raise SystemExit(errno)
 
 def generate_setuptools_kwargs_from_setup_cfg():
     config = ConfigParser.RawConfigParser()
@@ -72,7 +86,7 @@ def generate_setuptools_kwargs_from_setup_cfg():
     if config.has_option("metadata", "description_file"):
         kwargs["long_description"] = open(config.get("metadata",
                                                      "description_file")).read()
-
+    kwargs['cmdclass'] = {'test':PyTest}
     return kwargs
 
 kwargs = generate_setuptools_kwargs_from_setup_cfg()

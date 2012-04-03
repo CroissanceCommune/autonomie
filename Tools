@@ -1,0 +1,59 @@
+#!/bin/bash
+# Usefull function used to manage databases installation
+having_root_pwd() {
+    log "Have you got the root password"
+    if [ "$BDD_ROOT_PWD" == "" ]
+    then
+        echo "Missing the sql password for ${BDD_ROOT_USER}, please provide one and press [ENTER]:"
+        read BDD_ROOT_PWD
+    fi
+}
+
+mysql_set_db() {
+    DB=$1
+    FILENAME=$2
+    if [ "$NOPASSWORD" == "1" ]
+    then
+        mysql -u${BDD_ROOT_USER} $DB < $FILENAME
+    else
+        mysql -u${BDD_ROOT_USER} -p${BDD_ROOT_PWD} $DB < $FILENAME
+    fi
+}
+
+mysql_cmd() {
+    if [ "$NOPASSWORD" == "1" ]
+    then
+        echo "$@" | mysql -u${BDD_ROOT_USER}
+    else
+        having_root_pwd
+        echo "$@" | mysql -u${BDD_ROOT_USER} -p${BDD_ROOT_PWD}
+    fi
+}
+my_adddb() {
+    DB=$1
+    echo "Creating database : \"${DB}\""
+    mysql_cmd "CREATE DATABASE IF NOT EXISTS ${DB} character set utf8;"
+}
+my_adduser() {
+    UNAME=$@
+    echo "Creating mysql user : \"${UNAME}\""
+#    mysql_cmd "CREATE USER IF NOT EXISTS ${UNAME}@localhost;"
+}
+my_add() {
+    # my_add dbname dbuser dbpass
+    DB=$1
+    UNAME=$2
+    UPASS=$3
+    my_adddb $DB
+    my_adduser $UNAME
+    mysql_cmd "GRANT ALL PRIVILEGES ON ${DB}.* TO ${UNAME}@localhost IDENTIFIED BY '${UPASS}';"
+    mysql_cmd "FLUSH PRIVILEGES;"
+}
+mysql_filedump() {
+    DB=$1
+    FILENAME=$2
+    mysql_set_db ${DB} ${FILENAME}
+}
+log() {
+    echo $@
+}

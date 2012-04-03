@@ -1,0 +1,94 @@
+/*
+ * File Name : main.css
+ *
+ * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+ * Company : Majerti ( http://www.majerti.fr )
+ *
+ * This software is distributed under GPLV3
+ * License: http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ */
+header{
+  font-size:16px;
+}
+header .navbar{
+  margin-bottom:0px;
+}
+header .navbar .navbar-inner{
+  padding-left:15%;
+}
+header #logout_link{
+  font-size:12px;
+  font-weight:400;
+  color:#fff;
+  padding-right:10%;
+}
+header .navbar li:hover{
+  background-color:#3c3c3c;
+}
+#pagetitle{
+  padding:10px 0 5px 15%;
+  border-bottom:1px solid #ddd;
+  text-align:left;
+  background-color:#efefef;
+}
+.form-actions{ /* deform_bootstrap modification */
+  background:none;
+}
+.ui-icon{
+  float:left;
+  margin-right:3px;
+}
+.ui-button-primary .ui-icon, .btn-primary .ui-icon{
+  background-image:url('theme/images/ui-icons_f6cf3b_256x240.png');
+}
+.deform label{
+  font-size:1em;
+}
+.deform legend{
+  font-size:1.2em;
+  font-weight:bold;
+  border:none;
+  margin:0px;
+  padding:0 5px 0 10px;
+}
+#actionmenu{
+  padding-left:5%;
+}
+.message{
+  left: 35%;
+  max-width: 30%;
+  position: relative;
+  text-align: center;
+}
+.breadcrumb {
+  padding: 7px 14px;
+  margin: 0 0 18px;
+  background-color: #fbfbfb;
+  background-image: -moz-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -ms-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f5f5f5));
+  background-image: -webkit-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -o-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: linear-gradient(to bottom, #ffffff, #f5f5f5);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f5f5f5', GradientType=0);
+  border: 1px solid #ddd;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px 0 #ffffff;
+  -moz-box-shadow: inset 0 1px 0 #ffffff;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+.breadcrumb li {
+  display: inline-block;
+  text-shadow: 0 1px 0 #ffffff;
+}
+.breadcrumb .divider {
+  padding: 0 5px;
+  color: #999999;
+}
+.breadcrumb .active a {
+  color: #333333;
+}

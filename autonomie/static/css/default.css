@@ -1,0 +1,30 @@
+/* Default css */
+body, html{
+  width:100%;
+  height:100%;
+  margin:0px;
+  padding:0px;
+  font-family:Verdana,Helvetica,Arial,sans-serif !important;
+}
+.hcentered{
+  text-align:center;
+}
+.vcentered{
+  vertical-align:middle;
+}
+.floatcontainer{
+  /* Container able to receive left-floatted elements (inline divs) */
+  clear:both;
+  overflow:hidden;
+}
+.floatted{
+  float:left;
+  display:inline;
+}
+.rfloatted{
+  float:right;
+  display:inline;
+}
+.nolink{
+  text-decoration:none;
+}

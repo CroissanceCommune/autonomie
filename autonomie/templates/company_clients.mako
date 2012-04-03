@@ -2,7 +2,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    <a class="btn-primary" title='Référencer un nouveau client' style='margin:0px 10px 0px 50%;' href='#new' onclick="$('#addform').dialog('open');">
+    <a class="btn-primary" title='Référencer un nouveau client' href='#new' onclick="$('#addform').dialog('open');">
         Ajouter un Client
     </a>
     </li>

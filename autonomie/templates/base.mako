@@ -55,6 +55,7 @@
                 % endfor
               </ul>
         % endif
+        %if request.session.has_key('user'):
         <ul class='nav pull-right' id='logout_link'>
           <li>
           <a href="/account">${request.session['user'].lastname} ${request.session['user'].firstname}</a>
@@ -63,6 +64,7 @@
             <a href="/logout">Déconnexion</a>
             </li>
           </ul>
+        % endif
             </div>
           </div>
       </div>

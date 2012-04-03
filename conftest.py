@@ -14,15 +14,17 @@
 #
 import os
 
-def coerce_datas(settings, prefix, root_path=None):
+here = os.path.dirname(__file__)
+
+def coerce_datas(settings, prefix, here=None):
     """
         get the test db settings as a dict and format them
     """
     options = dict((key[len(prefix):], settings[key])
                 for key in settings if key.startswith(prefix))
-    if root_path:
-        options['sampledb'] = os.path.join(root_path, options['sampledb'])
-        options['sampledatas'] = os.path.join(root_path, options['sampledatas'])
+    if here:
+        options['sampledb'] = os.path.join(here, options['sampledb'])
+        options['sampledatas'] = os.path.join(here, options['sampledatas'])
     return options
 
 def launch_cmd(cmd):
@@ -77,12 +79,12 @@ def drop_sql_datas(settings, prefix):
     options = coerce_datas(settings, prefix)
     drop_db(options)
 
-def initialize_test_database(settings, prefix, root_path):
+def initialize_test_database(settings, prefix, here):
     """
         dump sample datas as a test database
     """
     print "Initializing test database"
-    options = coerce_datas(settings, prefix, root_path)
+    options = coerce_datas(settings, prefix, here)
     create_sql_user(options)
     create_test_db(options)
     grant_user(options)
@@ -101,12 +103,10 @@ def pytest_sessionstart():
         from paste.deploy.loadwsgi import appconfig
         from sqlalchemy import engine_from_config
 
-        here = os.path.dirname(__file__)
-        root_path = os.path.join(here, "../../")
-        settings = appconfig('config:' + os.path.join(root_path,
+        settings = appconfig('config:' + os.path.join(here,
                                                       'test.ini'),
                              "autonomie")
-        initialize_test_database(settings, "testdb.", root_path)
+        initialize_test_database(settings, "testdb.", here)
         engine = engine_from_config(settings, prefix='sqlalchemy.')
 
         print 'Creating the tables on the test database %s' % engine
@@ -122,9 +122,7 @@ def pytest_sessionfinish():
     from py.test import config
     if not hasattr(config, 'slaveinput'):
         from paste.deploy.loadwsgi import appconfig
-        here = os.path.dirname(__file__)
-        root_path = os.path.join(here, "../../")
-        settings = appconfig('config:' + os.path.join(root_path,
+        settings = appconfig('config:' + os.path.join(here,
                                                       'test.ini'),
                              "autonomie")
         drop_sql_datas(settings, 'testdb.')

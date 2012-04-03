@@ -36,12 +36,18 @@ def add_menu(event):
         cid = None
     menu = {}
     if cid:
-        menu = [dict(label=u'Clients', url=route_path('company_clients',
+        menu = [dict(label=u'Clients',
+                     url=route_path('company_clients',
                                                 request,
                                                 cid=cid)),
                 dict(label=u"Devis - Factures",
                      url=route_path('company_projects',
-                                request,
-                                cid=cid))
+                                                request,
+                                                cid=cid)),
+                dict(label=u"Paramètres",
+                     url=route_path('company',
+                                                request,
+                                                cid=cid,
+                                                _query={'edit':True})),
                ]
         event.update({'menu':menu})

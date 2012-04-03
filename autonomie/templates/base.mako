@@ -30,7 +30,6 @@
     <link href="${request.static_url('autonomie:static/css/default.css')}" rel="stylesheet"  type="text/css" />
     <link href="${request.static_url('deform:static/css/form.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform:static/css/beautify.css')}" type="text/css" rel="stylesheet"/>
-    <link href="${request.static_url('deform_bootstrap:static/css/bootstrap.min.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/deform_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/chosen_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
@@ -72,12 +71,8 @@
     </header>
     <%block name="headtitle">
     <div id='pagetitle' class='well'>
-      <ul class='nav nav-pills'>
-        <li>
         <h2>${title}</h2>
-        </li>
         <%block name="actionmenu" />
-      </ul>
       </div>
     </%block>
     <%block name="breadcrumb_block">

@@ -1,25 +1,18 @@
 <%inherit file="base.mako"></%inherit>
-<%block name='rightbar'>
-<div class='well'>
-    <ul class="nav nav-list">
-        <li class='nav-header'>Gérer vos projets</li>
-        <li>
-        <a title='Créer un nouveau projet' href='#new' onclick="$('#addform').dialog('open');">
-            <span class="ui-icon ui-icon-plusthick"></span>
+<%block name='actionmenu'>
+<ul class='nav nav-pills'>
+    <li>
+    <a class='btn-primary' title='Créer un nouveau projet' href='#new' onclick="$('#addform').dialog('open');">
             Ajouter un Projet
         </a>
-        </li>
-        <li class='nav-header'>Filtrer</li>
-        <li>
-            <select id="filter-element-select">
-                <option value='__TOUS'>Tous</option>
-                %for project in projects:
-                    <option value="${project.id}">${project.name}</option>
-                %endfor
-            </select>
-        </li>
-    </ul>
-</div>
+    </li>
+    <li>
+    <form class='navbar-form pull-right form-search' id='search_form' method='GET'>
+        <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
+        <button type="submit" class="btn">Rechercher</button>
+    </form>
+    </li>
+</ul>
 </%block>
 <%block name='content'>
 <table class="table table-striped table-condensed">
@@ -87,15 +80,6 @@
             })
             });
     % endif
-    $("#filter-element-select").chosen({allow_single_deselect:true}).change(function(event){
-    var clientcode = event.target.value;
-    if (clientcode == '__TOUS'){
-        $('.tableelement').show();
-    }else{
-        $('.tableelement').hide();
-        $('#'+clientcode).show();
-                        }
-            });
         </script>
     </%block>
 

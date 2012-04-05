@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 30 mars 2012 20:33:17 CEST
+# * Last Modified : jeu. 05 avril 2012 22:00:30 CEST
 #
 # * Project : autonomie
 #
@@ -23,6 +23,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.types import Integer as Integer_type
+from sqlalchemy.types import String as String_type
 
 from autonomie.models import DBBASE
 
@@ -46,6 +47,29 @@ class CustomeDateType(TypeDecorator):
             return datetime.datetime.fromtimestamp(float(value))
         else:
             return datetime.datetime.now()
+
+class CustomFileType(TypeDecorator):
+    """
+        Custom Filetype used to glue deform fileupload tools with
+        the database element
+    """
+    impl = String_type
+    def __init__(self, root_filepath, *args, **kw):
+        TypeDecorator.__init__(self, *args, **kw)
+        self.root_filepath = root_filepath
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return ""
+        elif isinstance(value, dict):
+            return value.get('filename', '')
+        else:
+            return value
+
+    def process_result_value(self, value, dialect):
+        if value:
+            return dict(filename = value,
+                        uid="plop")
 
 def _get_date():
     """
@@ -96,6 +120,9 @@ class Company(DBBASE):
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+    goal = Column("object", String(255))
+    logo = Column("logo", CustomFileType("/var/www/", 255))
+    header = Column("header", CustomFileType("/var/toto", 255))
 
     def get_client(self, client_id):
         """

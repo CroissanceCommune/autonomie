@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 28-01-2012
-# * Last Modified : lun. 02 avril 2012 11:50:15 CEST
+# * Last Modified : jeu. 05 avril 2012 21:58:00 CEST
 #
 # * Project : autonomie
 #
@@ -17,13 +17,18 @@ import colander
 import logging
 from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
+from deform import FileData
 
 from autonomie.utils.widgets import DisabledInput
 from autonomie.models import DBSESSION
 from autonomie.models.model import User
 from autonomie.models.model import Client
 
+from autonomie.views.fileupload import BeakerTempStore
+
 log = logging.getLogger(__name__)
+
+MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse mail valide"
 
 #FIXME : add length validators for strings
 @colander.deferred
@@ -143,7 +148,7 @@ class FAccount(colander.MappingSchema):
                             title="Nom")
     account_email = colander.SchemaNode(colander.String(),
                             title="Adresse e-mail",
-                            validator=colander.Email()
+                            validator=colander.Email(MAIL_ERROR_MESSAGE)
                             )
     login = colander.SchemaNode(colander.String(),
                             title="Login",
@@ -158,12 +163,14 @@ class FPassword(colander.MappingSchema):
                                        widget=widget.HiddenWidget())
     password = colander.SchemaNode(colander.String(),
                                          widget=widget.PasswordWidget(),
-                                            title="Mot de passe actuel")
+                                            title="Mot de passe actuel",
+                                            default=u'')
     pwd = colander.SchemaNode(colander.String(),
                         widget = widget.CheckedPasswordWidget(),
                         title="Nouveau mot de passe")
 
-pwdSchema = FPassword(validator=auth, after_bind=_check_pwd)
+pwdSchema = FPassword(validator=auth, after_bind=_check_pwd,
+                      title=u'Modification de mot de passe')
 
 class FUser(colander.MappingSchema):
     """
@@ -208,7 +215,7 @@ class ClientSchema(colander.MappingSchema):
     email = colander.SchemaNode(colander.String(),
          title=u'E-mail',
          missing=u'',
-         validator=colander.Email(u"Veuillez entrer une adresse email valide"))
+         validator=colander.Email(MAIL_ERROR_MESSAGE))
     phone = colander.SchemaNode(colander.String(),
                                 title=u'Téléphone',
                                 missing=u'',
@@ -316,3 +323,44 @@ class EstimationSchema(colander.MappingSchema):
                     colander.Integer(),
                     title=u"Remise commerciale (du HT)")
     estimationlines = EstimationLineSequence()
+
+class FileTempStore(dict):
+    def preview_url(self, uid):
+        return ""
+
+
+class CompanySchema(colander.MappingSchema):
+    """
+        Company add/edit form schema
+    """
+    name = colander.SchemaNode(colander.String(),
+                               widget=deferred_edit_widget,
+                               title=u'Nom')
+    goal_ = colander.SchemaNode(colander.String(),
+                                widget=deferred_edit_widget,
+                                title=u'Objet')
+    logo = colander.SchemaNode(FileData(),
+                            widget=widget.FileUploadWidget(BeakerTempStore()),
+                            title=u'Logo')
+    email = colander.SchemaNode(colander.String(),
+                            title=u'E-mail',
+                            missing=u'',
+                            validator=colander.Email(MAIL_ERROR_MESSAGE))
+    phone = colander.SchemaNode(colander.String(),
+                            title=u'Téléphone',
+                            missing=u'')
+    mobile = colander.SchemaNode(colander.String(),
+                            title=u'Téléphone portable',
+                            missing=u'')
+    RIB = colander.SchemaNode(colander.String(),
+                            widget=deferred_edit_widget,
+                            title=u'RIB',
+                            missing=u'')
+    IBAN = colander.SchemaNode(colander.String(),
+                            widget=deferred_edit_widget,
+                            title=u'IBAN',
+                            missing=u'')
+    header = colander.SchemaNode(FileData(),
+                            widget=widget.FileUploadWidget(BeakerTempStore()),
+                            title=u'Entête des PDF'
+                                )

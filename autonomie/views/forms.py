@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 28-01-2012
-# * Last Modified : jeu. 05 avril 2012 21:58:00 CEST
+# * Last Modified : ven. 06 avril 2012 17:49:26 CEST
 #
 # * Project : autonomie
 #
@@ -15,6 +15,8 @@
 """
 import colander
 import logging
+import os
+
 from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
 from deform import FileData
@@ -24,11 +26,13 @@ from autonomie.models import DBSESSION
 from autonomie.models.model import User
 from autonomie.models.model import Client
 
-from autonomie.views.fileupload import BeakerTempStore
+from autonomie.views.fileupload import FileTempStore
 
 log = logging.getLogger(__name__)
 
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse mail valide"
+HEADER_PATH = "header"
+LOGO_PATH = "logo"
 
 #FIXME : add length validators for strings
 @colander.deferred
@@ -324,9 +328,29 @@ class EstimationSchema(colander.MappingSchema):
                     title=u"Remise commerciale (du HT)")
     estimationlines = EstimationLineSequence()
 
-class FileTempStore(dict):
-    def preview_url(self, uid):
-        return ""
+def deferred_upload_widget(path):
+    @colander.deferred
+    def configured_widget(node, kw):
+        """
+            returns a already pre-configured upload widget
+        """
+        session = kw['session']
+        root_path = kw['rootpath']
+        filepath = os.path.join(root_path, path)
+        tmpstore = FileTempStore(session, filepath)
+        return widget.FileUploadWidget(tmpstore)
+    return configured_widget
+
+def validate_image_mime(node, value):
+    """
+        Validate mime types for image files
+    """
+    log.debug("In validating mimetype")
+    if value.get('fp'):
+        if not value['mimetype'].startswith('image/'):
+            message = u"Veuillez télécharger un fichier de type jpg, png, \
+bmp ou gif"
+            raise colander.Invalid(node, message)
 
 
 class CompanySchema(colander.MappingSchema):
@@ -336,12 +360,13 @@ class CompanySchema(colander.MappingSchema):
     name = colander.SchemaNode(colander.String(),
                                widget=deferred_edit_widget,
                                title=u'Nom')
-    goal_ = colander.SchemaNode(colander.String(),
+    goal = colander.SchemaNode(colander.String(),
                                 widget=deferred_edit_widget,
                                 title=u'Objet')
     logo = colander.SchemaNode(FileData(),
-                            widget=widget.FileUploadWidget(BeakerTempStore()),
-                            title=u'Logo')
+                            widget=deferred_upload_widget(path=LOGO_PATH),
+                            title=u'Logo',
+                            validator=validate_image_mime)
     email = colander.SchemaNode(colander.String(),
                             title=u'E-mail',
                             missing=u'',
@@ -361,6 +386,7 @@ class CompanySchema(colander.MappingSchema):
                             title=u'IBAN',
                             missing=u'')
     header = colander.SchemaNode(FileData(),
-                            widget=widget.FileUploadWidget(BeakerTempStore()),
-                            title=u'Entête des PDF'
-                                )
+                            widget=deferred_upload_widget(path=HEADER_PATH),
+                            title=u'Entête des PDF',
+                            validator=validate_image_mime
+                            )

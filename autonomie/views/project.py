@@ -17,13 +17,17 @@
 """
 import logging
 
+from functools import partial
+
 from deform import ValidationFailure
 from deform import Form
 from deform import Button
+from webhelpers import paginate
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
+from pyramid.url import current_route_url
 
 from autonomie.models import DBSESSION
 from autonomie.models.model import Project
@@ -32,6 +36,14 @@ from autonomie.views.forms import ProjectSchema
 from autonomie.views.forms import EstimationSchema
 
 log = logging.getLogger(__name__)
+
+def get_page_url(request, page):
+    """
+        Return a url generator for pagination
+    """
+    args = request.GET
+    args['page'] = str(page)
+    return current_route_url(request, page=page, _query=args)
 
 def build_client_value(client):
     if client:
@@ -64,17 +76,37 @@ def company_projects(request):
     """
         Return the list of projects
     """
+    log.debug("Getting projects")
+    search = request.params.get("search", "")
+    sort = request.params.get('sort', 'name')
+
+    direction = request.params.get("direction", 'asc')
+    if direction not in ['asc', 'desc']:
+        direction = 'asc'
+
+
     cid = request.matchdict.get('cid')
     avatar = request.session['user']
     company = avatar.get_company(cid)
-    projects = company.projects
+#    toquery = (Project.id, Project.client, Project.name)
+    dbsession = DBSESSION()
+    projects = dbsession.query(Project).filter(
+            Project.name.like(search+"%"),
+            Project.id_company == cid).order_by(sort + " " + direction)
+    page_url = partial(get_page_url, request=request)
+    current_page = int(request.params.get("page", 1))
+    records = paginate.Page(projects,
+                    current_page,
+                    url=page_url,
+                    items_per_page=15,)
+#    projects = company.projects
     clients = company.clients
     form = get_project_form(clients=clients,
                             path=route_path('company_projects',
                                             request,
                                             cid=cid))
     return dict(title=u"Projets",
-                projects=projects,
+                projects=records,
                 company=company,
                 html_form=form.render())
 

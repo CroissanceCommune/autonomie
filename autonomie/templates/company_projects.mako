@@ -1,10 +1,11 @@
 <%inherit file="base.mako"></%inherit>
+<%namespace file="/base/pager.html" import="pager"/>
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
     <a class='btn-primary' title='Créer un nouveau projet' href='#new' onclick="$('#addform').dialog('open');">
-            Ajouter un Projet
-        </a>
+        Ajouter un Projet
+    </a>
     </li>
     <li>
     <form class='navbar-form pull-right form-search' id='search_form' method='GET'>
@@ -49,37 +50,39 @@
                                 <span class='ui-icon ui-icon-folder-collapsed'></span>
                                 Archiver
                             </a>
-                        </td>
-                    </tr>
-                % endfor
-            % else:
-                <tr>
-                    <td colspan='6'>
-                        Aucun projet n'a été créé pour l'instant
+                        </div>
                     </td>
                 </tr>
-            % endif
-        </tbody>
-    </table>
+            % endfor
+        % else:
+            <tr>
+                <td colspan='6'>
+                    Aucun projet n'a été créé pour l'instant
+                </td>
+            </tr>
+        % endif
+    </tbody>
+</table>
+${pager(projects)}
+% if html_form is not UNDEFINED:
+    <div id='addform' style="overflow:hidden;">
+        ${html_form|n}
+    </div>
+% endif
+</%block>
+<%block name='footerjs'>
+<script>
     % if html_form is not UNDEFINED:
-        <div id='addform' style="overflow:hidden;">
-            ${html_form|n}
-        </div>
+        $( function() {
+        $("#addform").dialog({ autoOpen: false,
+        modal:true,
+        width:"auto",
+        height:"auto",
+        autoResize:true,
+        title:"Ajouter un Projet"
+        })
+        });
     % endif
-    </%block>
-    <%block name='footerjs'>
-        <script>
-    % if html_form is not UNDEFINED:
-            $( function() {
-            $("#addform").dialog({ autoOpen: false,
-            modal:true,
-            width:"auto",
-            height:"auto",
-            autoResize:true,
-            title:"Ajouter un Projet"
-            })
-            });
-    % endif
-        </script>
-    </%block>
+</script>
+</%block>
 

@@ -19,17 +19,15 @@
 """
 import os
 import logging
-from deform.interfaces import FileUploadTempStore
-from datetime import datetime, timedelta
-from pyramid.threadlocal import get_current_request
-
-from cStringIO import StringIO
+from datetime import datetime
+from datetime import timedelta
 
 log = logging.getLogger(__name__)
 
-class FileTempStore(FileUploadTempStore):
+class FileTempStore(dict):
     """
         Temporary stores files at a given location
+        implements deform.interfaces.FileUploadTempStore
     """
     session_key = 'deform_uploads'
     def __init__(self, session, path, default_filename=None):
@@ -106,8 +104,6 @@ class FileTempStore(FileUploadTempStore):
                 else:
                     fbuf.write(filedata)
             del value['fp']
-
-        session_fo = self.session.get(self.session_key, {})
 
         self.session.setdefault(self.session_key, {})[name] = {
             'time': datetime.now(),

@@ -16,6 +16,7 @@
     Client views
 """
 import logging
+from functools import partial
 
 from deform import ValidationFailure
 from deform import Form
@@ -25,11 +26,14 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.url import route_path
+from pyramid.url import current_route_url
 
 from autonomie.models import DBSESSION
 from autonomie.models.model import Client
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ClientSchema
+
+from webhelpers import paginate
 
 log = logging.getLogger(__name__)
 def get_client_form(edit=False, path=""):
@@ -41,6 +45,14 @@ def get_client_form(edit=False, path=""):
                                         title=u'Validez',
                                         type='submit'),))
     return form
+
+def get_page_url(request, page):
+    """
+        Return a url generator for pagination
+    """
+    args = request.GET
+    args['page'] = str(page)
+    return current_route_url(request, page=page, _query=args)
 
 @view_config(route_name='company_clients', renderer='company_clients.mako',
                                                 request_method='GET')
@@ -66,17 +78,23 @@ def company_clients(request):
     toquery = (Client.id, Client.contactLastName, Client.contactFirstName,
                         Client.name)
     if cid != -1:
-        clients = dbsession.query(*toquery).filter(Client.name.like(search+"%"),
-                                                Client.id_company == cid).\
-            order_by(sort + " " + direction)
+        clients = dbsession.query(*toquery).filter(
+                Client.name.like(search+"%"),
+                Client.id_company == cid).order_by(sort + " " + direction)
     else:
-        clients = dbsession.query(*toquery).filter(Client.name.like(search+"%")).\
-            order_by(sort + " " + direction)
-#    clients = company.clients
+        clients = dbsession.query(*toquery).filter(
+            Client.name.like(search+"%")).order_by(sort + " " + direction)
     form = get_client_form(path=route_path('company_clients', request,
                                             cid=cid))
+
+    page_url = partial(get_page_url, request=request)
+    current_page = int(request.params.get("page", 1))
+    records = paginate.Page(clients,
+                    current_page,
+                    url=page_url,
+                    items_per_page=15,)
     return dict(title=u"Clients",
-                clients=clients,
+                clients=records,
                 company=company,
                 html_form=form.render())
 

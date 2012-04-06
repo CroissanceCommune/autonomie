@@ -1,4 +1,5 @@
 <%inherit file="base.mako"></%inherit>
+<%namespace file="/base/pager.html" import="pager"/>
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
@@ -58,6 +59,7 @@
         % endif
     </tbody>
 </table>
+${pager(clients)}
 % if html_form is not UNDEFINED:
     <div id='addform'>
         ${html_form|n}

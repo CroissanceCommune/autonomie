@@ -22,7 +22,9 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPForbidden
 
 from deform import Form
+from autonomie.models import DBSESSION
 from autonomie.views.forms import CompanySchema
+from autonomie.utils.forms import merge_session_with_post
 
 log = logging.getLogger(__name__)
 @view_config(route_name='company', renderer='company_index.mako')
@@ -42,7 +44,8 @@ def company_index(request):
         ret_val = HTTPForbidden()
     return ret_val
 
-@view_config(route_name='company', renderer='company_edit.mako', request_param='edit')
+@view_config(route_name='company', renderer='company_edit.mako',
+                                                request_param='edit')
 def company_edit(request):
     """
         Company edition page
@@ -53,9 +56,11 @@ def company_edit(request):
         company = avatar.get_company(cid)
     except KeyError:
         return HTTPForbidden()
-    schema = CompanySchema().bind(edit=True)
+    schema = CompanySchema().bind(edit=True, rootpath='/tmp/%s'%company.id,
+                                    session=request.session)
     form = Form(schema, buttons=('submit', ))
     if 'submit' in request.params:
+        dbsession = DBSESSION()
         datas = request.params.items()
         print datas
         try:
@@ -63,8 +68,9 @@ def company_edit(request):
         except ValidationFailure, errform:
             html_form = errform.render()
         else:
-            company = merge_session_with_post(client, app_datas)
-            dbsession.merge(client)
+            company = merge_session_with_post(company, app_datas)
+            dbsession.merge(company)
+            message = u"Votre entreprise a bien été éditée"
             request.session.flash(message, queue='main')
             html_form = form.render(company.appstruct())
     else:

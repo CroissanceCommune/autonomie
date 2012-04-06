@@ -126,3 +126,5 @@ def pytest_sessionfinish():
                                                       'test.ini'),
                              "autonomie")
         drop_sql_datas(settings, 'testdb.')
+        from autonomie.tests.base import TMPDIR
+        launch_cmd('rm -rf "%s"' % TMPDIR)

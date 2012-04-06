@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 05 avril 2012 22:00:30 CEST
+# * Last Modified : ven. 06 avril 2012 16:14:01 CEST
 #
 # * Project : autonomie
 #
@@ -54,22 +54,27 @@ class CustomFileType(TypeDecorator):
         the database element
     """
     impl = String_type
-    def __init__(self, root_filepath, *args, **kw):
+    def __init__(self, prefix, *args, **kw):
         TypeDecorator.__init__(self, *args, **kw)
-        self.root_filepath = root_filepath
+        self.prefix = prefix
 
     def process_bind_param(self, value, dialect):
-        if value is None:
-            return ""
-        elif isinstance(value, dict):
-            return value.get('filename', '')
-        else:
-            return value
+        """
+            process the insertion of the value
+            write the file to persistent storage
+        """
+        ret_val = None
+        if isinstance(value, dict):
+            ret_val = value.get('filename', '')
+        return ret_val
 
     def process_result_value(self, value, dialect):
+        """
+            Get the datas from database
+        """
         if value:
             return dict(filename = value,
-                        uid="plop")
+                        uid=self.prefix + value)
 
 def _get_date():
     """
@@ -121,8 +126,8 @@ class Company(DBBASE):
                                         default=_get_date,
                                         onupdate=_get_date)
     goal = Column("object", String(255))
-    logo = Column("logo", CustomFileType("/var/www/", 255))
-    header = Column("header", CustomFileType("/var/toto", 255))
+    logo = Column("logo", CustomFileType("logo_", 255))
+    header = Column("header", CustomFileType("header_", 255))
 
     def get_client(self, client_id):
         """

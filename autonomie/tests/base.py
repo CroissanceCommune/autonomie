@@ -28,6 +28,8 @@ from autonomie.models import DBBASE  # base declarative object
 here = os.path.dirname(__file__)
 settings = appconfig('config:' + os.path.join(here, '../../', 'test.ini'),
                                                           "autonomie")
+TMPDIR = os.path.join(here, 'tmp')
+DATASDIR = os.path.join(here, 'datas')
 
 class BaseTestCase(unittest.TestCase):
     @classmethod

@@ -57,4 +57,13 @@ class TestModels(BaseTestCase):
 
         self.assertEqual(project.client.name, 'Client1')
 
+    def test_customfiletype(self):
+        from autonomie.models.model import CustomFileType
+        a = CustomFileType('test_', 255)
+        cstruct1 = {'uid':'test_testfile.jpg', 'filename':'testfile.jpg'}
+        self.assertEqual(a.process_bind_param(cstruct1, "nutt"),
+                                                'testfile.jpg')
+        self.assertEqual(a.process_result_value('testfile.jpg', 'nutt'),
+                                            cstruct1)
+
 

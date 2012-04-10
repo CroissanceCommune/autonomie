@@ -22,7 +22,7 @@ from pyramid import testing
 from .base import BaseFunctionnalTest
 from .base import BaseViewTest
 from .base import TMPDIR, DATASDIR
-from autonomie.views import fileupload
+from autonomie.utils import fileupload
 
 
 class TestFileTempStore(BaseFunctionnalTest):

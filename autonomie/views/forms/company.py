@@ -22,6 +22,7 @@ from deform import FileData
 
 from .utils import deferred_upload_widget
 from .utils import deferred_edit_widget
+from .utils import get_mail_input
 
 log = logging.getLogger(__name__)
 HEADER_PATH = "header"
@@ -51,10 +52,7 @@ class CompanySchema(colander.MappingSchema):
                             widget=deferred_upload_widget(path=LOGO_PATH),
                             title=u'Logo',
                             validator=validate_image_mime)
-    email = colander.SchemaNode(colander.String(),
-                            title=u'E-mail',
-                            missing=u'',
-                            validator=colander.Email(MAIL_ERROR_MESSAGE))
+    email = get_mail_input(missing=u'')
     phone = colander.SchemaNode(colander.String(),
                             title=u'Téléphone',
                             missing=u'')

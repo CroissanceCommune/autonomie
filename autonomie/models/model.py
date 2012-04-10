@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 06 avril 2012 16:14:01 CEST
+# * Last Modified : mar. 10 avril 2012 17:45:48 CEST
 #
 # * Project : autonomie
 #
@@ -237,19 +237,27 @@ class Task(DBBASE):
       `IDTask` int(11) NOT NULL auto_increment, #identifiant de la tâche
       `IDPhase` int(11) NOT NULL,           # identifiant de la phase associée
       `name` varchar(150) NOT NULL,         # Nom de la tâche
-      `CAEStatus` varchar(10) default NULL,
-      `customerStatus` varchar(10) default NULL,
-      `taskDate` int(11) default '0',
-      `IDEmployee` int(11) NOT NULL,
+
+      `CAEStatus` varchar(10) default NULL, # Statut de la tâche
+             valid/abort/paid/draft/geninv/aboinv/aboest/sent/wait/none
+      `statusComment` text,                 # Commentaire sur le statut
+                                 communication entrepr/CAE
+                                 information de paiement ([par chèque ...])
+      `statusPerson` int(11) default NULL,  #Id de la personne associée
+                                                aux informations de status
+      `statusDate` int(11) default NULL,
+
+      `customerStatus` varchar(10) default NULL, # Reste vide
+      `taskDate` int(11) default '0',       # Date
+      `IDEmployee` int(11) NOT NULL,        #Id de la personne propriétaire
       `document` varchar(255) default NULL,
       `creationDate` int(11) NOT NULL,
       `updateDate` int(11) NOT NULL,
-      `description` text,
-      `statusComment` text,
-      `documentType` varchar(255) default NULL,
-      `statusPerson` int(11) default NULL,
-      `statusDate` int(11) default NULL,
-      `rank` int(11) default NULL,
+      `description` text,                   #description
+      `documentType` varchar(255) default NULL, # header à envoyer pour
+                                l'ouverture du document
+                                (doit être réservé aux tâches personnalisées)
+      `rank` int(11) default NULL,  # Ordre des tâches
       PRIMARY KEY  (`IDTask`),
       KEY `IDPhase` (`IDPhase`),
       KEY `IDEmployee` (`IDEmployee`)
@@ -267,20 +275,25 @@ class Task(DBBASE):
 class Estimation(DBBASE):
     """
        `IDTask` int(11) NOT NULL,
-      `sequenceNumber` int(11) NOT NULL,
-      `number` varchar(100) NOT NULL,
-      `tva` int(11) NOT NULL default '196',
-      `discount` int(11) NOT NULL default '0',
-      `deposit` int(11) NOT NULL default '0',
-      `paymentConditions` text,
-      `exclusions` text,
-      `IDProject` int(11) NOT NULL,
-      `manualDeliverables` tinyint(4) default NULL,
-      `course` tinyint(4) NOT NULL default '0',
-      `displayedUnits` tinyint(4) NOT NULL default '0',
-      `discountHT` int(11) NOT NULL default '0',
-      `expenses` int(11) NOT NULL default '0',
-      `paymentDisplay` varchar(20) default 'SUMMARY',
+      `sequenceNumber` int(11) NOT NULL,        # Indice du devis dans la phase
+      `number` varchar(100) NOT NULL,           # identifiant du devis
+      `tva` int(11) NOT NULL default '196',     # tva à utiliser dans
+                                                  ce devis (*100)
+      `discount` int(11) NOT NULL default '0',  # Non utilisé
+      `deposit` int(11) NOT NULL default '0',   # accompte (pourcentage)
+      `paymentConditions` text,                 # condition de paiement
+      `exclusions` text,                        # Notes
+      `IDProject` int(11) NOT NULL,             # id du projet auquel
+                                                  appartient ce devis
+      `manualDeliverables` tinyint(4) default NULL, # les dates des conditions
+                                        de paiement ont été fixées manuellement
+      `course` tinyint(4) NOT NULL default '0',   # est-ce un cours (0/1)
+      `displayedUnits` tinyint(4) NOT NULL default '0', # afficher les unités
+                                                                        (0/1)
+      `discountHT` int(11) NOT NULL default '0',    #remise HT
+      `expenses` int(11) NOT NULL default '0',      # frais
+      `paymentDisplay` varchar(20) default 'SUMMARY', #afficher les conditions
+                            de paiement ALL/NONE/SUMMARY
       PRIMARY KEY  (`IDTask`),
       KEY `coop_estimation_sequenceNumber` (`sequenceNumber`),
       KEY `coop_estimation_IDProject` (`IDProject`),
@@ -297,13 +310,13 @@ class EstimationLine(DBBASE):
     """
       `IDWorkLine` int(11) NOT NULL auto_increment,
       `IDTask` int(11) NOT NULL,
-      `rowIndex` int(11) NOT NULL,
-      `description` text,
-      `cost` int(11) default NULL,
-      `quantity` double default NULL,
+      `rowIndex` int(11) NOT NULL,          # index de la ligne
+      `description` text,                   # "Prestation"
+      `cost` int(11) default NULL,          # montant
+      `quantity` double default NULL,       #quantité
       `creationDate` int(11) default NULL,
       `updateDate` int(11) default NULL,
-      `unity` varchar(10) default NULL,
+      `unity` varchar(10) default NULL,     # unité
       PRIMARY KEY  (`IDWorkLine`),
       KEY `coop_estimation_line_IDTask` (`IDTask`),
       KEY `coop_estimation_line_rowIndex` (`rowIndex`),
@@ -318,6 +331,25 @@ class EstimationLine(DBBASE):
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+
+class PaymentConditions(DBBASE):
+    """
+        coop_estimation_payment
+        `IDPaymentLine` int(11) NOT NULL auto_increment,
+        `IDTask` int(11) NOT NULL,
+        `rowIndex` int(11) NOT NULL,
+        `description` text,
+        `amount` int(11) default NULL,
+        `creationDate` int(11) default NULL,
+        `updateDate` int(11) default NULL,
+        `paymentDate` int(11) default NULL,
+    """
+    creationDate = Column("creationDate", CustomeDateType(11),
+                                            default=_get_date)
+    updateDate = Column("updateDate", CustomeDateType(11),
+                                        default=_get_date,
+                                        onupdate=_get_date)
+
 
 class Client(DBBASE):
     """

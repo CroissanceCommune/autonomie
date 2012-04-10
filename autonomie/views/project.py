@@ -33,7 +33,7 @@ from autonomie.models import DBSESSION
 from autonomie.models.model import Project
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
-from autonomie.views.forms import EstimationSchema
+#from autonomie.views.forms import EstimationSchema
 
 log = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ def estimation(request):
 
     #TODO : add sequenceNumber regarding the project
 
-    form = Form(EstimationSchema(), buttons=('submit','cancel',))
+    #form = Form(EstimationSchema(), buttons=('submit','cancel',))
 
-    return dict(title=u'Nouveau devis',
-                html_form=form.render())
+    return dict(title=u'Nouveau devis')
+            #    html_form=form.render())

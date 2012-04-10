@@ -20,10 +20,23 @@ import colander
 import logging
 
 from deform import widget
+from deform_bootstrap.widget import ChosenSingleWidget
 from autonomie.utils.fileupload import FileTempStore
 from autonomie.utils.widgets import DisabledInput
 
 log = logging.getLogger(__name__)
+
+MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse mail valide"
+
+def get_mail_input(missing=None):
+    """
+        Return a generic customized mail input field
+    """
+    return colander.SchemaNode(colander.String(),
+                            title="Adresse e-mail",
+                            validator=colander.Email(MAIL_ERROR_MESSAGE),
+                            missing=missing
+                            )
 
 def deferred_upload_widget(path):
     @colander.deferred
@@ -49,3 +62,16 @@ def deferred_edit_widget(node, kw):
     else:
         wid = widget.TextInputWidget()
     return wid
+
+@colander.deferred
+def deferred_autocomplete_widget(node, kw):
+    """
+        Dynamically assign a autocomplete single select widget
+    """
+    choices = kw.get('choices')
+    if choices:
+        wid = ChosenSingleWidget(values=choices)
+    else:
+        wid = widget.TextInputWidget()
+    return wid
+

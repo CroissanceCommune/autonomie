@@ -75,8 +75,8 @@ ${pager(clients)}
         width:"auto",
         title:"Ajouter un client",
         open: function(event, ui){
-        $('body').css('overflow','hidden');
         $('.ui-widget-overlay').css('width','100%');
+        $('.ui-widget-overlay').css('height','50%');
         }
         });
         });

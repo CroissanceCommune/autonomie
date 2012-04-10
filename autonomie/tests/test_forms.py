@@ -18,14 +18,14 @@ from .base import BaseTestCase
 
 class TestFormModels(BaseTestCase):
     def test_unique_login(self):
-        from autonomie.views.forms import unique_login
+        from autonomie.views.forms.user import unique_login
         node = colander.SchemaNode(colander.String())
         self.assertRaises(colander.Invalid, unique_login, node,
                                                     "user1_login")
 
     def test_fpassword(self):
         from autonomie.views.forms import pwdSchema
-        from autonomie.views.forms import auth
+        from autonomie.views.forms.user import auth
         schema = pwdSchema.bind(check=True)
         form = Form(schema)
         ok_values = dict(login='user1_login', password='user1')

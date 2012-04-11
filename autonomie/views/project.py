@@ -46,6 +46,9 @@ def get_page_url(request, page):
     return current_route_url(request, page=page, _query=args)
 
 def build_client_value(client):
+    """
+        return the tuple for building client select
+    """
     if client:
         return (client.id, client.name)
     else:
@@ -177,9 +180,31 @@ def estimation(request):
     clients = company.clients
     project = company.get_project(project_id)
 
-    #TODO : add sequenceNumber regarding the project
-
+#    schema = EstimationFormSchema()
+#    form = EstimationForm(schema)
+#
+#    #TODO : add sequenceNumber regarding the project
+#    if 'submit' in request.params:
+#        datas = request.params
+#        try:
+#            app_struct = form.validate(datas)
+#        except ValidationFailure, e:
+#            errors = e
+#        else:
+#            estimation, task = merge_appstruct_todatabase(app_struct)
+#            dbsession = DBSESSION()
+#            dbsession.merge(estimation)
+#            dbsession.merge(task)
+#            #dbsession.merge(
+#            dbsession.commit()
+#            return HTTPFound(route_path(company_projects,
+#                                        cid=cid,
+#                                        project_id=project_id))
+#
     #form = Form(EstimationSchema(), buttons=('submit','cancel',))
 
-    return dict(title=u'Nouveau devis')
+    return dict(title=u'Nouveau devis',
+                client=project.client,
+                company=company,
+                phases=project.phases)
             #    html_form=form.render())

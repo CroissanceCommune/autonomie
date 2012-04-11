@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 10 avril 2012 17:45:48 CEST
+# * Last Modified : mer. 11 avril 2012 11:34:03 CEST
 #
 # * Project : autonomie
 #
@@ -344,6 +344,8 @@ class PaymentConditions(DBBASE):
         `updateDate` int(11) default NULL,
         `paymentDate` int(11) default NULL,
     """
+    __tablename__ = 'coop_estimation_payment'
+    __table_args__ = {'autoload':True}
     creationDate = Column("creationDate", CustomeDateType(11),
                                             default=_get_date)
     updateDate = Column("updateDate", CustomeDateType(11),
@@ -419,3 +421,25 @@ class Project(DBBASE):
                                             default=_get_date)
     endingDate = Column("endingDate", CustomeDateType(11),
                                             default=_get_date)
+    phases = relationship("Phase", backref="project")
+
+class Phase(DBBASE):
+    """
+        Phase d'un projet
+        `IDPhase` int(11) NOT NULL auto_increment,
+        `IDProject` int(11) NOT NULL,
+        `name` varchar(150) NOT NULL,
+        `IDPreviousPhase` int(11) NOT NULL default '0',
+        `creationDate` int(11) NOT NULL,
+        `updateDate` int(11) NOT NULL,
+    """
+    __tablename__ = 'coop_phase'
+    __table_args__ = {'autoload':True}
+    id = Column('IDPhase', Integer(11), primary_key=True)
+    id_project = Column('IDProject', Integer(11),
+                        ForeignKey('coop_project.IDProject'))
+    creationDate = Column("creationDate", CustomeDateType(11),
+                                            default=_get_date)
+    updateDate = Column("updateDate", CustomeDateType(11),
+                                        default=_get_date,
+                                        onupdate=_get_date)

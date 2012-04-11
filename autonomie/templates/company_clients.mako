@@ -67,19 +67,17 @@ ${pager(clients)}
 % endif
 </%block>
 <%block name='footerjs'>
-<script>
-    % if html_form is not UNDEFINED:
-        $( function() {
-        $("#addform").dialog({ autoOpen: false,
-        modal:true,
-        width:"auto",
-        title:"Ajouter un client",
-        open: function(event, ui){
-        $('.ui-widget-overlay').css('width','100%');
-        $('.ui-widget-overlay').css('height','50%');
-        }
-        });
-        });
-    % endif
-</script>
+% if html_form is not UNDEFINED:
+    $( function() {
+    $("#addform").dialog({ autoOpen: false,
+    modal:true,
+    width:"auto",
+    title:"Ajouter un client",
+    open: function(event, ui){
+    $('.ui-widget-overlay').css('width','100%');
+    $('.ui-widget-overlay').css('height','50%');
+    }
+    });
+    });
+% endif
 </%block>

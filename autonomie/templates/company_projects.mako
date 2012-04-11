@@ -71,18 +71,16 @@ ${pager(projects)}
 % endif
 </%block>
 <%block name='footerjs'>
-<script>
-    % if html_form is not UNDEFINED:
-        $( function() {
-        $("#addform").dialog({ autoOpen: false,
-        modal:true,
-        width:"auto",
-        height:"auto",
-        autoResize:true,
-        title:"Ajouter un Projet"
-        })
-        });
-    % endif
-</script>
+% if html_form is not UNDEFINED:
+    $( function() {
+    $("#addform").dialog({ autoOpen: false,
+    modal:true,
+    width:"auto",
+    height:"auto",
+    autoResize:true,
+    title:"Ajouter un Projet"
+    })
+    });
+% endif
 </%block>
 

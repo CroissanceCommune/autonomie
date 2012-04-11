@@ -190,9 +190,9 @@ ${Row(u"Affichage des paiements", "", radios)}
             </div>
                     {{else}}
             <div class='span2 offset2 paymentamount'>
-                    <input class='input-mini' type='text' name="amount_${esc('id')}" id="amount_${esc('id')}" {{if amount}}value="${esc('amount')}"{{/if}}></input>
-                    <button class='btn btn-mini btn-info pull-right' type="button" onclick='addPaymentRow({readonly:false, description:"Paiement", amount:0}, "#paymentline_${esc('id')}");'>
-                    Ajouter une échéance
+                    <input class='input-mini' type='text' name="amount_${esc('id')}" id="amount_${esc('id')}" value="{{if amount}}${esc('amount')}{{else}}0{{/if}}"></input>
+                    <button class='btn btn-mini btn-info pull-right' type="button" onclick='addPaymentRow({readonly:false, description:"Paiement"}, "#paymentline_${esc('id')}");'>
+                    + Ajouter une échéance
                     </button>
             </div>
             <div class='span1'>

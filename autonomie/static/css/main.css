@@ -46,11 +46,15 @@ header .navbar li:hover{
   font-size:1em;
 }
 .deform legend{
-  font-size:1.2em;
+  font-size:1.4em;
   font-weight:bold;
+}
+.deform fieldset{
   border:none;
-  margin:0px;
-  padding:0 5px 0 10px;
+}
+.deform fieldset:hover{
+  border:none;
+  border-left:1px solid #efefef;
 }
 .deform .errorMsgLbl{
   background-color:transparent;

@@ -266,7 +266,7 @@ function addEstimationRow(args){
   if (args === undefined){
     args = new Object();
   }
-  var id = getNextId('div.estimation_line', "estimation_line_");
+  var id = getNextId('div.estimationline', "estimationline_");
   args["id"] = id;
   var html = getRow(args);
   $( '#estimationcontainer' ).append(html);
@@ -281,7 +281,7 @@ function addEstimationRow(args){
   computeEstimationRows(id);
   computeTotal();
   console.log("Setting focus");
-  $("#estimation_line_" + id + " textarea").focus();
+  $("#estimationline_" + id + " textarea").focus();
 }
 function getPaymentRow(args){
   /*

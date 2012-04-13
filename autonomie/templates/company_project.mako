@@ -1,4 +1,8 @@
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
-${html_form|n}
+<div class='container'>
+    <div class='span5'>
+        ${html_form|n}
+    </div>
+</div>
 </%block>

@@ -6,15 +6,22 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 18-02-2012
-# * Last Modified : jeu. 29 mars 2012 12:32:47 CEST
+# * Last Modified : ven. 13 avril 2012 23:11:45 CEST
 #
 # * Project : Autonomie
 #
-import deform
+"""
+    Translation tools
+"""
+import os
+
+from deform.template import ZPTTemplateLoader
+from deform import Form
 from pkg_resources import resource_filename
 from pyramid.i18n import TranslationStringFactory
 from pyramid.i18n import get_localizer
 from pyramid.threadlocal import get_current_request
+from pyramid.renderers import render
 
 translater = TranslationStringFactory('autonomie')
 def _(request, string, mapping=None):
@@ -22,23 +29,55 @@ def _(request, string, mapping=None):
     localizer = get_localizer(request)
     return localizer.translate(ts)
 
-def get_deform_renderer_opts():
+deform_template_dirs = (
+        resource_filename('deform_bootstrap', 'templates/'),
+        resource_filename('deform', 'templates/'),
+        )
+
+def translator(term):
     """
-        return the deform renderer with i18n support
+        String translator
     """
     factory = TranslationStringFactory('deform')
-    deform_template_dir = (
-            resource_filename('deform_bootstrap', 'templates/'),
-            resource_filename('deform', 'templates/'),)
-    def translator(term):
-        ts = factory(term)
-        localizer = get_localizer(get_current_request())
-        return localizer.translate(ts)
-    return deform_template_dir, translator
+    localizer = get_localizer(get_current_request())
+    return localizer.translate(factory(term))
+
+class MultiRendererFactory(object):
+    """
+        Multi renderer, allows rendering deform widgets
+        in multiple formats
+    """
+    def __init__(self, search_path, auto_reload=True, debug=False,
+                encoding='utf-8', translator=None):
+        self.default_loader = ZPTTemplateLoader(
+                            search_path=search_path,
+                            auto_reload=auto_reload,
+                            debug=debug,
+                            encoding=encoding,
+                            translate=translator)
+
+    def __call__(self, template_name, **kw):
+        """
+            Launched by the client library
+        """
+        return self.load(template_name, **kw)
+
+    def load(self, template_name, **kw):
+        """
+            Load the appropriate engine
+        """
+        if os.path.splitext(template_name)[1] == '':
+            template_name += ".pt"
+
+        if os.path.splitext(template_name)[1] == ".pt":
+            return self.default_loader.load(template_name)(**kw)
+        else:
+            return render(template_name, kw)
 
 def set_deform_renderer():
     """
         Returns a deform renderer allowing translation
     """
-    deform_template_dir, translator = get_deform_renderer_opts()
-    deform.Form.set_zpt_renderer(deform_template_dir, translator=translator)
+    renderer = MultiRendererFactory(deform_template_dirs)
+    Form.set_default_renderer(renderer)
+

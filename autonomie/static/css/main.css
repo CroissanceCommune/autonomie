@@ -54,7 +54,6 @@ header .navbar li:hover{
 }
 .deform fieldset:hover{
   border:none;
-  border-left:1px solid #efefef;
 }
 .deform .errorMsgLbl{
   background-color:transparent;

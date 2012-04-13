@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 11 avril 2012 11:34:03 CEST
+# * Last Modified : ven. 13 avril 2012 13:54:13 CEST
 #
 # * Project : autonomie
 #
@@ -443,3 +443,13 @@ class Phase(DBBASE):
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+
+class Tva(DBBASE):
+    """
+        coop_tva
+        `id` int(2) NOT NULL auto_increment,
+        `name` varchar(8) NOT NULL,
+        `value` int(5)
+    """
+    __tablename__ = 'coop_tva'
+    __table_args__ = {'autoload':True}

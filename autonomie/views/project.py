@@ -31,11 +31,19 @@ from pyramid.url import current_route_url
 
 from autonomie.models import DBSESSION
 from autonomie.models.model import Project
+from autonomie.models.model import Tva
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
-#from autonomie.views.forms import EstimationSchema
+from autonomie.views.forms.estimation import EstimationSchema
 
 log = logging.getLogger(__name__)
+
+def get_tvas():
+    """
+        return all configured tva amounts
+    """
+    tvas = DBSESSION().query(Tva).all()
+    return [(tva.value, tva.name)for tva in tvas]
 
 def get_page_url(request, page):
     """
@@ -203,8 +211,12 @@ def estimation(request):
 #
     #form = Form(EstimationSchema(), buttons=('submit','cancel',))
 
+    phases = project.phases
+    phase_choices = ((phase.id, phase.name) for phase in phases)
+    f = Form(EstimationSchema().bind(phases=phase_choices,
+                                     tvas=get_tvas()))
     return dict(title=u'Nouveau devis',
                 client=project.client,
                 company=company,
-                phases=project.phases)
-            #    html_form=form.render())
+                form = f.render()
+                )

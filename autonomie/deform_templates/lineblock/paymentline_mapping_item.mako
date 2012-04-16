@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 %if field.schema.css_class:
     <div class="${field.schema.css_class}">
 %else:

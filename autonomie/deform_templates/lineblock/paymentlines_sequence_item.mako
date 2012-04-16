@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 %if field.error:
     <div class='row estimationline' style="background-color:#d54836" id="${field.oid}">
     %else:

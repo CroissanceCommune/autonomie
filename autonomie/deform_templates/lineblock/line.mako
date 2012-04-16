@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
     <div class='row estimationline' id="estimationline_${esc('id')}">
         <div class='span5'>
             <textarea class='span5' name="prestation_${esc('id')}">{{if prestation}}${esc('prestation')}{{/if}}</textarea>

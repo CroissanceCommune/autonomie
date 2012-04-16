@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 <%doc>
 Select field for unity configuration
 </%doc>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 <div>
     <input type="hidden" name="__start__" value="${field.name}:sequence" class="deformProto" prototype="${field.widget.prototype(field)}">
     <div class='row linesblockheader'>

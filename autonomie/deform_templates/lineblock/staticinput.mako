@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 <%doc>
 Static div to show informations (amounts for example)
 </%doc>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 <%doc>
     input for estimation/invoice lines
 </%doc>

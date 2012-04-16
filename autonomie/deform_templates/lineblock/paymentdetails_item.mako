@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 %if field.title:
     % if field.widget.__dict__.has_key('before'):
         ${field.renderer(field.widget.before, options=field.widget.before_options)|n}

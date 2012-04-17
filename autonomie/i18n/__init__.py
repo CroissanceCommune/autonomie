@@ -1,2 +1,2 @@
 #-*-coding:utf-8-*-
-from .translater import _
+from .translater import translate

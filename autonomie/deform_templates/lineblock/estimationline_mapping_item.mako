@@ -12,7 +12,7 @@
     <br />
     <span class='help-inline'>
     %for msg in field.error.messages():
-        <span class="error">${msg}</span>
+        <span class="error">${_(msg)}</span>
     %endfor
 </span>
 % endif

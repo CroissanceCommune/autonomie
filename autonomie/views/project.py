@@ -180,6 +180,7 @@ def estimation(request):
     """
         Return the estimation edit view
     """
+    log.debug("## In Estimation ##")
     cid = request.matchdict.get('cid')
     project_id = request.matchdict.get('id')
     avatar = request.session['user']
@@ -188,10 +189,33 @@ def estimation(request):
     clients = company.clients
     project = company.get_project(project_id)
 
+
+    phases = project.phases
+    phase_choices = ((phase.id, phase.name) for phase in phases)
+    form = Form(EstimationSchema().bind(phases=phase_choices,
+                                     tvas=get_tvas()),
+                buttons=('submit',))
+    if 'submit' in request.params:
+        log.debug('***** Submitted')
+        datas = request.params.items()
+        log.debug(datas)
+        try:
+            app_struct = form.validate(datas)
+            log.debug("   + Validated : app_struct")
+            log.debug(app_struct)
+        except ValidationFailure, e:
+            log.debug("   - Error in validation")
+            html_form = e.render()
+        else:
+            html_form = form.render(app_struct)
+    else:
+        html_form = form.render()
 #    schema = EstimationFormSchema()
 #    form = EstimationForm(schema)
 #
 #    #TODO : add sequenceNumber regarding the project
+#    #TODO : add task status (history)
+#    #TODO : handle status (CAEStatus)
 #    if 'submit' in request.params:
 #        datas = request.params
 #        try:
@@ -199,7 +223,7 @@ def estimation(request):
 #        except ValidationFailure, e:
 #            errors = e
 #        else:
-#            estimation, task = merge_appstruct_todatabase(app_struct)
+#            estimation, task = merge_appstruct_to_estimation(app_struct)
 #            dbsession = DBSESSION()
 #            dbsession.merge(estimation)
 #            dbsession.merge(task)
@@ -211,12 +235,8 @@ def estimation(request):
 #
     #form = Form(EstimationSchema(), buttons=('submit','cancel',))
 
-    phases = project.phases
-    phase_choices = ((phase.id, phase.name) for phase in phases)
-    f = Form(EstimationSchema().bind(phases=phase_choices,
-                                     tvas=get_tvas()))
     return dict(title=u'Nouveau devis',
                 client=project.client,
                 company=company,
-                form = f.render()
+                html_form = html_form
                 )

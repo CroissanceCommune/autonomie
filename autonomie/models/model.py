@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 13 avril 2012 13:54:13 CEST
+# * Last Modified : lun. 16 avril 2012 11:00:19 CEST
 #
 # * Project : autonomie
 #
@@ -271,6 +271,7 @@ class Task(DBBASE):
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+    lines = relationship("TaskStatus", backref="task")
 
 class Estimation(DBBASE):
     """
@@ -453,3 +454,20 @@ class Tva(DBBASE):
     """
     __tablename__ = 'coop_tva'
     __table_args__ = {'autoload':True}
+
+class TaskStatus(DBBASE):
+    """
+        `IDTask` int(11) NOT NULL,
+        `statusCode` varchar(10) NOT NULL,
+        `statusComment` text,
+        `statusPerson` int(11) default NULL,
+        `statusDate` int(11) default NULL,
+        KEY `IDTask` (`IDTask`),
+        KEY `statusCode` (`statusCode`)
+    """
+    __tablename__ = 'coop_task_status'
+    __table_args__ = {'autoload':True}
+    id = Column("id", Integer(11), primary_key=True)
+    id_task = Column('IDTask', Integer(11),
+                        ForeignKey('coop_task.IDTask'))
+

@@ -10,8 +10,7 @@
             % if field.error and not field.widget.hidden and not field.typ.__class__.__name__=='Mapping':
                 <span class="help-inline">
                     % for msg in field.error.messages():
-                        <span>${msg}</span>
-                        ${msg}
+                        <span class='error'>${_(msg)}</span>
                     % endfor
                 </span>
             % endif

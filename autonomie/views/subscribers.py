@@ -21,6 +21,10 @@
 from pyramid.url import route_path
 from pyramid.events import subscriber
 from pyramid.events import BeforeRender
+from pyramid.events import NewRequest
+from pyramid.threadlocal import get_current_request
+
+from autonomie.i18n import translate
 
 @subscriber(BeforeRender)
 def add_menu(event):
@@ -51,3 +55,21 @@ def add_menu(event):
                                                 _query={'edit':True})),
                ]
         event.update({'menu':menu})
+
+@subscriber(BeforeRender)
+def add_renderer_globals(event):
+    """
+        Add some global functions to allow translation in mako templates
+    """
+    request = event['req']
+    if not request:
+        request = get_current_request()
+    event['_'] = request.translate
+
+@subscriber(NewRequest)
+def add_localizer(event):
+    """
+        Add some translation tool to the request object
+    """
+    request = event.request
+    request.translate = translate

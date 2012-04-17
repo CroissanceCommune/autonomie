@@ -52,7 +52,7 @@ def get_percents():
     """
         Return percents for select widget
     """
-    percent_options = [('0','0'), ('5','5%')]
+    percent_options = [('0','Aucun'), ('5','5%')]
     for i in range(10,110,10):
         percent_options.append(("%d" % i, "%d %%" % i))
     return percent_options
@@ -61,7 +61,7 @@ def get_payment_times():
     """
         Return options for payment times select
     """
-    payment_times = [('-1', u'Manuel')]
+    payment_times = [('-1', u'Configuration manuel')]
     for i in range(1,12):
         payment_times.append(('%d' % i, '%d fois' % i))
     return payment_times
@@ -80,6 +80,20 @@ days = (
         ('PACK', u'Forfait'),
         )
 
+def specialfloat(self, value):
+    """
+        preformat the value before passing it to the float function
+    """
+    if isinstance(value, unicode):
+        value = value.replace(u'€', '').replace(u',', '.').replace(u' ', '')
+    return float(value)
+
+class AmountType(colander.Number):
+    """
+        preformat an amount before considering it as a float object
+    """
+    num = specialfloat
+
 class EstimationLine(colander.MappingSchema):
     """
         A single estimation line
@@ -91,13 +105,13 @@ class EstimationLine(colander.MappingSchema):
              ),
          missing=u'',
          css_class='span5')
-    cost = colander.SchemaNode(colander.String(),
+    cost = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
                 template='autonomie:deform_templates/lineblock/lineinput.mako',
                 ),
             css_class='span1'
             )
-    quantity = colander.SchemaNode(colander.String(),
+    quantity = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
                 template='autonomie:deform_templates/lineblock/lineinput.mako',
                 ),
@@ -155,7 +169,7 @@ lineblock/estimationlines_sequence_item.mako',
                 ),
             title=u''
             )
-    discount = colander.SchemaNode(colander.String(),
+    discount = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
          template='autonomie:deform_templates/lineblock/wrappable_input.mako',
          before='autonomie:deform_templates/lineblock/staticinput.mako',
@@ -164,12 +178,12 @@ lineblock/estimationlines_sequence_item.mako',
          after_options={'label':u'Total HT', 'id':'httotal'}
                 ),
             title=u"Remise",
-            missing=u'0')
+            missing=0)
     tva = colander.SchemaNode(colander.String(),
             widget=get_deferred_choices_widget("tvas", css_class='span1'),
             title=u'TVA')
 
-    expenses = colander.SchemaNode(colander.String(),
+    expenses = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
          template='autonomie:deform_templates/lineblock/wrappable_input.mako',
          before='autonomie:deform_templates/lineblock/staticinput.mako',
@@ -178,7 +192,7 @@ lineblock/estimationlines_sequence_item.mako',
          after_options={'label':u'Total TTC', 'id':'total'}
                 ),
             title=u'Frais TTC',
-            missing=u'0')
+            missing=0)
 
 class EstimationConfiguration(colander.MappingSchema):
     """
@@ -186,7 +200,14 @@ class EstimationConfiguration(colander.MappingSchema):
     """
     phase = colander.SchemaNode(
                 colander.String(),
-                widget=get_deferred_choices_widget('phases')
+                widget=get_deferred_choices_widget('phases'),
+#                description=u"La phase du projet auquel ce document appartient"
+                )
+    taskDate = colander.SchemaNode(
+                colander.Date(),
+                title=u"Date du devis",
+                widget=widget.DateInputWidget(),
+#                description=u"Date d'émission du devis"
                 )
 
 class EstimationNotes(colander.MappingSchema):
@@ -197,7 +218,9 @@ class EstimationNotes(colander.MappingSchema):
                 colander.String(),
                 title=u'Notes',
                 widget=widget.TextAreaWidget(css_class='span10'),
-                missing=u"")
+                missing=u"",
+                description=u"Note complémentaires concernant \
+les prestations décrites")
 
 class EstimationPaymentLine(colander.MappingSchema):
     """
@@ -217,7 +240,7 @@ class EstimationPaymentLine(colander.MappingSchema):
                 default=datetime.date.today(),
                 css_class='span2',)
     amount = colander.SchemaNode(
-            colander.String(),
+            AmountType(),
             title=u'',
             widget=widget.TextInputWidget(
                 template='autonomie:deform_templates/lineblock/amount.mako',
@@ -264,8 +287,31 @@ lineblock/paymentlines_sequence.mako',
 lineblock/paymentlines_sequence_item.mako',
                    min_len=1
                    ),
-               title=u''
+               title=u'',
+               description=u"Définissez les échéances de paiement"
                )
+class EstimationComment(colander.MappingSchema):
+    """
+        Commentaires
+    """
+    paymentConditions = colander.SchemaNode(
+                    colander.String(),
+                    missing=u'',
+                    title=u'Commentaires',
+                    widget=widget.TextAreaWidget(css_class='span10'),
+                    description=u"Ajoutez des commentaires à votre document")
+
+class EstimationCommunication(colander.MappingSchema):
+    """
+        Communication avec la CAE
+    """
+    statusComment = colander.SchemaNode(
+                        colander.String(),
+                        missing=u'',
+                        title=u'Communication Entrepreneur/CAE',
+                        widget=widget.TextAreaWidget(css_class='span10'),
+                        description=u"Message à destination des membres de \
+la CAE qui validderont votre document (n'apparaît pas dans le PDF)")
 
 class EstimationSchema(colander.MappingSchema):
     """
@@ -283,6 +329,9 @@ estimationdetails_item.mako'
             widget=widget.MappingWidget(
                 item_template='autonomie:deform_templates/lineblock/\
 paymentdetails_item.mako'))
+    comments = EstimationComment(title=u"Commentaires")
+    communication = EstimationCommunication(
+                        title=u'Communication Entrepreneur/CAE')
 
 #def collect_indexes(keys, identifier):
 #    """

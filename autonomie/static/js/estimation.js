@@ -8,14 +8,18 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+/*
+ * Facade is the facade object used to dispatch events beetween elements
+ * since the model is quite simple we don't build a real mvc and keep it flat
+ */
 var Facade = new Object();
+
 /*
  *
  * Utitilities
  *
  *
  */
-
 function transformToCents(value) {
   /*
    * Transform the value to cents
@@ -66,12 +70,10 @@ function computeRowsTotal(){
    * Compute the estimation Total
    * and subtotals
    */
-  console.log('## Computing rows total');
   var sum = 0;
   $("div.linetotal .input").each(function(){
     sum += transformToCents($(this).text());
   });
-  console.log("  -> %s", sum);
   return sum;
 }
 function getDiscount(){
@@ -120,21 +122,28 @@ function formatPrice(price) {
   }
   return splitted[0] + "," + cents;
 }
+function isNotFormattable(amount){
+  var test = " " + amount;
+  if ((test.indexOf("€") >= 0 )||(test.indexOf("&nbsp;&euro;")>=0)){
+    return true;
+  }
+  return false;
+}
 function formatAmount( amount ){
   /*
    * return a formatted user-friendly amount
    */
+  if (isNotFormattable(amount)){
+    return amount;
+  }
   return formatPrice( amount ) + "&nbsp;&euro;";
 }
 function computeTotal(){
   /*
    * Compute the main totals
    */
-  console.log("Computing the total");
   var linestotal = computeRowsTotal();
-  console.log(" -Lines total : %s", linestotal);
   var discount = getDiscount();
-  console.log(" -Discount : %s", discount);
   var HTTotal = linestotal - discount;
   var tva = getTVA();
   var tvaPart = getTvaPart( HTTotal, tva );
@@ -157,57 +166,18 @@ function computePaymentRows(){
   /*
    * Return the sum of manually configured values in the payment lines
    */
-  console.log("** computePaymentRows");
   var sum = 0;
-  $(".paymentline input[name=amount]").each(function(){
+  $(".paymentline input:text[name=amount]").each(function(){
     sum += transformToCents($(this).val());
   });
-  console.log("  -> %s", sum);
-  console.log("-------------");
   return sum;
 }
-//function updatePayments(total){
-//  /*
-//   * Update the payments lines
-//   * Needed to allow manual configuration
-//   */
-//  if (total === undefined){
-//    total = transformToCents($('#total .input').text());
-//  }
-//  var nbpayments = getNbPayments();
-//  if (nbpayments === -1){
-//    // Manual payment
-//    var topay = setDeposit(total);
-//    var linesum = computePaymentRows();
-//    var rest = topay - linesum;
-//    $('.paymentamount .input').html(formatAmount(rest));
-//  }else{
-//    // Computed payments
-//    setPaymentRows(total, nbpayments);
-//  }
-//}
-//function setDeposit(total){
-//  /*
-//   * Compute and set the account line (if needed)
-//   */
-//  console.log("** setDeposit");
-//  var account_percent = getDepositPercent();
-//  var account_amount = setDepositAmount(total, account_percent);
-//  var topay = total - account_amount;
-//  console.log("Rest to be paid : %s", topay);
-//  return topay;
-//}
-function setPaymentRows(total, nbpayments){
+function setPaymentRows(){
   /*
    * Compute and set the payment amounts
    */
   $("#paymentcontainer").empty();
-  if (total === undefined){
-    total = transformToCents($('#total .input').text());
-  }
-  if (nbpayments === undefined){
-    nbpayments = getNbPayments();
-  }
+  var nbpayments = getNbPayments();
   var topay = getToPayAfterDeposit();
   if (nbpayments === -1){
     // we ask for manual payment configuration
@@ -217,7 +187,17 @@ function setPaymentRows(total, nbpayments){
   }else{
     setDividedPayments(topay, nbpayments);
   }
-  return total;
+}
+function computeDividedAmount(total, nbpayments){
+  /*
+   * Compute the divided amounts for payments rows
+   */
+  if (nbpayments > 1){
+    var p = total * 100 / nbpayments;
+    return Math.round( p / 100 );
+  }else{
+    return 0;
+  }
 }
 function setDividedPayments(total, nbpayments, readonly){
   /*
@@ -232,8 +212,7 @@ function setDividedPayments(total, nbpayments, readonly){
   var part = 0;
   if(nbpayments > 1){
     // When we divide the payments, we need to compute the part
-    var p = total * 100 / nbpayments;
-    part = Math.round( p / 100 );
+    part = computeDividedAmount(total, nbpayments);
   }
   for (i=1; i< nbpayments; i++){
     addPaymentRow({id:i,
@@ -247,25 +226,10 @@ function setDividedPayments(total, nbpayments, readonly){
   setSoldAmount(rest);
 }
 
-function computeSoldAmount(){
-  /*
-   * Return the sold's amount value
-   */
-  var topayAfterDeposit = getToPayAfterDeposit();
-  var sold = topayAfterDeposit - computePaymentRowSum();
-}
-function getSoldAmountTag(){
-  /*
-   * Returns the sold row
-   */
-  return $('#paymentline_1000 .paymentamount .input');
-}
 function addPaymentRow(args, after){
   /*
    * Add a payment line
    */
-  console.log("Adding a payment row");
-  console.log(args);
   if (args === undefined){
     args = new Object();
   }
@@ -291,7 +255,30 @@ function addPaymentRow(args, after){
       $(Facade).trigger('paymentlinechange');
     });
   }
-  $("#paymentDate_" + args['id']).datepicker();
+  if (args['paymentDate'] !== undefined){
+    $("#paymentDate_" + args['id']).val(formatPaymentDate(args['paymentDate']));
+  }
+  // We update the date information to fit the configured
+  // display format
+  $("#paymentDate_" + args['id']).datepicker({
+                altField:"#paymentDate_" + args['id'] + "_altField",
+                altFormat:"yy-mm-dd",
+                dateFormat:"dd/mm/yy"});
+}
+function formatPaymentDate(isoDate){
+  /*
+   *  format a date from iso to display format
+   */
+  if (isoDate !== ''){
+    var splitted = isoDate.split('-');
+    var year = parseInt(splitted[0], 10);
+    var month = parseInt(splitted[1], 10) - 1;
+    var day = parseInt(splitted[2], 10);
+    var date = new Date(year, month, day);
+    return $.datepicker.formatDate("dd/mm/yy", date);
+  }else{
+    return "";
+  }
 }
 function getNbPayments(){
   /*
@@ -342,9 +329,7 @@ function computeDeposit(total, percent){
   /*
    *  Compute the expected account
    */
-  console.log("** Computing Deposit total : %s percent : %s", total, percent);
   var result = total * percent / 100;
-  console.log("   -> Result : %s", result);
   return result;
 }
 function setDepositAmount(deposit){
@@ -401,7 +386,8 @@ function setSoldAmount(value){
   /*
    * Set the sold amount
    */
-  getSoldAmountTag().html(formatAmount(value));
+  $('#paymentline_1000 .paymentamount .input').html(formatAmount(value));
+  $('#paymentline_1000 .paymentamount input[name=amount]').val(value);
 }
 function updatePaymentRows(){
   /*
@@ -411,8 +397,36 @@ function updatePaymentRows(){
   if (nbpayments === -1){
     updateSoldAmount();
   }else{
-    setPaymentRows();
+    if ($('.paymentline').length != nbpayments){
+      // Lors du refraichissement de page on peut avoir des incohérences
+      setPaymentRows();
+    }else{
+      updateDividedPaymentAmounts(nbpayments);
+    }
   }
+}
+function updateDividedPaymentAmounts(nbpayments){
+  /*
+   *  Update divided payments amounts
+   */
+  var topay = getToPayAfterDeposit();
+  if (nbpayments == 1){
+    setSoldAmount(topay);
+  }else{
+    var part = computeDividedAmount(topay, nbpayments);
+    setDividedPaymentRowsAmount(part);
+    var rest = topay - ( part * (nbpayments - 1));
+    setSoldAmount(rest);
+  }
+}
+function setDividedPaymentRowsAmount(amount){
+  /*
+   *  update payment rows' amount
+   */
+  $('#paymentcontainer .paymentline').each(function(){
+      $(this).find('.input').html(formatAmount(amount));
+      $(this).find('input[name=amount]').val(amount);
+   });
 }
 function updateSoldAmount(){
   /*
@@ -420,14 +434,13 @@ function updateSoldAmount(){
    */
   var topay = getToPayAfterDeposit();
   var sold = topay - computePaymentRows();
-  console.log("The sold is now : %s", sold);
   setSoldAmount(sold);
 }
-function getAmountInput(textval, id){
+function getAmountInput(args){
   /*
    * Return an amount input
    */
-  var args = {id:id, amount:textval};
+
   var tmpl = $('#paymentAmountTmpl').template();
   return $.tmpl( tmpl, args );
 }
@@ -438,12 +451,17 @@ function setPaymentRowsToEditable(){
    * by default we assume they are readonly, so we change them
    * at startup if needed
    */
-  if ($('#paymentcontainer').is('.paymentline')){
+  if (!(jQuery.isEmptyObject($('#paymentcontainer .paymentline')))){
     $('#paymentcontainer .paymentline .paymentamount').each(function(){
-      var textval = $(this).find('.input').text();
+      var args = {};
+      args['amount'] = $(this).find('.input').text();
       // Parent node is the paymentline, we get the id there
-      var myid = getIdFromTagId( 'paymentline_', $(this).parent().attr('id') );
-      $(this).empty().html(getAmountInput(textval, myid));
+      args['id'] = getIdFromTagId( 'paymentline_', $(this).parent().attr('id') );
+
+      if (!(jQuery.isEmptyObject($(this).find('.error')))){
+        args['amount_error'] = $(this).find('.error').text();
+      }
+      $(this).replaceWith(getAmountInput(args));
     });
   }else{
     setPaymentRows();
@@ -458,7 +476,6 @@ function initialize(){
       * Add a row if needed and update rows to fit manual configuration
       * (set them editable for example)
       */
-     console.log("Manual payments");
      setPaymentRowsToEditable();
   }
   $(Facade).bind('linechange', function(event, element){
@@ -471,6 +488,7 @@ function initialize(){
     computeTotal();
   });
   $(Facade).bind('depositchange', function(event){
+    console.log("Deposit change fired");
     setDeposit();
     updatePaymentRows();
   });

@@ -25,6 +25,7 @@ def coerce_datas(settings, prefix, here=None):
     if here:
         options['sampledb'] = os.path.join(here, options['sampledb'])
         options['sampledatas'] = os.path.join(here, options['sampledatas'])
+        options['updatedir'] = os.path.join(here, options['updatedir'])
     return options
 
 def launch_cmd(cmd):
@@ -79,6 +80,13 @@ def drop_sql_datas(settings, prefix):
     options = coerce_datas(settings, prefix)
     drop_db(options)
 
+def update_database(options, fpath):
+    """
+        update database with the given sql file
+    """
+    options['updatefile'] = fpath
+    launch_cmd("{mysql_cmd} {db} < {updatefile}".format(**options))
+
 def initialize_test_database(settings, prefix, here):
     """
         dump sample datas as a test database
@@ -89,6 +97,8 @@ def initialize_test_database(settings, prefix, here):
     create_test_db(options)
     grant_user(options)
     dump_sample(options)
+    for fname in os.listdir(options['updatedir']):
+        update_database(options, os.path.join(options['updatedir'], fname))
 
 def pytest_sessionstart():
     """

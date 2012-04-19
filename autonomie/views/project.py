@@ -32,6 +32,8 @@ from pyramid.url import current_route_url
 from autonomie.models import DBSESSION
 from autonomie.models.model import Project
 from autonomie.models.model import Tva
+from autonomie.models.model import Task
+from autonomie.models.model import Estimation
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
 from autonomie.views.forms.estimation import EstimationSchema
@@ -189,6 +191,9 @@ def estimation(request):
     clients = company.clients
     project = company.get_project(project_id)
 
+    #HAndle task id
+    task = Task()
+    estimation = Estimation()
 
     phases = project.phases
     phase_choices = ((phase.id, phase.name) for phase in phases)
@@ -207,6 +212,7 @@ def estimation(request):
             log.debug("   - Error in validation")
             html_form = e.render()
         else:
+            merge_session_with_post(task, app_struct['common'])
             html_form = form.render(app_struct)
     else:
         html_form = form.render()

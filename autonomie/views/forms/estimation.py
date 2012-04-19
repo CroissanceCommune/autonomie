@@ -43,7 +43,8 @@ from deform import ValidationFailure
 from autonomie.models import DBSESSION
 from autonomie.models.model import Estimation
 from autonomie.models.model import EstimationLine
-#from autonomie.models import Task
+from autonomie.models.model import Task
+from autonomie.utils.forms import merge_session_with_post
 #from autonomie.models import PaymentConditions
 
 log = logging.getLogger(__name__)
@@ -198,7 +199,7 @@ class EstimationConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
-    phase = colander.SchemaNode(
+    id_phase = colander.SchemaNode(
                 colander.String(),
                 widget=get_deferred_choices_widget('phases'),
 #                description=u"La phase du projet auquel ce document appartient"
@@ -209,6 +210,19 @@ class EstimationConfiguration(colander.MappingSchema):
                 widget=widget.DateInputWidget(),
 #                description=u"Date d'émission du devis"
                 )
+    descripton = colander.SchemaNode(
+                colander.String(),
+                title=u"Objet du devis",
+                widget=widget.TextAreaWidget()
+                )
+    course = colander.SchemaNode(colander.String(),
+                title=u"Formation ?",
+                description=u"Ce devis concerne-t-il une formation ?",
+                widget=widget.CheckboxWidget(true_val='1', false_val='0'))
+    displayedUnits = colander.SchemaNode(colander.String(),
+                title=u"Afficher le détail",
+                description=u"Afficher le détail des prestations dans le devis ?",
+                widget=widget.CheckboxWidget(true_val='1', false_val='0'))
 
 class EstimationNotes(colander.MappingSchema):
     """
@@ -272,7 +286,7 @@ class EstimationPayments(colander.MappingSchema):
                         title=u"Accompte à la commande",
                         default="0",
                         widget=widget.SelectWidget(values=get_percents(),
-                             css_class='span1'))
+                             css_class='span2'))
     payment_times = colander.SchemaNode(
                         colander.String(),
                         title=u"Paiement en ",
@@ -332,6 +346,62 @@ paymentdetails_item.mako'))
     comments = EstimationComment(title=u"Commentaires")
     communication = EstimationCommunication(
                         title=u'Communication Entrepreneur/CAE')
+
+def serialize(dbdatas):
+    """
+        build a EstimationSchema compatible dict
+        enter :
+        {'task':{'id_phase':
+                 'name':
+                 'CAEStatus':
+                 'statusComment':
+                 'statusPerson':
+                 'statusDate':
+                 'customerStatus':
+                 'taskDate':
+                 'IDEmployee':
+                 'description': },
+         'estimation':{
+                tva
+                deposit
+                paymentConditions
+                exclusions
+                manualDeliverables
+                course
+                displayedUnits
+                discountHT
+                expenses
+                paymentDisplay
+                }
+          'estimationlines':[{
+                rowIndex
+                description
+                cost
+                quantity
+                unity
+            }...],
+            "paymentconditions":[{
+                rowIndex
+                description
+                amount
+                paymentDate
+            }...],
+            }
+        {'common':{'id_phase':}
+    """
+    datas = {}
+    merge_task_in_datas(datas, dbdatas['task'])
+
+def merge_task_in_datas(datas, taskdict):
+    """
+        merge the task dict in datas to match EstimationSchema
+    """
+    for field in ["id_phase", "taskDate", "description"]:
+        value = taskdict.get(field)
+        if value is not None:
+            datas.setdefault('common', {})[field] = value
+    return datas
+
 
 #def collect_indexes(keys, identifier):
 #    """

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 16 avril 2012 11:00:19 CEST
+# * Last Modified : jeu. 19 avril 2012 10:17:50 CEST
 #
 # * Project : autonomie
 #
@@ -266,6 +266,7 @@ class Task(DBBASE):
     __table_args__ = {'autoload':True}
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'),
                                                  primary_key=True)
+    id_phase = Column("IDPhase", ForeignKey('coop_phase.IDProject'))
     creationDate = Column("creationDate", CustomeDateType(11),
                                             default=_get_date)
     updateDate = Column("updateDate", CustomeDateType(11),
@@ -444,6 +445,7 @@ class Phase(DBBASE):
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+    tasks = relationship("Task", backref="phase")
 
 class Tva(DBBASE):
     """

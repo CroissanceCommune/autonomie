@@ -105,6 +105,7 @@ def company_clients(request):
 def company_client(request):
     """
         Return the client editform
+        or addform when an error has occured
     """
     cid = request.matchdict.get('cid')
     client_id = request.matchdict.get('id')

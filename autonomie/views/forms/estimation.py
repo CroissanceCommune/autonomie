@@ -38,15 +38,6 @@ import logging
 import colander
 import datetime
 
-from deform import ValidationFailure
-
-from autonomie.models import DBSESSION
-from autonomie.models.model import Estimation
-from autonomie.models.model import EstimationLine
-from autonomie.models.model import Task
-from autonomie.utils.forms import merge_session_with_post
-#from autonomie.models import PaymentConditions
-
 log = logging.getLogger(__name__)
 
 def get_percents():
@@ -382,20 +373,19 @@ class MappingWrapper:
                 dest_dict.setdefault(self.dbtype, {})[field] = value
         return dest_dict
 
-class TaskMatch(MappingWrapper):
-    matching_map = (('id_phase','common'),
-                         ('taskDate','common'),
-                         ('description', 'common'))
-    dbtype = 'task'
-
 class EstimationMatch(MappingWrapper):
-    matching_map = (('course', 'common'),
+    matching_map = (
+                         ('id_phase','common'),
+                         ('taskDate','common'),
+                         ('description', 'common'),
+                         ('course', 'common'),
                          ('tva', 'lines'),
                          ('discountHT', 'lines'),
                          ('expenses', 'lines'),
                          ('exclusions', 'notes'),
                          ('paymentDisplay', 'payments'),
-                         ('deposit', 'payments'),)
+                         ('deposit', 'payments'),
+                         )
     dbtype = 'estimation'
 
 class SequenceWrapper:
@@ -443,3 +433,13 @@ class PaymentLinesMatch(SequenceWrapper):
     sequence_name = 'payment_lines'
     fields = ('description', 'paymentDate', 'amount',)
     dbtype = "payment_lines"
+
+def get_schemadata(dbdatas):
+    """
+        return Estimation-compatible schemadatas
+    """
+    datas = {}
+    for matchobj in (EstimationMatch, EstimationLinesMatch, \
+                                                        PaymentLinesMatch):
+        datas = matchobj().toschema(dbdatas, datas)
+    return datas

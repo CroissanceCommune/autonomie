@@ -21,10 +21,10 @@ dbdatas = dict(estimation=dict(course="0",
                                 deposit="20",
                                 exclusions="Ne sera pas fait selon la règle",
                                 paymentDisplay="1",
-                                paymentConditions="Payer à l'heure",),
-                task=dict(id_phase="485",
-                          taskDate="10-12-2012",
-                          description="Devis pour le client test"),
+                                paymentConditions="Payer à l'heure",
+                                id_phase="485",
+                                taskDate="10-12-2012",
+                                description="Devis pour le client test"),
                 estimation_lines=[
                      {'description':'text2',
                      'cost':'20',
@@ -61,13 +61,6 @@ datas = {'common': dict(id_phase="485",
                         }
 
 class Test(BaseTestCase):
-    def test_merge_task_in_session(self):
-        from autonomie.views.forms.estimation import TaskMatch
-        t = TaskMatch()
-        result = t.toschema(dbdatas, {})
-        for field, value in dbdatas['task'].items():
-            self.assertEqual(result['common'][field], value)
-
     def test_merge_estimation_in_session(self):
         from autonomie.views.forms.estimation import EstimationMatch
         e = EstimationMatch()

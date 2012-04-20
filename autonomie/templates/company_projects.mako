@@ -35,9 +35,13 @@
                         <div class='btn-group'>
                             <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
                                 <span class='ui-icon ui-icon-pencil'></span>
+                                Voir
+                            </a>
+                            <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(edit=True))}'>
+                                <span class='ui-icon ui-icon-pencil'></span>
                                 Éditer
                             </a>
-                            <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id)}'>
+                            <a class='btn' href='${request.route_path("estimations", cid=company.id, id=project.id)}'>
                                 <span class='ui-icon ui-icon-plusthick'></span>
                                 Devis
                             </a>

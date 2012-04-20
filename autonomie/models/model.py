@@ -6,10 +6,13 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 19 avril 2012 19:07:16 CEST
+# * Last Modified : ven. 20 avril 2012 17:52:18 CEST
 #
 # * Project : autonomie
 #
+"""
+    Autonomie's SQLA models
+"""
 import datetime
 import time
 
@@ -114,7 +117,7 @@ class Company(DBBASE):
     __tablename__ = 'coop_company'
     __table_args__ = {'autoload':True}
     id = Column("IDCompany", Integer(11), primary_key=True)
-    clients = relationship('Client',
+    clients = relationship("Client",
                             order_by="Client.id",
                             backref='company')
     projects = relationship("Project",
@@ -264,17 +267,16 @@ class Task(DBBASE):
     """
     __tablename__ = 'coop_task'
     __table_args__ = {'autoload':True}
-    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'),
-                                                 primary_key=True)
-    id_phase = Column("IDPhase", ForeignKey('coop_phase.IDProject'))
+    IDTask = Column(Integer(11), primary_key=True)
     creationDate = Column("creationDate", CustomeDateType(11),
                                             default=_get_date)
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
-    taskstatus = relationship("TaskStatus", backref="task")
+    IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
 
-class Estimation(DBBASE):
+#class Estimation(DBBASE):
+class Estimation(Task):
     """
        `IDTask` int(11) NOT NULL,
       `sequenceNumber` int(11) NOT NULL,        # Indice du devis dans la phase
@@ -303,10 +305,49 @@ class Estimation(DBBASE):
     """
     __tablename__ = 'coop_estimation'
     __table_args__ = {'autoload':True}
+#    __mapper_args__ = {'concrete':True}
 
-    id = Column("IDTask", Integer(11), primary_key=True)
-    lines = relationship("EstimationLine", backref="estimation")
-    task = relationship("Task", backref="estimation", uselist=False)
+    IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'), primary_key=True)
+
+    IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
+    project = relationship("Project", backref='estimations')
+    phase =  relationship("Phase",
+                          backref="estimations",
+                          order_by='Estimation.sequenceNumber')
+
+class Invoice(Task):
+    """
+       `IDTask` int(11) NOT NULL,
+       `IDEstimation` int(11) DEFAULT '0',
+       `IDProject` int(11) NOT NULL,
+       `sequenceNumber` int(11) NOT NULL,
+       `number` varchar(100) NOT NULL,
+       `tva` int(11) NOT NULL DEFAULT '196',
+       `discount` int(11) NOT NULL DEFAULT '0',
+       `paymentConditions` text,
+       `estimationDate` int(11) DEFAULT '0',
+       `estimationNumber` varchar(100) DEFAULT NULL,
+       `deposit` tinyint(4) NOT NULL DEFAULT '0',
+       `course` tinyint(4) NOT NULL DEFAULT '0',
+       `officialNumber` int(11) DEFAULT NULL,
+       `paymentMode` varchar(10) DEFAULT NULL,
+       `displayedUnits` tinyint(4) NOT NULL DEFAULT '0',
+       `discountHT` int(11) NOT NULL DEFAULT '0',
+       `expenses` int(11) NOT NULL DEFAULT '0',
+       PRIMARY KEY (`IDTask`),
+       KEY `IDProject` (`IDProject`),
+       KEY `IDEstimation` (`IDEstimation`)
+    """
+    __tablename__ = 'coop_invoice'
+    __table_args__ = {'autoload':True}
+    IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'), primary_key=True)
+
+    IDEstimation = Column("IDEstimation", ForeignKey('coop_estimation.IDTask'))
+    IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
+    project = relationship("Project", backref='invoices')
+    phase =  relationship("Phase",
+                          backref="invoices",
+                          order_by='Invoice.sequenceNumber')
 
 class EstimationLine(DBBASE):
     """
@@ -327,14 +368,15 @@ class EstimationLine(DBBASE):
     __tablename__ = 'coop_estimation_line'
     __table_args__ = {'autoload':True}
     id = Column("IDWorkLine", Integer(11), primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
+    IDTask = Column(Integer, ForeignKey('coop_task.IDTask'))
     creationDate = Column("creationDate", CustomeDateType(11),
                                             default=_get_date)
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+    task = relationship("Task", backref="lines")
 
-class PaymentConditions(DBBASE):
+class PaymentLines(DBBASE):
     """
         coop_estimation_payment
         `IDPaymentLine` int(11) NOT NULL auto_increment,
@@ -353,7 +395,8 @@ class PaymentConditions(DBBASE):
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
-
+    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
+    estimation = relationship("Estimation", backref='payment_lines')
 
 class Client(DBBASE):
     """
@@ -423,7 +466,17 @@ class Project(DBBASE):
                                             default=_get_date)
     endingDate = Column("endingDate", CustomeDateType(11),
                                             default=_get_date)
-    phases = relationship("Phase", backref="project")
+
+    def get_estimation(self, taskid):
+        """
+            Returns the estimation with id taskid
+        """
+        print "In get_estimation : %s" % taskid
+
+        for estimation in self.estimations:
+            if estimation.IDTask == int(taskid):
+                return estimation
+        raise KeyError("No such task in this project")
 
 class Phase(DBBASE):
     """
@@ -440,12 +493,12 @@ class Phase(DBBASE):
     id = Column('IDPhase', Integer(11), primary_key=True)
     id_project = Column('IDProject', Integer(11),
                         ForeignKey('coop_project.IDProject'))
+    project = relationship("Project", backref="phases")
     creationDate = Column("creationDate", CustomeDateType(11),
                                             default=_get_date)
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
-    tasks = relationship("Task", backref="phase")
 
 class Tva(DBBASE):
     """
@@ -472,4 +525,4 @@ class TaskStatus(DBBASE):
     id = Column("id", Integer(11), primary_key=True)
     id_task = Column('IDTask', Integer(11),
                         ForeignKey('coop_task.IDTask'))
-
+    task = relationship("Task", backref="taskstatus")

@@ -23,6 +23,7 @@ from pyramid.httpexceptions import HTTPForbidden
 
 from deform import Form
 from autonomie.models import DBSESSION
+from autonomie.models.model import Estimation
 from autonomie.views.forms import CompanySchema
 from autonomie.utils.forms import merge_session_with_post
 
@@ -43,12 +44,15 @@ def company_index(request):
                                             company=company)
         all_statuses = []
         for project in company.projects:
-            for phase in project.phases:
-                for task in phase.tasks:
-                    all_statuses.extend(task.taskstatus)
-                    #FIXME
-                    sorted(all_statuses, key=lambda a:a.statusDate)
-        ret_val['status'] = all_statuses[-10:]
+            for estimation in project.estimations:
+                all_statuses.extend(estimation.taskstatus)
+            for invoice in project.invoices:
+                all_statuses.extend(invoice.taskstatus)
+        sorted(all_statuses, key=lambda a:a.statusDate, reverse=True)
+        ret_val['status'] = all_statuses[:10]
+
+        dbsession = DBSESSION()
+        a = dbsession.query(Estimation).filter(Estimation.IDTask==6495).first()
 
     except KeyError:
         ret_val = HTTPForbidden()

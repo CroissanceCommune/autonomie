@@ -2,7 +2,7 @@
 <%doc>
 Static div to show informations (amounts for example)
 </%doc>
-<div class='control-group estimationamounts'>
+<div class='control-group estimationamounts offset8'>
     <div class='control-label'>
         ${options['label']}
     </div>

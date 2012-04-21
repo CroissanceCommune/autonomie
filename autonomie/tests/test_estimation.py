@@ -37,7 +37,7 @@ dbdatas = dict(estimation=dict(course="0",
                      'quantity':'12',
                      'rowIndex':'1'},
                      ],
-                payment_conditions=[
+                payment_lines=[
                     {'description':"Début", "paymentDate":"12-12-2012",
                                             "amount":"150", "rowIndex":1},
                     {'description':"Milieu", "paymentDate":"13-12-2012",
@@ -60,49 +60,25 @@ datas = {'common': dict(id_phase="485",
         'comments':dict(paymentConditions="Payer à l'heure"),
                         }
 
-#class Test(BaseTestCase):
-#    maxDiff =None
-#    def collect_indexes(self):
-#        keys = ["prestation_5", "prestation_2", "prestation_1", "prestation_10"]
-#        self.assertEqual(collect_indexes(keys, "prestation_"), [5,2,1,10])
-#        self.assertEqual(collect_indexes(keys, "prestation_"), [5,2,1,10])
-#
-#    def test_format_lines(self):
-#        self.assertEqual(format_lines(origin), expected['estimation_lines'])
-#
-#    def test_task(self):
-#        self.assertEqual(format_task(origin), expected['task'])
-#
-#    def test_estimation(self):
-#        self.assertEqual(format_estimation(origin), expected['estimation'])
-#
-#    def test_payment_conditions(self):
-#        self.assertEqual(format_payment_conditions(origin),
-#                                expected['payment_conditions'])
-#
-#    def test_format_datas(self):
-#        formatted = format_datas(origin)
-#        self.assertEqual(formatted, expected)
 class Test(BaseTestCase):
     def test_merge_task_in_session(self):
-        from autonomie.views.forms.estimation import merge_task_in_datas
-        result = merge_task_in_datas({}, dbdatas['task'])
+        from autonomie.views.forms.estimation import TaskMatch
+        t = TaskMatch()
+        result = t.toschema(dbdatas, {})
         for field, value in dbdatas['task'].items():
             self.assertEqual(result['common'][field], value)
 
     def test_merge_estimation_in_session(self):
-        from autonomie.views.forms.estimation import merge_estimation_in_datas
-        result = merge_estimation_in_datas({}, dbdatas['estimation'])
-        for field, group in (('course', 'common',), ('displayedUnits', 'common'),
-                    ('discountHT', 'lines'), ('tva', 'lines'),
-                    ('expenses', 'lines'), ('deposit', 'payments'),
-                    ('exclusions', 'notes'), ('paymentDisplay', 'payments'),
-                    ('paymentConditions', 'comments'),):
+        from autonomie.views.forms.estimation import EstimationMatch
+        e = EstimationMatch()
+        result = e.toschema(dbdatas, {})
+        for field, group in e.matching_map:
             self.assertEqual(dbdatas['estimation'][field], result[group][field])
 
     def test_merge_estimationlines_in_session(self):
-        from autonomie.views.forms.estimation import merge_estimationlines_in_datas
-        result = merge_estimationlines_in_datas({}, dbdatas['estimation_lines'])
+        from autonomie.views.forms.estimation import EstimationLinesMatch
+        e = EstimationLinesMatch()
+        result = e.toschema(dbdatas, {})
         from copy import deepcopy
         lines = deepcopy(dbdatas['estimation_lines'])
         lines = sorted(lines, key=lambda row:int(row['rowIndex']))
@@ -112,10 +88,12 @@ class Test(BaseTestCase):
             self.assertEqual(result['lines']['lines'][i], line)
 
     def test_merge_paymentlines_in_session(self):
-        from autonomie.views.forms.estimation import merge_paymentlines_in_datas
-        result = merge_paymentlines_in_datas({}, dbdatas['payment_conditions'])
+        from autonomie.views.forms.estimation import PaymentLinesMatch
+        p = PaymentLinesMatch()
+        result = p.toschema(dbdatas, {})
+        print result
         from copy import deepcopy
-        lines = deepcopy(dbdatas['payment_conditions'])
+        lines = deepcopy(dbdatas['payment_lines'])
         lines = sorted(lines, key=lambda row:int(row['rowIndex']))
         for line in lines:
             del(line['rowIndex'])

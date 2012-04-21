@@ -347,254 +347,99 @@ paymentdetails_item.mako'))
     communication = EstimationCommunication(
                         title=u'Communication Entrepreneur/CAE')
 
-def serialize(dbdatas):
+class MappingWrapper:
     """
-        build a EstimationSchema compatible dict
-        enter :
-        {'task':{'id_phase':
-                 'name':
-                 'CAEStatus':
-                 'statusComment':
-                 'statusPerson':
-                 'statusDate':
-                 'customerStatus':
-                 'taskDate':
-                 'IDEmployee':
-                 'description': },
-         'estimation':{
-                tva
-                deposit
-                paymentConditions
-                exclusions
-                manualDeliverables
-                course
-                displayedUnits
-                discountHT
-                expenses
-                paymentDisplay
-                }
-          'estimationlines':[{
-                rowIndex
-                description
-                cost
-                quantity
-                unity
-            }...],
-            "paymentconditions":[{
-                rowIndex
-                description
-                amount
-                paymentDate
-            }...],
-            }
-        {'common':{'id_phase':}
+        Allows moving from one dict to another
+        allowing to map databases models and colander Mapping schemas
+        when db datas are dispatched through different mapping schemas
+        @param matching_map: matching_map as (
+                                    (field, colanderschemaname,multi_boolean),
+                                                                ...)
+        @param dbtype: internal dbtype name (like 'estimation', 'task' ...)
+                        corresponding to a database table
     """
-    datas = {}
-    merge_task_in_datas(datas, dbdatas['task'])
-    merge_estimation_in_datas(datas, dbdatas['estimation'])
-    merge_estimationlines_in_datas(datas, dbdatas['estimation_lines'])
-    if dbdatas['estimation']['manualDeliverables'] == '1':
-        merge_paymentlines_in_datas(datas, dbdatas['payment_lines'])
-    return datas
+    matching_map = None
+    dbtype = None
 
-def merge_task_in_datas(datas, taskdict):
-    """
-        merge the task dict in datas to match EstimationSchema
-    """
-    for field in ["id_phase", "taskDate", "description"]:
-        value = taskdict.get(field)
-        if value is not None:
-            datas.setdefault('common', {})[field] = value
-    return datas
+    def toschema(self, dbdatas, dest_dict):
+        """
+            convert db dict fashionned datas to the appropriate sections
+            to fit the EstimationSchema
+        """
+        for field, section in self.matching_map:
+            value = dbdatas.get(self.dbtype,{}).get(field)
+            if value is not None:
+                dest_dict.setdefault(section, {})[field] = value
+        return dest_dict
 
-def merge_estimation_in_datas(datas, estimationdict):
+    def todb(self, schemadatas, dest_dict):
+        """
+            convert colander deserialized datas to database dest_dict
+        """
+        for field, section in self.matching_map:
+            value = schemadatas.get(section, {}).get(field, None)
+            if value is not None or colander.null:
+                dest_dict.setdefault(self.dbtype, {})[field] = value
+        return dest_dict
+
+class TaskMatch(MappingWrapper):
+    matching_map = (('id_phase','common'),
+                         ('taskDate','common'),
+                         ('description', 'common'))
+    dbtype = 'task'
+
+class EstimationMatch(MappingWrapper):
+    matching_map = (('course', 'common'),
+                         ('tva', 'lines'),
+                         ('discountHT', 'lines'),
+                         ('expenses', 'lines'),
+                         ('exclusions', 'notes'),
+                         ('paymentDisplay', 'payments'),
+                         ('deposit', 'payments'),)
+    dbtype = 'estimation'
+
+class SequenceWrapper:
     """
-        merge an estimation dict in datas to match EstimationSchema
+        Maps the db models with colander Sequence Schemas
     """
-    for field in ['course', 'displayedUnits']:
-        value = estimationdict.get(field)
-        if value is not None:
-            datas.setdefault('common', {})[field] = value
-
-    for field in ["tva", "discountHT", "expenses"]:
-        value = estimationdict.get(field)
-        if value is not None:
-            datas.setdefault('lines', {})[field] = value
-
-    exclusions = estimationdict.get('exclusions')
-    if exclusions:
-        datas.setdefault('notes', {})['exclusions'] = exclusions
-
-    for field in ('paymentDisplay', 'deposit',):
-        value = estimationdict.get(field)
-        if value is not None:
-            datas.setdefault('payments', {})[field] = value
-
-    paymentConditions = estimationdict.get('paymentConditions')
-    if paymentConditions:
-        datas.setdefault('comments', {})['paymentConditions'] = paymentConditions
-
-    return datas
-
-def merge_estimationlines_in_datas(datas, lineslist):
-    """
-        merge estimationlines objects into datas dict to fit EstimationSchema
-    """
-    for line in sorted(lineslist, key=lambda line:int(line['rowIndex'])):
-        datas.setdefault('lines', {}).setdefault('lines', []).append(
-                     dict((key, value)for key, value in line.items()
-                        if key in ('description', 'cost', 'quantity', 'unity'))
-            )
-    return datas
-
-def merge_paymentlines_in_datas(datas, lineslist):
-    """
-        merge paymentlines objects into datas dict to fit EstimationSchema
-    """
-    for line in sorted(lineslist, key=lambda line:int(line['rowIndex'])):
-        datas.setdefault('payments', {}).setdefault('payment_lines', []).append(
+    mapping_name = ''
+    sequence_name = ''
+    dbtype = ''
+    fields = None
+    sort_key = 'rowIndex'
+    def toschema(self, dbdatas, dest_dict):
+        """
+            Build schema expected datas from list of elements
+        """
+        lineslist = dbdatas.get(self.dbtype, [])
+        print lineslist
+        for line in sorted(lineslist, key=lambda line:int(line[self.sort_key])):
+            dest_dict.setdefault(self.mapping_name, {})
+            dest_dict[self.mapping_name].setdefault(self.sequence_name, []).append(
                     dict((key, value)for key, value in line.items()
-                        if key in ('description', 'paymentDate', 'amount'))
+                                              if key in self.fields)
                     )
-    return datas
+        return dest_dict
 
+    def todb(self, shemadatas, dest_dict):
+        """
+            convert colander deserialized datas to database dest_dict
+        """
+        all_ = dest_dict.get(self.mapping_name, {}).get(self.sequence_name, [])
+        for index, line in enumerate(all_):
+            dest_dict.setdefault(self.dbtype, [])
+            line[self.sort_key] = str(index)
+            dest_dict[self.db_type].append(line)
+        return dest_dict
 
-#def collect_indexes(keys, identifier):
-#    """
-#        return estimation line indexes
-#    """
-#    return [int(key[len(identifier):]) for key in keys if key.startswith(identifier)]
-#
-#def format_lines(datas):
-#    """
-#        get all the estimation lines configured in datas and
-#        return a colander friendly data structure
-#    """
-#    keys = datas.keys()
-#    # keys :
-#    # prestation_id
-#    # price_id
-#    # quantity_id
-#    # unity_id
-#    indexes = collect_indexes(keys, "prestation_")
-#    lines = []
-#    for index in indexes:
-#        prestation = datas['prestation_%d' % index]
-#        quantity = datas['quantity_%d' % index]
-#        price = datas['price_%d' % index]
-#        unity = datas['unity_%d' % index]
-#        lines.append(dict(description=prestation,
-#                          cost=price,
-#                          quantity=quantity,
-#                          unity=unity))
-#    return lines
-#
-#def format_task(datas):
-#    """
-#        return all the task related fields
-#    """
-#    keys = ['id_phase','description','taskDate',]
-#    return dict((key, datas.get(key)) for key in keys)
-#
-#def format_estimation(datas):
-#    """
-#        return the estimation related fields
-#    """
-#    keys = ["tva",
-#            "deposit",
-#            "paymentConditions",
-#            "exclusions",
-#            "course",
-#            "displayedUnits",
-#            "discountHT",
-#            "expenses",
-#            "paymentDisplay",]
-#    return dict((key, datas.get(key)) for key in keys)
-#
-#def format_payment_conditions(datas):
-#    """
-#        format all payment conditions related datas
-#        to fit colander schema's expected structure
-#    """
-#    keys = datas.keys()
-#    payments = []
-#    indexes = collect_indexes(keys, "description_")
-#    indexes.sort()
-#    for index in indexes:
-#        description = datas["description_%d" % index]
-#        amount = datas["amount_%d" % index]
-#        paymentDate = datas["paymentDate_%s" % index]
-#        payments.append(dict(description=description,
-#                             amount=amount,
-#                             paymentDate=paymentDate,
-#                             rowIndex=index))
-#    return payments
-#
-#def format_datas(datas):
-#    """
-#        format all estimation form datas to fit the colander schema
-#    """
-#    log.debug("Formatting datas : %s" % (datas,))
-#    tovalid = dict(estimation=format_estimation(datas),
-#                   task=format_task(datas),
-#                   estimation_lines=format_lines(datas),
-#                   payment_conditions=format_payment_conditions(datas),
-#                   )
-#    return tovalid
-#
-#class EstimationForm():
-#    """
-#        Estimation Form makes the glue beetween
-#        colander (form validation),
-#        sqla (database orm)
-#        user-input
-#        user inputted datas are formatted;
-#        sent to colander;
-#        once validated, returns the appropriate elements
-#        to insert into the database
-#    """
-#    def __init__(self, schema):
-#        self.schema = schema
-#
-#    def validate(self, datas):
-#        """
-#            Launch datas validation
-#        """
-#        cstruct = format_datas(datas)
-#        try:
-#            validated = self.schema.deserialize(cstruct)
-#        except colander.Invalid, e:
-#            errors = e.asdict()
-#            log.warn(errors)
-#            raise ValidationFailure(errors)
-#        return validated
-#
-#def get_estimation_line(lines, _id):
-#    """
-#        Return an estimation_line object matching the _id
-#    """
-#    for line in lines:
-#        if line['id'] == _id:
-#            return line
-#    return EstimationLine()
-#
-#def merge_line(line, estimation_lines):
-#    """
-#        Merge a line with an estimation_line sqla object if needed
-#    """
-#    pass
-#
-#def merge_appstruct_todatabase(datas, task=None,
-#                                      estimation=None,
-#                                      estimation_lines=[],
-#                                      payment_conditions=None):
-#    """
-#        Build/update sqla elements from validated datas
-#        Input : datas and sqla objects
-#        Output : updated sqla objects
-#        Note: find a way to match estimation_lines with workline ids
-#    """
-#    estimation.name = datas['estimation']['name']
-#    for line in datas['estimation_line']:
-#        if line.has_key('idworkline'):
-#            merge_line(line, estimation_lines)
+class EstimationLinesMatch(SequenceWrapper):
+    mapping_name = 'lines'
+    sequence_name = 'lines'
+    fields = ('description', 'cost', 'quantity', 'unity',)
+    dbtype = 'estimation_lines'
+
+class PaymentLinesMatch(SequenceWrapper):
+    mapping_name = 'payments'
+    sequence_name = 'payment_lines'
+    fields = ('description', 'paymentDate', 'amount',)
+    dbtype = "payment_lines"

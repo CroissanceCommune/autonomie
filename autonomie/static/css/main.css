@@ -32,6 +32,10 @@ header .navbar li:hover{
   text-align:left;
   background-color:#efefef;
 }
+#pagetitle h2{
+  float:left;
+  margin-right:50px;
+}
 .form-actions{ /* deform_bootstrap modification */
   background:none;
 }
@@ -51,6 +55,7 @@ header .navbar li:hover{
 }
 .deform fieldset{
   border:none;
+  padding:0px;
 }
 .deform fieldset:hover{
   border:none;

@@ -39,7 +39,17 @@ def company_index(request):
     avatar = request.session['user']
     try:
         company = avatar.get_company(cid)
-        ret_val = dict(title=u"Autonomie", company=company)
+        ret_val = dict(title=u"{0}".format(company.name,),
+                                            company=company)
+        all_statuses = []
+        for project in company.projects:
+            for phase in project.phases:
+                for task in phase.tasks:
+                    all_statuses.extend(task.taskstatus)
+                    #FIXME
+                    sorted(all_statuses, key=lambda a:a.statusDate)
+        ret_val['status'] = all_statuses[-10:]
+
     except KeyError:
         ret_val = HTTPForbidden()
     return ret_val

@@ -3,7 +3,7 @@
     % if field.widget.__dict__.has_key('before'):
         ${field.renderer(field.widget.before, options=field.widget.before_options)|n}
      % endif
-     <div class='control-group estimationamounts'>
+     <div class='control-group estimationamounts offset8'>
         <label for="${field.oid}" class="control-label">${field.title}</label>
         <div class="controls" id="${field.oid}">
             ${field.serialize(cstruct).strip()|n}

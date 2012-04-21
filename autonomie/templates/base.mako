@@ -35,6 +35,7 @@
     <link href="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/chosen_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/theme/jquery-ui-1.8.16.custom.css')}" type="text/css" rel="stylesheet"/>
+    <link href="${request.static_url('autonomie:static/css/bootstrap-responsive.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/main.css')}" rel="stylesheet"  type="text/css" />
     <%block name="css" />
   </head>
@@ -44,6 +45,9 @@
       <div class="navbar-inner">
           <a class="brand" href='/'>Autonomie</a>
           <div class="container">
+            <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+              >>>
+              </a>
             <div class="nav-collapse">
         % if menu is not UNDEFINED:
               <ul class='nav'>
@@ -72,7 +76,7 @@
     </header>
     <%block name="headtitle">
     <div id='pagetitle' class='well'>
-        <h2>${title}</h2>
+        <h2 class='visible-desktop hidden-tablet'>${title}</h2>
         <%block name="actionmenu" />
       </div>
     </%block>

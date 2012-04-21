@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 19 avril 2012 10:17:50 CEST
+# * Last Modified : jeu. 19 avril 2012 19:07:16 CEST
 #
 # * Project : autonomie
 #
@@ -272,7 +272,7 @@ class Task(DBBASE):
     updateDate = Column("updateDate", CustomeDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
-    lines = relationship("TaskStatus", backref="task")
+    taskstatus = relationship("TaskStatus", backref="task")
 
 class Estimation(DBBASE):
     """

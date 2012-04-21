@@ -13,13 +13,15 @@
             <br />
             <br />
             % if len(account.companies) == 1:
-                <h4>Votre entreprise</h4>
+                <h3>Votre entreprise</h3>
             % else:
-                <h4>Vos entreprise(s)</h4>
+                <h3>Vos entreprise(s)</h3>
             % endif
             <br />
             % for company in account.companies:
-                <strong>${company.name}</strong>
+                <a href="${request.route_path('company', cid=company.id)}">
+                    <strong>${company.name}</strong>
+                    </a>
                 <br />
                 ${company.goal}
                 <br />

@@ -1,24 +1,21 @@
-    .input{
-    padding:6px 1px;
-    margin:1px;
-    }
-    .estimationline{
-    margin-bottom:5px;
-    padding-bottom:2px;
-    padding-top:2px;
-    border-bottom:1px solid #dddddd;
-    }
-    .linesblockheader{
-    background-color:#f2f2f2;
-    margin-bottom:10px;
-    font-weight:bold;
-    }
-    .estimationamounts{
-    padding-left:640px;
-    }
-    .estimationform .control-group{
-    margin-bottom:2px;
-    }
-    .paymentamount{
-    text-align:right;
-    }
+.input{
+padding:6px 1px;
+margin:1px;
+}
+.estimationline{
+margin-bottom:5px;
+padding-bottom:2px;
+padding-top:2px;
+border-bottom:1px solid #dddddd;
+}
+.linesblockheader{
+background-color:#f2f2f2;
+margin-bottom:10px;
+font-weight:bold;
+}
+.estimationform .control-group{
+margin-bottom:2px;
+}
+.paymentamount{
+text-align:right;
+}

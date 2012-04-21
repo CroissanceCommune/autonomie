@@ -59,6 +59,8 @@ def get_page_url(request, page):
 def company_clients(request):
     """
         Return the list of all the clients
+        Expects a url attribute cid
+        Accepts direction, sort, search as GET
     """
     search = request.params.get("search", "")
     sort = request.params.get('sort', 'name')
@@ -92,7 +94,7 @@ def company_clients(request):
     records = paginate.Page(clients,
                     current_page,
                     url=page_url,
-                    items_per_page=15,)
+                    items_per_page=10,)
     return dict(title=u"Clients",
                 clients=records,
                 company=company,

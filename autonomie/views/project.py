@@ -102,6 +102,7 @@ def company_projects(request):
     avatar = request.session['user']
     company = avatar.get_company(cid)
 #    toquery = (Project.id, Project.client, Project.name)
+    #TODO : handle join tables to search by client
     dbsession = DBSESSION()
     projects = dbsession.query(Project).filter(
             Project.name.like(search+"%"),
@@ -111,13 +112,14 @@ def company_projects(request):
     records = paginate.Page(projects,
                     current_page,
                     url=page_url,
-                    items_per_page=15,)
+                    items_per_page=10,)
 #    projects = company.projects
     clients = company.clients
     form = get_project_form(clients=clients,
                             path=route_path('company_projects',
                                             request,
                                             cid=cid))
+    print request.current_route_path()
     return dict(title=u"Projets",
                 projects=records,
                 company=company,

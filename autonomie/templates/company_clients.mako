@@ -1,5 +1,7 @@
 <%inherit file="base.mako"></%inherit>
-<%namespace file="/base/pager.html" import="pager"/>
+<%namespace file="/base/pager.mako" import="pager"/>
+<%namespace file="/base/pager.mako" import="sortable"/>
+<%namespace file="/base/utils.mako" import="searchform"/>
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
@@ -8,10 +10,7 @@
     </a>
     </li>
     <li>
-    <form class='navbar-form pull-right form-search' id='search_form' method='GET'>
-        <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
-        <button type="submit" class="btn">Rechercher</button>
-    </form>
+        ${searchform()}
     </li>
 </ul>
 </%block>
@@ -19,9 +18,9 @@
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
-            <th>Code</th>
-            <th>Entreprise</th>
-            <th>Nom du contact principal</th>
+            <th>${sortable("Code", "code")}</th>
+            <th>${sortable("Entreprise", "name")}</th>
+            <th>${sortable("Nom du contact principal", "contactLastName")}</th>
             <th>Actions</th>
         </tr>
     </thead>

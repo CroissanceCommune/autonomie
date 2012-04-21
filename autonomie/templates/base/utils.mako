@@ -19,3 +19,20 @@
         </address>
     %endif
 </%def>
+<%def name="searchform(label='Rechercher', html='')">
+    <form class='navbar-form pull-right form-search' id='search_form' method='GET'>
+        <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
+        ${html|n}
+        <button type="submit" class="btn">${label}</button>
+    </form>
+</%def>
+<%def name="urlbuild(args_dict)">
+<%doc>Returns an url preserving actual get args</%doc>
+<%
+get_args = request.GET
+get_args.update(args_dict)
+path = request.current_route_path()
+if get_args:
+    path = "{0}?{1}".format(path, '&'.join("{0}={1}".format(key, value)
+                                for key, value in get_args.items()))
+%>${path}</%def>

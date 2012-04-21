@@ -339,7 +339,7 @@ estimationdetails_item.mako'
             )
             )
     notes = EstimationNotes(title=u"Notes")
-    accounts = EstimationPayments(title=u'Conditions de paiement',
+    payments = EstimationPayments(title=u'Conditions de paiement',
             widget=widget.MappingWidget(
                 item_template='autonomie:deform_templates/lineblock/\
 paymentdetails_item.mako'))
@@ -391,6 +391,11 @@ def serialize(dbdatas):
     """
     datas = {}
     merge_task_in_datas(datas, dbdatas['task'])
+    merge_estimation_in_datas(datas, dbdatas['estimation'])
+    merge_estimationlines_in_datas(datas, dbdatas['estimation_lines'])
+    if dbdatas['estimation']['manualDeliverables'] == '1':
+        merge_paymentlines_in_datas(datas, dbdatas['payment_lines'])
+    return datas
 
 def merge_task_in_datas(datas, taskdict):
     """
@@ -400,6 +405,57 @@ def merge_task_in_datas(datas, taskdict):
         value = taskdict.get(field)
         if value is not None:
             datas.setdefault('common', {})[field] = value
+    return datas
+
+def merge_estimation_in_datas(datas, estimationdict):
+    """
+        merge an estimation dict in datas to match EstimationSchema
+    """
+    for field in ['course', 'displayedUnits']:
+        value = estimationdict.get(field)
+        if value is not None:
+            datas.setdefault('common', {})[field] = value
+
+    for field in ["tva", "discountHT", "expenses"]:
+        value = estimationdict.get(field)
+        if value is not None:
+            datas.setdefault('lines', {})[field] = value
+
+    exclusions = estimationdict.get('exclusions')
+    if exclusions:
+        datas.setdefault('notes', {})['exclusions'] = exclusions
+
+    for field in ('paymentDisplay', 'deposit',):
+        value = estimationdict.get(field)
+        if value is not None:
+            datas.setdefault('payments', {})[field] = value
+
+    paymentConditions = estimationdict.get('paymentConditions')
+    if paymentConditions:
+        datas.setdefault('comments', {})['paymentConditions'] = paymentConditions
+
+    return datas
+
+def merge_estimationlines_in_datas(datas, lineslist):
+    """
+        merge estimationlines objects into datas dict to fit EstimationSchema
+    """
+    for line in sorted(lineslist, key=lambda line:int(line['rowIndex'])):
+        datas.setdefault('lines', {}).setdefault('lines', []).append(
+                     dict((key, value)for key, value in line.items()
+                        if key in ('description', 'cost', 'quantity', 'unity'))
+            )
+    return datas
+
+def merge_paymentlines_in_datas(datas, lineslist):
+    """
+        merge paymentlines objects into datas dict to fit EstimationSchema
+    """
+    for line in sorted(lineslist, key=lambda line:int(line['rowIndex'])):
+        datas.setdefault('payments', {}).setdefault('payment_lines', []).append(
+                    dict((key, value)for key, value in line.items()
+                        if key in ('description', 'paymentDate', 'amount'))
+                    )
     return datas
 
 

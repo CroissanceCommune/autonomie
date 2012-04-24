@@ -89,7 +89,7 @@ class ClientView(ListView):
     @view_config(route_name='company_clients', renderer='company_client.mako',\
                                                         request_method='POST')
     @view_config(route_name='company_client', renderer='company_client.mako',\
-                                                        request_param='edit')
+                                                request_param='action=edit')
     def company_client(self):
         """
             Return :
@@ -117,7 +117,7 @@ class ClientView(ListView):
                 html_form = errform.render()
             else:
                 client = merge_session_with_post(client, app_datas)
-                self.dbsession.merge(client)
+                client = self.dbsession.merge(client)
                 if edit:
                     message = u"Le client <b>%s</b> a été édité avec succès" % (
                                                                     client.name,)

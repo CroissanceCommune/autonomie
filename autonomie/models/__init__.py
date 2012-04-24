@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 20 avril 2012 23:21:03 CEST
+# * Last Modified : ven. 20 avril 2012 23:27:35 CEST
 #
 # * Project : autonomie
 #
@@ -33,7 +33,7 @@ def record_to_appstruct(self):
         Transform a SQLAlchemy object into a deform compatible dict
         usefull to autofill an editform directly from db recovered datas
     """
-    return dict([(str(k), self.__dict__[k])
+    return dict([(k, self.__dict__[k])
                 for k in sorted(self.__dict__) if '_sa_' != k[:4]])
 
 # Add a bounded method to the DBBASE object

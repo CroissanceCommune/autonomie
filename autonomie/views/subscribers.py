@@ -44,7 +44,7 @@ def add_menu(event):
                      url=route_path('company_clients',
                                                 request,
                                                 cid=cid)),
-                dict(label=u"Devis - Factures",
+                dict(label=u"Projets",
                      url=route_path('company_projects',
                                                 request,
                                                 cid=cid)),

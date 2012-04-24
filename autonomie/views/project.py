@@ -22,39 +22,17 @@ from functools import partial
 from deform import ValidationFailure
 from deform import Form
 from deform import Button
-from webhelpers import paginate
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
-from pyramid.url import current_route_url
 
-from autonomie.models import DBSESSION
 from autonomie.models.model import Project
-from autonomie.models.model import Tva
-from autonomie.models.model import Task
-from autonomie.models.model import Estimation
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
-from autonomie.views.forms.estimation import EstimationSchema
-from autonomie.views.forms.estimation import get_schemadata
+from .base import ListView
 
 log = logging.getLogger(__name__)
-
-def get_tvas():
-    """
-        return all configured tva amounts
-    """
-    tvas = DBSESSION().query(Tva).all()
-    return [(tva.value, tva.name)for tva in tvas]
-
-def get_page_url(request, page):
-    """
-        Return a url generator for pagination
-    """
-    args = request.GET
-    args['page'] = str(page)
-    return current_route_url(request, page=page, _query=args)
 
 def build_client_value(client):
     """
@@ -85,198 +63,122 @@ def get_project_form(clients, default_client=None, edit=False, path=""):
                                         type='submit'),))
     return form
 
-@view_config(route_name='company_projects', renderer='company_projects.mako',
-                                            request_method='GET')
-def company_projects(request):
+class ProjectView(ListView):
     """
-        Return the list of projects
+        All the projects views are grouped in this class
     """
-    log.debug("Getting projects")
-    search = request.params.get("search", "")
-    sort = request.params.get('sort', 'name')
+    columns = ("code", "name")
+    @view_config(route_name='company_projects',
+                 renderer='company_projects.mako',\
+                 request_method='GET')
+    def company_projects(self):
+        """
+            Return the list of projects
+        """
+        log.debug("Getting projects")
+        search, sort, direction, current_page, items_per_page = \
+                                                self._get_pagination_args()
 
-    direction = request.params.get("direction", 'asc')
-    if direction not in ['asc', 'desc']:
-        direction = 'asc'
+        company = self.get_current_company()
 
+    #    toquery = (Project.id, Project.client, Project.name)
+        #TODO : handle join tables to search by client
 
-    cid = request.matchdict.get('cid')
-    avatar = request.session['user']
-    company = avatar.get_company(cid)
-#    toquery = (Project.id, Project.client, Project.name)
-    #TODO : handle join tables to search by client
-    dbsession = DBSESSION()
-    projects = dbsession.query(Project).filter(
-            Project.name.like(search+"%"),
-            Project.id_company == cid).order_by(sort + " " + direction)
-    page_url = partial(get_page_url, request=request)
-    current_page = int(request.params.get("page", 1))
-    records = paginate.Page(projects,
-                    current_page,
-                    url=page_url,
-                    items_per_page=10,)
-#    projects = company.projects
-    clients = company.clients
-    form = get_project_form(clients=clients,
-                            path=route_path('company_projects',
-                                            request,
-                                            cid=cid))
-    print request.current_route_path()
-    return dict(title=u"Projets",
-                projects=records,
-                company=company,
-                html_form=form.render())
-
-@view_config(route_name='company_projects', renderer='company_project.mako',
-                                                        request_method='POST')
-@view_config(route_name='company_project', renderer='company_project.mako', request_param='edit')
-def company_project_edit(request):
-    """
-        Returns the company edit view and add-error
-    """
-    cid = request.matchdict.get('cid')
-    project_id = request.matchdict.get('id')
-    avatar = request.session['user']
-    company = avatar.get_company(cid)
-    clients = company.clients
-    if project_id: # edition
-        project = company.get_project(project_id)
-        edit = True
-        default_client = project.client
-    else: # new project
-        project = Project()
-        project.id_company = cid
-        edit = False
-        default_client = None
-    form = get_project_form(clients,
-                            default_client,
-                            edit=edit)
-    dbsession = DBSESSION()
-    if 'submit' in request.params:
-        # form POSTed
-        datas = request.params.items()
-        log.debug("Datas")
-        log.debug(datas)
-        try:
-            app_datas = form.validate(datas)
-            log.debug(app_datas)
-        except ValidationFailure, errform:
-            html_form = errform.render()
+        if company is not None:
+            projects = self.dbsession.query(Project).filter(
+                                Project.name.like(search+"%"),
+                                Project.id_company == company.id
+                        ).order_by(sort + " " + direction)
         else:
-            log.debug(app_datas)
-            project = merge_session_with_post(project, app_datas)
-            dbsession.merge(project)
-            if edit:
-                message = u"Le projet <b>%s</b> a été édité avec succès" % (
-                                                                project.name,)
+            projects = self.dbsession.query(Project).filter(
+                                Project.name.like(search+"%")
+                        ).order_by(sort + " " + direction)
+
+        records = self._get_pagination(projects, current_page, items_per_page)
+
+        clients = company.clients
+        form = get_project_form(clients=clients,
+                                path=route_path('company_projects',
+                                                self.request,
+                                                cid=company.id))
+        return dict(title=u"Projets",
+                    projects=records,
+                    company=company,
+                    html_form=form.render())
+
+    @view_config(route_name='company_projects',  \
+                 renderer='company_project.mako', \
+                 request_method='POST')
+    @view_config(route_name='company_project', \
+                 renderer='company_project.mako', \
+                 request_param='edit')
+    def company_project(self):
+        """
+            Returns:
+            * the company edit form
+            or
+            * the company add form when an error has occured
+        """
+        company = self.get_current_company()
+
+
+        project_id = self.request.matchdict.get('id')
+        if project_id: # edition
+            project = company.get_project(project_id)
+            edit = True
+            default_client = project.client
+        else: # new project
+            project = Project()
+            project.id_company = company.id
+            edit = False
+            default_client = None
+
+        clients = company.clients
+        form = get_project_form(clients,
+                                default_client,
+                                edit=edit)
+        if 'submit' in self.request.params:
+            # form POSTed
+            datas = self.request.params.items()
+            try:
+                app_datas = form.validate(datas)
+                log.debug(app_datas)
+            except ValidationFailure, errform:
+                html_form = errform.render()
             else:
-                message = u"Le projet <b>%s</b> a été ajouté avec succès" % (
-                                                                project.name,)
-            request.session.flash(message, queue='main')
-            return HTTPFound(route_path('company_projects', request, cid=cid))
-    else:
-        html_form = form.render(project.appstruct())
-    return dict(title=project.name,
-                project=project,
-                html_form=html_form,
-                company=company)
-
-@view_config(route_name='company_project', renderer='project_view.mako')
-def company_project(request):
-    """
-        Company's project view
-    """
-    cid = request.matchdict.get('cid')
-    project_id = request.matchdict.get('id')
-    avatar = request.session['user']
-
-    company = avatar.get_company(cid)
-    clients = company.clients
-    project = company.get_project(project_id)
-    phases = project.phases
-    return dict(title=project.name,
-                project=project,
-                company=company)
-
-@view_config(route_name="estimations", renderer='estimation.mako')
-@view_config(route_name='estimation', renderer='estimation.mako')
-def estimation(request):
-    """
-        Return the estimation edit view
-    """
-    cid = request.matchdict.get('cid')
-    project_id = request.matchdict.get('id')
-    avatar = request.session['user']
-
-    company = avatar.get_company(cid)
-    clients = company.clients
-    project = company.get_project(project_id)
-
-    taskid = request.matchdict.get('taskid')
-    if taskid:
-        estimation = project.get_estimation(taskid)
-        estimation_lines = estimation.lines
-        payment_lines = estimation.payment_lines
-        dbdatas = {'estimation':estimation.appstruct(),
-                   'estimation_lines':[line.appstruct()
-                                        for line in estimation_lines],
-                   'payment_lines':[line.appstruct()
-                                        for line in payment_lines]}
-        print dbdatas
-        get_schemadata(dbdatas)
-
-    #HAndle task id
-    task = Task()
-    estimation = Estimation()
-
-    phases = project.phases
-    phase_choices = ((phase.id, phase.name) for phase in phases)
-    form = Form(EstimationSchema().bind(phases=phase_choices,
-                                     tvas=get_tvas()),
-                buttons=('submit',))
-    if 'submit' in request.params:
-        log.debug('***** Submitted')
-        datas = request.params.items()
-        log.debug(datas)
-        try:
-            app_struct = form.validate(datas)
-            log.debug("   + Validated : app_struct")
-            log.debug(app_struct)
-        except ValidationFailure, e:
-            log.debug("   - Error in validation")
-            html_form = e.render()
+                log.debug(app_datas)
+                project = merge_session_with_post(project, app_datas)
+                # The returned project is a persistent object
+                project = self.dbsession.merge(project)
+                if edit:
+                    message = u"Le projet <b>{0}</b> a été édité avec \
+succès".format(project.name)
+                else:
+                    message = u"Le projet <b>{0}</b> a été ajouté avec \
+succès".format(project.name)
+                self.request.session.flash(message, queue='main')
+                # Flusing the session launches sql queries
+                self.dbsession.flush()
+                return HTTPFound(route_path('company_project',
+                                            self.request,
+                                            cid=company.id,
+                                            id=project.id))
         else:
-            merge_session_with_post(task, app_struct['common'])
-            html_form = form.render(app_struct)
-    else:
-        html_form = form.render()
-#    schema = EstimationFormSchema()
-#    form = EstimationForm(schema)
-#
-#    #TODO : add sequenceNumber regarding the project
-#    #TODO : add task status (history)
-#    #TODO : handle status (CAEStatus)
-#    if 'submit' in request.params:
-#        datas = request.params
-#        try:
-#            app_struct = form.validate(datas)
-#        except ValidationFailure, e:
-#            errors = e
-#        else:
-#            estimation, task = merge_appstruct_to_estimation(app_struct)
-#            dbsession = DBSESSION()
-#            dbsession.merge(estimation)
-#            dbsession.merge(task)
-#            #dbsession.merge(
-#            dbsession.commit()
-#            return HTTPFound(route_path(company_projects,
-#                                        cid=cid,
-#                                        project_id=project_id))
-#
-    #form = Form(EstimationSchema(), buttons=('submit','cancel',))
+            html_form = form.render(project.appstruct())
+        return dict(title=project.name,
+                    project=project,
+                    html_form=html_form,
+                    company=company)
 
-    return dict(title=u'Nouveau devis',
-                client=project.client,
-                company=company,
-                html_form = html_form
-                )
+    @view_config(route_name='company_project', renderer='project_view.mako')
+    def company_project_view(self):
+        """
+            Company's project view
+        """
+        company = self.get_current_company()
+        project_id = self.request.matchdict.get('id')
+        project = company.get_project(project_id)
+        return dict(title=project.name,
+                    project=project,
+                    company=company)
+

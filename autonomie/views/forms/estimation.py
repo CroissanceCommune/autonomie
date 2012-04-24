@@ -218,8 +218,8 @@ class EstimationConfiguration(colander.MappingSchema):
     """
     IDPhase = colander.SchemaNode(
                 colander.String(),
+                title=u"Phase où insérer le devis",
                 widget=get_deferred_choices_widget('phases'),
-#                description=u"La phase du projet auquel ce document appartient"
                 )
     taskDate = colander.SchemaNode(
                 colander.Date(),

@@ -32,20 +32,10 @@
                     <td>${client.name}</td>
                     <td>${client.contactLastName} ${client.contactFirstName}</td>
                     <td>
-                        <div class='btn-group'>
                             <a class='btn' href='${request.route_path("company_client", cid=company.id, id=client.id)}'>
                                 <span class='ui-icon ui-icon-pencil'></span>
                                 Voir
                             </a>
-                            <a class='btn' href='${request.route_path("company_client", cid=company.id, id=client.id, _query=dict(edit=True))}'>
-                                <span class='ui-icon ui-icon-pencil'></span>
-                                Éditer
-                            </a>
-                            <a class='btn' href='${request.route_path("company_client", cid=company.id, id=client.id)}'>
-                                <span class='ui-icon ui-icon-folder-open'></span>
-                                Projets
-                            </a>
-                        </div>
                     </td>
                 </tr>
             % endfor

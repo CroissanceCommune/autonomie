@@ -20,3 +20,4 @@ from .user import pwdSchema
 from .client import ClientSchema
 from .company import CompanySchema
 from .project import ProjectSchema
+from .project import phaseSchema

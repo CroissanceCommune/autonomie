@@ -36,3 +36,7 @@ if get_args:
     path = "{0}?{1}".format(path, '&'.join("{0}={1}".format(key, value)
                                 for key, value in get_args.items()))
 %>${path}</%def>
+<%def name="print_date(timestamp)">
+<% import datetime %>
+${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
+</%def>

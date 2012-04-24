@@ -28,6 +28,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
 
 from autonomie.models.model import Project
+from autonomie.models.model import Phase
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
 from .base import ListView
@@ -111,7 +112,7 @@ class ProjectView(ListView):
                  request_method='POST')
     @view_config(route_name='company_project', \
                  renderer='company_project.mako', \
-                 request_param='edit')
+                 request_param='action=edit')
     def company_project(self):
         """
             Returns:
@@ -150,15 +151,21 @@ class ProjectView(ListView):
                 project = merge_session_with_post(project, app_datas)
                 # The returned project is a persistent object
                 project = self.dbsession.merge(project)
+                self.dbsession.flush()
+                log.debug("Session has been flushed")
+                log.debug("Project id : %s" % project.id)
                 if edit:
                     message = u"Le projet <b>{0}</b> a été édité avec \
 succès".format(project.name)
                 else:
+                    default_phase = Phase()
+                    default_phase.project = project
+                    default_phase.name = u"défaut"
+                    self.dbsession.merge(default_phase)
                     message = u"Le projet <b>{0}</b> a été ajouté avec \
 succès".format(project.name)
                 self.request.session.flash(message, queue='main')
                 # Flusing the session launches sql queries
-                self.dbsession.flush()
                 return HTTPFound(route_path('company_project',
                                             self.request,
                                             cid=company.id,
@@ -169,6 +176,11 @@ succès".format(project.name)
                     project=project,
                     html_form=html_form,
                     company=company)
+
+#    @view_config(route_name="company_project",
+#                 renderer="project_view.mako",
+#                 request_param="action=addphase"
+#                )
 
     @view_config(route_name='company_project', renderer='project_view.mako')
     def company_project_view(self):

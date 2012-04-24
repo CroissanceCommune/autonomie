@@ -37,6 +37,7 @@ from autonomie.models.model import Estimation
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
 from autonomie.views.forms.estimation import EstimationSchema
+from autonomie.views.forms.estimation import get_schemadata
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +72,7 @@ def build_client_values(clients):
     """
     return [build_client_value(client)
                             for client in clients]
+
 def get_project_form(clients, default_client=None, edit=False, path=""):
     """
         Returns the project add/edit form
@@ -127,8 +129,8 @@ def company_projects(request):
 
 @view_config(route_name='company_projects', renderer='company_project.mako',
                                                         request_method='POST')
-@view_config(route_name='company_project', renderer='company_project.mako')
-def company_project(request):
+@view_config(route_name='company_project', renderer='company_project.mako', request_param='edit')
+def company_project_edit(request):
     """
         Returns the company edit view and add-error
     """
@@ -179,12 +181,11 @@ def company_project(request):
                 html_form=html_form,
                 company=company)
 
-@view_config(route_name='estimation', renderer='estimation.mako')
-def estimation(request):
+@view_config(route_name='company_project', renderer='project_view.mako')
+def company_project(request):
     """
-        Return the estimation edit view
+        Company's project view
     """
-    log.debug("## In Estimation ##")
     cid = request.matchdict.get('cid')
     project_id = request.matchdict.get('id')
     avatar = request.session['user']
@@ -192,6 +193,37 @@ def estimation(request):
     company = avatar.get_company(cid)
     clients = company.clients
     project = company.get_project(project_id)
+    phases = project.phases
+    return dict(title=project.name,
+                project=project,
+                company=company)
+
+@view_config(route_name="estimations", renderer='estimation.mako')
+@view_config(route_name='estimation', renderer='estimation.mako')
+def estimation(request):
+    """
+        Return the estimation edit view
+    """
+    cid = request.matchdict.get('cid')
+    project_id = request.matchdict.get('id')
+    avatar = request.session['user']
+
+    company = avatar.get_company(cid)
+    clients = company.clients
+    project = company.get_project(project_id)
+
+    taskid = request.matchdict.get('taskid')
+    if taskid:
+        estimation = project.get_estimation(taskid)
+        estimation_lines = estimation.lines
+        payment_lines = estimation.payment_lines
+        dbdatas = {'estimation':estimation.appstruct(),
+                   'estimation_lines':[line.appstruct()
+                                        for line in estimation_lines],
+                   'payment_lines':[line.appstruct()
+                                        for line in payment_lines]}
+        print dbdatas
+        get_schemadata(dbdatas)
 
     #HAndle task id
     task = Task()

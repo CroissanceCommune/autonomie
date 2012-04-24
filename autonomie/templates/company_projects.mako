@@ -30,16 +30,12 @@
                 <tr class='tableelement' id="${project.id}">
                     <td>${project.code}</td>
                     <td>${project.name}</td>
-                    <td>${project.client.name}</td>
+                    <td><a href='${request.route_path("company_client", cid=company.id, id=project.client.id)}'>${project.client.name}</a></td>
                     <td>
                         <div class='btn-group'>
                             <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
                                 <span class='ui-icon ui-icon-pencil'></span>
                                 Voir
-                            </a>
-                            <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(edit=True))}'>
-                                <span class='ui-icon ui-icon-pencil'></span>
-                                Éditer
                             </a>
                             <a class='btn' href='${request.route_path("estimations", cid=company.id, id=project.id)}'>
                                 <span class='ui-icon ui-icon-plusthick'></span>

@@ -58,3 +58,11 @@ class ProjectSchema(colander.MappingSchema):
     code_client = colander.SchemaNode(colander.String(),
                                         title=u"Client",
                                         widget=deferred_autocomplete_widget)
+
+class PhaseSchema(colander.MappingSchema):
+    """
+        Schema for phase
+    """
+    name = colander.SchemaNode(colander.String(),
+                               validator=colander.Length(max=150))
+phaseSchema = PhaseSchema()

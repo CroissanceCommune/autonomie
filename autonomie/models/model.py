@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 24 avril 2012 13:10:08 CEST
+# * Last Modified : mar. 24 avril 2012 17:14:10 CEST
 #
 # * Project : autonomie
 #
@@ -37,7 +37,7 @@ class CustomDateType(TypeDecorator):
     """
     impl = Integer_type
     def process_bind_param(self, value, dialect):
-        if value is None:
+        if value is None or not value:
             return int(time.time())
         elif isinstance(value, datetime.datetime):
             return int(time.mktime(value.timetuple()))

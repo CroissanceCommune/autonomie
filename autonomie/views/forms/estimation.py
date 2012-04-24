@@ -80,11 +80,37 @@ def specialfloat(self, value):
         value = value.replace(u'€', '').replace(u',', '.').replace(u' ', '')
     return float(value)
 
+class QuantityType(colander.Number):
+    num = specialfloat
+
 class AmountType(colander.Number):
     """
         preformat an amount before considering it as a float object
+        then *100 to store it into database
     """
     num = specialfloat
+    def serialize(self, node, appstruct):
+        if appstruct is colander.null:
+            return colander.null
+
+        try:
+            return str(self.num(appstruct) / 100.0)
+        except Exception:
+            raise colander.Invalid(node,
+                          u"\"${val}\" n'est pas un montant valide".format(
+                                val=appstruct),
+                          )
+    def deserialize(self, node, cstruct):
+        if cstruct != 0 and not cstruct:
+            return colander.null
+
+        try:
+            return self.num(cstruct) * 100.0
+        except Exception:
+            raise Invalid(node,
+                          u"\"${val}\" n'est pas un montant valide".format(
+                            val=cstruct)
+                          )
 
 class EstimationLine(colander.MappingSchema):
     """
@@ -103,7 +129,7 @@ class EstimationLine(colander.MappingSchema):
                 ),
             css_class='span1'
             )
-    quantity = colander.SchemaNode(AmountType(),
+    quantity = colander.SchemaNode(QuantityType(),
             widget=widget.TextInputWidget(
                 template='autonomie:deform_templates/lineblock/lineinput.mako',
                 ),
@@ -190,7 +216,7 @@ class EstimationConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
-    id_phase = colander.SchemaNode(
+    IDPhase = colander.SchemaNode(
                 colander.String(),
                 widget=get_deferred_choices_widget('phases'),
 #                description=u"La phase du projet auquel ce document appartient"
@@ -201,19 +227,19 @@ class EstimationConfiguration(colander.MappingSchema):
                 widget=widget.DateInputWidget(),
 #                description=u"Date d'émission du devis"
                 )
-    descripton = colander.SchemaNode(
+    description = colander.SchemaNode(
                 colander.String(),
                 title=u"Objet du devis",
-                widget=widget.TextAreaWidget()
+                widget=widget.TextAreaWidget(css_class="span8"),
                 )
-    course = colander.SchemaNode(colander.String(),
+    course = colander.SchemaNode(colander.Integer(),
                 title=u"Formation ?",
                 description=u"Ce devis concerne-t-il une formation ?",
-                widget=widget.CheckboxWidget(true_val='1', false_val='0'))
-    displayedUnits = colander.SchemaNode(colander.String(),
+                widget=widget.CheckboxWidget(true_val=1, false_val=0))
+    displayedUnits = colander.SchemaNode(colander.Integer(),
                 title=u"Afficher le détail",
-                description=u"Afficher le détail des prestations dans le devis ?",
-                widget=widget.CheckboxWidget(true_val='1', false_val='0'))
+                description=u"Afficher le détail des prestations dans le PDF ?",
+                widget=widget.CheckboxWidget(true_val=1, false_val=0))
 
 class EstimationNotes(colander.MappingSchema):
     """
@@ -352,7 +378,7 @@ class MappingWrapper:
     matching_map = None
     dbtype = None
 
-    def toschema(self, dbdatas, dest_dict):
+    def toschema(self, dbdatas, appstruct):
         """
             convert db dict fashionned datas to the appropriate sections
             to fit the EstimationSchema
@@ -360,25 +386,26 @@ class MappingWrapper:
         for field, section in self.matching_map:
             value = dbdatas.get(self.dbtype,{}).get(field)
             if value is not None:
-                dest_dict.setdefault(section, {})[field] = value
-        return dest_dict
+                appstruct.setdefault(section, {})[field] = value
+        return appstruct
 
-    def todb(self, schemadatas, dest_dict):
+    def todb(self, appstruct, dbdatas):
         """
-            convert colander deserialized datas to database dest_dict
+            convert colander deserialized datas to database dbdatas
         """
         for field, section in self.matching_map:
-            value = schemadatas.get(section, {}).get(field, None)
+            value = appstruct.get(section, {}).get(field, None)
             if value is not None or colander.null:
-                dest_dict.setdefault(self.dbtype, {})[field] = value
-        return dest_dict
+                dbdatas.setdefault(self.dbtype, {})[field] = value
+        return dbdatas
 
 class EstimationMatch(MappingWrapper):
     matching_map = (
-                         ('id_phase','common'),
+                         ('IDPhase','common'),
                          ('taskDate','common'),
                          ('description', 'common'),
                          ('course', 'common'),
+                         ('displayedUnits', 'common'),
                          ('tva', 'lines'),
                          ('discountHT', 'lines'),
                          ('expenses', 'lines'),
@@ -397,30 +424,29 @@ class SequenceWrapper:
     dbtype = ''
     fields = None
     sort_key = 'rowIndex'
-    def toschema(self, dbdatas, dest_dict):
+    def toschema(self, dbdatas, appstruct):
         """
             Build schema expected datas from list of elements
         """
         lineslist = dbdatas.get(self.dbtype, [])
-        print lineslist
         for line in sorted(lineslist, key=lambda line:int(line[self.sort_key])):
-            dest_dict.setdefault(self.mapping_name, {})
-            dest_dict[self.mapping_name].setdefault(self.sequence_name, []).append(
+            appstruct.setdefault(self.mapping_name, {})
+            appstruct[self.mapping_name].setdefault(self.sequence_name, []).append(
                     dict((key, value)for key, value in line.items()
                                               if key in self.fields)
                     )
-        return dest_dict
+        return appstruct
 
-    def todb(self, shemadatas, dest_dict):
+    def todb(self, appstruct, dbdatas):
         """
-            convert colander deserialized datas to database dest_dict
+            convert colander deserialized datas to database dbdatas
         """
-        all_ = dest_dict.get(self.mapping_name, {}).get(self.sequence_name, [])
+        all_ = dbdatas.get(self.mapping_name, {}).get(self.sequence_name, [])
         for index, line in enumerate(all_):
-            dest_dict.setdefault(self.dbtype, [])
+            dbdatas.setdefault(self.dbtype, [])
             line[self.sort_key] = str(index)
-            dest_dict[self.db_type].append(line)
-        return dest_dict
+            dbdatas[self.dbtype].append(line)
+        return dbdatas
 
 class EstimationLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
@@ -434,12 +460,20 @@ class PaymentLinesMatch(SequenceWrapper):
     fields = ('description', 'paymentDate', 'amount',)
     dbtype = "payment_lines"
 
-def get_schemadata(dbdatas):
+def get_appstruct(dbdatas):
     """
-        return Estimation-compatible schemadatas
+        return Estimation-compatible appstruct
     """
-    datas = {}
-    for matchobj in (EstimationMatch, EstimationLinesMatch, \
-                                                        PaymentLinesMatch):
-        datas = matchobj().toschema(dbdatas, datas)
-    return datas
+    appstruct = {}
+    for matchobj in (EstimationMatch, EstimationLinesMatch, PaymentLinesMatch):
+        appstruct = matchobj().toschema(dbdatas, appstruct)
+    return appstruct
+
+def get_dbdatas(appstruct):
+    """
+        return dict with db compatible datas
+    """
+    dbdatas = {}
+    for matchobj in (EstimationMatch, EstimationLinesMatch, PaymentLinesMatch):
+        dbdatas = matchobj().todb(appstruct, dbdatas)
+    return dbdatas

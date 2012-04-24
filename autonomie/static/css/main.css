@@ -31,6 +31,7 @@ header .navbar li:hover{
   border-bottom:1px solid #ddd;
   text-align:left;
   background-color:#efefef;
+  overflow:hidden;
 }
 #pagetitle h2{
   float:left;

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 20 avril 2012 17:52:18 CEST
+# * Last Modified : mar. 24 avril 2012 13:10:08 CEST
 #
 # * Project : autonomie
 #
@@ -30,7 +30,7 @@ from sqlalchemy.types import String as String_type
 
 from autonomie.models import DBBASE
 
-class CustomeDateType(TypeDecorator):
+class CustomDateType(TypeDecorator):
     """
         Custom date type used because our database is using
         integers to store date's timestamp
@@ -50,6 +50,27 @@ class CustomeDateType(TypeDecorator):
             return datetime.datetime.fromtimestamp(float(value))
         else:
             return datetime.datetime.now()
+
+class CustomDateType2(TypeDecorator):
+    """
+        Custom date type used because our database is using
+        custom strings to store dates
+    """
+    impl = Integer_type
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        elif isinstance(value, datetime.date):
+            return int("{0}{1}{2}".format(value.year, value.month, value.day))
+        else:
+            return int(value)
+
+    def process_result_value(self, value, dialect):
+        if value:
+            value = str(value)
+            return datetime.date(int(value[0:4]), int(value[4:6]), int(value[6:8]))
+        else:
+            return ""
 
 class CustomFileType(TypeDecorator):
     """
@@ -123,9 +144,9 @@ class Company(DBBASE):
     projects = relationship("Project",
                             order_by="Project.id",
                             backref="company")
-    creationDate = Column("creationDate", CustomeDateType(11),
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
     goal = Column("object", String(255))
@@ -228,9 +249,9 @@ class Employee(DBBASE):
     __tablename__ = 'coop_employee'
     __table_args__ = {'autoload':True}
     id = Column("IDEmployee", Integer(11), primary_key=True)
-    creationDate = Column("creationDate", CustomeDateType(11),
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
 
@@ -268,12 +289,43 @@ class Task(DBBASE):
     __tablename__ = 'coop_task'
     __table_args__ = {'autoload':True}
     IDTask = Column(Integer(11), primary_key=True)
-    creationDate = Column("creationDate", CustomeDateType(11),
+    taskDate = Column("taskDate", CustomDateType2(11))
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
     IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
+    statusPerson = Column("statusPerson",
+                          ForeignKey('egw_accounts.account_id'))
+    statusPersonAccount = relationship("User",
+                        primaryjoin="Task.statusPerson==User.id",
+                        backref="taskStatuses")
+    IDEmployee = Column("IDEmployee",
+                            ForeignKey('egw_accounts.account_id'))
+    owner = relationship("User",
+                        primaryjoin="Task.IDEmployee==User.id",
+                            backref="ownedTasks")
+
+
+    def get_status_str(self):
+        statuses = dict((
+            ("valid", u"Validé{genre} par {firstname} {lastname}",),
+            ("abort", u"Annulé{genre} par {firstname} {lastname}",),
+            ("paid", u"Paiement reçu par {firstname} {lastname}",),
+            ("draft", u"Brouillon modifié par {firstname} {lastname}",),
+            ("geninv", u"Facture générée par {firstname} {lastname}",),
+            ("aboinv", u"Facture annulée par {firstname} {lastname}",),
+            ("aboest", u"Devis annulé par {firstname} {lastname}",),
+            ("sent", u"Document envoyé par {firstname} {lastname}",),
+            ("wait", u"En attente de validation",),
+            ('invalid', u"Invalidé{genre} par {firstname} {lastname}",)))
+        return statuses.get(self.CAEStatus, self.CAEStatus)
+#        statusStr = statuses.get(self.CAEStatus, "").format(genre="",
+#                             firstname=self.statusPersonAccount.firstname,
+#                             lastname=self.statusPersonAccount.lastname)
+#        return u"{0} : {1}".format(self.statusDate, statusStr)
+
 
 #class Estimation(DBBASE):
 class Estimation(Task):
@@ -369,9 +421,9 @@ class EstimationLine(DBBASE):
     __table_args__ = {'autoload':True}
     id = Column("IDWorkLine", Integer(11), primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_task.IDTask'))
-    creationDate = Column("creationDate", CustomeDateType(11),
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
     task = relationship("Task", backref="lines")
@@ -390,13 +442,14 @@ class PaymentLines(DBBASE):
     """
     __tablename__ = 'coop_estimation_payment'
     __table_args__ = {'autoload':True}
-    creationDate = Column("creationDate", CustomeDateType(11),
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     estimation = relationship("Estimation", backref='payment_lines')
+    paymentDate = Column("paymentDate", CustomDateType(11))
 
 class Client(DBBASE):
     """
@@ -424,9 +477,9 @@ class Client(DBBASE):
     id = Column('code', String(4), primary_key=True)
     id_company = Column("IDCompany", Integer(11),
                                     ForeignKey('coop_company.IDCompany'))
-    creationDate = Column("creationDate", CustomeDateType(11),
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
     projects = relationship("Project", backref="client")
@@ -457,22 +510,20 @@ class Project(DBBASE):
                                     ForeignKey('coop_company.IDCompany'))
     code_client = Column("customerCode", String(4),
                                     ForeignKey('coop_customer.code'))
-    creationDate = Column("creationDate", CustomeDateType(11),
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
-    startingDate = Column("startingDate", CustomeDateType(11),
+    startingDate = Column("startingDate", CustomDateType(11),
                                             default=_get_date)
-    endingDate = Column("endingDate", CustomeDateType(11),
+    endingDate = Column("endingDate", CustomDateType(11),
                                             default=_get_date)
 
     def get_estimation(self, taskid):
         """
             Returns the estimation with id taskid
         """
-        print "In get_estimation : %s" % taskid
-
         for estimation in self.estimations:
             if estimation.IDTask == int(taskid):
                 return estimation
@@ -494,9 +545,9 @@ class Phase(DBBASE):
     id_project = Column('IDProject', Integer(11),
                         ForeignKey('coop_project.IDProject'))
     project = relationship("Project", backref="phases")
-    creationDate = Column("creationDate", CustomeDateType(11),
+    creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
-    updateDate = Column("updateDate", CustomeDateType(11),
+    updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
 

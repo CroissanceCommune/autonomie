@@ -64,12 +64,11 @@ def dump_sample(options):
     launch_cmd("{mysql_cmd} {db} < {sampledb}".format(**options))
     launch_cmd("{mysql_cmd} {db} < {sampledatas}".format(**options))
 
-
 def drop_db(options):
     """
         drop the test database
     """
-    cmd = "echo 'drop database if exists {db};' | {mysql_cmd}".format(**options)
+    cmd = "echo \"echo 'drop database {db};' | {mysql_cmd}\" | at now".format(**options)
     launch_cmd(cmd)
 
 def drop_sql_datas(settings, prefix):

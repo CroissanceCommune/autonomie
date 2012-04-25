@@ -80,4 +80,4 @@ class TestSubscriber(BaseViewTest):
         event['req'] = MagicMock(matchdict={'cid':'100'})
         add_menu(event)
         self.assertEqual(event['menu'][0]['label'], u'Clients')
-        self.assertEqual(event['menu'][1]['label'], u'Devis - Factures')
+        self.assertEqual(event['menu'][1]['label'], u'Projets')

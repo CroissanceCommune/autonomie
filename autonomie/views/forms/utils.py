@@ -37,6 +37,13 @@ def get_mail_input(missing=None):
                             validator=colander.Email(MAIL_ERROR_MESSAGE),
                             missing=missing
                             )
+def get_date_input():
+    """
+        Return a date input displaying a french user friendly format
+    """
+    date_input = widget.DateInputWidget()
+    date_input.options['dateFormat'] = 'dd/mm/yy'
+    return date_input
 
 def deferred_upload_widget(path):
     @colander.deferred

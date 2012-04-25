@@ -35,8 +35,12 @@
         commit
 """
 import logging
-import colander
 import datetime
+
+import colander
+from deform import widget
+
+from .utils import get_date_input
 
 log = logging.getLogger(__name__)
 
@@ -44,25 +48,21 @@ def get_percents():
     """
         Return percents for select widget
     """
-    percent_options = [('0','Aucun'), ('5','5%')]
-    for i in range(10,110,10):
-        percent_options.append(("%d" % i, "%d %%" % i))
+    percent_options = [(0,'Aucun'), (5,'5%')]
+    for i in range(10, 110, 10):
+        percent_options.append((i, "%d %%" % i))
     return percent_options
 
 def get_payment_times():
     """
         Return options for payment times select
     """
-    payment_times = [('-1', u'Configuration manuel')]
-    for i in range(1,12):
-        payment_times.append(('%d' % i, '%d fois' % i))
+    payment_times = [(-1, u'Configuration manuel')]
+    for i in range(1, 12):
+        payment_times.append((i, '%d fois' % i))
     return payment_times
 
-
-import colander
-from deform import widget
-
-days = (
+DAYS = (
         ('NONE', '-'),
         ('HOUR', u'Heure(s)'),
         ('DAY', u'Jour(s)'),
@@ -71,6 +71,10 @@ days = (
         ('FEUIL', u'Feuillet(s)'),
         ('PACK', u'Forfait'),
         )
+PAYMENTDISPLAYCHOICES = (
+        ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
+        ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
+        ('ALL', u"Le détail des paiements apparaît dans le PDF",),)
 
 def specialfloat(self, value):
     """
@@ -81,6 +85,9 @@ def specialfloat(self, value):
     return float(value)
 
 class QuantityType(colander.Number):
+    """
+        Preformat unicode supposed to be numeric entries
+    """
     num = specialfloat
 
 class AmountType(colander.Number):
@@ -107,7 +114,7 @@ class AmountType(colander.Number):
         try:
             return self.num(cstruct) * 100.0
         except Exception:
-            raise Invalid(node,
+            raise colander.Invalid(node,
                           u"\"${val}\" n'est pas un montant valide".format(
                             val=cstruct)
                           )
@@ -138,7 +145,7 @@ class EstimationLine(colander.MappingSchema):
     unity = colander.SchemaNode(
                 colander.String(),
                 widget=widget.SelectWidget(
-                    values=days,
+                    values=DAYS,
                     template='autonomie:deform_templates/lineblock/unity.mako',
                     ),
                 css_class='span2'
@@ -224,7 +231,8 @@ class EstimationConfiguration(colander.MappingSchema):
     taskDate = colander.SchemaNode(
                 colander.Date(),
                 title=u"Date du devis",
-                widget=widget.DateInputWidget(),
+                widget=get_date_input(),
+                default=datetime.date.today()
 #                description=u"Date d'émission du devis"
                 )
     description = colander.SchemaNode(
@@ -299,17 +307,24 @@ class EstimationPayments(colander.MappingSchema):
         Gestion des accomptes
     """
     deposit = colander.SchemaNode(
-                        colander.String(),
+                        colander.Integer(),
                         title=u"Accompte à la commande",
-                        default="0",
+                        default=0,
                         widget=widget.SelectWidget(values=get_percents(),
                              css_class='span2'))
     payment_times = colander.SchemaNode(
-                        colander.String(),
+                        colander.Integer(),
                         title=u"Paiement en ",
-                        default='1',
+                        default=1,
                         widget = widget.SelectWidget(values=get_payment_times(),
                                      css_class='span2'))
+    paymentDisplay = colander.SchemaNode(
+               colander.String(),
+              validator=colander.OneOf([x[0] for x in PAYMENTDISPLAYCHOICES]),
+         widget=widget.RadioChoiceWidget(values=PAYMENTDISPLAYCHOICES),
+         title=u"Affichage des paiements",
+         default="SUMMARY"
+                        )
     payment_lines = EstimationPaymentLines(
                widget=widget.SequenceWidget(
                    template='autonomie:deform_templates/\
@@ -384,7 +399,7 @@ class MappingWrapper:
             to fit the EstimationSchema
         """
         for field, section in self.matching_map:
-            value = dbdatas.get(self.dbtype,{}).get(field)
+            value = dbdatas.get(self.dbtype, {}).get(field)
             if value is not None:
                 appstruct.setdefault(section, {})[field] = value
         return appstruct
@@ -412,6 +427,7 @@ class EstimationMatch(MappingWrapper):
                          ('exclusions', 'notes'),
                          ('paymentDisplay', 'payments'),
                          ('deposit', 'payments'),
+                         ('paymentConditions', 'comments')
                          )
     dbtype = 'estimation'
 
@@ -431,7 +447,8 @@ class SequenceWrapper:
         lineslist = dbdatas.get(self.dbtype, [])
         for line in sorted(lineslist, key=lambda line:int(line[self.sort_key])):
             appstruct.setdefault(self.mapping_name, {})
-            appstruct[self.mapping_name].setdefault(self.sequence_name, []).append(
+            appstruct[self.mapping_name].setdefault(self.sequence_name, []
+                                                    ).append(
                     dict((key, value)for key, value in line.items()
                                               if key in self.fields)
                     )
@@ -441,10 +458,10 @@ class SequenceWrapper:
         """
             convert colander deserialized datas to database dbdatas
         """
-        all_ = dbdatas.get(self.mapping_name, {}).get(self.sequence_name, [])
+        all_ = appstruct.get(self.mapping_name, {}).get(self.sequence_name, [])
         for index, line in enumerate(all_):
             dbdatas.setdefault(self.dbtype, [])
-            line[self.sort_key] = str(index)
+            line[self.sort_key] = index+1
             dbdatas[self.dbtype].append(line)
         return dbdatas
 
@@ -462,11 +479,12 @@ class PaymentLinesMatch(SequenceWrapper):
 
 def get_appstruct(dbdatas):
     """
-        return Estimation-compatible appstruct
+        return EstimationSchema-compatible appstruct
     """
     appstruct = {}
     for matchobj in (EstimationMatch, EstimationLinesMatch, PaymentLinesMatch):
         appstruct = matchobj().toschema(dbdatas, appstruct)
+    appstruct = set_payment_times(appstruct, dbdatas)
     return appstruct
 
 def get_dbdatas(appstruct):
@@ -476,4 +494,121 @@ def get_dbdatas(appstruct):
     dbdatas = {}
     for matchobj in (EstimationMatch, EstimationLinesMatch, PaymentLinesMatch):
         dbdatas = matchobj().todb(appstruct, dbdatas)
+    dbdatas = set_manualDeliverables(appstruct, dbdatas)
     return dbdatas
+
+def set_manualDeliverables(appstruct, dbdatas):
+    """
+        Hack the dbdatas to set the manualDeliverables value
+    """
+    if dbdatas['estimation']:
+        if appstruct.get('payments', {}).get('payment_times') == -1:
+            dbdatas['estimation']['manualDeliverables'] = 1
+        else:
+            dbdatas['estimation']['manualDeliverables'] = 0
+    return dbdatas
+
+def set_payment_times(appstruct, dbdatas):
+    """
+        Hack the appstruct to set the payment_times value
+    """
+    if dbdatas.get('estimation', {}).get('manualDeliverables') == 1:
+        appstruct.setdefault('payments', {})['payment_times'] = -1
+    else:
+        appstruct.setdefault('payments', {})['payment_times'] = max(1,
+                                        len(dbdatas.get('payment_lines')))
+    return appstruct
+
+# NOTE ON COMPUTING
+#
+# Since the datas stored in the database are stored in *100 format
+# We are now working with integers only
+#
+# TVA is stored as an integer too,
+#
+class EstimationComputingModel:
+
+    def __init__(self, estimation_model):
+        self.model = estimation_model
+
+    @staticmethod
+    def compute_line_total(line):
+        """
+            compute estimation line total
+        """
+        cost = line.cost
+        quantity = line.quantity
+        return cost * quantity
+
+    def compute_lines_total(self):
+        """
+            compute the estimations line total
+        """
+        return sum(self.compute_line_total(line) for line in self.model.lines)
+
+    def compute_totalht(self):
+        """
+            compute the ht total
+        """
+        return self.compute_lines_total() - self.model.discountHT
+
+    def compute_ttc(self):
+        """
+            compute the ttc value before expenses
+        """
+        totalht = self.compute_totalht()
+        tva_amount = int(totalht * (max(self.model.tva, 0.0) / 10000.0))
+        return totalht + tva_amount
+
+    def compute_total(self):
+        """
+            compute the total amount
+        """
+        return self.compute_ttc() - self.model.expenses
+
+    def compute_deposit(self):
+        """
+            Compute the amount of the deposit
+        """
+        if self.model.deposit > 0:
+            total = self.compute_total()
+            return int(total * self.model.deposit / 100.0)
+        return 0
+
+    def get_nb_payment_lines(self):
+        return len(self.model.payment_lines)
+
+    def compute_line_amount(self):
+        """
+            Compute payment lines amounts in case of equal division
+            (when manualDeliverables is 0)
+            (when the user has checked 3 times)
+        """
+        total = self.compute_total()
+        deposit = self.compute_deposit()
+        rest = total - deposit
+        return int(rest / self.get_nb_payment_lines())
+
+    def compute_sold(self):
+        """
+            Compute the sold amount to finish on an exact value
+            if we divide 10 in 3, we'd like to have something like :
+                3.33 3.33 3.34
+        """
+        total = self.compute_total()
+        deposit = self.compute_deposit()
+        rest = total - deposit
+        payment_lines_num = self.get_nb_payment_lines()
+        if payment_lines_num == 1:
+            print "passing Here"
+            return rest
+        else:
+            if self.model.manualDeliverables == 0:
+                print "passing there"
+                line_amount = self.compute_line_amount()
+                return rest - ((payment_lines_num-1) * line_amount)
+            else:
+                print "passing everywhere"
+                print rest
+                return rest - sum(line.amount \
+                        for line in self.model.payment_lines[:-1])

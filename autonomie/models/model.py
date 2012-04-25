@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 24 avril 2012 17:14:10 CEST
+# * Last Modified : mer. 25 avril 2012 19:19:36 CEST
 #
 # * Project : autonomie
 #
@@ -426,7 +426,8 @@ class EstimationLine(DBBASE):
     updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
-    task = relationship("Task", backref="lines")
+    task = relationship("Task", backref="lines",
+                            order_by='EstimationLine.rowIndex')
 
 class PaymentLines(DBBASE):
     """
@@ -448,7 +449,8 @@ class PaymentLines(DBBASE):
                                         default=_get_date,
                                         onupdate=_get_date)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
-    estimation = relationship("Estimation", backref='payment_lines')
+    estimation = relationship("Estimation", backref='payment_lines',
+                    order_by='PaymentLines.rowIndex')
     paymentDate = Column("paymentDate", CustomDateType(11))
 
 class Client(DBBASE):

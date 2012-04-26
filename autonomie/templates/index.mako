@@ -1,6 +1,6 @@
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
-% for company in companies
+% for company in companies:
    <div class="item drop-shadow round floatted">
        <a href="${company.url}" title="Accéder au gestionnaire de ${company.name}">
         <div class="hcentered">
@@ -9,5 +9,7 @@
         </div>
        </a>
     </div>
-% end for
+%else:
+    <strong>Aucune entreprise n'a été configurée pour ce compte</strong>
+% endfor
 </%block>

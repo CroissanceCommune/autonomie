@@ -552,12 +552,20 @@ class EstimationComputingModel:
         """
         return self.compute_lines_total() - self.model.discountHT
 
+    def compute_tva(self, totalht=None):
+        """
+            compute the tva amount
+        """
+        if not totalht:
+            totalht = self.compute_totalht()
+        return int(float(totalht) * (max(int(self.model.tva), 0) / 10000.0))
+
     def compute_ttc(self):
         """
             compute the ttc value before expenses
         """
         totalht = self.compute_totalht()
-        tva_amount = int(totalht * (max(self.model.tva, 0.0) / 10000.0))
+        tva_amount = self.compute_tva(totalht)
         return totalht + tva_amount
 
     def compute_total(self):

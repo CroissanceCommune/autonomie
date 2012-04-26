@@ -130,11 +130,11 @@
                     <td>${print_date(invoice.statusDate)}</td>
                     <td>${invoice.owner.firstname} ${invoice.owner.lastname}</td>
                     <td>
-                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask)}' title="Voir/éditer ce devis">
+                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=invoice.IDTask)}' title="Voir/éditer ce devis">
                             <span class='ui-icon ui-icon-pencil'></span>
                             Voir/Éditer
                         </a>
-                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask, _query=dict(pdf=True))}' title="Télécharger la version PDF">
+                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=invoice.IDTask, _query=dict(pdf=True))}' title="Télécharger la version PDF">
                            PDF
                         </a>
                     </td>

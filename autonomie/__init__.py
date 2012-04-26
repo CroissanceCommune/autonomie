@@ -6,13 +6,14 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : jeu. 26 avril 2012 17:16:35 CEST
+# * Last Modified : jeu. 26 avril 2012 21:53:20 CEST
 #
 # * Project : autonomie
 #
 """
     Main file for our pyramid application
 """
+import locale
 from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from sqlalchemy import engine_from_config, create_engine
@@ -49,8 +50,9 @@ def main(global_config, **settings):
     config.set_default_permission('view')
     config.add_static_view('static', 'autonomie:static', cache_max_age=3600)
     config.add_static_view('deformstatic', "deform:static", cache_max_age=3600)
-    company_assets = settings['autonomie.assets']
-    config.add_static_view('assets', company_assets, cache_max_age=3600)
+    company_assets = settings.get('autonomie.assets')
+    if company_assets:
+        config.add_static_view('assets', company_assets, cache_max_age=3600)
     config.add_route('index', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
@@ -89,6 +91,5 @@ def main(global_config, **settings):
     set_deform_renderer()
     config.scan('autonomie.views')
     config.add_translation_dirs("colander:locale/", "deform:locale")
-    import locale
     locale.setlocale(locale.LC_ALL, "")
     return config.make_wsgi_app()

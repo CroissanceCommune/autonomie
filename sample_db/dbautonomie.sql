@@ -424,6 +424,22 @@ CREATE TABLE `egw_accounts` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `egw_config`
+--
+
+DROP TABLE IF EXISTS `egw_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `egw_config` (
+  `config_app` varchar(50) NOT NULL,
+  `config_name` varchar(255) NOT NULL,
+  `config_value` text,
+  PRIMARY KEY  (`config_app`,`config_name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

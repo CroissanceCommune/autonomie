@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : jeu. 26 avril 2012 15:35:07 CEST
+# * Last Modified : jeu. 26 avril 2012 17:16:35 CEST
 #
 # * Project : autonomie
 #
@@ -49,6 +49,8 @@ def main(global_config, **settings):
     config.set_default_permission('view')
     config.add_static_view('static', 'autonomie:static', cache_max_age=3600)
     config.add_static_view('deformstatic', "deform:static", cache_max_age=3600)
+    company_assets = settings['autonomie.assets']
+    config.add_static_view('assets', company_assets, cache_max_age=3600)
     config.add_route('index', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
@@ -58,10 +60,14 @@ def main(global_config, **settings):
     config.add_route('company_client', '/company/{cid}/clients/{id}')
     config.add_route('company_projects', '/company/{cid}/projects')
     config.add_route('company_project', '/company/{cid}/projects/{id}')
-    config.add_route('estimations', '/company/{cid}/projects/{id}/estimations')
-    config.add_route('estimation', '/company/{cid}/projects/{id}/estimations/{taskid}')
-    config.add_route('invoices', '/company/{cid}/projects/{id}/invoices')
-    config.add_route('invoice', '/company/{cid}/projects/{id}/invoices/{taskid}')
+    config.add_route('estimations',
+                        '/company/{cid}/projects/{id}/estimations')
+    config.add_route('estimation',
+                        '/company/{cid}/projects/{id}/estimations/{taskid}')
+    config.add_route('invoices',
+                        '/company/{cid}/projects/{id}/invoices')
+    config.add_route('invoice',
+                        '/company/{cid}/projects/{id}/invoices/{taskid}')
 #    config.add_route('useradd', '/user/add')
 #    config.add_route('userpass', '/user/pwd')
 #    config.add_route('userdel', '/user/del')

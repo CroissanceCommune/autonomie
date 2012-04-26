@@ -6,13 +6,14 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 26 avril 2012 16:25:00 CEST
+# * Last Modified : jeu. 26 avril 2012 17:15:53 CEST
 #
 # * Project : autonomie
 #
 """
     Autonomie's SQLA models
 """
+import os
 import datetime
 import time
 
@@ -178,13 +179,15 @@ class Company(DBBASE):
         """
             Returns the header's relative filepath
         """
-        return os.path.join(model, self.id, 'header', self.header)
+        return os.path.join("company", str(self.id), 'header',
+                                            self.header['filename'])
 
     def get_logo_filepath(self):
         """
             Return the logo's relative filepath
         """
-        return os.path.join(model, self.id, 'header', self.logo)
+        return os.path.join("company", str(self.id), 'header',
+                                              self.logo['filename'])
 
 class User(DBBASE):
     """

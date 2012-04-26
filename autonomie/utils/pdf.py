@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 06-02-2012
-# * Last Modified : jeu. 26 avril 2012 18:21:38 CEST
+# * Last Modified : jeu. 26 avril 2012 20:31:40 CEST
 #
 # * Project : coopagestv2
 #
@@ -59,7 +59,7 @@ def buffer_pdf(html):
     pisa.pisaDocument(html,
                       result,
                       link_callback=fetch_resource,
-                      encoding='utf-8')
+                      encoding='utf-8', html_encoding="utf-8")
     return result
 
 def fetch_resource(uri, rel):

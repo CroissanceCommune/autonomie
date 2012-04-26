@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 25 avril 2012 19:19:36 CEST
+# * Last Modified : jeu. 26 avril 2012 13:05:17 CEST
 #
 # * Project : autonomie
 #
@@ -54,7 +54,8 @@ class CustomDateType(TypeDecorator):
 class CustomDateType2(TypeDecorator):
     """
         Custom date type used because our database is using
-        custom strings to store dates
+        custom integers to store dates
+        YYYYMMDD
     """
     impl = Integer_type
     def process_bind_param(self, value, dialect):
@@ -325,6 +326,9 @@ class Task(DBBASE):
 #                             firstname=self.statusPersonAccount.firstname,
 #                             lastname=self.statusPersonAccount.lastname)
 #        return u"{0} : {1}".format(self.statusDate, statusStr)
+
+    def is_editable(self):
+        return self.CAEStatus in ('draft', 'invalid',)
 
 
 #class Estimation(DBBASE):

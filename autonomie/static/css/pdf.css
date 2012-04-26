@@ -8,6 +8,51 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+html{
+  font-size:13px;
+}
 .addressblock{
   padding-left:500px;
+}
+.informationblock{
+  -pdf-keep-with-next:false;
+  padding-top:20px;
+  padding-bottom:20px;
+}
+.estimationlines{
+  border:1px solid #ddd;
+}
+.estimationlines thead tr{
+  background-color:#f6f6f6;
+  padding-top:6px;
+}
+.estimationlines td, .estimationlines th{
+  padding-top:6px;
+  padding:3px;
+}
+.estimationlines .price{
+  text-align:right;
+  width:30%;
+  background-color:#f6f6f6;
+}
+.estimationlines .quantity{
+  text-align:center;
+  width:30%;
+}
+.estimationlines .rightalign{
+  text-align:right;
+  font-weight:bold;
+}
+.title{
+  padding:3px;
+  padding-top:6px;
+  background-color:#f6f6f6;
+  font-weight:bold;
+  border:1px solid #ddd;
+}
+.content{
+  padding:3px;
+  border:1px solid #ddd;
+  padding-bottom:4px;
+  margin-bottom:2px;
 }

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 26 avril 2012 13:05:17 CEST
+# * Last Modified : jeu. 26 avril 2012 16:25:00 CEST
 #
 # * Project : autonomie
 #
@@ -107,7 +107,6 @@ def _get_date():
     """
     return int(time.time())
 
-
 company_employee = Table('coop_company_employee', DBBASE.metadata,
     Column("IDCompany", Integer(11), ForeignKey('coop_company.IDCompany')),
     # IDEmployee est identique dans la table coop_employee
@@ -174,6 +173,18 @@ class Company(DBBASE):
             if project.id == project_id:
                 return project
         raise KeyError
+
+    def get_header_filepath(self):
+        """
+            Returns the header's relative filepath
+        """
+        return os.path.join(model, self.id, 'header', self.header)
+
+    def get_logo_filepath(self):
+        """
+            Return the logo's relative filepath
+        """
+        return os.path.join(model, self.id, 'header', self.logo)
 
 class User(DBBASE):
     """

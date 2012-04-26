@@ -49,6 +49,11 @@
             ${project.definition}
         </div>
     </div>
+    %if len(project.phases)>1:
+        <% section_css = 'collapse' %>
+    %else:
+        <% section_css = 'in collapse' %>
+    %endif
     %for phase in project.phases:
 
         % if phase.name != 'default':
@@ -60,7 +65,7 @@
                         </a>
                     </h2>
         % endif
-        <div class="in collapse" id='phase_${phase.id}' style="margin:4px;">
+        <div class="${section_css}" id='phase_${phase.id}' style="margin:4px;">
             <h3 class='floatted' style="padding-right:10px">Devis</h3>
                 <a class='btn' href='${request.route_path("estimations", cid=company.id, id=project.id, _query=dict(phase=phase.id))}'>
                     <span class='ui-icon ui-icon-plusthick'></span>

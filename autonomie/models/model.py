@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 26 avril 2012 17:15:53 CEST
+# * Last Modified : jeu. 26 avril 2012 21:52:14 CEST
 #
 # * Project : autonomie
 #
@@ -23,6 +23,7 @@ from sqlalchemy import Table
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
+from sqlalchemy import Text
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
@@ -446,6 +447,20 @@ class EstimationLine(DBBASE):
                                         onupdate=_get_date)
     task = relationship("Task", backref="lines",
                             order_by='EstimationLine.rowIndex')
+    def get_unity_label(self):
+        """
+            return unitie's label
+        """
+        labels = dict(
+                NONE=u'-',
+                HOUR=u"heure(s)",
+                DAY=u"jour(s)",
+                WEEK=u"semaine(s)",
+                MONTH=u"mois",
+                FEUIL=u"feuillet(s)",
+                PACK=u"forfait",
+                )
+        return labels.get(self.unity, '-')
 
 class PaymentLines(DBBASE):
     """
@@ -597,3 +612,17 @@ class TaskStatus(DBBASE):
     id_task = Column('IDTask', Integer(11),
                         ForeignKey('coop_task.IDTask'))
     task = relationship("Task", backref="taskstatus")
+
+class Config(DBBASE):
+    """
+        Table containing the main configuration
+          `config_app` varchar(50) NOT NULL,
+          `config_name` varchar(255) NOT NULL,
+          `config_value` text,
+          PRIMARY KEY  (`config_app`,`config_name`)
+    """
+    __tablename__ = 'egw_config'
+    __table_args__ = {'autoload':True}
+    app = Column("config_app", String(255), primary_key=True)
+    name = Column("config_name", String(255), primary_key=True)
+    value = Column("config_value", Text())

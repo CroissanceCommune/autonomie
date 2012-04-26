@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 06-02-2012
-# * Last Modified : jeu. 26 avril 2012 17:34:27 CEST
+# * Last Modified : jeu. 26 avril 2012 18:21:38 CEST
 #
 # * Project : coopagestv2
 #
@@ -32,13 +32,11 @@ def render_html(request, template, datas):
     """
     return render( template, datas, request )
 
-def write_pdf(request, filename, template, datas):
+def write_pdf(request, filename, html):
     """
         Write a pdf in a pyramid request
     """
     request = write_pdf_headers(request, filename)
-
-    html = render_html(request, template, datas)
     result = buffer_pdf(html)
     request.response.write( result.getvalue() )
     return request

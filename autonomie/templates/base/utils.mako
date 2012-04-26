@@ -40,3 +40,11 @@ if get_args:
 <% import datetime %>
 ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
 </%def>
+<%def name="print_str_date(timestamp)">
+    <% import datetime %>
+    % if isinstance(timestamp, datetime.date):
+        ${timestamp.strftime("%A %d %B %Y").capitalize()}
+    %else:
+        ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%A %d %B %Y").capitalize()}
+    %endif
+</%def>

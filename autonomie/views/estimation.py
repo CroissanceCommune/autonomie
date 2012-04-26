@@ -149,6 +149,7 @@ def html_estimation(request):
     estimationcompute = EstimationComputingModel(estimation)
     template = "estimation_html.mako"
     datas = dict(
+                company=company,
                 estimation=estimationcompute,
                 project=project)
     html_estimation = render_html(request,
@@ -182,6 +183,7 @@ def estimation_pdf(request):
     estimationcompute = EstimationComputingModel(estimation)
     template = "estimation_html.mako"
     datas = dict(
+                company=company,
                 estimation=estimationcompute,
                 project=project)
     filename = "{0}.pdf".format(estimation.number)

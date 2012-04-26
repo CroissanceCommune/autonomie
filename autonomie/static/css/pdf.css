@@ -21,6 +21,7 @@ html{
 }
 .estimationlines{
   border:1px solid #ddd;
+  margin-bottom:26px;
 }
 .estimationlines thead tr{
   background-color:#f6f6f6;
@@ -54,5 +55,5 @@ html{
   padding:3px;
   border:1px solid #ddd;
   padding-bottom:4px;
-  margin-bottom:2px;
+  margin-bottom:26px;
 }

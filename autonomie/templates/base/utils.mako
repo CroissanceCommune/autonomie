@@ -43,8 +43,8 @@ ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
 <%def name="print_str_date(timestamp)">
     <% import datetime %>
     % if isinstance(timestamp, datetime.date):
-        ${timestamp.strftime("%A %d %B %Y").capitalize()}
+        ${timestamp.strftime("%A %d %B %Y").decode('utf-8').capitalize()}
     %else:
-        ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%A %d %B %Y").capitalize()}
+        ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%A %d %B %Y").decode('utf-8').capitalize()}
     %endif
 </%def>

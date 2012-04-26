@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 06-02-2012
-# * Last Modified : jeu. 26 avril 2012 15:45:11 CEST
+# * Last Modified : jeu. 26 avril 2012 17:34:27 CEST
 #
 # * Project : coopagestv2
 #
@@ -23,6 +23,7 @@ import cStringIO as StringIO
 from xhtml2pdf import pisa
 
 from pyramid.renderers import render
+from pyramid.threadlocal import get_current_request
 
 HERE = os.path.dirname(__file__)
 def render_html(request, template, datas):
@@ -60,7 +61,7 @@ def buffer_pdf(html):
     pisa.pisaDocument(html,
                       result,
                       link_callback=fetch_resource,
-                     encoding='utf-8')
+                      encoding='utf-8')
     return result
 
 def fetch_resource(uri, rel):
@@ -68,11 +69,19 @@ def fetch_resource(uri, rel):
         Callback used by pisa to locally retrieve ressources
         giving the uri
     """
-    if ':' in uri:
-        package, filename = uri.split(':')
-    else:
-        package = "autonomie"
-        filename = uri
-    filepath = pkg_resources.resource_filename(package, filename)
-
-    return filepath
+    request = get_current_request()
+    introspector = request.registry.introspector
+    if uri.startswith('/'):
+        uri = uri[1:]
+    mainuri, sep, relative_filepath = uri.partition('/')
+    mainuri = mainuri + '/'
+    resource = ''
+    for staticpath in introspector.get_category('static views'):
+        if mainuri == staticpath['introspectable']['name']:
+            basepath = staticpath['introspectable']['spec']
+            resource = os.path.join(basepath, relative_filepath)
+            if ':' in resource:
+                package, filename = resource.split(':')
+                resource = pkg_resources.resource_filename(package, filename)
+            break
+    return resource

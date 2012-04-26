@@ -59,5 +59,11 @@ class TestAvatar(BaseTestCase):
         build_avatar("user1_login", request)
         self.assertTrue(request.session['user'].email == "user1@test.fr")
 
-
-
+class TestConfig(BaseTestCase):
+    def test_load_value(self):
+        from autonomie.utils.config import load_config
+        all_ = load_config(self.session)
+        self.assertTrue("hostname" in all_.keys()
+                        and "coop_interviewergroup" in all_.keys())
+        one_ = load_config(self.session, "hostname")
+        self.assertEqual(one_['hostname'], "autonomie.localhost")

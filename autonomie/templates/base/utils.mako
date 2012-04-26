@@ -48,3 +48,18 @@ ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
         ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%A %d %B %Y").decode('utf-8').capitalize()}
     %endif
 </%def>
+<%def name="format_amount(data)">
+    <%doc>Format an amount for display</%doc>
+    <% data = "%.2f"% (int(data)/100.0,) %>
+    ${data.replace('.', ',')}
+</%def>
+<%def name="format_quantity(data)"><%doc>Format a quantity for display</%doc>
+    <% data = "%.2f"% (data,) %>
+    ${data.replace('.', ',')}
+</%def>
+<%def name="format_text(datas)">
+    <%doc>
+        Replace \n with br for html output
+    </%doc>
+    ${datas.replace(u'\n', u'<br />')|n}
+</%def>

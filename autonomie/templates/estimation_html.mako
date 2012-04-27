@@ -20,6 +20,20 @@
         <meta name="KEYWORDS" CONTENT="">
         <meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW,ALL">
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
+        <style>
+            @page {
+                width:21cm;
+                height:29.7cm;
+                margin:1cm;
+                @frame footer {
+                    -pdf-frame-content: footer;
+                    bottom: 0cm;
+                    margin-left: 1cm;
+                    margin-right: 1cm;
+                    height:3cm;
+                }
+            }
+        </style>
     </head>
     <body>
         <div class='header'>
@@ -59,6 +73,14 @@
                         <td class="price">${format_amount(estimation.compute_line_total(line))} €</td>
                     </tr>
                 % endfor
+                <tr>
+                    <td colspan='${colspan}' class='rightalign'>
+                        Total HT
+                    </td>
+                    <td class='price'>
+                         ${format_amount(estimation.compute_lines_total())}
+                     </td>
+                 </tr>
                 %if estimation.model.discountHT:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
@@ -68,23 +90,32 @@
                             ${format_amount(estimation.model.discountHT)}
                         </td>
                     </tr>
-                %endif
-                <tr>
-                    <td colspan='${colspan}' class='rightalign'>
-                        Total HT
-                    </td>
-                    <td class='price'>
-                    ${format_amount(estimation.compute_totalht())} €
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan='${colspan}' class='rightalign'>
-                        TVA (${format_amount(estimation.model.tva)} %)
-                    </td>
-                    <td class='price'>
-                        ${format_amount(estimation.compute_tva())} €
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan='${colspan}' class='rightalign'>
+                         Total HT après remise
+                        </td>
+                        <td class='price'>
+                            ${format_amount(estimation.compute_totalht())} €
+                        </td>
+                    </tr>
+
+                % endif
+                % if estimation.model.tva<0:
+                    <tr>
+                        <td colspan='${colspan + 1}'class='rightalign'>
+                            TVA non applicable selon l'article 259b du CGI.
+                        </td>
+                    </tr>
+                % else:
+                    <tr>
+                        <td colspan='${colspan}' class='rightalign'>
+                            TVA (${format_amount(estimation.model.tva)} %)
+                        </td>
+                        <td class='price'>
+                            ${format_amount(estimation.compute_tva())} €
+                        </td>
+                    </tr>
+                % endif
                 %if estimation.model.expenses:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
@@ -111,8 +142,66 @@
         %if estimation.model.paymentConditions:
             ${table(u"Conditions de paiement", estimation.model.paymentConditions)}
         % endif
+         <div class='title'>Conditions de paiement</div>
+        % if estimation.model.paymentDisplay != u"NONE":
+            <div class='content'>
+                % if estimation.model.deposit > 0 :
+                    Un accompte, puis paiement en ${estimation.get_nb_payment_lines()} fois.
+                %else:
+                    Paiement en ${estimation.get_nb_payment_lines()} fois.
+                %endif
+            </div>
+            % if estimation.model.paymentDisplay == u"ALL":
+                ## l'utilisateur a demandé le détail du paiement
+                <table>
+                    ## L'accompte à la commande
+                     % if estimation.model.deposit > 0 :
+                         <tr>
+                             <td>Accompte</td>
+                             <td>à la commande</td>
+                             <td class='price'>${format_amount(estimation.model.compute_deposit())} €</td>
+                         </tr>
+                     % endif
+                     ## Les paiements intermédiaires
+                     % for line in estimation.model.payment_lines[:-1]:
+                         <tr>
+                             <td>${line.description}</td>
+                             <td>${print_str_date(line.paymentDate)}</td>
+                             %if estimation.model.manualDeliverables == 1:
+                                 <td>${format_amount(line.amount)} €</td>
+                             %else:
+                                 <td>${format_amount(estimation.compute_line_amount())} €</td>
+                             %endif
+                         </tr>
+                     % endfor
+                     ## On affiche le solde qui doit être calculé séparément pour être sûr de tomber juste
+                     <tr>
+                         <td>
+                             ${format_text(estimation.model.payment_lines[-1].description)}
+                        </td>
+                        <td>
+                            ${print_str_date(estimation.model.payment_lines[-1].paymentDate)}</td>
+                        </td>
+                        <td>
+                            ${format_amount(estimation.compute_sold())} €
+                        </td>
+                    </tr>
+                </table>
+            % endif
+        % endif
         % if config.has_key('coop_estimationfooter'):
             ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
         %endif
+        <div id="footer">
+            % if config.has_key('coop_pdffootertitle'):
+                <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
+            %endif
+            % if estimation.model.course == 1 and config.has_key('coop_pdffootercourse'):
+                ${format_text(config.get('coop_pdffootercourse'))}<br />
+            % endif
+            % if config.has_key('coop_pdffootertext'):
+                ${format_text(config.get('coop_pdffootertext'))}
+            % endif
+        </div>
     </body>
 </html>

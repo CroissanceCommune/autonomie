@@ -23,7 +23,7 @@ def load_config(dbsession, name=None):
     """
     if name:
         entry = dbsession.query(Config).filter(Config.name==name).first()
-        if entry:
+        if not entry:
             return {}
         else:
             return {entry.name:entry.value}

@@ -38,6 +38,7 @@ def validate_image_mime(node, value):
             message = u"Veuillez télécharger un fichier de type jpg, png, \
 bmp ou gif"
             raise colander.Invalid(node, message)
+
 class CompanySchema(colander.MappingSchema):
     """
         Company add/edit form schema

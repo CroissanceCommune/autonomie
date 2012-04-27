@@ -57,3 +57,9 @@ html{
   padding-bottom:4px;
   margin-bottom:26px;
 }
+#footer{
+  background-color:#efefef;
+  color:#000;
+  text-align:center;
+  padding:5px;
+}

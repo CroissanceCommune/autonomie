@@ -21,6 +21,8 @@
             % for company in account.companies:
                 <a href="${request.route_path('company', cid=company.id)}">
                     <strong>${company.name}</strong>
+                    <br />
+                    <img src="assets/${company.get_logo_filepath()}" alt="" />
                     </a>
                 <br />
                 ${company.goal}

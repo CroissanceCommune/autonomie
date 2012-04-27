@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : jeu. 26 avril 2012 21:53:20 CEST
+# * Last Modified : ven. 27 avril 2012 19:25:00 CEST
 #
 # * Project : autonomie
 #
@@ -50,7 +50,8 @@ def main(global_config, **settings):
     config.set_default_permission('view')
     config.add_static_view('static', 'autonomie:static', cache_max_age=3600)
     config.add_static_view('deformstatic', "deform:static", cache_max_age=3600)
-    company_assets = settings.get('autonomie.assets')
+    from autonomie.utils.config import load_config
+    company_assets = load_config(dbsession(), 'files_dir').get('files_dir')
     if company_assets:
         config.add_static_view('assets', company_assets, cache_max_age=3600)
     config.add_route('index', '/')

@@ -16,6 +16,7 @@
     Views for the company handling
     Entry point for the main users
 """
+import os
 import logging
 from deform import ValidationFailure
 from pyramid.view import view_config
@@ -23,9 +24,9 @@ from pyramid.httpexceptions import HTTPForbidden
 
 from deform import Form
 from autonomie.models import DBSESSION
-from autonomie.models.model import Estimation
 from autonomie.views.forms import CompanySchema
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.config import load_config
 
 log = logging.getLogger(__name__)
 @view_config(route_name='company', renderer='company_index.mako')
@@ -51,9 +52,6 @@ def company_index(request):
         sorted(all_statuses, key=lambda a:a.statusDate, reverse=True)
         ret_val['status'] = all_statuses[:10]
 
-        dbsession = DBSESSION()
-        a = dbsession.query(Estimation).filter(Estimation.IDTask==6495).first()
-
     except KeyError:
         ret_val = HTTPForbidden()
     return ret_val
@@ -70,13 +68,15 @@ def company_edit(request):
         company = avatar.get_company(cid)
     except KeyError:
         return HTTPForbidden()
-    schema = CompanySchema().bind(edit=True, rootpath='/tmp/%s'%company.id,
-                                    session=request.session)
+    dbsession = DBSESSION()
+    root_path = load_config(dbsession, "files_dir").get('files_dir', '/tmp')
+    company_path = os.path.join(root_path, 'company', str(company.id))
+    schema = CompanySchema().bind(edit=True,
+                                  rootpath=company_path,
+                                  session=request.session)
     form = Form(schema, buttons=('submit', ))
     if 'submit' in request.params:
-        dbsession = DBSESSION()
         datas = request.params.items()
-        print datas
         try:
             app_datas = form.validate(datas)
         except ValidationFailure, errform:

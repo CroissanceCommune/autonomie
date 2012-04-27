@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 26 avril 2012 21:52:14 CEST
+# * Last Modified : ven. 27 avril 2012 19:22:42 CEST
 #
 # * Project : autonomie
 #
@@ -187,7 +187,7 @@ class Company(DBBASE):
         """
             Return the logo's relative filepath
         """
-        return os.path.join("company", str(self.id), 'header',
+        return os.path.join("company", str(self.id), 'logo',
                                               self.logo['filename'])
 
 class User(DBBASE):

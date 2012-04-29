@@ -38,7 +38,11 @@ if get_args:
 %>${path}</%def>
 <%def name="print_date(timestamp)">
 <% import datetime %>
-${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
+    % if isinstance(timestamp, datetime.date):
+        ${timestamp.strftime("%d/%m/%Y")}
+    % else:
+        ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
+    % endif
 </%def>
 <%def name="print_str_date(timestamp)">
     <% import datetime %>
@@ -54,7 +58,7 @@ ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
     ${data.replace('.', ',')}
 </%def>
 <%def name="format_quantity(data)"><%doc>Format a quantity for display</%doc>
-    <% data = "%.2f"% (data,) %>
+    <% data = "%d"% (int(data),) %>
     ${data.replace('.', ',')}
 </%def>
 <%def name="format_text(datas)">

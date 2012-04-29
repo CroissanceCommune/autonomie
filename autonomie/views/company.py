@@ -70,9 +70,11 @@ def company_edit(request):
         return HTTPForbidden()
     dbsession = DBSESSION()
     root_path = load_config(dbsession, "files_dir").get('files_dir', '/tmp')
-    company_path = os.path.join(root_path, 'company', str(company.id))
+    company_path = os.path.join(root_path, company.get_path())
+    company_url = os.path.join("/assets", company.get_path())
     schema = CompanySchema().bind(edit=True,
                                   rootpath=company_path,
+                                  rooturl=company_url,
                                   session=request.session)
     form = Form(schema, buttons=('submit', ))
     if 'submit' in request.params:

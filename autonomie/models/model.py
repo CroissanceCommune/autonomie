@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 27 avril 2012 19:22:42 CEST
+# * Last Modified : dim. 29 avril 2012 22:01:58 CEST
 #
 # * Project : autonomie
 #
@@ -176,19 +176,27 @@ class Company(DBBASE):
                 return project
         raise KeyError
 
+    def get_path(self):
+        """
+            get the relative filepath specific to the given company
+        """
+        return os.path.join("company", str(self.id))
+
     def get_header_filepath(self):
         """
             Returns the header's relative filepath
         """
-        return os.path.join("company", str(self.id), 'header',
-                                            self.header['filename'])
+        return os.path.join(self.get_path(),
+                            'header',
+                            self.header['filename'])
 
     def get_logo_filepath(self):
         """
             Return the logo's relative filepath
         """
-        return os.path.join("company", str(self.id), 'logo',
-                                              self.logo['filename'])
+        return os.path.join(self.get_path(),
+                            'logo',
+                             self.logo['filename'])
 
 class User(DBBASE):
     """

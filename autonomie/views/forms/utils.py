@@ -53,9 +53,13 @@ def deferred_upload_widget(path):
         """
         session = kw['session']
         root_path = kw['rootpath']
-        filepath = os.path.join(root_path, path)
-        tmpstore = FileTempStore(session, filepath)
-        return widget.FileUploadWidget(tmpstore)
+        root_url = kw['rooturl']
+        # path becomes : /assets/company_id/header (or logo)
+        store_url = os.path.join(root_url, path)
+        store_directory = os.path.join(root_path, path)
+        tmpstore = FileTempStore(session, store_directory, store_url)
+        return widget.FileUploadWidget(tmpstore,
+                    template="autonomie:deform_templates/fileupload.mako")
     return configured_widget
 
 @colander.deferred

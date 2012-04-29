@@ -363,7 +363,7 @@ class EstimationSchema(colander.MappingSchema):
     """
         colander Estimation form schema
     """
-    common = EstimationConfiguration()
+    common = EstimationConfiguration( title=u"")
     lines = EstimationLinesBlock(title=u"Détail des prestations",
             widget=widget.MappingWidget(
            item_template='autonomie:deform_templates/lineblock/\

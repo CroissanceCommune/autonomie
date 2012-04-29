@@ -19,28 +19,28 @@ html{
   padding-top:20px;
   padding-bottom:20px;
 }
-.estimationlines{
+.lines{
   border:1px solid #ddd;
   margin-bottom:26px;
 }
-.estimationlines thead tr{
+.lines thead tr{
   background-color:#f6f6f6;
   padding-top:6px;
 }
-.estimationlines td, .estimationlines th{
+.lines td, .lines th{
   padding-top:6px;
   padding:3px;
 }
-.estimationlines .price{
+.lines .price{
   text-align:right;
   width:30%;
   background-color:#f6f6f6;
 }
-.estimationlines .quantity{
+.lines .quantity{
   text-align:center;
   width:30%;
 }
-.estimationlines .rightalign{
+.lines .rightalign{
   text-align:right;
   font-weight:bold;
 }

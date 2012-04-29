@@ -1,5 +1,6 @@
 <%namespace file="/base/utils.mako" import="address" />
 <%namespace file="/base/utils.mako" import="print_str_date" />
+<%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_amount" />
 <%namespace file="/base/utils.mako" import="format_quantity" />
 <%namespace file="/base/utils.mako" import="format_text" />
@@ -37,12 +38,14 @@
     </head>
     <body>
         <div class='header'>
-            <img src='/assets/${company.get_header_filepath()}' alt='${company.name}' />
+            <img src='/assets/${company.get_header_filepath()}' alt='${company.name}' width='100%'/>
         </div>
-        <div class='addressblock'>
-            ${print_str_date(estimation.model.taskDate)}
-            <br />
-            ${address(project.client, 'client')}
+        <div class='row'>
+            <div class='addressblock'>
+                ${print_str_date(estimation.model.taskDate)}
+                <br />
+                ${address(project.client, 'client')}
+            </div>
         </div>
         <div class="informationblock">
             <strong>DEVIS N° </strong>${estimation.model.number}<br />
@@ -53,7 +56,8 @@
         %else:
             <% colspan = "1" %>
         % endif
-        <table class="estimationlines">
+        <div class='row'>
+        <table class="lines span12">
             <thead>
                 <tr>
                     <th class="description">Intitulé des postes</th>
@@ -68,7 +72,7 @@
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
                         %if estimation.model.displayedUnits == 1:
-                            <td class="quantity">${format_amount(line.cost)} € x ${format_quantity(line.quantity)} x ${line.get_unity_label()}</td>
+                            <td class="quantity">${format_amount(line.cost)} € x ${format_quantity(line.quantity)} ${line.get_unity_label()}</td>
                         % endif
                         <td class="price">${format_amount(estimation.compute_line_total(line))} €</td>
                     </tr>
@@ -136,24 +140,36 @@
                 </tr>
             </tbody>
         </table>
+    </div>
         %if estimation.model.exclusions:
             ${table(u"Notes", estimation.model.exclusions)}
         %endif
         %if estimation.model.paymentConditions:
             ${table(u"Conditions de paiement", estimation.model.paymentConditions)}
         % endif
-         <div class='title'>Conditions de paiement</div>
         % if estimation.model.paymentDisplay != u"NONE":
-            <div class='content'>
-                % if estimation.model.deposit > 0 :
-                    Un accompte, puis paiement en ${estimation.get_nb_payment_lines()} fois.
-                %else:
-                    Paiement en ${estimation.get_nb_payment_lines()} fois.
-                %endif
-            </div>
+            % if estimation.model.paymentDisplay == u"ALL":
+                <% colspan = 3 %>
+            %else:
+                <% colspan = 1 %>
+            % endif
+            <div class='row'>
+            <table class='lines span12'>
+            <thead>
+                <th colspan='${colspan}' style='text-align:left'>Conditions de paiement</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan='${colspan}'>
+                        % if estimation.model.deposit > 0 :
+                            Un accompte, puis paiement en ${estimation.get_nb_payment_lines()} fois.
+                        %else:
+                            Paiement en ${estimation.get_nb_payment_lines()} fois.
+                        %endif
+                    </td>
+                </tr>
             % if estimation.model.paymentDisplay == u"ALL":
                 ## l'utilisateur a demandé le détail du paiement
-                <table>
                     ## L'accompte à la commande
                      % if estimation.model.deposit > 0 :
                          <tr>
@@ -165,29 +181,31 @@
                      ## Les paiements intermédiaires
                      % for line in estimation.model.payment_lines[:-1]:
                          <tr>
+                             <td>${print_date(line.paymentDate)}</td>
                              <td>${line.description}</td>
-                             <td>${print_str_date(line.paymentDate)}</td>
                              %if estimation.model.manualDeliverables == 1:
                                  <td>${format_amount(line.amount)} €</td>
                              %else:
-                                 <td>${format_amount(estimation.compute_line_amount())} €</td>
+                                 <td class='price'>${format_amount(estimation.compute_line_amount())} €</td>
                              %endif
                          </tr>
                      % endfor
                      ## On affiche le solde qui doit être calculé séparément pour être sûr de tomber juste
                      <tr>
+                        <td>
+                            ${print_date(estimation.model.payment_lines[-1].paymentDate)}
+                        </td>
                          <td>
                              ${format_text(estimation.model.payment_lines[-1].description)}
                         </td>
-                        <td>
-                            ${print_str_date(estimation.model.payment_lines[-1].paymentDate)}</td>
-                        </td>
-                        <td>
+                        <td class='price'>
                             ${format_amount(estimation.compute_sold())} €
                         </td>
                     </tr>
-                </table>
             % endif
+                </tbody>
+            </table>
+        </div>
         % endif
         % if config.has_key('coop_estimationfooter'):
             ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}

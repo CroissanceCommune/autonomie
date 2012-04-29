@@ -37,6 +37,8 @@ class FileTempStore(dict):
         self.default_filename = default_filename
         if not os.path.isdir(self.store_directory):
             os.system("mkdir -p %s" % self.store_directory)
+        if not self.session.has_key(self.session_key):
+            self.session[self.session_key] = {}
 
     def preview_url(self, uid, filename=None):
         """

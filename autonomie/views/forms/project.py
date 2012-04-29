@@ -20,8 +20,8 @@ import logging
 
 from deform import widget
 
-from .utils import deferred_edit_widget
-from .utils import deferred_autocomplete_widget
+from autonomie.utils.forms import deferred_edit_widget
+from autonomie.utils.forms import deferred_autocomplete_widget
 
 log = logging.getLogger(__name__)
 

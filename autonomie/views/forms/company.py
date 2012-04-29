@@ -20,9 +20,9 @@ import logging
 
 from deform import FileData
 
-from .utils import deferred_upload_widget
-from .utils import deferred_edit_widget
-from .utils import get_mail_input
+from autonomie.utils.forms import deferred_upload_widget
+from autonomie.utils.forms import deferred_edit_widget
+from autonomie.utils.forms import get_mail_input
 
 log = logging.getLogger(__name__)
 HEADER_PATH = "header"

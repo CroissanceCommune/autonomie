@@ -40,7 +40,7 @@ import datetime
 import colander
 from deform import widget
 
-from .utils import get_date_input
+from autonomie.utils.forms import get_date_input
 
 log = logging.getLogger(__name__)
 

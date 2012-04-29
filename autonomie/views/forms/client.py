@@ -22,8 +22,8 @@ from deform import widget
 
 from autonomie.models import DBSESSION
 from autonomie.models.model import Client
-from .utils import deferred_edit_widget
-from .utils import get_mail_input
+from autonomie.utils.forms import deferred_edit_widget
+from autonomie.utils.forms import get_mail_input
 
 log = logging.getLogger(__name__)
 

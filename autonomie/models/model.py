@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : dim. 29 avril 2012 22:01:58 CEST
+# * Last Modified : lun. 30 avril 2012 16:07:19 CEST
 #
 # * Project : autonomie
 #
@@ -64,14 +64,19 @@ class CustomDateType2(TypeDecorator):
         if value is None:
             return None
         elif isinstance(value, datetime.date):
-            return int("{0}{1}{2}".format(value.year, value.month, value.day))
+            return int("{:%Y%m%d}".format(value))
         else:
             return int(value)
 
     def process_result_value(self, value, dialect):
         if value:
             value = str(value)
-            return datetime.date(int(value[0:4]), int(value[4:6]), int(value[6:8]))
+            if len(value) == 8:
+                return datetime.date(int(value[0:4]),
+                                     int(value[4:6]),
+                                    int(value[6:8]))
+            else:
+                return ""
         else:
             return ""
 
@@ -319,6 +324,9 @@ class Task(DBBASE):
     updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+    statusDate = Column("statusDate", CustomDateType(11),
+                                        default=_get_date,
+                                        onupdate=_get_date)
     IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
     statusPerson = Column("statusPerson",
                           ForeignKey('egw_accounts.account_id'))
@@ -344,7 +352,7 @@ class Task(DBBASE):
             ("sent", u"Document envoyé par {firstname} {lastname}",),
             ("wait", u"En attente de validation",),
             ('invalid', u"Invalidé{genre} par {firstname} {lastname}",)))
-        return statuses.get(self.CAEStatus, self.CAEStatus)
+        return statuses.get(self.CAEStatus, u"")
 #        statusStr = statuses.get(self.CAEStatus, "").format(genre="",
 #                             firstname=self.statusPersonAccount.firstname,
 #                             lastname=self.statusPersonAccount.lastname)
@@ -354,7 +362,6 @@ class Task(DBBASE):
         return self.CAEStatus in ('draft', 'invalid',)
 
 
-#class Estimation(DBBASE):
 class Estimation(Task):
     """
        `IDTask` int(11) NOT NULL,
@@ -384,12 +391,13 @@ class Estimation(Task):
     """
     __tablename__ = 'coop_estimation'
     __table_args__ = {'autoload':True}
-#    __mapper_args__ = {'concrete':True}
 
     IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'), primary_key=True)
 
     IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
-    project = relationship("Project", backref='estimations')
+    project = relationship("Project",
+                            backref='estimations',
+                            )
     phase =  relationship("Phase",
                           backref="estimations",
                           order_by='Estimation.sequenceNumber')
@@ -454,7 +462,8 @@ class EstimationLine(DBBASE):
                                         default=_get_date,
                                         onupdate=_get_date)
     task = relationship("Task", backref="lines",
-                            order_by='EstimationLine.rowIndex')
+                            order_by='EstimationLine.rowIndex',
+                        enable_typechecks=False )
     def get_unity_label(self):
         """
             return unitie's label
@@ -470,7 +479,7 @@ class EstimationLine(DBBASE):
                 )
         return labels.get(self.unity, '-')
 
-class PaymentLines(DBBASE):
+class PaymentLine(DBBASE):
     """
         coop_estimation_payment
         `IDPaymentLine` int(11) NOT NULL auto_increment,
@@ -491,8 +500,8 @@ class PaymentLines(DBBASE):
                                         onupdate=_get_date)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     estimation = relationship("Estimation", backref='payment_lines',
-                    order_by='PaymentLines.rowIndex')
-    paymentDate = Column("paymentDate", CustomDateType(11))
+                    order_by='PaymentLine.rowIndex')
+    paymentDate = Column("paymentDate", CustomDateType2(11))
 
 class Client(DBBASE):
     """

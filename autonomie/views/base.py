@@ -30,6 +30,7 @@ class BaseView(object):
     def __init__(self, request):
         self.request = request
         self.dbsession = DBSESSION()
+        self.user = self.get_avatar()
 
     def get_company_id(self):
         """
@@ -49,7 +50,7 @@ class BaseView(object):
         """
         #FIXME : Handle admin or not here ?
         try:
-            company = self.get_avatar().get_company(self.get_company_id())
+            company = self.user.get_company(self.get_company_id())
         except KeyError:
             raise HTTPForbidden()
         return company

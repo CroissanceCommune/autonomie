@@ -40,6 +40,8 @@ if get_args:
 <% import datetime %>
     % if isinstance(timestamp, datetime.date):
         ${timestamp.strftime("%d/%m/%Y")}
+    % elif not timestamp:
+        ""
     % else:
         ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%d/%m/%Y %H:%M")}
     % endif
@@ -48,6 +50,8 @@ if get_args:
     <% import datetime %>
     % if isinstance(timestamp, datetime.date):
         ${timestamp.strftime("%A %d %B %Y").decode('utf-8').capitalize()}
+    % elif not timestamp:
+        ""
     %else:
         ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%A %d %B %Y").decode('utf-8').capitalize()}
     %endif

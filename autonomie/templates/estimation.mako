@@ -13,6 +13,12 @@
 </%block>
 <%block name='content'>
 <div class="container">
+    <dl class="dl-horizontal">
+        <dt>Prestataire</dt>
+        <dd>${address(company, 'company')}</dd>
+        <dt>Client</dt>
+        <dd>${address(client, 'client')}</dd>
+        </dl>
 ${html_form|n}
 </%block>
 <%block name='footerjs'>

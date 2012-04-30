@@ -58,16 +58,22 @@ if get_args:
 </%def>
 <%def name="format_amount(data)">
     <%doc>Format an amount for display</%doc>
-    <% data = "%.2f"% (int(data)/100.0,) %>
-    ${data.replace('.', ',')}
+    %if data is not UNDEFINED and data is not None:
+        <% data = "%.2f"% (int(data)/100.0,) %>
+        ${data.replace('.', ',')}
+    %endif
 </%def>
 <%def name="format_quantity(data)"><%doc>Format a quantity for display</%doc>
-    <% data = "%d"% (int(data),) %>
-    ${data.replace('.', ',')}
+    %if data is not UNDEFINED and data is not None:
+        <% data = "%d"% (int(data),) %>
+        ${data.replace('.', ',')}
+    %endif
 </%def>
-<%def name="format_text(datas)">
+<%def name="format_text(data)">
     <%doc>
         Replace \n with br for html output
     </%doc>
-    ${datas.replace(u'\n', u'<br />')|n}
+    %if data is not UNDEFINED and data is not None:
+        ${data.replace(u'\n', u'<br />')|n}
+    %endif
 </%def>

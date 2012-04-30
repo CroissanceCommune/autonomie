@@ -255,27 +255,35 @@ function addPaymentRow(args, after){
       $(Facade).trigger('paymentlinechange');
     });
   }
-  if (args['paymentDate'] !== undefined){
-    $("#paymentDate_" + args['id']).val(formatPaymentDate(args['paymentDate']));
+  var date = new Date();
+  if (args['paymentDate'] !== ""){
+    date = parsePaymentDate(args['paymentDate']);
   }
   // We update the date information to fit the configured
   // display format
   $("#paymentDate_" + args['id']).datepicker({
                 altField:"#paymentDate_" + args['id'] + "_altField",
                 altFormat:"yy-mm-dd",
-                dateFormat:"dd/mm/yy"});
+                dateFormat:"dd/mm/yy"
+                });
+  $("#paymentDate_" + args['id']).datepicker('setDate', date);
+}
+function parsePaymentDate(isoDate){
+  /*
+   * Returns a js Date object
+   */
+   var splitted = isoDate.split('-');
+   var year = parseInt(splitted[0], 10);
+   var month = parseInt(splitted[1], 10) - 1;
+   var day = parseInt(splitted[2], 10);
+   return new Date(year, month, day);
 }
 function formatPaymentDate(isoDate){
   /*
    *  format a date from iso to display format
    */
   if (isoDate !== ''){
-    var splitted = isoDate.split('-');
-    var year = parseInt(splitted[0], 10);
-    var month = parseInt(splitted[1], 10) - 1;
-    var day = parseInt(splitted[2], 10);
-    var date = new Date(year, month, day);
-    return $.datepicker.formatDate("dd/mm/yy", date);
+    return $.datepicker.formatDate("dd/mm/yy", parsePaymentDate(isoDate));
   }else{
     return "";
   }

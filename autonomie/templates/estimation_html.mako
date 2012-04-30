@@ -175,7 +175,7 @@
                          <tr>
                              <td>Accompte</td>
                              <td>à la commande</td>
-                             <td class='price'>${format_amount(estimation.model.compute_deposit())} €</td>
+                             <td class='price'>${format_amount(estimation.compute_deposit())} €</td>
                          </tr>
                      % endif
                      ## Les paiements intermédiaires

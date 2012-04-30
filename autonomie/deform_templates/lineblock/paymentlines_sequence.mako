@@ -94,7 +94,7 @@
         if not isinstance(solde, dict):
             solde = {}
         if not isinstance(solde.get('paymentDate', '0'), basestring):
-            solde['paymentDate'] = ' ';
+            solde['paymentDate'] = '';
     %>
     <script type='text/javascript'>
         var solde = {amount:formatAmount("${solde.get('amount', '0')}"),

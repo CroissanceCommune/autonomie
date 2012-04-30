@@ -52,9 +52,9 @@
             <strong>Objet : </strong>${format_text(estimation.model.description)}<br />
         </div>
         %if estimation.model.displayedUnits == 1:
-            <% colspan = '2' %>
+            <% colspan = 2 %>
         %else:
-            <% colspan = "1" %>
+            <% colspan = 1 %>
         % endif
         <div class='row'>
         <table class="lines span12">

@@ -256,7 +256,7 @@ function addPaymentRow(args, after){
     });
   }
   var date = new Date();
-  if (args['paymentDate'] !== ""){
+  if ((args['paymentDate'] !== undefined) && (args['paymentDate'] !== "")) {
     date = parsePaymentDate(args['paymentDate']);
   }
   // We update the date information to fit the configured

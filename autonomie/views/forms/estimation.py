@@ -123,7 +123,7 @@ class EstimationLine(colander.MappingSchema):
     """
         A single estimation line
     """
-    prestation = colander.SchemaNode(colander.String(),
+    description = colander.SchemaNode(colander.String(),
          widget=widget.TextAreaWidget(cols=80, rows=4,
              template='autonomie:deform_templates/lineblock/prestation.mako',
              css_class='span5'
@@ -538,7 +538,7 @@ class EstimationComputingModel:
         """
         cost = line.cost
         quantity = line.quantity
-        return cost * quantity
+        return float(cost) * float(quantity)
 
     def compute_lines_total(self):
         """
@@ -550,7 +550,7 @@ class EstimationComputingModel:
         """
             compute the ht total
         """
-        return self.compute_lines_total() - self.model.discountHT
+        return self.compute_lines_total() - int(self.model.discountHT)
 
     def compute_tva(self, totalht=None):
         """
@@ -572,7 +572,7 @@ class EstimationComputingModel:
         """
             compute the total amount
         """
-        return self.compute_ttc() - self.model.expenses
+        return self.compute_ttc() - int(self.model.expenses)
 
     def compute_deposit(self):
         """
@@ -580,7 +580,7 @@ class EstimationComputingModel:
         """
         if self.model.deposit > 0:
             total = self.compute_total()
-            return int(total * self.model.deposit / 100.0)
+            return int(total * int(self.model.deposit) / 100.0)
         return 0
 
     def get_nb_payment_lines(self):

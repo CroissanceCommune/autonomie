@@ -99,9 +99,9 @@ DATAS = {'common': dict(IDPhase=485,
         {'description':"Début", "paymentDate":"12-12-2012", "amount":15000},
         {'description':"Milieu", "paymentDate":"13-12-2012","amount":15000},
         {'description':"Fin", "paymentDate":"14-12-2012","amount":150},
-        ]
+        ],
+        paymentConditions="Payer à l'heure"
         ),
-        'comments':dict(paymentConditions="Payer à l'heure"),
                         }
 
 def get_full_estimation_model(datas):
@@ -124,8 +124,8 @@ class Test(BaseTestCase):
             self.assertEqual(DBDATAS['estimation'][field], result[group][field])
 
     def test_estimationlines_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.estimation import EstimationLinesMatch
-        e = EstimationLinesMatch()
+        from autonomie.views.forms.estimation import TaskLinesMatch
+        e = TaskLinesMatch()
         result = e.toschema(DBDATAS, {})
         from copy import deepcopy
         lines = deepcopy(DBDATAS['estimation_lines'])
@@ -156,9 +156,9 @@ class Test(BaseTestCase):
         self.assertEqual(result['estimation'], dbdatas_['estimation'])
 
     def test_appstruct_to_estimationlinesdbdatas(self):
-        from autonomie.views.forms.estimation import EstimationLinesMatch
+        from autonomie.views.forms.estimation import TaskLinesMatch
         datas_ = deepcopy(DATAS)
-        e = EstimationLinesMatch()
+        e = TaskLinesMatch()
         result = e.todb(datas_, {})
         self.assertEqual(result['estimation_lines'], DBDATAS['estimation_lines'])
 
@@ -170,13 +170,13 @@ class Test(BaseTestCase):
         self.assertEqual(result['payment_lines'], DBDATAS['payment_lines'])
 
     def test_appstruct_to_dbdatas(self):
-        from autonomie.views.forms.estimation import get_dbdatas
+        from autonomie.views.forms.estimation import get_estimation_dbdatas
         datas_ = deepcopy(DATAS)
-        self.assertEqual(get_dbdatas(datas_), DBDATAS)
+        self.assertEqual(get_estimation_dbdatas(datas_), DBDATAS)
 
     def test_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.estimation import get_appstruct
-        self.assertEqual(get_appstruct(DBDATAS), DATAS)
+        from autonomie.views.forms.estimation import get_estimation_appstruct
+        self.assertEqual(get_estimation_appstruct(DBDATAS), DATAS)
 
     def test_computing(self):
         from autonomie.views.forms.estimation import EstimationComputingModel

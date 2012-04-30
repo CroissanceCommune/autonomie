@@ -62,6 +62,46 @@ def get_payment_times():
         payment_times.append((i, '%d fois' % i))
     return payment_times
 
+@colander.deferred
+def deferred_phase_title(node, kw):
+    """
+        deferred phase title
+    """
+    if kw.get('tasktype') == "invoice":
+        return u"Phase où insérer la facture"
+    else:
+        return u"Phase où insérer le devis"
+
+@colander.deferred
+def deferred_taskdate_title(node, kw):
+    """
+        deferred taskDate title
+    """
+    if kw.get('tasktype') == "invoice":
+        return u"Date de la facture"
+    else:
+        return u"Date du devis"
+
+@colander.deferred
+def deferred_description_title(node, kw):
+    """
+        deferred title
+    """
+    if kw.get('tasktype') == "invoice":
+        return u"Objet de la facture"
+    else:
+        return u"Objet du devis"
+
+@colander.deferred
+def deferred_course_title(node, kw):
+    """
+        deferred title
+    """
+    if kw.get('tasktype') == "invoice":
+        return u"Cette facture concerne-t-elle une formation ?"
+    else:
+        return u"Ce devis concerne-t-il une formation ?"
+
 DAYS = (
         ('NONE', '-'),
         ('HOUR', u'Heure(s)'),
@@ -125,20 +165,20 @@ class EstimationLine(colander.MappingSchema):
     """
     description = colander.SchemaNode(colander.String(),
          widget=widget.TextAreaWidget(cols=80, rows=4,
-             template='autonomie:deform_templates/lineblock/prestation.mako',
+             template='autonomie:deform_templates/prestation.mako',
              css_class='span5'
              ),
          missing=u'',
          css_class='span5')
     cost = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
-                template='autonomie:deform_templates/lineblock/lineinput.mako',
+                template='autonomie:deform_templates/lineinput.mako',
                 ),
             css_class='span1'
             )
     quantity = colander.SchemaNode(QuantityType(),
             widget=widget.TextInputWidget(
-                template='autonomie:deform_templates/lineblock/lineinput.mako',
+                template='autonomie:deform_templates/lineinput.mako',
                 ),
             css_class='span1'
             )
@@ -146,7 +186,7 @@ class EstimationLine(colander.MappingSchema):
                 colander.String(),
                 widget=widget.SelectWidget(
                     values=DAYS,
-                    template='autonomie:deform_templates/lineblock/unity.mako',
+                    template='autonomie:deform_templates/unity.mako',
                     ),
                 css_class='span2'
                 )
@@ -158,9 +198,9 @@ class EstimationLines(colander.SequenceSchema):
     estimationline = EstimationLine(
             widget=widget.MappingWidget(
                     template='autonomie:deform_templates/\
-lineblock/estimationline_mapping.mako',
+estimationline_mapping.mako',
                item_template='autonomie:deform_templates/\
-lineblock/estimationline_mapping_item.mako'
+estimationline_mapping_item.mako'
                      )
             )
 
@@ -179,27 +219,24 @@ def get_deferred_choices_widget(keyword, **options):
         return wid
     return deferred_choices_widget
 
-class EstimationLinesBlock(colander.MappingSchema):
+class TaskLinesBlock(colander.MappingSchema):
     """
         Fieldset containing the "Détail de la prestation" block
-        with estimation lines and all the stuff
+        with estimation and invoice lines and all the stuff
     """
     lines = EstimationLines(
             widget=widget.SequenceWidget(
-                template='autonomie:deform_templates/\
-lineblock/estimationlines_sequence.mako',
-                item_template='autonomie:deform_templates/\
-lineblock/estimationlines_sequence_item.mako',
-                min_len=1
-                ),
-            title=u''
-            )
+     template='autonomie:deform_templates/tasklines_sequence.mako',
+     item_template='autonomie:deform_templates/tasklines_sequence_item.mako',
+     min_len=1
+     ),
+            title=u'')
     discount = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
-         template='autonomie:deform_templates/lineblock/wrappable_input.mako',
-         before='autonomie:deform_templates/lineblock/staticinput.mako',
+         template='autonomie:deform_templates/wrappable_input.mako',
+         before='autonomie:deform_templates/staticinput.mako',
          before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},
-         after='autonomie:deform_templates/lineblock/staticinput.mako',
+         after='autonomie:deform_templates/staticinput.mako',
          after_options={'label':u'Total HT', 'id':'httotal'}
                 ),
             title=u"Remise",
@@ -210,46 +247,45 @@ lineblock/estimationlines_sequence_item.mako',
 
     expenses = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
-         template='autonomie:deform_templates/lineblock/wrappable_input.mako',
-         before='autonomie:deform_templates/lineblock/staticinput.mako',
+         template='autonomie:deform_templates/wrappable_input.mako',
+         before='autonomie:deform_templates/staticinput.mako',
          before_options={'label':u'Montant TVA', 'id':'tvapart'},
-         after='autonomie:deform_templates/lineblock/staticinput.mako',
+         after='autonomie:deform_templates/staticinput.mako',
          after_options={'label':u'Total TTC', 'id':'total'}
                 ),
             title=u'Frais TTC',
             missing=0)
 
-class EstimationConfiguration(colander.MappingSchema):
+class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
     IDPhase = colander.SchemaNode(
                 colander.String(),
-                title=u"Phase où insérer le devis",
+                title=deferred_phase_title,
                 widget=get_deferred_choices_widget('phases'),
                 )
     taskDate = colander.SchemaNode(
                 colander.Date(),
-                title=u"Date du devis",
+                title=deferred_taskdate_title,
                 widget=get_date_input(),
                 default=datetime.date.today()
-#                description=u"Date d'émission du devis"
                 )
     description = colander.SchemaNode(
                 colander.String(),
-                title=u"Objet du devis",
+                title=deferred_description_title,
                 widget=widget.TextAreaWidget(css_class="span8"),
                 )
     course = colander.SchemaNode(colander.Integer(),
                 title=u"Formation ?",
-                description=u"Ce devis concerne-t-il une formation ?",
+                description=deferred_course_title,
                 widget=widget.CheckboxWidget(true_val=1, false_val=0))
     displayedUnits = colander.SchemaNode(colander.Integer(),
                 title=u"Afficher le détail",
                 description=u"Afficher le détail des prestations dans le PDF ?",
                 widget=widget.CheckboxWidget(true_val=1, false_val=0))
 
-class EstimationNotes(colander.MappingSchema):
+class TaskNotes(colander.MappingSchema):
     """
         Notes
     """
@@ -269,7 +305,7 @@ class EstimationPaymentLine(colander.MappingSchema):
                             colander.String(),
                             title=u'',
                             widget=widget.TextInputWidget(
-            template='autonomie:deform_templates/lineblock/prestation.mako',
+            template='autonomie:deform_templates/prestation.mako',
             css_class='span5'),
                             css_class='span5',)
     paymentDate = colander.SchemaNode(
@@ -282,7 +318,7 @@ class EstimationPaymentLine(colander.MappingSchema):
             AmountType(),
             title=u'',
             widget=widget.TextInputWidget(
-                template='autonomie:deform_templates/lineblock/amount.mako',
+                template='autonomie:deform_templates/amount.mako',
                 css_class='span5'
                 ),
             css_class='span2 offset2',
@@ -295,9 +331,9 @@ class EstimationPaymentLines(colander.SequenceSchema):
     line = EstimationPaymentLine(
             widget=widget.MappingWidget(
                     template='autonomie:deform_templates/\
-lineblock/paymentline_mapping.mako',
+paymentline_mapping.mako',
                item_template='autonomie:deform_templates/\
-lineblock/paymentline_mapping_item.mako'
+paymentline_mapping_item.mako'
 )
             )
 
@@ -328,26 +364,36 @@ class EstimationPayments(colander.MappingSchema):
     payment_lines = EstimationPaymentLines(
                widget=widget.SequenceWidget(
                    template='autonomie:deform_templates/\
-lineblock/paymentlines_sequence.mako',
+paymentlines_sequence.mako',
                    item_template='autonomie:deform_templates/\
-lineblock/paymentlines_sequence_item.mako',
+paymentlines_sequence_item.mako',
                    min_len=1
                    ),
                title=u'',
                description=u"Définissez les échéances de paiement"
                )
-class EstimationComment(colander.MappingSchema):
+    paymentConditions = colander.SchemaNode(
+                    colander.String(),
+                    missing=u'',
+                    title=u'Conditions de paiement',
+                    widget=widget.TextAreaWidget(css_class='span10'),
+                     description=u"Précisez les conditions de paiement \
+dans votre devis")
+
+class InvoicePayments(colander.MappingSchema):
     """
-        Commentaires
+        Conditions de paiement de la facture
     """
     paymentConditions = colander.SchemaNode(
                     colander.String(),
                     missing=u'',
-                    title=u'Commentaires',
+                    title=u'Conditions de paiement',
                     widget=widget.TextAreaWidget(css_class='span10'),
-                    description=u"Ajoutez des commentaires à votre document")
+                     description=u"Les conditions de paiement sont requises \
+dans les factures")
 
-class EstimationCommunication(colander.MappingSchema):
+
+class TaskCommunication(colander.MappingSchema):
     """
         Communication avec la CAE
     """
@@ -363,20 +409,34 @@ class EstimationSchema(colander.MappingSchema):
     """
         colander Estimation form schema
     """
-    common = EstimationConfiguration( title=u"")
-    lines = EstimationLinesBlock(title=u"Détail des prestations",
+    common = TaskConfiguration( title=u"")
+    lines = TaskLinesBlock(title=u"Détail des prestations",
             widget=widget.MappingWidget(
-           item_template='autonomie:deform_templates/lineblock/\
+           item_template='autonomie:deform_templates/\
 estimationdetails_item.mako'
             )
             )
-    notes = EstimationNotes(title=u"Notes")
+    notes = TaskNotes(title=u"Notes")
     payments = EstimationPayments(title=u'Conditions de paiement',
             widget=widget.MappingWidget(
-                item_template='autonomie:deform_templates/lineblock/\
+                item_template='autonomie:deform_templates/\
 paymentdetails_item.mako'))
-    comments = EstimationComment(title=u"Commentaires")
-    communication = EstimationCommunication(
+    communication = TaskCommunication(
+                        title=u'Communication Entrepreneur/CAE')
+
+class InvoiceSchema(colander.MappingSchema):
+    """
+        colander Invoice form schema
+    """
+    common = TaskConfiguration( title=u"")
+    lines = TaskLinesBlock(title=u"Détail des prestations",
+            widget=widget.MappingWidget(
+                item_template='autonomie:deform_templates/\
+estimationdetails_item.mako')
+            )
+    notes = TaskNotes(title=u"Notes")
+    payments = InvoicePayments(title=u"Conditions de paiement")
+    communication = TaskCommunication(
                         title=u'Communication Entrepreneur/CAE')
 
 class MappingWrapper:
@@ -414,22 +474,43 @@ class MappingWrapper:
                 dbdatas.setdefault(self.dbtype, {})[field] = value
         return dbdatas
 
-class EstimationMatch(MappingWrapper):
+class InvoiceMatch(MappingWrapper):
     matching_map = (
+                        #task attrs
                          ('IDPhase','common'),
                          ('taskDate','common'),
                          ('description', 'common'),
+                        #both estimation and invoice attrs
                          ('course', 'common'),
                          ('displayedUnits', 'common'),
                          ('tva', 'lines'),
                          ('discountHT', 'lines'),
                          ('expenses', 'lines'),
                          ('exclusions', 'notes'),
+                         ('paymentConditions', 'payments'),
+            )
+    dbtype = 'estimation'
+
+class EstimationMatch(MappingWrapper):
+    matching_map = (
+                         ('IDPhase','common'),
+                         ('taskDate','common'),
+                         ('description', 'common'),
+
+                         ('course', 'common'),
+                         ('displayedUnits', 'common'),
+                         ('tva', 'lines'),
+                         ('discountHT', 'lines'),
+                         ('expenses', 'lines'),
+                         ('exclusions', 'notes'),
+                         ('paymentConditions', 'payments'),
+
+                        #estimation only attrs
                          ('paymentDisplay', 'payments'),
                          ('deposit', 'payments'),
-                         ('paymentConditions', 'comments')
                          )
     dbtype = 'estimation'
+
 
 class SequenceWrapper:
     """
@@ -465,7 +546,7 @@ class SequenceWrapper:
             dbdatas[self.dbtype].append(line)
         return dbdatas
 
-class EstimationLinesMatch(SequenceWrapper):
+class TaskLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
     sequence_name = 'lines'
     fields = ('description', 'cost', 'quantity', 'unity',)
@@ -477,24 +558,42 @@ class PaymentLinesMatch(SequenceWrapper):
     fields = ('description', 'paymentDate', 'amount',)
     dbtype = "payment_lines"
 
-def get_appstruct(dbdatas):
+def get_estimation_appstruct(dbdatas):
     """
         return EstimationSchema-compatible appstruct
     """
     appstruct = {}
-    for matchobj in (EstimationMatch, EstimationLinesMatch, PaymentLinesMatch):
+    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch):
         appstruct = matchobj().toschema(dbdatas, appstruct)
     appstruct = set_payment_times(appstruct, dbdatas)
     return appstruct
 
-def get_dbdatas(appstruct):
+def get_estimation_dbdatas(appstruct):
     """
         return dict with db compatible datas
     """
     dbdatas = {}
-    for matchobj in (EstimationMatch, EstimationLinesMatch, PaymentLinesMatch):
+    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch):
         dbdatas = matchobj().todb(appstruct, dbdatas)
     dbdatas = set_manualDeliverables(appstruct, dbdatas)
+    return dbdatas
+
+def get_invoice_appstruct(dbdatas):
+    """
+        return InvoiceSchema compatible appstruct
+    """
+    appstruct = {}
+    for matchobj in (InvoiceMatch, TaskLinesMatch):
+        appstruct = matchobj().toschema(dbdatas, appstruct)
+    return appstruct
+
+def get_invoice_dbdatas(appstruct):
+    """
+        return dict with db compatible datas
+    """
+    dbdatas = {}
+    for matchobj in (InvoiceMatch, TaskLinesMatch):
+        dbdatas = matchobj().todb(appstruct, dbdatas)
     return dbdatas
 
 def set_manualDeliverables(appstruct, dbdatas):
@@ -519,14 +618,30 @@ def set_payment_times(appstruct, dbdatas):
                                         len(dbdatas.get('payment_lines')))
     return appstruct
 
-# NOTE ON COMPUTING
-#
-# Since the datas stored in the database are stored in *100 format
-# We are now working with integers only
-#
-# TVA is stored as an integer too,
-#
 class EstimationComputingModel:
+    """
+        The estimation computing model is a handly class
+        overlaying the database model
+        it provides access to the model and computation of the main amounts
+        we'd like to be computed
+
+        NOTE ON COMPUTING
+
+        Since the datas stored in the database are stored in *100 format
+        We are now working with integers only
+        TVA is stored as an integer too (needs to be divided by 100*100
+        Database returns Decimal, so we convert all database retrieved amounts
+        in integers (except the quantity one which is not stored in *100 format)
+
+        Payment lines:
+            the payment lines are:
+                manually configured
+                or
+                splitted in equal parts
+            in each case, the sold should be computed aside to ensure the total
+            amount is reached (if not,we may make mistakes by rounding)
+
+    """
 
     def __init__(self, estimation_model):
         self.model = estimation_model
@@ -584,6 +699,9 @@ class EstimationComputingModel:
         return 0
 
     def get_nb_payment_lines(self):
+        """
+            Returns the number of payment lines configured
+        """
         return len(self.model.payment_lines)
 
     def compute_line_amount(self):
@@ -608,15 +726,11 @@ class EstimationComputingModel:
         rest = total - deposit
         payment_lines_num = self.get_nb_payment_lines()
         if payment_lines_num == 1:
-            print "passing Here"
             return rest
         else:
             if self.model.manualDeliverables == 0:
-                print "passing there"
                 line_amount = self.compute_line_amount()
                 return rest - ((payment_lines_num-1) * line_amount)
             else:
-                print "passing everywhere"
-                print rest
                 return rest - sum(line.amount \
                         for line in self.model.payment_lines[:-1])

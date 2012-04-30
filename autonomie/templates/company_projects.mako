@@ -41,7 +41,7 @@
                                 <span class='ui-icon ui-icon-plusthick'></span>
                                 Devis
                             </a>
-                            <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
+                            <a class='btn' href='${request.route_path("invoices", cid=company.id, id=project.id)}'>
                                 <span class='ui-icon ui-icon-plusthick'></span>
                                 Facture
                             </a>

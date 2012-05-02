@@ -489,7 +489,7 @@ class InvoiceMatch(MappingWrapper):
                          ('exclusions', 'notes'),
                          ('paymentConditions', 'payments'),
             )
-    dbtype = 'estimation'
+    dbtype = 'invoice'
 
 class EstimationMatch(MappingWrapper):
     matching_map = (
@@ -550,7 +550,7 @@ class TaskLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
     sequence_name = 'lines'
     fields = ('description', 'cost', 'quantity', 'unity',)
-    dbtype = 'estimation_lines'
+    dbtype = 'lines'
 
 class PaymentLinesMatch(SequenceWrapper):
     mapping_name = 'payments'

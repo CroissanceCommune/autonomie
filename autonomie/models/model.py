@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 30 avril 2012 16:07:19 CEST
+# * Last Modified : mer. 02 mai 2012 19:03:51 CEST
 #
 # * Project : autonomie
 #
@@ -340,27 +340,52 @@ class Task(DBBASE):
                             backref="ownedTasks")
 
 
-    def get_status_str(self):
+    def get_status_str(self, _type="estimation"):
+        """
+            Return human readable string for task status
+        """
+        if self.statusPersonAccount:
+            firstname = self.statusPersonAccount.firstname
+            lastname = self.statusPersonAccount.lastname
+        else:
+            firstname = "Inconnu"
+            lastname = ""
+        if self.statusDate:
+            date = self.statusDate or ""
+        else:
+            date = ""
+        suffix = u" par {firstname} {lastname} le {date:%d/%m/%Y}".format(
+                firstname=firstname, lastname=lastname, date=date)
+        if _type == "estimation":
+            genre = ""
+        else:
+            genre = "e"
         statuses = dict((
-            ("valid", u"Validé{genre} par {firstname} {lastname}",),
-            ("abort", u"Annulé{genre} par {firstname} {lastname}",),
-            ("paid", u"Paiement reçu par {firstname} {lastname}",),
-            ("draft", u"Brouillon modifié par {firstname} {lastname}",),
-            ("geninv", u"Facture générée par {firstname} {lastname}",),
-            ("aboinv", u"Facture annulée par {firstname} {lastname}",),
-            ("aboest", u"Devis annulé par {firstname} {lastname}",),
-            ("sent", u"Document envoyé par {firstname} {lastname}",),
-            ("wait", u"En attente de validation",),
-            ('invalid', u"Invalidé{genre} par {firstname} {lastname}",)))
-        return statuses.get(self.CAEStatus, u"")
-#        statusStr = statuses.get(self.CAEStatus, "").format(genre="",
-#                             firstname=self.statusPersonAccount.firstname,
-#                             lastname=self.statusPersonAccount.lastname)
-#        return u"{0} : {1}".format(self.statusDate, statusStr)
+            ("valid", u"Validé{genre}"),
+            ("abort", u"Annulé{genre}",),
+            ("paid", u"Paiement reçu",),
+            ("draft", u"Brouillon modifié",),
+            ("geninv", u"Facture générée",),
+            ("aboinv", u"Facture annulée",),
+            ("aboest", u"Devis annulé",),
+            ("sent", u"Document envoyé",),
+            ("wait", u"Validation demandée",),
+            ('invalid', u"Invalidé{genre}",)))
+        status_str = statuses.get(self.CAEStatus, u"Statut inconnu").format(
+                                                                genre=genre)
+        return status_str + suffix
 
     def is_editable(self):
+        """
+            return True if this task is editable for the user
+        """
         return self.CAEStatus in ('draft', 'invalid',)
 
+    def is_valid(self):
+        """
+            Return True if the task has been validated
+        """
+        return self.CAEStatus in ('valid', 'paid', 'geninv', 'sent',)
 
 class Estimation(Task):
     """
@@ -435,6 +460,10 @@ class Invoice(Task):
     phase =  relationship("Phase",
                           backref="invoices",
                           order_by='Invoice.sequenceNumber')
+    estimation = relationship("Estimation",
+                      backref="invoice",
+                      primaryjoin="Invoice.IDEstimation==Estimation.IDTask",
+                                )
 
 class EstimationLine(DBBASE):
     """
@@ -455,15 +484,15 @@ class EstimationLine(DBBASE):
     __tablename__ = 'coop_estimation_line'
     __table_args__ = {'autoload':True}
     id = Column("IDWorkLine", Integer(11), primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_task.IDTask'))
+    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
     updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
-    task = relationship("Task", backref="lines",
-                            order_by='EstimationLine.rowIndex',
-                        enable_typechecks=False )
+    task = relationship("Estimation", backref="lines",
+                            order_by='EstimationLine.rowIndex'
+                        )
     def get_unity_label(self):
         """
             return unitie's label
@@ -478,6 +507,50 @@ class EstimationLine(DBBASE):
                 PACK=u"forfait",
                 )
         return labels.get(self.unity, '-')
+
+class InvoiceLine(DBBASE):
+    """
+        Invoice lines
+        `IDInvoiceLine` int(11) NOT NULL auto_increment,
+        `IDTask` int(11) NOT NULL,
+        `rowIndex` int(11) NOT NULL,
+        `description` text,
+        `cost` int(11) default '0',
+        `quantity` double default '1',
+        `creationDate` int(11) default '0',
+        `updateDate` int(11) default '0',
+        `unity` varchar(10) default NULL,
+        PRIMARY KEY  (`IDInvoiceLine`),
+    """
+    __tablename__ = 'coop_invoice_line'
+    __table_args__ = {'autoload':True}
+    id = Column("IDInvoiceLine", Integer(11), primary_key=True)
+    IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
+    creationDate = Column("creationDate", CustomDateType(11),
+                                            default=_get_date)
+    updateDate = Column("updateDate", CustomDateType(11),
+                                        default=_get_date,
+                                        onupdate=_get_date)
+    task = relationship("Invoice", backref="lines",
+                            order_by='InvoiceLine.rowIndex'
+                        )
+                        #enable_typechecks=False )
+
+    def get_unity_label(self):
+        """
+            return unitie's label
+        """
+        labels = dict(
+                NONE=u'-',
+                HOUR=u"heure(s)",
+                DAY=u"jour(s)",
+                WEEK=u"semaine(s)",
+                MONTH=u"mois",
+                FEUIL=u"feuillet(s)",
+                PACK=u"forfait",
+                )
+        return labels.get(self.unity, '-')
+
 
 class PaymentLine(DBBASE):
     """
@@ -579,6 +652,15 @@ class Project(DBBASE):
         for estimation in self.estimations:
             if estimation.IDTask == int(taskid):
                 return estimation
+        raise KeyError("No such task in this project")
+
+    def get_invoice(self, taskid):
+        """
+            Returns the estimation with id taskid
+        """
+        for invoice in self.invoices:
+            if invoice.IDTask == int(taskid):
+                return invoice
         raise KeyError("No such task in this project")
 
 class Phase(DBBASE):

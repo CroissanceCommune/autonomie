@@ -23,9 +23,12 @@
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
         <style>
             @page {
-                width:21cm;
-                height:29.7cm;
+                size: a4 portrait;
                 margin:1cm;
+                margin-bottom:2.5cm;
+                % if not invoice.model.is_valid():
+                    background-image: url("${request.static_url('autonomie:static/watermark_invoice.jpg', _app_url='')}");
+                % endif
                 @frame footer {
                     -pdf-frame-content: footer;
                     bottom: 0cm;
@@ -42,16 +45,18 @@
         </div>
         <div class='row'>
             <div class='addressblock'>
-                ${print_str_date(estimation.model.taskDate)}
+                ${print_str_date(invoice.model.taskDate)}
                 <br />
                 ${address(project.client, 'client')}
             </div>
         </div>
         <div class="informationblock">
-            <strong>DEVIS N° </strong>${estimation.model.number}<br />
-            <strong>Objet : </strong>${format_text(estimation.model.description)}<br />
+            <strong>Facture N° </strong>${invoice.model.number}<br />
+            <span  style='color:#999'> <strong style='color:#999'>Référence devis N° </strong>${invoice.model.number}</span> <br />
+            <br />
+            <strong>Objet : </strong>${format_text(invoice.model.description)}<br />
         </div>
-        %if estimation.model.displayedUnits == 1:
+        %if invoice.model.displayedUnits == 1:
             <% colspan = 2 %>
         %else:
             <% colspan = 1 %>
@@ -61,20 +66,20 @@
             <thead>
                 <tr>
                     <th class="description">Intitulé des postes</th>
-                    %if estimation.model.displayedUnits == 1:
+                    %if invoice.model.displayedUnits == 1:
                         <th class="quantity">P.U. x Qté</th>
                     % endif
                     <th class="price">Prix</th>
                 </tr>
             </thead>
             <tbody>
-                % for line in estimation.model.lines:
+                % for line in invoice.model.lines:
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
-                        %if estimation.model.displayedUnits == 1:
+                        %if invoice.model.displayedUnits == 1:
                             <td class="quantity">${format_amount(line.cost)} € x ${format_quantity(line.quantity)} ${line.get_unity_label()}</td>
                         % endif
-                        <td class="price">${format_amount(estimation.compute_line_total(line))} €</td>
+                        <td class="price">${format_amount(invoice.compute_line_total(line))} €</td>
                     </tr>
                 % endfor
                 <tr>
@@ -82,16 +87,16 @@
                         Total HT
                     </td>
                     <td class='price'>
-                         ${format_amount(estimation.compute_lines_total())}
+                         ${format_amount(invoice.compute_lines_total())}
                      </td>
                  </tr>
-                %if estimation.model.discountHT:
+                %if invoice.model.discountHT:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
                             Remise commerciale
                         </td>
                         <td class='price'>
-                            ${format_amount(estimation.model.discountHT)}
+                            ${format_amount(invoice.model.discountHT)}
                         </td>
                     </tr>
                     <tr>
@@ -99,12 +104,12 @@
                          Total HT après remise
                         </td>
                         <td class='price'>
-                            ${format_amount(estimation.compute_totalht())} €
+                            ${format_amount(invoice.compute_totalht())} €
                         </td>
                     </tr>
 
                 % endif
-                % if estimation.model.tva<0:
+                % if invoice.model.tva<0:
                     <tr>
                         <td colspan='${colspan + 1}'class='rightalign'>
                             TVA non applicable selon l'article 259b du CGI.
@@ -113,20 +118,20 @@
                 % else:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
-                            TVA (${format_amount(estimation.model.tva)} %)
+                            TVA (${format_amount(invoice.model.tva)} %)
                         </td>
                         <td class='price'>
-                            ${format_amount(estimation.compute_tva())} €
+                            ${format_amount(invoice.compute_tva())} €
                         </td>
                     </tr>
                 % endif
-                %if estimation.model.expenses:
+                %if invoice.model.expenses:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
                             Frais liés à la prestation
                         </td>
                         <td class='price'>
-                            ${format_amount(estimation.model.expenses)}
+                            ${format_amount(invoice.model.expenses)} €
                         </td>
                     </tr>
                 %endif
@@ -135,86 +140,28 @@
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${format_amount(estimation.compute_total())} €
+                        ${format_amount(invoice.compute_total())} €
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
-        %if estimation.model.exclusions:
-            ${table(u"Notes", estimation.model.exclusions)}
-        %endif
-        %if estimation.model.paymentConditions:
-            ${table(u"Conditions de paiement", estimation.model.paymentConditions)}
+        %if invoice.model.paymentConditions:
+            ${table(u"Conditions de paiement", invoice.model.paymentConditions)}
         % endif
-        % if estimation.model.paymentDisplay != u"NONE":
-            % if estimation.model.paymentDisplay == u"ALL":
-                <% colspan = 3 %>
-            %else:
-                <% colspan = 1 %>
-            % endif
-            <div class='row'>
-            <table class='lines span12'>
-            <thead>
-                <th colspan='${colspan}' style='text-align:left'>Conditions de paiement</th>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan='${colspan}'>
-                        % if estimation.model.deposit > 0 :
-                            Un accompte, puis paiement en ${estimation.get_nb_payment_lines()} fois.
-                        %else:
-                            Paiement en ${estimation.get_nb_payment_lines()} fois.
-                        %endif
-                    </td>
-                </tr>
-            % if estimation.model.paymentDisplay == u"ALL":
-                ## l'utilisateur a demandé le détail du paiement
-                    ## L'accompte à la commande
-                     % if estimation.model.deposit > 0 :
-                         <tr>
-                             <td>Accompte</td>
-                             <td>à la commande</td>
-                             <td class='price'>${format_amount(estimation.compute_deposit())} €</td>
-                         </tr>
-                     % endif
-                     ## Les paiements intermédiaires
-                     % for line in estimation.model.payment_lines[:-1]:
-                         <tr>
-                             <td>${print_date(line.paymentDate)}</td>
-                             <td>${line.description}</td>
-                             %if estimation.model.manualDeliverables == 1:
-                                 <td>${format_amount(line.amount)} €</td>
-                             %else:
-                                 <td class='price'>${format_amount(estimation.compute_line_amount())} €</td>
-                             %endif
-                         </tr>
-                     % endfor
-                     ## On affiche le solde qui doit être calculé séparément pour être sûr de tomber juste
-                     <tr>
-                        <td>
-                            ${print_date(estimation.model.payment_lines[-1].paymentDate)}
-                        </td>
-                         <td>
-                             ${format_text(estimation.model.payment_lines[-1].description)}
-                        </td>
-                        <td class='price'>
-                            ${format_amount(estimation.compute_sold())} €
-                        </td>
-                    </tr>
-            % endif
-                </tbody>
-            </table>
-        </div>
-        % endif
-        % if config.has_key('coop_estimationfooter'):
-            ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
+        % if config.has_key('coop_invoicepayment'):
+            <% paymentinfo = config.get('coop_invoicepayment').replace("%ENTREPRENEUR%", company.name).replace("%RIB%", company.RIB).replace("%IBAN%", company.IBAN) %>
+            ${table(u"Mode de paiement", paymentinfo)}
         %endif
+        % if config.has_key('coop_invoicelate'):
+            <% tolate = config.get('coop_invoicelate').replace("%ENTREPRENEUR%", company.name) %>
+            ${table(u"Retard de paiement", tolate)}
+        % endif
         <div id="footer">
             % if config.has_key('coop_pdffootertitle'):
                 <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
             %endif
-            % if estimation.model.course == 1 and config.has_key('coop_pdffootercourse'):
+            % if invoice.model.course == 1 and config.has_key('coop_pdffootercourse'):
                 ${format_text(config.get('coop_pdffootercourse'))}<br />
             % endif
             % if config.has_key('coop_pdffootertext'):

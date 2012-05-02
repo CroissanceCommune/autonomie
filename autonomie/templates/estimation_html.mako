@@ -26,6 +26,9 @@
                 width:21cm;
                 height:29.7cm;
                 margin:1cm;
+                % if not estimation.model.is_valid():
+                    background-image: url("${request.static_url('autonomie:static/watermark_estimation.jpg', _app_url='')}");
+                % endif
                 @frame footer {
                     -pdf-frame-content: footer;
                     bottom: 0cm;

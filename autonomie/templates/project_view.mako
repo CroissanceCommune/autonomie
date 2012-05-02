@@ -84,11 +84,7 @@
                 <tr>
                     <td><a href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask)}' title="Voir/éditer ce devis">${estimation.number}</a></td>
                     <td>${estimation.name}</td>
-                    % if estimation.statusPersonAccount is not UNDEFINED and estimation.statusPersonAccount is not None:
-                        <td>${estimation.get_status_str().format(genre='', firstname=estimation.statusPersonAccount.firstname, lastname=estimation.statusPersonAccount.lastname)}</td>
-                    % else:
-                        <td>${estimation.get_status_str().format(genre='', firstname="Utilisateur", lastname="Inconnu")}</td>
-                    % endif
+                    <td>${estimation.get_status_str('estimation')}</td>
                     <td>${print_date(estimation.statusDate)}</td>
                     <td>${estimation.owner.firstname} ${estimation.owner.lastname}</td>
                     <td>
@@ -127,19 +123,15 @@
                 <tr>
                     <td><a href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=invoice.IDTask)}' title="Voir/éditer cette facture">${invoice.number}</a></td>
                     <td>${invoice.name}</td>
-                    %if invoice.statusPersonAccount is not UNDEFINED and invoice.statusPersonAccount is not None:
-                        <td>${invoice.get_status_str().format(genre='e', firstname=invoice.statusPersonAccount.firstname, lastname=invoice.statusPersonAccount.lastname)}</td>
-                    %else:
-                        <td>${invoice.get_status_str().format(genre='e', firstname="Utilisateur", lastname="Inconnu")}</td>
-                    %endif
+                    <td>${invoice.get_status_str("invoice")}</td>
                     <td>${print_date(invoice.statusDate)}</td>
                     <td>${invoice.owner.firstname} ${invoice.owner.lastname}</td>
                     <td>
-                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=invoice.IDTask)}' title="Voir/éditer ce devis">
+                        <a class='btn' href='${request.route_path("invoice", cid=company.id, id=project.id, taskid=invoice.IDTask)}' title="Voir/éditer ce devis">
                             <span class='ui-icon ui-icon-pencil'></span>
                             Voir/Éditer
                         </a>
-                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=invoice.IDTask, _query=dict(pdf=True))}' title="Télécharger la version PDF">
+                        <a class='btn' href='${request.route_path("invoice", cid=company.id, id=project.id, taskid=invoice.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
                            PDF
                         </a>
                     </td>

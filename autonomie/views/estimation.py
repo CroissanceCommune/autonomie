@@ -28,8 +28,10 @@ from pyramid.url import route_path
 from autonomie.models import DBSESSION
 from autonomie.models.model import Tva
 from autonomie.models.model import Estimation
+from autonomie.models.model import Invoice
 from autonomie.models.model import Phase
 from autonomie.models.model import EstimationLine
+from autonomie.models.model import InvoiceLine
 from autonomie.models.model import PaymentLine
 from autonomie.views.forms.estimation import EstimationSchema
 from autonomie.views.forms.estimation import InvoiceSchema
@@ -79,8 +81,10 @@ class TaskView(BaseView):
     schema = None
     add_title = u""
     edit_title = u""
-    tasknumber_tmpl = ""
-    route = ""
+    taskname_tmpl = u""
+    tasknumber_tmpl = u""
+    route = u""
+
     def __init__(self, request):
         BaseView.__init__(self, request)
         self.company = self.get_current_company()
@@ -145,7 +149,7 @@ class TaskView(BaseView):
         """
             set the current taskname
         """
-        self.task.name = u"Devis {0}".format(
+        self.task.name = self.taskname_tmpl.format(
                                       self.task.sequenceNumber
                                                   )
 
@@ -158,6 +162,7 @@ class TaskView(BaseView):
                                str(self.task.taskDate.year)[2:])
         pcode = self.project.code
         ccode = self.project.client.id
+        log.debug(self.task.sequenceNumber)
         self.task.number = self.tasknumber_tmpl.format(pcode,
                                   ccode,
                                   self.task.sequenceNumber,
@@ -184,6 +189,7 @@ class EstimationView(TaskView):
     schema = EstimationSchema()
     add_title = u"Nouveau devis"
     edit_title = u"Édition du devis {task.number}"
+    taskname_tmpl = u"Devis {0}"
     tasknumber_tmpl = "{0}_{1}_D{2}_{3}"
     route = "estimation"
 
@@ -200,7 +206,7 @@ class EstimationView(TaskView):
             Returns dbdatas as a dict of dict
         """
         return {'estimation':self.task.appstruct(),
-                'estimation_lines':[line.appstruct()
+                'lines':[line.appstruct()
                                        for line in self.task_lines],
                 'payment_lines':[line.appstruct()
                                         for line in self.payment_lines]}
@@ -242,8 +248,10 @@ class EstimationView(TaskView):
                 dbdatas = get_estimation_dbdatas(appstruct)
                 merge_session_with_post(self.task, dbdatas['estimation'])
 
+                self.set_sequencenumber()
                 self.set_taskname()
                 self.set_tasknumber()
+                log.debug(self.task.sequenceNumber)
                 self.set_taskstatus()
                 self.remove_lines_from_session()
                 self.add_lines_to_task(dbdatas)
@@ -281,7 +289,7 @@ class EstimationView(TaskView):
             pline = PaymentLine()
             merge_session_with_post(pline, line)
             self.task.payment_lines.append(pline)
-        for line in dbdatas['estimation_lines']:
+        for line in dbdatas['lines']:
             eline = EstimationLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
@@ -351,6 +359,7 @@ class InvoiceView(TaskView):
     schema = InvoiceSchema()
     add_title = u"Nouvelle facture"
     edit_title = u"Édition de la facture {task.number}"
+    taskname_tmpl = u"Facture {0}"
     tasknumber_tmpl = "{0}_{1}_F{2}_{3}"
     route = "invoice"
 
@@ -365,7 +374,7 @@ class InvoiceView(TaskView):
             Returns dbdatas as a dict of dict
         """
         return {'invoice':self.task.appstruct(),
-                'invoice_lines':[line.appstruct()
+                'lines':[line.appstruct()
                                        for line in self.task_lines],
                 }
 
@@ -399,14 +408,17 @@ class InvoiceView(TaskView):
             #TODO
             log.debug("   + Values have been submitted")
             datas = self.request.params.items()
+            log.debug(datas)
             try:
                 appstruct = form.validate(datas)
             except ValidationFailure, e:
                 html_form = e.render()
             else:
                 dbdatas = get_invoice_dbdatas(appstruct)
+                log.debug(dbdatas)
                 merge_session_with_post(self.task, dbdatas['invoice'])
 
+                self.set_sequencenumber()
                 self.set_taskname()
                 self.set_tasknumber()
                 self.set_taskstatus()
@@ -428,11 +440,20 @@ class InvoiceView(TaskView):
                     company=self.company,
                     html_form = html_form
                     )
+
+    def set_sequencenumber(self):
+        """
+            set the sequence number
+            don't know really if this column matters
+        """
+        num = len(self.project.invoices) + 1
+        self.task.sequenceNumber = num
+
     def remove_lines_from_session(self):
         """
             Remove invoice lines and payment lines from the current session
         """
-        # if edition we remove all invoice and payment lines
+        # if edition we remove all invoice lines
         for line in self.task.lines:
             self.dbsession.delete(line)
 
@@ -440,8 +461,8 @@ class InvoiceView(TaskView):
         """
             Add the lines to the current invoice
         """
-        for line in dbdatas['invoice_lines']:
-            eline = EstimationLine()
+        for line in dbdatas['lines']:
+            eline = InvoiceLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
 
@@ -452,7 +473,7 @@ class InvoiceView(TaskView):
         if self.taskid:
             return self.project.get_invoice(self.taskid)
         else:
-            invoice = Estimation()
+            invoice = Invoice()
             invoice.CAEStatus = 'draft'
             phaseid = self.request.params.get('phase')
             invoice.IDPhase = phaseid
@@ -483,7 +504,7 @@ class InvoiceView(TaskView):
             Returns a page displaying an html rendering of the given task
         """
         #TODO
-        title = u"Devis numéro : {0}".format(self.task.number)
+        title = u"Facture numéro : {0}".format(self.task.number)
         return dict(
                     title=title,
                     task=self.task,

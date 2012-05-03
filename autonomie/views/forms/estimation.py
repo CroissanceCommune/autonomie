@@ -618,10 +618,10 @@ def set_payment_times(appstruct, dbdatas):
                                         len(dbdatas.get('payment_lines')))
     return appstruct
 
-class EstimationComputingModel:
+class TaskComputing:
     """
-        The estimation computing model is a handly class
-        overlaying the database model
+        The task computing model is a handly class
+        overlaying the database model for estimation or invoices
         it provides access to the model and computation of the main amounts
         we'd like to be computed
 
@@ -643,13 +643,13 @@ class EstimationComputingModel:
 
     """
 
-    def __init__(self, estimation_model):
-        self.model = estimation_model
+    def __init__(self, model):
+        self.model = model
 
     @staticmethod
     def compute_line_total(line):
         """
-            compute estimation line total
+            compute estimation/invoice line total
         """
         cost = line.cost
         quantity = line.quantity
@@ -657,7 +657,7 @@ class EstimationComputingModel:
 
     def compute_lines_total(self):
         """
-            compute the estimations line total
+            compute the estimation/invoices line total
         """
         return sum(self.compute_line_total(line) for line in self.model.lines)
 

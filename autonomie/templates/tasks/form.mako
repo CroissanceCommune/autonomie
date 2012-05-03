@@ -1,7 +1,7 @@
 <%doc>
-    Template for estimation edition/creation
+    Template for estimation and invoice edition/creation
 </%doc>
-<%inherit file="base.mako"></%inherit>
+<%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="esc"/>
 <%namespace file="/base/utils.mako" import="address"/>
 <%block name='headjs'>

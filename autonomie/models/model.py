@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 02 mai 2012 19:03:51 CEST
+# * Last Modified : jeu. 03 mai 2012 17:41:16 CEST
 #
 # * Project : autonomie
 #
@@ -427,6 +427,30 @@ class Estimation(Task):
                           backref="estimations",
                           order_by='Estimation.sequenceNumber')
 
+    def duplicate(self):
+        """
+            returns a duplicate estimation object
+        """
+        duple = Estimation()
+        duple.IDPhase = self.IDPhase
+        duple.taskDate = datetime.date.today()
+        duple.IDEmployee = self.IDEmployee
+        duple.description = self.description
+
+        duple.tva = self.tva
+        duple.discount = self.discount
+        duple.deposit = self.deposit
+        duple.paymentConditions = self.paymentConditions
+        duple.exclusions = self.exclusions
+        duple.IDProject = self.IDProject
+        duple.manualDeliverables = self.manualDeliverables
+        duple.course = self.course
+        duple.displayedUnits = self.displayedUnits
+        duple.discountHT = self.discountHT
+        duple.expenses = self.expenses
+        duple.paymentDisplay = self.paymentDisplay
+        return duple
+
 class Invoice(Task):
     """
        `IDTask` int(11) NOT NULL,
@@ -508,6 +532,18 @@ class EstimationLine(DBBASE):
                 )
         return labels.get(self.unity, '-')
 
+    def duplicate(self):
+        """
+            duplicate an estimationline
+        """
+        newone = EstimationLine()
+        newone.rowIndex = self.rowIndex
+        newone.cost = self.cost
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        return newone
+
 class InvoiceLine(DBBASE):
     """
         Invoice lines
@@ -575,6 +611,17 @@ class PaymentLine(DBBASE):
     estimation = relationship("Estimation", backref='payment_lines',
                     order_by='PaymentLine.rowIndex')
     paymentDate = Column("paymentDate", CustomDateType2(11))
+
+    def duplicate(self):
+        """
+            duplicate a paymentline
+        """
+        newone = PaymentLine()
+        newone.rowIndex = self.rowIndex
+        newone.amount = self.amount
+        newone.description = self.description
+        newone.paymentDate = datetime.date.today()
+        return newone
 
 class Client(DBBASE):
     """

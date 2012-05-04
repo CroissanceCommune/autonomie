@@ -45,7 +45,9 @@
                                 <span class='ui-icon ui-icon-plusthick'></span>
                                 Facture
                             </a>
-                            <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
+                            <a class='btn'
+                                href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="archive"))}'
+                                onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
                                 <span class='ui-icon ui-icon-folder-collapsed'></span>
                                 Archiver
                             </a>

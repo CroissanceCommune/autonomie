@@ -43,13 +43,13 @@
     <header>
     <div class="navbar">
       <div class="navbar-inner">
+        <div class="container">
           <a class="brand" href='/'>Autonomie</a>
-          <div class="container">
-            <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
-              >>>
-              </a>
-            <div class="nav-collapse">
-        % if menu is not UNDEFINED:
+          <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+            >>>
+          </a>
+          <div class="nav-collapse">
+            % if menu is not UNDEFINED:
               <ul class='nav'>
                 % for item in menu:
                   <li>
@@ -58,64 +58,81 @@
                   <li class='divider-vertical'>
                 % endfor
               </ul>
-        % endif
-        %if request.session.has_key('user'):
-        <ul class='nav pull-right' id='logout_link'>
-          <li>
-          <a href="/account">${request.session['user'].lastname} ${request.session['user'].firstname}</a>
-            </li>
-            <li>
-            <a href="/logout">Déconnexion</a>
-            </li>
-          </ul>
-        % endif
-            </div>
+            % endif
+            %if request.session.has_key('user'):
+              <ul class='nav pull-right' id='logout_link'>
+                <li>
+                <a href="/account">${request.session['user'].lastname} ${request.session['user'].firstname}</a>
+                </li>
+                <li>
+                <a href="/logout">Déconnexion</a>
+                </li>
+              </ul>
+            % endif
           </div>
+        </div>
       </div>
     </div>
     </header>
     <%block name="headtitle">
     <div id='pagetitle' class='well'>
-        <h2 class='visible-desktop hidden-tablet'>${title}</h2>
+      <h2 class='visible-desktop hidden-tablet'>${title}</h2>
+    </div>
+    </%block>
+    <div class='container'>
+      <div class='subnav'>
         <%block name="actionmenu" />
       </div>
-    </%block>
-    <%block name="breadcrumb_block">
-    % if breadcrumb is not UNDEFINED:
-    <ul class="breadcrumb">
-      % for link in breadcrumb.links:
-      % if link['active']:
-        <li class='active'>
-        ${link['label']}
-      % else:
-        <li>
-        <a href="${link['url']}">${link['label']}<a>
-            ${link['label']}
-            <span class='delimiter'>></span>
-      % endif
-      </li>
-      % endfor
-    </ul>
-    % endif
-    </%block>
-    <%block name='pop_message'>
-    % for num, message in enumerate(request.session.pop_flash(queue="main")):
-      <a href="#" onclick="$('#main_message_${num}').hide();" id="main_message_${num}">
-        <div class="message ui-widget">
-        <div class="ui-state-highlight ui-corner-all">
-          <p>
-            <span class="ui-icon ui-icon-check">
-            </span>
-            ${message|n}
-          </p>
-        </div>
-      </div>
-      </a>
-    % endfor
-    </%block>
-        <%block name='content' />
+      <%block name="breadcrumb_block">
+      % if breadcrumb is not UNDEFINED:
+        <ul class="breadcrumb">
+          % for link in breadcrumb.links:
+            % if link['active']:
+              <li class='active'>
+              ${link['label']}
+            % else:
+              <li>
+              <a href="${link['url']}">${link['label']}<a>
+                  ${link['label']}
+                  <span class='delimiter'>></span>
+                % endif
+                </li>
+              % endfor
+            </ul>
+          % endif
+          </%block>
+          <%block name='pop_message'>
+          % for num, message in enumerate(request.session.pop_flash(queue="main")):
+            <a href="#" onclick="$('#main_message_${num}').hide();" id="main_message_${num}">
+              <div class="message ui-widget">
+                <div class="ui-state-highlight ui-corner-all">
+                  <p>
+                    <span class="ui-icon ui-icon-check">
+                    </span>
+                    ${message|n}
+                  </p>
+                </div>
+              </div>
+            </a>
+          % endfor
+          % for num, message in enumerate(request.session.pop_flash(queue="error")):
+            <a href="#" onclick="$('#error_message_${num}').hide();" id="error_message_${num}">
+              <div class="message ui-widget">
+                <div class="ui-state-error ui-corner-all">
+                  <p>
+                    <span class="ui-icon ui-icon-check">
+                    </span>
+                    ${message|n}
+                  </p>
+                </div>
+              </div>
+            </a>
+          % endfor
+          </%block>
+          <%block name='content' />
+     </div>
         <script type='text/javascript'>
           <%block name='footerjs' />
-          </script>
-  </body>
-</html>
+        </script>
+      </body>
+    </html>

@@ -24,6 +24,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
 
 from autonomie.models.model import Estimation
+from autonomie.models.model import Invoice
 from autonomie.models.model import EstimationLine
 from autonomie.models.model import PaymentLine
 from autonomie.views.forms.estimation import EstimationSchema
@@ -34,6 +35,7 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.config import load_config
+from autonomie.utils.security import Forbidden
 
 from .base import TaskView
 
@@ -105,27 +107,31 @@ class EstimationView(TaskView):
             except ValidationFailure, e:
                 html_form = e.render()
             else:
-                dbdatas = get_estimation_dbdatas(appstruct)
-                merge_session_with_post(self.task, dbdatas['estimation'])
+                try:
+                    dbdatas = get_estimation_dbdatas(appstruct)
+                    merge_session_with_post(self.task, dbdatas['estimation'])
 
-                if not edit:
-                    self.task.sequenceNumber = self.get_sequencenumber()
-                    self.task.name = self.get_taskname()
-                    self.task.number = self.get_tasknumber(self.task.taskDate)
-                self.task.statusPerson = self.user.id
-                self.task.CAEStatus = self.get_taskstatus()
-                self.task.project = self.project
-                self.remove_lines_from_session()
-                self.add_lines_to_task(dbdatas)
+                    if not edit:
+                        self.task.sequenceNumber = self.get_sequencenumber()
+                        self.task.name = self.get_taskname()
+                        self.task.number = self.get_tasknumber(self.task.taskDate)
+                    self.task.statusPerson = self.user.id
+                    self.task.CAEStatus = self.get_taskstatus()
+                    self.task.project = self.project
+                    self.remove_lines_from_session()
+                    self.add_lines_to_task(dbdatas)
 
-                self.dbsession.merge(self.task)
-                self.dbsession.flush()
-                # Redirecting to the project page
-                return HTTPFound(route_path('company_project',
-                              self.request,
-                              cid=self.company.id,
-                              id=self.project.id)
-                              )
+                    self.dbsession.merge(self.task)
+                    self.dbsession.flush()
+                    # Redirecting to the project page
+                    return HTTPFound(route_path('company_project',
+                                  self.request,
+                                  cid=self.company.id,
+                                  id=self.project.id)
+                                  )
+                except Forbidden, e:
+                    self.request.session.flash(e.message, queue='error')
+                    html_form = form.render(appstruct)
         else:
             html_form = form.render(appstruct)
         return dict(title=title,
@@ -256,6 +262,32 @@ class EstimationView(TaskView):
         else:
             message = u"Vous n'êtes pas autorisé à supprimer ce devis."
         self.request.session.flash(message)
+        return HTTPFound(route_path(
+                        'company_project',
+                        self.request,
+                        cid=self.company.id,
+                        id=self.project.id))
+
+    @view_config(route_name='estimation', request_param='action=status')
+    def status_change(self):
+        """
+            Called when an estimation status is changed
+            ( when no form is displayed : the estimation itself is not
+            editable anymore )
+        """
+        if 'submit' in self.request.params:
+            newstatus = self.request.params['submit']
+            self.task.CAEStatus = newstatus
+
+            computer = TaskComputing(self.task)
+
+
+            if newstatus == 'geninv':
+                count = 1
+                if self.task.deposit > 0:
+                    deposit = Invoice()
+                    deposit.name = u"Facture d'accompte {0}".format(count)
+                    #TODO
         return HTTPFound(route_path(
                         'company_project',
                         self.request,

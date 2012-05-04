@@ -120,7 +120,7 @@
               <div class="message ui-widget">
                 <div class="ui-state-error ui-corner-all">
                   <p>
-                    <span class="ui-icon ui-icon-check">
+                  <span class="ui-icon ui-icon-alert">
                     </span>
                     ${message|n}
                   </p>

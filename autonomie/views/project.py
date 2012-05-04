@@ -197,7 +197,7 @@ succès".format(project.name)
             phasename = self.request.params.get('phase')
             phase = Phase()
             phase.name = phasename
-            phase.IDProject = project.id
+            phase.id_project = project.id
             self.dbsession.add(phase)
             self.request.session.flash(u"La phase {0} a bien été \
 rajoutée".format(phasename), queue="main")

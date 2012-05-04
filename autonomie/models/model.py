@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 03 mai 2012 18:00:06 CEST
+# * Last Modified : ven. 04 mai 2012 18:15:40 CEST
 #
 # * Project : autonomie
 #
@@ -26,11 +26,13 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import validates
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.types import Integer as Integer_type
 from sqlalchemy.types import String as String_type
 
 from autonomie.models import DBBASE
+from autonomie.utils.security import Forbidden
 
 class CustomDateType(TypeDecorator):
     """
@@ -328,6 +330,8 @@ class Task(DBBASE):
                                         default=_get_date,
                                         onupdate=_get_date)
     IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
+
+    CAEStatus = Column('CAEStatus', String(10))
     statusPerson = Column("statusPerson",
                           ForeignKey('egw_accounts.account_id'))
     statusPersonAccount = relationship("User",
@@ -361,16 +365,17 @@ class Task(DBBASE):
         else:
             genre = "e"
         statuses = dict((
-            ("valid", u"Validé{genre}"),
-            ("abort", u"Annulé{genre}",),
-            ("paid", u"Paiement reçu",),
             ("draft", u"Brouillon modifié",),
+            ("wait", u"Validation demandée",),
+            ("valid", u"Validé{genre}"),
+            ('invalid', u"Invalidé{genre}",),
+            ("abort", u"Annulé{genre}",),
             ("geninv", u"Facture générée",),
             ("aboinv", u"Facture annulée",),
             ("aboest", u"Devis annulé",),
             ("sent", u"Document envoyé",),
-            ("wait", u"Validation demandée",),
-            ('invalid', u"Invalidé{genre}",)))
+            ("paid", u"Paiement reçu",),
+            ))
         status_str = statuses.get(self.CAEStatus, u"Statut inconnu").format(
                                                                 genre=genre)
         return status_str + suffix
@@ -386,6 +391,42 @@ class Task(DBBASE):
             Return True if the task has been validated
         """
         return self.CAEStatus in ('valid', 'paid', 'geninv', 'sent',)
+
+    @validates('CAEStatus')
+    def validate_status(self, key, status):
+        """
+            validate the caestatus change
+        """
+        message = u"Vous n'êtes pas autorisé à assigner ce statut à ce \
+document."
+        actual_status = self.CAEStatus
+        if status in ('draft', 'wait',):
+            if not actual_status in (None, 'draft', 'invalid'):
+                raise Forbidden(message)
+        elif status in ('valid',):
+            if not actual_status in ('wait',):
+                raise Forbidden(message)
+        elif status in ('invalid',):
+            if not actual_status in ('wait', 'valid',):
+                raise Forbidden(message)
+        elif status in ('aboest',):
+            if not actual_status in ('valid', 'sent', 'invalid',):
+                raise Forbidden(message)
+        elif status in ('geninv',):
+            if not actual_status in ('valid', 'sent',):
+                raise Forbidden(message)
+        elif status in ('sent',):
+            if not actual_status in ('valid',):
+                raise Forbidden(message)
+        elif status in ('paid',):
+            if not actual_status in ('valid', 'sent',):
+                raise Forbidden(message)
+        elif status in ('aboinv', 'abort',):
+            #TODO
+            pass
+        else:
+            assert False
+        return status
 
 class Estimation(Task):
     """
@@ -494,6 +535,18 @@ class Invoice(Task):
                       backref="invoice",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask",
                                 )
+    def is_tolate(self):
+        """
+            Return True if a payment is expected since more than
+            45 days
+        """
+        today = datetime.date.today()
+        elapsed = today - self.taskDate
+        if elapsed > datetime.timedelta(days=45):
+            tolate = True
+        else:
+            tolate = False
+        return self.CAEStatus in ('valid', 'sent',) and tolate
 
 class EstimationLine(DBBASE):
     """

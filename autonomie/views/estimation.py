@@ -243,3 +243,21 @@ class EstimationView(TaskView):
                     cid=self.company.id,
                     id=self.project.id,
                     taskid=taskid))
+
+    @view_config(route_name='estimation', request_param='action=delete')
+    def estimation_delete(self):
+        """
+            Delete an estimation
+        """
+        if self.task.is_deletable():
+            self.dbsession.delete(self.task)
+            message = u"Le devis {0} a bien été supprimé.".format(
+                                                            self.task.number)
+        else:
+            message = u"Vous n'êtes pas autorisé à supprimer ce devis."
+        self.request.session.flash(message)
+        return HTTPFound(route_path(
+                        'company_project',
+                        self.request,
+                        cid=self.company.id,
+                        id=self.project.id))

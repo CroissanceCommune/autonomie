@@ -2,13 +2,13 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    <a class="btn-primary" title='Éditer les informations de ce client'
+    <a title='Éditer les informations de ce client'
         href='${request.route_path("company_client", cid=company.id, id=client.id, _query=dict(action="edit"))}'>
         Éditer
     </a>
     </li>
     <li>
-    <a class="btn-primary" title='Revenir à la liste des clients'  href='${request.route_path("company_clients", cid=company.id)}'>
+    <a title='Revenir à la liste des clients'  href='${request.route_path("company_clients", cid=company.id)}'>
         Revenir à la liste
     </a>
     </li>

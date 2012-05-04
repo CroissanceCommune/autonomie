@@ -5,7 +5,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    <a class="btn-primary" title='Référencer un nouveau client' href='#new' onclick="$('#addform').dialog('open');">
+    <a title='Référencer un nouveau client' href='#new' onclick="$('#addform').dialog('open');">
         Ajouter un Client
     </a>
     </li>
@@ -64,7 +64,7 @@ ${pager(clients)}
     title:"Ajouter un client",
     open: function(event, ui){
     $('.ui-widget-overlay').css('width','100%');
-    $('.ui-widget-overlay').css('height','50%');
+    $('.ui-widget-overlay').css('height','100%');
     }
     });
     });

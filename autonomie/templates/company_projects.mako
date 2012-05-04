@@ -5,7 +5,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    <a class='btn-primary' title='Créer un nouveau projet' href='#new' onclick="$('#addform').dialog('open');">
+    <a title='Créer un nouveau projet' href='#new' onclick="$('#addform').dialog('open');">
         Ajouter un Projet
     </a>
     </li>

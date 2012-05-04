@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 27 mars 2012 11:16:54 CEST
+# * Last Modified : ven. 04 mai 2012 16:47:26 CEST
 #
 # * Project : autonomie
 #
@@ -25,3 +25,9 @@ class RootFactory(object):
                 ]
     def __init__(self, request):
         self.request = request
+
+class Forbidden(Exception):
+    """
+        Forbidden exception, used to raise a forbidden action error
+    """
+    pass

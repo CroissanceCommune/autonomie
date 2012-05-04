@@ -4,29 +4,56 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    <a class="btn-primary" title='Éditer les informations de ce client'
-        href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="edit"))}'>
-        Éditer
-    </a>
-    </li>
-    <li>
-    <a class="btn-primary" title='Revenir à la liste des clients'  href='${request.route_path("company_projects", cid=company.id)}'>
+    <a title='Revenir à la liste des clients'  href='${request.route_path("company_projects", cid=company.id)}'>
         Revenir à la liste
     </a>
     </li>
     <li>
-    <a class="btn-primary" title='Afficher le détail'  href="#" data-toggle='collapse' data-target='#project-description'>
+    <a title='Afficher le détail'  href="#" data-toggle='collapse' data-target='#project-description'>
         Afficher les détails
         </a>
     </li>
     <li>
-        <a class="btn-primary" title='Ajouter une phase dans le projet' href="${request.route_path("company_projects", cid=company.id)}">
+    <a title='Ajouter une phase dans le projet'  href="#" data-toggle='collapse' data-target='#project-addphase'>
             Ajouter une phase
         </a>
     </li>
 </ul>
 </%block>
 <%block name='content'>
+    %if request.params.get('showphase'):
+        <div class='row in collapse' id='project-addphase'>
+    %else:
+        <div class='row collapse' id='project-addphase'>
+    %endif
+        <div class='span4'>
+            <h3>Ajouter une phase</h3>
+            <form class='navbar-form' method='POST' action="${request.route_path('company_project', cid=company.id, id=project.id, _query=dict(action='addphase'))}">
+                <input type='text' name='phase' />
+                <button class='btn btn-primary' type='submit' name='submit' value='addphase'>Valider</button>
+            </form>
+            <br />
+        </div>
+    </div>
+    <div class='row collapse' id='project-description'>
+        <div class="span2">
+            <h3>Client</h3>
+            ${address(project.client, "client")}
+            %if project.type:
+                <b>Type de projet :</b> ${project.type}
+            % endif
+            <a class="btn btn-primary" title='Éditer les informations de ce client'
+                href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="edit"))}'>
+                Éditer
+            </a>
+            <br />
+            <br />
+        </div>
+        <div class="span5 offset2">
+            <h3>Définition du projet</h3>
+            ${project.definition}
+        </div>
+    </div>
 <style>
 .section-header{
     background-color: #F5F5F5;
@@ -36,19 +63,6 @@
 }
 </style>
 <div class='container'>
-    <div class='row collapse' id='project-description'>
-        <div class="span2">
-            <h3>Client</h3>
-            ${address(project.client, "client")}
-            %if project.type:
-                <b>Type de projet :</b> ${project.type}
-            % endif
-        </div>
-        <div class="span5 offset2">
-            <h3>Définition du projet</h3>
-            ${project.definition}
-        </div>
-    </div>
     %if len(project.phases)>1:
         <% section_css = 'collapse' %>
     %else:
@@ -98,6 +112,14 @@
                         <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask, _query=dict(action="duplicate"))}' title="Dupliquer le devis">
                             Dupliquer
                         </a>
+                        %if estimation.is_deletable():
+                            <a class='btn'
+                                href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask, _query=dict(action="delete"))}'
+                                title="Supprimer le devis"
+                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');">
+                                Supprimer
+                            </a>
+                        %endif
                     </td>
                 </tr>
             %endfor

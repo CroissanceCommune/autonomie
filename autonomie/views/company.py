@@ -25,6 +25,7 @@ from pyramid.httpexceptions import HTTPForbidden
 from deform import Form
 from autonomie.models import DBSESSION
 from autonomie.views.forms import CompanySchema
+from autonomie.views.forms.estimation import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.config import load_config
 
@@ -42,15 +43,23 @@ def company_index(request):
     try:
         company = avatar.get_company(cid)
         ret_val = dict(title=u"{0}".format(company.name,),
-                                            company=company)
-        all_statuses = []
+                       company=company)
+        all_tasks = []
+        all_invoices = []
         for project in company.projects:
-            for estimation in project.estimations:
-                all_statuses.extend(estimation.taskstatus)
-            for invoice in project.invoices:
-                all_statuses.extend(invoice.taskstatus)
-        sorted(all_statuses, key=lambda a:a.statusDate, reverse=True)
-        ret_val['status'] = all_statuses[:10]
+            all_tasks.extend(project.estimations)
+            all_tasks.extend(project.invoices)
+            all_invoices.extend(project.invoices)
+
+        all_tasks = sorted(all_tasks, key=lambda a:a.statusDate, reverse=True)
+        ret_val['tasks'] = all_tasks[:10]
+
+        elapsed_invoices = [TaskComputing(invoice) for invoice in all_invoices \
+                                    if invoice.is_tolate()]
+        elapsed_invoices = sorted(elapsed_invoices,
+                                  key=lambda a:a.model.taskDate,
+                                  reverse=True)
+        ret_val['elapsed_invoices'] = elapsed_invoices
 
     except KeyError:
         ret_val = HTTPForbidden()

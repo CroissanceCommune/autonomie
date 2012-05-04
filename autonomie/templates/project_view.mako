@@ -73,13 +73,13 @@
         % if phase.name != 'default':
             <h2 class='section-header'>
                         <a href="#" data-toggle='collapse' data-target='#phase_${phase.id}'>
-                            <div>
-                                ${phase.name}
-                            </div>
+                            <div>${phase.name}</div>
                         </a>
-                    </h2>
+            </h2>
+            <div class="${section_css}" id='phase_${phase.id}' style="margin:4px;">
+        %else:
+            <div  id='phase_${phase.id}' style="margin:4px;">
         % endif
-        <div class="${section_css}" id='phase_${phase.id}' style="margin:4px;">
             <h3 class='floatted' style="padding-right:10px">Devis</h3>
                 <a class='btn' href='${request.route_path("estimations", cid=company.id, id=project.id, _query=dict(phase=phase.id))}'>
                     <span class='ui-icon ui-icon-plusthick'></span>

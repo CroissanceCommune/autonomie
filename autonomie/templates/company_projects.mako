@@ -2,6 +2,7 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="searchform"/>
+<%namespace file="/base/utils.mako" import="urlbuild" />
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
@@ -10,7 +11,14 @@
     </a>
     </li>
     <li>
-        ${searchform()}
+        %if request.GET.get('archived') == '1':
+            <a title='Afficher les projets actifs' href='${urlbuild(dict(archived='0'))}'>Afficher les projets actifs</a>
+        %else:
+            <a title='Afficher les projets archivés' href='${urlbuild(dict(archived='1'))}'>Afficher les projets archivés</a>
+        %endif
+    </li>
+    <li>
+    ${searchform()}
     </li>
 </ul>
 </%block>
@@ -45,12 +53,21 @@
                                 <span class='ui-icon ui-icon-plusthick'></span>
                                 Facture
                             </a>
-                            <a class='btn'
-                                href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="archive"))}'
-                                onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
-                                <span class='ui-icon ui-icon-folder-collapsed'></span>
-                                Archiver
-                            </a>
+                            %if request.GET.get('archived') != '1':
+                                <a class='btn'
+                                    href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="archive"))}'
+                                    onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
+                                    <span class='ui-icon ui-icon-folder-collapsed'></span>
+                                    Archiver
+                                </a>
+                            %elif not project.invoices:
+                                <a class='btn'
+                                    href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="delete"))}'
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');">
+                                    <span class='ui-icon ui-icon-trash'></span>
+                                    Supprimer
+                                </a>
+                            %endif
                         </div>
                     </td>
                 </tr>

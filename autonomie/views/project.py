@@ -84,6 +84,8 @@ class ProjectView(ListView):
         search, sort, direction, current_page, items_per_page = \
                                                 self._get_pagination_args()
 
+        archived = self.request.params.get('archived', '0')
+
         company = self.get_current_company()
 
     #    toquery = (Project.id, Project.client, Project.name)
@@ -92,11 +94,13 @@ class ProjectView(ListView):
         if company is not None:
             projects = self.dbsession.query(Project).filter(
                                 Project.name.like(search+"%"),
-                                Project.id_company == company.id
+                                Project.id_company == company.id,
+                                Project.archived == archived
                         ).order_by(sort + " " + direction)
         else:
             projects = self.dbsession.query(Project).filter(
-                                Project.name.like(search+"%")
+                                Project.name.like(search+"%"),
+                                Project.archived == archived
                         ).order_by(sort + " " + direction)
 
         records = self._get_pagination(projects, current_page, items_per_page)
@@ -150,13 +154,10 @@ class ProjectView(ListView):
             except ValidationFailure, errform:
                 html_form = errform.render()
             else:
-                log.debug(app_datas)
                 project = merge_session_with_post(project, app_datas)
                 # The returned project is a persistent object
                 project = self.dbsession.merge(project)
                 self.dbsession.flush()
-                log.debug("Session has been flushed")
-                log.debug("Project id : %s" % project.id)
                 if edit:
                     message = u"Le projet <b>{0}</b> a été édité avec \
 succès".format(project.name)
@@ -226,3 +227,34 @@ rajoutée".format(phasename), queue="main")
         project_id = self.request.matchdict.get('id')
         return company.get_project(project_id)
 
+    @view_config(route_name="company_project",
+                request_param="action=archive")
+    def archive(self):
+        """
+            Archive the current project
+        """
+        company = self.get_current_company()
+        project = self.get_current_project(company)
+        project.archived = 1
+        self.dbsession.merge(project)
+        self.request.session.flash(u"Le projet '{0}' a été archivé".format(
+                                project.name)
+                                    )
+        return HTTPFound(route_path('company_projects',
+                            self.request,
+                            cid=company.id))
+
+    @view_config(route_name="company_project",
+                request_param="action=delete")
+    def delete(self):
+        """
+            Delete the current project
+        """
+        company = self.get_current_company()
+        project = self.get_current_project(company)
+        self.dbsession.delete(project)
+        self.request.session.flash(u"Le projet '{0}' a bien été \
+supprimé".format(project.name) )
+        return HTTPFound(route_path('company_projects',
+                            self.request,
+                            cid=company.id))

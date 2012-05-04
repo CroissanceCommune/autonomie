@@ -69,6 +69,10 @@ class ProjectView(ListView):
         All the projects views are grouped in this class
     """
     columns = ("code", "name")
+
+    def __init__(self, request):
+        ListView.__init__(self, request)
+
     @view_config(route_name='company_projects',
                  renderer='company_projects.mako',\
                  request_method='GET')
@@ -121,7 +125,6 @@ class ProjectView(ListView):
             * the company add form when an error has occured
         """
         company = self.get_current_company()
-
 
         project_id = self.request.matchdict.get('id')
         if project_id: # edition
@@ -177,10 +180,33 @@ succès".format(project.name)
                     html_form=html_form,
                     company=company)
 
-#    @view_config(route_name="company_project",
-#                 renderer="project_view.mako",
-#                 request_param="action=addphase"
-#                )
+    @view_config(route_name="company_project",
+                 request_param="action=addphase"
+                )
+    def add_phase(self):
+        """
+            Add a phase to the current project
+        """
+        company = self.get_current_company()
+        project = self.get_current_project(company)
+        if not self.request.params.get('phase'):
+            self.request.session.flash(u"Le nom de la phase est obligatoire",
+                                                                queue='error')
+            query_dict = dict(showphase=1)
+        else:
+            phasename = self.request.params.get('phase')
+            phase = Phase()
+            phase.name = phasename
+            phase.IDProject = project.id
+            self.dbsession.add(phase)
+            self.request.session.flash(u"La phase {0} a bien été \
+rajoutée".format(phasename), queue="main")
+            query_dict = dict()
+        return HTTPFound(route_path('company_project',
+                                self.request,
+                                cid=company.id,
+                                id=project.id,
+                                _query=query_dict))
 
     @view_config(route_name='company_project', renderer='project_view.mako')
     def company_project_view(self):
@@ -188,9 +214,15 @@ succès".format(project.name)
             Company's project view
         """
         company = self.get_current_company()
-        project_id = self.request.matchdict.get('id')
-        project = company.get_project(project_id)
+        project = self.get_current_project(company)
         return dict(title=project.name,
                     project=project,
                     company=company)
+
+    def get_current_project(self, company):
+        """
+            return current project or None
+        """
+        project_id = self.request.matchdict.get('id')
+        return company.get_project(project_id)
 

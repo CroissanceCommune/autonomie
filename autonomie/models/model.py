@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 03 mai 2012 17:41:16 CEST
+# * Last Modified : jeu. 03 mai 2012 18:00:06 CEST
 #
 # * Project : autonomie
 #
@@ -450,6 +450,12 @@ class Estimation(Task):
         duple.expenses = self.expenses
         duple.paymentDisplay = self.paymentDisplay
         return duple
+
+    def is_deletable(self):
+        """
+            Returns True if the estimation could be deleted
+        """
+        return self.CAEStatus not in ('geninv',)
 
 class Invoice(Task):
     """

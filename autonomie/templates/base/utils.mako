@@ -20,7 +20,7 @@
     %endif
 </%def>
 <%def name="searchform(label='Rechercher', html='')">
-    <form class='navbar-form pull-right form-search' id='search_form' method='GET'>
+    <form class='navbar-form pull-right form-search offset3' id='search_form' method='GET'>
         <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
         ${html|n}
         <button type="submit" class="btn">${label}</button>
@@ -29,7 +29,7 @@
 <%def name="urlbuild(args_dict)">
 <%doc>Returns an url preserving actual get args</%doc>
 <%
-get_args = request.GET
+get_args = request.GET.copy()
 get_args.update(args_dict)
 path = request.current_route_path()
 if get_args:
@@ -75,5 +75,27 @@ if get_args:
     </%doc>
     %if data is not UNDEFINED and data is not None:
         ${data.replace(u'\n', u'<br />')|n}
+    %endif
+</%def>
+<%def name="format_client(client, company)">
+    <%doc>
+        Render a client
+    </%doc>
+    %if client is not UNDEFINED and client is not None:
+        <a href="${request.route_path('company_client', cid=company.id, id=client.id)}"
+           title="Voir le client ${client.name}">
+            ${client.name}
+        </a>
+    %endif
+</%def>
+<%def name="format_project(project, company)">
+    <%doc>
+        Render a project
+    </%doc>
+    %if project is not UNDEFINED and project is not None:
+        <a href="${request.route_path('company_project', cid=company.id, id=project.id)}"
+            title="Voir le projet ${project.name}">
+            ${project.name}
+        </a>
     %endif
 </%def>

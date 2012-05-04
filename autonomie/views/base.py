@@ -200,12 +200,7 @@ class TaskView(BaseView):
         """
             Set all status related attributes
         """
-        caestatus = self.request.params['submit']
-        if caestatus in ('draft', 'wait'):
-            return caestatus
-        else:
-            return 'draft'
-
+        return self.request.params['submit']
 
     def get_tvas(self):
         """

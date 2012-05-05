@@ -60,7 +60,6 @@
                         <td>
                             ${format_amount(invoice.compute_tva())} €
                         </td>
-                        <td>
                     </tr>
                 % endfor
             </tbody>

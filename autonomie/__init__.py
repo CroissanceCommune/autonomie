@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 27 avril 2012 19:25:00 CEST
+# * Last Modified : ven. 04 mai 2012 21:11:11 CEST
 #
 # * Project : autonomie
 #
@@ -63,6 +63,7 @@ def main(global_config, **settings):
     config.add_route('company_client', '/company/{cid}/clients/{id}')
     config.add_route('company_projects', '/company/{cid}/projects')
     config.add_route('company_project', '/company/{cid}/projects/{id}')
+    config.add_route('company_invoices', '/company/{cid}/invoices')
     config.add_route('estimations',
                         '/company/{cid}/projects/{id}/estimations')
     config.add_route('estimation',

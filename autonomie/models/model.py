@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 04 mai 2012 18:15:40 CEST
+# * Last Modified : sam. 05 mai 2012 21:39:13 CEST
 #
 # * Project : autonomie
 #
@@ -55,6 +55,34 @@ class CustomDateType(TypeDecorator):
         else:
             return datetime.datetime.now()
 
+def format_to_taskdate(value):
+    """
+        format a datetime.date object to a 'taskdate' format:
+        an integer composed from a string YYYYmmdd
+        Sorry .... it's not my responsability
+    """
+    if value is None:
+        return None
+    elif isinstance(value, datetime.date):
+        return int("{:%Y%m%d}".format(value))
+    else:
+        return int(value)
+
+def format_from_taskdate(value):
+    """
+        return a datetime.date object from an integer in 'taskdate' format
+    """
+    if value:
+        value = str(value)
+        if len(value) == 8:
+            return datetime.date(int(value[0:4]),
+                                 int(value[4:6]),
+                                int(value[6:8]))
+        else:
+            return ""
+    else:
+        return ""
+
 class CustomDateType2(TypeDecorator):
     """
         Custom date type used because our database is using
@@ -63,24 +91,10 @@ class CustomDateType2(TypeDecorator):
     """
     impl = Integer_type
     def process_bind_param(self, value, dialect):
-        if value is None:
-            return None
-        elif isinstance(value, datetime.date):
-            return int("{:%Y%m%d}".format(value))
-        else:
-            return int(value)
+        return format_to_taskdate(value)
 
     def process_result_value(self, value, dialect):
-        if value:
-            value = str(value)
-            if len(value) == 8:
-                return datetime.date(int(value[0:4]),
-                                     int(value[4:6]),
-                                    int(value[6:8]))
-            else:
-                return ""
-        else:
-            return ""
+        return format_from_taskdate(value)
 
 class CustomFileType(TypeDecorator):
     """
@@ -547,6 +561,18 @@ class Invoice(Task):
         else:
             tolate = False
         return self.CAEStatus in ('valid', 'sent',) and tolate
+
+    def get_paymentmode_str(self):
+        """
+            Return a user-friendly string describing the payment Mode
+        """
+        if self.paymentMode == 'CHEQUE':
+            return u"par chèque"
+        elif self.paymentMode == 'VIREMENT':
+            return u"par virement"
+        else:
+            return u"mode paiement inconnu"
+
 
 class EstimationLine(DBBASE):
     """

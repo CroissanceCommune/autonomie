@@ -734,3 +734,9 @@ class TaskComputing:
             else:
                 return rest - sum(line.amount \
                         for line in self.model.payment_lines[:-1])
+
+    def get_client(self):
+        """
+            Returns the client associated to the given task
+        """
+        return self.model.project.client

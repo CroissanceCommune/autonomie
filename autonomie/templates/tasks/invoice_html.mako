@@ -12,7 +12,12 @@
         <strong>Aucune information d'historique ou de statut n'a pu être retrouvée</strong>
         <br />
     %endif
-    Vous ne pouvez plus modifier ce document car il a déjà été validé.
+        Vous ne pouvez plus modifier ce document car il a déjà été validé.
+        <br />
+    <a class='btn btn-primary' href='${request.route_path("invoice", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+        Télécharger la version PDF
+    </a>
+    <br />
 </div>
 
         <div style='border:1px solid #888'>

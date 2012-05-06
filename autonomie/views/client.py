@@ -81,7 +81,7 @@ class ClientView(ListView):
         form = get_client_form(path=route_path('company_clients', self.request,
                                                 cid=company.id))
 
-        return dict(title=u"Clients",
+        return dict(title=u"Liste des clients",
                     clients=records,
                     company=company,
                     html_form=form.render())
@@ -103,10 +103,12 @@ class ClientView(ListView):
         if client_id: #edition
             client = company.get_client(client_id)
             edit = True
+            title = u"Édition du client : {0}".format(client.name)
         else: #new entry
             client = Client()
             client.id_company = company.id
             edit = False
+            title = u"Ajout d'un nouveau client"
         form = get_client_form(edit=edit)
         if 'submit' in self.request.params:
             # form POSTed
@@ -118,19 +120,20 @@ class ClientView(ListView):
             else:
                 client = merge_session_with_post(client, app_datas)
                 client = self.dbsession.merge(client)
-                if edit:
-                    message = u"Le client <b>%s</b> a été édité avec succès" % (
-                                                                    client.name,)
-                else:
-                    message = u"Le client <b>%s</b> a été ajouté avec succès" % (
-                                                                    client.name,)
-                self.request.session.flash(message, queue='main')
                 self.dbsession.flush()
+                if edit:
+                    message = u"Le client <b>{0}</b> a été édité avec \
+succès".format(client.name)
+                else:
+                    #TODO : auto add a new project
+                    message = u"Le client <b>{0}</b> a été ajouté avec \
+succès".format(client.name)
+                self.request.session.flash(message, queue='main')
                 return HTTPFound(route_path('company_client', self.request,
                                                 cid=company.id, id=client.id))
         else:
             html_form = form.render(client.appstruct())
-        return dict(title=client.name,
+        return dict(title=title,
                     client=client,
                     html_form=html_form,
                     company=company)
@@ -144,6 +147,6 @@ class ClientView(ListView):
         company = self.get_current_company()
         client_id = self.request.matchdict.get('id')
         client = company.get_client(client_id)
-        return dict(title=client.name,
+        return dict(title=u"Client : {0}".format(client.name),
                 client=client,
                 company=company)

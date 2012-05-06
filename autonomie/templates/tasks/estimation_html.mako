@@ -29,8 +29,9 @@
         </a>
     %elif task.CAEStatus in ('sent', 'valid', 'wait'):
         <a class='btn btn-primary'
-            href='${request.route_path("estimation", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(action="geninv"))}'
-            title="Annuler ce devis">
+            href='${request.route_path("estimation", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(action="aboest"))}'
+            title="Annuler ce devis"
+            onclick="return confirm('Êtes-vous sûr de vouloir annuler ce devis ?');">
             Annuler/Indiquer sans suite
         </a>
     %endif

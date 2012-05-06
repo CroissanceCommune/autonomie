@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : dim. 06 mai 2012 22:24:02 CEST
+# * Last Modified : lun. 07 mai 2012 00:00:33 CEST
 #
 # * Project : autonomie
 #
@@ -429,7 +429,7 @@ document."
             if not actual_status in ('wait', 'valid',):
                 raise Forbidden(message)
         elif status in ('aboest',):
-            if not actual_status in ('valid', 'sent', 'invalid',):
+            if not actual_status in ('valid', 'sent', 'invalid', 'wait'):
                 raise Forbidden(message)
         elif status in ('geninv',):
             if not actual_status in ('valid', 'sent',):

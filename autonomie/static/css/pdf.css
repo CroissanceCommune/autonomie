@@ -50,6 +50,7 @@ html{
   background-color:#f6f6f6;
   font-weight:bold;
   border:1px solid #ddd;
+  -pdf-keep-with-next:true;
 }
 .content{
   padding:3px;

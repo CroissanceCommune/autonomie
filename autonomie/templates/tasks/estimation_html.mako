@@ -12,8 +12,12 @@
         <strong>Aucune information d'historique ou de statut n'a pu être retrouvée pour ce devis.</strong>
         <br />
     %endif
+    %if task.CAEStatus in ('sent', 'valid'):
         Vous ne pouvez plus modifier ce document car il a déjà été validé.
-        <br />
+    %elif task.CAEStatus in ('wait',):
+        Vous ne pouvez plus modifier ce document car il est en attente de validation.
+    %endif
+    <br />
     <a class='btn btn-primary' href='${request.route_path("estimation", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
         Télécharger la version PDF
     </a>
@@ -23,10 +27,11 @@
             title="Générer les factures correspondantes">
             Générer les factures
         </a>
+    %elif task.CAEStatus in ('sent', 'valid', 'wait'):
         <a class='btn btn-primary'
             href='${request.route_path("estimation", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(action="geninv"))}'
             title="Annuler ce devis">
-            Indiquer sans suite
+            Annuler/Indiquer sans suite
         </a>
     %endif
     <br />

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 07 mai 2012 00:00:33 CEST
+# * Last Modified : lun. 07 mai 2012 01:44:58 CEST
 #
 # * Project : autonomie
 #
@@ -135,9 +135,9 @@ def _get_date():
     return int(time.time())
 
 company_employee = Table('coop_company_employee', DBBASE.metadata,
-    Column("IDCompany", Integer(11), ForeignKey('coop_company.IDCompany')),
+    Column("IDCompany", Integer, ForeignKey('coop_company.IDCompany')),
     # IDEmployee est identique dans la table coop_employee
-    Column("IDEmployee", Integer(11), ForeignKey('egw_accounts.account_id')),
+    Column("IDEmployee", Integer, ForeignKey('egw_accounts.account_id')),
     autoload=True)
 
 class Company(DBBASE):
@@ -164,7 +164,7 @@ class Company(DBBASE):
     """
     __tablename__ = 'coop_company'
     __table_args__ = {'autoload':True}
-    id = Column("IDCompany", Integer(11), primary_key=True)
+    id = Column("IDCompany", Integer, primary_key=True)
     clients = relationship("Client",
                             order_by="Client.id",
                             backref='company')
@@ -247,7 +247,7 @@ class User(DBBASE):
     """
     __tablename__ = 'egw_accounts'
     __table_args__ = {'autoload':True}
-    id = Column('account_id', Integer(11), primary_key=True)
+    id = Column('account_id', Integer, primary_key=True)
     login = Column('account_lid', String(64))
     pwd = Column("account_pwd", String(100))
     lastname = Column("account_lastname", String(50))
@@ -298,7 +298,7 @@ class Employee(DBBASE):
     """
     __tablename__ = 'coop_employee'
     __table_args__ = {'autoload':True}
-    id = Column("IDEmployee", Integer(11), primary_key=True)
+    id = Column("IDEmployee", Integer, primary_key=True)
     creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
     updateDate = Column("updateDate", CustomDateType(11),
@@ -338,7 +338,7 @@ class Task(DBBASE):
     """
     __tablename__ = 'coop_task'
     __table_args__ = {'autoload':True}
-    IDTask = Column(Integer(11), primary_key=True)
+    IDTask = Column(Integer, primary_key=True)
     taskDate = Column("taskDate", CustomDateType2(11))
     creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
@@ -607,7 +607,7 @@ class EstimationLine(DBBASE):
     """
     __tablename__ = 'coop_estimation_line'
     __table_args__ = {'autoload':True}
-    id = Column("IDWorkLine", Integer(11), primary_key=True)
+    id = Column("IDWorkLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
@@ -660,7 +660,7 @@ class InvoiceLine(DBBASE):
     """
     __tablename__ = 'coop_invoice_line'
     __table_args__ = {'autoload':True}
-    id = Column("IDInvoiceLine", Integer(11), primary_key=True)
+    id = Column("IDInvoiceLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
     creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
@@ -760,7 +760,7 @@ class Client(DBBASE):
     __tablename__ = 'coop_customer'
     __table_args__ = {'autoload':True}
     id = Column('code', String(4), primary_key=True)
-    id_company = Column("IDCompany", Integer(11),
+    id_company = Column("IDCompany", Integer,
                                     ForeignKey('coop_company.IDCompany'))
     creationDate = Column("creationDate", CustomDateType(11),
                                             default=_get_date)
@@ -790,8 +790,8 @@ class Project(DBBASE):
     """
     __tablename__ = 'coop_project'
     __table_args__ = {'autoload':True}
-    id = Column('IDProject', Integer(11), primary_key=True)
-    id_company = Column("IDCompany", Integer(11),
+    id = Column('IDProject', Integer, primary_key=True)
+    id_company = Column("IDCompany", Integer,
                                     ForeignKey('coop_company.IDCompany'))
     code_client = Column("customerCode", String(4),
                                     ForeignKey('coop_customer.code'))
@@ -847,8 +847,8 @@ class Phase(DBBASE):
     """
     __tablename__ = 'coop_phase'
     __table_args__ = {'autoload':True}
-    id = Column('IDPhase', Integer(11), primary_key=True)
-    id_project = Column('IDProject', Integer(11),
+    id = Column('IDPhase', Integer, primary_key=True)
+    id_project = Column('IDProject', Integer,
                         ForeignKey('coop_project.IDProject'))
     project = relationship("Project", backref="phases")
     creationDate = Column("creationDate", CustomDateType(11),
@@ -879,8 +879,8 @@ class TaskStatus(DBBASE):
     """
     __tablename__ = 'coop_task_status'
     __table_args__ = {'autoload':True}
-    id = Column("id", Integer(11), primary_key=True)
-    id_task = Column('IDTask', Integer(11),
+    id = Column("id", Integer, primary_key=True)
+    id_task = Column('IDTask', Integer,
                         ForeignKey('coop_task.IDTask'))
     task = relationship("Task", backref="taskstatus")
 
@@ -922,10 +922,10 @@ class ManualInvoice(DBBASE):
     created_at = Column("created_at", DateTime(), default=datetime.datetime)
     updated_at = Column("updated_at", DateTime(), default=datetime.datetime,
                                                   onupdate=datetime.datetime)
-    id = Column('id', BigInteger(20), primary_key=True)
+    id = Column('id', BigInteger, primary_key=True)
     client_id = Column('client_id', String(5),
                             ForeignKey('coop_customer.code'))
-    company_id = Column('compagnie_id', BigInteger(20),
+    company_id = Column('compagnie_id', BigInteger,
                             ForeignKey('coop_company.IDCompany'))
     client = relationship("Client",
                 primaryjoin="Client.id==ManualInvoice.client_id",
@@ -935,10 +935,10 @@ class ManualInvoice(DBBASE):
                   backref='manual_invoices')
     taskDate = Column('date_emission', Date())
     description = Column('libelle', String(255))
-    officialNumber = Column('sequence_id', BigInteger(50))
+    officialNumber = Column('sequence_id', BigInteger)
     paymentMode = Column("paiement_comment", String(255))
     statusDate = Column("paiement_date", Date())
-    payment_ok = Column("paiement_ok", Integer(1))
+    payment_ok = Column("paiement_ok", Integer)
 
     def is_paid(self):
         """

@@ -56,7 +56,6 @@ class EstimationView(TaskView):
     tasknumber_tmpl = "{0}_{1}_D{2}_{3}"
     route = "estimation"
 
-
     def set_lines(self):
         """
             set the lines attributes
@@ -77,7 +76,7 @@ class EstimationView(TaskView):
 
     @view_config(route_name="estimations", renderer='tasks/form.mako')
     @view_config(route_name='estimation', renderer='tasks/form.mako')
-    def estimation_form(self):
+    def form(self):
         """
             Return the estimation edit view
         """
@@ -178,7 +177,7 @@ class EstimationView(TaskView):
             estimation.IDEmployee = self.user.id
             return estimation
 
-    def html(self):
+    def _html(self):
         """
             Returns an html version of the current estimation
         """
@@ -196,7 +195,7 @@ class EstimationView(TaskView):
     @view_config(route_name='estimation',
                 renderer='tasks/estimation_html.mako',
                 request_param='view=html')
-    def html_estimation(self):
+    def html(self):
         """
             Returns a page displaying an html rendering of the given task
         """
@@ -205,21 +204,21 @@ class EstimationView(TaskView):
                     title=title,
                     task=self.task,
                     company=self.company,
-                    html_datas=self.html()
+                    html_datas=self._html()
                     )
 
     @view_config(route_name='estimation',
                 request_param='view=pdf')
-    def estimation_pdf(self):
+    def pdf(self):
         """
             Returns a page displaying an html rendering of the given task
         """
         filename = "{0}.pdf".format(self.task.number)
-        write_pdf(self.request, filename, self.html())
+        write_pdf(self.request, filename, self._html())
         return self.request.response
 
     @view_config(route_name='estimation', request_param='action=duplicate')
-    def estmation_duplicate(self):
+    def duplicate(self):
         """
             Duplicates current estimation
         """
@@ -253,7 +252,7 @@ class EstimationView(TaskView):
                     taskid=taskid))
 
     @view_config(route_name='estimation', request_param='action=delete')
-    def estimation_delete(self):
+    def delete(self):
         """
             Delete an estimation
         """
@@ -271,7 +270,7 @@ class EstimationView(TaskView):
                         id=self.project.id))
 
     @view_config(route_name='estimation', request_param='action=geninv')
-    def status_change(self):
+    def gen_invoices(self):
         """
             Called when an estimation status is changed
             ( when no form is displayed : the estimation itself is not
@@ -385,6 +384,20 @@ class EstimationView(TaskView):
         self.dbsession.merge(invoice)
         self.request.session.flash(u"Vos factures ont bien été générées",
                                 queue='main')
+        return HTTPFound(route_path(
+                        'company_project',
+                        self.request,
+                        cid=self.company.id,
+                        id=self.project.id))
+
+    @view_config(route_name='estimation', request_param='action=aboest')
+    def abort(self):
+        """
+            Abort current estimation
+        """
+        self.task.CAEStatus = "aboest"
+        self.request.session.flash(u"Le devis {0} a été annulé \
+(indiqué sans suite).".format(self.task.number))
         return HTTPFound(route_path(
                         'company_project',
                         self.request,

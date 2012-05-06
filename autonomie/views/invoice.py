@@ -24,7 +24,9 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
 
-from autonomie.models.model import Invoice, Project
+from autonomie.models.model import Invoice
+from autonomie.models.model import Project
+from autonomie.models.model import ManualInvoice
 from autonomie.models.model import InvoiceLine
 from autonomie.models.model import format_to_taskdate
 from autonomie.views.forms.estimation import InvoiceSchema
@@ -41,6 +43,39 @@ from .base import ListView
 
 log = logging.getLogger(__file__)
 
+class ManualInvoiceComputing:
+    """
+        wrap manual invoices to allow computing
+    """
+    def __init__(self, model):
+        self.model = model
+
+    def compute_totalht(self):
+        """
+            Compute ht total
+        """
+        return int(self.model.montant_ht * 100)
+
+    def compute_tva(self):
+        """
+            compute_tva
+        """
+        if self.model.tva:
+            totalht = self.compute_totalht()
+            if self.model.tva < 0 :
+                return int(float(self.model.tva) * 100)
+            else:
+                tva = max(int(self.model.tva), 0)
+                return int(float(totalht) * (tva / 10000.0))
+        else:
+            return 0
+
+    def get_client(self):
+        """
+            returns the associated client
+        """
+        return self.model.client
+
 class InvoiceView(TaskView, ListView):
     """
         All invoice related views
@@ -54,7 +89,7 @@ class InvoiceView(TaskView, ListView):
     taskname_tmpl = u"Facture {0}"
     tasknumber_tmpl = "{0}_{1}_F{2}_{3}"
     route = "invoice"
-    columns = ('coop_invoice_taskDate', 'coop_invoice_name', 'coop_Client_name')
+    columns = ('coop_invoice_taskDate', 'coop_invoice_number', 'coop_Client_name')
     default_sort = 'coop_task_taskDate'
     default_direction = 'desc'
 
@@ -154,26 +189,41 @@ class InvoiceView(TaskView, ListView):
             client = None
         paid = self.request.params.get('paid', 'both')
         year = self.request.params.get('year', current_year)
-        officialNumber = self.request.params.get('officialNumber')
 
         invoices = self.dbsession.query(Invoice).join(
                         Invoice.project).join(
                                 Project.client).filter(
                                 Project.id_company==self.company.id )
+        manual_invoices = self.dbsession.query(ManualInvoice).join(
+                                ManualInvoice.client).filter(
+                             ManualInvoice.company_id==self.company.id)
 
-        years = sorted(set([i.taskDate.year for i in invoices.all()]))
+        years = sorted(
+                    set([i.taskDate.year for i in invoices.all()]).union(
+                     set([i.taskDate.year for i in manual_invoices.all()]))
+                )
 
-        if officialNumber:
-            invoices = invoices.filter(Invoice.officialNumber == officialNumber)
+        if search:
+            invoices = invoices.filter(
+                                Invoice.officialNumber == search)
+            manual_invoices = manual_invoices.filter(
+                                ManualInvoice.officialNumber == search)
         #If we search an invoice number, we don't need more filter
         else:
             if client:
                 invoices = invoices.filter(Project.code_client == client)
+                manual_invoices = manual_invoices.filter(
+                                ManualInvoice.client_id == client)
             if paid == 'paid':
                 invoices = invoices.filter(Invoice.CAEStatus == 'paid')
+                manual_invoices = manual_invoices.filter(
+                                ManualInvoice.payment_ok==1)
             elif paid == 'notpaid':
-                invoices = invoices.filter(Invoice.CAEStatus.in_(('sent', 'valid',)
+                invoices = invoices.filter(Invoice.CAEStatus.in_(('sent',
+                                                                  'valid',)
                                             ))
+                manual_invoices = manual_invoices.filter(
+                                ManualInvoice.payment_ok==0)
             else:
                 invoices = invoices.filter(Invoice.CAEStatus.in_(('paid',
                                                               'sent',
@@ -187,10 +237,14 @@ class InvoiceView(TaskView, ListView):
                                 format_to_taskdate(fday),
                                 format_to_taskdate(lday))
                         )
+                manual_invoices = manual_invoices.filter(
+                        ManualInvoice.taskDate.between(fday, lday))
 
 
         invoices = invoices.order_by(sort + " " + direction).all()
-        invoices = [TaskComputing(invoice) for invoice in invoices]
+        invoices = [TaskComputing(i) for i in invoices]
+        invoices.extend([ManualInvoiceComputing(i)
+                                        for i in manual_invoices.all()])
         records = self._get_pagination(invoices, current_page, items_per_page)
         return dict(title=u"Factures",
                     company=self.company,
@@ -198,15 +252,15 @@ class InvoiceView(TaskView, ListView):
                     current_client=client,
                     current_year=year,
                     current_paid=paid,
+                    manual_invoices=manual_invoices,
                     years=years)
 
-    def set_sequencenumber(self):
+    def get_sequencenumber(self):
         """
             set the sequence number
             don't know really if this column matters
         """
-        num = len(self.project.invoices) + 1
-        self.task.sequenceNumber = num
+        return len(self.project.invoices) + 1
 
     def remove_lines_from_session(self):
         """
@@ -276,8 +330,51 @@ class InvoiceView(TaskView, ListView):
         """
             Returns a page displaying an html rendering of the given task
         """
-        #TODO
         filename = "{0}.pdf".format(self.task.number)
         write_pdf(self.request, filename, self.html())
         return self.request.response
 
+    @view_config(route_name='company_treasury',
+                 renderer='company_treasury.mako')
+    def company_treasury(self):
+        """
+            View for the treasury view
+        """
+        current_year = datetime.date.today().year
+        year = self.request.params.get('year', current_year)
+        today = datetime.date.today()
+        log.debug("Getting invoices")
+        invoices = self.dbsession.query(Invoice).join(
+                        Invoice.project).filter(
+                                Project.id_company==self.company.id
+                                       ).filter(
+                                Invoice.CAEStatus=='paid'
+                                       )
+        manual_invoices = self.dbsession.query(ManualInvoice).filter(
+                                ManualInvoice.company_id==self.company.id
+                                        ).filter(
+                                    ManualInvoice.payment_ok==1)
+        years = sorted(set([i.taskDate.year for i in invoices.all()]))
+
+        fday = datetime.date(int(year), 1, 1)
+        lday = datetime.date(int(year) + 1, 1, 1)
+        invoices = invoices.filter(
+                                Invoice.taskDate.between(
+                                        format_to_taskdate(fday),
+                                        format_to_taskdate(lday))
+                                       ).order_by(Invoice.taskDate)
+        manual_invoices = manual_invoices.filter(
+                                ManualInvoice.taskDate.between(
+                                        format_to_taskdate(fday),
+                                        format_to_taskdate(lday))
+                                        ).order_by(ManualInvoice.taskDate)
+        invoices = [TaskComputing(i) for i in invoices.all()]
+        invoices.extend([ManualInvoiceComputing(i)
+                            for i in manual_invoices.all()])
+        return dict(
+                title=u"Trésorerie",
+                invoices=invoices,
+                company=self.company,
+                years=years,
+                current_year=year,
+                today=datetime.date.today())

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 05 mai 2012 21:39:13 CEST
+# * Last Modified : dim. 06 mai 2012 22:24:02 CEST
 #
 # * Project : autonomie
 #
@@ -22,11 +22,15 @@ from hashlib import md5
 from sqlalchemy import Table
 from sqlalchemy import Column
 from sqlalchemy import Integer
+from sqlalchemy import BigInteger
+from sqlalchemy import Date
+from sqlalchemy import DateTime
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
+from sqlalchemy.orm import backref
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.types import Integer as Integer_type
 from sqlalchemy.types import String as String_type
@@ -249,8 +253,9 @@ class User(DBBASE):
     lastname = Column("account_lastname", String(50))
     firstname = Column("account_firstname", String(50))
     email = Column("account_email", String(100))
-    companies = relationship("Company", secondary=company_employee,
-            backref="employees")
+    companies = relationship("Company",
+                             secondary=company_employee,
+                             backref="employees")
 
     @staticmethod
     def _encode_pass(password):
@@ -476,11 +481,12 @@ class Estimation(Task):
 
     IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
     project = relationship("Project",
-                            backref='estimations',
+                            backref=backref('estimations',
+                                            order_by='Estimation.taskDate')
                             )
     phase =  relationship("Phase",
-                          backref="estimations",
-                          order_by='Estimation.sequenceNumber')
+                          backref=backref("estimations",
+                          order_by='Estimation.taskDate'))
 
     def duplicate(self):
         """
@@ -541,10 +547,13 @@ class Invoice(Task):
 
     IDEstimation = Column("IDEstimation", ForeignKey('coop_estimation.IDTask'))
     IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
-    project = relationship("Project", backref='invoices')
+    project = relationship("Project", backref=backref('invoices',
+                                            order_by='Invoice.taskDate')
+                            )
     phase =  relationship("Phase",
-                          backref="invoices",
-                          order_by='Invoice.sequenceNumber')
+                          backref=backref("invoices",
+                                          order_by='Invoice.taskDate')
+                          )
     estimation = relationship("Estimation",
                       backref="invoice",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask",
@@ -561,6 +570,12 @@ class Invoice(Task):
         else:
             tolate = False
         return self.CAEStatus in ('valid', 'sent',) and tolate
+
+    def is_paid(self):
+        """
+            Return True if the invoice is paid
+        """
+        return self.CAEStatus == 'paid'
 
     def get_paymentmode_str(self):
         """
@@ -672,6 +687,19 @@ class InvoiceLine(DBBASE):
                 )
         return labels.get(self.unity, '-')
 
+    def duplicate(self):
+        """
+            duplicate an estimationline
+        """
+        newone = InvoiceLine()
+        newone.rowIndex = self.rowIndex
+        newone.cost = self.cost
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        return newone
+
+
 
 class PaymentLine(DBBASE):
     """
@@ -693,8 +721,8 @@ class PaymentLine(DBBASE):
                                         default=_get_date,
                                         onupdate=_get_date)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
-    estimation = relationship("Estimation", backref='payment_lines',
-                    order_by='PaymentLine.rowIndex')
+    estimation = relationship("Estimation", backref=backref('payment_lines',
+                    order_by='PaymentLine.rowIndex'))
     paymentDate = Column("paymentDate", CustomDateType2(11))
 
     def duplicate(self):
@@ -795,6 +823,18 @@ class Project(DBBASE):
                 return invoice
         raise KeyError("No such task in this project")
 
+    def is_archived(self):
+        """
+            Return True if the project is archived
+        """
+        return self.archived == 1
+
+    def is_deletable(self):
+        """
+            Return True if this project could be deleted
+        """
+        return self.archived == 1 and not self.invoices
+
 class Phase(DBBASE):
     """
         Phase d'un projet
@@ -857,3 +897,81 @@ class Config(DBBASE):
     app = Column("config_app", String(255), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
+
+class ManualInvoice(DBBASE):
+    """
+        symf_facture_manuelle
+        `id` bigint(20) NOT NULL auto_increment,
+        `sequence_id` bigint(20) NOT NULL,
+        `libelle` varchar(255) character set utf8 default NULL,
+        `montant_ht` decimal(18,2) default NULL,
+        `tva` decimal(18,2) default NULL,
+        `paiement_ok` tinyint(1) default NULL,
+        `paiement_date` date default NULL,
+        `paiement_comment` varchar(255) character set utf8 default NULL,
+        `client_id` varchar(5) character set utf8 NOT NULL,
+        `date_emission` date default NULL,
+        `compagnie_id` bigint(20) NOT NULL,
+        `created_at` datetime NOT NULL,
+        `updated_at` datetime NOT NULL,
+        PRIMARY KEY  (`id`),
+        UNIQUE KEY `id` (`id`)
+    """
+    __tablename__ = 'symf_facture_manuelle'
+    __table_args__ = {'autoload':True}
+    created_at = Column("created_at", DateTime(), default=datetime.datetime)
+    updated_at = Column("updated_at", DateTime(), default=datetime.datetime,
+                                                  onupdate=datetime.datetime)
+    id = Column('id', BigInteger(20), primary_key=True)
+    client_id = Column('client_id', String(5),
+                            ForeignKey('coop_customer.code'))
+    company_id = Column('compagnie_id', BigInteger(20),
+                            ForeignKey('coop_company.IDCompany'))
+    client = relationship("Client",
+                primaryjoin="Client.id==ManualInvoice.client_id",
+                  backref='manual_invoices')
+    company = relationship("Company",
+                primaryjoin="Company.id==ManualInvoice.company_id",
+                  backref='manual_invoices')
+    taskDate = Column('date_emission', Date())
+    description = Column('libelle', String(255))
+    officialNumber = Column('sequence_id', BigInteger(50))
+    paymentMode = Column("paiement_comment", String(255))
+    statusDate = Column("paiement_date", Date())
+    payment_ok = Column("paiement_ok", Integer(1))
+
+    def is_paid(self):
+        """
+            return True if it's paid
+        """
+        return self.payment_ok == 1
+
+    def get_paymentmode_str(self):
+        """
+            Return the payment mode string
+        """
+        if self.paymentMode == 'chèque':
+            return u"par chèque"
+        elif self.paymentMode == 'virement':
+            return u"par virement"
+        else:
+            return u""
+
+    def is_tolate(self):
+        today = datetime.date.today()
+        elapsed = today - self.taskDate
+        return not self.is_paid() and elapsed > datetime.timedelta(days=45)
+
+    @property
+    def number(self):
+        """
+            return the invoice number
+        """
+        return u"FACT_MAN_{0}".format(self.officialNumber)
+
+    @property
+    def project(self):
+        """
+            return None
+        """
+        return None

@@ -2,10 +2,6 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    <a title='Éditer les informations de ce client'
-        href='${request.route_path("company_client", cid=company.id, id=client.id, _query=dict(action="edit"))}'>
-        Éditer
-    </a>
     </li>
     <li>
     <a title='Revenir à la liste des clients'  href='${request.route_path("company_clients", cid=company.id)}'>
@@ -27,6 +23,11 @@
                     % endif
                 % endfor
             </dl>
+        <a title='Éditer les informations de ce client'
+            href='${request.route_path("company_client", cid=company.id, id=client.id, _query=dict(action="edit"))}'
+            class='btn btn-primary'>
+            Éditer
+        </a>
         </div>
         <div class="span2 offset1">
             <h3>Contact principal</h3>
@@ -91,28 +92,47 @@
             </thead>
             <tbody>
                 % for project in client.projects:
-                    <tr class='tableelement' id="${project.id}">
+                    %if project.is_archived():
+                        <tr class='tableelement' style='background-color:#999' id="${project.id}">
+                    %else:
+                        <tr class='tableelement' id="${project.id}">
+                    %endif
                         <td>${project.code}</td>
-                        <td>${project.name}</td>
+                        <td>${project.name}
+                            %if project.is_archived():
+                                (ce projet a été archivé)
+                            %endif
+                        </td>
                         <td>
-                            <div class='btn-group'>
-                                <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
-                                    <span class='ui-icon ui-icon-pencil'></span>
-                                    Voir
-                                </a>
-                                <a class='btn' href='${request.route_path("estimations", cid=company.id, id=project.id)}'>
-                                    <span class='ui-icon ui-icon-plusthick'></span>
-                                    Devis
-                                </a>
-                                <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
-                                    <span class='ui-icon ui-icon-plusthick'></span>
-                                    Facture
-                                </a>
-                                <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
+                        <div class='btn-group'>
+                            <a class='btn' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
+                                <span class='ui-icon ui-icon-pencil'></span>
+                                Voir
+                            </a>
+                            <a class='btn' href='${request.route_path("estimations", cid=company.id, id=project.id)}'>
+                                <span class='ui-icon ui-icon-plusthick'></span>
+                                Devis
+                            </a>
+                            <a class='btn' href='${request.route_path("invoices", cid=company.id, id=project.id)}'>
+                                <span class='ui-icon ui-icon-plusthick'></span>
+                                Facture
+                            </a>
+                            %if not project.is_archived():
+                                <a class='btn'
+                                    href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="archive"))}'
+                                    onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
                                     <span class='ui-icon ui-icon-folder-collapsed'></span>
                                     Archiver
                                 </a>
-                            </div>
+                            %elif project.is_deletable():
+                                <a class='btn'
+                                    href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="delete"))}'
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');">
+                                    <span class='ui-icon ui-icon-trash'></span>
+                                    Supprimer
+                                </a>
+                            %endif
+                        </div>
                         </td>
                     </tr>
 

@@ -16,8 +16,8 @@
 </ul>
 </%block>
 <%block name='content'>
-<div class='container'>
-    <div class='span5'>
+<div class='row'>
+    <div class='span6 offset3'>
         ${html_form|n}
     </div>
 </div>

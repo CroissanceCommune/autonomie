@@ -60,7 +60,7 @@
                                     <span class='ui-icon ui-icon-folder-collapsed'></span>
                                     Archiver
                                 </a>
-                            %elif not project.invoices:
+                            %elif project.is_deletable():
                                 <a class='btn'
                                     href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="delete"))}'
                                     onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');">

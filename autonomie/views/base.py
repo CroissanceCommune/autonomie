@@ -68,18 +68,20 @@ class ListView(BaseView):
         Base view object for listing elements
     """
     columns = ()
+    default_sort = 'name'
+    default_direction = 'asc'
     def _get_pagination_args(self):
         """
             Returns arguments for element listing
         """
         search = self.request.params.get("search", "")
-        sort = self.request.params.get('sort', 'name')
+        sort = self.request.params.get('sort', self.default_sort)
         if sort not in self.columns:
-            sort = "name"
+            sort = self.default_sort
 
-        direction = self.request.params.get("direction", 'asc')
+        direction = self.request.params.get("direction", self.default_direction)
         if direction not in ['asc', 'desc']:
-            direction = 'asc'
+            direction = self.default_direction
 
         items_per_page = int(self.request.params.get('nb', 10))
 
@@ -146,7 +148,10 @@ class TaskView(BaseView):
             Returns the current project
         """
         project_id = self.request.matchdict.get('id')
-        return company.get_project(project_id)
+        try:
+            return company.get_project(project_id)
+        except:
+            return None
 
     def add_default_phase(self):
         """

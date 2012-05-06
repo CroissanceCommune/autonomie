@@ -110,7 +110,7 @@ class ProjectView(ListView):
                                 path=route_path('company_projects',
                                                 self.request,
                                                 cid=company.id))
-        return dict(title=u"Projets",
+        return dict(title=u"Liste des projets",
                     projects=records,
                     company=company,
                     html_form=form.render())
@@ -135,11 +135,13 @@ class ProjectView(ListView):
             project = company.get_project(project_id)
             edit = True
             default_client = project.client
+            title = u"Édition du projet : {0}".format(project.name)
         else: # new project
             project = Project()
             project.id_company = company.id
             edit = False
             default_client = None
+            title = u"Ajout d'un nouveau projet"
 
         clients = company.clients
         form = get_project_form(clients,
@@ -176,7 +178,7 @@ succès".format(project.name)
                                             id=project.id))
         else:
             html_form = form.render(project.appstruct())
-        return dict(title=project.name,
+        return dict(title=title,
                     project=project,
                     html_form=html_form,
                     company=company)
@@ -216,7 +218,7 @@ rajoutée".format(phasename), queue="main")
         """
         company = self.get_current_company()
         project = self.get_current_project(company)
-        return dict(title=project.name,
+        return dict(title=u"Projet : {project.name}".format(project=project),
                     project=project,
                     company=company)
 
@@ -238,11 +240,9 @@ rajoutée".format(phasename), queue="main")
         project.archived = 1
         self.dbsession.merge(project)
         self.request.session.flash(u"Le projet '{0}' a été archivé".format(
-                                project.name)
+                                project.name), queue='main'
                                     )
-        return HTTPFound(route_path('company_projects',
-                            self.request,
-                            cid=company.id))
+        return HTTPFound(self.request.referer)
 
     @view_config(route_name="company_project",
                 request_param="action=delete")
@@ -255,6 +255,4 @@ rajoutée".format(phasename), queue="main")
         self.dbsession.delete(project)
         self.request.session.flash(u"Le projet '{0}' a bien été \
 supprimé".format(project.name) )
-        return HTTPFound(route_path('company_projects',
-                            self.request,
-                            cid=company.id))
+        return HTTPFound(self.request.referer)

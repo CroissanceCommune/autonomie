@@ -16,15 +16,17 @@
     Invoice views
 """
 import logging
+import datetime
+
 from deform import ValidationFailure
 from deform import Form
-
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
 
-from autonomie.models.model import Invoice
+from autonomie.models.model import Invoice, Project
 from autonomie.models.model import InvoiceLine
+from autonomie.models.model import format_to_taskdate
 from autonomie.views.forms.estimation import InvoiceSchema
 from autonomie.views.forms.estimation import get_invoice_appstruct
 from autonomie.views.forms.estimation import get_invoice_dbdatas
@@ -35,10 +37,11 @@ from autonomie.utils.pdf import write_pdf
 from autonomie.utils.config import load_config
 
 from .base import TaskView
+from .base import ListView
 
 log = logging.getLogger(__file__)
 
-class InvoiceView(TaskView):
+class InvoiceView(TaskView, ListView):
     """
         All invoice related views
         form
@@ -51,6 +54,9 @@ class InvoiceView(TaskView):
     taskname_tmpl = u"Facture {0}"
     tasknumber_tmpl = "{0}_{1}_F{2}_{3}"
     route = "invoice"
+    columns = ('coop_invoice_taskDate', 'coop_invoice_name', 'coop_Client_name')
+    default_sort = 'coop_task_taskDate'
+    default_direction = 'desc'
 
     def set_lines(self):
         """
@@ -132,6 +138,68 @@ class InvoiceView(TaskView):
                     html_form = html_form
                     )
 
+    @view_config(route_name='company_invoices',
+                renderer='company_invoices.mako')
+    def company_invoices(self):
+        """
+            List invoices for the given company
+        """
+        current_year = datetime.date.today().year
+        log.debug("Getting invoices")
+        search, sort, direction, current_page, items_per_page = \
+                    self._get_pagination_args()
+
+        client = self.request.params.get('client')
+        if client == '-1':
+            client = None
+        paid = self.request.params.get('paid', 'both')
+        year = self.request.params.get('year', current_year)
+        officialNumber = self.request.params.get('officialNumber')
+
+        invoices = self.dbsession.query(Invoice).join(
+                        Invoice.project).join(
+                                Project.client).filter(
+                                Project.id_company==self.company.id )
+
+        years = sorted(set([i.taskDate.year for i in invoices.all()]))
+
+        if officialNumber:
+            invoices = invoices.filter(Invoice.officialNumber == officialNumber)
+        #If we search an invoice number, we don't need more filter
+        else:
+            if client:
+                invoices = invoices.filter(Project.code_client == client)
+            if paid == 'paid':
+                invoices = invoices.filter(Invoice.CAEStatus == 'paid')
+            elif paid == 'notpaid':
+                invoices = invoices.filter(Invoice.CAEStatus.in_(('sent', 'valid',)
+                                            ))
+            else:
+                invoices = invoices.filter(Invoice.CAEStatus.in_(('paid',
+                                                              'sent',
+                                                              'valid',)
+                                                            ))
+            if year:
+                fday = datetime.date(int(year), 1, 1)
+                lday = datetime.date(int(year)+1, 1, 1)
+                invoices = invoices.filter(
+                        Invoice.taskDate.between(
+                                format_to_taskdate(fday),
+                                format_to_taskdate(lday))
+                        )
+
+
+        invoices = invoices.order_by(sort + " " + direction).all()
+        invoices = [TaskComputing(invoice) for invoice in invoices]
+        records = self._get_pagination(invoices, current_page, items_per_page)
+        return dict(title=u"Factures",
+                    company=self.company,
+                    invoices=records,
+                    current_client=client,
+                    current_year=year,
+                    current_paid=paid,
+                    years=years)
+
     def set_sequencenumber(self):
         """
             set the sequence number
@@ -175,7 +243,6 @@ class InvoiceView(TaskView):
         """
             Returns an html version of the current invoice
         """
-        #TODO
         invoicecompute = TaskComputing(self.task)
         template = "tasks/invoice.mako"
         config = load_config(self.dbsession)
@@ -194,7 +261,6 @@ class InvoiceView(TaskView):
         """
             Returns a page displaying an html rendering of the given task
         """
-        #TODO
         title = u"Facture numéro : {0}".format(self.task.number)
         return dict(
                     title=title,

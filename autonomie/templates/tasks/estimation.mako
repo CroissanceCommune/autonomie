@@ -19,9 +19,9 @@
 <%block name='header'>
         <style>
             @page {
-                width:21cm;
-                height:29.7cm;
+                size: a4 portrait;
                 margin:1cm;
+                margin-bottom:3.5cm;
                 % if not task.model.is_valid():
                     background-image: url("${request.static_url('autonomie:static/watermark_estimation.jpg', _app_url='')}");
                 % endif

@@ -16,6 +16,7 @@
     Estimation views
 """
 import logging
+import datetime
 from deform import ValidationFailure
 from deform import Form
 
@@ -25,6 +26,7 @@ from pyramid.url import route_path
 
 from autonomie.models.model import Estimation
 from autonomie.models.model import Invoice
+from autonomie.models.model import InvoiceLine
 from autonomie.models.model import EstimationLine
 from autonomie.models.model import PaymentLine
 from autonomie.views.forms.estimation import EstimationSchema
@@ -242,7 +244,7 @@ class EstimationView(TaskView):
         taskid = newone.IDTask
         self.request.session.flash(u"Le devis {0} a bien été dupliqué".format(
             self.task.number
-            ))
+            ), queue='main')
         return HTTPFound(route_path(
                     'estimation',
                     self.request,
@@ -261,33 +263,128 @@ class EstimationView(TaskView):
                                                             self.task.number)
         else:
             message = u"Vous n'êtes pas autorisé à supprimer ce devis."
-        self.request.session.flash(message)
+        self.request.session.flash(message, queue='error')
         return HTTPFound(route_path(
                         'company_project',
                         self.request,
                         cid=self.company.id,
                         id=self.project.id))
 
-    @view_config(route_name='estimation', request_param='action=status')
+    @view_config(route_name='estimation', request_param='action=geninv')
     def status_change(self):
         """
             Called when an estimation status is changed
             ( when no form is displayed : the estimation itself is not
             editable anymore )
         """
-        if 'submit' in self.request.params:
-            newstatus = self.request.params['submit']
-            self.task.CAEStatus = newstatus
+        log.debug("We change the estimation status")
+        newstatus = "geninv"
+        self.task.CAEStatus = newstatus
 
-            computer = TaskComputing(self.task)
+        #recovering common datas needed to generate the invoices
+        computer = TaskComputing(self.task)
+        count = 1
+        taskDate = datetime.date.today()
+        invoice_args_common = dict(
+            IDProject = self.project.id,
+            IDPhase = self.task.IDPhase,
+            taskDate=taskDate,
+            CAEStatus = 'draft',
+            statusPerson = self.user.id,
+            IDEmployee = self.user.id,
+            tva = self.task.tva,
+            IDEstimation=self.task.IDTask,
+            paymentConditions=self.task.paymentConditions,
+            description=self.task.description,
+            course=self.task.course,
+            )
 
+        pcode = self.project.code
+        ccode = self.project.client.id
+        shortdate = "{0}{1}".format(
+                taskDate.month,
+                str(taskDate.year)[2:])
+        already_paid_lines = []
 
-            if newstatus == 'geninv':
-                count = 1
-                if self.task.deposit > 0:
-                    deposit = Invoice()
-                    deposit.name = u"Facture d'accompte {0}".format(count)
-                    #TODO
+        #generating deposit invoice
+        if self.task.deposit > 0:
+            invoice_args = invoice_args_common.copy()
+            invoice_args.update(
+                dict(
+                    sequenceNumber=len(self.project.invoices) + count,
+                    name = u"Facture d'acompte {0}".format(count),
+                    number = "{0}_{1}_FA{2}_{3}".format(pcode,
+                                                        ccode,
+                                                        count,
+                                                        shortdate),
+                    displayedUnits=0,
+                    ))
+            invoice = Invoice(**invoice_args)
+            amount = computer.compute_deposit()
+            line = InvoiceLine(rowIndex=count,
+                               description=u"Facture d'acompte",
+                               cost=amount)
+            invoice.lines.append(line)
+            self.dbsession.merge(invoice)
+            count += 1
+            #we keep the information to display it in the last invoice
+            remember = line.duplicate()
+            # setting negative cost
+            remember.cost = -1 * remember.cost
+            remember.rowIndex = count
+            already_paid_lines.append(remember)
+        # generating the different payment lines' invoices (not the last one)
+        for paymentline in self.payment_lines[:-1]:
+            invoice_args = invoice_args_common.copy()
+            invoice_args.update(
+                    dict(
+                        sequenceNumber=len(self.project.invoices) + count,
+                        name = u"Facture d'acompte {0}".format(count),
+                        number = "{0}_{1}_FA{2}_{3}".format(pcode,
+                                                            ccode,
+                                                            count,
+                                                            shortdate),
+                        displayedUnits=0,
+                        ))
+            invoice = Invoice(**invoice_args)
+
+            # if payment amounts have been set manually or not
+            if self.task.manualDeliverables == 0:
+                amount = computer.compute_line_amount()
+            else:
+                amount = paymentline.amount
+            line = InvoiceLine(rowIndex=1,
+                               description=paymentline.description,
+                               cost=amount)
+
+            invoice.lines.append(line)
+            self.dbsession.merge(invoice)
+            count += 1
+            #we keep the information to display it in the last invoice
+            remember = line.duplicate()
+            # setting negative cost
+            remember.cost = -1 * remember.cost
+            remember.rowIndex = count
+            already_paid_lines.append(remember)
+
+        # generating the sold invoice
+        paymentline = self.payment_lines[-1]
+        invoice_args = invoice_args_common.copy()
+        invoice_args.update(
+            dict(sequenceNumber=len(self.project.invoices) + count,
+                name=u"Facture de solde {0}".format(count),
+                number="{0}_{1}_F{2}_{3}".format(pcode,ccode,count,shortdate),
+                displayedUnits=0))
+        invoice = Invoice(**invoice_args)
+        line = InvoiceLine(rowIndex=1,
+                            description=paymentline.description,
+                            cost=computer.compute_totalht())
+        invoice.lines.append(line)
+        for i in already_paid_lines:
+            invoice.lines.append(i.duplicate())
+        self.dbsession.merge(invoice)
+        self.request.session.flash(u"Vos factures ont bien été générées",
+                                queue='main')
         return HTTPFound(route_path(
                         'company_project',
                         self.request,

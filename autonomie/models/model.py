@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 07 mai 2012 01:44:58 CEST
+# * Last Modified : lun. 07 mai 2012 02:01:43 CEST
 #
 # * Project : autonomie
 #
@@ -68,7 +68,7 @@ def format_to_taskdate(value):
     if value is None:
         return None
     elif isinstance(value, datetime.date):
-        return int("{:%Y%m%d}".format(value))
+        return int(value.strftime("%Y%m%d"))
     else:
         return int(value)
 
@@ -374,10 +374,14 @@ class Task(DBBASE):
             firstname = "Inconnu"
             lastname = ""
         if self.statusDate:
-            date = self.statusDate or ""
+            if isinstance(self.statusDate, datetime.date) or \
+                    isinstance(self.statusDate, datetime.datetime):
+                date = self.statusDate.strftime("%d/%m/%Y")
+            else:
+                date = ""
         else:
             date = ""
-        suffix = u" par {firstname} {lastname} le {date:%d/%m/%Y}".format(
+        suffix = u" par {firstname} {lastname} le {date}".format(
                 firstname=firstname, lastname=lastname, date=date)
         if _type == "estimation":
             genre = ""

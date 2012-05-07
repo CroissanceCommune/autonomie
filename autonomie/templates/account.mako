@@ -22,7 +22,7 @@
                 <a href="${request.route_path('company', cid=company.id)}">
                     <strong>${company.name}</strong>
                     <br />
-                    <img src="/assets/${company.get_logo_filepath()}" alt="" />
+                    <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
                     </a>
                 <br />
                 ${company.goal}

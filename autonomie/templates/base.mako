@@ -62,7 +62,12 @@
             %if request.session.has_key('user'):
               <ul class='nav pull-right' id='logout_link'>
                 <li>
-                <a href="/account">${request.session['user'].lastname} ${request.session['user'].firstname}</a>
+                %if company is not UNDEFINED:
+                  <a href="${request.route_path('account', cid=company.id)}">
+                    <span class='ui-icon ui-icon-gear'></span>
+                    ${request.session['user'].lastname} ${request.session['user'].firstname}
+                  </a>
+                %endif
                 </li>
                 <li>
                 <a href="/logout">Déconnexion</a>

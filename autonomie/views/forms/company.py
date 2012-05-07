@@ -47,7 +47,6 @@ class CompanySchema(colander.MappingSchema):
                                widget=deferred_edit_widget,
                                title=u'Nom')
     goal = colander.SchemaNode(colander.String(),
-                                widget=deferred_edit_widget,
                                 title=u'Objet')
     logo = colander.SchemaNode(FileData(),
                             widget=deferred_upload_widget(path=LOGO_PATH),

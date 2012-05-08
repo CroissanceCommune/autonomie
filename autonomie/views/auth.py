@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 03 avril 2012 14:31:27 CEST
+# * Last Modified : mar. 08 mai 2012 17:09:09 CEST
 #
 # * Project :
 #
@@ -81,7 +81,7 @@ def login_view(request):
         remember(request, login)
         return HTTPFound(location=nextpage)
     return {
-            'title':"Bienvenu sur Autonomie",
+            'title':"Bienvenue dans Autonomie",
             'html_form':myform,
             'message':fail_message
             }
@@ -91,6 +91,7 @@ def logout_view(request):
     """
         The logout view
     """
+    del(request.session['user'])
     headers = forget(request)
     loc = request.route_url('index')
     return HTTPFound(location=loc, headers=headers)

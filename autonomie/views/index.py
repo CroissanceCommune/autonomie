@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 27 mars 2012 15:28:49 CEST
+# * Last Modified : mar. 08 mai 2012 16:52:26 CEST
 #
 # * Project : autonomie
 #
@@ -71,7 +71,7 @@ def index(request):
         for company in companies:
             company.url = route_path("company", request, cid=company.id)
             company.icon = request.static_url("autonomie:static/company.png")
-        return dict(title=u"Bienvenu dans Autonomie",
+        return dict(title=u"Bienvenue dans Autonomie",
                     companies=avatar.companies)
 
 

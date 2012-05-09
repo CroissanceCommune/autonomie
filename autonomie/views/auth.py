@@ -6,14 +6,16 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 08 mai 2012 17:09:09 CEST
+# * Last Modified : mer. 09 mai 2012 14:00:56 CEST
 #
 # * Project :
 #
+"""
+    All Authentication views
+"""
 import logging
 
 from pyramid.view import view_config
-from pyramid.url import route_url
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPForbidden
 
@@ -52,7 +54,6 @@ def login_view(request):
     """
         The login view
     """
-    log.debug("# Login page")
     form = Form(authSchema,
                 buttons=(Button(name="submit",
                                 title="Connexion",
@@ -62,24 +63,25 @@ def login_view(request):
     myform = form.render(app_struct)
     fail_message = None
     if 'submit' in request.params:
-        log.debug(" + Validating authentication")
+        log.debug("# Authentication process #")
         controls = request.params.items()
         try:
             datas = form.validate(controls)
         except ValidationFailure, e:
-            log.debug("Erreur d'authentification")
+            log.exception(" - Authentication error")
             myform = e.render()
             fail_message = u"Erreur d'authentification"
             return {'title':"Authentification",
                     'html_form':myform,
                     'message':fail_message
                     }
-        log.debug("  + Validation ok, redirecting")
-        log.debug("     -> {0}".format(nextpage))
-        login = datas['login']
-        # Storing the datas in the session
-        remember(request, login)
-        return HTTPFound(location=nextpage)
+        else:
+            login = datas['login']
+            log.info("User '{0}' has been authenticated".format(login))
+            log.debug("  + Redirecting to {0}".format(nextpage))
+            # Storing the datas in the request object
+            remember(request, login)
+            return HTTPFound(location=nextpage)
     return {
             'title':"Bienvenue dans Autonomie",
             'html_form':myform,
@@ -110,9 +112,9 @@ def account(request):
         try:
             datas = pwdform.validate(controls)
         except ValidationFailure, e:
-            log.debug("Erreur d'authentification")
             html_form = e.render()
         else:
+            log.debug("# User {0} has changed his password #")
             dbsession = DBSESSION()
             new_pass = datas['pwd']
             avatar.set_password(new_pass)

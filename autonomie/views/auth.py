@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 09 mai 2012 14:00:56 CEST
+# * Last Modified : mer. 09 mai 2012 18:00:40 CEST
 #
 # * Project :
 #
@@ -39,9 +39,9 @@ def forbidden_view(request):
     """
         The forbidden view (handles the redirection to login form)
     """
-    log.debug("# Forbidden view")
+    log.warn("# An access has been forbidden #")
     if authenticated_userid(request):
-        log.debug(" + Authenticated but not allowed")
+        log.warn(" + An authenticated user tried to connect")
         return HTTPForbidden()
     log.debug(" + Not authenticated : try again")
     #redirecting to the login page with the current path as param

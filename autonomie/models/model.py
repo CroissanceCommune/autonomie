@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 07 mai 2012 02:01:43 CEST
+# * Last Modified : mar. 05 juin 2012 22:58:12 CEST
 #
 # * Project : autonomie
 #
@@ -36,7 +36,7 @@ from sqlalchemy.types import Integer as Integer_type
 from sqlalchemy.types import String as String_type
 
 from autonomie.models import DBBASE
-from autonomie.utils.security import Forbidden
+from autonomie.utils.exception import Forbidden
 
 class CustomDateType(TypeDecorator):
     """
@@ -256,6 +256,8 @@ class User(DBBASE):
     companies = relationship("Company",
                              secondary=company_employee,
                              backref="employees")
+    primary_group = Column("account_primary_group",
+                            Integer)
 
     @staticmethod
     def _encode_pass(password):
@@ -286,6 +288,18 @@ class User(DBBASE):
             if company.id == cid:
                 return company
         raise KeyError
+
+    def is_admin(self):
+        """
+            return true if the user is and administrator
+        """
+        return self.primary_group == -10
+
+    def is_manager(self):
+        """
+            return True if the user is a manager
+        """
+        return self.primary_group == -14
 
 class Employee(DBBASE):
     """
@@ -772,6 +786,9 @@ class Client(DBBASE):
                                         default=_get_date,
                                         onupdate=_get_date)
     projects = relationship("Project", backref="client")
+    name = Column("name", String(255), default=None)
+    contactFirstName = Column("contactFirstName", String(255), default=None)
+    contactLastName = Column("contactLastName", String(255), default=None)
 
 class Project(DBBASE):
     """
@@ -808,6 +825,8 @@ class Project(DBBASE):
                                             default=_get_date)
     endingDate = Column("endingDate", CustomDateType(11),
                                             default=_get_date)
+    name = Column("name", String(255))
+    archived = Column("archived", String(255))
 
     def get_estimation(self, taskid):
         """

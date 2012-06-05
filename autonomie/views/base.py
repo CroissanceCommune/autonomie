@@ -23,10 +23,11 @@ from deform import Button
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
+from pyramid.security import authenticated_userid
 
 from autonomie.models import DBSESSION
 from autonomie.models.model import Phase
-from autonomie.models.model import Tva
+from autonomie.models.model import Tva, User
 from autonomie.utils.views import get_page_url
 
 log = logging.getLogger(__file__)
@@ -50,7 +51,10 @@ class BaseView(object):
         """
             Return the user's avatar
         """
-        return self.request.session['user']
+        userid = authenticated_userid(self.request)
+        avatar = self.dbsession.query(User).filter_by(login=userid).one()
+        return avatar
+#        return self.request.session['user']
 
     def get_current_company(self):
         """

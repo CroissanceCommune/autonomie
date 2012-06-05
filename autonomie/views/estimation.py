@@ -37,7 +37,7 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.config import load_config
-from autonomie.utils.security import Forbidden
+from autonomie.utils.exception import Forbidden
 
 from .base import TaskView
 

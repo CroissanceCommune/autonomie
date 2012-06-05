@@ -42,7 +42,7 @@ class CompanyViews(BaseView):
                 - last validated estimation/invoice
                 - To be relaunched bill
         """
-        company = self.get_current_company()
+        company = self.request.context
         ret_val = dict(title=u"{0}".format(company.name,),
                     company=company)
         # recovering last activities
@@ -73,7 +73,7 @@ class CompanyViews(BaseView):
         """
             Company edition page
         """
-        company = self.get_current_company()
+        company = self.request.context
         root_path = load_config(self.dbsession, "files_dir").get('files_dir',
                                                                         '/tmp')
         company_path = os.path.join(root_path, company.get_path())

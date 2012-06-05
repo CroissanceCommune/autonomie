@@ -48,7 +48,8 @@ class ClientView(ListView):
     columns = ("code", "name", "contactLastName",)
 
     @view_config(route_name='company_clients', renderer='company_clients.mako',
-                                                request_method='GET')
+                                               request_method='GET',
+                                               permission='view')
     def company_clients(self):
         """
             Return the list of all the clients
@@ -57,10 +58,25 @@ class ClientView(ListView):
         log.debug("Getting clients")
         search, sort, direction, current_page, items_per_page = \
                                                 self._get_pagination_args()
-
-        company = self.get_current_company()
-
+        company = self.request.context
         # Request database
+        clients = self._get_clients(company, search, sort, direction)
+
+        # Get pagination
+        records = self._get_pagination(clients, current_page, items_per_page)
+        # Get add form
+        form = get_client_form(path=route_path('company_clients', self.request,
+                                                cid=company.id))
+
+        return dict(title=u"Liste des clients",
+                    clients=records,
+                    company=company,
+                    html_form=form.render())
+
+    def _get_clients(self, company, search, sort, direction):
+        """
+            query clients against the database
+        """
         toquery = (Client.id,
                    Client.contactLastName,
                    Client.contactFirstName,
@@ -74,17 +90,7 @@ class ClientView(ListView):
         else:
             clients = self.dbsession.query(*toquery).filter(
                 Client.name.like(search+"%")).order_by(sort + " " + direction)
-
-        # Get pagination
-        records = self._get_pagination(clients, current_page, items_per_page)
-        # Get add form
-        form = get_client_form(path=route_path('company_clients', self.request,
-                                                cid=company.id))
-
-        return dict(title=u"Liste des clients",
-                    clients=records,
-                    company=company,
-                    html_form=form.render())
+        return clients
 
     @view_config(route_name='company_clients', renderer='company_client.mako',\
                                                         request_method='POST')
@@ -97,18 +103,17 @@ class ClientView(ListView):
             or
             * the client addform when an error has occured
         """
-        company = self.get_current_company()
-
-        client_id = self.request.matchdict.get('id')
-        if client_id: #edition
-            client = company.get_client(client_id)
-            edit = True
-            title = u"Édition du client : {0}".format(client.name)
-        else: #new entry
+        if self.request.context.__name__ == 'company':
+            company = self.request.context
             client = Client()
             client.id_company = company.id
             edit = False
             title = u"Ajout d'un nouveau client"
+        else:
+            client = self.request.context
+            edit = True
+            title = u"Édition du client : {0}".format(client.name)
+
         form = get_client_form(edit=edit)
         if 'submit' in self.request.params:
             # form POSTed
@@ -129,14 +134,15 @@ succès".format(client.name)
                     message = u"Le client <b>{0}</b> a été ajouté avec \
 succès".format(client.name)
                 self.request.session.flash(message, queue='main')
-                return HTTPFound(route_path('company_client', self.request,
-                                                cid=company.id, id=client.id))
+                return HTTPFound(route_path('company_client',
+                                            self.request,
+                                            id=client.id))
         else:
             html_form = form.render(client.appstruct())
         return dict(title=title,
                     client=client,
                     html_form=html_form,
-                    company=company)
+                    company=client.company)
 
     @view_config(route_name='company_client', renderer='client_view.mako', \
                                                         request_method='GET')
@@ -144,9 +150,7 @@ succès".format(client.name)
         """
             Return the view of a client
         """
-        company = self.get_current_company()
-        client_id = self.request.matchdict.get('id')
-        client = company.get_client(client_id)
+        client = self.request.context
         return dict(title=u"Client : {0}".format(client.name),
-                client=client,
-                company=company)
+                    client=client,
+                    company=client.company)

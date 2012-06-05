@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 09 mai 2012 18:00:40 CEST
+# * Last Modified : lun. 04 juin 2012 09:16:40 CEST
 #
 # * Project :
 #
@@ -59,6 +59,9 @@ def login_view(request):
                                 title="Connexion",
                                 type='submit'),))
     nextpage = request.params.get('nextpage') or request.route_url('index')
+    # avoid looping
+    if nextpage == request.route_url('login'):
+        nextpage = request.route_url('index')
     app_struct = {'nextpage':nextpage}
     myform = form.render(app_struct)
     fail_message = None
@@ -103,7 +106,10 @@ def account(request):
     """
         Account handling page
     """
-    avatar = request.session['user']
+    #avatar = request.session['user']
+
+    userid = authenticated_userid(request)
+    avatar = DBSESSION().query(User).filter_by(login=userid).one()
     pwdformschema = pwdSchema.bind(check=True)
     pwdform = Form(pwdformschema, buttons=("submit",))
     html_form = pwdform.render({'login':avatar.login})

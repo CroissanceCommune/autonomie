@@ -86,23 +86,12 @@ class ProjectView(ListView):
 
         archived = self.request.params.get('archived', '0')
 
-        company = self.get_current_company()
+        company = self.request.context
 
     #    toquery = (Project.id, Project.client, Project.name)
         #TODO : handle join tables to search by client
-
-        if company is not None:
-            projects = self.dbsession.query(Project).filter(
-                                Project.name.like(search+"%"),
-                                Project.id_company == company.id,
-                                Project.archived == archived
-                        ).order_by(sort + " " + direction)
-        else:
-            projects = self.dbsession.query(Project).filter(
-                                Project.name.like(search+"%"),
-                                Project.archived == archived
-                        ).order_by(sort + " " + direction)
-
+        projects = self._get_projects(company, search, sort, direction,
+                                                                archived)
         records = self._get_pagination(projects, current_page, items_per_page)
 
         clients = company.clients
@@ -115,12 +104,29 @@ class ProjectView(ListView):
                     company=company,
                     html_form=form.render())
 
+    def _get_projects(self, company, search, sort, direction, archived):
+        """
+            query projects against the database
+        """
+        if company is not None:
+            projects = self.dbsession.query(Project).filter(
+                                Project.name.like(search+"%"),
+                                Project.id_company == company.id,
+                                Project.archived == archived
+                        ).order_by(sort + " " + direction)
+        else:
+            projects = self.dbsession.query(Project).filter(
+                                Project.name.like(search+"%"),
+                                Project.archived == archived
+                        ).order_by(sort + " " + direction)
+        return projects
+
     @view_config(route_name='company_projects',  \
                  renderer='company_project.mako', \
                  request_method='POST')
     @view_config(route_name='company_project', \
                  renderer='company_project.mako', \
-                 request_param='action=edit')
+                 request_param='action=edit', permission='edit')
     def company_project(self):
         """
             Returns:
@@ -128,20 +134,19 @@ class ProjectView(ListView):
             or
             * the company add form when an error has occured
         """
-        company = self.get_current_company()
-
-        project_id = self.request.matchdict.get('id')
-        if project_id: # edition
-            project = company.get_project(project_id)
-            edit = True
-            default_client = project.client
-            title = u"Édition du projet : {0}".format(project.name)
-        else: # new project
+        if self.request.context.__name__ == 'company':
+            company = self.request.context
             project = Project()
             project.id_company = company.id
             edit = False
             default_client = None
             title = u"Ajout d'un nouveau projet"
+        else:
+            project = self.request.context
+            company = project.company
+            edit = True
+            default_client = project.client
+            title = u"Édition du projet : {0}".format(project.name)
 
         clients = company.clients
         form = get_project_form(clients,
@@ -174,7 +179,6 @@ succès".format(project.name)
                 # Flusing the session launches sql queries
                 return HTTPFound(route_path('company_project',
                                             self.request,
-                                            cid=company.id,
                                             id=project.id))
         else:
             html_form = form.render(project.appstruct())
@@ -190,8 +194,7 @@ succès".format(project.name)
         """
             Add a phase to the current project
         """
-        company = self.get_current_company()
-        project = self.get_current_project(company)
+        project = self.request.context
         if not self.request.params.get('phase'):
             self.request.session.flash(u"Le nom de la phase est obligatoire",
                                                                 queue='error')
@@ -207,7 +210,6 @@ rajoutée".format(phasename), queue="main")
             query_dict = dict()
         return HTTPFound(route_path('company_project',
                                 self.request,
-                                cid=company.id,
                                 id=project.id,
                                 _query=query_dict))
 
@@ -216,18 +218,11 @@ rajoutée".format(phasename), queue="main")
         """
             Company's project view
         """
-        company = self.get_current_company()
-        project = self.get_current_project(company)
+        project = self.request.context
+        company = project.company
         return dict(title=u"Projet : {project.name}".format(project=project),
                     project=project,
                     company=company)
-
-    def get_current_project(self, company):
-        """
-            return current project or None
-        """
-        project_id = self.request.matchdict.get('id')
-        return company.get_project(project_id)
 
     @view_config(route_name="company_project",
                 request_param="action=archive")
@@ -235,8 +230,8 @@ rajoutée".format(phasename), queue="main")
         """
             Archive the current project
         """
-        company = self.get_current_company()
-        project = self.get_current_project(company)
+        project = self.request.context
+
         project.archived = 1
         self.dbsession.merge(project)
         self.request.session.flash(u"Le projet '{0}' a été archivé".format(
@@ -250,8 +245,7 @@ rajoutée".format(phasename), queue="main")
         """
             Delete the current project
         """
-        company = self.get_current_company()
-        project = self.get_current_project(company)
+        project = self.request.context
         self.dbsession.delete(project)
         self.request.session.flash(u"Le projet '{0}' a bien été \
 supprimé".format(project.name) )

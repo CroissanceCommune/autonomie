@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 08 mai 2012 16:51:41 CEST
+# * Last Modified : mar. 05 juin 2012 23:55:15 CEST
 #
 # * Project : autonomie
 #
@@ -25,7 +25,6 @@ from autonomie.models import initialize_sql
 from autonomie.utils.avatar import get_build_avatar
 from autonomie.utils.forms import set_deform_renderer
 
-
 def main(global_config, **settings):
     """
         Main function : returns a Pyramid WSGI application.
@@ -33,6 +32,8 @@ def main(global_config, **settings):
     engine = engine_from_config(settings, 'sqlalchemy.')
     dbsession = initialize_sql(engine)
     from autonomie.utils.security import RootFactory
+    from autonomie.utils.security import BaseDBFactory
+    BaseDBFactory.dbsession = dbsession
 
     avatar_builder = get_build_avatar(dbsession)
 
@@ -54,25 +55,53 @@ def main(global_config, **settings):
     company_assets = load_config(dbsession(), 'files_dir').get('files_dir')
     if company_assets:
         config.add_static_view('assets', company_assets, cache_max_age=3600)
+
     config.add_route('index', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
-    config.add_route('account', '/company/{cid}/account')
-    config.add_route('company', '/company/{cid}')
-    config.add_route('company_clients', '/company/{cid}/clients')
-    config.add_route('company_client', '/company/{cid}/clients/{id}')
-    config.add_route('company_projects', '/company/{cid}/projects')
-    config.add_route('company_project', '/company/{cid}/projects/{id}')
-    config.add_route('company_invoices', '/company/{cid}/invoices')
-    config.add_route('company_treasury', '/company/{cid}/treasury')
+    config.add_route('account',
+                     '/company/{cid:\d+}/account',
+                     traverse='/companies/{cid}')
+    #Company routes
+    config.add_route('company',
+                     '/company/{cid:\d+}',
+                     traverse='/companies/{cid}')
+    config.add_route('company_clients',
+                     '/company/{cid:\d+}/clients',
+                     traverse='/companies/{cid}')
+    config.add_route('company_projects',
+                     '/company/{cid:\d+}/projects',
+                     traverse='/companies/{cid}')
+    config.add_route('company_invoices',
+                     '/company/{cid:\d+}/invoices',
+                     traverse='/company/{cid}')
+    config.add_route('company_treasury',
+                     '/company/{cid:\d+}/treasury',
+                     traverse='/company/{cid}')
+
+    #Client routes
+    config.add_route('company_client',
+                     '/clients/{id}',
+                     traverse='/clients/{id}')
+    #Project routes
+    config.add_route('company_project',
+                     '/projects/{id:\d+}',
+                     traverse='/projects/{id}')
+
+    #Tasks (estimation and invoice) routes
     config.add_route('estimations',
-                        '/company/{cid}/projects/{id}/estimations')
+                     '/projects/{id:\d+}/estimations',
+                      traverse='/projects/{cid}')
     config.add_route('estimation',
-                        '/company/{cid}/projects/{id}/estimations/{taskid}')
+                     '/estimations/{id:\d+}',
+                      traverse='/estimations/{id}')
+
     config.add_route('invoices',
-                        '/company/{cid}/projects/{id}/invoices')
+                     '/projects/{id:\d+}/invoices',
+                     traverse='/projects/{cid}')
     config.add_route('invoice',
-                        '/company/{cid}/projects/{id}/invoices/{taskid}')
+                     '/invoices/{id:\d+}',
+                     traverse='/invoices/{id}')
 #    config.add_route('useradd', '/user/add')
 #    config.add_route('userpass', '/user/pwd')
 #    config.add_route('userdel', '/user/del')

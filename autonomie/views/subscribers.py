@@ -34,8 +34,8 @@ def add_menu(event):
     """
     request = event['req']
     # We test matchdict is present : it's not when inner render call is made
-    if hasattr(request, "matchdict"):
-        cid = request.matchdict.get('cid')
+    if hasattr(request, "context") and hasattr(request.context, "get_company_id"):
+        cid = request.context.get_company_id()
     else:
         cid = None
     menu = {}
@@ -43,23 +43,23 @@ def add_menu(event):
         menu = [dict(label=u'Clients',
                      url=route_path('company_clients',
                                                 request,
-                                                cid=cid)),
+                                                id=cid)),
                 dict(label=u"Projets",
                      url=route_path('company_projects',
                                                 request,
-                                                cid=cid)),
+                                                id=cid)),
                 dict(label=u"Factures",
                      url=route_path('company_invoices',
                                     request,
-                                    cid=cid)),
+                                    id=cid)),
                 dict(label=u"Trésorerie",
                     url=route_path('company_treasury',
                                     request,
-                                    cid=cid)),
+                                    id=cid)),
                 dict(label=u"Paramètres",
                      url=route_path('company',
                                                 request,
-                                                cid=cid,
+                                                id=cid,
                                                 _query={'edit':True})),
                ]
         event.update({'menu':menu})

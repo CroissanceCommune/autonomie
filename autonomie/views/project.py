@@ -171,7 +171,7 @@ succès".format(project.name)
                 else:
                     default_phase = Phase()
                     default_phase.project = project
-                    default_phase.name = u"défaut"
+                    default_phase.name = u"Phase par défaut"
                     self.dbsession.merge(default_phase)
                     message = u"Le projet <b>{0}</b> a été ajouté avec \
 succès".format(project.name)

@@ -70,7 +70,7 @@
     %endif
     %for phase in project.phases:
 
-        % if phase.name != 'default':
+        % if phase.name != u'Phase par défaut' and phase.name != u'défaut':
             <h2 class='section-header'>
                         <a href="#" data-toggle='collapse' data-target='#phase_${phase.id}'>
                             <div>${phase.name}</div>

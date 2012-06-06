@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 04 juin 2012 09:15:10 CEST
+# * Last Modified : mer. 06 juin 2012 09:44:31 CEST
 #
 # * Project : autonomie
 #
@@ -35,10 +35,10 @@ def index(request):
     companies = avatar.companies
     if len(companies) == 1:
         company = companies[0]
-        return HTTPFound(route_path('company', request, cid=company.id))
+        return HTTPFound(route_path('company', request, id=company.id))
     else:
         for company in companies:
-            company.url = route_path("company", request, cid=company.id)
+            company.url = route_path("company", request, id=company.id)
             company.icon = request.static_url("autonomie:static/company.png")
         return dict(title=u"Bienvenue dans Autonomie",
                     companies=avatar.companies)

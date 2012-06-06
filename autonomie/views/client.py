@@ -66,7 +66,7 @@ class ClientView(ListView):
         records = self._get_pagination(clients, current_page, items_per_page)
         # Get add form
         form = get_client_form(path=route_path('company_clients', self.request,
-                                                cid=company.id))
+                                                id=company.id))
 
         return dict(title=u"Liste des clients",
                     clients=records,

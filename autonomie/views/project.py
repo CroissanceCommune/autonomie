@@ -98,7 +98,7 @@ class ProjectView(ListView):
         form = get_project_form(clients=clients,
                                 path=route_path('company_projects',
                                                 self.request,
-                                                cid=company.id))
+                                                id=company.id))
         return dict(title=u"Liste des projets",
                     projects=records,
                     company=company,

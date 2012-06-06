@@ -32,7 +32,7 @@
                     <td>${client.name}</td>
                     <td>${client.contactLastName} ${client.contactFirstName}</td>
                     <td>
-                            <a class='btn' href='${request.route_path("company_client", cid=company.id, id=client.id)}'>
+                            <a class='btn' href='${request.route_path("company_client", id=client.id)}'>
                                 <span class='ui-icon ui-icon-pencil'></span>
                                 Voir
                             </a>

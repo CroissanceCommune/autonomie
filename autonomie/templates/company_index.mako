@@ -13,18 +13,18 @@
         <div class=''>
             <div class="ui-widget">
                 <div class="ui-state-error ui-corner-all">
-                  <p>
-                  <span class="ui-icon ui-icon-alert">
-                    </span>
-                    <strong>
-                        Les factures suivantes demandent votre attention, le paiement a plus de 45 jours de retard.</>
+                    <p>
+                        <span class="ui-icon ui-icon-alert">
+                        </span>
+                        <strong>
+                            Les factures suivantes demandent votre attention, le paiement a plus de 45 jours de retard.
                         </strong>
-                  </p>
+                    </p>
                 </div>
-              </div>
-              <a class='btn btn-primary' href="${request.route_path('company_invoices', cid=company.id)}">
-                  Liste des factures
-              </a>
+            </div>
+            <a class='btn btn-primary' href="${request.route_path('company_invoices', id=company.id)}">
+                Liste des factures
+            </a>
             <table class='table table-stripped'>
                 <thead>
                     <th>Numéro de facture</th>
@@ -35,53 +35,53 @@
                     <th>TVA</th>
                 </thead>
                 <tbody>
-                % for invoice in elapsed_invoices:
-                    <tr>
-                        <td>
-                            ${invoice.model.officialNumber}
+                    % for invoice in elapsed_invoices:
+                        <tr>
+                            <td>
+                                ${invoice.model.officialNumber}
                             </td>
                             <td>
-                            ${print_date(invoice.model.taskDate)}
-                        </td>
-                        <td>
+                                ${print_date(invoice.model.taskDate)}
+                            </td>
+                            <td>
                                 <blockquote>
-                                    <a href="${request.route_path('invoice', cid=company.id, id=invoice.model.project.id, taskid=invoice.model.IDTask)}" title='Voir le document'>
+                                    <a href="${request.route_path('invoice', id=invoice.model.IDTask)}" title='Voir le document'>
                                         ${invoice.model.number}<br />
                                     </a>
                                     <small>Projet : ${format_project(invoice.model.project, company)}</small>
                                 </blockquote>
-                        </td>
-                        <td>
-                            ${format_client(invoice.model.project.client, company)}
-                        </td>
-                        <td>
-                            ${format_amount(invoice.compute_totalht())} € HT
-                        </td>
-                        <td>
-                            ${format_amount(invoice.compute_tva())} €
-                        </td>
-                    </tr>
-                % endfor
-            </tbody>
-                </table>
-            </div>
+                            </td>
+                            <td>
+                                ${format_client(invoice.model.project.client, company)}
+                            </td>
+                            <td>
+                                ${format_amount(invoice.compute_totalht())} € HT
+                            </td>
+                            <td>
+                                ${format_amount(invoice.compute_tva())} €
+                            </td>
+                        </tr>
+                    % endfor
+                </tbody>
+            </table>
         </div>
-    %endif
-    <div class='row'>
-        <h3>Dernières activités</h3>
-        <table class='table table-stripped'>
-            <thead>
-                <th>
-                    Nom du projet
-                </th>
-                <th>
-                    Nom du document
-                </th>
-                <th>
-                    Dernière modification
-                </th>
-            </thead>
-            <tbody>
+    </div>
+%endif
+<div class='row'>
+    <h3>Dernières activités</h3>
+    <table class='table table-stripped'>
+        <thead>
+            <th>
+                Nom du projet
+            </th>
+            <th>
+                Nom du document
+            </th>
+            <th>
+                Dernière modification
+            </th>
+        </thead>
+        <tbody>
             % for task in tasks:
                 <tr>
                     <td>
@@ -91,7 +91,7 @@
                     <td>${task.get_status_str()}</td>
                 </tr>
             % endfor
-            </tbody>
-        </table>
-    </div>
-    </%block>
+        </tbody>
+    </table>
+</div>
+</%block>

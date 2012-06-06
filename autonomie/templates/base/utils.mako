@@ -82,7 +82,7 @@ if get_args:
         Render a client
     </%doc>
     %if client is not UNDEFINED and client is not None:
-        <a href="${request.route_path('company_client', cid=company.id, id=client.id)}"
+        <a href="${request.route_path('company_client', id=client.id)}"
            title="Voir le client ${client.name}">
             ${client.name}
         </a>
@@ -93,7 +93,7 @@ if get_args:
         Render a project
     </%doc>
     %if project is not UNDEFINED and project is not None:
-        <a href="${request.route_path('company_project', cid=company.id, id=project.id)}"
+        <a href="${request.route_path('company_project', id=project.id)}"
             title="Voir le projet ${project.name}">
             ${project.name}
         </a>

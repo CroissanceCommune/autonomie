@@ -19,7 +19,7 @@
             % endif
             <br />
             % for company in account.companies:
-                <a href="${request.route_path('company', cid=company.id)}">
+                <a href="${request.route_path('company', id=company.id)}">
                     <strong>${company.name}</strong>
                     <br />
                     <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />

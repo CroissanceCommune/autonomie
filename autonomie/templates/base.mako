@@ -63,7 +63,7 @@
               <ul class='nav pull-right' id='logout_link'>
                 <li>
                 %if company is not UNDEFINED:
-                  <a href="${request.route_path('account', cid=company.id)}">
+                  <a href="${request.route_path('account', id=company.id)}">
                     <span class='ui-icon ui-icon-gear'></span>
                     ${request.session['user'].lastname} ${request.session['user'].firstname}
                   </a>

@@ -3,13 +3,13 @@
 <ul class='nav nav-pills'>
     % if project is not UNDEFINED and project.id is not None:
     <li>
-        <a title='Voir le projet' href='${request.route_path("company_project", cid=company.id, id=project.id)}'>
+        <a title='Voir le projet' href='${request.route_path("company_project", id=project.id)}'>
             Revenir à la fiche du projet
         </a>
         </li>
     % endif
     <li>
-    <a title='Revenir à la liste des projets'  href='${request.route_path("company_projects", cid=company.id)}'>
+    <a title='Revenir à la liste des projets'  href='${request.route_path("company_projects", id=company.id)}'>
         Revenir à la liste des projets
     </a>
     </li>

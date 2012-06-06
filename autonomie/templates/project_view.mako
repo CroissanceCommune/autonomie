@@ -4,7 +4,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    <a title='Revenir à la liste des clients'  href='${request.route_path("company_projects", cid=company.id)}'>
+    <a title='Revenir à la liste des clients'  href='${request.route_path("company_projects", id=company.id)}'>
         Revenir à la liste
     </a>
     </li>
@@ -28,7 +28,7 @@
     %endif
         <div class='span4'>
             <h3>Ajouter une phase</h3>
-            <form class='navbar-form' method='POST' action="${request.route_path('company_project', cid=company.id, id=project.id, _query=dict(action='addphase'))}">
+            <form class='navbar-form' method='POST' action="${request.route_path('company_project', id=project.id, _query=dict(action='addphase'))}">
                 <input type='text' name='phase' />
                 <button class='btn btn-primary' type='submit' name='submit' value='addphase'>Valider</button>
             </form>
@@ -43,7 +43,7 @@
                 <b>Type de projet :</b> ${project.type}
             % endif
             <a class="btn btn-primary" title='Éditer les informations de ce client'
-                href='${request.route_path("company_project", cid=company.id, id=project.id, _query=dict(action="edit"))}'>
+                href='${request.route_path("company_project", id=project.id, _query=dict(action="edit"))}'>
                 Éditer
             </a>
             <br />
@@ -81,7 +81,7 @@
             <div  id='phase_${phase.id}' style="margin:4px;">
         % endif
             <h3 class='floatted' style="padding-right:10px">Devis</h3>
-                <a class='btn' href='${request.route_path("estimations", cid=company.id, id=project.id, _query=dict(phase=phase.id))}'>
+                <a class='btn' href='${request.route_path("estimations", id=project.id, _query=dict(phase=phase.id))}'>
                     <span class='ui-icon ui-icon-plusthick'></span>
                 </a>
         %if  phase.estimations:
@@ -96,25 +96,25 @@
             </thead>
             %for estimation in phase.estimations:
                 <tr>
-                    <td><a href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask)}' title="Voir/éditer ce devis">${estimation.number}</a></td>
+                    <td><a href='${request.route_path("estimation", id=estimation.IDTask)}' title="Voir/éditer ce devis">${estimation.number}</a></td>
                     <td>${estimation.name}</td>
                     <td>${estimation.get_status_str('estimation')}</td>
                     ##    <td>${print_date(estimation.statusDate)}</td>
                     ##<td>${estimation.owner.firstname} ${estimation.owner.lastname}</td>
                     <td>
-                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask)}' title="Voir/éditer ce devis">
+                        <a class='btn' href='${request.route_path("estimation", id=estimation.IDTask)}' title="Voir/éditer ce devis">
                             <span class='ui-icon ui-icon-pencil'></span>
                             Voir/Éditer
                         </a>
-                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                        <a class='btn' href='${request.route_path("estimation", id=estimation.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
                             PDF
                         </a>
-                        <a class='btn' href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask, _query=dict(action="duplicate"))}' title="Dupliquer le devis">
+                        <a class='btn' href='${request.route_path("estimation", id=estimation.IDTask, _query=dict(action="duplicate"))}' title="Dupliquer le devis">
                             Dupliquer
                         </a>
                         %if estimation.is_deletable():
                             <a class='btn'
-                                href='${request.route_path("estimation", cid=company.id, id=project.id, taskid=estimation.IDTask, _query=dict(action="delete"))}'
+                                href='${request.route_path("estimation", id=estimation.IDTask, _query=dict(action="delete"))}'
                                 title="Supprimer le devis"
                                 onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');">
                                 Supprimer
@@ -128,7 +128,7 @@
         <div style='clear:both'>Aucun devis n'a été créé dans cette phase</div>
     %endif
     <h3 class='floatted' style='padding-right:10px;'>Facture(s)</h3>
-        <a class='btn' href='${request.route_path("invoices", cid=company.id, id=project.id, _query=dict(phase=phase.id))}'>
+        <a class='btn' href='${request.route_path("invoices", id=project.id, _query=dict(phase=phase.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>
         </a>
         %if phase.invoices:
@@ -143,17 +143,17 @@
         </thead>
             %for invoice in phase.invoices:
                 <tr>
-                    <td><a href='${request.route_path("invoice", cid=company.id, id=project.id, taskid=invoice.IDTask)}' title="Voir/éditer cette facture">${invoice.number}</a></td>
+                    <td><a href='${request.route_path("invoice", id=invoice.IDTask)}' title="Voir/éditer cette facture">${invoice.number}</a></td>
                     <td>${invoice.name}</td>
                     <td>${invoice.get_status_str("invoice")}</td>
                     ##      <td>${print_date(invoice.statusDate)}</td>
                     ##      <td>${invoice.owner.firstname} ${invoice.owner.lastname}</td>
                     <td>
-                        <a class='btn' href='${request.route_path("invoice", cid=company.id, id=project.id, taskid=invoice.IDTask)}' title="Voir/éditer ce devis">
+                        <a class='btn' href='${request.route_path("invoice", id=invoice.IDTask)}' title="Voir/éditer ce devis">
                             <span class='ui-icon ui-icon-pencil'></span>
                             Voir/Éditer
                         </a>
-                        <a class='btn' href='${request.route_path("invoice", cid=company.id, id=project.id, taskid=invoice.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                        <a class='btn' href='${request.route_path("invoice", id=invoice.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
                            PDF
                         </a>
                     </td>

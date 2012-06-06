@@ -18,18 +18,18 @@
         Vous ne pouvez plus modifier ce document car il est en attente de validation.
     %endif
     <br />
-    <a class='btn btn-primary' href='${request.route_path("estimation", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+    <a class='btn btn-primary' href='${request.route_path("estimation", id=task.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
         Télécharger la version PDF
     </a>
     %if task.CAEStatus in ('sent', 'valid'):
         <a class='btn btn-primary'
-            href='${request.route_path("estimation", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(action="geninv"))}'
+            href='${request.route_path("estimation", id=task.IDTask, _query=dict(action="geninv"))}'
             title="Générer les factures correspondantes">
             Générer les factures
         </a>
     %elif task.CAEStatus in ('sent', 'valid', 'wait'):
         <a class='btn btn-primary'
-            href='${request.route_path("estimation", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(action="aboest"))}'
+            href='${request.route_path("estimation", id=task.IDTask, _query=dict(action="aboest"))}'
             title="Annuler ce devis"
             onclick="return confirm('Êtes-vous sûr de vouloir annuler ce devis ?');">
             Annuler/Indiquer sans suite

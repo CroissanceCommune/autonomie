@@ -135,7 +135,7 @@
                     <td>
                         <blockquote>
                             %if invoice.model.project:
-                                <a href="${request.route_path('invoice', cid=company.id, id=invoice.model.project.id, taskid=invoice.model.IDTask)}" title='Voir le document'>
+                                <a href="${request.route_path('invoice', id=invoice.model.IDTask)}" title='Voir le document'>
                                 ${invoice.model.number}<br />
                             </a>
                             %else:
@@ -163,7 +163,7 @@
                     <td>
                         %if invoice.model.project:
                             <a class='btn'
-                                href='${request.route_path("invoice", cid=company.id, id=invoice.model.IDProject, taskid=invoice.model.IDTask, _query=dict(view="pdf"))}'
+                                href='${request.route_path("invoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
                                 <span class='ui-icon ui-icon-document'></span>
                            </a>

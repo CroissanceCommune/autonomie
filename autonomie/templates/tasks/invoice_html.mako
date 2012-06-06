@@ -18,7 +18,7 @@
         Vous ne pouvez plus modifier ce document car il est en attente de validation.
     %endif
         <br />
-    <a class='btn btn-primary' href='${request.route_path("invoice", cid=company.id, id=task.IDProject, taskid=task.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+    <a class='btn btn-primary' href='${request.route_path("invoice", id=task.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
         Télécharger la version PDF
     </a>
     <br />

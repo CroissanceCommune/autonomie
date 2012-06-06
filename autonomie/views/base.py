@@ -116,10 +116,16 @@ class TaskView(BaseView):
 
     def __init__(self, request):
         BaseView.__init__(self, request)
-        self.company = self.get_current_company()
-        self.project = self.get_current_project(self.company)
-        self.taskid = self.request.matchdict.get('taskid')
-        self.task = self.get_task()
+        if self.request.context.__name__ == 'project':
+            self.project = self.request.context
+            self.company = self.project.company
+            self.taskid = None
+            self.task = self.get_task()
+        else:
+            self.task = self.request.context
+            self.taskid = self.task.IDTask
+            self.project = self.task.project
+            self.company = self.project.company
         self.set_lines()
 
     def get_task(self):
@@ -141,21 +147,9 @@ class TaskView(BaseView):
         return HTTPFound(route_path(
                             self.route,
                             self.request,
-                            cid=self.company.id,
-                            id=self.project.id,
-                            taskid=self.taskid,
+                            id=self.taskid,
                             _query=dict(view='html')
                             ))
-
-    def get_current_project(self, company):
-        """
-            Returns the current project
-        """
-        project_id = self.request.matchdict.get('id')
-        try:
-            return company.get_project(project_id)
-        except:
-            return None
 
     def add_default_phase(self):
         """
@@ -207,7 +201,7 @@ class TaskView(BaseView):
                                   date)
     def get_taskstatus(self):
         """
-            Set all status related attributes
+            get the status asked when validating the form
         """
         return self.request.params['submit']
 
@@ -236,4 +230,11 @@ class TaskView(BaseView):
                         value=u"Annuler")
         return (draft, askvalidation, cancel,)
 
-
+    def project_view_redirect(self):
+        """
+            return a http redirect object to the project page
+        """
+        return HTTPFound(route_path(
+                            'company_project',
+                            self.request,
+                            id=self.project.id))

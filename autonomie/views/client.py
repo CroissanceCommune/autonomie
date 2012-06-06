@@ -111,6 +111,7 @@ class ClientView(ListView):
             title = u"Ajout d'un nouveau client"
         else:
             client = self.request.context
+            company = client.company
             edit = True
             title = u"Édition du client : {0}".format(client.name)
 
@@ -142,7 +143,7 @@ succès".format(client.name)
         return dict(title=title,
                     client=client,
                     html_form=html_form,
-                    company=client.company)
+                    company=company)
 
     @view_config(route_name='company_client', renderer='client_view.mako', \
                                                         request_method='GET')

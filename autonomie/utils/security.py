@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 05 juin 2012 23:48:10 CEST
+# * Last Modified : mer. 06 juin 2012 11:20:23 CEST
 #
 # * Project : autonomie
 #
@@ -20,11 +20,17 @@ from pyramid.security import Authenticated
 from autonomie.models.model import Project
 from autonomie.models.model import Company
 from autonomie.models.model import Client
+from autonomie.models.model import Estimation
+from autonomie.models.model import Invoice
 
 log = logging.getLogger(__file__)
 
 class BaseDBFactory(object):
-    __acl__ = [(Allow, Authenticated, 'view'),]
+    """
+        Base class for dbrelated objects
+    """
+    acl = [(Allow, u"admin", ("view", 'edit',)),
+           (Allow, Authenticated, 'visit'),]
     dbsession = None
 
 class RootFactory(dict):
@@ -40,18 +46,19 @@ class RootFactory(dict):
         self['companies'] = CompanyFactory(self, "companies")
         self['projects'] = ProjectFactory(self, 'projects')
         self['clients'] = ClientFactory(self, 'clients')
+        self['estimations'] = EstimationFactory(self, 'estimations')
+        self['invoices'] = InvoiceFactory(self, 'invoices')
 
-class CompanyWrapper(Company):
+
+def get_company_acl(self):
     """
-        Wrap The project model to handle acls
+        Compute the company's acls
     """
-    @property
-    def __acl__(self):
-        acl = [(Allow, u"admin", ("view", 'edit',)),
-               (Allow, Authenticated, ('visit',)),]
-        acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
-                            for user in self.employees])
-        return acl
+    acl = [(Allow, u"admin", ("view", 'edit',)),
+           (Allow, Authenticated, ('visit',)),]
+    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
+                        for user in self.employees])
+    return acl
 
 class CompanyFactory(BaseDBFactory):
     """
@@ -68,24 +75,23 @@ class CompanyFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(CompanyWrapper).filter(
-                               CompanyWrapper.id==key).scalar()
+        Company.__acl__ = property(get_company_acl)
+        obj = dbsession.query(Company).filter(
+                               Company.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
         obj.__name__ = "company"
         return obj
 
-class ProjectWrapper(Project):
+def get_client_or_project_acls(self):
     """
-        Wrap The project model to handle acls
+        Compute the project's acls
     """
-    @property
-    def __acl__(self):
-        acl = [(Allow, u"admin", ("view", 'edit',)),]
-        acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
-                            for user in self.company.employees])
-        return acl
+    acl = [(Allow, u"admin", ("view", 'edit',)),]
+    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
+                        for user in self.company.employees])
+    return acl
 
 class ProjectFactory(BaseDBFactory):
     """
@@ -102,24 +108,14 @@ class ProjectFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(ProjectWrapper).filter(
-                                               ProjectWrapper.id==key).scalar()
+        Project.__acl__ = property(get_client_or_project_acls)
+        obj = dbsession.query(Project).filter(
+                                               Project.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
         obj.__name__ = "project"
         return obj
-
-class ClientWrapper(Client):
-    """
-        Wrap The client model to handle acls
-    """
-    @property
-    def __acl__(self):
-        acl = [(Allow, u"admin", ("view", 'edit',)),]
-        acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
-                            for user in self.company.employees])
-        return acl
 
 class ClientFactory(BaseDBFactory):
     """
@@ -136,10 +132,68 @@ class ClientFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(ClientWrapper).filter(
-                                             ClientWrapper.id==key).scalar()
+        Client.__acl__ = property(get_client_or_project_acls)
+        obj = dbsession.query(Client).filter(
+                                             Client.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
         obj.__name__ = "client"
+        return obj
+
+def get_task_acl(self):
+    """
+        return the acls of the current task object
+    """
+    acl = [(Allow, u"admin", ("view", 'edit',)),]
+    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
+                        for user in self.project.company.employees])
+    return acl
+
+class EstimationFactory(BaseDBFactory):
+    """
+        Handle access to a client
+    """
+    def __init__(self, parent, name):
+        self.__parent__ = parent
+        self.__name__ = name
+
+    def __getitem__(self, key):
+        """
+            Returns the traversed object
+        """
+        if self.dbsession == None:
+            raise Exception("Missing dbsession")
+        dbsession = self.dbsession()
+        Estimation.__acl__ = property(get_task_acl)
+        obj = dbsession.query(Estimation).filter(
+                                           Estimation.IDTask==key).scalar()
+        if obj is None:
+            raise KeyError
+        obj.__parent__ = self
+        obj.__name__ = "estimation"
+        return obj
+
+class InvoiceFactory(BaseDBFactory):
+    """
+        Handle access to a client
+    """
+    def __init__(self, parent, name):
+        self.__parent__ = parent
+        self.__name__ = name
+
+    def __getitem__(self, key):
+        """
+            Returns the traversed object
+        """
+        if self.dbsession == None:
+            raise Exception("Missing dbsession")
+        Invoice.__acl__ = property(get_task_acl)
+        dbsession = self.dbsession()
+        obj = dbsession.query(Invoice).filter(
+                                             Invoice.IDTask==key).scalar()
+        if obj is None:
+            raise KeyError
+        obj.__parent__ = self
+        obj.__name__ = "invoice"
         return obj

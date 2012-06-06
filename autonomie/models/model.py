@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 05 juin 2012 22:58:12 CEST
+# * Last Modified : mer. 06 juin 2012 11:38:49 CEST
 #
 # * Project : autonomie
 #
@@ -222,6 +222,13 @@ class Company(DBBASE):
         return os.path.join(self.get_path(),
                             'logo',
                              self.logo['filename'])
+
+    def get_company_id(self):
+        """
+            Return the current company id
+            Allows company id access through request's context
+        """
+        return self.id
 
 class User(DBBASE):
     """
@@ -464,6 +471,9 @@ document."
         else:
             assert False
         return status
+
+    def get_company_id(self):
+        return self.project.company.id
 
 class Estimation(Task):
     """
@@ -790,6 +800,9 @@ class Client(DBBASE):
     contactFirstName = Column("contactFirstName", String(255), default=None)
     contactLastName = Column("contactLastName", String(255), default=None)
 
+    def get_company_id(self):
+        return self.company.id
+
 class Project(DBBASE):
     """
         `IDProject` int(11) NOT NULL auto_increment,
@@ -826,7 +839,7 @@ class Project(DBBASE):
     endingDate = Column("endingDate", CustomDateType(11),
                                             default=_get_date)
     name = Column("name", String(255))
-    archived = Column("archived", String(255))
+    archived = Column("archived", String(255), default=0)
 
     def get_estimation(self, taskid):
         """
@@ -857,6 +870,10 @@ class Project(DBBASE):
             Return True if this project could be deleted
         """
         return self.archived == 1 and not self.invoices
+
+    def get_company_id(self):
+        return self.company.id
+
 
 class Phase(DBBASE):
     """

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 05 juin 2012 23:55:15 CEST
+# * Last Modified : mer. 06 juin 2012 09:55:52 CEST
 #
 # * Project : autonomie
 #
@@ -60,24 +60,24 @@ def main(global_config, **settings):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('account',
-                     '/company/{cid:\d+}/account',
-                     traverse='/companies/{cid}')
+                     '/company/{id:\d+}/account',
+                     traverse='/companies/{id}')
     #Company routes
     config.add_route('company',
-                     '/company/{cid:\d+}',
-                     traverse='/companies/{cid}')
+                     '/company/{id:\d+}',
+                     traverse='/companies/{id}')
     config.add_route('company_clients',
-                     '/company/{cid:\d+}/clients',
-                     traverse='/companies/{cid}')
+                     '/company/{id:\d+}/clients',
+                     traverse='/companies/{id}')
     config.add_route('company_projects',
-                     '/company/{cid:\d+}/projects',
-                     traverse='/companies/{cid}')
+                     '/company/{id:\d+}/projects',
+                     traverse='/companies/{id}')
     config.add_route('company_invoices',
-                     '/company/{cid:\d+}/invoices',
-                     traverse='/company/{cid}')
+                     '/company/{id:\d+}/invoices',
+                     traverse='/companies/{id}')
     config.add_route('company_treasury',
-                     '/company/{cid:\d+}/treasury',
-                     traverse='/company/{cid}')
+                     '/company/{id:\d+}/treasury',
+                     traverse='/companies/{id}')
 
     #Client routes
     config.add_route('company_client',
@@ -91,14 +91,14 @@ def main(global_config, **settings):
     #Tasks (estimation and invoice) routes
     config.add_route('estimations',
                      '/projects/{id:\d+}/estimations',
-                      traverse='/projects/{cid}')
+                      traverse='/projects/{id}')
     config.add_route('estimation',
                      '/estimations/{id:\d+}',
                       traverse='/estimations/{id}')
 
     config.add_route('invoices',
                      '/projects/{id:\d+}/invoices',
-                     traverse='/projects/{cid}')
+                     traverse='/projects/{id}')
     config.add_route('invoice',
                      '/invoices/{id:\d+}',
                      traverse='/invoices/{id}')

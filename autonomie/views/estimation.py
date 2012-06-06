@@ -125,11 +125,7 @@ class EstimationView(TaskView):
                     self.dbsession.merge(self.task)
                     self.dbsession.flush()
                     # Redirecting to the project page
-                    return HTTPFound(route_path('company_project',
-                                  self.request,
-                                  cid=self.company.id,
-                                  id=self.project.id)
-                                  )
+                    return self.project_view_redirect()
                 except Forbidden, e:
                     self.request.session.flash(e.message, queue='error')
                     html_form = form.render(appstruct)
@@ -167,15 +163,12 @@ class EstimationView(TaskView):
         """
             return the current estimation or a new one
         """
-        if self.taskid:
-            return self.project.get_estimation(self.taskid)
-        else:
-            estimation = Estimation()
-            estimation.CAEStatus = 'draft'
-            phaseid = self.request.params.get('phase')
-            estimation.IDPhase = phaseid
-            estimation.IDEmployee = self.user.id
-            return estimation
+        estimation = Estimation()
+        estimation.CAEStatus = 'draft'
+        phaseid = self.request.params.get('phase')
+        estimation.IDPhase = phaseid
+        estimation.IDEmployee = self.user.id
+        return estimation
 
     def _html(self):
         """
@@ -247,8 +240,6 @@ class EstimationView(TaskView):
         return HTTPFound(route_path(
                     'estimation',
                     self.request,
-                    cid=self.company.id,
-                    id=self.project.id,
                     taskid=taskid))
 
     @view_config(route_name='estimation', request_param='action=delete')
@@ -263,11 +254,7 @@ class EstimationView(TaskView):
         else:
             message = u"Vous n'êtes pas autorisé à supprimer ce devis."
         self.request.session.flash(message, queue='error')
-        return HTTPFound(route_path(
-                        'company_project',
-                        self.request,
-                        cid=self.company.id,
-                        id=self.project.id))
+        return self.project_view_redirect()
 
     @view_config(route_name='estimation', request_param='action=geninv')
     def gen_invoices(self):
@@ -384,11 +371,7 @@ class EstimationView(TaskView):
         self.dbsession.merge(invoice)
         self.request.session.flash(u"Vos factures ont bien été générées",
                                 queue='main')
-        return HTTPFound(route_path(
-                        'company_project',
-                        self.request,
-                        cid=self.company.id,
-                        id=self.project.id))
+        return self.project_view_redirect()
 
     @view_config(route_name='estimation', request_param='action=aboest')
     def abort(self):
@@ -398,8 +381,4 @@ class EstimationView(TaskView):
         self.task.CAEStatus = "aboest"
         self.request.session.flash(u"Le devis {0} a été annulé \
 (indiqué sans suite).".format(self.task.number))
-        return HTTPFound(route_path(
-                        'company_project',
-                        self.request,
-                        cid=self.company.id,
-                        id=self.project.id))
+        return self.project_view_redirect()

@@ -29,6 +29,7 @@
     <%block name="headjs" />
 
     <link href="${request.static_url('autonomie:static/css/default.css')}" rel="stylesheet"  type="text/css" />
+    <link href="${request.static_url('autonomie:static/css/shadow.css')}" rel="stylesheet"  type="text/css" />
     <link href="${request.static_url('deform:static/css/form.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform:static/css/beautify.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/deform_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>

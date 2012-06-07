@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 06 juin 2012 11:20:23 CEST
+# * Last Modified : jeu. 07 juin 2012 17:54:43 CEST
 #
 # * Project : autonomie
 #
@@ -29,7 +29,7 @@ class BaseDBFactory(object):
     """
         Base class for dbrelated objects
     """
-    acl = [(Allow, u"admin", ("view", 'edit',)),
+    acl = [(Allow, "group:admin", "admin",),
            (Allow, Authenticated, 'visit'),]
     dbsession = None
 
@@ -39,6 +39,7 @@ class RootFactory(dict):
        the request object
     """
     __acl__ = [
+                (Allow, "group:admin", "admin",),
                 (Allow, Authenticated, 'view'),
                 ]
     def __init__(self, request):
@@ -54,7 +55,7 @@ def get_company_acl(self):
     """
         Compute the company's acls
     """
-    acl = [(Allow, u"admin", ("view", 'edit',)),
+    acl = [(Allow, "group:admin", ("view", "edit", "admin",)),
            (Allow, Authenticated, ('visit',)),]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
                         for user in self.employees])
@@ -88,7 +89,7 @@ def get_client_or_project_acls(self):
     """
         Compute the project's acls
     """
-    acl = [(Allow, u"admin", ("view", 'edit',)),]
+    acl = [(Allow, "group:admin", ("view", 'edit',)),]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
                         for user in self.company.employees])
     return acl
@@ -145,7 +146,7 @@ def get_task_acl(self):
     """
         return the acls of the current task object
     """
-    acl = [(Allow, u"admin", ("view", 'edit',)),]
+    acl = [(Allow, "group:admin", ("view", 'edit',)),]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
                         for user in self.project.company.employees])
     return acl

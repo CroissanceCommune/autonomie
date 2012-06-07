@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 06 juin 2012 09:44:31 CEST
+# * Last Modified : jeu. 07 juin 2012 18:18:37 CEST
 #
 # * Project : autonomie
 #
@@ -20,7 +20,6 @@ from pyramid.view import view_config
 from pyramid.url import route_path
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models import DBSESSION
 from autonomie.models.model import User
 
 log = logging.getLogger(__name__)
@@ -30,8 +29,7 @@ def index(request):
     """
         Index page
     """
-    userid = authenticated_userid(request)
-    avatar = DBSESSION().query(User).filter_by(login=userid).one()
+    avatar = request.user
     companies = avatar.companies
     if len(companies) == 1:
         company = companies[0]

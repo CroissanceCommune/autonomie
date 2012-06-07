@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : lun. 04 juin 2012 09:16:40 CEST
+# * Last Modified : jeu. 07 juin 2012 18:18:08 CEST
 #
 # * Project :
 #
@@ -28,7 +28,6 @@ from deform import Form
 from deform import Button
 from deform import ValidationFailure
 
-from autonomie.models import DBSESSION
 from autonomie.views.forms import authSchema
 from autonomie.views.forms import pwdSchema
 
@@ -96,7 +95,6 @@ def logout_view(request):
     """
         The logout view
     """
-    del(request.session['user'])
     headers = forget(request)
     loc = request.route_url('index')
     return HTTPFound(location=loc, headers=headers)
@@ -106,10 +104,7 @@ def account(request):
     """
         Account handling page
     """
-    #avatar = request.session['user']
-
-    userid = authenticated_userid(request)
-    avatar = DBSESSION().query(User).filter_by(login=userid).one()
+    avatar = request.user
     pwdformschema = pwdSchema.bind(check=True)
     pwdform = Form(pwdformschema, buttons=("submit",))
     html_form = pwdform.render({'login':avatar.login})
@@ -121,7 +116,7 @@ def account(request):
             html_form = e.render()
         else:
             log.debug("# User {0} has changed his password #")
-            dbsession = DBSESSION()
+            dbsession = request.dbsession()
             new_pass = datas['pwd']
             avatar.set_password(new_pass)
             dbsession.merge(avatar)

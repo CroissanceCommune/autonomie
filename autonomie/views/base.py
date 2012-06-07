@@ -25,7 +25,6 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
 from pyramid.security import authenticated_userid
 
-from autonomie.models import DBSESSION
 from autonomie.models.model import Phase
 from autonomie.models.model import Tva, User
 from autonomie.utils.views import get_page_url
@@ -38,23 +37,14 @@ class BaseView(object):
     """
     def __init__(self, request):
         self.request = request
-        self.dbsession = DBSESSION()
-        self.user = self.get_avatar()
+        self.dbsession = request.dbsession()
+        self.user = request.user
 
     def get_company_id(self):
         """
             Return current company Id
         """
         return self.request.matchdict.get('cid')
-
-    def get_avatar(self):
-        """
-            Return the user's avatar
-        """
-        userid = authenticated_userid(self.request)
-        avatar = self.dbsession.query(User).filter_by(login=userid).one()
-        return avatar
-#        return self.request.session['user']
 
     def get_current_company(self):
         """

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : lun. 04 juin 2012 10:36:30 CEST
+# * Last Modified : jeu. 07 juin 2012 18:15:01 CEST
 #
 # * Project : Autonomie
 #
@@ -18,33 +18,31 @@ from pyramid.security import authenticated_userid
 
 log = logging.getLogger(__name__)
 
-def get_build_avatar(dbsession):
+def get_groups(login, request):
     """
-        preferred to func.patial
+        return the current user's groups
     """
-    def build_avatar(login, request):
-        """
-            Stores the avatar object in the session
-        """
-        log.debug("# Getting user auth datas #")
-        user = get_user(login, dbsession)
-        if user.is_admin():
-            return ['admin']
-        elif user.is_manager():
-            return ['manager']
-        else:
-            return ['entrepreneur']
-    return build_avatar
+    dbsession = request.dbsession
+    log.debug("# Getting user auth datas #")
+    user = get_user(login, dbsession)
+    if user.is_admin():
+        log.debug("User is admin")
+        return ['group:admin']
+    elif user.is_manager():
+        log.debug("User is a manager")
+        return ['group:manager']
+    else:
+        log.debug("User is not a manager, nor admin")
+        return ['group:entrepreneur']
 
-def get_avatar(request, dbsession):
+def get_avatar(request, dbsession=None):
     """
         Returns the current User object
     """
+    if not dbsession:
+        dbsession = request.dbsession
     login = authenticated_userid(request)
-    avatar = get_user(login, dbsession)
-    if not avatar:
-        raise KeyError()
-    return avatar
+    return get_user(login, dbsession)
 
 def get_user(login, dbsession):
     """

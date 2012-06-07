@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 06 juin 2012 09:55:52 CEST
+# * Last Modified : jeu. 07 juin 2012 18:14:46 CEST
 #
 # * Project : autonomie
 #
@@ -22,7 +22,8 @@ from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from autonomie.models import initialize_sql
-from autonomie.utils.avatar import get_build_avatar
+from autonomie.utils.avatar import get_groups
+from autonomie.utils.avatar import get_avatar
 from autonomie.utils.forms import set_deform_renderer
 
 def main(global_config, **settings):
@@ -31,14 +32,13 @@ def main(global_config, **settings):
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
     dbsession = initialize_sql(engine)
+
     from autonomie.utils.security import RootFactory
     from autonomie.utils.security import BaseDBFactory
     BaseDBFactory.dbsession = dbsession
 
-    avatar_builder = get_build_avatar(dbsession)
-
     session_factory = session_factory_from_settings(settings)
-    auth_policy = SessionAuthenticationPolicy(callback=avatar_builder)
+    auth_policy = SessionAuthenticationPolicy(callback=get_groups)
     acl_policy = ACLAuthorizationPolicy()
 
 
@@ -48,7 +48,14 @@ def main(global_config, **settings):
                         session_factory=session_factory,
                         root_factory=RootFactory
                         )
+    # Application main configuration
     config.set_default_permission('view')
+
+    # Adding some properties to the request object
+    config.set_request_property(lambda _:dbsession, 'dbsession', reify=True)
+    from autonomie.utils.avatar import get_avatar
+    config.set_request_property(get_avatar, 'user', reify=True)
+
     config.add_static_view('static', 'autonomie:static', cache_max_age=3600)
     config.add_static_view('deformstatic', "deform:static", cache_max_age=3600)
     from autonomie.utils.config import load_config
@@ -102,6 +109,13 @@ def main(global_config, **settings):
     config.add_route('invoice',
                      '/invoices/{id:\d+}',
                      traverse='/invoices/{id}')
+
+    # Administration routes
+    config.add_route("admin_index",
+                     "/admin")
+    config.add_route("admin_main",
+                    "/admin/main")
+
 #    config.add_route('useradd', '/user/add')
 #    config.add_route('userpass', '/user/pwd')
 #    config.add_route('userdel', '/user/del')

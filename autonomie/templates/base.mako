@@ -60,14 +60,18 @@
                 % endfor
               </ul>
             % endif
-            %if request.session.has_key('user'):
+            %if request.user:
               <ul class='nav pull-right' id='logout_link'>
                 <li>
                 %if company is not UNDEFINED:
                   <a href="${request.route_path('account', id=company.id)}">
                     <span class='ui-icon ui-icon-gear'></span>
-                    ${request.session['user'].lastname} ${request.session['user'].firstname}
+                    ${request.user.lastname} ${request.user.firstname}
                   </a>
+                %else:
+                  <a href="${request.route_path('account', id=-1)}">
+                    ${request.user.lastname} ${request.user.firstname}
+                    </a>
                 %endif
                 </li>
                 <li>

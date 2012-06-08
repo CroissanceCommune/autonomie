@@ -54,17 +54,3 @@
             ${table(u"Retard de paiement", tolate)}
         % endif
         </%block>
-
-        <div id="footer">
-            % if config.has_key('coop_pdffootertitle'):
-                <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
-            %endif
-            % if task.model.course == 1 and config.has_key('coop_pdffootercourse'):
-                ${format_text(config.get('coop_pdffootercourse'))}<br />
-            % endif
-            % if config.has_key('coop_pdffootertext'):
-                ${format_text(config.get('coop_pdffootertext'))}
-            % endif
-        </div>
-    </body>
-</html>

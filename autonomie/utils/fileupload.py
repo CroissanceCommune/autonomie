@@ -28,6 +28,17 @@ class FileTempStore(dict):
     """
         Temporary stores files at a given location
         implements deform.interfaces.FileUploadTempStore
+
+        default_filename : if provided, name used to store and access the
+                           uploaded file
+        session : pyramid session
+        path : the path to store (retrieve) the file from
+        url : the base url used to access the file
+        Example :
+            to upload a file to /tmp/logo/ and access it through /assets/logo
+            FileTempStore(session, "/tmp/logo", "/assets/logo/")
+            if you want to force the logo file to be called logo.png
+            FileTempStore(session, "/tmp/logo", "/assets/logo/", "logo.png")
     """
     session_key = 'deform_uploads'
     def __init__(self, session, path, url, default_filename=None):
@@ -44,18 +55,20 @@ class FileTempStore(dict):
         """
             Returns the url for the preview
         """
-        print "Asking for a preview URl"
-        print "uid : %s" % uid
-
-        if not filename:
+        log.debug("Asking for a preview URl")
+        log.debug(" + uid : %s" % uid)
+        filepath = None
+        if self.default_filename:
+            filename = self.default_filename
+        elif not filename:
             filename = self.get(uid, {}).get('filename')
-        filepath = os.path.join(self.store_url, filename)
 
-        print "The filepath where to find our file is : %s" % filepath
-
-        #if os.path.isfile(filepath):
-        #    filedata = file(filepath, 'r').read()
-        #    value['fp'] = filedata
+        if filename:
+            log.debug(" + filename : %s" % filename)
+            filepath = os.path.join(self.store_url, filename)
+        else:
+            filepath = None
+        log.debug(" -> The filepath where to find our file is : %s" % filepath)
         return filepath
 
     def get(self, uid, default=None):
@@ -100,11 +113,11 @@ class FileTempStore(dict):
             Saves the file contents to a file
         """
         log.debug("In __setitem__")
-        log.debug(uid)
-        log.debug(value)
+        log.debug(" + uid : %s" % uid)
+        log.debug(" + value : %s" % value)
         filedata = value.get('fp')
+        filename = self.default_filename or value['filename']
         if filedata:
-            filename = self.default_filename or value['filename']
             filepath = os.path.join(self.store_directory, filename)
             log.debug("Writing file datas to : %s" % filepath)
             with file(filepath, 'w') as fbuf:
@@ -113,13 +126,15 @@ class FileTempStore(dict):
                 else:
                     fbuf.write(filedata)
             del value['fp']
-        if value.get('filename'):
-            value['preview_url'] = self.preview_url(uid, value['filename'])
+        else:
+            log.debug("No file data where transmitted")
+        if filename:
+            value['preview_url'] = self.preview_url(uid, filename)
 
         self.session.setdefault(self.session_key, {})[uid] = {
             'time': datetime.now(),
             'value': {
-                'filename': value['filename'],
+                'filename': filename,
                 'mimetype': value.get('mimetype'),
                 'size': value.get('size'),
                 'preview_url':value.get('preview_url')

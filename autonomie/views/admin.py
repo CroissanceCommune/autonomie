@@ -54,8 +54,15 @@ class AdminViews(BaseView):
         """
             Main parameters administration
         """
-        schema = MainConfig()
+        # static assets path
+        root_path = self.request.config.get('files_dir', '/tmp')
+        schema = MainConfig().bind(
+                                   session=self.request.session,
+                                   rootpath=root_path,
+                                   rooturl="/assets/")
         form = Form(schema, buttons=('submit',))
+
+
         if 'submit' in self.request.params:
             datas = self.request.params.items()
             try:
@@ -102,6 +109,7 @@ class AdminViews(BaseView):
                     self.dbsession.flush()
                 for data in appstruct['tvas']:
                     tva = Tva()
+                    print data
                     dbdatas = merge_session_with_post(tva, data)
                     self.dbsession.merge(tva)
                 self.dbsession.flush()
@@ -109,7 +117,9 @@ class AdminViews(BaseView):
                     u"Les taux de TVA ont bien été modifiés", queue='main')
                 return HTTPFound(self.request.route_path("admin_tva"))
         else:
-            appstruct = [{'name':tva.name, 'value':tva.value}for tva in tvas]
+            appstruct = [{'name':tva.name,
+                          'value':tva.value,
+                          "default":tva.default}for tva in tvas]
             html_form=form.render({'tvas':appstruct})
         return dict(title=u"Configuration des taux de TVA",
                     tvas=tvas,

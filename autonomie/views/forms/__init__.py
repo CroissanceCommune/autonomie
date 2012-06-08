@@ -22,3 +22,4 @@ from .company import CompanySchema
 from .project import ProjectSchema
 from .project import phaseSchema
 from .admin import MainConfig
+from .admin import TvaConfig

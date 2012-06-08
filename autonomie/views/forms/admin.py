@@ -15,14 +15,34 @@
 """
     Form schemes for administration
 """
+import os
 import colander
 import logging
 
 from deform import widget
+from deform import FileData
+
+from autonomie.utils.forms import validate_image_mime
+from autonomie.utils.fileupload import FileTempStore
+
 
 from .custom_types import AmountType
 
 log = logging.getLogger(__name__)
+
+@colander.deferred
+def deferred_upload_widget(node, kw):
+    """
+        Returns a fileupload widget to allow logo upload
+    """
+    session = kw['session']
+    root_path = kw['rootpath']
+    root_url = kw['rooturl']
+    store_url = os.path.join(root_url, "main")
+    store_directory = os.path.join(root_path, "main")
+    tmpstore = FileTempStore(session, store_directory, store_url, 'logo.png')
+    return widget.FileUploadWidget(tmpstore,
+            template="autonomie:deform_templates/fileupload.mako" )
 
 class EstimationConfig(colander.MappingSchema):
     """
@@ -72,8 +92,11 @@ class SiteConfig(colander.MappingSchema):
         Site configuration
         logos ...
     """
-    pass
-
+    logo = colander.SchemaNode(FileData(),
+                widget=deferred_upload_widget,
+                title=u'Logo du site',
+                validator=validate_image_mime,
+                default={"filename":"logo.png", "uid":"MAINLOGO"})
 
 class MainConfig(colander.MappingSchema):
     """
@@ -92,6 +115,9 @@ class TvaItem(colander.MappingSchema):
     value = colander.SchemaNode(AmountType(),
                                 title=u"Montant",
                                 css_class='span2')
+    default = colander.SchemaNode(colander.Integer(),
+                    title=u"Valeur par défaut ?",
+                    widget=widget.CheckboxWidget(true_val="1", false_val="0"))
 
 class TvaSequence(colander.SequenceSchema):
     tva = TvaItem(title=u"")

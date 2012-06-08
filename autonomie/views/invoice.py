@@ -34,7 +34,6 @@ from autonomie.views.forms.estimation import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
-from autonomie.utils.config import load_config
 
 from .base import TaskView
 from .base import ListView
@@ -361,7 +360,7 @@ class InvoiceView(TaskView, ListView):
         """
         invoicecompute = TaskComputing(self.task)
         template = "tasks/invoice.mako"
-        config = load_config(self.dbsession)
+        config = self.request.config
         datas = dict(
                     company=self.company,
                     project=self.project,

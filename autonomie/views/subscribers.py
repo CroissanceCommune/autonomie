@@ -33,11 +33,13 @@ def add_menu(event):
         if cid is not None
     """
     request = event['req']
+    cid = None
     # We test matchdict is present : it's not when inner render call is made
     if hasattr(request, "context") and hasattr(request.context, "get_company_id"):
         cid = request.context.get_company_id()
-    else:
-        cid = None
+    elif hasattr(request, "user") and request.user:
+        if len(request.user.companies):
+            cid = request.user.companies[0].id
     menu = {}
     if cid:
         menu = [dict(label=u'Clients',

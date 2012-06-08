@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 06 juin 2012 11:38:49 CEST
+# * Last Modified : ven. 08 juin 2012 13:35:33 CEST
 #
 # * Project : autonomie
 #
@@ -903,9 +903,14 @@ class Tva(DBBASE):
         `id` int(2) NOT NULL auto_increment,
         `name` varchar(8) NOT NULL,
         `value` int(5)
+        `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
     __tablename__ = 'coop_tva'
     __table_args__ = {'autoload':True}
+
+    @classmethod
+    def query(class_, dbsession):
+        return dbsession.query(Tva).order_by('value')
 
 class TaskStatus(DBBASE):
     """

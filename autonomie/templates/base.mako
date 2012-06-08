@@ -63,16 +63,10 @@
             %if request.user:
               <ul class='nav pull-right' id='logout_link'>
                 <li>
-                %if company is not UNDEFINED:
-                  <a href="${request.route_path('account', id=company.id)}">
+                <a href="${request.route_path('account')}">
                     <span class='ui-icon ui-icon-gear'></span>
                     ${request.user.lastname} ${request.user.firstname}
                   </a>
-                %else:
-                  <a href="${request.route_path('account', id=-1)}">
-                    ${request.user.lastname} ${request.user.firstname}
-                    </a>
-                %endif
                 </li>
                 <li>
                 <a href="/logout">Déconnexion</a>

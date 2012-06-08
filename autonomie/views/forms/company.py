@@ -20,24 +20,15 @@ import logging
 
 from deform import FileData
 
-from autonomie.utils.forms import deferred_upload_widget
 from autonomie.utils.forms import deferred_edit_widget
+from autonomie.utils.forms import deferred_upload_widget
+from autonomie.utils.forms import validate_image_mime
 from autonomie.utils.forms import get_mail_input
 
 log = logging.getLogger(__name__)
 HEADER_PATH = "header"
 LOGO_PATH = "logo"
 
-def validate_image_mime(node, value):
-    """
-        Validate mime types for image files
-    """
-    log.debug("In validating mimetype")
-    if value.get('fp'):
-        if not value['mimetype'].startswith('image/'):
-            message = u"Veuillez télécharger un fichier de type jpg, png, \
-bmp ou gif"
-            raise colander.Invalid(node, message)
 
 class CompanySchema(colander.MappingSchema):
     """

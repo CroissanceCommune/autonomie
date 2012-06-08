@@ -1,6 +1,11 @@
 <%inherit file="base.mako" ></%inherit>
 <%block name='content'>
-<div style="width:300px;margin-left:35%;margin-top:100px;">
+<div class='row'>
+    <div class='span6 offset3'>
+        <div style='text-align:center;'>
+            <img src="/assets/main/logo.png" alt='Votre CAE' />
+            </div>
 ${html_form|n}
+</div>
 </div>
 </%block>

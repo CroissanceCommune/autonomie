@@ -104,3 +104,6 @@ header .navbar li:hover{
 .breadcrumb .active a {
   color: #333333;
 }
+textarea{
+  width:auto;
+}

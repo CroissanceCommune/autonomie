@@ -107,30 +107,24 @@
           </%block>
           <%block name='pop_message'>
           % for num, message in enumerate(request.session.pop_flash(queue="main")):
-            <a href="#" onclick="$('#main_message_${num}').hide();" id="main_message_${num}">
-              <div class="message ui-widget">
-                <div class="ui-state-highlight ui-corner-all">
-                  <p>
-                    <span class="ui-icon ui-icon-check">
-                    </span>
-                    ${message|n}
-                  </p>
-                </div>
+            <div class='row'>
+              <div class='span6 offset3'>
+            <div class="alert alert-success">
+              <button class="close" data-dismiss="alert" type="button">×</button>
+               ${message|n}
+             </div>
               </div>
-            </a>
+              </div>
           % endfor
           % for num, message in enumerate(request.session.pop_flash(queue="error")):
-            <a href="#" onclick="$('#error_message_${num}').hide();" id="error_message_${num}">
-              <div class="message ui-widget">
-                <div class="ui-state-error ui-corner-all">
-                  <p>
-                  <span class="ui-icon ui-icon-alert">
-                    </span>
-                    ${message|n}
-                  </p>
-                </div>
+            <div class='row'>
+              <div class='span6 offset3'>
+              <div class="alert alert-error">
+                <button class="close" data-dismiss="alert" type="button">×</button>
+                ${message|n}
               </div>
-            </a>
+              </div>
+              </div>
           % endfor
           </%block>
           <%block name='content' />

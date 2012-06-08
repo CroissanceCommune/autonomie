@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : jeu. 07 juin 2012 18:14:46 CEST
+# * Last Modified : jeu. 07 juin 2012 18:40:10 CEST
 #
 # * Project : autonomie
 #
@@ -24,6 +24,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from autonomie.models import initialize_sql
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
+from autonomie.utils.config import get_config
 from autonomie.utils.forms import set_deform_renderer
 
 def main(global_config, **settings):
@@ -53,22 +54,25 @@ def main(global_config, **settings):
 
     # Adding some properties to the request object
     config.set_request_property(lambda _:dbsession, 'dbsession', reify=True)
-    from autonomie.utils.avatar import get_avatar
     config.set_request_property(get_avatar, 'user', reify=True)
+    config.set_request_property(get_config, 'config')
 
     config.add_static_view('static', 'autonomie:static', cache_max_age=3600)
     config.add_static_view('deformstatic', "deform:static", cache_max_age=3600)
-    from autonomie.utils.config import load_config
-    company_assets = load_config(dbsession(), 'files_dir').get('files_dir')
+
+    company_assets = get_config(None, dbsession).get('files_dir')
+
     if company_assets:
         config.add_static_view('assets', company_assets, cache_max_age=3600)
 
     config.add_route('index', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    # TODO : Trouver un moyen de stocker la compagnie en cours de traitement
+    #        pour conserver le menu
+    # Cas de l'admin
     config.add_route('account',
-                     '/company/{id:\d+}/account',
-                     traverse='/companies/{id}')
+                    '/account')
     #Company routes
     config.add_route('company',
                      '/company/{id:\d+}',

@@ -12,8 +12,13 @@
 </%block>
 <%block name='content'>
 <div class='container'>
-    <div class="row">
+    <ul class="row">
         <div class='span2'>
+        <a title='Éditer les informations de ce client'
+            href='${request.route_path("company_client", id=client.id, _query=dict(action="edit"))}'
+            class='btn btn-primary'>
+            Éditer
+        </a>
             <h3>Entreprise</h3>
             <dl>
                 % for label, value in ((u"Nom de l'entreprise", client.name), (u"Code", client.id), (u"TVA intracommunautaire", client.intraTVA)):
@@ -23,13 +28,8 @@
                     % endif
                 % endfor
             </dl>
-        <a title='Éditer les informations de ce client'
-            href='${request.route_path("company_client", id=client.id, _query=dict(action="edit"))}'
-            class='btn btn-primary'>
-            Éditer
-        </a>
         </div>
-        <div class="span2 offset1">
+        <div class="span3 offset1">
             <h3>Contact principal</h3>
             <strong>${client.contactLastName} ${client.contactFirstName}</strong>
             <br />
@@ -66,7 +66,7 @@
                 </dd>
             </dl>
         </div>
-        <div class='span6 offset1'>
+        <div class='span5 offset1'>
             % if client.comments:
                 <h3>Commentaires</h3>
                 <blockquote style='padding:15px;margin-top:25px;border:1px solid #eee;'>

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 31-01-2012
-# * Last Modified : dim. 29 avril 2012 22:20:01 CEST
+# * Last Modified : ven. 08 juin 2012 16:19:52 CEST
 #
 # * Project : autonomie
 #
@@ -191,4 +191,15 @@ def deferred_autocomplete_widget(node, kw):
     else:
         wid = widget.TextInputWidget()
     return wid
+
+def validate_image_mime(node, value):
+    """
+        Validate mime types for image files
+    """
+    log.debug("In validating mimetype")
+    if value.get('fp'):
+        if not value['mimetype'].startswith('image/'):
+            message = u"Veuillez télécharger un fichier de type jpg, png, \
+bmp ou gif"
+            raise colander.Invalid(node, message)
 

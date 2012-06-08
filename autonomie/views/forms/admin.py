@@ -20,6 +20,8 @@ import logging
 
 from deform import widget
 
+from .custom_types import AmountType
+
 log = logging.getLogger(__name__)
 
 class EstimationConfig(colander.MappingSchema):
@@ -80,6 +82,23 @@ class MainConfig(colander.MappingSchema):
     site = SiteConfig()
     document = DocumentConfig(title=u'Document (devis et factures)')
 
+class TvaItem(colander.MappingSchema):
+    """
+        Allows Tva configuration
+    """
+    name = colander.SchemaNode(colander.String(),
+                                title=u"Libellé du taux de TVA",
+                                css_class='span2')
+    value = colander.SchemaNode(AmountType(),
+                                title=u"Montant",
+                                css_class='span2')
+
+class TvaSequence(colander.SequenceSchema):
+    tva = TvaItem(title=u"")
+
+class TvaConfig(colander.MappingSchema):
+    tvas = TvaSequence(title=u"", missing=u'')
+
 def get_config_appstruct(config_dict):
     """
         transform Config datas to ConfigSchema compatible appstruct
@@ -136,3 +155,4 @@ def merge_dbdatas(dbdatas, appstruct):
         if new_val:
             datas.value = new_val
     return dbdatas
+

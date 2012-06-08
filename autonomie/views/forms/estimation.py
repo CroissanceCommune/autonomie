@@ -204,20 +204,29 @@ estimationline_mapping_item.mako'
                      )
             )
 
-def get_deferred_choices_widget(keyword, **options):
-    @colander.deferred
-    def deferred_choices_widget(node, kw):
-        """
-            Returns a dynamically generated Select widget
-            with choices passed at bind
-        """
-        choices = kw.get(keyword)
-        if choices:
-            wid = widget.SelectWidget(values=choices, **options)
-        else:
-            wid = widget.TextInputWidget(**options)
-        return wid
-    return deferred_choices_widget
+
+@colander.deferred
+def deferred_tvas_widget(node, kw):
+    """
+        return a tva widget
+    """
+    tvas = kw.get('tvas')
+    wid = widget.SelectWidget(values=tvas,
+                                  css_class='span1')
+    return wid
+
+
+@colander.deferred
+def deferred_phases_widget(node, kw):
+    """
+        return phase select widget
+    """
+    choices = kw.get("phases")
+    if choices:
+        wid = widget.SelectWidget(values=choices)
+    else:
+        wid = widget.TextInputWidget()
+    return wid
 
 class TaskLinesBlock(colander.MappingSchema):
     """
@@ -242,7 +251,8 @@ class TaskLinesBlock(colander.MappingSchema):
             title=u"Remise",
             missing=0)
     tva = colander.SchemaNode(colander.String(),
-            widget=get_deferred_choices_widget("tvas", css_class='span1'),
+            widget=deferred_tvas_widget,
+            default=1960,
             title=u'TVA')
 
     expenses = colander.SchemaNode(AmountType(),
@@ -263,7 +273,7 @@ class TaskConfiguration(colander.MappingSchema):
     IDPhase = colander.SchemaNode(
                 colander.String(),
                 title=deferred_phase_title,
-                widget=get_deferred_choices_widget('phases'),
+                widget=deferred_phases_widget,
                 )
     taskDate = colander.SchemaNode(
                 colander.Date(),

@@ -36,7 +36,6 @@ from autonomie.views.forms.estimation import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
-from autonomie.utils.config import load_config
 from autonomie.utils.exception import Forbidden
 
 from .base import TaskView
@@ -72,7 +71,6 @@ class EstimationView(TaskView):
                                        for line in self.task_lines],
                 'payment_lines':[line.appstruct()
                                         for line in self.payment_lines]}
-
 
     @view_config(route_name="estimations", renderer='tasks/form.mako')
     @view_config(route_name='estimation', renderer='tasks/form.mako')
@@ -176,7 +174,7 @@ class EstimationView(TaskView):
         """
         estimationcompute = TaskComputing(self.task)
         template = "tasks/estimation.mako"
-        config = load_config(self.dbsession)
+        config = self.request.config
         datas = dict(
                     company=self.company,
                     project=self.project,

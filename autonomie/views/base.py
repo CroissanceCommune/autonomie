@@ -26,7 +26,8 @@ from pyramid.url import route_path
 from pyramid.security import authenticated_userid
 
 from autonomie.models.model import Phase
-from autonomie.models.model import Tva, User
+from autonomie.models.model import Tva
+from autonomie.models.model import User
 from autonomie.utils.views import get_page_url
 
 log = logging.getLogger(__file__)
@@ -91,6 +92,7 @@ class ListView(BaseView):
                              current_page,
                              url=page_url,
                              items_per_page=items_per_page)
+
 
 class TaskView(BaseView):
     """
@@ -199,7 +201,7 @@ class TaskView(BaseView):
         """
             return all configured tva amounts
         """
-        tvas = self.dbsession.query(Tva).all()
+        tvas = Tva.query(self.dbsession)
         return [(tva.value, tva.name)for tva in tvas]
 
     def get_buttons(self):

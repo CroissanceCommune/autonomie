@@ -15,18 +15,13 @@
 """
     Simple utilities to access main configuration
 """
-from autonomie.models.model import Config
 
-def load_config(dbsession, name=None):
+def get_config(request, dbsession=None):
     """
-        Load the config value for key
+        Return a dictionnary with the config objects
     """
-    if name:
-        entry = dbsession.query(Config).filter(Config.name==name).first()
-        if not entry:
-            return {}
-        else:
-            return {entry.name:entry.value}
-    else:
-        return dict((entry.name, entry.value)
-                for entry in dbsession.query(Config).all())
+    from autonomie.models.model import Config
+    if not dbsession:
+        dbsession = request.dbsession
+    return dict((entry.name, entry.value)
+                for entry in dbsession().query(Config).all())

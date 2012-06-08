@@ -41,6 +41,8 @@ import colander
 from deform import widget
 
 from autonomie.utils.forms import get_date_input
+from .custom_types import QuantityType
+from .custom_types import AmountType
 
 log = logging.getLogger(__name__)
 
@@ -115,49 +117,6 @@ PAYMENTDISPLAYCHOICES = (
         ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
         ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
         ('ALL', u"Le détail des paiements apparaît dans le PDF",),)
-
-def specialfloat(self, value):
-    """
-        preformat the value before passing it to the float function
-    """
-    if isinstance(value, unicode):
-        value = value.replace(u'€', '').replace(u',', '.').replace(u' ', '')
-    return float(value)
-
-class QuantityType(colander.Number):
-    """
-        Preformat unicode supposed to be numeric entries
-    """
-    num = specialfloat
-
-class AmountType(colander.Number):
-    """
-        preformat an amount before considering it as a float object
-        then *100 to store it into database
-    """
-    num = specialfloat
-    def serialize(self, node, appstruct):
-        if appstruct is colander.null:
-            return colander.null
-
-        try:
-            return str(self.num(appstruct) / 100.0)
-        except Exception:
-            raise colander.Invalid(node,
-                          u"\"${val}\" n'est pas un montant valide".format(
-                                val=appstruct),
-                          )
-    def deserialize(self, node, cstruct):
-        if cstruct != 0 and not cstruct:
-            return colander.null
-
-        try:
-            return self.num(cstruct) * 100.0
-        except Exception:
-            raise colander.Invalid(node,
-                          u"\"${val}\" n'est pas un montant valide".format(
-                            val=cstruct)
-                          )
 
 class EstimationLine(colander.MappingSchema):
     """
@@ -289,11 +248,11 @@ class TaskConfiguration(colander.MappingSchema):
     course = colander.SchemaNode(colander.Integer(),
                 title=u"Formation ?",
                 description=deferred_course_title,
-                widget=widget.CheckboxWidget(true_val=1, false_val=0))
+                widget=widget.CheckboxWidget(true_val="1", false_val="0"))
     displayedUnits = colander.SchemaNode(colander.Integer(),
                 title=u"Afficher le détail",
                 description=u"Afficher le détail des prestations dans le PDF ?",
-                widget=widget.CheckboxWidget(true_val=1, false_val=0))
+                widget=widget.CheckboxWidget(true_val="1", false_val="0"))
 
 class TaskNotes(colander.MappingSchema):
     """

@@ -25,7 +25,6 @@ from deform import Form
 from autonomie.views.forms import CompanySchema
 from autonomie.views.forms.estimation import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.utils.config import load_config
 
 from .base import BaseView
 
@@ -74,8 +73,7 @@ class CompanyViews(BaseView):
             Company edition page
         """
         company = self.request.context
-        root_path = load_config(self.dbsession, "files_dir").get('files_dir',
-                                                                        '/tmp')
+        root_path = self.request.config.get('files_dir', '/tmp')
         company_path = os.path.join(root_path, company.get_path())
         company_url = os.path.join("/assets", company.get_path())
         schema = CompanySchema().bind(edit=True,

@@ -17,6 +17,7 @@
 """
 from .user import authSchema
 from .user import pwdSchema
+from .user import userSchema
 from .client import ClientSchema
 from .company import CompanySchema
 from .project import ProjectSchema

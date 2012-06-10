@@ -80,9 +80,9 @@ def _edit_form(node, kw):
         Modify the user form removing the password node if edit is True
         in the binding parameters
     """
-    # TODO : check if this one is needed
-    if kw.get('edit'):
-        del node['password']
+    pass
+#    if kw.get('edit'):
+#        del node['password']
 
 def _check_pwd(node, kw):
     """
@@ -140,8 +140,9 @@ class FUser(colander.MappingSchema):
     """
         Schema for user add
     """
-    user = FAccount()
-    password = pwdSchema
+    user = FAccount(title=u"Utilisateur")
+    password = FPassword(validator=auth, after_bind=_check_pwd,
+                        title=u"Mot de passe")
 
 userSchema = FUser(after_bind=_edit_form)
 

@@ -53,9 +53,25 @@
             % if menu is not UNDEFINED:
               <ul class='nav'>
                 % for item in menu:
-                  <li>
-                  <a href="${item['url']}">${item['label']}</a>
-                  </li>
+                  %if item.has_key('dropdown'):
+                    <li class='dropdown'>
+                        <a class='dropdown-toggle' data-toggle='dropdown' href='#'>
+                          ${item['label']}
+                          <b class="caret"></b>
+                        </a>
+                        <ul class='dropdown-menu'>
+                        % for subitem in item['dropdown']:
+                          <li>
+                            <a href="${subitem['url']}">${subitem['label']}</a>
+                          </li>
+                        % endfor
+                        </ul>
+                    </li>
+                  %else:
+                    <li>
+                      <a href="${item['url']}">${item['label']}</a>
+                    </li>
+                  %endif
                   <li class='divider-vertical'>
                 % endfor
               </ul>
@@ -79,8 +95,8 @@
     </div>
     </header>
     <%block name="headtitle">
-    <div id='pagetitle' class='well'>
-      <h2 class='visible-desktop hidden-tablet'>${title}</h2>
+    <div id='pagetitle' class='visible-desktop hidden-tablet'>
+      <h2 >${title}</h2>
     </div>
     </%block>
     <div class='container'>

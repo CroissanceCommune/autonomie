@@ -24,6 +24,14 @@ from datetime import timedelta
 
 log = logging.getLogger(__name__)
 
+def pop_absolute_urls(filepath):
+    """
+        pop all directories informations included in a filename
+        used to avoid problems with IE who's sending absolute filepaths
+    """
+    filepath = filepath.replace('\\', '/')
+    return os.path.basename(filepath)
+
 class FileTempStore(dict):
     """
         Temporary stores files at a given location
@@ -117,6 +125,7 @@ class FileTempStore(dict):
         log.debug(" + value : %s" % value)
         filedata = value.get('fp')
         filename = self.default_filename or value['filename']
+        filename = pop_absolute_urls(filename)
         if filedata:
             filepath = os.path.join(self.store_directory, filename)
             log.debug("Writing file datas to : %s" % filepath)

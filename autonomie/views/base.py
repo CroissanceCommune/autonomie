@@ -78,7 +78,9 @@ class ListView(BaseView):
         if direction not in ['asc', 'desc']:
             direction = self.default_direction
 
-        items_per_page = int(self.request.params.get('nb', 10))
+        default_item_pp = int(self.request.cookies.get('items_per_page', 10))
+        items_per_page = int(self.request.params.get('nb', default_item_pp))
+        self.request.response.set_cookie("items_per_page", str(items_per_page))
 
         current_page = int(self.request.params.get("page", 1))
         return search, sort, direction, current_page, items_per_page

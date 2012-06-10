@@ -23,6 +23,16 @@
     <form class='navbar-form pull-right form-search offset3' id='search_form' method='GET'>
         <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
         ${html|n}
+        <select class='span1' name='nb'>
+            % for text, value in (('10', u'10'), ('20', u'20'), ('30', u'30'), (40, u'40'), ('50', u'50'), ('Tous', u'1000'),):
+                <% nb_item = request.GET.get("nb") %>
+                % if nb_item == value or request.cookies.get('items_per_page') == value:
+                    <option value="${value}" selected='true'>${text}</option>
+                %else:
+                    <option value="${value}">${text}</option>
+                %endif
+            % endfor
+        </select>
         <button type="submit" class="btn">${label}</button>
     </form>
 </%def>

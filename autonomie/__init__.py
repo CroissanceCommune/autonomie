@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 08 juin 2012 16:14:41 CEST
+# * Last Modified : ven. 08 juin 2012 18:04:11 CEST
 #
 # * Project : autonomie
 #
@@ -121,6 +121,10 @@ def main(global_config, **settings):
                     "/admin/main")
     config.add_route("admin_tva",
                     "/admin/tva")
+
+    # Main routes
+    config.add_route("user_directory",
+                    "/directory")
 
 #    config.add_route('useradd', '/user/add')
 #    config.add_route('userpass', '/user/pwd')

@@ -8,9 +8,6 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
-header{
-  font-size:16px;
-}
 header .navbar{
   margin-bottom:0px;
 }
@@ -18,9 +15,6 @@ header .navbar .navbar-inner{
   padding-left:15%;
 }
 header #logout_link{
-  font-size:12px;
-  font-weight:400;
-  color:#fff;
   padding-right:10%;
 }
 header .navbar li:hover{
@@ -30,11 +24,12 @@ header .navbar li:hover{
   padding:10px 0 5px 15%;
   border-bottom:1px solid #ddd;
   text-align:left;
-  background-color:#efefef;
+  background-color:#f5f5f5;
   overflow:hidden;
 }
 #pagetitle h2{
   float:left;
+  font-size:16px;
   margin-right:50px;
 }
 .form-actions{ /* deform_bootstrap modification */
@@ -106,4 +101,7 @@ header .navbar li:hover{
 }
 textarea{
   width:auto;
+}
+.rowlink{
+  cursor:pointer;
 }

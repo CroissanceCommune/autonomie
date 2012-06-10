@@ -36,9 +36,9 @@
         % if projects:
             % for project in projects:
                 <tr class='tableelement' id="${project.id}">
-                    <td>${project.code}</td>
-                    <td>${project.name}</td>
-                    <td><a href='${request.route_path("company_client", id=project.client.id)}'>${project.client.name}</a></td>
+                    <td onclick="document.location='${request.route_path("company_project", id=project.id)}'" class='rowlink'>${project.code}</td>
+                    <td onclick="document.location='${request.route_path("company_project", id=project.id)}'" class='rowlink'>${project.name}</td>
+                    <td onclick="document.location='${request.route_path("company_project", id=project.id)}'" class='rowlink'>${project.client.name}</td>
                     <td>
                         <div class='btn-group'>
                             <a class='btn' href='${request.route_path("company_project", id=project.id)}'>

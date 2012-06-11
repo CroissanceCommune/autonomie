@@ -19,12 +19,14 @@ import logging
 
 from sqlalchemy import or_
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPFound
 
 from deform import Form
 from deform import ValidationFailure
 
 from autonomie.models.model import User
 from autonomie.models.model import Company
+from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import pwdSchema
 from autonomie.views.forms import userSchema
 
@@ -48,7 +50,8 @@ def account(request):
         except ValidationFailure, e:
             html_form = e.render()
         else:
-            log.debug("# User {0} has changed his password #")
+            log.debug("# User {0} has changed his password #".format(
+                                                    request.user.login))
             dbsession = request.dbsession()
             new_pass = datas['pwd']
             avatar.set_password(new_pass)
@@ -62,14 +65,6 @@ def account(request):
                 account=avatar
                 )
 
-def _get_user_form(edit=False):
-    """
-        Return the user add form
-    """
-    schema = userSchema.bind(edit=edit)
-    form = Form(schema, buttons=('submit',))
-    return form
-
 class UserView(ListView):
     """
         User related views
@@ -78,7 +73,19 @@ class UserView(ListView):
     default_sort = 'account_lastname'
     default_direction = 'asc'
 
-    @view_config(route_name='user_directory', renderer='directory.mako')
+    def _get_user_form(self, edit=False):
+        """
+            Return the user add form
+        """
+        companies = [comp.name
+                for comp in self.dbsession.query(Company.name).all()]
+        schema = userSchema.bind(edit=edit,
+                                 companies=companies)
+        form = Form(schema, buttons=('submit',))
+        return form
+
+
+    @view_config(route_name='users', renderer='users.mako')
     def directory(self):
         """
             User directory
@@ -93,7 +100,7 @@ class UserView(ListView):
 
         records = self._get_pagination(users, current_page, items_per_page)
         # Add user form
-        form = _get_user_form(edit=False)
+        form = self._get_user_form(edit=False)
         return dict(title=u"Annuaire des utilisateurs",
                     users=records,
                     html_form=form.render())
@@ -108,5 +115,76 @@ class UserView(ListView):
         """
             Return a filtered query
         """
-        return query.filter( or_(User.lastname.like("%"+search+"%"),
-                     User.companies.any(Company.name.like("%"+search+"%"))))
+        return query.filter( or_(User.lastname.like(search+"%"),
+                     User.companies.any(Company.name.like(search+"%"))))
+
+    @view_config(route_name='users', renderer='user_edit.mako',
+                                                      request_method='POST')
+    @view_config(route_name='user', renderer='user_edit.mako',
+                                                request_param='action=edit')
+    def user_edit(self):
+        """
+            Add / Edit a user
+        """
+        log.debug("# In UserView.user #")
+        log.debug(" + request's context {0}".format(self.request.context))
+        if self.request.context.__name__ == 'user':
+            user = self.request.context
+            edit = True
+            title = u"Édition du compte {0}".format(user.login)
+            validate_msg = u"Le compte a bien été édité"
+        else:
+            user = User()
+            edit = False
+            title = u"Ajout d'un nouveau compte"
+            validate_msg = u"Le compte a bien été ajouté"
+
+        form = self._get_user_form(edit=edit)
+        if 'submit' in self.request.params:
+            datas = self.request.params.items()
+            try:
+                app_datas = form.validate(datas)
+            except ValidationFailure, errform:
+                html_form = errform.render()
+            else:
+                # Validation OK
+                # Création/édition du compte de l'utilisateur
+                # Création (ou non) de la/des entreprise(s)
+                # Création du lien entre les deux
+                merge_session_with_post(user, app_datas['user'])
+                if app_datas['password']['pwd']:
+                    user.set_password(app_datas['password']['pwd'])
+                #avoid creating duplicate companies at this level
+                companies = set(app_datas['companies'])
+                user.companies = []
+                for company_name in companies:
+                    company = self.dbsession.query(Company).filter(
+                               Company.name==company_name).first()
+                    if not company:
+                        log.debug(" + Adding company : %s" % company_name)
+                        company = Company()
+                        company.name = company_name
+                        company.goal = u"Entreprise de {0}".format(
+                                user.firstname, user.lastname)
+                        self.dbsession.merge(company)
+                        self.dbsession.flush()
+                    user.companies.append(company)
+                log.debug(" + Adding user : {0}" .format(user.login))
+                self.dbsession.merge(user)
+                self.dbsession.flush()
+                self.request.session.flash(validate_msg, queue="main")
+                return HTTPFound(self.request.route_path("user", id=user.id))
+        else:
+            html_form = form.render({'user':user.appstruct(),
+                        'companies': [comp.name for comp in user.companies]})
+        return dict(title=title,
+                    html_form=html_form)
+
+    @view_config(route_name='user', renderer='user.mako')
+    def user_view(self):
+        """
+            User view
+        """
+        user = self.request.context
+        return dict(title=u"{0} {1}".format(user.lastname, user.firstname),
+                    user=user)

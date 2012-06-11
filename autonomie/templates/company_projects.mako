@@ -18,7 +18,7 @@
         %endif
     </li>
     <li>
-    ${searchform()}
+    ${searchform(helptext=u"Projet ou nom du client")}
     </li>
 </ul>
 </%block>

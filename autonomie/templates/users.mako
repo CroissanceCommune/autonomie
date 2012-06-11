@@ -30,9 +30,9 @@
         % if users:
             % for user in users:
                 <tr>
-                    <td>${user.lastname.upper()} ${user.firstname.capitalize()}</td>
-                    <td>${user.email}</td>
-                    <td>
+                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.lastname.upper()} ${user.firstname.capitalize()}</td>
+                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.email}</td>
+                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >
                         <ul>
                             % for company in user.companies:
                                 <li>${company.name}</li>

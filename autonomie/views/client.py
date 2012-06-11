@@ -17,6 +17,8 @@
 """
 import logging
 
+from sqlalchemy import or_
+
 from deform import ValidationFailure
 from deform import Form
 from deform import Button
@@ -60,7 +62,9 @@ class ClientView(ListView):
                                                 self._get_pagination_args()
         company = self.request.context
         # Request database
-        clients = self._get_clients(company, search, sort, direction)
+        clients = self._get_clients(company)
+        clients = self._filter_clients(clients, search)
+        clients = clients.order_by(sort + " " + direction).all()
 
         # Get pagination
         records = self._get_pagination(clients, current_page, items_per_page)
@@ -73,7 +77,7 @@ class ClientView(ListView):
                     company=company,
                     html_form=form.render())
 
-    def _get_clients(self, company, search, sort, direction):
+    def _get_clients(self, company=None):
         """
             query clients against the database
         """
@@ -81,15 +85,17 @@ class ClientView(ListView):
                    Client.contactLastName,
                    Client.contactFirstName,
                    Client.name)
+        clients = self.dbsession.query(*toquery)
         if company is not None:
-            clients = self.dbsession.query(*toquery).filter(
-                    Client.name.like(search+"%"),
-                    Client.id_company == company.id).order_by(sort \
-                                                    + " " \
-                                                    + direction)
-        else:
-            clients = self.dbsession.query(*toquery).filter(
-                Client.name.like(search+"%")).order_by(sort + " " + direction)
+            clients = clients.filter(Client.id_company == company.id)
+        return clients
+
+    def _filter_clients(self, clients, search):
+        """
+            Return a filtered query
+        """
+        clients = clients.filter(or_(Client.name.like("%"+search+"%"),
+                               Client.contactLastName.like("%"+search+"%")))
         return clients
 
     @view_config(route_name='company_clients', renderer='company_client.mako',\

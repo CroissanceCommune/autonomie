@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 11 juin 2012 14:58:10 CEST
+# * Last Modified : lun. 11 juin 2012 17:55:21 CEST
 #
 # * Project : autonomie
 #
@@ -127,6 +127,21 @@ class CustomFileType(TypeDecorator):
         if value:
             return dict(filename = value,
                         uid=self.prefix + value)
+        else:
+            return dict(filename="",
+                        uid=self.prefix)
+
+class CustomInteger(TypeDecorator):
+    impl = Integer_type
+    def process_bind_param(self, value, dialect):
+        if isinstance(value, long):
+            value = int(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if isinstance(value, long):
+            value = int(value)
+        return value
 
 def _get_date():
     """
@@ -165,6 +180,7 @@ class Company(DBBASE):
     __tablename__ = 'coop_company'
     __table_args__ = {'autoload':True}
     id = Column("IDCompany", Integer, primary_key=True)
+    name = Column("name", String(150))
     clients = relationship("Client",
                             order_by="Client.id",
                             backref='company')
@@ -179,27 +195,9 @@ class Company(DBBASE):
     goal = Column("object", String(255))
     logo = Column("logo", CustomFileType("logo_", 255))
     header = Column("header", CustomFileType("header_", 255))
-
-    def get_client(self, client_id):
-        """
-            return the client with id (code) client_id
-        """
-        # Warn ! the id is a string
-        for client in self.clients:
-            if client.id == client_id:
-                return client
-        raise KeyError
-
-    def get_project(self, project_id):
-        """
-            return the project with id project_id
-        """
-        if not isinstance(project_id, int):
-            project_id = int(project_id)
-        for project in self.projects:
-            if project.id == project_id:
-                return project
-        raise KeyError
+    IDGroup = Column("IDGroup", Integer, default=0)
+    phone = Column("phone", String(20), default="")
+    IDEGWUser = Column("IDEGWUser", Integer, default=0)
 
     def get_path(self):
         """
@@ -270,7 +268,7 @@ class User(DBBASE):
                              secondary=company_employee,
                              backref="employees")
     primary_group = Column("account_primary_group",
-                            Integer)
+                            CustomInteger)
 
     @staticmethod
     def _encode_pass(password):
@@ -894,6 +892,7 @@ class Phase(DBBASE):
     __tablename__ = 'coop_phase'
     __table_args__ = {'autoload':True}
     id = Column('IDPhase', Integer, primary_key=True)
+    name = Column("name", String(150), default=u'Phase par défaut')
     id_project = Column('IDProject', Integer,
                         ForeignKey('coop_project.IDProject'))
     project = relationship("Project", backref="phases")
@@ -902,6 +901,11 @@ class Phase(DBBASE):
     updateDate = Column("updateDate", CustomDateType(11),
                                         default=_get_date,
                                         onupdate=_get_date)
+    def is_default(self):
+        """
+            return True is this phase is a default one
+        """
+        return self.name in (u'Phase par défaut', u"default", u"défaut",)
 
 class Tva(DBBASE):
     """

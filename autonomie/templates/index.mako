@@ -5,7 +5,7 @@
        <a href="${company.url}" title="Accéder au gestionnaire de ${company.name}">
         <div class="hcentered">
             <h3>${company.name}</h3>
-            <img src="${company.icon}" title="${company.name}"/>
+            <img src="${company.get_logo_filepath}" title="${company.name}" alt=""/>
         </div>
        </a>
     </div>

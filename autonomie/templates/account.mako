@@ -22,7 +22,9 @@
                 <a href="${request.route_path('company', id=company.id)}">
                     <strong>${company.name}</strong>
                     <br />
-                    <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
+                    %if company.get_logo_filepath():
+                        <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
+                    %endif
                     </a>
                 <br />
                 ${company.goal}

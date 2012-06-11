@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : lun. 11 juin 2012 11:12:19 CEST
+# * Last Modified : lun. 11 juin 2012 16:19:34 CEST
 #
 # * Project : autonomie
 #
@@ -16,21 +16,25 @@
 import logging
 from pyramid.security import Allow
 from pyramid.security import Authenticated
+from pyramid.security import ALL_PERMISSIONS
 
 from autonomie.models.model import Project
 from autonomie.models.model import Company
 from autonomie.models.model import Client
 from autonomie.models.model import Estimation
 from autonomie.models.model import Invoice
+from autonomie.models.model import User
 
 log = logging.getLogger(__file__)
+
+DEFAULT_PERM = [(Allow, "group:admin", ALL_PERMISSIONS,),
+                (Allow, Authenticated, 'view'),]
 
 class BaseDBFactory(object):
     """
         Base class for dbrelated objects
     """
-    acl = [(Allow, "group:admin", "admin",),
-           (Allow, Authenticated, 'visit'),]
+    acl = DEFAULT_PERM[:]
     dbsession = None
 
 class RootFactory(dict):
@@ -38,10 +42,9 @@ class RootFactory(dict):
        Ressource factory, returns the appropriate resource regarding
        the request object
     """
-    __acl__ = [
-                (Allow, "group:admin", "admin",),
-                (Allow, Authenticated, 'view'),
-                ]
+    __name__ = "root"
+    __acl__ = DEFAULT_PERM[:]
+
     def __init__(self, request):
         self.request = request
         self['companies'] = CompanyFactory(self, "companies")
@@ -49,14 +52,14 @@ class RootFactory(dict):
         self['clients'] = ClientFactory(self, 'clients')
         self['estimations'] = EstimationFactory(self, 'estimations')
         self['invoices'] = InvoiceFactory(self, 'invoices')
+        self['users'] = UserFactory(self, 'users')
 
 
 def get_company_acl(self):
     """
         Compute the company's acls
     """
-    acl = [(Allow, "group:admin", ("view", "edit", "admin",)),
-           (Allow, Authenticated, ('visit',)),]
+    acl = DEFAULT_PERM[:]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
                         for user in self.employees])
     return acl
@@ -89,7 +92,7 @@ def get_client_or_project_acls(self):
     """
         Compute the project's acls
     """
-    acl = [(Allow, "group:admin", ("view", 'edit',)),]
+    acl = DEFAULT_PERM[:]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
                         for user in self.company.employees])
     return acl
@@ -146,8 +149,8 @@ def get_task_acl(self):
     """
         return the acls of the current task object
     """
-    acl = [(allow, "group:admin", ("view", 'edit',)),]
-    acl.extend([(allow, u"%s" % user.login, ("view", "edit",))
+    acl = DEFAULT_PERM[:]
+    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
                         for user in self.project.company.employees])
     return acl
 
@@ -203,11 +206,9 @@ def get_user_acl(self):
     """
         Get acls for user account edition
     """
-    acl = [(allow, "group:admin", ("view", 'edit',)),]
-    acl.append((allow, u"%s" % self.login, ("view", "edit",)))
-    acl.append((allow, Authenticated, ('view',)))
+    acl = DEFAULT_PERM[:]
+    acl.append((Allow, u"%s" % self.login, ("view", "edit",)))
     return acl
-
 
 class UserFactory(BaseDBFactory):
     """
@@ -221,14 +222,15 @@ class UserFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
-        Invoice.__acl__ = property(get_task_acl)
+        User.__acl__ = property(get_task_acl)
         dbsession = self.dbsession()
-        obj = dbsession.query(Invoice).filter(
-                                             Invoice.IDTask==key).scalar()
+        obj = dbsession.query(User).filter(User.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "invoice"
+        obj.__name__ = "user"
         return obj

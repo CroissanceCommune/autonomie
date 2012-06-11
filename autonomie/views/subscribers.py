@@ -35,7 +35,8 @@ def add_menu(event):
     request = event['req']
     cid = None
     # We test matchdict is present : it's not when inner render call is made
-    if hasattr(request, "context") and hasattr(request.context, "get_company_id"):
+    if hasattr(request, "context") and hasattr(request.context,
+                                                "get_company_id"):
         cid = request.context.get_company_id()
     elif hasattr(request, "user") and request.user:
         if len(request.user.companies):
@@ -65,9 +66,9 @@ def add_menu(event):
                      url=route_path('company',
                                                 request,
                                                 id=cid,
-                                                _query={'edit':True})),
+                                                _query={'action':'edit'})),
                 dict(label=u"Annuaire",
-                    url=route_path('user_directory',
+                    url=route_path('users',
                                     request,)),
                ]
         event.update({'menu':menu})

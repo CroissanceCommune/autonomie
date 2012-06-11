@@ -70,7 +70,7 @@
     %endif
     %for phase in project.phases:
 
-        % if phase.name != u'Phase par défaut' and phase.name != u'défaut':
+        % if not phase.is_default():
             <h2 class='section-header'>
                         <a href="#" data-toggle='collapse' data-target='#phase_${phase.id}'>
                             <div>${phase.name}</div>
@@ -125,7 +125,11 @@
             %endfor
         </table>
     %else:
-        <div style='clear:both'>Aucun devis n'a été créé dans cette phase</div>
+        <div style='clear:both'>Aucun devis n'a été créé
+            %if not phase.is_default():
+                dans cette phase
+            %endif
+        </div>
     %endif
     <h3 class='floatted' style='padding-right:10px;'>Facture(s)</h3>
         <a class='btn' href='${request.route_path("invoices", id=project.id, _query=dict(phase=phase.id))}'>
@@ -161,7 +165,11 @@
             %endfor
         </table>
         % else:
-            <div style='clear:both'>Aucune facture n'a été créée dans cette phase</div>
+            <div style='clear:both'>Aucune facture n'a été créée
+            %if not phase.is_default():
+                dans cette phase
+            %endif
+        </div>
         % endif
     </div>
     %endfor

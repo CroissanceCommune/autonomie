@@ -94,6 +94,10 @@ def _check_pwd(node, kw):
         del node['login']
         del node['password']
         node['pwd'].title = "Mot de passe"
+        node['pwd'].missing = None
+
+ROLES = (("-10", 'Administrateur'), ("-14", 'Membre de la coopérative'),
+        ("-11", 'Entrepreneur'),)
 
 class FAccount(colander.MappingSchema):
     """
@@ -109,15 +113,20 @@ class FAccount(colander.MappingSchema):
     #account_primary_group
     #account_challenge
     #account_response
-    account_firstname = colander.SchemaNode(colander.String(),
+    firstname = colander.SchemaNode(colander.String(),
                            title="Prénom" )
-    account_lastname = colander.SchemaNode(colander.String(),
+    lastname = colander.SchemaNode(colander.String(),
                             title="Nom")
     login = colander.SchemaNode(colander.String(),
                             title="Login",
                             validator=deferred_login_validator,
                             widget=deferred_edit_widget)
-    account_email = get_mail_input()
+    email = get_mail_input(missing=u"")
+    primary_group = colander.SchemaNode(colander.String(),
+                        title=u"Rôle de l'utilisateur",
+                        validator=colander.OneOf([x[0] for x in ROLES]),
+                        widget=widget.RadioChoiceWidget(values=ROLES),
+                        default="-11")
 
 class FPassword(colander.MappingSchema):
     """
@@ -133,16 +142,36 @@ class FPassword(colander.MappingSchema):
                         widget = widget.CheckedPasswordWidget(),
                         title="Nouveau mot de passe")
 
-pwdSchema = FPassword(validator=auth, after_bind=_check_pwd,
+pwdSchema = FPassword(validator=auth,
+                      after_bind=_check_pwd,
                       title=u'Modification de mot de passe')
+
+@colander.deferred
+def deferred_company_input(node, kw):
+    """
+        Deferred company list
+    """
+    companies = kw.get('companies')
+    wid = widget.AutocompleteInputWidget(values=companies)
+    return wid
+
+class CompanySchema(colander.SequenceSchema):
+    company = colander.SchemaNode(colander.String(),
+                            title=u"Nom de l'entreprise",
+                            widget=deferred_company_input,
+                            )
 
 class FUser(colander.MappingSchema):
     """
         Schema for user add
     """
     user = FAccount(title=u"Utilisateur")
-    password = FPassword(validator=auth, after_bind=_check_pwd,
-                        title=u"Mot de passe")
+    companies = CompanySchema(title=u"Entreprise(s)",
+                widget=widget.SequenceWidget(min_len=1,
+                add_subitem_text_template=u"Ajouter une entreprise"))
+    password = FPassword(validator=auth,
+                         after_bind=_check_pwd,
+                         title=u"Mot de passe")
 
 userSchema = FUser(after_bind=_edit_form)
 

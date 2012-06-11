@@ -19,7 +19,7 @@
             % endif
             <br />
             % for company in account.companies:
-                <a href="${request.route_path('company', id=company.id)}">
+                <a href="${request.route_path('company', id=company.id _query=dict(edit=True))}">
                     <strong>${company.name}</strong>
                     <br />
                     %if company.get_logo_filepath():

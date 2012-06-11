@@ -19,12 +19,17 @@
         </address>
     %endif
 </%def>
-<%def name="searchform(label='Rechercher', html='')">
-    <form class='navbar-form pull-right form-search offset3' id='search_form' method='GET'>
-        <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
+<%def name="searchform(label='Rechercher', html='', helptext=None)">
+    <form class='navbar-form pull-right form-search offset3 form-inline' id='search_form' method='GET'>
+        <div class='floatted' style='padding-right:3px'>
+            <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
+        % if helptext:
+            <span class="help-block">${helptext}</span>
+        %endif
+        </div>
         ${html|n}
         <select class='span1' name='nb'>
-            % for text, value in (('10', u'10'), ('20', u'20'), ('30', u'30'), (40, u'40'), ('50', u'50'), ('Tous', u'1000'),):
+            % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'1000'),):
                 <% nb_item = request.GET.get("nb") %>
                 % if nb_item == value or request.cookies.get('items_per_page') == value:
                     <option value="${value}" selected='true'>${text}</option>

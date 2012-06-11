@@ -34,7 +34,8 @@ class CompanyViews(BaseView):
     """
         all company related views
     """
-    @view_config(route_name='company', renderer='company_index.mako')
+    @view_config(route_name='company', renderer='company_index.mako',
+                                        request_param='action=index')
     def company_index(self):
         """
             index page for the company shows latest news :
@@ -67,7 +68,7 @@ class CompanyViews(BaseView):
         return ret_val
 
     @view_config(route_name='company', renderer='company_edit.mako',
-                                                    request_param='edit')
+                                                  request_param='action=edit')
     def company_edit(self):
         """
             Company edition page

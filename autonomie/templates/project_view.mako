@@ -55,11 +55,26 @@
         </div>
     </div>
 <style>
-.section-header{
-    background-color: #F5F5F5;
-    border-bottom: 1px solid #dedede;
-    border-top: 1px solid #dedede;
+.section-header a{
+display:block;
     padding-left:10px;
+    padding-bottom:5px;
+    padding-top:5px;
+    color:#111;
+    font-weight:bold;
+    vertical-align:middle;
+    font-size:24px;
+    text-transform:capitalize;
+}
+.section-header a:hover{
+    text-decoration:none;
+    color:#333;
+    font-weight:bold;
+    background-color:#f5f5f5;
+}
+h3.floatted{
+    font-size:16px;
+    font-weight:100;
 }
 </style>
 <div class='container'>
@@ -71,16 +86,18 @@
     %for phase in project.phases:
 
         % if not phase.is_default():
-            <h2 class='section-header'>
-                        <a href="#" data-toggle='collapse' data-target='#phase_${phase.id}'>
-                            <div>${phase.name}</div>
-                        </a>
-            </h2>
-            <div class="${section_css}" id='phase_${phase.id}' style="margin:4px;">
+            <div class='section-header'>
+                <a href="#" data-toggle='collapse' data-target='#phase_${phase.id}'>
+                    <div>
+                        <i style="vertical-align:middle" class="icon-folder-open"></i>&nbsp;${phase.name}
+                    </div>
+                </a>
+            </div>
+            <div class="${section_css}" id='phase_${phase.id}' style="margin:4px; padding-left:5px;border-left:2px solid #d1d1d1;">
         %else:
-            <div  id='phase_${phase.id}' style="margin:4px;">
+            <div  id='phase_${phase.id}' style="margin:4px;padding-left:5px;border-left:2px solid #d1d1d1;">
         % endif
-            <h3 class='floatted' style="padding-right:10px">Devis</h3>
+        <h3 class='floatted' style="padding-right:10px;">Devis</h3>
                 <a class='btn' href='${request.route_path("estimations", id=project.id, _query=dict(phase=phase.id))}'>
                     <span class='ui-icon ui-icon-plusthick'></span>
                 </a>
@@ -131,7 +148,7 @@
             %endif
         </div>
     %endif
-    <h3 class='floatted' style='padding-right:10px;'>Facture(s)</h3>
+    <h3 class='floatted' style='padding-right:10px;font-weight:100;'>Facture(s)</h3>
         <a class='btn' href='${request.route_path("invoices", id=project.id, _query=dict(phase=phase.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>
         </a>

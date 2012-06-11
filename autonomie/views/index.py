@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 07 juin 2012 18:18:37 CEST
+# * Last Modified : lun. 11 juin 2012 16:20:06 CEST
 #
 # * Project : autonomie
 #
@@ -15,12 +15,10 @@
 """
 import logging
 
-from pyramid.security import authenticated_userid
 from pyramid.view import view_config
 from pyramid.url import route_path
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.model import User
 
 log = logging.getLogger(__name__)
 
@@ -33,10 +31,11 @@ def index(request):
     companies = avatar.companies
     if len(companies) == 1:
         company = companies[0]
-        return HTTPFound(route_path('company', request, id=company.id))
+        return HTTPFound(route_path('company', request, id=company.id,
+                                            _query=dict(action='index')))
     else:
         for company in companies:
-            company.url = route_path("company", request, id=company.id)
-            company.icon = request.static_url("autonomie:static/company.png")
+            company.url = request.route_path("company", id=company.id,
+                                            _query=dict(action='index'))
         return dict(title=u"Bienvenue dans Autonomie",
                     companies=avatar.companies)

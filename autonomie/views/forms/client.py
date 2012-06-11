@@ -47,7 +47,7 @@ class ClientSchema(colander.MappingSchema):
     id = colander.SchemaNode(colander.String(),
                                 widget=deferred_edit_widget,
                                 title=u'Code',
-                                validator=colander.Length(4))
+                                validator=colander.Length(4, 4))
     name = colander.SchemaNode(colander.String(),
                             title=u"Nom de l'entreprise",
                             validator=colander.Length(max=255))

@@ -10,7 +10,7 @@
     </a>
     </li>
     <li>
-        ${searchform()}
+    ${searchform(helptext=u"Entreprise ou contact principal")}
     </li>
 </ul>
 </%block>

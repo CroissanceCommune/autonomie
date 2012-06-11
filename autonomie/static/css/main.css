@@ -105,3 +105,7 @@ textarea{
 .rowlink{
   cursor:pointer;
 }
+.help-block{
+  font-size:11px;
+  font-style:italic;
+}

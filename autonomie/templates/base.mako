@@ -14,15 +14,13 @@
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <!--    <script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery-1.7.2.min.js')}"></script>-->
     <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/jquery-1.7.1.min.js')}"></script>
     <script type="text/javascript" src="${request.static_url('deform:static/scripts/jquery.form.js')}"></script>
     <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/jquery-ui-1.8.18.custom.min.js')}"></script>
-    <!--    <script type="text/javascript" src="${request.static_url('deform:static/scripts/jquery-ui-timepicker-addon.js')}"></script>-->
     <script type="text/javascript" src="${request.static_url('deform:static/scripts/deform.js')}"></script>
     <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/deform_bootstrap.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/bootstrap.min.js')}"></script>
-    <!--    <script type="text/javascript" src="${request.static_url('autonomie:static/js/bootstrap-datepicker.js')}"></script>-->
+    ##    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/bootstrap.min.js')}"></script>
+    <script type="text/javascript" src="${request.static_url('autonomie:static/js/bootstrap.min.js')}"></script>
     <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/bootstrap-typeahead.js')}"></script>
     <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.jquery.js')}"></script>
     <script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery.ui.datepicker-fr.js')}"></script>
@@ -32,8 +30,9 @@
     <link href="${request.static_url('autonomie:static/css/shadow.css')}" rel="stylesheet"  type="text/css" />
     <link href="${request.static_url('deform:static/css/form.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform:static/css/beautify.css')}" type="text/css" rel="stylesheet"/>
-    <link href="${request.static_url('deform_bootstrap:static/deform_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
+##    <link href="${request.static_url('deform_bootstrap:static/deform_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
+<link href="${request.static_url('autonomie:static/css/bootstrap.min.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/chosen_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/theme/jquery-ui-1.8.16.custom.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/bootstrap-responsive.css')}" type="text/css" rel="stylesheet"/>
@@ -77,15 +76,25 @@
               </ul>
             % endif
             %if request.user:
-              <ul class='nav pull-right' id='logout_link'>
+              <div class="btn-group pull-right">
+                <a class="btn dropdown-toggle" href="#" data-toggle="dropdown">
+                  <i class="icon-user"></i>
+                  ${request.user.lastname} ${request.user.firstname}
+                  <span class="caret"></span>
+                </a>
+
+                <ul class='dropdown-menu'>
                 <li>
-                <a href="${request.route_path('account')}">
+                  <a href="${request.route_path('account')}">
                     <span class='ui-icon ui-icon-gear'></span>
-                    ${request.user.lastname} ${request.user.firstname}
+                    Mon compte
                   </a>
-                </li>
+                  </li>
+                  <li class="divider"></li>
                 <li>
-                <a href="/logout">Déconnexion</a>
+                <a href="/logout">
+                  <span class='ui-icon ui-icon-close'></span>
+                  Déconnexion</a>
                 </li>
               </ul>
             % endif

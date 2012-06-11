@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : jeu. 07 juin 2012 17:54:43 CEST
+# * Last Modified : lun. 11 juin 2012 11:12:19 CEST
 #
 # * Project : autonomie
 #
@@ -146,8 +146,8 @@ def get_task_acl(self):
     """
         return the acls of the current task object
     """
-    acl = [(Allow, "group:admin", ("view", 'edit',)),]
-    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
+    acl = [(allow, "group:admin", ("view", 'edit',)),]
+    acl.extend([(allow, u"%s" % user.login, ("view", "edit",))
                         for user in self.project.company.employees])
     return acl
 
@@ -178,6 +178,40 @@ class EstimationFactory(BaseDBFactory):
 class InvoiceFactory(BaseDBFactory):
     """
         Handle access to a client
+    """
+    def __init__(self, parent, name):
+        self.__parent__ = parent
+        self.__name__ = name
+
+    def __getitem__(self, key):
+        """
+            Returns the traversed object
+        """
+        if self.dbsession == None:
+            raise Exception("Missing dbsession")
+        Invoice.__acl__ = property(get_task_acl)
+        dbsession = self.dbsession()
+        obj = dbsession.query(Invoice).filter(
+                                             Invoice.IDTask==key).scalar()
+        if obj is None:
+            raise KeyError
+        obj.__parent__ = self
+        obj.__name__ = "invoice"
+        return obj
+
+def get_user_acl(self):
+    """
+        Get acls for user account edition
+    """
+    acl = [(allow, "group:admin", ("view", 'edit',)),]
+    acl.append((allow, u"%s" % self.login, ("view", "edit",)))
+    acl.append((allow, Authenticated, ('view',)))
+    return acl
+
+
+class UserFactory(BaseDBFactory):
+    """
+        Handle access to a user account
     """
     def __init__(self, parent, name):
         self.__parent__ = parent

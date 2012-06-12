@@ -76,6 +76,12 @@ h3.floatted{
     font-size:16px;
     font-weight:100;
 }
+.section-content{
+    margin:4px;
+    margin-left:27px;
+    padding-left:10px;
+    border-left:2px solid #d1d1d1;
+}
 </style>
 <div class='container'>
     %if len(project.phases)>1:
@@ -93,9 +99,9 @@ h3.floatted{
                     </div>
                 </a>
             </div>
-            <div class="${section_css}" id='phase_${phase.id}' style="margin:4px; padding-left:5px;border-left:2px solid #d1d1d1;">
+            <div class="section-content ${section_css}" id='phase_${phase.id}'>
         %else:
-            <div  id='phase_${phase.id}' style="margin:4px;padding-left:5px;border-left:2px solid #d1d1d1;">
+            <div class="section-content" id='phase_${phase.id}'>
         % endif
         <h3 class='floatted' style="padding-right:10px;">Devis</h3>
                 <a class='btn' href='${request.route_path("estimations", id=project.id, _query=dict(phase=phase.id))}'>

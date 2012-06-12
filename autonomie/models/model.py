@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 11 juin 2012 17:55:21 CEST
+# * Last Modified : mar. 12 juin 2012 12:13:00 CEST
 #
 # * Project : autonomie
 #
@@ -731,8 +731,6 @@ class InvoiceLine(DBBASE):
         newone.unity = self.unity
         return newone
 
-
-
 class PaymentLine(DBBASE):
     """
         coop_estimation_payment
@@ -1030,3 +1028,35 @@ class ManualInvoice(DBBASE):
             return None
         """
         return None
+
+class OperationComptable(DBBASE):
+    """
+        Recense les opérations comptables
+        `id` bigint(20) NOT NULL auto_increment,
+        `montant` decimal(18,2) default NULL,
+        `charge` tinyint(1) default NULL,
+        `compagnie_id` bigint(20) NOT NULL,
+        `date` date default NULL,
+        `libelle` varchar(255) collate utf8_unicode_ci default NULL,
+        `created_at` datetime NOT NULL,
+        `updated_at` datetime NOT NULL,
+        `annee` bigint(20) default NULL,
+        `type` text collate utf8_unicode_ci,
+        PRIMARY KEY  (`id`),
+        UNIQUE KEY `id` (`id`)
+    """
+    __tablename__ = 'symf_operation_treso'
+    __table_args__ = {'autoload':True}
+    id = Column('id', BigInteger, primary_key=True)
+    company_id = Column('compagnie_id', BigInteger,
+                            ForeignKey('coop_company.IDCompany'))
+    company = relationship("Company",
+                       primaryjoin="Company.id==OperationComptable.company_id",
+                       backref='operation_comptable')
+    created_at = Column("created_at", DateTime(), default=datetime.datetime)
+    updated_at = Column("updated_at", DateTime(), default=datetime.datetime,
+                                                  onupdate=datetime.datetime)
+    charge = Column("charge", Integer, default=0)
+    date = Column("date", Date(), default=datetime.date)
+    libelle = Column("libelle", String, default="")
+    annee = Column("annee", BigInteger)

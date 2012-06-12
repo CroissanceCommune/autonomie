@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 12 juin 2012 13:13:49 CEST
+# * Last Modified : mar. 12 juin 2012 16:02:12 CEST
 #
 # * Project : autonomie
 #
@@ -973,9 +973,11 @@ class ManualInvoice(DBBASE):
     """
     __tablename__ = 'symf_facture_manuelle'
     __table_args__ = {'autoload':True}
-    created_at = Column("created_at", DateTime(), default=datetime.datetime)
-    updated_at = Column("updated_at", DateTime(), default=datetime.datetime,
-                                                  onupdate=datetime.datetime)
+    created_at = Column("created_at", DateTime(),
+                                      default=datetime.datetime.now)
+    updated_at = Column("updated_at", DateTime(),
+                                      default=datetime.datetime.now,
+                                      onupdate=datetime.datetime.now)
     id = Column('id', BigInteger, primary_key=True)
     client_id = Column('client_id', String(5),
                             ForeignKey('coop_customer.code'))
@@ -1049,14 +1051,16 @@ class OperationComptable(DBBASE):
     __tablename__ = 'symf_operation_treso'
     __table_args__ = {'autoload':True}
     id = Column('id', BigInteger, primary_key=True)
-    company_id = Column('compagnie_id', BigInteger,
+    company_id = Column('compagnie_id', CustomInteger,
                             ForeignKey('coop_company.IDCompany'))
     company = relationship("Company",
                        primaryjoin="Company.id==OperationComptable.company_id",
                        backref='operation_comptable')
-    created_at = Column("created_at", DateTime(), default=datetime.datetime)
-    updated_at = Column("updated_at", DateTime(), default=datetime.datetime,
-                                                  onupdate=datetime.datetime)
+    created_at = Column("created_at", DateTime(),
+                                        default=datetime.datetime.now)
+    updated_at = Column("updated_at", DateTime(),
+                                        default=datetime.datetime.now,
+                                        onupdate=datetime.datetime.now)
     charge = Column("charge", Integer, default=0)
     date = Column("date", Date(), default=datetime.date)
     label = Column("libelle", String, default="")

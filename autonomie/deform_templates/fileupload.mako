@@ -9,7 +9,7 @@
            id="${field.oid}-uid"/>
       </div>
         % if cstruct.get('preview_url'):
-            <span class="help-inline">
+            <span class="help-block">
                 <a href='${cstruct['preview_url']}'>${cstruct.get('filename')}</a>
             </span>
         % endif

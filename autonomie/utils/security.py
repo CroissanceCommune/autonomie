@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : lun. 11 juin 2012 16:19:34 CEST
+# * Last Modified : mar. 12 juin 2012 15:20:15 CEST
 #
 # * Project : autonomie
 #
@@ -24,6 +24,7 @@ from autonomie.models.model import Client
 from autonomie.models.model import Estimation
 from autonomie.models.model import Invoice
 from autonomie.models.model import User
+from autonomie.models.model import OperationComptable
 
 log = logging.getLogger(__file__)
 
@@ -53,6 +54,7 @@ class RootFactory(dict):
         self['estimations'] = EstimationFactory(self, 'estimations')
         self['invoices'] = InvoiceFactory(self, 'invoices')
         self['users'] = UserFactory(self, 'users')
+        self['operations'] = OperationFactory(self, 'operations')
 
 
 def get_company_acl(self):
@@ -233,4 +235,37 @@ class UserFactory(BaseDBFactory):
             raise KeyError
         obj.__parent__ = self
         obj.__name__ = "user"
+        return obj
+
+def get_base_acl(self):
+    """
+        return the base acls
+    """
+    acl = DEFAULT_PERM[:]
+    return acl
+
+class OperationFactory(BaseDBFactory):
+    """
+        Handle access to a comptability operation entry
+    """
+    def __init__(self, parent, name):
+        self.__parent__ = parent
+        self.__name__ = name
+
+    def __getitem__(self, key):
+        """
+            Returns the traversed object
+        """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
+        if self.dbsession == None:
+            raise Exception("Missing dbsession")
+        OperationComptable.__acl__ = property(get_task_acl)
+        dbsession = self.dbsession()
+        obj = dbsession.query(OperationComptable).filter(
+                                OperationComptable.id==key).scalar()
+        if obj is None:
+            raise KeyError
+        obj.__parent__ = self
+        obj.__name__ = "operation"
         return obj

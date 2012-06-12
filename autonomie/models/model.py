@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 12 juin 2012 12:13:00 CEST
+# * Last Modified : mar. 12 juin 2012 13:13:49 CEST
 #
 # * Project : autonomie
 #
@@ -23,6 +23,7 @@ from sqlalchemy import Table
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import BigInteger
+from sqlalchemy import Numeric
 from sqlalchemy import Date
 from sqlalchemy import DateTime
 from sqlalchemy import String
@@ -1058,5 +1059,6 @@ class OperationComptable(DBBASE):
                                                   onupdate=datetime.datetime)
     charge = Column("charge", Integer, default=0)
     date = Column("date", Date(), default=datetime.date)
-    libelle = Column("libelle", String, default="")
-    annee = Column("annee", BigInteger)
+    label = Column("libelle", String, default="")
+    year = Column("annee", BigInteger)
+    amount = Column("montant", Numeric)

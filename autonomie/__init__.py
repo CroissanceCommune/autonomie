@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 11 juin 2012 11:01:26 CEST
+# * Last Modified : mar. 12 juin 2012 11:00:22 CEST
 #
 # * Project : autonomie
 #
@@ -150,5 +150,5 @@ def main(global_config, **settings):
     set_deform_renderer()
     config.scan('autonomie.views')
     config.add_translation_dirs("colander:locale/", "deform:locale")
-    locale.setlocale(locale.LC_TIME, "fr_FR")
+    locale.setlocale(locale.LC_ALL, "")
     return config.make_wsgi_app()

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 12 juin 2012 11:00:22 CEST
+# * Last Modified : mar. 12 juin 2012 15:20:42 CEST
 #
 # * Project : autonomie
 #
@@ -128,6 +128,13 @@ def main(global_config, **settings):
     config.add_route("user",
                      "/users/{id:\d+}",
                      traverse="/users/{id}")
+
+    config.add_route("operations",
+                    "/operations")
+    config.add_route("operation",
+                    "/operations/{id:\d+}",
+                    traverse="/operations/{id}")
+
 
 #    config.add_route('useradd', '/user/add')
 #    config.add_route('userpass', '/user/pwd')

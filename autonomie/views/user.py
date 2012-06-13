@@ -20,6 +20,7 @@ import logging
 from sqlalchemy import or_
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import has_permission
 
 from deform import Form
 from deform import ValidationFailure
@@ -27,6 +28,9 @@ from deform import ValidationFailure
 from autonomie.models.model import User
 from autonomie.models.model import Company
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.widgets import ViewLink
+from autonomie.utils.widgets import ActionMenu
+from autonomie.utils.widgets import SearchForm
 from autonomie.views.forms import pwdSchema
 from autonomie.views.forms import userSchema
 
@@ -81,7 +85,12 @@ class UserView(ListView):
                 for comp in self.dbsession.query(Company.name).all()]
         schema = userSchema.bind(edit=edit,
                                  companies=companies)
-        form = Form(schema, buttons=('submit',))
+        if edit:
+            form = Form(schema, buttons=('submit',))
+        else:
+            form = Form(schema,
+                action=self.request.route_path('users', _query=dict(new=1)),
+                buttons=('submit',))
         return form
 
 
@@ -94,16 +103,23 @@ class UserView(ListView):
                                                 self._get_pagination_args()
         query = self._get_users()
         if search:
-            #FIXME :
             query = self._filter_search(query, search)
         users = query.order_by(sort + " " + direction).all()
 
         records = self._get_pagination(users, current_page, items_per_page)
-        # Add user form
-        form = self._get_user_form(edit=False)
-        return dict(title=u"Annuaire des utilisateurs",
-                    users=records,
-                    html_form=form.render())
+        ret_dict = dict(title=u"Annuaire des utilisateurs",
+                        users=records,
+                        action_menu=self.actionmenu)
+        self._set_item_menu()
+        if has_permission('add', self.request.context, self.request):
+            # Add user form
+            form = self._get_user_form(edit=False)
+            ret_dict['html_form'] = form.render()
+            add_link = ViewLink(u"Ajouter un utilisateur", "add",
+                                js="$('#addform').dialog('open');")
+            self.actionmenu.add(add_link)
+        self.actionmenu.add(SearchForm(u"Nom ou entreprise"))
+        return ret_dict
 
     def _get_users(self):
         """
@@ -118,10 +134,19 @@ class UserView(ListView):
         return query.filter( or_(User.lastname.like(search+"%"),
                      User.companies.any(Company.name.like(search+"%"))))
 
+    def _set_item_menu(self, user=None, edit=False):
+        self.actionmenu.add(ViewLink(u"Annuaire", "view",
+                                     path="users"))
+        if edit:
+            self.actionmenu.add(ViewLink(u"Voir", "view",
+                        path="user", id=user.id))
+            self.actionmenu.add(ViewLink(u"Éditer", "edit",
+                          path="user", id=user.id, _query=dict(action="edit")))
+
     @view_config(route_name='users', renderer='user_edit.mako',
-                                                      request_method='POST')
+                        request_method='POST', permission='add')
     @view_config(route_name='user', renderer='user_edit.mako',
-                                                request_param='action=edit')
+                        request_param='action=edit', permission='edit')
     def user_edit(self):
         """
             Add / Edit a user
@@ -131,17 +156,20 @@ class UserView(ListView):
         if self.request.context.__name__ == 'user':
             user = self.request.context
             edit = True
-            title = u"Édition du compte {0}".format(user.login)
+            title = u"Édition de {0} {1}".format(user.lastname, user.firstname)
             validate_msg = u"Le compte a bien été édité"
         else:
             user = User()
             edit = False
             title = u"Ajout d'un nouveau compte"
             validate_msg = u"Le compte a bien été ajouté"
+        self._set_item_menu(user, edit=edit)
 
         form = self._get_user_form(edit=edit)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
+            log.debug(" + Submitted datas")
+            log.debug(datas)
             try:
                 app_datas = form.validate(datas)
             except ValidationFailure, errform:
@@ -175,10 +203,12 @@ class UserView(ListView):
                 self.request.session.flash(validate_msg, queue="main")
                 return HTTPFound(self.request.route_path("user", id=user.id))
         else:
+            log.debug(" + User's appstruct : ")
             html_form = form.render({'user':user.appstruct(),
                         'companies': [comp.name for comp in user.companies]})
         return dict(title=title,
-                    html_form=html_form)
+                    html_form=html_form,
+                    action_menu=self.actionmenu)
 
     @view_config(route_name='user', renderer='user.mako')
     def user_view(self):
@@ -186,5 +216,7 @@ class UserView(ListView):
             User view
         """
         user = self.request.context
+        self._set_item_menu(user, edit=True)
         return dict(title=u"{0} {1}".format(user.lastname, user.firstname),
-                    user=user)
+                    user=user,
+                    action_menu=self.actionmenu)

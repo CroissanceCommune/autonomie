@@ -29,6 +29,7 @@ from autonomie.models.model import Phase
 from autonomie.models.model import Tva
 from autonomie.models.model import User
 from autonomie.utils.views import get_page_url
+from autonomie.utils.widgets import ActionMenu
 
 log = logging.getLogger(__file__)
 
@@ -40,6 +41,7 @@ class BaseView(object):
         self.request = request
         self.dbsession = request.dbsession()
         self.user = request.user
+        self.actionmenu = ActionMenu()
 
     def get_company_id(self):
         """

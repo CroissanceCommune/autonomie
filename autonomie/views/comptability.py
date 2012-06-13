@@ -120,12 +120,15 @@ class ComptabilityView(ListView):
         records = self._get_pagination(operations,
                                        current_page,
                                        items_per_page)
+
+        form = self._get_operation_form()
         return dict(title=u"Opérations comptables",
                     operations=records,
                     companies=companies,
                     current_company=company_id,
                     years=years,
                     current_year=year,
+                    html_form=form.render()
                     )
 
     def _get_operations(self):
@@ -193,23 +196,27 @@ class ComptabilityView(ListView):
                 log.debug(operation.appstruct())
                 operation = self.dbsession.merge(operation)
                 self.dbsession.flush()
+                self.request.session.flash(valid_msg, queue="main")
                 return HTTPFound(self.request.route_path('operations'))
         else:
             html_form = form.render(operation.appstruct())
         return dict(title=title,
                     html_form=html_form)
 
-
-
-
     def _import(self):
         """
             Operations import
         """
+        #TODO
         pass
 
+    @view_config(route_name="operation", request_param="action=delete")
     def _delete(self):
         """
             Delete a recorded operation
         """
-        pass
+        operation = self.request.context
+        self.dbsession.delete(operation)
+        self.request.session.flash(u"L'opération a bien été supprimée",
+                                                           queue='main')
+        return HTTPFound(self.request.route_path('operations'))

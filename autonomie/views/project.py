@@ -17,8 +17,7 @@
 """
 import logging
 
-from functools import partial
-
+from webhelpers.html.builder import HTML
 from deform import ValidationFailure
 from deform import Form
 from deform import Button
@@ -26,9 +25,14 @@ from deform import Button
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
+from pyramid.security import has_permission
 
 from autonomie.models.model import Project
 from autonomie.models.model import Phase
+from autonomie.utils.widgets import ViewLink
+from autonomie.utils.widgets import ToggleLink
+from autonomie.utils.widgets import StaticWidget
+from autonomie.utils.widgets import SearchForm
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
 from .base import ListView
@@ -64,6 +68,20 @@ def get_project_form(clients, default_client=None, edit=False, path=""):
                                         type='submit'),))
     return form
 
+def urlbuild(request, args_dict):
+    """
+        Return an url including args dict in the current path
+    """
+    get_args = request.GET.copy()
+    get_args.update(args_dict)
+    path = request.current_route_path()
+    if get_args:
+        path = "{0}?{1}".format(path, '&'.join("{0}={1}".format(key, value)
+                                for key, value in get_args.items()))
+    return path
+
+
+
 class ProjectView(ListView):
     """
         All the projects views are grouped in this class
@@ -72,6 +90,36 @@ class ProjectView(ListView):
 
     def __init__(self, request):
         ListView.__init__(self, request)
+
+    def _set_actionmenu(self, company, project=None, edit=False):
+        """
+            Set the menu item into the returned actionmenu
+        """
+        self.actionmenu.add(ViewLink(u"Liste des projets", "edit",
+            path="company_projects", id=company.id))
+        if edit:
+            self.actionmenu.add(ViewLink(u"Voir", "view",
+                path="company_project", id=project.id))
+            self.actionmenu.add(ViewLink(u"Éditer", "edit",
+                path="company_project", id=project.id,
+                _query=dict(action="edit")))
+            add_phase_btn = ToggleLink(u"Ajouter une phase", "edit",
+                    target="project-addphase", css="addphase")
+            self.actionmenu.add(add_phase_btn)
+        else:
+            self.actionmenu.add(ViewLink(u"Ajouter un projet", "add",
+                js="$('#addform').dialog('open');"))
+            archived = self.request.params.get('archived', '0')
+            if archived == '0':
+                show_archive = HTML.a(u"Afficher les projets archivés",
+                    href=self.request.current_route_path(
+                            _query=dict(archived="1")))
+            else:
+                show_archive = HTML.a(u"Afficher les projets actifs",
+                    href=self.request.current_route_path(
+                            _query=dict(archived="0")))
+            self.actionmenu.add(StaticWidget(show_archive))
+            self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
 
     @view_config(route_name='company_projects',
                  renderer='company_projects.mako',\
@@ -95,14 +143,18 @@ class ProjectView(ListView):
         records = self._get_pagination(projects, current_page, items_per_page)
 
         clients = company.clients
-        form = get_project_form(clients=clients,
+        ret_dict =  dict(title=u"Liste des projets",
+                          projects=records,
+                          company=company,
+                          action_menu=self.actionmenu)
+        if has_permission("add", self.request.context, self.request):
+            form = get_project_form(clients=clients,
                                 path=route_path('company_projects',
                                                 self.request,
                                                 id=company.id))
-        return dict(title=u"Liste des projets",
-                    projects=records,
-                    company=company,
-                    html_form=form.render())
+            ret_dict['html_form'] = form.render()
+        self._set_actionmenu(company)
+        return ret_dict
 
     def _get_projects(self, company, search, sort, direction, archived):
         """
@@ -147,6 +199,7 @@ class ProjectView(ListView):
             edit = True
             default_client = project.client
             title = u"Édition du projet : {0}".format(project.name)
+        self._set_actionmenu(company, project, edit)
 
         clients = company.clients
         form = get_project_form(clients,
@@ -184,7 +237,9 @@ succès".format(project.name)
         return dict(title=title,
                     project=project,
                     html_form=html_form,
-                    company=company)
+                    company=company,
+                    action_menu=self.actionmenu
+                    )
 
     @view_config(route_name="company_project",
                  request_param="action=addphase"
@@ -197,7 +252,7 @@ succès".format(project.name)
         if not self.request.params.get('phase'):
             self.request.session.flash(u"Le nom de la phase est obligatoire",
                                                                 queue='error')
-            query_dict = dict(showphase=1)
+            anchor = "showphase"
         else:
             phasename = self.request.params.get('phase')
             phase = Phase()
@@ -206,21 +261,26 @@ succès".format(project.name)
             self.dbsession.add(phase)
             self.request.session.flash(u"La phase {0} a bien été \
 rajoutée".format(phasename), queue="main")
-            query_dict = dict()
+            anchor = ""
         return HTTPFound(route_path('company_project',
                                 self.request,
                                 id=project.id,
-                                _query=query_dict))
+                                _anchor=anchor))
 
     @view_config(route_name='company_project', renderer='project_view.mako')
     def company_project_view(self):
         """
             Company's project view
         """
+        log.debug("Here")
+        log.debug(self.request.url)
+        log.debug(self.request.current_route_path())
         project = self.request.context
         company = project.company
+        self._set_actionmenu(company, project, True)
         return dict(title=u"Projet : {project.name}".format(project=project),
                     project=project,
+                    action_menu=self.actionmenu,
                     company=company)
 
     @view_config(route_name="company_project",

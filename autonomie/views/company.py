@@ -25,6 +25,7 @@ from deform import Form
 from autonomie.views.forms import CompanySchema
 from autonomie.views.forms.estimation import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.widgets import ViewLink
 
 from .base import BaseView
 
@@ -34,8 +35,12 @@ class CompanyViews(BaseView):
     """
         all company related views
     """
+
+    def __init__(self, request):
+        BaseView.__init__(self, request)
+
     @view_config(route_name='company', renderer='company_index.mako',
-                                        request_param='action=index')
+                 request_param='action=index', permission='edit')
     def company_index(self):
         """
             index page for the company shows latest news :
@@ -43,7 +48,7 @@ class CompanyViews(BaseView):
                 - To be relaunched bill
         """
         company = self.request.context
-        ret_val = dict(title=u"{0}".format(company.name,),
+        ret_val = dict(title=company.name.title(),
                     company=company)
         # recovering last activities
         all_tasks = []
@@ -68,7 +73,7 @@ class CompanyViews(BaseView):
         return ret_val
 
     @view_config(route_name='company', renderer='company_edit.mako',
-                                                  request_param='action=edit')
+                 request_param='action=edit', permission="edit")
     def company_edit(self):
         """
             Company edition page
@@ -96,6 +101,46 @@ class CompanyViews(BaseView):
                 html_form = form.render(company.appstruct())
         else:
             html_form = form.render(company.appstruct())
-        return dict(title=company.name,
+        self._set_item_menu(company)
+        return dict(title=u"Édition de {0}".format(company.name.title()),
                     company=company,
-                    html_form=html_form)
+                    html_form=html_form,
+                    action_menu=self.actionmenu)
+
+    def _set_item_menu(self, company):
+        """
+            Set the menu for item related views
+        """
+        self.actionmenu.add(ViewLink(u"Annuaire", "view",
+                path="users"))
+        self.actionmenu.add(ViewLink(u"Voir",
+                        "view", path="company", id=company.id))
+        self.actionmenu.add(ViewLink(u"Éditer", "edit",
+                path="company", id=company.id, _query=dict(action="edit")))
+
+    @view_config(route_name='company', renderer='company.mako',
+                                              permission="view")
+    def company_view(self):
+        """
+            Company main view
+        """
+        log.debug("View company")
+        company = self.request.context
+        self._set_item_menu(company)
+        link_list = []
+        link_list.append(ViewLink(u"Voir les clients",
+                "admin", path="company_clients", id=company.id,
+                icon='icon-arrow-right'
+                ))
+        link_list.append(ViewLink(u"Voir les projets",
+                "admin", path="company_projects", id=company.id,
+                icon='icon-arrow-right'
+                ))
+        link_list.append(ViewLink(u"Voir les factures",
+                "admin", path="company_invoices", id=company.id,
+                icon='icon-arrow-right'
+                ))
+        return dict(title=company.name.title(),
+                    company=company,
+                    action_menu=self.actionmenu,
+                    link_list=link_list)

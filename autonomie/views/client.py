@@ -29,6 +29,8 @@ from pyramid.url import route_path
 
 from autonomie.models.model import Client
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.widgets import ViewLink
+from autonomie.utils.widgets import SearchForm
 from autonomie.views.forms import ClientSchema
 from .base import ListView
 
@@ -72,10 +74,14 @@ class ClientView(ListView):
         form = get_client_form(path=route_path('company_clients', self.request,
                                                 id=company.id))
 
+        self._set_actionmenu(company)
+
         return dict(title=u"Liste des clients",
                     clients=records,
                     company=company,
-                    html_form=form.render())
+                    html_form=form.render(),
+                    action_menu=self.actionmenu
+                    )
 
     def _get_clients(self, company=None):
         """
@@ -97,6 +103,23 @@ class ClientView(ListView):
         clients = clients.filter(or_(Client.name.like("%"+search+"%"),
                                Client.contactLastName.like("%"+search+"%")))
         return clients
+
+    def _set_actionmenu(self, company, client=False, edit=False):
+        """
+            Set the current actionmenu
+        """
+        self.actionmenu.add(ViewLink(u"Liste des clients", "edit",
+            path="company_clients", id=company.id))
+        if edit:
+            self.actionmenu.add(ViewLink(u"Voir", "view",
+                path="company_client", id=client.id))
+            self.actionmenu.add(ViewLink(u"Éditer", "edit",
+             path="company_client", id=client.id, _query=dict(action="edit")))
+        else:
+            self.actionmenu.add(ViewLink(u"Ajouter un client", "add",
+                js="$('#addform').dialog('open');"))
+            self.actionmenu.add(SearchForm(u"Entreprise ou contact principal"))
+
 
     @view_config(route_name='company_clients', renderer='company_client.mako',\
                                                         request_method='POST')
@@ -120,6 +143,8 @@ class ClientView(ListView):
             company = client.company
             edit = True
             title = u"Édition du client : {0}".format(client.name)
+
+        self._set_actionmenu(company, client, edit)
 
         form = get_client_form(edit=edit)
         if 'submit' in self.request.params:
@@ -149,7 +174,8 @@ succès".format(client.name)
         return dict(title=title,
                     client=client,
                     html_form=html_form,
-                    company=company)
+                    company=company,
+                    action_menu=self.actionmenu)
 
     @view_config(route_name='company_client', renderer='client_view.mako', \
                                                         request_method='GET')
@@ -158,6 +184,9 @@ succès".format(client.name)
             Return the view of a client
         """
         client = self.request.context
+        self._set_actionmenu(client.company, client, edit=True)
         return dict(title=u"Client : {0}".format(client.name),
                     client=client,
-                    company=client.company)
+                    company=client.company,
+                    action_menu=self.actionmenu
+                    )

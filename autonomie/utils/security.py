@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 12 juin 2012 15:20:15 CEST
+# * Last Modified : mer. 13 juin 2012 14:57:49 CEST
 #
 # * Project : autonomie
 #
@@ -35,7 +35,7 @@ class BaseDBFactory(object):
     """
         Base class for dbrelated objects
     """
-    acl = DEFAULT_PERM[:]
+    __acl__ = DEFAULT_PERM[:]
     dbsession = None
 
 class RootFactory(dict):
@@ -228,7 +228,7 @@ class UserFactory(BaseDBFactory):
         log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
-        User.__acl__ = property(get_task_acl)
+        User.__acl__ = property(get_user_acl)
         dbsession = self.dbsession()
         obj = dbsession.query(User).filter(User.id==key).scalar()
         if obj is None:

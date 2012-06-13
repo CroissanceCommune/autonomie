@@ -46,10 +46,7 @@
 <%
 get_args = request.GET.copy()
 get_args.update(args_dict)
-path = request.current_route_path()
-if get_args:
-    path = "{0}?{1}".format(path, '&'.join("{0}={1}".format(key, value)
-                                for key, value in get_args.items()))
+path = request.current_route_path(_query=get_args)
 %>${path}</%def>
 <%def name="print_date(timestamp)">
 <% import datetime %>

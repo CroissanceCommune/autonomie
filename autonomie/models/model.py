@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 12 juin 2012 16:02:12 CEST
+# * Last Modified : mar. 12 juin 2012 18:18:32 CEST
 #
 # * Project : autonomie
 #
@@ -144,7 +144,7 @@ class CustomInteger(TypeDecorator):
             value = int(value)
         return value
 
-def _get_date():
+def _get_current_timestamp():
     """
         returns current time
     """
@@ -189,10 +189,10 @@ class Company(DBBASE):
                             order_by="Project.id",
                             backref="company")
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     goal = Column("object", String(255))
     logo = Column("logo", CustomFileType("logo_", 255))
     header = Column("header", CustomFileType("header_", 255))
@@ -269,7 +269,7 @@ class User(DBBASE):
                              secondary=company_employee,
                              backref="employees")
     primary_group = Column("account_primary_group",
-                            CustomInteger)
+                            Integer)
 
     @staticmethod
     def _encode_pass(password):
@@ -305,13 +305,19 @@ class User(DBBASE):
         """
             return true if the user is and administrator
         """
-        return self.primary_group == -10
+        return self.primary_group == 1
 
     def is_manager(self):
         """
             return True if the user is a manager
         """
-        return self.primary_group == -14
+        return self.primary_group == 2
+
+    def is_contractor(self):
+        """
+            return True if the user is a contractor
+        """
+        return self.primary_group == 3
 
 class Employee(DBBASE):
     """
@@ -326,10 +332,10 @@ class Employee(DBBASE):
     __table_args__ = {'autoload':True}
     id = Column("IDEmployee", Integer, primary_key=True)
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
 
 class Task(DBBASE):
     """
@@ -367,13 +373,13 @@ class Task(DBBASE):
     IDTask = Column(Integer, primary_key=True)
     taskDate = Column("taskDate", CustomDateType2(11))
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     statusDate = Column("statusDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
 
     CAEStatus = Column('CAEStatus', String(10))
@@ -643,10 +649,10 @@ class EstimationLine(DBBASE):
     id = Column("IDWorkLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     task = relationship("Estimation", backref="lines",
                             order_by='EstimationLine.rowIndex'
                         )
@@ -696,10 +702,10 @@ class InvoiceLine(DBBASE):
     id = Column("IDInvoiceLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     task = relationship("Invoice", backref="lines",
                             order_by='InvoiceLine.rowIndex'
                         )
@@ -747,10 +753,10 @@ class PaymentLine(DBBASE):
     __tablename__ = 'coop_estimation_payment'
     __table_args__ = {'autoload':True}
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     estimation = relationship("Estimation", backref=backref('payment_lines',
                     order_by='PaymentLine.rowIndex'))
@@ -794,10 +800,10 @@ class Client(DBBASE):
     id_company = Column("IDCompany", Integer,
                                     ForeignKey('coop_company.IDCompany'))
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     projects = relationship("Project", backref="client")
     name = Column("name", String(255), default=None)
     contactFirstName = Column("contactFirstName", String(255), default=None)
@@ -833,14 +839,14 @@ class Project(DBBASE):
     code_client = Column("customerCode", String(4),
                                     ForeignKey('coop_customer.code'))
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     startingDate = Column("startingDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     endingDate = Column("endingDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     name = Column("name", String(255))
     archived = Column("archived", String(255), default=0)
 
@@ -896,10 +902,10 @@ class Phase(DBBASE):
                         ForeignKey('coop_project.IDProject'))
     project = relationship("Project", backref="phases")
     creationDate = Column("creationDate", CustomDateType(11),
-                                            default=_get_date)
+                                            default=_get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType(11),
-                                        default=_get_date,
-                                        onupdate=_get_date)
+                                        default=_get_current_timestamp,
+                                        onupdate=_get_current_timestamp)
     def is_default(self):
         """
             return True is this phase is a default one
@@ -973,9 +979,9 @@ class ManualInvoice(DBBASE):
     """
     __tablename__ = 'symf_facture_manuelle'
     __table_args__ = {'autoload':True}
-    created_at = Column("created_at", DateTime(),
+    created_at = Column("created_at", DateTime,
                                       default=datetime.datetime.now)
-    updated_at = Column("updated_at", DateTime(),
+    updated_at = Column("updated_at", DateTime,
                                       default=datetime.datetime.now,
                                       onupdate=datetime.datetime.now)
     id = Column('id', BigInteger, primary_key=True)
@@ -1056,13 +1062,13 @@ class OperationComptable(DBBASE):
     company = relationship("Company",
                        primaryjoin="Company.id==OperationComptable.company_id",
                        backref='operation_comptable')
-    created_at = Column("created_at", DateTime(),
+    created_at = Column("created_at", DateTime,
                                         default=datetime.datetime.now)
-    updated_at = Column("updated_at", DateTime(),
+    updated_at = Column("updated_at", DateTime,
                                         default=datetime.datetime.now,
                                         onupdate=datetime.datetime.now)
     charge = Column("charge", Integer, default=0)
-    date = Column("date", Date(), default=datetime.date)
+    date = Column("date", Date(), default=datetime.date.today)
     label = Column("libelle", String, default="")
     year = Column("annee", BigInteger)
     amount = Column("montant", Numeric)

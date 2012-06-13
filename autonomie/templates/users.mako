@@ -4,19 +4,6 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%namespace file="/base/utils.mako" import="searchform"/>
-<%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-    <a title='Référencer un nouveau client' href='#new' onclick="$('#addform').dialog('open');">
-        Ajouter un Utilisateur
-    </a>
-    </li>
-    <li>
-        ${searchform()}
-    </li>
-</ul>
-</%block>
 <%block name='content'>
 <table class="table table-striped table-condensed">
     <thead>

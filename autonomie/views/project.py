@@ -68,20 +68,6 @@ def get_project_form(clients, default_client=None, edit=False, path=""):
                                         type='submit'),))
     return form
 
-def urlbuild(request, args_dict):
-    """
-        Return an url including args dict in the current path
-    """
-    get_args = request.GET.copy()
-    get_args.update(args_dict)
-    path = request.current_route_path()
-    if get_args:
-        path = "{0}?{1}".format(path, '&'.join("{0}={1}".format(key, value)
-                                for key, value in get_args.items()))
-    return path
-
-
-
 class ProjectView(ListView):
     """
         All the projects views are grouped in this class

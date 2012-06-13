@@ -96,8 +96,11 @@ def _check_pwd(node, kw):
         node['pwd'].title = "Mot de passe"
         node['pwd'].missing = None
 
-ROLES = (("-10", 'Administrateur'), ("-14", 'Membre de la coopérative'),
-        ("-11", 'Entrepreneur'),)
+ROLES = [
+         (u"3", u'Entrepreneur'),
+         (u"1", u'Administrateur'),
+         (u"2", u'Membre de la coopérative'),
+        ]
 
 class FAccount(colander.MappingSchema):
     """
@@ -113,20 +116,21 @@ class FAccount(colander.MappingSchema):
     #account_primary_group
     #account_challenge
     #account_response
-    firstname = colander.SchemaNode(colander.String(),
-                           title="Prénom" )
-    lastname = colander.SchemaNode(colander.String(),
-                            title="Nom")
     login = colander.SchemaNode(colander.String(),
-                            title="Login",
+                            title=u"Identifiant",
                             validator=deferred_login_validator,
                             widget=deferred_edit_widget)
+    firstname = colander.SchemaNode(colander.String(),
+                           title=u"Prénom" )
+    lastname = colander.SchemaNode(colander.String(),
+                            title=u"Nom")
     email = get_mail_input(missing=u"")
     primary_group = colander.SchemaNode(colander.String(),
                         title=u"Rôle de l'utilisateur",
                         validator=colander.OneOf([x[0] for x in ROLES]),
                         widget=widget.RadioChoiceWidget(values=ROLES),
-                        default="-11")
+                        default=u"3"
+                        )
 
 class FPassword(colander.MappingSchema):
     """

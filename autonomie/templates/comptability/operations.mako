@@ -6,6 +6,9 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
+    <a title='Référencer une nouvelle opération comptable' href='#new' onclick="$('#addform').dialog('open');">
+        Ajouter une opération
+    </a>
     </li>
     <li>
     </li>
@@ -83,7 +86,10 @@
                             <a class='btn' href='${request.route_path("operation", id=operation.id, _query=dict(action="edit"))}' title="Éditer">
                                 <i class='icon-pencil'></i>
                             </a>
-                            <a class='btn' href='${request.route_path("operation", id=operation.id, _query=dict(action="delete"))}' title="Supprimer">
+                            <a class='btn'
+                               href='${request.route_path("operation", id=operation.id, _query=dict(action="delete"))}'
+                               title="Supprimer"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette opération ?');">
                                 <i class='icon-remove'></i>
                             </a>
                         </div>
@@ -100,8 +106,26 @@
     </tbody>
 </table>
 ${pager(operations)}
+% if html_form is not UNDEFINED:
+    <div id='addform'>
+        ${html_form|n}
+    </div>
+% endif
 </%block>
 <%block name='footerjs'>
+% if html_form is not UNDEFINED:
+    $( function() {
+    $("#addform").dialog({ autoOpen: false,
+    modal:true,
+    width:"auto",
+    title:"Ajouter une opération",
+    open: function(event, ui){
+    $('.ui-widget-overlay').css('width','100%');
+    $('.ui-widget-overlay').css('height','100%');
+    }
+    });
+    });
+% endif
 $('#company-select').chosen({allow_single_deselect: true});
 $('#company-select').change(function(){$(this).closest('form').submit()});
 $('#year-select').chosen({allow_single_deselect: true});

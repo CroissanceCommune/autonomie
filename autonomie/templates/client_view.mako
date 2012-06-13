@@ -1,24 +1,8 @@
 <%inherit file="base.mako"></%inherit>
-<%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-    </li>
-    <li>
-    <a title='Revenir à la liste des clients'  href='${request.route_path("company_clients", id=company.id)}'>
-        Revenir à la liste
-    </a>
-    </li>
-</ul>
-</%block>
 <%block name='content'>
 <div class='container'>
     <ul class="row">
         <div class='span2'>
-        <a title='Éditer les informations de ce client'
-            href='${request.route_path("company_client", id=client.id, _query=dict(action="edit"))}'
-            class='btn btn-primary'>
-            Éditer
-        </a>
             <h3>Entreprise</h3>
             <dl>
                 % for label, value in ((u"Nom de l'entreprise", client.name), (u"Code", client.id), (u"TVA intracommunautaire", client.intraTVA)):

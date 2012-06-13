@@ -1,25 +1,6 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="base/utils.mako" import="print_date" />
 <%namespace file="base/utils.mako" import="address" />
-<%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-    <a title='Revenir à la liste des clients'  href='${request.route_path("company_projects", id=company.id)}'>
-        Revenir à la liste
-    </a>
-    </li>
-    <li>
-    <a title='Afficher le détail'  href="#" data-toggle='collapse' data-target='#project-description'>
-        Afficher les détails
-        </a>
-    </li>
-    <li>
-    <a title='Ajouter une phase dans le projet'  href="#" data-toggle='collapse' data-target='#project-addphase'>
-            Ajouter une phase
-        </a>
-    </li>
-</ul>
-</%block>
 <%block name='content'>
     %if request.params.get('showphase'):
         <div class='row in collapse' id='project-addphase'>
@@ -197,4 +178,11 @@ h3.floatted{
     </div>
     %endfor
 </div>
+</%block>
+<%block name="footerjs">
+$( function() {
+if (window.location.hash == "#showphase"){
+$("#project-addphase").addClass('in');
+}
+});
 </%block>

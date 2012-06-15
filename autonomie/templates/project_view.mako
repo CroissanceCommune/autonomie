@@ -2,11 +2,7 @@
 <%namespace file="base/utils.mako" import="print_date" />
 <%namespace file="base/utils.mako" import="address" />
 <%block name='content'>
-    %if request.params.get('showphase'):
-        <div class='row in collapse' id='project-addphase'>
-    %else:
-        <div class='row collapse' id='project-addphase'>
-    %endif
+    <div class='row collapse' id='project-addphase'>
         <div class='span4'>
             <h3>Ajouter une phase</h3>
             <form class='navbar-form' method='POST' action="${request.route_path('company_project', id=project.id, _query=dict(action='addphase'))}">
@@ -177,6 +173,9 @@ h3.floatted{
         % endif
     </div>
     %endfor
+    %if not project.phases:
+        <strong>Aucune phase n'a été créée dans ce projet</strong>
+    %endif
 </div>
 </%block>
 <%block name="footerjs">

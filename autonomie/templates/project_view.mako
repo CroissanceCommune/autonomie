@@ -3,7 +3,7 @@
 <%namespace file="base/utils.mako" import="address" />
 <%block name='content'>
     <div class='row collapse' id='project-addphase'>
-        <div class='span4'>
+        <div class='span4 offset4'>
             <h3>Ajouter une phase</h3>
             <form class='navbar-form' method='POST' action="${request.route_path('company_project', id=project.id, _query=dict(action='addphase'))}">
                 <input type='text' name='phase' />
@@ -13,7 +13,7 @@
         </div>
     </div>
     <div class='row collapse' id='project-description'>
-        <div class="span2">
+        <div class="span2 offset2">
             <h3>Client</h3>
             ${address(project.client, "client")}
             %if project.type:

@@ -13,8 +13,15 @@
        % endif
       >
       %if elem.icon:
+        %if hasattr(elem.icon, "__iter__"):
+            %for icon in elem.icon:
+                <i class="${icon}"></i>
+            % endfor
+        %else:
           <i class='${elem.icon}'></i>
-      % endif
+        % endif
+    %else:
       ${elem.label}
+      % endif
     </a>
 % endif

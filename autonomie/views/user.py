@@ -38,7 +38,8 @@ from .base import ListView
 
 log = logging.getLogger(__name__)
 
-@view_config(route_name='account', renderer='account.mako')
+@view_config(route_name='account', renderer='account.mako',
+        permission='edit')
 def account(request):
     """
         Account handling page
@@ -94,7 +95,8 @@ class UserView(ListView):
         return form
 
 
-    @view_config(route_name='users', renderer='users.mako')
+    @view_config(route_name='users', renderer='users.mako',
+            permission='view')
     def directory(self):
         """
             User directory
@@ -210,7 +212,7 @@ class UserView(ListView):
                     html_form=html_form,
                     action_menu=self.actionmenu)
 
-    @view_config(route_name='user', renderer='user.mako')
+    @view_config(route_name='user', renderer='user.mako', permission='view')
     def user_view(self):
         """
             User view

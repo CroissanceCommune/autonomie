@@ -122,9 +122,9 @@ class ClientView(ListView):
 
 
     @view_config(route_name='company_clients', renderer='company_client.mako',\
-                                                        request_method='POST')
+                        request_method='POST', permission='edit')
     @view_config(route_name='company_client', renderer='company_client.mako',\
-                                                request_param='action=edit')
+                                request_param='action=edit', permission='edit')
     def company_client(self):
         """
             Return :
@@ -178,7 +178,7 @@ succès".format(client.name)
                     action_menu=self.actionmenu)
 
     @view_config(route_name='company_client', renderer='client_view.mako', \
-                                                        request_method='GET')
+                            request_method='GET', permission='view')
     def company_client_view(self):
         """
             Return the view of a client

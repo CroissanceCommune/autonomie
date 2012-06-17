@@ -129,7 +129,8 @@ class ProjectView(ListView):
 
     @view_config(route_name='company_projects',
                  renderer='company_projects.mako',\
-                 request_method='GET')
+                 request_method='GET',
+                 permission='view')
     def company_projects(self):
         """
             Return the list of projects
@@ -194,10 +195,12 @@ class ProjectView(ListView):
 
     @view_config(route_name='company_projects',  \
                  renderer='company_project.mako', \
-                 request_method='POST')
+                 request_method='POST',
+                 permission='edit')
     @view_config(route_name='company_project', \
                  renderer='company_project.mako', \
-                 request_param='action=edit', permission='edit')
+                 request_param='action=edit',
+                 permission='edit')
     def company_project(self):
         """
             Returns:
@@ -261,7 +264,8 @@ succès".format(project.name)
                     )
 
     @view_config(route_name="company_project",
-                 request_param="action=addphase"
+                 request_param="action=addphase",
+                 permission='edit'
                 )
     def add_phase(self):
         """
@@ -286,7 +290,9 @@ rajoutée".format(phasename), queue="main")
                                 id=project.id,
                                 _anchor=anchor))
 
-    @view_config(route_name='company_project', renderer='project_view.mako')
+    @view_config(route_name='company_project', renderer='project_view.mako',
+            permission='view'
+            )
     def company_project_view(self):
         """
             Company's project view
@@ -300,7 +306,8 @@ rajoutée".format(phasename), queue="main")
                     company=company)
 
     @view_config(route_name="company_project",
-                request_param="action=archive")
+                request_param="action=archive",
+                permission='edit')
     def archive(self):
         """
             Archive the current project
@@ -315,7 +322,8 @@ rajoutée".format(phasename), queue="main")
         return HTTPFound(self.request.referer)
 
     @view_config(route_name="company_project",
-                request_param="action=delete")
+                request_param="action=delete",
+                permission='edit')
     def delete(self):
         """
             Delete the current project
@@ -332,23 +340,25 @@ supprimé".format(project.name) )
         """
         btns = []
         btns.append(ItemActionLink(u"Voir", "view", css='btn',
-                path="company_project"))
+                path="company_project", icon="icon-search"))
         btns.append(ItemActionLink(u"Devis", "edit", css="btn",
-            path="estimations"))
+            path="estimations", icon=("icon-file", )))
         btns.append(ItemActionLink(u"Facture", "edit", css="btn",
-            path="invoices"))
+            path="invoices", icon=("icon-file", )))
         if self.request.params.get('archived', '0') == '0':
             btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
                                 js=u"return confirm('Êtes-vous sûr \
 de vouloir archiver ce projet ?');",
                                 path="company_project",
-                                _query=dict(action="archive")))
+                                _query=dict(action="archive"),
+                                icon="icon-book"))
         else:
             del_link = ItemActionLink(u"Supprimer", "edit", css="btn",
                                 js=u"return confirm('Êtes-vous sûr \
 de vouloir supprimer ce projet ?');",
                                       path="company_project",
-                                      _query=dict(action="delete"))
+                                      _query=dict(action="delete"),
+                                      icon="icon-trash")
             def is_deletable_perm(context, req):
                 """
                     Return True if the current item (context) is deletable

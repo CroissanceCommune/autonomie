@@ -20,8 +20,9 @@
         %else:
           <i class='${elem.icon}'></i>
         % endif
-    %else:
-      ${elem.label}
       % endif
+      <span class="visible-desktop hidden-tablet" style="display:inline">
+      ${elem.label}
+      </span>
     </a>
 % endif

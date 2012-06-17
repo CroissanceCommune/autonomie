@@ -342,14 +342,17 @@ supprimé".format(project.name) )
         btns.append(ItemActionLink(u"Voir", "view", css='btn',
                 path="company_project", icon="icon-search"))
         btns.append(ItemActionLink(u"Devis", "edit", css="btn",
+            title=u"Nouveau devis",
             path="estimations", icon=("icon-file", )))
         btns.append(ItemActionLink(u"Facture", "edit", css="btn",
+            title=u"Nouvelle facture",
             path="invoices", icon=("icon-file", )))
         if self.request.params.get('archived', '0') == '0':
             btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
                                 js=u"return confirm('Êtes-vous sûr \
 de vouloir archiver ce projet ?');",
                                 path="company_project",
+                                title=u"Archiver le projet",
                                 _query=dict(action="archive"),
                                 icon="icon-book"))
         else:
@@ -357,6 +360,7 @@ de vouloir archiver ce projet ?');",
                                 js=u"return confirm('Êtes-vous sûr \
 de vouloir supprimer ce projet ?');",
                                       path="company_project",
+                                      title=u"Supprimer le projet",
                                       _query=dict(action="delete"),
                                       icon="icon-trash")
             def is_deletable_perm(context, req):

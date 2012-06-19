@@ -48,11 +48,11 @@
                                     <a href="${request.route_path('invoice', id=invoice.model.IDTask)}" title='Voir le document'>
                                         ${invoice.model.number}<br />
                                     </a>
-                                    <small>Projet : ${format_project(invoice.model.project, company)}</small>
+                                    <small>Projet : ${format_project(invoice.model.project)}</small>
                                 </blockquote>
                             </td>
                             <td>
-                                ${format_client(invoice.model.project.client, company)}
+                                ${format_client(invoice.model.project.client)}
                             </td>
                             <td>
                                 ${format_amount(invoice.compute_totalht())} € HT
@@ -85,7 +85,7 @@
             % for task in tasks:
                 <tr>
                     <td>
-                        ${format_project(task.project, company)}
+                        ${format_project(task.project)}
                     </td>
                     <td>${task.name}</td>
                     <td>${task.get_status_str()}</td>

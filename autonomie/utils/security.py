@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 13 juin 2012 14:57:49 CEST
+# * Last Modified : ven. 15 juin 2012 13:21:15 CEST
 #
 # * Project : autonomie
 #
@@ -30,6 +30,18 @@ log = logging.getLogger(__file__)
 
 DEFAULT_PERM = [(Allow, "group:admin", ALL_PERMISSIONS,),
                 (Allow, Authenticated, 'view'),]
+
+def wrap_db_objects():
+    """
+        Add acls and names to the db objects used as context
+    """
+    Company.__acl__ = property(get_company_acl)
+    Project.__acl__ = property(get_client_or_project_acls)
+    Client.__acl__ = property(get_client_or_project_acls)
+    Estimation.__acl__ = property(get_task_acl)
+    Invoice.__acl__ = property(get_task_acl)
+    User.__acl__ = property(get_user_acl)
+    OperationComptable.__acl__ = property(get_task_acl)
 
 class BaseDBFactory(object):
     """
@@ -81,13 +93,12 @@ class CompanyFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        Company.__acl__ = property(get_company_acl)
         obj = dbsession.query(Company).filter(
                                Company.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "company"
+        obj.__name__ = 'company'
         return obj
 
 def get_client_or_project_acls(self):
@@ -114,13 +125,12 @@ class ProjectFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        Project.__acl__ = property(get_client_or_project_acls)
         obj = dbsession.query(Project).filter(
                                                Project.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "project"
+        obj.__name__ = 'project'
         return obj
 
 class ClientFactory(BaseDBFactory):
@@ -138,13 +148,12 @@ class ClientFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        Client.__acl__ = property(get_client_or_project_acls)
         obj = dbsession.query(Client).filter(
                                              Client.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "client"
+        obj.__name__ = 'client'
         return obj
 
 def get_task_acl(self):
@@ -171,13 +180,12 @@ class EstimationFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        Estimation.__acl__ = property(get_task_acl)
         obj = dbsession.query(Estimation).filter(
                                            Estimation.IDTask==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "estimation"
+        obj.__name__ = 'estimation'
         return obj
 
 class InvoiceFactory(BaseDBFactory):
@@ -194,14 +202,13 @@ class InvoiceFactory(BaseDBFactory):
         """
         if self.dbsession == None:
             raise Exception("Missing dbsession")
-        Invoice.__acl__ = property(get_task_acl)
         dbsession = self.dbsession()
         obj = dbsession.query(Invoice).filter(
                                              Invoice.IDTask==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "invoice"
+        obj.__name__ = 'invoice'
         return obj
 
 def get_user_acl(self):
@@ -228,13 +235,12 @@ class UserFactory(BaseDBFactory):
         log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
-        User.__acl__ = property(get_user_acl)
         dbsession = self.dbsession()
         obj = dbsession.query(User).filter(User.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "user"
+        obj.__name__ = 'user'
         return obj
 
 def get_base_acl(self):
@@ -260,12 +266,11 @@ class OperationFactory(BaseDBFactory):
         log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
-        OperationComptable.__acl__ = property(get_task_acl)
         dbsession = self.dbsession()
         obj = dbsession.query(OperationComptable).filter(
                                 OperationComptable.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
-        obj.__name__ = "operation"
+        obj.__name__ = 'operation'
         return obj

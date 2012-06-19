@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 19 juin 2012 19:28:58 CEST
+# * Last Modified : mar. 19 juin 2012 20:03:07 CEST
 #
 # * Project : autonomie
 #
@@ -33,9 +33,12 @@ def main(global_config, **settings):
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
     dbsession = initialize_sql(engine)
-
+    # Many calls related to dbsession needs to be done after the initialize_sql
+    # because of the autoload stuff we're using
     from autonomie.utils.security import RootFactory
     from autonomie.utils.security import BaseDBFactory
+    from autonomie.utils.security import wrap_db_objects
+    wrap_db_objects()
     BaseDBFactory.dbsession = dbsession
 
     session_factory = session_factory_from_settings(settings)

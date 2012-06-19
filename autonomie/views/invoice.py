@@ -91,7 +91,8 @@ class CompanyInvoicesView(ListView):
     @view_config(route_name="invoices",
                 renderer="invoices.mako")
     @view_config(route_name='company_invoices',
-                 renderer='company_invoices.mako')
+                 renderer='company_invoices.mako',
+                 permission='view')
     def company_invoices(self):
         """
             List invoices for the given company
@@ -221,7 +222,8 @@ class CompanyInvoicesView(ListView):
         return inv
 
     @view_config(route_name='company_treasury',
-                 renderer='company_treasury.mako')
+                 renderer='company_treasury.mako',
+                 permission='view')
     def company_treasury(self):
         """
             View for the treasury view
@@ -275,8 +277,10 @@ class InvoiceView(TaskView, ListView):
                                        for line in self.task_lines],
                 }
 
-    @view_config(route_name="company_invoices", renderer='tasks/form.mako')
-    @view_config(route_name='invoice', renderer='tasks/form.mako')
+    @view_config(route_name="project_invoices", renderer='tasks/form.mako',
+            permission='edit')
+    @view_config(route_name='invoice', renderer='tasks/form.mako',
+            permission='edit')
     def invoice_form(self):
         """
             Return the invoice edit view
@@ -387,6 +391,7 @@ class InvoiceView(TaskView, ListView):
 
     @view_config(route_name='invoice',
                 renderer='tasks/invoice_html.mako',
+                permission='view',
                 request_param='view=html')
     def html_invoice(self):
         """
@@ -402,7 +407,8 @@ class InvoiceView(TaskView, ListView):
 
     @view_config(route_name='invoice',
                 renderer='tasks/invoice_html.mako',
-                request_param='view=pdf')
+                request_param='view=pdf',
+                permission='view')
     def invoice_pdf(self):
         """
             Returns a page displaying an html rendering of the given task

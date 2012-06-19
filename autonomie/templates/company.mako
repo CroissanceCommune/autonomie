@@ -4,8 +4,14 @@
     <div class="span6 offset3">
         <h3>Entreprise ${company.name}</h3>
         ${company.goal}
-        <br />
-        <br />
+        <dl>
+        % for label, attr in ((u'E-mail', 'email'), (u'Téléphone', 'phone'), (u"Téléphone portable", "mobile"),):
+            %if getattr(company, attr):
+                <dt>${label}</dt>
+                <dd>${getattr(company, attr)}</dd>
+            % endif
+        % endfor
+        </dl>
         %for link in link_list:
             <p>${link.render(request)|n}</p>
         %endfor

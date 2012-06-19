@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mer. 13 juin 2012 20:25:27 CEST
+# * Last Modified : ven. 15 juin 2012 14:04:23 CEST
 #
 # * Project : autonomie
 #
@@ -79,11 +79,22 @@ class PermWidget(object):
     """
         widget with permission
     """
+    def set_special_perm_func(self, func):
+        """
+            Allows to insert a specific permission function
+        """
+        self.special_perm_func = func
+
     def permitted(self, context, request):
         """
             Return True if the user has the right to access the destination
         """
-        return has_permission(self.perm, context, request)
+        right = has_permission(self.perm, context, request)
+
+        if right and hasattr(self, "special_perm_func"):
+            return self.special_perm_func(context, request)
+        else:
+            return right
 
 class StaticWidget(PermWidget):
     """
@@ -97,11 +108,6 @@ class StaticWidget(PermWidget):
 
 class Link(Widget, PermWidget):
     template = None
-    def permitted(self, context, request):
-        """
-            Return True if the user has the right to access the destination
-        """
-        return has_permission(self.perm, context, request)
 
 class JsLink(Link):
     """
@@ -169,6 +175,23 @@ class ViewLink(Link):
         if request.GET.has_key('action'):
             cur_path += "?action=%s" % request.GET['action']
         return urllib.unquote(cur_path) == self.url(request)
+
+class ItemActionLink(ViewLink):
+    """
+        Action button used in item list
+    """
+    template = "base/itemactionlink.mako"
+    def url(self, context, request):
+        """
+            Returns the url associated with current btn
+        """
+        return request.route_path(self.path,
+                                  id=context.id,
+                                  **self.url_kw)
+
+    def render(self, request, item):
+        return render_html( request, self.template, {'elem':self, 'item':item})
+
 
 class ToggleLink(Link):
     template = "base/togglelink.mako"

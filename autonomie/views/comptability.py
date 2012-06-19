@@ -87,7 +87,7 @@ class ComptabilityView(ListView):
         return form
 
     @view_config(route_name="operations",
-                                    renderer="comptability/operations.mako")
+            renderer="comptability/operations.mako", permission='manage')
     def list(self):
         """
             list all operations
@@ -164,10 +164,12 @@ class ComptabilityView(ListView):
 
     @view_config(route_name="operations",
                     renderer="comptability/operation_edit.mako",
-                    request_method="POST")
+                    request_method="POST",
+                    permission='manage')
     @view_config(route_name="operation",
                     renderer="comptability/operation_edit.mako",
-                                         request_param="action=edit")
+                    request_param="action=edit",
+                    permission='manage')
     def _new_or_edit(self):
         """
             Add a new operation or edit existing one
@@ -210,7 +212,8 @@ class ComptabilityView(ListView):
         #TODO
         pass
 
-    @view_config(route_name="operation", request_param="action=delete")
+    @view_config(route_name="operation", request_param="action=delete",
+                permission='manage')
     def _delete(self):
         """
             Delete a recorded operation

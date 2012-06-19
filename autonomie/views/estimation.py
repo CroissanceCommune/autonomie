@@ -72,8 +72,10 @@ class EstimationView(TaskView):
                 'payment_lines':[line.appstruct()
                                         for line in self.payment_lines]}
 
-    @view_config(route_name="estimations", renderer='tasks/form.mako')
-    @view_config(route_name='estimation', renderer='tasks/form.mako')
+    @view_config(route_name="estimations", renderer='tasks/form.mako',
+                permission='edit')
+    @view_config(route_name='estimation', renderer='tasks/form.mako',
+                permission='edit')
     def form(self):
         """
             Return the estimation edit view
@@ -185,7 +187,8 @@ class EstimationView(TaskView):
 
     @view_config(route_name='estimation',
                 renderer='tasks/estimation_html.mako',
-                request_param='view=html')
+                request_param='view=html',
+                permission='view')
     def html(self):
         """
             Returns a page displaying an html rendering of the given task
@@ -199,7 +202,8 @@ class EstimationView(TaskView):
                     )
 
     @view_config(route_name='estimation',
-                request_param='view=pdf')
+                request_param='view=pdf',
+                permission='view')
     def pdf(self):
         """
             Returns a page displaying an html rendering of the given task
@@ -208,7 +212,8 @@ class EstimationView(TaskView):
         write_pdf(self.request, filename, self._html())
         return self.request.response
 
-    @view_config(route_name='estimation', request_param='action=duplicate')
+    @view_config(route_name='estimation', request_param='action=duplicate',
+            permission='edit')
     def duplicate(self):
         """
             Duplicates current estimation
@@ -240,7 +245,8 @@ class EstimationView(TaskView):
                     self.request,
                     taskid=taskid))
 
-    @view_config(route_name='estimation', request_param='action=delete')
+    @view_config(route_name='estimation', request_param='action=delete',
+            permission='edit')
     def delete(self):
         """
             Delete an estimation
@@ -254,7 +260,8 @@ class EstimationView(TaskView):
         self.request.session.flash(message, queue='error')
         return self.project_view_redirect()
 
-    @view_config(route_name='estimation', request_param='action=geninv')
+    @view_config(route_name='estimation', request_param='action=geninv',
+            permission='edit')
     def gen_invoices(self):
         """
             Called when an estimation status is changed
@@ -371,7 +378,8 @@ class EstimationView(TaskView):
                                 queue='main')
         return self.project_view_redirect()
 
-    @view_config(route_name='estimation', request_param='action=aboest')
+    @view_config(route_name='estimation', request_param='action=aboest',
+            permission='edit')
     def abort(self):
         """
             Abort current estimation

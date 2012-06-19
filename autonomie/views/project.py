@@ -17,6 +17,7 @@
 """
 import logging
 
+from sqlalchemy import or_
 from webhelpers.html.builder import HTML
 from deform import ValidationFailure
 from deform import Form
@@ -29,8 +30,10 @@ from pyramid.security import has_permission
 
 from autonomie.models.model import Project
 from autonomie.models.model import Phase
+from autonomie.models.model import Client
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import ToggleLink
+from autonomie.utils.widgets import ItemActionLink
 from autonomie.utils.widgets import StaticWidget
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.forms import merge_session_with_post
@@ -72,7 +75,8 @@ class ProjectView(ListView):
     """
         All the projects views are grouped in this class
     """
-    columns = ("code", "name")
+    columns = ("code", "coop_project.name")
+    default_sort = 'coop_project.name'
 
     def __init__(self, request):
         ListView.__init__(self, request)
@@ -89,6 +93,8 @@ class ProjectView(ListView):
             self.actionmenu.add(ViewLink(u"Éditer", "edit",
                 path="company_project", id=project.id,
                 _query=dict(action="edit")))
+            self.actionmenu.add(ToggleLink(u"Afficher les détails", "view",
+                    target="project-description"))
             add_phase_btn = ToggleLink(u"Ajouter une phase", "edit",
                     target="project-addphase", css="addphase")
             self.actionmenu.add(add_phase_btn)
@@ -109,7 +115,8 @@ class ProjectView(ListView):
 
     @view_config(route_name='company_projects',
                  renderer='company_projects.mako',\
-                 request_method='GET')
+                 request_method='GET',
+                 permission='view')
     def company_projects(self):
         """
             Return the list of projects
@@ -124,15 +131,22 @@ class ProjectView(ListView):
 
     #    toquery = (Project.id, Project.client, Project.name)
         #TODO : handle join tables to search by client
-        projects = self._get_projects(company, search, sort, direction,
-                                                                archived)
+        query = self._get_projects()
+        if company:
+            query = self._filter_company(query, company)
+        if archived == "1":
+            query = self._filter_archived(query)
+        if search:
+            query = self._filter_search(query, search)
+        projects = query.order_by(sort + " " + direction).all()
         records = self._get_pagination(projects, current_page, items_per_page)
 
         clients = company.clients
         ret_dict =  dict(title=u"Liste des projets",
                           projects=records,
                           company=company,
-                          action_menu=self.actionmenu)
+                          action_menu=self.actionmenu,
+                          item_actions=self._get_actions())
         if has_permission("add", self.request.context, self.request):
             form = get_project_form(clients=clients,
                                 path=route_path('company_projects',
@@ -141,30 +155,38 @@ class ProjectView(ListView):
             ret_dict['html_form'] = form.render()
         self._set_actionmenu(company)
         return ret_dict
-
-    def _get_projects(self, company, search, sort, direction, archived):
+    def _get_projects(self):# company, search, sort, direction, archived):
         """
             query projects against the database
         """
-        if company is not None:
-            projects = self.dbsession.query(Project).filter(
-                                Project.name.like(search+"%"),
-                                Project.id_company == company.id,
-                                Project.archived == archived
-                        ).order_by(sort + " " + direction)
-        else:
-            projects = self.dbsession.query(Project).filter(
-                                Project.name.like(search+"%"),
-                                Project.archived == archived
-                        ).order_by(sort + " " + direction)
+        return self.dbsession.query(Project).join(Project.client)
+
+    def _filter_company(self, query, company):
+        """
+            add a filter for the company on the query
+        """
+        return query.filter(Project.id_company==company.id)
+
+    def _filter_archived(self, query):
+        """
+            add a filter to query only archived projects
+        """
+        return query.filter(Project.archived == "1")
+
+    def _filter_search(self, query, search):
+        return query.filter( or_(Project.name.like(search + "%"),
+                        Client.name.like(search +"%")))
+
         return projects
 
     @view_config(route_name='company_projects',  \
                  renderer='company_project.mako', \
-                 request_method='POST')
+                 request_method='POST',
+                 permission='edit')
     @view_config(route_name='company_project', \
                  renderer='company_project.mako', \
-                 request_param='action=edit', permission='edit')
+                 request_param='action=edit',
+                 permission='edit')
     def company_project(self):
         """
             Returns:
@@ -228,7 +250,8 @@ succès".format(project.name)
                     )
 
     @view_config(route_name="company_project",
-                 request_param="action=addphase"
+                 request_param="action=addphase",
+                 permission='edit'
                 )
     def add_phase(self):
         """
@@ -253,14 +276,13 @@ rajoutée".format(phasename), queue="main")
                                 id=project.id,
                                 _anchor=anchor))
 
-    @view_config(route_name='company_project', renderer='project_view.mako')
+    @view_config(route_name='company_project', renderer='project_view.mako',
+            permission='view'
+            )
     def company_project_view(self):
         """
             Company's project view
         """
-        log.debug("Here")
-        log.debug(self.request.url)
-        log.debug(self.request.current_route_path())
         project = self.request.context
         company = project.company
         self._set_actionmenu(company, project, True)
@@ -270,7 +292,8 @@ rajoutée".format(phasename), queue="main")
                     company=company)
 
     @view_config(route_name="company_project",
-                request_param="action=archive")
+                request_param="action=archive",
+                permission='edit')
     def archive(self):
         """
             Archive the current project
@@ -285,7 +308,8 @@ rajoutée".format(phasename), queue="main")
         return HTTPFound(self.request.referer)
 
     @view_config(route_name="company_project",
-                request_param="action=delete")
+                request_param="action=delete",
+                permission='edit')
     def delete(self):
         """
             Delete the current project
@@ -295,3 +319,42 @@ rajoutée".format(phasename), queue="main")
         self.request.session.flash(u"Le projet '{0}' a bien été \
 supprimé".format(project.name) )
         return HTTPFound(self.request.referer)
+
+    def _get_actions(self):
+        """
+            Return action buttons with permission handling
+        """
+        btns = []
+        btns.append(ItemActionLink(u"Voir", "view", css='btn',
+                path="company_project", icon="icon-search"))
+        btns.append(ItemActionLink(u"Devis", "edit", css="btn",
+            title=u"Nouveau devis",
+            path="estimations", icon=("icon-file", )))
+        btns.append(ItemActionLink(u"Facture", "edit", css="btn",
+            title=u"Nouvelle facture",
+            path="invoices", icon=("icon-file", )))
+        if self.request.params.get('archived', '0') == '0':
+            btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
+                                js=u"return confirm('Êtes-vous sûr \
+de vouloir archiver ce projet ?');",
+                                path="company_project",
+                                title=u"Archiver le projet",
+                                _query=dict(action="archive"),
+                                icon="icon-book"))
+        else:
+            del_link = ItemActionLink(u"Supprimer", "edit", css="btn",
+                                js=u"return confirm('Êtes-vous sûr \
+de vouloir supprimer ce projet ?');",
+                                      path="company_project",
+                                      title=u"Supprimer le projet",
+                                      _query=dict(action="delete"),
+                                      icon="icon-trash")
+            def is_deletable_perm(context, req):
+                """
+                    Return True if the current item (context) is deletable
+                """
+                return context.is_deletable()
+            del_link.set_special_perm_func(is_deletable_perm)
+            btns.append(del_link)
+        return btns
+

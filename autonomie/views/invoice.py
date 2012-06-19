@@ -18,19 +18,23 @@
 import logging
 import datetime
 
+from sqlalchemy import desc
+
 from deform import ValidationFailure
 from deform import Form
 from pyramid.view import view_config
 
 from autonomie.models.model import Invoice
+from autonomie.models.model import Client
+from autonomie.models.model import Company
 from autonomie.models.model import Project
 from autonomie.models.model import ManualInvoice
 from autonomie.models.model import InvoiceLine
 from autonomie.models.model import format_to_taskdate
-from autonomie.views.forms.estimation import InvoiceSchema
-from autonomie.views.forms.estimation import get_invoice_appstruct
-from autonomie.views.forms.estimation import get_invoice_dbdatas
-from autonomie.views.forms.estimation import TaskComputing
+from autonomie.views.forms.task import InvoiceSchema
+from autonomie.views.forms.task import get_invoice_appstruct
+from autonomie.views.forms.task import get_invoice_dbdatas
+from autonomie.views.forms.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
@@ -77,16 +81,25 @@ class CompanyInvoicesView(ListView):
     """
         Treasury and invoice view
     """
-    columns = ('coop_invoice_taskDate', 'coop_invoice_number', 'coop_Client_name')
-    default_sort = 'coop_task_taskDate'
+    columns = dict(taskDate=Invoice.taskDate,
+                   number=Invoice.number,
+                   client=Client.name,
+                   company=Company.name)
+    default_sort = "taskDate"
     default_direction = 'desc'
+
+    @view_config(route_name="invoices",
+                renderer="invoices.mako")
     @view_config(route_name='company_invoices',
                  renderer='company_invoices.mako')
     def company_invoices(self):
         """
             List invoices for the given company
         """
-        company = self.request.context
+        if self.request.context.__name__ == 'company':
+            company = self.request.context
+        else:
+            company = None
         current_year = datetime.date.today().year
         log.debug("Getting invoices")
         search, sort, direction, current_page, items_per_page = \
@@ -111,7 +124,9 @@ class CompanyInvoicesView(ListView):
             inv, man_inv = self._filter_by_status(inv, man_inv, paid)
             if year:
                 inv, man_inv = self._filter_by_date(inv, man_inv, year)
-        inv = inv.order_by(sort + " " + direction).all()
+        inv = self._sort(inv, sort, direction)
+        inv = inv.all()
+#        inv = inv.order_by(sort + " " + direction).all()
         invoices = self._wrap_for_computing(inv, man_inv)
         records = self._get_pagination(invoices, current_page, items_per_page)
         return dict(title=u"Factures",
@@ -123,7 +138,8 @@ class CompanyInvoicesView(ListView):
                     manual_invoices=man_inv,
                     years=years)
 
-    def _get_invoices(self, company):
+
+    def _get_invoices(self, company=None):
         """
             request filter invoices by clients
         """
@@ -259,7 +275,7 @@ class InvoiceView(TaskView, ListView):
                                        for line in self.task_lines],
                 }
 
-    @view_config(route_name="invoices", renderer='tasks/form.mako')
+    @view_config(route_name="company_invoices", renderer='tasks/form.mako')
     @view_config(route_name='invoice', renderer='tasks/form.mako')
     def invoice_form(self):
         """

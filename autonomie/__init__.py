@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 19 juin 2012 20:03:07 CEST
+# * Last Modified : mar. 19 juin 2012 23:05:36 CEST
 #
 # * Project : autonomie
 #
@@ -16,6 +16,7 @@
 import locale
 from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
+from pyramid_beaker import set_cache_regions_from_settings
 from sqlalchemy import engine_from_config, create_engine
 
 from pyramid.authentication import SessionAuthenticationPolicy
@@ -42,6 +43,7 @@ def main(global_config, **settings):
     BaseDBFactory.dbsession = dbsession
 
     session_factory = session_factory_from_settings(settings)
+    set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
     acl_policy = ACLAuthorizationPolicy()
 

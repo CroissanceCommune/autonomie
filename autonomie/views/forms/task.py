@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# * File Name :
+# * File Name : task.py
 #
 # * Copyright (C) 2010 Gaston TJEBBES <g.t@majerti.fr>
 # * Company : Majerti ( http://www.majerti.fr )
@@ -13,7 +13,7 @@
 # * Project :
 #
 """
-    Estimation form schema
+    Task form schemas (estimation, invoice ...)
     Note : since deform doesn't fit our form needs
             (estimation form is complicated and its structure
              is mixing many sqla tables)

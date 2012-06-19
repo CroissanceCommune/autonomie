@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 12 juin 2012 18:18:32 CEST
+# * Last Modified : mar. 19 juin 2012 22:49:39 CEST
 #
 # * Project : autonomie
 #
@@ -69,9 +69,13 @@ def format_to_taskdate(value):
     if value is None:
         return None
     elif isinstance(value, datetime.date):
+        if value.year < 1900:
+            value.year = 1901
         return int(value.strftime("%Y%m%d"))
     else:
         return int(value)
+
+DEFAULT_DATETIME = datetime.date(2000, 1, 1)
 
 def format_from_taskdate(value):
     """
@@ -79,14 +83,27 @@ def format_from_taskdate(value):
     """
     if value:
         value = str(value)
-        if len(value) == 8:
-            return datetime.date(int(value[0:4]),
-                                 int(value[4:6]),
-                                int(value[6:8]))
-        else:
-            return ""
+        try:
+            year = int(value[0:4])
+            assert year > 1910
+        except:
+            year = 2000
+        try:
+            month = int(value[4:6])
+            assert month in range(1,12)
+        except:
+            month = 1
+        try:
+            day = int(value[6:8])
+            assert day in range(1,31)
+        except:
+            day = 1
+        try:
+            return datetime.date(year, month, day)
+        except:
+            return datetime.date(year, 1, 1)
     else:
-        return ""
+        return DEFAULT_DATETIME
 
 class CustomDateType2(TypeDecorator):
     """
@@ -133,13 +150,22 @@ class CustomFileType(TypeDecorator):
                         uid=self.prefix)
 
 class CustomInteger(TypeDecorator):
+    """
+        Custom integer, allow long to int automatic conversion
+    """
     impl = Integer_type
     def process_bind_param(self, value, dialect):
+        """
+            On insertion
+        """
         if isinstance(value, long):
             value = int(value)
         return value
 
     def process_result_value(self, value, dialect):
+        """
+            On query
+        """
         if isinstance(value, long):
             value = int(value)
         return value
@@ -234,6 +260,14 @@ class Company(DBBASE):
             Allows company id access through request's context
         """
         return self.id
+
+    @classmethod
+    def query(class_, dbsession, keys=None):
+        if keys:
+            return dbsession.query(*keys)
+        else:
+            return dbsession.query(Company).order_by(Company.name)
+
 
 class User(DBBASE):
     """
@@ -483,7 +517,19 @@ document."
             assert False
         return status
 
+    def get_company(self):
+        """
+            Return the company owning this task
+        """
+        if self.project:
+            return self.project.company
+        else:
+            return None
+
     def get_company_id(self):
+        """
+            Return the id of the company owning this task
+        """
         return self.project.company.id
 
 class Estimation(Task):
@@ -626,7 +672,6 @@ class Invoice(Task):
             return u"par virement"
         else:
             return u"mode paiement inconnu"
-
 
 class EstimationLine(DBBASE):
     """
@@ -1001,6 +1046,8 @@ class ManualInvoice(DBBASE):
     paymentMode = Column("paiement_comment", String(255))
     statusDate = Column("paiement_date", Date())
     payment_ok = Column("paiement_ok", Integer)
+    taskDate = Column("date_emission", Date(),
+                                default=datetime.datetime.now)
 
     def is_paid(self):
         """
@@ -1012,9 +1059,9 @@ class ManualInvoice(DBBASE):
         """
             Return the payment mode string
         """
-        if self.paymentMode == 'chèque':
+        if self.paymentMode == u'chèque':
             return u"par chèque"
-        elif self.paymentMode == 'virement':
+        elif self.paymentMode == u'virement':
             return u"par virement"
         else:
             return u""
@@ -1037,6 +1084,12 @@ class ManualInvoice(DBBASE):
             return None
         """
         return None
+
+    def get_company(self):
+        """
+            return the company
+        """
+        return self.company
 
 class OperationComptable(DBBASE):
     """
@@ -1072,3 +1125,64 @@ class OperationComptable(DBBASE):
     label = Column("libelle", String, default="")
     year = Column("annee", BigInteger)
     amount = Column("montant", Numeric)
+
+class CancelInvoice(Task):
+    """
+       `IDTask` int(11) NOT NULL,
+       `sequenceNumber` int(11) NOT NULL,
+       `number` varchar(100) NOT NULL,
+       `tva` int(11) NOT NULL DEFAULT '196',
+       `reimbursementConditions` text,
+       `officialNumber` int(11) DEFAULT NULL,
+       `paymentMode` varchar(10) DEFAULT NULL,
+       `displayedUnits` tinyint(4) NOT NULL DEFAULT '0',
+       `expenses` int(11) NOT NULL DEFAULT '0',
+       `IDProject` int(11) NOT NULL,
+       `IDInvoice` int(11) DEFAULT '0',
+       `invoiceDate` int(11) DEFAULT '0',
+       `invoiceNumber` varchar(100) DEFAULT NULL,
+       PRIMARY KEY (`IDTask`),
+       KEY `IDProject` (`IDProject`),
+       KEY `IDEstimation` (`IDEstimation`)
+    """
+    __tablename__ = 'coop_cancel_invoice'
+    IDTask = Column(Integer, ForeignKey('coop_task.IDTask'), primary_key=True)
+
+    IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'))
+    IDProject = Column(Integer, ForeignKey('coop_project.IDProject'))
+    sequenceNumber = Column(Integer)
+    number = Column(String(100))
+    tva = Column(Integer, default=1960)
+    reimbursementConditions = Column(String(255), default=None)
+    officialNumber = Column(Integer, default=None)
+    paymentMode = Column(String, default=None)
+    displayedUnits = Column(Integer, default=0)
+    expenses = Column(Integer, default=0)
+
+    project = relationship("Project", backref=backref('cancelinvoices',
+                                            order_by='CancelInvoice.taskDate')
+                            )
+    phase = relationship("Phase",
+                          backref=backref("cancelinvoices",
+                                          order_by='CancelInvoice.taskDate')
+                          )
+    invoice = relationship("Invoice",
+                      backref="cancelinvoice",
+                      primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask",
+                                )
+    def is_paid(self):
+        """
+            Return True if the invoice is paid
+        """
+        return self.CAEStatus == 'paid'
+
+    def get_paymentmode_str(self):
+        """
+            Return a user-friendly string describing the payment Mode
+        """
+        if self.paymentMode == 'CHEQUE':
+            return u"par chèque"
+        elif self.paymentMode == 'VIREMENT':
+            return u"par virement"
+        else:
+            return u"mode paiement inconnu"

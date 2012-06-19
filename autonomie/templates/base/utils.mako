@@ -89,7 +89,7 @@ path = request.current_route_path(_query=get_args)
         ${data.replace(u'\n', u'<br />')|n}
     %endif
 </%def>
-<%def name="format_client(client, company)">
+<%def name="format_client(client)">
     <%doc>
         Render a client
     </%doc>
@@ -100,7 +100,7 @@ path = request.current_route_path(_query=get_args)
         </a>
     %endif
 </%def>
-<%def name="format_project(project, company)">
+<%def name="format_project(project)">
     <%doc>
         Render a project
     </%doc>

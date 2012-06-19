@@ -140,7 +140,8 @@ class CompanyInvoicesView(ListView):
         return years
 
     @view_config(route_name="invoices",
-                renderer="invoices.mako")
+                renderer="invoices.mako",
+                permission="manage")
     def invoices(self):
         """
             Return all invoices

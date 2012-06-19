@@ -5,7 +5,6 @@
 <%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_client" />
-<%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="format_amount" />
 <%block name='actionmenu'>
 <style>
@@ -42,6 +41,7 @@
 <div class='row'>
     <div class='span7'>
         <form class='navbar-form form-search form-horizontal' id='search_form' method='GET'>
+            <div style="padding-bottom:3px">
             <select id='client-select' name='client' data-placeholder="Sélectionner un client">
                 <option value=''></option>
                 %for client in company.clients:
@@ -70,13 +70,22 @@
                     %endif
                 %endfor
             </select>
-            <div class='control-group'>
-                <label class='control-label' for='search'>Identifiant du document</label>
-                <div class='controls'>
-                    <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}" />
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-                </div>
+            <select class='span1' name='nb'>
+                % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'1000'),):
+                    <% nb_item = request.GET.get("nb") %>
+                    % if nb_item == value or request.cookies.get('items_per_page') == value:
+                        <option value="${value}" selected='true'>${text}</option>
+                    %else:
+                        <option value="${value}">${text}</option>
+                    %endif
+                % endfor
+            </select>
             </div>
+            <div class='floatted' style="padding-right:3px">
+                    <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}" />
+                    <span class="help-block">Identifiant du document</span>
+            </div>
+            <button type="submit" class="btn btn-primary">Filtrer</button>
         </form>
     </div>
     <div class='span4'>
@@ -101,16 +110,24 @@
 <table class="table table-condensed table-bordered">
     <thead>
         <th>Statut</th>
-        <th>Identifiant</th>
-        <th>${sortable(u"Émise le", 'coop_task_taskDate')}</th>
-        <th>${sortable(u"Nom", 'coop_task_number')}</th>
-        <th>${sortable(u"Client", 'coop_customer_name')}</th>
+        <th>${sortable(u"Identifiant", "officialNumber")}</th>
+        <th>${sortable(u"Émise le", 'taskDate')}</th>
+        <th>${sortable(u"Nom", 'number')}</th>
+        <th>${sortable(u"Client", 'client')}</th>
         <th>Montant HT</th>
         <th>TVA</th>
         <th>Information de paiement</th>
         <th>PDF</th>
     </thead>
     <tbody>
+        <% totalht = sum([invoice.compute_totalht() for invoice in invoices]) %>
+        <% totaltva = sum([invoice.compute_tva() for invoice in invoices]) %>
+        <tr>
+            <td colspan='5'><strong>Total</strong></td>
+            <td><strong>${format_amount(totalht)} €</strong></td>
+            <td><strong>${format_amount(totaltva)} €</strong></td>
+            <td colspan='3'></td>
+        </tr>
         % if invoices:
             % for invoice in invoices:
                 %if invoice.model.is_tolate():
@@ -145,7 +162,7 @@
                         </blockquote>
                     </td>
                     <td class='invoice_company_name'>
-                        ${format_client(invoice.get_client(), company)}
+                        ${format_client(invoice.get_client())}
                     </td>
                     <td>
                         <strong>
@@ -182,8 +199,8 @@
     <tfoot>
         <tr>
             <td colspan='5'><strong>Total</strong></td>
-            <td><strong>${format_amount(sum([invoice.compute_totalht() for invoice in invoices]))} €</strong></td>
-            <td><strong>${format_amount(sum([invoice.compute_tva() for invoice in invoices]))} €</strong></td>
+            <td><strong>${format_amount(totalht)} €</strong></td>
+            <td><strong>${format_amount(totaltva)} €</strong></td>
             <td colspan='3'></td>
         </tr>
     </tfoot>

@@ -18,6 +18,8 @@
 import logging
 from functools import partial
 
+from sqlalchemy import desc, asc
+
 from webhelpers import paginate
 from deform import Button
 from pyramid.httpexceptions import HTTPForbidden
@@ -64,7 +66,7 @@ class ListView(BaseView):
     """
         Base view object for listing elements
     """
-    columns = ()
+    columns = dict()
     default_sort = 'name'
     default_direction = 'asc'
     def _get_pagination_args(self):
@@ -72,11 +74,16 @@ class ListView(BaseView):
             Returns arguments for element listing
         """
         search = self.request.params.get("search", "")
-        sort = self.request.params.get('sort', self.default_sort)
-        if sort not in self.columns:
-            sort = self.default_sort
+        sort_key = self.request.params.get('sort', self.default_sort)
+        if sort_key not in self.columns:
+            sort_key = self.default_sort
+        if isinstance(self.columns, dict):
+            sort = self.columns[sort_key]
+        else:
+            sort = sort_key
 
-        direction = self.request.params.get("direction", self.default_direction)
+        direction = self.request.params.get("direction",
+                                    self.default_direction)
         if direction not in ['asc', 'desc']:
             direction = self.default_direction
 
@@ -98,6 +105,15 @@ class ListView(BaseView):
                              url=page_url,
                              items_per_page=items_per_page)
 
+    def _sort(self, query, column, direction):
+        """
+            Return a sorted query
+        """
+        if direction == 'asc':
+            func = asc
+        else:
+            func = desc
+        return query.order_by(func(column))
 
 class TaskView(BaseView):
     """

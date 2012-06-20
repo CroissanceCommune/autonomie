@@ -23,20 +23,23 @@ from deform import Form
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
+from pyramid.security import has_permission
 
 from autonomie.models.model import Estimation
 from autonomie.models.model import Invoice
 from autonomie.models.model import InvoiceLine
 from autonomie.models.model import EstimationLine
 from autonomie.models.model import PaymentLine
-from autonomie.views.forms.estimation import EstimationSchema
-from autonomie.views.forms.estimation import get_estimation_appstruct
-from autonomie.views.forms.estimation import get_estimation_dbdatas
-from autonomie.views.forms.estimation import TaskComputing
+from autonomie.views.forms.task import EstimationSchema
+from autonomie.views.forms.task import get_estimation_appstruct
+from autonomie.views.forms.task import get_estimation_dbdatas
+from autonomie.views.forms.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.exception import Forbidden
+from autonomie.utils.widgets import ItemActionLink
+from autonomie.utils.widgets import ViewLink
 
 from .base import TaskView
 
@@ -81,14 +84,20 @@ class EstimationView(TaskView):
             Return the estimation edit view
         """
         log.debug("#  Estimation Form #")
-        if not self.task.is_editable():
+        # If the task is not "editable" anymore and the current user doesn't
+        # have manage rights, then he's redirected to the html view
+        if not self.task.is_editable() \
+            and not has_permission('manage', self.task, self.request):
             return self.redirect_to_view_only()
+
         if self.taskid:
             title = self.edit_title.format(task=self.task)
             edit = True
+            valid_msg = u"Le devis a bien été édité."
         else:
             title = self.add_title
             edit = False
+            valid_msg = u"Le devis a bien été ajouté."
 
         dbdatas = self.get_dbdatas_as_dict()
         # Get colander's schema compatible datas
@@ -98,7 +107,8 @@ class EstimationView(TaskView):
                                 phases=self.get_phases_choice(),
                                 tvas=self.get_tvas()
                             )
-        form = Form(schema, buttons=self.get_buttons())
+        form = Form(schema, buttons=self.get_buttons(edit))
+        form.widget.template = 'autonomie:deform_templates/form.pt'
 
         if 'submit' in self.request.params:
             log.debug("   + Values have been submitted")
@@ -115,7 +125,8 @@ class EstimationView(TaskView):
                     if not edit:
                         self.task.sequenceNumber = self.get_sequencenumber()
                         self.task.name = self.get_taskname()
-                        self.task.number = self.get_tasknumber(self.task.taskDate)
+                        self.task.number = self.get_tasknumber(
+                                                            self.task.taskDate)
                     self.task.statusPerson = self.user.id
                     self.task.CAEStatus = self.get_taskstatus()
                     self.task.project = self.project
@@ -124,6 +135,7 @@ class EstimationView(TaskView):
 
                     self.dbsession.merge(self.task)
                     self.dbsession.flush()
+                    self.request.session.flash(valid_msg, queue="main")
                     # Redirecting to the project page
                     return self.project_view_redirect()
                 except Forbidden, e:
@@ -131,10 +143,12 @@ class EstimationView(TaskView):
                     html_form = form.render(appstruct)
         else:
             html_form = form.render(appstruct)
+        self._set_actionmenu()
         return dict(title=title,
                     client=self.project.client,
                     company=self.company,
-                    html_form = html_form
+                    html_form = html_form,
+                    action_menu=self.actionmenu
                     )
     def remove_lines_from_session(self):
         """
@@ -194,12 +208,52 @@ class EstimationView(TaskView):
             Returns a page displaying an html rendering of the given task
         """
         title = u"Devis numéro : {0}".format(self.task.number)
+        self._set_actionmenu()
+        self.actionmenu.add(
+                ViewLink(u"Télécharger la version PDF", "view",
+                    path="estimation",
+                    id=self.task.id,
+                    _query=dict(view="pdf"))
+                )
+        if self.task.CAEStatus in ('sent', 'valid'):
+            self.actionmenu.add(
+                ViewLink(u"Générer les factures", "edit",
+                    title="Générer les factures correspondantes",
+                    path="estimation",
+                    id=self.task.id,
+                    _query=dict(action="geninv"))
+                )
+        if self.task.CAEStatus in ('sent', 'valid', 'wait'):
+            self.actionmenu.add(
+                ViewLink(u"Annuler/Indiquer sans suite", "edit",
+          js=u"return confirm('Êtes-vous sûr de vouloir annuler ce devis ?');",
+                    path="estimation",
+                    id=self.task.id,
+                    _query=dict(action="aboest"))
+                )
         return dict(
                     title=title,
                     task=self.task,
-                    company=self.company,
-                    html_datas=self._html()
+                    html_datas=self._html(),
+                    action_menu=self.actionmenu
                     )
+
+    def _set_actionmenu(self):
+        """
+            Build the action menu for the estimation views
+        """
+        self.actionmenu.add(
+                ViewLink(u"Revenir au projet", "edit",
+                    path="company_project", id=self.project.id))
+        if self.task.CAEStatus in ('wait',):
+            self.actionmenu.add(
+                ViewLink(u"Valider ce devis", "manage",
+                         path="estimation", id=self.task.id,
+                         _query=dict(action="valid")))
+            self.actionmenu.add(
+                ViewLink(u"Refuser ce devis", "manage",
+                         path="estimation", id=self.task.id,
+                         _query=dict(action="invalid")))
 
     @view_config(route_name='estimation',
                 request_param='view=pdf',

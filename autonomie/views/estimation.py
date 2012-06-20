@@ -75,6 +75,17 @@ class EstimationView(TaskView):
                 'payment_lines':[line.appstruct()
                                         for line in self.payment_lines]}
 
+    def is_editable(self):
+        """
+            Return True if the current task can be edited by the current user
+        """
+        if self.task.is_editable():
+            return True
+        if has_permission('manage', self.request.context, self.request):
+            if self.task.is_waiting():
+                return True
+        return False
+
     @view_config(route_name="estimations", renderer='tasks/form.mako',
                 permission='edit')
     @view_config(route_name='estimation', renderer='tasks/form.mako',
@@ -86,8 +97,7 @@ class EstimationView(TaskView):
         log.debug("#  Estimation Form #")
         # If the task is not "editable" anymore and the current user doesn't
         # have manage rights, then he's redirected to the html view
-        if not self.task.is_editable() \
-            and not has_permission('manage', self.task, self.request):
+        if not self.is_editable():
             return self.redirect_to_view_only()
 
         if self.taskid:

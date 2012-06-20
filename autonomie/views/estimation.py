@@ -216,12 +216,16 @@ class EstimationView(TaskView):
         """
             Returns a page displaying an html rendering of the given task
         """
+        if self.is_editable():
+            return HTTPFound(self.request.route_path('invoice',
+                                                id=self.task.id))
         title = u"Devis numéro : {0}".format(self.task.number)
         return dict(
                     title=title,
                     task=self.task,
                     html_datas=self._html(),
-                    action_menu=self.actionmenu
+                    action_menu=self.actionmenu,
+                    submit_buttons=self.get_buttons()
                     )
 
     @view_config(route_name='estimation',

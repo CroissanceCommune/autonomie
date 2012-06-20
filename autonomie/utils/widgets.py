@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : ven. 15 juin 2012 14:04:23 CEST
+# * Last Modified : mer. 20 juin 2012 18:47:39 CEST
 #
 # * Project : autonomie
 #
@@ -69,16 +69,19 @@ class Widget(object):
         Base widget
     """
     template = None
+    request = None
     def render(self, request):
         """
             return an html output of the widget
         """
+        request = self.request or request
         return render_html( request, self.template, {'elem':self})
 
 class PermWidget(object):
     """
         widget with permission
     """
+    perm = None
     def set_special_perm_func(self, func):
         """
             Allows to insert a specific permission function
@@ -90,7 +93,6 @@ class PermWidget(object):
             Return True if the user has the right to access the destination
         """
         right = has_permission(self.perm, context, request)
-
         if right and hasattr(self, "special_perm_func"):
             return self.special_perm_func(context, request)
         else:
@@ -136,7 +138,7 @@ class ViewLink(Link):
     template = "base/button.mako"
 
     def __init__(self, label, perm, path=None, css="", js=None, title=None,
-            icon="", **kw):
+            icon="", request=None, **kw):
         self.label = label
         self.perm = perm
         self.path = path
@@ -148,11 +150,13 @@ class ViewLink(Link):
         self.url_kw = kw
         self.css = css
         self.icon = icon
+        self.request = request
 
     def url(self, request):
         """
             Returns the button's url
         """
+        request = self.request or request
         if self.path:
             return request.route_path(self.path, **self.url_kw)
         else:
@@ -168,9 +172,7 @@ class ViewLink(Link):
         """
             Return True if the button is active
         """
-        log.debug(request.current_route_path())
-        log.debug(request.current_route_url())
-        log.debug(request.path_qs)
+        request = self.request or request
         cur_path = request.current_route_path()
         if request.GET.has_key('action'):
             cur_path += "?action=%s" % request.GET['action']
@@ -192,6 +194,33 @@ class ItemActionLink(ViewLink):
     def render(self, request, item):
         return render_html( request, self.template, {'elem':self, 'item':item})
 
+class Submit(Widget, PermWidget):
+    """
+        Submit Link used to be included in a form
+        It's componed by :
+        @label : the label of the button
+        @perm : permission needed to display this button
+        @value: value of the button
+        @name : name of the button (the couple name=value is submitted)
+        @title: title used onmouseover
+        @css: css class string
+        @_type: type of the button
+    """
+    template = "base/submit.mako"
+    def __init__(self, label, perm, value, name="submit", title=None,
+            css="btn btn-primary", js=None, icon=None,
+            type_='submit', request=None):
+        self.label = label
+        self.perm = perm
+        self.value = value
+        self.name = name
+        self.title = title or self.label
+        self.css = css
+        self.js = js
+        self.icon = icon
+        self.type_ = type_
+        if request:
+            self.request = request
 
 class ToggleLink(Link):
     template = "base/togglelink.mako"

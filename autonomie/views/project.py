@@ -110,7 +110,7 @@ class ProjectView(ListView):
                 show_archive = HTML.a(u"Afficher les projets actifs",
                     href=self.request.current_route_path(
                             _query=dict(archived="0")))
-            self.actionmenu.add(StaticWidget(show_archive))
+            self.actionmenu.add(StaticWidget(show_archive, "view"))
             self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
 
     @view_config(route_name='company_projects',

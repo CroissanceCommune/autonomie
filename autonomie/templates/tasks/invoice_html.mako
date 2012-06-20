@@ -5,6 +5,7 @@
 <%block name='content'>
 <div class='container' style='overflow:hidden'>
 <div>
+    <span class="label label-important">></span>
     %if task.statusPersonAccount  is not UNDEFINED and task.statusPersonAccount:
         <strong>${task.get_status_str().format(genre='', firstname=task.statusPersonAccount.firstname, lastname=task.statusPersonAccount.lastname)}</strong>
         <br />
@@ -18,10 +19,6 @@
         Vous ne pouvez plus modifier ce document car il est en attente de validation.
     %endif
         <br />
-    <a class='btn btn-primary' href='${request.route_path("invoice", id=task.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
-        Télécharger la version PDF
-    </a>
-    <br />
 </div>
 
         <div style='border:1px solid #888'>

@@ -141,6 +141,7 @@ class TaskView(BaseView):
             self.taskid = self.task.IDTask
             self.project = self.task.project
             self.company = self.project.company
+        self._set_actionmenu()
         self.set_lines()
 
     def get_task(self):
@@ -227,7 +228,7 @@ class TaskView(BaseView):
         tvas = Tva.query(self.dbsession)
         return [(tva.value, tva.name)for tva in tvas]
 
-    def _draft_btns(self, edit=True):
+    def _draft_btns(self):
         """
             Return buttons used on a draft document
         """
@@ -320,7 +321,19 @@ class TaskView(BaseView):
                           id=self.project.id)
         return [cancel]
 
-    def get_buttons(self, edit=True):
+    def _pdf_btn(self):
+        """
+            Return a PDF view btn
+        """
+        if self.task.id:
+            pdf_btn = ViewLink(u"Voir le PDF", "view",
+               path="invoice", css="btn btn-primary", request=self.request,
+               id=self.task.id, _query=dict(view="pdf"))
+            return [pdf_btn]
+        else:
+            return []
+
+    def get_buttons(self):
         """
             returns submit buttons for estimation/invoice form
         """
@@ -332,28 +345,16 @@ class TaskView(BaseView):
         btns.extend(self._paid_btn())
         btns.extend(self._validate_btns())
         btns.extend(self._cancel_btn())
+        btns.extend(self._pdf_btn())
         return btns
-#        manage = has_permission('manage', self.task, self.request)
-#        if self.task.is_draft() or self.task.is_invalid():
-#            buttons.append(
-#
-#        if has_permission('manage', self.task, self.request):
-#            # We are a manager
-#
-#        else:
-#            draft = Button(name='submit',
-#                    title=u"Enregistrer en tant que brouillon",
-#                    type='submit',
-#                    value="draft")
-#            askvalidation = Button(name='submit',
-#                            title=u"Demander à la CAE de valider ce document",
-#                            type='submit',
-#                            value="wait")
-#            cancel = Button(name='cancel',
-#                        title=u"Annuler",
-#                        type='reset',
-#                        value=u"Annuler")
-#        return (draft, askvalidation, cancel,)
+
+    def _set_actionmenu(self):
+        """
+            Build the action menu for the task views
+        """
+        self.actionmenu.add(
+                ViewLink(u"Revenir au projet", "edit",
+                    path="company_project", id=self.project.id))
 
     def project_view_redirect(self):
         """

@@ -22,6 +22,7 @@ from beaker.cache import cache_region
 from deform import ValidationFailure
 from deform import Form
 from pyramid.view import view_config
+from pyramid.security import has_permission
 
 from autonomie.models.model import Invoice
 from autonomie.models.model import Client
@@ -345,6 +346,17 @@ class InvoiceView(TaskView, ListView):
                                        for line in self.task_lines],
                 }
 
+    def is_editable(self):
+        """
+            Return True if the current task can be edited by the current user
+        """
+        if self.task.is_editable():
+            return True
+        if has_permission('manage', self.request.context, self.request):
+            if self.task.is_waiting():
+                return True
+        return False
+
     @view_config(route_name="project_invoices", renderer='tasks/form.mako',
             permission='edit')
     @view_config(route_name='invoice', renderer='tasks/form.mako',
@@ -354,7 +366,7 @@ class InvoiceView(TaskView, ListView):
             Return the invoice edit view
         """
         log.debug("#  Invoice Form #")
-        if not self.task.is_editable():
+        if not self.is_editable():
             return self.redirect_to_view_only()
         if self.taskid:
             title = self.edit_title.format(task=self.task)
@@ -373,6 +385,7 @@ class InvoiceView(TaskView, ListView):
                                 tasktype='invoice'
                             )
         form = Form(schema, buttons=self.get_buttons())
+        form.widget.template = "autonomie:deform_templates/form.pt"
 
         if 'submit' in self.request.params:
             log.debug("   + Values have been submitted")
@@ -405,7 +418,8 @@ class InvoiceView(TaskView, ListView):
         return dict(title=title,
                     client=self.project.client,
                     company=self.company,
-                    html_form = html_form
+                    html_form = html_form,
+                    action_menu=self.actionmenu
                     )
     def get_sequencenumber(self):
         """
@@ -442,7 +456,7 @@ class InvoiceView(TaskView, ListView):
         invoice.IDEmployee = self.user.id
         return invoice
 
-    def html(self):
+    def _html(self):
         """
             Returns an html version of the current invoice
         """
@@ -461,7 +475,7 @@ class InvoiceView(TaskView, ListView):
                 renderer='tasks/invoice_html.mako',
                 permission='view',
                 request_param='view=html')
-    def html_invoice(self):
+    def html(self):
         """
             Returns a page displaying an html rendering of the given task
         """
@@ -469,8 +483,8 @@ class InvoiceView(TaskView, ListView):
         return dict(
                     title=title,
                     task=self.task,
-                    company=self.company,
-                    html_datas=self.html()
+                    html_datas=self._html(),
+                    action_menu=self.actionmenu
                     )
 
     @view_config(route_name='invoice',
@@ -482,6 +496,6 @@ class InvoiceView(TaskView, ListView):
             Returns a page displaying an html rendering of the given task
         """
         filename = "{0}.pdf".format(self.task.number)
-        write_pdf(self.request, filename, self.html())
+        write_pdf(self.request, filename, self._html())
         return self.request.response
 

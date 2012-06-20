@@ -144,6 +144,9 @@ class TaskView(BaseView):
         self._set_actionmenu()
         self.set_lines()
 
+    def is_invoice(self):
+        return hasattr(self.task, 'IDEstimation')
+
     def get_task(self):
         """
             should return the current task
@@ -268,8 +271,7 @@ class TaskView(BaseView):
         """
         # This button is displayed only for invoices (which have a
         # IDEstimation attr) and if the doc is valid
-        if self.task.has_been_validated() and \
-                hasattr(self.task, "IDEstimation"):
+        if self.task.has_been_validated() and self.is_invoice():
             client_btn = Submit(u"Client relancé",
                         "edit",
                         title=u"Indiquer que le client a été relancé",
@@ -341,7 +343,7 @@ class TaskView(BaseView):
         """
         if self.task.id:
             pdf_btn = ViewLink(u"Voir le PDF", "view",
-               path="invoice", css="btn btn-primary", request=self.request,
+               path=self.route, css="btn btn-primary", request=self.request,
                id=self.task.id, _query=dict(view="pdf"))
             return [pdf_btn]
         else:

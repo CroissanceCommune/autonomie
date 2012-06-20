@@ -23,6 +23,15 @@
 </div>
 
         <div style='border:1px solid #888'>
+<form id="deform" class="deform form-horizontal deform"
+    accept-charset="utf-8"
+    enctype="multipart/form-data"
+    method="POST"
+    action="${request.route_path('invoice', id=task.id, _query=dict(action='status'))}">
+    % for button in submit_buttons:
+        ${button.render(request)|n}
+    % endfor
+</form>
             ${html_datas|n}
         </div>
 </div>

@@ -32,6 +32,8 @@ from autonomie.models.model import Tva
 from autonomie.models.model import User
 from autonomie.utils.views import get_page_url
 from autonomie.utils.widgets import ActionMenu
+from autonomie.utils.widgets import Submit
+from autonomie.utils.widgets import ViewLink
 
 log = logging.getLogger(__file__)
 
@@ -225,23 +227,133 @@ class TaskView(BaseView):
         tvas = Tva.query(self.dbsession)
         return [(tva.value, tva.name)for tva in tvas]
 
-    def get_buttons(self):
+    def _draft_btns(self, edit=True):
+        """
+            Return buttons used on a draft document
+        """
+        if self.task.is_draft():
+            draft_save = Submit(u"Enregistrer comme brouillon",
+                                "edit",
+                                value="draft",
+                                request=self.request,
+                                )
+            save_and_valid = Submit(u"Enregistrer et demander la validation",
+                               "edit",
+                               value="valid",
+                               request=self.request
+                               )
+            return [draft_save, save_and_valid]
+        else:
+            return []
+
+    def _sent_to_client_btn(self):
+        """
+            Return a button to change the status to "sent"
+        """
+        if self.task.is_valid():
+            sent_btn = Submit(u"Envoyé au client",
+                               "edit",
+                               value="sent",
+                               request=self.request
+                               )
+            return [sent_btn]
+        else:
+            return []
+
+    def _call_client_btn(self):
+        """
+            Return a button to change the status to "client has been called"
+        """
+        # This button is displayed only for invoices (which have a
+        # IDEstimation attr) and if the doc is valid
+        if self.task.has_been_validated() and \
+                hasattr(self.task, "IDEstimation"):
+            client_btn = Submit(u"Client relancé",
+                                "manage",
+                                value="recinv",
+                                request=self.request)
+            return [client_btn]
+        else:
+            return []
+
+    def _paid_btn(self):
+        """
+            Return a button to set a paid btn and a select to choose
+            the payment mode
+        """
+        if self.task.has_been_validated() and \
+                hasattr(self.task, "IDEstimation"):
+            paid_btn = Submit(u"Facture payée",
+                            "manage",
+                            value="paid",
+                            request=self.request)
+            return [paid_btn]
+        else:
+            return []
+
+    def _validate_btns(self):
+        """
+            Return the buttons to handle validation
+        """
+        if self.task.is_waiting():
+            valid_btn = Submit(u"Valider le document",
+                        "manage",
+                        value="valid",
+                        request=self.request)
+            invalid_btn = Submit(u"Document invalide",
+                        "manage",
+                        value="invalid",
+                        request=self.request)
+            return [valid_btn, invalid_btn]
+        else:
+            return []
+
+    def _cancel_btn(self):
+        """
+            Return a cancel btn returning the user to the project view
+        """
+        cancel = ViewLink(u"Annuler",
+                          "view",
+                          path="company_project",
+                          css="btn btn-primary",
+                          request=self.request,
+                          id=self.project.id)
+        return [cancel]
+
+    def get_buttons(self, edit=True):
         """
             returns submit buttons for estimation/invoice form
         """
-        draft = Button(name='submit',
-                    title=u"Enregistrer en tant que brouillon",
-                    type='submit',
-                    value="draft")
-        askvalidation = Button(name='submit',
-                            title=u"Demander à la CAE de valider ce document",
-                            type='submit',
-                            value="wait")
-        cancel = Button(name='cancel',
-                        title=u"Annuler",
-                        type='reset',
-                        value=u"Annuler")
-        return (draft, askvalidation, cancel,)
+        print "Status : %s" % self.task.CAEStatus
+        btns = []
+        btns.extend(self._draft_btns())
+        btns.extend(self._sent_to_client_btn())
+        btns.extend(self._call_client_btn())
+        btns.extend(self._paid_btn())
+        btns.extend(self._validate_btns())
+        btns.extend(self._cancel_btn())
+        return btns
+#        manage = has_permission('manage', self.task, self.request)
+#        if self.task.is_draft() or self.task.is_invalid():
+#            buttons.append(
+#
+#        if has_permission('manage', self.task, self.request):
+#            # We are a manager
+#
+#        else:
+#            draft = Button(name='submit',
+#                    title=u"Enregistrer en tant que brouillon",
+#                    type='submit',
+#                    value="draft")
+#            askvalidation = Button(name='submit',
+#                            title=u"Demander à la CAE de valider ce document",
+#                            type='submit',
+#                            value="wait")
+#            cancel = Button(name='cancel',
+#                        title=u"Annuler",
+#                        type='reset',
+#                        value=u"Annuler")
+#        return (draft, askvalidation, cancel,)
 
     def project_view_redirect(self):
         """

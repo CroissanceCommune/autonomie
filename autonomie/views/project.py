@@ -129,8 +129,6 @@ class ProjectView(ListView):
 
         company = self.request.context
 
-    #    toquery = (Project.id, Project.client, Project.name)
-        #TODO : handle join tables to search by client
         query = self._get_projects()
         if company:
             query = self._filter_company(query, company)
@@ -155,6 +153,7 @@ class ProjectView(ListView):
             ret_dict['html_form'] = form.render()
         self._set_actionmenu(company)
         return ret_dict
+
     def _get_projects(self):# company, search, sort, direction, archived):
         """
             query projects against the database
@@ -176,8 +175,6 @@ class ProjectView(ListView):
     def _filter_search(self, query, search):
         return query.filter( or_(Project.name.like(search + "%"),
                         Client.name.like(search +"%")))
-
-        return projects
 
     @view_config(route_name='company_projects',  \
                  renderer='company_project.mako', \
@@ -332,7 +329,7 @@ supprimé".format(project.name) )
             path="estimations", icon=("icon-file", )))
         btns.append(ItemActionLink(u"Facture", "edit", css="btn",
             title=u"Nouvelle facture",
-            path="invoices", icon=("icon-file", )))
+            path="project_invoices", icon=("icon-file", )))
         if self.request.params.get('archived', '0') == '0':
             btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
                                 js=u"return confirm('Êtes-vous sûr \

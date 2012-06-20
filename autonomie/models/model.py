@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 19 juin 2012 22:49:39 CEST
+# * Last Modified : mer. 20 juin 2012 18:23:26 CEST
 #
 # * Project : autonomie
 #
@@ -464,22 +464,44 @@ class Task(DBBASE):
             ("aboest", u"Devis annulé",),
             ("sent", u"Document envoyé",),
             ("paid", u"Paiement reçu",),
+            ("recinv", u"Client relancé",),
             ))
         status_str = statuses.get(self.CAEStatus, u"Statut inconnu").format(
                                                                 genre=genre)
         return status_str + suffix
 
-    def is_editable(self):
+    def is_draft(self):
         """
-            return True if this task is editable for the user
+            Return True if this task is in a draft status (or equivalent)
         """
         return self.CAEStatus in ('draft', 'invalid',)
 
+    def is_editable(self, manage=False):
+        """
+            return True if this task is editable for the user
+        """
+        if manage:
+            return self.CAEStatus in ('draft', 'invalid', 'wait',)
+        else:
+            return self.CAEStatus in ('draft', 'invalid',)
+
     def is_valid(self):
+        """
+            Return True if the task is valid
+        """
+        return self.CAEStatus == 'valid'
+
+    def has_been_validated(self):
         """
             Return True if the task has been validated
         """
-        return self.CAEStatus in ('valid', 'paid', 'geninv', 'sent',)
+        return self.CAEStatus in ('valid', 'paid', 'geninv', 'sent', "recinv",)
+
+    def is_waiting(self):
+        """
+            Return True if the task is in a wait status
+        """
+        return self.CAEStatus == "wait"
 
     @validates('CAEStatus')
     def validate_status(self, key, status):
@@ -505,10 +527,10 @@ document."
             if not actual_status in ('valid', 'sent',):
                 raise Forbidden(message)
         elif status in ('sent',):
-            if not actual_status in ('valid',):
+            if not actual_status in ('valid', "recinv"):
                 raise Forbidden(message)
         elif status in ('paid',):
-            if not actual_status in ('valid', 'sent',):
+            if not actual_status in ('valid', 'sent', "recinv"):
                 raise Forbidden(message)
         elif status in ('aboinv', 'abort',):
             #TODO
@@ -531,6 +553,10 @@ document."
             Return the id of the company owning this task
         """
         return self.project.company.id
+
+    @property
+    def id(self):
+        return self.IDTask
 
 class Estimation(Task):
     """

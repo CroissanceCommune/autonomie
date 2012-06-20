@@ -13,9 +13,9 @@
         <strong>Aucune information d'historique ou de statut n'a pu être retrouvée pour ce devis.</strong>
         <br />
     %endif
-    %if task.CAEStatus in ('sent', 'valid'):
+    %if task.has_been_validated():
         Vous ne pouvez plus modifier ce document car il a déjà été validé.
-    %elif task.CAEStatus in ('wait',):
+    %elif task.is_waiting():
         Vous ne pouvez plus modifier ce document car il est en attente de validation.
     %endif
     <br />

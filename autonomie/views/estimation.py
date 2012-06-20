@@ -107,7 +107,7 @@ class EstimationView(TaskView):
                                 phases=self.get_phases_choice(),
                                 tvas=self.get_tvas()
                             )
-        form = Form(schema, buttons=self.get_buttons(edit))
+        form = Form(schema, buttons=self.get_buttons())
         form.widget.template = 'autonomie:deform_templates/form.pt'
 
         if 'submit' in self.request.params:
@@ -143,7 +143,6 @@ class EstimationView(TaskView):
                     html_form = form.render(appstruct)
         else:
             html_form = form.render(appstruct)
-        self._set_actionmenu()
         return dict(title=title,
                     client=self.project.client,
                     company=self.company,
@@ -208,52 +207,12 @@ class EstimationView(TaskView):
             Returns a page displaying an html rendering of the given task
         """
         title = u"Devis numéro : {0}".format(self.task.number)
-        self._set_actionmenu()
-        self.actionmenu.add(
-                ViewLink(u"Télécharger la version PDF", "view",
-                    path="estimation",
-                    id=self.task.id,
-                    _query=dict(view="pdf"))
-                )
-        if self.task.CAEStatus in ('sent', 'valid'):
-            self.actionmenu.add(
-                ViewLink(u"Générer les factures", "edit",
-                    title="Générer les factures correspondantes",
-                    path="estimation",
-                    id=self.task.id,
-                    _query=dict(action="geninv"))
-                )
-        if self.task.CAEStatus in ('sent', 'valid', 'wait'):
-            self.actionmenu.add(
-                ViewLink(u"Annuler/Indiquer sans suite", "edit",
-          js=u"return confirm('Êtes-vous sûr de vouloir annuler ce devis ?');",
-                    path="estimation",
-                    id=self.task.id,
-                    _query=dict(action="aboest"))
-                )
         return dict(
                     title=title,
                     task=self.task,
                     html_datas=self._html(),
                     action_menu=self.actionmenu
                     )
-
-    def _set_actionmenu(self):
-        """
-            Build the action menu for the estimation views
-        """
-        self.actionmenu.add(
-                ViewLink(u"Revenir au projet", "edit",
-                    path="company_project", id=self.project.id))
-        if self.task.CAEStatus in ('wait',):
-            self.actionmenu.add(
-                ViewLink(u"Valider ce devis", "manage",
-                         path="estimation", id=self.task.id,
-                         _query=dict(action="valid")))
-            self.actionmenu.add(
-                ViewLink(u"Refuser ce devis", "manage",
-                         path="estimation", id=self.task.id,
-                         _query=dict(action="invalid")))
 
     @view_config(route_name='estimation',
                 request_param='view=pdf',

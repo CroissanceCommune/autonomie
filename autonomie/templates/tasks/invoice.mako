@@ -22,7 +22,7 @@
                 size: a4 portrait;
                 margin:1cm;
                 margin-bottom:3.5cm;
-                % if not task.model.is_valid():
+                % if not task.model.has_been_validated() and not task.model.is_paid() and not task.is_cancelled():
                     background-image: url("${request.static_url('autonomie:static/watermark_invoice.jpg', _app_url='')}");
                 % endif
                 @frame footer {

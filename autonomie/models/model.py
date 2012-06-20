@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 20 juin 2012 18:23:26 CEST
+# * Last Modified : jeu. 21 juin 2012 00:43:53 CEST
 #
 # * Project : autonomie
 #
@@ -495,7 +495,7 @@ class Task(DBBASE):
         """
             Return True if the task has been validated
         """
-        return self.CAEStatus in ('valid', 'paid', 'geninv', 'sent', "recinv",)
+        return self.CAEStatus in ('valid', 'geninv', 'sent', "recinv",)
 
     def is_waiting(self):
         """
@@ -508,9 +508,10 @@ class Task(DBBASE):
         """
             validate the caestatus change
         """
-        message = u"Vous n'êtes pas autorisé à assigner ce statut à ce \
+        message = u"Vous n'êtes pas autorisé à assigner ce statut {0}à ce \
 document."
         actual_status = self.CAEStatus
+        message = message.format(status)
         if status in ('draft', 'wait',):
             if not actual_status in (None, 'draft', 'invalid'):
                 raise Forbidden(message)
@@ -518,7 +519,7 @@ document."
             if not actual_status in ('wait',):
                 raise Forbidden(message)
         elif status in ('invalid',):
-            if not actual_status in ('wait', 'valid',):
+            if not actual_status in ('wait', ):
                 raise Forbidden(message)
         elif status in ('aboest',):
             if not actual_status in ('valid', 'sent', 'invalid', 'wait'):
@@ -533,8 +534,12 @@ document."
             if not actual_status in ('valid', 'sent', "recinv"):
                 raise Forbidden(message)
         elif status in ('aboinv', 'abort',):
-            #TODO
-            pass
+            if not actual_status in ('valid', 'sent', "recinv", "invalid", \
+                                                                    "wait"):
+                raise Forbidden(message)
+        elif status in ('recinv',):
+            if not actual_status in ('valid', 'sent', "recinv",):
+                raise Forbidden(message)
         else:
             assert False
         return status
@@ -698,6 +703,15 @@ class Invoice(Task):
             return u"par virement"
         else:
             return u"mode paiement inconnu"
+
+    @validates("paymentMode")
+    def validate_paymentMode(self, key, paymentMode):
+        """
+            Validate the paymentMode
+        """
+        if not paymentMode in ('CHEQUE', 'VIREMENT'):
+            raise Forbidden(u'Mode de paiement inconnu')
+        return paymentMode
 
 class EstimationLine(DBBASE):
     """
@@ -1091,6 +1105,15 @@ class ManualInvoice(DBBASE):
             return u"par virement"
         else:
             return u""
+
+    @validates("paymentMode")
+    def validate_paymentMode(self, key, paymentMode):
+        """
+            Validate the paymentMode
+        """
+        if not paymentMode in (u'chèque', u'virement'):
+            raise Forbidden(u'Mode de paiement inconnu')
+        return paymentMode
 
     def is_tolate(self):
         today = datetime.date.today()

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 21 juin 2012 00:43:53 CEST
+# * Last Modified : jeu. 21 juin 2012 01:08:17 CEST
 #
 # * Project : autonomie
 #
@@ -634,6 +634,12 @@ class Estimation(Task):
         """
         return self.CAEStatus not in ('geninv',)
 
+    def is_cancelled(self):
+        """
+            Return True is the invoice has been cancelled
+        """
+        return self.CAEStatus == 'aboest'
+
 class Invoice(Task):
     """
        `IDTask` int(11) NOT NULL,
@@ -692,6 +698,12 @@ class Invoice(Task):
             Return True if the invoice is paid
         """
         return self.CAEStatus == 'paid'
+
+    def is_cancelled(self):
+        """
+            Return True is the invoice has been cancelled
+        """
+        return self.CAEStatus == 'aboinv'
 
     def get_paymentmode_str(self):
         """

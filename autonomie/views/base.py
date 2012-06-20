@@ -21,19 +21,18 @@ from functools import partial
 from sqlalchemy import desc, asc
 
 from webhelpers import paginate
-from deform import Button
+from webhelpers.html import tags
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
 from pyramid.url import route_path
-from pyramid.security import authenticated_userid
 
 from autonomie.models.model import Phase
 from autonomie.models.model import Tva
-from autonomie.models.model import User
 from autonomie.utils.views import get_page_url
 from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import Submit
 from autonomie.utils.widgets import ViewLink
+from autonomie.utils.widgets import StaticWidget
 
 log = logging.getLogger(__file__)
 
@@ -107,7 +106,8 @@ class ListView(BaseView):
                              url=page_url,
                              items_per_page=items_per_page)
 
-    def _sort(self, query, column, direction):
+    @staticmethod
+    def _sort(query, column, direction):
         """
             Return a sorted query
         """
@@ -240,7 +240,7 @@ class TaskView(BaseView):
                                 )
             save_and_valid = Submit(u"Enregistrer et demander la validation",
                                "edit",
-                               value="valid",
+                               value="wait",
                                request=self.request
                                )
             return [draft_save, save_and_valid]
@@ -253,9 +253,10 @@ class TaskView(BaseView):
         """
         if self.task.is_valid():
             sent_btn = Submit(u"Envoyé au client",
-                               "edit",
-                               value="sent",
-                               request=self.request
+                "edit",
+                title=u"Indiquer que le document a bien été envoyé au client",
+                value="sent",
+                request=self.request
                                )
             return [sent_btn]
         else:
@@ -270,12 +271,23 @@ class TaskView(BaseView):
         if self.task.has_been_validated() and \
                 hasattr(self.task, "IDEstimation"):
             client_btn = Submit(u"Client relancé",
-                                "manage",
-                                value="recinv",
-                                request=self.request)
+                        "edit",
+                        title=u"Indiquer que le client a été relancé",
+                        value="recinv",
+                        request=self.request)
             return [client_btn]
         else:
             return []
+
+    @staticmethod
+    def _paid_mod_select():
+        """
+            Return a select object for paiment mode select
+        """
+        options = tags.Options((('CHEQUE', u"Par chèque",),
+                                ('VIREMENT', u"Par virement")))
+        select = tags.select('paymentMode', [], options, **{'class':'span2'})
+        return select
 
     def _paid_btn(self):
         """
@@ -283,12 +295,14 @@ class TaskView(BaseView):
             the payment mode
         """
         if self.task.has_been_validated() and \
-                hasattr(self.task, "IDEstimation"):
+                hasattr(self.task, "IDEstimation") and not self.task.is_paid():
             paid_btn = Submit(u"Facture payée",
                             "manage",
                             value="paid",
                             request=self.request)
-            return [paid_btn]
+            paid_mod = StaticWidget(self._paid_mod_select(),
+                        "manage")
+            return [paid_btn, paid_mod]
         else:
             return []
 

@@ -489,6 +489,9 @@ class InvoiceView(TaskView, ListView):
         """
             Returns a page displaying an html rendering of the given task
         """
+        if self.is_editable():
+            return HTTPFound(self.request.route_path('invoice',
+                                                id=self.task.id))
         title = u"Facture numéro : {0}".format(self.task.number)
         return dict(
                     title=title,

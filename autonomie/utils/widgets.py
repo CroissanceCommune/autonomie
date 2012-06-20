@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mer. 20 juin 2012 18:47:39 CEST
+# * Last Modified : jeu. 21 juin 2012 00:55:01 CEST
 #
 # * Project : autonomie
 #
@@ -101,12 +101,21 @@ class PermWidget(object):
 class StaticWidget(PermWidget):
     """
         Static Html widget with permission management
+        @html : an html string (maybe you can use Webhelpers to build it)
+        @perm: the permission needed to display this element
     """
-    def __init__(self, html):
+    def __init__(self, html, perm):
         self.html = html
+        self.perm = perm
 
     def render(self, request):
-        return self.html
+        """
+            Return the html output
+        """
+        if self.permitted(request.context, request):
+            return self.html
+        else:
+            return ""
 
 class Link(Widget, PermWidget):
     template = None

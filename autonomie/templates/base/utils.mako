@@ -61,11 +61,11 @@ path = request.current_route_path(_query=get_args)
 <%def name="print_str_date(timestamp)">
     <% import datetime %>
     % if isinstance(timestamp, datetime.date):
-        ${timestamp.strftime("%A %d %B %Y").decode('utf-8').capitalize()}
+        le ${timestamp.strftime("%e %B %Y").decode('utf-8').capitalize()}
     % elif not timestamp:
         ""
     %else:
-        ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%A %d %B %Y").decode('utf-8').capitalize()}
+        le ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%e %B %Y").decode('utf-8').capitalize()}
     %endif
 </%def>
 <%def name="format_amount(data)">

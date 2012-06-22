@@ -10,7 +10,7 @@
         % endif
         % for item in elem.items:
             ${item.render(request)|n}
-            <li class='divider-vertical'>
+            <li class='divider-vertical'></li>
         % endfor
     </ul>
 % endif

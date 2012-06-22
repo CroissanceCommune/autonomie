@@ -126,22 +126,26 @@ class CompanyInvoicesView(ListView):
         """
             Return all taskdates
         """
-        return self.dbsession.query(Invoice.taskDate), \
-               self.dbsession.query(ManualInvoice.taskDate)
+        @cache_region("long_term", "taskdates")
+        def taskdates():
+            return self.dbsession.query(Invoice.taskDate), \
+                self.dbsession.query(ManualInvoice.taskDate)
+        return taskdates()
 
-    @cache_region('long_term')
     def _get_years(self):
         """
             We consider that all documents should be dated after 2000
         """
         inv, man_inv = self._get_taskdates()
-        years = sorted(
+        @cache_region("long_term", "taskyears")
+        def years():
+            return sorted(
                     set([i.taskDate.year for i in inv.all()
                             ]).union(
                      set([i.taskDate.year for i in man_inv.all()
                          ]))
                 )
-        return years
+        return years()
 
     @view_config(route_name="invoices",
                 renderer="invoices.mako",

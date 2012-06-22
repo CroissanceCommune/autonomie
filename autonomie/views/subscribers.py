@@ -19,6 +19,7 @@
 """
 
 from webhelpers.html import tags
+from webhelpers.html import HTML
 
 from pyramid.events import subscriber
 from pyramid.events import BeforeRender
@@ -38,8 +39,7 @@ def get_cid(request):
         Return the current cid from the request
     """
     cid = None
-    if hasattr(request, "user") and request.user and \
-                            request.user.companies == 1:
+    if len(request.user.companies) == 1:
         cid = request.user.companies[0].id
     elif hasattr(request, "context") and hasattr(request.context,
                                                 "get_company_id"):
@@ -101,7 +101,7 @@ def company_menu(request, companies, cid):
     """
         Add the company choose menu
     """
-    menu = get_company( request, cid ).name
+    menu = HTML.li(HTML.h2(get_company( request, cid ).name))
     if len(companies) > 1:
         options = ((request.route_path("company", id=company.id),
                     company.name) for company in companies)
@@ -125,14 +125,14 @@ def add_menu(event):
         cid = get_cid(request)
         if request.user.is_admin() or request.user.is_manager():
             menu, submenu = get_admin_menus(cid)
-        else:
+        elif cid:
             menu = get_user_menu(cid)
             companies = get_companies(request)
-            menu.add(company_menu(request, companies, cid))
+            menu.insert(company_menu(request, companies, cid))
 
-        menu.add(MainMenuItem(u"Annuaire", "view", path="users"))
-
-        event.update({'menu':menu})
+        if menu:
+            menu.add(MainMenuItem(u"Annuaire", "view", path="users"))
+            event.update({'menu':menu})
         if submenu:
             companies = get_companies(request)
             submenu.insert(company_menu(request, companies, cid))

@@ -1,6 +1,7 @@
 <%doc>
 Dropdown menu template
 </%doc>
+% if elem.permitted(request.context, request):
 <li class='dropdown'>
 <a class='dropdown-toggle' data-toggle='dropdown' href='#'>
     ${elem.label}
@@ -12,3 +13,4 @@ Dropdown menu template
 % endfor
 </ul>
 </li>
+% endif

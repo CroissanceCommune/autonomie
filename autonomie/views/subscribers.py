@@ -51,12 +51,11 @@ def get_companies(request):
         Return available companies from the request object
     """
     companies = []
-    if hasattr(request, "user") and request.user:
-        if request.user.is_admin() or request.user.is_manager():
-            dbsession = request.dbsession()
-            companies = get_all_companies(dbsession)
-        else:
-            companies = request.user.companies
+    if request.user.is_admin() or request.user.is_manager():
+        dbsession = request.dbsession()
+        companies = get_all_companies(dbsession)
+    else:
+        companies = request.user.companies
     return companies
 
 def get_company(request, cid):
@@ -67,19 +66,18 @@ def get_company(request, cid):
     company = dbsession.query(Company).filter(Company.id==cid).first()
     return company
 
-def get_user_menu(request, css=None):
+def get_user_menu(cid, css=None):
     """
         Return the menu for a common user
     """
-    cid = get_cid(request)
     menu = None
     if cid:
         menu = Menu("base/mainmenu.mako", css=css)
-        menu.add(MainMenuItem(u"Clients", "view",
+        menu.add(MainMenuItem(u"Clients", "edit",
                                 path="company_clients", id=cid))
-        menu.add(MainMenuItem(u"Projets", "view",
+        menu.add(MainMenuItem(u"Projets", "edit",
                                 path="company_projects", id=cid))
-        gestion = MenuDropDown(u"Gestion", "view")
+        gestion = MenuDropDown(u"Gestion", "edit")
         gestion.add(MainMenuItem(u"Factures", "edit",
                                 path="company_invoices", id=cid))
         gestion.add(MainMenuItem(u"Trésorerie", "edit",
@@ -89,14 +87,14 @@ def get_user_menu(request, css=None):
                                 path="company", id=cid))
     return menu
 
-def get_admin_menus(request):
+def get_admin_menus(cid):
     """
         Return the menu for admin or managers
     """
     menu = Menu("base/mainmenu.mako")
     menu.add(MainMenuItem(u"Factures", "manage", path="invoices"))
     menu.add(MainMenuItem(u"Configuration", "admin", path="admin_index"))
-    submenu = get_user_menu(request, "nav-pills")
+    submenu = get_user_menu(cid, "nav-pills")
     return menu, submenu
 
 def company_menu(request, companies, cid):
@@ -121,20 +119,18 @@ def add_menu(event):
         if cid is not None
     """
     request = event['req']
-    cid = get_cid(request)
     menu = None
     submenu = None
-    if request:
+    if request and hasattr(request, 'user') and request.user:
+        cid = get_cid(request)
         if request.user.is_admin() or request.user.is_manager():
-            menu, submenu = get_admin_menus(request)
+            menu, submenu = get_admin_menus(cid)
         else:
-            menu = get_user_menu(request)
+            menu = get_user_menu(cid)
             companies = get_companies(request)
             menu.add(company_menu(request, companies, cid))
 
         menu.add(MainMenuItem(u"Annuaire", "view", path="users"))
-
-
 
         event.update({'menu':menu})
         if submenu:

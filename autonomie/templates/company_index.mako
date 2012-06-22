@@ -8,31 +8,18 @@
 <%namespace file="/base/utils.mako" import="format_amount" />
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
+<div class='row'>
+    <div class='span4'>
 %if elapsed_invoices:
-    <div class='row'>
-        <div class=''>
-            <div class="ui-widget">
-                <div class="ui-state-error ui-corner-all">
-                    <p>
-                        <span class="ui-icon ui-icon-alert">
-                        </span>
-                        <strong>
-                            Les factures suivantes demandent votre attention, le paiement a plus de 45 jours de retard.
-                        </strong>
-                    </p>
-                </div>
+    <div class='section-header'>Factures en retard
             </div>
-            <a class='btn btn-primary' href="${request.route_path('company_invoices', id=company.id)}">
-                Liste des factures
-            </a>
+            <a class='btn btn-primary'
+                href="${request.route_path('company_invoices', id=company.id)}">Voir</a>
             <table class='table table-stripped'>
                 <thead>
-                    <th>Numéro de facture</th>
-                    <th>Émise le</th>
-                    <th>Nom</th>
+                    <th>Numéro</th>
                     <th>Client</th>
-                    <th>Total HT</th>
-                    <th>TVA</th>
+                    <th>Total</th>
                 </thead>
                 <tbody>
                     % for invoice in elapsed_invoices:
@@ -41,38 +28,22 @@
                                 ${invoice.model.officialNumber}
                             </td>
                             <td>
-                                ${print_date(invoice.model.taskDate)}
-                            </td>
-                            <td>
-                                <blockquote>
-                                    <a href="${request.route_path('invoice', id=invoice.model.IDTask)}" title='Voir le document'>
-                                        ${invoice.model.number}<br />
-                                    </a>
-                                    <small>Projet : ${format_project(invoice.model.project)}</small>
-                                </blockquote>
-                            </td>
-                            <td>
                                 ${format_client(invoice.model.project.client)}
                             </td>
                             <td>
-                                ${format_amount(invoice.compute_totalht())} € HT
-                            </td>
-                            <td>
-                                ${format_amount(invoice.compute_tva())} €
+                                ${format_amount(invoice.compute_total())} €
                             </td>
                         </tr>
                     % endfor
                 </tbody>
             </table>
-        </div>
-    </div>
 %endif
-<div class='row'>
-    <h3>Dernières activités</h3>
+
+<div class='section-header'><strong>Dernières activités</strong></div>
     <table class='table table-stripped'>
         <thead>
             <th>
-                Nom du projet
+                Projet
             </th>
             <th>
                 Nom du document
@@ -93,5 +64,13 @@
             % endfor
         </tbody>
     </table>
+</div>
+<div class='span6 offset1'>
+    % if request.config.has_key('welcome'):
+            <p>
+                ${format_text(request.config['welcome'])}
+            </p>
+    % endif
+</div>
 </div>
 </%block>

@@ -39,7 +39,7 @@ from .base import ListView
 log = logging.getLogger(__name__)
 
 @view_config(route_name='account', renderer='account.mako',
-        permission='edit')
+        permission='view')
 def account(request):
     """
         Account handling page

@@ -12,7 +12,9 @@
             </dl>
             <br />
             <br />
-            % if len(account.companies) == 1:
+            % if len(account.companies) == 0:
+                Vous n'êtes lié(e) à aucune entreprise
+            % elif len(account.companies) == 1:
                 <h3>Votre entreprise</h3>
             % else:
                 <h3>Vos entreprise(s)</h3>

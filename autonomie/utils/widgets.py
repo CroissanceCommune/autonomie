@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : jeu. 21 juin 2012 00:55:01 CEST
+# * Last Modified : ven. 22 juin 2012 11:40:45 CEST
 #
 # * Project : autonomie
 #
@@ -70,6 +70,13 @@ class Widget(object):
     """
     template = None
     request = None
+
+    def set_template(self, template):
+        """
+            Change the template of the menu
+        """
+        self.template = template
+
     def render(self, request):
         """
             return an html output of the widget
@@ -256,17 +263,40 @@ class SearchForm(Widget):
         """
         self.widgets.append(widget)
 
-class ActionMenu(Widget):
-    """
-        Represent the ActionMenu
-    """
-    template = "base/actionmenu.mako"
-
-    def __init__(self):
+class Menu(Widget):
+    template = None
+    def __init__(self, template=None, css=None):
         self.items = []
+        if template:
+            self.set_template(template)
+        if css:
+            self.css = css
 
     def add(self, item):
         """
             Add an item to the menu
         """
         self.items.append(item)
+
+    def insert(self, item, index=0):
+        """
+            Insert an item in the menu
+        """
+        self.items.insert(index, item)
+
+class ActionMenu(Menu):
+    """
+        Represent the ActionMenu
+    """
+    template = "base/actionmenu.mako"
+
+class MenuDropDown(Menu, PermWidget):
+    template = "base/dropdown.mako"
+    def __init__(self, label, perm, title=None, template=None):
+        Menu.__init__(self, template)
+        self.label = label
+        self.perm = perm
+        self.title = title or label
+
+class MainMenuItem(ViewLink):
+    template = "base/mainmenu_item.mako"

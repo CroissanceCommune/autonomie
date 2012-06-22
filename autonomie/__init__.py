@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 19 juin 2012 23:05:36 CEST
+# * Last Modified : ven. 22 juin 2012 13:26:02 CEST
 #
 # * Project : autonomie
 #
@@ -73,9 +73,6 @@ def main(global_config, **settings):
     config.add_route('index', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
-    # TODO : Trouver un moyen de stocker la compagnie en cours de traitement
-    #        pour conserver le menu
-    # Cas de l'admin
     config.add_route('account',
                     '/account')
     #Company routes

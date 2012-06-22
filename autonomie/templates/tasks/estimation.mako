@@ -2,8 +2,6 @@
     estimation template
 </%doc>
 <%inherit file="/tasks/task.mako" />
-<%namespace file="/base/utils.mako" import="address" />
-<%namespace file="/base/utils.mako" import="print_str_date" />
 <%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_amount" />
 <%namespace file="/base/utils.mako" import="format_quantity" />

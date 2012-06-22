@@ -128,7 +128,7 @@
         <th>${sortable(u"Identifiant", "officialNumber")}</th>
         <th>${sortable(u"Entrepreneur", 'company')}</th>
         <th>${sortable(u"Émise le", 'taskDate')}</th>
-        <th>${sortable(u"Nom", 'number')}</th>
+        <th>${sortable(u"Nom de la facture", 'number')}</th>
         <th>${sortable(u"Client", 'client')}</th>
         <th>Montant HT</th>
         <th>TVA</th>
@@ -165,9 +165,8 @@
                     <td>
                         <% company = invoice.model.get_company() %>
                         %if company:
-                            ${company.name}
-                        %else:
-                            TOTO
+                            <a href="${request.route_path('company', id=company.id)}"
+                            title="Voir l'entreprise">${company.name}</a>
                         %endif
                     </td>
                     <td>
@@ -176,9 +175,8 @@
                     <td>
                         <blockquote>
                             %if invoice.model.project:
-                                <a href="${request.route_path('invoice', id=invoice.model.IDTask)}" title='Voir le document'>
-                                ${invoice.model.number}<br />
-                            </a>
+                                <a href="${request.route_path('invoice', id=invoice.model.IDTask)}"
+                                title='Voir le document'>${invoice.model.number}</a>
                             %else:
                                 ${invoice.model.number}
                             %endif

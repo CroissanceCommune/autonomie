@@ -20,7 +20,6 @@
 
 from webhelpers.html import tags
 
-from pyramid.url import route_path
 from pyramid.events import subscriber
 from pyramid.events import BeforeRender
 from pyramid.events import NewRequest
@@ -28,6 +27,7 @@ from pyramid.threadlocal import get_current_request
 
 from autonomie.i18n import translate
 from autonomie.models.model import Company
+from autonomie.models.main import get_companies as get_all_companies
 from autonomie.utils.widgets import Menu
 from autonomie.utils.widgets import MainMenuItem
 from autonomie.utils.widgets import MenuDropDown
@@ -54,7 +54,7 @@ def get_companies(request):
     if hasattr(request, "user") and request.user:
         if request.user.is_admin() or request.user.is_manager():
             dbsession = request.dbsession()
-            companies = dbsession.query(Company).all()
+            companies = get_all_companies(dbsession)
         else:
             companies = request.user.companies
     return companies
@@ -85,6 +85,8 @@ def get_user_menu(request, css=None):
         gestion.add(MainMenuItem(u"Trésorerie", "edit",
                                 path="company_treasury", id=cid))
         menu.add(gestion)
+        menu.add(MainMenuItem(u"Paramètres", "edit",
+                                path="company", id=cid))
     return menu
 
 def get_admin_menus(request):
@@ -96,13 +98,6 @@ def get_admin_menus(request):
     menu.add(MainMenuItem(u"Configuration", "admin", path="admin_index"))
     submenu = get_user_menu(request, "nav-pills")
     return menu, submenu
-
-def user_menu(request):
-    """
-        Return the user config menu
-    """
-    # TODO
-    pass
 
 def company_menu(request, companies, cid):
     """
@@ -127,15 +122,14 @@ def add_menu(event):
     """
     request = event['req']
     cid = get_cid(request)
-    companies = get_companies(request)
     menu = None
     submenu = None
     if request:
         if request.user.is_admin() or request.user.is_manager():
             menu, submenu = get_admin_menus(request)
-            submenu.insert(company_menu(request, companies, cid))
         else:
             menu = get_user_menu(request)
+            companies = get_companies(request)
             menu.add(company_menu(request, companies, cid))
 
         menu.add(MainMenuItem(u"Annuaire", "view", path="users"))
@@ -144,8 +138,8 @@ def add_menu(event):
 
         event.update({'menu':menu})
         if submenu:
-            if len(companies) > 1:
-                event.update({'companies':companies, 'cid':cid})
+            companies = get_companies(request)
+            submenu.insert(company_menu(request, companies, cid))
             event.update({'submenu':submenu})
 
 @subscriber(BeforeRender)

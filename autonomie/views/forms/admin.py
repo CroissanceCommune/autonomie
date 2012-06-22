@@ -22,6 +22,7 @@ import logging
 from deform import widget
 from deform import FileData
 
+from autonomie.models.model import Config
 from autonomie.utils.forms import validate_image_mime
 from autonomie.utils.fileupload import FileTempStore
 
@@ -97,6 +98,10 @@ class SiteConfig(colander.MappingSchema):
                 title=u'Logo du site',
                 validator=validate_image_mime,
                 default={"filename":"logo.png", "uid":"MAINLOGO"})
+    welcome = colander.SchemaNode(colander.String(),
+                                title=u"Texte d'accueil",
+                                widget=widget.TextAreaWidget(cols=80, rows=2),
+                                missing=u'')
 
 class MainConfig(colander.MappingSchema):
     """
@@ -129,7 +134,7 @@ def get_config_appstruct(config_dict):
     """
         transform Config datas to ConfigSchema compatible appstruct
     """
-    appstruct = {'site':{},
+    appstruct = {'site':{'welcome':None},
             'document':{'estimation':{'footer':None,},
                         'invoice':{'payment':None,
                                    'late':None},
@@ -137,9 +142,13 @@ def get_config_appstruct(config_dict):
                         'footercourse':None,
                         'footercontent':None},
                 }
-    appstruct['document']['footertitle'] = config_dict.get('coop_pdffootertitle')
-    appstruct['document']['footercourse'] = config_dict.get('coop_pdffootercourse')
-    appstruct['document']['footercontent'] = config_dict.get('coop_pdffootertext')
+    appstruct['site']['welcome'] = config_dict.get('welcome')
+    appstruct['document']['footertitle'] = config_dict.get(
+                                                       'coop_pdffootertitle')
+    appstruct['document']['footercourse'] = config_dict.get(
+                                                      'coop_pdffootercourse')
+    appstruct['document']['footercontent'] = config_dict.get(
+                                                        'coop_pdffootertext')
 
     appstruct['document']['estimation']['footer'] = config_dict.get(
                                                        'coop_estimationfooter')
@@ -169,16 +178,31 @@ def get_config_dbdatas(appstruct):
                                                 'invoice', {}).get('payment')
     dbdatas['coop_invoicelate'] = appstruct.get('document', {}).get(
                                                 'invoice', {}).get('late')
+    dbdatas['welcome'] = appstruct.get('site', {}).get('welcome')
     return dbdatas
+
+def get_element_by_name(list_, name):
+    """
+        Return an element from list_ which has the name "name"
+    """
+    found = None
+    for element in list_:
+        if element.name == name:
+            found = element
+    return found
 
 def merge_dbdatas(dbdatas, appstruct):
     """
         Merge the datas returned by form validation and the original dbdatas
     """
     new_datas = get_config_dbdatas(appstruct)
-    for datas in dbdatas:
-        new_val = new_datas.get(datas.name)
-        if new_val:
-            datas.value = new_val
+    for name, value in new_datas.items():
+        dbdata = get_element_by_name(dbdatas, name)
+        if not dbdata:
+            # The key 'name' doesn't exist in the database, adding new one
+            dbdata = Config(app=u"autonomie", name=name, value=value)
+            dbdatas.append(dbdata)
+        else:
+            dbdata.value = value
     return dbdatas
 

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 22 juin 2012 13:26:02 CEST
+# * Last Modified : ven. 22 juin 2012 15:38:30 CEST
 #
 # * Project : autonomie
 #
@@ -75,6 +75,8 @@ def main(global_config, **settings):
     config.add_route('logout', '/logout')
     config.add_route('account',
                     '/account')
+    config.add_route('holliday',
+                    '/holliday')
     #Company routes
     config.add_route('company',
                      '/company/{id:\d+}',

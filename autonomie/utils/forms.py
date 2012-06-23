@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 31-01-2012
-# * Last Modified : ven. 08 juin 2012 16:19:52 CEST
+# * Last Modified : sam. 23 juin 2012 04:32:35 CEST
 #
 # * Project : autonomie
 #
@@ -140,11 +140,11 @@ def get_mail_input(missing=None):
                             validator=colander.Email(MAIL_ERROR_MESSAGE),
                             missing=missing
                             )
-def get_date_input():
+def get_date_input(**kw):
     """
         Return a date input displaying a french user friendly format
     """
-    date_input = widget.DateInputWidget()
+    date_input = widget.DateInputWidget(**kw)
     date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
 
@@ -202,4 +202,3 @@ def validate_image_mime(node, value):
             message = u"Veuillez télécharger un fichier de type jpg, png, \
 bmp ou gif"
             raise colander.Invalid(node, message)
-

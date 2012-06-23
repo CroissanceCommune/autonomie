@@ -41,7 +41,7 @@
                 <dt>Téléphone</dt>
                 <dd>
                     %if client.phone:
-                        ${client.phone}
+                        ${format_phone(client.phone)}
                     %else:
                         Aucun numéro connu
                     %endif

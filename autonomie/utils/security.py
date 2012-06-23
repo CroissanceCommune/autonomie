@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : ven. 15 juin 2012 13:21:15 CEST
+# * Last Modified : sam. 23 juin 2012 15:13:06 CEST
 #
 # * Project : autonomie
 #
@@ -29,6 +29,7 @@ from autonomie.models.model import OperationComptable
 log = logging.getLogger(__file__)
 
 DEFAULT_PERM = [(Allow, "group:admin", ALL_PERMISSIONS,),
+                (Allow, "group:manager", ("manage", "add", "edit", "view")),
                 (Allow, Authenticated, 'view'),]
 
 def wrap_db_objects():

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 23 juin 2012 03:05:27 CEST
+# * Last Modified : sam. 23 juin 2012 03:58:24 CEST
 #
 # * Project : autonomie
 #
@@ -1282,6 +1282,6 @@ class Holliday(DBBASE):
         """
         q = dbsession.query(Holliday)
         if user_id:
-            q.filter(Holliday.user_id==user_id)
+            q = q.filter(Holliday.user_id==user_id)
         return q.order_by("start_date")
 

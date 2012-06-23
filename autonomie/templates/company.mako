@@ -1,14 +1,21 @@
 <%inherit file="base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="format_mail" />
+<%namespace file="/base/utils.mako" import="format_phone" />
 <%block name='content'>
 <div class='row'>
     <div class="span6 offset3">
         <h3>Entreprise ${company.name}</h3>
         ${company.goal}
         <dl>
-        % for label, attr in ((u'E-mail', 'email'), (u'Téléphone', 'phone'), (u"Téléphone portable", "mobile"),):
+            % if company.email:
+                <dt>E-mail</dt>
+                <dd>${format_mail(mail)}</dd>
+            % endif
+
+        % for label, attr in ((u'Téléphone', 'phone'), (u"Téléphone portable", "mobile"),):
             %if getattr(company, attr):
                 <dt>${label}</dt>
-                <dd>${getattr(company, attr)}</dd>
+                <dd>${format_phone(getattr(company, attr))}</dd>
             % endif
         % endfor
         </dl>

@@ -1,13 +1,15 @@
 <%inherit file="base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="format_mail" />
 <%block name='content'>
     <div class="row">
         <div class='span5'>
             <h3>Informations</h3>
             <dl class="dl-horizontal">
-                %for label, value in ((u'Identifiant', account.login), (u'Nom', account.lastname), (u'Prénom', account.firstname), (u'E-mail', account.email)):
+                %for label, value in ((u'Identifiant', account.login), (u'Nom', account.lastname), (u'Prénom', account.firstname)):
                     <dt>${label}</dt>
                     <dd>${value}</dd>
                 % endfor
+                <dt>E-mail</dt><dd>${format_mail(account.email)}</dd>
             </dl>
             <br />
             <br />

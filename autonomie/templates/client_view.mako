@@ -33,9 +33,7 @@
                 <dt>E-mail</dt>
                 <dd>
                     %if client.email:
-                        <address>
-                            ${client.email}
-                        </address>
+                        ${format_mail(account.email))}
                     % else:
                         Aucune adresse connue
                     % endif

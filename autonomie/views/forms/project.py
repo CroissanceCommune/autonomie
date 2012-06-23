@@ -22,12 +22,10 @@ from deform import widget
 
 from autonomie.utils.forms import deferred_edit_widget
 from autonomie.utils.forms import deferred_autocomplete_widget
+from autonomie.utils.forms import get_date_input
 
 log = logging.getLogger(__name__)
 
-timeinput = widget.DateInputWidget
-#timeinput.options = {'dateFormat':'dd / mm / yy', "altFormat": "yy-mm-dd",
-#                     "altfield"}
 class ProjectSchema(colander.MappingSchema):
     """
         Schema for project
@@ -50,11 +48,11 @@ class ProjectSchema(colander.MappingSchema):
     startingDate = colander.SchemaNode(colander.Date(),
                                         title=u"Date de début",
                                         missing=u"",
-                                        widget=timeinput())
+                                        widget=get_date_input())
     endingDate = colander.SchemaNode(colander.Date(),
                                         title=u"Date de fin",
                                     missing=u"",
-                                    widget=timeinput())
+                                    widget=get_date_input())
     code_client = colander.SchemaNode(colander.String(),
                                         title=u"Client",
                                         widget=deferred_autocomplete_widget)

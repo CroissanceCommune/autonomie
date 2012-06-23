@@ -200,7 +200,7 @@ class UserView(ListView):
                         self.dbsession.flush()
                     user.companies.append(company)
                 log.debug(" + Adding user : {0}" .format(user.login))
-                self.dbsession.merge(user)
+                user = self.dbsession.merge(user)
                 self.dbsession.flush()
                 self.request.session.flash(validate_msg, queue="main")
                 return HTTPFound(self.request.route_path("user", id=user.id))

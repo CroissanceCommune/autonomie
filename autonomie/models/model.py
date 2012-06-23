@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 23 juin 2012 03:58:24 CEST
+# * Last Modified : sam. 23 juin 2012 15:26:10 CEST
 #
 # * Project : autonomie
 #
@@ -355,7 +355,12 @@ class User(DBBASE):
 
     @classmethod
     def query(cls, dbsession):
-        return dbsession.query(User)
+        """
+            Query users
+            Note : join on companies allows us to avoid egw accounts
+                    which are not used inside egw's coopagest plugin
+        """
+        return dbsession.query(User).join(User.companies)
 
 class Employee(DBBASE):
     """

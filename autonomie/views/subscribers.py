@@ -108,7 +108,8 @@ def company_menu(request, companies, cid):
         default = request.route_path("company", id=cid)
         html_attrs = {'class':'floatted company-search',
                       'id':"company-select-menu"}
-        menu = tags.select("companies", default, options, **html_attrs)
+        menu = HTML.li(
+                tags.select("companies", default, options, **html_attrs))
     menu = StaticWidget(menu, "view")
     return menu
 

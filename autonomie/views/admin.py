@@ -74,8 +74,6 @@ class AdminViews(BaseView):
                 # la table config étant un stockage clé valeur
                 # le merge_session_with_post ne peut être utilisé
                 dbdatas = self.dbsession.query(Config).all()
-                print dbdatas
-                print appstruct
                 dbdatas = merge_dbdatas(dbdatas, appstruct)
                 for dbdata in dbdatas:
                     self.dbsession.merge(dbdata)
@@ -111,7 +109,6 @@ class AdminViews(BaseView):
                     self.dbsession.flush()
                 for data in appstruct['tvas']:
                     tva = Tva()
-                    print data
                     dbdatas = merge_session_with_post(tva, data)
                     self.dbsession.merge(tva)
                 self.dbsession.flush()

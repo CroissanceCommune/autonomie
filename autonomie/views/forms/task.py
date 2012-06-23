@@ -280,7 +280,7 @@ class EstimationPaymentLine(colander.MappingSchema):
     paymentDate = colander.SchemaNode(
                 colander.Date(),
                 title=u'',
-                widget=widget.DateInputWidget(css_class='span2'),
+                widget=get_date_input(css_class='span2'),
                 default=datetime.date.today(),
                 css_class='span2',)
     amount = colander.SchemaNode(

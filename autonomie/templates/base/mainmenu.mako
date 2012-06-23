@@ -9,8 +9,10 @@
             class='nav'>
         % endif
         % for item in elem.items:
-            ${item.render(request)|n}
-            <li class='divider-vertical'></li>
+            % if item.permitted(request.context, request):
+                ${item.render(request)|n}
+                <li class='divider-vertical'></li>
+            % endif
         % endfor
     </ul>
 % endif

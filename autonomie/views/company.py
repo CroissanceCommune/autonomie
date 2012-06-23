@@ -129,15 +129,15 @@ class CompanyViews(BaseView):
         self._set_item_menu(company)
         link_list = []
         link_list.append(ViewLink(u"Voir les clients",
-                "admin", path="company_clients", id=company.id,
+                "manage", path="company_clients", id=company.id,
                 icon='icon-arrow-right'
                 ))
         link_list.append(ViewLink(u"Voir les projets",
-                "admin", path="company_projects", id=company.id,
+                "manage", path="company_projects", id=company.id,
                 icon='icon-arrow-right'
                 ))
         link_list.append(ViewLink(u"Voir les factures",
-                "admin", path="company_invoices", id=company.id,
+                "manage", path="company_invoices", id=company.id,
                 icon='icon-arrow-right'
                 ))
         return dict(title=company.name.title(),

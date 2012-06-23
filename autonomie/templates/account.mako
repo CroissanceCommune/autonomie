@@ -1,6 +1,5 @@
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
-<div class='container'>
     <div class="row">
         <div class='span5'>
             <h3>Informations</h3>
@@ -37,5 +36,4 @@
             ${html_form|n}
         </div>
     </div>
-</div>
 </%block>

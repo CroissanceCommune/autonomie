@@ -66,7 +66,6 @@ class HollidayView(BaseView):
             else:
                 # Validation OK
                 for holliday in hollidays:
-                    self.dbsession.delete(holliday)
                     self.dbsession.flush()
                 for data in appstruct['hollidays']:
                     holliday = Holliday(user_id=self.request.user.id)
@@ -116,6 +115,7 @@ class HollidayView(BaseView):
                                                                     end_date)))
                 if user_id:
                     hollidays = hollidays.filter(Holliday.user_id==user_id)
+                hollidays=hollidays.all()
                 html_form = form.render(appstruct)
                 log.debug("Rendering with appstruct : %s" % appstruct)
         else:
@@ -123,7 +123,7 @@ class HollidayView(BaseView):
         return dict(
                     title=u"Les congés des entrepreneurs",
                     html_form=html_form,
-                    hollidays=hollidays.all(),
+                    hollidays=hollidays,
                     start_date=start_date,
                     end_date=end_date
                     )

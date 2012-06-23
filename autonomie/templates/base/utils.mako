@@ -111,3 +111,20 @@ path = request.current_route_path(_query=get_args)
         </a>
     %endif
 </%def>
+<%def name="format_mail(mail)">
+    <%doc>
+        Render an email address
+    </%doc>
+    % if mail is not UNDEFINED and mail is not None:
+        <a href="mailto:${mail}"><span class="ui-icon ui-icon-mail-closed"></span>${mail}</a>
+    % endif
+</%def>
+<%def name="format_phone(phone)">
+    <%doc>
+        Render a phone with a phone link
+    </%doc>
+    % if phone is not UNDEFINED and phone is not None:
+        <a class="visible-mobile hidden-desktop" href="tel://${phone}">${phone}</a>
+        <span class="hidden-mobile visible-desktop">${phone}</span>
+    % endif
+</%def>

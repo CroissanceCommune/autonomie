@@ -69,6 +69,9 @@
   display: none;
 }
 @media (max-width: 767px) {
+  /*
+   * Portrait tablet and mobile specific Layouts
+   */
   .visible-phone {
     display: block;
   }
@@ -85,84 +88,10 @@
     margin-bottom:2px;
     padding:2px;
   }
-}
-@media (min-width: 768px) and (max-width: 979px) {
-  .visible-tablet {
-    display: block;
-  }
-  .hidden-tablet {
-    display: none;
-  }
-  .hidden-desktop {
-    display: block;
-  }
-  .visible-desktop {
-    display: none;
-  }
-  .form-horizontal .control-group{
-    margin-bottom:2px;
-    padding:2px;
-  }
-}
-@media (max-width: 480px) {
-  .form-horizontal .control-group{
-    margin-bottom:2px;
-    padding:2px;
-  }
-  .nav-collapse {
-    -webkit-transform: translate3d(0, 0, 0);
-  }
-  .page-header h1 small {
-    display: block;
-    line-height: 18px;
-  }
-  input[type="checkbox"],
-  input[type="radio"] {
-    border: 1px solid #ccc;
-  }
-  .form-horizontal .control-group > label {
-    float: none;
-    width: auto;
-    padding-top: 0;
-    text-align: left;
-  }
-  .form-horizontal .controls {
-    margin-left: 0;
-  }
-  .form-horizontal .control-list {
-    padding-top: 0;
-  }
-  .form-horizontal .form-actions {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-  .modal {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    width: auto;
-    margin: 0;
-  }
-  .modal.fade.in {
-    top: auto;
-  }
-  .modal-header .close {
-    padding: 10px;
-    margin: -10px;
-  }
-  .carousel-caption {
-    position: static;
-  }
-}
-@media (max-width: 767px) {
-  .form-horizontal .control-group{
-    margin-bottom:2px;
-    padding:2px;
-  }
-.deform fieldset{
+
+  .deform fieldset{
   padding:0px;
-}
+  }
   body {
     padding-left: 20px;
     padding-right: 20px;
@@ -212,7 +141,25 @@
   }
 }
 @media (min-width: 768px) and (max-width: 979px) {
-  /* Portrait tablet to landscape and desktop*/
+  /*
+   * Tablet landscape and desktop
+   */
+  .visible-tablet {
+    display: block;
+  }
+  .hidden-tablet {
+    display: none;
+  }
+  .hidden-desktop {
+    display: block;
+  }
+  .visible-desktop {
+    display: none;
+  }
+  .form-horizontal .control-group{
+    margin-bottom:2px;
+    padding:2px;
+  }
   .form-horizontal .help-block{
     display:inline-block;
     font-size:10px;
@@ -426,7 +373,64 @@
     width: 32px;
   }
 }
+@media (max-width: 480px) {
+  /*
+   * Only mobiles
+   */
+  .form-horizontal .control-group{
+    margin-bottom:2px;
+    padding:2px;
+  }
+  .nav-collapse {
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+  .page-header h1 small {
+    display: block;
+    line-height: 18px;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    border: 1px solid #ccc;
+  }
+  .form-horizontal .control-group > label {
+    float: none;
+    width: auto;
+    padding-top: 0;
+    text-align: left;
+  }
+  .form-horizontal .controls {
+    margin-left: 0;
+  }
+  .form-horizontal .control-list {
+    padding-top: 0;
+  }
+  .form-horizontal .form-actions {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .modal {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    margin: 0;
+  }
+  .modal.fade.in {
+    top: auto;
+  }
+  .modal-header .close {
+    padding: 10px;
+    margin: -10px;
+  }
+  .carousel-caption {
+    position: static;
+  }
+}
 @media (max-width: 979px) {
+  /*
+   * All medias smaller than 979px (tablet portrait and layout + mobile + some desktops)
+   */
 .deform fieldset{
   padding:0px;
 }
@@ -452,7 +456,7 @@
   .navbar .nav-collapse {
     clear: left;
   }
-  .navbar .nav {
+  .navbar .nav, .navbar .floatted{
     float: none;
     margin: 0 0 9px;
   }

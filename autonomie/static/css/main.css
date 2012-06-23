@@ -128,3 +128,7 @@ textarea{
   font-weight:bold;
   border-bottom:1px solid #ddd;
 }
+.deformSeqItem{
+  margin-bottom:5px;
+  background-color:#eee;
+  }

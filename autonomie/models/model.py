@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 21 juin 2012 01:08:17 CEST
+# * Last Modified : sam. 23 juin 2012 03:05:27 CEST
 #
 # * Project : autonomie
 #
@@ -262,7 +262,7 @@ class Company(DBBASE):
         return self.id
 
     @classmethod
-    def query(class_, dbsession, keys=None):
+    def query(cls, dbsession, keys=None):
         if keys:
             return dbsession.query(*keys)
         else:
@@ -352,6 +352,10 @@ class User(DBBASE):
             return True if the user is a contractor
         """
         return self.primary_group == 3
+
+    @classmethod
+    def query(cls, dbsession):
+        return dbsession.query(User)
 
 class Employee(DBBASE):
     """
@@ -1021,7 +1025,7 @@ class Tva(DBBASE):
     __table_args__ = {'autoload':True}
 
     @classmethod
-    def query(class_, dbsession):
+    def query(cls, dbsession):
         return dbsession.query(Tva).order_by('value')
 
 class TaskStatus(DBBASE):
@@ -1207,6 +1211,7 @@ class CancelInvoice(Task):
        KEY `IDEstimation` (`IDEstimation`)
     """
     __tablename__ = 'coop_cancel_invoice'
+    __table_args__ = {'mysql_engine': 'MyISAM'}
     IDTask = Column(Integer, ForeignKey('coop_task.IDTask'), primary_key=True)
 
     IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'))
@@ -1216,7 +1221,7 @@ class CancelInvoice(Task):
     tva = Column(Integer, default=1960)
     reimbursementConditions = Column(String(255), default=None)
     officialNumber = Column(Integer, default=None)
-    paymentMode = Column(String, default=None)
+    paymentMode = Column(String(80), default=None)
     displayedUnits = Column(Integer, default=0)
     expenses = Column(Integer, default=0)
 
@@ -1247,3 +1252,36 @@ class CancelInvoice(Task):
             return u"par virement"
         else:
             return u"mode paiement inconnu"
+
+class Holliday(DBBASE):
+    """
+        Hollidays table
+        Stores the start and end date for holliday declaration
+        user_id
+        start_date
+        end_date
+    """
+    __tablename__ = "coop_holliday"
+    __table_args__ = {'mysql_engine': 'MyISAM'}
+    id = Column(Integer, primary_key=True)
+    user_id = Column("user_id", Integer, ForeignKey('egw_accounts.account_id'))
+    start_date = Column(Date)
+    end_date = Column(Date)
+    user = relationship("User",
+                        backref=backref("hollidays",
+                                        order_by="Holliday.start_date"),
+                        primaryjoin="Holliday.user_id==User.id"
+                        )
+
+    @classmethod
+    def query(cls, dbsession, user_id=None):
+        """
+            query the database for the current class instances
+            @dbsession : instanciated dbsession
+            @user_id: id of the user we want the holliday from
+        """
+        q = dbsession.query(Holliday)
+        if user_id:
+            q.filter(Holliday.user_id==user_id)
+        return q.order_by("start_date")
+

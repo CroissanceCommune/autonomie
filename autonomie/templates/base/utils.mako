@@ -51,7 +51,7 @@ path = request.current_route_path(_query=get_args)
 <%def name="print_date(timestamp)">
 <% import datetime %>
     % if isinstance(timestamp, datetime.date):
-        ${timestamp.strftime("%d/%m/%Y")}
+        ${timestamp.strftime("%e/%m/%Y")}
     % elif not timestamp:
         ""
     % else:

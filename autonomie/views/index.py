@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 11 juin 2012 16:20:06 CEST
+# * Last Modified : dim. 24 juin 2012 03:19:40 CEST
 #
 # * Project : autonomie
 #
@@ -16,7 +16,6 @@
 import logging
 
 from pyramid.view import view_config
-from pyramid.url import route_path
 from pyramid.httpexceptions import HTTPFound
 
 
@@ -27,15 +26,18 @@ def index(request):
     """
         Index page
     """
-    avatar = request.user
-    companies = avatar.companies
-    if len(companies) == 1:
+    user = request.user
+    companies = user.companies
+    if user.is_admin() or user.is_manager():
+        return HTTPFound(request.route_path('manage'))
+    elif len(companies) == 1:
         company = companies[0]
-        return HTTPFound(route_path('company', request, id=company.id,
+        return HTTPFound(request.route_path('company', id=company.id,
                                             _query=dict(action='index')))
     else:
         for company in companies:
             company.url = request.route_path("company", id=company.id,
                                             _query=dict(action='index'))
-        return dict(title=u"Bienvenue dans Autonomie",
-                    companies=avatar.companies)
+        return dict(
+                    title=u"Bienvenue dans Autonomie",
+                    companies=user.companies)

@@ -46,10 +46,10 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href='/'>Autonomie</a>
-          <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+          <a class="btn btn-navbar" data-target=".menu" data-toggle="collapse">
             >>>
           </a>
-          <div class="nav-collapse">
+          <div class="nav-collapse menu">
             % if menu is not UNDEFINED and menu:
               ${menu.render(request)|n}
             % endif
@@ -85,7 +85,10 @@
     <div class="navbar">
       <div class="navbar-inner">
         <div class="container">
-      <div class='subnav'>
+          <a class="btn btn-navbar" data-target=".submenu" data-toggle="collapse">
+            >>>
+          </a>
+          <div class='nav-collapse submenu'>
         ${submenu.render(request)|n}
       </div>
       </div>

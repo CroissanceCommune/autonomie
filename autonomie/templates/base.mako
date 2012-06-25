@@ -68,6 +68,12 @@
                     Mon compte
                   </a>
                   </li>
+                  <li>
+                  <a href="${request.route_path('holliday')}">
+                    <span class='icon-plane'></span>
+                    Mes congés
+                    </a>
+                  </li>
                   <li class="divider"></li>
                 <li>
                 <a href="/logout">

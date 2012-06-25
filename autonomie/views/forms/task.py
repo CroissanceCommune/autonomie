@@ -199,7 +199,7 @@ class TaskLinesBlock(colander.MappingSchema):
      min_len=1
      ),
             title=u'')
-    discount = colander.SchemaNode(AmountType(),
+    discountHT = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
          template='autonomie:deform_templates/wrappable_input.mako',
          before='autonomie:deform_templates/staticinput.mako',

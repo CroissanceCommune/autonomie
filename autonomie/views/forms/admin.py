@@ -102,6 +102,8 @@ class SiteConfig(colander.MappingSchema):
                                 title=u"Texte d'accueil",
                                 widget=widget.TextAreaWidget(cols=80, rows=2),
                                 missing=u'')
+    files_dir = colander.SchemaNode(colander.String(),
+                 title=u"Chemin de stockage des fichiers (logo, entête)...")
 
 class MainConfig(colander.MappingSchema):
     """
@@ -134,7 +136,8 @@ def get_config_appstruct(config_dict):
     """
         transform Config datas to ConfigSchema compatible appstruct
     """
-    appstruct = {'site':{'welcome':None},
+    appstruct = {'site':{'welcome':None,
+                        'files_dir':None},
             'document':{'estimation':{'footer':None,},
                         'invoice':{'payment':None,
                                    'late':None},
@@ -143,6 +146,7 @@ def get_config_appstruct(config_dict):
                         'footercontent':None},
                 }
     appstruct['site']['welcome'] = config_dict.get('welcome')
+    appstruct['site']['files_dir'] = config_dict.get('files_dir')
     appstruct['document']['footertitle'] = config_dict.get(
                                                        'coop_pdffootertitle')
     appstruct['document']['footercourse'] = config_dict.get(
@@ -179,6 +183,7 @@ def get_config_dbdatas(appstruct):
     dbdatas['coop_invoicelate'] = appstruct.get('document', {}).get(
                                                 'invoice', {}).get('late')
     dbdatas['welcome'] = appstruct.get('site', {}).get('welcome')
+    dbdatas['files_dir'] = appstruct.get('site', {}).get('files_dir')
     return dbdatas
 
 def get_element_by_name(list_, name):

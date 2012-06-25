@@ -80,7 +80,7 @@ function getDiscount(){
   /*
    * Returns the current discount
    */
-  return transformToCents($("input[name=discount]").val());
+  return transformToCents($("input[name=discountHT]").val());
 }
 function getTVA(){
   /*

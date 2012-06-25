@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 25 juin 2012 12:52:01 CEST
+# * Last Modified : lun. 25 juin 2012 12:57:47 CEST
 #
 # * Project : autonomie
 #
@@ -582,6 +582,13 @@ document."
 
     def is_estimation(self):
         return not hasattr(self, "IDEstimation")
+
+    @classmethod
+    def query(cls, dbsession):
+        """
+            return a query for getting all the Task objects
+        """
+        return dbsession.query(Task)
 
 class Estimation(Task):
     """

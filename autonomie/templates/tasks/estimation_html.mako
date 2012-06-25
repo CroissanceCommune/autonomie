@@ -7,7 +7,7 @@
 <div>
     <span class="label label-important">></span>
     %if task.statusPersonAccount  is not UNDEFINED and task.statusPersonAccount:
-        <strong>${task.get_status_str("estimation")}</strong>
+        <strong>${task.get_status_str()}</strong>
         <br />
     %else:
         <strong>Aucune information d'historique ou de statut n'a pu être retrouvée pour ce devis.</strong>
@@ -15,6 +15,7 @@
     %endif
     %if task.has_been_validated():
         Vous ne pouvez plus modifier ce document car il a déjà été validé.
+        Il porte le numéro <b>${task.officialNumber}</b>.
     %elif task.is_waiting():
         Vous ne pouvez plus modifier ce document car il est en attente de validation.
     %endif

@@ -7,7 +7,7 @@
 <div>
     <span class="label label-important">></span>
     %if task.statusPersonAccount  is not UNDEFINED and task.statusPersonAccount:
-        <strong>${task.get_status_str("invoice")}</strong>
+        <strong>${task.get_status_str()}</strong>
         <br />
     %else:
         <strong>Aucune information d'historique ou de statut n'a pu être retrouvée</strong>

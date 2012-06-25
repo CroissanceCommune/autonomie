@@ -94,7 +94,7 @@ path = request.current_route_path(_query=get_args)
         Render a client
     </%doc>
     %if client is not UNDEFINED and client is not None:
-        <a href="${request.route_path('company_client', id=client.id)}"
+        <a href="${request.route_path('client', id=client.id)}"
            title="Voir le client ${client.name}">
             ${client.name}
         </a>

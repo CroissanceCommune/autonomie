@@ -112,20 +112,20 @@ class ClientView(ListView):
             path="company_clients", id=company.id))
         if edit:
             self.actionmenu.add(ViewLink(u"Voir", "view",
-                path="company_client", id=client.id))
+                path="client", id=client.id))
             self.actionmenu.add(ViewLink(u"Éditer", "edit",
-             path="company_client", id=client.id, _query=dict(action="edit")))
+             path="client", id=client.id, _query=dict(action="edit")))
         else:
             self.actionmenu.add(ViewLink(u"Ajouter un client", "add",
                 js="$('#addform').dialog('open');"))
             self.actionmenu.add(SearchForm(u"Entreprise ou contact principal"))
 
 
-    @view_config(route_name='company_clients', renderer='company_client.mako',\
+    @view_config(route_name='company_clients', renderer='client.mako',\
                         request_method='POST', permission='edit')
-    @view_config(route_name='company_client', renderer='company_client.mako',\
+    @view_config(route_name='client', renderer='client.mako',\
                                 request_param='action=edit', permission='edit')
-    def company_client(self):
+    def client(self):
         """
             Return :
             * the client editform
@@ -166,7 +166,7 @@ succès".format(client.name)
                     message = u"Le client <b>{0}</b> a été ajouté avec \
 succès".format(client.name)
                 self.request.session.flash(message, queue='main')
-                return HTTPFound(route_path('company_client',
+                return HTTPFound(route_path('client',
                                             self.request,
                                             id=client.id))
         else:
@@ -177,9 +177,9 @@ succès".format(client.name)
                     company=company,
                     action_menu=self.actionmenu)
 
-    @view_config(route_name='company_client', renderer='client_view.mako', \
+    @view_config(route_name='client', renderer='client_view.mako', \
                             request_method='GET', permission='view')
-    def company_client_view(self):
+    def client_view(self):
         """
             Return the view of a client
         """

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : sam. 23 juin 2012 03:17:33 CEST
+# * Last Modified : lun. 25 juin 2012 12:15:44 CEST
 #
 # * Project : autonomie
 #
@@ -72,38 +72,45 @@ def main(global_config, **settings):
     if company_assets:
         config.add_static_view('assets', company_assets, cache_max_age=3600)
 
+    # Common routes
     config.add_route('index', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('account',
                     '/account')
-    config.add_route('holliday',
+
+    # Holliday routes
+    config.add_route('holliday', # Add
                     '/holliday')
-    config.add_route('hollidays',
+    config.add_route('hollidays', # view
                     '/hollidays')
-    #Company routes
+    # Company Routes
     config.add_route('company',
                      '/company/{id:\d+}',
                      traverse='/companies/{id}')
+    # * Clients
     config.add_route('company_clients',
                      '/company/{id:\d+}/clients',
                      traverse='/companies/{id}')
+    # * Projects
     config.add_route('company_projects',
                      '/company/{id:\d+}/projects',
                      traverse='/companies/{id}')
+    # * Invoices
     config.add_route('company_invoices',
                      '/company/{id:\d+}/invoices',
                      traverse='/companies/{id}')
+    # * Treasury
     config.add_route('company_treasury',
                      '/company/{id:\d+}/treasury',
                      traverse='/companies/{id}')
 
-    #Client routes
-    config.add_route('company_client',
+    # Client route
+    config.add_route('client',
                      '/clients/{id}',
                      traverse='/clients/{id}')
-    #Project routes
-    config.add_route('company_project',
+    # Project route
+    config.add_route('project',
                      '/projects/{id:\d+}',
                      traverse='/projects/{id}')
 

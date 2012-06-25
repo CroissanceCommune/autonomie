@@ -92,7 +92,10 @@ def get_admin_menus(cid):
         Return the menu for admin or managers
     """
     menu = Menu("base/mainmenu.mako")
+    menu.add(MainMenuItem(u"Validation", "manage", path="manage"))
     menu.add(MainMenuItem(u"Factures", "manage", path="invoices"))
+    menu.add(MainMenuItem(u"Congés", "manage", path="hollidays"))
+    menu.add(MainMenuItem(u"Comptabilité", "manage", path="operations"))
     menu.add(MainMenuItem(u"Configuration", "admin", path="admin_index"))
     submenu = get_user_menu(cid, "nav-pills")
     return menu, submenu

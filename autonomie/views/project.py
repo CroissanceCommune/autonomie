@@ -89,9 +89,9 @@ class ProjectView(ListView):
             path="company_projects", id=company.id))
         if edit:
             self.actionmenu.add(ViewLink(u"Voir", "view",
-                path="company_project", id=project.id))
+                path="project", id=project.id))
             self.actionmenu.add(ViewLink(u"Éditer", "edit",
-                path="company_project", id=project.id,
+                path="project", id=project.id,
                 _query=dict(action="edit")))
             self.actionmenu.add(ToggleLink(u"Afficher les détails", "view",
                     target="project-description"))
@@ -177,14 +177,14 @@ class ProjectView(ListView):
                         Client.name.like(search +"%")))
 
     @view_config(route_name='company_projects',  \
-                 renderer='company_project.mako', \
+                 renderer='project.mako', \
                  request_method='POST',
                  permission='edit')
-    @view_config(route_name='company_project', \
-                 renderer='company_project.mako', \
+    @view_config(route_name='project', \
+                 renderer='project.mako', \
                  request_param='action=edit',
                  permission='edit')
-    def company_project(self):
+    def project(self):
         """
             Returns:
             * the company edit form
@@ -234,7 +234,7 @@ succès".format(project.name)
 succès".format(project.name)
                 self.request.session.flash(message, queue='main')
                 # Flusing the session launches sql queries
-                return HTTPFound(route_path('company_project',
+                return HTTPFound(route_path('project',
                                             self.request,
                                             id=project.id))
         else:
@@ -246,7 +246,7 @@ succès".format(project.name)
                     action_menu=self.actionmenu
                     )
 
-    @view_config(route_name="company_project",
+    @view_config(route_name="project",
                  request_param="action=addphase",
                  permission='edit'
                 )
@@ -268,15 +268,15 @@ succès".format(project.name)
             self.request.session.flash(u"La phase {0} a bien été \
 rajoutée".format(phasename), queue="main")
             anchor = ""
-        return HTTPFound(route_path('company_project',
+        return HTTPFound(route_path('project',
                                 self.request,
                                 id=project.id,
                                 _anchor=anchor))
 
-    @view_config(route_name='company_project', renderer='project_view.mako',
+    @view_config(route_name='project', renderer='project_view.mako',
             permission='view'
             )
-    def company_project_view(self):
+    def project_view(self):
         """
             Company's project view
         """
@@ -288,7 +288,7 @@ rajoutée".format(phasename), queue="main")
                     action_menu=self.actionmenu,
                     company=company)
 
-    @view_config(route_name="company_project",
+    @view_config(route_name="project",
                 request_param="action=archive",
                 permission='edit')
     def archive(self):
@@ -304,7 +304,7 @@ rajoutée".format(phasename), queue="main")
                                     )
         return HTTPFound(self.request.referer)
 
-    @view_config(route_name="company_project",
+    @view_config(route_name="project",
                 request_param="action=delete",
                 permission='edit')
     def delete(self):
@@ -323,7 +323,7 @@ supprimé".format(project.name) )
         """
         btns = []
         btns.append(ItemActionLink(u"Voir", "view", css='btn',
-                path="company_project", icon="icon-search"))
+                path="project", icon="icon-search"))
         btns.append(ItemActionLink(u"Devis", "edit", css="btn",
             title=u"Nouveau devis",
             path="estimations", icon=("icon-file", )))
@@ -334,7 +334,7 @@ supprimé".format(project.name) )
             btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
                                 js=u"return confirm('Êtes-vous sûr \
 de vouloir archiver ce projet ?');",
-                                path="company_project",
+                                path="project",
                                 title=u"Archiver le projet",
                                 _query=dict(action="archive"),
                                 icon="icon-book"))
@@ -342,7 +342,7 @@ de vouloir archiver ce projet ?');",
             del_link = ItemActionLink(u"Supprimer", "edit", css="btn",
                                 js=u"return confirm('Êtes-vous sûr \
 de vouloir supprimer ce projet ?');",
-                                      path="company_project",
+                                      path="project",
                                       title=u"Supprimer le projet",
                                       _query=dict(action="delete"),
                                       icon="icon-trash")

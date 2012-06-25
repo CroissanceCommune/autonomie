@@ -331,7 +331,7 @@ class TaskView(BaseView):
         """
         cancel = ViewLink(u"Annuler",
                           "view",
-                          path="company_project",
+                          path="project",
                           css="btn btn-primary",
                           request=self.request,
                           id=self.project.id)
@@ -370,13 +370,13 @@ class TaskView(BaseView):
         """
         self.actionmenu.add(
                 ViewLink(u"Revenir au projet", "edit",
-                    path="company_project", id=self.project.id))
+                    path="project", id=self.project.id))
 
     def project_view_redirect(self):
         """
             return a http redirect object to the project page
         """
         return HTTPFound(route_path(
-                            'company_project',
+                            'project',
                             self.request,
                             id=self.project.id))

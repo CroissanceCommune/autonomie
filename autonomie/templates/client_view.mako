@@ -1,4 +1,6 @@
 <%inherit file="base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="format_mail" />
+<%namespace file="/base/utils.mako" import="format_phone" />
 <%block name='content'>
 <div class='container'>
     <ul class="row">
@@ -33,7 +35,7 @@
                 <dt>E-mail</dt>
                 <dd>
                     %if client.email:
-                        ${format_mail(account.email))}
+                        ${format_mail(client.email)}
                     % else:
                         Aucune adresse connue
                     % endif

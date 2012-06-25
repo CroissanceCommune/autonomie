@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 23 juin 2012 15:26:10 CEST
+# * Last Modified : lun. 25 juin 2012 12:52:01 CEST
 #
 # * Project : autonomie
 #
@@ -438,10 +438,15 @@ class Task(DBBASE):
                             backref="ownedTasks")
 
 
-    def get_status_str(self, _type="estimation"):
+    def get_status_str(self):
         """
             Return human readable string for task status
         """
+        if self.is_invoice():
+            _type = "invoice"
+        else:
+            _type = "estimation"
+
         if self.statusPersonAccount:
             firstname = self.statusPersonAccount.firstname
             lastname = self.statusPersonAccount.lastname
@@ -572,6 +577,12 @@ document."
     def id(self):
         return self.IDTask
 
+    def is_invoice(self):
+        return hasattr(self, "IDEstimation")
+
+    def is_estimation(self):
+        return not hasattr(self, "IDEstimation")
+
 class Estimation(Task):
     """
        `IDTask` int(11) NOT NULL,
@@ -648,6 +659,13 @@ class Estimation(Task):
             Return True is the invoice has been cancelled
         """
         return self.CAEStatus == 'aboest'
+
+    @classmethod
+    def query(cls, dbsession):
+        """
+            Return a db query for Estimation
+        """
+        return dbsession.query(Estimation)
 
 class Invoice(Task):
     """
@@ -733,6 +751,13 @@ class Invoice(Task):
         if not paymentMode in ('CHEQUE', 'VIREMENT'):
             raise Forbidden(u'Mode de paiement inconnu')
         return paymentMode
+
+    @classmethod
+    def query(cls, dbsession):
+        """
+            Return a database query for invoices
+        """
+        return dbsession.query(Invoice)
 
 class EstimationLine(DBBASE):
     """

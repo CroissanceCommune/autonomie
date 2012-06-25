@@ -4,7 +4,7 @@
 <div class='row collapse' id='project-addphase'>
     <div class='span4 offset4'>
         <h3>Ajouter une phase</h3>
-        <form class='navbar-form' method='POST' action="${request.route_path('company_project', id=project.id, _query=dict(action='addphase'))}">
+        <form class='navbar-form' method='POST' action="${request.route_path('project', id=project.id, _query=dict(action='addphase'))}">
             <input type='text' name='phase' />
             <button class='btn btn-primary' type='submit' name='submit' value='addphase'>Valider</button>
         </form>

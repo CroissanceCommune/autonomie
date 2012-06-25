@@ -87,7 +87,7 @@
                         </td>
                         <td>
                         <div class='btn-group'>
-                            <a class='btn' href='${request.route_path("company_project", id=project.id)}'>
+                            <a class='btn' href='${request.route_path("project", id=project.id)}'>
                                 <span class='ui-icon ui-icon-pencil'></span>
                                 Voir
                             </a>
@@ -101,14 +101,14 @@
                             </a>
                             %if not project.is_archived():
                                 <a class='btn'
-                                    href='${request.route_path("company_project", id=project.id, _query=dict(action="archive"))}'
+                                    href='${request.route_path("project", id=project.id, _query=dict(action="archive"))}'
                                     onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
                                     <span class='ui-icon ui-icon-folder-collapsed'></span>
                                     Archiver
                                 </a>
                             %elif project.is_deletable():
                                 <a class='btn'
-                                    href='${request.route_path("company_project", id=project.id, _query=dict(action="delete"))}'
+                                    href='${request.route_path("project", id=project.id, _query=dict(action="delete"))}'
                                     onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');">
                                     <span class='ui-icon ui-icon-trash'></span>
                                     Supprimer

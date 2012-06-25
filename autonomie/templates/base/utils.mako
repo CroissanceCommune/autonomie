@@ -105,7 +105,7 @@ path = request.current_route_path(_query=get_args)
         Render a project
     </%doc>
     %if project is not UNDEFINED and project is not None:
-        <a href="${request.route_path('company_project', id=project.id)}"
+        <a href="${request.route_path('project', id=project.id)}"
             title="Voir le projet ${project.name}">
             ${project.name}
         </a>

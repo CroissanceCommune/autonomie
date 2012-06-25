@@ -5,7 +5,7 @@
     <div class='row collapse' id='project-addphase'>
         <div class='span4 offset4'>
             <h3>Ajouter une phase</h3>
-            <form class='navbar-form' method='POST' action="${request.route_path('company_project', id=project.id, _query=dict(action='addphase'))}">
+            <form class='navbar-form' method='POST' action="${request.route_path('project', id=project.id, _query=dict(action='addphase'))}">
                 <input type='text' name='phase' />
                 <button class='btn btn-primary' type='submit' name='submit' value='addphase'>Valider</button>
             </form>
@@ -20,7 +20,7 @@
                 <b>Type de projet :</b> ${project.type}
             % endif
             <a class="btn btn-primary" title='Éditer les informations de ce client'
-                href='${request.route_path("company_project", id=project.id, _query=dict(action="edit"))}'>
+                href='${request.route_path("project", id=project.id, _query=dict(action="edit"))}'>
                 Éditer
             </a>
             <br />

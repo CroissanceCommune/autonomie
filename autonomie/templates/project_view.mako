@@ -98,7 +98,7 @@ h3.floatted{
                 <tr>
                     <td><a href='${request.route_path("estimation", id=estimation.IDTask)}' title="Voir/éditer ce devis">${estimation.number}</a></td>
                     <td>${estimation.name}</td>
-                    <td>${estimation.get_status_str('estimation')}</td>
+                    <td>${estimation.get_status_str()}</td>
                     ##    <td>${print_date(estimation.statusDate)}</td>
                     ##<td>${estimation.owner.firstname} ${estimation.owner.lastname}</td>
                     <td>
@@ -149,7 +149,7 @@ h3.floatted{
                 <tr>
                     <td><a href='${request.route_path("invoice", id=invoice.IDTask)}' title="Voir/éditer cette facture">${invoice.number}</a></td>
                     <td>${invoice.name}</td>
-                    <td>${invoice.get_status_str("invoice")}</td>
+                    <td>${invoice.get_status_str()}</td>
                     ##      <td>${print_date(invoice.statusDate)}</td>
                     ##      <td>${invoice.owner.firstname} ${invoice.owner.lastname}</td>
                     <td>

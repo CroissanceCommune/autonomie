@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 25 juin 2012 12:57:47 CEST
+# * Last Modified : lun. 25 juin 2012 15:24:30 CEST
 #
 # * Project : autonomie
 #
@@ -35,6 +35,7 @@ from sqlalchemy.orm import backref
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.types import Integer as Integer_type
 from sqlalchemy.types import String as String_type
+from sqlalchemy import func
 
 from autonomie.models import DBBASE
 from autonomie.utils.exception import Forbidden
@@ -714,6 +715,8 @@ class Invoice(Task):
                       backref="invoice",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask",
                                 )
+    officialNumber = Column("officialNumber", Integer)
+
     def is_tolate(self):
         """
             Return True if a payment is expected since more than
@@ -765,6 +768,20 @@ class Invoice(Task):
             Return a database query for invoices
         """
         return dbsession.query(Invoice)
+
+    @classmethod
+    def get_officialNumber(cls, dbsession):
+        """
+            Return the next officialNumber available in the Invoice's table
+            Take the max of official Number
+            when taskDate startswith the current year
+            taskdate is a string (YYYYMMDD)
+        """
+        current_year = datetime.date.today().year
+        return dbsession.query(func.max(Invoice.officialNumber)).filter(
+                Invoice.taskDate.between(current_year*10000,
+                                         (current_year+1)*10000
+                                    ))
 
 class EstimationLine(DBBASE):
     """
@@ -1192,6 +1209,16 @@ class ManualInvoice(DBBASE):
             return the company
         """
         return self.company
+
+    @classmethod
+    def get_officialNumber(cls, dbsession):
+        """
+            Return the greatest officialNumber actually used in the
+            ManualInvoice table
+        """
+        current_year = datetime.date.today().year
+        return dbsession.query(func.max(ManualInvoice.officialNumber)).filter(
+                    func.year(ManualInvoice.taskDate) == current_year)
 
 class OperationComptable(DBBASE):
     """

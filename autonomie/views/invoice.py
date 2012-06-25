@@ -33,6 +33,7 @@ from autonomie.models.model import Project
 from autonomie.models.model import ManualInvoice
 from autonomie.models.model import InvoiceLine
 from autonomie.models.model import format_to_taskdate
+from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import InvoiceSchema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
@@ -399,6 +400,7 @@ class InvoiceView(TaskView, ListView):
         if 'submit' in self.request.params:
             log.debug("   + Values have been submitted")
             datas = self.request.params.items()
+            log.debug(datas)
             try:
                 appstruct = form.validate(datas)
             except ValidationFailure, e:
@@ -413,12 +415,24 @@ class InvoiceView(TaskView, ListView):
                     self.task.name = self.get_taskname()
                     self.task.number = self.get_tasknumber(self.task.taskDate)
                 try:
-                    self.task.CAEStatus = self.get_taskstatus()
                     self.task.statusPerson = self.user.id
                     self.task.project = self.project
                     self.remove_lines_from_session()
                     self.add_lines_to_task(dbdatas)
 
+                    status = self.get_taskstatus()
+                    if self._can_change_status(status):
+                        if status == "valid":
+                            officialNumber = get_next_officialNumber(
+                                                        self.request.dbsession)
+                            self.task.officialNumber = officialNumber
+                            valid_msg += u"<br />La facture porte le numéro \
+<b>{0}</b>".format(officialNumber)
+
+                        self.task.CAEStatus = status
+                    else:
+                        raise Forbidden(u"Vous n'êtes pas autorisé à \
+effectuer à attribuer ce statut à une facture.")
                     self.dbsession.merge(self.task)
                     self.dbsession.flush()
                     self.request.session.flash(valid_msg, queue="main")
@@ -533,6 +547,7 @@ class InvoiceView(TaskView, ListView):
         """
             Called when simple status is changed
         """
+        valid_msg = u"Le statut de la facture a bien été modifié"
         if 'submit' in self.request.params:
             status = self.get_taskstatus()
             if not self._can_change_status(status):
@@ -541,11 +556,9 @@ class InvoiceView(TaskView, ListView):
                 if status == 'paid':
                     paymentMode = self.request.params.get('paymentMode')
                     self.task.paymentMode = paymentMode
-
                 self.task.CAEStatus = status
                 self.task.statusPerson = self.user.id
-                self.request.session.flash(u"Le statut de la facture a bien \
-été modifié", queue="main")
+                self.request.session.flash(valid_msg, queue="main")
             except Forbidden, e:
                 self.request.session.flash(e.message, queue='error')
         else:

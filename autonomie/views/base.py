@@ -351,7 +351,6 @@ class TaskView(BaseView):
         """
             returns submit buttons for estimation/invoice form
         """
-        print "Status : %s" % self.task.CAEStatus
         btns = []
         btns.extend(self._draft_btns())
         btns.extend(self._sent_to_client_btn())

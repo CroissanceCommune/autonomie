@@ -311,7 +311,7 @@ class CompanyInvoicesView(ListView):
         current_year = today.year
         year = self.request.params.get('year', current_year)
         log.debug("Getting invoices")
-        inv, man_inv = self._get_invoices(company)
+        inv, man_inv = self._get_invoices()
         inv, man_inv = self._filter_by_status(inv, man_inv, "paid")
         years = sorted(set([i.taskDate.year for i in inv.all()]))
         inv, man_inv = self._filter_by_date(inv, man_inv, year)

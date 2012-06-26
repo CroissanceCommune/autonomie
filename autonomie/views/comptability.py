@@ -32,7 +32,7 @@ from autonomie.views.forms import OperationSchema
 
 from .base import ListView
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 class Column(object):
     """

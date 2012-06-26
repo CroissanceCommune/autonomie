@@ -22,7 +22,7 @@ from deform import widget
 from autonomie.utils.forms import deferred_autocomplete_widget
 from autonomie.utils.forms import  get_date_input
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 def date_validator(form, value):
     if value['start_date'] >= value['end_date']:

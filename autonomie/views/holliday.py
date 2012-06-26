@@ -34,7 +34,7 @@ from autonomie.views.forms.holliday import HollidaysSchema
 from autonomie.views.forms.holliday import searchSchema
 from .base import BaseView
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 def get_user_choices(dbsession):
     choices = [(0, u'Tous les entrepreneurs')]

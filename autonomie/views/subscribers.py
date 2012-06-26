@@ -73,17 +73,17 @@ def get_user_menu(cid, css=None):
     menu = None
     if cid:
         menu = Menu("base/mainmenu.mako", css=css)
-        menu.add(MainMenuItem(u"Clients", "edit",
+        menu.add(MainMenuItem(u"Clients", "view",
                                 path="company_clients", id=cid))
-        menu.add(MainMenuItem(u"Projets", "edit",
+        menu.add(MainMenuItem(u"Projets", "view",
                                 path="company_projects", id=cid))
-        gestion = MenuDropDown(u"Gestion", "edit")
-        gestion.add(MainMenuItem(u"Factures", "edit",
+        gestion = MenuDropDown(u"Gestion", "view")
+        gestion.add(MainMenuItem(u"Factures", "view",
                                 path="company_invoices", id=cid))
-        gestion.add(MainMenuItem(u"Trésorerie", "edit",
+        gestion.add(MainMenuItem(u"Trésorerie", "view",
                                 path="company_treasury", id=cid))
         menu.add(gestion)
-        menu.add(MainMenuItem(u"Paramètres", "edit",
+        menu.add(MainMenuItem(u"Paramètres", "view",
                                 path="company", id=cid))
     return menu
 

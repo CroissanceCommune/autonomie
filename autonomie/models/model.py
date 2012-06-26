@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 25 juin 2012 15:24:30 CEST
+# * Last Modified : mar. 26 juin 2012 15:43:57 CEST
 #
 # * Project : autonomie
 #
@@ -518,6 +518,12 @@ class Task(DBBASE):
         """
         return self.CAEStatus == "wait"
 
+    def is_sent(self):
+        """
+            Return True if the task is in a sent status
+        """
+        return self.CAEStatus == "sent"
+
     @validates('CAEStatus')
     def validate_status(self, key, status):
         """
@@ -540,7 +546,7 @@ document."
             if not actual_status in ('valid', 'sent', 'invalid', 'wait'):
                 raise Forbidden(message)
         elif status in ('geninv',):
-            if not actual_status in ('valid', 'sent',):
+            if not actual_status in ('valid', 'sent', ):
                 raise Forbidden(message)
         elif status in ('sent',):
             if not actual_status in ('valid', "recinv"):

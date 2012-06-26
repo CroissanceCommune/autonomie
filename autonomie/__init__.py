@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 27 juin 2012 01:03:54 CEST
+# * Last Modified : mer. 27 juin 2012 01:20:48 CEST
 #
 # * Project : autonomie
 #
@@ -133,7 +133,8 @@ def main(global_config, **settings):
                     "/invoices")
 
     config.add_route("cancelinvoices",
-                    "/cancelinvoice")
+                     "/projects/{id:\d+}/cancelinvoices",
+                     traverse='/projects/{id}')
     config.add_route("cancelinvoice",
                     "/cancelinvoices/{id:\d+}",
                     traverse='/cancelinvoices/{id}')

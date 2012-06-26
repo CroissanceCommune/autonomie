@@ -27,7 +27,7 @@
     accept-charset="utf-8"
     enctype="multipart/form-data"
     method="POST"
-    action="${request.route_path('invoice', id=task.id, _query=dict(action='status'))}">
+    action="${request.route_path('estimation', id=task.id, _query=dict(action='status'))}">
     % for button in submit_buttons:
         ${button.render(request)|n}
     % endfor

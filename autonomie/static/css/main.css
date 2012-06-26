@@ -130,6 +130,7 @@ textarea{
   margin:2px;
   font-weight:bold;
   border-bottom:1px solid #ddd;
+  font-size:15px;
 }
 .deformSeqItem{
   margin-bottom:5px;

@@ -22,7 +22,6 @@ from deform import Form
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.url import route_path
 from pyramid.security import has_permission
 
 from autonomie.models.model import Estimation
@@ -267,9 +266,8 @@ class EstimationView(TaskView):
         self.request.session.flash(u"Le devis {0} a bien été dupliqué".format(
             self.task.number
             ), queue='main')
-        return HTTPFound(route_path(
+        return HTTPFound(self.request.route_path(
                     'estimation',
-                    self.request,
                     taskid=taskid))
 
     @view_config(route_name='estimation', request_param='action=delete',

@@ -25,7 +25,6 @@ from deform import Button
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.url import route_path
 from pyramid.security import has_permission
 
 from autonomie.models.model import Project
@@ -147,9 +146,8 @@ class ProjectView(ListView):
                           item_actions=self._get_actions())
         if has_permission("add", self.request.context, self.request):
             form = get_project_form(clients=clients,
-                                path=route_path('company_projects',
-                                                self.request,
-                                                id=company.id))
+                        path=self.request.route_path('company_projects',
+                                                     id=company.id))
             ret_dict['html_form'] = form.render()
         self._set_actionmenu(company)
         return ret_dict
@@ -234,8 +232,7 @@ succès".format(project.name)
 succès".format(project.name)
                 self.request.session.flash(message, queue='main')
                 # Flusing the session launches sql queries
-                return HTTPFound(route_path('project',
-                                            self.request,
+                return HTTPFound(self.request.route_path('project',
                                             id=project.id))
         else:
             html_form = form.render(project.appstruct())
@@ -268,8 +265,7 @@ succès".format(project.name)
             self.request.session.flash(u"La phase {0} a bien été \
 rajoutée".format(phasename), queue="main")
             anchor = ""
-        return HTTPFound(route_path('project',
-                                self.request,
+        return HTTPFound(self.request.route_path('project',
                                 id=project.id,
                                 _anchor=anchor))
 

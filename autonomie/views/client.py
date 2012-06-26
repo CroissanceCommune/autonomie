@@ -25,7 +25,6 @@ from deform import Button
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.url import route_path
 
 from autonomie.models.model import Client
 from autonomie.utils.forms import merge_session_with_post
@@ -71,7 +70,7 @@ class ClientView(ListView):
         # Get pagination
         records = self._get_pagination(clients, current_page, items_per_page)
         # Get add form
-        form = get_client_form(path=route_path('company_clients', self.request,
+        form = get_client_form(path=self.request.route_path('company_clients',
                                                 id=company.id))
 
         self._set_actionmenu(company)
@@ -166,8 +165,7 @@ succès".format(client.name)
                     message = u"Le client <b>{0}</b> a été ajouté avec \
 succès".format(client.name)
                 self.request.session.flash(message, queue='main')
-                return HTTPFound(route_path('client',
-                                            self.request,
+                return HTTPFound(self.request.route_path('client',
                                             id=client.id))
         else:
             html_form = form.render(client.appstruct())

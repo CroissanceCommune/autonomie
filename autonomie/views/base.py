@@ -24,7 +24,6 @@ from webhelpers import paginate
 from webhelpers.html import tags
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
-from pyramid.url import route_path
 
 from autonomie.models.model import Phase
 from autonomie.models.model import Tva
@@ -163,9 +162,8 @@ class TaskView(BaseView):
         """
             redirect the user to the view only url
         """
-        return HTTPFound(route_path(
+        return HTTPFound(self.request.route_path(
                             self.route,
-                            self.request,
                             id=self.taskid,
                             _query=dict(view='html')
                             ))
@@ -376,7 +374,6 @@ class TaskView(BaseView):
         """
             return a http redirect object to the project page
         """
-        return HTTPFound(route_path(
+        return HTTPFound(self.request.route_path(
                             'project',
-                            self.request,
                             id=self.project.id))

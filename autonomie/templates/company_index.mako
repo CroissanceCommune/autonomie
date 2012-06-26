@@ -10,8 +10,8 @@
 <%block name='content'>
 <div class='row'>
     <div class='span4'>
-%if elapsed_invoices:
-    <div class='section-header'>Factures en retard
+        %if elapsed_invoices:
+            <div class='section-header'>Factures en retard
             </div>
             <a class='btn btn-primary'
                 href="${request.route_path('company_invoices', id=company.id)}">Voir</a>
@@ -37,40 +37,44 @@
                     % endfor
                 </tbody>
             </table>
-%endif
+        %endif
+        <div class='span6 offset1'>
+            % if request.config.has_key('welcome'):
+                <p>
+                    ${format_text(request.config['welcome'])}
+                </p>
+            % endif
+        </div>
+    </div>
+</div>
 
-<div class='section-header'><strong>Dernières activités</strong></div>
-    <table class='table table-stripped'>
-        <thead>
-            <th>
-                Projet
-            </th>
-            <th>
-                Nom du document
-            </th>
-            <th>
-                Dernière modification
-            </th>
-        </thead>
-        <tbody>
-            % for task in tasks:
-                <tr>
-                    <td>
-                        ${format_project(task.project)}
-                    </td>
-                    <td>${task.name}</td>
-                    <td>${task.get_status_str()}</td>
-                </tr>
-            % endfor
-        </tbody>
-    </table>
-</div>
-<div class='span6 offset1'>
-    % if request.config.has_key('welcome'):
-            <p>
-                ${format_text(request.config['welcome'])}
-            </p>
-    % endif
-</div>
+<div class='row'>
+    <div class='span12'>
+        <div class='section-header'>Dernières activités</div>
+        <table class='table table-stripped'>
+            <thead>
+                <th>
+                    Projet
+                </th>
+                <th>
+                    Nom du document
+                </th>
+                <th>
+                    Dernière modification
+                </th>
+            </thead>
+            <tbody>
+                % for task in tasks:
+                    <tr>
+                        <td>
+                            ${format_project(task.project)}
+                        </td>
+                        <td>${task.name}</td>
+                        <td>${task.get_status_str()}</td>
+                    </tr>
+                % endfor
+            </tbody>
+        </table>
+    </div>
 </div>
 </%block>

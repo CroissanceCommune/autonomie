@@ -42,6 +42,9 @@ header .navbar li:hover{
 .ui-button-primary .ui-icon, .btn-primary .ui-icon{
   background-image:url('theme/images/ui-icons_f6cf3b_256x240.png');
 }
+.btn{
+  font-size:11px;
+}
 .deform label{
   font-size:1em;
 }

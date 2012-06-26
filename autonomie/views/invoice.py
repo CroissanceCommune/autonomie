@@ -24,7 +24,6 @@ from deform import Form
 from pyramid.view import view_config
 from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
-from pyramid.httpexceptions import HTTPForbidden
 
 from autonomie.models.model import Invoice
 from autonomie.models.model import Client
@@ -42,11 +41,12 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.exception import Forbidden
+from autonomie.views.mail import StatusChanged
 
 from .base import TaskView
 from .base import ListView
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 class ManualInvoiceComputing:
     """
@@ -129,6 +129,9 @@ class CompanyInvoicesView(ListView):
         """
         @cache_region("long_term", "taskdates")
         def taskdates():
+            """
+                Cached version
+            """
             return self.dbsession.query(Invoice.taskDate), \
                 self.dbsession.query(ManualInvoice.taskDate)
         return taskdates()
@@ -140,6 +143,9 @@ class CompanyInvoicesView(ListView):
         inv, man_inv = self._get_taskdates()
         @cache_region("long_term", "taskyears")
         def years():
+            """
+                cached version
+            """
             return sorted(
                     set([i.taskDate.year for i in inv.all()
                             ]).union(
@@ -212,7 +218,7 @@ class CompanyInvoicesView(ListView):
         invoices = self._wrap_for_computing(inv, man_inv)
         return invoices
 
-    def _get_invoices(self, company=None):
+    def _get_invoices(self):
         """
             request filter invoices by clients
         """
@@ -262,15 +268,10 @@ class CompanyInvoicesView(ListView):
             man_inv = man_inv.filter(
                                         ManualInvoice.payment_ok==1)
         elif status == "notpaid":
-            inv = inv.filter(Invoice.CAEStatus.in_(('sent','valid',)
-                                                                            ))
-            man_inv = man_inv.filter(
-                                        ManualInvoice.payment_ok==0)
+            inv = inv.filter(Invoice.CAEStatus.in_(('sent', 'valid',)))
+            man_inv = man_inv.filter(ManualInvoice.payment_ok==0)
         else:
-            inv = inv.filter(Invoice.CAEStatus.in_(('paid',
-                                                              'sent',
-                                                              'valid',)
-                                                            ))
+            inv = inv.filter(Invoice.CAEStatus.in_(('paid', 'sent', 'valid',)))
         return inv, man_inv
 
     @staticmethod
@@ -336,7 +337,7 @@ class InvoiceView(TaskView, ListView):
     add_title = u"Nouvelle facture"
     edit_title = u"Édition de la facture {task.number}"
     taskname_tmpl = u"Facture {0}"
-    tasknumber_tmpl = "{0}_{1}_F{2}_{3}"
+    tasknumber_tmpl = "{0}_{1}_F{2}_{3:%m%y}"
     route = "invoice"
 
     def set_lines(self):
@@ -398,7 +399,7 @@ class InvoiceView(TaskView, ListView):
         form.widget.template = "autonomie:deform_templates/form.pt"
 
         if 'submit' in self.request.params:
-            log.debug("   + Values have been submitted")
+            log.debug(" + Values have been submitted")
             datas = self.request.params.items()
             log.debug(datas)
             try:
@@ -406,37 +407,25 @@ class InvoiceView(TaskView, ListView):
             except ValidationFailure, e:
                 html_form = e.render()
             else:
+                log.debug("  + Values are valid")
                 dbdatas = get_invoice_dbdatas(appstruct)
                 log.debug(dbdatas)
                 merge_session_with_post(self.task, dbdatas['invoice'])
-
                 if not edit:
                     self.task.sequenceNumber = self.get_sequencenumber()
                     self.task.name = self.get_taskname()
                     self.task.number = self.get_tasknumber(self.task.taskDate)
                 try:
-                    self.task.statusPerson = self.user.id
+                    self.request.session.flash(valid_msg, queue="main")
                     self.task.project = self.project
                     self.remove_lines_from_session()
                     self.add_lines_to_task(dbdatas)
-
-                    status = self.get_taskstatus()
-                    if self._can_change_status(status):
-                        if status == "valid":
-                            officialNumber = get_next_officialNumber(
-                                                        self.request.dbsession)
-                            self.task.officialNumber = officialNumber
-                            valid_msg += u"<br />La facture porte le numéro \
-<b>{0}</b>".format(officialNumber)
-
-                        self.task.CAEStatus = status
-                    else:
-                        raise Forbidden(u"Vous n'êtes pas autorisé à \
-effectuer à attribuer ce statut à une facture.")
-                    self.dbsession.merge(self.task)
-                    self.dbsession.flush()
-                    self.request.session.flash(valid_msg, queue="main")
+                    self._status_process()
+                    self._set_modifications()
+                    self.request.registry.notify(StatusChanged(self.request,
+                                                    self.task))
                 except Forbidden, e:
+                    self.request.session.pop_flash("main")
                     self.request.session.flash(e.message, queue='error')
 
                 # Redirecting to the project page
@@ -449,6 +438,7 @@ effectuer à attribuer ce statut à une facture.")
                     html_form = html_form,
                     action_menu=self.actionmenu
                     )
+
     def get_sequencenumber(self):
         """
             set the sequence number
@@ -531,6 +521,29 @@ effectuer à attribuer ce statut à une facture.")
         write_pdf(self.request, filename, self._html())
         return self.request.response
 
+    @view_config(route_name="invoice", request_param='action=status',
+                permission="edit")
+    def status(self):
+        """
+            Status change view
+        """
+        self._status()
+
+    def _post_status_process(self, status):
+        """
+            Change the current task's status
+        """
+        if status == "valid":
+            officialNumber = get_next_officialNumber(
+                                        self.request.dbsession)
+            self.task.officialNumber = officialNumber
+            self.request.session.flash(u"La facture porte le numéro \
+<b>{0}</b>".format(officialNumber), queue='main')
+
+        elif status == 'paid':
+            paymentMode = self.request.params.get('paymentMode')
+            self.task.paymentMode = paymentMode
+
     def _can_change_status(self, status):
         """
             Handle the permission on status change depending on
@@ -540,29 +553,4 @@ effectuer à attribuer ce statut à une facture.")
             if status in ('invalid', 'valid', 'paid', 'aboinv'):
                 return False
         return True
-
-    @view_config(route_name="invoice", request_param='action=status',
-                permission="edit")
-    def status(self):
-        """
-            Called when simple status is changed
-        """
-        valid_msg = u"Le statut de la facture a bien été modifié"
-        if 'submit' in self.request.params:
-            status = self.get_taskstatus()
-            if not self._can_change_status(status):
-                raise HTTPForbidden()
-            try:
-                if status == 'paid':
-                    paymentMode = self.request.params.get('paymentMode')
-                    self.task.paymentMode = paymentMode
-                self.task.CAEStatus = status
-                self.task.statusPerson = self.user.id
-                self.request.session.flash(valid_msg, queue="main")
-            except Forbidden, e:
-                self.request.session.flash(e.message, queue='error')
-        else:
-            self.request.session.flash(u"Aucune modification n'a pu être \
-    effectuée, des informations sont manquantes.", queue="error")
-        return HTTPFound(self.request.route_path("invoice", id=self.task.id))
 

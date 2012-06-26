@@ -32,8 +32,10 @@ from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import Submit
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import StaticWidget
+from autonomie.utils.exception import Forbidden
+from autonomie.views.mail import StatusChanged
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 class BaseView(object):
     """
@@ -55,7 +57,6 @@ class BaseView(object):
         """
             Returns the current company
         """
-        #FIXME : Handle admin or not here ?
         try:
             company = self.user.get_company(self.get_company_id())
         except KeyError:
@@ -143,9 +144,6 @@ class TaskView(BaseView):
         self._set_actionmenu()
         self.set_lines()
 
-    def is_invoice(self):
-        return hasattr(self.task, 'IDEstimation')
-
     def get_task(self):
         """
             should return the current task
@@ -202,20 +200,21 @@ class TaskView(BaseView):
         """
         return self.taskname_tmpl.format(self.get_sequencenumber())
 
-    def get_tasknumber(self, taskDate):
+    def get_tasknumber(self, taskDate, tmpl=None, seq_number=None):
         """
             return the task number
         """
-        date = "{0}{1}".format(
-                               taskDate.month,
-                               str(taskDate.year)[2:])
         pcode = self.project.code
         ccode = self.project.client.id
-        return self.tasknumber_tmpl.format(
-                                  pcode,
-                                  ccode,
-                                  self.get_sequencenumber(),
-                                  date)
+        if not tmpl:
+            tmpl = self.tasknumber_tmpl
+        if not seq_number:
+            seq_number = self.get_sequencenumber()
+        return tmpl.format( pcode,
+                            ccode,
+                            seq_number,
+                            taskDate)
+
     def get_taskstatus(self):
         """
             get the status asked when validating the form
@@ -248,6 +247,26 @@ class TaskView(BaseView):
         else:
             return []
 
+    def _est_btns(self):
+        """
+            Return the button used to generate invoices or abort an estimation
+        """
+        if self.task.is_estimation() and (self.task.is_valid()
+                                          or self.task.is_sent()):
+            geninv_btn = Submit(u"Générer les factures",
+                     "edit",
+                      title=u"Générer les factures correspondantes au devis",
+                      value="geninv",
+                      request=self.request)
+            aboest = Submit(u"Indiquer sans suite",
+                    "edit",
+                    title=u"Indiquer que le devis n'aura pas de suite",
+                    value="aboest",
+                    request=self.request)
+            return [geninv_btn, aboest]
+        else:
+            return []
+
     def _sent_to_client_btn(self):
         """
             Return a button to change the status to "sent"
@@ -269,7 +288,7 @@ class TaskView(BaseView):
         """
         # This button is displayed only for invoices (which have a
         # IDEstimation attr) and if the doc is valid
-        if self.task.has_been_validated() and self.is_invoice():
+        if self.task.has_been_validated() and self.task.is_invoice():
             client_btn = Submit(u"Client relancé",
                         "edit",
                         title=u"Indiquer que le client a été relancé",
@@ -353,6 +372,7 @@ class TaskView(BaseView):
         """
         btns = []
         btns.extend(self._draft_btns())
+        btns.extend(self._est_btns())
         btns.extend(self._sent_to_client_btn())
         btns.extend(self._call_client_btn())
         btns.extend(self._paid_btn())
@@ -376,3 +396,54 @@ class TaskView(BaseView):
         return HTTPFound(self.request.route_path(
                             'project',
                             id=self.project.id))
+
+    def _can_change_status(self, status):
+        """
+            Called to check if the user can set the current status
+        """
+        raise Exception("Not implemented yet")
+
+    def _status_process(self):
+        """
+            Change the current task's status
+        """
+        status = self.get_taskstatus()
+        if not self._can_change_status(status):
+            raise Forbidden(u"Vous n'êtes pas autorisé à \
+effectuer à attribuer ce statut à ce document.")
+        log.debug(" + The status is set to {0}".format(status))
+        if hasattr(self, "_post_status_process"):
+            getattr(self, "_post_status_process")(status)
+        self.task.statusPerson = self.user.id
+        self.task.CAEStatus = status
+
+    def _set_modifications(self):
+        """
+            Set the modifications in the database
+        """
+        log.debug(" = > Flushing modification to the database")
+        self.task = self.dbsession.merge(self.task)
+        self.dbsession.flush()
+
+    def _status(self):
+        """
+            Change the status of the document
+        """
+        log.debug("# Document status modification #")
+        valid_msg = u"Le statut a bien été modifié"
+        if 'submit' in self.request.params:
+            try:
+                self.request.session.flash(valid_msg, queue="main")
+                self._status_process()
+                self._set_modifications()
+                self.request.registry.notify(StatusChanged(self.request,
+                                                    self.task))
+            except Forbidden, e:
+                log.exception(" !! Unauthorized action by : {0}".format(
+                                                        self.user.login))
+                self.request.session.pop_flash("main")
+                self.request.session.flash(e.message, queue='error')
+        else:
+            self.request.session.flash(u"Aucune modification n'a pu être \
+    effectuée, des informations sont manquantes.", queue="error")
+        return self.project_view_redirect()

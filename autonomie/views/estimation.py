@@ -37,8 +37,7 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.exception import Forbidden
-from autonomie.utils.widgets import ItemActionLink
-from autonomie.utils.widgets import ViewLink
+from autonomie.views.mail import StatusChanged
 
 from .base import TaskView
 
@@ -54,7 +53,7 @@ class EstimationView(TaskView):
     add_title = u"Nouveau devis"
     edit_title = u"Édition du devis {task.number}"
     taskname_tmpl = u"Devis {0}"
-    tasknumber_tmpl = "{0}_{1}_D{2}_{3}"
+    tasknumber_tmpl = "{0}_{1}_D{2}_{3:%m%y}"
     route = "estimation"
 
     def set_lines(self):
@@ -94,11 +93,8 @@ class EstimationView(TaskView):
             Return the estimation edit view
         """
         log.debug("#  Estimation Form #")
-        # If the task is not "editable" anymore and the current user doesn't
-        # have manage rights, then he's redirected to the html view
         if not self.is_editable():
             return self.redirect_to_view_only()
-
         if self.taskid:
             title = self.edit_title.format(task=self.task)
             edit = True
@@ -120,36 +116,38 @@ class EstimationView(TaskView):
         form.widget.template = 'autonomie:deform_templates/form.pt'
 
         if 'submit' in self.request.params:
-            log.debug("   + Values have been submitted")
+            log.debug(" + Values have been submitted")
             datas = self.request.params.items()
+            log.debug(datas)
             try:
                 appstruct = form.validate(datas)
             except ValidationFailure, e:
                 html_form = e.render()
             else:
+                log.debug("  + Values are valid")
+                dbdatas = get_estimation_dbdatas(appstruct)
+                log.debug(dbdatas)
+                merge_session_with_post(self.task, dbdatas['estimation'])
+                if not edit:
+                    self.task.sequenceNumber = self.get_sequencenumber()
+                    self.task.name = self.get_taskname()
+                    self.task.number = self.get_tasknumber(self.task.taskDate)
                 try:
-                    dbdatas = get_estimation_dbdatas(appstruct)
-                    merge_session_with_post(self.task, dbdatas['estimation'])
-
-                    if not edit:
-                        self.task.sequenceNumber = self.get_sequencenumber()
-                        self.task.name = self.get_taskname()
-                        self.task.number = self.get_tasknumber(
-                                                            self.task.taskDate)
-                    self.task.statusPerson = self.user.id
-                    self.task.CAEStatus = self.get_taskstatus()
+                    self.request.session.flash(valid_msg, queue="main")
                     self.task.project = self.project
                     self.remove_lines_from_session()
                     self.add_lines_to_task(dbdatas)
-
-                    self.dbsession.merge(self.task)
-                    self.dbsession.flush()
-                    self.request.session.flash(valid_msg, queue="main")
-                    # Redirecting to the project page
-                    return self.project_view_redirect()
+                    self._status_process()
+                    self._set_modifications()
+                    self.request.registry.notify(StatusChanged(self.request,
+                                                    self.task))
+                    log.debug(" > Estimation has been added/edited succesfully")
                 except Forbidden, e:
+                    self.request.session.pop_flash("main")
                     self.request.session.flash(e.message, queue='error')
-                    html_form = form.render(appstruct)
+
+                # Redirecting to the project page
+                return self.project_view_redirect()
         else:
             html_form = form.render(appstruct)
         return dict(title=title,
@@ -216,8 +214,8 @@ class EstimationView(TaskView):
             Returns a page displaying an html rendering of the given task
         """
         if self.is_editable():
-            return HTTPFound(self.request.route_path('invoice',
-                                                id=self.task.id))
+            return HTTPFound(self.request.route_path(self.route,
+                                                     id=self.task.id))
         title = u"Devis numéro : {0}".format(self.task.number)
         return dict(
                     title=title,
@@ -234,6 +232,7 @@ class EstimationView(TaskView):
         """
             Returns a page displaying an html rendering of the given task
         """
+        log.debug("# Generating the pdf file #")
         filename = "{0}.pdf".format(self.task.number)
         write_pdf(self.request, filename, self._html())
         return self.request.response
@@ -244,6 +243,7 @@ class EstimationView(TaskView):
         """
             Duplicates current estimation
         """
+        log.debug("# Duplicate estimation #")
         newone = self.task.duplicate()
         newone.CAEStatus = "draft"
         newone.statusPerson = self.user.id
@@ -260,15 +260,13 @@ class EstimationView(TaskView):
             newone.payment_lines.append(newline)
 
         newone.project = self.project
-        self.dbsession.merge(newone)
+        newone = self.dbsession.merge(newone)
         self.dbsession.flush()
         taskid = newone.IDTask
         self.request.session.flash(u"Le devis {0} a bien été dupliqué".format(
             self.task.number
             ), queue='main')
-        return HTTPFound(self.request.route_path(
-                    'estimation',
-                    taskid=taskid))
+        return HTTPFound(self.request.route_path(self.route, id=taskid))
 
     @view_config(route_name='estimation', request_param='action=delete',
             permission='edit')
@@ -276,27 +274,24 @@ class EstimationView(TaskView):
         """
             Delete an estimation
         """
+        log.debug("# Deleting an invoice #")
         if self.task.is_deletable():
             self.dbsession.delete(self.task)
             message = u"Le devis {0} a bien été supprimé.".format(
                                                             self.task.number)
+            self.request.session.flash(message, queue='main')
         else:
             message = u"Vous n'êtes pas autorisé à supprimer ce devis."
-        self.request.session.flash(message, queue='error')
+            self.request.session.flash(message, queue='error')
         return self.project_view_redirect()
 
-    @view_config(route_name='estimation', request_param='action=geninv',
-            permission='edit')
     def gen_invoices(self):
         """
             Called when an estimation status is changed
             ( when no form is displayed : the estimation itself is not
             editable anymore )
         """
-        log.debug("We change the estimation status")
-        newstatus = "geninv"
-        self.task.CAEStatus = newstatus
-
+        log.debug("# Invoice Generation #")
         #recovering common datas needed to generate the invoices
         computer = TaskComputing(self.task)
         count = 1
@@ -315,24 +310,19 @@ class EstimationView(TaskView):
             course=self.task.course,
             )
 
-        pcode = self.project.code
-        ccode = self.project.client.id
-        shortdate = "{0}{1}".format(
-                taskDate.month,
-                str(taskDate.year)[2:])
         already_paid_lines = []
 
         #generating deposit invoice
+        log.debug(" + Generating deposit invoice")
         if self.task.deposit > 0:
             invoice_args = invoice_args_common.copy()
             invoice_args.update(
                 dict(
                     sequenceNumber=len(self.project.invoices) + count,
-                    name = u"Facture d'acompte {0}".format(count),
-                    number = "{0}_{1}_FA{2}_{3}".format(pcode,
-                                                        ccode,
-                                                        count,
-                                                        shortdate),
+                    name=u"Facture d'acompte {0}".format(count),
+                    number=self.get_tasknumber(taskDate,
+                                               tmpl="{0}_{1}_FA{2}_{3:%m%y}",
+                                               seq_number=count),
                     displayedUnits=0,
                     ))
             invoice = Invoice(**invoice_args)
@@ -350,16 +340,16 @@ class EstimationView(TaskView):
             remember.rowIndex = count
             already_paid_lines.append(remember)
         # generating the different payment lines' invoices (not the last one)
+        log.debug(" + Generating payment invoices")
         for paymentline in self.payment_lines[:-1]:
             invoice_args = invoice_args_common.copy()
             invoice_args.update(
                     dict(
                         sequenceNumber=len(self.project.invoices) + count,
-                        name = u"Facture d'acompte {0}".format(count),
-                        number = "{0}_{1}_FA{2}_{3}".format(pcode,
-                                                            ccode,
-                                                            count,
-                                                            shortdate),
+                        name=u"Facture d'acompte {0}".format(count),
+                        number=self.get_tasknumber(taskDate,
+                                                 tmpl="{0}_{1}_FA{2}_{3:%m%y}",
+                                                 seq_number=count),
                         displayedUnits=0,
                         ))
             invoice = Invoice(**invoice_args)
@@ -384,12 +374,15 @@ class EstimationView(TaskView):
             already_paid_lines.append(remember)
 
         # generating the sold invoice
+        log.debug(" + Generating the last invoice")
         paymentline = self.payment_lines[-1]
         invoice_args = invoice_args_common.copy()
         invoice_args.update(
             dict(sequenceNumber=len(self.project.invoices) + count,
-                name=u"Facture de solde {0}".format(count),
-                number="{0}_{1}_F{2}_{3}".format(pcode,ccode,count,shortdate),
+                name=u"Facture de solde",
+                number=self.get_tasknumber(taskDate,
+                                           tmpl="{0}_{1}_F{2}_{3:%m%y}",
+                                           seq_number=count),
                 displayedUnits=0))
         invoice = Invoice(**invoice_args)
         line = InvoiceLine(rowIndex=1,
@@ -401,15 +394,31 @@ class EstimationView(TaskView):
         self.dbsession.merge(invoice)
         self.request.session.flash(u"Vos factures ont bien été générées",
                                 queue='main')
-        return self.project_view_redirect()
 
-    @view_config(route_name='estimation', request_param='action=aboest',
-            permission='edit')
-    def abort(self):
+    @view_config(route_name="estimation", request_param='action=status',
+                 permission="edit")
+    def status(self):
         """
-            Abort current estimation
+            Status change view
         """
-        self.task.CAEStatus = "aboest"
-        self.request.session.flash(u"Le devis {0} a été annulé \
+        return self._status()
+
+    def _can_change_status(self, status):
+        """
+            Handle the permission on status change depending on
+            actual permissions
+        """
+        if not has_permission('manage', self.request.context, self.request):
+            if status in ('invalid', 'valid', 'aboest'):
+                return False
+        return True
+
+    def _post_status_process(self, status):
+        """
+            Handle specific status changes
+        """
+        if status == "geninv":
+            self.gen_invoices()
+        elif status == "aboest":
+            self.request.session.flash(u"Le devis {0} a été annulé \
 (indiqué sans suite).".format(self.task.number))
-        return self.project_view_redirect()

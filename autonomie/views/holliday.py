@@ -66,6 +66,7 @@ class HollidayView(BaseView):
             else:
                 # Validation OK
                 for holliday in hollidays:
+                    self.dbsession.delete(holliday)
                     self.dbsession.flush()
                 for data in appstruct['hollidays']:
                     holliday = Holliday(user_id=self.request.user.id)

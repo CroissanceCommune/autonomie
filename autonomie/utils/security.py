@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 27 juin 2012 00:33:58 CEST
+# * Last Modified : mer. 27 juin 2012 01:09:06 CEST
 #
 # * Project : autonomie
 #
@@ -23,6 +23,7 @@ from autonomie.models.model import Company
 from autonomie.models.model import Client
 from autonomie.models.model import Estimation
 from autonomie.models.model import Invoice
+from autonomie.models.model import CancelInvoice
 from autonomie.models.model import User
 from autonomie.models.model import OperationComptable
 
@@ -41,6 +42,7 @@ def wrap_db_objects():
     Client.__acl__ = property(get_client_or_project_acls)
     Estimation.__acl__ = property(get_task_acl)
     Invoice.__acl__ = property(get_task_acl)
+    CancelInvoice.__acl__ = property(get_task_acl)
     User.__acl__ = property(get_user_acl)
     OperationComptable.__acl__ = property(get_task_acl)
 
@@ -74,6 +76,7 @@ class RootFactory(dict):
         self['clients'] = ClientFactory(self, 'clients')
         self['estimations'] = EstimationFactory(self, 'estimations')
         self['invoices'] = InvoiceFactory(self, 'invoices')
+        self['cancelinvoices'] = CancelInvoiceFactory(self, 'cancelinvoices')
         self['users'] = UserFactory(self, 'users')
         self['operations'] = OperationFactory(self, 'operations')
 
@@ -200,7 +203,7 @@ class EstimationFactory(BaseDBFactory):
 
 class InvoiceFactory(BaseDBFactory):
     """
-        Handle access to a client
+        Handle access to an invoice
     """
     def __init__(self, parent, name):
         self.__parent__ = parent
@@ -219,6 +222,30 @@ class InvoiceFactory(BaseDBFactory):
             raise KeyError
         obj.__parent__ = self
         obj.__name__ = 'invoice'
+        return obj
+
+
+class CancelInvoiceFactory(BaseDBFactory):
+    """
+        Handle access to a cancelinvoice
+    """
+    def __init__(self, parent, name):
+        self.__parent__ = parent
+        self.__name__ = name
+
+    def __getitem__(self, key):
+        """
+            Returns the traversed object
+        """
+        if self.dbsession == None:
+            raise Exception("Missing dbsession")
+        dbsession = self.dbsession()
+        obj = dbsession.query(CancelInvoice).filter(
+                                    CancelInvoice.IDTask==key).scalar()
+        if obj is None:
+            raise KeyError
+        obj.__parent__ = self
+        obj.__name__ = 'cancelinvoice'
         return obj
 
 def get_user_acl(self):

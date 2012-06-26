@@ -188,8 +188,8 @@ class CompanyInvoicesView(ListView):
                     current_company=company_id,
                     companies=Company.query(self.dbsession).all())
 
-    def get_invoices(self, company_id, search, client, year, paid, \
-                                                    sort, direction):
+    def get_invoices(self, company_id=None, search=None, client=None,
+                           year=None, paid=None, sort=None, direction="asc"):
         """
             Return the invoices
         """
@@ -205,15 +205,16 @@ class CompanyInvoicesView(ListView):
             inv, man_inv = self._filter_by_status(inv, man_inv, paid)
             if year:
                 inv, man_inv = self._filter_by_date(inv, man_inv, year)
-        inv = self._sort(inv, sort, direction)
+        if sort:
+            inv = self._sort(inv, sort, direction)
+            if sort == Invoice.officialNumber:
+                sort = ManualInvoice.officialNumber
+            elif sort == Invoice.taskDate:
+                sort = ManualInvoice.taskDate
+            elif sort == Invoice.number:
+                sort = ManualInvoice.officialNumber
+            man_inv = self._sort(man_inv, sort, direction)
         inv = inv.all()
-        if sort == Invoice.officialNumber:
-            sort = ManualInvoice.officialNumber
-        elif sort == Invoice.taskDate:
-            sort = ManualInvoice.taskDate
-        elif sort == Invoice.number:
-            sort = ManualInvoice.officialNumber
-        man_inv = self._sort(man_inv, sort, direction)
         man_inv = man_inv.all()
         invoices = self._wrap_for_computing(inv, man_inv)
         return invoices
@@ -311,18 +312,21 @@ class CompanyInvoicesView(ListView):
         current_year = today.year
         year = self.request.params.get('year', current_year)
         log.debug("Getting invoices")
-        inv, man_inv = self._get_invoices()
-        inv, man_inv = self._filter_by_status(inv, man_inv, "paid")
-        years = sorted(set([i.taskDate.year for i in inv.all()]))
-        inv, man_inv = self._filter_by_date(inv, man_inv, year)
-        inv = inv.order_by(Invoice.taskDate)
-        man_inv = man_inv.order_by(ManualInvoice.taskDate)
-        invoices = self._wrap_for_computing(inv, man_inv)
+        invoices = self.get_invoices(company_id=company.id,
+                                         paid="paid",
+                                         year=year,
+                                         sort=Invoice.taskDate)
+        #inv, man_inv = self._filter_by_status(inv, man_inv, "paid")
+        #years = sorted(set([i.taskDate.year for i in inv.all()]))
+        #inv, man_inv = self._filter_by_date(inv, man_inv, year)
+        #inv = inv.order_by(Invoice.taskDate)
+        #man_inv = man_inv.order_by(ManualInvoice.taskDate)
+        #invoices = self._wrap_for_computing(inv, man_inv)
         return dict(
                 title=u"Trésorerie",
                 invoices=invoices,
                 company=company,
-                years=years,
+                years=self._get_years(),
                 current_year=year,
                 today=today)
 

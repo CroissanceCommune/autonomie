@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 26 juin 2012 15:47:16 CEST
+# * Last Modified : mar. 26 juin 2012 17:27:08 CEST
 #
 # * Project : autonomie
 #
@@ -75,7 +75,7 @@ def get_company_acl(self):
         Compute the company's acls
     """
     acl = DEFAULT_PERM[:]
-    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
+    acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.employees])
     return acl
 
@@ -107,7 +107,7 @@ def get_client_or_project_acls(self):
         Compute the project's acls
     """
     acl = DEFAULT_PERM[:]
-    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
+    acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.company.employees])
     return acl
 
@@ -162,7 +162,7 @@ def get_task_acl(self):
         return the acls of the current task object
     """
     acl = DEFAULT_PERM[:]
-    acl.extend([(Allow, u"%s" % user.login, ("view", "edit",))
+    acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.project.company.employees])
     return acl
 
@@ -217,7 +217,7 @@ def get_user_acl(self):
         Get acls for user account edition
     """
     acl = DEFAULT_PERM[:]
-    acl.append((Allow, u"%s" % self.login, ("view", "edit",)))
+    acl.append((Allow, u"%s" % self.login, ("view", "edit", "add")))
     return acl
 
 class UserFactory(BaseDBFactory):

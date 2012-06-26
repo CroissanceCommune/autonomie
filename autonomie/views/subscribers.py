@@ -105,6 +105,8 @@ def company_menu(request, companies, cid):
         Add the company choose menu
     """
     menu = HTML.li(HTML.h2(get_company( request, cid ).name))
+    menu = MainMenuItem(get_company( request, cid ).name, "view",
+                    path="company", id=cid, _query=dict(action="index"))
     if len(companies) > 1:
         options = ((request.route_path("company", id=company.id),
                     company.name) for company in companies)
@@ -113,7 +115,7 @@ def company_menu(request, companies, cid):
                       'id':"company-select-menu"}
         menu = HTML.li(
                 tags.select("companies", default, options, **html_attrs))
-    menu = StaticWidget(menu, "view")
+        menu = StaticWidget(menu, "view")
     return menu
 
 @subscriber(BeforeRender)

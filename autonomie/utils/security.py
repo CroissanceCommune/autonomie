@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : sam. 23 juin 2012 15:13:06 CEST
+# * Last Modified : mar. 26 juin 2012 15:47:16 CEST
 #
 # * Project : autonomie
 #
@@ -26,7 +26,7 @@ from autonomie.models.model import Invoice
 from autonomie.models.model import User
 from autonomie.models.model import OperationComptable
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 DEFAULT_PERM = [(Allow, "group:admin", ALL_PERMISSIONS,),
                 (Allow, "group:manager", ("manage", "add", "edit", "view")),

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 26 juin 2012 17:27:08 CEST
+# * Last Modified : mer. 27 juin 2012 00:33:58 CEST
 #
 # * Project : autonomie
 #
@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 
 DEFAULT_PERM = [(Allow, "group:admin", ALL_PERMISSIONS,),
                 (Allow, "group:manager", ("manage", "add", "edit", "view")),
-                (Allow, Authenticated, 'view'),]
+                ]
 
 def wrap_db_objects():
     """
@@ -57,7 +57,15 @@ class RootFactory(dict):
        the request object
     """
     __name__ = "root"
-    __acl__ = DEFAULT_PERM[:]
+
+    @property
+    def __acl__(self):
+        """
+            Default permissions
+        """
+        acl = DEFAULT_PERM[:]
+        acl.append((Allow, Authenticated, 'view',))
+        return acl
 
     def __init__(self, request):
         self.request = request
@@ -75,6 +83,7 @@ def get_company_acl(self):
         Compute the company's acls
     """
     acl = DEFAULT_PERM[:]
+    acl.append((Allow, Authenticated, 'view',))
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.employees])
     return acl

@@ -15,7 +15,6 @@
     %endif
     %if task.has_been_validated():
         Vous ne pouvez plus modifier ce document car il a déjà été validé.
-        Il porte le numéro <b>${task.officialNumber}</b>.
     %elif task.is_waiting():
         Vous ne pouvez plus modifier ce document car il est en attente de validation.
     %endif

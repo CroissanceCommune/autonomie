@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : ven. 22 juin 2012 11:40:45 CEST
+# * Last Modified : mar. 26 juin 2012 15:50:08 CEST
 #
 # * Project : autonomie
 #
@@ -30,7 +30,7 @@ from pkg_resources import resource_filename
 
 from autonomie.utils.pdf import render_html
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 def mako_renderer(tmpl, **kw):
     """

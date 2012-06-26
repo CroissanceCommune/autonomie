@@ -71,6 +71,8 @@ def deferred_phase_title(node, kw):
     """
     if kw.get('tasktype') == "invoice":
         return u"Phase où insérer la facture"
+    elif kw.get('tasktype') == "cancelinvoice":
+        return u"Phase où insérer l'avoir"
     else:
         return u"Phase où insérer le devis"
 
@@ -81,6 +83,8 @@ def deferred_taskdate_title(node, kw):
     """
     if kw.get('tasktype') == "invoice":
         return u"Date de la facture"
+    elif kw.get('tasktype') == "cancelinvoice":
+        return u"Date de l'avoir"
     else:
         return u"Date du devis"
 
@@ -91,6 +95,8 @@ def deferred_description_title(node, kw):
     """
     if kw.get('tasktype') == "invoice":
         return u"Objet de la facture"
+    elif kw.get('tasktype') == "cancelinvoice":
+        return u"Objet de l'avoir"
     else:
         return u"Objet du devis"
 
@@ -407,6 +413,19 @@ estimationdetails_item.mako')
     payments = InvoicePayments(title=u"Conditions de paiement")
     communication = TaskCommunication(
                         title=u'Communication Entrepreneur/CAE')
+
+def get_cancel_invoice_schema():
+    """
+        return the cancel invoice form schema
+    """
+    schema = InvoiceSchema()
+    del schema['common']['course']
+    schema["payments"].title = u"Conditions de remboursement"
+    del schema['communication']
+    schema['payments']['paymentConditions'].title = u"Conditions de remboursement"
+    schema['payments']['paymentConditions'].description = u""
+    del schema["lines"]["discountHT"]
+    return schema
 
 class MappingWrapper:
     """

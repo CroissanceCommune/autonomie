@@ -471,12 +471,12 @@ class InvoiceView(TaskView, ListView):
         """
             return the current invoice or a new one
         """
-        invoice = Invoice()
-        invoice.CAEStatus = 'draft'
+        document = Invoice()
+        document.CAEStatus = "draft"
         phaseid = self.request.params.get('phase')
-        invoice.IDPhase = phaseid
-        invoice.IDEmployee = self.user.id
-        return invoice
+        document.IDPhase = phaseid
+        document.IDEmployee = self.user.id
+        return document
 
     def _html(self):
         """

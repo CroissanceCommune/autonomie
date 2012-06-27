@@ -95,9 +95,9 @@ h3.floatted{
             %for task in phase.estimations:
                 <tr>
                     <% task.url = request.route_path("estimation", id=task.id) %>
-                    <td onclick="document.location='${task.url}'">${task.number}</td>
-                    <td onclick="document.location='${task.url}'">${task.name}</td>
-                    <td onclick="document.location='${task.url}'">
+                    <td class='rowlink' onclick="document.location='${task.url}'">${task.number}</td>
+                    <td class='rowlink' onclick="document.location='${task.url}'">${task.name}</td>
+                    <td class='rowlink' onclick="document.location='${task.url}'">
                         %if task.is_cancelled():
                             <span class="label label-important">
                                 >
@@ -113,10 +113,11 @@ h3.floatted{
                     </td>
                     <td>
                         <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
-                            <span class='ui-icon ui-icon-pencil'></span>
+                            <i class='icon icon-pencil'></i>
                             Voir/Éditer
                         </a>
                         <a class='btn' href='${request.route_path("estimation", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                                <i class='icon icon-file'></i>
                             PDF
                         </a>
                         <a class='btn' href='${request.route_path("estimation", id=task.id, _query=dict(action="duplicate"))}' title="Dupliquer le devis">
@@ -168,6 +169,8 @@ h3.floatted{
                             </span>
                         %elif task.is_paid():
                             <i class='icon icon-ok'></i>
+                        %elif task.is_draft():
+                            <i class='icon icon-bold'></i>
                         %elif task.is_waiting():
                             <i class='icon icon-time'></i>
                         %endif
@@ -175,10 +178,11 @@ h3.floatted{
                     </td>
                     <td>
                         <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
-                            <span class='ui-icon ui-icon-pencil'></span>
+                            <i class='icon icon-pencil'></i>
                             Voir/Éditer
                         </a>
                         <a class='btn' href='${request.route_path("invoice", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                                <i class='icon icon-file'></i>
                            PDF
                         </a>
                     </td>
@@ -195,13 +199,20 @@ h3.floatted{
                     </td>
                     <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
                     <td onclick="document.location='${task.url}'" class='rowlink'>${task.name}</td>
-                    <td onclick="document.location='${task.url}'" class='rowlink'>${task.get_status_str()}</td>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>
+                        %if task.is_paid():
+                            <i class='icon icon-ok'></i>
+                        %elif task.is_draft():
+                            <i class='icon icon-bold'></i>
+                        %endif
+                        ${task.get_status_str()}</td>
                     <td>
                         <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
-                            <span class='ui-icon ui-icon-pencil'></span>
+                            <i class='icon icon-pencil'></i>
                             Voir/Éditer
                         </a>
                         <a class='btn' href='${request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                                <i class='icon icon-file'></i>
                            PDF
                         </a>
                     </td>

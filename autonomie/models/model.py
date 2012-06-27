@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 27 juin 2012 13:04:39 CEST
+# * Last Modified : mer. 27 juin 2012 18:43:25 CEST
 #
 # * Project : autonomie
 #
@@ -16,6 +16,7 @@
 import os
 import datetime
 import time
+import logging
 
 from hashlib import md5
 
@@ -39,6 +40,8 @@ from sqlalchemy import func
 
 from autonomie.models import DBBASE
 from autonomie.utils.exception import Forbidden
+
+log = logging.getLogger(__name__)
 
 class CustomDateType(TypeDecorator):
     """
@@ -529,7 +532,7 @@ class Task(DBBASE):
         """
             validate the caestatus change
         """
-        message = u"Vous n'êtes pas autorisé à assigner ce statut {0}à ce \
+        message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à ce \
 document."
         actual_status = self.CAEStatus
         message = message.format(status)
@@ -537,7 +540,9 @@ document."
             if not actual_status in (None, 'draft', 'invalid'):
                 raise Forbidden(message)
         elif status in ('valid',):
-            if not actual_status in ('wait',):
+            if self.is_cancelinvoice() and not actual_status in ('draft',):
+                    raise Forbidden(message)
+            elif not actual_status in ('wait',):
                 raise Forbidden(message)
         elif status in ('invalid',):
             if not actual_status in ('wait', ):
@@ -1353,34 +1358,6 @@ class CancelInvoice(Task):
             Return True if the current task is editable
         """
         return self.CAEStatus == 'draft'
-
-    @validates("CAEStatus")
-    def validate_status(self, key, status):
-        """
-            validate the caestatus change
-        """
-        message = u"Vous n'êtes pas autorisé à assigner ce statut {0}à ce \
-document."
-        actual_status = self.CAEStatus
-        message = message.format(status)
-        if status in ('draft',):
-            if not actual_status in (None, 'draft'):
-                raise Forbidden(message)
-        elif status in ('valid',):
-            if not actual_status in ('draft',):
-                raise Forbidden(message)
-        elif status in ('sent',):
-            if not actual_status in ('valid',):
-                raise Forbidden(message)
-        elif status in ('paid',):
-            if not actual_status in ('valid', 'sent',):
-                raise Forbidden(message)
-        elif status in ('abort',):
-            if not actual_status in ('valid', 'sent', "wait"):
-                raise Forbidden(message)
-        else:
-            assert False
-        return status
 
     def get_paymentmode_str(self):
         """

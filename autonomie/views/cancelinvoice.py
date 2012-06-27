@@ -20,9 +20,16 @@ import logging
 from deform import Form
 
 from pyramid.view import view_config
+from deform import ValidationFailure
 
+from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import get_cancel_invoice_schema
+from autonomie.views.forms.task import get_cancel_invoice_appstruct
+from autonomie.views.forms.task import get_cancel_invoice_dbdatas
 from autonomie.models.model import CancelInvoice
+from autonomie.models.model import CancelInvoiceLine
+from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.exception import Forbidden
 
 from .base import TaskView
 log = logging.getLogger(__name__)
@@ -47,6 +54,8 @@ class CancelInvoiceView(TaskView):
         """
             Cancel invoice add/edit
         """
+        if not self.is_editable():
+            return self.redirect_to_view_only()
         log.debug("# CancelInvoice Form #")
         if self.taskid:
             title = self.edit_title.format(task=self.task)
@@ -57,17 +66,48 @@ class CancelInvoiceView(TaskView):
             edit = False
             valid_msg = u"L'avoir a bien été ajouté."
 
-        appstruct = {}
+        #Retrieving datas
+        dbdatas = self.get_dbdatas_as_dict()
+        appstruct = appstruct = get_cancel_invoice_appstruct(dbdatas)
 
+        #Building form
         schema = self.schema.bind(phases=self.get_phases_choice(),
                                   tvas=self.get_tvas(),
                                   tasktype='cancelinvoice')
         form = Form(schema, buttons=self.get_buttons())
         form.widget.template = "autonomie:deform_templates/form.pt"
+
         if 'submit' in self.request.params:
             log.debug(" + Values have been submitted")
             datas = self.request.params.items()
             log.debug(datas)
+            try:
+                appstruct = form.validate(datas)
+            except ValidationFailure, e:
+                html_form = e.render()
+            else:
+                log.debug("  + Values are valid")
+                dbdatas = get_cancel_invoice_dbdatas(appstruct)
+                log.debug(dbdatas)
+                merge_session_with_post(self.task, dbdatas['cancelinvoice'])
+                if not edit:
+                    self.task.sequenceNumber = self.get_sequencenumber()
+                    self.task.name = self.get_taskname()
+                    self.task.number = self.get_tasknumber(self.task.taskDate)
+                try:
+                    self.request.session.flash(valid_msg, queue="main")
+                    self.task.project = self.project
+                    self.remove_lines_from_session()
+                    self.add_lines_to_task(dbdatas)
+                    self._status_process()
+                    self._set_modifications()
+                except Forbidden, e:
+                    self.request.session.pop_flash("main")
+                    self.request.session.flash(e.message, queue='error')
+
+                # Redirecting to the project page
+                return self.project_view_redirect()
+
         else:
             html_form = form.render(appstruct)
         return dict(title=title,
@@ -76,11 +116,18 @@ class CancelInvoiceView(TaskView):
                     html_form=html_form,
                     action_menu=self.actionmenu)
 
+    def is_editable(self):
+        """
+            Return True if the current task can be edited by the current user
+        """
+        return self.task.is_editable()
+
     def get_task(self):
         """
             return the current task
         """
         document = CancelInvoice()
+        # a cancel invoice doesn't pass the validation process
         document.CAEStatus = "draft"
         phaseid = self.request.params.get('phase')
         document.IDPhase = phaseid
@@ -91,6 +138,98 @@ class CancelInvoiceView(TaskView):
         """
             set the lines
         """
+        self.task_lines = self.task.lines
+
+    def get_dbdatas_as_dict(self):
+        """
+            Returns dbdatas as a dict of dict
+        """
+        return {'cancelinvoice':self.task.appstruct(),
+                'lines':[line.appstruct()
+                            for line in self.task_lines],
+                }
+
+    def get_sequencenumber(self):
+        """
+            set the sequence number
+            don't know really if this column matters
+        """
+        return len(self.project.cancelinvoices) + 1
+
+
+    def remove_lines_from_session(self):
+        """
+            Remove invoice lines and payment lines from the current session
+        """
+        # if edition we remove all invoice lines
+        for line in self.task.lines:
+            self.dbsession.delete(line)
+
+    def add_lines_to_task(self, dbdatas):
+        """
+            Add the lines to the current invoice
+        """
+        for line in dbdatas['lines']:
+            eline = CancelInvoiceLine()
+            merge_session_with_post(eline, line)
+            self.task.lines.append(eline)
+
+    def _html(self):
+        """
+            Returns an html version of the current document
+        """
         #TODO
         pass
+
+    @view_config(route_name='cancelinvoice',
+                 renderer='tasks/cancelinvoice_html.mako',
+                 request_param='view=html',
+                 permission='view')
+    def html(self):
+        """
+            Html output of the document
+        """
+        # TODO
+        pass
+
+    @view_config(route_name='cancelinvoice',
+                    renderer='tasks/cancelinvoice_html.mako',
+                    request_param='view=pdf',
+                    permission='view')
+    def pdf(self):
+        """
+            Returns a pdf displaying the given task
+        """
+        #TODO
+        pass
+
+    @view_config(route_name="cancelinvoice", permission="manage",
+                                   request_param='action=status')
+    def status(self):
+        """
+            Status change view
+        """
+        self._status()
+
+    def _post_status_process(self, status):
+        """
+            post status process
+        """
+        if status == "valid":
+            officialNumber = get_next_officialNumber(
+                                self.request.dbsession)
+            self.task.officialNumber = officialNumber
+            self.request.session.flash(u"L'avoir porte le numéro \
+<b>{0}</b>".format(officialNumber), queue='main')
+
+        elif status == 'paid':
+            paymentMode = self.request.params.get('paymentMode')
+            self.task.paymentMode = paymentMode
+
+    def _can_change_status(self, status):
+        """
+            Handle the permissions on status change depending on actual
+            permission
+        """
+        return status in ('draft', 'valid', 'sent', 'paid',)
 

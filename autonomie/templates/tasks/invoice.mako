@@ -35,8 +35,10 @@
 </%block>
         <%block name='information'>
             <strong>Facture N° </strong>${task.model.number}<br />
-            <span  style='color:#999'> <strong style='color:#999'>Référence devis N° </strong>${task.model.number}</span> <br />
-            <br />
+            % if task.model.estimation:
+                <span  style='color:#999'> <strong style='color:#999'>Référence devis N° </strong>${task.model.estimation.number}</span> <br />
+                <br />
+            % endif
             <strong>Objet : </strong>${format_text(task.model.description)}<br />
         </%block>
         <%block name="notes_and_conditions">

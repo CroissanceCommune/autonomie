@@ -65,42 +65,6 @@ def get_payment_times():
     return payment_times
 
 @colander.deferred
-def deferred_phase_title(node, kw):
-    """
-        deferred phase title
-    """
-    if kw.get('tasktype') == "invoice":
-        return u"Phase où insérer la facture"
-    elif kw.get('tasktype') == "cancelinvoice":
-        return u"Phase où insérer l'avoir"
-    else:
-        return u"Phase où insérer le devis"
-
-@colander.deferred
-def deferred_taskdate_title(node, kw):
-    """
-        deferred taskDate title
-    """
-    if kw.get('tasktype') == "invoice":
-        return u"Date de la facture"
-    elif kw.get('tasktype') == "cancelinvoice":
-        return u"Date de l'avoir"
-    else:
-        return u"Date du devis"
-
-@colander.deferred
-def deferred_description_title(node, kw):
-    """
-        deferred title
-    """
-    if kw.get('tasktype') == "invoice":
-        return u"Objet de la facture"
-    elif kw.get('tasktype') == "cancelinvoice":
-        return u"Objet de l'avoir"
-    else:
-        return u"Objet du devis"
-
-@colander.deferred
 def deferred_course_title(node, kw):
     """
         deferred title
@@ -169,7 +133,6 @@ estimationline_mapping_item.mako'
                      )
             )
 
-
 @colander.deferred
 def deferred_tvas_widget(node, kw):
     """
@@ -237,18 +200,18 @@ class TaskConfiguration(colander.MappingSchema):
     """
     IDPhase = colander.SchemaNode(
                 colander.String(),
-                title=deferred_phase_title,
+                title=u"Phase où insérer le devis",
                 widget=deferred_phases_widget,
                 )
     taskDate = colander.SchemaNode(
                 colander.Date(),
-                title=deferred_taskdate_title,
+                title=u"Date du devis",
                 widget=get_date_input(),
                 default=datetime.date.today()
                 )
     description = colander.SchemaNode(
                 colander.String(),
-                title=deferred_description_title,
+                title=u"Objet du devis",
                 widget=widget.TextAreaWidget(css_class="span8"),
                 )
     course = colander.SchemaNode(colander.Integer(),
@@ -380,50 +343,64 @@ class TaskCommunication(colander.MappingSchema):
                         description=u"Message à destination des membres de \
 la CAE qui validderont votre document (n'apparaît pas dans le PDF)")
 
-class EstimationSchema(colander.MappingSchema):
+class TaskSchema(colander.MappingSchema):
     """
-        colander Estimation form schema
+        colander base Schema for task edition
     """
     common = TaskConfiguration( title=u"")
     lines = TaskLinesBlock(title=u"Détail des prestations",
-            widget=widget.MappingWidget(
-           item_template='autonomie:deform_templates/\
-estimationdetails_item.mako'
-            )
-            )
+                           widget=widget.MappingWidget(
+      item_template='autonomie:deform_templates/estimationdetails_item.mako'))
     notes = TaskNotes(title=u"Notes")
-    payments = EstimationPayments(title=u'Conditions de paiement',
-            widget=widget.MappingWidget(
-                item_template='autonomie:deform_templates/\
-paymentdetails_item.mako'))
-    communication = TaskCommunication(
-                        title=u'Communication Entrepreneur/CAE')
 
-class InvoiceSchema(colander.MappingSchema):
+def get_estimation_schema():
     """
-        colander Invoice form schema
+        Return the schema for estimation add/edit
     """
-    common = TaskConfiguration( title=u"")
-    lines = TaskLinesBlock(title=u"Détail des prestations",
-            widget=widget.MappingWidget(
-                item_template='autonomie:deform_templates/\
-estimationdetails_item.mako')
-            )
-    notes = TaskNotes(title=u"Notes")
-    payments = InvoicePayments(title=u"Conditions de paiement")
-    communication = TaskCommunication(
-                        title=u'Communication Entrepreneur/CAE')
+    schema = TaskSchema().clone()
+    tmpl = 'autonomie:deform_templates/paymentdetails_item.mako'
+    schema.add(
+            EstimationPayments(title=u'Conditions de paiement',
+                              widget=widget.MappingWidget(item_template=tmpl),
+                              name='payments'))
+    schema.add(TaskCommunication(title=u'Communication Entrepreneur/CAE',
+                                 name='communication'))
+    return schema
+
+def get_invoice_schema():
+    """
+        Return the schema for invoice add/edit
+    """
+    schema = TaskSchema().clone()
+    title = u"Phase où insérer la facture"
+    schema['common']['IDPhase'].title = title
+    title = u"Date de la facture"
+    schema['common']['taskDate'].title = title
+    title = u"Objet de la facture"
+    schema['common']['description'].title = title
+    title = u"Conditions de paiement"
+    schema.add(InvoicePayments(title=title, name='payments'))
+    schema.add(TaskCommunication(title=u'Communication Entrepreneur/CAE',
+                                 name='communication'))
+    return schema
 
 def get_cancel_invoice_schema():
     """
         return the cancel invoice form schema
     """
-    schema = InvoiceSchema()
+    schema = TaskSchema().clone()
+    title = u"Phase où insérer l'avoir"
+    schema['common']['IDPhase'].title = title
+    title = u"Date de l'avoir"
+    schema['common']['taskDate'].title = title
+    title = u"Objet de l'avoir"
+    schema['common']['description'].title = title
     del schema['common']['course']
-    schema["payments"].title = u"Conditions de remboursement"
-    del schema['communication']
-    schema['payments']['paymentConditions'].title = u"Conditions de remboursement"
-    schema['payments']['paymentConditions'].description = u""
+    title = u"Conditions de remboursement"
+    payments = InvoicePayments(title=title, name='payments').clone()
+    payments['paymentConditions'].title = title
+    payments['paymentConditions'].description = u""
+    schema.add(payments)
     del schema["lines"]["discountHT"]
     return schema
 
@@ -462,6 +439,41 @@ class MappingWrapper:
                 dbdatas.setdefault(self.dbtype, {})[field] = value
         return dbdatas
 
+class SequenceWrapper:
+    """
+        Maps the db models with colander Sequence Schemas
+    """
+    mapping_name = ''
+    sequence_name = ''
+    dbtype = ''
+    fields = None
+    sort_key = 'rowIndex'
+    def toschema(self, dbdatas, appstruct):
+        """
+            Build schema expected datas from list of elements
+        """
+        lineslist = dbdatas.get(self.dbtype, [])
+        for line in sorted(lineslist, key=lambda line:int(line[self.sort_key])):
+            appstruct.setdefault(self.mapping_name, {})
+            appstruct[self.mapping_name].setdefault(self.sequence_name, []
+                                                    ).append(
+                    dict((key, value)for key, value in line.items()
+                                              if key in self.fields)
+                    )
+        return appstruct
+
+    def todb(self, appstruct, dbdatas):
+        """
+            convert colander deserialized datas to database dbdatas
+        """
+        all_ = appstruct.get(self.mapping_name, {}).get(self.sequence_name, [])
+        for index, line in enumerate(all_):
+            dbdatas.setdefault(self.dbtype, [])
+            line[self.sort_key] = index+1
+            dbdatas[self.dbtype].append(line)
+        return dbdatas
+
+
 class InvoiceMatch(MappingWrapper):
     matching_map = (
                         #task attrs
@@ -499,40 +511,20 @@ class EstimationMatch(MappingWrapper):
                          )
     dbtype = 'estimation'
 
-
-class SequenceWrapper:
-    """
-        Maps the db models with colander Sequence Schemas
-    """
-    mapping_name = ''
-    sequence_name = ''
-    dbtype = ''
-    fields = None
-    sort_key = 'rowIndex'
-    def toschema(self, dbdatas, appstruct):
-        """
-            Build schema expected datas from list of elements
-        """
-        lineslist = dbdatas.get(self.dbtype, [])
-        for line in sorted(lineslist, key=lambda line:int(line[self.sort_key])):
-            appstruct.setdefault(self.mapping_name, {})
-            appstruct[self.mapping_name].setdefault(self.sequence_name, []
-                                                    ).append(
-                    dict((key, value)for key, value in line.items()
-                                              if key in self.fields)
-                    )
-        return appstruct
-
-    def todb(self, appstruct, dbdatas):
-        """
-            convert colander deserialized datas to database dbdatas
-        """
-        all_ = appstruct.get(self.mapping_name, {}).get(self.sequence_name, [])
-        for index, line in enumerate(all_):
-            dbdatas.setdefault(self.dbtype, [])
-            line[self.sort_key] = index+1
-            dbdatas[self.dbtype].append(line)
-        return dbdatas
+class CancelInvoiceMatch(MappingWrapper):
+    matching_map = (
+                        #task attrs
+                         ('IDPhase','common'),
+                         ('taskDate','common'),
+                         ('description', 'common'),
+                        #both estimation and invoice attrs
+                         ('displayedUnits', 'common'),
+                         ('tva', 'lines'),
+                         ('expenses', 'lines'),
+                         ('exclusions', 'notes'),
+                         ('reimbursementConditions', 'payments'),
+            )
+    dbtype = 'cancelinvoice'
 
 class TaskLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
@@ -584,6 +576,24 @@ def get_invoice_dbdatas(appstruct):
         dbdatas = matchobj().todb(appstruct, dbdatas)
     return dbdatas
 
+def get_cancel_invoice_appstruct(dbdatas):
+    """
+        return cancel invoice schema compatible appstruct
+    """
+    appstruct = {}
+    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
+        appstruct = matchobj().toschema(dbdatas, appstruct)
+    return appstruct
+
+def get_cancel_invoice_dbdatas(appstruct):
+    """
+        return dict with db compatible datas
+    """
+    dbdatas = {}
+    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
+        dbdatas = matchobj().todb(appstruct, dbdatas)
+    return dbdatas
+
 def set_manualDeliverables(appstruct, dbdatas):
     """
         Hack the dbdatas to set the manualDeliverables value
@@ -605,126 +615,3 @@ def set_payment_times(appstruct, dbdatas):
         appstruct.setdefault('payments', {})['payment_times'] = max(1,
                                         len(dbdatas.get('payment_lines')))
     return appstruct
-
-class TaskComputing:
-    """
-        The task computing model is a handly class
-        overlaying the database model for estimation or invoices
-        it provides access to the model and computation of the main amounts
-        we'd like to be computed
-
-        NOTE ON COMPUTING
-
-        Since the datas stored in the database are stored in *100 format
-        We are now working with integers only
-        TVA is stored as an integer too (needs to be divided by 100*100
-        Database returns Decimal, so we convert all database retrieved amounts
-        in integers (except the quantity one which is not stored in *100 format)
-
-        Payment lines:
-            the payment lines are:
-                manually configured
-                or
-                splitted in equal parts
-            in each case, the sold should be computed aside to ensure the total
-            amount is reached (if not,we may make mistakes by rounding)
-
-    """
-
-    def __init__(self, model):
-        self.model = model
-
-    @staticmethod
-    def compute_line_total(line):
-        """
-            compute estimation/invoice line total
-        """
-        cost = line.cost
-        quantity = line.quantity
-        return float(cost) * float(quantity)
-
-    def compute_lines_total(self):
-        """
-            compute the estimation/invoices line total
-        """
-        return sum(self.compute_line_total(line) for line in self.model.lines)
-
-    def compute_totalht(self):
-        """
-            compute the ht total
-        """
-        return self.compute_lines_total() - int(self.model.discountHT)
-
-    def compute_tva(self, totalht=None):
-        """
-            compute the tva amount
-        """
-        if not totalht:
-            totalht = self.compute_totalht()
-        return int(float(totalht) * (max(int(self.model.tva), 0) / 10000.0))
-
-    def compute_ttc(self):
-        """
-            compute the ttc value before expenses
-        """
-        totalht = self.compute_totalht()
-        tva_amount = self.compute_tva(totalht)
-        return totalht + tva_amount
-
-    def compute_total(self):
-        """
-            compute the total amount
-        """
-        return self.compute_ttc() - int(self.model.expenses)
-
-    def compute_deposit(self):
-        """
-            Compute the amount of the deposit
-        """
-        if self.model.deposit > 0:
-            total = self.compute_total()
-            return int(total * int(self.model.deposit) / 100.0)
-        return 0
-
-    def get_nb_payment_lines(self):
-        """
-            Returns the number of payment lines configured
-        """
-        return len(self.model.payment_lines)
-
-    def compute_line_amount(self):
-        """
-            Compute payment lines amounts in case of equal division
-            (when manualDeliverables is 0)
-            (when the user has checked 3 times)
-        """
-        total = self.compute_total()
-        deposit = self.compute_deposit()
-        rest = total - deposit
-        return int(rest / self.get_nb_payment_lines())
-
-    def compute_sold(self):
-        """
-            Compute the sold amount to finish on an exact value
-            if we divide 10 in 3, we'd like to have something like :
-                3.33 3.33 3.34
-        """
-        total = self.compute_total()
-        deposit = self.compute_deposit()
-        rest = total - deposit
-        payment_lines_num = self.get_nb_payment_lines()
-        if payment_lines_num == 1:
-            return rest
-        else:
-            if self.model.manualDeliverables == 0:
-                line_amount = self.compute_line_amount()
-                return rest - ((payment_lines_num-1) * line_amount)
-            else:
-                return rest - sum(line.amount \
-                        for line in self.model.payment_lines[:-1])
-
-    def get_client(self):
-        """
-            Returns the client associated to the given task
-        """
-        return self.model.project.client

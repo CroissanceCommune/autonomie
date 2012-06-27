@@ -18,9 +18,10 @@
 """
 import logging
 
+from sqlalchemy import and_
 from pyramid.view import view_config
 
-from autonomie.models.model import Invoice, Estimation
+from autonomie.models.model import Invoice, Estimation, Phase
 
 log = logging.getLogger(__name__)
 
@@ -30,12 +31,14 @@ def manage(request):
         The manage view
     """
     dbsession = request.dbsession()
-    invoices = Invoice.query(dbsession).filter(Invoice.CAEStatus=='wait').all()
+    invoices = Invoice.query(dbsession).join(Invoice.phase).filter(
+            and_(Invoice.CAEStatus=='wait', Phase.name!=None)).all()
     for i in invoices:
         i.url = request.route_path("invoice", id=i.id)
 
-    estimations = Estimation.query(dbsession).filter(
-                                       Estimation.CAEStatus=='wait').all()
+    estimations = Estimation.query(dbsession).join(Estimation.phase).filter(
+                    and_(Estimation.CAEStatus=='wait',
+                            Phase.name!=None)).all()
     for i in estimations:
         i.url = request.route_path("estimation", id=i.id)
     invoices.extend(estimations)

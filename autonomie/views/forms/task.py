@@ -140,7 +140,10 @@ def deferred_tvas_widget(node, kw):
     """
     tvas = kw.get('tvas')
     wid = widget.SelectWidget(values=tvas,
-                                  css_class='span1')
+                                  css_class='span1',
+                 before='autonomie:deform_templates/staticinput.mako',
+                 before_options={'label':u'Total HT', 'id':'httotal'})
+
     return wid
 
 
@@ -173,8 +176,8 @@ class TaskLinesBlock(colander.MappingSchema):
          template='autonomie:deform_templates/wrappable_input.mako',
          before='autonomie:deform_templates/staticinput.mako',
          before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},
-         after='autonomie:deform_templates/staticinput.mako',
-         after_options={'label':u'Total HT', 'id':'httotal'}
+#         after='autonomie:deform_templates/staticinput.mako',
+#         after_options={'label':u'Total HT', 'id':'httotal'}
                 ),
             title=u"Remise",
             missing=0)
@@ -397,6 +400,11 @@ def get_cancel_invoice_schema():
     schema['common']['description'].title = title
     del schema['common']['course']
     title = u"Conditions de remboursement"
+    tva = schema['lines']['tva']
+    tva.before='autonomie:deform_templates/staticinput.mako',
+    tva.before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},
+    tva.after='autonomie:deform_templates/staticinput.mako',
+    tva.after_options={'label':u'Total HT', 'id':'httotal'}
     payments = InvoicePayments(title=title, name='payments').clone()
     payments['paymentConditions'].title = title
     payments['paymentConditions'].description = u""

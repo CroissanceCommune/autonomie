@@ -39,6 +39,11 @@ Base template for task rendering
         %else:
             <% colspan = 1 %>
         % endif
+        % if task.model.is_cancelinvoice():
+            <% sign = "- " %>
+        % else:
+            <% sign = "" %>
+        % endif
         <div class='row'>
         <table class="lines span12">
             <thead>
@@ -65,10 +70,10 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                         ${format_amount(task.compute_lines_total())}
+                        ${sign} ${format_amount(task.compute_lines_total())}
                      </td>
                  </tr>
-                %if task.model.discountHT:
+                 %if hasattr(task.model, "discountHT") and task.model.discountHT:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
                             Remise commerciale
@@ -118,7 +123,7 @@ Base template for task rendering
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${format_amount(task.compute_total())} €
+                        ${sign} ${format_amount(task.compute_total())} €
                     </td>
                 </tr>
             </tbody>
@@ -132,7 +137,7 @@ Base template for task rendering
             % if config.has_key('coop_pdffootertitle'):
                 <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
             %endif
-            % if task.model.course == 1 and config.has_key('coop_pdffootercourse'):
+            % if hasattr(task.model, "course") and task.model.course == 1 and config.has_key('coop_pdffootercourse'):
                 ${format_text(config.get('coop_pdffootercourse'))}<br />
             % endif
             % if config.has_key('coop_pdffootertext'):

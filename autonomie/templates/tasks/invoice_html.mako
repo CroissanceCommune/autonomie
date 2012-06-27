@@ -20,6 +20,10 @@
         Vous ne pouvez plus modifier ce document car il est en attente de validation.
     %endif
         <br />
+    %if task.estimation:
+        Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.number}</a>
+    % endif
+        <br />
 </div>
         <div style='border:1px solid #888'>
 <form id="deform" class="deform form-horizontal deform"

@@ -35,7 +35,6 @@ from autonomie.views.forms.task import get_estimation_dbdatas
 from autonomie.utils.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
-from autonomie.utils.pdf import write_pdf
 from autonomie.utils.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
@@ -53,7 +52,7 @@ class EstimationView(TaskView):
     add_title = u"Nouveau devis"
     edit_title = u"Édition du devis {task.number}"
     taskname_tmpl = u"Devis {0}"
-    tasknumber_tmpl = "{0}_{1}_D{2}_{3:%m%y}"
+    tasknumber_tmpl = u"{0}_{1}_D{2}_{3:%m%y}"
     route = "estimation"
 
     def set_lines(self):
@@ -232,10 +231,7 @@ class EstimationView(TaskView):
         """
             Returns a page displaying an html rendering of the given task
         """
-        log.debug("# Generating the pdf file #")
-        filename = "{0}.pdf".format(self.task.number)
-        write_pdf(self.request, filename, self._html())
-        return self.request.response
+        return self._pdf()
 
     @view_config(route_name='estimation', request_param='action=duplicate',
             permission='edit')
@@ -321,7 +317,7 @@ class EstimationView(TaskView):
                     sequenceNumber=len(self.project.invoices) + count,
                     name=u"Facture d'acompte {0}".format(count),
                     number=self.get_tasknumber(taskDate,
-                                               tmpl="{0}_{1}_FA{2}_{3:%m%y}",
+                                               tmpl=u"{0}_{1}_FA{2}_{3:%m%y}",
                                                seq_number=count),
                     displayedUnits=0,
                     ))
@@ -348,7 +344,7 @@ class EstimationView(TaskView):
                         sequenceNumber=len(self.project.invoices) + count,
                         name=u"Facture d'acompte {0}".format(count),
                         number=self.get_tasknumber(taskDate,
-                                                 tmpl="{0}_{1}_FA{2}_{3:%m%y}",
+                                                tmpl=u"{0}_{1}_FA{2}_{3:%m%y}",
                                                  seq_number=count),
                         displayedUnits=0,
                         ))
@@ -381,7 +377,7 @@ class EstimationView(TaskView):
             dict(sequenceNumber=len(self.project.invoices) + count,
                 name=u"Facture de solde",
                 number=self.get_tasknumber(taskDate,
-                                           tmpl="{0}_{1}_F{2}_{3:%m%y}",
+                                           tmpl=u"{0}_{1}_F{2}_{3:%m%y}",
                                            seq_number=count),
                 displayedUnits=0))
         invoice = Invoice(**invoice_args)

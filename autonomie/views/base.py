@@ -34,6 +34,7 @@ from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import StaticWidget
 from autonomie.utils.exception import Forbidden
 from autonomie.views.mail import StatusChanged
+from autonomie.utils.pdf import write_pdf
 
 log = logging.getLogger(__name__)
 
@@ -301,12 +302,17 @@ class TaskView(BaseView):
             Return a button to set a paid btn and a select to choose
             the payment mode
         """
-        if self.task.has_been_validated() and self.task.is_invoice() and \
-                                                    not self.task.is_paid():
-            yield Submit(u"Facture payée",
-                            "manage",
-                            value="paid",
-                            request=self.request)
+        if self.task.has_been_validated() and \
+                not self.task.is_estimation() and \
+                not self.task.is_paid():
+            if self.task.is_cancelinvoice():
+                label = u"Avoir payé"
+            else:
+                label = u"Facture payée"
+            yield Submit(label,
+                         "manage",
+                         value="paid",
+                         request=self.request)
             yield StaticWidget(self._paid_mod_select(),
                         "manage")
 
@@ -315,7 +321,7 @@ class TaskView(BaseView):
             Return a button to abort an invoice
         """
         if self.task.has_been_validated() and \
-                not self.task.is_estimation() and \
+                self.task.is_invoice() and \
                 not self.task.is_paid():
             yield Submit(u"Annuler cette facture",
                                 "manage",
@@ -326,7 +332,8 @@ class TaskView(BaseView):
         """
             Return the buttons to handle validation
         """
-        if self.task.is_waiting() or self.task.is_cancelinvoice():
+        if self.task.is_waiting() or (
+                    self.task.is_cancelinvoice() and self.task.is_draft()):
             yield Submit(u"Valider le document",
                         "manage",
                         value="valid",
@@ -439,3 +446,12 @@ effectuer à attribuer ce statut à ce document.")
             self.request.session.flash(u"Aucune modification n'a pu être \
     effectuée, des informations sont manquantes.", queue="error")
         return self.project_view_redirect()
+
+    def _pdf(self):
+        """
+            Returns a page displaying an html rendering of the current task
+        """
+        log.debug("# Generating the pdf file #")
+        filename = u"{0}.pdf".format(self.task.number)
+        write_pdf(self.request, filename, self._html())
+        return self.request.response

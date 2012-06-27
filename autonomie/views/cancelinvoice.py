@@ -21,6 +21,7 @@ from deform import Form
 
 from pyramid.view import view_config
 from deform import ValidationFailure
+from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import get_cancel_invoice_schema
@@ -30,6 +31,9 @@ from autonomie.models.model import CancelInvoice
 from autonomie.models.model import CancelInvoiceLine
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.exception import Forbidden
+from autonomie.utils.task import CancelInvoiceComputing
+from autonomie.utils.pdf import render_html
+from autonomie.utils.pdf import write_pdf
 
 from .base import TaskView
 log = logging.getLogger(__name__)
@@ -42,7 +46,7 @@ class CancelInvoiceView(TaskView):
     add_title = u"Nouvel avoir"
     edit_title = u"Édition de l'avoir {task.number}"
     taskname_tmpl = u"Avoir {0}"
-    tasknumber_tmpl = "{0}_{1}_A{2}_{3}"
+    tasknumber_tmpl = u"{0}_{1}_A{2}_{3:%m%y}"
     route = "cancelinvoice"
 
     @view_config(route_name="cancelinvoices",
@@ -178,8 +182,15 @@ class CancelInvoiceView(TaskView):
         """
             Returns an html version of the current document
         """
-        #TODO
-        pass
+        compute = CancelInvoiceComputing(self.task)
+        template = "tasks/cancelinvoice.mako"
+        config = self.request.config
+        datas = dict(
+                company=self.company,
+                project=self.project,
+                task=compute,
+                config=config)
+        return render_html(self.request, template, datas)
 
     @view_config(route_name='cancelinvoice',
                  renderer='tasks/cancelinvoice_html.mako',
@@ -189,8 +200,15 @@ class CancelInvoiceView(TaskView):
         """
             Html output of the document
         """
-        # TODO
-        pass
+        if self.is_editable():
+            return HTTPFound(self.request.route_path(self.route,
+                                                    id=self.task.id))
+        title = u"Avoir numéro : {0}".format(self.task.number)
+        return dict(title=title,
+                    task=self.task,
+                    html_datas=self._html(),
+                    action_menu=self.actionmenu,
+                    submit_buttons=self.get_buttons())
 
     @view_config(route_name='cancelinvoice',
                     renderer='tasks/cancelinvoice_html.mako',
@@ -200,8 +218,7 @@ class CancelInvoiceView(TaskView):
         """
             Returns a pdf displaying the given task
         """
-        #TODO
-        pass
+        return self._pdf()
 
     @view_config(route_name="cancelinvoice", permission="manage",
                                    request_param='action=status')
@@ -209,7 +226,7 @@ class CancelInvoiceView(TaskView):
         """
             Status change view
         """
-        self._status()
+        return self._status()
 
     def _post_status_process(self, status):
         """
@@ -232,4 +249,3 @@ class CancelInvoiceView(TaskView):
             permission
         """
         return status in ('draft', 'valid', 'sent', 'paid',)
-

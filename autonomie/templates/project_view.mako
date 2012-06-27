@@ -90,31 +90,41 @@ h3.floatted{
                 <th>Document</th>
                 <th>Nom</th>
                 <th>État</th>
-                ##<th>Date</th>
-                ##<th>Créé par</th>
                 <th>Action</th>
             </thead>
-            %for estimation in phase.estimations:
+            %for task in phase.estimations:
                 <tr>
-                    <td><a href='${request.route_path("estimation", id=estimation.IDTask)}' title="Voir/éditer ce devis">${estimation.number}</a></td>
-                    <td>${estimation.name}</td>
-                    <td>${estimation.get_status_str()}</td>
-                    ##    <td>${print_date(estimation.statusDate)}</td>
-                    ##<td>${estimation.owner.firstname} ${estimation.owner.lastname}</td>
+                    <% task.url = request.route_path("estimation", id=task.id) %>
+                    <td onclick="document.location='${task.url}'">${task.number}</td>
+                    <td onclick="document.location='${task.url}'">${task.name}</td>
+                    <td onclick="document.location='${task.url}'">
+                        %if task.is_cancelled():
+                            <span class="label label-important">
+                                >
+                            </span>
+                        %elif task.is_draft():
+                            <i class='icon icon-bold'></i>
+                        %elif task.CAEStatus == 'geninv':
+                            <i class='icon icon-tasks'></i>
+                        %elif task.is_waiting():
+                            <i class='icon icon-time'></i>
+                        %endif
+                        ${task.get_status_str()}
+                    </td>
                     <td>
-                        <a class='btn' href='${request.route_path("estimation", id=estimation.IDTask)}' title="Voir/éditer ce devis">
+                        <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
                             <span class='ui-icon ui-icon-pencil'></span>
                             Voir/Éditer
                         </a>
-                        <a class='btn' href='${request.route_path("estimation", id=estimation.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                        <a class='btn' href='${request.route_path("estimation", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
                             PDF
                         </a>
-                        <a class='btn' href='${request.route_path("estimation", id=estimation.IDTask, _query=dict(action="duplicate"))}' title="Dupliquer le devis">
+                        <a class='btn' href='${request.route_path("estimation", id=task.id, _query=dict(action="duplicate"))}' title="Dupliquer le devis">
                             Dupliquer
                         </a>
-                        %if estimation.is_deletable():
+                        %if task.is_deletable():
                             <a class='btn'
-                                href='${request.route_path("estimation", id=estimation.IDTask, _query=dict(action="delete"))}'
+                                href='${request.route_path("estimation", id=task.id, _query=dict(action="delete"))}'
                                 title="Supprimer le devis"
                                 onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');">
                                 Supprimer
@@ -138,31 +148,65 @@ h3.floatted{
         %if phase.invoices:
             <table class='table table-striped table-condensed'>
         <thead>
+            <th>Numéro</th>
             <th>Document</th>
             <th>Nom</th>
             <th>État</th>
-            ##<th>Date</th>
-            ##<th>Créé par</th>
             <th>Action</th>
         </thead>
-            %for invoice in phase.invoices:
+            %for task in phase.invoices:
                 <tr>
-                    <td><a href='${request.route_path("invoice", id=invoice.IDTask)}' title="Voir/éditer cette facture">${invoice.number}</a></td>
-                    <td>${invoice.name}</td>
-                    <td>${invoice.get_status_str()}</td>
-                    ##      <td>${print_date(invoice.statusDate)}</td>
-                    ##      <td>${invoice.owner.firstname} ${invoice.owner.lastname}</td>
+                    <% task.url = request.route_path("invoice", id=task.id) %>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>
+                        ${task.officialNumber}</td>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>${task.name}</td>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>
+                        %if task.is_cancelled():
+                            <span class="label label-important">
+                                >
+                            </span>
+                        %elif task.is_paid():
+                            <i class='icon icon-ok'></i>
+                        %elif task.is_waiting():
+                            <i class='icon icon-time'></i>
+                        %endif
+                        ${task.get_status_str()}
+                    </td>
                     <td>
-                        <a class='btn' href='${request.route_path("invoice", id=invoice.IDTask)}' title="Voir/éditer ce devis">
+                        <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
                             <span class='ui-icon ui-icon-pencil'></span>
                             Voir/Éditer
                         </a>
-                        <a class='btn' href='${request.route_path("invoice", id=invoice.IDTask, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                        <a class='btn' href='${request.route_path("invoice", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
                            PDF
                         </a>
                     </td>
                 </tr>
             %endfor
+            % for task in phase.cancelinvoices:
+                <tr>
+                    <% task.url = request.route_path("cancelinvoice", id=task.id) %>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>
+                        ${task.officialNumber}
+                        % if task.invoice:
+                            (lié à la facture ${task.invoice.officialNumber})
+                        % endif
+                    </td>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>${task.name}</td>
+                    <td onclick="document.location='${task.url}'" class='rowlink'>${task.get_status_str()}</td>
+                    <td>
+                        <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
+                            <span class='ui-icon ui-icon-pencil'></span>
+                            Voir/Éditer
+                        </a>
+                        <a class='btn' href='${request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
+                           PDF
+                        </a>
+                    </td>
+                </tr>
+            % endfor
         </table>
         % else:
             <div style='clear:both'>Aucune facture n'a été créée

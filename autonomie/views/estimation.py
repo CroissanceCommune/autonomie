@@ -29,10 +29,10 @@ from autonomie.models.model import Invoice
 from autonomie.models.model import InvoiceLine
 from autonomie.models.model import EstimationLine
 from autonomie.models.model import PaymentLine
-from autonomie.views.forms.task import EstimationSchema
+from autonomie.views.forms.task import get_estimation_schema
 from autonomie.views.forms.task import get_estimation_appstruct
 from autonomie.views.forms.task import get_estimation_dbdatas
-from autonomie.views.forms.task import TaskComputing
+from autonomie.utils.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
@@ -49,7 +49,7 @@ class EstimationView(TaskView):
         pdf
         html
     """
-    schema = EstimationSchema()
+    schema = get_estimation_schema()
     add_title = u"Nouveau devis"
     edit_title = u"Édition du devis {task.number}"
     taskname_tmpl = u"Devis {0}"

@@ -23,7 +23,7 @@ from pyramid.view import view_config
 
 from deform import Form
 from autonomie.views.forms import CompanySchema
-from autonomie.views.forms.task import TaskComputing
+from autonomie.utils.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 

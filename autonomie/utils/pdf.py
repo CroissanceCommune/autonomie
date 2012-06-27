@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 06-02-2012
-# * Last Modified : jeu. 26 avril 2012 20:31:40 CEST
+# * Last Modified : mer. 27 juin 2012 22:49:42 CEST
 #
 # * Project : coopagestv2
 #
@@ -25,7 +25,13 @@ from xhtml2pdf import pisa
 from pyramid.renderers import render
 from pyramid.threadlocal import get_current_request
 
-HERE = os.path.dirname(__file__)
+def force_ascii(datas):
+    """
+        Return enforced ascii string
+        éko=>ko
+    """
+    return "".join((i for i in datas if ord(i)<128))
+
 def render_html(request, template, datas):
     """
         Compile the current template with the given datas
@@ -48,7 +54,7 @@ def write_pdf_headers(request, filename):
     request.response.content_type = 'application/pdf'
     request.response.headerlist.append(
                 ('Content-Disposition',
-                 'attachment; filename={0}'.format(filename)))
+                 'attachment; filename={0}'.format(force_ascii(filename))))
     return request
 
 def buffer_pdf(html):

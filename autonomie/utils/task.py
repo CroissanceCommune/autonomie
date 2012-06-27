@@ -139,6 +139,16 @@ class TaskComputing:
         """
         return self.model.project.client
 
+class CancelInvoiceComputing(TaskComputing):
+    """
+        Computer for cancelinvoices
+    """
+    def compute_totalht(self):
+        """
+            compute the ht total
+        """
+        return self.compute_lines_total()
+
 class ManualInvoiceComputing:
     """
         wrap manual invoices to allow computing

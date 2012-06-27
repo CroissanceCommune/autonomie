@@ -21,6 +21,7 @@ from beaker.cache import cache_region
 
 from autonomie.models.model import Company
 from autonomie.models.model import Invoice
+from autonomie.models.model import CancelInvoice
 from autonomie.models.model import ManualInvoice
 
 def get_companies(dbsession):
@@ -43,9 +44,12 @@ def get_next_officialNumber(dbsession):
     """
     a = Invoice.get_officialNumber(dbsession).first()[0]
     b = ManualInvoice.get_officialNumber(dbsession).first()[0]
+    c = CancelInvoice.get_officialNumber(dbsession).first()[0]
     if not a:
         a = 0
     if not b:
         b = 0
-    next_ = max(a,b) + 1
+    if not c:
+        c = 0
+    next_ = max(a,b,c) + 1
     return int(next_)

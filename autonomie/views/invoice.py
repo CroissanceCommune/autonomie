@@ -33,10 +33,11 @@ from autonomie.models.model import ManualInvoice
 from autonomie.models.model import InvoiceLine
 from autonomie.models.model import format_to_taskdate
 from autonomie.models.main import get_next_officialNumber
-from autonomie.views.forms.task import InvoiceSchema
+from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
-from autonomie.views.forms.task import TaskComputing
+from autonomie.utils.task import TaskComputing
+from autonomie.utils.task import ManualInvoiceComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
@@ -47,39 +48,6 @@ from .base import TaskView
 from .base import ListView
 
 log = logging.getLogger(__name__)
-
-class ManualInvoiceComputing:
-    """
-        wrap manual invoices to allow computing
-    """
-    def __init__(self, model):
-        self.model = model
-
-    def compute_totalht(self):
-        """
-            Compute ht total
-        """
-        return int(self.model.montant_ht * 100)
-
-    def compute_tva(self):
-        """
-            compute_tva
-        """
-        if self.model.tva:
-            totalht = self.compute_totalht()
-            if self.model.tva < 0 :
-                return int(float(self.model.tva) * 100)
-            else:
-                tva = max(int(self.model.tva), 0)
-                return int(float(totalht) * (tva / 10000.0))
-        else:
-            return 0
-
-    def get_client(self):
-        """
-            returns the associated client
-        """
-        return self.model.client
 
 class CompanyInvoicesView(ListView):
     """
@@ -330,14 +298,14 @@ class CompanyInvoicesView(ListView):
                 current_year=year,
                 today=today)
 
-class InvoiceView(TaskView, ListView):
+class InvoiceView(TaskView):
     """
         All invoice related views
         form
         pdf
         html
     """
-    schema = InvoiceSchema()
+    schema = get_invoice_schema()
     add_title = u"Nouvelle facture"
     edit_title = u"Édition de la facture {task.number}"
     taskname_tmpl = u"Facture {0}"
@@ -397,7 +365,6 @@ class InvoiceView(TaskView, ListView):
         schema = self.schema.bind(
                                 phases=self.get_phases_choice(),
                                 tvas=self.get_tvas(),
-                                tasktype='invoice'
                             )
         form = Form(schema, buttons=self.get_buttons())
         form.widget.template = "autonomie:deform_templates/form.pt"
@@ -517,7 +484,7 @@ class InvoiceView(TaskView, ListView):
                 renderer='tasks/invoice_html.mako',
                 request_param='view=pdf',
                 permission='view')
-    def invoice_pdf(self):
+    def pdf(self):
         """
             Returns a page displaying an html rendering of the given task
         """
@@ -531,7 +498,7 @@ class InvoiceView(TaskView, ListView):
         """
             Status change view
         """
-        self._status()
+        return self._status()
 
     def _post_status_process(self, status):
         """
@@ -548,6 +515,14 @@ class InvoiceView(TaskView, ListView):
             paymentMode = self.request.params.get('paymentMode')
             self.task.paymentMode = paymentMode
 
+        elif status == 'aboinv':
+            log.debug(" + An invoice is aborted -> generating cancel")
+            id_ = self._gen_cancel_invoice()
+            log.debug("   + The cancel id : {0}".format(id_))
+            self.request.session.flash(u"La facture a été annulée, \
+Un avoir a été généré, vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
+    self.request.route_path("cancelinvoice", id=id_)), queue="main")
+
     def _can_change_status(self, status):
         """
             Handle the permission on status change depending on
@@ -558,3 +533,23 @@ class InvoiceView(TaskView, ListView):
                 return False
         return True
 
+    def _gen_cancel_invoice(self):
+        """
+            Generates a cancel invoice based on the current invoice
+        """
+        seq_number = len(self.project.cancelinvoices) + 1
+        cancelinvoice = self.task.gen_cancel_invoice()
+        today = datetime.date.today()
+        cancelinvoice.statusPerson = self.user.id
+        cancelinvoice.statusDate = today
+        cancelinvoice.owner = self.user
+        cancelinvoice.name = u"Avoir {0}".format(seq_number)
+        cancelinvoice.number = self.get_tasknumber(today,
+                                        tmpl="{0}_{1}_FA{2}_{3:%m%y}",
+                                        seq_number=seq_number)
+        for line in self.task.lines:
+            cancelinvoice.lines.append(line.gen_cancel_invoice_line())
+        cancelinvoice = self.dbsession.merge(cancelinvoice)
+        self.dbsession.flush()
+        id_ = cancelinvoice.id
+        return id_

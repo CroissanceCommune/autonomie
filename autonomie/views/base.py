@@ -233,19 +233,17 @@ class TaskView(BaseView):
             Return buttons used on a draft document
         """
         if self.task.is_draft():
-            draft_save = Submit(u"Enregistrer comme brouillon",
+            yield Submit(u"Enregistrer comme brouillon",
                                 "edit",
                                 value="draft",
                                 request=self.request,
                                 )
-            save_and_valid = Submit(u"Enregistrer et demander la validation",
+            if not self.task.is_cancelinvoice():
+                yield Submit(u"Enregistrer et demander la validation",
                                "edit",
                                value="wait",
                                request=self.request
                                )
-            return [draft_save, save_and_valid]
-        else:
-            return []
 
     def _est_btns(self):
         """
@@ -253,34 +251,27 @@ class TaskView(BaseView):
         """
         if self.task.is_estimation() and (self.task.is_valid()
                                           or self.task.is_sent()):
-            geninv_btn = Submit(u"Générer les factures",
+            yield Submit(u"Générer les factures",
                      "edit",
                       title=u"Générer les factures correspondantes au devis",
                       value="geninv",
                       request=self.request)
-            aboest = Submit(u"Indiquer sans suite",
+            yield Submit(u"Indiquer sans suite",
                     "edit",
                     title=u"Indiquer que le devis n'aura pas de suite",
                     value="aboest",
                     request=self.request)
-            return [geninv_btn, aboest]
-        else:
-            return []
 
     def _sent_to_client_btn(self):
         """
             Return a button to change the status to "sent"
         """
         if self.task.is_valid():
-            sent_btn = Submit(u"Envoyé au client",
+            yield Submit(u"Envoyé au client",
                 "edit",
                 title=u"Indiquer que le document a bien été envoyé au client",
                 value="sent",
-                request=self.request
-                               )
-            return [sent_btn]
-        else:
-            return []
+                request=self.request)
 
     def _call_client_btn(self):
         """
@@ -289,14 +280,11 @@ class TaskView(BaseView):
         # This button is displayed only for invoices (which have a
         # IDEstimation attr) and if the doc is valid
         if self.task.has_been_validated() and self.task.is_invoice():
-            client_btn = Submit(u"Client relancé",
+            yield Submit(u"Client relancé",
                         "edit",
                         title=u"Indiquer que le client a été relancé",
                         value="recinv",
                         request=self.request)
-            return [client_btn]
-        else:
-            return []
 
     @staticmethod
     def _paid_mod_select():
@@ -313,58 +301,61 @@ class TaskView(BaseView):
             Return a button to set a paid btn and a select to choose
             the payment mode
         """
-        if self.task.has_been_validated() and \
-                hasattr(self.task, "IDEstimation") and not self.task.is_paid():
-            paid_btn = Submit(u"Facture payée",
+        if self.task.has_been_validated() and self.task.is_invoice() and \
+                                                    not self.task.is_paid():
+            yield Submit(u"Facture payée",
                             "manage",
                             value="paid",
                             request=self.request)
-            paid_mod = StaticWidget(self._paid_mod_select(),
+            yield StaticWidget(self._paid_mod_select(),
                         "manage")
-            return [paid_btn, paid_mod]
-        else:
-            return []
+
+    def _aboinv_btn(self):
+        """
+            Return a button to abort an invoice
+        """
+        if self.task.has_been_validated() and \
+                not self.task.is_estimation() and \
+                not self.task.is_paid():
+            yield Submit(u"Annuler cette facture",
+                                "manage",
+                                value="aboinv",
+                                request=self.request)
 
     def _validate_btns(self):
         """
             Return the buttons to handle validation
         """
-        if self.task.is_waiting():
-            valid_btn = Submit(u"Valider le document",
+        if self.task.is_waiting() or self.task.is_cancelinvoice():
+            yield Submit(u"Valider le document",
                         "manage",
                         value="valid",
                         request=self.request)
-            invalid_btn = Submit(u"Document invalide",
+        if self.task.is_waiting():
+            yield Submit(u"Document invalide",
                         "manage",
                         value="invalid",
                         request=self.request)
-            return [valid_btn, invalid_btn]
-        else:
-            return []
 
     def _cancel_btn(self):
         """
             Return a cancel btn returning the user to the project view
         """
-        cancel = ViewLink(u"Annuler",
+        yield ViewLink(u"Annuler",
                           "view",
                           path="project",
                           css="btn btn-primary",
                           request=self.request,
                           id=self.project.id)
-        return [cancel]
 
     def _pdf_btn(self):
         """
             Return a PDF view btn
         """
         if self.task.id:
-            pdf_btn = ViewLink(u"Voir le PDF", "view",
+            yield ViewLink(u"Voir le PDF", "view",
                path=self.route, css="btn btn-primary", request=self.request,
                id=self.task.id, _query=dict(view="pdf"))
-            return [pdf_btn]
-        else:
-            return []
 
     def get_buttons(self):
         """
@@ -376,6 +367,7 @@ class TaskView(BaseView):
         btns.extend(self._sent_to_client_btn())
         btns.extend(self._call_client_btn())
         btns.extend(self._paid_btn())
+        btns.extend(self._aboinv_btn())
         btns.extend(self._validate_btns())
         btns.extend(self._cancel_btn())
         btns.extend(self._pdf_btn())

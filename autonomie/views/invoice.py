@@ -309,7 +309,7 @@ class InvoiceView(TaskView):
     add_title = u"Nouvelle facture"
     edit_title = u"Édition de la facture {task.number}"
     taskname_tmpl = u"Facture {0}"
-    tasknumber_tmpl = "{0}_{1}_F{2}_{3:%m%y}"
+    tasknumber_tmpl = u"{0}_{1}_F{2}_{3:%m%y}"
     route = "invoice"
 
     def set_lines(self):
@@ -488,9 +488,7 @@ class InvoiceView(TaskView):
         """
             Returns a page displaying an html rendering of the given task
         """
-        filename = "{0}.pdf".format(self.task.number)
-        write_pdf(self.request, filename, self._html())
-        return self.request.response
+        return self._pdf()
 
     @view_config(route_name="invoice", request_param='action=status',
                 permission="edit")
@@ -545,7 +543,7 @@ Un avoir a été généré, vous pouvez l'éditer <a href='{0}'>Ici</a>.".format
         cancelinvoice.owner = self.user
         cancelinvoice.name = u"Avoir {0}".format(seq_number)
         cancelinvoice.number = self.get_tasknumber(today,
-                                        tmpl="{0}_{1}_FA{2}_{3:%m%y}",
+                                        tmpl=u"{0}_{1}_A{2}_{3:%m%y}",
                                         seq_number=seq_number)
         for line in self.task.lines:
             cancelinvoice.lines.append(line.gen_cancel_invoice_line())

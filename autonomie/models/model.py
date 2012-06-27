@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 27 juin 2012 18:43:25 CEST
+# * Last Modified : mer. 27 juin 2012 22:19:14 CEST
 #
 # * Project : autonomie
 #
@@ -484,8 +484,11 @@ class Task(DBBASE):
             ("paid", u"Paiement reçu",),
             ("recinv", u"Client relancé",),
             ))
-        status_str = statuses.get(self.CAEStatus, u"Statut inconnu").format(
-                                                                genre=genre)
+        if self.is_cancelinvoice() and self.CAEStatus == 'paid':
+            status_str = u"Réglé "
+        else:
+            status_str = statuses.get(self.CAEStatus, u"Statut inconnu")
+        status_str = status_str.format(genre=genre)
         return status_str + suffix
 
     def is_draft(self):
@@ -534,13 +537,17 @@ class Task(DBBASE):
         """
         message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à ce \
 document."
+        log.debug("# CAEStatus change #")
         actual_status = self.CAEStatus
+        log.debug(" + was {0}, becomes {1}".format(actual_status, status))
         message = message.format(status)
         if status in ('draft', 'wait',):
             if not actual_status in (None, 'draft', 'invalid'):
                 raise Forbidden(message)
         elif status in ('valid',):
-            if self.is_cancelinvoice() and not actual_status in ('draft',):
+            log.debug(self.is_cancelinvoice())
+            if self.is_cancelinvoice():
+                if not actual_status in ('draft',):
                     raise Forbidden(message)
             elif not actual_status in ('wait',):
                 raise Forbidden(message)

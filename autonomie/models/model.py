@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 27 juin 2012 01:43:55 CEST
+# * Last Modified : mer. 27 juin 2012 13:04:39 CEST
 #
 # * Project : autonomie
 #
@@ -588,7 +588,10 @@ document."
         return hasattr(self, "IDEstimation")
 
     def is_estimation(self):
-        return not hasattr(self, "IDEstimation")
+        return not self.is_invoice() and not self.is_cancelinvoice()
+
+    def is_cancelinvoice(self):
+        return hasattr(self, "IDInvoice")
 
     @classmethod
     def query(cls, dbsession):
@@ -789,6 +792,25 @@ class Invoice(Task):
                                          (current_year+1)*10000
                                     ))
 
+    def gen_cancel_invoice(self):
+        """
+            Return a cancel invoice with self's informations
+        """
+        cancelinvoice = CancelInvoice()
+        cancelinvoice.IDPhase = self.IDPhase
+        cancelinvoice.CAEStatus = 'draft'
+        cancelinvoice.taskDate = datetime.date.today()
+        cancelinvoice.description = self.description
+
+        cancelinvoice.IDInvoice = self.IDTask
+        cancelinvoice.IDProject = self.IDProject
+        cancelinvoice.invoiceDate = self.taskDate
+        cancelinvoice.invoiceNumber = self.officialNumber
+        cancelinvoice.expenses = self.expenses
+        cancelinvoice.displayedUnits = self.displayedUnits
+        cancelinvoice.tva = self.tva
+        return cancelinvoice
+
 class EstimationLine(DBBASE):
     """
       `IDWorkLine` int(11) NOT NULL auto_increment,
@@ -834,7 +856,7 @@ class EstimationLine(DBBASE):
 
     def duplicate(self):
         """
-            duplicate an estimationline
+            duplicate a line
         """
         newone = EstimationLine()
         newone.rowIndex = self.rowIndex
@@ -889,7 +911,7 @@ class InvoiceLine(DBBASE):
 
     def duplicate(self):
         """
-            duplicate an estimationline
+            duplicate a line
         """
         newone = InvoiceLine()
         newone.rowIndex = self.rowIndex
@@ -898,6 +920,19 @@ class InvoiceLine(DBBASE):
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
+
+    def gen_cancel_invoice_line(self):
+        """
+            Return a cancel invoice line duplicating this one
+        """
+        newone = CancelInvoiceLine()
+        newone.rowIndex = self.rowIndex
+        newone.cost = self.cost
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        return newone
+
 
 class PaymentLine(DBBASE):
     """
@@ -1284,7 +1319,8 @@ class CancelInvoice(Task):
     __table_args__ = {'mysql_engine': 'MyISAM'}
     IDTask = Column(Integer, ForeignKey('coop_task.IDTask'), primary_key=True)
 
-    IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'))
+    IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'),
+                                                        default=None)
     IDProject = Column(Integer, ForeignKey('coop_project.IDProject'))
     sequenceNumber = Column(Integer)
     number = Column(String(100))
@@ -1312,6 +1348,40 @@ class CancelInvoice(Task):
         """
         return self.CAEStatus == 'paid'
 
+    def is_editable(self):
+        """
+            Return True if the current task is editable
+        """
+        return self.CAEStatus == 'draft'
+
+    @validates("CAEStatus")
+    def validate_status(self, key, status):
+        """
+            validate the caestatus change
+        """
+        message = u"Vous n'êtes pas autorisé à assigner ce statut {0}à ce \
+document."
+        actual_status = self.CAEStatus
+        message = message.format(status)
+        if status in ('draft',):
+            if not actual_status in (None, 'draft'):
+                raise Forbidden(message)
+        elif status in ('valid',):
+            if not actual_status in ('draft',):
+                raise Forbidden(message)
+        elif status in ('sent',):
+            if not actual_status in ('valid',):
+                raise Forbidden(message)
+        elif status in ('paid',):
+            if not actual_status in ('valid', 'sent',):
+                raise Forbidden(message)
+        elif status in ('abort',):
+            if not actual_status in ('valid', 'sent', "wait"):
+                raise Forbidden(message)
+        else:
+            assert False
+        return status
+
     def get_paymentmode_str(self):
         """
             Return a user-friendly string describing the payment Mode
@@ -1322,6 +1392,73 @@ class CancelInvoice(Task):
             return u"par virement"
         else:
             return u"mode paiement inconnu"
+
+    @classmethod
+    def get_officialNumber(cls, dbsession):
+        """
+            Return the greatest officialNumber actually used in the
+            ManualInvoice table
+        """
+        current_year = datetime.date.today().year
+        return dbsession.query(func.max(CancelInvoice.officialNumber)).filter(
+                    func.year(CancelInvoice.taskDate) == current_year)
+
+class CancelInvoiceLine(DBBASE):
+    """
+        CancelInvoice lines
+        `id` int(11) NOT NULL auto_increment,
+        `IDTask` int(11) NOT NULL,
+        `rowIndex` int(11) NOT NULL,
+        `description` text,
+        `cost` int(11) default '0',
+        `quantity` double default '1',
+        `creationDate` int(11) default '0',
+        `updateDate` int(11) default '0',
+        `unity` varchar(10) default NULL,
+        PRIMARY KEY  (`IDCancelInvoiceLine`),
+    """
+    __tablename__ = 'coop_cancel_invoice_line'
+    __table_args__ = {'mysql_engine': 'MyISAM'}
+    id = Column(Integer, primary_key=True)
+    IDTask = Column(Integer, ForeignKey('coop_cancel_invoice.IDTask'))
+    created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, default=datetime.datetime.now,
+                                  onupdate=datetime.datetime.now)
+    task = relationship("CancelInvoice", backref="lines",
+                            order_by='CancelInvoiceLine.rowIndex'
+                        )
+    rowIndex = Column(Integer)
+    description = Column(Text, default="")
+    cost = Column(Integer, default=0)
+    quantity = Column(Integer, default=1)
+    unity = Column(String(10), default=None)
+
+    def get_unity_label(self):
+        """
+            return unitie's label
+        """
+        labels = dict(
+                NONE=u'-',
+                HOUR=u"heure(s)",
+                DAY=u"jour(s)",
+                WEEK=u"semaine(s)",
+                MONTH=u"mois",
+                FEUIL=u"feuillet(s)",
+                PACK=u"forfait",
+                )
+        return labels.get(self.unity, '-')
+
+    def duplicate(self):
+        """
+            duplicate a line
+        """
+        newone = CancelInvoiceLine()
+        newone.rowIndex = self.rowIndex
+        newone.cost = self.cost
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        return newone
 
 class Holliday(DBBASE):
     """

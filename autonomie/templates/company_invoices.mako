@@ -180,7 +180,11 @@
                     <td>
                         %if invoice.model.project:
                             <a class='btn'
-                                href='${request.route_path("invoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
+                                % if invoice.model.is_cancelinvoice():
+                                    href='${request.route_path("cancelinvoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
+                                % else:
+                                    href='${request.route_path("invoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
+                                % endif
                                 title="Télécharger la version PDF">
                                 <span class='ui-icon ui-icon-document'></span>
                            </a>

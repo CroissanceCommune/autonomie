@@ -26,12 +26,13 @@ from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.model import Invoice
+from autonomie.models.model import CancelInvoice
 from autonomie.models.model import Client
 from autonomie.models.model import Company
 from autonomie.models.model import Project
 from autonomie.models.model import ManualInvoice
 from autonomie.models.model import InvoiceLine
-from autonomie.models.model import format_to_taskdate
+from autonomie.models.types import format_to_taskdate
 from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
@@ -40,7 +41,6 @@ from autonomie.utils.task import TaskComputing
 from autonomie.utils.task import ManualInvoiceComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
-from autonomie.utils.pdf import write_pdf
 from autonomie.utils.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
@@ -161,20 +161,29 @@ class CompanyInvoicesView(ListView):
         """
             Return the invoices
         """
-        inv, man_inv = self._get_invoices()
+        cancel_inv, inv, man_inv = self._get_invoices()
         if company_id:
-            inv, man_inv = self._filter_by_company(inv, man_inv, company_id)
+            cancel_inv, inv, man_inv = self._filter_by_company(cancel_inv, inv, man_inv, company_id)
         if search:
-            inv, man_inv = self._filter_by_number(inv, man_inv, search)
+            cancel_inv, inv, man_inv = self._filter_by_number(cancel_inv, inv, man_inv, search)
         #If we search an invoice number, we don't need more filter
         else:
             if client:
-                inv, man_inv = self._filter_by_client(inv, man_inv, client)
-            inv, man_inv = self._filter_by_status(inv, man_inv, paid)
+                cancel_inv, inv, man_inv = self._filter_by_client(cancel_inv, inv, man_inv, client)
+            cancel_inv, inv, man_inv = self._filter_by_status(cancel_inv, inv, man_inv, paid)
             if year:
-                inv, man_inv = self._filter_by_date(inv, man_inv, year)
+                cancel_inv, inv, man_inv = self._filter_by_date(cancel_inv, inv, man_inv, year)
+
         if sort:
             inv = self._sort(inv, sort, direction)
+            if sort == Invoice.officialNumber:
+                csort = CancelInvoice.officialNumber
+            elif sort == Invoice.taskDate:
+                csort = CancelInvoice.taskDate
+            elif sort == Invoice.number:
+                csort = CancelInvoice.number
+
+            cancel_inv = self._sort(cancel_inv, csort, direction)
             if sort == Invoice.officialNumber:
                 sort = ManualInvoice.officialNumber
             elif sort == Invoice.taskDate:
@@ -183,68 +192,83 @@ class CompanyInvoicesView(ListView):
                 sort = ManualInvoice.officialNumber
             man_inv = self._sort(man_inv, sort, direction)
         inv = inv.all()
+        cancel_inv = cancel_inv.all()
         man_inv = man_inv.all()
-        invoices = self._wrap_for_computing(inv, man_inv)
+        invoices = self._wrap_for_computing(cancel_inv, inv, man_inv)
         return invoices
 
     def _get_invoices(self):
         """
             request filter invoices by clients
         """
-        inv = self.dbsession.query(Invoice).join(
-                                   Invoice.project).join(
-                                      Project.client).join(Client.company)
+        join_args = ("project", "client", "company",)
+        cancel_inv = self.dbsession.query(CancelInvoice).join(*join_args)
+        inv = self.dbsession.query(Invoice).join(*join_args)
+#        inv = inv.union_all(cancel_inv)
+
+#        inv = self.dbsession.query(Task).with_polymorphic([CancelInvoice, Invoice]).join(Invoice.project, aliased=True).join(CancelInvoice.project).join(Project.client).join(Client.company)
+#        inv = self.dbsession.query(Task).outerjoin(CancelInvoice, Invoice)#.join(CancelInvoice.project, Invoice.project, aliased=True)
+        #print inv.all()
+
+
+
         man_inv = self.dbsession.query(ManualInvoice).join(
                                  ManualInvoice.client).join(Client.company)
-        return inv, man_inv
+        return cancel_inv, inv, man_inv
 
     @staticmethod
-    def _filter_by_company(inv, man_inv, company_id):
+    def _filter_by_company(cancel_inv, inv, man_inv, company_id):
         """
             add a filter on the company id
         """
         inv = inv.filter(Project.id_company==company_id )
+        cancel_inv = cancel_inv.filter(Project.id_company==company_id )
         man_inv = man_inv.filter(ManualInvoice.company_id==company_id)
-        return inv, man_inv
+        return cancel_inv, inv, man_inv
 
     @staticmethod
-    def _filter_by_number(inv, man_inv, number):
+    def _filter_by_number(cancel_inv, inv, man_inv, number):
         """
             add a filter on the numbers to invoices sqla queries
         """
         inv = inv.filter(Invoice.officialNumber == number)
+        cancel_inv = cancel_inv.filter(CancelInvoice.officialNumber == number)
         man_inv = man_inv.filter(
                              ManualInvoice.officialNumber == number)
-        return inv, man_inv
+        return cancel_inv, inv, man_inv
 
     @staticmethod
-    def _filter_by_client(inv, man_inv, client):
+    def _filter_by_client(cancel_inv, inv, man_inv, client):
         """
             add a filter on the client to invoices sqla queries
         """
         inv = inv.filter(Project.code_client == client)
+        cancel_inv = cancel_inv.filter(Project.code_client == client)
         man_inv = man_inv.filter(
                         ManualInvoice.client_id == client)
-        return inv, man_inv
+        return cancel_inv, inv, man_inv
 
     @staticmethod
-    def _filter_by_status(inv, man_inv, status):
+    def _filter_by_status(cancel_inv, inv, man_inv, status):
         """
             add a filter on the status to invoices sqla queries
         """
         if status == "paid":
             inv = inv.filter(Invoice.CAEStatus == 'paid')
+            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus == 'paid')
             man_inv = man_inv.filter(
                                         ManualInvoice.payment_ok==1)
         elif status == "notpaid":
             inv = inv.filter(Invoice.CAEStatus.in_(('sent', 'valid',)))
+            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(('sent', 'valid',)))
             man_inv = man_inv.filter(ManualInvoice.payment_ok==0)
         else:
             inv = inv.filter(Invoice.CAEStatus.in_(('paid', 'sent', 'valid',)))
-        return inv, man_inv
+            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(('paid', 'sent', 'valid',)))
+        return cancel_inv, inv, man_inv
 
     @staticmethod
-    def _filter_by_date(inv, man_inv, year):
+    def _filter_by_date(cancel_inv, inv, man_inv, year):
         """
             add a filter on dates to the invoices sqla queries
         """
@@ -255,16 +279,20 @@ class CompanyInvoicesView(ListView):
                                 format_to_taskdate(fday),
                                 format_to_taskdate(lday))
                         )
+        cancel_inv = cancel_inv.filter(CancelInvoice.taskDate.between(
+                                format_to_taskdate(fday),
+                                format_to_taskdate(lday)))
         man_inv = man_inv.filter(
                         ManualInvoice.taskDate.between(fday, lday))
-        return inv, man_inv
+        return cancel_inv, inv, man_inv
 
     @staticmethod
-    def _wrap_for_computing(inv, man_inv):
+    def _wrap_for_computing(cancel_inv, inv, man_inv):
         """
             wrap all invoices to be able to compute them
         """
         inv = [TaskComputing(i) for i in inv]
+        inv.extend([TaskComputing(i) for i in cancel_inv])
         inv.extend([ManualInvoiceComputing(i) for i in man_inv])
         return inv
 

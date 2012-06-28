@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 26 juin 2012 16:10:45 CEST
+# * Last Modified : jeu. 28 juin 2012 21:03:10 CEST
 #
 # * Project : Autonomie
 #
@@ -23,7 +23,7 @@ def get_groups(login, request):
         return the current user's groups
     """
     dbsession = request.dbsession
-    user = get_user(login, dbsession)
+    user = get_user(login, request)
     if user.is_admin():
         return ['group:admin']
     elif user.is_manager():
@@ -35,14 +35,17 @@ def get_avatar(request, dbsession=None):
     """
         Returns the current User object
     """
-    if not dbsession:
-        dbsession = request.dbsession
     login = authenticated_userid(request)
-    return get_user(login, dbsession)
+    user = get_user(login, request, dbsession)
+    return request._user
 
-def get_user(login, dbsession):
+def get_user(login, request, dbsession=None):
     """
         return a user object
     """
-    from autonomie.models.model import User
-    return dbsession.query(User).filter_by(login=login).first()
+    if not dbsession:
+        dbsession = request.dbsession
+    if not hasattr(request, '_user'):
+        from autonomie.models.model import User
+        request._user = dbsession.query(User).filter_by(login=login).first()
+    return request._user

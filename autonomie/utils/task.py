@@ -64,6 +64,7 @@ class TaskComputing:
             compute the ht total
         """
         if hasattr(self.model, "discountHT"):
+            print self.model
             return self.compute_lines_total() - int(self.model.discountHT)
         else:
             return self.compute_lines_total()
@@ -122,19 +123,23 @@ class TaskComputing:
             if we divide 10 in 3, we'd like to have something like :
                 3.33 3.33 3.34
         """
+        result = 0
         total = self.compute_total()
         deposit = self.compute_deposit()
         rest = total - deposit
         payment_lines_num = self.get_nb_payment_lines()
         if payment_lines_num == 1:
-            return rest
+            result = rest
         else:
             if self.model.manualDeliverables == 0:
                 line_amount = self.compute_line_amount()
-                return rest - ((payment_lines_num-1) * line_amount)
+                result = rest - ((payment_lines_num-1) * line_amount)
             else:
-                return rest - sum(line.amount \
+                result = rest - sum(line.amount \
                         for line in self.model.payment_lines[:-1])
+        if self.model.is_cancelinvoice():
+            result = result * (-1)
+        return result
 
     def get_client(self):
         """

@@ -344,7 +344,7 @@ class TaskCommunication(colander.MappingSchema):
                         title=u'Communication Entrepreneur/CAE',
                         widget=widget.TextAreaWidget(css_class='span10'),
                         description=u"Message à destination des membres de \
-la CAE qui validderont votre document (n'apparaît pas dans le PDF)")
+la CAE qui valideront votre document (n'apparaît pas dans le PDF)")
 
 class TaskSchema(colander.MappingSchema):
     """

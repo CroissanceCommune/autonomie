@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 27 juin 2012 22:19:14 CEST
+# * Last Modified : jeu. 28 juin 2012 14:48:55 CEST
 #
 # * Project : autonomie
 #
@@ -417,6 +417,10 @@ class Task(DBBASE):
     """
     __tablename__ = 'coop_task'
     __table_args__ = {'autoload':True}
+    __mapper_args__ = {
+                        'polymorphic_identity':'task',
+                        }
+
     IDTask = Column(Integer, primary_key=True)
     taskDate = Column("taskDate", CustomDateType2)
     creationDate = Column("creationDate", CustomDateType,
@@ -652,6 +656,9 @@ class Estimation(Task):
     phase =  relationship("Phase",
                           backref=backref("estimations",
                           order_by='Estimation.taskDate'))
+    __mapper_args__ = {
+                        'polymorphic_identity':'estimation',
+                       }
 
     def duplicate(self):
         """
@@ -721,6 +728,9 @@ class Invoice(Task):
     """
     __tablename__ = 'coop_invoice'
     __table_args__ = {'autoload':True}
+    __mapper_args__ = {
+                       'polymorphic_identity':'invoice',
+                       }
     IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'), primary_key=True)
 
     IDEstimation = Column("IDEstimation", ForeignKey('coop_estimation.IDTask'))
@@ -1203,7 +1213,6 @@ class ManualInvoice(DBBASE):
     company = relationship("Company",
                 primaryjoin="Company.id==ManualInvoice.company_id",
                   backref='manual_invoices')
-    taskDate = Column('date_emission', Date())
     description = Column('libelle', String(255))
     officialNumber = Column('sequence_id', BigInteger)
     paymentMode = Column("paiement_comment", String(255))
@@ -1329,6 +1338,9 @@ class CancelInvoice(Task):
     """
     __tablename__ = 'coop_cancel_invoice'
     __table_args__ = {'mysql_engine': 'MyISAM'}
+    __mapper_args__ = {
+                        'polymorphic_identity':'cancelinvoice',
+                        }
     IDTask = Column(Integer, ForeignKey('coop_task.IDTask'), primary_key=True)
 
     IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'),
@@ -1475,4 +1487,3 @@ class Holliday(DBBASE):
         if user_id:
             q = q.filter(Holliday.user_id==user_id)
         return q.order_by("start_date")
-

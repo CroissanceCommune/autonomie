@@ -204,7 +204,7 @@
                             <a class='btn'
                                 href='${request.route_path("invoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
-                                <span class='ui-icon ui-icon-document'></span>
+                                <i class='icon icon-file'></i>
                            </a>
                         %endif
                     </td>

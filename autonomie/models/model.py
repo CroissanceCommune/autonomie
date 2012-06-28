@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 28 juin 2012 18:34:51 CEST
+# * Last Modified : jeu. 28 juin 2012 20:48:30 CEST
 #
 # * Project : autonomie
 #
@@ -53,8 +53,7 @@ log = logging.getLogger(__name__)
 company_employee = Table('coop_company_employee', DBBASE.metadata,
     Column("IDCompany", Integer, ForeignKey('coop_company.IDCompany')),
     # IDEmployee est identique dans la table coop_employee
-    Column("IDEmployee", Integer, ForeignKey('egw_accounts.account_id')),
-    autoload=True)
+    Column("IDEmployee", Integer, ForeignKey('egw_accounts.account_id')))
 
 class Company(DBBASE):
     """
@@ -79,26 +78,33 @@ class Company(DBBASE):
         PRIMARY KEY  (`IDCompany`)
     """
     __tablename__ = 'coop_company'
-    __table_args__ = {'autoload':True}
     id = Column("IDCompany", Integer, primary_key=True)
     name = Column("name", String(150))
+    goal = deferred(Column("object", String(255)))
+    email = deferred(Column("email", String(255)))
+    phone = deferred(Column("phone", String(20), default=""))
+    mobile = deferred(Column("mobile", String(20)))
+    comments = deferred(Column("comments", Text))
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp))
+    active = deferred(Column("active", String(1), default="Y"))
+    IDGroup = deferred(Column("IDGroup", Integer, default=0))
+    logo = deferred(Column("logo", CustomFileType("logo_", 255)))
+    header = deferred(Column("header", CustomFileType("header_", 255)))
+    logoType = deferred(Column("logoType", String(255)))
+    headerType = deferred(Column("headerType", String(255)))
+    IDEGWUser = deferred(Column("IDEGWUser", Integer, default=0))
+    RIB = deferred(Column("RIB", String(255)))
+    IBAN = deferred(Column("IBAN", String(255)))
     clients = relationship("Client",
                             order_by="Client.id",
                             backref='company')
     projects = relationship("Project",
                             order_by="Project.id",
                             backref="company")
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
-    goal = Column("object", String(255))
-    logo = Column("logo", CustomFileType("logo_", 255))
-    header = Column("header", CustomFileType("header_", 255))
-    IDGroup = Column("IDGroup", Integer, default=0)
-    phone = Column("phone", String(20), default="")
-    IDEGWUser = Column("IDEGWUser", Integer, default=0)
 
     def get_path(self):
         """
@@ -166,26 +172,14 @@ class User(DBBASE):
 
     """
     __tablename__ = 'egw_accounts'
-    __table_args__ = {'autoload':True}
     id = Column('account_id', Integer, primary_key=True)
     login = Column('account_lid', String(64))
     pwd = Column("account_pwd", String(100))
     firstname = Column("account_firstname", String(50))
     lastname = Column("account_lastname", String(50))
-    account_lastlogin = deferred(Column("account_lastlogin", Integer))
-    account_lastloginfrom = deferred(Column("account_lastloginfrom",
-                                                          String(255)))
-    account_lastpwd_change = deferred(Column("account_lastpwd_change",
-                                            Integer))
-    account_status = deferred(Column("account_status", String(1)))
-    account_expires = deferred(Column("account_expires", Integer))
-    account_type = deferred(Column("account_type", String(1)))
-    person_id = deferred(Column("person_id", Integer))
     primary_group = Column("account_primary_group",
                             Integer)
     email = Column("account_email", String(100))
-    account_challenge  = deferred(Column("account_challenge", String(100)))
-    account_response = deferred(Column("account_response", String(100)))
     companies = relationship("Company",
                              secondary=company_employee,
                              backref="employees")
@@ -257,13 +251,12 @@ class Employee(DBBASE):
         PRIMARY KEY  (`IDEmployee`)
     """
     __tablename__ = 'coop_employee'
-    __table_args__ = {'autoload':True}
     id = Column("IDEmployee", Integer, primary_key=True)
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+                                        onupdate=get_current_timestamp))
 
 class Task(DBBASE):
     """
@@ -297,31 +290,32 @@ class Task(DBBASE):
       KEY `IDEmployee` (`IDEmployee`)
     """
     __tablename__ = 'coop_task'
-    __table_args__ = {'autoload':True}
     __mapper_args__ = {
                         'polymorphic_identity':'task',
                         }
 
     IDTask = Column(Integer, primary_key=True)
-    taskDate = Column("taskDate", CustomDateType2)
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+    IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
+    name = Column("name", String(255))
+    CAEStatus = Column('CAEStatus', String(10))
+    statusComment = Column("statusComment", Text)
+    statusPerson = Column("statusPerson",
+                          ForeignKey('egw_accounts.account_id'))
     statusDate = Column("statusDate", CustomDateType,
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp)
-    IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
-
-    CAEStatus = Column('CAEStatus', String(10))
-    statusPerson = Column("statusPerson",
-                          ForeignKey('egw_accounts.account_id'))
+    taskDate = Column("taskDate", CustomDateType2)
+    IDEmployee = Column("IDEmployee",
+                            ForeignKey('egw_accounts.account_id'))
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = Column("updateDate", CustomDateType,
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
+    description = Column("description", Text)
     statusPersonAccount = relationship("User",
                         primaryjoin="Task.statusPerson==User.id",
                         backref="taskStatuses")
-    IDEmployee = Column("IDEmployee",
-                            ForeignKey('egw_accounts.account_id'))
     owner = relationship("User",
                         primaryjoin="Task.IDEmployee==User.id",
                             backref="ownedTasks")
@@ -525,11 +519,25 @@ class Estimation(Task):
       KEY `IDProject` (`IDProject`)
     """
     __tablename__ = 'coop_estimation'
-    __table_args__ = {'autoload':True}
-
-    IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'), primary_key=True)
-
+    IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'),
+                primary_key=True, nullable=False)
+    sequenceNumber = Column("sequenceNumber", Integer,
+                nullable=False)
+    number = Column("number", String(100), nullable=False)
+    tva = Column("tva", Integer, nullable=False, default=196)
+    deposit = Column("deposit", Integer, default=0)
+    paymentConditions = deferred(Column("paymentConditions", Text))
+    exclusions = deferred(Column("exclusions", Text))
     IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
+    manualDeliverables = deferred(Column("manualDeliverables", Integer))
+    course = deferred(Column('course', Integer,
+                                    nullable=False, default=0))
+    displayedUnits = deferred(Column('displayedUnits', Integer,
+                                    nullable=False, default=0))
+    discountHT = Column('discountHT', Integer, default=0)
+    expenses = deferred(Column('expenses', Integer, default=0))
+    paymentDisplay = deferred(Column('paymentDisplay', String(20),
+                                                default="SUMMARY"))
     project = relationship("Project",
                             backref=backref('estimations',
                                             order_by='Estimation.taskDate')
@@ -608,14 +616,28 @@ class Invoice(Task):
        KEY `IDEstimation` (`IDEstimation`)
     """
     __tablename__ = 'coop_invoice'
-    __table_args__ = {'autoload':True}
     __mapper_args__ = {
                        'polymorphic_identity':'invoice',
                        }
     IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'), primary_key=True)
-
     IDEstimation = Column("IDEstimation", ForeignKey('coop_estimation.IDTask'))
     IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
+    sequenceNumber = Column("sequenceNumber", Integer,
+                nullable=False)
+    number = Column("number", String(100), nullable=False)
+    tva = Column("tva", Integer, nullable=False, default=196)
+    paymentConditions = deferred(Column("paymentConditions", Text))
+    deposit = deferred(Column('deposit', Integer,
+                                    nullable=False, default=0))
+    course = deferred(Column('course', Integer,
+                                    nullable=False, default=0))
+    officialNumber = Column("officialNumber", Integer)
+    paymentMode = Column("paymentMode", String(10))
+    displayedUnits = deferred(Column('displayedUnits', Integer,
+                                    nullable=False, default=0))
+    discountHT = Column('discountHT', Integer, default=0)
+    expenses = deferred(Column('expenses', Integer, default=0))
+
     project = relationship("Project", backref=backref('invoices',
                                             order_by='Invoice.taskDate')
                             )
@@ -627,7 +649,6 @@ class Invoice(Task):
                       backref="invoice",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask",
                                 )
-    officialNumber = Column("officialNumber", Integer)
 
     def is_tolate(self):
         """
@@ -731,14 +752,18 @@ class EstimationLine(DBBASE):
       KEY `IDTask` (`IDTask`)
     """
     __tablename__ = 'coop_estimation_line'
-    __table_args__ = {'autoload':True}
     id = Column("IDWorkLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
+    rowIndex = deferred(Column("rowIndex", Integer))
+    description = deferred(Column("description", Text))
+    cost = Column("cost", Integer)
+    quantity = Column("quantity", Integer)
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+                                        onupdate=get_current_timestamp))
+    unity = Column("unity", String(10))
     task = relationship("Estimation", backref="lines",
                             order_by='EstimationLine.rowIndex'
                         )
@@ -784,18 +809,21 @@ class InvoiceLine(DBBASE):
         PRIMARY KEY  (`IDInvoiceLine`),
     """
     __tablename__ = 'coop_invoice_line'
-    __table_args__ = {'autoload':True}
     id = Column("IDInvoiceLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
+    rowIndex = deferred(Column("rowIndex", Integer))
+    description = deferred(Column("description", Text))
+    cost = Column("cost", Integer)
+    quantity = Column("quantity", Integer)
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+                                        onupdate=get_current_timestamp))
+    unity = Column("unity", String(10))
     task = relationship("Invoice", backref="lines",
                             order_by='InvoiceLine.rowIndex'
                         )
-                        #enable_typechecks=False )
 
     def get_unity_label(self):
         """
@@ -850,16 +878,19 @@ class PaymentLine(DBBASE):
         `paymentDate` int(11) default NULL,
     """
     __tablename__ = 'coop_estimation_payment'
-    __table_args__ = {'autoload':True}
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+    id = Column("IDPaymentLine", Integer, primary_key=True, nullable=False)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
+    rowIndex = Column("rowIndex", Integer)
+    description = Column("description", Text)
+    amount = Column("amount", Integer)
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp))
+    paymentDate = Column("paymentDate", CustomDateType2(11))
     estimation = relationship("Estimation", backref=backref('payment_lines',
                     order_by='PaymentLine.rowIndex'))
-    paymentDate = Column("paymentDate", CustomDateType2(11))
 
     def duplicate(self):
         """
@@ -894,19 +925,28 @@ class Client(DBBASE):
         KEY `IDCompany` (`IDCompany`)
     """
     __tablename__ = 'coop_customer'
-    __table_args__ = {'autoload':True}
     id = Column('code', String(4), primary_key=True)
-    id_company = Column("IDCompany", Integer,
-                                    ForeignKey('coop_company.IDCompany'))
+    comments = deferred(Column("comments", Text))
     creationDate = Column("creationDate", CustomDateType,
                                             default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp)
-    projects = relationship("Project", backref="client")
+    id_company = Column("IDCompany", Integer,
+                                    ForeignKey('coop_company.IDCompany'))
+    intraTVA = deferred(Column("intraTVA", String(50)))
+    address = deferred(Column("address", String(255)))
+    zipCode = deferred(Column("zipCode", String(20)))
+    city = deferred(Column("city", String(255)))
+    country = deferred(Column("country", String(150)))
+    phone = deferred(Column("phone", String(50)))
+    email = deferred(Column("email", String(255)))
+    contactLastName = deferred(Column("contactLastName",
+                    String(255), default=None))
     name = Column("name", String(255), default=None)
-    contactFirstName = Column("contactFirstName", String(255), default=None)
-    contactLastName = Column("contactLastName", String(255), default=None)
+    contactFirstName = deferred(Column("contactFirstName",
+                    String(255), default=None))
+    projects = relationship("Project", backref="client")
 
     def get_company_id(self):
         return self.company.id
@@ -931,11 +971,11 @@ class Project(DBBASE):
         KEY `IDCompany` (`IDCompany`)
     """
     __tablename__ = 'coop_project'
-    __table_args__ = {'autoload':True}
     id = Column('IDProject', Integer, primary_key=True)
     name = Column("name", String(255))
     code_client = Column("customerCode", String(4),
                                     ForeignKey('coop_customer.code'))
+    code = Column("code", String(4), nullable=False)
     definition = deferred(Column("definition", Text))
 
     id_company = Column("IDCompany", Integer,
@@ -951,8 +991,6 @@ class Project(DBBASE):
                                             default=get_current_timestamp))
 
     type = deferred(Column('type', String(150)))
-    status = deferred(Column("status", String(20)))
-    dispatchType = deferred(Column("dispatchType", String(10)))
     archived = Column("archived", String(255), default=0)
 
     def get_estimation(self, taskid):
@@ -1000,17 +1038,16 @@ class Phase(DBBASE):
         `updateDate` int(11) NOT NULL,
     """
     __tablename__ = 'coop_phase'
-    __table_args__ = {'autoload':True}
     id = Column('IDPhase', Integer, primary_key=True)
-    name = Column("name", String(150), default=u'Phase par défaut')
     id_project = Column('IDProject', Integer,
                         ForeignKey('coop_project.IDProject'))
+    name = Column("name", String(150), default=u'Phase par défaut')
     project = relationship("Project", backref="phases")
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+                                        onupdate=get_current_timestamp))
     def is_default(self):
         """
             return True is this phase is a default one
@@ -1026,7 +1063,10 @@ class Tva(DBBASE):
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
     __tablename__ = 'coop_tva'
-    __table_args__ = {'autoload':True}
+    id = Column('id', Integer, primary_key=True)
+    name = Column("name", String(8), nullable=False)
+    value = Column("value", Integer)
+    default = Column("default", Integer)
 
     @classmethod
     def query(cls, dbsession):
@@ -1043,10 +1083,12 @@ class TaskStatus(DBBASE):
         KEY `statusCode` (`statusCode`)
     """
     __tablename__ = 'coop_task_status'
-    __table_args__ = {'autoload':True}
     id = Column("id", Integer, primary_key=True)
     id_task = Column('IDTask', Integer,
                         ForeignKey('coop_task.IDTask'))
+    statusCode = Column("statusCode", String(10))
+    statusComment = Column("statusComment", Text)
+    statusDate = Column("statusDate", Integer)
     task = relationship("Task", backref="taskstatus")
 
 class Config(DBBASE):
@@ -1058,7 +1100,6 @@ class Config(DBBASE):
           PRIMARY KEY  (`config_app`,`config_name`)
     """
     __tablename__ = 'egw_config'
-    __table_args__ = {'autoload':True}
     app = Column("config_app", String(255), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
@@ -1083,30 +1124,31 @@ class ManualInvoice(DBBASE):
         UNIQUE KEY `id` (`id`)
     """
     __tablename__ = 'symf_facture_manuelle'
-    __table_args__ = {'autoload':True}
-    created_at = Column("created_at", DateTime,
-                                      default=datetime.datetime.now)
-    updated_at = Column("updated_at", DateTime,
-                                      default=datetime.datetime.now,
-                                      onupdate=datetime.datetime.now)
     id = Column('id', BigInteger, primary_key=True)
+    officialNumber = Column('sequence_id', BigInteger)
+    description = Column('libelle', String(255))
+    montant_ht = Column("montant_ht", Integer)
+    tva = Column("tva", Integer)
+    payment_ok = Column("paiement_ok", Integer)
+    statusDate = Column("paiement_date", Date())
+    paymentMode = Column("paiement_comment", String(255))
     client_id = Column('client_id', String(5),
                             ForeignKey('coop_customer.code'))
+    taskDate = Column("date_emission", Date(),
+                                default=datetime.datetime.now)
     company_id = Column('compagnie_id', BigInteger,
                             ForeignKey('coop_company.IDCompany'))
+    created_at = deferred(Column("created_at", DateTime,
+                                      default=datetime.datetime.now))
+    updated_at = deferred(Column("updated_at", DateTime,
+                                      default=datetime.datetime.now,
+                                      onupdate=datetime.datetime.now))
     client = relationship("Client",
                 primaryjoin="Client.id==ManualInvoice.client_id",
                   backref='manual_invoices')
     company = relationship("Company",
                 primaryjoin="Company.id==ManualInvoice.company_id",
                   backref='manual_invoices')
-    description = Column('libelle', String(255))
-    officialNumber = Column('sequence_id', BigInteger)
-    paymentMode = Column("paiement_comment", String(255))
-    statusDate = Column("paiement_date", Date())
-    payment_ok = Column("paiement_ok", Integer)
-    taskDate = Column("date_emission", Date(),
-                                default=datetime.datetime.now)
 
     def is_paid(self):
         """
@@ -1186,23 +1228,23 @@ class OperationComptable(DBBASE):
         UNIQUE KEY `id` (`id`)
     """
     __tablename__ = 'symf_operation_treso'
-    __table_args__ = {'autoload':True}
     id = Column('id', BigInteger, primary_key=True)
+    amount = Column("montant", Numeric)
+    charge = Column("charge", Integer, default=0)
     company_id = Column('compagnie_id', CustomInteger,
                             ForeignKey('coop_company.IDCompany'))
+    date = Column("date", Date(), default=datetime.date.today)
+    label = Column("libelle", String, default="")
     company = relationship("Company",
                        primaryjoin="Company.id==OperationComptable.company_id",
                        backref='operation_comptable')
-    created_at = Column("created_at", DateTime,
-                                        default=datetime.datetime.now)
-    updated_at = Column("updated_at", DateTime,
+    created_at = deferred(Column("created_at", DateTime,
+                                        default=datetime.datetime.now))
+    updated_at = deferred(Column("updated_at", DateTime,
                                         default=datetime.datetime.now,
-                                        onupdate=datetime.datetime.now)
-    charge = Column("charge", Integer, default=0)
-    date = Column("date", Date(), default=datetime.date.today)
-    label = Column("libelle", String, default="")
+                                        onupdate=datetime.datetime.now))
     year = Column("annee", BigInteger)
-    amount = Column("montant", Numeric)
+    type = deferred(Column("type", Text))
 
 class CancelInvoice(Task):
     """

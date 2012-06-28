@@ -63,7 +63,10 @@ class TaskComputing:
         """
             compute the ht total
         """
-        return self.compute_lines_total() - int(self.model.discountHT)
+        if hasattr(self.model, "discountHT"):
+            return self.compute_lines_total() - int(self.model.discountHT)
+        else:
+            return self.compute_lines_total()
 
     def compute_tva(self, totalht=None):
         """
@@ -138,16 +141,6 @@ class TaskComputing:
             Returns the client associated to the given task
         """
         return self.model.project.client
-
-class CancelInvoiceComputing(TaskComputing):
-    """
-        Computer for cancelinvoices
-    """
-    def compute_totalht(self):
-        """
-            compute the ht total
-        """
-        return self.compute_lines_total()
 
 class ManualInvoiceComputing:
     """

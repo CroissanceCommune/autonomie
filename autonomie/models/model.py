@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 28 juin 2012 14:48:55 CEST
+# * Last Modified : jeu. 28 juin 2012 16:32:37 CEST
 #
 # * Project : autonomie
 #
@@ -33,152 +33,22 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
 from sqlalchemy.orm import backref
-from sqlalchemy.types import TypeDecorator
-from sqlalchemy.types import Integer as Integer_type
-from sqlalchemy.types import String as String_type
+from sqlalchemy.orm import deferred
 from sqlalchemy import func
+
+from autonomie.models.types import CustomDateType
+from autonomie.models.types import CustomDateType2
+from autonomie.models.types import CustomInteger
+from autonomie.models.types import CustomFileType
+from autonomie.models.utils import format_to_taskdate
+from autonomie.models.utils import format_from_taskdate
+from autonomie.models.utils import get_current_timestamp
+
 
 from autonomie.models import DBBASE
 from autonomie.utils.exception import Forbidden
 
 log = logging.getLogger(__name__)
-
-class CustomDateType(TypeDecorator):
-    """
-        Custom date type used because our database is using
-        integers to store date's timestamp
-    """
-    impl = Integer_type
-    def process_bind_param(self, value, dialect):
-        if value is None or not value:
-            return int(time.time())
-        elif isinstance(value, datetime.datetime):
-            return int(time.mktime(value.timetuple()))
-        elif isinstance(value, int):
-            return value
-        return time.mktime(value.timetuple())
-
-    def process_result_value(self, value, dialect):
-        if value:
-            return datetime.datetime.fromtimestamp(float(value))
-        else:
-            return datetime.datetime.now()
-
-def format_to_taskdate(value):
-    """
-        format a datetime.date object to a 'taskdate' format:
-        an integer composed from a string YYYYmmdd
-        Sorry .... it's not my responsability
-    """
-    if value is None:
-        return None
-    elif isinstance(value, datetime.date):
-        if value.year < 1900:
-            value.year = 1901
-        return int(value.strftime("%Y%m%d"))
-    else:
-        return int(value)
-
-DEFAULT_DATETIME = datetime.date(2000, 1, 1)
-
-def format_from_taskdate(value):
-    """
-        return a datetime.date object from an integer in 'taskdate' format
-    """
-    if value:
-        value = str(value)
-        try:
-            year = int(value[0:4])
-            assert year > 1910
-        except:
-            year = 2000
-        try:
-            month = int(value[4:6])
-            assert month in range(1,12)
-        except:
-            month = 1
-        try:
-            day = int(value[6:8])
-            assert day in range(1,31)
-        except:
-            day = 1
-        try:
-            return datetime.date(year, month, day)
-        except:
-            return datetime.date(year, 1, 1)
-    else:
-        return DEFAULT_DATETIME
-
-class CustomDateType2(TypeDecorator):
-    """
-        Custom date type used because our database is using
-        custom integers to store dates
-        YYYYMMDD
-    """
-    impl = Integer_type
-    def process_bind_param(self, value, dialect):
-        return format_to_taskdate(value)
-
-    def process_result_value(self, value, dialect):
-        return format_from_taskdate(value)
-
-class CustomFileType(TypeDecorator):
-    """
-        Custom Filetype used to glue deform fileupload tools with
-        the database element
-    """
-    impl = String_type
-    def __init__(self, prefix, *args, **kw):
-        TypeDecorator.__init__(self, *args, **kw)
-        self.prefix = prefix
-
-    def process_bind_param(self, value, dialect):
-        """
-            process the insertion of the value
-            write the file to persistent storage
-        """
-        ret_val = None
-        if isinstance(value, dict):
-            ret_val = value.get('filename', '')
-        return ret_val
-
-    def process_result_value(self, value, dialect):
-        """
-            Get the datas from database
-        """
-        if value:
-            return dict(filename = value,
-                        uid=self.prefix + value)
-        else:
-            return dict(filename="",
-                        uid=self.prefix)
-
-class CustomInteger(TypeDecorator):
-    """
-        Custom integer, allow long to int automatic conversion
-    """
-    impl = Integer_type
-    def process_bind_param(self, value, dialect):
-        """
-            On insertion
-        """
-        if isinstance(value, long):
-            value = int(value)
-        return value
-
-    def process_result_value(self, value, dialect):
-        """
-            On query
-        """
-        if isinstance(value, long):
-            value = int(value)
-        return value
-
-def _get_current_timestamp():
-    """
-        returns current time
-    """
-    return int(time.time())
 
 company_employee = Table('coop_company_employee', DBBASE.metadata,
     Column("IDCompany", Integer, ForeignKey('coop_company.IDCompany')),
@@ -219,10 +89,10 @@ class Company(DBBASE):
                             order_by="Project.id",
                             backref="company")
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     goal = Column("object", String(255))
     logo = Column("logo", CustomFileType("logo_", 255))
     header = Column("header", CustomFileType("header_", 255))
@@ -300,14 +170,25 @@ class User(DBBASE):
     id = Column('account_id', Integer, primary_key=True)
     login = Column('account_lid', String(64))
     pwd = Column("account_pwd", String(100))
-    lastname = Column("account_lastname", String(50))
     firstname = Column("account_firstname", String(50))
+    lastname = Column("account_lastname", String(50))
+    account_lastlogin = deferred(Column("account_lastlogin", Integer))
+    account_lastloginfrom = deferred(Column("account_lastloginfrom",
+                                                          String(255)))
+    account_lastpwd_change = deferred(Column("account_lastpwd_change",
+                                            Integer))
+    account_status = deferred(Column("account_status", String(1)))
+    account_expires = deferred(Column("account_expires", Integer))
+    account_type = deferred(Column("account_type", String(1)))
+    person_id = deferred(Column("person_id", Integer))
+    primary_group = Column("account_primary_group",
+                            Integer)
     email = Column("account_email", String(100))
+    account_challenge  = deferred(Column("account_challenge", String(100)))
+    account_response = deferred(Column("account_response", String(100)))
     companies = relationship("Company",
                              secondary=company_employee,
                              backref="employees")
-    primary_group = Column("account_primary_group",
-                            Integer)
 
     @staticmethod
     def _encode_pass(password):
@@ -379,10 +260,10 @@ class Employee(DBBASE):
     __table_args__ = {'autoload':True}
     id = Column("IDEmployee", Integer, primary_key=True)
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
 
 class Task(DBBASE):
     """
@@ -424,13 +305,13 @@ class Task(DBBASE):
     IDTask = Column(Integer, primary_key=True)
     taskDate = Column("taskDate", CustomDateType2)
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     statusDate = Column("statusDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
 
     CAEStatus = Column('CAEStatus', String(10))
@@ -854,10 +735,10 @@ class EstimationLine(DBBASE):
     id = Column("IDWorkLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     task = relationship("Estimation", backref="lines",
                             order_by='EstimationLine.rowIndex'
                         )
@@ -907,10 +788,10 @@ class InvoiceLine(DBBASE):
     id = Column("IDInvoiceLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     task = relationship("Invoice", backref="lines",
                             order_by='InvoiceLine.rowIndex'
                         )
@@ -971,10 +852,10 @@ class PaymentLine(DBBASE):
     __tablename__ = 'coop_estimation_payment'
     __table_args__ = {'autoload':True}
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     estimation = relationship("Estimation", backref=backref('payment_lines',
                     order_by='PaymentLine.rowIndex'))
@@ -1018,10 +899,10 @@ class Client(DBBASE):
     id_company = Column("IDCompany", Integer,
                                     ForeignKey('coop_company.IDCompany'))
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     projects = relationship("Project", backref="client")
     name = Column("name", String(255), default=None)
     contactFirstName = Column("contactFirstName", String(255), default=None)
@@ -1052,20 +933,22 @@ class Project(DBBASE):
     __tablename__ = 'coop_project'
     __table_args__ = {'autoload':True}
     id = Column('IDProject', Integer, primary_key=True)
-    id_company = Column("IDCompany", Integer,
-                                    ForeignKey('coop_company.IDCompany'))
+    name = Column("name", String(255))
     code_client = Column("customerCode", String(4),
                                     ForeignKey('coop_customer.code'))
+    definition = Column("definition", Text)
+
+    id_company = Column("IDCompany", Integer,
+                                    ForeignKey('coop_company.IDCompany'))
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     startingDate = Column("startingDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     endingDate = Column("endingDate", CustomDateType,
-                                            default=_get_current_timestamp)
-    name = Column("name", String(255))
+                                            default=get_current_timestamp)
     archived = Column("archived", String(255), default=0)
 
     def get_estimation(self, taskid):
@@ -1120,10 +1003,10 @@ class Phase(DBBASE):
                         ForeignKey('coop_project.IDProject'))
     project = relationship("Project", backref="phases")
     creationDate = Column("creationDate", CustomDateType,
-                                            default=_get_current_timestamp)
+                                            default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
-                                        default=_get_current_timestamp,
-                                        onupdate=_get_current_timestamp)
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp)
     def is_default(self):
         """
             return True is this phase is a default one
@@ -1398,6 +1281,12 @@ class CancelInvoice(Task):
         current_year = datetime.date.today().year
         return dbsession.query(func.max(CancelInvoice.officialNumber)).filter(
                     func.year(CancelInvoice.taskDate) == current_year)
+
+    def is_tolate(self):
+        """
+            Return False
+        """
+        return False
 
 class CancelInvoiceLine(DBBASE):
     """

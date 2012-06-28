@@ -44,12 +44,13 @@ class TaskComputing:
     def __init__(self, model):
         self.model = model
 
-    @staticmethod
-    def compute_line_total(line):
+    def compute_line_total(self, line):
         """
             compute estimation/invoice line total
         """
         cost = line.cost
+        if self.model.is_cancelinvoice:
+            cost = -1 * cost
         quantity = line.quantity
         return float(cost) * float(quantity)
 
@@ -63,11 +64,12 @@ class TaskComputing:
         """
             compute the ht total
         """
+        result = None
         if hasattr(self.model, "discountHT"):
-            print self.model
-            return self.compute_lines_total() - int(self.model.discountHT)
+            result = self.compute_lines_total() - int(self.model.discountHT)
         else:
-            return self.compute_lines_total()
+            result = self.compute_lines_total()
+        return result
 
     def compute_tva(self, totalht=None):
         """
@@ -89,7 +91,7 @@ class TaskComputing:
         """
             compute the total amount
         """
-        return self.compute_ttc() - int(self.model.expenses)
+        return self.compute_ttc() + self.compute_expenses()
 
     def compute_deposit(self):
         """
@@ -117,6 +119,15 @@ class TaskComputing:
         rest = total - deposit
         return int(rest / self.get_nb_payment_lines())
 
+    def compute_expenses(self):
+        """
+            Compute the expense value
+        """
+        result = int(self.model.expenses)
+        if self.model.is_cancelinvoice():
+            result = -1 * result
+        return result
+
     def compute_sold(self):
         """
             Compute the sold amount to finish on an exact value
@@ -137,8 +148,6 @@ class TaskComputing:
             else:
                 result = rest - sum(line.amount \
                         for line in self.model.payment_lines[:-1])
-        if self.model.is_cancelinvoice():
-            result = result * (-1)
         return result
 
     def get_client(self):

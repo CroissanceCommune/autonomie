@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 28 juin 2012 16:32:37 CEST
+# * Last Modified : jeu. 28 juin 2012 17:57:41 CEST
 #
 # * Project : autonomie
 #
@@ -43,6 +43,7 @@ from autonomie.models.types import CustomFileType
 from autonomie.models.utils import format_to_taskdate
 from autonomie.models.utils import format_from_taskdate
 from autonomie.models.utils import get_current_timestamp
+from autonomie.models.utils import url_safe
 
 
 from autonomie.models import DBBASE
@@ -709,7 +710,7 @@ class Invoice(Task):
         cancelinvoice.IDProject = self.IDProject
         cancelinvoice.invoiceDate = self.taskDate
         cancelinvoice.invoiceNumber = self.officialNumber
-        cancelinvoice.expenses = self.expenses
+        cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.displayedUnits = self.displayedUnits
         cancelinvoice.tva = self.tva
         return cancelinvoice
@@ -830,7 +831,7 @@ class InvoiceLine(DBBASE):
         """
         newone = CancelInvoiceLine()
         newone.rowIndex = self.rowIndex
-        newone.cost = self.cost
+        newone.cost = -1 * self.cost
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
@@ -936,19 +937,23 @@ class Project(DBBASE):
     name = Column("name", String(255))
     code_client = Column("customerCode", String(4),
                                     ForeignKey('coop_customer.code'))
-    definition = Column("definition", Text)
+    definition = deferred(Column("definition", Text))
 
     id_company = Column("IDCompany", Integer,
                                     ForeignKey('coop_company.IDCompany'))
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
-    startingDate = Column("startingDate", CustomDateType,
-                                            default=get_current_timestamp)
-    endingDate = Column("endingDate", CustomDateType,
-                                            default=get_current_timestamp)
+                                        onupdate=get_current_timestamp))
+    startingDate = deferred(Column("startingDate", CustomDateType,
+                                            default=get_current_timestamp))
+    endingDate = deferred(Column("endingDate", CustomDateType,
+                                            default=get_current_timestamp))
+
+    type = deferred(Column('type', String(150)))
+    status = deferred(Column("status", String(20)))
+    dispatchType = deferred(Column("dispatchType", String(10)))
     archived = Column("archived", String(255), default=0)
 
     def get_estimation(self, taskid):
@@ -1229,14 +1234,14 @@ class CancelInvoice(Task):
     IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'),
                                                         default=None)
     IDProject = Column(Integer, ForeignKey('coop_project.IDProject'))
-    sequenceNumber = Column(Integer)
+    sequenceNumber = deferred(Column(Integer))
     number = Column(String(100))
     tva = Column(Integer, default=1960)
-    reimbursementConditions = Column(String(255), default=None)
-    officialNumber = Column(Integer, default=None)
-    paymentMode = Column(String(80), default=None)
+    reimbursementConditions = deferred(Column(String(255), default=None))
+    officialNumber = deferred(Column(Integer, default=None))
+    paymentMode = deferred(Column(String(80), default=None))
     displayedUnits = Column(Integer, default=0)
-    expenses = Column(Integer, default=0)
+    expenses = deferred(Column(Integer, default=0))
 
     project = relationship("Project", backref=backref('cancelinvoices',
                                             order_by='CancelInvoice.taskDate')

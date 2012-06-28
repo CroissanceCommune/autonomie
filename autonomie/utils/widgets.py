@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mar. 26 juin 2012 15:50:08 CEST
+# * Last Modified : jeu. 28 juin 2012 21:13:32 CEST
 #
 # * Project : autonomie
 #
@@ -99,11 +99,12 @@ class PermWidget(object):
         """
             Return True if the user has the right to access the destination
         """
-        right = has_permission(self.perm, context, request)
+        right = True
+        if self.perm:
+            right = has_permission(self.perm, context, request)
         if right and hasattr(self, "special_perm_func"):
-            return self.special_perm_func(context, request)
-        else:
-            return right
+            right = self.special_perm_func(context, request)
+        return right
 
 class StaticWidget(PermWidget):
     """

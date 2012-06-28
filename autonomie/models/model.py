@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 28 juin 2012 17:57:41 CEST
+# * Last Modified : jeu. 28 juin 2012 18:34:51 CEST
 #
 # * Project : autonomie
 #
@@ -43,7 +43,6 @@ from autonomie.models.types import CustomFileType
 from autonomie.models.utils import format_to_taskdate
 from autonomie.models.utils import format_from_taskdate
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.utils import url_safe
 
 
 from autonomie.models import DBBASE

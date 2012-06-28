@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -d /root/majerti/autonomie ]
+if [ ! -d /root/majerti/autonomie ]
 then
     echo "Missing /root/majerti/autonomie, Exiting \n"
     exit 1

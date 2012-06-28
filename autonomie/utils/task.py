@@ -49,8 +49,6 @@ class TaskComputing:
             compute estimation/invoice line total
         """
         cost = line.cost
-        if self.model.is_cancelinvoice:
-            cost = -1 * cost
         quantity = line.quantity
         return float(cost) * float(quantity)
 
@@ -77,7 +75,8 @@ class TaskComputing:
         """
         if not totalht:
             totalht = self.compute_totalht()
-        return int(float(totalht) * (max(int(self.model.tva), 0) / 10000.0))
+        result = int(float(totalht) * (max(int(self.model.tva), 0) / 10000.0))
+        return result
 
     def compute_ttc(self):
         """
@@ -124,8 +123,6 @@ class TaskComputing:
             Compute the expense value
         """
         result = int(self.model.expenses)
-        if self.model.is_cancelinvoice():
-            result = -1 * result
         return result
 
     def compute_sold(self):

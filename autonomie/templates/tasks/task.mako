@@ -60,7 +60,7 @@ Base template for task rendering
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
                         %if task.model.displayedUnits == 1:
-                            <td class="quantity">${format_amount(line.cost)} € x ${format_quantity(line.quantity)} ${line.get_unity_label()}</td>
+                            <td class="quantity">${sign} ${format_amount(line.cost)} € x ${format_quantity(line.quantity)} ${line.get_unity_label()}</td>
                         % endif
                         <td class="price">${format_amount(task.compute_line_total(line))} €</td>
                     </tr>
@@ -70,7 +70,7 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                        ${sign} ${format_amount(task.compute_lines_total())}
+                        ${format_amount(task.compute_lines_total())}
                      </td>
                  </tr>
                  %if hasattr(task.model, "discountHT") and task.model.discountHT:
@@ -114,7 +114,7 @@ Base template for task rendering
                             Frais liés à la prestation
                         </td>
                         <td class='price'>
-                            ${format_amount(task.model.expenses)} €
+                            ${format_amount(task.compute_expenses())} €
                         </td>
                     </tr>
                 %endif
@@ -123,7 +123,7 @@ Base template for task rendering
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${sign} ${format_amount(task.compute_total())} €
+                        ${format_amount(task.compute_total())} €
                     </td>
                 </tr>
             </tbody>

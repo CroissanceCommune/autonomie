@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 20 avril 2012 23:27:35 CEST
+# * Last Modified : ven. 29 juin 2012 17:19:12 CEST
 #
 # * Project : autonomie
 #
@@ -47,4 +47,5 @@ def initialize_sql(engine):
     #DBSESSION.configure(bind=engine)
     DBMETADATA.bind = engine
     DBBASE.metadata.bind = engine
+    DBBASE.metadata.create_all(engine)
     return DBSESSION

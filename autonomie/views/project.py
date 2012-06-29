@@ -131,8 +131,7 @@ class ProjectView(ListView):
         query = self._get_projects()
         if company:
             query = self._filter_company(query, company)
-        if archived == "1":
-            query = self._filter_archived(query)
+        query = self._filter_archived(query, archived)
         if search:
             query = self._filter_search(query, search)
         projects = query.order_by(sort + " " + direction).all()
@@ -164,11 +163,13 @@ class ProjectView(ListView):
         """
         return query.filter(Project.id_company==company.id)
 
-    def _filter_archived(self, query):
+    def _filter_archived(self, query, archived):
         """
             add a filter to query only archived projects
         """
-        return query.filter(Project.archived == "1")
+        if archived not in ("1", "0"):
+            archived = "0"
+        return query.filter(Project.archived == archived)
 
     def _filter_search(self, query, search):
         return query.filter( or_(Project.name.like(search + "%"),

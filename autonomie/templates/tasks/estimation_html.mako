@@ -21,6 +21,14 @@
     <br />
 
 </div>
+% if hasattr(task, "statusComment") and task.statusComment:
+    <div class='well'>
+        <b>Communication CAE-Entrepreneur</b>
+        <div>
+            ${task.statusComment}
+        </div>
+    </div>
+% endif
 
         <div style='border:1px solid #888'>
 <form id="deform" class="deform form-horizontal deform"

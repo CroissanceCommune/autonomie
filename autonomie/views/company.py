@@ -61,7 +61,7 @@ class CompanyViews(BaseView):
         all_tasks = sorted(all_tasks,
                             key=lambda a:a.statusDate,
                             reverse=True)
-        ret_val['tasks'] = all_tasks[:10]
+        ret_val['tasks'] = all_tasks[:5]
 
         # recovering elapsed invoices for warning
         elapsed_invoices = [TaskComputing(invoice) \
@@ -69,7 +69,7 @@ class CompanyViews(BaseView):
         elapsed_invoices = sorted(elapsed_invoices,
                                 key=lambda a:a.model.taskDate,
                                 reverse=True)
-        ret_val['elapsed_invoices'] = elapsed_invoices
+        ret_val['elapsed_invoices'] = elapsed_invoices[:5]
         return ret_val
 
     @view_config(route_name='company', renderer='company_edit.mako',

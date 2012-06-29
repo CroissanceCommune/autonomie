@@ -53,11 +53,11 @@ class CompanyInvoicesView(ListView):
     """
         Treasury and invoice view
     """
-    columns = dict(taskDate=Invoice.taskDate,
-                   number=Invoice.number,
-                   client=Client.name,
-                   company=Company.name,
-                   officialNumber=Invoice.officialNumber
+    columns = dict(taskDate=("taskDate",),
+                   number=("number",),
+                   client=("project", "client", "name",),
+                   company=("project", "company", "name",),
+                   officialNumber=("officialNumber",)
                    )
     default_sort = "officialNumber"
     default_direction = 'desc'
@@ -174,27 +174,43 @@ class CompanyInvoicesView(ListView):
             if year:
                 cancel_inv, inv, man_inv = self._filter_by_date(cancel_inv, inv, man_inv, year)
 
-        if sort:
-            inv = self._sort(inv, sort, direction)
-            if sort == Invoice.officialNumber:
-                csort = CancelInvoice.officialNumber
-            elif sort == Invoice.taskDate:
-                csort = CancelInvoice.taskDate
-            elif sort == Invoice.number:
-                csort = CancelInvoice.number
+#        if sort:
+#            inv = self._sort(inv, sort, direction)
+#            if sort == Invoice.officialNumber:
+#                csort = CancelInvoice.officialNumber
+#            elif sort == Invoice.taskDate:
+#                csort = CancelInvoice.taskDate
+#            elif sort == Invoice.number:
+#                csort = CancelInvoice.number
+#
+#            cancel_inv = self._sort(cancel_inv, csort, direction)
+#            if sort == Invoice.officialNumber:
+#                sort = ManualInvoice.officialNumber
+#            elif sort == Invoice.taskDate:
+#                sort = ManualInvoice.taskDate
+#            elif sort == Invoice.number:
+#                sort = ManualInvoice.officialNumber
+#            man_inv = self._sort(man_inv, sort, direction)
+        all_inv = inv.all()
+        all_inv.extend(cancel_inv)
+        all_inv.extend(man_inv)
+        if direction == 'asc':
+            reverse = False
+        else:
+            reverse = True
 
-            cancel_inv = self._sort(cancel_inv, csort, direction)
-            if sort == Invoice.officialNumber:
-                sort = ManualInvoice.officialNumber
-            elif sort == Invoice.taskDate:
-                sort = ManualInvoice.taskDate
-            elif sort == Invoice.number:
-                sort = ManualInvoice.officialNumber
-            man_inv = self._sort(man_inv, sort, direction)
+        def sort_key(a):
+            res = a.model
+            for e in sort:
+                res = getattr(res, e)
+            return res
+
+
         inv = inv.all()
         cancel_inv = cancel_inv.all()
         man_inv = man_inv.all()
         invoices = self._wrap_for_computing(cancel_inv, inv, man_inv)
+        invoices = sorted(invoices, key=sort_key, reverse=reverse)
         return invoices
 
     def _get_invoices(self):
@@ -204,14 +220,6 @@ class CompanyInvoicesView(ListView):
         join_args = ("project", "client", "company",)
         cancel_inv = self.dbsession.query(CancelInvoice).join(*join_args)
         inv = self.dbsession.query(Invoice).join(*join_args)
-#        inv = inv.union_all(cancel_inv)
-
-#        inv = self.dbsession.query(Task).with_polymorphic([CancelInvoice, Invoice]).join(Invoice.project, aliased=True).join(CancelInvoice.project).join(Project.client).join(Client.company)
-#        inv = self.dbsession.query(Task).outerjoin(CancelInvoice, Invoice)#.join(CancelInvoice.project, Invoice.project, aliased=True)
-        #print inv.all()
-
-
-
         man_inv = self.dbsession.query(ManualInvoice).join(
                                  ManualInvoice.client).join(Client.company)
         return cancel_inv, inv, man_inv

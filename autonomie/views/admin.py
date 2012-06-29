@@ -29,6 +29,7 @@ from deform import ValidationFailure
 from autonomie.models.model import Config
 from autonomie.models.model import Tva
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.views import submit_btn
 from autonomie.views.forms import MainConfig
 from autonomie.views.forms import TvaConfig
 from autonomie.views.forms.admin import get_config_appstruct
@@ -59,7 +60,7 @@ class AdminViews(BaseView):
                                    session=self.request.session,
                                    rootpath=root_path,
                                    rooturl="/assets/")
-        form = Form(schema, buttons=('submit',))
+        form = Form(schema, buttons=(submit_btn,))
 
 
         if 'submit' in self.request.params:
@@ -93,7 +94,7 @@ class AdminViews(BaseView):
             Tva configuration
         """
         schema = TvaConfig()
-        form = Form(schema, buttons=('submit',))
+        form = Form(schema, buttons=(submit_btn,))
         tvas = Tva.query(self.dbsession)
         if 'submit' in self.request.params:
             datas = self.request.params.items()

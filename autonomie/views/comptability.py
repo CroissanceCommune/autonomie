@@ -28,6 +28,7 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.models.model import OperationComptable
 from autonomie.models.model import Company
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.views import submit_btn
 from autonomie.views.forms import OperationSchema
 
 from .base import ListView
@@ -83,7 +84,7 @@ class ComptabilityView(ListView):
         companies = [(unicode(c.id), c.name)
                 for c in self.dbsession.query(Company.id, Company.name).all()]
         schema = OperationSchema().bind(choices=companies, edit=edit)
-        form = Form(schema, buttons=('submit',))
+        form = Form(schema, buttons=(submit_btn,))
         return form
 
     @view_config(route_name="operations",

@@ -21,7 +21,6 @@ from sqlalchemy import or_
 from webhelpers.html.builder import HTML
 from deform import ValidationFailure
 from deform import Form
-from deform import Button
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -35,6 +34,7 @@ from autonomie.utils.widgets import ToggleLink
 from autonomie.utils.widgets import ItemActionLink
 from autonomie.utils.widgets import StaticWidget
 from autonomie.utils.widgets import SearchForm
+from autonomie.utils.views import submit_btn
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
 from .base import ListView
@@ -65,9 +65,7 @@ def get_project_form(clients, default_client=None, edit=False, path=""):
     choices = build_client_values(clients)
     default = build_client_value(default_client)
     schema = ProjectSchema().bind(edit=edit, choices=choices, default=default)
-    form = Form(schema, actions=path, buttons=(Button(name='submit',
-                                        title=u'Validez',
-                                        type='submit'),))
+    form = Form(schema, actions=path, buttons=(submit_btn,))
     return form
 
 class ProjectView(ListView):

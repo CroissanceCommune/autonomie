@@ -31,6 +31,7 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import SearchForm
+from autonomie.utils.views import submit_btn
 from autonomie.views.forms import pwdSchema
 from autonomie.views.forms import userSchema
 
@@ -46,7 +47,7 @@ def account(request):
     """
     avatar = request.user
     pwdformschema = pwdSchema.bind(check=True)
-    pwdform = Form(pwdformschema, buttons=("submit",))
+    pwdform = Form(pwdformschema, buttons=(submit_btn,))
     html_form = pwdform.render({'login':avatar.login})
     if "submit" in request.params:
         controls = request.params.items()
@@ -87,11 +88,11 @@ class UserView(ListView):
         schema = userSchema.bind(edit=edit,
                                  companies=companies)
         if edit:
-            form = Form(schema, buttons=('submit',))
+            form = Form(schema, buttons=(submit_btn,))
         else:
             form = Form(schema,
                 action=self.request.route_path('users', _query=dict(new=1)),
-                buttons=('submit',))
+                buttons=(submit_btn,))
         return form
 
 

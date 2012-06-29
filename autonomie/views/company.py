@@ -26,6 +26,7 @@ from autonomie.views.forms import CompanySchema
 from autonomie.utils.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
+from autonomie.utils.views import submit_btn
 
 from .base import BaseView
 
@@ -86,7 +87,7 @@ class CompanyViews(BaseView):
                                     rootpath=company_path,
                                     rooturl=company_url,
                                     session=self.request.session)
-        form = Form(schema, buttons=('submit', ))
+        form = Form(schema, buttons=(submit_btn, ))
         if 'submit' in self.request.params:
             datas = self.request.params.items()
             try:

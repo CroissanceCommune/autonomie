@@ -30,6 +30,7 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.models.model import Holliday
 from autonomie.models.model import User
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.views import submit_btn
 from autonomie.views.forms.holliday import HollidaysSchema
 from autonomie.views.forms.holliday import searchSchema
 from .base import BaseView
@@ -54,7 +55,7 @@ class HollidayView(BaseView):
             Allows a simple user to set his hollidays
         """
         schema = HollidaysSchema()
-        form = Form(schema, buttons=('submit',))
+        form = Form(schema, buttons=(submit_btn,))
         hollidays = Holliday.query(self.dbsession,user_id=self.request.user.id)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
@@ -93,7 +94,7 @@ class HollidayView(BaseView):
         """
         schema = searchSchema.bind(
                 choices=get_user_choices(self.dbsession))
-        form = Form(schema, buttons=('submit',))
+        form = Form(schema, buttons=(submit_btn,))
         hollidays = []
         start_date = None
         end_date = None

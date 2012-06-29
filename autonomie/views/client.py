@@ -21,7 +21,6 @@ from sqlalchemy import or_
 
 from deform import ValidationFailure
 from deform import Form
-from deform import Button
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -30,6 +29,7 @@ from autonomie.models.model import Client
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
+from autonomie.utils.views import submit_btn
 from autonomie.views.forms import ClientSchema
 from .base import ListView
 
@@ -39,9 +39,7 @@ def get_client_form(edit=False, path=""):
         Returns the client add/edit form
     """
     schema = ClientSchema().bind(edit=edit)
-    form = Form(schema, actions=path, buttons=(Button(name='submit',
-                                        title=u'Validez',
-                                        type='submit'),))
+    form = Form(schema, actions=path, buttons=(submit_btn,))
     return form
 
 class ClientView(ListView):

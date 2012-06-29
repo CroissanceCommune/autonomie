@@ -496,6 +496,7 @@ class InvoiceMatch(MappingWrapper):
                          ('expenses', 'lines'),
                          ('exclusions', 'notes'),
                          ('paymentConditions', 'payments'),
+                         ('statusComment', 'communication'),
             )
     dbtype = 'invoice'
 
@@ -516,6 +517,7 @@ class EstimationMatch(MappingWrapper):
                         #estimation only attrs
                          ('paymentDisplay', 'payments'),
                          ('deposit', 'payments'),
+                         ('statusComment', 'communication'),
                          )
     dbtype = 'estimation'
 

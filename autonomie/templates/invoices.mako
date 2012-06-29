@@ -124,7 +124,7 @@
 <%block name='content'>
 <table class="table table-condensed table-bordered">
     <thead>
-        <th>Statut</th>
+        <th><span class="ui-icon ui-icon-comment"></span></th>
         <th>${sortable(u"Identifiant", "officialNumber")}</th>
         <th>${sortable(u"Entrepreneur", 'company')}</th>
         <th>${sortable(u"Émise le", 'taskDate')}</th>
@@ -146,18 +146,22 @@
         </tr>
         % if invoices:
             % for invoice in invoices:
-                %if invoice.model.is_tolate():
-                    <tr class='invoice_tolate_tr'>
-                    <td class='invoice_tolate'>
+                    %if invoice.model.is_tolate():
+                        <tr class='invoice_tolate_tr'>
+                            <td class='invoice_tolate'>
+                    <br />
                     %elif invoice.model.is_paid():
                         <tr class='invoice_paid_tr'>
-                    <td class='invoice_paid'>
-                            <span class="ui-icon ui-icon-check"></span>
+                            <td class='invoice_paid'>
+                    <br />
                     %else:
                         <tr>
-                    <td class='invoice_notpaid'>
-                    %endif
+                            <td class='invoice_notpaid'>
                     <br />
+                    %endif
+                    %if hasattr(invoice.model, "statusComment") and invoice.model.statusComment:
+                        <span class="ui-icon ui-icon-comment" title="${invoice.model.statusComment}"></span>
+                    %endif
                 </td>
                     <td>
                         ${invoice.model.officialNumber}

@@ -86,7 +86,7 @@
                 %endfor
             </select>
             <select class='span1' name='nb'>
-                % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'1000'),):
+                % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'10000'),):
                     <% nb_item = request.GET.get("nb") %>
                     % if nb_item == value or request.cookies.get('items_per_page') == value:
                         <option value="${value}" selected='true'>${text}</option>
@@ -174,7 +174,7 @@
                     </td>
                     <td>
                         <blockquote>
-                            %if invoice.model.project:
+                            %if invoice.model.IDTask:
                                 <a href="${request.route_path('invoice', id=invoice.model.IDTask)}"
                                 title='Voir le document'>${invoice.model.number}</a>
                             %else:

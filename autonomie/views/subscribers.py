@@ -17,7 +17,7 @@
     add_menu : add a menu to the returned datas at BeforeRender
                if the company id is set
 """
-
+import logging
 from webhelpers.html import tags
 from webhelpers.html import HTML
 
@@ -62,9 +62,11 @@ def get_company(request, cid):
     """
         Return the current company object
     """
-    dbsession = request.dbsession()
-    company = dbsession.query(Company).filter(Company.id==cid).first()
-    return company
+    if not hasattr(request, "_company"):
+        dbsession = request.dbsession()
+        company = dbsession.query(Company).filter(Company.id==cid).first()
+        request._company = company
+    return request._company
 
 def get_user_menu(cid, css=None):
     """

@@ -15,7 +15,9 @@
 """
     View utilities
 """
+from deform import Button
 from pyramid.url import current_route_url
+
 def get_page_url(request, page):
     """
         Return a url generator for pagination
@@ -24,4 +26,4 @@ def get_page_url(request, page):
     args['page'] = str(page)
     return current_route_url(request, page=page, _query=args)
 
-
+submit_btn = Button(name="submit", type="submit", title=u"Validez")

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 28 juin 2012 20:48:30 CEST
+# * Last Modified : ven. 29 juin 2012 15:23:17 CEST
 #
 # * Project : autonomie
 #
@@ -80,11 +80,16 @@ class Company(DBBASE):
     __tablename__ = 'coop_company'
     id = Column("IDCompany", Integer, primary_key=True)
     name = Column("name", String(150))
-    goal = deferred(Column("object", String(255)))
-    email = deferred(Column("email", String(255)))
-    phone = deferred(Column("phone", String(20), default=""))
-    mobile = deferred(Column("mobile", String(20)))
-    comments = deferred(Column("comments", Text))
+    goal = deferred(Column("object", String(255)),
+            group='edit')
+    email = deferred(Column("email", String(255)),
+            group='edit')
+    phone = deferred(Column("phone", String(20), default=""),
+            group='edit')
+    mobile = deferred(Column("mobile", String(20)),
+            group='edit')
+    comments = deferred(Column("comments", Text),
+            group='edit')
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = deferred(Column("updateDate", CustomDateType,
@@ -92,13 +97,17 @@ class Company(DBBASE):
                                         onupdate=get_current_timestamp))
     active = deferred(Column("active", String(1), default="Y"))
     IDGroup = deferred(Column("IDGroup", Integer, default=0))
-    logo = deferred(Column("logo", CustomFileType("logo_", 255)))
-    header = deferred(Column("header", CustomFileType("header_", 255)))
+    logo = deferred(Column("logo", CustomFileType("logo_", 255)),
+            group='edit')
+    header = deferred(Column("header", CustomFileType("header_", 255)),
+            group='edit')
     logoType = deferred(Column("logoType", String(255)))
     headerType = deferred(Column("headerType", String(255)))
     IDEGWUser = deferred(Column("IDEGWUser", Integer, default=0))
-    RIB = deferred(Column("RIB", String(255)))
-    IBAN = deferred(Column("IBAN", String(255)))
+    RIB = deferred(Column("RIB", String(255)),
+            group='edit')
+    IBAN = deferred(Column("IBAN", String(255)),
+            group='edit')
     clients = relationship("Client",
                             order_by="Client.id",
                             backref='company')
@@ -526,18 +535,25 @@ class Estimation(Task):
     number = Column("number", String(100), nullable=False)
     tva = Column("tva", Integer, nullable=False, default=196)
     deposit = Column("deposit", Integer, default=0)
-    paymentConditions = deferred(Column("paymentConditions", Text))
-    exclusions = deferred(Column("exclusions", Text))
+    paymentConditions = deferred(Column("paymentConditions", Text),
+                        group='edit')
+    exclusions = deferred(Column("exclusions", Text),
+                        group='edit')
     IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
-    manualDeliverables = deferred(Column("manualDeliverables", Integer))
+    manualDeliverables = deferred(Column("manualDeliverables", Integer),
+                        group='edit')
     course = deferred(Column('course', Integer,
-                                    nullable=False, default=0))
+                                    nullable=False, default=0),
+                                    group='edit')
     displayedUnits = deferred(Column('displayedUnits', Integer,
-                                    nullable=False, default=0))
+                                    nullable=False, default=0),
+                                    group='edit')
     discountHT = Column('discountHT', Integer, default=0)
-    expenses = deferred(Column('expenses', Integer, default=0))
+    expenses = deferred(Column('expenses', Integer, default=0),
+                                group='edit')
     paymentDisplay = deferred(Column('paymentDisplay', String(20),
-                                                default="SUMMARY"))
+                                                default="SUMMARY"),
+                                                group='edit')
     project = relationship("Project",
                             backref=backref('estimations',
                                             order_by='Estimation.taskDate')
@@ -626,17 +642,21 @@ class Invoice(Task):
                 nullable=False)
     number = Column("number", String(100), nullable=False)
     tva = Column("tva", Integer, nullable=False, default=196)
-    paymentConditions = deferred(Column("paymentConditions", Text))
+    paymentConditions = deferred(Column("paymentConditions", Text),
+                                                        group='edit')
     deposit = deferred(Column('deposit', Integer,
-                                    nullable=False, default=0))
+                                    nullable=False, default=0),
+                                    group='edit')
     course = deferred(Column('course', Integer,
-                                    nullable=False, default=0))
+                                    nullable=False, default=0),
+                                    group='edit')
     officialNumber = Column("officialNumber", Integer)
     paymentMode = Column("paymentMode", String(10))
     displayedUnits = deferred(Column('displayedUnits', Integer,
-                                    nullable=False, default=0))
+                                    nullable=False, default=0),
+                                    group='edit')
     discountHT = Column('discountHT', Integer, default=0)
-    expenses = deferred(Column('expenses', Integer, default=0))
+    expenses = deferred(Column('expenses', Integer, default=0), group='edit')
 
     project = relationship("Project", backref=backref('invoices',
                                             order_by='Invoice.taskDate')
@@ -754,8 +774,8 @@ class EstimationLine(DBBASE):
     __tablename__ = 'coop_estimation_line'
     id = Column("IDWorkLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
-    rowIndex = deferred(Column("rowIndex", Integer))
-    description = deferred(Column("description", Text))
+    rowIndex = Column("rowIndex", Integer)
+    description = Column("description", Text)
     cost = Column("cost", Integer)
     quantity = Column("quantity", Integer)
     creationDate = deferred(Column("creationDate", CustomDateType,
@@ -811,8 +831,8 @@ class InvoiceLine(DBBASE):
     __tablename__ = 'coop_invoice_line'
     id = Column("IDInvoiceLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
-    rowIndex = deferred(Column("rowIndex", Integer))
-    description = deferred(Column("description", Text))
+    rowIndex = Column("rowIndex", Integer)
+    description = Column("description", Text)
     cost = Column("cost", Integer)
     quantity = Column("quantity", Integer)
     creationDate = deferred(Column("creationDate", CustomDateType,
@@ -926,7 +946,7 @@ class Client(DBBASE):
     """
     __tablename__ = 'coop_customer'
     id = Column('code', String(4), primary_key=True)
-    comments = deferred(Column("comments", Text))
+    comments = deferred(Column("comments", Text), group='edit')
     creationDate = Column("creationDate", CustomDateType,
                                             default=get_current_timestamp)
     updateDate = Column("updateDate", CustomDateType,
@@ -934,18 +954,18 @@ class Client(DBBASE):
                                         onupdate=get_current_timestamp)
     id_company = Column("IDCompany", Integer,
                                     ForeignKey('coop_company.IDCompany'))
-    intraTVA = deferred(Column("intraTVA", String(50)))
-    address = deferred(Column("address", String(255)))
-    zipCode = deferred(Column("zipCode", String(20)))
-    city = deferred(Column("city", String(255)))
-    country = deferred(Column("country", String(150)))
-    phone = deferred(Column("phone", String(50)))
-    email = deferred(Column("email", String(255)))
+    intraTVA = deferred(Column("intraTVA", String(50)), group='edit')
+    address = deferred(Column("address", String(255)), group='edit')
+    zipCode = deferred(Column("zipCode", String(20)), group='edit')
+    city = deferred(Column("city", String(255)), group='edit')
+    country = deferred(Column("country", String(150)), group='edit')
+    phone = deferred(Column("phone", String(50)), group='edit')
+    email = deferred(Column("email", String(255)), group='edit')
     contactLastName = deferred(Column("contactLastName",
-                    String(255), default=None))
+                    String(255), default=None), group='edit')
     name = Column("name", String(255), default=None)
     contactFirstName = deferred(Column("contactFirstName",
-                    String(255), default=None))
+                    String(255), default=None), group='edit')
     projects = relationship("Project", backref="client")
 
     def get_company_id(self):
@@ -976,7 +996,7 @@ class Project(DBBASE):
     code_client = Column("customerCode", String(4),
                                     ForeignKey('coop_customer.code'))
     code = Column("code", String(4), nullable=False)
-    definition = deferred(Column("definition", Text))
+    definition = deferred(Column("definition", Text), group='edit')
 
     id_company = Column("IDCompany", Integer,
                                     ForeignKey('coop_company.IDCompany'))
@@ -986,11 +1006,11 @@ class Project(DBBASE):
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp))
     startingDate = deferred(Column("startingDate", CustomDateType,
-                                            default=get_current_timestamp))
+                                default=get_current_timestamp), group='edit')
     endingDate = deferred(Column("endingDate", CustomDateType,
-                                            default=get_current_timestamp))
+                                default=get_current_timestamp), group='edit')
 
-    type = deferred(Column('type', String(150)))
+    type = deferred(Column('type', String(150)), group='edit')
     archived = Column("archived", String(255), default=0)
 
     def get_estimation(self, taskid):
@@ -1244,7 +1264,7 @@ class OperationComptable(DBBASE):
                                         default=datetime.datetime.now,
                                         onupdate=datetime.datetime.now))
     year = Column("annee", BigInteger)
-    type = deferred(Column("type", Text))
+    type = Column("type", Text)
 
 class CancelInvoice(Task):
     """
@@ -1275,14 +1295,15 @@ class CancelInvoice(Task):
     IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'),
                                                         default=None)
     IDProject = Column(Integer, ForeignKey('coop_project.IDProject'))
-    sequenceNumber = deferred(Column(Integer))
+    sequenceNumber = deferred(Column(Integer), group='edit')
     number = Column(String(100))
     tva = Column(Integer, default=1960)
-    reimbursementConditions = deferred(Column(String(255), default=None))
-    officialNumber = deferred(Column(Integer, default=None))
-    paymentMode = deferred(Column(String(80), default=None))
+    reimbursementConditions = deferred(Column(String(255), default=None),
+            group='edit')
+    officialNumber = deferred(Column(Integer, default=None), group='edit')
+    paymentMode = deferred(Column(String(80), default=None), group='edit')
     displayedUnits = Column(Integer, default=0)
-    expenses = deferred(Column(Integer, default=0))
+    expenses = deferred(Column(Integer, default=0), group='edit')
 
     project = relationship("Project", backref=backref('cancelinvoices',
                                             order_by='CancelInvoice.taskDate')

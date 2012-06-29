@@ -11,6 +11,7 @@
 <div class='row'>
     <div class='span4'>
         %if elapsed_invoices:
+        <div class='well' style="margin-top:10px">
             <div class='section-header'>Factures en retard
             </div>
             <a class='btn btn-primary'
@@ -37,7 +38,9 @@
                     % endfor
                 </tbody>
             </table>
+        </div>
         %endif
+    </div>
         <div class='span6 offset1'>
             % if request.config.has_key('welcome'):
                 <p>
@@ -45,11 +48,11 @@
                 </p>
             % endif
         </div>
-    </div>
 </div>
 
 <div class='row'>
     <div class='span12'>
+        <div class='well' style="margin-top:10px">
         <div class='section-header'>Dernières activités</div>
         <table class='table table-stripped'>
             <thead>
@@ -75,6 +78,7 @@
                 % endfor
             </tbody>
         </table>
+    </div>
     </div>
 </div>
 </%block>

@@ -45,7 +45,7 @@
     <div class="navbar">
       <div class="navbar-inner">
         <div class="container">
-          <a class="brand" href='/'>Autonomie</a>
+          <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
           <a class="btn btn-navbar" data-target=".menu" data-toggle="collapse">
             >>>
           </a>

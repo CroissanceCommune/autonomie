@@ -76,16 +76,21 @@ def get_user_menu(cid, css=None):
     if cid:
         menu = Menu("base/mainmenu.mako", css=css)
         menu.add(MainMenuItem(u"Clients", "view",
+            icon="icon-white icon-user",
                                 path="company_clients", id=cid))
         menu.add(MainMenuItem(u"Projets", "view",
+            icon="icon-white icon-folder-open",
                                 path="company_projects", id=cid))
         gestion = MenuDropDown(u"Gestion", "view")
         gestion.add(MainMenuItem(u"Factures", "view",
+            icon="icon-list-alt",
                                 path="company_invoices", id=cid))
         gestion.add(MainMenuItem(u"Trésorerie", "view",
+            icon="icon-info-sign",
                                 path="company_treasury", id=cid))
         menu.add(gestion)
         menu.add(MainMenuItem(u"Paramètres", "view",
+            icon="icon-white icon-cog",
                                 path="company", id=cid))
     return menu
 
@@ -94,10 +99,16 @@ def get_admin_menus(cid):
         Return the menu for admin or managers
     """
     menu = Menu("base/mainmenu.mako")
-    menu.add(MainMenuItem(u"Factures", "manage", path="invoices"))
-    menu.add(MainMenuItem(u"Congés", "manage", path="hollidays"))
-    menu.add(MainMenuItem(u"Comptabilité", "manage", path="operations"))
-    menu.add(MainMenuItem(u"Configuration", "admin", path="admin_index"))
+    menu.add(MainMenuItem(u"Factures", "manage", path="invoices",
+        icon="icon-white icon-list-alt"))
+    menu.add(MainMenuItem(u"Congés", "manage", path="hollidays",
+        icon="icon-white icon-plane"
+        ))
+    menu.add(MainMenuItem(u"Comptabilité", "manage", path="operations",
+        icon="icon-white icon-info-sign",
+        ))
+    menu.add(MainMenuItem(u"Configuration", "admin", path="admin_index",
+        icon="icon-white icon-cog"))
     submenu = get_user_menu(cid, "nav-pills")
     return menu, submenu
 
@@ -138,7 +149,8 @@ def add_menu(event):
             menu.insert(company_menu(request, companies, cid))
 
         if menu:
-            menu.add(MainMenuItem(u"Annuaire", "view", path="users"))
+            menu.add(MainMenuItem(u"Annuaire", "view",
+                        icon="icon-white icon-book", path="users"))
             event.update({'menu':menu})
         if submenu:
             companies = get_companies(request)

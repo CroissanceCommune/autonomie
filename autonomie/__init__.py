@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 29 juin 2012 17:19:24 CEST
+# * Last Modified : ven. 29 juin 2012 17:45:45 CEST
 #
 # * Project : autonomie
 #
@@ -161,27 +161,12 @@ def main(global_config, **settings):
     # Manage main view
     config.add_route("manage",
                     "/manage")
-
-#    config.add_route('useradd', '/user/add')
-#    config.add_route('userpass', '/user/pwd')
-#    config.add_route('userdel', '/user/del')
-#
-#    config.add_route('usermodpass', '/profile/pwd')
-#
-#    config.add_route("clientdel", "/user/{id}/delform")
-#    config.add_route("clientedit", "/user/{id}/editform")
-#    config.add_route("clientadd", "/user/addform")
-#
-#    config.add_route('estimationlist', '/estimation/list')
-#    config.add_route('estimation_pdf', '/estimation/pdf')
-#
-#    # REST API
-#    config.add_route("users", "/users")
-#    config.add_route("user", "/users/{uid}")
-#    config.add_route("clients", "/company/{cid}/clients")
-#    config.add_route('client', "/company/{cid}/clients/{id}")
+    # Set deform multi renderer handling translation and both chameleon and mako
+    # templates
     set_deform_renderer()
     config.scan('autonomie.views')
     config.add_translation_dirs("colander:locale/", "deform:locale")
-    locale.setlocale(locale.LC_ALL, "")
+    locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
+    locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
+
     return config.make_wsgi_app()

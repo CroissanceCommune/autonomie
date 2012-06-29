@@ -15,7 +15,7 @@
             <div class='section-header'>Factures en retard
             </div>
             <a class='btn btn-primary'
-                href="${request.route_path('company_invoices', id=company.id)}">Voir</a>
+                href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">Voir</a>
             <table class='table table-stripped'>
                 <thead>
                     <th>Numéro</th>

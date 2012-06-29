@@ -146,7 +146,8 @@ def add_menu(event):
         elif cid:
             menu = get_user_menu(cid)
             companies = get_companies(request)
-            menu.insert(company_menu(request, companies, cid))
+            if len(companies) > 1:
+                menu.insert(company_menu(request, companies, cid))
 
         if menu:
             menu.add(MainMenuItem(u"Annuaire", "view",

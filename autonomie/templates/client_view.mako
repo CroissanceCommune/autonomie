@@ -2,10 +2,10 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />
 <%block name='content'>
-<div class='container'>
-    <ul class="row">
-        <div class='span2'>
-            <h3>Entreprise</h3>
+<div class="row">
+    <div class='span3'>
+        <div class='well'>
+            <h3>Entreprise ${client.name.upper()}</h3>
             <dl>
                 % for label, value in ((u"Nom de l'entreprise", client.name), (u"Code", client.id), (u"TVA intracommunautaire", client.intraTVA)):
                     %if value:
@@ -15,9 +15,11 @@
                 % endfor
             </dl>
         </div>
-        <div class="span3 offset1">
+    </div>
+    <div class="span3">
+        <div class='well'>
             <h3>Contact principal</h3>
-            <strong>${client.contactLastName} ${client.contactFirstName}</strong>
+            <strong>${client.contactLastName.upper()} ${client.contactFirstName.capitalize()}</strong>
             <br />
             % if client.address:
                 <address>
@@ -50,7 +52,9 @@
                 </dd>
             </dl>
         </div>
-        <div class='span5 offset1'>
+    </div>
+    <div class='span6'>
+        <div class='well'>
             % if client.comments:
                 <h3>Commentaires</h3>
                 <blockquote style='padding:15px;margin-top:25px;border:1px solid #eee;'>
@@ -61,71 +65,72 @@
             % endif
         </div>
     </div>
-    <div class='row'>
-    </div>
-    <h2>Projets</h2>
-    <div class='row'>
+</div>
+<div class='row'>
+    <div class='span12'>
+        <h2>Projets</h2>
         %if client.projects:
-        <table class="table table-striped table-condensed">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Nom</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                % for project in client.projects:
-                    %if project.is_archived():
-                        <tr class='tableelement' style='background-color:#999' id="${project.id}">
-                    %else:
-                        <tr class='tableelement' id="${project.id}">
-                    %endif
-                        <td>${project.code}</td>
-                        <td>${project.name}
-                            %if project.is_archived():
-                                (ce projet a été archivé)
-                            %endif
-                        </td>
-                        <td>
-                        <div class='btn-group'>
-                            <a class='btn' href='${request.route_path("project", id=project.id)}'>
-                                <span class='ui-icon ui-icon-pencil'></span>
-                                Voir
-                            </a>
-                            <a class='btn' href='${request.route_path("estimations", id=project.id)}'>
-                                <span class='ui-icon ui-icon-plusthick'></span>
-                                Devis
-                            </a>
-                            <a class='btn' href='${request.route_path("project_invoices", id=project.id)}'>
-                                <span class='ui-icon ui-icon-plusthick'></span>
-                                Facture
-                            </a>
-                            %if not project.is_archived():
-                                <a class='btn'
-                                    href='${request.route_path("project", id=project.id, _query=dict(action="archive"))}'
-                                    onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
-                                    <span class='ui-icon ui-icon-folder-collapsed'></span>
-                                    Archiver
-                                </a>
-                            %elif project.is_deletable():
-                                <a class='btn'
-                                    href='${request.route_path("project", id=project.id, _query=dict(action="delete"))}'
-                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');">
-                                    <span class='ui-icon ui-icon-trash'></span>
-                                    Supprimer
-                                </a>
-                            %endif
-                        </div>
-                        </td>
+            <table class="table table-striped table-condensed">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Nom</th>
+                        <th>Actions</th>
                     </tr>
+                </thead>
+                <tbody>
+                    % for project in client.projects:
+                        %if project.is_archived():
+                            <tr class='tableelement' style='background-color:#999' id="${project.id}">
+                            %else:
+                                <tr class='tableelement' id="${project.id}">
+                                %endif
+                                <td>${project.code}</td>
+                                <td>${project.name}
+                                    %if project.is_archived():
+                                        (ce projet a été archivé)
+                                    %endif
+                                </td>
+                                <td>
+                                    <div class='btn-group'>
+                                        <a class='btn' href='${request.route_path("project", id=project.id)}'>
+                                            <span class='ui-icon ui-icon-pencil'></span>
+                                            Voir
+                                        </a>
+                                        <a class='btn' href='${request.route_path("estimations", id=project.id)}'>
+                                            <span class='ui-icon ui-icon-plusthick'></span>
+                                            Devis
+                                        </a>
+                                        <a class='btn' href='${request.route_path("project_invoices", id=project.id)}'>
+                                            <span class='ui-icon ui-icon-plusthick'></span>
+                                            Facture
+                                        </a>
+                                        %if not project.is_archived():
+                                            <a class='btn'
+                                                href='${request.route_path("project", id=project.id, _query=dict(action="archive"))}'
+                                                onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
+                                                <span class='ui-icon ui-icon-folder-collapsed'></span>
+                                                Archiver
+                                            </a>
+                                        %elif project.is_deletable():
+                                            <a class='btn'
+                                                href='${request.route_path("project", id=project.id, _query=dict(action="delete"))}'
+                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');">
+                                                <span class='ui-icon ui-icon-trash'></span>
+                                                Supprimer
+                                            </a>
+                                        %endif
+                                    </div>
+                                </td>
+                            </tr>
 
-                %endfor
-            </tbody>
-        </table>
-    %else:
-        Aucun projet n'a été initié avec ce client
-    %endif
+                        %endfor
+                    </tbody>
+                </table>
+            %else:
+                Aucun projet n'a été initié avec ce client
+            %endif
+        </div>
     </div>
 </div>
 </%block>

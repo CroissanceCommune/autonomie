@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 27 juin 2012 01:09:06 CEST
+# * Last Modified : ven. 29 juin 2012 15:23:52 CEST
 #
 # * Project : autonomie
 #
@@ -17,6 +17,7 @@ import logging
 from pyramid.security import Allow
 from pyramid.security import Authenticated
 from pyramid.security import ALL_PERMISSIONS
+from sqlalchemy.orm import undefer_group
 
 from autonomie.models.model import Project
 from autonomie.models.model import Company
@@ -106,7 +107,7 @@ class CompanyFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(Company).filter(
+        obj = dbsession.query(Company).options(undefer_group('edit')).filter(
                                Company.id==key).scalar()
         if obj is None:
             raise KeyError
@@ -138,7 +139,7 @@ class ProjectFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(Project).filter(
+        obj = dbsession.query(Project).options(undefer_group('edit')).filter(
                                                Project.id==key).scalar()
         if obj is None:
             raise KeyError
@@ -161,7 +162,7 @@ class ClientFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(Client).filter(
+        obj = dbsession.query(Client).options(undefer_group('edit')).filter(
                                              Client.id==key).scalar()
         if obj is None:
             raise KeyError
@@ -193,7 +194,7 @@ class EstimationFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(Estimation).filter(
+        obj = dbsession.query(Estimation).options(undefer_group('edit')).filter(
                                            Estimation.IDTask==key).scalar()
         if obj is None:
             raise KeyError
@@ -216,7 +217,7 @@ class InvoiceFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(Invoice).filter(
+        obj = dbsession.query(Invoice).options(undefer_group('edit')).filter(
                                              Invoice.IDTask==key).scalar()
         if obj is None:
             raise KeyError
@@ -240,8 +241,8 @@ class CancelInvoiceFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(CancelInvoice).filter(
-                                    CancelInvoice.IDTask==key).scalar()
+        obj = dbsession.query(CancelInvoice).options(undefer_group('edit')
+                                  ).filter(CancelInvoice.IDTask==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
@@ -273,7 +274,8 @@ class UserFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(User).filter(User.id==key).scalar()
+        obj = dbsession.query(User).options(undefer_group('edit')
+                                            ).filter(User.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__parent__ = self
@@ -304,7 +306,8 @@ class OperationFactory(BaseDBFactory):
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
-        obj = dbsession.query(OperationComptable).filter(
+        obj = dbsession.query(OperationComptable).options(
+                undefer_group('edit')).filter(
                                 OperationComptable.id==key).scalar()
         if obj is None:
             raise KeyError

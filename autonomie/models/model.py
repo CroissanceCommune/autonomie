@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 29 juin 2012 15:23:17 CEST
+# * Last Modified : ven. 29 juin 2012 16:50:03 CEST
 #
 # * Project : autonomie
 #
@@ -1209,11 +1209,20 @@ class ManualInvoice(DBBASE):
         return u"FACT_MAN_{0}".format(self.officialNumber)
 
     @property
+    def IDTask(self):
+        return None
+
+    @property
     def project(self):
         """
             return None
         """
-        return None
+        class Void:
+            pass
+        p = Void()
+        p.client = self.client
+        p.company = self.company
+        return p
 
     def get_company(self):
         """

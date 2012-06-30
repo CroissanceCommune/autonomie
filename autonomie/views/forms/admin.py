@@ -100,7 +100,8 @@ class SiteConfig(colander.MappingSchema):
                 default={"filename":"logo.png", "uid":"MAINLOGO"})
     welcome = colander.SchemaNode(colander.String(),
                                 title=u"Texte d'accueil",
-                                widget=widget.TextAreaWidget(cols=80, rows=2),
+                                widget=widget.RichTextWidget(cols=80, rows=2,
+                                    theme="advanced"),
                                 missing=u'')
     files_dir = colander.SchemaNode(colander.String(),
                  title=u"Chemin de stockage des fichiers (logo, entête)...")

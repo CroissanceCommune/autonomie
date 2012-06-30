@@ -2,7 +2,7 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%block name='content'>
 <div class='row'>
-    <div class='span4 offset2'>
+    <div class='span4 offset1'>
         <div class='well'>
             <dl>
                 % for label, value in ((u'Identifiant', user.login), (u"Nom", user.lastname), (u"Prénom", user.firstname)):

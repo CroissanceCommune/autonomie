@@ -374,9 +374,9 @@ class InvoiceView(TaskView):
                 return True
         return False
 
-    @view_config(route_name="project_invoices", renderer='tasks/form.mako',
+    @view_config(route_name="project_invoices", renderer='tasks/edit.mako',
             permission='edit')
-    @view_config(route_name='invoice', renderer='tasks/form.mako',
+    @view_config(route_name='invoice', renderer='tasks/edit.mako',
             permission='edit')
     def invoice_form(self):
         """
@@ -497,7 +497,7 @@ class InvoiceView(TaskView):
         return render_html(self.request, template, datas)
 
     @view_config(route_name='invoice',
-                renderer='tasks/invoice_html.mako',
+                renderer='tasks/view_only.mako',
                 permission='view',
                 request_param='view=html')
     def html(self):
@@ -517,7 +517,6 @@ class InvoiceView(TaskView):
                     )
 
     @view_config(route_name='invoice',
-                renderer='tasks/invoice_html.mako',
                 request_param='view=pdf',
                 permission='view')
     def pdf(self):

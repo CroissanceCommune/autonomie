@@ -83,9 +83,9 @@ class EstimationView(TaskView):
                 return True
         return False
 
-    @view_config(route_name="estimations", renderer='tasks/form.mako',
+    @view_config(route_name="estimations", renderer='tasks/edit.mako',
                 permission='edit')
-    @view_config(route_name='estimation', renderer='tasks/form.mako',
+    @view_config(route_name='estimation', renderer='tasks/edit.mako',
                 permission='edit')
     def form(self):
         """
@@ -205,7 +205,7 @@ class EstimationView(TaskView):
         return render_html(self.request, template, datas)
 
     @view_config(route_name='estimation',
-                renderer='tasks/estimation_html.mako',
+                renderer='tasks/view_only.mako',
                 request_param='view=html',
                 permission='view')
     def html(self):

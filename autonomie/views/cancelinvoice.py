@@ -50,9 +50,9 @@ class CancelInvoiceView(TaskView):
     route = "cancelinvoice"
 
     @view_config(route_name="cancelinvoices",
-                 renderer="tasks/form.mako",
+                 renderer="tasks/edit.mako",
                  permission="manage")
-    @view_config(route_name="cancelinvoice", renderer="tasks/form.mako",
+    @view_config(route_name="cancelinvoice", renderer="tasks/edit.mako",
                 permission='manage')
     def form(self):
         """
@@ -193,7 +193,7 @@ class CancelInvoiceView(TaskView):
         return render_html(self.request, template, datas)
 
     @view_config(route_name='cancelinvoice',
-                 renderer='tasks/cancelinvoice_html.mako',
+                 renderer='tasks/view_only.mako',
                  request_param='view=html',
                  permission='view')
     def html(self):
@@ -211,7 +211,6 @@ class CancelInvoiceView(TaskView):
                     submit_buttons=self.get_buttons())
 
     @view_config(route_name='cancelinvoice',
-                    renderer='tasks/cancelinvoice_html.mako',
                     request_param='view=pdf',
                     permission='view')
     def pdf(self):

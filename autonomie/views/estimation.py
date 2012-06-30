@@ -325,7 +325,8 @@ class EstimationView(TaskView):
             amount = computer.compute_deposit()
             line = InvoiceLine(rowIndex=count,
                                description=u"Facture d'acompte",
-                               cost=amount)
+                               cost=amount,
+                               quantity=1)
             invoice.lines.append(line)
             self.dbsession.merge(invoice)
             count += 1
@@ -357,7 +358,8 @@ class EstimationView(TaskView):
                 amount = paymentline.amount
             line = InvoiceLine(rowIndex=1,
                                description=paymentline.description,
-                               cost=amount)
+                               cost=amount,
+                               quantity=1)
 
             invoice.lines.append(line)
             self.dbsession.merge(invoice)
@@ -383,7 +385,8 @@ class EstimationView(TaskView):
         invoice = Invoice(**invoice_args)
         line = InvoiceLine(rowIndex=1,
                             description=paymentline.description,
-                            cost=computer.compute_totalht())
+                            cost=computer.compute_totalht(),
+                            quantity=1)
         invoice.lines.append(line)
         for i in already_paid_lines:
             invoice.lines.append(i.duplicate())

@@ -170,8 +170,8 @@ class ProjectView(ListView):
         return query.filter(Project.archived == archived)
 
     def _filter_search(self, query, search):
-        return query.filter( or_(Project.name.like(search + "%"),
-                        Client.name.like(search +"%")))
+        return query.filter( or_(Project.name.like("%" + search + "%"),
+                        Client.name.like("%" + search +"%")))
 
     @view_config(route_name='company_projects',  \
                  renderer='project.mako', \

@@ -25,12 +25,12 @@
                 Vous ne pouvez plus modifier ce document car il est en attente de validation.
             </p>
         % endif
-        % if hasattr(task, 'estimation') and task.estimation:
+        % if hasattr(task, 'estimation') and task.estimation and task.is_invoice():
             <p>
                 Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.number}</a>
             </p>
-        %elif hasattr(task, 'invoice') and task.invoice:
-            Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">${task.invoice.number}</a>
+        %elif hasattr(task, 'invoice') and task.invoice and task.is_cancelinvoice():
+            Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">${task.invoice.officialNumber}</a>
         % endif
         % if hasattr(task, "statusComment") and task.statusComment:
             <b>Communication CAE-Entrepreneur</b>

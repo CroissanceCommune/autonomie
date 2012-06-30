@@ -4,11 +4,12 @@
 <div class="row" style="margin-top:10px">
     <div class='span4 offset1'>
         <div class="well">
-            <h3>Informations</h3>
             <dl class="dl-horizontal">
                 %for label, value in ((u'Identifiant', account.login), (u'Nom', account.lastname), (u'Prénom', account.firstname)):
+                    %if value:
                     <dt>${label}</dt>
                     <dd>${value}</dd>
+                % endif
                 % endfor
                 <dt>E-mail</dt><dd>${format_mail(account.email)}</dd>
             </dl>

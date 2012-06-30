@@ -4,7 +4,7 @@
 <div class='row'>
     <div class='span4 offset1'>
         <div class='well'>
-            <dl>
+            <dl class="dl-horizontal">
                 % for label, value in ((u'Identifiant', user.login), (u"Nom", user.lastname), (u"Prénom", user.firstname)):
                     %if value:
                         <dt>${label}</dt>

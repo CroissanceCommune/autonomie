@@ -110,7 +110,7 @@
                                                     <td class='rowlink' onclick="document.location='${task.url}'">
                                                         %if task.is_cancelled():
                                                             <span class="label label-important">
-                                                                >
+                                                                <i class="icon-white icon-remove"></i>
                                                             </span>
                                                         %elif task.is_draft():
                                                             <i class='icon icon-bold'></i>
@@ -162,7 +162,7 @@
                                                     <td onclick="document.location='${task.url}'" class='rowlink'>
                                                         %if task.is_cancelled():
                                                             <span class="label label-important">
-                                                                >
+                                                                <i class="icon-white icon-remove"></i>
                                                             </span>
                                                         %elif task.is_paid():
                                                             <i class='icon icon-ok'></i>

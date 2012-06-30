@@ -319,7 +319,7 @@ class CompanyInvoicesView(ListView):
         invoices = self.get_invoices(company_id=company.id,
                                          paid="paid",
                                          year=year,
-                                         sort=Invoice.taskDate)
+                                         sort=('taskDate',))
         #inv, man_inv = self._filter_by_status(inv, man_inv, "paid")
         #years = sorted(set([i.taskDate.year for i in inv.all()]))
         #inv, man_inv = self._filter_by_date(inv, man_inv, year)

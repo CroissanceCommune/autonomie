@@ -33,7 +33,7 @@ from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import pwdSchema
-from autonomie.views.forms import userSchema
+from autonomie.views.forms import get_user_schema
 
 from .base import ListView
 
@@ -83,10 +83,7 @@ class UserView(ListView):
         """
             Return the user add form
         """
-        companies = [comp.name
-                for comp in self.dbsession.query(Company.name).all()]
-        schema = userSchema.bind(edit=edit,
-                                 companies=companies)
+        schema = get_user_schema(self.request, edit)
         if edit:
             form = Form(schema, buttons=(submit_btn,))
         else:
@@ -183,23 +180,25 @@ class UserView(ListView):
                 # Création (ou non) de la/des entreprise(s)
                 # Création du lien entre les deux
                 merge_session_with_post(user, app_datas['user'])
-                if app_datas['password']['pwd']:
-                    user.set_password(app_datas['password']['pwd'])
+                if app_datas.has_key('password'):
+                    if app_datas['password']['pwd']:
+                        user.set_password(app_datas['password']['pwd'])
                 #avoid creating duplicate companies at this level
-                companies = set(app_datas['companies'])
-                user.companies = []
-                for company_name in companies:
-                    company = self.dbsession.query(Company).filter(
+                if app_datas.has_key('companies'):
+                    companies = set(app_datas.get('companies'))
+                    user.companies = []
+                    for company_name in companies:
+                        company = self.dbsession.query(Company).filter(
                                Company.name==company_name).first()
-                    if not company:
-                        log.debug(" + Adding company : %s" % company_name)
-                        company = Company()
-                        company.name = company_name
-                        company.goal = u"Entreprise de {0}".format(
+                        if not company:
+                            log.debug(" + Adding company : %s" % company_name)
+                            company = Company()
+                            company.name = company_name
+                            company.goal = u"Entreprise de {0}".format(
                                 user.firstname, user.lastname)
-                        self.dbsession.merge(company)
-                        self.dbsession.flush()
-                    user.companies.append(company)
+                            self.dbsession.merge(company)
+                            self.dbsession.flush()
+                        user.companies.append(company)
                 log.debug(" + Adding user : {0}" .format(user.login))
                 user = self.dbsession.merge(user)
                 self.dbsession.flush()

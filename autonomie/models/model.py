@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 30 juin 2012 14:45:45 CEST
+# * Last Modified : sam. 30 juin 2012 16:08:41 CEST
 #
 # * Project : autonomie
 #
@@ -576,7 +576,6 @@ class Estimation(Task):
         duple.description = self.description
 
         duple.tva = self.tva
-        duple.discount = self.discount
         duple.deposit = self.deposit
         duple.paymentConditions = self.paymentConditions
         duple.exclusions = self.exclusions

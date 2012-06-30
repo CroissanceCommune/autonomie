@@ -22,6 +22,7 @@ from deform import widget
 
 from autonomie.models import DBSESSION
 from autonomie.models.model import User
+from autonomie.models.main import get_companies
 from autonomie.utils.forms import get_mail_input
 from autonomie.utils.forms import deferred_edit_widget
 
@@ -75,15 +76,6 @@ def deferred_pwd_validator(node, kw):
     else:
         return None
 
-def _edit_form(node, kw):
-    """
-        Modify the user form removing the password node if edit is True
-        in the binding parameters
-    """
-    pass
-#    if kw.get('edit'):
-#        del node['password']
-
 def _check_pwd(node, kw):
     """
         modify the schema regarding if it's a self modify pass form
@@ -96,11 +88,15 @@ def _check_pwd(node, kw):
         node['pwd'].title = "Mot de passe"
         node['pwd'].missing = None
 
-ROLES = [
+# Admins can do what they want
+ADMIN_ROLES = [
          (u"3", u'Entrepreneur'),
          (u"1", u'Administrateur'),
          (u"2", u'Membre de la coopérative'),
         ]
+
+# Managers can't set the admin status
+MANAGER_ROLES = [(u"3", u'Entrepreneur'), (u"2", u'Membre de la coopérative'),]
 
 class FAccount(colander.MappingSchema):
     """
@@ -127,8 +123,8 @@ class FAccount(colander.MappingSchema):
     email = get_mail_input(missing=u"")
     primary_group = colander.SchemaNode(colander.String(),
                         title=u"Rôle de l'utilisateur",
-                        validator=colander.OneOf([x[0] for x in ROLES]),
-                        widget=widget.RadioChoiceWidget(values=ROLES),
+                        validator=colander.OneOf([x[0] for x in ADMIN_ROLES]),
+                        widget=widget.RadioChoiceWidget(values=ADMIN_ROLES),
                         default=u"3"
                         )
 
@@ -177,7 +173,36 @@ class FUser(colander.MappingSchema):
                          after_bind=_check_pwd,
                          title=u"Mot de passe")
 
-userSchema = FUser(after_bind=_edit_form)
+def get_companies_choices(dbsession):
+    """
+        Return companies choices for autocomplete
+    """
+    return [comp.name for comp in get_companies(dbsession)]
+
+def get_user_schema(request, edit):
+    """
+        Return the user schema
+        user:the avatar of the user in the current session
+    """
+    schema = FUser().clone()
+    user = request.user
+    if user.is_admin():
+        companies = get_companies_choices(request.dbsession())
+        return schema.bind(edit=False, companies=companies)
+    elif user.is_manager():
+        companies = get_companies_choices(request.dbsession())
+        # manager can't set admin rights
+        roles = MANAGER_ROLES
+        group = schema['user']['primary_group']
+        group.validator = colander.OneOf([x[0] for x in roles])
+        group.widget = widget.RadioChoiceWidget(values=roles)
+        return schema.bind(edit=False, companies=companies)
+    else:
+        # Non admin users are limited
+        del schema['user']['primary_group']
+        del schema['companies']
+        del schema['password']
+        return schema.bind(edit=True)
 
 class FAuth(colander.MappingSchema):
     """

@@ -2,6 +2,7 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="searchform"/>
+<%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
 <table class="table table-striped table-condensed">
     <thead>
@@ -9,7 +10,7 @@
             <th>${sortable("Code", "code")}</th>
             <th>${sortable("Entreprise", "name")}</th>
             <th>${sortable("Nom du contact principal", "contactLastName")}</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -19,11 +20,8 @@
                     <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.id}</td>
                     <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.name}</td>
                     <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.contactLastName} ${client.contactFirstName}</td>
-                    <td>
-                            <a class='btn' href='${request.route_path("client", id=client.id)}'>
-                                <span class='ui-icon ui-icon-pencil'></span>
-                                Voir
-                            </a>
+                    <td style="text-align:right">
+                        ${table_btn(request.route_path("client", id=client.id), u"Voir/Éditer", u"Voir/Éditer ce client", icon=u"icon-pencil")}
                     </td>
                 </tr>
             % endfor

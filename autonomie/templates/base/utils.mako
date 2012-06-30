@@ -128,3 +128,20 @@ path = request.current_route_path(_query=get_args)
         <span class="hidden-mobile visible-desktop">${phone}</span>
     % endif
 </%def>
+<%def name="table_btn(href, label, title, icon=None, onclick=None, icotext=None)">
+    <a class='btn' href='${href}' title="${title}"
+        % if onclick:
+            onclick="${onclick}"
+        % endif
+        >
+        %if icotext:
+            <span>${icotext|n}</span>
+        % endif
+        %if icon:
+            <i class='icon ${icon}'></i>
+        %endif
+        <span class="visible-desktop hidden-tablet" style="display:inline">
+            ${label}
+        </span>
+    </a>
+</%def>

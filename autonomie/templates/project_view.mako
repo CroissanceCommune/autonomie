@@ -1,6 +1,7 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="base/utils.mako" import="print_date" />
 <%namespace file="base/utils.mako" import="address" />
+<%namespace file="base/utils.mako" import="table_btn" />
 <%block name='content'>
 <div class='row collapse' id='project-addphase'>
     <div class='span4 offset4'>
@@ -99,7 +100,7 @@
                                                 <th>Document</th>
                                                 <th>Nom</th>
                                                 <th>État</th>
-                                                <th>Action</th>
+                                                <th style="text-align:center">Action</th>
                                             </thead>
                                             %for task in phase.estimations:
                                                 <tr>
@@ -120,25 +121,12 @@
                                                         %endif
                                                         ${task.get_status_str()}
                                                     </td>
-                                                    <td>
-                                                        <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
-                                                            <i class='icon icon-pencil'></i>
-                                                            Voir/Éditer
-                                                        </a>
-                                                        <a class='btn' href='${request.route_path("estimation", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
-                                                            <i class='icon icon-file'></i>
-                                                            PDF
-                                                        </a>
-                                                        <a class='btn' href='${request.route_path("estimation", id=task.id, _query=dict(action="duplicate"))}' title="Dupliquer le devis">
-                                                            Dupliquer
-                                                        </a>
+                                                    <td style="text-align:right">
+                                                        ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer ce devis", u"icon-pencil")}
+                                                        ${table_btn(request.route_path("estimation", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
+                                                        ${table_btn(request.route_path("estimation", id=task.id, _query=dict(action="duplicate")), u"Dupliquer", u"Dupliquer le devis", icotext="<b>x2</b>")}
                                                         %if task.is_deletable():
-                                                            <a class='btn'
-                                                                href='${request.route_path("estimation", id=task.id, _query=dict(action="delete"))}'
-                                                                title="Supprimer le devis"
-                                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');">
-                                                                Supprimer
-                                                            </a>
+                                                            ${table_btn(request.route_path("estimation", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer le devis", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
                                                         %endif
                                                     </td>
                                                 </tr>
@@ -162,7 +150,7 @@
                                                 <th>Document</th>
                                                 <th>Nom</th>
                                                 <th>État</th>
-                                                <th>Action</th>
+                                                <th style="text-align:center">Action</th>
                                             </thead>
                                             %for task in phase.invoices:
                                                 <tr>
@@ -185,15 +173,9 @@
                                                         %endif
                                                         ${task.get_status_str()}
                                                     </td>
-                                                    <td>
-                                                        <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
-                                                            <i class='icon icon-pencil'></i>
-                                                            Voir/Éditer
-                                                        </a>
-                                                        <a class='btn' href='${request.route_path("invoice", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
-                                                            <i class='icon icon-file'></i>
-                                                            PDF
-                                                        </a>
+                                                    <td style="text-align:right">
+                                                        ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cette facture", u"icon-pencil")}
+                                                        ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
                                                     </td>
                                                 </tr>
                                             %endfor
@@ -215,15 +197,9 @@
                                                             <i class='icon icon-bold'></i>
                                                         %endif
                                                         ${task.get_status_str()}</td>
-                                                    <td>
-                                                        <a class='btn' href='${task.url}' title="Voir/éditer ce devis">
-                                                            <i class='icon icon-pencil'></i>
-                                                            Voir/Éditer
-                                                        </a>
-                                                        <a class='btn' href='${request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf"))}' title="Télécharger la version PDF">
-                                                            <i class='icon icon-file'></i>
-                                                            PDF
-                                                        </a>
+                                                    <td style="text-align:right">
+                                                        ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cet avoir", u"icon-pencil")}
+                                                        ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
                                                     </td>
                                                 </tr>
                                             % endfor

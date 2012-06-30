@@ -15,18 +15,18 @@
 % endif
 % if hasattr(project, "client") and project.client:
 <div class='row collapse' id='project-description'>
-    <div class="span2 offset2">
+        <div class="span8 offset2">
+    <div class="well">
         <h3>Client</h3>
         ${address(project.client, "client")}
         %if project.type:
             <b>Type de projet :</b> ${project.type}
         % endif
         <br />
-    </div>
-    <div class="span5 offset2">
         <h3>Définition du projet</h3>
         ${project.definition}
     </div>
+</div>
 </div>
 % endif
 <div class='row'>

@@ -13,7 +13,7 @@
         <dl>
                 % if company.email:
                     <dt>E-mail</dt>
-                    <dd>${format_mail(mail)}</dd>
+                    <dd>${format_mail(company.email)}</dd>
                 % endif
 
             % for label, attr in ((u'Téléphone', 'phone'), (u"Téléphone portable", "mobile"),):

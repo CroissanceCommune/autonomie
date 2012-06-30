@@ -175,7 +175,7 @@
                                                     </td>
                                                     <td style="text-align:right">
                                                         ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cette facture", u"icon-pencil")}
-                                                        ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
+                                                        ${table_btn(request.route_path("invoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
                                                     </td>
                                                 </tr>
                                             %endfor

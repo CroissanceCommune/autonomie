@@ -354,7 +354,6 @@ class TaskSchema(colander.MappingSchema):
     lines = TaskLinesBlock(title=u"Détail des prestations",
                            widget=widget.MappingWidget(
       item_template='autonomie:deform_templates/estimationdetails_item.mako'))
-    notes = TaskNotes(title=u"Notes")
 
 def get_estimation_schema():
     """
@@ -362,6 +361,8 @@ def get_estimation_schema():
     """
     schema = TaskSchema().clone()
     tmpl = 'autonomie:deform_templates/paymentdetails_item.mako'
+    schema.add(
+            TaskNotes(title=u"Notes", name="notes"))
     schema.add(
             EstimationPayments(title=u'Conditions de paiement',
                               widget=widget.MappingWidget(item_template=tmpl),
@@ -494,7 +495,6 @@ class InvoiceMatch(MappingWrapper):
                          ('tva', 'lines'),
                          ('discountHT', 'lines'),
                          ('expenses', 'lines'),
-                         ('exclusions', 'notes'),
                          ('paymentConditions', 'payments'),
                          ('statusComment', 'communication'),
             )
@@ -531,7 +531,6 @@ class CancelInvoiceMatch(MappingWrapper):
                          ('displayedUnits', 'common'),
                          ('tva', 'lines'),
                          ('expenses', 'lines'),
-                         ('exclusions', 'notes'),
                          ('reimbursementConditions', 'payments'),
             )
     dbtype = 'cancelinvoice'

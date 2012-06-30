@@ -14,10 +14,6 @@
                     % endif
                 % endfor
             </dl>
-        </div>
-    </div>
-    <div class="span3">
-        <div class='well'>
             <h3>Contact principal</h3>
             <strong>${client.contactLastName.upper()} ${client.contactFirstName.capitalize()}</strong>
             <br />

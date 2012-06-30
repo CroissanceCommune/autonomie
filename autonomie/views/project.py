@@ -95,7 +95,7 @@ class ProjectView(ListView):
             add_phase_btn = ToggleLink(u"Ajouter une phase", "edit",
                     target="project-addphase", css="addphase")
             self.actionmenu.add(add_phase_btn)
-        else:
+        elif project is None:
             self.actionmenu.add(ViewLink(u"Ajouter un projet", "add",
                 js="$('#addform').dialog('open');"))
             archived = self.request.params.get('archived', '0')

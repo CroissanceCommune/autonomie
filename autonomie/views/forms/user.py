@@ -98,6 +98,17 @@ ADMIN_ROLES = [
 # Managers can't set the admin status
 MANAGER_ROLES = [(u"3", u'Entrepreneur'), (u"2", u'Membre de la coopérative'),]
 
+@colander.deferred
+def deferred_code_compta_title(node, kw):
+    """
+        deferred displaying last available compta code
+    """
+    if kw.get('code_compta'):
+        return u"Le dernier code de comptabilité utilisé est {0}".format(
+                                                        kw['code_compta'])
+    else:
+        return u"Aucun code de comptabilité n'a encore été attribué"
+
 class FAccount(colander.MappingSchema):
     """
         Form Schema for an account creation
@@ -121,6 +132,9 @@ class FAccount(colander.MappingSchema):
     lastname = colander.SchemaNode(colander.String(),
                             title=u"Nom")
     email = get_mail_input(missing=u"")
+    code_compta = colander.SchemaNode(colander.String(),
+                            title=u"Code compta",
+                            description=deferred_code_compta_title)
     primary_group = colander.SchemaNode(colander.String(),
                         title=u"Rôle de l'utilisateur",
                         validator=colander.OneOf([x[0] for x in ADMIN_ROLES]),
@@ -187,18 +201,21 @@ def get_user_schema(request, edit):
     schema = FUser().clone()
     user = request.user
     if user.is_admin():
+        code = User.get_code_compta(request.dbsession())
         companies = get_companies_choices(request.dbsession())
-        return schema.bind(edit=False, companies=companies)
+        return schema.bind(edit=False, companies=companiesi, code_compta=code)
     elif user.is_manager():
         companies = get_companies_choices(request.dbsession())
+        code = User.get_code_compta(request.dbsession())
         # manager can't set admin rights
         roles = MANAGER_ROLES
         group = schema['user']['primary_group']
         group.validator = colander.OneOf([x[0] for x in roles])
         group.widget = widget.RadioChoiceWidget(values=roles)
-        return schema.bind(edit=False, companies=companies)
+        return schema.bind(edit=False, companies=companies, code_compta=code)
     else:
         # Non admin users are limited
+        del schema['user']['code_compta']
         del schema['user']['primary_group']
         del schema['companies']
         del schema['password']

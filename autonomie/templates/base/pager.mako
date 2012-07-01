@@ -22,7 +22,7 @@ pager template
 %else:
   <% css_class = ""%>
 %endif
-%if (column == sort_column and sort_direction == "asc"):
+%if sort_direction == "asc":
   <% direction = "desc" %>
 %else:
   <% direction = "asc"%>
@@ -30,6 +30,11 @@ pager template
 <% args_dict = dict(direction=direction, sort=column) %>
 
 <a href="${urlbuild(args_dict)}" class='${css_class}'>
+    %if direction =='asc':
+        <i class="icon-chevron-up"></i>
+    %else:
+        <i class="icon-chevron-down"></i>
+    %endif
   ${label}
   </a>
 </%def>

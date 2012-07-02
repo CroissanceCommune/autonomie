@@ -11,75 +11,85 @@
 <div class='row'>
     <div class='span4'>
         %if elapsed_invoices:
-        <div class='well' style="margin-top:10px">
-            <div class='section-header'>
-                Vos impayés
+            <div class='well' style="margin-top:10px">
+                <div class='section-header'>
+                    Vos impayés
+                </div>
+                <table class='table table-stripped'>
+                    <thead>
+                        <th>Numéro</th>
+                        <th>Client</th>
+                        <th>Total</th>
+                    </thead>
+                    <tbody>
+                        % for invoice in elapsed_invoices[:5]:
+                            <tr>
+                                <td>
+                                    ${invoice.model.officialNumber}
+                                </td>
+                                <td>
+                                    ${format_client(invoice.model.project.client)}
+                                </td>
+                                <td>
+                                    ${format_amount(invoice.compute_total())} €
+                                </td>
+                            </tr>
+                        % endfor
+                    </tbody>
+                </table>
+                % if len(elapsed_invoices) > 5:
+                    <b>...</b>
+                    <a class='btn btn-primary'
+                        href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">
+                        Voir plus
+                    </a>
+                % else:
+                    <a class='btn btn-primary'
+                        href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">
+                        Voir
+                    </a>
+                % endif
             </div>
-            <a class='btn btn-primary'
-                href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">Voir</a>
-            <table class='table table-stripped'>
-                <thead>
-                    <th>Numéro</th>
-                    <th>Client</th>
-                    <th>Total</th>
-                </thead>
-                <tbody>
-                    % for invoice in elapsed_invoices:
-                        <tr>
-                            <td>
-                                ${invoice.model.officialNumber}
-                            </td>
-                            <td>
-                                ${format_client(invoice.model.project.client)}
-                            </td>
-                            <td>
-                                ${format_amount(invoice.compute_total())} €
-                            </td>
-                        </tr>
-                    % endfor
-                </tbody>
-            </table>
-        </div>
         %endif
     </div>
-        <div class='span6 offset1'>
-            % if request.config.has_key('welcome'):
-                <p>
-                    ${format_text(request.config['welcome'])}
-                </p>
-            % endif
-        </div>
+    <div class='span6 offset1'>
+        % if request.config.has_key('welcome'):
+            <p>
+                ${format_text(request.config['welcome'])}
+            </p>
+        % endif
+    </div>
 </div>
 
 <div class='row'>
     <div class='span12'>
         <div class='well' style="margin-top:10px">
-        <div class='section-header'>Dernières activités</div>
-        <table class='table table-stripped'>
-            <thead>
-                <th>
-                    Projet
-                </th>
-                <th>
-                    Nom du document
-                </th>
-                <th>
-                    Dernière modification
-                </th>
-            </thead>
-            <tbody>
-                % for task in tasks:
-                    <tr>
-                        <td>
-                            ${format_project(task.project)}
-                        </td>
-                        <td>${task.name}</td>
-                        <td>${task.get_status_str()}</td>
-                    </tr>
-                % endfor
-            </tbody>
-        </table>
-    </div>
+            <div class='section-header'>Dernières activités</div>
+            <table class='table table-stripped'>
+                <thead>
+                    <th>
+                        Projet
+                    </th>
+                    <th>
+                        Nom du document
+                    </th>
+                    <th>
+                        Dernière modification
+                    </th>
+                </thead>
+                <tbody>
+                    % for task in tasks:
+                        <tr>
+                            <td>
+                                ${format_project(task.project)}
+                            </td>
+                            <td>${task.name}</td>
+                            <td>${task.get_status_str()}</td>
+                        </tr>
+                    % endfor
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 </%block>

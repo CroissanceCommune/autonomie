@@ -70,7 +70,7 @@ class CompanyViews(BaseView):
         elapsed_invoices = sorted(elapsed_invoices,
                                 key=lambda a:a.model.taskDate,
                                 reverse=True)
-        ret_val['elapsed_invoices'] = elapsed_invoices[:5]
+        ret_val['elapsed_invoices'] = elapsed_invoices
         return ret_val
 
     @view_config(route_name='company', renderer='company_edit.mako',

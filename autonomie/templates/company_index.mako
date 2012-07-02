@@ -12,7 +12,8 @@
     <div class='span4'>
         %if elapsed_invoices:
         <div class='well' style="margin-top:10px">
-            <div class='section-header'>Factures en retard
+            <div class='section-header'>
+                Vos impayés
             </div>
             <a class='btn btn-primary'
                 href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">Voir</a>

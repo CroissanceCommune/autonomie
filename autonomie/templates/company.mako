@@ -6,7 +6,9 @@
     <div class="span4 offset1">
         <div class='well'>
         <h3>Entreprise ${company.name}</h3>
-        ${company.goal}
+        <p>
+            ${company.goal}
+        </p>
         %if company.get_logo_filepath():
             <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
         %endif

@@ -285,7 +285,7 @@ class EstimationPayments(colander.MappingSchema):
     """
     deposit = colander.SchemaNode(
                         colander.Integer(),
-                        title=u"Accompte à la commande",
+                        title=u"Acompte à la commande",
                         default=0,
                         widget=widget.SelectWidget(values=get_percents(),
                              css_class='span2'))

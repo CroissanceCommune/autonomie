@@ -59,7 +59,7 @@
                 <tr>
                     <td colspan='${colspan}'>
                         % if task.model.deposit > 0 :
-                            Un accompte, puis paiement en ${task.get_nb_payment_lines()} fois.
+                            Un acompte, puis paiement en ${task.get_nb_payment_lines()} fois.
                         %else:
                             Paiement en ${task.get_nb_payment_lines()} fois.
                         %endif
@@ -67,10 +67,10 @@
                 </tr>
             % if task.model.paymentDisplay == u"ALL":
                 ## l'utilisateur a demandé le détail du paiement
-                    ## L'accompte à la commande
+                    ## L'acompte à la commande
                      % if task.model.deposit > 0 :
                          <tr>
-                             <td>Accompte</td>
+                             <td>Acompte</td>
                              <td>à la commande</td>
                              <td class='price'>${format_amount(task.compute_deposit())} €</td>
                          </tr>

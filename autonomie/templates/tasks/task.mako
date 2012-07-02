@@ -55,7 +55,7 @@ Base template for task rendering
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
                         %if task.model.displayedUnits == 1:
-                            <td class="quantity">${format_amount(line.cost)} € x ${format_quantity(line.quantity)} ${line.get_unity_label()}</td>
+                            <td class="quantity">${format_amount(line.cost)} € x ${format_quantity(line.quantity)} ${line.get_unity_label(pretty=True)}</td>
                         % endif
                         <td class="price">${format_amount(task.compute_line_total(line))} €</td>
                     </tr>

@@ -70,9 +70,10 @@ def deferred_course_title(node, kw):
         deferred title
     """
     if kw.get('tasktype') == "invoice":
-        return u"Cette facture concerne-t-elle une formation ?"
+        return u"Cette facture concerne-t-elle une formation professionnelle \
+continue ?"
     else:
-        return u"Ce devis concerne-t-il une formation ?"
+        return u"Ce devis concerne-t-il une formation professionnelle continue?"
 
 DAYS = (
         ('NONE', '-'),

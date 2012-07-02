@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 02 juil. 2012 10:05:48 CEST
+# * Last Modified : lun. 02 juil. 2012 20:30:21 CEST
 #
 # * Project : autonomie
 #
@@ -795,12 +795,16 @@ class EstimationLine(DBBASE):
     task = relationship("Estimation", backref="lines",
                             order_by='EstimationLine.rowIndex'
                         )
-    def get_unity_label(self):
+    def get_unity_label(self, pretty=False):
         """
             return unitie's label
         """
+        if pretty:
+            default = u""
+        else:
+            default = u"-"
         labels = dict(
-                NONE=u'-',
+                NONE=default,
                 HOUR=u"heure(s)",
                 DAY=u"jour(s)",
                 WEEK=u"semaine(s)",
@@ -808,7 +812,7 @@ class EstimationLine(DBBASE):
                 FEUIL=u"feuillet(s)",
                 PACK=u"forfait",
                 )
-        return labels.get(self.unity, '-')
+        return labels.get(self.unity, default)
 
     def duplicate(self):
         """

@@ -102,9 +102,12 @@
     </div>
     % endif
     </header>
+    <img src="/assets/main/logo.png" alt='' style="position:fixed;bottom:5px;right:5px;"/>
     <%block name="headtitle">
     <div class='pagetitle visible-desktop hidden-tablet'>
-      <h2 >${title}</h2>
+      <h2 >
+        ${title}
+      </h2>
     </div>
     </%block>
     <div class='container'>

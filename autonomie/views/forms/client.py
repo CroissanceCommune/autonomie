@@ -28,17 +28,23 @@ from autonomie.utils.forms import get_mail_input
 log = logging.getLogger(__name__)
 
 @colander.deferred
-def unique_ccode(node, value):
-    """
-        Test customer code unicity
-    """
-    #Test unicity
-    db = DBSESSION()
-    result = db.query(Client).filter_by(code=value).first()
-    if result:
-        message = u"Le code '{0}' n'est pas disponible.".format(
-                                                    value)
-        raise colander.Invalid(node, message)
+def deferred_ccode_valid(node, kw):
+    def unique_ccode(node, value):
+        """
+            Test customer code unicity
+        """
+        #Test unicity
+        db = DBSESSION()
+        result = db.query(Client).filter(Client.id==value).first()
+        if len(value) != 4:
+            message = u"Le code client doit contenir 4 caractères."
+            raise colander.Invalid(node, message)
+        if result:
+            message = u"Le code '{0}' est déjà utilisé et n'est pas \
+disponible.".format(value)
+            raise colander.Invalid(node, message)
+    if not kw.get('edit'):
+        return unique_ccode
 
 class ClientSchema(colander.MappingSchema):
     """
@@ -47,7 +53,7 @@ class ClientSchema(colander.MappingSchema):
     id = colander.SchemaNode(colander.String(),
                                 widget=deferred_edit_widget,
                                 title=u'Code',
-                                validator=colander.Length(4, 4))
+                                validator=deferred_ccode_valid)
     name = colander.SchemaNode(colander.String(),
                             title=u"Nom de l'entreprise",
                             validator=colander.Length(max=255))

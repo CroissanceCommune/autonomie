@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : dim. 01 juil. 2012 17:23:25 CEST
+# * Last Modified : lun. 02 juil. 2012 10:05:48 CEST
 #
 # * Project : autonomie
 #
@@ -1152,6 +1152,7 @@ class ManualInvoice(DBBASE):
         UNIQUE KEY `id` (`id`)
     """
     __tablename__ = 'symf_facture_manuelle'
+    __table_args__ = {'mysql_engine': 'MyISAM'}
     id = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)
     description = Column('libelle', String(255))
@@ -1277,7 +1278,7 @@ class OperationComptable(DBBASE):
     company_id = Column('compagnie_id', CustomInteger,
                             ForeignKey('coop_company.IDCompany'))
     date = Column("date", Date(), default=datetime.date.today)
-    label = Column("libelle", String, default="")
+    label = Column("libelle", String(255), default="")
     company = relationship("Company",
                        primaryjoin="Company.id==OperationComptable.company_id",
                        backref='operation_comptable')

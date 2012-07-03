@@ -72,8 +72,10 @@ class ProjectView(ListView):
     """
         All the projects views are grouped in this class
     """
-    columns = ("code", "coop_project.name")
-    default_sort = 'coop_project.name'
+    columns = dict(code=Project.code,
+                    name=Project.name)
+    #("coop_project.code", "coop_project.name")
+    default_sort = 'name'
 
     def __init__(self, request):
         ListView.__init__(self, request)
@@ -132,7 +134,7 @@ class ProjectView(ListView):
         query = self._filter_archived(query, archived)
         if search:
             query = self._filter_search(query, search)
-        projects = query.order_by(sort + " " + direction).all()
+        projects = self._sort(query, sort, direction).all()
         records = self._get_pagination(projects, current_page, items_per_page)
 
         clients = company.clients

@@ -22,7 +22,7 @@ from deform import ValidationFailure
 from pyramid.view import view_config
 
 from deform import Form
-from autonomie.views.forms import CompanySchema
+from autonomie.views.forms import get_company_schema
 from autonomie.utils.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
@@ -83,10 +83,8 @@ class CompanyViews(BaseView):
         root_path = self.request.config.get('files_dir', '/tmp')
         company_path = os.path.join(root_path, company.get_path())
         company_url = os.path.join("/assets", company.get_path())
-        schema = CompanySchema().bind(edit=True,
-                                    rootpath=company_path,
-                                    rooturl=company_url,
-                                    session=self.request.session)
+        schema = get_company_schema(self.request, True,
+                                    company_path, company_url)
         form = Form(schema, buttons=(submit_btn, ))
         if 'submit' in self.request.params:
             datas = self.request.params.items()

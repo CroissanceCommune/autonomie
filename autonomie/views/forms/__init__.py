@@ -19,7 +19,7 @@ from .user import authSchema
 from .user import pwdSchema
 from .user import get_user_schema
 from .client import ClientSchema
-from .company import CompanySchema
+from .company import get_company_schema
 from .project import ProjectSchema
 from .project import phaseSchema
 from .admin import MainConfig

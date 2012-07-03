@@ -29,6 +29,15 @@ log = logging.getLogger(__name__)
 HEADER_PATH = "header"
 LOGO_PATH = "logo"
 
+@colander.deferred
+def deferred_edit_adminonly_widget(node, kw):
+    """
+        return a deferred adminonly edit widget
+    """
+    if kw.get('user').is_contractor():
+        return deferred_edit_widget(node, dict(edit=True))
+    else:
+        return deferred_edit_widget(node, dict(edit=False))
 
 class CompanySchema(colander.MappingSchema):
     """
@@ -51,11 +60,11 @@ class CompanySchema(colander.MappingSchema):
                             title=u'Téléphone portable',
                             missing=u'')
     RIB = colander.SchemaNode(colander.String(),
-                            widget=deferred_edit_widget,
+                            widget=deferred_edit_adminonly_widget,
                             title=u'RIB',
                             missing=u'')
     IBAN = colander.SchemaNode(colander.String(),
-                            widget=deferred_edit_widget,
+                            widget=deferred_edit_adminonly_widget,
                             title=u'IBAN',
                             missing=u'')
     header = colander.SchemaNode(FileData(),
@@ -63,3 +72,12 @@ class CompanySchema(colander.MappingSchema):
                             title=u'Entête des PDF',
                             validator=validate_image_mime
                             )
+
+def get_company_schema(request, edit, rootpath, rooturl):
+    schema = CompanySchema().clone()
+    schema = schema.bind(edit=edit,
+                         rootpath=rootpath,
+                         rooturl=rooturl,
+                         session=request.session,
+                         user=request.user)
+    return schema

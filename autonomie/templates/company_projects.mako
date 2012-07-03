@@ -7,9 +7,9 @@
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
-            <th>${sortable("Code", "code")}</th>
-            <th>${sortable("Nom", "name")}</th>
-            <th>Client</th>
+            <th>${sortable(u"Code", "code")}</th>
+            <th>${sortable(u"Nom", "name")}</th>
+            <th>${sortable(u"Client", "client")}</th>
             <th style="text-align:center">Actions</th>
         </tr>
     </thead>

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 29 juin 2012 17:45:45 CEST
+# * Last Modified : mar. 03 juil. 2012 11:31:55 CEST
 #
 # * Project : autonomie
 #
@@ -81,6 +81,12 @@ def main(global_config, **settings):
                     '/holliday')
     config.add_route('hollidays', # view
                     '/hollidays')
+
+    config.add_route('statistic',
+                    '/statistics/{id:\d+}',
+                    traverse='/companies/{id}')
+    config.add_route('statistics', # view
+                    '/statistics')
     # Company Routes
     config.add_route('company',
                      '/company/{id:\d+}',

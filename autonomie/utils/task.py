@@ -44,7 +44,8 @@ class TaskComputing:
     def __init__(self, model):
         self.model = model
 
-    def compute_line_total(self, line):
+    @staticmethod
+    def compute_line_total(line):
         """
             compute estimation/invoice line total
         """
@@ -136,7 +137,7 @@ class TaskComputing:
         deposit = self.compute_deposit()
         rest = total - deposit
         payment_lines_num = self.get_nb_payment_lines()
-        if payment_lines_num == 1:
+        if payment_lines_num == 1 or not self.get_nb_payment_lines():
             result = rest
         else:
             if self.model.manualDeliverables == 0:

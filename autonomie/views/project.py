@@ -73,7 +73,8 @@ class ProjectView(ListView):
         All the projects views are grouped in this class
     """
     columns = dict(code=Project.code,
-                    name=Project.name)
+                    name=Project.name,
+                    client=Client.name)
     #("coop_project.code", "coop_project.name")
     default_sort = 'name'
 

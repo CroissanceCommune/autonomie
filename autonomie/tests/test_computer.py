@@ -119,6 +119,12 @@ class TestCompute(BaseTestCase):
 
     def test_compute_sold(self):
         self.assertEqual(self.computer.compute_sold(), est_sold)
+        # Verify missing payment lines gives a correct sold
+        estimation = Estimation(**est)
+        for l in est_lines:
+            estimation.lines.append(EstimationLine(**l))
+        comp = TaskComputing(estimation)
+        self.assertEqual(comp.compute_sold(), est_sold)
 
     def test_payments_sum(self):
         self.assertEqual(self.computer.compute_sold() + \

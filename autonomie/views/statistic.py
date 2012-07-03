@@ -61,9 +61,6 @@ class StatisticView(BaseView):
             invoices = []
             estimations = []
             for proj in projects:
-                for invoice in proj.invoices:
-                    print invoice.taskDate.year
-                    print current_year
                 invoices.extend([inv for inv in proj.invoices
                                         if inv.taskDate.year >= current_year])
                 estimations.extend([est for est in proj.estimations \

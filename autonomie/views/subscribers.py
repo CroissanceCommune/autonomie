@@ -120,9 +120,14 @@ def company_menu(request, companies, cid):
     menu = MainMenuItem(get_company( request, cid ).name, "view",
                     path="company", id=cid, _query=dict(action="index"))
     if len(companies) > 1:
-        options = ((request.route_path("company", id=company.id),
+        if request.context.__name__ == 'company':
+            options = ((request.current_route_path(id=company.id),
                     company.name) for company in companies)
-        default = request.route_path("company", id=cid)
+            default = request.current_route_path(id=cid)
+        else:
+            options = ((request.route_path("company", id=company.id),
+                    company.name) for company in companies)
+            default = request.route_path("company", id=cid)
         html_attrs = {'class':'floatted company-search',
                       'id':"company-select-menu"}
         menu = HTML.li(

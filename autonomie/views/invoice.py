@@ -541,6 +541,7 @@ class InvoiceView(TaskView):
             officialNumber = get_next_officialNumber(
                                         self.request.dbsession)
             self.task.officialNumber = officialNumber
+            self.task.taskDate = datetime.date.today()
             self.request.session.flash(u"La facture porte le numéro \
 <b>{0}</b>".format(officialNumber), queue='main')
 

@@ -27,11 +27,11 @@ from autonomie.utils.forms import get_mail_input
 from autonomie.utils.forms import deferred_edit_widget
 
 log = logging.getLogger(__name__)
-@colander.deferred
 def unique_login(node, value):
     """
         Test login unicity against database
     """
+    log.debug(" + Testing login unicity")
     db = DBSESSION()
     result = db.query(User).filter_by(login=value).first()
     if result:
@@ -62,7 +62,9 @@ def deferred_login_validator(node, kw):
     """
         Dynamically choose the validator user for validating the login
     """
+    log.debug(" + Attaching a validator")
     if not kw.get('edit'):
+        log.debug(" + attached")
         return unique_login
     return None
 

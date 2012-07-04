@@ -68,7 +68,7 @@ path = request.current_route_path(_query=get_args)
         le ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%e %B %Y").decode('utf-8').capitalize()}
     %endif
 </%def>
-<%def name="format_amount(data)">
+<%def name="format_amount(data)" filter="trim">
     <%doc>Format an amount for display</%doc>
     %if data is not UNDEFINED and data is not None:
         <% data = "%.2f"% (int(data)/100.0,) %>

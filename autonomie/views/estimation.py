@@ -421,3 +421,5 @@ class EstimationView(TaskView):
         elif status == "aboest":
             self.request.session.flash(u"Le devis {0} a été annulé \
 (indiqué sans suite).".format(self.task.number))
+        elif status == "valid":
+            self.task.taskDate = datetime.date.today()

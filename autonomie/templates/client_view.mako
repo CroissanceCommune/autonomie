@@ -1,6 +1,7 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />
+<%namespace file="/base/utils.mako" import="format_text" />
 <%block name='content'>
 <div class="row">
     <div class='span3'>
@@ -53,9 +54,7 @@
         <div class='well'>
             % if client.comments:
                 <h3>Commentaires</h3>
-                <blockquote style='padding:15px;margin-top:25px;border:1px solid #eee;'>
-                    ${client.comments}
-                </blockquote>
+                    ${format_text(client.comments)|n}
             %else :
                 Aucun commentaire
             % endif

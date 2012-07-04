@@ -2,6 +2,7 @@
 <%namespace file="base/utils.mako" import="print_date" />
 <%namespace file="base/utils.mako" import="address" />
 <%namespace file="base/utils.mako" import="table_btn" />
+<%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
 <div class='row collapse' id='project-addphase'>
     <div class='span4 offset4'>
@@ -31,7 +32,7 @@
             </div>
                 <h3>Définition du projet</h3>
                 <p>
-                    ${project.definition}
+                    ${format_text(project.definition)|n}
                 </p>
                 <br />
                 <a class="btn btn-primary" title='Éditer les informations de ce client'

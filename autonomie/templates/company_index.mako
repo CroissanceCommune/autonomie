@@ -13,7 +13,7 @@
         %if elapsed_invoices:
             <div class='well' style="margin-top:10px">
                 <div class='section-header'>
-                    Vos impayés
+                    Vos impayés de + de 45 jours
                 </div>
                 <table class='table table-stripped'>
                     <thead>

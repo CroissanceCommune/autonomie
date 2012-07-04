@@ -66,7 +66,7 @@
                 Nombre de facture : ${len(invoices)}
 
                 <br />
-                Nombre de factures annulées : ${len([inv for inv in invoices if inv.is_cancelled])}
+                Nombre de factures annulées : ${len([inv for inv in invoices if inv.is_cancelled()])}
             </div>
         </div>
     </div>

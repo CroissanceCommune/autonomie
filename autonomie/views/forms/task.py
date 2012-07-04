@@ -180,7 +180,7 @@ class TaskLinesBlock(colander.MappingSchema):
 #         after='autonomie:deform_templates/staticinput.mako',
 #         after_options={'label':u'Total HT', 'id':'httotal'}
                 ),
-            title=u"Remise",
+            title=u"Remise en €",
             missing=0)
     tva = colander.SchemaNode(colander.String(),
             widget=deferred_tvas_widget,

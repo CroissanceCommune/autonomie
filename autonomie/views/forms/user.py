@@ -203,7 +203,7 @@ def get_user_schema(request, edit):
     if user.is_admin():
         code = User.get_code_compta(request.dbsession())
         companies = get_companies_choices(request.dbsession())
-        return schema.bind(edit=False, companies=companiesi, code_compta=code)
+        return schema.bind(edit=False, companies=companies, code_compta=code)
     elif user.is_manager():
         companies = get_companies_choices(request.dbsession())
         code = User.get_code_compta(request.dbsession())

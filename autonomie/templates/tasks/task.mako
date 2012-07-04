@@ -55,9 +55,9 @@ Base template for task rendering
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
                         %if task.model.displayedUnits == 1:
-                            <td class="quantity">${format_amount(line.cost)} € x ${format_quantity(line.quantity)} ${line.get_unity_label(pretty=True)}</td>
+                            <td class="quantity">${format_amount(line.cost)}&nbsp;€&nbsp;x&nbsp;${format_quantity(line.quantity)} ${line.get_unity_label(pretty=True)}</td>
                         % endif
-                        <td class="price">${format_amount(task.compute_line_total(line))} €</td>
+                        <td class="price">${format_amount(task.compute_line_total(line))}&nbsp;€</td>
                     </tr>
                 % endfor
                 <tr>
@@ -82,7 +82,7 @@ Base template for task rendering
                          Total HT après remise
                         </td>
                         <td class='price'>
-                            ${format_amount(task.compute_totalht())} €
+                            ${format_amount(task.compute_totalht())}&nbsp;€
                         </td>
                     </tr>
 
@@ -99,7 +99,7 @@ Base template for task rendering
                             TVA (${format_amount(task.model.tva)} %)
                         </td>
                         <td class='price'>
-                            ${format_amount(task.compute_tva())} €
+                            ${format_amount(task.compute_tva())}&nbsp;€
                         </td>
                     </tr>
                 % endif
@@ -109,7 +109,7 @@ Base template for task rendering
                             Frais liés à la prestation
                         </td>
                         <td class='price'>
-                            ${format_amount(task.compute_expenses())} €
+                            ${format_amount(task.compute_expenses())}&nbsp;€
                         </td>
                     </tr>
                 %endif
@@ -118,7 +118,7 @@ Base template for task rendering
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${format_amount(task.compute_total())} €
+                        ${format_amount(task.compute_total())}&nbsp;€
                     </td>
                 </tr>
             </tbody>

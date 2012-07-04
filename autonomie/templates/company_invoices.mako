@@ -124,8 +124,8 @@
         <% totaltva = sum([invoice.compute_tva() for invoice in invoices]) %>
         <tr>
             <td colspan='5'><strong>Total</strong></td>
-            <td><strong>${format_amount(totalht)} €</strong></td>
-            <td><strong>${format_amount(totaltva)} €</strong></td>
+            <td><strong>${format_amount(totalht)}&nbsp;€</strong></td>
+            <td><strong>${format_amount(totaltva)}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
         % if invoices:
@@ -166,11 +166,11 @@
                     </td>
                     <td>
                         <strong>
-                            ${format_amount(invoice.compute_totalht())} €
+                            ${format_amount(invoice.compute_totalht())}&nbsp;€
                         </strong>
                     </td>
                     <td>
-                        ${format_amount(invoice.compute_tva())} €
+                        ${format_amount(invoice.compute_tva())}&nbsp;€
                     </td>
                     <td>
                         %if invoice.model.is_paid():
@@ -203,8 +203,8 @@
     <tfoot>
         <tr>
             <td colspan='5'><strong>Total</strong></td>
-            <td><strong>${format_amount(totalht)} €</strong></td>
-            <td><strong>${format_amount(totaltva)} €</strong></td>
+            <td><strong>${format_amount(totalht)}&nbsp;€</strong></td>
+            <td><strong>${format_amount(totaltva)}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
     </tfoot>

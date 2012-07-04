@@ -71,7 +71,7 @@
                         <tr>
                             <td>Acompte</td>
                             <td>à la commande</td>
-                            <td class='price'>${format_amount(task.compute_deposit())} €</td>
+                            <td class='price'>${format_amount(task.compute_deposit())}&nbsp;€</td>
                         </tr>
                     % endif
                     ## Les paiements intermédiaires
@@ -80,9 +80,9 @@
                             <td>${print_date(line.paymentDate)}</td>
                             <td>${line.description}</td>
                             %if task.model.manualDeliverables == 1:
-                                <td>${format_amount(line.amount)} €</td>
+                                <td>${format_amount(line.amount)}&nbsp;€</td>
                             %else:
-                                <td class='price'>${format_amount(task.compute_line_amount())} €</td>
+                                <td class='price'>${format_amount(task.compute_line_amount())}&nbsp;€</td>
                             %endif
                         </tr>
                     % endfor
@@ -95,7 +95,7 @@
                             ${format_text(task.model.payment_lines[-1].description)}
                         </td>
                         <td class='price'>
-                            ${format_amount(task.compute_sold())} €
+                            ${format_amount(task.compute_sold())}&nbsp;€
                         </td>
                     </tr>
                 % endif

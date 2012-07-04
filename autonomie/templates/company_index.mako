@@ -31,7 +31,7 @@
                                     ${format_client(invoice.model.project.client)}
                                 </td>
                                 <td>
-                                    ${format_amount(invoice.compute_total())} €
+                                    ${format_amount(invoice.compute_total())}&nbsp;€
                                 </td>
                             </tr>
                         % endfor

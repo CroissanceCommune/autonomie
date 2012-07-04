@@ -57,8 +57,7 @@
             <strong>Solde de trésorerie</strong>
         </td>
         <td>
-            <strong>${format_amount(sum([invoice.compute_totalht() for invoice in invoices]))} €</strong>
-
+            <strong>${format_amount(sum([invoice.compute_totalht() for invoice in invoices]))}&nbsp;€</strong>
         </td>
     </tfoot>
 </table>

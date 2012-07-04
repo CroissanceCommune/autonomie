@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 02 juil. 2012 20:30:21 CEST
+# * Last Modified : mer. 04 juil. 2012 11:35:49 CEST
 #
 # * Project : autonomie
 #
@@ -857,12 +857,16 @@ class InvoiceLine(DBBASE):
                             order_by='InvoiceLine.rowIndex'
                         )
 
-    def get_unity_label(self):
+    def get_unity_label(self, pretty=False):
         """
             return unitie's label
         """
+        if pretty:
+            default = u""
+        else:
+            default = u"-"
         labels = dict(
-                NONE=u'-',
+                NONE=default,
                 HOUR=u"heure(s)",
                 DAY=u"jour(s)",
                 WEEK=u"semaine(s)",
@@ -870,7 +874,7 @@ class InvoiceLine(DBBASE):
                 FEUIL=u"feuillet(s)",
                 PACK=u"forfait",
                 )
-        return labels.get(self.unity, '-')
+        return labels.get(self.unity, default)
 
     def duplicate(self):
         """
@@ -1413,12 +1417,16 @@ class CancelInvoiceLine(DBBASE):
     quantity = Column(Integer, default=1)
     unity = Column(String(10), default=None)
 
-    def get_unity_label(self):
+    def get_unity_label(self, pretty=False):
         """
             return unitie's label
         """
+        if pretty:
+            default = u""
+        else:
+            default = u"-"
         labels = dict(
-                NONE=u'-',
+                NONE=default,
                 HOUR=u"heure(s)",
                 DAY=u"jour(s)",
                 WEEK=u"semaine(s)",
@@ -1426,7 +1434,7 @@ class CancelInvoiceLine(DBBASE):
                 FEUIL=u"feuillet(s)",
                 PACK=u"forfait",
                 )
-        return labels.get(self.unity, '-')
+        return labels.get(self.unity, default)
 
     def duplicate(self):
         """

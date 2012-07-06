@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : sam. 04 sept. 2010 23:20:16 CEST
+# * Last Modified : ven. 06 juil. 2012 13:21:32 CEST
 #
 # * Project : autonomie
 #
@@ -17,6 +17,7 @@ import logging
 from pyramid.security import Allow
 from pyramid.security import Authenticated
 from pyramid.security import ALL_PERMISSIONS
+from pyramid.security import DENY_ALL
 from sqlalchemy.orm import undefer_group
 
 from autonomie.models.model import Project
@@ -106,6 +107,8 @@ class CompanyFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -113,7 +116,6 @@ class CompanyFactory(BaseDBFactory):
                                Company.id==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'company'
         return obj
 
@@ -140,6 +142,8 @@ class ProjectFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -147,7 +151,6 @@ class ProjectFactory(BaseDBFactory):
                                                Project.id==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'project'
         return obj
 
@@ -163,6 +166,8 @@ class ClientFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -170,7 +175,6 @@ class ClientFactory(BaseDBFactory):
                                              Client.id==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'client'
         return obj
 
@@ -197,6 +201,8 @@ class EstimationFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -204,7 +210,6 @@ class EstimationFactory(BaseDBFactory):
                                            Estimation.IDTask==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'estimation'
         return obj
 
@@ -220,6 +225,8 @@ class InvoiceFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -227,7 +234,6 @@ class InvoiceFactory(BaseDBFactory):
                                              Invoice.IDTask==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'invoice'
         return obj
 
@@ -244,6 +250,8 @@ class CancelInvoiceFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
+        log.debug("We are in the __getitem__")
+        log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -251,7 +259,6 @@ class CancelInvoiceFactory(BaseDBFactory):
                                   ).filter(CancelInvoice.IDTask==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'cancelinvoice'
         return obj
 
@@ -284,7 +291,6 @@ class UserFactory(BaseDBFactory):
                                             ).filter(User.id==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'user'
         return obj
 
@@ -317,6 +323,5 @@ class OperationFactory(BaseDBFactory):
                                 OperationComptable.id==key).scalar()
         if obj is None:
             raise KeyError
-        obj.__parent__ = self
         obj.__name__ = 'operation'
         return obj

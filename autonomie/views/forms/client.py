@@ -22,7 +22,7 @@ from deform import widget
 
 from autonomie.models import DBSESSION
 from autonomie.models.model import Client
-from autonomie.views.forms.widgets import deferred_edit_widget
+from autonomie.views.forms.widgets import get_deferred_edit_widget
 from autonomie.views.forms.widgets import get_mail_input
 
 log = logging.getLogger(__name__)
@@ -51,9 +51,9 @@ class ClientSchema(colander.MappingSchema):
         Schema for customer insertion
     """
     id = colander.SchemaNode(colander.String(),
-                                widget=deferred_edit_widget,
-                                title=u'Code',
-                                validator=deferred_ccode_valid)
+                             widget=get_deferred_edit_widget(mask='* * * *'),
+                             title=u'Code',
+                             validator=deferred_ccode_valid)
     name = colander.SchemaNode(colander.String(),
                             title=u"Nom de l'entreprise",
                             validator=colander.Length(max=255))

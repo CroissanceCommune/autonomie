@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 03 juil. 2012 11:31:55 CEST
+# * Last Modified : lun. 09 juil. 2012 22:51:46 CEST
 #
 # * Project : autonomie
 #
@@ -30,7 +30,7 @@ from autonomie.models import initialize_sql
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
 from autonomie.utils.config import get_config
-from autonomie.utils.forms import set_deform_renderer
+from autonomie.utils.renderer import set_deform_renderer
 
 def main(global_config, **settings):
     """

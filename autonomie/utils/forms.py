@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 31-01-2012
-# * Last Modified : sam. 23 juin 2012 04:32:35 CEST
+# * Last Modified : lun. 09 juil. 2012 22:51:28 CEST
 #
 # * Project : autonomie
 #
@@ -17,17 +17,12 @@ import os
 import logging
 import colander
 
-from pkg_resources import resource_filename
-
-from pyramid.renderers import render
 from deform.form import Form
-from deform.template import ZPTRendererFactory
 from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
 
 from autonomie.utils.fileupload import FileTempStore
 from autonomie.utils.widgets import DisabledInput
-from autonomie.i18n import translate
 
 log = logging.getLogger(__name__)
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
@@ -83,53 +78,6 @@ class XHttpForm(Form):
         html += Form.render(self, appstruct, readonly)
         html += "<script>deform.load()</script>"
         return html
-
-class MultiRendererFactory(object):
-    """
-        Multi renderer, allows rendering deform widgets
-        in multiple formats
-        chameleon by default and mako if not
-    """
-    def __init__(self,
-                    search_path,
-                    auto_reload=True,
-                    translator=None):
-        #FIXME : auto_reload should be retrived from inifile
-        self.default_renderer = ZPTRendererFactory(
-                                search_path=search_path,
-                                auto_reload=auto_reload,
-                                encoding="utf-8",
-                                translator=translator)
-
-    def __call__(self, template_name, **kw):
-        """
-            Launched by the client library
-        """
-        return self.load(template_name, **kw)
-
-    def load(self, template_name, **kw):
-        """
-            Load the appropriate engine
-            chameleon by default mako if not
-        """
-        if os.path.splitext(template_name)[1] == "":
-            return self.default_renderer(template_name, **kw)
-        else:
-            return render(template_name, kw)
-
-def set_deform_renderer():
-    """
-        Returns a deform renderer allowing translation
-    """
-    deform_template_dirs = (
-        resource_filename('deform_bootstrap', 'templates/'),
-        resource_filename('deform', 'templates/'),
-        )
-
-    renderer = MultiRendererFactory(search_path=deform_template_dirs,
-                                    translator=translate
-                                    )
-    Form.default_renderer = renderer
 
 def get_mail_input(missing=None):
     """

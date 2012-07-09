@@ -44,6 +44,60 @@ class DisabledInput(widget.Widget):
     def deserialize(self, field, pstruct):
         return pstruct
 
+class CustomDateInputWidget(widget.Widget):
+    """
+
+    Renders a JQuery UI date picker widget
+    (http://jqueryui.com/demos/datepicker/).  Most useful when the
+    schema node is a ``colander.Date`` object.
+    alt Tag is used to allow full customization of the displayed input
+
+    **Attributes/Arguments**
+
+    size
+        The size, in columns, of the text input field.  Defaults to
+        ``None``, meaning that the ``size`` is not included in the
+        widget output (uses browser default size).
+
+    template
+        The template name used to render the widget.  Default:
+        ``dateinput``.
+
+    options
+        Options for configuring the widget (eg: date format)
+
+    readonly_template
+        The template name used to render the widget in read-only mode.
+        Default: ``readonly/textinput``.
+    """
+    template = 'autonomie:deform_templates/dateinput.pt'
+    readonly_template = 'readonly/textinput'
+    size = None
+    requirements = ( ('jqueryui', None), )
+    default_options = (('dateFormat', 'yy-mm-dd'),)
+
+    def __init__(self, *args, **kwargs):
+        self.options = dict(self.default_options)
+        widget.Widget.__init__(self, *args, **kwargs)
+
+    def serialize(self, field, cstruct, readonly=False):
+        if cstruct in (colander.null, None):
+            cstruct = ''
+        template = readonly and self.readonly_template or self.template
+        options = self.options
+        # Force iso format for colander compatibility
+        options['altFormat'] = 'yy-mm-dd'
+        return field.renderer(template,
+                              field=field,
+                              cstruct=cstruct,
+                              options=self.options)
+
+    def deserialize(self, field, pstruct):
+        date = pstruct.get('date', colander.null)
+        if date in ('', colander.null):
+            return colander.null
+        return date
+
 def get_mail_input(missing=None):
     """
         Return a generic customized mail input field
@@ -51,13 +105,13 @@ def get_mail_input(missing=None):
     return colander.SchemaNode(colander.String(),
                             title="Adresse e-mail",
                             validator=colander.Email(MAIL_ERROR_MESSAGE),
-                            missing=missing
-                            )
+                            missing=missing)
+
 def get_date_input(**kw):
     """
         Return a date input displaying a french user friendly format
     """
-    date_input = widget.DateInputWidget(**kw)
+    date_input = CustomDateInputWidget(**kw)
     date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
 

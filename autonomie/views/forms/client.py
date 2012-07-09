@@ -51,7 +51,7 @@ class ClientSchema(colander.MappingSchema):
         Schema for customer insertion
     """
     id = colander.SchemaNode(colander.String(),
-                             widget=get_deferred_edit_widget(mask='* * * *'),
+                             widget=get_deferred_edit_widget(mask='****'),
                              title=u'Code',
                              validator=deferred_ccode_valid)
     name = colander.SchemaNode(colander.String(),

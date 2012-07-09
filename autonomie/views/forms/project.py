@@ -37,7 +37,7 @@ class ProjectSchema(colander.MappingSchema):
             validator=colander.Length(max=150), css_class='floatted')
     code = colander.SchemaNode(colander.String(),
             title=u"Code du projet",
-            widget=get_deferred_edit_widget(mask='* * * *'),
+            widget=get_deferred_edit_widget(mask='****'),
             validator=colander.Length(4))
     type = colander.SchemaNode(colander.String(),
             title="Type de projet",

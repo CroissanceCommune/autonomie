@@ -147,6 +147,19 @@ def deferred_edit_widget(node, kw):
         wid = widget.TextInputWidget()
     return wid
 
+def get_deferred_edit_widget(**options):
+    """
+        Return a deferred edit widget
+    """
+    @colander.deferred
+    def deferred_edit_widget(node, kw):
+        if kw.get('edit'):
+            wid = DisabledInput()
+        else:
+            wid = widget.TextInputWidget(**options)
+        return wid
+    return deferred_edit_widget
+
 @colander.deferred
 def deferred_autocomplete_widget(node, kw):
     """

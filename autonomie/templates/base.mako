@@ -25,6 +25,7 @@
     <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/bootstrap-typeahead.js')}"></script>
     <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.jquery.js')}"></script>
     <script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery.ui.datepicker-fr.js')}"></script>
+    <script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery.maskedinput-1.3.min.js')}"></script>
     <%block name="headjs" />
 
     <link href="${request.static_url('autonomie:static/css/default.css')}" rel="stylesheet"  type="text/css" />

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : jeu. 28 juin 2012 21:13:32 CEST
+# * Last Modified : lun. 09 juil. 2012 22:57:43 CEST
 #
 # * Project : autonomie
 #
@@ -17,16 +17,10 @@ import cgi
 import urllib
 import logging
 
-from mako.template import Template
-
-from pyramid.renderers import render
-from pyramid.security import has_permission
-
-from colander import null
-
-from deform.widget import Widget as DeformWidget
-
 from pkg_resources import resource_filename
+
+from mako.template import Template
+from pyramid.security import has_permission
 
 from autonomie.utils.pdf import render_html
 
@@ -48,21 +42,6 @@ class Link:
         self.label = label
         self.title = title
         self.icon = icon
-
-class DisabledInput(DeformWidget):
-    """
-        A non editable input
-    """
-    template = "autonomie:deform_templates/disabledinput.mako"
-    def serialize(self, field, cstruct=None, readonly=True):
-        if cstruct is null:
-            cstruct = u''
-        quoted = cgi.escape(cstruct, quote='"')
-        params = {'name': field.name, 'value':quoted}
-        return render(self.template, params)
-
-    def deserialize(self, field, pstruct):
-        return pstruct
 
 class Widget(object):
     """

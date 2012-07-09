@@ -6,26 +6,20 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 31-01-2012
-# * Last Modified : lun. 09 juil. 2012 22:51:28 CEST
+# * Last Modified : lun. 09 juil. 2012 22:55:35 CEST
 #
 # * Project : autonomie
 #
 """
     Deform utility wrappers
 """
-import os
 import logging
 import colander
 
 from deform.form import Form
-from deform import widget
-from deform_bootstrap.widget import ChosenSingleWidget
 
-from autonomie.utils.fileupload import FileTempStore
-from autonomie.utils.widgets import DisabledInput
 
 log = logging.getLogger(__name__)
-MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
 
 def merge_session_with_post(session, app_struct):
     """
@@ -79,74 +73,3 @@ class XHttpForm(Form):
         html += "<script>deform.load()</script>"
         return html
 
-def get_mail_input(missing=None):
-    """
-        Return a generic customized mail input field
-    """
-    return colander.SchemaNode(colander.String(),
-                            title="Adresse e-mail",
-                            validator=colander.Email(MAIL_ERROR_MESSAGE),
-                            missing=missing
-                            )
-def get_date_input(**kw):
-    """
-        Return a date input displaying a french user friendly format
-    """
-    date_input = widget.DateInputWidget(**kw)
-    date_input.options['dateFormat'] = 'dd/mm/yy'
-    return date_input
-
-def deferred_upload_widget(path):
-    """
-        return a deferred fileupload widget
-    """
-    @colander.deferred
-    def configured_widget(node, kw):
-        """
-            returns a already pre-configured upload widget
-        """
-        session = kw['session']
-        root_path = kw['rootpath']
-        root_url = kw['rooturl']
-        # path becomes : /assets/company_id/header (or logo)
-        store_url = os.path.join(root_url, path)
-        store_directory = os.path.join(root_path, path)
-        tmpstore = FileTempStore(session, store_directory, store_url)
-        return widget.FileUploadWidget(tmpstore,
-                    template="autonomie:deform_templates/fileupload.mako")
-    return configured_widget
-
-@colander.deferred
-def deferred_edit_widget(node, kw):
-    """
-        Dynamic assigned widget
-        returns a text widget disabled if edit is True in schema binding
-    """
-    if kw.get('edit'):
-        wid = DisabledInput()
-    else:
-        wid = widget.TextInputWidget()
-    return wid
-
-@colander.deferred
-def deferred_autocomplete_widget(node, kw):
-    """
-        Dynamically assign a autocomplete single select widget
-    """
-    choices = kw.get('choices')
-    if choices:
-        wid = ChosenSingleWidget(values=choices)
-    else:
-        wid = widget.TextInputWidget()
-    return wid
-
-def validate_image_mime(node, value):
-    """
-        Validate mime types for image files
-    """
-    log.debug("In validating mimetype")
-    if value.get('fp'):
-        if not value['mimetype'].startswith('image/'):
-            message = u"Veuillez télécharger un fichier de type jpg, png, \
-bmp ou gif"
-            raise colander.Invalid(node, message)

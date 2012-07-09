@@ -23,8 +23,8 @@ from deform import widget
 from autonomie.models import DBSESSION
 from autonomie.models.model import User
 from autonomie.models.main import get_companies
-from autonomie.utils.forms import get_mail_input
-from autonomie.utils.forms import deferred_edit_widget
+from autonomie.views.forms.widgets import get_mail_input
+from autonomie.views.forms.widgets import deferred_edit_widget
 
 log = logging.getLogger(__name__)
 def unique_login(node, value):

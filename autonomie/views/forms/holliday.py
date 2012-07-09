@@ -19,8 +19,8 @@ import colander
 import logging
 
 from deform import widget
-from autonomie.utils.forms import deferred_autocomplete_widget
-from autonomie.utils.forms import  get_date_input
+from autonomie.views.forms.widgets import deferred_autocomplete_widget
+from autonomie.views.forms.widgets import  get_date_input
 
 log = logging.getLogger(__name__)
 

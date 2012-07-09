@@ -40,7 +40,7 @@ import datetime
 import colander
 from deform import widget
 
-from autonomie.utils.forms import get_date_input
+from autonomie.views.forms.widgets import get_date_input
 from .custom_types import QuantityType
 from .custom_types import AmountType
 

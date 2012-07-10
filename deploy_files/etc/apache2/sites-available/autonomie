@@ -1,3 +1,4 @@
+WSGIApplicationGroup %{GLOBAL}
 <VirtualHost *:8080>
     ServerName ${app.url}
     <Directory /var/www/autonomie>

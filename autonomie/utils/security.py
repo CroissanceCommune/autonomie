@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : ven. 06 juil. 2012 13:21:32 CEST
+# * Last Modified : mer. 11 juil. 2012 00:26:20 CEST
 #
 # * Project : autonomie
 #
@@ -268,6 +268,7 @@ def get_user_acl(self):
     """
     acl = DEFAULT_PERM[:]
     acl.append((Allow, u"%s" % self.login, ("view", "edit", "add")))
+    acl.append((Allow, Authenticated, ('view')))
     return acl
 
 class UserFactory(BaseDBFactory):

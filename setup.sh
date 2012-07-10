@@ -1,30 +1,60 @@
 #!/bin/bash
+ORIG_DIR=/root/autonomie
+WWW_DIR=/var/www/autonomie
+LOG_DIR=/var/log/autonomie
+CACHE_DIR=/var/cache/autonomie
 
-if [ ! -d /root/majerti/autonomie ]
+if [ ! -d ${ORIG_DIR} ]
 then
-    echo "Missing /root/majerti/autonomie, Exiting \n"
+    echo "Missing ${ORIG_DIR}, Exiting \n"
     exit 1
 fi
 
-if [ ! -d /var/www/autonomie_env ]
+if [ ! -d ${WWW_DIR} ]
 then
     echo "Creating virtualenv ... \n"
-    virtualenv -- no-site-packages /var/www/autonomie_env
+    virtualenv -- no-site-packages ${WWW_DIR}
     echo " - > Done\n"
 fi
 
 echo "Installing autonomie\n"
-source /var/www/autonomie_env/bin/activate
+source ${WWW_DIR}/bin/activate
 
-rm -rf /var/www/autonomie_env/autonomie/
+# Removing existing datas
+rm -rf ${WWW_DIR}/autonomie/
 
-mv /root/majerti/autonomie /var/www/autonomie_env/autonomie
-cd /var/www/autonomie_env/autonomie
+# Copying source files
+mv ${ORIG_DIR} ${WWW_DIR}/autonomie
+cd ${WWW_DIR}/autonomie
 rm -rf .git*
 python setup.py develop
 
-/bin/mkdir -p /var/cache/autonomie/beaker
-/bin/mkdir -p /var/cache/autonomie/mako
+# Cache directories
+/bin/mkdir -p ${CACHE_DIR}/beaker
+/bin/mkdir -p ${CACHE_DIR}/mako
+/bin/rm -rf ${CACHE_DIR}/mako/*
+/bin/rm -rf ${CACHE_DIR}/beaker/*
+
+#Log directories
+/bin/mkdir -p ${LOG_DIR}
+chown -R www-data ${LOG_DIR}
+
+#logrotate
+echo """
+${LOG_DIR}/*.log {
+    weekly
+    missingok
+    rotate 4
+    compress
+    delaycompress
+    notifempty
+    create 640 www-data
+    sharedscripts
+    postrotate
+        /etc/init.d/apache2 reload > /dev/null
+    endscript
+}""" > /etc/logrotate.d/autonomie.log
+
 
 echo " - > Done\n"
 echo "Setting rights\n"
@@ -36,6 +66,6 @@ chmod -R o-rwx *
 echo " - > Done\n"
 
 echo "Installation is done, you need to\n"
-echo " 1- Configure some stuff in /var/www/autonomie_env/autonomie/production.ini\n"
+echo " 1- Configure some stuff in ${WWW_DIR}/autonomie/production.ini\n"
 echo " 2- Setup the apache stuff\n"
 exit 1

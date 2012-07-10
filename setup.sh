@@ -3,6 +3,7 @@ ORIG_DIR=/root/autonomie
 WWW_DIR=/var/www/autonomie
 LOG_DIR=/var/log/autonomie
 CACHE_DIR=/var/cache/autonomie
+FILE_DIR=/var/intranet_files/files
 TMP_DIR=/tmp/garbage/
 
 if [ "$1" == '' ]
@@ -55,6 +56,12 @@ rm -rf ${TMP_DIR}
 #Log directories
 /bin/mkdir -p ${LOG_DIR}
 chown -R www-data ${LOG_DIR}
+chmod -R o-rwx ${LOG_DIR}
+
+# Datas storing
+/bin/mkdir -p ${FILE_DIR}/main
+chown -R www-data ${FILE_DIR}
+chmod -R o-rw ${FILE_DIR}
 
 #logrotate
 echo """
@@ -75,8 +82,8 @@ ${LOG_DIR}/*.log {
 
 echo " - > Done\n"
 echo "Setting rights\n"
-chown -R www-data:www-data /var/cache/autonomie/
-chmod -R o-rwx /var/cache/autonomie/
+chown -R www-data:www-data ${CACHE_DIR}
+chmod -R o-rwx ${CACHE_DIR}
 
 chown -R www-data:www-data *
 chmod -R o-rwx *

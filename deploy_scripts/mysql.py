@@ -73,7 +73,7 @@ def gen_database(dbname="autonomie", user="autonomie"):
         launch_cmd(bash_cmd)
     return password
 
-def add_user(login="admin.majerti", name="Majerti", firstname="Admin",
+def adduser(login="admin.majerti", name="Majerti", firstname="Admin",
                                                     primary_group="1"):
     """
         Add a user to the database

@@ -16,19 +16,28 @@
 """
     Usefull python tools to templatize, generate database and so on
 """
+import os
+
 from .utils import gen_random_str
 from .utils import launch_cmd
 
-def get_sql_cmds(user, password, dbname):
+def get_sql_grant_cmds(user, password, dbname):
+    """
+        return the change password command
+    """
+    grant = "grant all privileges on {0}.* to {1}@localhost identified by \
+'{2}';".format(dbname, user, password)
+    flush = "flush privileges;"
+    return [grant, flush]
+
+def get_sql_create_cmds(user, password, dbname):
     """
         Generates a database and adds a specific user
     """
     add_user = "CREATE USER {0} IDENTIFIED BY '{1}';".format(user, password)
     create_db = "CREATE DATABASE {0} CHARACTER SET utf8 COLLATE \
 utf8_bin;".format(dbname)
-    grant = "grant all privileges on {0}.* to {1}@localhost identified by \
-'{2}';".format(dbname, user, password)
-    return [add_user, create_db, grant]
+    return [add_user, create_db]
 
 def get_sql_connect_cmd():
     """
@@ -36,14 +45,13 @@ def get_sql_connect_cmd():
     """
     return "mysql --defaults-file=/etc/mysql/debian.cnf"
 
-def get_cmds(user, password, dbname):
+def get_bash_cmd(sql_cmd):
     """
-        return the bash cmds to launch
+        return the bash cmd to launch
     """
     root_cmd = get_sql_connect_cmd()
-    for sql_cmd in get_sql_cmds(user, password, dbname):
-        topipe = 'echo "{0}"'.format(sql_cmd)
-        yield "{0} | {1}".format(topipe, root_cmd)
+    topipe = 'echo "{0}"'.format(sql_cmd)
+    return "{0} | {1}".format(topipe, root_cmd)
 
 def gen_database(dbname="autonomie", user="autonomie"):
     """
@@ -51,8 +59,17 @@ def gen_database(dbname="autonomie", user="autonomie"):
         a random password
     """
     password = gen_random_str()
-    for cmd in get_cmds(user, password, dbname):
-        launch_cmd(cmd)
+    if os.path.isdir("/var/lib/mysql/{0}".format(dbname)):
+        print "The database {0} already exists, only modifying password".format(
+                                                                        dbname)
+        sql_cmds = get_sql_grant_cmds(user, password, dbname)
+    else:
+        sql_cmds = get_sql_create_cmds(user, password, dbname)
+        sql_cmds.extend(get_sql_grant_cmds(user, password, dbname))
+
+    for sql_cmd in sql_cmds:
+        bash_cmd = get_bash_cmd(sql_cmd)
+        launch_cmd(bash_cmd)
     return password
 
 if __name__ == '__main__':

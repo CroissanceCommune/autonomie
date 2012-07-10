@@ -1,0 +1,14 @@
+<VirtualHost *:8080>
+    ServerName ${recipe.url}
+    <Directory /var/www/autonomie>
+    Order allow,deny
+    Allow from all
+    </Directory>
+    
+    WSGIDaemonProcess ${recipe.url} processes=1 threads=15 display-name=%{GROUP} python-path=/var/www/autonomie/lib/python2.6/site-packages
+    WSGIProcessGroup ${recipe.url}
+    ## Log Files
+    ErrorLog /var/log/apache2/error.log
+    CustomLog /var/log/apache2/access.log combined
+    WSGIScriptAlias / /var/www/autonomie/pyramid.wsgi
+</VirtualHost>

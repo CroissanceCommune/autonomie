@@ -3,6 +3,13 @@ ORIG_DIR=/root/autonomie
 WWW_DIR=/var/www/autonomie
 LOG_DIR=/var/log/autonomie
 CACHE_DIR=/var/cache/autonomie
+TMP_DIR=/tmp/garbage/
+
+if [ $1 == '' ]
+then
+    echo "Missing the url of your website that should be passed as first argument"
+    exit 1
+fi
 
 if [ ! -d ${ORIG_DIR} ]
 then
@@ -28,6 +35,12 @@ mv ${ORIG_DIR} ${WWW_DIR}/autonomie
 cd ${WWW_DIR}/autonomie
 rm -rf .git*
 python setup.py develop
+
+echo " + Setting up conf files + "
+/usr/bin/python ${ORIG_DIR}/autonomie/deploy_scripts/all.py $1
+
+rsync -av ${TMP_DIR} /
+rm -rf ${TMP_DIR}
 
 # Cache directories
 /bin/mkdir -p ${CACHE_DIR}/beaker

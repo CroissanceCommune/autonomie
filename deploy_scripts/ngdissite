@@ -1,0 +1,19 @@
+#!/bin/bash
+AV_DIR=/etc/nginx/sites-available/
+EN_DIR=/etc/nginx/sites-enabled/
+if [ -f ${EN_DIR}${1} ]
+then
+    if [ -f ${AV_DIR}${1} ]
+    then
+        /bin/rm -f ${EN_DIR}${1}
+    else
+        echo "This site is enabled without symlink, I can't do anything for you ... sorry!"
+        exit 1
+    fi
+else
+    echo "No site named $1"
+    exit 1
+fi
+echo "Please reload nginx configuration : "
+echo "service nginx reload"
+exit 0

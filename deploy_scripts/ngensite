@@ -1,0 +1,13 @@
+#!/bin/bash
+AV_DIR=/etc/nginx/sites-available/
+EN_DIR=/etc/nginx/sites-enabled/
+if [ -f ${AV_DIR}${1} ]
+then
+    /bin/ln -s ${AV_DIR}${1} ${EN_DIR}${1}
+else
+    echo "No site named $1"
+    exit 1
+fi
+echo "Please reload nginx configuration : "
+echo "service nginx reload"
+exit 0

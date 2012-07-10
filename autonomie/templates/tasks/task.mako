@@ -65,7 +65,7 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                        ${format_amount(task.compute_lines_total())}
+                        ${format_amount(task.compute_lines_total())}&nbsp;€
                      </td>
                  </tr>
                  %if hasattr(task.model, "discountHT") and task.model.discountHT:
@@ -74,7 +74,7 @@ Base template for task rendering
                             Remise commerciale
                         </td>
                         <td class='price'>
-                            ${format_amount(task.model.discountHT)}
+                            ${format_amount(task.model.discountHT)}&nbsp;€
                         </td>
                     </tr>
                     <tr>

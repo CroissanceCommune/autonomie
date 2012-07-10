@@ -19,8 +19,10 @@
 import os
 from mako.template import Template
 
-HERE = os.path.abspath(__file__)
-TMPL_DIR = os.path.join(HERE, "deploy_files/")
+HERE = os.path.dirname(os.path.abspath(__file__))
+print HERE
+TMPL_DIR = os.path.join(HERE, "../deploy_files/")
+print TMPL_DIR
 DEST_DIR = "/tmp/garbage/"
 
 def mkdir_p(dirname):

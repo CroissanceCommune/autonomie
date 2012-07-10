@@ -18,8 +18,8 @@
 """
 import os
 
-from .utils import gen_random_str
-from .utils import launch_cmd
+from utils import gen_random_str
+from utils import launch_cmd
 
 def get_sql_grant_cmds(user, password, dbname):
     """

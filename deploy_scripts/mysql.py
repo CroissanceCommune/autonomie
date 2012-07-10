@@ -17,6 +17,7 @@
     Usefull python tools to templatize, generate database and so on
 """
 import os
+from hashlib import md5
 
 from utils import gen_random_str
 from utils import launch_cmd
@@ -71,6 +72,21 @@ def gen_database(dbname="autonomie", user="autonomie"):
         bash_cmd = get_bash_cmd(sql_cmd)
         launch_cmd(bash_cmd)
     return password
+
+def add_user(login="admin.majerti", name="Majerti", firstname="Admin",
+                                                    primary_group="1"):
+    """
+        Add a user to the database
+    """
+    password = gen_random_str(10)
+    md5_pass = md5(password).hexdigest()
+    cmd = "echo \"INSERT INTO egw_accounts (account_lid, account_pwd, account_firstname, \
+account_lastname, account_status, account_primary_group, \
+account_email) VALUES ('{0}', '{1}', '{2}', '{3}', 'A', '{4}', \
+'equipe@majerti.fr');\" | mysql -uroot autonomie" .format(login, md5_pass,
+                                                firstname, name, primary_group)
+    launch_cmd(cmd)
+    print "New password : {0}".format(password)
 
 if __name__ == '__main__':
     print gen_database()

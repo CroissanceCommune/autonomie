@@ -5,7 +5,7 @@ LOG_DIR=/var/log/autonomie
 CACHE_DIR=/var/cache/autonomie
 TMP_DIR=/tmp/garbage/
 
-if [ $1 == '' ]
+if [ "$1" == '' ]
 then
     echo "Missing the url of your website that should be passed as first argument"
     exit 1
@@ -24,6 +24,9 @@ then
     echo " - > Done\n"
 fi
 
+echo "Specific package installation"
+apt-get install apache2 libapache2-mod-wsgi python-mysqldb libmysqlclient-dev python2.6-dev mariadb-server-5.5
+
 echo "Installing autonomie\n"
 source ${WWW_DIR}/bin/activate
 
@@ -31,13 +34,14 @@ source ${WWW_DIR}/bin/activate
 rm -rf ${WWW_DIR}/autonomie/
 
 # Copying source files
-mv ${ORIG_DIR} ${WWW_DIR}/autonomie
+cp -R ${ORIG_DIR} ${WWW_DIR}/autonomie
 cd ${WWW_DIR}/autonomie
-rm -rf .git*
+rm -rf ${WWW_DIR}/autonomie/.git*
 python setup.py develop
 
 echo " + Setting up conf files + "
-/usr/bin/python ${ORIG_DIR}/autonomie/deploy_scripts/all.py $1
+python ${ORIG_DIR}/deploy_scripts/all.py $1
+hostname $1
 
 rsync -av ${TMP_DIR} /
 rm -rf ${TMP_DIR}
@@ -66,7 +70,7 @@ ${LOG_DIR}/*.log {
     postrotate
         /etc/init.d/apache2 reload > /dev/null
     endscript
-}""" > /etc/logrotate.d/autonomie.log
+}""" > /etc/logrotate.d/autonomie
 
 
 echo " - > Done\n"
@@ -78,7 +82,6 @@ chown -R www-data:www-data *
 chmod -R o-rwx *
 echo " - > Done\n"
 
-echo "Installation is done, you need to\n"
-echo " 1- Configure some stuff in ${WWW_DIR}/autonomie/production.ini\n"
-echo " 2- Setup the apache stuff\n"
-exit 1
+echo "Installation is done"
+service apache2 restart
+exit 0

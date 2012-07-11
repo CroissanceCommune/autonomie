@@ -6,7 +6,7 @@
     %endif
     ${field.serialize(cstruct)|n}
     <div class='span1'>
-        <button type='button' class='close' onclick="$(this).parent().parent().remove();">x</a>
+        <button type='button' class='close' onclick="$(this).parent().parent().remove();">x</button>
     </div>
 </div>
 

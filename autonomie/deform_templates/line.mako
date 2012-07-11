@@ -24,6 +24,6 @@
             <div class='input'></div>
         </div>
         <div class='span1'>
-            <button type='button' class='close' onclick="delRow('estimationline_${esc('id')}');">x</a>
+            <button type='button' class='close' onclick="delRow('estimationline_${esc('id')}');">x</button>
         </div>
     </div>

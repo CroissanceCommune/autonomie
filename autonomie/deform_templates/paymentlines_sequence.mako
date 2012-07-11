@@ -52,7 +52,7 @@
                 {{/if}}
             </div>
             <div class='span1'>
-                <button type='button' class='close' onclick="delRow('paymentline_${esc('id')}');">x</a>
+                <button type='button' class='close' onclick="delRow('paymentline_${esc('id')}');">x</button>
             </div>
             {{/if}}
             <input type="hidden" name="__end__" value="${field.name}:mapping"/>
@@ -71,7 +71,7 @@
             {{/if}}
         </div>
         <div class='span1'>
-            <button type='button' class='close' onclick="delRow('paymentline_${esc('id')}');">x</a>
+            <button type='button' class='close' onclick="delRow('paymentline_${esc('id')}');">x</button>
         </div>
     </script>
     <div class='row linesblockheader'>

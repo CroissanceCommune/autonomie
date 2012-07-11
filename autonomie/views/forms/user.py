@@ -136,7 +136,8 @@ class FAccount(colander.MappingSchema):
     email = get_mail_input(missing=u"")
     code_compta = colander.SchemaNode(colander.String(),
                             title=u"Code compta",
-                            description=deferred_code_compta_title)
+                            description=deferred_code_compta_title,
+                            missing="")
     primary_group = colander.SchemaNode(colander.String(),
                         title=u"Rôle de l'utilisateur",
                         validator=colander.OneOf([x[0] for x in ADMIN_ROLES]),
@@ -177,6 +178,15 @@ class CompanySchema(colander.SequenceSchema):
                             widget=deferred_company_input,
                             )
 
+class Password(colander.MappingSchema):
+    """
+        Schema for password set
+    """
+    pwd = colander.SchemaNode(colander.String(),
+                validator=colander.Length(min=4),
+                widget=widget.CheckedPasswordWidget(size=20),
+                title=u"")
+
 class FUser(colander.MappingSchema):
     """
         Schema for user add
@@ -185,9 +195,11 @@ class FUser(colander.MappingSchema):
     companies = CompanySchema(title=u"Entreprise(s)",
                 widget=widget.SequenceWidget(min_len=1,
                 add_subitem_text_template=u"Ajouter une entreprise"))
-    password = FPassword(validator=auth,
-                         after_bind=_check_pwd,
-                         title=u"Mot de passe")
+    password = Password(title=u"Mot de passe")
+
+#FPassword(validator=auth,
+#                         after_bind=_check_pwd,
+#                         title=u"Mot de passe")
 
 def get_companies_choices(dbsession):
     """
@@ -205,7 +217,7 @@ def get_user_schema(request, edit):
     if user.is_admin():
         code = User.get_code_compta(request.dbsession())
         companies = get_companies_choices(request.dbsession())
-        return schema.bind(edit=False, companies=companies, code_compta=code)
+        return schema.bind(edit=edit, companies=companies, code_compta=code)
     elif user.is_manager():
         companies = get_companies_choices(request.dbsession())
         code = User.get_code_compta(request.dbsession())
@@ -214,7 +226,7 @@ def get_user_schema(request, edit):
         group = schema['user']['primary_group']
         group.validator = colander.OneOf([x[0] for x in roles])
         group.widget = widget.RadioChoiceWidget(values=roles)
-        return schema.bind(edit=False, companies=companies, code_compta=code)
+        return schema.bind(edit=edit, companies=companies, code_compta=code)
     else:
         # Non admin users are limited
         del schema['user']['code_compta']

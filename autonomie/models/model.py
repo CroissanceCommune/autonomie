@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 04 juil. 2012 11:35:49 CEST
+# * Last Modified : mer. 11 juil. 2012 14:57:54 CEST
 #
 # * Project : autonomie
 #
@@ -792,9 +792,9 @@ class EstimationLine(DBBASE):
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp))
     unity = Column("unity", String(10))
-    task = relationship("Estimation", backref="lines",
-                            order_by='EstimationLine.rowIndex'
-                        )
+    task = relationship("Estimation", backref=backref("lines",
+                            order_by='EstimationLine.rowIndex'))
+
     def get_unity_label(self, pretty=False):
         """
             return unitie's label
@@ -853,9 +853,8 @@ class InvoiceLine(DBBASE):
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp))
     unity = Column("unity", String(10))
-    task = relationship("Invoice", backref="lines",
-                            order_by='InvoiceLine.rowIndex'
-                        )
+    task = relationship("Invoice", backref=backref("lines",
+                            order_by='InvoiceLine.rowIndex'))
 
     def get_unity_label(self, pretty=False):
         """

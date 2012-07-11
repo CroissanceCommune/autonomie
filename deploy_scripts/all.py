@@ -40,4 +40,6 @@ if __name__ == '__main__':
             password = sys.argv[3]
     addsite({'url':sys.argv[1],
              'mail':{"username":username,
-                     "password":password}})
+                     "password":password,
+                     "host":"smtp.google.com",
+                     "port":"567"}})

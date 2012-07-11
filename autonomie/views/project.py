@@ -116,7 +116,7 @@ class ProjectView(ListView):
     @view_config(route_name='company_projects',
                  renderer='company_projects.mako',\
                  request_method='GET',
-                 permission='view')
+                 permission='edit')
     def company_projects(self):
         """
             Return the list of projects

@@ -50,7 +50,7 @@ class ClientView(ListView):
 
     @view_config(route_name='company_clients', renderer='company_clients.mako',
                                                request_method='GET',
-                                               permission='view')
+                                               permission='edit')
     def company_clients(self):
         """
             Return the list of all the clients

@@ -196,11 +196,14 @@ class UserView(ListView):
                             company.name = company_name
                             company.goal = u"Entreprise de {0}".format(
                                 user.firstname, user.lastname)
-                            self.dbsession.merge(company)
+                            company = self.dbsession.merge(company)
+                            log.debug("Flushing")
                             self.dbsession.flush()
+                            log.debug("Adding company to the user")
                         user.companies.append(company)
-                log.debug(" + Adding user : {0}" .format(user.login))
+                log.debug(" + Adding/Editing user : {0}" .format(user.login))
                 user = self.dbsession.merge(user)
+                log.debug("Flushing")
                 self.dbsession.flush()
                 self.request.session.flash(validate_msg, queue="main")
                 return HTTPFound(self.request.route_path("user", id=user.id))

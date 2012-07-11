@@ -1,10 +1,5 @@
 WSGIApplicationGroup %{GLOBAL}
 <VirtualHost *:8080>
-    <IfModule mod_rpaf.c>
-        RPAFenable On
-        RPAFsethostname On
-        RPAFproxy_ips 192.168.122.1
-    </IfModule>
     ServerName ${app.url}
     <Directory /var/www/autonomie>
     Order allow,deny

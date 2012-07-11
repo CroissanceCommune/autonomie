@@ -28,7 +28,7 @@ def get_companies(dbsession):
     """
         Return all the companies present in the database
     """
-    @cache_region("long_term", "companies")
+#    @cache_region("long_term", "companies")
     def companies():
         """
             query the database and cache the result

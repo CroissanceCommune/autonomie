@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 11 juil. 2012 14:57:54 CEST
+# * Last Modified : mer. 11 juil. 2012 16:48:05 CEST
 #
 # * Project : autonomie
 #
@@ -53,7 +53,9 @@ log = logging.getLogger(__name__)
 company_employee = Table('coop_company_employee', DBBASE.metadata,
     Column("IDCompany", Integer, ForeignKey('coop_company.IDCompany')),
     # IDEmployee est identique dans la table coop_employee
-    Column("IDEmployee", Integer, ForeignKey('egw_accounts.account_id')))
+    Column("IDEmployee", Integer, ForeignKey('egw_accounts.account_id')),
+        mysql_charset='utf8', mysql_engine='MyISAM',
+    )
 
 class Company(DBBASE):
     """
@@ -78,6 +80,7 @@ class Company(DBBASE):
         PRIMARY KEY  (`IDCompany`)
     """
     __tablename__ = 'coop_company'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDCompany", Integer, primary_key=True)
     name = Column("name", String(150))
     goal = deferred(Column("object", String(255)),
@@ -181,6 +184,7 @@ class User(DBBASE):
 
     """
     __tablename__ = 'egw_accounts'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('account_id', Integer, primary_key=True)
     login = Column('account_lid', String(64))
     pwd = Column("account_pwd", String(100))
@@ -269,6 +273,7 @@ class Employee(DBBASE):
         PRIMARY KEY  (`IDEmployee`)
     """
     __tablename__ = 'coop_employee'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDEmployee", Integer, primary_key=True)
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
@@ -308,6 +313,7 @@ class Task(DBBASE):
       KEY `IDEmployee` (`IDEmployee`)
     """
     __tablename__ = 'coop_task'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {
                         'polymorphic_identity':'task',
                         }
@@ -537,6 +543,7 @@ class Estimation(Task):
       KEY `IDProject` (`IDProject`)
     """
     __tablename__ = 'coop_estimation'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'),
                 primary_key=True, nullable=False)
     sequenceNumber = Column("sequenceNumber", Integer,
@@ -640,6 +647,7 @@ class Invoice(Task):
        KEY `IDEstimation` (`IDEstimation`)
     """
     __tablename__ = 'coop_invoice'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {
                        'polymorphic_identity':'invoice',
                        }
@@ -780,6 +788,7 @@ class EstimationLine(DBBASE):
       KEY `IDTask` (`IDTask`)
     """
     __tablename__ = 'coop_estimation_line'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDWorkLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     rowIndex = Column("rowIndex", Integer)
@@ -841,6 +850,7 @@ class InvoiceLine(DBBASE):
         PRIMARY KEY  (`IDInvoiceLine`),
     """
     __tablename__ = 'coop_invoice_line'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDInvoiceLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
     rowIndex = Column("rowIndex", Integer)
@@ -913,6 +923,7 @@ class PaymentLine(DBBASE):
         `paymentDate` int(11) default NULL,
     """
     __tablename__ = 'coop_estimation_payment'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDPaymentLine", Integer, primary_key=True, nullable=False)
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     rowIndex = Column("rowIndex", Integer)
@@ -960,6 +971,7 @@ class Client(DBBASE):
         KEY `IDCompany` (`IDCompany`)
     """
     __tablename__ = 'coop_customer'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('code', String(4), primary_key=True)
     comments = deferred(Column("comments", Text), group='edit')
     creationDate = Column("creationDate", CustomDateType,
@@ -1006,6 +1018,7 @@ class Project(DBBASE):
         KEY `IDCompany` (`IDCompany`)
     """
     __tablename__ = 'coop_project'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('IDProject', Integer, primary_key=True)
     name = Column("name", String(255))
     code_client = Column("customerCode", String(4),
@@ -1073,6 +1086,7 @@ class Phase(DBBASE):
         `updateDate` int(11) NOT NULL,
     """
     __tablename__ = 'coop_phase'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('IDPhase', Integer, primary_key=True)
     id_project = Column('IDProject', Integer,
                         ForeignKey('coop_project.IDProject'))
@@ -1098,6 +1112,7 @@ class Tva(DBBASE):
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
     __tablename__ = 'coop_tva'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(8), nullable=False)
     value = Column("value", Integer)
@@ -1118,6 +1133,7 @@ class TaskStatus(DBBASE):
         KEY `statusCode` (`statusCode`)
     """
     __tablename__ = 'coop_task_status'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("id", Integer, primary_key=True)
     id_task = Column('IDTask', Integer,
                         ForeignKey('coop_task.IDTask'))
@@ -1135,7 +1151,8 @@ class Config(DBBASE):
           PRIMARY KEY  (`config_app`,`config_name`)
     """
     __tablename__ = 'egw_config'
-    app = Column("config_app", String(255), primary_key=True)
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    app = Column("config_app", String(50), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
 
@@ -1159,7 +1176,7 @@ class ManualInvoice(DBBASE):
         UNIQUE KEY `id` (`id`)
     """
     __tablename__ = 'symf_facture_manuelle'
-    __table_args__ = {'mysql_engine': 'MyISAM'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)
     description = Column('libelle', String(255))
@@ -1279,6 +1296,7 @@ class OperationComptable(DBBASE):
         UNIQUE KEY `id` (`id`)
     """
     __tablename__ = 'symf_operation_treso'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('id', BigInteger, primary_key=True)
     amount = Column("montant", Numeric)
     charge = Column("charge", Integer, default=0)
@@ -1317,7 +1335,7 @@ class CancelInvoice(Task):
        KEY `IDEstimation` (`IDEstimation`)
     """
     __tablename__ = 'coop_cancel_invoice'
-    __table_args__ = {'mysql_engine': 'MyISAM'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {
                         'polymorphic_identity':'cancelinvoice',
                         }
@@ -1401,7 +1419,7 @@ class CancelInvoiceLine(DBBASE):
         PRIMARY KEY  (`IDCancelInvoiceLine`),
     """
     __tablename__ = 'coop_cancel_invoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column(Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_cancel_invoice.IDTask'))
     created_at = Column(DateTime, default=datetime.datetime.now)
@@ -1456,7 +1474,7 @@ class Holliday(DBBASE):
         end_date
     """
     __tablename__ = "coop_holliday"
-    __table_args__ = {'mysql_engine': 'MyISAM'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column(Integer, primary_key=True)
     user_id = Column("user_id", Integer, ForeignKey('egw_accounts.account_id'))
     start_date = Column(Date)

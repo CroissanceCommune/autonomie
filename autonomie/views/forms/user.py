@@ -169,8 +169,16 @@ def deferred_company_input(node, kw):
         Deferred company list
     """
     companies = kw.get('companies')
-    wid = widget.AutocompleteInputWidget(values=companies)
+    wid = widget.AutocompleteInputWidget(values=companies,
+            template="autonomie:deform_templates/autocomple_input.pt")
     return wid
+
+@colander.deferred
+def deferred_missing_password(node, kw):
+    if kw.get('edit'):
+        return ""
+    else:
+        return colander.required
 
 class CompanySchema(colander.SequenceSchema):
     company = colander.SchemaNode(colander.String(),
@@ -185,7 +193,8 @@ class Password(colander.MappingSchema):
     pwd = colander.SchemaNode(colander.String(),
                 validator=colander.Length(min=4),
                 widget=widget.CheckedPasswordWidget(size=20),
-                title=u"")
+                title=u"",
+                missing=deferred_missing_password)
 
 class FUser(colander.MappingSchema):
     """

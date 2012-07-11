@@ -33,4 +33,11 @@ def addsite(server_conf):
     process_templates(params)
 
 if __name__ == '__main__':
-    addsite({'url':sys.argv[1]})
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+        if len(sys.argv) > 2:
+            username = sys.argv[2]
+            password = sys.argv[3]
+    addsite({'url':sys.argv[1],
+             'mail':{"username":username,
+                     "password":password}})

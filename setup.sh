@@ -41,7 +41,7 @@ rm -rf ${WWW_DIR}/autonomie/.git*
 python setup.py develop
 
 echo " + Setting up conf files + "
-python ${ORIG_DIR}/deploy_scripts/all.py $1
+python ${ORIG_DIR}/deploy_scripts/all.py $1 $2 $3
 hostname $1
 
 rsync -av ${TMP_DIR} /

@@ -85,7 +85,8 @@ a été {3}.".format( self.document.number,
         """
             Return True if the new status requires a mail to be sent
         """
-        if self.document.CAEStatus in ("valid", "invalid", "paid"):
+        if self.document.CAEStatus in ("valid", "invalid", "paid") and \
+                                    not self.document.is_cancelinvoice():
             return True
         else:
             return False

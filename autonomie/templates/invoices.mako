@@ -146,6 +146,11 @@
         </tr>
         % if invoices:
             % for invoice in invoices:
+                % if invoice.model.is_invoice():
+                    <% route_name="invoice" %>
+                % else:
+                    <% route_name="cancelinvoice" %>
+                %endif
                     %if invoice.model.is_tolate():
                         <tr class='invoice_tolate_tr'>
                             <td class='invoice_tolate'>
@@ -179,7 +184,7 @@
                     <td>
                         <blockquote>
                             %if invoice.model.IDTask:
-                                <a href="${request.route_path('invoice', id=invoice.model.IDTask)}"
+                                <a href="${request.route_path(route_name, id=invoice.model.IDTask)}"
                                 title='Voir le document'>${invoice.model.number}</a>
                             %else:
                                 ${invoice.model.number}
@@ -204,7 +209,7 @@
                     <td>
                         %if invoice.model.project:
                             <a class='btn'
-                                href='${request.route_path("invoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
+                                href='${request.route_path(route_name, id=invoice.model.IDTask, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
                                 <i class='icon icon-file'></i>
                            </a>

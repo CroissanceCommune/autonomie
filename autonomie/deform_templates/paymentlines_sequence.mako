@@ -20,7 +20,7 @@
             </div>
             <div class='span2 control-group {{if paymentDate_error}}error{{/if}}' id="date_${esc('id')}">
                 <input type="hidden" name="__start__" value="paymentDate:mapping"></input>
-                <input class='input-mini' type='date' id="paymentDate_${esc('id')}" name="displayDate" {{if paymentDate}}value="${esc('paymentDate')}"{{/if}}></input>
+                <input class='input-mini' type='text' id="paymentDate_${esc('id')}" name="displayDate" {{if paymentDate}}value="${esc('paymentDate')}"{{/if}}></input>
                 <input class='input-mini' type='hidden' id="paymentDate_${esc('id')}_altField" name="date" {{if paymentDate}}value="${esc('paymentDate')}"{{/if}}></input>
                 {{if paymentDate_error}}
                 <span class='help-inline'>

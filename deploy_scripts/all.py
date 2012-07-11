@@ -18,7 +18,7 @@ DEFAULT_CONF = dict(url="autonomie.majerti.fr",
                             db=dict(password="toBeSet",
                                      user="autonomie",
                                      name="autonomie"),
-                            mail=dict(host="smtp.google.fr",
+                            mail=dict(host="smtp.google.com",
                                       port="567",
                                       username="nill",
                                       password="nopass"))

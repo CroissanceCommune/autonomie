@@ -77,7 +77,7 @@ path = request.current_route_path(_query=get_args)
 </%def>
 <%def name="format_quantity(data)"><%doc>Format a quantity for display</%doc>
     %if data is not UNDEFINED and data is not None:
-        <% data = "%d"% (int(data),) %>
+        <% data = "%s"% (float(data),) %>
         ${data.replace('.', ',')}
     %endif
 </%def>

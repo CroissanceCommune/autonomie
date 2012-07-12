@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 12 juil. 2012 12:19:33 CEST
+# * Last Modified : jeu. 12 juil. 2012 14:36:23 CEST
 #
 # * Project : autonomie
 #
@@ -1264,6 +1264,12 @@ class ManualInvoice(DBBASE):
         return self.company
 
     def is_cancelinvoice(self):
+        """
+            return false
+        """
+        return False
+
+    def is_invoice(self):
         """
             return false
         """

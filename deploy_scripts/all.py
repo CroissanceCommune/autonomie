@@ -18,10 +18,10 @@ DEFAULT_CONF = dict(url="autonomie.majerti.fr",
                             db=dict(password="toBeSet",
                                      user="autonomie",
                                      name="autonomie"),
-                            mail=dict(host="smtp.gmail.com",
-                                      port="587",
-                                      username="nill",
-                                      password="nopass"))
+                            mail=dict(host=None,
+                                      port=None,
+                                      username=None,
+                                      password=None))
 def addsite(server_conf):
     """
         Add a site's configuration
@@ -41,5 +41,5 @@ if __name__ == '__main__':
     addsite({'url':sys.argv[1],
              'mail':{"username":username,
                      "password":password,
-                     "host":"smtp.google.com",
-                     "port":"567"}})
+                     "host":"smtp.gmail.com",
+                     "port":"587"}})

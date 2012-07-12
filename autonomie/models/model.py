@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 11 juil. 2012 16:48:05 CEST
+# * Last Modified : jeu. 12 juil. 2012 12:19:33 CEST
 #
 # * Project : autonomie
 #
@@ -697,7 +697,7 @@ class Invoice(Task):
             tolate = True
         else:
             tolate = False
-        return self.CAEStatus in ('valid', 'sent',) and tolate
+        return self.CAEStatus in ('valid', 'sent','recinv') and tolate
 
     def is_paid(self):
         """

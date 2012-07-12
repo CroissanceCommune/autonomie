@@ -267,12 +267,16 @@ class CompanyInvoicesView(ListView):
             man_inv = man_inv.filter(
                                         ManualInvoice.payment_ok==1)
         elif status == "notpaid":
-            inv = inv.filter(Invoice.CAEStatus.in_(('sent', 'valid', 'recinv')))
-            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(('sent', 'valid','recinv')))
+            inv = inv.filter(Invoice.CAEStatus.in_(
+                                        ('sent', 'valid', 'recinv')))
+            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(
+                                          ('sent','valid','recinv')))
             man_inv = man_inv.filter(ManualInvoice.payment_ok==0)
         else:
-            inv = inv.filter(Invoice.CAEStatus.in_(('paid', 'sent', 'valid','recinv')))
-            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(('paid', 'sent', 'valid','recinv')))
+            inv = inv.filter(Invoice.CAEStatus.in_(
+                                ('paid', 'sent', 'valid','aboinv', 'recinv')))
+            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(
+                                          ('paid', 'sent', 'valid','recinv')))
         return cancel_inv, inv, man_inv
 
     @staticmethod

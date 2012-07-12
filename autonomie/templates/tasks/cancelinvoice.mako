@@ -34,7 +34,7 @@
         </style>
 </%block>
         <%block name='information'>
-        <strong>Avoir N° </strong>${task.model.number}<br />
+        <strong>Avoir N° </strong>${task.model.officialNumber}-${task.model.number}<br />
         % if task.model.invoice:
             <span  style='color:#999'> <strong style='color:#999'>Référence facture N° </strong>${task.model.invoice.number}</span> <br />
                 <br />

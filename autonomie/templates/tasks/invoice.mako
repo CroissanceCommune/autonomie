@@ -34,7 +34,7 @@
         </style>
 </%block>
         <%block name='information'>
-            <strong>Facture N° </strong>${task.model.number}<br />
+        <strong>Facture N° </strong>${task.model.officialNumber}-${task.model.number}<br />
             % if task.model.estimation:
                 <span  style='color:#999'> <strong style='color:#999'>Référence devis N° </strong>${task.model.estimation.number}</span> <br />
                 <br />

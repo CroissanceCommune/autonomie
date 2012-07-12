@@ -144,6 +144,7 @@
             <td><strong>${format_amount(totaltva)}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
+        ## invoices are : Invoices, ManualInvoices or CancelInvoices
         % if invoices:
             % for invoice in invoices:
                 % if invoice.model.is_invoice():
@@ -207,7 +208,7 @@
                         %endif
                     </td>
                     <td>
-                        %if invoice.model.project:
+                        %if invoice.model.IDTask:
                             <a class='btn'
                                 href='${request.route_path(route_name, id=invoice.model.IDTask, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">

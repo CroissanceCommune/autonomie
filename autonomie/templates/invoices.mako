@@ -32,6 +32,9 @@
       .invoice_paid_tr{
       background-color:#fffbaa;
     }
+    .invoice_cancelled_tr{
+        background-color:#eeeeee;
+        }
 </style>
 <ul class='nav nav-pills'>
     <li>
@@ -152,19 +155,24 @@
                 % else:
                     <% route_name="cancelinvoice" %>
                 %endif
-                    %if invoice.model.is_tolate():
+                    %if invoice.model.is_invoice() and invoice.model.is_cancelled():
+                        <tr class='invoice_cancelled_tr'>
+                            <td class='invoice_cancelled'>
+                                <span class="label label-important">
+                                    <i class="icon-white icon-remove"></i>
+                                </span>
+                    % elif invoice.model.is_tolate():
                         <tr class='invoice_tolate_tr'>
                             <td class='invoice_tolate'>
-                    <br />
-                    %elif invoice.model.is_paid():
+                                <br />
+                    % elif invoice.model.is_paid():
                         <tr class='invoice_paid_tr'>
                             <td class='invoice_paid'>
-                    <br />
-                    %else:
+                    % else:
                         <tr>
                             <td class='invoice_notpaid'>
-                    <br />
-                    %endif
+                                <br />
+                    % endif
                     %if hasattr(invoice.model, "statusComment") and invoice.model.statusComment:
                         <span class="ui-icon ui-icon-comment" title="${invoice.model.statusComment}"></span>
                     %endif

@@ -5,6 +5,7 @@
 <%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_client" />
+<%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="format_amount" />
 <%block name='actionmenu'>
 <style>
@@ -31,6 +32,9 @@
       .invoice_paid_tr{
       background-color:#fffbaa;
     }
+    .invoice_cancelled_tr{
+        background-color:#eeeeee;
+        }
 </style>
 <ul class='nav nav-pills'>
     <li>
@@ -52,7 +56,7 @@
                     %endif
                 %endfor
             </select>
-            <select name='year' id='year-select' class='span2'>
+            <select name='year' id='year-select' class='span2' data-placeholder="Sélectionner une année">
                 %for year in years:
                     %if unicode(current_year) == unicode(year):
                         <option selected="1" value='${year}'>${year}</option>
@@ -71,7 +75,7 @@
                 %endfor
             </select>
             <select class='span1' name='nb'>
-                % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'1000'),):
+                % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'10000'),):
                     <% nb_item = request.GET.get("nb") %>
                     % if nb_item == value or request.cookies.get('items_per_page') == value:
                         <option value="${value}" selected='true'>${text}</option>
@@ -109,10 +113,10 @@
 <%block name='content'>
 <table class="table table-condensed table-bordered">
     <thead>
-        <th>Statut</th>
+        <th><span class="ui-icon ui-icon-comment"></span></th>
         <th>${sortable(u"Identifiant", "officialNumber")}</th>
         <th>${sortable(u"Émise le", 'taskDate')}</th>
-        <th>${sortable(u"Nom", 'number')}</th>
+        <th>${sortable(u"Nom de la facture", 'number')}</th>
         <th>${sortable(u"Client", 'client')}</th>
         <th>Montant HT</th>
         <th>TVA</th>
@@ -128,20 +132,35 @@
             <td><strong>${format_amount(totaltva)}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
+        ## invoices are : Invoices, ManualInvoices or CancelInvoices
         % if invoices:
             % for invoice in invoices:
-                %if invoice.model.is_tolate():
-                    <tr class='invoice_tolate_tr'>
-                    <td class='invoice_tolate'>
-                    %elif invoice.model.is_paid():
+                % if invoice.model.is_invoice():
+                    <% route_name="invoice" %>
+                % else:
+                    <% route_name="cancelinvoice" %>
+                %endif
+                    %if invoice.model.is_invoice() and invoice.model.is_cancelled():
+                        <tr class='invoice_cancelled_tr'>
+                            <td class='invoice_cancelled'>
+                                <span class="label label-important">
+                                    <i class="icon-white icon-remove"></i>
+                                </span>
+                    % elif invoice.model.is_tolate():
+                        <tr class='invoice_tolate_tr'>
+                            <td class='invoice_tolate'>
+                                <br />
+                    % elif invoice.model.is_paid():
                         <tr class='invoice_paid_tr'>
-                    <td class='invoice_paid'>
-                            <span class="ui-icon ui-icon-check"></span>
-                    %else:
+                            <td class='invoice_paid'>
+                    % else:
                         <tr>
-                    <td class='invoice_notpaid'>
+                            <td class='invoice_notpaid'>
+                                <br />
+                    % endif
+                    %if hasattr(invoice.model, "statusComment") and invoice.model.statusComment:
+                        <span class="ui-icon ui-icon-comment" title="${invoice.model.statusComment}"></span>
                     %endif
-                    <br />
                 </td>
                     <td>
                         ${invoice.model.officialNumber}
@@ -151,10 +170,9 @@
                     </td>
                     <td>
                         <blockquote>
-                            %if invoice.model.project:
-                                <a href="${request.route_path('invoice', id=invoice.model.IDTask)}" title='Voir le document'>
-                                ${invoice.model.number}<br />
-                            </a>
+                            %if invoice.model.IDTask:
+                                <a href="${request.route_path(route_name, id=invoice.model.IDTask)}"
+                                title='Voir le document'>${invoice.model.number}</a>
                             %else:
                                 ${invoice.model.number}
                             %endif
@@ -165,9 +183,7 @@
                         ${format_client(invoice.get_client())}
                     </td>
                     <td>
-                        <strong>
-                            ${format_amount(invoice.compute_totalht())}&nbsp;€
-                        </strong>
+                        <strong>${format_amount(invoice.compute_totalht())}&nbsp;€</strong>
                     </td>
                     <td>
                         ${format_amount(invoice.compute_tva())}&nbsp;€
@@ -178,15 +194,11 @@
                         %endif
                     </td>
                     <td>
-                        %if invoice.model.project:
+                        %if invoice.model.IDTask:
                             <a class='btn'
-                                % if invoice.model.is_cancelinvoice():
-                                    href='${request.route_path("cancelinvoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
-                                % else:
-                                    href='${request.route_path("invoice", id=invoice.model.IDTask, _query=dict(view="pdf"))}'
-                                % endif
+                                href='${request.route_path(route_name, id=invoice.model.IDTask, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
-                                <span class='ui-icon ui-icon-document'></span>
+                                <i class='icon icon-file'></i>
                            </a>
                         %endif
                     </td>

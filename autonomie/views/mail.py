@@ -31,12 +31,18 @@ class StatusChanged(object):
         self.request = request
         self.document = document
 
+    def format_mail(self, mail):
+        """
+            Format the mail address to fit gmail's rfc interpretation
+        """
+        return u"<{0}>".format(mail)
+
     @property
     def recipients(self):
         """
             return the recipients' emails
         """
-        email = self.document.owner.email
+        email = self.format_mail(self.document.owner.email)
         return [email]
 
     @property
@@ -44,7 +50,7 @@ class StatusChanged(object):
         """
             Return the sender's email
         """
-        return self.request.user.email
+        return self.format_mail(self.request.user.email)
 
     @property
     def subject(self):
@@ -124,7 +130,7 @@ def send_mail(event):
                       sender=event.sendermail,
                       recipients=recipients,
                       body=event.body)
-                mailer.send(message)
+                mailer.send_immediately(message)
             except:
                 log.exception(" - An error has occured while sending the \
 email(s)")

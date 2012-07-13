@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 06-02-2012
-# * Last Modified : jeu. 28 juin 2012 18:03:32 CEST
+# * Last Modified : ven. 13 juil. 2012 13:19:34 CEST
 #
 # * Project : coopagestv2
 #
@@ -84,8 +84,4 @@ def fetch_resource(uri, rel):
         if mainuri == staticpath['introspectable']['name']:
             basepath = staticpath['introspectable']['spec']
             resource = os.path.join(basepath, relative_filepath).encode('utf-8')
-            if ':' in resource:
-                package, filename = resource.split(':')
-                resource = pkg_resources.resource_filename(package, filename)
-            break
     return resource

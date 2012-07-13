@@ -96,7 +96,7 @@ function getTvaPart(total, tva){
   /*
    * returns the value of the tva
    */
-  return total * (tva / 10000);
+  return total * tva / 10000;
 }
 function getExpenses(){
   /*
@@ -109,7 +109,7 @@ function formatPrice(price) {
    * Return a formatted price for display
    * @price : compute-formatted price
    */
-  price = Math.round(price*100) / 100;
+  price = Math.floor(price*100) / 100;
   price = String(price);
   var splitted = price.split('.');
   if (splitted[1] != undefined){

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 12 juil. 2012 14:36:23 CEST
+# * Last Modified : lun. 16 juil. 2012 22:57:47 CEST
 #
 # * Project : autonomie
 #
@@ -201,6 +201,8 @@ class User(DBBASE):
 
     @staticmethod
     def _encode_pass(password):
+        if type(password) == unicode:
+            password = password.encode('utf-8')
         return md5(password).hexdigest()
 
     def set_password(self, password):

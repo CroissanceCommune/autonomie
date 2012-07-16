@@ -89,6 +89,7 @@ chown -R www-data:www-data *
 chmod -R o-rwx *
 echo " - > Done\n"
 
+a2ensite autonomie
 echo "Installation is done"
 service apache2 restart
 exit 0

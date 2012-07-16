@@ -202,8 +202,9 @@ class FUser(colander.MappingSchema):
     """
     user = FAccount(title=u"Utilisateur")
     companies = CompanySchema(title=u"Entreprise(s)",
-                widget=widget.SequenceWidget(min_len=1,
-                add_subitem_text_template=u"Ajouter une entreprise"))
+                widget=widget.SequenceWidget(
+                add_subitem_text_template=u"Ajouter une entreprise"),
+                )
     password = Password(title=u"Mot de passe")
 
 #FPassword(validator=auth,

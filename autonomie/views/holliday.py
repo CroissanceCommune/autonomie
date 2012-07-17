@@ -119,7 +119,7 @@ class HollidayView(BaseView):
                     hollidays = hollidays.filter(Holliday.user_id==user_id)
                 hollidays=hollidays.all()
                 html_form = form.render(appstruct)
-                log.debug("Rendering with appstruct : %s" % appstruct)
+                log.debug(u"Rendering with appstruct : %s" % appstruct)
         else:
             html_form = form.render()
         return dict(

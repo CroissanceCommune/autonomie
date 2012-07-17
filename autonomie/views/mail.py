@@ -120,7 +120,7 @@ def send_mail(event):
     if event.is_key_event():
         recipients = event.recipients
         if recipients:
-            log.debug(" + It's a key event, we send an email to {0}".format(
+            log.debug(u" + It's a key event, we send an email to {0}".format(
                                                             recipients))
             log.debug(event.subject)
             log.debug(event.body)

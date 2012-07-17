@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : ven. 08 juin 2012 17:49:50 CEST
+# * Last Modified : mar. 17 juil. 2012 21:35:51 CEST
 #
 # * Project :
 #
@@ -78,8 +78,8 @@ def login_view(request):
                     }
         else:
             login = datas['login']
-            log.info("User '{0}' has been authenticated".format(login))
-            log.debug("  + Redirecting to {0}".format(nextpage))
+            log.info(u"User '{0}' has been authenticated".format(login))
+            log.debug(u"  + Redirecting to {0}".format(nextpage))
             # Storing the datas in the request object
             remember(request, login)
             return HTTPFound(location=nextpage)

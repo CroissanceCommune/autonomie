@@ -64,7 +64,7 @@ class FileTempStore(dict):
             Returns the url for the preview
         """
         log.debug("Asking for a preview URl")
-        log.debug(" + uid : %s" % uid)
+        log.debug(u" + uid : %s" % uid)
         filepath = None
         if self.default_filename:
             filename = self.default_filename
@@ -72,11 +72,11 @@ class FileTempStore(dict):
             filename = self.get(uid, {}).get('filename')
 
         if filename:
-            log.debug(" + filename : %s" % filename)
+            log.debug(u" + filename : %s" % filename)
             filepath = os.path.join(self.store_url, filename)
         else:
             filepath = None
-        log.debug(" -> The filepath where to find our file is : %s" % filepath)
+        log.debug(u" -> The filepath where to find our file is : %s" % filepath)
         return filepath
 
     def get(self, uid, default=None):
@@ -94,14 +94,14 @@ class FileTempStore(dict):
             Retrieves the file contents of a given file
         """
         log.debug("In __getitem__")
-        log.debug(" + uid %s" % uid)
+        log.debug(u" + uid %s" % uid)
 
         # We erase elements in the for loop
         items = self.session[self.session_key].items()
         # Check old items
         for key, value in items:
             if value['time'] + timedelta(minutes=15) < datetime.now():
-                log.debug("  + Expiring %s" % key)
+                log.debug(u"  + Expiring %s" % key)
                 del self.session[self.session_key][key]
 
         if not uid in self.session[self.session_key]:
@@ -112,7 +112,7 @@ class FileTempStore(dict):
         self.session.persist()
 
         value = self.session[self.session_key][uid]['value']
-        log.debug(" + Value : %s" % value)
+        log.debug(u" + Value : %s" % value)
         value['uid'] = uid
         return value
 
@@ -121,14 +121,14 @@ class FileTempStore(dict):
             Saves the file contents to a file
         """
         log.debug("In __setitem__")
-        log.debug(" + uid : %s" % uid)
-        log.debug(" + value : %s" % value)
+        log.debug(u" + uid : %s" % uid)
+        log.debug(u" + value : %s" % value)
         filedata = value.get('fp')
         filename = self.default_filename or value['filename']
         filename = pop_absolute_urls(filename)
         if filedata:
             filepath = os.path.join(self.store_directory, filename)
-            log.debug("Writing file datas to : %s" % filepath)
+            log.debug(u"Writing file datas to : %s" % filepath)
             with file(filepath, 'w') as fbuf:
                 if isinstance(filedata, file):
                     fbuf.write(filedata.read())
@@ -136,7 +136,7 @@ class FileTempStore(dict):
                     fbuf.write(filedata)
             del value['fp']
         else:
-            log.debug("No file data where transmitted")
+            log.debug(u"No file data where transmitted")
         if filename:
             value['preview_url'] = self.preview_url(uid, filename)
 

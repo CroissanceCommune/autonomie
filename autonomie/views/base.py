@@ -410,7 +410,7 @@ class TaskView(BaseView):
         if not self._can_change_status(status):
             raise Forbidden(u"Vous n'êtes pas autorisé à \
 effectuer à attribuer ce statut à ce document.")
-        log.debug(" + The status is set to {0}".format(status))
+        log.debug(u" + The status is set to {0}".format(status))
         if hasattr(self, "_post_status_process"):
             getattr(self, "_post_status_process")(status)
         self.task.statusPerson = self.user.id

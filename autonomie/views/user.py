@@ -56,7 +56,7 @@ def account(request):
         except ValidationFailure, e:
             html_form = e.render()
         else:
-            log.debug("# User {0} has changed his password #".format(
+            log.debug(u"# User {0} has changed his password #".format(
                                                     request.user.login))
             dbsession = request.dbsession()
             new_pass = datas['pwd']
@@ -151,8 +151,8 @@ class UserView(ListView):
         """
             Add / Edit a user
         """
-        log.debug("# In UserView.user #")
-        log.debug(" + request's context {0}".format(self.request.context))
+        log.debug(u"# In UserView.user #")
+        log.debug(u" + request's context {0}".format(self.request.context))
         if self.request.context.__name__ == 'user':
             user = self.request.context
             edit = True
@@ -168,7 +168,7 @@ class UserView(ListView):
         form = self._get_user_form(edit=edit)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
-            log.debug(" + Submitted datas")
+            log.debug(u" + Submitted datas")
             log.debug(datas)
             try:
                 app_datas = form.validate(datas)
@@ -191,24 +191,23 @@ class UserView(ListView):
                         company = self.dbsession.query(Company).filter(
                                Company.name==company_name).first()
                         if not company:
-                            log.debug(" + Adding company : %s" % company_name)
+                            log.debug(u" + Adding company : %s" % company_name)
                             company = Company()
                             company.name = company_name
                             company.goal = u"Entreprise de {0}".format(
                                 user.firstname, user.lastname)
                             company = self.dbsession.merge(company)
-                            log.debug("Flushing")
+                            log.debug(u"Flushing")
                             self.dbsession.flush()
-                            log.debug("Adding company to the user")
+                            log.debug(u"Adding company to the user")
                         user.companies.append(company)
-                log.debug(" + Adding/Editing user : {0}" .format(user.login))
+                log.debug(u" + Adding/Editing user : {0}" .format(user.login))
                 user = self.dbsession.merge(user)
-                log.debug("Flushing")
+                log.debug(u"Flushing")
                 self.dbsession.flush()
                 self.request.session.flash(validate_msg, queue="main")
                 return HTTPFound(self.request.route_path("user", id=user.id))
         else:
-            log.debug(" + User's appstruct : ")
             html_form = form.render({'user':user.appstruct(),
                         'companies': [comp.name for comp in user.companies]})
         return dict(title=title,

@@ -556,7 +556,7 @@ class InvoiceView(TaskView):
         elif status == 'aboinv':
             log.debug(" + An invoice is aborted -> generating cancel")
             id_ = self._gen_cancel_invoice()
-            log.debug("   + The cancel id : {0}".format(id_))
+            log.debug(u"   + The cancel id : {0}".format(id_))
             self.request.session.flash(u"La facture a été annulée, \
 Un avoir a été généré, vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
     self.request.route_path("cancelinvoice", id=id_)), queue="main")

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 16 juil. 2012 22:57:47 CEST
+# * Last Modified : mar. 17 juil. 2012 21:31:11 CEST
 #
 # * Project : autonomie
 #
@@ -442,9 +442,9 @@ class Task(DBBASE):
         """
         message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à ce \
 document."
-        log.debug("# CAEStatus change #")
+        log.debug(u"# CAEStatus change #")
         actual_status = self.CAEStatus
-        log.debug(" + was {0}, becomes {1}".format(actual_status, status))
+        log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
         message = message.format(status)
         if status in ('draft', 'wait',):
             if not actual_status in (None, 'draft', 'invalid'):

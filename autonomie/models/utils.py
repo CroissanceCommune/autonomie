@@ -48,7 +48,7 @@ def format_from_taskdate(value):
             year = 2000
         try:
             month = int(value[4:6])
-            assert month in range(1,12)
+            assert month in range(1,13)
         except:
             month = 1
         try:

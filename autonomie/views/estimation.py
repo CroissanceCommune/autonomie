@@ -375,12 +375,17 @@ class EstimationView(TaskView):
         log.debug(" + Generating the last invoice")
         paymentline = self.payment_lines[-1]
         invoice_args = invoice_args_common.copy()
+        seq_number = len(self.project.invoices) + count
+        if len(self.payment_lines) > 1:
+            name = u"Facture de solde"
+        else:
+            name = u"Facture {0}".format(seq_number)
         invoice_args.update(
-            dict(sequenceNumber=len(self.project.invoices) + count,
-                name=u"Facture de solde",
+            dict(sequenceNumber=seq_number,
+                name=name,
                 number=self.get_tasknumber(taskDate,
                                            tmpl=u"{0}_{1}_F{2}_{3:%m%y}",
-                                           seq_number=count),
+                                           seq_number=seq_number),
                 displayedUnits=0))
         invoice = Invoice(**invoice_args)
         line = InvoiceLine(rowIndex=1,

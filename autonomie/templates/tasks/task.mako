@@ -57,7 +57,7 @@ Base template for task rendering
                         %if task.model.displayedUnits == 1:
                             <td class="quantity">${format_amount(line.cost)}&nbsp;€&nbsp;x&nbsp;${format_quantity(line.quantity)} ${line.get_unity_label(pretty=True)}</td>
                         % endif
-                        <td class="price">${format_amount(task.compute_line_total(line))}&nbsp;€</td>
+                        <td class="price">${format_amount(task.compute_line_total(line), trim=False)}&nbsp;€</td>
                     </tr>
                 % endfor
                 <tr>
@@ -65,7 +65,7 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                        ${format_amount(task.compute_lines_total())}&nbsp;€
+                        ${format_amount(task.compute_lines_total(), trim=False)}&nbsp;€
                      </td>
                  </tr>
                  %if hasattr(task.model, "discountHT") and task.model.discountHT:

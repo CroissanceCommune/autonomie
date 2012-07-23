@@ -42,8 +42,11 @@ class StatusChanged(object):
         """
             return the recipients' emails
         """
-        email = self.format_mail(self.document.owner.email)
-        return [email]
+        if self.document.owner.email:
+            email = [self.format_mail(self.document.owner.email)]
+        else:
+            email = []
+        return email
 
     @property
     def sendermail(self):

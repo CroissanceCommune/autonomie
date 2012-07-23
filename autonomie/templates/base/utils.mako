@@ -68,10 +68,14 @@ path = request.current_route_path(_query=get_args)
         Le ${datetime.datetime.fromtimestamp(float(timestamp)).strftime("%e %B %Y").decode('utf-8').capitalize()}
     %endif
 </%def>
-<%def name="format_amount(data)" filter="trim">
+<%def name="format_amount(data, trim=True)" filter="trim">
     <%doc>Format an amount for display</%doc>
     %if data is not UNDEFINED and data is not None:
-        <% data = "%.2f"% (int(data)/100.0,) %>
+        % if trim:
+            <% data = "%.2f"% (int(data)/100.0,) %>
+        % else:
+            <% data = "%s" % (data/100.0,) %>
+        % endif
         ${data.replace('.', ',')}
     %endif
 </%def>

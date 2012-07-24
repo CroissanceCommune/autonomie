@@ -13,9 +13,6 @@
     %elif _type == 'company':
         <address>
             <b>${datas.name}</b><br />
-            Port Parallèle<br />
-            70, rue Amelot<br />
-            75011 Paris
         </address>
     %endif
 </%def>

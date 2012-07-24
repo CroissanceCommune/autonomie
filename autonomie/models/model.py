@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 17 juil. 2012 21:31:11 CEST
+# * Last Modified : mar. 24 juil. 2012 18:59:00 CEST
 #
 # * Project : autonomie
 #
@@ -196,7 +196,7 @@ class User(DBBASE):
     companies = relationship("Company",
                              secondary=company_employee,
                              backref="employees")
-    code_compta = Column("code_compta", Integer,
+    code_compta = Column("code_compta", String,
                          default=0)
 
     @staticmethod
@@ -257,13 +257,6 @@ class User(DBBASE):
                     which are not used inside egw's coopagest plugin
         """
         return dbsession.query(User).join(User.companies)
-
-    @classmethod
-    def get_code_compta(cls, dbsession):
-        """
-            Query the last available compta code
-        """
-        return dbsession.query(func.max(User.code_compta)).first()[0]
 
 class Employee(DBBASE):
     """

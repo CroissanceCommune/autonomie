@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 24 juil. 2012 18:59:00 CEST
+# * Last Modified : mer. 25 juil. 2012 15:06:08 CEST
 #
 # * Project : autonomie
 #
@@ -192,6 +192,7 @@ class User(DBBASE):
     lastname = Column("account_lastname", String(50))
     primary_group = Column("account_primary_group",
                             Integer)
+    status = Column("account_status", String(1), default='A')
     email = Column("account_email", String(100))
     companies = relationship("Company",
                              secondary=company_employee,
@@ -253,10 +254,9 @@ class User(DBBASE):
     def query(cls, dbsession):
         """
             Query users
-            Note : join on companies allows us to avoid egw accounts
-                    which are not used inside egw's coopagest plugin
+            Joining companies and not showing archived users
         """
-        return dbsession.query(User).join(User.companies)
+        return dbsession.query(User).filter(User.status=='A')
 
 class Employee(DBBASE):
     """

@@ -125,7 +125,7 @@ class UserView(ListView):
         """
             return the user query
         """
-        return self.dbsession.query(User).join(User.companies)
+        return User.query(self.dbsession).outerjoin(User.companies)
 
     def _filter_search(self, query, search):
         """

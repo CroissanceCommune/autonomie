@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 29 juin 2012 17:19:12 CEST
+# * Last Modified : mer. 25 juil. 2012 16:02:14 CEST
 #
 # * Project : autonomie
 #
@@ -24,9 +24,28 @@ from sqlalchemy.orm import scoped_session
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
-DBBASE = declarative.declarative_base()
 DBSESSION = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DBMETADATA = MetaData()
+
+class ORMClass(object):
+    """
+        Base class for our models providing usefull query and get methods
+    """
+    @classmethod
+    def query(cls):
+        """
+            return a query
+        """
+        return DBSESSION.query(cls)
+
+    @classmethod
+    def get(cls, id_):
+        """
+            Return a query
+        """
+        return DBSESSION.query(cls).get(id_)
+
+DBBASE = declarative.declarative_base(cls=ORMClass)
 
 def record_to_appstruct(self):
     """

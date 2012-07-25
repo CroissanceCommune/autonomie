@@ -41,7 +41,7 @@ def get_user_choices(dbsession):
     choices = [(0, u'Tous les entrepreneurs')]
     choices.extend([(unicode(user.id),
                      u"{0} {1}".format(user.lastname, user.firstname),)
-                        for user in User.query(dbsession).all()])
+                        for user in User.query().all()])
     return choices
 
 class HollidayView(BaseView):

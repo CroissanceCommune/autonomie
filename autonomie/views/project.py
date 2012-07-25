@@ -113,6 +113,18 @@ class ProjectView(ListView):
             self.actionmenu.add(StaticWidget(show_archive, "view"))
             self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
 
+    def redirect_to_clients(self, company):
+        """
+            Force project page to be redirected to client page
+        """
+        self.request.session.flash(u"Vous avez été redirigé vers la liste \
+des clients", queue="main")
+        self.request.session.flash(u"Vous devez créer des clients afin \
+de créer de nouveaux projets", queue="main")
+        raise HTTPFound(self.request.route_path("company_clients",
+                                                id=company.id))
+
+
     @view_config(route_name='company_projects',
                  renderer='company_projects.mako',\
                  request_method='GET',
@@ -122,12 +134,15 @@ class ProjectView(ListView):
             Return the list of projects
         """
         log.debug("Getting projects")
+        company = self.request.context
+        # If not client have been added, redirecting to clients page
+        if not company.clients:
+            self.redirect_to_clients(company)
         search, sort, direction, current_page, items_per_page = \
                                                 self._get_pagination_args()
 
         archived = self.request.params.get('archived', '0')
 
-        company = self.request.context
 
         query = self._get_projects()
         if company:
@@ -205,6 +220,8 @@ class ProjectView(ListView):
             default_client = project.client
             title = u"Édition du projet : {0}".format(project.name)
         self._set_actionmenu(company, project, edit)
+        if not company.clients:
+            self.redirect_to_clients(company)
 
         clients = company.clients
         form = get_project_form(clients,

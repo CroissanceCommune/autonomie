@@ -95,9 +95,9 @@ def initialize_test_database(settings, prefix, here):
     create_sql_user(options)
     create_test_db(options)
     grant_user(options)
-#    dump_sample(options)
-#    for fname in sorted(os.listdir(options['updatedir'])):
-#        update_database(options, os.path.join(options['updatedir'], fname))
+    dump_sample(options)
+    for fname in sorted(os.listdir(options['updatedir'])):
+        update_database(options, os.path.join(options['updatedir'], fname))
 
 def pytest_sessionstart():
     """

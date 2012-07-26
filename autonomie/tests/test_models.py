@@ -101,20 +101,73 @@ class TestTaskModels(BaseTestCase):
         self.assertTrue(verifyObject(IPaidTask, Invoice()))
         self.assertTrue(verifyObject(IPaidTask, CancelInvoice()))
 
-    def _get_task(self):
-        from autonomie.models.task import Task
+    def _get_task(self, obj):
         from autonomie.models.user import User
         user = User(**TEST1)
-        task = Task(**TEST_TASK)
+        task = obj(**TEST_TASK)
         task.statusPersonAccount = user
         task.owner = user
         return task
 
-    def test_task(self):
-        task = self._get_task()
+    def test_task_status(self):
+        from autonomie.models.task import Task
+        from autonomie.models.task import Estimation
+        from autonomie.models.task import Invoice
+        from autonomie.models.task import CancelInvoice
+        task = self._get_task(obj=Task)
         self.assertEqual(task.get_status_suffix(),
                 u" par user1_firstname user1_lastname le {:%d/%m/%Y}".format(
                                                         datetime.date.today()))
-
-
-
+        #Estimations
+        task = self._get_task(obj=Estimation)
+        self.assertTrue(task.is_draft())
+        self.assertTrue(task.is_editable())
+        self.assertFalse(task.is_valid())
+        self.assertFalse(task.has_been_validated())
+        self.assertFalse(task.is_waiting())
+        self.assertFalse(task.is_sent())
+        task.CAEStatus = "wait"
+        self.assertTrue(task.is_waiting())
+        self.assertFalse(task.is_valid())
+        self.assertFalse(task.is_editable())
+        self.assertTrue(task.is_editable(manage=True))
+        for i in ("valid", "sent", "geninv"):
+            task.CAEStatus = i
+            self.assertTrue(task.has_been_validated())
+            self.assertFalse(task.is_editable())
+        # Invoices
+        task = self._get_task(obj=Invoice)
+        self.assertTrue(task.is_draft())
+        self.assertTrue(task.is_editable())
+        self.assertFalse(task.is_valid())
+        self.assertFalse(task.has_been_validated())
+        self.assertFalse(task.is_waiting())
+        self.assertFalse(task.is_sent())
+        task.CAEStatus = "wait"
+        self.assertTrue(task.is_waiting())
+        self.assertFalse(task.is_valid())
+        self.assertFalse(task.is_editable())
+        self.assertTrue(task.is_editable(manage=True))
+        for i in ("valid", "sent", "recinv"):
+            task.CAEStatus = i
+            self.assertTrue(task.has_been_validated())
+            self.assertFalse(task.is_editable())
+        task.CAEStatus = "paid"
+        self.assertTrue(task.is_paid())
+        # CancelInvoice
+        task = self._get_task(obj=CancelInvoice)
+        self.assertTrue(task.is_draft())
+        self.assertTrue(task.is_editable())
+        self.assertFalse(task.is_valid())
+        self.assertFalse(task.has_been_validated())
+        self.assertFalse(task.is_waiting())
+        self.assertFalse(task.is_sent())
+        task.CAEStatus = "valid"
+        self.assertTrue(task.is_valid())
+        self.assertFalse(task.is_editable())
+        for i in ("sent", "recinv"):
+            task.CAEStatus = i
+            self.assertTrue(task.has_been_validated())
+            self.assertFalse(task.is_editable())
+        task.CAEStatus = "paid"
+        self.assertTrue(task.is_paid())

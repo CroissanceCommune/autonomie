@@ -152,10 +152,10 @@
             % for invoice in invoices:
                 % if invoice.model.is_invoice():
                     <% route_name="invoice" %>
-                % else:
+                % elif invoice.model.is_cancelinvoice():
                     <% route_name="cancelinvoice" %>
                 %endif
-                    %if invoice.model.is_invoice() and invoice.model.is_cancelled():
+                %if invoice.model.is_cancelled():
                         <tr class='invoice_cancelled_tr'>
                             <td class='invoice_cancelled'>
                                 <span class="label label-important">
@@ -173,7 +173,7 @@
                             <td class='invoice_notpaid'>
                                 <br />
                     % endif
-                    %if hasattr(invoice.model, "statusComment") and invoice.model.statusComment:
+                    %if invoice.model.statusComment:
                         <span class="ui-icon ui-icon-comment" title="${invoice.model.statusComment}"></span>
                     %endif
                 </td>
@@ -192,8 +192,8 @@
                     </td>
                     <td>
                         <blockquote>
-                            %if invoice.model.IDTask:
-                                <a href="${request.route_path(route_name, id=invoice.model.IDTask)}"
+                            %if invoice.model.id:
+                                <a href="${request.route_path(route_name, id=invoice.model.id)}"
                                 title='Voir le document'>${invoice.model.number}</a>
                             %else:
                                 ${invoice.model.number}
@@ -202,7 +202,7 @@
                         </blockquote>
                     </td>
                     <td class='invoice_company_name'>
-                        ${format_client(invoice.get_client())}
+                        ${format_client(invoice.model.get_client())}
                     </td>
                     <td>
                         <strong>${format_amount(invoice.compute_totalht())}&nbsp;€</strong>
@@ -211,14 +211,14 @@
                         ${format_amount(invoice.compute_tva())}&nbsp;€
                     </td>
                     <td>
-                        %if invoice.model.is_paid():
+                        %if invoice.model.is_paid() and invoice.model.get_paymentmode_str():
                             ${invoice.model.get_paymentmode_str()} le ${print_date(invoice.model.statusDate)}
                         %endif
                     </td>
                     <td>
-                        %if invoice.model.IDTask:
+                        %if invoice.model.id:
                             <a class='btn'
-                                href='${request.route_path(route_name, id=invoice.model.IDTask, _query=dict(view="pdf"))}'
+                                href='${request.route_path(route_name, id=invoice.model.id, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
                                 <i class='icon icon-file'></i>
                            </a>
@@ -255,4 +255,3 @@ $('#year-select').change(function(){$(this).closest('form').submit()});
 $('#paid-select').chosen({allow_single_deselect: true});
 $('#paid-select').change(function(){$(this).closest('form').submit()});
 </%block>
-

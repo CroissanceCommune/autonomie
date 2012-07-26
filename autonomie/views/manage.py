@@ -30,13 +30,12 @@ def manage(request):
     """
         The manage view
     """
-    dbsession = request.dbsession()
-    invoices = Invoice.query(dbsession).join(Invoice.phase).filter(
+    invoices = Invoice.query().join(Invoice.phase).filter(
             and_(Invoice.CAEStatus=='wait', Phase.name!=None)).all()
     for i in invoices:
         i.url = request.route_path("invoice", id=i.id)
 
-    estimations = Estimation.query(dbsession).join(Estimation.phase).filter(
+    estimations = Estimation.query().join(Estimation.phase).filter(
                     and_(Estimation.CAEStatus=='wait',
                             Phase.name!=None)).all()
     for i in estimations:

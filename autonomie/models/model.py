@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 25 juil. 2012 19:56:13 CEST
+# * Last Modified : jeu. 26 juil. 2012 13:24:54 CEST
 #
 # * Project : autonomie
 #
@@ -42,6 +42,7 @@ from autonomie.models.task import Task
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
 from autonomie.models.task import CancelInvoice
+from autonomie.models.task import ManualInvoice
 
 
 from autonomie.models import DBBASE
@@ -434,135 +435,6 @@ class Config(DBBASE):
     app = Column("config_app", String(50), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
-
-class ManualInvoice(DBBASE):
-    """
-        symf_facture_manuelle
-        `id` bigint(20) NOT NULL auto_increment,
-        `sequence_id` bigint(20) NOT NULL,
-        `libelle` varchar(255) character set utf8 default NULL,
-        `montant_ht` decimal(18,2) default NULL,
-        `tva` decimal(18,2) default NULL,
-        `paiement_ok` tinyint(1) default NULL,
-        `paiement_date` date default NULL,
-        `paiement_comment` varchar(255) character set utf8 default NULL,
-        `client_id` varchar(5) character set utf8 NOT NULL,
-        `date_emission` date default NULL,
-        `compagnie_id` bigint(20) NOT NULL,
-        `created_at` datetime NOT NULL,
-        `updated_at` datetime NOT NULL,
-        PRIMARY KEY  (`id`),
-        UNIQUE KEY `id` (`id`)
-    """
-    __tablename__ = 'symf_facture_manuelle'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column('id', BigInteger, primary_key=True)
-    officialNumber = Column('sequence_id', BigInteger)
-    description = Column('libelle', String(255))
-    montant_ht = Column("montant_ht", Integer)
-    tva = Column("tva", Integer)
-    payment_ok = Column("paiement_ok", Integer)
-    statusDate = Column("paiement_date", Date())
-    paymentMode = Column("paiement_comment", String(255))
-    client_id = Column('client_id', String(5),
-                            ForeignKey('coop_customer.code'))
-    taskDate = Column("date_emission", Date(),
-                                default=datetime.datetime.now)
-    company_id = Column('compagnie_id', BigInteger,
-                            ForeignKey('coop_company.IDCompany'))
-    created_at = deferred(Column("created_at", DateTime,
-                                      default=datetime.datetime.now))
-    updated_at = deferred(Column("updated_at", DateTime,
-                                      default=datetime.datetime.now,
-                                      onupdate=datetime.datetime.now))
-    client = relationship("Client",
-                primaryjoin="Client.id==ManualInvoice.client_id",
-                  backref='manual_invoices')
-    company = relationship("Company",
-                primaryjoin="Company.id==ManualInvoice.company_id",
-                  backref='manual_invoices')
-
-    def is_paid(self):
-        """
-            return True if it's paid
-        """
-        return self.payment_ok == 1
-
-    def get_paymentmode_str(self):
-        """
-            Return the payment mode string
-        """
-        if self.paymentMode == u'chèque':
-            return u"par chèque"
-        elif self.paymentMode == u'virement':
-            return u"par virement"
-        else:
-            return u""
-
-    @validates("paymentMode")
-    def validate_paymentMode(self, key, paymentMode):
-        """
-            Validate the paymentMode
-        """
-        if not paymentMode in (u'chèque', u'virement'):
-            raise Forbidden(u'Mode de paiement inconnu')
-        return paymentMode
-
-    def is_tolate(self):
-        today = datetime.date.today()
-        elapsed = today - self.taskDate
-        return not self.is_paid() and elapsed > datetime.timedelta(days=45)
-
-    @property
-    def number(self):
-        """
-            return the invoice number
-        """
-        return u"FACT_MAN_{0}".format(self.officialNumber)
-
-    @property
-    def IDTask(self):
-        return None
-
-    @property
-    def project(self):
-        """
-            return None
-        """
-        class Void:
-            pass
-        p = Void()
-        p.client = self.client
-        p.company = self.company
-        return p
-
-    def get_company(self):
-        """
-            return the company
-        """
-        return self.company
-
-    def is_cancelinvoice(self):
-        """
-            return false
-        """
-        return False
-
-    def is_invoice(self):
-        """
-            return false
-        """
-        return False
-
-    @classmethod
-    def get_officialNumber(cls, dbsession):
-        """
-            Return the greatest officialNumber actually used in the
-            ManualInvoice table
-        """
-        current_year = datetime.date.today().year
-        return dbsession.query(func.max(ManualInvoice.officialNumber)).filter(
-                    func.year(ManualInvoice.taskDate) == current_year)
 
 class OperationComptable(DBBASE):
     """

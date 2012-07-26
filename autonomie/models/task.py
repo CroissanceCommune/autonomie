@@ -21,7 +21,7 @@
       `name` varchar(150) NOT NULL,         # Nom de la tâche
 
       `CAEStatus` varchar(10) default NULL, # Statut de la tâche
-             valid/abort/paid/draft/geninv/aboinv/aboest/sent/wait/none
+             valid/abort/paid/draft/geninv/aboinv/aboest/sent/wait/none/recinv
       `statusComment` text,                 # Commentaire sur le statut
                                  communication entrepr/CAE
                                  information de paiement ([par chèque ...])
@@ -56,6 +56,9 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import ForeignKey
+from sqlalchemy import Date
+from sqlalchemy import BigInteger
+from sqlalchemy import DateTime
 from sqlalchemy import Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
@@ -129,6 +132,10 @@ class IValidatedTask(ITask):
             Has the current document been sent to a client
         """
 
+    def is_cancelled():
+        """
+            Has the current document been cancelled
+        """
 
 class IPaidTask(IValidatedTask):
     """
@@ -142,6 +149,62 @@ class IPaidTask(IValidatedTask):
     def is_paid():
         """
             Has the current task been paid
+        """
+
+
+class IInvoice(Interface):
+    """
+        Invoice interface (used to get an uniform invoice list display
+        See templates/invoices.mako (under invoice.model) to see the expected
+        common informations
+    """
+    statusComment = Attribute("""statusComment to allow discussion""")
+    statusDate = Attribute("""The date the status has last been changed""")
+    officialNumber = Attribute("""official number used in sage""")
+    taskDate = Attribute("""Date of the task""")
+    id = Attribute("""the document sql id""")
+    IDTask = Attribute("""Another name for the id""")
+    number = Attribute("""the document's non official number""")
+    description = Attribute("""the document description string""")
+
+    def get_company():
+        """
+            Return the company this task is related to
+        """
+
+    def get_client():
+        """
+            Return the client this document is related to
+        """
+
+    def is_paid():
+        """
+            Has the current task been paid
+        """
+
+    def is_cancelled():
+        """
+            Has the current document been cancelled
+        """
+
+    def is_tolate():
+        """
+            Is it too late
+        """
+
+    def is_invoice():
+        """
+            is the current task an invoice ?
+        """
+
+    def is_cancelinvoice():
+        """
+            Is the current task a cancelled invoice ?
+        """
+
+    def get_paymentmode_str():
+        """
+            Return the string for the payment mode display
         """
 
 DEF_STATUS = u"Statut inconnu"
@@ -248,7 +311,6 @@ document."
             if not actual_status in (None, 'draft', 'invalid'):
                 raise Forbidden(message)
         elif status in ('valid',):
-            log.debug(self.is_cancelinvoice())
             if self.is_cancelinvoice():
                 if not actual_status in ('draft',):
                     raise Forbidden(message)
@@ -286,6 +348,15 @@ document."
         """
         if self.project:
             return self.project.company
+        else:
+            return None
+
+    def get_client(self):
+        """
+            Return the client of the current task
+        """
+        if self.project:
+            return self.project.client
         else:
             return None
 
@@ -361,7 +432,7 @@ class Estimation(Task):
         return self.CAEStatus == 'valid'
 
     def has_been_validated(self):
-        return self.CAEStatus in ('valid', 'geninv', 'sent', "recinv",)
+        return self.CAEStatus in ('valid', 'geninv', 'sent',)
 
     def is_waiting(self):
         return self.CAEStatus == 'wait'
@@ -372,6 +443,19 @@ class Estimation(Task):
 
     def is_estimation(self):
         return True
+
+    def get_next_actions(self):
+        """
+            Return the next available actions regarding the current status
+        """
+        matchdict = dict(draft=['wait', 'duplicate'],
+                         wait=['valid', 'invalid', 'duplicate'],
+                         invalid=['wait', 'duplicate'],
+                         valid=['sent', 'aboest', 'geninv', 'duplicate'],
+                         sent=['aboest', 'geninv', 'duplicate', ],
+                         aboest=['delete'],
+                         geninv=['duplicate'])
+        return matchdict[self.CAEStatus]
 
     def duplicate(self):
         """
@@ -408,14 +492,7 @@ class Estimation(Task):
         """
         return self.CAEStatus == 'aboest'
 
-    @classmethod
-    def query(cls, dbsession):
-        """
-            Return a db query for Estimation
-        """
-        return dbsession.query(Estimation)
-
-@implementer(IPaidTask)
+@implementer(IPaidTask, IInvoice)
 class Invoice(Task):
     """
         Invoice Model
@@ -503,6 +580,19 @@ class Invoice(Task):
             tolate = False
         return self.CAEStatus in ('valid', 'sent','recinv') and tolate
 
+    def get_next_actions(self):
+        """
+            Return the next available actions regarding the current status
+        """
+        matchdict = dict(draft=['wait', 'duplicate'],
+                       wait=['valid', 'invalid', 'duplicate'],
+                       invalid=['wait', 'duplicate'],
+                       valid=['sent', 'aboinv', 'paid', 'duplicate', 'recinv'],
+                       sent=['aboinv', 'paid', 'duplicate', 'recinv' ],
+                       aboinv=['delete'],
+                       paid=['duplicate'])
+        return matchdict[self.CAEStatus]
+
     def get_paymentmode_str(self):
         """
             Return a user-friendly string describing the payment Mode
@@ -522,13 +612,6 @@ class Invoice(Task):
         if not paymentMode in ('CHEQUE', 'VIREMENT'):
             raise Forbidden(u'Mode de paiement inconnu')
         return paymentMode
-
-    @classmethod
-    def query(cls, dbsession):
-        """
-            Return a database query for invoices
-        """
-        return dbsession.query(Invoice)
 
     @classmethod
     def get_officialNumber(cls, dbsession):
@@ -563,7 +646,7 @@ class Invoice(Task):
         cancelinvoice.tva = self.tva
         return cancelinvoice
 
-@implementer(IPaidTask)
+@implementer(IPaidTask, IInvoice)
 class CancelInvoice(Task):
     """
         CancelInvoice model
@@ -629,6 +712,9 @@ class CancelInvoice(Task):
     def is_paid(self):
         return self.CAEStatus == 'paid'
 
+    def is_cancelled(self):
+        return False
+
     def get_paymentmode_str(self):
         """
             Return a user-friendly string describing the payment Mode
@@ -655,3 +741,118 @@ class CancelInvoice(Task):
             Return False
         """
         return False
+
+@implementer(IInvoice)
+class ManualInvoice(DBBASE):
+    """
+        Modèle pour les factures manuelles (ancienne version)
+    """
+    __tablename__ = 'symf_facture_manuelle'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    id_ = Column('id', BigInteger, primary_key=True)
+    officialNumber = Column('sequence_id', BigInteger)
+    description = Column('libelle', String(255))
+    montant_ht = Column("montant_ht", Integer)
+    tva = Column("tva", Integer)
+    payment_ok = Column("paiement_ok", Integer)
+    statusDate = Column("paiement_date", Date())
+    paymentMode = Column("paiement_comment", String(255))
+    client_id = Column('client_id', String(5),
+                            ForeignKey('coop_customer.code'))
+    taskDate = Column("date_emission", Date(),
+                                default=datetime.datetime.now)
+    company_id = Column('compagnie_id', BigInteger,
+                            ForeignKey('coop_company.IDCompany'))
+    created_at = deferred(Column("created_at", DateTime,
+                                      default=datetime.datetime.now))
+    updated_at = deferred(Column("updated_at", DateTime,
+                                      default=datetime.datetime.now,
+                                      onupdate=datetime.datetime.now))
+    client = relationship("Client",
+                primaryjoin="Client.id==ManualInvoice.client_id",
+                  backref='manual_invoices')
+    company = relationship("Company",
+                primaryjoin="Company.id==ManualInvoice.company_id",
+                  backref='manual_invoices')
+    @property
+    def statusComment(self):
+        return None
+
+    @property
+    def statusDate(self):
+        return None
+
+    @property
+    def id(self):
+        return None
+
+    @property
+    def IDTask(self):
+        return None
+
+    @property
+    def number(self):
+        """
+            return the invoice number
+        """
+        return u"FACT_MAN_{0}".format(self.officialNumber)
+
+    def get_company(self):
+        return self.company
+
+    def get_client(self):
+        return self.client
+
+    def is_paid(self):
+        return self.payment_ok == 1
+
+    def is_cancelled(self):
+        return False
+
+    def is_tolate(self):
+        today = datetime.date.today()
+        elapsed = today - self.taskDate
+        return not self.is_paid() and elapsed > datetime.timedelta(days=45)
+
+    def get_paymentmode_str(self):
+        """
+            Return the payment mode string
+        """
+        if self.paymentMode == u'chèque':
+            return u"par chèque"
+        elif self.paymentMode == u'virement':
+            return u"par virement"
+        else:
+            return u""
+
+    @validates("paymentMode")
+    def validate_paymentMode(self, key, paymentMode):
+        """
+            Validate the paymentMode
+        """
+        if not paymentMode in (u'chèque', u'virement'):
+            raise Forbidden(u'Mode de paiement inconnu')
+        return paymentMode
+
+
+    def is_cancelinvoice(self):
+        """
+            return false
+        """
+        return False
+
+    def is_invoice(self):
+        """
+            return false
+        """
+        return False
+
+    @classmethod
+    def get_officialNumber(cls, dbsession):
+        """
+            Return the greatest officialNumber actually used in the
+            ManualInvoice table
+        """
+        current_year = datetime.date.today().year
+        return dbsession.query(func.max(ManualInvoice.officialNumber)).filter(
+                    func.year(ManualInvoice.taskDate) == current_year)

@@ -148,12 +148,6 @@ class TaskComputing:
                         for line in self.model.payment_lines[:-1])
         return result
 
-    def get_client(self):
-        """
-            Returns the client associated to the given task
-        """
-        return self.model.project.client
-
 class ManualInvoiceComputing:
     """
         wrap manual invoices to allow computing
@@ -180,10 +174,3 @@ class ManualInvoiceComputing:
                 return int(float(totalht) * (tva / 10000.0))
         else:
             return 0
-
-    def get_client(self):
-        """
-            returns the associated client
-        """
-        return self.model.client
-

@@ -240,22 +240,7 @@ class EstimationView(TaskView):
             Duplicates current estimation
         """
         log.debug("# Duplicate estimation #")
-        newone = self.task.duplicate()
-        newone.CAEStatus = "draft"
-        newone.statusPerson = self.user.id
-        newone.name = self.get_taskname()
-        newone.sequenceNumber = self.get_sequencenumber()
-        newone.number = self.get_tasknumber(newone.taskDate)
-
-        for line in self.task_lines:
-            newline = line.duplicate()
-            newone.lines.append(newline)
-
-        for line in self.task.payment_lines:
-            newline = line.duplicate()
-            newone.payment_lines.append(newline)
-
-        newone.project = self.project
+        newone = self.task.duplicate(self.user, self.project)
         newone = self.dbsession.merge(newone)
         self.dbsession.flush()
         taskid = newone.IDTask

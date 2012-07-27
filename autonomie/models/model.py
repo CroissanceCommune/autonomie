@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 26 juil. 2012 13:24:54 CEST
+# * Last Modified : ven. 27 juil. 2012 18:21:45 CEST
 #
 # * Project : autonomie
 #
@@ -43,6 +43,10 @@ from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
 from autonomie.models.task import CancelInvoice
 from autonomie.models.task import ManualInvoice
+from autonomie.models.task import CancelInvoiceLine
+from autonomie.models.task import EstimationLine
+from autonomie.models.task import InvoiceLine
+from autonomie.models.task import PaymentLine
 
 
 from autonomie.models import DBBASE
@@ -50,184 +54,6 @@ from autonomie.utils.exception import Forbidden
 
 log = logging.getLogger(__name__)
 
-
-class EstimationLine(DBBASE):
-    """
-      `IDWorkLine` int(11) NOT NULL auto_increment,
-      `IDTask` int(11) NOT NULL,
-      `rowIndex` int(11) NOT NULL,          # index de la ligne
-      `description` text,                   # "Prestation"
-      `cost` int(11) default NULL,          # montant
-      `quantity` double default NULL,       #quantité
-      `creationDate` int(11) default NULL,
-      `updateDate` int(11) default NULL,
-      `unity` varchar(10) default NULL,     # unité
-      PRIMARY KEY  (`IDWorkLine`),
-      KEY `coop_estimation_line_IDTask` (`IDTask`),
-      KEY `coop_estimation_line_rowIndex` (`rowIndex`),
-      KEY `IDTask` (`IDTask`)
-    """
-    __tablename__ = 'coop_estimation_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("IDWorkLine", Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
-    rowIndex = Column("rowIndex", Integer)
-    description = Column("description", Text)
-    cost = Column("cost", Integer)
-    quantity = Column("quantity", Integer)
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
-    unity = Column("unity", String(10))
-    task = relationship("Estimation", backref=backref("lines",
-                            order_by='EstimationLine.rowIndex'))
-
-    def get_unity_label(self, pretty=False):
-        """
-            return unitie's label
-        """
-        if pretty:
-            default = u""
-        else:
-            default = u"-"
-        labels = dict(
-                NONE=default,
-                HOUR=u"heure(s)",
-                DAY=u"jour(s)",
-                WEEK=u"semaine(s)",
-                MONTH=u"mois",
-                FEUIL=u"feuillet(s)",
-                PACK=u"forfait",
-                )
-        return labels.get(self.unity, default)
-
-    def duplicate(self):
-        """
-            duplicate a line
-        """
-        newone = EstimationLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = self.cost
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.unity = self.unity
-        return newone
-
-class InvoiceLine(DBBASE):
-    """
-        Invoice lines
-        `IDInvoiceLine` int(11) NOT NULL auto_increment,
-        `IDTask` int(11) NOT NULL,
-        `rowIndex` int(11) NOT NULL,
-        `description` text,
-        `cost` int(11) default '0',
-        `quantity` double default '1',
-        `creationDate` int(11) default '0',
-        `updateDate` int(11) default '0',
-        `unity` varchar(10) default NULL,
-        PRIMARY KEY  (`IDInvoiceLine`),
-    """
-    __tablename__ = 'coop_invoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("IDInvoiceLine", Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
-    rowIndex = Column("rowIndex", Integer)
-    description = Column("description", Text)
-    cost = Column("cost", Integer)
-    quantity = Column("quantity", Integer)
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
-    unity = Column("unity", String(10))
-    task = relationship("Invoice", backref=backref("lines",
-                            order_by='InvoiceLine.rowIndex'))
-
-    def get_unity_label(self, pretty=False):
-        """
-            return unitie's label
-        """
-        if pretty:
-            default = u""
-        else:
-            default = u"-"
-        labels = dict(
-                NONE=default,
-                HOUR=u"heure(s)",
-                DAY=u"jour(s)",
-                WEEK=u"semaine(s)",
-                MONTH=u"mois",
-                FEUIL=u"feuillet(s)",
-                PACK=u"forfait",
-                )
-        return labels.get(self.unity, default)
-
-    def duplicate(self):
-        """
-            duplicate a line
-        """
-        newone = InvoiceLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = self.cost
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.unity = self.unity
-        return newone
-
-    def gen_cancel_invoice_line(self):
-        """
-            Return a cancel invoice line duplicating this one
-        """
-        newone = CancelInvoiceLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = -1 * self.cost
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.unity = self.unity
-        return newone
-
-
-class PaymentLine(DBBASE):
-    """
-        coop_estimation_payment
-        `IDPaymentLine` int(11) NOT NULL auto_increment,
-        `IDTask` int(11) NOT NULL,
-        `rowIndex` int(11) NOT NULL,
-        `description` text,
-        `amount` int(11) default NULL,
-        `creationDate` int(11) default NULL,
-        `updateDate` int(11) default NULL,
-        `paymentDate` int(11) default NULL,
-    """
-    __tablename__ = 'coop_estimation_payment'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("IDPaymentLine", Integer, primary_key=True, nullable=False)
-    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
-    rowIndex = Column("rowIndex", Integer)
-    description = Column("description", Text)
-    amount = Column("amount", Integer)
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
-    paymentDate = Column("paymentDate", CustomDateType2(11))
-    estimation = relationship("Estimation", backref=backref('payment_lines',
-                    order_by='PaymentLine.rowIndex'))
-
-    def duplicate(self):
-        """
-            duplicate a paymentline
-        """
-        newone = PaymentLine()
-        newone.rowIndex = self.rowIndex
-        newone.amount = self.amount
-        newone.description = self.description
-        newone.paymentDate = datetime.date.today()
-        return newone
 
 class Client(DBBASE):
     """
@@ -354,6 +180,12 @@ class Project(DBBASE):
     def get_company_id(self):
         return self.company.id
 
+    def get_next_estimation_number(self):
+        return len(self.estimations) + 1
+
+    def get_next_invoice_number(self):
+        return len(self.invoices) + 1
+
 
 class Phase(DBBASE):
     """
@@ -472,67 +304,6 @@ class OperationComptable(DBBASE):
     year = Column("annee", BigInteger)
     type = Column("type", Text)
 
-
-class CancelInvoiceLine(DBBASE):
-    """
-        CancelInvoice lines
-        `id` int(11) NOT NULL auto_increment,
-        `IDTask` int(11) NOT NULL,
-        `rowIndex` int(11) NOT NULL,
-        `description` text,
-        `cost` int(11) default '0',
-        `quantity` double default '1',
-        `creationDate` int(11) default '0',
-        `updateDate` int(11) default '0',
-        `unity` varchar(10) default NULL,
-        PRIMARY KEY  (`IDCancelInvoiceLine`),
-    """
-    __tablename__ = 'coop_cancel_invoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column(Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_cancel_invoice.IDTask'))
-    created_at = Column(DateTime, default=datetime.datetime.now)
-    updated_at = Column(DateTime, default=datetime.datetime.now,
-                                  onupdate=datetime.datetime.now)
-    task = relationship("CancelInvoice", backref="lines",
-                            order_by='CancelInvoiceLine.rowIndex'
-                        )
-    rowIndex = Column(Integer)
-    description = Column(Text, default="")
-    cost = Column(Integer, default=0)
-    quantity = Column(Integer, default=1)
-    unity = Column(String(10), default=None)
-
-    def get_unity_label(self, pretty=False):
-        """
-            return unitie's label
-        """
-        if pretty:
-            default = u""
-        else:
-            default = u"-"
-        labels = dict(
-                NONE=default,
-                HOUR=u"heure(s)",
-                DAY=u"jour(s)",
-                WEEK=u"semaine(s)",
-                MONTH=u"mois",
-                FEUIL=u"feuillet(s)",
-                PACK=u"forfait",
-                )
-        return labels.get(self.unity, default)
-
-    def duplicate(self):
-        """
-            duplicate a line
-        """
-        newone = CancelInvoiceLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = self.cost
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.unity = self.unity
-        return newone
 
 class Holliday(DBBASE):
     """

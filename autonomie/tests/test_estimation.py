@@ -117,14 +117,14 @@ def get_full_estimation_model(datas):
 
 class Test(BaseTestCase):
     def test_estimation_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.estimation import EstimationMatch
+        from autonomie.views.estimation import EstimationMatch
         e = EstimationMatch()
         result = e.toschema(DBDATAS, {})
         for field, group in e.matching_map:
             self.assertEqual(DBDATAS['estimation'][field], result[group][field])
 
     def test_estimationlines_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.estimation import TaskLinesMatch
+        from autonomie.views.estimation import TaskLinesMatch
         e = TaskLinesMatch()
         result = e.toschema(DBDATAS, {})
         from copy import deepcopy
@@ -136,7 +136,7 @@ class Test(BaseTestCase):
             self.assertEqual(result['lines']['lines'][i], line)
 
     def test_paymentlines_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.estimation import PaymentLinesMatch
+        from autonomie.views.estimation import PaymentLinesMatch
         p = PaymentLinesMatch()
         result = p.toschema(DBDATAS, {})
         lines = deepcopy(DBDATAS['payment_lines'])
@@ -147,7 +147,7 @@ class Test(BaseTestCase):
             self.assertEqual(result['payments']['payment_lines'][i], line)
 
     def test_appstruct_to_estimationdbdatas(self):
-        from autonomie.views.forms.estimation import EstimationMatch
+        from autonomie.views.estimation import EstimationMatch
         datas_ = deepcopy(DATAS)
         e = EstimationMatch()
         result = e.todb(datas_, {})
@@ -156,30 +156,30 @@ class Test(BaseTestCase):
         self.assertEqual(result['estimation'], dbdatas_['estimation'])
 
     def test_appstruct_to_estimationlinesdbdatas(self):
-        from autonomie.views.forms.estimation import TaskLinesMatch
+        from autonomie.views.estimation import TaskLinesMatch
         datas_ = deepcopy(DATAS)
         e = TaskLinesMatch()
         result = e.todb(datas_, {})
         self.assertEqual(result['estimation_lines'], DBDATAS['estimation_lines'])
 
     def test_appstruct_to_paymentlinesdbdatas(self):
-        from autonomie.views.forms.estimation import PaymentLinesMatch
+        from autonomie.views.estimation import PaymentLinesMatch
         p = PaymentLinesMatch()
         datas_ = deepcopy(DATAS)
         result = p.todb(datas_, {})
         self.assertEqual(result['payment_lines'], DBDATAS['payment_lines'])
 
     def test_appstruct_to_dbdatas(self):
-        from autonomie.views.forms.estimation import get_estimation_dbdatas
+        from autonomie.views.estimation import get_estimation_dbdatas
         datas_ = deepcopy(DATAS)
         self.assertEqual(get_estimation_dbdatas(datas_), DBDATAS)
 
     def test_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.estimation import get_estimation_appstruct
+        from autonomie.views.estimation import get_estimation_appstruct
         self.assertEqual(get_estimation_appstruct(DBDATAS), DATAS)
 
     def test_computing(self):
-        from autonomie.views.forms.estimation import EstimationComputingModel
+        from autonomie.views.estimation import EstimationComputingModel
         mocked_est = get_full_estimation_model(DBDATAS)
         estimation = EstimationComputingModel(mocked_est)
         self.assertEqual(estimation.compute_line_total(mocked_est.lines[0]),
@@ -192,7 +192,7 @@ class Test(BaseTestCase):
         self.assertEqual(estimation.compute_sold(), 208000)
 
     def test_computing_strange_amounts(self):
-        from autonomie.views.forms.estimation import EstimationComputingModel
+        from autonomie.views.estimation import EstimationComputingModel
         mocked_est = get_full_estimation_model(DBDATAS2)
         estimation = EstimationComputingModel(mocked_est)
         self.assertEqual(estimation.compute_line_amount(), 333)

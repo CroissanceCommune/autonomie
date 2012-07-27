@@ -44,8 +44,8 @@ est= {"sequenceNumber":1,
 
 est_lines = [
         {
-    "cost":10000,
-    "quantity":1,
+    "cost":10025,
+    "quantity":1.25,
     "unity":"DAY",
     "description":u"Prestation 1",
     "rowIndex":1,
@@ -66,8 +66,10 @@ est_lines = [
     },
 
     ]
-
-est_lines_total = (10000,22500, -5200)
+# Lines total should accept until 4 elements after the . (here they are *100)
+# so it fits the limit case
+est_lines_total = (12531.25,22500, -5200)
+# Round function is launched after the tva count
 est_tva = int((sum(est_lines_total) - est['discountHT'])*196/10000.0)
 est_total = sum(est_lines_total) - est['discountHT'] + est['expenses'] + est_tva
 est_deposit = int(est_total * float(est['deposit']) / 100.0)

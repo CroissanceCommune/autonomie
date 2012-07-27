@@ -27,8 +27,9 @@ DBDATAS = dict(estimation=dict(course="0",
                                 IDPhase=485,
                                 taskDate="10-12-2012",
                                 description="Devis pour le client test",
-                                manualDeliverables=1),
-                estimation_lines=[
+                                manualDeliverables=1,
+                                statusComment=u"Aucun commentaire"),
+                lines=[
                      {'description':'text1',
                      'cost':1000,
                      'unity':'days',
@@ -61,8 +62,9 @@ DBDATAS2 = dict(estimation=dict(course="0",
                                 IDPhase=485,
                                 taskDate="10-12-2012",
                                 description="Devis pour le client test",
+                                statusComment=u"Aucun commentaire",
                                 manualDeliverables=0),
-                estimation_lines=[
+                lines=[
                      {'description':'text1',
                      'cost':1000,
                      'unity':'days',
@@ -100,8 +102,9 @@ DATAS = {'common': dict(IDPhase=485,
         {'description':"Milieu", "paymentDate":"13-12-2012","amount":15000},
         {'description':"Fin", "paymentDate":"14-12-2012","amount":150},
         ],
-        paymentConditions="Payer à l'heure"
+        paymentConditions="Payer à l'heure",
         ),
+        "communication":dict(statusComment=u"Aucun commentaire"),
                         }
 
 def get_full_estimation_model(datas):
@@ -109,26 +112,26 @@ def get_full_estimation_model(datas):
         Returns a simulated database model
     """
     est = MagicMock(**datas['estimation'])
-    estlines = [MagicMock(**line)for line in datas['estimation_lines']]
+    estlines = [MagicMock(**line)for line in datas['lines']]
     estpayments = [MagicMock(**line)for line in datas['payment_lines']]
     est.lines = estlines
     est.payment_lines = estpayments
     return est
 
-class Test(BaseTestCase):
+class TestEstimationMatchTools(BaseTestCase):
     def test_estimation_dbdatas_to_appstruct(self):
-        from autonomie.views.estimation import EstimationMatch
+        from autonomie.views.forms.task import EstimationMatch
         e = EstimationMatch()
         result = e.toschema(DBDATAS, {})
         for field, group in e.matching_map:
             self.assertEqual(DBDATAS['estimation'][field], result[group][field])
 
     def test_estimationlines_dbdatas_to_appstruct(self):
-        from autonomie.views.estimation import TaskLinesMatch
+        from autonomie.views.forms.task import TaskLinesMatch
         e = TaskLinesMatch()
         result = e.toschema(DBDATAS, {})
         from copy import deepcopy
-        lines = deepcopy(DBDATAS['estimation_lines'])
+        lines = deepcopy(DBDATAS['lines'])
         lines = sorted(lines, key=lambda row:int(row['rowIndex']))
         for line in lines:
             del(line['rowIndex'])
@@ -136,7 +139,7 @@ class Test(BaseTestCase):
             self.assertEqual(result['lines']['lines'][i], line)
 
     def test_paymentlines_dbdatas_to_appstruct(self):
-        from autonomie.views.estimation import PaymentLinesMatch
+        from autonomie.views.forms.task import PaymentLinesMatch
         p = PaymentLinesMatch()
         result = p.toschema(DBDATAS, {})
         lines = deepcopy(DBDATAS['payment_lines'])
@@ -147,7 +150,7 @@ class Test(BaseTestCase):
             self.assertEqual(result['payments']['payment_lines'][i], line)
 
     def test_appstruct_to_estimationdbdatas(self):
-        from autonomie.views.estimation import EstimationMatch
+        from autonomie.views.forms.task import EstimationMatch
         datas_ = deepcopy(DATAS)
         e = EstimationMatch()
         result = e.todb(datas_, {})
@@ -156,44 +159,16 @@ class Test(BaseTestCase):
         self.assertEqual(result['estimation'], dbdatas_['estimation'])
 
     def test_appstruct_to_estimationlinesdbdatas(self):
-        from autonomie.views.estimation import TaskLinesMatch
+        from autonomie.views.forms.task import TaskLinesMatch
         datas_ = deepcopy(DATAS)
         e = TaskLinesMatch()
         result = e.todb(datas_, {})
-        self.assertEqual(result['estimation_lines'], DBDATAS['estimation_lines'])
+        print result
+        self.assertEqual(result['lines'], DBDATAS['lines'])
 
     def test_appstruct_to_paymentlinesdbdatas(self):
-        from autonomie.views.estimation import PaymentLinesMatch
+        from autonomie.views.forms.task import PaymentLinesMatch
         p = PaymentLinesMatch()
         datas_ = deepcopy(DATAS)
         result = p.todb(datas_, {})
         self.assertEqual(result['payment_lines'], DBDATAS['payment_lines'])
-
-    def test_appstruct_to_dbdatas(self):
-        from autonomie.views.estimation import get_estimation_dbdatas
-        datas_ = deepcopy(DATAS)
-        self.assertEqual(get_estimation_dbdatas(datas_), DBDATAS)
-
-    def test_dbdatas_to_appstruct(self):
-        from autonomie.views.estimation import get_estimation_appstruct
-        self.assertEqual(get_estimation_appstruct(DBDATAS), DATAS)
-
-    def test_computing(self):
-        from autonomie.views.estimation import EstimationComputingModel
-        mocked_est = get_full_estimation_model(DBDATAS)
-        estimation = EstimationComputingModel(mocked_est)
-        self.assertEqual(estimation.compute_line_total(mocked_est.lines[0]),
-                        12000)
-        self.assertEqual(estimation.compute_lines_total(), 252000)
-        self.assertEqual(estimation.compute_totalht(), 250000)
-        self.assertEqual(estimation.compute_ttc(), 299000)
-        self.assertEqual(estimation.compute_total(), 297500)
-        self.assertEqual(estimation.compute_deposit(), 59500)
-        self.assertEqual(estimation.compute_sold(), 208000)
-
-    def test_computing_strange_amounts(self):
-        from autonomie.views.estimation import EstimationComputingModel
-        mocked_est = get_full_estimation_model(DBDATAS2)
-        estimation = EstimationComputingModel(mocked_est)
-        self.assertEqual(estimation.compute_line_amount(), 333)
-        self.assertEqual(estimation.compute_sold(), 334)

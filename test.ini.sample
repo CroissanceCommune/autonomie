@@ -36,7 +36,7 @@ sqlalchemy.encoding=UTF8
 testdb.user=testautonomie
 testdb.password=password
 testdb.db=testautonomie
-testdb.mysql_cmd=mysql -uroot
+testdb.mysql_cmd=mysql --defaults-file=/home/feth/autonomie/debian.cnf
 testdb.sampledb=sample_db/dbautonomie.sql
 testdb.sampledatas=sample_db/testdatas.sql
 testdb.updatedir=sample_db/updates

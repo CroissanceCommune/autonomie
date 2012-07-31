@@ -53,7 +53,7 @@ def format_from_taskdate(value):
             month = 1
         try:
             day = int(value[6:8])
-            assert day in range(1,31)
+            assert day in range(1,32)
         except:
             day = 1
         try:

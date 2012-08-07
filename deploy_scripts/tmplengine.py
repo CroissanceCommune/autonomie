@@ -21,7 +21,7 @@ from mako.template import Template
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TMPL_DIR = os.path.join(HERE, "../deploy_files/")
-DEST_DIR = "/tmp/garbage/"
+DEST_DIR = "/"
 
 def mkdir_p(dirname):
     """
@@ -59,7 +59,7 @@ def templatize(params):
         a = file(dest_file, 'w')
         a.write(datas)
         a.close()
-    return "All is all_right"
+    return "All is allright"
 
 class obj(object):
     """
@@ -69,9 +69,13 @@ class obj(object):
     def __init__(self, d):
         for a, b in d.items():
             if isinstance(b, (list, tuple)):
-                setattr(self, a, [obj(x) if isinstance(x, dict) else x for x in b])
+                setattr(self,
+                        a,
+                        [obj(x) if isinstance(x, dict) else x for x in b])
             else:
-                setattr(self, a, obj(b) if isinstance(b, dict) else b)
+                setattr(self,
+                        a,
+                        obj(b) if isinstance(b, dict) else b)
 
 def process_templates(conf):
     """

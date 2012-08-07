@@ -81,5 +81,4 @@ def process_templates(conf):
     """
         templatize all the stuff
     """
-    all_params = obj(conf)
-    templatize(all_params)
+    templatize(conf)

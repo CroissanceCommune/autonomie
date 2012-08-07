@@ -2,16 +2,15 @@
 """
     Handle the installation of a new vm with all the necessary stuff
 """
-import sys
 import os
 import sys
+from ConfigParser import RawConfigParser
 import inspect
 # realpath() with make your script run, even if you symlink it :)
 cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 
-from ConfigParser import RawConfigParser
 from mysql import gen_database
 from utils import gen_random_str
 from tmplengine import process_templates
@@ -88,7 +87,7 @@ class Parser(RawConfigParser):
     def get_db_conf(self):
         return dict(password="",
                     user="autonomie",
-                    name="autonomie"),
+                    name="autonomie")
 
     def has_dict(self):
         ret_dict = dict(db=self.get_db_conf())

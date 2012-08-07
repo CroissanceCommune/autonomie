@@ -5,6 +5,7 @@ from sys import argv
 try:
     from setuptools import setup
     from setuptools import Command
+    from setuptools import find_packages
     use_setuptools = True
 except ImportError, err:
     from distutils.core import setup
@@ -13,24 +14,30 @@ except ImportError, err:
 
 import os
 
-SETUP_ARGS = {"name"        : ("metadata",),
-        "version"     : ("metadata",),
-        "description" : ("metadata", "summary"),
-        "classifiers" : ("metadata", "classifier"),
-        "author"      : ("metadata",),
-        "author_email": ("metadata",),
-        "keywords"    : ("metadata",),
-        "url"         : ("metadata", "home_page"),
-        "license"     : ("metadata",),
-        "packages"    : ("files",),
-        "requires"    : ("metadata", "requires_dist"),
-        "test_suite"  : ('specific',),
-        "entry_points" : ('specific',),
+SETUP_ARGS = {
+        "name"                  : ("metadata",),
+        "version"               : ("metadata",),
+        "description"           : ("metadata", "summary"),
+        "classifiers"           : ("metadata", "classifier"),
+        "author"                : ("metadata",),
+        "author_email"          : ("metadata",),
+        "keywords"              : ("metadata",),
+        "url"                   : ("metadata", "home_page"),
+        "license"               : ("metadata",),
+        "packages"              : ("files",),
+        "include_package_data"  : ("files",),
+        "zip_safe"              : ('files',),
+        "requires"              : ("metadata", "requires_dist"),
+        "test_suite"            : ('specific',),
+        "entry_points"          : ('specific',),
         }
 MULTI = ("classifiers",
           "requires",
           "packages",
           "scripts")
+
+BOOL = ("include_package_data",
+        "zip_safe",)
 
 class PyTest(Command):
     description = "Run tests"
@@ -70,6 +77,9 @@ def generate_setuptools_kwargs_from_setup_cfg():
             else:
                 in_cfg_value = list((in_cfg_value,))
 
+        if arg in BOOL:
+            in_cfg_value = bool(in_cfg_value)
+
         if arg == "requires" and use_setuptools:
             arg = "install_requires"
 
@@ -83,10 +93,13 @@ def generate_setuptools_kwargs_from_setup_cfg():
 
         kwargs[arg] = in_cfg_value
 
+
     if config.has_option("metadata", "description_file"):
         kwargs["long_description"] = open(config.get("metadata",
                                                      "description_file")).read()
     kwargs['cmdclass'] = {'test':PyTest}
+    if use_setuptools:
+        kwargs['packages'] = find_packages()
     return kwargs
 
 kwargs = generate_setuptools_kwargs_from_setup_cfg()

@@ -37,7 +37,6 @@ from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
-from autonomie.utils.task import ManualInvoiceComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.exception import Forbidden
@@ -199,7 +198,7 @@ class CompanyInvoicesView(ListView):
             reverse = True
 
         def sort_key(a):
-            res = a.model
+            res = a
             for e in sort:
                 res = getattr(res, e)
             return res
@@ -208,7 +207,7 @@ class CompanyInvoicesView(ListView):
         inv = inv.all()
         inv.extend(cancel_inv.all())
         inv.extend(man_inv.all())
-        invoices = sorted(invoices, key=sort_key, reverse=reverse)
+        invoices = sorted(inv, key=sort_key, reverse=reverse)
         return invoices
 
     def _get_invoices(self):

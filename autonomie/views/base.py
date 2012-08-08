@@ -438,7 +438,7 @@ effectuer à attribuer ce statut à ce document.")
                 self.request.registry.notify(StatusChanged(self.request,
                                                     self.task))
             except Forbidden, e:
-                log.exception(" !! Unauthorized action by : {0}".format(
+                log.exception(u" !! Unauthorized action by : {0}".format(
                                                         self.user.login))
                 self.request.session.pop_flash("main")
                 self.request.session.flash(e.message, queue='error')

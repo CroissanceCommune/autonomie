@@ -105,7 +105,7 @@ class FileTempStore(dict):
                 del self.session[self.session_key][key]
 
         if not uid in self.session[self.session_key]:
-            raise AttributeError, "Name '{0}' does not exists".format(uid)
+            raise AttributeError, u"Name '{0}' does not exists".format(uid)
 
         # reset last timestamp
         self.session[self.session_key][uid]['time'] = datetime.now()

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : lun. 09 juil. 2012 22:57:43 CEST
+# * Last Modified : mer. 08 août 2012 10:14:44 CEST
 #
 # * Project : autonomie
 #
@@ -156,7 +156,7 @@ class ViewLink(Link):
         if self.path:
             return request.route_path(self.path, **self.url_kw)
         else:
-            return "#{0}".format(self.perm)
+            return u"#{0}".format(self.perm)
 
     def onclick(self):
         """

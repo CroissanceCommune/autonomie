@@ -68,7 +68,7 @@ Base template for task rendering
                         ${format_amount(task.lines_total(), trim=False)}&nbsp;€
                      </td>
                  </tr>
-                 %if hasattr(task. "discountHT") and task.discountHT:
+                 %if hasattr(task, "discountHT") and task.discountHT:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
                             Remise commerciale
@@ -132,7 +132,7 @@ Base template for task rendering
             % if config.has_key('coop_pdffootertitle'):
                 <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
             %endif
-            % if hasattr(task. "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
+            % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
                 ${format_text(config.get('coop_pdffootercourse'))}<br />
             % endif
             % if config.has_key('coop_pdffootertext'):

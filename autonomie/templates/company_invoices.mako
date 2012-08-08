@@ -158,7 +158,7 @@
                             <td class='invoice_notpaid'>
                                 <br />
                     % endif
-                    %if hasattr(invoice. "statusComment") and invoice.statusComment:
+                    %if hasattr(invoice, "statusComment") and invoice.statusComment:
                         <span class="ui-icon ui-icon-comment" title="${invoice.statusComment}"></span>
                     %endif
                 </td>

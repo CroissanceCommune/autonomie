@@ -34,6 +34,7 @@ from autonomie.models.task import EstimationLine
 from autonomie.models.task import InvoiceLine
 from autonomie.models.task import PaymentLine
 from autonomie.models.task import CancelInvoiceLine
+from autonomie.models.task import TaskCompute
 
 from autonomie.models.user import User
 
@@ -69,22 +70,50 @@ ESTIMATION=dict(course="0",
                 manualDeliverables=1,
                 statusComment=u"Aucun commentaire")
 LINES = [{'description':u'text1',
-          'cost':1000,
-          'unity':'days',
-          'quantity':12,
+          'cost':10025,
+          'unity':'DAY',
+          'quantity':1.25,
           'rowIndex':1},
          {'description':u'text2',
-          'cost':20000,
+          'cost':7500,
           'unity':'month',
-          'quantity':12,
-          'rowIndex':2}]
+          'quantity':3,
+          'rowIndex':2},
+         {'description':u'text3',
+          'cost':-5200,
+          "quantity":1,
+          "unity":"DAY",
+          "rowIndex":3,}]
 
 PAYMENT_LINES = [{'description':u"Début", "paymentDate":"12-12-2012",
-                                          "amount":15000, "rowIndex":1},
+                                          "amount":1000, "rowIndex":1},
                  {'description':u"Milieu", "paymentDate":"13-12-2012",
-                                           "amount":15000, "rowIndex":2},
+                                           "amount":1000, "rowIndex":2},
                  {'description':u"Fin", "paymentDate":"14-12-2012",
                                         "amount":150, "rowIndex":3}]
+
+# Values:
+#         the money values are represented *100
+#
+# Rounding rules:
+#         TVA, total_ttc and deposit are rounded (total_ht is not)
+
+# Lines total should accept until 4 elements after the '.'(here they are *100)
+# so it fits the limit case
+#
+# Line totals should be floats (here they are *100)
+EST_LINES_TOTAL = (12531.25, 22500, -5200)
+LINES_TOTAL = sum(EST_LINES_TOTAL)
+
+TVA = int((LINES_TOTAL - ESTIMATION['discountHT']) \
+                * float(ESTIMATION['tva']) / 10000)
+
+# EST_TOTAL = lines + tva + expenses rounded
+EST_TOTAL = int(LINES_TOTAL - ESTIMATION['discountHT'] \
+                        + TVA + ESTIMATION['expenses'])
+EST_DEPOSIT = int(EST_TOTAL * ESTIMATION['deposit'] / 100.0)
+PAYMENTSSUM = sum([p['amount'] for p in PAYMENT_LINES[:-1]])
+EST_SOLD = EST_TOTAL - EST_DEPOSIT - PAYMENTSSUM
 
 def get_client():
     client = MagicMock(**CLIENT)
@@ -107,7 +136,7 @@ def get_task(factory):
     task.owner = user
     return task
 
-def get_estimation(user, project):
+def get_estimation(user=None, project=None):
     est = Estimation(**ESTIMATION)
     for line in LINES:
         l = EstimationLine(**line)
@@ -115,6 +144,10 @@ def get_estimation(user, project):
     for line in PAYMENT_LINES:
         l = PaymentLine(**line)
         est.payment_lines.append(l)
+    if not user:
+        user = get_user()
+    if not project:
+        project = get_project()
     est.project = project
     est.statusPersonAccount = user
     return est
@@ -261,6 +294,61 @@ class TestTaskModels(BaseTestCase):
         for st in ("draft", "sent", "valid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
+class TestComputing(BaseTestCase):
+    def test_line_total(self):
+        for index, line in enumerate(LINES):
+            for obj in InvoiceLine, CancelInvoiceLine, EstimationLine:
+                line_obj = obj(**line)
+                self.assertEqual(line_obj.total(), EST_LINES_TOTAL[index])
+
+    def test_lines_total(self):
+        task = TaskCompute()
+        task.lines = []
+        for index, line in enumerate(LINES):
+            task.lines.append(InvoiceLine(**line))
+        self.assertEqual(task.lines_total(), sum(EST_LINES_TOTAL))
+        for obj, line_obj in ((Invoice, InvoiceLine), \
+                            (CancelInvoice, CancelInvoiceLine), \
+                            (Estimation, EstimationLine)):
+            task = get_task(factory=obj)
+            for line in LINES:
+                task.lines.append(line_obj(**line))
+            self.assertEqual(task.lines_total(), sum(EST_LINES_TOTAL))
+
+    def test_total_ht(self):
+        est = get_estimation()
+        self.assertEqual(est.total_ht(),
+                    sum(EST_LINES_TOTAL)-ESTIMATION['discountHT'])
+
+    def test_tva_amount(self):
+        task = TaskCompute()
+        task.tva = 1960
+        # cf #501
+        # ici 5010 correpond à 50€10
+        self.assertEqual(task.tva_amount(5010), 981)
+
+        est = get_estimation()
+        self.assertEqual(est.tva_amount(), TVA)
+
+    def test_total_ttc(self):
+        line = InvoiceLine(cost=1030, quantity=1.25, rowIndex=1,
+                            description='')
+        # cf ticket #501
+        # line total : 12.875
+        # tva : 2.5235 -> 2.52
+        # A confirmer :l'arrondi ici bas
+        # => total : 15.39 (au lieu de 15.395)
+        task = TaskCompute()
+        task.tva = 1960
+        task.lines = [line]
+        self.assertEqual(task.total_ttc(), 1539)
+
+    def test_total(self):
+        est = get_estimation()
+        self.assertEqual(est.total(), EST_TOTAL)
+
+
+class TestEstimation(BaseTestCase):
     def test_duplicate_estimation(self):
         user = get_user(USER2)
         project = get_project()
@@ -270,5 +358,19 @@ class TestTaskModels(BaseTestCase):
         self.assertEqual(newest.project, project)
         self.assertEqual(newest.statusPersonAccount, user)
         self.assertTrue(newest.number.startswith("PRO1_CLI1_D2_"))
+
+    def test_estimation_deposit(self):
+        est = get_estimation()
+        self.assertEqual(est.deposit_amount(), EST_DEPOSIT)
+
+    def test_sold(self):
+        est = get_estimation()
+        self.assertEqual(est.sold(), EST_SOLD)
+
+    def test_payments_sum(self):
+        est = get_estimation()
+        self.assertEqual(est.sold() + est.deposit_amount()
+                + sum([p.amount for p in est.payment_lines[:-1]]),
+                est.total())
 
 

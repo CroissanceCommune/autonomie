@@ -49,7 +49,6 @@ import logging
 
 from zope.interface import Attribute
 from zope.interface import Interface
-from zope.interface import implements
 from zope.interface import implementer
 
 from sqlalchemy import Column
@@ -141,7 +140,47 @@ class IValidatedTask(ITask):
             Has the current document been cancelled
         """
 
-class IPaidTask(IValidatedTask):
+class IMoneyTask(Interface):
+    """
+        Interface for task handling money
+    """
+    def lines_total():
+        """
+            Return the sum of the document lines
+        """
+
+    def total_ht():
+        """
+            return the HT total of the document
+        """
+
+    def discount_amount():
+        """
+            Return the discount
+        """
+
+    def tva_amount(totalht):
+        """
+            compute the tva
+        """
+
+    def total_ttc():
+        """
+            compute the ttc value before expenses
+        """
+
+    def total():
+        """
+            compute the total to be paid
+        """
+
+    def expenses_amount():
+        """
+            return the TTC expenses
+        """
+
+
+class IPaidTask():
     """
         Task interface for task needing to be paid
     """
@@ -210,6 +249,40 @@ class IInvoice(Interface):
         """
             Return the string for the payment mode display
         """
+
+
+class TaskCompute(object):
+
+    # Computing functions
+    def lines_total(self):
+        return sum(line.total() for line in self.lines)
+
+    def total_ht(self):
+        return self.lines_total() - self.discount_amount()
+
+    def discount_amount(self):
+        if hasattr(self, "discountHT"):
+            return int(self.discountHT)
+        else:
+            return 0
+
+    def tva_amount(self, totalht=None):
+        if not totalht:
+            totalht = self.total_ht()
+        result = int(float(totalht) * (max(int(self.tva), 0) / 10000.0))
+        return result
+
+    def total_ttc(self):
+        totalht = self.total_ht()
+        tva_amount = self.tva_amount(totalht)
+        return int(totalht + tva_amount)
+
+    def total(self):
+        return self.total_ttc() + self.expenses_amount()
+
+    def expenses_amount(self):
+        result = int(self.expenses)
+        return result
 
 DEF_STATUS = u"Statut inconnu"
 STATUS = dict((
@@ -374,8 +447,8 @@ document."
     def id(self):
         return self.IDTask
 
-@implementer(IValidatedTask)
-class Estimation(Task):
+@implementer(IValidatedTask, IMoneyTask)
+class Estimation(Task, TaskCompute):
     """
         Estimation Model
     """
@@ -495,6 +568,12 @@ class Estimation(Task):
         duple.payment_lines = self.get_duplicated_payment_lines()
         return duple
 
+    def gen_invoices(self):
+        """
+            Return the invoices based on the current estimation
+        """
+        pass
+
     def get_duplicated_lines(self):
         """
             return duplicated lines
@@ -535,8 +614,60 @@ class Estimation(Task):
         """
         return self.CAEStatus == 'aboest'
 
-@implementer(IPaidTask, IInvoice)
-class Invoice(Task):
+    # Computing
+    def deposit_amount(self):
+        """
+            Compute the amount of the deposit
+        """
+        if self.deposit > 0:
+            total = self.total()
+            return int(total * int(self.deposit) / 100.0)
+        return 0
+
+    def get_nb_payment_lines(self):
+        """
+            Returns the number of payment lines configured
+        """
+        return len(self.payment_lines)
+
+    def paymentline_amount(self):
+        """
+            Compute payment lines amounts in case of equal division
+            (when manualDeliverables is 0)
+            (when the user has checked 3 times)
+        """
+        total = self.total()
+        deposit = self.deposit_amount()
+        rest = total - deposit
+        return int(rest / self.get_nb_payment_lines())
+
+    def sold(self):
+        """
+            Compute the sold amount to finish on an exact value
+            if we divide 10 in 3, we'd like to have something like :
+                3.33 3.33 3.34
+        """
+        result = 0
+        total = self.total()
+        deposit = self.deposit_amount()
+        rest = total - deposit
+        payment_lines_num = self.get_nb_payment_lines()
+        if payment_lines_num == 1 or not self.get_nb_payment_lines():
+            result = rest
+        else:
+            if self.manualDeliverables == 0:
+                line_amount = self.paymentline_amount()
+                result = rest - ((payment_lines_num-1) * line_amount)
+            else:
+                result = rest - sum(line.amount \
+                        for line in self.payment_lines[:-1])
+        return result
+
+
+
+
+@implementer(IPaidTask, IInvoice, IMoneyTask)
+class Invoice(Task, TaskCompute):
     """
         Invoice Model
     """
@@ -689,8 +820,8 @@ class Invoice(Task):
         cancelinvoice.tva = self.tva
         return cancelinvoice
 
-@implementer(IPaidTask, IInvoice)
-class CancelInvoice(Task):
+@implementer(IPaidTask, IInvoice, IMoneyTask)
+class CancelInvoice(Task, TaskCompute):
     """
         CancelInvoice model
         Could also be called negative invoice
@@ -900,6 +1031,14 @@ class ManualInvoice(DBBASE):
         return dbsession.query(func.max(ManualInvoice.officialNumber)).filter(
                     func.year(ManualInvoice.taskDate) == current_year)
 
+    def total_ht(self):
+        return int(self.montant_ht * 100)
+
+    def tva_amount(self):
+        total_ht = self.total_ht()
+        tva = max(int(self.tva), 0)
+        return int(float(total_ht) * (tva / 10000.0))
+
 class CancelInvoiceLine(DBBASE):
     """
         CancelInvoice lines
@@ -960,6 +1099,12 @@ class CancelInvoiceLine(DBBASE):
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
+
+    def total(self):
+        """
+            Compute the line's total
+        """
+        return float(self.cost) * float(self.quantity)
 
 class EstimationLine(DBBASE):
     """
@@ -1024,6 +1169,13 @@ class EstimationLine(DBBASE):
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
+
+    def total(self):
+        """
+            Compute the line's total
+        """
+        return float(self.cost) * float(self.quantity)
+
 
 class InvoiceLine(DBBASE):
     """
@@ -1099,6 +1251,11 @@ class InvoiceLine(DBBASE):
         newone.unity = self.unity
         return newone
 
+    def total(self):
+        """
+            Compute the line's total
+        """
+        return float(self.cost) * float(self.quantity)
 
 class PaymentLine(DBBASE):
     """

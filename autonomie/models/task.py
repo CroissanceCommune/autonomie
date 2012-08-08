@@ -180,7 +180,7 @@ class IMoneyTask(Interface):
         """
 
 
-class IPaidTask():
+class IPaidTask(Interface):
     """
         Task interface for task needing to be paid
     """

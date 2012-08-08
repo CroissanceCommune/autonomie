@@ -37,7 +37,6 @@ from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
-from autonomie.utils.task import TaskComputing
 from autonomie.utils.task import ManualInvoiceComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
@@ -207,9 +206,8 @@ class CompanyInvoicesView(ListView):
 
 
         inv = inv.all()
-        cancel_inv = cancel_inv.all()
-        man_inv = man_inv.all()
-        invoices = self._wrap_for_computing(cancel_inv, inv, man_inv)
+        inv.extend(cancel_inv.all())
+        inv.extend(man_inv.all())
         invoices = sorted(invoices, key=sort_key, reverse=reverse)
         return invoices
 
@@ -297,16 +295,6 @@ class CompanyInvoicesView(ListView):
         man_inv = man_inv.filter(
                         ManualInvoice.taskDate.between(fday, lday))
         return cancel_inv, inv, man_inv
-
-    @staticmethod
-    def _wrap_for_computing(cancel_inv, inv, man_inv):
-        """
-            wrap all invoices to be able to compute them
-        """
-        inv = [TaskComputing(i) for i in inv]
-        inv.extend([TaskComputing(i) for i in cancel_inv])
-        inv.extend([ManualInvoiceComputing(i) for i in man_inv])
-        return inv
 
     @view_config(route_name='company_treasury',
                  renderer='company_treasury.mako',
@@ -489,13 +477,12 @@ class InvoiceView(TaskView):
         """
             Returns an html version of the current invoice
         """
-        invoicecompute = TaskComputing(self.task)
         template = "tasks/invoice.mako"
         config = self.request.config
         datas = dict(
                     company=self.company,
                     project=self.project,
-                    task=invoicecompute,
+                    task=self.task,
                     config=config
                     )
         return render_html(self.request, template, datas)

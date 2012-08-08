@@ -31,7 +31,6 @@ from autonomie.models.model import CancelInvoice
 from autonomie.models.model import CancelInvoiceLine
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.exception import Forbidden
-from autonomie.utils.task import TaskComputing
 from autonomie.utils.pdf import render_html
 from autonomie.utils.pdf import write_pdf
 
@@ -182,13 +181,12 @@ class CancelInvoiceView(TaskView):
         """
             Returns an html version of the current document
         """
-        compute = TaskComputing(self.task)
         template = "tasks/cancelinvoice.mako"
         config = self.request.config
         datas = dict(
                 company=self.company,
                 project=self.project,
-                task=compute,
+                task=self.task,
                 config=config)
         return render_html(self.request, template, datas)
 

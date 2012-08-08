@@ -32,7 +32,6 @@ from autonomie.models.model import PaymentLine
 from autonomie.views.forms.task import get_estimation_schema
 from autonomie.views.forms.task import get_estimation_appstruct
 from autonomie.views.forms.task import get_estimation_dbdatas
-from autonomie.utils.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.pdf import render_html
 from autonomie.utils.exception import Forbidden
@@ -193,13 +192,12 @@ class EstimationView(TaskView):
         """
             Returns an html version of the current estimation
         """
-        estimationcompute = TaskComputing(self.task)
         template = "tasks/estimation.mako"
         config = self.request.config
         datas = dict(
                     company=self.company,
                     project=self.project,
-                    task=estimationcompute,
+                    task=self.task,
                     config=config
                     )
         return render_html(self.request, template, datas)
@@ -274,7 +272,6 @@ class EstimationView(TaskView):
         """
         log.debug("# Invoice Generation #")
         #recovering common datas needed to generate the invoices
-        computer = TaskComputing(self.task)
         count = 1
         taskDate = datetime.date.today()
         invoice_args_common = dict(
@@ -307,7 +304,7 @@ class EstimationView(TaskView):
                     displayedUnits=0,
                     ))
             invoice = Invoice(**invoice_args)
-            amount = computer.compute_deposit()
+            amount = self.task.deposit_amount()
             line = InvoiceLine(rowIndex=count,
                                description=u"Facture d'acompte",
                                cost=amount,
@@ -338,7 +335,7 @@ class EstimationView(TaskView):
 
             # if payment amounts have been set manually or not
             if self.task.manualDeliverables == 0:
-                amount = computer.compute_line_amount()
+                amount = self.task.paymentline_amount()
             else:
                 amount = paymentline.amount
             line = InvoiceLine(rowIndex=1,
@@ -375,7 +372,7 @@ class EstimationView(TaskView):
         invoice = Invoice(**invoice_args)
         line = InvoiceLine(rowIndex=1,
                             description=paymentline.description,
-                            cost=computer.compute_totalht(),
+                            cost=self.task.total_ht(),
                             quantity=1)
         invoice.lines.append(line)
         for i in already_paid_lines:

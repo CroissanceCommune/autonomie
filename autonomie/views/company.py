@@ -23,7 +23,6 @@ from pyramid.view import view_config
 
 from deform import Form
 from autonomie.views.forms import get_company_schema
-from autonomie.utils.task import TaskComputing
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.views import submit_btn
@@ -65,10 +64,10 @@ class CompanyViews(BaseView):
         ret_val['tasks'] = all_tasks[:5]
 
         # recovering elapsed invoices for warning
-        elapsed_invoices = [TaskComputing(invoice) \
+        elapsed_invoices = [invoice \
                         for invoice in all_invoices if invoice.is_tolate()]
         elapsed_invoices = sorted(elapsed_invoices,
-                                key=lambda a:a.model.taskDate,
+                                key=lambda a:a.taskDate,
                                 reverse=True)
         ret_val['elapsed_invoices'] = elapsed_invoices
         return ret_val

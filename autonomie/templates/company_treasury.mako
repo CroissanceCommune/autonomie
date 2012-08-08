@@ -41,13 +41,13 @@
         %for invoice in invoices:
             <tr>
                 <td>
-                    ${invoice.get_client().name} - ${invoice.model.number}
+                    ${invoice.get_client().name} - ${invoice.number}
                 </td>
                 <td>
-                    ${print_date(invoice.model.taskDate)}
+                    ${print_date(invoice.taskDate)}
                 </td>
                 <td>
-                    ${format_amount(invoice.compute_totalht())}
+                    ${format_amount(invoice.total_ht())}
                 </td>
             </tr>
         %endfor
@@ -57,7 +57,7 @@
             <strong>Solde de trésorerie</strong>
         </td>
         <td>
-            <strong>${format_amount(sum([invoice.compute_totalht() for invoice in invoices]))}&nbsp;€</strong>
+            <strong>${format_amount(sum([invoice.total_ht() for invoice in invoices]))}&nbsp;€</strong>
         </td>
     </tfoot>
 </table>

@@ -25,7 +25,7 @@ Base template for task rendering
         </div>
         <div class='row'>
             <div class='addressblock'>
-                ${print_str_date(task.model.taskDate)}
+                ${print_str_date(task.taskDate)}
                 <br />
                 ${address(project.client, 'client')}
             </div>
@@ -34,7 +34,7 @@ Base template for task rendering
         <%block name='information'>
         </%block>
         </div>
-        %if task.model.displayedUnits == 1:
+        %if task.displayedUnits == 1:
             <% colspan = 2 %>
         %else:
             <% colspan = 1 %>
@@ -44,20 +44,20 @@ Base template for task rendering
             <thead>
                 <tr>
                     <th class="description">Intitulé des postes</th>
-                    %if task.model.displayedUnits == 1:
+                    %if task.displayedUnits == 1:
                         <th class="quantity">P.U. x Qté</th>
                     % endif
                     <th class="price">Prix</th>
                 </tr>
             </thead>
             <tbody>
-                % for line in task.model.lines:
+                % for line in task.lines:
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
-                        %if task.model.displayedUnits == 1:
+                        %if task.displayedUnits == 1:
                             <td class="quantity">${format_amount(line.cost)}&nbsp;€&nbsp;x&nbsp;${format_quantity(line.quantity)} ${line.get_unity_label(pretty=True)}</td>
                         % endif
-                        <td class="price">${format_amount(task.compute_line_total(line), trim=False)}&nbsp;€</td>
+                        <td class="price">${format_amount(line.total(), trim=False)}&nbsp;€</td>
                     </tr>
                 % endfor
                 <tr>
@@ -65,16 +65,16 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                        ${format_amount(task.compute_lines_total(), trim=False)}&nbsp;€
+                        ${format_amount(task.lines_total(), trim=False)}&nbsp;€
                      </td>
                  </tr>
-                 %if hasattr(task.model, "discountHT") and task.model.discountHT:
+                 %if hasattr(task. "discountHT") and task.discountHT:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
                             Remise commerciale
                         </td>
                         <td class='price'>
-                            ${format_amount(task.model.discountHT)}&nbsp;€
+                            ${format_amount(task.discountHT)}&nbsp;€
                         </td>
                     </tr>
                     <tr>
@@ -82,12 +82,12 @@ Base template for task rendering
                          Total HT après remise
                         </td>
                         <td class='price'>
-                            ${format_amount(task.compute_totalht())}&nbsp;€
+                            ${format_amount(task.total_ht())}&nbsp;€
                         </td>
                     </tr>
 
                 % endif
-                % if task.model.tva<0:
+                % if task.tva<0:
                     <tr>
                         <td colspan='${colspan + 1}'class='rightalign'>
                             TVA non applicable selon l'article 259b du CGI.
@@ -96,20 +96,20 @@ Base template for task rendering
                 % else:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
-                            TVA (${format_amount(task.model.tva)} %)
+                            TVA (${format_amount(task.tva)} %)
                         </td>
                         <td class='price'>
-                            ${format_amount(task.compute_tva())}&nbsp;€
+                            ${format_amount(task.tva_amount())}&nbsp;€
                         </td>
                     </tr>
                 % endif
-                %if task.model.expenses:
+                %if task.expenses:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
                             Frais liés à la prestation
                         </td>
                         <td class='price'>
-                            ${format_amount(task.compute_expenses())}&nbsp;€
+                            ${format_amount(task.expenses_amount())}&nbsp;€
                         </td>
                     </tr>
                 %endif
@@ -118,7 +118,7 @@ Base template for task rendering
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${format_amount(task.compute_total())}&nbsp;€
+                        ${format_amount(task.total())}&nbsp;€
                     </td>
                 </tr>
             </tbody>
@@ -132,7 +132,7 @@ Base template for task rendering
             % if config.has_key('coop_pdffootertitle'):
                 <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
             %endif
-            % if hasattr(task.model, "course") and task.model.course == 1 and config.has_key('coop_pdffootercourse'):
+            % if hasattr(task. "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
                 ${format_text(config.get('coop_pdffootercourse'))}<br />
             % endif
             % if config.has_key('coop_pdffootertext'):

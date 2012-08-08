@@ -25,13 +25,13 @@
                         % for invoice in elapsed_invoices[:5]:
                             <tr>
                                 <td>
-                                    ${invoice.model.officialNumber}
+                                    ${invoice.officialNumber}
                                 </td>
                                 <td>
-                                    ${format_client(invoice.model.project.client)}
+                                    ${format_client(invoice.project.client)}
                                 </td>
                                 <td>
-                                    ${format_amount(invoice.compute_total())}&nbsp;€
+                                    ${format_amount(invoice.total())}&nbsp;€
                                 </td>
                             </tr>
                         % endfor

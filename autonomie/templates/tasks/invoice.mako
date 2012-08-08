@@ -20,7 +20,7 @@
                 size: a4 portrait;
                 margin:1cm;
                 margin-bottom:3.5cm;
-                % if not task.model.has_been_validated() and not task.model.is_paid():
+                % if not task.has_been_validated() and not task.is_paid():
                     background-image: url("${request.static_url('autonomie:static/watermark_invoice.jpg', _app_url='')}");
                 % endif
                 @frame footer {
@@ -34,16 +34,16 @@
         </style>
 </%block>
         <%block name='information'>
-        <strong>Facture N° </strong>${task.model.officialNumber}-${task.model.number}<br />
-            % if task.model.estimation:
-                <span  style='color:#999'> <strong style='color:#999'>Référence devis N° </strong>${task.model.estimation.number}</span> <br />
+        <strong>Facture N° </strong>${task.officialNumber}-${task.number}<br />
+            % if task.estimation:
+                <span  style='color:#999'> <strong style='color:#999'>Référence devis N° </strong>${task.estimation.number}</span> <br />
                 <br />
             % endif
-            <strong>Objet : </strong>${format_text(task.model.description)}<br />
+            <strong>Objet : </strong>${format_text(task.description)}<br />
         </%block>
         <%block name="notes_and_conditions">
-        %if task.model.paymentConditions:
-            ${table(u"Conditions de paiement", task.model.paymentConditions)}
+        %if task.paymentConditions:
+            ${table(u"Conditions de paiement", task.paymentConditions)}
         % endif
         % if config.has_key('coop_invoicepayment'):
             <% paymentinfo = config.get('coop_invoicepayment')%>

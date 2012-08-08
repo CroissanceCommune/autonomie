@@ -39,7 +39,7 @@ def get_cid(request):
         Return the current cid from the request
     """
     cid = None
-    if len(request.user.companies) == 1:
+    if len(request.user.companies) == 1 and request.user.is_contractor():
         cid = request.user.companies[0].id
     elif hasattr(request, "context") and hasattr(request.context,
                                                 "get_company_id"):

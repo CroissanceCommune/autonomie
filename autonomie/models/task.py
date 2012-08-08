@@ -66,6 +66,10 @@ from sqlalchemy.orm import deferred
 from sqlalchemy.orm import backref
 from sqlalchemy import func
 
+# Aye : ici on a du double dans la bdd, en attendant une éventuelle
+# migration des données, on dépend entièrement de mysql
+from sqlalchemy.dialects.mysql import DOUBLE
+
 from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomDateType2
 from autonomie.models.utils import get_current_timestamp
@@ -923,7 +927,7 @@ class CancelInvoiceLine(DBBASE):
     rowIndex = Column(Integer)
     description = Column(Text, default="")
     cost = Column(Integer, default=0)
-    quantity = Column(Integer, default=1)
+    quantity = Column(DOUBLE, default=1)
     unity = Column(String(10), default=None)
 
     def get_unity_label(self, pretty=False):
@@ -979,8 +983,8 @@ class EstimationLine(DBBASE):
     IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
-    cost = Column("cost", Integer)
-    quantity = Column("quantity", Integer)
+    cost = Column(Integer, default=0)
+    quantity = Column(DOUBLE, default=1)
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = deferred(Column("updateDate", CustomDateType,
@@ -1041,8 +1045,8 @@ class InvoiceLine(DBBASE):
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
-    cost = Column("cost", Integer)
-    quantity = Column("quantity", Integer)
+    cost = Column(Integer, default=0)
+    quantity = Column(DOUBLE, default=1)
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = deferred(Column("updateDate", CustomDateType,

@@ -24,4 +24,4 @@ def get_config(request, dbsession=None):
     if not dbsession:
         dbsession = request.dbsession
     return dict((entry.name, entry.value)
-                for entry in dbsession().query(Config).all())
+                for entry in dbsession.query(Config).all())

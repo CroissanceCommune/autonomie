@@ -14,11 +14,13 @@
 #
 import colander
 from deform.form import Form
+from pyramid import testing
 from mock import Mock
 
 from autonomie.utils.forms import merge_session_with_post, XHttpForm
 
 from .base import BaseTestCase
+from .base import BaseViewTest
 
 class DummySchema(colander.MappingSchema):
     lastname = colander.SchemaNode(colander.String(), title='Nom')
@@ -43,27 +45,25 @@ class TestFormUtils(BaseTestCase):
         f.reset_messages()
         self.assertTrue("Jean is wrong" not in f.render())
 
-class TestAvatar(BaseTestCase):
+class TestAvatar(BaseViewTest):
     """
         A dummy user is created in test initiliazition
     """
     def test_avatar(self):
-        from autonomie.utils.avatar import get_build_avatar
-        build_avatar = get_build_avatar(self.session)
-        request = Mock()
-        request.session = dict()
-        build_avatar("WrongUser", request)
-        self.assertTrue(request.session['user'] is None)
-        request = Mock()
-        request.session = dict()
-        build_avatar("user1_login", request)
-        self.assertTrue(request.session['user'].email == "user1@test.fr")
+        from autonomie.utils.avatar import get_avatar
+        self.config.testing_securitypolicy(userid="authenticated")
+        request = testing.DummyRequest()
+        request._user = Mock(name="username")
+        avatar = get_avatar(request, self.session)
+        self.assertEqual(avatar, request._user)
+        self.config.testing_securitypolicy(userid="user1_login")
+        request = testing.DummyRequest()
+        avatar = get_avatar(request, self.session)
+        self.assertEqual(avatar.lastname, "user1_lastname")
 
 class TestConfig(BaseTestCase):
     def test_load_value(self):
-        from autonomie.utils.config import load_config
-        all_ = load_config(self.session)
+        from autonomie.utils.config import get_config
+        all_ = get_config(testing.DummyRequest(), self.session)
         self.assertTrue("hostname" in all_.keys()
                         and "coop_interviewergroup" in all_.keys())
-        one_ = load_config(self.session, "hostname")
-        self.assertEqual(one_['hostname'], "autonomie.localhost")

@@ -34,50 +34,32 @@ class TestAuth(BaseFunctionnalTest):
 
 def get_avatar():
     user = MagicMock(name=u'test', companies=[])
+    user.is_admin = lambda :False
+    user.is_manager = lambda :False
     user.companies = [MagicMock(name=u'Test', id=100), MagicMock(name=u'Test2', id=101)]
     return user
 
 def get_avatar2():
     user = MagicMock(name=u'test2')
+    user.is_admin = lambda :False
+    user.is_manager = lambda :False
     user.companies = [MagicMock(name=u'Test', id=100)]
     return user
 
 class TestIndex(BaseViewTest):
     def test_index_view(self):
         from autonomie.views.index import index
-        self.config.add_route('company', '/company/{cid}')
+        self.config.add_route('company', '/company/{id}')
         self.config.add_static_view('static', 'autonomie:static')
         request = self.get_csrf_request()
         avatar = get_avatar()
-        request.session['user'] = avatar
+        request._user = avatar
+        request.user = avatar
         response = index(request)
         self.assertEqual(avatar.companies, response['companies'])
-        request.session['user'] = get_avatar2()
+        avatar = get_avatar2()
+        request._user = avatar
+        request.user = avatar
         response = index(request)
+        print response
         self.assertEqual(response.status_int, 302)
-
-class TestCompany(BaseFunctionnalTest):
-    def test_company_index(self):
-        from autonomie.views.company import company_index
-        from autonomie.models.model import User
-        avatar = self.session.query(User).first()
-        self.config.add_route('company', '/company/{cid}')
-        self.config.add_static_view('static', 'autonomie:static')
-        request = self.get_csrf_request()
-        request.matchdict['cid'] = 1
-        request.session['user'] = avatar
-        response = company_index(request)
-        self.assertEqual(avatar.companies[0].name, response['company'].name )
-        request.matchdict['cid'] = 0
-        response = company_index(request)
-        self.assertEqual(response.status_int, 403)
-
-class TestSubscriber(BaseViewTest):
-    def test_menu_scriber(self):
-        from autonomie.views.subscribers import add_menu
-        from pyramid.events import BeforeRender
-        event = BeforeRender({})
-        event['req'] = MagicMock(matchdict={'cid':'100'})
-        add_menu(event)
-        self.assertEqual(event['menu'][0]['label'], u'Clients')
-        self.assertEqual(event['menu'][1]['label'], u'Projets')

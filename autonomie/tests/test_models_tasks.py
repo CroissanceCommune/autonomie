@@ -56,7 +56,9 @@ USER2 = dict(id=3, login=u"test_user2")
 PROJECT = dict(id=1, IDProject=1, name=u'project1', code=u"PRO1")
 CLIENT = dict(code=u"CLI1", name=u"client1", id=u"CLI1")
 
-ESTIMATION=dict(course="0",
+ESTIMATION=dict(IDPhase=1,
+                IDProject=1,
+                course="0",
                 displayedUnits="1",
                 discountHT=2000,
                 tva=1960,
@@ -85,12 +87,17 @@ LINES = [{'description':u'text1',
           "unity":"DAY",
           "rowIndex":3,}]
 
-PAYMENT_LINES = [{'description':u"Début", "paymentDate":"12-12-2012",
-                                          "amount":1000, "rowIndex":1},
-                 {'description':u"Milieu", "paymentDate":"13-12-2012",
-                                           "amount":1000, "rowIndex":2},
-                 {'description':u"Fin", "paymentDate":"14-12-2012",
-                                        "amount":150, "rowIndex":3}]
+PAYMENT_LINES = [{'description':u"Début",
+                  "paymentDate":datetime.date(2012, 12, 12),
+                  "amount":1000,
+                  "rowIndex":1},
+                 {'description':u"Milieu",
+                  "paymentDate":datetime.date(2012, 12, 13),
+                  "amount":1000, "rowIndex":2},
+                 {'description':u"Fin",
+                  "paymentDate":datetime.date(2012, 12, 14),
+                  "amount":150,
+                  "rowIndex":3}]
 
 # Values:
 #         the money values are represented *100
@@ -373,4 +380,36 @@ class TestEstimation(BaseTestCase):
                 + sum([p.amount for p in est.payment_lines[:-1]]),
                 est.total())
 
+    def test_get_number(self):
+        project = get_project()
+        seq_number = 15
+        date = datetime.date(1969, 07, 31)
+        self.assertEqual(Estimation.get_number(project, seq_number, date),
+                        u"PRO1_CLI1_D15_0769")
 
+    def test_gen_invoice(self):
+        est = get_estimation()
+        invoices = est.gen_invoices(1)
+        for inv in invoices:
+            self.session.add(inv)
+            self.session.flush()
+        #deposit :
+        deposit = invoices[0]
+        self.assertEqual(deposit.taskDate, datetime.date.today())
+        self.assertEqual(deposit.total_ht(), est.deposit_amount())
+        #intermediate invoices:
+        intermediate_invoices = invoices[1:-1]
+        for index, line in enumerate(PAYMENT_LINES[:-1]):
+            inv = intermediate_invoices[index]
+            self.assertEqual(inv.total_ht(), line['amount'])
+            self.assertEqual(inv.taskDate, line['paymentDate'])
+
+class TestInvoice(BaseTestCase):
+    def test_get_number(self):
+        project = get_project()
+        seq_number = 15
+        date = datetime.date(1969, 07, 31)
+        self.assertEqual(Invoice.get_number(project, seq_number, date),
+                        u"PRO1_CLI1_F15_0769")
+        self.assertEqual(Invoice.get_number(project, seq_number, date,
+                deposit=True), u"PRO1_CLI1_FA15_0769")

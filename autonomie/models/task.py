@@ -1195,7 +1195,7 @@ class InvoiceLine(DBBASE):
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDInvoiceLine", Integer, primary_key=True)
     IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
-    rowIndex = Column("rowIndex", Integer)
+    rowIndex = Column("rowIndex", Integer, default=1)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
     quantity = Column(DOUBLE, default=1)

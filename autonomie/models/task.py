@@ -568,11 +568,140 @@ class Estimation(Task, TaskCompute):
         duple.payment_lines = self.get_duplicated_payment_lines()
         return duple
 
-    def gen_invoices(self):
+    def _common_args_for_generation(self, user_id):
+        """
+            Return the args common to all the generated invoices
+        """
+        return dict(IDProject = self.IDProject,
+                    IDPhase = self.IDPhase,
+                    CAEStatus = 'draft',
+                    statusPerson = user_id,
+                    IDEmployee = user_id,
+                    tva = self.tva,
+                    IDEstimation=self.IDTask,
+                    paymentConditions=self.paymentConditions,
+                    description=self.description,
+                    course=self.course)
+
+    def _account_invoiceline(self, amount, description):
+        """
+            Return an account invoiceline
+        """
+        return InvoiceLine(cost=amount, description=description)
+
+    def _account_invoice(self, args, count=0):
+        """
+            Return an account invoice
+        """
+        args['sequenceNumber'] = self.project.get_next_invoice_number() + count
+        args['name'] = u"Facture d'acompte {0}".format(count + 1)
+        args['number'] = Invoice.get_number(self.project,
+                                            args['sequenceNumber'],
+                                            args['taskDate'],
+                                            deposit=True)
+        args['displayedUnits'] = 0
+        return Invoice(**args)
+
+    def _deposit_invoice(self, args):
+        """
+            Return the deposit
+        """
+        args['taskDate'] = datetime.date.today()
+        invoice = self._account_invoice(args)
+        amount = self.deposit_amount()
+        description=u"Facture d'accompte"
+        line = self._account_invoiceline(amount, description)
+        invoice.lines.append(line)
+        return invoice, line.duplicate()
+
+    def _intermediate_invoices(self, args, paymentline, count):
+        """
+            return an intermediary invoice described by "paymentline"
+        """
+        args['taskDate'] = paymentline.paymentDate
+        invoice = self._account_invoice(args, count)
+        if self.manualDeliverables:
+            amount = paymentline.amount
+        else:
+            amount = self.paymentline_amount()
+        description = paymentline.description
+        line = self._account_invoiceline(amount, description)
+        invoice.lines.append(line)
+        return invoice, line.duplicate()
+
+    def _sold_invoice_name(self, seq_number, count):
+        """
+            Return the name of the last invoice
+        """
+        if count > 0:
+            name = u"Facture de solde"
+        else:
+            name = u"Facture {0}".format(seq_number)
+        return name
+
+    def _sold_invoice_lines(self, account_lines):
+        """
+            return the lines that will appear in the sold invoice
+        """
+        sold_lines = []
+        for line in self.lines:
+            sold_lines.append(line.gen_invoice_line())
+        rowIndex = len(self.lines)
+        for line in account_lines:
+            rowIndex = rowIndex + 1
+            line.cost = -1 * line.cost
+            line.rowIndex = rowIndex
+            sold_lines.append(line)
+        return sold_lines
+
+    def _sold_invoice(self, args, paymentline, count, account_lines):
+        """
+            Return the sold invoice
+        """
+        args['taskDate'] = paymentline.paymentDate
+        args['sequenceNumber'] = self.project.get_next_invoice_number() + count
+        args['name'] = self._sold_invoice_name(args['sequenceNumber'], count)
+        args['number'] = Invoice.get_number(self.project,
+                                            args['sequenceNumber'],
+                                            args['taskDate'])
+        args['displayedUnits'] = self.displayedUnits
+        args['expenses'] = self.expenses
+        args['discountHT'] = self.discountHT
+        invoice = Invoice(**args)
+        for line in self._sold_invoice_lines(account_lines):
+            invoice.lines.append(line)
+        return invoice
+
+    def gen_invoices(self, user_id):
         """
             Return the invoices based on the current estimation
         """
-        pass
+        invoices = []
+        lines = []
+        common_args = self._common_args_for_generation(user_id)
+        count = 0
+        if self.deposit > 0:
+            deposit, line = self._deposit_invoice(common_args.copy())
+            invoices.append(deposit)
+            # We remember the lines to display them in the laste invoice
+            lines.append(line)
+            count += 1
+        # all payment lines specified (less the last one)
+        for paymentline in self.payment_lines[:-1]:
+            invoice, line = self._intermediate_invoices(common_args.copy(),
+                                                            paymentline,
+                                                            count)
+            invoices.append(invoice)
+            lines.append(line)
+            count += 1
+
+        invoice = self._sold_invoice(common_args.copy(),
+                                     self.payment_lines[-1],
+                                     count,
+                                     lines)
+        invoices.append(invoice)
+        return invoices
+
 
     def get_duplicated_lines(self):
         """
@@ -596,7 +725,8 @@ class Estimation(Task, TaskCompute):
         taskname_tmpl = u"Devis {0}"
         return taskname_tmpl.format(seq_number)
 
-    def get_number(self, project, seq_number, taskDate):
+    @classmethod
+    def get_number(cls, project, seq_number, taskDate):
         tasknumber_tmpl = u"{0}_{1}_D{2}_{3:%m%y}"
         pcode = project.code
         ccode = project.client.id
@@ -777,6 +907,16 @@ class Invoice(Task, TaskCompute):
             return u"par virement"
         else:
             return u"mode paiement inconnu"
+
+    @classmethod
+    def get_number(cls, project, seq_number, taskDate, deposit=False):
+        if deposit:
+            tasknumber_tmpl = u"{0}_{1}_FA{2}_{3:%m%y}"
+        else:
+            tasknumber_tmpl = u"{0}_{1}_F{2}_{3:%m%y}"
+        pcode = project.code
+        ccode = project.client.id
+        return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):
@@ -1169,6 +1309,18 @@ class EstimationLine(DBBASE):
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
+
+    def gen_invoice_line(self):
+        """
+            return the equivalent InvoiceLine
+        """
+        line = InvoiceLine()
+        line.rowIndex = self.rowIndex
+        line.cost = self.cost
+        line.description = self.description
+        line.quantity = self.quantity
+        line.unity = self.unity
+        return line
 
     def total(self):
         """

@@ -45,6 +45,7 @@ class BaseTestCase(unittest.TestCase):
 
         # bind an individual DBSESSION to the connection
         self.DBSession.configure(bind=self.connection)
+        from functools import partial
         self.session = self.DBSession(bind=self.connection)
         DBBASE.session = self.session
 
@@ -77,6 +78,7 @@ class BaseViewTest(BaseTestCase):
             post.update({'csrf_token': def_csrf})
         request = testing.DummyRequest(post)
         request.session = self.make_session(request)
+        request.dbsession = lambda :self.session
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
         request.session.get_csrf_token = csrf_token

@@ -31,7 +31,7 @@ class TestFileTempStore(BaseFunctionnalTest):
         request = self.get_csrf_request()
         session = request.session
         tempstore = fileupload.FileTempStore(session, TMPDIR, FAKEURL)
-        self.assertRaises(AttributeError, tempstore.preview_url, "dummy")
+        self.assertEqual(None, tempstore.preview_url("dummy"))
         #coming from database
         cstruct1 = {'uid':'test', 'filename':'testfile1.jpg'}
         tempstore[cstruct1['uid']] = cstruct1

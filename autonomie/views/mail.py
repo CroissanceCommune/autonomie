@@ -20,6 +20,7 @@ import logging
 from pyramid.events import subscriber
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
+from pyramid.threadlocal import get_current_registry
 
 log = logging.getLogger(__name__)
 
@@ -53,7 +54,16 @@ class StatusChanged(object):
         """
             Return the sender's email
         """
-        return self.format_mail(self.request.user.email)
+        settings = get_current_registry().settings
+        if self.request.user.email:
+            mail = self.request.user.email
+        elif settings.has_key('mail.default_sender'):
+            mail = settings['mail.default_sender']
+        else:
+            log.info(u"The current user : {0} has not set his email".format(
+                                                    self.request.user.login))
+            mail = "Unknown"
+        return self.format_mail(mail)
 
     @property
     def subject(self):

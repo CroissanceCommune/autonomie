@@ -63,7 +63,7 @@ function computeEstimationRow(tag){
   var cost = row.find("input[name=cost]").val();
   var quantity = row.find("input[name=quantity]").val();
   var total = transformToCents(cost) * transformToCents(quantity);
-  totalinput.empty().html( formatAmount(total) );
+  totalinput.empty().html( formatAmount(total, false) );
 }
 function computeRowsTotal(){
   /*
@@ -104,19 +104,40 @@ function getExpenses(){
    */
   return transformToCents( $('input[name=expenses]').val() );
 }
-function formatPrice(price) {
+function trailingZeros(cents, rounded) {
+  /*
+   * Handle the trailing zeros needed for an amount
+   */
+   if (cents.length === 1){
+    cents += 0;
+   }
+   if ( ! rounded ){
+    if ( cents.length > 2 ){
+      if (cents.charAt(3) == "0"){
+        cents = cents.substr(0,3);
+      }
+      if (cents.charAt(2) == "0"){
+        cents = cents.substr(0,2);
+      }
+    }
+   }
+   return cents;
+}
+function formatPrice(price, rounded) {
   /*
    * Return a formatted price for display
    * @price : compute-formatted price
    */
-  price = Math.floor(price*100) / 100;
+  if (rounded){
+    price = Math.floor(price*100) / 100;
+  }else{
+    price = price.toFixed(4);
+  }
   price = String(price);
   var splitted = price.split('.');
   if (splitted[1] != undefined){
     var cents = splitted[1];
-    if (cents.length===1){
-      cents += '0';
-    }
+    cents = trailingZeros(cents, rounded);
   }else{
     cents = '00';
   }
@@ -129,14 +150,17 @@ function isNotFormattable(amount){
   }
   return false;
 }
-function formatAmount( amount ){
+function formatAmount( amount, rounded ){
   /*
    * return a formatted user-friendly amount
    */
+  if ( rounded === undefined ){
+    rounded = true;
+  }
   if (isNotFormattable(amount)){
     return amount;
   }
-  return formatPrice( amount ) + "&nbsp;&euro;";
+  return formatPrice( amount, rounded ) + "&nbsp;&euro;";
 }
 function computeTotal(){
   /*
@@ -149,8 +173,8 @@ function computeTotal(){
   var tvaPart = getTvaPart( HTTotal, tva );
   var expenses = getExpenses();
   var total = HTTotal + tvaPart + expenses;
-  $('#linestotal .input').empty().html(formatAmount(linestotal));
-  $('#httotal .input').empty().html(formatAmount(HTTotal));
+  $('#linestotal .input').empty().html(formatAmount(linestotal, false));
+  $('#httotal .input').empty().html(formatAmount(HTTotal, false));
   $('#tvapart .input').empty().html(formatAmount(tvaPart));
   $('#total .input').empty().html(formatAmount(total));
   $(Facade).trigger('totalchanged');

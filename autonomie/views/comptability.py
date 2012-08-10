@@ -82,7 +82,7 @@ class ComptabilityView(ListView):
             Return the operation edit/add form
         """
         companies = [(unicode(c.id), c.name)
-                for c in self.dbsession.query(Company.id, Company.name).all()]
+                for c in Company.query([Company.id, Company.name]).all()]
         schema = OperationSchema().bind(choices=companies, edit=edit)
         form = Form(schema, buttons=(submit_btn,))
         return form

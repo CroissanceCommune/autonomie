@@ -188,7 +188,7 @@ class UserView(ListView):
                     companies = set(app_datas.get('companies'))
                     user.companies = []
                     for company_name in companies:
-                        company = self.dbsession.query(Company).filter(
+                        company = Company.query().filter(
                                Company.name==company_name).first()
                         if not company:
                             log.debug(u" + Adding company : %s" % company_name)

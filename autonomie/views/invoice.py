@@ -152,7 +152,7 @@ class CompanyInvoicesView(ListView):
                     current_paid=paid,
                     years=self._get_years(),
                     current_company=company_id,
-                    companies=Company.query(self.dbsession).all())
+                    companies=Company.query().all())
 
     def get_invoices(self, company_id=None, search=None, client=None,
                            year=None, paid=None, sort=None, direction="asc"):

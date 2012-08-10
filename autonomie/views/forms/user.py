@@ -20,9 +20,8 @@ import logging
 
 from deform import widget
 
-from autonomie.models import DBSESSION
 from autonomie.models.model import User
-from autonomie.models.main import get_companies
+from autonomie.models.model import Company
 from autonomie.views.forms.widgets import get_mail_input
 from autonomie.views.forms.widgets import deferred_edit_widget
 
@@ -32,8 +31,7 @@ def unique_login(node, value):
         Test login unicity against database
     """
     log.debug(" + Testing login unicity")
-    db = DBSESSION()
-    result = db.query(User).filter_by(login=value).first()
+    result = User.query().filter_by(login=value).first()
     if result:
         message = u"Le login '{0}' n'est pas disponible.".format(
                                                             value)
@@ -44,11 +42,10 @@ def auth(form, value):
         Check the login/password content
     """
     log.debug(u" * Authenticating")
-    db = DBSESSION()
     login = value.get('login')
     log.debug(u"   +  Login {0}".format(login))
     password = value.get('password')
-    result = db.query(User).filter_by(login=login).first()
+    result = User.query().filter_by(login=login).first()
     log.debug(result)
     if not result or not result.auth(password):
         log.debug(u"    - Authentication Error")
@@ -200,11 +197,11 @@ class FUser(colander.MappingSchema):
 #                         after_bind=_check_pwd,
 #                         title=u"Mot de passe")
 
-def get_companies_choices(dbsession):
+def get_companies_choices():
     """
         Return companies choices for autocomplete
     """
-    return [comp.name for comp in get_companies(dbsession)]
+    return [comp.name for comp in Company.query([Company.name]).all()]
 
 def get_user_schema(request, edit):
     """
@@ -214,10 +211,10 @@ def get_user_schema(request, edit):
     schema = FUser().clone()
     user = request.user
     if user.is_admin():
-        companies = get_companies_choices(request.dbsession())
+        companies = get_companies_choices()
         return schema.bind(edit=edit, companies=companies)
     elif user.is_manager():
-        companies = get_companies_choices(request.dbsession())
+        companies = get_companies_choices()
         # manager can't set admin rights
         roles = MANAGER_ROLES
         group = schema['user']['primary_group']

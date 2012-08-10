@@ -30,6 +30,7 @@ from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomFileType
 
 from autonomie.models import DBBASE
+from autonomie.models import DBSESSION
 
 log = logging.getLogger(__name__)
 
@@ -113,12 +114,12 @@ class Company(DBBASE):
         return self.id
 
     @classmethod
-    def query(cls, dbsession, keys=None):
+    def query(cls, keys=None):
         """
             Return a query
         """
         if keys:
-            return dbsession.query(*keys)
+            return DBSESSION.query(*keys)
         else:
             query = super(Company, cls).query()
             return query.order_by(Company.name)

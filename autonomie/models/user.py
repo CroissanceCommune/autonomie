@@ -119,4 +119,4 @@ class User(DBBASE):
             Joining companies and not showing archived users
         """
         query = super(User, cls).query()
-        return query.filter(User.status=='A')
+        return query.filter(User.status=='A').order_by(User.lastname)

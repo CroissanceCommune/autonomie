@@ -541,14 +541,13 @@ class Estimation(Task, TaskCompute):
         seq_number = project.get_next_estimation_number()
         taskDate = datetime.date.today()
 
+        log.debug("# Estimation Duplication #")
         duple = Estimation()
         duple.IDPhase = self.IDPhase
         duple.taskDate = taskDate
         duple.IDEmployee = self.IDEmployee
         duple.description = self.description
-        duple.CAEStatus = "draft"
         duple.sequenceNumber = seq_number
-        duple.statusPersonAccount = user
 
         duple.name = self.get_name(seq_number)
         duple.number = self.get_number(project, seq_number, taskDate)
@@ -557,7 +556,6 @@ class Estimation(Task, TaskCompute):
         duple.deposit = self.deposit
         duple.paymentConditions = self.paymentConditions
         duple.exclusions = self.exclusions
-        duple.project = project
         duple.manualDeliverables = self.manualDeliverables
         duple.course = self.course
         duple.displayedUnits = self.displayedUnits
@@ -566,6 +564,12 @@ class Estimation(Task, TaskCompute):
         duple.paymentDisplay = self.paymentDisplay
         duple.lines = self.get_duplicated_lines()
         duple.payment_lines = self.get_duplicated_payment_lines()
+
+        # Setting relationships at the end of the duplication
+        log.debug("    adding relationships")
+        duple.statusPersonAccount = user
+        duple.project = project
+        log.debug("-> Returning the duplicate")
         return duple
 
     def _common_args_for_generation(self, user_id):

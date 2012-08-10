@@ -53,11 +53,15 @@ USER = dict(id=2,
 
 USER2 = dict(id=3, login=u"test_user2")
 
-PROJECT = dict(id=1, IDProject=1, name=u'project1', code=u"PRO1")
-CLIENT = dict(code=u"CLI1", name=u"client1", id=u"CLI1")
+PROJECT = dict(id=1, name=u'project1', code=u"PRO1", id_company=1,
+        code_client=u"CLI1")
+CLIENT = dict(name=u"client1", id=u"CLI1", id_company=1)
 
 ESTIMATION=dict(IDPhase=1,
                 IDProject=1,
+                name=u"Devis 2",
+                sequenceNumber=2,
+                CAEStatus="draft",
                 course="0",
                 displayedUnits="1",
                 discountHT=2000,
@@ -67,10 +71,11 @@ ESTIMATION=dict(IDPhase=1,
                 exclusions=u"Notes",
                 paymentDisplay=u"ALL",
                 paymentConditions=u"Conditions de paiement",
-                taskDate=u"10-12-2012",
+                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description du devis",
                 manualDeliverables=1,
-                statusComment=u"Aucun commentaire")
+                statusComment=u"Aucun commentaire",
+                number=u"estnumber")
 LINES = [{'description':u'text1',
           'cost':10025,
           'unity':'DAY',
@@ -158,7 +163,6 @@ def get_estimation(user=None, project=None):
     est.project = project
     est.statusPersonAccount = user
     return est
-
 
 class TestTaskModels(BaseTestCase):
     def test_interfaces(self):
@@ -365,6 +369,26 @@ class TestEstimation(BaseTestCase):
         self.assertEqual(newest.project, project)
         self.assertEqual(newest.statusPersonAccount, user)
         self.assertTrue(newest.number.startswith("PRO1_CLI1_D2_"))
+
+    def test_duplicate_estimation_integration(self):
+        """
+            Here we test the duplication on a real world case
+            specifically, the client is not loaded in the session
+            causing the insert statement to be fired during duplication
+        """
+        from autonomie.models.user import User
+        from autonomie.models.model import Project
+        user = self.session.query(User).first()
+        project = self.session.query(Project).first()
+        est = get_estimation(user, project)
+        self.assertEqual(est.statusPersonAccount, user)
+        self.assertEqual(est.project, project)
+        est.IDEmployee = user.id
+        est = self.session.merge(est)
+        self.session.flush()
+        newest = est.duplicate(user, project)
+        self.session.merge(newest)
+        self.session.flush()
 
     def test_estimation_deposit(self):
         est = get_estimation()

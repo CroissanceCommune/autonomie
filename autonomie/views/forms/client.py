@@ -20,7 +20,6 @@ import logging
 
 from deform import widget
 
-from autonomie.models import DBSESSION
 from autonomie.models.model import Client
 from autonomie.views.forms.widgets import get_deferred_edit_widget
 from autonomie.views.forms.widgets import get_mail_input
@@ -34,8 +33,7 @@ def deferred_ccode_valid(node, kw):
             Test customer code unicity
         """
         #Test unicity
-        db = DBSESSION()
-        result = db.query(Client).filter(Client.id==value).first()
+        result = Client.get(value)
         if len(value) != 4:
             message = u"Le code client doit contenir 4 caractères."
             raise colander.Invalid(node, message)

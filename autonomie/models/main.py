@@ -17,26 +17,9 @@
     Allows to handle caching at function level (not at sqla level)
 """
 
-from beaker.cache import cache_region
-
-from autonomie.models.model import Company
 from autonomie.models.model import Invoice
 from autonomie.models.model import CancelInvoice
 from autonomie.models.model import ManualInvoice
-
-def get_companies(dbsession):
-    """
-        Return all the companies present in the database
-    """
-#    @cache_region("long_term", "companies")
-    def companies():
-        """
-            query the database and cache the result
-            cache is using the function params to identify the cache key
-            that's why we needed a two level scope for caching
-        """
-        return dbsession.query(Company).all()
-    return companies()
 
 def get_next_officialNumber(dbsession):
     """

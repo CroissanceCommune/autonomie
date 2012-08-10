@@ -40,8 +40,8 @@ class StatisticView(BaseView):
         """
         log.debug("# Asking for the statistics page #")
         ret_dict = dict(title=u"Statistiques")
-        companies = Company.query(self.request.dbsession(), [Company.id,
-                                                          Company.name]).all()
+        companies = Company.query([Company.id, Company.name]).order_by(
+                                                            Company.name).all()
         ret_dict['companies'] = companies
         current_year = 2000
         years = range(2000, datetime.date.today().year+1)

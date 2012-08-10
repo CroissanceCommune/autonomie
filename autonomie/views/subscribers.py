@@ -28,7 +28,6 @@ from pyramid.threadlocal import get_current_request
 
 from autonomie.i18n import translate
 from autonomie.models.model import Company
-from autonomie.models.main import get_companies as get_all_companies
 from autonomie.utils.widgets import Menu
 from autonomie.utils.widgets import MainMenuItem
 from autonomie.utils.widgets import MenuDropDown
@@ -52,8 +51,7 @@ def get_companies(request):
     """
     companies = []
     if request.user.is_admin() or request.user.is_manager():
-        dbsession = request.dbsession()
-        companies = get_all_companies(dbsession)
+        companies = Company.query().all()
     else:
         companies = request.user.companies
     return companies
@@ -63,8 +61,7 @@ def get_company(request, cid):
         Return the current company object
     """
     if not hasattr(request, "_company"):
-        dbsession = request.dbsession()
-        company = dbsession.query(Company).filter(Company.id==cid).first()
+        company = Company.get(cid)
         request._company = company
     return request._company
 

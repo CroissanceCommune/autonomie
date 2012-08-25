@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 27 juil. 2012 18:21:45 CEST
+# * Last Modified : jeu. 23 août 2012 20:54:07 CEST
 #
 # * Project : autonomie
 #
@@ -36,8 +36,8 @@ from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomDateType2
 from autonomie.models.types import CustomInteger
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.user import User
 from autonomie.models.company import Company
+from autonomie.models.project import Project
 from autonomie.models.task import Task
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
@@ -47,6 +47,7 @@ from autonomie.models.task import CancelInvoiceLine
 from autonomie.models.task import EstimationLine
 from autonomie.models.task import InvoiceLine
 from autonomie.models.task import PaymentLine
+from autonomie.models.user import User
 
 
 from autonomie.models import DBBASE
@@ -103,88 +104,6 @@ class Client(DBBASE):
 
     def get_company_id(self):
         return self.company.id
-
-class Project(DBBASE):
-    """
-        `IDProject` int(11) NOT NULL auto_increment,
-        `name` varchar(150) NOT NULL,
-        `customerCode` varchar(4) NOT NULL,
-        `type` varchar(150) default NULL,
-        `code` varchar(4) NOT NULL,
-        `definition` text,
-        `creationDate` int(11) NOT NULL,
-        `updateDate` int(11) NOT NULL,
-        `startingDate` int(11) default NULL,
-        `endingDate` int(11) default NULL,
-        `status` varchar(20) NOT NULL,
-        `IDCompany` int(11) NOT NULL,
-        `dispatchType` varchar(10) NOT NULL default 'PERCENT',
-        `archived` tinyint(4) NOT NULL default '0',
-        PRIMARY KEY  (`IDProject`),
-        KEY `IDCompany` (`IDCompany`)
-    """
-    __tablename__ = 'coop_project'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column('IDProject', Integer, primary_key=True)
-    name = Column("name", String(255))
-    code_client = Column("customerCode", String(4),
-                                    ForeignKey('coop_customer.code'))
-    code = Column("code", String(4), nullable=False)
-    definition = deferred(Column("definition", Text), group='edit')
-
-    id_company = Column("IDCompany", Integer,
-                                    ForeignKey('coop_company.IDCompany'))
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
-    startingDate = deferred(Column("startingDate", CustomDateType,
-                                default=get_current_timestamp), group='edit')
-    endingDate = deferred(Column("endingDate", CustomDateType,
-                                default=get_current_timestamp), group='edit')
-
-    type = deferred(Column('type', String(150)), group='edit')
-    archived = Column("archived", String(255), default=0)
-
-    def get_estimation(self, taskid):
-        """
-            Returns the estimation with id taskid
-        """
-        for estimation in self.estimations:
-            if estimation.IDTask == int(taskid):
-                return estimation
-        raise KeyError("No such task in this project")
-
-    def get_invoice(self, taskid):
-        """
-            Returns the estimation with id taskid
-        """
-        for invoice in self.invoices:
-            if invoice.IDTask == int(taskid):
-                return invoice
-        raise KeyError("No such task in this project")
-
-    def is_archived(self):
-        """
-            Return True if the project is archived
-        """
-        return self.archived == 1
-
-    def is_deletable(self):
-        """
-            Return True if this project could be deleted
-        """
-        return self.archived == 1 and not self.invoices
-
-    def get_company_id(self):
-        return self.company.id
-
-    def get_next_estimation_number(self):
-        return len(self.estimations) + 1
-
-    def get_next_invoice_number(self):
-        return len(self.invoices) + 1
 
 
 class Phase(DBBASE):

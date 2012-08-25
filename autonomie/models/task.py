@@ -543,6 +543,7 @@ class Estimation(Task, TaskCompute):
 
         log.debug("# Estimation Duplication #")
         duple = Estimation()
+        duple.CAEStatus = u'draft'
         duple.IDPhase = self.IDPhase
         duple.taskDate = taskDate
         duple.IDEmployee = self.IDEmployee
@@ -598,7 +599,7 @@ class Estimation(Task, TaskCompute):
             Return an account invoice
         """
         args['sequenceNumber'] = self.project.get_next_invoice_number() + count
-        args['name'] = u"Facture d'acompte {0}".format(count + 1)
+        args['name'] = Invoice.get_name(count + 1, account=True)
         args['number'] = Invoice.get_number(self.project,
                                             args['sequenceNumber'],
                                             args['taskDate'],
@@ -638,10 +639,10 @@ class Estimation(Task, TaskCompute):
             Return the name of the last invoice
         """
         if count > 0:
-            name = u"Facture de solde"
+            sold = True
         else:
-            name = u"Facture {0}".format(seq_number)
-        return name
+            sold = False
+        return Invoice.get_name(seq_number, sold=sold)
 
     def _sold_invoice_lines(self, account_lines):
         """
@@ -725,7 +726,8 @@ class Estimation(Task, TaskCompute):
             newlines.append(line.duplicate())
         return newlines
 
-    def get_name(self, seq_number):
+    @classmethod
+    def get_name(cls, seq_number):
         taskname_tmpl = u"Devis {0}"
         return taskname_tmpl.format(seq_number)
 
@@ -796,9 +798,6 @@ class Estimation(Task, TaskCompute):
                 result = rest - sum(line.amount \
                         for line in self.payment_lines[:-1])
         return result
-
-
-
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class Invoice(Task, TaskCompute):
@@ -888,6 +887,19 @@ class Invoice(Task, TaskCompute):
             tolate = False
         return self.CAEStatus in ('valid', 'sent','recinv') and tolate
 
+    @classmethod
+    def get_name(cls, seq_number, account=False, sold=False):
+        """
+            return an invoice name
+        """
+        if account:
+            taskname_tmpl = u"Facture d'acompte {0}"
+        elif sold:
+            taskname_tmpl = u"Facture de solde"
+        else:
+            taskname_tmpl = u"Facture {0}"
+        return taskname_tmpl.format(seq_number)
+
     def get_next_actions(self):
         """
             Return the next available actions regarding the current status
@@ -945,24 +957,43 @@ class Invoice(Task, TaskCompute):
                                          (current_year+1)*10000
                                     ))
 
-    def gen_cancel_invoice(self):
+    def gen_cancelinvoice(self, user_id):
         """
             Return a cancel invoice with self's informations
         """
         cancelinvoice = CancelInvoice()
+        seq_number = self.project.get_next_cancelinvoice_number()
+        cancelinvoice.name = u"Avoir {0}".format(seq_number)
         cancelinvoice.IDPhase = self.IDPhase
         cancelinvoice.CAEStatus = 'draft'
         cancelinvoice.taskDate = datetime.date.today()
         cancelinvoice.description = self.description
 
         cancelinvoice.IDInvoice = self.IDTask
-        cancelinvoice.IDProject = self.IDProject
         cancelinvoice.invoiceDate = self.taskDate
         cancelinvoice.invoiceNumber = self.officialNumber
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.displayedUnits = self.displayedUnits
         cancelinvoice.tva = self.tva
+        cancelinvoice.number = CancelInvoice.get_number(self.project,
+                            cancelinvoice.sequenceNumber,
+                            cancelinvoice.taskDate)
+        cancelinvoice.statusPerson = user_id
+        cancelinvoice.IDProject = self.IDProject
+        cancelinvoice.IDEmployee = user_id
+        for line in self.lines:
+            cancelinvoice.lines.append(line.gen_cancelinvoice_line())
+        if self.discountHT:
+            discount_line = CancelInvoiceLine(cost=self.discountHT,
+                                          quantity=1,
+                                          description=u"Remise HT",
+                                          rowIndex=self.get_next_row_index(),
+                                          unity='NONE')
+            cancelinvoice.lines.append(discount_line)
         return cancelinvoice
+
+    def get_next_row_index(self):
+        return len(self.lines) + 1
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
@@ -1033,6 +1064,14 @@ class CancelInvoice(Task, TaskCompute):
     def is_cancelled(self):
         return False
 
+    @classmethod
+    def get_name(cls, seq_number):
+        """
+            return an cancelinvoice name
+        """
+        taskname_tmpl = u"Avoir {0}"
+        return taskname_tmpl.format(seq_number)
+
     def get_paymentmode_str(self):
         """
             Return a user-friendly string describing the payment Mode
@@ -1059,6 +1098,13 @@ class CancelInvoice(Task, TaskCompute):
             Return False
         """
         return False
+
+    @classmethod
+    def get_number(cls, project, seq_number, taskDate):
+        tasknumber_tmpl = u"{0}_{1}_A{2}_{3:%m%y}"
+        pcode = project.code
+        ccode = project.client.id
+        return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
 
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):
@@ -1182,73 +1228,6 @@ class ManualInvoice(DBBASE):
         total_ht = self.total_ht()
         tva = max(int(self.tva), 0)
         return int(float(total_ht) * (tva / 10000.0))
-
-class CancelInvoiceLine(DBBASE):
-    """
-        CancelInvoice lines
-        `id` int(11) NOT NULL auto_increment,
-        `IDTask` int(11) NOT NULL,
-        `rowIndex` int(11) NOT NULL,
-        `description` text,
-        `cost` int(11) default '0',
-        `quantity` double default '1',
-        `creationDate` int(11) default '0',
-        `updateDate` int(11) default '0',
-        `unity` varchar(10) default NULL,
-        PRIMARY KEY  (`IDCancelInvoiceLine`),
-    """
-    __tablename__ = 'coop_cancel_invoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column(Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_cancel_invoice.IDTask'))
-    created_at = Column(DateTime, default=datetime.datetime.now)
-    updated_at = Column(DateTime, default=datetime.datetime.now,
-                                  onupdate=datetime.datetime.now)
-    task = relationship("CancelInvoice", backref="lines",
-                            order_by='CancelInvoiceLine.rowIndex'
-                        )
-    rowIndex = Column(Integer)
-    description = Column(Text, default="")
-    cost = Column(Integer, default=0)
-    quantity = Column(DOUBLE, default=1)
-    unity = Column(String(10), default=None)
-
-    def get_unity_label(self, pretty=False):
-        """
-            return unitie's label
-        """
-        if pretty:
-            default = u""
-        else:
-            default = u"-"
-        labels = dict(
-                NONE=default,
-                HOUR=u"heure(s)",
-                DAY=u"jour(s)",
-                WEEK=u"semaine(s)",
-                MONTH=u"mois",
-                FEUIL=u"feuillet(s)",
-                PACK=u"forfait",
-                )
-        return labels.get(self.unity, default)
-
-    def duplicate(self):
-        """
-            duplicate a line
-        """
-        newone = CancelInvoiceLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = self.cost
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.unity = self.unity
-        return newone
-
-    def total(self):
-        """
-            Compute the line's total
-        """
-        return float(self.cost) * float(self.quantity)
 
 class EstimationLine(DBBASE):
     """
@@ -1395,13 +1374,80 @@ class InvoiceLine(DBBASE):
         newone.unity = self.unity
         return newone
 
-    def gen_cancel_invoice_line(self):
+    def gen_cancelinvoice_line(self):
         """
             Return a cancel invoice line duplicating this one
         """
         newone = CancelInvoiceLine()
         newone.rowIndex = self.rowIndex
         newone.cost = -1 * self.cost
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        return newone
+
+    def total(self):
+        """
+            Compute the line's total
+        """
+        return float(self.cost) * float(self.quantity)
+
+class CancelInvoiceLine(DBBASE):
+    """
+        CancelInvoice lines
+        `id` int(11) NOT NULL auto_increment,
+        `IDTask` int(11) NOT NULL,
+        `rowIndex` int(11) NOT NULL,
+        `description` text,
+        `cost` int(11) default '0',
+        `quantity` double default '1',
+        `creationDate` int(11) default '0',
+        `updateDate` int(11) default '0',
+        `unity` varchar(10) default NULL,
+        PRIMARY KEY  (`IDCancelInvoiceLine`),
+    """
+    __tablename__ = 'coop_cancel_invoice_line'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    id = Column(Integer, primary_key=True)
+    IDTask = Column(Integer, ForeignKey('coop_cancel_invoice.IDTask'))
+    created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, default=datetime.datetime.now,
+                                  onupdate=datetime.datetime.now)
+    task = relationship("CancelInvoice", backref="lines",
+                            order_by='CancelInvoiceLine.rowIndex'
+                        )
+    rowIndex = Column(Integer)
+    description = Column(Text, default="")
+    cost = Column(Integer, default=0)
+    quantity = Column(DOUBLE, default=1)
+    unity = Column(String(10), default=None)
+
+    def get_unity_label(self, pretty=False):
+        """
+            return unitie's label
+        """
+        if pretty:
+            default = u""
+        else:
+            default = u"-"
+        labels = dict(
+                NONE=default,
+                HOUR=u"heure(s)",
+                DAY=u"jour(s)",
+                WEEK=u"semaine(s)",
+                MONTH=u"mois",
+                FEUIL=u"feuillet(s)",
+                PACK=u"forfait",
+                )
+        return labels.get(self.unity, default)
+
+    def duplicate(self):
+        """
+            duplicate a line
+        """
+        newone = CancelInvoiceLine()
+        newone.rowIndex = self.rowIndex
+        newone.cost = self.cost
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity

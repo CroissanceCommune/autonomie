@@ -123,6 +123,8 @@ class TaskView(BaseView):
         BaseTask related view
         Base object for estimation and invoice views
     """
+    type_ = u""
+    model = None
     schema = None
     add_title = u""
     edit_title = u""
@@ -149,7 +151,12 @@ class TaskView(BaseView):
         """
             should return the current task
         """
-        raise Exception("Not implemented yet")
+        task = self.model()
+        task.CAEStatus = 'draft'
+        phaseid = self.request.params.get('phase')
+        task.IDPhase = phaseid
+        task.IDEmployee = self.user.id
+        return task
 
     def set_lines(self):
         """
@@ -193,28 +200,21 @@ class TaskView(BaseView):
             set the sequence number
             don't know really if this column matters
         """
-        return len(self.project.estimations) + 1
+        return getattr(self.project, "get_next_%s_number" % self.type_)()
 
-    def get_taskname(self):
+    def get_taskname(self, seq_number):
         """
             set the current taskname
         """
-        return self.taskname_tmpl.format(self.get_sequencenumber())
+        return self.model.get_name(self.get_sequencenumber())
 
     def get_tasknumber(self, taskDate, tmpl=None, seq_number=None):
         """
             return the task number
         """
-        pcode = self.project.code
-        ccode = self.project.client.id
-        if not tmpl:
-            tmpl = self.tasknumber_tmpl
-        if not seq_number:
-            seq_number = self.get_sequencenumber()
-        return tmpl.format( pcode,
-                            ccode,
-                            seq_number,
-                            taskDate)
+        return self.model.get_number(self.project,
+                                     self.get_sequencenumber(),
+                                     taskDate)
 
     def get_taskstatus(self):
         """

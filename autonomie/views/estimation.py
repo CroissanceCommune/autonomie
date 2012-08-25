@@ -47,6 +47,8 @@ class EstimationView(TaskView):
         pdf
         html
     """
+    model = Estimation
+    type_ = "estimation"
     schema = get_estimation_schema()
     add_title = u"Nouveau devis"
     edit_title = u"Édition du devis {task.number}"
@@ -176,17 +178,6 @@ class EstimationView(TaskView):
             eline = EstimationLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
-
-    def get_task(self):
-        """
-            return the current estimation or a new one
-        """
-        estimation = Estimation()
-        estimation.CAEStatus = 'draft'
-        phaseid = self.request.params.get('phase')
-        estimation.IDPhase = phaseid
-        estimation.IDEmployee = self.user.id
-        return estimation
 
     def _html(self):
         """

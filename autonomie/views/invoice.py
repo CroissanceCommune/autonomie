@@ -169,26 +169,9 @@ class CompanyInvoicesView(ListView):
             if client:
                 cancel_inv, inv, man_inv = self._filter_by_client(cancel_inv, inv, man_inv, client)
             cancel_inv, inv, man_inv = self._filter_by_status(cancel_inv, inv, man_inv, paid)
-            if year:
-                cancel_inv, inv, man_inv = self._filter_by_date(cancel_inv, inv, man_inv, year)
+        if year:
+            cancel_inv, inv, man_inv = self._filter_by_date(cancel_inv, inv, man_inv, year)
 
-#        if sort:
-#            inv = self._sort(inv, sort, direction)
-#            if sort == Invoice.officialNumber:
-#                csort = CancelInvoice.officialNumber
-#            elif sort == Invoice.taskDate:
-#                csort = CancelInvoice.taskDate
-#            elif sort == Invoice.number:
-#                csort = CancelInvoice.number
-#
-#            cancel_inv = self._sort(cancel_inv, csort, direction)
-#            if sort == Invoice.officialNumber:
-#                sort = ManualInvoice.officialNumber
-#            elif sort == Invoice.taskDate:
-#                sort = ManualInvoice.taskDate
-#            elif sort == Invoice.number:
-#                sort = ManualInvoice.officialNumber
-#            man_inv = self._sort(man_inv, sort, direction)
         all_inv = inv.all()
         all_inv.extend(cancel_inv)
         all_inv.extend(man_inv)
@@ -202,8 +185,6 @@ class CompanyInvoicesView(ListView):
             for e in sort:
                 res = getattr(res, e)
             return res
-
-
         inv = inv.all()
         inv.extend(cancel_inv.all())
         inv.extend(man_inv.all())
@@ -311,12 +292,6 @@ class CompanyInvoicesView(ListView):
                                          paid="paid",
                                          year=year,
                                          sort=('taskDate',))
-        #inv, man_inv = self._filter_by_status(inv, man_inv, "paid")
-        #years = sorted(set([i.taskDate.year for i in inv.all()]))
-        #inv, man_inv = self._filter_by_date(inv, man_inv, year)
-        #inv = inv.order_by(Invoice.taskDate)
-        #man_inv = man_inv.order_by(ManualInvoice.taskDate)
-        #invoices = self._wrap_for_computing(inv, man_inv)
         return dict(
                 title=u"Trésorerie",
                 invoices=invoices,
@@ -332,6 +307,8 @@ class InvoiceView(TaskView):
         pdf
         html
     """
+    type_ = "invoice"
+    model = Invoice
     schema = get_invoice_schema()
     add_title = u"Nouvelle facture"
     edit_title = u"Édition de la facture {task.number}"
@@ -437,13 +414,6 @@ class InvoiceView(TaskView):
                     action_menu=self.actionmenu
                     )
 
-    def get_sequencenumber(self):
-        """
-            set the sequence number
-            don't know really if this column matters
-        """
-        return len(self.project.invoices) + 1
-
     def remove_lines_from_session(self):
         """
             Remove invoice lines and payment lines from the current session
@@ -460,17 +430,6 @@ class InvoiceView(TaskView):
             eline = InvoiceLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
-
-    def get_task(self):
-        """
-            return the current invoice or a new one
-        """
-        document = Invoice()
-        document.CAEStatus = "draft"
-        phaseid = self.request.params.get('phase')
-        document.IDPhase = phaseid
-        document.IDEmployee = self.user.id
-        return document
 
     def _html(self):
         """
@@ -541,7 +500,7 @@ class InvoiceView(TaskView):
 
         elif status == 'aboinv':
             log.debug(" + An invoice is aborted -> generating cancel")
-            id_ = self._gen_cancel_invoice()
+            id_ = self._gen_cancelinvoice()
             log.debug(u"   + The cancel id : {0}".format(id_))
             self.request.session.flash(u"La facture a été annulée, \
 Un avoir a été généré, vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
@@ -557,22 +516,11 @@ Un avoir a été généré, vous pouvez l'éditer <a href='{0}'>Ici</a>.".format
                 return False
         return True
 
-    def _gen_cancel_invoice(self):
+    def _gen_cancelinvoice(self):
         """
             Generates a cancel invoice based on the current invoice
         """
-        seq_number = len(self.project.cancelinvoices) + 1
-        cancelinvoice = self.task.gen_cancel_invoice()
-        today = datetime.date.today()
-        cancelinvoice.statusPerson = self.user.id
-        cancelinvoice.statusDate = today
-        cancelinvoice.owner = self.user
-        cancelinvoice.name = u"Avoir {0}".format(seq_number)
-        cancelinvoice.number = self.get_tasknumber(today,
-                                        tmpl=u"{0}_{1}_A{2}_{3:%m%y}",
-                                        seq_number=seq_number)
-        for line in self.task.lines:
-            cancelinvoice.lines.append(line.gen_cancel_invoice_line())
+        cancelinvoice = self.task.gen_cancelinvoice(self.user.id)
         cancelinvoice = self.dbsession.merge(cancelinvoice)
         self.dbsession.flush()
         id_ = cancelinvoice.id

@@ -41,6 +41,8 @@ class CancelInvoiceView(TaskView):
     """
         all views for cancelled invoices
     """
+    type_ = "cancelinvoice"
+    model = CancelInvoice
     schema = get_cancel_invoice_schema()
     add_title = u"Nouvel avoir"
     edit_title = u"Édition de l'avoir {task.number}"
@@ -125,18 +127,6 @@ class CancelInvoiceView(TaskView):
         """
         return self.task.is_editable()
 
-    def get_task(self):
-        """
-            return the current task
-        """
-        document = CancelInvoice()
-        # a cancel invoice doesn't pass the validation process
-        document.CAEStatus = "draft"
-        phaseid = self.request.params.get('phase')
-        document.IDPhase = phaseid
-        document.IDEmployee = self.user.id
-        return document
-
     def set_lines(self):
         """
             set the lines
@@ -151,14 +141,6 @@ class CancelInvoiceView(TaskView):
                 'lines':[line.appstruct()
                             for line in self.task_lines],
                 }
-
-    def get_sequencenumber(self):
-        """
-            set the sequence number
-            don't know really if this column matters
-        """
-        return len(self.project.cancelinvoices) + 1
-
 
     def remove_lines_from_session(self):
         """

@@ -57,7 +57,7 @@ PROJECT = dict(id=1, name=u'project1', code=u"PRO1", id_company=1,
         code_client=u"CLI1")
 CLIENT = dict(name=u"client1", id=u"CLI1", id_company=1)
 
-ESTIMATION=dict(IDPhase=1,
+ESTIMATION = dict(IDPhase=1,
                 IDProject=1,
                 name=u"Devis 2",
                 sequenceNumber=2,
@@ -76,6 +76,22 @@ ESTIMATION=dict(IDPhase=1,
                 manualDeliverables=1,
                 statusComment=u"Aucun commentaire",
                 number=u"estnumber")
+INVOICE = dict(IDPhase=1,
+                IDProject=1,
+                name=u"Facture 2",
+                sequenceNumber=2,
+                CAEStatus="draft",
+                course="0",
+                displayedUnits="1",
+                discountHT=2000,
+                tva=1960,
+                expenses=1500,
+                deposit=20,
+                paymentConditions=u"Conditions de paiement",
+                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+                description=u"Description de la facture",
+                statusComment=u"Aucun commentaire",
+                number=u"invoicenumber")
 LINES = [{'description':u'text1',
           'cost':10025,
           'unity':'DAY',
@@ -135,6 +151,8 @@ def get_project():
     project = MagicMock(**PROJECT)
     project.client = get_client()
     project.get_next_estimation_number = lambda :2
+    project.get_next_invoice_number = lambda :2
+    project.get_next_cancelinvoice_number = lambda :2
     return project
 
 def get_user(datas=USER):
@@ -163,6 +181,19 @@ def get_estimation(user=None, project=None):
     est.project = project
     est.statusPersonAccount = user
     return est
+
+def get_invoice(user=None, project=None):
+    inv = Invoice(**INVOICE)
+    for line in LINES:
+        l = InvoiceLine(**line)
+        inv.lines.append(l)
+    if not user:
+        user = get_user()
+    if not project:
+        project = get_project()
+    inv.project = project
+    inv.statusPersonAccount = user
+    return inv
 
 class TestTaskModels(BaseTestCase):
     def test_interfaces(self):
@@ -358,8 +389,10 @@ class TestComputing(BaseTestCase):
         est = get_estimation()
         self.assertEqual(est.total(), EST_TOTAL)
 
-
 class TestEstimation(BaseTestCase):
+    def test_get_name(self):
+        self.assertEqual(Estimation.get_name(5), u"Devis 5")
+
     def test_duplicate_estimation(self):
         user = get_user(USER2)
         project = get_project()
@@ -429,6 +462,12 @@ class TestEstimation(BaseTestCase):
             self.assertEqual(inv.taskDate, line['paymentDate'])
 
 class TestInvoice(BaseTestCase):
+    def test_get_name(self):
+        self.assertEqual(Invoice.get_name(5), u"Facture 5")
+        self.assertEqual(Invoice.get_name(5, sold=True), u"Facture de solde")
+        self.assertEqual(Invoice.get_name(5, account=True),
+                                                      u"Facture d'acompte 5")
+
     def test_get_number(self):
         project = get_project()
         seq_number = 15
@@ -436,4 +475,99 @@ class TestInvoice(BaseTestCase):
         self.assertEqual(Invoice.get_number(project, seq_number, date),
                         u"PRO1_CLI1_F15_0769")
         self.assertEqual(Invoice.get_number(project, seq_number, date,
-                deposit=True), u"PRO1_CLI1_FA15_0769")
+                        deposit=True), u"PRO1_CLI1_FA15_0769")
+
+    def test_gen_cancelinvoice(self):
+        user = User(**USER)
+        inv = get_invoice(user=user)
+        cinv = inv.gen_cancelinvoice(user.id)
+        self.session.add(cinv)
+        self.session.flush()
+
+        self.assertEqual(cinv.name, "Avoir 2")
+        self.assertEqual(cinv.total_ht(), -1 * inv.total_ht())
+        today = datetime.date.today()
+        self.assertEqual(cinv.taskDate, today)
+
+class TestCancelInvoice(BaseTestCase):
+    def test_get_name(self):
+        self.assertEqual(CancelInvoice.get_name(5), u"Avoir 5")
+
+    def test_get_number(self):
+        project = get_project()
+        seq_number = 15
+        date = datetime.date(1969, 07, 31)
+        self.assertEqual(CancelInvoice.get_number(project, seq_number, date),
+                        u"PRO1_CLI1_A15_0769")
+
+
+class TestEstimationLine(BaseTestCase):
+    def test_get_unity(self):
+        i = InvoiceLine(unity='HOUR')
+        self.assertEqual(i.get_unity_label(), u'heure(s)')
+        i = InvoiceLine(unity='SHIT')
+        self.assertEqual(i.get_unity_label(), u'-')
+        self.assertEqual(i.get_unity_label(pretty=True), u'')
+
+    def test_duplicate_line(self):
+        line = EstimationLine(**LINES[1])
+        dline = line.duplicate()
+        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+            self.assertEqual(getattr(dline, i), getattr(line, i))
+
+    def test_gen_invoiceline(self):
+        line = EstimationLine(**LINES[1])
+        iline = line.gen_invoice_line()
+        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+            self.assertEqual(getattr(line, i), getattr(iline, i))
+
+    def test_total(self):
+        i = EstimationLine(cost=1.25, quantity=1.25)
+        self.assertEqual(i.total(), 1.5625)
+
+class TestInvoiceLine(BaseTestCase):
+    def test_get_unity(self):
+        i = InvoiceLine(unity='HOUR')
+        self.assertEqual(i.get_unity_label(), u'heure(s)')
+        i = InvoiceLine(unity='SHIT')
+        self.assertEqual(i.get_unity_label(), u'-')
+        self.assertEqual(i.get_unity_label(pretty=True), u'')
+
+    def test_duplicate_line(self):
+        line = InvoiceLine(**LINES[1])
+        dline = line.duplicate()
+        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+            self.assertEqual(getattr(dline, i), getattr(line, i))
+
+
+    def test_gen_cancelinvoice_line(self):
+        line = InvoiceLine(**LINES[1])
+        cline = line.gen_cancelinvoice_line()
+        for i in ('rowIndex', "description", "quantity", "unity"):
+            self.assertEqual(getattr(cline, i), getattr(line, i))
+        self.assertEqual(cline.cost, -1 * line.cost)
+
+    def test_total(self):
+        i = InvoiceLine(cost=1.25, quantity=1.25)
+        self.assertEqual(i.total(), 1.5625)
+
+class TestCancelInvoiceLine(BaseTestCase):
+    def test_duplicate_line(self):
+        line = CancelInvoiceLine(**LINES[1])
+        dline = line.duplicate()
+        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+            self.assertEqual(getattr(dline, i), getattr(line, i))
+
+    def test_total(self):
+        i = CancelInvoiceLine(cost=1.25, quantity=1.25)
+        self.assertEqual(i.total(), 1.5625)
+
+class TestPaymentLine(BaseTestCase):
+    def test_duplicate(self):
+        line = PaymentLine(**PAYMENT_LINES[0])
+        dline = line.duplicate()
+        for i in ('rowIndex', 'description', 'amount'):
+            self.assertEqual(getattr(line, i), getattr(dline, i))
+        today = datetime.date.today()
+        self.assertEqual(dline.paymentDate, today)
+

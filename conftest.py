@@ -12,6 +12,7 @@
 #
 # * Project :
 #
+import sys
 import os
 
 here = os.path.dirname(__file__)
@@ -33,7 +34,7 @@ def launch_cmd(cmd):
         Main entry to launch os commands
     """
     print "Launching : %s" % cmd
-    os.system(cmd)
+    return os.system(cmd)
 
 def create_sql_user(options):
     """
@@ -86,12 +87,34 @@ def update_database(options, fpath):
     options['updatefile'] = fpath
     launch_cmd("{mysql_cmd} {db} < {updatefile}".format(**options))
 
+def test_connect(options):
+    """
+        test the db connection
+    """
+    cmd = "echo 'quit' | {mysql_cmd}".format(**options)
+    ret_code = launch_cmd(cmd)
+    if ret_code != 0:
+        err_str = """
+    actual err_code = %s \n
+    You need to configure the test.ini file to allow the test
+setup script to build the mysql test database like the following : \n
+    testdb.mysql_cmd=mysql --defaults-file=/etc/mysql/debian.cnf\n
+    or \n
+    testdb.mysql_cmd=mysql -uroot -p<password>\n
+""" % ret_code
+        print err_str
+        sys.exit(err_str)
+
+
+
 def initialize_test_database(settings, prefix, here):
     """
         dump sample datas as a test database
     """
     print "Initializing test database"
     options = coerce_datas(settings, prefix, here)
+    print "testing connection"
+    test_connect(options)
     create_sql_user(options)
     create_test_db(options)
     grant_user(options)

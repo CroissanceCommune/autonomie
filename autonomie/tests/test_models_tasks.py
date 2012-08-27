@@ -217,7 +217,6 @@ class TestTaskModels(BaseTestCase):
                                                         datetime.date.today()))
         #Estimations
         task = get_task(factory=Estimation)
-        task.CAEStatus = 'draft'
         self.assertTrue(task.is_draft())
         self.assertTrue(task.is_editable())
         self.assertFalse(task.is_valid())
@@ -235,7 +234,6 @@ class TestTaskModels(BaseTestCase):
             self.assertFalse(task.is_editable())
         # Invoices
         task = get_task(factory=Invoice)
-        task.CAEStatus = 'draft'
         self.assertTrue(task.is_draft())
         self.assertTrue(task.is_editable())
         self.assertFalse(task.is_valid())
@@ -255,7 +253,6 @@ class TestTaskModels(BaseTestCase):
         self.assertTrue(task.is_paid())
         # CancelInvoice
         task = get_task(factory=CancelInvoice)
-        task.CAEStatus = 'draft'
         self.assertTrue(task.is_draft())
         self.assertTrue(task.is_editable())
         self.assertFalse(task.is_valid())

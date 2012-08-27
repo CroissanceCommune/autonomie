@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mer. 08 août 2012 10:14:44 CEST
+# * Last Modified : lun. 27 août 2012 16:39:45 CEST
 #
 # * Project : autonomie
 #
@@ -205,7 +205,7 @@ class Submit(Widget, PermWidget):
     template = "base/submit.mako"
     def __init__(self, label, perm, value, name="submit", title=None,
             css="btn btn-primary", js=None, icon=None,
-            type_='submit', request=None):
+            type_='submit', request=None, confirm=None):
         self.label = label
         self.perm = perm
         self.value = value
@@ -213,6 +213,9 @@ class Submit(Widget, PermWidget):
         self.title = title or self.label
         self.css = css
         self.js = js
+        if confirm:
+            self.js = u"return confirm('%s')".format(
+                                        confirm.replace("'", "\\'"))
         self.icon = icon
         self.type_ = type_
         if request:

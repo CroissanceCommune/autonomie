@@ -221,13 +221,13 @@ class InvoiceView(TaskView):
             paymentMode = self.request.params.get('paymentMode')
             self.task.paymentMode = paymentMode
 
-        elif status == 'aboinv':
-            log.debug(" + An invoice is aborted -> generating cancel")
+        elif status == 'gencinv':
+            log.debug(" + Asking for a cancelinvoice")
             id_ = self._gen_cancelinvoice()
             log.debug(u"   + The cancel id : {0}".format(id_))
-            self.request.session.flash(u"La facture a été annulée, \
-Un avoir a été généré, vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
-    self.request.route_path("cancelinvoice", id=id_)), queue="main")
+            self.request.session.flash(u"Un avoir a été généré, \
+vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
+            self.request.route_path("cancelinvoice", id=id_)), queue="main")
 
     def _can_change_status(self, status):
         """

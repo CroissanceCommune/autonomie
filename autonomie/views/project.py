@@ -347,16 +347,14 @@ supprimé".format(project.name) )
             path="project_invoices", icon=("icon-file", )))
         if self.request.params.get('archived', '0') == '0':
             btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
-                                js=u"return confirm('Êtes-vous sûr \
-de vouloir archiver ce projet ?');",
+                   confirm='Êtes-vous sûr de vouloir archiver ce projet ?',
                                 path="project",
                                 title=u"Archiver le projet",
                                 _query=dict(action="archive"),
                                 icon="icon-book"))
         else:
             del_link = ItemActionLink(u"Supprimer", "edit", css="btn",
-                                js=u"return confirm('Êtes-vous sûr \
-de vouloir supprimer ce projet ?');",
+                   confirm='Êtes-vous sûr de vouloir supprimer ce projet ?',
                                       path="project",
                                       title=u"Supprimer le projet",
                                       _query=dict(action="delete"),

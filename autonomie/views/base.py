@@ -328,8 +328,21 @@ class TaskView(BaseView):
                 self.task.is_invoice() and \
                 not self.task.is_paid():
             yield Submit(u"Annuler cette facture",
+                     "manage",
+                     value="aboinv",
+                     request=self.request,
+                     confirm="Êtes-vous sûr de vouloir annuler cette facture ?")
+
+    def _gen_cinv_btn(self):
+        """
+            Return a button for invoice cancel
+        """
+        if self.task.has_been_validated() and \
+                self.task.is_invoice() and \
+                not self.task.is_paid():
+            yield Submit(u"Générer un avoir",
                                 "manage",
-                                value="aboinv",
+                                value="gencinv",
                                 request=self.request)
 
     def _validate_btns(self):
@@ -379,6 +392,7 @@ class TaskView(BaseView):
         btns.extend(self._call_client_btn())
         btns.extend(self._paid_btn())
         btns.extend(self._aboinv_btn())
+        btns.extend(self._gen_cinv_btn())
         btns.extend(self._validate_btns())
         btns.extend(self._cancel_btn())
         btns.extend(self._pdf_btn())

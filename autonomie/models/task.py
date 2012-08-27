@@ -297,7 +297,34 @@ STATUS = dict((
             ("sent", u"Document envoyé",),
             ("paid", u"Paiement reçu",),
             ("recinv", u"Client relancé",),
+            ('gencinv', u"Avoir généré",),
             ))
+
+EST_STATUS_DICT = {None:('draft',),
+                   'draft':('wait', 'duplicate',),
+                   'wait':('valid', 'invalid', 'duplicate',),
+                   'invalid':('wait', 'duplicate',),
+                   'valid':('sent', 'aboest', 'geninv', 'duplicate',),
+                   'sent':('aboest', 'geninv', 'duplicate', ),
+                   'aboest':('delete',),
+                   'geninv':('duplicate',)}
+INV_STATUS_DICT = {None:('draft',),
+    'draft':('wait', 'duplicate',),
+    'wait':('valid', 'invalid', 'duplicate',),
+    'invalid':('wait', 'duplicate',),
+    'valid':('sent', 'aboinv', 'paid', 'duplicate', 'recinv', "gencinv",),
+    'sent':('aboinv', 'paid', 'duplicate', 'recinv', "gencinv" ,),
+    'aboinv':('delete',),
+    'paid':('duplicate',),
+    'recinv':('aboinv', 'paid', 'duplicate',"gencinv",)}
+
+CINV_STATUS_DICT = {'draft':('wait',),
+                    'wait':('valid', 'invalid',),
+                    'invalid':('wait',),
+                    'valid':('sent', 'paid', 'recinv',),
+                    'sent':('paid', 'recinv',),
+                    'recinv':('paid',),
+                    None:('draft',)}
 
 @implementer(ITask)
 class Task(DBBASE):
@@ -334,6 +361,7 @@ class Task(DBBASE):
                         primaryjoin="Task.IDEmployee==User.id",
                             backref="ownedTasks")
 
+    status_dict = {None:('draft',)}
 
     def get_status_suffix(self):
         """
@@ -378,45 +406,17 @@ class Task(DBBASE):
         """
             validate the caestatus change
         """
-        message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à ce \
-document."
         log.debug(u"# CAEStatus change #")
+
         actual_status = self.CAEStatus
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
-        message = message.format(status)
-        if status in ('draft', 'wait',):
-            if not actual_status in (None, 'draft', 'invalid'):
-                raise Forbidden(message)
-        elif status in ('valid',):
-            if self.is_cancelinvoice():
-                if not actual_status in ('draft',):
-                    raise Forbidden(message)
-            elif not actual_status in ('wait',):
-                raise Forbidden(message)
-        elif status in ('invalid',):
-            if not actual_status in ('wait', ):
-                raise Forbidden(message)
-        elif status in ('aboest',):
-            if not actual_status in ('valid', 'sent', 'invalid', 'wait'):
-                raise Forbidden(message)
-        elif status in ('geninv',):
-            if not actual_status in ('valid', 'sent', ):
-                raise Forbidden(message)
-        elif status in ('sent',):
-            if not actual_status in ('valid', "recinv"):
-                raise Forbidden(message)
-        elif status in ('paid',):
-            if not actual_status in ('valid', 'sent', "recinv"):
-                raise Forbidden(message)
-        elif status in ('aboinv', 'abort',):
-            if not actual_status in ('valid', 'sent', "recinv", "invalid", \
-                                                                    "wait"):
-                raise Forbidden(message)
-        elif status in ('recinv',):
-            if not actual_status in ('valid', 'sent', "recinv",):
-                raise Forbidden(message)
-        else:
-            assert False
+        allowed_status = self.status_dict.get(actual_status, [])
+
+
+        if status != actual_status and status not in allowed_status:
+            message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à \
+ce document.".format(status)
+            raise Forbidden(message)
         return status
 
     def get_company(self):
@@ -491,6 +491,8 @@ class Estimation(Task, TaskCompute):
                         'polymorphic_identity':'estimation',
                        }
 
+    status_dict = EST_STATUS_DICT
+
     #ITask interface
     def get_status_str(self):
         status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u"")
@@ -525,13 +527,6 @@ class Estimation(Task, TaskCompute):
         """
             Return the next available actions regarding the current status
         """
-        matchdict = dict(draft=['wait', 'duplicate'],
-                         wait=['valid', 'invalid', 'duplicate'],
-                         invalid=['wait', 'duplicate'],
-                         valid=['sent', 'aboest', 'geninv', 'duplicate'],
-                         sent=['aboest', 'geninv', 'duplicate', ],
-                         aboest=['delete'],
-                         geninv=['duplicate'])
         return matchdict[self.CAEStatus]
 
     def duplicate(self, user, project):
@@ -837,6 +832,8 @@ class Invoice(Task, TaskCompute):
                       backref="invoice",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask")
 
+    status_dict = INV_STATUS_DICT
+
     def get_status_str(self):
         status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u'e')
         return status_str + self.get_status_suffix()
@@ -904,13 +901,6 @@ class Invoice(Task, TaskCompute):
         """
             Return the next available actions regarding the current status
         """
-        matchdict = dict(draft=['wait', 'duplicate'],
-                       wait=['valid', 'invalid', 'duplicate'],
-                       invalid=['wait', 'duplicate'],
-                       valid=['sent', 'aboinv', 'paid', 'duplicate', 'recinv'],
-                       sent=['aboinv', 'paid', 'duplicate', 'recinv' ],
-                       aboinv=['delete'],
-                       paid=['duplicate'])
         return matchdict[self.CAEStatus]
 
     def get_paymentmode_str(self):
@@ -1030,6 +1020,8 @@ class CancelInvoice(Task, TaskCompute):
                       backref="cancelinvoice",
                       primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask")
 
+    status_dict = CINV_STATUS_DICT
+
     def get_status_str(self):
         status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u'')
         if self.CAEStatus == 'paid':
@@ -1041,7 +1033,10 @@ class CancelInvoice(Task, TaskCompute):
         return self.CAEStatus in ('draft', 'invalid')
 
     def is_editable(self, manage=False):
-        return self.CAEStatus == 'draft'
+        if manage:
+            return self.CAEStatus in ('draft', 'invalid', 'wait',)
+        else:
+            return self.CAEStatus in ('draft', 'invalid',)
 
     def is_valid(self):
         return self.CAEStatus == 'valid'

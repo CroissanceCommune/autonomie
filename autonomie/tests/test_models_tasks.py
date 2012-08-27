@@ -217,6 +217,7 @@ class TestTaskModels(BaseTestCase):
                                                         datetime.date.today()))
         #Estimations
         task = get_task(factory=Estimation)
+        task.CAEStatus = 'draft'
         self.assertTrue(task.is_draft())
         self.assertTrue(task.is_editable())
         self.assertFalse(task.is_valid())
@@ -234,6 +235,7 @@ class TestTaskModels(BaseTestCase):
             self.assertFalse(task.is_editable())
         # Invoices
         task = get_task(factory=Invoice)
+        task.CAEStatus = 'draft'
         self.assertTrue(task.is_draft())
         self.assertTrue(task.is_editable())
         self.assertFalse(task.is_valid())
@@ -253,12 +255,18 @@ class TestTaskModels(BaseTestCase):
         self.assertTrue(task.is_paid())
         # CancelInvoice
         task = get_task(factory=CancelInvoice)
+        task.CAEStatus = 'draft'
         self.assertTrue(task.is_draft())
         self.assertTrue(task.is_editable())
         self.assertFalse(task.is_valid())
         self.assertFalse(task.has_been_validated())
         self.assertFalse(task.is_waiting())
         self.assertFalse(task.is_sent())
+        task.CAEStatus = "wait"
+        self.assertTrue(task.is_waiting())
+        self.assertFalse(task.is_valid())
+        self.assertFalse(task.is_editable())
+        self.assertTrue(task.is_editable(manage=True))
         task.CAEStatus = "valid"
         self.assertTrue(task.is_valid())
         self.assertFalse(task.is_editable())
@@ -272,7 +280,6 @@ class TestTaskModels(BaseTestCase):
     def test_status_change(self):
         # Estimation
         task = get_task(factory=Estimation)
-        task.CAEStatus = 'draft'
         for st in ("valid", "geninv", "sent", "aboest", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "wait"), "wait")
@@ -282,12 +289,12 @@ class TestTaskModels(BaseTestCase):
         self.assertEqual(task.validate_status("nutt", "invalid"), "invalid")
         self.assertEqual(task.validate_status("nutt", "valid"), "valid")
         task.CAEStatus = "valid"
-        for st in ("draft", "invalid", "valid"):
+        for st in ("draft", "invalid", ):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         for st in ("geninv", "sent", "aboest"):
             self.assertEqual(task.validate_status("nutt", st), st)
         task.CAEStatus = "sent"
-        for st in ("draft", "invalid", "sent", "valid"):
+        for st in ("draft", "invalid", "valid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         task.CAEStatus = "geninv"
         for st in ("draft", "invalid", "sent", "valid", "aboest"):
@@ -295,7 +302,6 @@ class TestTaskModels(BaseTestCase):
 
         # Invoice
         task = get_task(factory=Invoice)
-        task.CAEStatus = 'draft'
         for st in ("valid", "sent", "aboinv", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "wait"), "wait")
@@ -305,32 +311,31 @@ class TestTaskModels(BaseTestCase):
         self.assertEqual(task.validate_status("nutt", "invalid"), "invalid")
         self.assertEqual(task.validate_status("nutt", "valid"), "valid")
         task.CAEStatus = "valid"
-        for st in ("draft", "invalid", "valid"):
+        for st in ("draft", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         for st in ("sent", "aboinv", "recinv", "paid"):
             self.assertEqual(task.validate_status("nutt", st), st)
         task.CAEStatus = "sent"
-        for st in ("draft", "invalid", "sent", "valid"):
+        for st in ("draft", "invalid", "valid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         for st in ("aboinv", "recinv", "paid"):
             self.assertEqual(task.validate_status("nutt", st), st)
         task.CAEStatus = "paid"
         for st in ("draft", "invalid", "sent", "valid", "aboinv", "recinv",
-                                                                    "paid"):
+                                                                    ):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
         # CancelInvoice
         task = get_task(factory=CancelInvoice)
-        task.CAEStatus = 'draft'
-        # Direct validation of the cancelinvoice
-        self.assertEqual(task.validate_status("nutt", "valid"), "valid")
+        # Removing Direct validation of the cancelinvoice
+        task.CAEStatus = 'wait'
         task.CAEStatus = "valid"
         for st in ("draft",):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         for st in ("sent", "paid", ):
             self.assertEqual(task.validate_status("nutt", st), st)
         task.CAEStatus = "sent"
-        for st in ("draft", "sent", "valid"):
+        for st in ("draft", "valid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         task.CAEStatus = "paid"
         for st in ("draft", "sent", "valid"):

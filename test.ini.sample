@@ -5,20 +5,12 @@ pyramid.reload_templates = true
 pyramid.reload_assets = true
 pyramid.reload_all = true
 pyramid.debug_authorization = false
-pyramid.debug_notfound = true
+pyramid.debug_notfound = false
 pyramid.debug_routematch = false
-pyramid.debug_templates = false
-pyramid.default_locale_name = fr
-pyramid.includes =   pyramid_tm
-                    deform_bootstrap
-                    pyramid_mailer
+pyramid.debug_templates = true
+pyramid.default_locale_name = en
+pyramid.includes =pyramid_tm
 
-sqlalchemy.url = mysql://egw:egw@localhost/egw?charset=utf8
-sqlalchemy.echo=False
-sqlalchemy.encoding=UTF8
-# Those variables should be improved
-sqlalchemy.pool_recycle=7200
-sqlalchemy.pool_size=100
 mako.directories = autonomie:templates
 mako.imports = from markupsafe import escape_silent
 mako.default_filters = escape_silent
@@ -28,7 +20,7 @@ session.data_dir = %(here)s/data/sessions/data
 session.lock_dir = %(here)s/data/sessions/lock
 session.cookie_on_exception = true
 session.auto=True
-session.secret=Okd962SudK3od45kejytgaucbrh499E3939
+session.secret=A_very_secret_string
 session.timeout=3600
 cache.regions = default_term, second, short_term, long_term
 cache.type = memory
@@ -36,25 +28,30 @@ cache.second.expire = 1
 cache.short_term.expire = 60
 cache.default_term.expire = 300
 cache.long_term.expire = 20
-mail.host = smtp.gmail.com
-mail.port=587
-mail.username=toto@gmail.com
-mail.password=o
-mail.tls=True
-mail.debug=True
+
+#### CONFIGURE THOSE LINES TO ALLOW THE TESTS TO SETUP A MYSQL DATABASE ####
+sqlalchemy.url = mysql://testautonomie:password@localhost/testautonomie?charset=utf8
+sqlalchemy.echo=False
+sqlalchemy.encoding=UTF8
+testdb.user=testautonomie
+testdb.password=password
+testdb.db=testautonomie
+testdb.mysql_cmd=mysql -uroot
+testdb.sampledb=sample_db/dbautonomie.sql
+testdb.sampledatas=sample_db/testdatas.sql
+testdb.updatedir=sample_db/updates
 
 [pipeline:main]
 pipeline =
     autonomie
 
-
-
 [server:main]
 use = egg:waitress#main
-host = 0.0.0.0
+host = 127.0.0.1
 port = 8080
 
 # Begin logging configuration
+
 [loggers]
 keys = root, autonomie, sqlalchemy
 
@@ -65,8 +62,8 @@ keys = console, file
 keys = generic
 
 [logger_root]
-level = ERROR
-handlers = file, console
+level = DEBUG
+handlers = console, file
 
 [logger_autonomie]
 level = DEBUG
@@ -74,10 +71,8 @@ handlers = console, file
 qualname = autonomie
 
 [logger_sqlalchemy]
-#level = WARN
-#level = DEBUG
-level = INFO
-handlers = file
+level = DEBUG
+handlers = console, file
 qualname = sqlalchemy.engine
 # level = INFO logs SQL queries.
 # level = DEBUG logs SQL queries and results.

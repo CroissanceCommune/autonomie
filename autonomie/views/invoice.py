@@ -16,7 +16,6 @@
     Invoice views
 """
 import logging
-import datetime
 
 from deform import ValidationFailure
 from deform import Form
@@ -209,12 +208,9 @@ class InvoiceView(TaskView):
             Change the current task's status
         """
         if status == "valid":
-            officialNumber = get_next_officialNumber(
-                                        self.request.dbsession)
-            self.task.officialNumber = officialNumber
-            self.task.taskDate = datetime.date.today()
+            self.task.valid_callback()
             self.request.session.flash(u"La facture porte le numéro \
-<b>{0}</b>".format(officialNumber), queue='main')
+<b>{0}</b>".format(self.task.officialNumber), queue='main')
 
         elif status == 'paid':
             paymentMode = self.request.params.get('paymentMode')

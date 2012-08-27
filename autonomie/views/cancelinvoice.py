@@ -23,7 +23,6 @@ from pyramid.view import view_config
 from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import get_cancel_invoice_schema
 from autonomie.views.forms.task import get_cancel_invoice_appstruct
 from autonomie.views.forms.task import get_cancel_invoice_dbdatas
@@ -196,11 +195,9 @@ class CancelInvoiceView(TaskView):
             post status process
         """
         if status == "valid":
-            officialNumber = get_next_officialNumber(
-                                self.request.dbsession)
-            self.task.officialNumber = officialNumber
+            self.task.valid_callback()
             self.request.session.flash(u"L'avoir porte le numéro \
-<b>{0}</b>".format(officialNumber), queue='main')
+<b>{0}</b>".format(self.task.officialNumber), queue='main')
 
         elif status == 'paid':
             paymentMode = self.request.params.get('paymentMode')
@@ -211,4 +208,4 @@ class CancelInvoiceView(TaskView):
             Handle the permissions on status change depending on actual
             permission
         """
-        return status in ('draft', 'valid', 'sent', 'paid',)
+        return True

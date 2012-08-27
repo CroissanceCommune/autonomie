@@ -35,6 +35,8 @@ from autonomie.utils.widgets import StaticWidget
 from autonomie.utils.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 from autonomie.utils.pdf import write_pdf
+from autonomie.utils.pdf import render_html
+
 
 log = logging.getLogger(__name__)
 
@@ -128,9 +130,8 @@ class TaskView(BaseView):
     schema = None
     add_title = u""
     edit_title = u""
-    taskname_tmpl = u""
-    tasknumber_tmpl = u""
     route = u""
+    template = u""
 
     def __init__(self, request):
         BaseView.__init__(self, request)
@@ -151,7 +152,10 @@ class TaskView(BaseView):
         """
             should return the current task
         """
-        task = self.model()
+        if self.model:
+            task = self.model()
+        else:
+            raise Exception("Not implemented yet")
         task.CAEStatus = 'draft'
         phaseid = self.request.params.get('phase')
         task.IDPhase = phaseid
@@ -202,13 +206,13 @@ class TaskView(BaseView):
         """
         return getattr(self.project, "get_next_%s_number" % self.type_)()
 
-    def get_taskname(self, seq_number):
+    def get_taskname(self):
         """
             set the current taskname
         """
         return self.model.get_name(self.get_sequencenumber())
 
-    def get_tasknumber(self, taskDate, tmpl=None, seq_number=None):
+    def get_tasknumber(self, taskDate):
         """
             return the task number
         """
@@ -446,6 +450,20 @@ effectuer à attribuer ce statut à ce document.")
             self.request.session.flash(u"Aucune modification n'a pu être \
     effectuée, des informations sont manquantes.", queue="error")
         return self.project_view_redirect()
+
+    def _html(self):
+        """
+            Returns an html version of the current document
+        """
+        template = self.template
+        config = self.request.config
+        datas = dict(
+                    company=self.company,
+                    project=self.project,
+                    task=self.task,
+                    config=config
+                    )
+        return render_html(self.request, template, datas)
 
     def _pdf(self):
         """

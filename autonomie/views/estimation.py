@@ -25,15 +25,12 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.model import Estimation
-from autonomie.models.model import Invoice
-from autonomie.models.model import InvoiceLine
 from autonomie.models.model import EstimationLine
 from autonomie.models.model import PaymentLine
 from autonomie.views.forms.task import get_estimation_schema
 from autonomie.views.forms.task import get_estimation_appstruct
 from autonomie.views.forms.task import get_estimation_dbdatas
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.utils.pdf import render_html
 from autonomie.utils.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
@@ -52,9 +49,8 @@ class EstimationView(TaskView):
     schema = get_estimation_schema()
     add_title = u"Nouveau devis"
     edit_title = u"Édition du devis {task.number}"
-    taskname_tmpl = u"Devis {0}"
-    tasknumber_tmpl = u"{0}_{1}_D{2}_{3:%m%y}"
     route = "estimation"
+    template = "tasks/estimation.mako"
 
     def set_lines(self):
         """
@@ -178,20 +174,6 @@ class EstimationView(TaskView):
             eline = EstimationLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
-
-    def _html(self):
-        """
-            Returns an html version of the current estimation
-        """
-        template = "tasks/estimation.mako"
-        config = self.request.config
-        datas = dict(
-                    company=self.company,
-                    project=self.project,
-                    task=self.task,
-                    config=config
-                    )
-        return render_html(self.request, template, datas)
 
     @view_config(route_name='estimation',
                 renderer='tasks/view_only.mako',

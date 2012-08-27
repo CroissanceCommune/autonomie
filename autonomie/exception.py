@@ -20,4 +20,10 @@ class Forbidden(Exception):
     """
         Forbidden exception, used to raise a forbidden action error
     """
-    pass
+    message = u"Vous n'êtes pas autorisé à effectuer cette action"
+
+class SignatureError(Forbidden):
+    """
+        Exception for status modification calls with the wrong signature
+    """
+    message = u"Des informations manquent pour effectuer cette action"

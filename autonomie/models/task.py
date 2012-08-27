@@ -70,11 +70,13 @@ from sqlalchemy import func
 from sqlalchemy.dialects.mysql import DOUBLE
 
 from autonomie.models.types import CustomDateType
+from autonomie.models.statemachine import TaskState
 from autonomie.models.types import CustomDateType2
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models import DBSESSION
 from autonomie.models import DBBASE
 from autonomie.exception import Forbidden
+from autonomie.exception import SignatureError
 
 log = logging.getLogger(__name__)
 
@@ -301,6 +303,8 @@ class TaskCompute(object):
         result = int(self.expenses)
         return result
 
+
+
 DEF_STATUS = u"Statut inconnu"
 STATUS = dict((
             ("draft", u"Brouillon modifié",),
@@ -317,32 +321,90 @@ STATUS = dict((
             ('gencinv', u"Avoir généré",),
             ))
 
-EST_STATUS_DICT = {None:('draft', 'wait',),
-                   'draft':('draft', 'wait', 'duplicate', ),
-                   'wait':('valid', 'invalid', 'duplicate',),
-                   'invalid':('draft', 'wait', 'duplicate', ),
-                   'valid':('sent', 'aboest', 'geninv', 'duplicate',),
-                   'sent':('aboest', 'geninv', 'duplicate', ),
-                   'aboest':('delete',),
-                   'geninv':('duplicate',)}
+MANAGER_PERMS = "manage"
 
-INV_STATUS_DICT = {None:('draft', 'wait',),
-    'draft':('draft', 'wait', 'duplicate', ),
-    'wait':('valid', 'invalid', 'duplicate',),
-    'invalid':('draft', 'wait', 'duplicate', ),
-    'valid':('sent', 'aboinv', 'paid', 'duplicate', 'recinv', "gencinv",),
-    'sent':('aboinv', 'paid', 'duplicate', 'recinv', "gencinv" ,),
-    'aboinv':('delete',),
+def record_payment(task, **kw):
+    """
+        record a payment for the given task
+        expecting a paymendMode to be passed throught kw
+    """
+    if "paymentMode" in kw:
+        task.paymentMode = kw['paymentMode']
+        return task
+    else:
+        raise Forbidden()
+
+def gen_cancelinvoice(task, **kw):
+    """
+        gen the cancelinvoice for the given task
+    """
+    if 'user_id' in kw:
+        return task.gen_cancelinvoice(kw['user_id'])
+    else:
+        raise SignatureError()
+
+def gen_invoices(task, **kw):
+    """
+        gen_invoices for the given task
+    """
+    if "user_id" in kw:
+        return task.gen_invoices(kw['user_id'])
+    else:
+        raise SignatureError()
+
+def set_date(task, **kw):
+    """
+        set the date of the current task
+    """
+    task.taskDate = datetime.date.today()
+    return task
+
+BASE_STATUS_DICT = {
+        'draft':('draft', 'wait', 'duplicate', ),
+        'wait':(('valid', MANAGER_PERMS, set_date),
+                ('invalid', MANAGER_PERMS),
+                'duplicate',),
+        'invalid':('draft', 'wait', 'duplicate',),}
+
+EST_STATUS_DICT = BASE_STATUS_DICT.copy()
+EST_STATUS_DICT.update(
+   {'valid':('sent', 'aboest', ('geninv', None, gen_invoices), 'duplicate',),
+    'sent':('aboest', ('geninv', None, gen_invoices), 'duplicate', ),
+    'aboest':((None, None, None, 'delete',),),
+    'geninv':('duplicate',)})
+
+
+INV_STATUS_DICT = BASE_STATUS_DICT.copy()
+INV_STATUS_DICT.update(
+    {'valid':('sent',
+            ('aboinv', MANAGER_PERMS),
+            ('paid', MANAGER_PERMS, record_payment),
+             'duplicate',
+             'recinv',
+            ('gencinv', None, gen_cancelinvoice),),
+    'sent':(('aboinv', MANAGER_PERMS),
+            ('paid', MANAGER_PERMS, record_payment),
+            'duplicate', 'recinv',
+            ('gencinv', None, gen_cancelinvoice)),
+    'aboinv':((None, None, None, 'delete',),),
     'paid':('duplicate',),
-    'recinv':('aboinv', 'paid', 'duplicate',"gencinv",)}
+    'recinv':(('aboinv', MANAGER_PERMS),
+              ('paid', MANAGER_PERMS, record_payment),
+               'duplicate',
+              ('gencinv', None, gen_cancelinvoice))})
 
-CINV_STATUS_DICT = {'draft':('draft', 'wait',),
-                    'wait':('valid', 'invalid',),
-                    'invalid':('draft', 'wait'),
-                    'valid':('sent', 'paid', 'recinv',),
-                    'sent':('paid', 'recinv',),
-                    'recinv':('paid',),
-                    None:('draft', 'wait')}
+CINV_STATUS_DICT = BASE_STATUS_DICT.copy()
+CINV_STATUS_DICT.update({
+    'valid': ('sent', ('paid', MANAGER_PERMS), 'recinv'),
+    'sent': (('paid', MANAGER_PERMS, record_payment),
+             'recinv'),
+    'recinv': (('paid', MANAGER_PERMS, record_payment),)})
+
+DEFAULT_STATE_MACHINES = {
+        "base":TaskState('draft', BASE_STATUS_DICT),
+        "estimation":TaskState('draft', EST_STATUS_DICT),
+        "invoice":TaskState('draft', INV_STATUS_DICT),
+        "cancelinvoice":TaskState('draft', CINV_STATUS_DICT)}
 
 @implementer(ITask)
 class Task(DBBASE):
@@ -379,7 +441,7 @@ class Task(DBBASE):
                         primaryjoin="Task.IDEmployee==User.id",
                             backref="ownedTasks")
 
-    status_dict = {None:('draft',)}
+    state_machine = DEFAULT_STATE_MACHINES['base']
 
 
     def __init__(self, **kwargs):
@@ -388,6 +450,13 @@ class Task(DBBASE):
 
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+    def set_status(self, status, request, user_id, **kw):
+        """
+            set the status of a task through the state machine
+        """
+        self.statusPerson = user_id
+        return self.state_machine.process(self, request, user_id, status, **kw)
 
     def get_status_suffix(self):
         """
@@ -435,9 +504,11 @@ class Task(DBBASE):
         log.debug(u"# CAEStatus change #")
 
         actual_status = self.CAEStatus
+        if actual_status is None and status == 'draft':
+            return status
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
-        allowed_status = self.status_dict.get(actual_status, [])
 
+        allowed_status = self.state_machine.get_next_status(actual_status)
 
         if status != actual_status and status not in allowed_status:
             message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à \
@@ -449,7 +520,7 @@ ce document.".format(status)
         """
             Return the next available actions regarding the current status
         """
-        return self.status_dict.get(self.CAEStatus, ())
+        return self.state_machine.get_next_states(self.CAEStatus)
 
     def get_company(self):
         """
@@ -523,7 +594,7 @@ class Estimation(Task, TaskCompute):
                         'polymorphic_identity':'estimation',
                        }
 
-    status_dict = EST_STATUS_DICT
+    state_machine = DEFAULT_STATE_MACHINES['estimation']
 
     #ITask interface
     def get_status_str(self):
@@ -858,7 +929,7 @@ class Invoice(Task, TaskCompute):
                       backref="invoice",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask")
 
-    status_dict = INV_STATUS_DICT
+    state_machine = DEFAULT_STATE_MACHINES['invoice']
 
     def get_status_str(self):
         status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u'e')
@@ -1048,7 +1119,7 @@ class CancelInvoice(Task, TaskCompute):
                       backref="cancelinvoice",
                       primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask")
 
-    status_dict = CINV_STATUS_DICT
+    state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
 
     def get_status_str(self):
         status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u'')

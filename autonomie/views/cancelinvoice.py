@@ -190,22 +190,10 @@ class CancelInvoiceView(TaskView):
         """
         return self._status()
 
-    def _post_status_process(self, status):
+    def _post_status_process(self, status, ret_data):
         """
             post status process
         """
         if status == "valid":
-            self.task.valid_callback()
             self.request.session.flash(u"L'avoir porte le numéro \
 <b>{0}</b>".format(self.task.officialNumber), queue='main')
-
-        elif status == 'paid':
-            paymentMode = self.request.params.get('paymentMode')
-            self.task.paymentMode = paymentMode
-
-    def _can_change_status(self, status):
-        """
-            Handle the permissions on status change depending on actual
-            permission
-        """
-        return True

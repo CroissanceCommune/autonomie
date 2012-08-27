@@ -239,7 +239,6 @@ class TaskView(BaseView):
             Return a button to abort an estimation
         """
         yield Submit(u"Indiquer sans suite",
-                     "edit",
                      title=u"Indiquer que le devis n'aura pas de suite",
                      value="aboest",
                      request=self.request)
@@ -249,7 +248,6 @@ class TaskView(BaseView):
             Return a button for invoice generation
         """
         yield Submit(u"Générer les factures",
-                 "edit",
                   title=u"Générer les factures correspondantes au devis",
                   value="geninv",
                   request=self.request)
@@ -289,7 +287,6 @@ class TaskView(BaseView):
             Return the draft btn
         """
         yield Submit(u"Enregistrer comme brouillon",
-                            "edit",
                             value="draft",
                             request=self.request,
                             )
@@ -299,7 +296,6 @@ class TaskView(BaseView):
             Return the btn for asking wait status
         """
         yield Submit(u"Enregistrer et demander la validation",
-                       "edit",
                        value="wait",
                        request=self.request
                        )
@@ -317,7 +313,6 @@ class TaskView(BaseView):
             Return the valid button
         """
         yield Submit(u"Valider le document",
-                    "manage",
                     value="valid",
                     request=self.request)
 
@@ -326,7 +321,6 @@ class TaskView(BaseView):
             Return the invalid button
         """
         yield Submit(u"Document invalide",
-                     "manage",
                      value="invalid",
                      request=self.request)
 
@@ -335,7 +329,6 @@ class TaskView(BaseView):
             Return a button to change the status to "sent"
         """
         yield Submit(u"Envoyé au client",
-            "edit",
             title=u"Indiquer que le document a bien été envoyé au client",
             value="sent",
             request=self.request)
@@ -345,7 +338,6 @@ class TaskView(BaseView):
             Return a button to change the status to "client has been called"
         """
         yield Submit(u"Client relancé",
-                     "edit",
                      title=u"Indiquer que le client a été relancé",
                      value="recinv",
                      request=self.request)
@@ -355,9 +347,7 @@ class TaskView(BaseView):
             Return a button to set a paid btn and a select to choose
             the payment mode
         """
-        label = u"A été payé(e)"
-        yield Submit(label,
-                     "manage",
+        yield Submit(u"A été payé(e)",
                      value="paid",
                      request=self.request)
         yield StaticWidget(self._paid_mod_select(),
@@ -368,7 +358,6 @@ class TaskView(BaseView):
             Return a button to abort an invoice
         """
         yield Submit(u"Annuler cette facture",
-                 "manage",
                  value="aboinv",
                  request=self.request,
                  confirm="Êtes-vous sûr de vouloir annuler cette facture ?")
@@ -378,9 +367,17 @@ class TaskView(BaseView):
             Return a button for generating a cancelinvoice
         """
         yield Submit(u"Générer un avoir",
-                     "manage",
                      value="gencinv",
                      request=self.request)
+
+    def _delete_btn(self):
+        """
+            Return a button for deleting a document
+        """
+        yield Submit(u"Supprimer ce document",
+                  value="delete",
+                  request=self.request,
+                  confirm=u"Êtes-vous sûr de vouloir supprimer ce document ?")
 
 
     def get_buttons(self):
@@ -390,8 +387,9 @@ class TaskView(BaseView):
         btns = []
         actions = self.task.get_next_actions()
         for action in actions:
-            func = getattr(self, "_%s_btn" % action)
-            btns.extend(func())
+            if action.allowed(self.task, self.request):
+                func = getattr(self, "_%s_btn" % action.action)
+                btns.extend(func())
         btns.extend(self._cancel_btn())
         btns.extend(self._pdf_btn())
         return btns
@@ -412,25 +410,18 @@ class TaskView(BaseView):
                             'project',
                             id=self.project.id))
 
-    def _can_change_status(self, status):
-        """
-            Called to check if the user can set the current status
-        """
-        raise Exception("Not implemented yet")
-
     def _status_process(self):
         """
             Change the current task's status
         """
         status = self.get_taskstatus()
-        if not self._can_change_status(status):
-            raise Forbidden(u"Vous n'êtes pas autorisé à \
-effectuer à attribuer ce statut à ce document.")
+        data = self.task.set_status(status,
+                                    self.request,
+                                    self.user.id,
+                                    **self.request.params)
         log.debug(u" + The status is set to {0}".format(status))
-        self.task.statusPerson = self.user.id
-        self.task.CAEStatus = status
         if hasattr(self, "_post_status_process"):
-            getattr(self, "_post_status_process")(status)
+            getattr(self, "_post_status_process")(status, data)
 
     def _set_modifications(self):
         """

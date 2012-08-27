@@ -16,7 +16,6 @@
     Estimation views
 """
 import logging
-import datetime
 from deform import ValidationFailure
 from deform import Form
 
@@ -226,15 +225,16 @@ class EstimationView(TaskView):
         """
             Delete an estimation
         """
-        log.debug("# Deleting an invoice #")
-        if self.task.is_deletable():
+        log.debug("# Deleting an estimation #")
+        try:
+            self.task.set_status("delete", self.request, self.user.id)
+        except Forbidden, err:
+            self.request.session.flash(err.message, queue="error")
+        else:
             self.dbsession.delete(self.task)
             message = u"Le devis {0} a bien été supprimé.".format(
                                                             self.task.number)
             self.request.session.flash(message, queue='main')
-        else:
-            message = u"Vous n'êtes pas autorisé à supprimer ce devis."
-            self.request.session.flash(message, queue='error')
         return self.project_view_redirect()
 
     def gen_invoices(self):
@@ -257,24 +257,23 @@ class EstimationView(TaskView):
         """
         return self._status()
 
-    def _can_change_status(self, status):
-        """
-            Handle the permission on status change depending on
-            actual permissions
-        """
-        if not has_permission('manage', self.request.context, self.request):
-            if status in ('invalid', 'valid', 'aboest'):
-                return False
-        return True
-
-    def _post_status_process(self, status):
+    def _post_status_process(self, status, ret_data):
         """
             Handle specific status changes
         """
         if status == "geninv":
-            self.gen_invoices()
+            for invoice in ret_data:
+                self.dbsession.merge(invoice)
+            self.request.session.flash(u"Vos factures ont bien été générées",
+                                    queue='main')
         elif status == "aboest":
             self.request.session.flash(u"Le devis {0} a été annulé \
 (indiqué sans suite).".format(self.task.number))
-        elif status == "valid":
-            self.task.taskDate = datetime.date.today()
+        elif status == 'delete':
+            log.debug("Deleting")
+            self.dbsession.delete(self.task)
+            self.dbsession.flush()
+            self.request.session.flash(u"Le devis {0} a été supprimé"\
+                    .format(self.task.number))
+            raise self.project_view_redirect()
+

@@ -203,43 +203,20 @@ class InvoiceView(TaskView):
         """
         return self._status()
 
-    def _post_status_process(self, status):
+    def _post_status_process(self, status, ret_data):
         """
             Change the current task's status
         """
         if status == "valid":
-            self.task.valid_callback()
             self.request.session.flash(u"La facture porte le numéro \
 <b>{0}</b>".format(self.task.officialNumber), queue='main')
 
-        elif status == 'paid':
-            paymentMode = self.request.params.get('paymentMode')
-            self.task.paymentMode = paymentMode
-
         elif status == 'gencinv':
-            log.debug(" + Asking for a cancelinvoice")
-            id_ = self._gen_cancelinvoice()
+            cancelinvoice = ret_data
+            cancelinvoice = self.dbsession.merge(cancelinvoice)
+            self.dbsession.flush()
+            id_ = cancelinvoice.id
             log.debug(u"   + The cancel id : {0}".format(id_))
             self.request.session.flash(u"Un avoir a été généré, \
 vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
             self.request.route_path("cancelinvoice", id=id_)), queue="main")
-
-    def _can_change_status(self, status):
-        """
-            Handle the permission on status change depending on
-            actual permissions
-        """
-        if not has_permission('manage', self.request.context, self.request):
-            if status in ('invalid', 'valid', 'paid', 'aboinv'):
-                return False
-        return True
-
-    def _gen_cancelinvoice(self):
-        """
-            Generates a cancel invoice based on the current invoice
-        """
-        cancelinvoice = self.task.gen_cancelinvoice(self.user.id)
-        cancelinvoice = self.dbsession.merge(cancelinvoice)
-        self.dbsession.flush()
-        id_ = cancelinvoice.id
-        return id_

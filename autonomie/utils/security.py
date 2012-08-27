@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 11 juil. 2012 00:26:20 CEST
+# * Last Modified : mar. 28 août 2012 01:06:51 CEST
 #
 # * Project : autonomie
 #
@@ -67,10 +67,10 @@ class RootFactory(dict):
         """
             Default permissions
         """
-        log.debug("# Getting root acls : ")
+        #log.debug("# Getting root acls : ")
         acl = DEFAULT_PERM[:]
         acl.append((Allow, Authenticated, 'view',))
-        log.debug(acl)
+        #log.debug(acl)
         return acl
 
     def __init__(self, request):
@@ -107,8 +107,8 @@ class CompanyFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -126,8 +126,8 @@ def get_client_or_project_acls(self):
     acl = DEFAULT_PERM[:]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.company.employees])
-    log.debug("# Getting acls for the current project or client : ")
-    log.debug(acl)
+    #log.debug("# Getting acls for the current project or client : ")
+    #log.debug(acl)
     return acl
 
 class ProjectFactory(BaseDBFactory):
@@ -142,8 +142,8 @@ class ProjectFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -166,8 +166,8 @@ class ClientFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -185,8 +185,8 @@ def get_task_acl(self):
     acl = DEFAULT_PERM[:]
     acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
                         for user in self.project.company.employees])
-    log.debug("# Getting acls for the current task : ")
-    log.debug(acl)
+    #log.debug("# Getting acls for the current task : ")
+    #log.debug(acl)
     return acl
 
 class EstimationFactory(BaseDBFactory):
@@ -201,8 +201,8 @@ class EstimationFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -225,8 +225,8 @@ class InvoiceFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -250,8 +250,8 @@ class CancelInvoiceFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -283,8 +283,8 @@ class UserFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
@@ -314,8 +314,8 @@ class OperationFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        log.debug("We are in the __getitem__")
-        log.debug(key)
+        #log.debug("We are in the __getitem__")
+        #log.debug(key)
         if self.dbsession == None:
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()

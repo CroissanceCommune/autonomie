@@ -1,7 +1,6 @@
 <%doc>
 Submit buttons for special form renderings
 </%doc>
-% if elem.permitted(request.context, request):
 <button type="${elem.type_}" name="${elem.name}" value="${elem.value}"
     title="${elem.title}"
 % if elem.js:
@@ -22,4 +21,3 @@ Submit buttons for special form renderings
 % endif
 ${elem.label}
 </button>
-% endif

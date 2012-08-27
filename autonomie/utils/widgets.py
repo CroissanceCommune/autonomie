@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : lun. 27 août 2012 16:39:45 CEST
+# * Last Modified : mar. 28 août 2012 00:57:14 CEST
 #
 # * Project : autonomie
 #
@@ -190,7 +190,7 @@ class ItemActionLink(ViewLink):
     def render(self, request, item):
         return render_html( request, self.template, {'elem':self, 'item':item})
 
-class Submit(Widget, PermWidget):
+class Submit(Widget):
     """
         Submit Link used to be included in a form
         It's componed by :
@@ -203,21 +203,20 @@ class Submit(Widget, PermWidget):
         @_type: type of the button
     """
     template = "base/submit.mako"
-    def __init__(self, label, perm, value, name="submit", title=None,
-            css="btn btn-primary", js=None, icon=None,
-            type_='submit', request=None, confirm=None):
+    name = "submit"
+    css = "btn btn-primary"
+    js = None
+    type_='submit'
+    icon = None
+
+    def __init__(self, label, value, title=None,
+                            request=None, confirm=None):
         self.label = label
-        self.perm = perm
         self.value = value
-        self.name = name
         self.title = title or self.label
-        self.css = css
-        self.js = js
         if confirm:
-            self.js = u"return confirm('%s')".format(
+            self.js = u"return confirm('{0}')".format(
                                         confirm.replace("'", "\\'"))
-        self.icon = icon
-        self.type_ = type_
         if request:
             self.request = request
 

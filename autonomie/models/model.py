@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 23 août 2012 20:54:07 CEST
+# * Last Modified : lun. 27 août 2012 20:50:37 CEST
 #
 # * Project : autonomie
 #
@@ -51,7 +51,7 @@ from autonomie.models.user import User
 
 
 from autonomie.models import DBBASE
-from autonomie.utils.exception import Forbidden
+from autonomie.exception import Forbidden
 
 log = logging.getLogger(__name__)
 

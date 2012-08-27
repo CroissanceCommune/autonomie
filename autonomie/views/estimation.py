@@ -31,7 +31,7 @@ from autonomie.views.forms.task import get_estimation_schema
 from autonomie.views.forms.task import get_estimation_appstruct
 from autonomie.views.forms.task import get_estimation_dbdatas
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.utils.exception import Forbidden
+from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
 from .base import TaskView

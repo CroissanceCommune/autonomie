@@ -38,7 +38,7 @@ from autonomie.models.task import TaskCompute
 
 from autonomie.models.user import User
 
-from autonomie.utils.exception import Forbidden
+from autonomie.exception import Forbidden
 
 TASK = dict(name=u"Test task",
                  CAEStatus="draft",

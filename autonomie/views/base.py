@@ -32,7 +32,7 @@ from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import Submit
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import StaticWidget
-from autonomie.utils.exception import Forbidden
+from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.pdf import render_html

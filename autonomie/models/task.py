@@ -72,10 +72,27 @@ from sqlalchemy.dialects.mysql import DOUBLE
 from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomDateType2
 from autonomie.models.utils import get_current_timestamp
+from autonomie.models import DBSESSION
 from autonomie.models import DBBASE
-from autonomie.utils.exception import Forbidden
+from autonomie.exception import Forbidden
 
 log = logging.getLogger(__name__)
+
+def get_next_officialNumber():
+    """
+        Return the next available official number
+    """
+    a = Invoice.get_officialNumber().first()[0]
+    b = ManualInvoice.get_officialNumber().first()[0]
+    c = CancelInvoice.get_officialNumber().first()[0]
+    if not a:
+        a = 0
+    if not b:
+        b = 0
+    if not c:
+        c = 0
+    next_ = max(a,b,c) + 1
+    return int(next_)
 
 class ITask(Interface):
     """
@@ -300,31 +317,32 @@ STATUS = dict((
             ('gencinv', u"Avoir généré",),
             ))
 
-EST_STATUS_DICT = {None:('draft',),
-                   'draft':('wait', 'duplicate',),
+EST_STATUS_DICT = {None:('draft', 'wait',),
+                   'draft':('draft', 'wait', 'duplicate', ),
                    'wait':('valid', 'invalid', 'duplicate',),
-                   'invalid':('wait', 'duplicate',),
+                   'invalid':('draft', 'wait', 'duplicate', ),
                    'valid':('sent', 'aboest', 'geninv', 'duplicate',),
                    'sent':('aboest', 'geninv', 'duplicate', ),
                    'aboest':('delete',),
                    'geninv':('duplicate',)}
-INV_STATUS_DICT = {None:('draft',),
-    'draft':('wait', 'duplicate',),
+
+INV_STATUS_DICT = {None:('draft', 'wait',),
+    'draft':('draft', 'wait', 'duplicate', ),
     'wait':('valid', 'invalid', 'duplicate',),
-    'invalid':('wait', 'duplicate',),
+    'invalid':('draft', 'wait', 'duplicate', ),
     'valid':('sent', 'aboinv', 'paid', 'duplicate', 'recinv', "gencinv",),
     'sent':('aboinv', 'paid', 'duplicate', 'recinv', "gencinv" ,),
     'aboinv':('delete',),
     'paid':('duplicate',),
     'recinv':('aboinv', 'paid', 'duplicate',"gencinv",)}
 
-CINV_STATUS_DICT = {'draft':('wait',),
+CINV_STATUS_DICT = {'draft':('draft', 'wait',),
                     'wait':('valid', 'invalid',),
-                    'invalid':('wait',),
+                    'invalid':('draft', 'wait'),
                     'valid':('sent', 'paid', 'recinv',),
                     'sent':('paid', 'recinv',),
                     'recinv':('paid',),
-                    None:('draft',)}
+                    None:('draft', 'wait')}
 
 @implementer(ITask)
 class Task(DBBASE):
@@ -362,6 +380,14 @@ class Task(DBBASE):
                             backref="ownedTasks")
 
     status_dict = {None:('draft',)}
+
+
+    def __init__(self, **kwargs):
+        if not 'CAEStatus' in kwargs:
+            self.CAEStatus = 'draft'
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def get_status_suffix(self):
         """
@@ -418,6 +444,12 @@ class Task(DBBASE):
 ce document.".format(status)
             raise Forbidden(message)
         return status
+
+    def get_next_actions(self):
+        """
+            Return the next available actions regarding the current status
+        """
+        return self.status_dict.get(self.CAEStatus, ())
 
     def get_company(self):
         """
@@ -503,9 +535,9 @@ class Estimation(Task, TaskCompute):
 
     def is_editable(self, manage=False):
         if manage:
-            return self.CAEStatus in ('draft', 'invalid', 'wait',)
+            return self.CAEStatus in ('draft', 'invalid', 'wait', None)
         else:
-            return self.CAEStatus in ('draft', 'invalid')
+            return self.CAEStatus in ('draft', 'invalid', None)
 
     def is_valid(self):
         return self.CAEStatus == 'valid'
@@ -522,12 +554,6 @@ class Estimation(Task, TaskCompute):
 
     def is_estimation(self):
         return True
-
-    def get_next_actions(self):
-        """
-            Return the next available actions regarding the current status
-        """
-        return matchdict[self.CAEStatus]
 
     def duplicate(self, user, project):
         """
@@ -843,9 +869,9 @@ class Invoice(Task, TaskCompute):
 
     def is_editable(self, manage=False):
         if manage:
-            return self.CAEStatus in ('draft', 'invalid', 'wait',)
+            return self.CAEStatus in ('draft', 'invalid', 'wait', None,)
         else:
-            return self.CAEStatus in ('draft', 'invalid',)
+            return self.CAEStatus in ('draft', 'invalid', None,)
 
     def is_valid(self):
         return self.CAEStatus == 'valid'
@@ -897,12 +923,6 @@ class Invoice(Task, TaskCompute):
             taskname_tmpl = u"Facture {0}"
         return taskname_tmpl.format(seq_number)
 
-    def get_next_actions(self):
-        """
-            Return the next available actions regarding the current status
-        """
-        return matchdict[self.CAEStatus]
-
     def get_paymentmode_str(self):
         """
             Return a user-friendly string describing the payment Mode
@@ -934,7 +954,7 @@ class Invoice(Task, TaskCompute):
         return paymentMode
 
     @classmethod
-    def get_officialNumber(cls, dbsession):
+    def get_officialNumber(cls):
         """
             Return the next officialNumber available in the Invoice's table
             Take the max of official Number
@@ -942,7 +962,7 @@ class Invoice(Task, TaskCompute):
             taskdate is a string (YYYYMMDD)
         """
         current_year = datetime.date.today().year
-        return dbsession.query(func.max(Invoice.officialNumber)).filter(
+        return DBSESSION.query(func.max(Invoice.officialNumber)).filter(
                 Invoice.taskDate.between(current_year*10000,
                                          (current_year+1)*10000
                                     ))
@@ -965,6 +985,7 @@ class Invoice(Task, TaskCompute):
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.displayedUnits = self.displayedUnits
         cancelinvoice.tva = self.tva
+        cancelinvoice.sequenceNumber = seq_number
         cancelinvoice.number = CancelInvoice.get_number(self.project,
                             cancelinvoice.sequenceNumber,
                             cancelinvoice.taskDate)
@@ -984,6 +1005,13 @@ class Invoice(Task, TaskCompute):
 
     def get_next_row_index(self):
         return len(self.lines) + 1
+
+    def valid_callback(self):
+        """
+            Validate an invoice
+        """
+        self.officialNumber = get_next_officialNumber()
+        self.taskDate = datetime.date.today()
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
@@ -1034,9 +1062,9 @@ class CancelInvoice(Task, TaskCompute):
 
     def is_editable(self, manage=False):
         if manage:
-            return self.CAEStatus in ('draft', 'invalid', 'wait',)
+            return self.CAEStatus in ('draft', 'invalid', 'wait', None,)
         else:
-            return self.CAEStatus in ('draft', 'invalid',)
+            return self.CAEStatus in ('draft', 'invalid', None,)
 
     def is_valid(self):
         return self.CAEStatus == 'valid'
@@ -1079,13 +1107,13 @@ class CancelInvoice(Task, TaskCompute):
             return u"mode paiement inconnu"
 
     @classmethod
-    def get_officialNumber(cls, dbsession):
+    def get_officialNumber(cls):
         """
             Return the greatest officialNumber actually used in the
             ManualInvoice table
         """
         current_year = datetime.date.today().year
-        return dbsession.query(func.max(CancelInvoice.officialNumber)).filter(
+        return DBSESSION.query(func.max(CancelInvoice.officialNumber)).filter(
                     func.year(CancelInvoice.taskDate) == current_year)
 
     def is_tolate(self):
@@ -1100,6 +1128,13 @@ class CancelInvoice(Task, TaskCompute):
         pcode = project.code
         ccode = project.client.id
         return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
+
+    def valid_callback(self):
+        """
+            Validate an invoice
+        """
+        self.officialNumber = get_next_officialNumber()
+        self.taskDate = datetime.date.today()
 
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):
@@ -1137,9 +1172,9 @@ class ManualInvoice(DBBASE):
     def statusComment(self):
         return None
 
-    @property
-    def statusDate(self):
-        return None
+#    @property
+#    def statusDate(self):
+#        return None
 
     @property
     def id(self):
@@ -1207,13 +1242,13 @@ class ManualInvoice(DBBASE):
         return False
 
     @classmethod
-    def get_officialNumber(cls, dbsession):
+    def get_officialNumber(cls):
         """
             Return the greatest officialNumber actually used in the
             ManualInvoice table
         """
         current_year = datetime.date.today().year
-        return dbsession.query(func.max(ManualInvoice.officialNumber)).filter(
+        return DBSESSION.query(func.max(ManualInvoice.officialNumber)).filter(
                     func.year(ManualInvoice.taskDate) == current_year)
 
     def total_ht(self):

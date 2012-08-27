@@ -26,12 +26,11 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.model import Invoice
 from autonomie.models.model import InvoiceLine
-from autonomie.models.main import get_next_officialNumber
 from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.utils.exception import Forbidden
+from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
 from .base import TaskView

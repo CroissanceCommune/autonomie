@@ -45,6 +45,7 @@ class BaseView(object):
         Base View object
     """
     def __init__(self, request):
+        log.debug("We are in the view : %s"  %self)
         self.request = request
         self.dbsession = request.dbsession()
         self.user = request.user
@@ -156,7 +157,7 @@ class TaskView(BaseView):
             task = self.model()
         else:
             raise Exception("Not implemented yet")
-        task.CAEStatus = 'draft'
+        #task.CAEStatus = 'draft'
         phaseid = self.request.params.get('phase')
         task.IDPhase = phaseid
         task.IDEmployee = self.user.id
@@ -233,63 +234,25 @@ class TaskView(BaseView):
         tvas = Tva.query(self.dbsession)
         return [(tva.value, tva.name)for tva in tvas]
 
-    def _draft_btns(self):
+    def _aboest_btn(self):
         """
-            Return buttons used on a draft document
+            Return a button to abort an estimation
         """
-        if self.task.is_draft():
-            yield Submit(u"Enregistrer comme brouillon",
-                                "edit",
-                                value="draft",
-                                request=self.request,
-                                )
-            if not self.task.is_cancelinvoice():
-                yield Submit(u"Enregistrer et demander la validation",
-                               "edit",
-                               value="wait",
-                               request=self.request
-                               )
-
-    def _est_btns(self):
-        """
-            Return the button used to generate invoices or abort an estimation
-        """
-        if self.task.is_estimation() and (self.task.is_valid()
-                                          or self.task.is_sent()):
-            yield Submit(u"Générer les factures",
+        yield Submit(u"Indiquer sans suite",
                      "edit",
-                      title=u"Générer les factures correspondantes au devis",
-                      value="geninv",
-                      request=self.request)
-            yield Submit(u"Indiquer sans suite",
-                    "edit",
-                    title=u"Indiquer que le devis n'aura pas de suite",
-                    value="aboest",
-                    request=self.request)
+                     title=u"Indiquer que le devis n'aura pas de suite",
+                     value="aboest",
+                     request=self.request)
 
-    def _sent_to_client_btn(self):
+    def _geninv_btn(self):
         """
-            Return a button to change the status to "sent"
+            Return a button for invoice generation
         """
-        if self.task.is_valid():
-            yield Submit(u"Envoyé au client",
-                "edit",
-                title=u"Indiquer que le document a bien été envoyé au client",
-                value="sent",
-                request=self.request)
-
-    def _call_client_btn(self):
-        """
-            Return a button to change the status to "client has been called"
-        """
-        # This button is displayed only for invoices (which have a
-        # IDEstimation attr) and if the doc is valid
-        if self.task.has_been_validated() and self.task.is_invoice():
-            yield Submit(u"Client relancé",
-                        "edit",
-                        title=u"Indiquer que le client a été relancé",
-                        value="recinv",
-                        request=self.request)
+        yield Submit(u"Générer les factures",
+                 "edit",
+                  title=u"Générer les factures correspondantes au devis",
+                  value="geninv",
+                  request=self.request)
 
     @staticmethod
     def _paid_mod_select():
@@ -301,71 +264,11 @@ class TaskView(BaseView):
         select = tags.select('paymentMode', [], options, **{'class':'span2'})
         return select
 
-    def _paid_btn(self):
-        """
-            Return a button to set a paid btn and a select to choose
-            the payment mode
-        """
-        if self.task.has_been_validated() and \
-                not self.task.is_estimation() and \
-                not self.task.is_paid():
-            if self.task.is_cancelinvoice():
-                label = u"Avoir payé"
-            else:
-                label = u"Facture payée"
-            yield Submit(label,
-                         "manage",
-                         value="paid",
-                         request=self.request)
-            yield StaticWidget(self._paid_mod_select(),
-                        "manage")
-
-    def _aboinv_btn(self):
-        """
-            Return a button to abort an invoice
-        """
-        if self.task.has_been_validated() and \
-                self.task.is_invoice() and \
-                not self.task.is_paid():
-            yield Submit(u"Annuler cette facture",
-                     "manage",
-                     value="aboinv",
-                     request=self.request,
-                     confirm="Êtes-vous sûr de vouloir annuler cette facture ?")
-
-    def _gen_cinv_btn(self):
-        """
-            Return a button for invoice cancel
-        """
-        if self.task.has_been_validated() and \
-                self.task.is_invoice() and \
-                not self.task.is_paid():
-            yield Submit(u"Générer un avoir",
-                                "manage",
-                                value="gencinv",
-                                request=self.request)
-
-    def _validate_btns(self):
-        """
-            Return the buttons to handle validation
-        """
-        if self.task.is_waiting() or (
-                    self.task.is_cancelinvoice() and self.task.is_draft()):
-            yield Submit(u"Valider le document",
-                        "manage",
-                        value="valid",
-                        request=self.request)
-        if self.task.is_waiting():
-            yield Submit(u"Document invalide",
-                        "manage",
-                        value="invalid",
-                        request=self.request)
-
     def _cancel_btn(self):
         """
             Return a cancel btn returning the user to the project view
         """
-        yield ViewLink(u"Annuler",
+        yield ViewLink(u"Revenir en arrière",
                           "view",
                           path="project",
                           css="btn btn-primary",
@@ -381,19 +284,114 @@ class TaskView(BaseView):
                path=self.route, css="btn btn-primary", request=self.request,
                id=self.task.id, _query=dict(view="pdf"))
 
+    def _draft_btn(self):
+        """
+            Return the draft btn
+        """
+        yield Submit(u"Enregistrer comme brouillon",
+                            "edit",
+                            value="draft",
+                            request=self.request,
+                            )
+
+    def _wait_btn(self):
+        """
+            Return the btn for asking wait status
+        """
+        yield Submit(u"Enregistrer et demander la validation",
+                       "edit",
+                       value="wait",
+                       request=self.request
+                       )
+
+    def _duplicate_btn(self):
+        """
+            Return the button for asking duplication of the current document
+        """
+        #TODO
+        # return the client -> project -> phase -> list
+        return []
+
+    def _valid_btn(self):
+        """
+            Return the valid button
+        """
+        yield Submit(u"Valider le document",
+                    "manage",
+                    value="valid",
+                    request=self.request)
+
+    def _invalid_btn(self):
+        """
+            Return the invalid button
+        """
+        yield Submit(u"Document invalide",
+                     "manage",
+                     value="invalid",
+                     request=self.request)
+
+    def _sent_btn(self):
+        """
+            Return a button to change the status to "sent"
+        """
+        yield Submit(u"Envoyé au client",
+            "edit",
+            title=u"Indiquer que le document a bien été envoyé au client",
+            value="sent",
+            request=self.request)
+
+    def _recinv_btn(self):
+        """
+            Return a button to change the status to "client has been called"
+        """
+        yield Submit(u"Client relancé",
+                     "edit",
+                     title=u"Indiquer que le client a été relancé",
+                     value="recinv",
+                     request=self.request)
+
+    def _paid_btn(self):
+        """
+            Return a button to set a paid btn and a select to choose
+            the payment mode
+        """
+        label = u"A été payé(e)"
+        yield Submit(label,
+                     "manage",
+                     value="paid",
+                     request=self.request)
+        yield StaticWidget(self._paid_mod_select(),
+                    "manage")
+
+    def _aboinv_btn(self):
+        """
+            Return a button to abort an invoice
+        """
+        yield Submit(u"Annuler cette facture",
+                 "manage",
+                 value="aboinv",
+                 request=self.request,
+                 confirm="Êtes-vous sûr de vouloir annuler cette facture ?")
+
+    def _gencinv_btn(self):
+        """
+            Return a button for generating a cancelinvoice
+        """
+        yield Submit(u"Générer un avoir",
+                     "manage",
+                     value="gencinv",
+                     request=self.request)
+
+
     def get_buttons(self):
         """
             returns submit buttons for estimation/invoice form
         """
         btns = []
-        btns.extend(self._draft_btns())
-        btns.extend(self._est_btns())
-        btns.extend(self._sent_to_client_btn())
-        btns.extend(self._call_client_btn())
-        btns.extend(self._paid_btn())
-        btns.extend(self._aboinv_btn())
-        btns.extend(self._gen_cinv_btn())
-        btns.extend(self._validate_btns())
+        actions = self.task.get_next_actions()
+        for action in actions:
+            func = getattr(self, "_%s_btn" % action)
+            btns.extend(func())
         btns.extend(self._cancel_btn())
         btns.extend(self._pdf_btn())
         return btns
@@ -429,10 +427,10 @@ class TaskView(BaseView):
             raise Forbidden(u"Vous n'êtes pas autorisé à \
 effectuer à attribuer ce statut à ce document.")
         log.debug(u" + The status is set to {0}".format(status))
-        if hasattr(self, "_post_status_process"):
-            getattr(self, "_post_status_process")(status)
         self.task.statusPerson = self.user.id
         self.task.CAEStatus = status
+        if hasattr(self, "_post_status_process"):
+            getattr(self, "_post_status_process")(status)
 
     def _set_modifications(self):
         """

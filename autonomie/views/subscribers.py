@@ -14,8 +14,8 @@
 #
 """
     Subscribers
-    add_menu : add a menu to the returned datas at BeforeRender
-               if the company id is set
+    Add menus to the returned datas before rendering
+    Add a translation stuff to the templating context
 """
 import logging
 from webhelpers.html import tags

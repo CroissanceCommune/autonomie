@@ -14,12 +14,18 @@ function setPopUp(id, title){
    */
   $("#" + id).dialog(
     { autoOpen: false,
+    resize:'auto',
       modal:true,
       width:"auto",
+      height:"auto",
       title:title,
       open: function(event, ui){
-        $('.ui-widget-overlay').css('width','100%');
-        $('.ui-widget-overlay').css('height','100%');
+        width =
+        $('.ui-widget').css('width','60%');
+        $('.ui-widget').css('height','80%');
+        $('.ui-widget').css('left', '20%');
+        $('.ui-widget').css('top', '10%');
+        $('.ui-widget-content').css('height','auto');
       }
     });
 }

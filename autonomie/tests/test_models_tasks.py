@@ -78,6 +78,8 @@ ESTIMATION = dict(IDPhase=1,
                 number=u"estnumber")
 INVOICE = dict(IDPhase=1,
                 IDProject=1,
+                IDEmployee=2,
+                statusPerson=2,
                 name=u"Facture 2",
                 sequenceNumber=2,
                 CAEStatus="draft",
@@ -182,17 +184,19 @@ def get_estimation(user=None, project=None):
     est.statusPersonAccount = user
     return est
 
-def get_invoice(user=None, project=None):
+def get_invoice(user=None, project=None, stripped=False):
     inv = Invoice(**INVOICE)
     for line in LINES:
         l = InvoiceLine(**line)
         inv.lines.append(l)
-    if not user:
-        user = get_user()
-    if not project:
-        project = get_project()
-    inv.project = project
-    inv.statusPersonAccount = user
+    if not stripped:
+        if not user:
+            user = get_user()
+        if not project:
+            project = get_project()
+        inv.project = project
+        inv.statusPersonAccount = user
+        inv.owner = user
     return inv
 
 class TestTaskModels(BaseTestCase):
@@ -573,3 +577,16 @@ class TestPaymentLine(BaseTestCase):
         today = datetime.date.today()
         self.assertEqual(dline.paymentDate, today)
 
+class TestPayment(BaseTestCase):
+    def setUp(self):
+        super(TestPayment, self).setUp()
+        self.task = get_invoice(stripped=True)
+
+    def test_record_payment(self):
+        from autonomie.models.task import record_payment
+        request_params = {'amount':1500, 'mode':'cheque'}
+        record_payment(self.task, **request_params)
+        self.assertEqual(len(self.task.payments), 1)
+        self.assertEqual(self.task.payments[0].amount, 1500)
+        self.session.add(self.task)
+        self.session.flush()

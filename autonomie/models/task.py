@@ -328,8 +328,9 @@ def record_payment(task, **kw):
         record a payment for the given task
         expecting a paymendMode to be passed throught kw
     """
-    if "paymentMode" in kw:
-        task.paymentMode = kw['paymentMode']
+    if "mode" in kw and "amount" in kw:
+        payment = Payment(mode=kw['mode'], amount=kw['amount'])
+        task.payments.append(payment)
         return task
     else:
         raise Forbidden()
@@ -370,7 +371,7 @@ EST_STATUS_DICT = BASE_STATUS_DICT.copy()
 EST_STATUS_DICT.update(
    {'valid':('sent', 'aboest', ('geninv', None, gen_invoices), 'duplicate',),
     'sent':('aboest', ('geninv', None, gen_invoices), 'duplicate', ),
-    'aboest':((None, None, None, 'delete',),),
+    'aboest':(('delete', None, None, False,),),
     'geninv':('duplicate',)})
 
 
@@ -386,7 +387,7 @@ INV_STATUS_DICT.update(
             ('paid', MANAGER_PERMS, record_payment),
             'duplicate', 'recinv',
             ('gencinv', None, gen_cancelinvoice)),
-    'aboinv':((None, None, None, 'delete',),),
+    'aboinv':(('delete', None, None, False),),
     'paid':('duplicate',),
     'recinv':(('aboinv', MANAGER_PERMS),
               ('paid', MANAGER_PERMS, record_payment),
@@ -1592,9 +1593,21 @@ class PaymentLine(DBBASE):
         """
             duplicate a paymentline
         """
-        newone = PaymentLine()
-        newone.rowIndex = self.rowIndex
-        newone.amount = self.amount
-        newone.description = self.description
-        newone.paymentDate = datetime.date.today()
-        return newone
+        return PaymentLine(rowIndex=self.rowIndex,
+                             amount=self.amount,
+                             description=self.description,
+                             paymentDate=datetime.date.today())
+
+class Payment(DBBASE):
+    """
+        Payment entry
+    """
+    __tablename__ = 'coop_payment'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    id = Column(Integer, primary_key=True)
+    mode = Column(String(50))
+    amount = Column(Integer)
+    date = Column(DateTime, default=datetime.datetime.now)
+    IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
+    invoice = relationship("Invoice", backref=backref('payments',
+                order_by='Payment.date'))

@@ -17,14 +17,13 @@
 """
 from .base import BaseViewTest
 from mock import MagicMock
-from pyramid.security import Allow
+from pyramid.security import Allow, ALL_PERMISSIONS, Authenticated, Deny
 from pyramid import testing
 from autonomie.models.statemachine import TaskState
 from autonomie.exception import Forbidden
 
 def get_task():
     return MagicMock(CAEStatus='draft',
-                    __acl__=[(Allow, "group:manager", ("edit",))],
                     statusPerson="toto")
 
 class TestTaskState(BaseViewTest):
@@ -40,9 +39,9 @@ class TestTaskState(BaseViewTest):
                     self.state_machine.get_transition('wait', 'valid').name,
                                                             'valid')
 
-    def test_process(self):
+    def test_process_ok(self):
         self.config.testing_securitypolicy(userid='test',
-                                            groupids="group:manager")
+                                        permissive=True)
         request = testing.DummyRequest()
         task = get_task()
         process_result = self.state_machine.process(task,
@@ -52,12 +51,34 @@ class TestTaskState(BaseViewTest):
         self.assertEqual(process_result, (task, 2))
         self.assertEqual(task.statusPerson, 'test')
         self.assertEqual(task.CAEStatus, 'wait')
+
+    def test_process_failure(self):
         self.config.testing_securitypolicy(userid='test',
-                                            groupids="group:pamanager")
+                                            groupids=["group:pabon"],
+                                            permissive=False)
         request = testing.DummyRequest()
+        task = get_task()
         self.assertRaises(Forbidden, self.state_machine.process, task,
                                                     request, 'test',
                                                      'wait')
         self.assertRaises(Forbidden, self.state_machine.process, task,
                                                 request, 'test',
                                                    'invalid')
+
+
+    def test_process_caestate(self):
+        self.state_machine.add_transition(
+              'draft', 'delete', 'edit', lambda task, user_id:(task, user_id),
+                cae=False)
+        self.config.testing_securitypolicy(userid='test',
+                                         permissive=True)
+        request = testing.DummyRequest()
+        task = get_task()
+        process_result = self.state_machine.process(task,
+                                                    request,
+                                                    'test',
+                                                    'delete')
+        self.assertEqual(process_result, (task, 'test'))
+        # Because delete state has a False cae attr, it doesn't affect the task
+        # object
+        self.assertEqual(task.CAEStatus, 'draft')

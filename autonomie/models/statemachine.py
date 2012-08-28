@@ -21,16 +21,17 @@ from autonomie.exception import Forbidden
 class State(object):
     """
         a state object with a name, permission and a callback callbacktion
+        name:the state name
+        permission: the permission needed to set this state
+        callback: a callback function to call on state process
+        cae_state: True if this state is a CAE state
+                                 (it should be set as CAEStatus on the object)
     """
-    def __init__(self, name, permission=None, callback=None, action=None):
-        print "name : %s" %name
-        print "action : %s" % action
-        print ""
-
+    def __init__(self, name, permission=None, callback=None, cae_state=True):
         self.name = name
         self.permission = permission or "edit"
         self.callback = callback
-        self.action = action or name
+        self.cae_state = cae_state
 
     def allowed(self, context, request):
         """
@@ -43,8 +44,8 @@ class State(object):
         """
             process the expected actions after status change
         """
-        task.statusPerson = user_id
-        if self.name:
+        if self.cae_state:
+            task.statusPerson = user_id
             task.CAEStatus = self.name
         if self.callback:
             return self.callback(task, user_id=user_id, **kw)
@@ -71,14 +72,13 @@ class TaskState(object):
             for new_state in new_states:
                 if not hasattr(new_state, '__iter__'):
                     new_state = [new_state]
-                print new_state
                 self.add_transition(state, *new_state)
 
-    def add_transition(self, state, next_state, permission=None, callback=None, action=None):
+    def add_transition(self, state, next_, perm=None, callback=None, cae=True):
         """
             adds a transition to the state machine
         """
-        state_obj = State(next_state, permission, callback, action)
+        state_obj = State(next_, perm, callback, cae)
         self.transitions.setdefault(state, []).append(state_obj)
 
     def process(self, task, request, user_id, new_state, **kw):
@@ -101,7 +101,7 @@ class TaskState(object):
         """
         available_states = self.transitions.get(state, [])
         for state_obj in available_states:
-            if state_obj.action == new_state:
+            if state_obj.name == new_state:
                 return state_obj
         return None
 

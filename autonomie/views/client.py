@@ -24,11 +24,13 @@ from deform import Form
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import has_permission
 
 from autonomie.models.model import Client
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
+from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import ClientSchema
 from .base import ListView
@@ -47,6 +49,17 @@ class ClientView(ListView):
         Client views
     """
     columns = ("code", "name", "contactLastName",)
+
+    def __init__(self, request):
+        super(ClientView, self).__init__(request)
+        self.context = request.context
+        self.actionmenu.add(ViewLink(u"Liste des clients", "edit",
+                    path="company_clients", id=self.context.get_company_id()))
+
+        if self.context.__name__ == 'client':
+            self.actionmenu.add(self._get_view_button())
+            if has_permission('edit', self.context, request):
+                self.actionmenu.add(self._get_edit_button())
 
     @view_config(route_name='company_clients', renderer='company_clients.mako',
                                                request_method='GET',
@@ -67,16 +80,23 @@ class ClientView(ListView):
 
         # Get pagination
         records = self._get_pagination(clients, current_page, items_per_page)
-        # Get add form
-        form = get_client_form(path=self.request.route_path('company_clients',
-                                                id=company.id))
 
-        self._set_actionmenu(company)
+        # Add form
+        if has_permission('add', self.context, self.request):
+            form = get_client_form(path=self.request.route_path(
+                                                'company_clients',
+                                                id=company.id))
+            popup = PopUp("addform", u'Ajouter un client', form.render())
+            popups = {popup.name:popup}
+            self.actionmenu.add(popup.open_btn())
+
+        # Search form
+        self.actionmenu.add(SearchForm(u"Entreprise ou contact principal"))
 
         return dict(title=u"Liste des clients",
                     clients=records,
                     company=company,
-                    html_form=form.render(),
+                    popups=popups,
                     action_menu=self.actionmenu
                     )
 
@@ -101,23 +121,6 @@ class ClientView(ListView):
                                Client.contactLastName.like("%"+search+"%")))
         return clients
 
-    def _set_actionmenu(self, company, client=False, edit=False):
-        """
-            Set the current actionmenu
-        """
-        self.actionmenu.add(ViewLink(u"Liste des clients", "edit",
-            path="company_clients", id=company.id))
-        if edit:
-            self.actionmenu.add(ViewLink(u"Voir", "view",
-                path="client", id=client.id))
-            self.actionmenu.add(ViewLink(u"Éditer", "edit",
-             path="client", id=client.id, _query=dict(action="edit")))
-        else:
-            self.actionmenu.add(ViewLink(u"Ajouter un client", "add",
-                js="$('#addform').dialog('open');"))
-            self.actionmenu.add(SearchForm(u"Entreprise ou contact principal"))
-
-
     @view_config(route_name='company_clients', renderer='client.mako',\
                         request_method='POST', permission='edit')
     @view_config(route_name='client', renderer='client.mako',\
@@ -140,8 +143,6 @@ class ClientView(ListView):
             company = client.company
             edit = True
             title = u"Édition du client : {0}".format(client.name)
-
-        self._set_actionmenu(company, client, edit)
 
         form = get_client_form(edit=edit)
         if 'submit' in self.request.params:
@@ -179,10 +180,21 @@ succès".format(client.name)
         """
             Return the view of a client
         """
-        client = self.request.context
-        self._set_actionmenu(client.company, client, edit=True)
-        return dict(title=u"Client : {0}".format(client.name),
-                    client=client,
-                    company=client.company,
+        return dict(title=u"Client : {0}".format(self.context.name),
+                    client=self.context,
+                    company=self.context.company,
                     action_menu=self.actionmenu
                     )
+
+    def _get_view_button(self):
+        """
+            return a view button
+        """
+        return ViewLink(u"Voir", "view", path="client", id=self.context.id)
+
+    def _get_edit_button(self):
+        """
+            Return an edit button
+        """
+        return ViewLink(u"Éditer", "edit", path="client", id=self.context.id,
+                                            _query=dict(action="edit"))

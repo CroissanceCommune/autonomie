@@ -1,5 +1,4 @@
-development.ini
-test.ini
+*.ini
 *.pyc
 .*.swp
 *.egg-info

@@ -121,3 +121,7 @@ formatter = generic
 format = %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
 
 # End logging configuration
+#Alembic conf
+[alembic]
+script_location = alembic
+# file_template = %%(rev)s_%%(slug)s

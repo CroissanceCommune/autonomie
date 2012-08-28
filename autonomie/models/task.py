@@ -323,6 +323,14 @@ STATUS = dict((
 
 MANAGER_PERMS = "manage"
 
+def valid_callback(task, **kw):
+    """
+        callback for the task validation
+    """
+    task = set_date(task)
+    task.valid_callback()
+    return task
+
 def record_payment(task, **kw):
     """
         record a payment for the given task
@@ -362,14 +370,14 @@ def set_date(task, **kw):
 
 BASE_STATUS_DICT = {
         'draft':('draft', 'wait', 'duplicate', ),
-        'wait':(('valid', MANAGER_PERMS, set_date),
-                ('invalid', MANAGER_PERMS),
-                'duplicate',),
         'invalid':('draft', 'wait', 'duplicate',),}
 
 EST_STATUS_DICT = BASE_STATUS_DICT.copy()
 EST_STATUS_DICT.update(
-   {'valid':('sent', 'aboest', ('geninv', None, gen_invoices), 'duplicate',),
+   {'wait':(('valid', MANAGER_PERMS, set_date),
+                ('invalid', MANAGER_PERMS),
+                'duplicate',),
+    'valid':('sent', 'aboest', ('geninv', None, gen_invoices), 'duplicate',),
     'sent':('aboest', ('geninv', None, gen_invoices), 'duplicate', ),
     'aboest':(('delete', None, None, False,),),
     'geninv':('duplicate',)})
@@ -377,7 +385,10 @@ EST_STATUS_DICT.update(
 
 INV_STATUS_DICT = BASE_STATUS_DICT.copy()
 INV_STATUS_DICT.update(
-    {'valid':('sent',
+   {'wait':(('valid', MANAGER_PERMS, valid_callback),
+            ('invalid', MANAGER_PERMS),
+            'duplicate',),
+    'valid':('sent',
             ('aboinv', MANAGER_PERMS),
             ('paid', MANAGER_PERMS, record_payment),
              'duplicate',
@@ -395,7 +406,10 @@ INV_STATUS_DICT.update(
               ('gencinv', None, gen_cancelinvoice))})
 
 CINV_STATUS_DICT = BASE_STATUS_DICT.copy()
-CINV_STATUS_DICT.update({
+CINV_STATUS_DICT.update(
+   {'wait':(('valid', MANAGER_PERMS, valid_callback),
+            ('invalid', MANAGER_PERMS),
+            'duplicate',),
     'valid': ('sent', ('paid', MANAGER_PERMS), 'recinv'),
     'sent': (('paid', MANAGER_PERMS, record_payment),
              'recinv'),

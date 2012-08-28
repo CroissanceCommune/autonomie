@@ -23,7 +23,9 @@
 
 import datetime
 from mock import MagicMock
+from pyramid import testing
 from .base import BaseTestCase
+from .base import BaseViewTest
 
 from autonomie.models.task import Task
 from autonomie.models.task import Estimation
@@ -467,7 +469,7 @@ class TestEstimation(BaseTestCase):
             self.assertEqual(inv.total_ht(), line['amount'])
             self.assertEqual(inv.taskDate, line['paymentDate'])
 
-class TestInvoice(BaseTestCase):
+class TestInvoice(BaseViewTest):
     def test_get_name(self):
         self.assertEqual(Invoice.get_name(5), u"Facture 5")
         self.assertEqual(Invoice.get_name(5, sold=True), u"Facture de solde")
@@ -494,6 +496,41 @@ class TestInvoice(BaseTestCase):
         self.assertEqual(cinv.total_ht(), -1 * inv.total_ht())
         today = datetime.date.today()
         self.assertEqual(cinv.taskDate, today)
+
+    def test_valid_invoice(self):
+        inv = get_invoice(stripped=True)
+        self.session.add(inv)
+        self.session.flush()
+        self.config.testing_securitypolicy(userid='test', permissive=True)
+        request = testing.DummyRequest()
+        inv.set_status('wait', request, 1)
+        self.session.merge(inv)
+        self.session.flush()
+        inv.set_status('valid', request, 1)
+        today = datetime.date.today()
+        self.assertEqual(inv.taskDate, today)
+        self.assertEqual(inv.officialNumber, 1)
+
+    def test_valid_payment(self):
+        inv = get_invoice(stripped=True)
+        self.session.add(inv)
+        self.session.flush()
+        self.config.testing_securitypolicy(userid='test', permissive=True)
+        request = testing.DummyRequest()
+        inv.set_status('wait', request, 1)
+        self.session.merge(inv)
+        self.session.flush()
+        inv.set_status('valid', request, 1)
+        self.session.merge(inv)
+        self.session.flush()
+        inv.set_status("paid", request, 1, amount=150, mode="CHEQUE")
+        inv = self.session.merge(inv)
+        self.session.flush()
+        invoice = self.session.query(Invoice)\
+                .filter(Invoice.IDTask==inv.id).first()
+        self.assertEqual(invoice.CAEStatus, 'paid')
+        self.assertEqual(len(invoice.payments), 1)
+        self.assertEqual(invoice.payments[0].amount, 150)
 
 class TestCancelInvoice(BaseTestCase):
     def test_get_name(self):

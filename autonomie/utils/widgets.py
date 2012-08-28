@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mar. 28 août 2012 15:03:38 CEST
+# * Last Modified : mar. 28 août 2012 17:57:59 CEST
 #
 # * Project : autonomie
 #
@@ -288,12 +288,13 @@ class ButtonLink(Widget):
 
     template = "base/button.mako"
 
-    def __init__(self, label, path, js=None, title=None, icon="", **kw):
+    def __init__(self, label, path, js=None, title=None, icon="", css='',**kw):
         self.label = label
         self.path = path
         self.js = js
         self.title = title or self.label
         self.icon = icon
+        self.css = css
         self.url_kw = kw
 
     def url(self, request):

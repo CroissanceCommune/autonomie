@@ -45,7 +45,7 @@ class AmountType(colander.Number):
             return str(self.num(appstruct) / 100.0)
         except Exception:
             raise colander.Invalid(node,
-                          u"\"${val}\" n'est pas un montant valide".format(
+                          u"\"{val}\" n'est pas un montant valide".format(
                                 val=appstruct),
                           )
     def deserialize(self, node, cstruct):
@@ -56,7 +56,7 @@ class AmountType(colander.Number):
             return self.num(cstruct) * 100.0
         except Exception:
             raise colander.Invalid(node,
-                          u"\"${val}\" n'est pas un montant valide".format(
+                          u"\"{val}\" n'est pas un montant valide".format(
                             val=cstruct)
                           )
 

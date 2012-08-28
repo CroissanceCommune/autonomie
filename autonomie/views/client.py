@@ -52,7 +52,6 @@ class ClientView(ListView):
 
     def __init__(self, request):
         super(ClientView, self).__init__(request)
-        self.context = request.context
         self.actionmenu.add(ViewLink(u"Liste des clients", "edit",
                     path="company_clients", id=self.context.get_company_id()))
 

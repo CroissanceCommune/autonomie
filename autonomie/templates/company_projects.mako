@@ -37,23 +37,4 @@
     </tbody>
 </table>
 ${pager(projects)}
-% if html_form is not UNDEFINED:
-    <div id='addform' style="overflow:hidden;">
-        ${html_form|n}
-    </div>
-% endif
 </%block>
-<%block name='footerjs'>
-% if html_form is not UNDEFINED:
-    $( function() {
-    $("#addform").dialog({ autoOpen: false,
-    modal:true,
-    width:"auto",
-    height:"auto",
-    autoResize:true,
-    title:"Ajouter un Projet"
-    })
-    });
-% endif
-</%block>
-

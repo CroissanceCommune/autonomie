@@ -33,6 +33,7 @@ from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import ToggleLink
 from autonomie.utils.widgets import ItemActionLink
 from autonomie.utils.widgets import StaticWidget
+from autonomie.utils.widgets import PopUp
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.views import submit_btn
 from autonomie.utils.forms import merge_session_with_post
@@ -80,38 +81,16 @@ class ProjectView(ListView):
 
     def __init__(self, request):
         ListView.__init__(self, request)
-
-    def _set_actionmenu(self, company, project=None, edit=False):
-        """
-            Set the menu item into the returned actionmenu
-        """
         self.actionmenu.add(ViewLink(u"Liste des projets", "edit",
-            path="company_projects", id=company.id))
-        if edit:
-            self.actionmenu.add(ViewLink(u"Voir", "view",
-                path="project", id=project.id))
-            self.actionmenu.add(ViewLink(u"Éditer", "edit",
-                path="project", id=project.id,
-                _query=dict(action="edit")))
-            self.actionmenu.add(ToggleLink(u"Afficher les détails", "view",
-                    target="project-description"))
-            add_phase_btn = ToggleLink(u"Ajouter une phase", "edit",
-                    target="project-addphase", css="addphase")
-            self.actionmenu.add(add_phase_btn)
-        elif project is None:
-            self.actionmenu.add(ViewLink(u"Ajouter un projet", "add",
-                js="$('#addform').dialog('open');"))
-            archived = self.request.params.get('archived', '0')
-            if archived == '0':
-                show_archive = HTML.a(u"Afficher les projets archivés",
-                    href=self.request.current_route_path(
-                            _query=dict(archived="1")))
-            else:
-                show_archive = HTML.a(u"Afficher les projets actifs",
-                    href=self.request.current_route_path(
-                            _query=dict(archived="0")))
-            self.actionmenu.add(StaticWidget(show_archive, "view"))
-            self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
+                   path="company_projects", id=self.context.get_company_id()))
+
+        if self.context.__name__ == 'project':
+            self.actionmenu.add(self._get_view_btn())
+            self.actionmenu.add(self._get_edit_btn())
+            if has_permission('edit', self.context, self.request):
+                self.actionmenu.add(self._get_detail_btn())
+                self.actionmenu.add(self._get_phase_btn())
+
 
     def redirect_to_clients(self, company):
         """
@@ -143,7 +122,6 @@ de créer de nouveaux projets", queue="main")
 
         archived = self.request.params.get('archived', '0')
 
-
         query = self._get_projects()
         if company:
             query = self._filter_company(query, company)
@@ -159,12 +137,13 @@ de créer de nouveaux projets", queue="main")
                           company=company,
                           action_menu=self.actionmenu,
                           item_actions=self._get_actions())
-        if has_permission("add", self.request.context, self.request):
-            form = get_project_form(clients=clients,
-                        path=self.request.route_path('company_projects',
-                                                     id=company.id))
-            ret_dict['html_form'] = form.render()
-        self._set_actionmenu(company)
+
+        if has_permission("add", self.context, self.request):
+            popup = self._get_add_project_popup()
+            ret_dict['popups'] = {popup.name:popup}
+            self.actionmenu.add(popup.open_btn())
+        self.actionmenu.add(self._get_archived_btn(archived))
+        self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
         return ret_dict
 
     def _get_projects(self):# company, search, sort, direction, archived):
@@ -173,13 +152,15 @@ de créer de nouveaux projets", queue="main")
         """
         return self.dbsession.query(Project).join(Project.client)
 
-    def _filter_company(self, query, company):
+    @staticmethod
+    def _filter_company(query, company):
         """
             add a filter for the company on the query
         """
         return query.filter(Project.id_company==company.id)
 
-    def _filter_archived(self, query, archived):
+    @staticmethod
+    def _filter_archived(query, archived):
         """
             add a filter to query only archived projects
         """
@@ -187,7 +168,11 @@ de créer de nouveaux projets", queue="main")
             archived = "0"
         return query.filter(Project.archived == archived)
 
-    def _filter_search(self, query, search):
+    @staticmethod
+    def _filter_search(query, search):
+        """
+            filter the query on the searched argument
+        """
         return query.filter( or_(Project.name.like("%" + search + "%"),
                         Client.name.like("%" + search +"%")))
 
@@ -219,7 +204,6 @@ de créer de nouveaux projets", queue="main")
             edit = True
             default_client = project.client
             title = u"Édition du projet : {0}".format(project.name)
-        self._set_actionmenu(company, project, edit)
         if not company.clients:
             self.redirect_to_clients(company)
 
@@ -295,13 +279,10 @@ rajoutée".format(phasename), queue="main")
         """
             Company's project view
         """
-        project = self.request.context
-        company = project.company
-        self._set_actionmenu(company, project, True)
-        return dict(title=u"Projet : {project.name}".format(project=project),
-                    project=project,
+        return dict(title=u"Projet : {0}".format(self.context.name),
+                    project=self.context,
                     action_menu=self.actionmenu,
-                    company=company)
+                    company=self.context.company)
 
     @view_config(route_name="project",
                 request_param="action=archive",
@@ -368,3 +349,49 @@ supprimé".format(project.name) )
             btns.append(del_link)
         return btns
 
+    def _get_view_btn(self):
+        """
+            return the View button
+        """
+        return ViewLink(u"Voir", path="project", id=self.context.id)
+
+    def _get_edit_btn(self):
+        """
+            return the Edit button
+        """
+        return ViewLink(u"Éditer",  path="project", id=self.context.id,
+                                            _query=dict(action="edit"))
+
+    @staticmethod
+    def _get_detail_btn():
+        """
+            return the toggle button which show the details
+        """
+        return ToggleLink(u"Afficher les détails", target="project-description")
+
+    @staticmethod
+    def _get_phase_btn():
+        """
+            return the toggle button for phase addition
+        """
+        return ToggleLink(u"Ajouter une phase", target="project-addphase",
+                                                            css="addphase")
+    def _get_archived_btn(self, archived):
+        """
+            return the show archived button
+        """
+        if archived == '0':
+            url = self.request.current_route_path(_query=dict(archived="1"))
+            link = HTML.a(u"Afficher les projets archivés",  href=url)
+        else:
+            url = self.request.current_route_path(_query=dict(archived="0"))
+            link = HTML.a(u"Afficher les projets actifs", href=url)
+        return StaticWidget(link)
+
+    def _get_add_project_popup(self):
+        """
+            return a popup object for add project
+        """
+        url = self.request.route_path('company_projects', id=self.context.id)
+        form = get_project_form(clients=self.context.clients, path=url)
+        return  PopUp('add', u"Ajouter un projet", form.render())

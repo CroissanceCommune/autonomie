@@ -17,13 +17,15 @@
 """
 import logging
 from functools import partial
+from deform import Form
+from deform import Button
 
 from sqlalchemy import desc, asc
 
 from webhelpers import paginate
-from webhelpers.html import tags
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import has_permission
 
 from autonomie.models.model import Phase
 from autonomie.models.model import Tva
@@ -31,9 +33,10 @@ from autonomie.utils.views import get_page_url
 from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import Submit
 from autonomie.utils.widgets import ViewLink
-from autonomie.utils.widgets import StaticWidget
+from autonomie.utils.widgets import PopUp
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
+from autonomie.views.forms.task import Payment
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.pdf import render_html
 
@@ -47,6 +50,7 @@ class BaseView(object):
     def __init__(self, request):
         log.debug("We are in the view : %s"  %self)
         self.request = request
+        self.context = request.context
         self.dbsession = request.dbsession()
         self.user = request.user
         self.actionmenu = ActionMenu()
@@ -147,6 +151,7 @@ class TaskView(BaseView):
             self.project = self.task.project
             self.company = self.project.company
         self._set_actionmenu()
+        self.popups = {}
         self.set_lines()
 
     def get_task(self):
@@ -252,15 +257,19 @@ class TaskView(BaseView):
                   value="geninv",
                   request=self.request)
 
-    @staticmethod
-    def _paid_mod_select():
+    def _paid_form(self):
         """
-            Return a select object for paiment mode select
+            return the form for payment registration
         """
-        options = tags.Options((('CHEQUE', u"Par chèque",),
-                                ('VIREMENT', u"Par virement")))
-        select = tags.select('paymentMode', [], options, **{'class':'span2'})
-        return select
+        valid_btn = Button(name='submit', value="paid", type='submit',
+                                                        title=u"Validez")
+        schema = Payment()
+        schema['amount'].default = self.task.total_ttc()
+        action = self.request.route_path(self.route,
+                                         id=self.context.id,
+                                        _query=dict(action='payment'))
+        form = Form(schema=schema, buttons=(valid_btn,), action=action)
+        return form
 
     def _cancel_btn(self):
         """
@@ -347,11 +356,13 @@ class TaskView(BaseView):
             Return a button to set a paid btn and a select to choose
             the payment mode
         """
-        yield Submit(u"A été payé(e)",
-                     value="paid",
-                     request=self.request)
-        yield StaticWidget(self._paid_mod_select(),
-                    "manage")
+
+        if has_permission("manage", self.context, self.request):
+            form = self._paid_form()
+            title = u"Notifier un paiement"
+            popup = PopUp("paidform", title, form.render())
+            self.popups[popup.name] = popup
+            yield popup.open_btn(css='btn btn-primary')
 
     def _aboinv_btn(self):
         """
@@ -360,7 +371,7 @@ class TaskView(BaseView):
         yield Submit(u"Annuler cette facture",
                  value="aboinv",
                  request=self.request,
-                 confirm="Êtes-vous sûr de vouloir annuler cette facture ?")
+                 confirm=u"Êtes-vous sûr de vouloir annuler cette facture ?")
 
     def _gencinv_btn(self):
         """
@@ -415,11 +426,20 @@ class TaskView(BaseView):
             Change the current task's status
         """
         status = self.get_taskstatus()
+        params = dict(self.request.params.items())
+
+        if hasattr(self, "_pre_status_process"):
+            getattr(self, "_pre_status_process")(status, params)
+
+        log.debug(" pre status process is OK")
+
         data = self.task.set_status(status,
                                     self.request,
                                     self.user.id,
-                                    **self.request.params)
+                                    **params)
+
         log.debug(u" + The status is set to {0}".format(status))
+
         if hasattr(self, "_post_status_process"):
             getattr(self, "_post_status_process")(status, data)
 
@@ -436,22 +456,20 @@ class TaskView(BaseView):
             Change the status of the document
         """
         log.debug("# Document status modification #")
+        log.debug(self.request.params)
         valid_msg = u"Le statut a bien été modifié"
         if 'submit' in self.request.params:
             try:
-                self.request.session.flash(valid_msg, queue="main")
                 self._status_process()
                 self._set_modifications()
                 self.request.registry.notify(StatusChanged(self.request,
                                                     self.task))
+                self.request.session.flash(valid_msg, queue="main")
             except Forbidden, e:
                 log.exception(u" !! Unauthorized action by : {0}".format(
                                                         self.user.login))
                 self.request.session.pop_flash("main")
                 self.request.session.flash(e.message, queue='error')
-        else:
-            self.request.session.flash(u"Aucune modification n'a pu être \
-    effectuée, des informations sont manquantes.", queue="error")
         return self.project_view_redirect()
 
     def _html(self):

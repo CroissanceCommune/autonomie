@@ -146,7 +146,8 @@ class InvoiceView(TaskView):
                     client=self.project.client,
                     company=self.company,
                     html_form = html_form,
-                    action_menu=self.actionmenu
+                    action_menu=self.actionmenu,
+                    popups=self.popups
                     )
 
     def remove_lines_from_session(self):
@@ -183,6 +184,7 @@ class InvoiceView(TaskView):
                     task=self.task,
                     html_datas=self._html(),
                     action_menu=self.actionmenu,
+                    popups=self.popups,
                     submit_buttons=self.get_buttons(),
                     )
 
@@ -220,3 +222,28 @@ class InvoiceView(TaskView):
             self.request.session.flash(u"Un avoir a été généré, \
 vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
             self.request.route_path("cancelinvoice", id=id_)), queue="main")
+
+    def _pre_status_process(self, status, params):
+        """
+            Validates the current payment form before setting the status
+        """
+        if status == "paid":
+            form = self._paid_form()
+            appstruct = form.validate(params.items())
+            params = appstruct
+
+    @view_config(route_name="invoice", request_param='action=payment',
+                permission="manage", renderer='base/formpage.mako')
+    def register_payment(self):
+        """
+            register_payment view
+        """
+        log.debug(u"Registering a payment")
+        try:
+            ret_dict = self._status()
+        except ValidationFailure, err:
+            log.exception(u"An error has been detected")
+            ret_dict = dict(html_form=err.render(),
+                    title=u"Enregistrement d'un paiement")
+        log.debug(ret_dict)
+        return ret_dict

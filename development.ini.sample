@@ -123,5 +123,5 @@ format = %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
 # End logging configuration
 #Alembic conf
 [alembic]
-script_location = alembic
+script_location = autonomie:alembic
 # file_template = %%(rev)s_%%(slug)s

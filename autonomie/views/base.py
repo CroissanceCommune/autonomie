@@ -388,7 +388,7 @@ class TaskView(BaseView):
         actions = self.task.get_next_actions()
         for action in actions:
             if action.allowed(self.task, self.request):
-                func = getattr(self, "_%s_btn" % action.action)
+                func = getattr(self, "_%s_btn" % action.name)
                 btns.extend(func())
         btns.extend(self._cancel_btn())
         btns.extend(self._pdf_btn())

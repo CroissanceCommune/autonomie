@@ -1,0 +1,5 @@
+import sys                                                                      
+from pkg_resources import load_entry_point                                      
+sys.exit(                                                                       
+    load_entry_point('autonomie', 'console_scripts', 'migrate_autonomie')()   
+)            

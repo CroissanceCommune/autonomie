@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mar. 28 août 2012 00:57:14 CEST
+# * Last Modified : mar. 28 août 2012 15:03:38 CEST
 #
 # * Project : autonomie
 #
@@ -91,7 +91,7 @@ class StaticWidget(PermWidget):
         @html : an html string (maybe you can use Webhelpers to build it)
         @perm: the permission needed to display this element
     """
-    def __init__(self, html, perm):
+    def __init__(self, html, perm=None):
         self.html = html
         self.perm = perm
 
@@ -112,7 +112,7 @@ class JsLink(Link):
         Simple Javascript Link
     """
     template = "base/jsbutton.mako"
-    def __init__(self, label, perm, css="", js=None, title=None, icon=""):
+    def __init__(self, label, perm=None, css="", js=None, title=None, icon=""):
         self.label = label
         self.perm = perm
         self.js = js
@@ -133,7 +133,7 @@ class ViewLink(Link):
 
     template = "base/button.mako"
 
-    def __init__(self, label, perm, path=None, css="", js=None, title=None,
+    def __init__(self, label, perm=None, path=None, css="", js=None, title=None,
             icon="", request=None, **kw):
         self.label = label
         self.perm = perm
@@ -222,7 +222,8 @@ class Submit(Widget):
 
 class ToggleLink(Link):
     template = "base/togglelink.mako"
-    def __init__(self, label, perm, target, title=None, css="", icon=""):
+    def __init__(self, label, perm=None, target=None, title=None, css="", \
+                                                                icon=""):
         self.label = label
         self.perm = perm
         self.target = target
@@ -274,7 +275,7 @@ class ActionMenu(Menu):
 
 class MenuDropDown(Menu, PermWidget):
     template = "base/dropdown.mako"
-    def __init__(self, label, perm, title=None, template=None):
+    def __init__(self, label, perm=None, title=None, template=None):
         Menu.__init__(self, template)
         self.label = label
         self.perm = perm
@@ -282,3 +283,66 @@ class MenuDropDown(Menu, PermWidget):
 
 class MainMenuItem(ViewLink):
     template = "base/mainmenu_item.mako"
+
+class ButtonLink(Widget):
+
+    template = "base/button.mako"
+
+    def __init__(self, label, path, js=None, title=None, icon="", **kw):
+        self.label = label
+        self.path = path
+        self.js = js
+        self.title = title or self.label
+        self.icon = icon
+        self.url_kw = kw
+
+    def url(self, request):
+        """
+            Returns the button's url
+        """
+        return request.route_path(self.path, **self.url_kw)
+
+    def onclick(self):
+        """
+            return the onclick attribute
+        """
+        return self.js
+
+    def selected(self, request):
+        """
+            Return True if the button is active
+        """
+        request = self.request or request
+        cur_path = request.current_route_path()
+        if request.GET.has_key('action'):
+            cur_path += "?action=%s" % request.GET['action']
+        return urllib.unquote(cur_path) == self.url(request)
+
+class ButtonJsLink(ButtonLink):
+
+    template = "base/button.mako"
+
+    def url(self, request):
+        return "#{0}".format(self.path)
+
+    def selected(self, request):
+        """
+            return True if it's selected
+        """
+        return False
+
+class PopUp(object):
+    """
+        A popup
+    """
+    def __init__(self, name, title, html):
+        self.name = name
+        self.title = title
+        self.html = html
+
+    def open_btn(self, label=None, factory=ButtonJsLink, **kw):
+        label = label or self.title
+        return factory(label, js=self._get_js_link(), path=self.name, **kw)
+
+    def _get_js_link(self):
+        return u"$('#{0}').dialog('open');".format(self.name)

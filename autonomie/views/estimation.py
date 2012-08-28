@@ -149,7 +149,8 @@ class EstimationView(TaskView):
                     client=self.project.client,
                     company=self.company,
                     html_form = html_form,
-                    action_menu=self.actionmenu
+                    action_menu=self.actionmenu,
+                    popups=self.popups
                     )
     def remove_lines_from_session(self):
         """
@@ -191,7 +192,8 @@ class EstimationView(TaskView):
                     task=self.task,
                     html_datas=self._html(),
                     action_menu=self.actionmenu,
-                    submit_buttons=self.get_buttons()
+                    submit_buttons=self.get_buttons(),
+                    popups=self.popups
                     )
 
     @view_config(route_name='estimation',

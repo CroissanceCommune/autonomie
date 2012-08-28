@@ -1,3 +1,6 @@
+<%doc>
+    company View page
+</%doc>
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />

@@ -29,7 +29,7 @@ from autonomie.views.forms.task import get_cancel_invoice_dbdatas
 from autonomie.models.model import CancelInvoice
 from autonomie.models.model import CancelInvoiceLine
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.utils.exception import Forbidden
+from autonomie.exception import Forbidden
 
 from .base import TaskView
 log = logging.getLogger(__name__)

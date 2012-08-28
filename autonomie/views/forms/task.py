@@ -625,3 +625,16 @@ def set_payment_times(appstruct, dbdatas):
         appstruct.setdefault('payments', {})['payment_times'] = max(1,
                                         len(dbdatas.get('payment_lines')))
     return appstruct
+
+PAYMENT_MODE_CHOICES = (('CHEQUE', u'Par chèque'),
+                        ('VIREMENT', u'Par virement'))
+class Payment(colander.MappingSchema):
+    """
+        colander schema for payment recording
+    """
+    amount = colander.SchemaNode(AmountType(), title=u"Montant")
+    mode = colander.SchemaNode(colander.String(),
+                    title=u"Mode de paiement",
+                    widget=widget.SelectWidget(values=PAYMENT_MODE_CHOICES),
+               default=PAYMENT_MODE_CHOICES[0][0],
+               validator=colander.OneOf([x[0] for x in PAYMENT_MODE_CHOICES]))

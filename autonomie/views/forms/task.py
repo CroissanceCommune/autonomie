@@ -647,7 +647,7 @@ def deferred_total_validator(node, kw):
     max_msg = u"Le montant ne doit pas dépasser %s\
 (total ttc - somme des paiements enregistrés)" % (task.topay() / 100.0)
     min_msg = u"Le montant doit être positif"
-    return colander.Range(min=0, max=task.topay()+1, min_err=min_msg,
+    return colander.Range(min=0, max=task.topay(), min_err=min_msg,
                                                    max_err=max_msg)
 
 class Payment(colander.MappingSchema):

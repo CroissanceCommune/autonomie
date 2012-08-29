@@ -230,7 +230,9 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
         if status == "paid":
             form = self._paid_form()
             appstruct = form.validate(params.items())
-            params = appstruct
+            log.debug("Appstruct : %s" % appstruct)
+            return appstruct
+        return params
 
     @view_config(route_name="invoice", request_param='action=payment',
                 permission="manage", renderer='base/formpage.mako')

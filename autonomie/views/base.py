@@ -429,7 +429,7 @@ class TaskView(BaseView):
         params = dict(self.request.params.items())
 
         if hasattr(self, "_pre_status_process"):
-            getattr(self, "_pre_status_process")(status, params)
+            params = getattr(self, "_pre_status_process")(status, params)
 
         log.debug(" pre status process is OK")
 

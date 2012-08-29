@@ -1680,4 +1680,4 @@ class Payment(DBBASE):
                 backref=backref('payments', order_by='Payment.date'))
 
     def get_amount(self):
-        return float(self.amount) / 100.0
+        return self.amount

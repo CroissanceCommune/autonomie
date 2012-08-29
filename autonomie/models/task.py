@@ -59,7 +59,6 @@ from sqlalchemy import Date
 from sqlalchemy import BigInteger
 from sqlalchemy import DateTime
 from sqlalchemy import Text
-from sqlalchemy import Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
 from sqlalchemy.orm import deferred
@@ -347,9 +346,10 @@ def record_payment(task, **kw):
         record a payment for the given task
         expecting a paymendMode to be passed throught kw
     """
+    log.debug("recording a payment")
+    log.debug(task)
     if "mode" in kw and "amount" in kw:
-        task.record_payment(kw['mode'], kw['amount'], kw.get('resulted'))
-        return task
+        return task.record_payment(kw['mode'], kw['amount'], kw.get('resulted'))
     else:
         raise Forbidden()
 
@@ -411,7 +411,9 @@ INV_STATUS_DICT.update(
             'duplicate', 'recinv',
             ('gencinv', None, gen_cancelinvoice)),
     'aboinv':(('delete', None, None, False),),
-    'paid':('duplicate', 'paid', 'resulted'),
+    'paid':('duplicate',
+            ('paid', MANAGER_PERMS, record_payment),
+            'resulted'),
     'recinv':(('aboinv', MANAGER_PERMS),
               ('paid', MANAGER_PERMS, record_payment),
                'resulted',
@@ -423,7 +425,9 @@ CINV_STATUS_DICT.update(
    {'wait':(('valid', MANAGER_PERMS, valid_callback),
             ('invalid', MANAGER_PERMS),
             'duplicate',),
-    'valid': ('sent', ('paid', MANAGER_PERMS), 'recinv'),
+    'valid': ('sent',
+              ('paid', MANAGER_PERMS, record_payment),
+              'recinv'),
     'sent': (('paid', MANAGER_PERMS, record_payment),
               'resulted',
              'recinv'),
@@ -1122,10 +1126,15 @@ class Invoice(Task, TaskCompute):
         """
             Validate a record payment
         """
+        log.debug("Invoice payment recording")
+        log.debug("  o There was to pay : %s" % self.topay())
+        log.debug("    ->Is recorded : %s" % amount)
         payment = Payment(mode=mode, amount=amount)
         self.payments.append(payment)
+        log.debug("     -> There still to pay : %s" % self.topay())
         if self.topay() == 0 or resulted:
             self.CAEStatus = 'resulted'
+        return self
 
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
@@ -1255,10 +1264,15 @@ class CancelInvoice(Task, TaskCompute):
         """
             Validate a record payment
         """
+        log.debug("Invoice payment recording")
+        log.debug("  o There was to pay : %s" % self.topay())
+        log.debug("    ->Is recorded : %s" % amount)
         payment = Payment(mode=mode, amount=amount)
         self.payments.append(payment)
+        log.debug("     -> There still to pay : %s" % self.topay())
         if self.topay() == 0 or resulted:
             self.CAEStatus = 'resulted'
+        return self
 
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):

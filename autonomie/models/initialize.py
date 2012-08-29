@@ -24,7 +24,6 @@ def initialize_sql(engine):
     """
         Initialize the database engine
     """
-    print "In initialize sql"
     DBSESSION.configure(bind=engine)
     DBMETADATA.bind = engine
     if not engine.table_names():

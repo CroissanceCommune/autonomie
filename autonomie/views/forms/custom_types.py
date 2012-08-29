@@ -53,7 +53,7 @@ class AmountType(colander.Number):
             return colander.null
 
         try:
-            return self.num(cstruct) * 100.0
+            return int(self.num(cstruct) * 100.0)
         except Exception:
             raise colander.Invalid(node,
                           u"\"{val}\" n'est pas un montant valide".format(

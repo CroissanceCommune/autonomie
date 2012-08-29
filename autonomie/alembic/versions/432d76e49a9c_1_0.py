@@ -20,7 +20,7 @@ def upgrade():
             sa.Column('id', sa.Integer, primary_key=True),
             sa.Column("name", sa.String(8), nullable=False),
             sa.Column("value", sa.Integer),
-            __table_args__={'mysql_engine': 'MyISAM', "mysql_charset":'utf8'})
+            mysql_engine="MyISAM", mysql_charset='utf8')
 
 
 def downgrade():

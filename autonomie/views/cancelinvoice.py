@@ -115,6 +115,7 @@ class CancelInvoiceView(TaskView):
                     client=self.project.client,
                     company=self.company,
                     html_form=html_form,
+                    popups=self.popups,
                     action_menu=self.actionmenu)
 
     def is_editable(self):
@@ -171,6 +172,7 @@ class CancelInvoiceView(TaskView):
                     task=self.task,
                     html_datas=self._html(),
                     action_menu=self.actionmenu,
+                    popups=self.popups,
                     submit_buttons=self.get_buttons())
 
     @view_config(route_name='cancelinvoice',

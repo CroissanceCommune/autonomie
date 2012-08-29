@@ -663,12 +663,12 @@ class TestPayment(BaseTestCase):
 
     def test_payment_get_amount(self):
         payment = Payment(**PAYMENTS[1])
-        self.assertEqual(payment.get_amount(), 18.95)
+        self.assertEqual(payment.get_amount(), 1895)
 
     def test_invoice_topay(self):
         task = self.get_task()
-        self.assertEqual(task.paid(), 33.95)
-        self.assertEqual(task.topay(), EST_TOTAL - 33.95)
+        self.assertEqual(task.paid(), 3395)
+        self.assertEqual(task.topay(), EST_TOTAL - 3395)
 
     def test_resulted_manual(self):
         task = self.get_task()
@@ -686,7 +686,7 @@ class TestPayment(BaseTestCase):
         task.CAEStatus = 'valid'
         task.CAEStatus = 'paid'
         from autonomie.models.task import record_payment
-        request_params = {'amount':int(task.topay() * 100), 'mode':'cheque'}
+        request_params = {'amount':int(task.topay()), 'mode':'cheque'}
         record_payment(task, **request_params)
         self.assertEqual(task.CAEStatus, 'resulted')
 

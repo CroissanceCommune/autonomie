@@ -8,7 +8,8 @@ from autonomie.models import DBMETADATA
 def run_migrations_online():
     if DBSESSION.bind is None:
         raise ValueError(
-            "\nYou must run Kotti's migration using the 'kotti-migrate' script"
+            "\nYou must Autonomie's migration using the 'autonomie-migrate' \
+            script"
             "\nand not through 'alembic' directly."
             )
 
@@ -30,3 +31,5 @@ def run_migrations_online():
     finally:
         #connection.close()
         pass
+
+run_migrations_online()

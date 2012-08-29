@@ -456,6 +456,9 @@ class Task(DBBASE):
                         primaryjoin="Task.IDEmployee==User.id",
                             backref="ownedTasks")
 
+    type_ = Column('type_', String(30), nullable=False)
+    __mapper_args__ = {'polymorphic_on': type_}
+
     state_machine = DEFAULT_STATE_MACHINES['base']
 
 
@@ -1622,6 +1625,10 @@ class Payment(DBBASE):
     mode = Column(String(50))
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
-    IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
-    invoice = relationship("Invoice", backref=backref('payments',
-                order_by='Payment.date'))
+    IDTask = Column(Integer, ForeignKey('coop_task.IDTask'))
+    document = relationship("Task",
+                primaryjoin="Task.IDTask==Payment.IDTask",
+                backref=backref('payments', order_by='Payment.date'))
+
+    def get_amount(self):
+        return float(self.amount) / 100.0

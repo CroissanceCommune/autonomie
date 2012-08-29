@@ -37,6 +37,7 @@ from autonomie.models.task import InvoiceLine
 from autonomie.models.task import PaymentLine
 from autonomie.models.task import CancelInvoiceLine
 from autonomie.models.task import TaskCompute
+from autonomie.models.task import Payment
 
 from autonomie.models.user import User
 
@@ -96,6 +97,22 @@ INVOICE = dict(IDPhase=1,
                 description=u"Description de la facture",
                 statusComment=u"Aucun commentaire",
                 number=u"invoicenumber")
+CANCELINVOICE = dict(IDPhase=1,
+                IDProject=1,
+                IDEmployee=2,
+                statusPerson=2,
+                name=u"Avoir 2",
+                sequenceNumber=2,
+                CAEStatus="draft",
+                course="0",
+                displayedUnits="1",
+                tva=1960,
+                expenses=1500,
+                paymentConditions=u"Conditions de paiement",
+                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+                description=u"Description de l'avoir",
+                statusComment=u"Aucun commentaire",
+                number=u"cancelinvoicenumber")
 LINES = [{'description':u'text1',
           'cost':10025,
           'unity':'DAY',
@@ -123,6 +140,11 @@ PAYMENT_LINES = [{'description':u"Début",
                   "paymentDate":datetime.date(2012, 12, 14),
                   "amount":150,
                   "rowIndex":3}]
+
+PAYMENTS = [
+            {'amount':1500, 'mode':'CHEQUE'},
+            {'amount':1895, 'mode':'CHEQUE'},
+            ]
 
 # Values:
 #         the money values are represented *100
@@ -200,6 +222,13 @@ def get_invoice(user=None, project=None, stripped=False):
         inv.statusPersonAccount = user
         inv.owner = user
     return inv
+
+def get_cancelinvoice():
+    cinv = CancelInvoice(**CANCELINVOICE)
+    for line in LINES:
+        l = CancelInvoiceLine(**line)
+        cinv.lines.append(l)
+    return cinv
 
 class TestTaskModels(BaseTestCase):
     def test_interfaces(self):
@@ -615,15 +644,75 @@ class TestPaymentLine(BaseTestCase):
         self.assertEqual(dline.paymentDate, today)
 
 class TestPayment(BaseTestCase):
-    def setUp(self):
-        super(TestPayment, self).setUp()
-        self.task = get_invoice(stripped=True)
+
+    def get_task(self):
+        task = get_invoice(stripped=True)
+        for i in PAYMENTS:
+            task.payments.append(Payment(**i))
+        return task
 
     def test_record_payment(self):
+        task = self.get_task()
         from autonomie.models.task import record_payment
         request_params = {'amount':1500, 'mode':'cheque'}
-        record_payment(self.task, **request_params)
-        self.assertEqual(len(self.task.payments), 1)
-        self.assertEqual(self.task.payments[0].amount, 1500)
-        self.session.add(self.task)
+        record_payment(task, **request_params)
+        self.assertEqual(len(task.payments), 3)
+        self.assertEqual(task.payments[2].amount, 1500)
+        self.session.add(task)
         self.session.flush()
+
+    def test_payment_get_amount(self):
+        payment = Payment(**PAYMENTS[1])
+        self.assertEqual(payment.get_amount(), 18.95)
+
+    def test_invoice_topay(self):
+        task = self.get_task()
+        self.assertEqual(task.paid(), 33.95)
+        self.assertEqual(task.topay(), EST_TOTAL - 33.95)
+
+    def test_resulted_manual(self):
+        task = self.get_task()
+        task.CAEStatus = 'wait'
+        task.CAEStatus = 'valid'
+        task.CAEStatus = 'paid'
+        from autonomie.models.task import record_payment
+        request_params = {'amount':0, 'mode':'cheque', 'resulted':True}
+        record_payment(task, **request_params)
+        self.assertEqual(task.CAEStatus, 'resulted')
+
+    def test_resulted_auto(self):
+        task = self.get_task()
+        task.CAEStatus = 'wait'
+        task.CAEStatus = 'valid'
+        task.CAEStatus = 'paid'
+        from autonomie.models.task import record_payment
+        request_params = {'amount':int(task.topay() * 100), 'mode':'cheque'}
+        record_payment(task, **request_params)
+        self.assertEqual(task.CAEStatus, 'resulted')
+
+class TestPolymorphic(BaseTestCase):
+    def test_invoice(self):
+        inv = get_invoice(stripped=True)
+        inv.IDPhase = 16
+        self.session.add(inv)
+        self.session.flush()
+        task = self.session.query(Task).filter(Task.IDPhase==16).first()
+        self.assertTrue(isinstance(task, Invoice))
+
+    def test_payment(self):
+        invoice = get_invoice(stripped=True)
+        invoice.IDPhase = 17
+        cancelinvoice = get_cancelinvoice()
+        cancelinvoice.IDPhase = 18
+        invoice.record_payment(**PAYMENTS[0])
+        cancelinvoice.record_payment(**PAYMENTS[1])
+        self.session.add(invoice)
+        self.session.add(cancelinvoice)
+        self.session.flush()
+        p1 = self.session.query(Payment).join(Task).filter(Task.IDPhase==17).first()
+        p2 = self.session.query(Payment).join(Task).filter(Task.IDPhase==18).first()
+        self.assertTrue(isinstance(p1.document, Invoice))
+        self.assertFalse(isinstance(p1.document, CancelInvoice))
+        self.assertTrue(isinstance(p2.document, CancelInvoice))
+        self.assertFalse(isinstance(p2.document, Invoice))
+

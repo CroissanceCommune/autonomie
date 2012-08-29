@@ -628,13 +628,45 @@ def set_payment_times(appstruct, dbdatas):
 
 PAYMENT_MODE_CHOICES = (('CHEQUE', u'Par chèque'),
                         ('VIREMENT', u'Par virement'))
+
+
+@colander.deferred
+def deferred_amount_default(node, kw):
+    """
+        default value for the payment amount
+    """
+    task = kw.get('task')
+    return task.topay()
+
+@colander.deferred
+def deferred_total_validator(node, kw):
+    """
+        validate the amount to keep the sum under the total
+    """
+    task = kw.get('task')
+    max_msg = u"Le montant (${val}) ne doit pas dépasser ${max} \
+(total ttc - somme des paiements enregistrés)"
+    min_msg = u"Le montant doit être positif"
+    return colander.Range(min=0, max=task.topay(), min_err=min_msg,
+                                                   max_err=max_msg)
+
 class Payment(colander.MappingSchema):
     """
         colander schema for payment recording
     """
-    amount = colander.SchemaNode(AmountType(), title=u"Montant")
+    amount = colander.SchemaNode(AmountType(),
+                                 title=u"Montant",
+                                 validator=deferred_total_validator,
+                                 default=deferred_amount_default
+                                )
     mode = colander.SchemaNode(colander.String(),
                     title=u"Mode de paiement",
                     widget=widget.SelectWidget(values=PAYMENT_MODE_CHOICES),
                default=PAYMENT_MODE_CHOICES[0][0],
                validator=colander.OneOf([x[0] for x in PAYMENT_MODE_CHOICES]))
+    resulted = colander.SchemaNode(colander.Boolean(),
+            title=u"Soldé",
+            description="Indique que le document est soldé (\
+        ne recevra plus de paiement), si le montant indiqué correspond au \
+        montant de la facture celle-ci est soldée automatiquement",
+            default=False)

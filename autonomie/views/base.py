@@ -263,8 +263,7 @@ class TaskView(BaseView):
         """
         valid_btn = Button(name='submit', value="paid", type='submit',
                                                         title=u"Validez")
-        schema = Payment()
-        schema['amount'].default = self.task.total_ttc()
+        schema = Payment().bind(task=self.task)
         action = self.request.route_path(self.route,
                                          id=self.context.id,
                                         _query=dict(action='payment'))
@@ -399,8 +398,9 @@ class TaskView(BaseView):
         actions = self.task.get_next_actions()
         for action in actions:
             if action.allowed(self.task, self.request):
-                func = getattr(self, "_%s_btn" % action.name)
-                btns.extend(func())
+                if hasattr(self, "_%s_btn" % action.name):
+                    func = getattr(self, "_%s_btn" % action.name)
+                    btns.extend(func())
         btns.extend(self._cancel_btn())
         btns.extend(self._pdf_btn())
         return btns

@@ -62,7 +62,6 @@ def dump_sample(options):
     """
         dump sample datas in our test database
     """
-    launch_cmd("{mysql_cmd} {db} < {sampledb}".format(**options))
     launch_cmd("{mysql_cmd} {db} < {sampledatas}".format(**options))
 
 def drop_db(options):
@@ -79,13 +78,6 @@ def drop_sql_datas(settings, prefix):
     print "Dropping test datas : keeping it clean"
     options = coerce_datas(settings, prefix)
     drop_db(options)
-
-def update_database(options, fpath):
-    """
-        update database with the given sql file
-    """
-    options['updatefile'] = fpath
-    launch_cmd("{mysql_cmd} {db} < {updatefile}".format(**options))
 
 def test_connect(options):
     """
@@ -105,22 +97,22 @@ setup script to build the mysql test database like the following : \n
         print err_str
         sys.exit(err_str)
 
-
-
-def initialize_test_database(settings, prefix, here):
+def initialize_test_database(settings):
     """
         dump sample datas as a test database
     """
     print "Initializing test database"
-    options = coerce_datas(settings, prefix, here)
-    print "testing connection"
-    test_connect(options)
-    create_sql_user(options)
-    create_test_db(options)
-    grant_user(options)
-    dump_sample(options)
-    for fname in sorted(os.listdir(options['updatedir'])):
-        update_database(options, os.path.join(options['updatedir'], fname))
+    test_connect(settings)
+    create_sql_user(settings)
+    create_test_db(settings)
+    grant_user(settings)
+
+def migrate_database(settings, key):
+    """
+        migrate the database
+    """
+    from autonomie.scripts.migrate import upgrade
+    upgrade(settings[key])
 
 def pytest_sessionstart():
     """
@@ -130,7 +122,7 @@ def pytest_sessionstart():
 
     # Only run database setup on master (in case of xdist/multiproc mode)
     if not hasattr(config, 'slaveinput'):
-        from autonomie.models import initialize_sql
+        from autonomie.models.initialize import initialize_sql
         from pyramid.config import Configurator
         from paste.deploy.loadwsgi import appconfig
         from sqlalchemy import engine_from_config
@@ -138,14 +130,15 @@ def pytest_sessionstart():
         settings = appconfig('config:' + os.path.join(here,
                                                       'test.ini'),
                              "autonomie")
-        initialize_test_database(settings, "testdb.", here)
+        test_settings = coerce_datas(settings, "testdb.", here)
+        initialize_test_database(test_settings)
         engine = engine_from_config(settings, prefix='sqlalchemy.')
-
         print 'Creating the tables on the test database %s' % engine
-
         config = Configurator(settings=settings)
+        config.begin()
+        config.commit()
         initialize_sql(engine)
-        from autonomie.models.model import *
+        dump_sample(test_settings)
 
 def pytest_sessionfinish():
     """

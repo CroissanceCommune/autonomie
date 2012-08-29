@@ -51,9 +51,9 @@ class PackageEnvironment(object):
         Here we use one but it could be usefull when handling plugins'
         migrations
     """
-    def __init__(self, location):
+    def __init__(self, location, sql_url=None):
         self.location = location
-        self.config = self._make_config()
+        self.config = self._make_config(sql_url)
         self.script_dir = self._make_script_dir(self.config)
 
     @property
@@ -80,14 +80,17 @@ class PackageEnvironment(object):
             ):
             self.script_dir.run_env()
 
-    def _make_config(self):
+    def _make_config(self, sql_url=None):
         """
             populate alembic's configuration
         """
         cfg = Config()
         cfg.set_main_option("script_location", self.location)
         settings = get_current_registry().settings
-        cfg.set_main_option("sqlalchemy.url", settings['sqlalchemy.url'])
+        if sql_url is None:
+            cfg.set_main_option("sqlalchemy.url", settings['sqlalchemy.url'])
+        else:
+            cfg.set_main_option("sqlalchemy.url", sql_url)
         return cfg
 
     def _make_script_dir(self, alembic_cfg):
@@ -98,11 +101,11 @@ class PackageEnvironment(object):
         script_dir.__class__ = ScriptDirectoryWithDefaultEnvPy
         return script_dir
 
-def upgrade():
+def upgrade(sql_url=None):
     """
         upgrade the content of DEFAULT_LOCATION
     """
-    pkg_env = PackageEnvironment(DEFAULT_LOCATION)
+    pkg_env = PackageEnvironment(DEFAULT_LOCATION, sql_url)
 
     revision = pkg_env.script_dir.get_current_head()
     print(u'Upgrading {0}:'.format(pkg_env.location))
@@ -145,7 +148,7 @@ def list_all():
     pkg_env.run_env(current_revision)
     print
 
-def stamp(revision):
+def fetch(revision=None):
     """
         fetch a revision without migrating
     """
@@ -160,13 +163,18 @@ def stamp(revision):
         return []
     PackageEnvironment(DEFAULT_LOCATION).run_env(do_stamp)
 
+def fetch_head():
+    """
+        fetch the latest revision
+    """
+    fetch(None)
 
 def migrate():
     __doc__ = """Migrate autonomie's database
     Usage:
         migrate <config_uri> list_all
         migrate <config_uri> upgrade
-        migrate <config_uri> stamp [--rev=<rev>]
+        migrate <config_uri> fetch [--rev=<rev>]
 
     o stamp : join a specific migration revision without launching migration
               scripts
@@ -182,9 +190,9 @@ def migrate():
             func = list_all
         elif arguments['upgrade']:
             func = upgrade
-        elif arguments['stamp']:
+        elif arguments['fetch']:
             args = (arguments['--rev'],)
-            func = stamp
+            func = fetch
         return func(*args)
     try:
         return command(callback, __doc__)

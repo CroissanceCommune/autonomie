@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 25 juil. 2012 16:02:14 CEST
+# * Last Modified : mer. 29 août 2012 10:51:14 CEST
 #
 # * Project : autonomie
 #
@@ -46,6 +46,7 @@ class ORMClass(object):
         return DBSESSION.query(cls).get(id_)
 
 DBBASE = declarative.declarative_base(cls=ORMClass)
+DBBASE.metadata = DBMETADATA
 
 def record_to_appstruct(self):
     """
@@ -58,13 +59,3 @@ def record_to_appstruct(self):
 # Add a bounded method to the DBBASE object
 #DBBASE.appstruct = types.MethodType( record_to_appstruct, DBBASE )
 DBBASE.appstruct = record_to_appstruct
-
-def initialize_sql(engine):
-    """
-        Initialize the database engine
-    """
-    #DBSESSION.configure(bind=engine)
-    DBMETADATA.bind = engine
-    DBBASE.metadata.bind = engine
-    DBBASE.metadata.create_all(engine)
-    return DBSESSION

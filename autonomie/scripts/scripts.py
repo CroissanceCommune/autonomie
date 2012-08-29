@@ -18,28 +18,16 @@ command line scripts for autonomie
 import os
 import pkg_resources
 
+from pyramid.threadlocal import get_current_registry
+from zope.sqlalchemy import mark_changed
+
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic.environment import EnvironmentContext
 from alembic.util import load_python_file
 
-from docopt import docopt
-from pyramid.paster import bootstrap
-from pyramid.threadlocal import get_current_registry
-from zope.sqlalchemy import mark_changed
 from autonomie.models import DBSESSION
-
-def command(func, doc):
-    """
-        Usefull function to wrap command line scripts
-    """
-    args = docopt(doc)
-    pyramid_env = bootstrap(args['<config_uri>'])
-    try:
-        func(args)
-    finally:
-        pyramid_env['closer']()
-    return 0
+from autonomie.scripts.utils import command
 
 SCRIPT_DIR = pkg_resources.resource_filename('autonomie', 'alembic')
 DEFAULT_LOCATION = 'autonomie:alembic'
@@ -74,9 +62,15 @@ class PackageEnvironment(object):
 
     @property
     def version_table(self):
+        """
+            Return the name of the table hosting alembic's current revision
+        """
         return '{0}_alembic_version'.format(self.pkg_name)
 
     def run_env(self, fn, **kw):
+        """
+            run alembic's context
+        """
         with EnvironmentContext(
             self.config,
             self.script_dir,
@@ -87,6 +81,9 @@ class PackageEnvironment(object):
             self.script_dir.run_env()
 
     def _make_config(self):
+        """
+            populate alembic's configuration
+        """
         cfg = Config()
         cfg.set_main_option("script_location", self.location)
         settings = get_current_registry().settings
@@ -94,6 +91,9 @@ class PackageEnvironment(object):
         return cfg
 
     def _make_script_dir(self, alembic_cfg):
+        """
+            build and cast the script_directory
+        """
         script_dir = ScriptDirectory.from_config(alembic_cfg)
         script_dir.__class__ = ScriptDirectoryWithDefaultEnvPy
         return script_dir
@@ -107,7 +107,7 @@ def upgrade():
     revision = pkg_env.script_dir.get_current_head()
     print(u'Upgrading {0}:'.format(pkg_env.location))
 
-    def upgrade(rev, context):
+    def upgrade_func(rev, context):
         if rev == revision:
             print(u'  - already up to date.')
             return []
@@ -116,13 +116,16 @@ def upgrade():
         return context.script._upgrade_revs(revision, rev)
 
     pkg_env.run_env(
-        upgrade,
+        upgrade_func,
         starting_rev=None,
         destination_rev=revision,
         )
     print
 
 def list_all():
+    """
+        list all available revisions
+    """
     pkg_env = PackageEnvironment(DEFAULT_LOCATION)
     print(u'{0}:'.format(pkg_env.pkg_name))
 
@@ -134,6 +137,9 @@ def list_all():
             ))
 
     def current_revision(rev, context):
+        """
+            print the current revision
+        """
         print(u"  - current revision: {0}".format(rev))
         return []
     pkg_env.run_env(current_revision)

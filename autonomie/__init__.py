@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 09 juil. 2012 22:51:46 CEST
+# * Last Modified : mer. 29 août 2012 11:14:08 CEST
 #
 # * Project : autonomie
 #
@@ -22,11 +22,13 @@ from sqlalchemy import engine_from_config, create_engine
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
+from pyramid.threadlocal import get_current_registry
+
 from autonomie.utils.security import RootFactory
 from autonomie.utils.security import BaseDBFactory
 from autonomie.utils.security import wrap_db_objects
 
-from autonomie.models import initialize_sql
+from autonomie.models.initialize import initialize_sql
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
 from autonomie.utils.config import get_config
@@ -37,10 +39,6 @@ def main(global_config, **settings):
         Main function : returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
-    dbsession = initialize_sql(engine)
-    wrap_db_objects()
-    BaseDBFactory.dbsession = dbsession
-
     session_factory = session_factory_from_settings(settings)
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
@@ -50,9 +48,15 @@ def main(global_config, **settings):
     config = Configurator(settings=settings,
                         authentication_policy=auth_policy,
                         authorization_policy=acl_policy,
-                        session_factory=session_factory,
-                        root_factory=RootFactory
-                        )
+                        session_factory=session_factory)
+    config.begin()
+    config.commit()
+
+    dbsession = initialize_sql(engine)
+    wrap_db_objects()
+    BaseDBFactory.dbsession = dbsession
+    config._set_root_factory(RootFactory)
+
     # Application main configuration
     config.set_default_permission('view')
 

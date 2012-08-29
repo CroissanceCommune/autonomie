@@ -18,8 +18,8 @@ Alembic migration
 
 migrate:
 
-    migrate app.ini upgrade
+    autonomie-migrate app.ini upgrade
 
 add a new revision:
 
-    alembic -c app.ini -n alembic revision -m"my_revision_name"
+    alembic -c app.ini -n alembic revision -m"my revision description"

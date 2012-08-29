@@ -59,6 +59,7 @@ from sqlalchemy import Date
 from sqlalchemy import BigInteger
 from sqlalchemy import DateTime
 from sqlalchemy import Text
+from sqlalchemy import Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
 from sqlalchemy.orm import deferred
@@ -303,7 +304,17 @@ class TaskCompute(object):
         result = int(self.expenses)
         return result
 
+    def paid(self):
+        """
+            return the amount that has already been paid
+        """
+        if hasattr(self, "payments"):
+            return sum([payment.get_amount() for payment in self.payments])
+        else:
+            return 0
 
+    def topay(self):
+        return self.total() - self.paid()
 
 DEF_STATUS = u"Statut inconnu"
 STATUS = dict((
@@ -337,8 +348,7 @@ def record_payment(task, **kw):
         expecting a paymendMode to be passed throught kw
     """
     if "mode" in kw and "amount" in kw:
-        payment = Payment(mode=kw['mode'], amount=kw['amount'])
-        task.payments.append(payment)
+        task.record_payment(kw['mode'], kw['amount'], kw.get('resulted'))
         return task
     else:
         raise Forbidden()
@@ -391,17 +401,20 @@ INV_STATUS_DICT.update(
     'valid':('sent',
             ('aboinv', MANAGER_PERMS),
             ('paid', MANAGER_PERMS, record_payment),
+             'resulted',
              'duplicate',
              'recinv',
             ('gencinv', None, gen_cancelinvoice),),
     'sent':(('aboinv', MANAGER_PERMS),
             ('paid', MANAGER_PERMS, record_payment),
+            'resulted',
             'duplicate', 'recinv',
             ('gencinv', None, gen_cancelinvoice)),
     'aboinv':(('delete', None, None, False),),
-    'paid':('duplicate',),
+    'paid':('duplicate', 'paid', 'resulted'),
     'recinv':(('aboinv', MANAGER_PERMS),
               ('paid', MANAGER_PERMS, record_payment),
+               'resulted',
                'duplicate',
               ('gencinv', None, gen_cancelinvoice))})
 
@@ -412,8 +425,11 @@ CINV_STATUS_DICT.update(
             'duplicate',),
     'valid': ('sent', ('paid', MANAGER_PERMS), 'recinv'),
     'sent': (('paid', MANAGER_PERMS, record_payment),
+              'resulted',
              'recinv'),
-    'recinv': (('paid', MANAGER_PERMS, record_payment),)})
+    'paid':('resulted',),
+    'recinv': (('paid', MANAGER_PERMS, record_payment),
+                'resulted')})
 
 DEFAULT_STATE_MACHINES = {
         "base":TaskState('draft', BASE_STATUS_DICT),
@@ -1102,6 +1118,16 @@ class Invoice(Task, TaskCompute):
         self.officialNumber = get_next_officialNumber()
         self.taskDate = datetime.date.today()
 
+    def record_payment(self, mode, amount, resulted=False):
+        """
+            Validate a record payment
+        """
+        payment = Payment(mode=mode, amount=amount)
+        self.payments.append(payment)
+        if self.topay() == 0 or resulted:
+            self.CAEStatus = 'resulted'
+
+
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
     """
@@ -1224,6 +1250,15 @@ class CancelInvoice(Task, TaskCompute):
         """
         self.officialNumber = get_next_officialNumber()
         self.taskDate = datetime.date.today()
+
+    def record_payment(self, mode, amount, resulted=False):
+        """
+            Validate a record payment
+        """
+        payment = Payment(mode=mode, amount=amount)
+        self.payments.append(payment)
+        if self.topay() == 0 or resulted:
+            self.CAEStatus = 'resulted'
 
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):

@@ -160,6 +160,8 @@ def add_menu(event):
             submenu.insert(company_menu(request, companies, cid))
             event.update({'submenu':submenu})
 
+from autonomie.views.render_api import api
+
 @subscriber(BeforeRender)
 def add_renderer_globals(event):
     """
@@ -169,6 +171,7 @@ def add_renderer_globals(event):
     if not request:
         request = get_current_request()
     event['_'] = request.translate
+    event['api'] = api
 
 @subscriber(NewRequest)
 def add_localizer(event):

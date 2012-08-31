@@ -247,9 +247,6 @@ class TestTaskModels(BaseTestCase):
 
     def test_task_status(self):
         task = get_task(factory=Task)
-        self.assertEqual(task.get_status_suffix(),
-                u" par user1_firstname user1_lastname le {:%d/%m/%Y}".format(
-                                                        datetime.date.today()))
         #Estimations
         task = get_task(factory=Estimation)
         self.assertTrue(task.is_draft())

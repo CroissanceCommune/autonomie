@@ -46,6 +46,7 @@
 """
 import datetime
 import logging
+import locale
 
 from zope.interface import Attribute
 from zope.interface import Interface
@@ -100,11 +101,6 @@ class ITask(Interface):
     """
         Task interface, need to be implemented by all documents
     """
-    def get_status_str():
-        """
-            Provide a human readble string for the current task status
-        """
-
     def is_invoice():
         """
             is the current task an invoice ?
@@ -264,11 +260,10 @@ class IInvoice(Interface):
             Is the current task a cancelled invoice ?
         """
 
-    def get_paymentmode_str():
+    def is_resulted():
         """
-            Return the string for the payment mode display
+            Return True if the task is resulted (definitively paid)
         """
-
 
 class TaskCompute(object):
 
@@ -314,23 +309,6 @@ class TaskCompute(object):
 
     def topay(self):
         return self.total() - self.paid()
-
-DEF_STATUS = u"Statut inconnu"
-STATUS = dict((
-            ("draft", u"Brouillon modifié",),
-            ("wait", u"Validation demandée",),
-            ("valid", u"Validé{genre}"),
-            ('invalid', u"Invalidé{genre}",),
-            ("abort", u"Annulé{genre}",),
-            ("geninv", u"Facture générée",),
-            ("aboinv", u"Facture annulée",),
-            ("aboest", u"Devis annulé",),
-            ("sent", u"Document envoyé",),
-            ("paid", u"Paiement partiel reçu",),
-            ("resulted", u"Paiement reçu",),
-            ("recinv", u"Client relancé",),
-            ('gencinv', u"Avoir généré",),
-            ))
 
 MANAGER_PERMS = "manage"
 
@@ -497,35 +475,6 @@ class Task(DBBASE):
         self.statusPerson = user_id
         return self.state_machine.process(self, request, user_id, status, **kw)
 
-    def get_status_suffix(self):
-        """
-            return the status suffix for rendering a pretty status string
-        """
-        if self.statusPersonAccount:
-            firstname = self.statusPersonAccount.firstname
-            lastname = self.statusPersonAccount.lastname
-        else:
-            firstname = "Inconnu"
-            lastname = ""
-        if self.statusDate:
-            if isinstance(self.statusDate, datetime.date) or \
-                    isinstance(self.statusDate, datetime.datetime):
-                date = self.statusDate.strftime("%d/%m/%Y")
-            else:
-                date = ""
-        else:
-            date = ""
-        return u" par {firstname} {lastname} le {date}".format(
-                firstname=firstname, lastname=lastname, date=date)
-
-    def get_status_str(self):
-        """
-            Return human readable string for task status
-            Task are actually simple documents
-        """
-        status_str = u"Déposé"
-        return status_str + self.get_status_suffix()
-
     def is_invoice(self):
         return False
 
@@ -634,11 +583,6 @@ class Estimation(Task, TaskCompute):
                        }
 
     state_machine = DEFAULT_STATE_MACHINES['estimation']
-
-    #ITask interface
-    def get_status_str(self):
-        status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u"")
-        return status_str + self.get_status_suffix()
 
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
@@ -970,10 +914,6 @@ class Invoice(Task, TaskCompute):
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
-    def get_status_str(self):
-        status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u'e')
-        return status_str + self.get_status_suffix()
-
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
 
@@ -1032,17 +972,6 @@ class Invoice(Task, TaskCompute):
         else:
             taskname_tmpl = u"Facture {0}"
         return taskname_tmpl.format(seq_number)
-
-    def get_paymentmode_str(self):
-        """
-            Return a user-friendly string describing the payment Mode
-        """
-        if self.paymentMode == 'CHEQUE':
-            return u"par chèque"
-        elif self.paymentMode == 'VIREMENT':
-            return u"par virement"
-        else:
-            return u"mode paiement inconnu"
 
     @classmethod
     def get_number(cls, project, seq_number, taskDate, deposit=False):
@@ -1137,6 +1066,10 @@ class Invoice(Task, TaskCompute):
             self.CAEStatus = 'resulted'
         return self
 
+    def is_resulted(self):
+        return self.CAEStatus == 'resulted'
+
+
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
@@ -1174,12 +1107,6 @@ class CancelInvoice(Task, TaskCompute):
                       primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask")
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
-
-    def get_status_str(self):
-        status_str = STATUS.get(self.CAEStatus, DEF_STATUS).format(genre=u'')
-        if self.CAEStatus == 'paid':
-            status_str = u"Réglé"
-        return status_str + self.get_status_suffix()
 
 
     def is_draft(self):
@@ -1219,17 +1146,6 @@ class CancelInvoice(Task, TaskCompute):
         """
         taskname_tmpl = u"Avoir {0}"
         return taskname_tmpl.format(seq_number)
-
-    def get_paymentmode_str(self):
-        """
-            Return a user-friendly string describing the payment Mode
-        """
-        if self.paymentMode == 'CHEQUE':
-            return u"par chèque"
-        elif self.paymentMode == 'VIREMENT':
-            return u"par virement"
-        else:
-            return u"mode paiement inconnu"
 
     @classmethod
     def get_officialNumber(cls):
@@ -1275,6 +1191,9 @@ class CancelInvoice(Task, TaskCompute):
             self.CAEStatus = 'resulted'
         return self
 
+    def is_resulted(self):
+        return self.CAEStatus == 'resulted'
+
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):
     """
@@ -1316,6 +1235,14 @@ class ManualInvoice(DBBASE):
 #        return None
 
     @property
+    def payments(self):
+        """
+            Return a payment object for compatibility
+            with other invoices
+        """
+        return [Payment(self.paymentMode, 0)]
+
+    @property
     def id(self):
         return None
 
@@ -1337,6 +1264,9 @@ class ManualInvoice(DBBASE):
         return self.client
 
     def is_paid(self):
+        return self.is_resulted
+
+    def is_resulted(self):
         return self.payment_ok == 1
 
     def is_cancelled(self):
@@ -1346,17 +1276,6 @@ class ManualInvoice(DBBASE):
         today = datetime.date.today()
         elapsed = today - self.taskDate
         return not self.is_paid() and elapsed > datetime.timedelta(days=45)
-
-    def get_paymentmode_str(self):
-        """
-            Return the payment mode string
-        """
-        if self.paymentMode == u'chèque':
-            return u"par chèque"
-        elif self.paymentMode == u'virement':
-            return u"par virement"
-        else:
-            return u""
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):
@@ -1682,3 +1601,15 @@ class Payment(DBBASE):
 
     def get_amount(self):
         return self.amount
+
+    def get_mode_str(self):
+        """
+            Return a user-friendly string describing the payment Mode
+        """
+        if self.mode == 'CHEQUE':
+            return u"par chèque"
+        elif self.mode == 'VIREMENT':
+            return u"par virement"
+        else:
+            return u"mode paiement inconnu"
+

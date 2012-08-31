@@ -1,7 +1,6 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_text" />
-<%namespace file="/base/utils.mako" import="format_amount" />
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
@@ -47,7 +46,7 @@
                     ${print_date(invoice.taskDate)}
                 </td>
                 <td>
-                    ${format_amount(invoice.total_ht())}
+                    ${api.format_amount(invoice.total_ht())}
                 </td>
             </tr>
         %endfor
@@ -57,7 +56,7 @@
             <strong>Solde de trésorerie</strong>
         </td>
         <td>
-            <strong>${format_amount(sum([invoice.total_ht() for invoice in invoices]))}&nbsp;€</strong>
+            <strong>${api.format_amount(sum([invoice.total_ht() for invoice in invoices]))}&nbsp;€</strong>
         </td>
     </tfoot>
 </table>

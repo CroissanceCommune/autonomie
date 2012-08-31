@@ -2,9 +2,6 @@
     estimation template
 </%doc>
 <%inherit file="/tasks/task.mako" />
-<%namespace file="/base/utils.mako" import="print_date" />
-<%namespace file="/base/utils.mako" import="format_amount" />
-<%namespace file="/base/utils.mako" import="format_quantity" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%def name="table(title, datas)">
     <div class="title">
@@ -71,31 +68,31 @@
                         <tr>
                             <td>Acompte</td>
                             <td>à la commande</td>
-                            <td class='price'>${format_amount(task.deposit_amount())}&nbsp;€</td>
+                            <td class='price'>${api.format_amount(task.deposit_amount())}&nbsp;€</td>
                         </tr>
                     % endif
                     ## Les paiements intermédiaires
                     % for line in task.payment_lines[:-1]:
                         <tr>
-                            <td>${print_date(line.paymentDate)}</td>
+                            <td>${api.format_date(line.paymentDate)}</td>
                             <td>${line.description}</td>
                             %if task.manualDeliverables == 1:
-                                <td>${format_amount(line.amount)}&nbsp;€</td>
+                                <td>${api.format_amount(line.amount)}&nbsp;€</td>
                             %else:
-                                <td class='price'>${format_amount(task.paymentline_amount())}&nbsp;€</td>
+                                <td class='price'>${api.format_amount(task.paymentline_amount())}&nbsp;€</td>
                             %endif
                         </tr>
                     % endfor
                     ## On affiche le solde qui doit être calculé séparément pour être sûr de tomber juste
                     <tr>
                         <td>
-                            ${print_date(task.payment_lines[-1].paymentDate)}
+                            ${api.format_date(task.payment_lines[-1].paymentDate)}
                         </td>
                         <td>
                             ${format_text(task.payment_lines[-1].description)}
                         </td>
                         <td class='price'>
-                            ${format_amount(task.sold())}&nbsp;€
+                            ${api.format_amount(task.sold())}&nbsp;€
                         </td>
                     </tr>
                 % endif

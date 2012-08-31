@@ -2,10 +2,6 @@
 Base template for task rendering
 </%doc>
 <%namespace file="/base/utils.mako" import="address" />
-<%namespace file="/base/utils.mako" import="print_str_date" />
-<%namespace file="/base/utils.mako" import="print_date" />
-<%namespace file="/base/utils.mako" import="format_amount" />
-<%namespace file="/base/utils.mako" import="format_quantity" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,7 +21,7 @@ Base template for task rendering
         </div>
         <div class='row'>
             <div class='addressblock'>
-                ${print_str_date(task.taskDate)}
+                ${api.format_date(task.taskDate, False)}
                 <br />
                 ${address(project.client, 'client')}
             </div>
@@ -55,9 +51,9 @@ Base template for task rendering
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
                         %if task.displayedUnits == 1:
-                            <td class="quantity">${format_amount(line.cost)}&nbsp;€&nbsp;x&nbsp;${format_quantity(line.quantity)} ${line.get_unity_label(pretty=True)}</td>
+                            <td class="quantity">${api.format_amount(line.cost)}&nbsp;€&nbsp;x&nbsp;${api.format_quantity(line.quantity)} ${api.format_unity(line.unity)}</td>
                         % endif
-                        <td class="price">${format_amount(line.total(), trim=False)}&nbsp;€</td>
+                        <td class="price">${api.format_amount(line.total(), trim=False)}&nbsp;€</td>
                     </tr>
                 % endfor
                 <tr>
@@ -65,7 +61,7 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                        ${format_amount(task.lines_total(), trim=False)}&nbsp;€
+                        ${api.format_amount(task.lines_total(), trim=False)}&nbsp;€
                      </td>
                  </tr>
                  %if hasattr(task, "discountHT") and task.discountHT:
@@ -74,7 +70,7 @@ Base template for task rendering
                             Remise commerciale
                         </td>
                         <td class='price'>
-                            ${format_amount(task.discountHT)}&nbsp;€
+                            ${api.format_amount(task.discountHT)}&nbsp;€
                         </td>
                     </tr>
                     <tr>
@@ -82,7 +78,7 @@ Base template for task rendering
                          Total HT après remise
                         </td>
                         <td class='price'>
-                            ${format_amount(task.total_ht())}&nbsp;€
+                            ${api.format_amount(task.total_ht())}&nbsp;€
                         </td>
                     </tr>
 
@@ -96,10 +92,10 @@ Base template for task rendering
                 % else:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
-                            TVA (${format_amount(task.tva)} %)
+                            TVA (${api.format_amount(task.tva)} %)
                         </td>
                         <td class='price'>
-                            ${format_amount(task.tva_amount())}&nbsp;€
+                            ${api.format_amount(task.tva_amount())}&nbsp;€
                         </td>
                     </tr>
                 % endif
@@ -109,7 +105,7 @@ Base template for task rendering
                             Frais liés à la prestation
                         </td>
                         <td class='price'>
-                            ${format_amount(task.expenses_amount())}&nbsp;€
+                            ${api.format_amount(task.expenses_amount())}&nbsp;€
                         </td>
                     </tr>
                 %endif
@@ -118,7 +114,7 @@ Base template for task rendering
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${format_amount(task.total())}&nbsp;€
+                        ${api.format_amount(task.total())}&nbsp;€
                     </td>
                 </tr>
             </tbody>

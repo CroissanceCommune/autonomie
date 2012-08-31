@@ -138,4 +138,38 @@ textarea{
 .deformSeqItem{
   margin-bottom:5px;
   background-color:#eee;
-  }
+}
+/* Invoice list */
+.invoice_resulted{
+  background-color:#fff866;
+  width:36px;
+}
+.invoice_paid{
+  background-color:#ffb266;
+  width:36px;
+}
+.invoice_notpaid{
+  background-color:#ffffff;
+  width:36px;
+}
+.invoice_tolate{
+  background-color:#C43C35;
+  width:36px;
+}
+.invoice_tolate a{
+  color:#fff;
+  text-transform:uppercase;
+  text-decoration:underline;
+}
+.invoice_resulted_tr{
+  background-color:#fffbaa;
+}
+.invoice_paid_tr{
+  background-color:#ffb266;
+}
+.invoice_tolate_tr{
+  background-color:#f9aaaa;
+}
+.invoice_cancelled_tr{
+  background-color:#eeeeee;
+}

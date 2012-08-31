@@ -5,37 +5,6 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_client" />
 <%block name='actionmenu'>
-<style>
-    .invoice_paid{
-        background-color:#fff866;
-        width:36px;
-        }
-    .invoice_notpaid{
-        background-color:#ffffff;
-        width:36px;
-    }
-    .invoice_tolate{
-    background-color:#C43C35;
-        width:36px;
-    }
-    .invoice_tolate a{
-    color:#fff;
-        text-transform:uppercase;
-        text-decoration:underline;
-    }
-   .invoice_tolate_tr{
-      background-color:#f9aaaa;
-      }
-      .invoice_paid_tr{
-      background-color:#fffbaa;
-    }
-    .invoice_resulted_tr{
-
-        }
-    .invoice_cancelled_tr{
-        background-color:#eeeeee;
-        }
-</style>
 <ul class='nav nav-pills'>
     <li>
     </li>
@@ -109,8 +78,12 @@
     <div class='span4'>
         <table class='table table-bordered'>
             <tr>
-                <td class='invoice_paid'><br /></td>
+                <td class='invoice_resulted'><br /></td>
                 <td>Factures payées</td>
+            </tr>
+            <tr>
+                <td class='invoice_paid'><br /></td>
+                <td>Factures payées partiellement</td>
             </tr>
             <tr>
                 <td class='invoice_notpaid'><br /></td>
@@ -215,7 +188,7 @@
                     </td>
                     <td>
                         % if len(task.payments) == 1 and task.is_resulted():
-                            ${api.format_paymentmode(task.payments[0].mode)} le ${api.format_date(task.payments[0])}
+                            ${api.format_paymentmode(task.payments[0].mode)} le ${api.format_date(task.payments[0].date)}
                         % elif len(task.payments) > 0:
                             <ul>
                                 % for payment in task.payments:

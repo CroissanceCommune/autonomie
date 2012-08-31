@@ -5,34 +5,6 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_client" />
 <%block name='actionmenu'>
-<style>
-    .invoice_paid{
-        background-color:#fff866;
-        width:36px;
-        }
-    .invoice_notpaid{
-        background-color:#ffffff;
-        width:36px;
-    }
-    .invoice_tolate{
-    background-color:#C43C35;
-        width:36px;
-    }
-    .invoice_tolate a{
-    color:#fff;
-        text-transform:uppercase;
-        text-decoration:underline;
-    }
-   .invoice_tolate_tr{
-      background-color:#f9aaaa;
-      }
-      .invoice_paid_tr{
-      background-color:#fffbaa;
-    }
-    .invoice_cancelled_tr{
-        background-color:#eeeeee;
-        }
-</style>
 <ul class='nav nav-pills'>
     <li>
     </li>
@@ -92,8 +64,12 @@
     <div class='span4'>
         <table class='table table-bordered'>
             <tr>
-                <td class='invoice_paid'><br /></td>
+                <td class='invoice_resulted'><br /></td>
                 <td>Factures payées</td>
+            </tr>
+            <tr>
+                <td class='invoice_paid'><br /></td>
+                <td>Factures payées partiellement</td>
             </tr>
             <tr>
                 <td class='invoice_notpaid'><br /></td>
@@ -150,6 +126,9 @@
                     % elif invoice.is_paid():
                         <tr class='invoice_paid_tr'>
                             <td class='invoice_paid'>
+                    % elif invoice.is_resulted():
+                        <tr class='invoice_resulted_tr'>
+                            <td class='invoice_resulted'>
                     % else:
                         <tr>
                             <td class='invoice_notpaid'>
@@ -187,7 +166,7 @@
                     </td>
                     <td>
                         % if len(invoice.payments) == 1 and invoice.is_resulted():
-                            ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0])}
+                            ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0].amount)}
                         % elif len(invoice.payments) > 0:
                             <ul>
                                 % for payment in invoice.payments:

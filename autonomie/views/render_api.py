@@ -133,10 +133,11 @@ class Api(object):
         for key, value in kw.items():
             setattr(self, key, value)
 
-
 api = Api(format_amount=format_amount,
           format_date=format_date,
           format_status=format_status,
           format_account=format_account,
-          format_paymentmode=format_paymentmode)
+          format_paymentmode=format_paymentmode,
+          format_short_date=format_short_date,
+          format_long_date=format_long_date)
 

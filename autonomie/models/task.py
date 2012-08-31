@@ -1350,25 +1350,6 @@ class EstimationLine(DBBASE):
     task = relationship("Estimation", backref=backref("lines",
                             order_by='EstimationLine.rowIndex'))
 
-    def get_unity_label(self, pretty=False):
-        """
-            return unitie's label
-        """
-        if pretty:
-            default = u""
-        else:
-            default = u"-"
-        labels = dict(
-                NONE=default,
-                HOUR=u"heure(s)",
-                DAY=u"jour(s)",
-                WEEK=u"semaine(s)",
-                MONTH=u"mois",
-                FEUIL=u"feuillet(s)",
-                PACK=u"forfait",
-                )
-        return labels.get(self.unity, default)
-
     def duplicate(self):
         """
             duplicate a line
@@ -1431,25 +1412,6 @@ class InvoiceLine(DBBASE):
     task = relationship("Invoice", backref=backref("lines",
                             order_by='InvoiceLine.rowIndex'))
 
-    def get_unity_label(self, pretty=False):
-        """
-            return unitie's label
-        """
-        if pretty:
-            default = u""
-        else:
-            default = u"-"
-        labels = dict(
-                NONE=default,
-                HOUR=u"heure(s)",
-                DAY=u"jour(s)",
-                WEEK=u"semaine(s)",
-                MONTH=u"mois",
-                FEUIL=u"feuillet(s)",
-                PACK=u"forfait",
-                )
-        return labels.get(self.unity, default)
-
     def duplicate(self):
         """
             duplicate a line
@@ -1509,25 +1471,6 @@ class CancelInvoiceLine(DBBASE):
     cost = Column(Integer, default=0)
     quantity = Column(DOUBLE, default=1)
     unity = Column(String(10), default=None)
-
-    def get_unity_label(self, pretty=False):
-        """
-            return unitie's label
-        """
-        if pretty:
-            default = u""
-        else:
-            default = u"-"
-        labels = dict(
-                NONE=default,
-                HOUR=u"heure(s)",
-                DAY=u"jour(s)",
-                WEEK=u"semaine(s)",
-                MONTH=u"mois",
-                FEUIL=u"feuillet(s)",
-                PACK=u"forfait",
-                )
-        return labels.get(self.unity, default)
 
     def duplicate(self):
         """

@@ -571,13 +571,6 @@ class TestCancelInvoice(BaseTestCase):
 
 
 class TestEstimationLine(BaseTestCase):
-    def test_get_unity(self):
-        i = InvoiceLine(unity='HOUR')
-        self.assertEqual(i.get_unity_label(), u'heure(s)')
-        i = InvoiceLine(unity='SHIT')
-        self.assertEqual(i.get_unity_label(), u'-')
-        self.assertEqual(i.get_unity_label(pretty=True), u'')
-
     def test_duplicate_line(self):
         line = EstimationLine(**LINES[1])
         dline = line.duplicate()
@@ -595,13 +588,6 @@ class TestEstimationLine(BaseTestCase):
         self.assertEqual(i.total(), 1.5625)
 
 class TestInvoiceLine(BaseTestCase):
-    def test_get_unity(self):
-        i = InvoiceLine(unity='HOUR')
-        self.assertEqual(i.get_unity_label(), u'heure(s)')
-        i = InvoiceLine(unity='SHIT')
-        self.assertEqual(i.get_unity_label(), u'-')
-        self.assertEqual(i.get_unity_label(pretty=True), u'')
-
     def test_duplicate_line(self):
         line = InvoiceLine(**LINES[1])
         dline = line.duplicate()

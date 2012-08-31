@@ -84,6 +84,15 @@ def format_amount(amount, trim=True):
     resp = resp.replace(' ', '&nbsp;')
     return resp
 
+def format_quantity(quantity):
+    """
+        format the quantity
+    """
+    if quantity is not None:
+        return locale.format('%g', quantity, grouping=True)
+    else:
+        return ""
+
 def format_short_date(date):
     """
         return a short printable version of the date obj
@@ -114,7 +123,7 @@ def format_long_date(date):
                                             .capitalize())
     return resp
 
-def format_date(date, short=False):
+def format_date(date, short=True):
     """
         return a pretty print version of the date object
     """
@@ -134,6 +143,26 @@ def format_paymentmode(paymentmode):
     else:
         return u"mode paiement inconnu"
 
+def format_unity(unity, pretty=False):
+    """
+        format the unity of a document (days, weeks ...)
+    """
+    if pretty:
+        default = u""
+    else:
+        default = u"-"
+    labels = dict(
+            NONE=default,
+            HOUR=u"heure(s)",
+            DAY=u"jour(s)",
+            WEEK=u"semaine(s)",
+            MONTH=u"mois",
+            FEUIL=u"feuillet(s)",
+            PACK=u"forfait",
+            )
+    return labels.get(unity, default)
+
+
 class Api(object):
     """
         Api object passed to the templates hosting all commands we will use
@@ -148,5 +177,7 @@ api = Api(format_amount=format_amount,
           format_account=format_account,
           format_paymentmode=format_paymentmode,
           format_short_date=format_short_date,
-          format_long_date=format_long_date)
+          format_long_date=format_long_date,
+          format_quantity=format_quantity,
+          format_unity=format_unity)
 

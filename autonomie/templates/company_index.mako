@@ -1,11 +1,9 @@
 <%doc>
     Company index page shows last activities and elapsed invoices
 </%doc>
-<%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_client" />
 <%namespace file="/base/utils.mako" import="format_project" />
-<%namespace file="/base/utils.mako" import="format_amount" />
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
 <div class='row'>
@@ -31,7 +29,7 @@
                                     ${format_client(invoice.project.client)}
                                 </td>
                                 <td>
-                                    ${format_amount(invoice.total())}&nbsp;€
+                                    ${api.format_amount(invoice.total())}&nbsp;€
                                 </td>
                             </tr>
                         % endfor
@@ -84,7 +82,7 @@
                                 ${format_project(task.project)}
                             </td>
                             <td>${task.name}</td>
-                            <td>${task.get_status_str()}</td>
+                            <td>${api.format_status(task)}</td>
                         </tr>
                     % endfor
                 </tbody>

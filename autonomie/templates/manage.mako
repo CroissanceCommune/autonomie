@@ -21,7 +21,7 @@
             ${task.name}
         </td>
         <td onclick="document.location='${task.url}'" class='rowlink'>
-            ${task.get_status_str()}
+            ${api.format_status(task)}
         </td>
     </tr>
 % endfor

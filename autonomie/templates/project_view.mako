@@ -120,7 +120,7 @@
                                                         %elif task.is_waiting():
                                                             <i class='icon icon-time'></i>
                                                         %endif
-                                                        ${task.get_status_str()}
+                                                        ${api.format_status(task)}
                                                     </td>
                                                     <td style="text-align:right">
                                                         ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer ce devis", u"icon-pencil")}
@@ -172,7 +172,7 @@
                                                         %elif task.is_waiting():
                                                             <i class='icon icon-time'></i>
                                                         %endif
-                                                        ${task.get_status_str()}
+                                                        ${api.format_status(task)}
                                                     </td>
                                                     <td style="text-align:right">
                                                         ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cette facture", u"icon-pencil")}
@@ -197,7 +197,7 @@
                                                         %elif task.is_draft():
                                                             <i class='icon icon-bold'></i>
                                                         %endif
-                                                        ${task.get_status_str()}</td>
+                                                        ${api.format_status(task)}</td>
                                                     <td style="text-align:right">
                                                         ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cet avoir", u"icon-pencil")}
                                                         ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}

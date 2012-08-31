@@ -2,11 +2,8 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="searchform"/>
-<%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_client" />
-<%namespace file="/base/utils.mako" import="format_project" />
-<%namespace file="/base/utils.mako" import="format_amount" />
 <%block name='actionmenu'>
 <style>
     .invoice_paid{
@@ -143,8 +140,8 @@
         <% totaltva = sum([invoice.tva_amount() for invoice in invoices]) %>
         <tr>
             <td colspan='6'><strong>Total</strong></td>
-            <td><strong>${format_amount(totalht)}&nbsp;€</strong></td>
-            <td><strong>${format_amount(totaltva)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
@@ -188,7 +185,7 @@
                         %endif
                     </td>
                     <td>
-                        ${print_date(invoice.taskDate)}
+                        ${api.format_date(invoice.taskDate)}
                     </td>
                     <td>
                         <blockquote>
@@ -205,15 +202,23 @@
                         ${format_client(invoice.get_client())}
                     </td>
                     <td>
-                        <strong>${format_amount(invoice.total_ht())}&nbsp;€</strong>
+                        <strong>${api.format_amount(invoice.total_ht())}&nbsp;€</strong>
                     </td>
                     <td>
-                        ${format_amount(invoice.tva_amount())}&nbsp;€
+                        ${api.format_amount(invoice.tva_amount())}&nbsp;€
                     </td>
                     <td>
-                        %if invoice.is_paid() and invoice.get_paymentmode_str():
-                            ${invoice.get_paymentmode_str()} le ${print_date(invoice.statusDate)}
-                        %endif
+                        % if len(task.payments) == 1 and task.is_resulted():
+                            ${api.format_paymentmode(task.payments[0].mode)} le ${api.format_date(task.payments[0])}
+                        % elif (len(task.payments) > 0:
+                            <ul>
+                                % for payment in task.payments:
+                                    <li>
+                                        ${api.format_amount(payment.amount)} ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
+                                    </li>
+                                % endfor
+                            </ul>
+                        % endif
                     </td>
                     <td>
                         %if invoice.id:
@@ -237,8 +242,8 @@
     <tfoot>
         <tr>
             <td colspan='6'><strong>Total</strong></td>
-            <td><strong>${format_amount(totalht)}&nbsp;€</strong></td>
-            <td><strong>${format_amount(totaltva)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
     </tfoot>

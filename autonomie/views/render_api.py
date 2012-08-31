@@ -66,14 +66,23 @@ def format_account(account):
         lastname = ""
     return u"{0} {1}".format(lastname.upper(), firstname.capitalize())
 
-def format_amount(amount, strip=True):
+def format_amount(amount, trim=True):
     """
         return a pretty printable amount
     """
-    amount = locale.format("%.2f", amount, grouping=True)
-    if strip:
-        amount = amount.replace(' ', '&nbsp;')
-    return amount
+    resp = u""
+    if amount is not None:
+        if isinstance(amount, float) or isinstance(amount, int):
+            if amount == int(amount):
+                # On a 2 chiffres après la virgule (pas plus)
+                trim = True
+        if trim:
+            amount = int(amount)/100.0
+            resp = locale.format("%.2f", amount, grouping=True)
+        else:
+            resp = locale.format("%g", amount/100.0, grouping=True)
+    resp = resp.replace(' ', '&nbsp;')
+    return resp
 
 def format_short_date(date):
     """

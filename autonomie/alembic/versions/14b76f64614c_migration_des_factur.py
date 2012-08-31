@@ -14,6 +14,7 @@ from alembic import op
 import sqlalchemy as sa
 from autonomie.models import DBSESSION
 from autonomie.models import model
+from autonomie.models.task import Payment
 
 
 def upgrade():
@@ -22,7 +23,10 @@ def upgrade():
         for i in sess.query(fact).filter(fact.CAEStatus=='paid').all():
             amount = i.total()
             mode = i.paymentMode
-            i.record_payment(mode, amount, resulted=True)
+            date = i.statusDate
+            payment = Payment(mode=mode, amount=amount, date=date)
+            i.payments.append(payment)
+            i.CAEStatus = 'resulted'
             sess.merge(i)
     sess.flush()
 

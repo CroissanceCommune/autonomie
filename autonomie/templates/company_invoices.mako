@@ -125,8 +125,8 @@
         <% totaltva = sum([invoice.tva_amount() for invoice in invoices]) %>
         <tr>
             <td colspan='5'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
@@ -180,19 +180,19 @@
                         ${format_client(invoice.get_client())}
                     </td>
                     <td>
-                        <strong>${api.format_amount(invoice.total_ht())}&nbsp;€</strong>
+                        <strong>${api.format_amount(invoice.total_ht())|n}&nbsp;€</strong>
                     </td>
                     <td>
-                        ${api.format_amount(invoice.tva_amount())}&nbsp;€
+                        ${api.format_amount(invoice.tva_amount())|n}&nbsp;€
                     </td>
                     <td>
-                        % if len(task.payments) == 1 and task.is_resulted():
-                            ${api.format_paymentmode(task.payments[0].mode)} le ${api.format_date(task.payments[0])}
-                        % elif (len(task.payments) > 0:
+                        % if len(invoice.payments) == 1 and invoice.is_resulted():
+                            ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0])}
+                        % elif len(invoice.payments) > 0:
                             <ul>
-                                % for payment in task.payments:
+                                % for payment in invoice.payments:
                                     <li>
-                                        ${api.format_amount(payment.amount)} ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
+                                    ${api.format_amount(payment.amount)|n} ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
                                     </li>
                                 % endfor
                             </ul>
@@ -221,8 +221,8 @@
     <tfoot>
         <tr>
             <td colspan='5'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
     </tfoot>

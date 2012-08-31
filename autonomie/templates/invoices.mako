@@ -29,6 +29,9 @@
       .invoice_paid_tr{
       background-color:#fffbaa;
     }
+    .invoice_resulted_tr{
+
+        }
     .invoice_cancelled_tr{
         background-color:#eeeeee;
         }
@@ -140,8 +143,8 @@
         <% totaltva = sum([invoice.tva_amount() for invoice in invoices]) %>
         <tr>
             <td colspan='6'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
@@ -165,6 +168,9 @@
                     % elif invoice.is_paid():
                         <tr class='invoice_paid_tr'>
                             <td class='invoice_paid'>
+                    % elif invoice.is_resulted():
+                        <tr class='invoice_resulted_tr'>
+                            <td class='invoice_resulted'>
                     % else:
                         <tr>
                             <td class='invoice_notpaid'>
@@ -179,10 +185,10 @@
                     </td>
                     <td>
                         <% company = invoice.get_company() %>
-                        %if company:
+                        % if company:
                             <a href="${request.route_path('company', id=company.id)}"
                             title="Voir l'entreprise">${company.name}</a>
-                        %endif
+                        % endif
                     </td>
                     <td>
                         ${api.format_date(invoice.taskDate)}
@@ -202,19 +208,19 @@
                         ${format_client(invoice.get_client())}
                     </td>
                     <td>
-                        <strong>${api.format_amount(invoice.total_ht())}&nbsp;€</strong>
+                        <strong>${api.format_amount(invoice.total_ht())|n}&nbsp;€</strong>
                     </td>
                     <td>
-                        ${api.format_amount(invoice.tva_amount())}&nbsp;€
+                        ${api.format_amount(invoice.tva_amount())|n}&nbsp;€
                     </td>
                     <td>
                         % if len(task.payments) == 1 and task.is_resulted():
                             ${api.format_paymentmode(task.payments[0].mode)} le ${api.format_date(task.payments[0])}
-                        % elif (len(task.payments) > 0:
+                        % elif len(task.payments) > 0:
                             <ul>
                                 % for payment in task.payments:
                                     <li>
-                                        ${api.format_amount(payment.amount)} ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
+                                    ${api.format_amount(payment.amount)|n} ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
                                     </li>
                                 % endfor
                             </ul>
@@ -242,8 +248,8 @@
     <tfoot>
         <tr>
             <td colspan='6'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
     </tfoot>

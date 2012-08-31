@@ -46,7 +46,7 @@
                     ${print_date(invoice.taskDate)}
                 </td>
                 <td>
-                    ${api.format_amount(invoice.total_ht())}
+                    ${api.format_amount(invoice.total_ht())|n}
                 </td>
             </tr>
         %endfor
@@ -56,7 +56,7 @@
             <strong>Solde de trésorerie</strong>
         </td>
         <td>
-            <strong>${api.format_amount(sum([invoice.total_ht() for invoice in invoices]))}&nbsp;€</strong>
+            <strong>${api.format_amount(sum([invoice.total_ht() for invoice in invoices]))|n}&nbsp;€</strong>
         </td>
     </tfoot>
 </table>

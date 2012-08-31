@@ -51,9 +51,9 @@ Base template for task rendering
                     <tr>
                         <td class="description">${format_text(line.description)}</td>
                         %if task.displayedUnits == 1:
-                            <td class="quantity">${api.format_amount(line.cost)}&nbsp;€&nbsp;x&nbsp;${api.format_quantity(line.quantity)} ${api.format_unity(line.unity)}</td>
+                            <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€&nbsp;x&nbsp;${api.format_quantity(line.quantity)} ${api.format_unity(line.unity)}</td>
                         % endif
-                        <td class="price">${api.format_amount(line.total(), trim=False)}&nbsp;€</td>
+                        <td class="price">${api.format_amount(line.total(), trim=False)|n}&nbsp;€</td>
                     </tr>
                 % endfor
                 <tr>
@@ -61,7 +61,7 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                        ${api.format_amount(task.lines_total(), trim=False)}&nbsp;€
+                        ${api.format_amount(task.lines_total(), trim=False)|n}&nbsp;€
                      </td>
                  </tr>
                  %if hasattr(task, "discountHT") and task.discountHT:
@@ -70,7 +70,7 @@ Base template for task rendering
                             Remise commerciale
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.discountHT)}&nbsp;€
+                            ${api.format_amount(task.discountHT)|n}&nbsp;€
                         </td>
                     </tr>
                     <tr>
@@ -78,7 +78,7 @@ Base template for task rendering
                          Total HT après remise
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.total_ht())}&nbsp;€
+                            ${api.format_amount(task.total_ht())|n}&nbsp;€
                         </td>
                     </tr>
 
@@ -92,10 +92,10 @@ Base template for task rendering
                 % else:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
-                            TVA (${api.format_amount(task.tva)} %)
+                            TVA (${api.format_amount(task.tva)|n} %)
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.tva_amount())}&nbsp;€
+                            ${api.format_amount(task.tva_amount())|n}&nbsp;€
                         </td>
                     </tr>
                 % endif
@@ -105,7 +105,7 @@ Base template for task rendering
                             Frais liés à la prestation
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.expenses_amount())}&nbsp;€
+                            ${api.format_amount(task.expenses_amount())|n}&nbsp;€
                         </td>
                     </tr>
                 %endif
@@ -114,7 +114,7 @@ Base template for task rendering
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${api.format_amount(task.total())}&nbsp;€
+                        ${api.format_amount(task.total())|n}&nbsp;€
                     </td>
                 </tr>
             </tbody>

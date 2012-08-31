@@ -68,7 +68,7 @@
                         <tr>
                             <td>Acompte</td>
                             <td>à la commande</td>
-                            <td class='price'>${api.format_amount(task.deposit_amount())}&nbsp;€</td>
+                            <td class='price'>${api.format_amount(task.deposit_amount())|n}&nbsp;€</td>
                         </tr>
                     % endif
                     ## Les paiements intermédiaires
@@ -77,9 +77,9 @@
                             <td>${api.format_date(line.paymentDate)}</td>
                             <td>${line.description}</td>
                             %if task.manualDeliverables == 1:
-                                <td>${api.format_amount(line.amount)}&nbsp;€</td>
+                                <td>${api.format_amount(line.amount)|n}&nbsp;€</td>
                             %else:
-                                <td class='price'>${api.format_amount(task.paymentline_amount())}&nbsp;€</td>
+                                <td class='price'>${api.format_amount(task.paymentline_amount())|n}&nbsp;€</td>
                             %endif
                         </tr>
                     % endfor
@@ -92,7 +92,7 @@
                             ${format_text(task.payment_lines[-1].description)}
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.sold())}&nbsp;€
+                            ${api.format_amount(task.sold())|n}&nbsp;€
                         </td>
                     </tr>
                 % endif

@@ -941,6 +941,9 @@ class Invoice(Task, TaskCompute):
     def is_paid(self):
         return self.CAEStatus == 'paid'
 
+    def is_resulted(self):
+        return self.CAEStatus == 'resulted'
+
     def is_cancelled(self):
         """
             Return True is the invoice has been cancelled
@@ -958,7 +961,7 @@ class Invoice(Task, TaskCompute):
             tolate = True
         else:
             tolate = False
-        return self.CAEStatus in ('valid', 'sent','recinv') and tolate
+        return self.CAEStatus in ('valid', 'sent','recinv', 'paid') and tolate
 
     @classmethod
     def get_name(cls, seq_number, account=False, sold=False):
@@ -1066,9 +1069,6 @@ class Invoice(Task, TaskCompute):
             self.CAEStatus = 'resulted'
         return self
 
-    def is_resulted(self):
-        return self.CAEStatus == 'resulted'
-
 
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
@@ -1135,6 +1135,9 @@ class CancelInvoice(Task, TaskCompute):
 
     def is_paid(self):
         return self.CAEStatus == 'paid'
+
+    def is_resulted(self):
+        return self.CAEStatus == 'resulted'
 
     def is_cancelled(self):
         return False
@@ -1240,7 +1243,7 @@ class ManualInvoice(DBBASE):
             Return a payment object for compatibility
             with other invoices
         """
-        return [Payment(self.paymentMode, 0)]
+        return [Payment(mode=self.paymentMode, amount=0, date=self.statusDate)]
 
     @property
     def id(self):
@@ -1264,7 +1267,7 @@ class ManualInvoice(DBBASE):
         return self.client
 
     def is_paid(self):
-        return self.is_resulted
+        return self.is_resulted()
 
     def is_resulted(self):
         return self.payment_ok == 1
@@ -1275,7 +1278,7 @@ class ManualInvoice(DBBASE):
     def is_tolate(self):
         today = datetime.date.today()
         elapsed = today - self.taskDate
-        return not self.is_paid() and elapsed > datetime.timedelta(days=45)
+        return not self.is_resulted() and elapsed > datetime.timedelta(days=45)
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):

@@ -22,6 +22,7 @@
 """
 
 import datetime
+from zope.interface.verify import verifyObject
 from mock import MagicMock
 from pyramid import testing
 from .base import BaseTestCase
@@ -36,8 +37,13 @@ from autonomie.models.task import EstimationLine
 from autonomie.models.task import InvoiceLine
 from autonomie.models.task import PaymentLine
 from autonomie.models.task import CancelInvoiceLine
-from autonomie.models.task import TaskCompute
 from autonomie.models.task import Payment
+from autonomie.models.task.states import record_payment
+from autonomie.models.task.compute import TaskCompute
+from autonomie.models.task.interfaces import ITask
+from autonomie.models.task.interfaces import IValidatedTask
+from autonomie.models.task.interfaces import IPaidTask
+from autonomie.models.task.interfaces import IInvoice
 
 from autonomie.models.user import User
 
@@ -232,11 +238,6 @@ def get_cancelinvoice():
 
 class TestTaskModels(BaseTestCase):
     def test_interfaces(self):
-        from autonomie.models.task import ITask
-        from autonomie.models.task import IValidatedTask
-        from autonomie.models.task import IPaidTask
-        from autonomie.models.task import IInvoice
-        from zope.interface.verify import verifyObject
         self.assertTrue(verifyObject(ITask, Task()))
         self.assertTrue(verifyObject(IValidatedTask, Estimation()))
         self.assertTrue(verifyObject(IPaidTask, Invoice()))
@@ -630,7 +631,6 @@ class TestPayment(BaseTestCase):
 
     def test_record_payment(self):
         task = self.get_task()
-        from autonomie.models.task import record_payment
         request_params = {'amount':1500, 'mode':'cheque'}
         record_payment(task, **request_params)
         self.assertEqual(len(task.payments), 3)
@@ -652,7 +652,6 @@ class TestPayment(BaseTestCase):
         task.CAEStatus = 'wait'
         task.CAEStatus = 'valid'
         task.CAEStatus = 'paid'
-        from autonomie.models.task import record_payment
         request_params = {'amount':0, 'mode':'cheque', 'resulted':True}
         record_payment(task, **request_params)
         self.assertEqual(task.CAEStatus, 'resulted')
@@ -662,7 +661,6 @@ class TestPayment(BaseTestCase):
         task.CAEStatus = 'wait'
         task.CAEStatus = 'valid'
         task.CAEStatus = 'paid'
-        from autonomie.models.task import record_payment
         request_params = {'amount':int(task.topay()), 'mode':'cheque'}
         record_payment(task, **request_params)
         self.assertEqual(task.CAEStatus, 'resulted')

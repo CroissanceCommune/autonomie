@@ -299,12 +299,9 @@ class TestTaskModels(BaseTestCase):
         task.CAEStatus = "valid"
         self.assertTrue(task.is_valid())
         self.assertFalse(task.is_editable())
-        for i in ("sent", "recinv"):
-            task.CAEStatus = i
-            self.assertTrue(task.has_been_validated())
-            self.assertFalse(task.is_editable())
-        task.CAEStatus = "paid"
-        self.assertTrue(task.is_paid())
+        task.CAEStatus = "sent"
+        self.assertTrue(task.has_been_validated())
+        self.assertFalse(task.is_editable())
 
     def test_status_change(self):
         # Estimation
@@ -361,13 +358,10 @@ class TestTaskModels(BaseTestCase):
         task.CAEStatus = "valid"
         for st in ("draft",):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("sent", "paid", ):
+        for st in ("sent", ):
             self.assertEqual(task.validate_status("nutt", st), st)
         task.CAEStatus = "sent"
-        for st in ("draft", "valid"):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        task.CAEStatus = "paid"
-        for st in ("draft", "sent", "valid"):
+        for st in ("draft", "valid", "invalid",):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
 class TestComputing(BaseTestCase):
@@ -685,17 +679,10 @@ class TestPolymorphic(BaseTestCase):
     def test_payment(self):
         invoice = get_invoice(stripped=True)
         invoice.IDPhase = 17
-        cancelinvoice = get_cancelinvoice()
-        cancelinvoice.IDPhase = 18
         invoice.record_payment(**PAYMENTS[0])
-        cancelinvoice.record_payment(**PAYMENTS[1])
         self.session.add(invoice)
-        self.session.add(cancelinvoice)
         self.session.flush()
         p1 = self.session.query(Payment).join(Task).filter(Task.IDPhase==17).first()
-        p2 = self.session.query(Payment).join(Task).filter(Task.IDPhase==18).first()
         self.assertTrue(isinstance(p1.document, Invoice))
         self.assertFalse(isinstance(p1.document, CancelInvoice))
-        self.assertTrue(isinstance(p2.document, CancelInvoice))
-        self.assertFalse(isinstance(p2.document, Invoice))
 

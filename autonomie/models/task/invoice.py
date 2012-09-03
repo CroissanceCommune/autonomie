@@ -108,6 +108,8 @@ class Invoice(Task, TaskCompute):
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
+    valid_states = ('valid', 'sent', "recinv", 'paid', 'resulted', 'gencinv')
+
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
 
@@ -121,19 +123,16 @@ class Invoice(Task, TaskCompute):
         return self.CAEStatus == 'valid'
 
     def has_been_validated(self):
-        return self.CAEStatus in ('valid', 'geninv', 'sent', "recinv",)
+        return self.CAEStatus in self.valid_states
 
     def is_waiting(self):
         return self.CAEStatus == "wait"
-
-    def is_sent(self):
-        return self.CAEStatus == "sent"
 
     def is_invoice(self):
         return True
 
     def is_paid(self):
-        return self.CAEStatus == 'paid'
+        return len(self.payments) > 0
 
     def is_resulted(self):
         return self.CAEStatus == 'resulted'
@@ -155,7 +154,8 @@ class Invoice(Task, TaskCompute):
             tolate = True
         else:
             tolate = False
-        return self.CAEStatus in ('valid', 'sent', 'recinv', 'paid') and tolate
+        return self.CAEStatus in ('valid', 'sent', 'recinv', 'paid',
+                                  'gencinv') and tolate
 
     @classmethod
     def get_name(cls, seq_number, account=False, sold=False):
@@ -361,14 +361,14 @@ class CancelInvoice(Task, TaskCompute):
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
 
 
-    def is_draft(self):
-        return self.CAEStatus in ('draft', 'invalid')
-
     def is_editable(self, manage=False):
         if manage:
             return self.CAEStatus in ('draft', 'invalid', 'wait', None,)
         else:
             return self.CAEStatus in ('draft', 'invalid', None,)
+
+    def is_draft(self):
+        return self.CAEStatus in ('draft', 'invalid')
 
     def is_valid(self):
         return self.CAEStatus == 'valid'
@@ -376,23 +376,20 @@ class CancelInvoice(Task, TaskCompute):
     def has_been_validated(self):
         return self.CAEStatus in ('valid', 'sent', "recinv",)
 
-    def is_waiting(self):
-        return self.CAEStatus == 'wait'
-
-    def is_sent(self):
-        return self.CAEStatus == "sent"
-
-    def is_cancelinvoice(self):
-        return True
-
     def is_paid(self):
-        return self.CAEStatus == 'paid'
+        return False
 
     def is_resulted(self):
-        return self.CAEStatus == 'resulted'
+        return self.has_been_validated()
 
     def is_cancelled(self):
         return False
+
+    def is_waiting(self):
+        return self.CAEStatus == 'wait'
+
+    def is_cancelinvoice(self):
+        return True
 
     @classmethod
     def get_name(cls, seq_number):
@@ -499,7 +496,7 @@ class ManualInvoice(DBBASE):
         return self.client
 
     def is_paid(self):
-        return self.is_resulted()
+        return False
 
     def is_resulted(self):
         return self.payment_ok == 1

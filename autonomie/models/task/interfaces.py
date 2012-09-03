@@ -66,11 +66,6 @@ class IValidatedTask(ITask):
             Is the current task waiting for approval
         """
 
-    def is_sent():
-        """
-            Has the current document been sent to a client
-        """
-
     def is_cancelled():
         """
             Has the current document been cancelled

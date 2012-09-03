@@ -255,7 +255,6 @@ class TestTaskModels(BaseTestCase):
         self.assertFalse(task.is_valid())
         self.assertFalse(task.has_been_validated())
         self.assertFalse(task.is_waiting())
-        self.assertFalse(task.is_sent())
         task.CAEStatus = "wait"
         self.assertTrue(task.is_waiting())
         self.assertFalse(task.is_valid())
@@ -272,7 +271,6 @@ class TestTaskModels(BaseTestCase):
         self.assertFalse(task.is_valid())
         self.assertFalse(task.has_been_validated())
         self.assertFalse(task.is_waiting())
-        self.assertFalse(task.is_sent())
         task.CAEStatus = "wait"
         self.assertTrue(task.is_waiting())
         self.assertFalse(task.is_valid())
@@ -291,7 +289,6 @@ class TestTaskModels(BaseTestCase):
         self.assertFalse(task.is_valid())
         self.assertFalse(task.has_been_validated())
         self.assertFalse(task.is_waiting())
-        self.assertFalse(task.is_sent())
         task.CAEStatus = "wait"
         self.assertTrue(task.is_waiting())
         self.assertFalse(task.is_valid())

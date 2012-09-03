@@ -187,11 +187,11 @@
                         ${api.format_amount(invoice.tva_amount())|n}&nbsp;€
                     </td>
                     <td>
-                        % if len(task.payments) == 1 and task.is_resulted():
-                            ${api.format_paymentmode(task.payments[0].mode)} le ${api.format_date(task.payments[0].date)}
-                        % elif len(task.payments) > 0:
+                        % if len(invoice.payments) == 1 and invoice.is_resulted():
+                            ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0].date)}
+                        % elif len(invoice.payments) > 0:
                             <ul>
-                                % for payment in task.payments:
+                                % for payment in invoice.payments:
                                     <li>
                                     ${api.format_amount(payment.amount)|n} ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
                                     </li>

@@ -1,3 +1,6 @@
+<%doc>
+    Invoice List for a given company
+</%doc>
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
@@ -108,12 +111,7 @@
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
         % if invoices:
             % for invoice in invoices:
-                % if invoice.is_invoice():
-                    <% route_name="invoice" %>
-                % else:
-                    <% route_name="cancelinvoice" %>
-                %endif
-                    %if invoice.is_invoice() and invoice.is_cancelled():
+                    %if invoice.is_cancelled():
                         <tr class='invoice_cancelled_tr'>
                             <td class='invoice_cancelled'>
                                 <span class="label label-important">
@@ -147,7 +145,7 @@
                     <td>
                         <blockquote>
                             %if invoice.IDTask:
-                                <a href="${request.route_path(route_name, id=invoice.IDTask)}"
+                                <a href="${request.route_path(invoice.type_, id=invoice.IDTask)}"
                                 title='Voir le document'>${invoice.number}</a>
                             %else:
                                 ${invoice.number}
@@ -181,7 +179,7 @@
                     <td>
                         %if invoice.IDTask:
                             <a class='btn'
-                                href='${request.route_path(route_name, id=invoice.IDTask, _query=dict(view="pdf"))}'
+                                href='${request.route_path(invoice.type_, id=invoice.IDTask, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
                                 <i class='icon icon-file'></i>
                            </a>

@@ -123,35 +123,30 @@
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
         % if invoices:
             % for invoice in invoices:
-                % if invoice.is_invoice():
-                    <% route_name="invoice" %>
-                % elif invoice.is_cancelinvoice():
-                    <% route_name="cancelinvoice" %>
-                %endif
                 %if invoice.is_cancelled():
-                        <tr class='invoice_cancelled_tr'>
-                            <td class='invoice_cancelled'>
-                                <span class="label label-important">
-                                    <i class="icon-white icon-remove"></i>
-                                </span>
-                    % elif invoice.is_tolate():
-                        <tr class='invoice_tolate_tr'>
-                            <td class='invoice_tolate'>
-                                <br />
-                    % elif invoice.is_paid():
-                        <tr class='invoice_paid_tr'>
-                            <td class='invoice_paid'>
-                    % elif invoice.is_resulted():
-                        <tr class='invoice_resulted_tr'>
-                            <td class='invoice_resulted'>
-                    % else:
-                        <tr>
-                            <td class='invoice_notpaid'>
-                                <br />
-                    % endif
-                    %if invoice.statusComment:
-                        <span class="ui-icon ui-icon-comment" title="${invoice.statusComment}"></span>
-                    %endif
+                    <tr class='invoice_cancelled_tr'>
+                        <td class='invoice_cancelled'>
+                            <span class="label label-important">
+                                <i class="icon-white icon-remove"></i>
+                            </span>
+                % elif invoice.is_tolate():
+                    <tr class='invoice_tolate_tr'>
+                        <td class='invoice_tolate'>
+                            <br />
+                % elif invoice.is_paid():
+                    <tr class='invoice_paid_tr'>
+                        <td class='invoice_paid'>
+                % elif invoice.is_resulted():
+                    <tr class='invoice_resulted_tr'>
+                        <td class='invoice_resulted'>
+                % else:
+                    <tr>
+                        <td class='invoice_notpaid'>
+                            <br />
+                % endif
+                %if invoice.statusComment:
+                    <span class="ui-icon ui-icon-comment" title="${invoice.statusComment}"></span>
+                %endif
                 </td>
                     <td>
                         ${invoice.officialNumber}
@@ -169,7 +164,7 @@
                     <td>
                         <blockquote>
                             %if invoice.id:
-                                <a href="${request.route_path(route_name, id=invoice.id)}"
+                                <a href="${request.route_path(invoice.type_, id=invoice.id)}"
                                 title='Voir le document'>${invoice.number}</a>
                             %else:
                                 ${invoice.number}
@@ -202,7 +197,7 @@
                     <td>
                         %if invoice.id:
                             <a class='btn'
-                                href='${request.route_path(route_name, id=invoice.id, _query=dict(view="pdf"))}'
+                                href='${request.route_path(invoice.type_, id=invoice.id, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
                                 <i class='icon icon-file'></i>
                            </a>

@@ -22,6 +22,8 @@ from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from pyramid.threadlocal import get_current_registry
 
+from autonomie.views.render_api import format_status
+
 log = logging.getLogger(__name__)
 
 class StatusChanged(object):
@@ -71,7 +73,7 @@ class StatusChanged(object):
             return the subject of the email
         """
         return u"{0} : {1}".format( self.document.name,
-                                    self.document.get_status_str())
+                                    format_status(self.document))
 
     @property
     def body(self):

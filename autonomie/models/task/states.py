@@ -129,4 +129,3 @@ DEFAULT_STATE_MACHINES = {
         "estimation":TaskState('draft', get_est_state(BASE_STATUS_DICT)),
         "invoice":TaskState('draft', get_inv_state(BASE_STATUS_DICT)),
         "cancelinvoice":TaskState('draft', get_cinv_state(BASE_STATUS_DICT))}
-

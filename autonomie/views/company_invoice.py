@@ -230,27 +230,29 @@ class CompanyInvoicesView(ListView):
         return cancel_inv, inv, man_inv
 
     @staticmethod
-    def _filter_by_status(cancel_inv, inv, man_inv, status):
+    def _filter_by_status(cinv, inv, man_inv, status):
         """
             add a filter on the status to invoices sqla queries
         """
+        inv_paid = Invoice.paid_states
+        inv_notpaid = Invoice.not_paid_states
+        inv_validated = Invoice.valid_states
+
+        cinv_valid = CancelInvoice.valid_states
+
         if status == "paid":
-            inv = inv.filter(Invoice.CAEStatus == 'paid')
-            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus == 'paid')
-            man_inv = man_inv.filter(
-                                        ManualInvoice.payment_ok==1)
+            inv = inv.filter(Invoice.CAEStatus.in_(inv_paid))
+            cinv = cinv.filter(CancelInvoice.CAEStatus.in_(cinv_valid))
+            man_inv = man_inv.filter(ManualInvoice.payment_ok==1)
         elif status == "notpaid":
-            inv = inv.filter(Invoice.CAEStatus.in_(
-                                    ('sent', 'valid', 'recinv')))
-            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(
-                                                   ('sent','valid','recinv')))
+            inv = inv.filter(Invoice.CAEStatus.in_(inv_notpaid))
+            # A cancel invoice is always paid
+            cinv = cinv.filter(CancelInvoice.CAEStatus=="nutt")
             man_inv = man_inv.filter(ManualInvoice.payment_ok==0)
         else:
-            inv = inv.filter(Invoice.CAEStatus.in_(
-                              ('paid', 'sent', 'valid', 'gencinv', 'recinv')))
-            cancel_inv = cancel_inv.filter(CancelInvoice.CAEStatus.in_(
-                                          ('paid', 'sent', 'valid','recinv')))
-        return cancel_inv, inv, man_inv
+            inv = inv.filter(Invoice.CAEStatus.in_(inv_validated))
+            cinv = cinv.filter(CancelInvoice.CAEStatus.in_(cinv_valid))
+        return cinv, inv, man_inv
 
     @staticmethod
     def _filter_by_date(cancel_inv, inv, man_inv, year):

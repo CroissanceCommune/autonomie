@@ -108,7 +108,9 @@ class Invoice(Task, TaskCompute):
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
-    valid_states = ('valid', 'sent', "recinv", 'paid', 'resulted', 'gencinv')
+    paid_states = ('resulted')
+    not_paid_states = ('valid', 'sent', "recinv", 'paid', 'gencinv')
+    valid_states = paid_states + not_paid_states
 
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
@@ -359,6 +361,7 @@ class CancelInvoice(Task, TaskCompute):
                       primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask")
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
+    valid_states = ('valid', 'sent',)
 
 
     def is_editable(self, manage=False):
@@ -374,7 +377,7 @@ class CancelInvoice(Task, TaskCompute):
         return self.CAEStatus == 'valid'
 
     def has_been_validated(self):
-        return self.CAEStatus in ('valid', 'sent', "recinv",)
+        return self.CAEStatus in self.valid_states
 
     def is_paid(self):
         return False

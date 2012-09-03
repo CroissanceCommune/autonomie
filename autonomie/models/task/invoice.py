@@ -108,7 +108,7 @@ class Invoice(Task, TaskCompute):
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
-    paid_states = ('resulted')
+    paid_states = ('resulted',)
     not_paid_states = ('valid', 'sent', "recinv", 'paid', 'gencinv')
     valid_states = paid_states + not_paid_states
 
@@ -134,7 +134,7 @@ class Invoice(Task, TaskCompute):
         return True
 
     def is_paid(self):
-        return len(self.payments) > 0
+        return self.CAEStatus == 'paid'
 
     def is_resulted(self):
         return self.CAEStatus == 'resulted'

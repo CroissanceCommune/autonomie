@@ -371,7 +371,6 @@ EST_STATUS_DICT.update(
     'aboest':(('delete', None, None, False,),),
     'geninv':('duplicate',)})
 
-
 INV_STATUS_DICT = BASE_STATUS_DICT.copy()
 INV_STATUS_DICT.update(
    {'wait':(('valid', MANAGER_PERMS, valid_callback),
@@ -404,15 +403,7 @@ CINV_STATUS_DICT.update(
    {'wait':(('valid', MANAGER_PERMS, valid_callback),
             ('invalid', MANAGER_PERMS),
             'duplicate',),
-    'valid': ('sent',
-              ('paid', MANAGER_PERMS, record_payment),
-              'recinv'),
-    'sent': (('paid', MANAGER_PERMS, record_payment),
-              'resulted',
-             'recinv'),
-    'paid':('resulted',),
-    'recinv': (('paid', MANAGER_PERMS, record_payment),
-                'resulted')})
+    'valid': ('sent', ),})
 
 DEFAULT_STATE_MACHINES = {
         "base":TaskState('draft', BASE_STATUS_DICT),
@@ -1175,27 +1166,11 @@ class CancelInvoice(Task, TaskCompute):
 
     def valid_callback(self):
         """
-            Validate an invoice
+            Validate a cancelinvoice
+            Generates an official number
         """
         self.officialNumber = get_next_officialNumber()
         self.taskDate = datetime.date.today()
-
-    def record_payment(self, mode, amount, resulted=False):
-        """
-            Validate a record payment
-        """
-        log.debug("Invoice payment recording")
-        log.debug("  o There was to pay : %s" % self.topay())
-        log.debug("    ->Is recorded : %s" % amount)
-        payment = Payment(mode=mode, amount=amount)
-        self.payments.append(payment)
-        log.debug("     -> There still to pay : %s" % self.topay())
-        if self.topay() == 0 or resulted:
-            self.CAEStatus = 'resulted'
-        return self
-
-    def is_resulted(self):
-        return self.CAEStatus == 'resulted'
 
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):
@@ -1232,10 +1207,6 @@ class ManualInvoice(DBBASE):
     @property
     def statusComment(self):
         return None
-
-#    @property
-#    def statusDate(self):
-#        return None
 
     @property
     def payments(self):

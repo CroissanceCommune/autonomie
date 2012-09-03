@@ -160,9 +160,9 @@ class TaskView(BaseView):
         """
         if self.model:
             task = self.model()
+            log.debug(" + A new task has been built")
         else:
             raise Exception("Not implemented yet")
-        #task.CAEStatus = 'draft'
         phaseid = self.request.params.get('phase')
         task.IDPhase = phaseid
         task.IDEmployee = self.user.id
@@ -396,8 +396,11 @@ class TaskView(BaseView):
         """
         btns = []
         actions = self.task.get_next_actions()
+        log.debug("   + Available actions :")
         for action in actions:
-            if action.allowed(self.task, self.request):
+            log.debug("    * {0}".format(action.name))
+            if action.allowed(self.context, self.request):
+                log.debug("     -> is allowed for the current user")
                 if hasattr(self, "_%s_btn" % action.name):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.extend(func())

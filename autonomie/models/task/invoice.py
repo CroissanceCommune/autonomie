@@ -549,7 +549,11 @@ class ManualInvoice(DBBASE):
 
     def tva_amount(self):
         total_ht = self.total_ht()
-        tva = max(int(self.tva), 0)
+        if self.tva:
+            tva = int(self.tva)
+        else:
+            tva = 0
+        tva = max(tva, 0)
         return int(float(total_ht) * (tva / 10000.0))
 
 class CancelInvoiceLine(DBBASE):

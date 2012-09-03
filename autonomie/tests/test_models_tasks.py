@@ -564,6 +564,11 @@ class TestCancelInvoice(BaseTestCase):
         self.assertEqual(CancelInvoice.get_number(project, seq_number, date),
                         u"PRO1_CLI1_A15_0769")
 
+class TestManualInvoice(BaseTestCase):
+    def test_tva_amount(self):
+        m = ManualInvoice(montant_ht=1950)
+        self.assertEqual(m.tva_amount(), 0)
+
 
 class TestEstimationLine(BaseTestCase):
     def test_duplicate_line(self):

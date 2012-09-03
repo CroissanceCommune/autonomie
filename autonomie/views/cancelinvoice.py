@@ -48,9 +48,9 @@ class CancelInvoiceView(TaskView):
 
     @view_config(route_name="cancelinvoices",
                  renderer="tasks/edit.mako",
-                 permission="manage")
+                 permission="edit")
     @view_config(route_name="cancelinvoice", renderer="tasks/edit.mako",
-                permission='manage')
+                permission='edit')
     def form(self):
         """
             Cancel invoice add/edit
@@ -184,7 +184,7 @@ class CancelInvoiceView(TaskView):
         """
         return self._pdf()
 
-    @view_config(route_name="cancelinvoice", permission="manage",
+    @view_config(route_name="cancelinvoice", permission="edit",
                                    request_param='action=status')
     def status(self):
         """

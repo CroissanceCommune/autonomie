@@ -103,7 +103,7 @@ class Invoice(Task, TaskCompute):
     phase =  relationship("Phase", backref=backref("invoices",
                                                 order_by='Invoice.taskDate'))
     estimation = relationship("Estimation",
-                      backref="invoice",
+                      backref="invoices",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask")
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
@@ -356,7 +356,7 @@ class CancelInvoice(Task, TaskCompute):
                                           order_by='CancelInvoice.taskDate')
                           )
     invoice = relationship("Invoice",
-                      backref="cancelinvoice",
+                      backref=backref("cancelinvoice", uselist=False),
                       primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask")
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']

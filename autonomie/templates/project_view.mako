@@ -199,11 +199,9 @@
                                             % for task in phase.cancelinvoices:
                                                 <tr>
                                                     <td>
-                                                    % if task.cancelinvoice or task.estimation:
                                                         <div style="background-color:${task.color};width:10px;">
                                                              <br />
                                                          </div>
-                                                    % endif
                                                     </td>
                                                     <% task.url = request.route_path("cancelinvoice", id=task.id) %>
                                                     <td onclick="document.location='${task.url}'" class='rowlink'>

@@ -178,7 +178,7 @@ class Invoice(Task, TaskCompute):
         else:
             tasknumber_tmpl = u"{0}_{1}_F{2}_{3:%m%y}"
         pcode = project.code
-        ccode = project.client.id
+        ccode = project.client.code
         return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
 
     @validates("paymentMode")
@@ -421,7 +421,7 @@ class CancelInvoice(Task, TaskCompute):
     def get_number(cls, project, seq_number, taskDate):
         tasknumber_tmpl = u"{0}_{1}_A{2}_{3:%m%y}"
         pcode = project.code
-        ccode = project.client.id
+        ccode = project.client.code
         return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
 
     def valid_callback(self):
@@ -448,7 +448,7 @@ class ManualInvoice(DBBASE):
     statusDate = Column("paiement_date", Date())
     paymentMode = Column("paiement_comment", String(255))
     client_id = Column('client_id', String(5),
-                            ForeignKey('coop_customer.code'))
+                            ForeignKey('coop_customer.id'))
     taskDate = Column("date_emission", Date(),
                                 default=datetime.datetime.now)
     company_id = Column('compagnie_id', BigInteger,
@@ -459,7 +459,7 @@ class ManualInvoice(DBBASE):
                                       default=datetime.datetime.now,
                                       onupdate=datetime.datetime.now))
     client = relationship("Client",
-                primaryjoin="Client.id==ManualInvoice.client_id",
+                primaryjoin="Client.code==ManualInvoice.client_id",
                   backref='manual_invoices')
     company = relationship("Company",
                 primaryjoin="Company.id==ManualInvoice.company_id",

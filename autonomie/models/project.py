@@ -50,8 +50,7 @@ class Project(DBBASE):
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('IDProject', Integer, primary_key=True)
     name = Column("name", String(255))
-    code_client = Column("customerCode", String(4),
-                                    ForeignKey('coop_customer.code'))
+    client_id = Column("client_id", Integer,  ForeignKey('coop_customer.id'))
     code = Column("code", String(4), nullable=False)
     definition = deferred(Column("definition", Text), group='edit')
 

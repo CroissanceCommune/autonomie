@@ -315,7 +315,7 @@ class Estimation(Task, TaskCompute):
     def get_number(cls, project, seq_number, taskDate):
         tasknumber_tmpl = u"{0}_{1}_D{2}_{3:%m%y}"
         pcode = project.code
-        ccode = project.client.id
+        ccode = project.client.code
         return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
 
     def is_deletable(self):

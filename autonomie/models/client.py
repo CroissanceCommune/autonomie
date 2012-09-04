@@ -53,7 +53,8 @@ class Client(DBBASE):
     """
     __tablename__ = 'coop_customer'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column('code', String(4), primary_key=True)
+    id = Column('id', Integer, primary_key=True)
+    code = Column('code', String(4))
     comments = deferred(Column("comments", Text), group='edit')
     creationDate = Column("creationDate", CustomDateType,
                                             default=get_current_timestamp)

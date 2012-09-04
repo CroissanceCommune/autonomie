@@ -62,6 +62,12 @@ def format_account(account):
     else:
         firstname = "Inconnu"
         lastname = ""
+    return format_name(firstname, lastname)
+
+def format_name(firstname, lastname):
+    """
+        format firstname and lastname in a common format
+    """
     return u"{0} {1}".format(lastname.upper(), firstname.capitalize())
 
 def format_amount(amount, trim=True):
@@ -173,6 +179,7 @@ api = Api(format_amount=format_amount,
           format_date=format_date,
           format_status=format_status,
           format_account=format_account,
+          format_name=format_name,
           format_paymentmode=format_paymentmode,
           format_short_date=format_short_date,
           format_long_date=format_long_date,

@@ -30,7 +30,7 @@ STATUS = dict((
             ("aboest", u"Devis annulé",),
             ("paid", u"Paiement partiel reçu",),
             ("resulted", u"Paiement reçu",),
-            ('gencinv', u"Avoir généré",),
+            ('gencinv', u"Avoir généré depuis cette facture",),
             ))
 
 def format_status(task):

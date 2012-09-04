@@ -109,7 +109,7 @@ class Invoice(Task, TaskCompute):
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
     paid_states = ('resulted',)
-    not_paid_states = ('valid', 'paid', 'gencinv')
+    not_paid_states = ('valid', 'paid', )
     valid_states = paid_states + not_paid_states
 
     def is_draft(self):
@@ -156,7 +156,7 @@ class Invoice(Task, TaskCompute):
             tolate = True
         else:
             tolate = False
-        return self.CAEStatus in ('valid', 'paid', 'gencinv') and tolate
+        return self.CAEStatus in ('valid', 'paid', ) and tolate
 
     @classmethod
     def get_name(cls, seq_number, account=False, sold=False):

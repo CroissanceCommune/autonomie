@@ -77,6 +77,11 @@ def set_date(task, **kw):
 def get_est_state(base_dict):
     """
         return the estimation state workflow
+        draft
+        wait
+        valid
+        invalid
+        aboest
     """
     valid = ('valid', MANAGER_PERMS, set_date,)
     invalid = ('invalid', MANAGER_PERMS,)
@@ -92,25 +97,36 @@ def get_est_state(base_dict):
 def get_inv_state(base_dict):
     """
         return the invoice state workflow
+        draft
+        wait
+        valid
+        invalid
+        paid
+        resulted
+        aboinv
     """
-
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     aboinv = ('aboinv', MANAGER_PERMS,)
     paid = ('paid', MANAGER_PERMS, record_payment,)
-    gencinv = ('gencinv', None, gen_cancelinvoice,)
+    gencinv = ('gencinv', None, gen_cancelinvoice, False,)
     delete = ('delete', None, None, False,)
+    resulted = ('resulted', MANAGER_PERMS,)
     result = base_dict.copy()
     result['wait'] = (valid, invalid, 'duplicate',)
-    result['valid'] = (aboinv, paid, 'resulted', 'duplicate', gencinv,)
+    result['valid'] = (paid, resulted, aboinv, gencinv, 'duplicate', )
+    result['paid'] = (paid, resulted, gencinv, 'duplicate',)
+    result['resulted'] = (gencinv, 'duplicate',)
     result['aboinv'] = (delete,)
-    result['paid'] = ('duplicate', paid, gencinv, 'resulted')
-    result['gencinv'] = (paid, 'resulted', 'duplicate',)
     return result
 
 def get_cinv_state(base_dict):
     """
         return the cancel invoice state workflow
+        draft
+        wait
+        valid
+        invalid
     """
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)

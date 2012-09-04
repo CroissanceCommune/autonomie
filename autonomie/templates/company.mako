@@ -4,30 +4,12 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />
+<%namespace file="/base/utils.mako" import="format_company" />
 <%block name='content'>
 <div class='row'>
     <div class="span4 offset1">
         <div class='well'>
-        <h3>Entreprise ${company.name}</h3>
-        <p>
-            ${company.goal}
-        </p>
-        %if company.get_logo_filepath():
-            <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
-        %endif
-        <dl>
-                % if company.email:
-                    <dt>E-mail</dt>
-                    <dd>${format_mail(company.email)}</dd>
-                % endif
-
-            % for label, attr in ((u'Téléphone', 'phone'), (u"Téléphone portable", "mobile"),):
-                %if getattr(company, attr):
-                    <dt>${label}</dt>
-                    <dd>${format_phone(getattr(company, attr))}</dd>
-                % endif
-            % endfor
-        </dl>
+            ${format_company(company)}
         %for link in link_list:
             <p>${link.render(request)|n}</p>
         %endfor

@@ -146,3 +146,26 @@ path = request.current_route_path(_query=get_args)
         </span>
     </a>
 </%def>
+<%def name="format_company(company)">
+    <h3>
+        <a href="${request.route_path('company', id=company.id)}">Entreprise ${company.name}</a>
+    </h3>
+        <p>
+          ${company.goal}
+        </p>
+        %if company.get_logo_filepath():
+          <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
+        %endif
+        <dl>
+            % if company.email:
+                <dt>E-mail</dt>
+                <dd>${format_mail(company.email)}</dd>
+            % endif
+            % for label, attr in ((u'Téléphone', 'phone'), (u"Téléphone portable", "mobile"),):
+                %if getattr(company, attr):
+                    <dt>${label}</dt>
+                    <dd>${format_phone(getattr(company, attr))}</dd>
+                % endif
+            % endfor
+        </dl>
+</%def>

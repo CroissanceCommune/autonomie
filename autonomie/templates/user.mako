@@ -1,5 +1,7 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_mail" />
+<%namespace file="/base/utils.mako" import="format_phone" />
+<%namespace file="/base/utils.mako" import="format_company" />
 <%block name='content'>
 <div class='row'>
     <div class='span4 offset1'>
@@ -17,7 +19,6 @@
     </div>
     <div class='span6'>
         <div class='well'>
-
             % if len(user.companies) == 1:
                 <h3>Entreprise</h3>
             %else:
@@ -25,17 +26,8 @@
             % endif
             <br />
             % for company in user.companies:
-                <a href="${request.route_path('company', id=company.id)}">
-                    <strong>${company.name}</strong>
-                    <br />
-                    %if company.get_logo_filepath():
-                        <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
-                    %endif
-                </a>
-                <br />
-                ${company.goal}
-                <br />
-            % endfor
+                ${format_company(company)}
+                % endfor
         </div>
     </div>
 </div>

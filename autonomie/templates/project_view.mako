@@ -98,6 +98,7 @@
                                     %if  phase.estimations:
                                         <table class='table table-striped table-condensed'>
                                             <thead>
+                                                <th></th>
                                                 <th>Document</th>
                                                 <th>Nom</th>
                                                 <th>État</th>
@@ -105,6 +106,13 @@
                                             </thead>
                                             %for task in phase.estimations:
                                                 <tr>
+                                                    <td>
+                                                    % if task.invoices:
+                                                        <div style="background-color:${task.color};width:10px;">
+                                                             <br />
+                                                        </div>
+                                                    % endif
+                                                    </td>
                                                     <% task.url = request.route_path("estimation", id=task.id) %>
                                                     <td class='rowlink' onclick="document.location='${task.url}'">${task.number}</td>
                                                     <td class='rowlink' onclick="document.location='${task.url}'">${task.name}</td>
@@ -147,6 +155,7 @@
                                     %if phase.invoices:
                                         <table class='table table-striped table-condensed'>
                                             <thead>
+                                                <th></th>
                                                 <th>Numéro</th>
                                                 <th>Document</th>
                                                 <th>Nom</th>
@@ -155,6 +164,13 @@
                                             </thead>
                                             %for task in phase.invoices:
                                                 <tr>
+                                                    <td>
+                                                    % if task.cancelinvoice or task.estimation:
+                                                        <div style="background-color:${task.color};width:10px;">
+                                                             <br />
+                                                        </div>
+                                                    % endif
+                                                    </td>
                                                     <% task.url = request.route_path("invoice", id=task.id) %>
                                                     <td onclick="document.location='${task.url}'" class='rowlink'>
                                                         ${task.officialNumber}</td>
@@ -182,6 +198,13 @@
                                             %endfor
                                             % for task in phase.cancelinvoices:
                                                 <tr>
+                                                    <td>
+                                                    % if task.cancelinvoice or task.estimation:
+                                                        <div style="background-color:${task.color};width:10px;">
+                                                             <br />
+                                                         </div>
+                                                    % endif
+                                                    </td>
                                                     <% task.url = request.route_path("cancelinvoice", id=task.id) %>
                                                     <td onclick="document.location='${task.url}'" class='rowlink'>
                                                         ${task.officialNumber}

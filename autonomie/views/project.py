@@ -279,6 +279,31 @@ rajoutée".format(phasename), queue="main")
         """
             Company's project view
         """
+        from colorsys import hsv_to_rgb
+        from random import randint, uniform
+        def rgb_to_hex(rgb):
+            return '#%02x%02x%02x' % rgb
+
+        def get_color():
+            h = uniform(0.1, 0.8)
+            s = uniform(0.8, 1)
+            v = uniform(0.8, 1)
+            return rgb_to_hex(tuple(255*c for c in hsv_to_rgb(h, s, v)))
+
+        phases = self.context.phases
+        for phase in phases:
+            for estimation in phase.estimations:
+                estimation.color = get_color()
+        for phase in phases:
+            for invoice in phase.invoices:
+                if invoice.estimation:
+                    invoice.color = invoice.estimation.color
+                else:
+                    invoice.color = get_color()
+        for phase in phases:
+            for cancelinvoice in phase.cancelinvoices:
+                cancelinvoice.color = cancelinvoice.invoice.color
+
         return dict(title=u"Projet : {0}".format(self.context.name),
                     project=self.context,
                     action_menu=self.actionmenu,

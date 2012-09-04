@@ -173,3 +173,8 @@ textarea{
 .invoice_cancelled_tr{
   background-color:#eeeeee;
 }
+.navbar-form button, .navbar-form input, .navbar-form select{
+  margin-top: 5px;
+  float:left;
+  margin-right:3px;
+}

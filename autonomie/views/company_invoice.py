@@ -223,10 +223,9 @@ class CompanyInvoicesView(ListView):
         """
             add a filter on the client to invoices sqla queries
         """
-        inv = inv.filter(Project.code_client == client)
-        cancel_inv = cancel_inv.filter(Project.code_client == client)
-        man_inv = man_inv.filter(
-                        ManualInvoice.client_id == client)
+        inv = inv.filter(Project.client_id == client)
+        cancel_inv = cancel_inv.filter(Project.client_id == client)
+        man_inv = man_inv.filter(ManualInvoice.client_id == client)
         return cancel_inv, inv, man_inv
 
     @staticmethod

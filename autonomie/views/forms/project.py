@@ -55,9 +55,9 @@ class ProjectSchema(colander.MappingSchema):
                                         title=u"Date de fin",
                                     missing=u"",
                                     widget=get_date_input())
-    code_client = colander.SchemaNode(colander.String(),
-                                        title=u"Client",
-                                        widget=deferred_autocomplete_widget)
+    client_id = colander.SchemaNode(colander.Integer(),
+                                    title=u"Client",
+                                    widget=deferred_autocomplete_widget)
 
 class PhaseSchema(colander.MappingSchema):
     """

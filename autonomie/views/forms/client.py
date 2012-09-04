@@ -21,35 +21,37 @@ import logging
 from deform import widget
 
 from autonomie.models.model import Client
-from autonomie.views.forms.widgets import get_deferred_edit_widget
 from autonomie.views.forms.widgets import get_mail_input
 
 log = logging.getLogger(__name__)
 
 @colander.deferred
 def deferred_ccode_valid(node, kw):
+    company = kw['company']
+    id_company = company.id
     def unique_ccode(node, value):
         """
             Test customer code unicity
         """
-        #Test unicity
-        result = Client.get(value)
         if len(value) != 4:
             message = u"Le code client doit contenir 4 caractères."
             raise colander.Invalid(node, message)
-        if result:
-            message = u"Le code '{0}' est déjà utilisé et n'est pas \
-disponible.".format(value)
+        #Test unicity
+        result = Client.query().filter(Client.id_company==id_company)\
+                .filter(Client.code==value).all()
+
+        if len(result):
+            message = u"Vous avez déjà utilisé ce code '{0}' pour un autre \
+client".format(value)
             raise colander.Invalid(node, message)
-    if not kw.get('edit'):
-        return unique_ccode
+    return unique_ccode
 
 class ClientSchema(colander.MappingSchema):
     """
         Schema for customer insertion
     """
-    id = colander.SchemaNode(colander.String(),
-                             widget=get_deferred_edit_widget(mask='****'),
+    code = colander.SchemaNode(colander.String(),
+                             widget=widget.TextInputWidget(mask='****'),
                              title=u'Code',
                              validator=deferred_ccode_valid)
     name = colander.SchemaNode(colander.String(),

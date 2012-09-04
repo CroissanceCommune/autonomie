@@ -28,5 +28,5 @@ def initialize_sql(engine):
     DBMETADATA.bind = engine
     if not engine.table_names():
         fetch_head()
-        DBBASE.metadata.create_all(engine)
+    DBBASE.metadata.create_all(engine)
     return DBSESSION

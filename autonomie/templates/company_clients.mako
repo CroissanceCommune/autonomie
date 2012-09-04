@@ -17,7 +17,7 @@
         % if clients:
             % for client in clients:
                 <tr class='tableelement' id="${client.id}">
-                    <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.id}</td>
+                    <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.code}</td>
                     <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.name}</td>
                     <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.contactLastName} ${client.contactFirstName}</td>
                     <td style="text-align:right">

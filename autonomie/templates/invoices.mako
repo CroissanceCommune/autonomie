@@ -31,9 +31,9 @@
                     <optgroup label="${company.name}">
                     %for client in company.clients:
                         %if client.id == current_client:
-                            <option selected='1' value='${client.id}'>${client.name} (${client.id})</option>
+                            <option selected='1' value='${client.id}'>${client.name} (${client.code})</option>
                         %else:
-                            <option value='${client.id}'>${client.name} (${client.id})</option>
+                            <option value='${client.id}'>${client.name} (${client.code})</option>
                         %endif
                     %endfor
                     </optgroup>

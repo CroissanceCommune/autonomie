@@ -8,7 +8,7 @@
         <div class='well'>
             <h3>Entreprise ${client.name.upper()}</h3>
             <dl>
-                % for label, value in ((u"Nom de l'entreprise", client.name), (u"Code", client.id), (u"TVA intracommunautaire", client.intraTVA)):
+                % for label, value in ((u"Nom de l'entreprise", client.name), (u"Code", client.code), (u"TVA intracommunautaire", client.intraTVA)):
                     %if value:
                         <dt>${label}</dt>
                         <dd>${value}</dd>

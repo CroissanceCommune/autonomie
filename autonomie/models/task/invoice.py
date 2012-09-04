@@ -459,8 +459,8 @@ class ManualInvoice(DBBASE):
                                       default=datetime.datetime.now,
                                       onupdate=datetime.datetime.now))
     client = relationship("Client",
-                primaryjoin="Client.code==ManualInvoice.client_id",
-                  backref='manual_invoices')
+                primaryjoin="Client.id==ManualInvoice.client_id",
+                backref='manual_invoices')
     company = relationship("Company",
                 primaryjoin="Company.id==ManualInvoice.company_id",
                   backref='manual_invoices')

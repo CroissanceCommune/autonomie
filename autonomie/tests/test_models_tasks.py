@@ -63,8 +63,8 @@ USER = dict(id=2,
 USER2 = dict(id=3, login=u"test_user2")
 
 PROJECT = dict(id=1, name=u'project1', code=u"PRO1", id_company=1,
-        code_client=u"CLI1")
-CLIENT = dict(name=u"client1", id=u"CLI1", id_company=1)
+        client_id=1)
+CLIENT = dict(id=1, name=u"client1", code=u"CLI1", id_company=1)
 
 ESTIMATION = dict(IDPhase=1,
                 IDProject=1,
@@ -206,10 +206,12 @@ def get_estimation(user=None, project=None):
     for line in PAYMENT_LINES:
         l = PaymentLine(**line)
         est.payment_lines.append(l)
-    if not user:
+    if user is None:
         user = get_user()
-    if not project:
+    if project is None:
         project = get_project()
+    print "Project"
+    project
     est.project = project
     est.statusPersonAccount = user
     return est
@@ -422,6 +424,8 @@ class TestEstimation(BaseTestCase):
         from autonomie.models.model import Project
         user = self.session.query(User).first()
         project = self.session.query(Project).first()
+        print project
+        print user
         est = get_estimation(user, project)
         self.assertEqual(est.statusPersonAccount, user)
         self.assertEqual(est.project, project)

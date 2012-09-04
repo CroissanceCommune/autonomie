@@ -57,6 +57,9 @@ class BaseTestCase(unittest.TestCase):
         self.trans.rollback()
         self.session.close()
 
+    def assertNotRaises(self, func, *args):
+        func(*args)
+
 class BaseViewTest(BaseTestCase):
     """
         Base class for testing views

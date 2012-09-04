@@ -69,6 +69,9 @@
                         Projet
                     </th>
                     <th>
+                        Client
+                    </th>
+                    <th>
                         Nom du document
                     </th>
                     <th>
@@ -80,6 +83,9 @@
                         <tr>
                             <td>
                                 ${format_project(task.project)}
+                            </td>
+                            <td>
+                                ${format_client(task.project.client)}
                             </td>
                             <td>${task.name}</td>
                             <td>${api.format_status(task)}</td>

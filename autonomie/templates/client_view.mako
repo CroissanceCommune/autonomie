@@ -16,7 +16,7 @@
                 % endfor
             </dl>
             <h3>Contact principal</h3>
-            <strong>${client.contactLastName.upper()} ${client.contactFirstName.capitalize()}</strong>
+            <strong>${api.format_name(client.contactFirstName, client.contactLastName)}</strong>
             <br />
             % if client.address:
                 <address>
@@ -50,19 +50,7 @@
             </dl>
         </div>
     </div>
-    <div class='span6'>
-        <div class='well'>
-            % if client.comments:
-                <h3>Commentaires</h3>
-                    ${format_text(client.comments)|n}
-            %else :
-                Aucun commentaire
-            % endif
-        </div>
-    </div>
-</div>
-<div class='row'>
-    <div class='span12'>
+    <div class='span9'>
         <h2>Projets</h2>
         %if client.projects:
             <table class="table table-striped table-condensed">
@@ -92,15 +80,15 @@
                                             <span class='ui-icon ui-icon-pencil'></span>
                                             Voir
                                         </a>
-                                        <a class='btn' href='${request.route_path("estimations", id=project.id)}'>
-                                            <span class='ui-icon ui-icon-plusthick'></span>
-                                            Devis
-                                        </a>
-                                        <a class='btn' href='${request.route_path("project_invoices", id=project.id)}'>
-                                            <span class='ui-icon ui-icon-plusthick'></span>
-                                            Facture
-                                        </a>
                                         %if not project.is_archived():
+                                            <a class='btn' href='${request.route_path("estimations", id=project.id)}'>
+                                                <span class='ui-icon ui-icon-plusthick'></span>
+                                                Devis
+                                            </a>
+                                            <a class='btn' href='${request.route_path("project_invoices", id=project.id)}'>
+                                                <span class='ui-icon ui-icon-plusthick'></span>
+                                                Facture
+                                            </a>
                                             <a class='btn'
                                                 href='${request.route_path("project", id=project.id, _query=dict(action="archive"))}'
                                                 onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
@@ -121,10 +109,21 @@
 
                         %endfor
                     </tbody>
-                </table>
-            %else:
-                Aucun projet n'a été initié avec ce client
-            %endif
+            </table>
+        %else:
+            Aucun projet n'a été initié avec ce client
+        %endif
+    </div>
+</div>
+<div class='row'>
+    <div class='span12'>
+        <div class='well'>
+            % if client.comments:
+                <h3>Commentaires</h3>
+                ${format_text(client.comments)|n}
+            %else :
+                Aucun commentaire
+            % endif
         </div>
     </div>
 </div>

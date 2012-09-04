@@ -1,4 +1,4 @@
-"""1.1
+"""1.1 : Adding id to status table and adding project status
 
 Revision ID: 3ffdda6a6fe6
 Revises: 432d76e49a9c

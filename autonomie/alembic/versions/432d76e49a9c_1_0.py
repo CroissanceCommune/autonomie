@@ -1,4 +1,4 @@
-"""1.0
+"""1.0 : Ajout de la table tva
 
 Revision ID: 432d76e49a9c
 Revises: None

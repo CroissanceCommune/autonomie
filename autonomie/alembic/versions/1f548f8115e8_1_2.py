@@ -1,4 +1,4 @@
-"""1.2
+"""1.2 : Update primary_groups to fit autonomie
 
 Revision ID: 1f548f8115e8
 Revises: 3ffdda6a6fe6

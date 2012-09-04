@@ -1,4 +1,4 @@
-"""1.3
+"""1.3 : Ajout du code compta pour les comptes entrepreneurs
 
 Revision ID: 1902ba0cc2ac
 Revises: 1f548f8115e8

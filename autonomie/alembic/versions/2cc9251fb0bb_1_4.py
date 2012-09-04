@@ -1,4 +1,4 @@
-"""1.4
+"""1.4 : Desactivation des comptes sans entreprises (sauf ceux des admin)
 
 Revision ID: 2cc9251fb0bb
 Revises: 1902ba0cc2ac

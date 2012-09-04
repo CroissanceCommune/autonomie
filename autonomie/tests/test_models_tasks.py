@@ -260,7 +260,7 @@ class TestTaskModels(BaseTestCase):
         self.assertFalse(task.is_valid())
         self.assertFalse(task.is_editable())
         self.assertTrue(task.is_editable(manage=True))
-        for i in ("valid", "sent", "geninv"):
+        for i in ("valid", "geninv"):
             task.CAEStatus = i
             self.assertTrue(task.has_been_validated())
             self.assertFalse(task.is_editable())
@@ -276,7 +276,7 @@ class TestTaskModels(BaseTestCase):
         self.assertFalse(task.is_valid())
         self.assertFalse(task.is_editable())
         self.assertTrue(task.is_editable(manage=True))
-        for i in ("valid", "sent", "recinv"):
+        for i in ("valid", ):
             task.CAEStatus = i
             self.assertTrue(task.has_been_validated())
             self.assertFalse(task.is_editable())
@@ -297,56 +297,44 @@ class TestTaskModels(BaseTestCase):
         task.CAEStatus = "valid"
         self.assertTrue(task.is_valid())
         self.assertFalse(task.is_editable())
-        task.CAEStatus = "sent"
-        self.assertTrue(task.has_been_validated())
-        self.assertFalse(task.is_editable())
 
     def test_status_change(self):
         # Estimation
         task = get_task(factory=Estimation)
-        for st in ("valid", "geninv", "sent", "aboest", "invalid"):
+        for st in ("valid", "geninv", "aboest", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "wait"), "wait")
         task.CAEStatus = "wait"
-        for st in ("draft", "geninv", "sent",):
+        for st in ("draft", "geninv", ):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "invalid"), "invalid")
         self.assertEqual(task.validate_status("nutt", "valid"), "valid")
         task.CAEStatus = "valid"
         for st in ("draft", "invalid", ):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("geninv", "sent", "aboest"):
+        for st in ("geninv", "aboest"):
             self.assertEqual(task.validate_status("nutt", st), st)
-        task.CAEStatus = "sent"
-        for st in ("draft", "invalid", "valid"):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         task.CAEStatus = "geninv"
-        for st in ("draft", "invalid", "sent", "valid", "aboest"):
+        for st in ("draft", "invalid", "valid", "aboest"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
         # Invoice
         task = get_task(factory=Invoice)
-        for st in ("valid", "sent", "aboinv", "invalid"):
+        for st in ("valid", "aboinv", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "wait"), "wait")
         task.CAEStatus = "wait"
-        for st in ("draft", "sent",):
+        for st in ("draft", ):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "invalid"), "invalid")
         self.assertEqual(task.validate_status("nutt", "valid"), "valid")
         task.CAEStatus = "valid"
         for st in ("draft", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("sent", "aboinv", "recinv", "paid"):
-            self.assertEqual(task.validate_status("nutt", st), st)
-        task.CAEStatus = "sent"
-        for st in ("draft", "invalid", "valid"):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("aboinv", "recinv", "paid"):
+        for st in ("aboinv", "paid"):
             self.assertEqual(task.validate_status("nutt", st), st)
         task.CAEStatus = "paid"
-        for st in ("draft", "invalid", "sent", "valid", "aboinv", "recinv",
-                                                                    ):
+        for st in ("draft", "invalid", "valid", "aboinv", ):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
         # CancelInvoice
@@ -355,11 +343,6 @@ class TestTaskModels(BaseTestCase):
         task.CAEStatus = 'wait'
         task.CAEStatus = "valid"
         for st in ("draft",):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("sent", ):
-            self.assertEqual(task.validate_status("nutt", st), st)
-        task.CAEStatus = "sent"
-        for st in ("draft", "valid", "invalid",):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
 class TestComputing(BaseTestCase):

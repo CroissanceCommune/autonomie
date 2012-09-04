@@ -84,8 +84,7 @@ def get_est_state(base_dict):
     delete = ('delete', None, None, False,)
     result = base_dict.copy()
     result['wait'] = (valid, invalid, 'duplicate',)
-    result['valid'] = ('sent', 'aboest', geninv, 'duplicate',)
-    result['sent'] = ('aboest', geninv, 'duplicate',)
+    result['valid'] = ('aboest', geninv, 'duplicate',)
     result['aboest'] = (delete,)
     result['geninv'] = ('duplicate',)
     return result
@@ -94,6 +93,7 @@ def get_inv_state(base_dict):
     """
         return the invoice state workflow
     """
+
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     aboinv = ('aboinv', MANAGER_PERMS,)
@@ -102,14 +102,9 @@ def get_inv_state(base_dict):
     delete = ('delete', None, None, False,)
     result = base_dict.copy()
     result['wait'] = (valid, invalid, 'duplicate',)
-    result['valid'] = ('sent', aboinv, paid, 'resulted', 'duplicate',
-                                                       'recinv', gencinv,)
-    result['sent'] = (aboinv, paid, 'resulted', 'duplicate', 'recinv',
-                                                                 gencinv,)
+    result['valid'] = (aboinv, paid, 'resulted', 'duplicate', gencinv,)
     result['aboinv'] = (delete,)
     result['paid'] = ('duplicate', paid, gencinv, 'resulted')
-    result['recinv'] = (aboinv, paid, gencinv, 'resulted', 'duplicate',
-                                                                 gencinv,)
     result['gencinv'] = (paid, 'resulted', 'duplicate',)
     return result
 
@@ -121,7 +116,6 @@ def get_cinv_state(base_dict):
     invalid = ('invalid', MANAGER_PERMS,)
     result = base_dict.copy()
     result['wait'] = (valid, invalid, 'duplicate',)
-    result['valid'] = ('sent',)
     return result
 
 DEFAULT_STATE_MACHINES = {

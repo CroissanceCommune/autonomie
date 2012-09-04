@@ -106,14 +106,10 @@ class Estimation(Task, TaskCompute):
         return self.CAEStatus == 'valid'
 
     def has_been_validated(self):
-        return self.CAEStatus in ('valid', 'geninv', 'sent',)
+        return self.CAEStatus in ('valid', 'geninv',)
 
     def is_waiting(self):
         return self.CAEStatus == 'wait'
-
-    def is_sent(self):
-        return self.CAEStatus == "sent"
-
 
     def is_estimation(self):
         return True

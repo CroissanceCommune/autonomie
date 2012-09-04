@@ -25,13 +25,38 @@
                 Vous ne pouvez plus modifier ce document car il est en attente de validation.
             </p>
         % endif
-        % if hasattr(task, 'estimation') and task.estimation and task.is_invoice():
-            <p>
-                Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.number}</a>
-            </p>
-        %elif hasattr(task, 'invoice') and task.invoice and task.is_cancelinvoice():
-            Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">${task.invoice.officialNumber}</a>
-        % endif
+        % if task.is_invoice():
+            % if hasattr(task, 'estimation') and task.estimation:
+                <p>
+                    Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.number}</a>
+                </p>
+            % endif
+            % if hasattr(task, 'cancelinvoice') and task.cancelinvoice:
+                <p>
+                    L'avoir : <a href="${request.route_path('cancelinvoice', id=task.cancelinvoice.id)}">${task.cancelinvoice.number}</a> a été généré depuis cette facture.
+                </p>
+            % endif
+        % elif task.is_estimation():
+            % if hasattr(task, 'invoices') and task.invoices:
+                <p>
+                    Les factures suivantes ont été générées depuis ce devis :
+                    <ul class='unstyled'>
+                        % for invoice in task.invoices:
+                            <li>
+                                <a href="${request.route_path('invoice', id=invoice.id)}">${invoice.number}</a>
+                            </li>
+                        % endfor
+                    </ul>
+                </p>
+            % endif
+        % elif task.is_cancelinvoice():
+            % if hasattr(task, 'invoice') and task.invoice:
+                <p>
+                    Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">${task.invoice.officialNumber}</a>
+                </p>
+            % endif
+        %endif
+
         % if hasattr(task, "statusComment") and task.statusComment:
             <b>Communication CAE-Entrepreneur</b>
             <p>

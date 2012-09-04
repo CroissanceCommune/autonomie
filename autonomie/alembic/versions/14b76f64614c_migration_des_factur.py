@@ -28,13 +28,13 @@ def upgrade():
         i.payments.append(payment)
         i.CAEStatus = 'resulted'
         sess.merge(i)
-    # We ensure all cancel invoice have a correct status
-    for i in sess.query(model.CancelInvoice)\
-        .filter(model.CancelInvoice.CAEStatus.in_(('paid', 'sent', 'recinv'))):
-        i.CAEStatus = 'valid'
-        sess.merge(i)
-    sess.flush()
-
+    # Using direct sql allows to enforce CAEStatus modifications
+    # Ref #573
+    # Ref #551
+    op.execute("""
+update coop_task set CAEStatus='valid' where CAEStatus='sent' OR CAEStatus='recinv';
+update coop_task as t join coop_cancel_invoice as est on t.IDTask=est.IDTask SET t.CAEStatus='valid' WHERE t.CAEStatus='paid';
+""")
 
 def downgrade():
     pass

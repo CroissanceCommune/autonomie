@@ -21,7 +21,7 @@ import logging
 from sqlalchemy import and_
 from pyramid.view import view_config
 
-from autonomie.models.model import Invoice, Estimation, Phase
+from autonomie.models.model import Task, Invoice, Estimation, Phase, CancelInvoice
 
 log = logging.getLogger(__name__)
 
@@ -30,19 +30,14 @@ def manage(request):
     """
         The manage view
     """
-    invoices = Invoice.query().join(Invoice.phase).filter(
-            and_(Invoice.CAEStatus=='wait', Phase.name!=None)).all()
-    for i in invoices:
-        i.url = request.route_path("invoice", id=i.id)
-
-    estimations = Estimation.query().join(Estimation.phase).filter(
-                    and_(Estimation.CAEStatus=='wait',
-                            Phase.name!=None)).all()
-    for i in estimations:
-        i.url = request.route_path("estimation", id=i.id)
-    invoices.extend(estimations)
-    invoices = sorted(invoices, key=lambda a:a.statusDate)
+    documents = Task.query()\
+            .with_polymorphic([Invoice, CancelInvoice, Estimation])\
+            .join(Task.phase)\
+            .filter(and_(Task.CAEStatus=='wait', Phase.name!=None))\
+            .order_by(Task.statusDate).all()
+    for document in documents:
+        document.url = request.route_path(document.type_, id=document.id)
     return dict(title=u"Documents en attente de validation",
-                tasks=invoices,
+                tasks=documents,
                )
 

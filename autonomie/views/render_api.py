@@ -28,10 +28,8 @@ STATUS = dict((
             ("geninv", u"Facture générée",),
             ("aboinv", u"Facture annulée",),
             ("aboest", u"Devis annulé",),
-            ("sent", u"Document envoyé",),
             ("paid", u"Paiement partiel reçu",),
             ("resulted", u"Paiement reçu",),
-            ("recinv", u"Client relancé",),
             ('gencinv', u"Avoir généré",),
             ))
 

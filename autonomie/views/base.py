@@ -332,24 +332,6 @@ class TaskView(BaseView):
                      value="invalid",
                      request=self.request)
 
-    def _sent_btn(self):
-        """
-            Return a button to change the status to "sent"
-        """
-        yield Submit(u"Envoyé au client",
-            title=u"Indiquer que le document a bien été envoyé au client",
-            value="sent",
-            request=self.request)
-
-    def _recinv_btn(self):
-        """
-            Return a button to change the status to "client has been called"
-        """
-        yield Submit(u"Client relancé",
-                     title=u"Indiquer que le client a été relancé",
-                     value="recinv",
-                     request=self.request)
-
     def _paid_btn(self):
         """
             Return a button to set a paid btn and a select to choose

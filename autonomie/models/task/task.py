@@ -74,6 +74,10 @@ class Task(DBBASE):
                         primaryjoin="Task.IDEmployee==User.id",
                             backref="ownedTasks")
 
+    phase = relationship("Phase",
+                        primaryjoin="Task.IDPhase==Phase.id",
+                        backref="documents")
+
     type_ = Column('type_', String(30), nullable=False)
     __mapper_args__ = {'polymorphic_on': type_}
 

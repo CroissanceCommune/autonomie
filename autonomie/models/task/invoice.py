@@ -100,8 +100,8 @@ class Invoice(Task, TaskCompute):
 
     project = relationship("Project", backref=backref('invoices',
                                             order_by='Invoice.taskDate'))
-    phase =  relationship("Phase", backref=backref("invoices",
-                                                order_by='Invoice.taskDate'))
+    #phase =  relationship("Phase", backref=backref("invoices",
+    #                                            order_by='Invoice.taskDate'))
     estimation = relationship("Estimation",
                       backref="invoices",
                       primaryjoin="Invoice.IDEstimation==Estimation.IDTask")
@@ -351,10 +351,10 @@ class CancelInvoice(Task, TaskCompute):
     project = relationship("Project", backref=backref('cancelinvoices',
                                             order_by='CancelInvoice.taskDate')
                             )
-    phase = relationship("Phase",
-                          backref=backref("cancelinvoices",
-                                          order_by='CancelInvoice.taskDate')
-                          )
+    #phase = relationship("Phase",
+    #                      backref=backref("cancelinvoices",
+    #                                      order_by='CancelInvoice.taskDate')
+    #                      )
     invoice = relationship("Invoice",
                       backref=backref("cancelinvoice", uselist=False),
                       primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask")

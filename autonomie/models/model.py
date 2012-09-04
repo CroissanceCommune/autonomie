@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 04 sept. 2012 14:38:54 CEST
+# * Last Modified : mar. 04 sept. 2012 18:16:33 CEST
 #
 # * Project : autonomie
 #
@@ -80,6 +80,25 @@ class Phase(DBBASE):
             return True is this phase is a default one
         """
         return self.name in (u'Phase par défaut', u"default", u"défaut",)
+
+    @property
+    def estimations(self):
+        return self.get_documents_by_type('estimation')
+
+    @property
+    def invoices(self):
+        return self.get_documents_by_type('invoice')
+
+    @property
+    def cancelinvoices(self):
+        return self.get_documents_by_type('cancelinvoice')
+
+    def get_documents_by_type(self, type_):
+        """
+            return the documents of the passed type
+        """
+        return [doc for doc in self.documents if document.type_==type_]
+
 
 class Tva(DBBASE):
     """

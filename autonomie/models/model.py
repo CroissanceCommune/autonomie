@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 04 sept. 2012 18:16:33 CEST
+# * Last Modified : mar. 04 sept. 2012 18:21:54 CEST
 #
 # * Project : autonomie
 #
@@ -97,7 +97,7 @@ class Phase(DBBASE):
         """
             return the documents of the passed type
         """
-        return [doc for doc in self.documents if document.type_==type_]
+        return [doc for doc in self.documents if doc.type_==type_]
 
 
 class Tva(DBBASE):

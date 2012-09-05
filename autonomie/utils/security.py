@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 28 août 2012 01:06:51 CEST
+# * Last Modified : mer. 05 sept. 2012 09:12:39 CEST
 #
 # * Project : autonomie
 #
@@ -30,6 +30,11 @@ from autonomie.models.model import User
 from autonomie.models.model import OperationComptable
 
 log = logging.getLogger(__name__)
+
+MANAGER_ROLES = ((u"3", u'Entrepreneur'), (u"2", u'Membre de la coopérative'),)
+ADMIN_ROLES = ((u"3", u'Entrepreneur'),
+               (u"1", u'Administrateur'),
+               (u"2", u'Membre de la coopérative'),)
 
 DEFAULT_PERM = [(Allow, "group:admin", ALL_PERMISSIONS,),
                 (Allow, "group:manager", ("manage", "add", "edit", "view")),

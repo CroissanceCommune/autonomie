@@ -51,7 +51,7 @@ class Client(DBBASE):
     """
         Client model
     """
-    __tablename__ = 'coop_customer'
+    __tablename__ = 'customer'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('id', Integer, primary_key=True)
     code = Column('code', String(4))
@@ -62,7 +62,7 @@ class Client(DBBASE):
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp)
     id_company = Column("IDCompany", Integer,
-                                    ForeignKey('coop_company.IDCompany'))
+                                    ForeignKey('company.IDCompany'))
     intraTVA = deferred(Column("intraTVA", String(50)), group='edit')
     address = deferred(Column("address", String(255)), group='edit')
     zipCode = deferred(Column("zipCode", String(20)), group='edit')

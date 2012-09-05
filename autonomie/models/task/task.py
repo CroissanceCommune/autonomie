@@ -44,12 +44,12 @@ class Task(DBBASE):
     """
         Metadata pour une tâche (estimation, invoice)
     """
-    __tablename__ = 'coop_task'
+    __tablename__ = 'document'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {'polymorphic_identity':'task'}
 
     IDTask = Column(Integer, primary_key=True)
-    IDPhase = Column("IDPhase", ForeignKey('coop_phase.IDPhase'))
+    IDPhase = Column("IDPhase", ForeignKey('phase.IDPhase'))
     name = Column("name", String(255))
     CAEStatus = Column('CAEStatus', String(10))
     statusComment = Column("statusComment", Text)

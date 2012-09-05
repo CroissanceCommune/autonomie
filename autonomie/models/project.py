@@ -46,16 +46,16 @@ class Project(DBBASE):
     """
         The project model
     """
-    __tablename__ = 'coop_project'
+    __tablename__ = 'project'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column('IDProject', Integer, primary_key=True)
+    id = Column('id', Integer, primary_key=True)
     name = Column("name", String(255))
-    client_id = Column("client_id", Integer,  ForeignKey('coop_customer.id'))
+    client_id = Column("client_id", Integer,  ForeignKey('customer.id'))
     code = Column("code", String(4), nullable=False)
     definition = deferred(Column("definition", Text), group='edit')
 
     id_company = Column("IDCompany", Integer,
-                                    ForeignKey('coop_company.IDCompany'))
+                                    ForeignKey('company.IDCompany'))
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = deferred(Column("updateDate", CustomDateType,

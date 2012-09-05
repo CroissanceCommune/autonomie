@@ -39,7 +39,7 @@ class Company(DBBASE):
         Company model
         Store all company specific stuff (headers, logos, RIB, ...)
     """
-    __tablename__ = 'coop_company'
+    __tablename__ = 'company'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDCompany", Integer, primary_key=True)
     name = Column("name", String(150))

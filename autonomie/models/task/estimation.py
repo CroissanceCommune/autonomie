@@ -52,9 +52,9 @@ class Estimation(Task, TaskCompute):
     """
         Estimation Model
     """
-    __tablename__ = 'coop_estimation'
+    __tablename__ = 'estimation'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'),
+    IDTask = Column("IDTask", ForeignKey('document.IDTask'),
                 primary_key=True, nullable=False)
     sequenceNumber = Column("sequenceNumber", Integer,
                 nullable=False)
@@ -65,7 +65,7 @@ class Estimation(Task, TaskCompute):
                         group='edit')
     exclusions = deferred(Column("exclusions", Text),
                         group='edit')
-    IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
+    project_id = Column("project_id", ForeignKey('project.id'))
     manualDeliverables = deferred(Column("manualDeliverables", Integer),
                         group='edit')
     course = deferred(Column('course', Integer,
@@ -157,7 +157,7 @@ class Estimation(Task, TaskCompute):
         """
             Return the args common to all the generated invoices
         """
-        return dict(IDProject = self.IDProject,
+        return dict(project_id=self.project_id,
                     IDPhase = self.IDPhase,
                     CAEStatus = 'draft',
                     statusPerson = user_id,
@@ -395,10 +395,10 @@ class EstimationLine(DBBASE):
       KEY `coop_estimation_line_rowIndex` (`rowIndex`),
       KEY `IDTask` (`IDTask`)
     """
-    __tablename__ = 'coop_estimation_line'
+    __tablename__ = 'estimation_line'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDWorkLine", Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
+    IDTask = Column(Integer, ForeignKey('estimation.IDTask'))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
@@ -444,7 +444,6 @@ class EstimationLine(DBBASE):
 
 class PaymentLine(DBBASE):
     """
-        coop_estimation_payment
         `IDPaymentLine` int(11) NOT NULL auto_increment,
         `IDTask` int(11) NOT NULL,
         `rowIndex` int(11) NOT NULL,
@@ -454,10 +453,10 @@ class PaymentLine(DBBASE):
         `updateDate` int(11) default NULL,
         `paymentDate` int(11) default NULL,
     """
-    __tablename__ = 'coop_estimation_payment'
+    __tablename__ = 'estimation_payment'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDPaymentLine", Integer, primary_key=True, nullable=False)
-    IDTask = Column(Integer, ForeignKey('coop_estimation.IDTask'))
+    IDTask = Column(Integer, ForeignKey('estimation.IDTask'))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
     amount = Column("amount", Integer)

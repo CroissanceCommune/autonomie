@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 05 sept. 2012 17:45:51 CEST
+# * Last Modified : mer. 05 sept. 2012 20:42:01 CEST
 #
 # * Project : autonomie
 #
@@ -63,11 +63,11 @@ class Phase(DBBASE):
         `creationDate` int(11) NOT NULL,
         `updateDate` int(11) NOT NULL,
     """
-    __tablename__ = 'coop_phase'
+    __tablename__ = 'phase'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('IDPhase', Integer, primary_key=True)
-    id_project = Column('IDProject', Integer,
-                        ForeignKey('coop_project.IDProject'))
+    project_id = Column('project_id', Integer,
+                        ForeignKey('project.id'))
     name = Column("name", String(150), default=u'Phase par défaut')
     project = relationship("Project", backref="phases")
     creationDate = deferred(Column("creationDate", CustomDateType,
@@ -102,13 +102,12 @@ class Phase(DBBASE):
 
 class Tva(DBBASE):
     """
-        coop_tva
         `id` int(2) NOT NULL auto_increment,
         `name` varchar(8) NOT NULL,
         `value` int(5)
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
-    __tablename__ = 'coop_tva'
+    __tablename__ = 'tva'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(8), nullable=False)
@@ -129,11 +128,11 @@ class TaskStatus(DBBASE):
         KEY `IDTask` (`IDTask`),
         KEY `statusCode` (`statusCode`)
     """
-    __tablename__ = 'coop_task_status'
+    __tablename__ = 'task_status'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("id", Integer, primary_key=True)
     id_task = Column('IDTask', Integer,
-                        ForeignKey('coop_task.IDTask'))
+                        ForeignKey('document.IDTask'))
     statusCode = Column("statusCode", String(10))
     statusComment = Column("statusComment", Text)
     statusDate = Column("statusDate", Integer)
@@ -147,7 +146,7 @@ class Config(DBBASE):
           `config_value` text,
           PRIMARY KEY  (`config_app`,`config_name`)
     """
-    __tablename__ = 'egw_config'
+    __tablename__ = 'config'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     app = Column("config_app", String(50), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
@@ -169,13 +168,13 @@ class OperationComptable(DBBASE):
         PRIMARY KEY  (`id`),
         UNIQUE KEY `id` (`id`)
     """
-    __tablename__ = 'symf_operation_treso'
+    __tablename__ = 'operation_tresorerie'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column('id', BigInteger, primary_key=True)
     amount = Column("montant", Numeric)
     charge = Column("charge", Integer, default=0)
     company_id = Column('compagnie_id', CustomInteger,
-                            ForeignKey('coop_company.IDCompany'))
+                            ForeignKey('company.IDCompany'))
     date = Column("date", Date(), default=datetime.date.today)
     label = Column("libelle", String(255), default="")
     company = relationship("Company",
@@ -190,24 +189,24 @@ class OperationComptable(DBBASE):
     type = Column("type", Text)
 
 
-class Holliday(DBBASE):
+class Holiday(DBBASE):
     """
-        Hollidays table
-        Stores the start and end date for holliday declaration
+        Holidays table
+        Stores the start and end date for holiday declaration
         user_id
         start_date
         end_date
     """
-    __tablename__ = "coop_holliday"
+    __tablename__ = "holiday"
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column(Integer, primary_key=True)
     user_id = Column("user_id", Integer, ForeignKey('accounts.id'))
     start_date = Column(Date)
     end_date = Column(Date)
     user = relationship("User",
-                        backref=backref("hollidays",
-                                        order_by="Holliday.start_date"),
-                        primaryjoin="Holliday.user_id==User.id"
+                        backref=backref("holidays",
+                                        order_by="Holiday.start_date"),
+                        primaryjoin="Holiday.user_id==User.id"
                         )
 
     @classmethod
@@ -215,9 +214,9 @@ class Holliday(DBBASE):
         """
             query the database for the current class instances
             @dbsession : instanciated dbsession
-            @user_id: id of the user we want the holliday from
+            @user_id: id of the user we want the holiday from
         """
-        q = dbsession.query(Holliday)
+        q = dbsession.query(cls)
         if user_id:
-            q = q.filter(Holliday.user_id==user_id)
+            q = q.filter(cls.user_id==user_id)
         return q.order_by("start_date")

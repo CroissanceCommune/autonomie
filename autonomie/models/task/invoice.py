@@ -73,14 +73,14 @@ class Invoice(Task, TaskCompute):
     """
         Invoice Model
     """
-    __tablename__ = 'coop_invoice'
+    __tablename__ = 'invoice'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {
                        'polymorphic_identity':'invoice',
                        }
-    IDTask = Column("IDTask", ForeignKey('coop_task.IDTask'), primary_key=True)
-    IDEstimation = Column("IDEstimation", ForeignKey('coop_estimation.IDTask'))
-    IDProject = Column("IDProject", ForeignKey('coop_project.IDProject'))
+    IDTask = Column("IDTask", ForeignKey('document.IDTask'), primary_key=True)
+    IDEstimation = Column("IDEstimation", ForeignKey('estimation.IDTask'))
+    project_id = Column("project_id", ForeignKey('project.id'))
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     number = Column("number", String(100), nullable=False)
     tva = Column("tva", Integer, nullable=False, default=196)
@@ -227,7 +227,7 @@ class Invoice(Task, TaskCompute):
                             cancelinvoice.sequenceNumber,
                             cancelinvoice.taskDate)
         cancelinvoice.statusPerson = user_id
-        cancelinvoice.IDProject = self.IDProject
+        cancelinvoice.project_id = self.project_id
         cancelinvoice.IDEmployee = user_id
         for line in self.lines:
             cancelinvoice.lines.append(line.gen_cancelinvoice_line())
@@ -278,10 +278,10 @@ class InvoiceLine(DBBASE):
         `unity` varchar(10) default NULL,
         PRIMARY KEY  (`IDInvoiceLine`),
     """
-    __tablename__ = 'coop_invoice_line'
+    __tablename__ = 'invoice_line'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("IDInvoiceLine", Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_invoice.IDTask'))
+    IDTask = Column(Integer, ForeignKey('invoice.IDTask'))
     rowIndex = Column("rowIndex", Integer, default=1)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
@@ -330,14 +330,14 @@ class CancelInvoice(Task, TaskCompute):
         CancelInvoice model
         Could also be called negative invoice
     """
-    __tablename__ = 'coop_cancel_invoice'
+    __tablename__ = 'cancelinvoice'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {'polymorphic_identity':'cancelinvoice'}
-    IDTask = Column(Integer, ForeignKey('coop_task.IDTask'), primary_key=True)
+    IDTask = Column(Integer, ForeignKey('document.IDTask'), primary_key=True)
 
-    IDInvoice = Column(Integer, ForeignKey('coop_invoice.IDTask'),
+    IDInvoice = Column(Integer, ForeignKey('invoice.IDTask'),
                                                         default=None)
-    IDProject = Column(Integer, ForeignKey('coop_project.IDProject'))
+    project_id = Column(Integer, ForeignKey('project.id'))
     sequenceNumber = deferred(Column(Integer), group='edit')
     number = Column(String(100))
     tva = Column(Integer, default=1960)
@@ -437,7 +437,7 @@ class ManualInvoice(DBBASE):
     """
         Modèle pour les factures manuelles (ancienne version)
     """
-    __tablename__ = 'symf_facture_manuelle'
+    __tablename__ = 'manual_invoice'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id_ = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)
@@ -448,11 +448,11 @@ class ManualInvoice(DBBASE):
     statusDate = Column("paiement_date", Date())
     paymentMode = Column("paiement_comment", String(255))
     client_id = Column('client_id', String(5),
-                            ForeignKey('coop_customer.id'))
+                            ForeignKey('customer.id'))
     taskDate = Column("date_emission", Date(),
                                 default=datetime.datetime.now)
     company_id = Column('compagnie_id', BigInteger,
-                            ForeignKey('coop_company.IDCompany'))
+                            ForeignKey('company.IDCompany'))
     created_at = deferred(Column("created_at", DateTime,
                                       default=datetime.datetime.now))
     updated_at = deferred(Column("updated_at", DateTime,
@@ -569,10 +569,10 @@ class CancelInvoiceLine(DBBASE):
         `unity` varchar(10) default NULL,
         PRIMARY KEY  (`IDCancelInvoiceLine`),
     """
-    __tablename__ = 'coop_cancel_invoice_line'
+    __tablename__ = 'cancelinvoice_line'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column(Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('coop_cancel_invoice.IDTask'))
+    IDTask = Column(Integer, ForeignKey('cancelinvoice.IDTask'))
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now,
                                   onupdate=datetime.datetime.now)
@@ -607,13 +607,13 @@ class Payment(DBBASE):
     """
         Payment entry
     """
-    __tablename__ = 'coop_payment'
+    __tablename__ = 'payment'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column(Integer, primary_key=True)
     mode = Column(String(50))
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
-    IDTask = Column(Integer, ForeignKey('coop_task.IDTask'))
+    IDTask = Column(Integer, ForeignKey('document.IDTask'))
     document = relationship("Task",
                 primaryjoin="Task.IDTask==Payment.IDTask",
                 backref=backref('payments', order_by='Payment.date'))

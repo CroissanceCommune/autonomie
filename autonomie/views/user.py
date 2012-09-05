@@ -252,7 +252,7 @@ class UserView(ListView):
                 log.debug(datas)
                 if datas.get('companies', False):
                     self._disable_companies()
-                elif datas.get('disable', False):
+                if datas.get('disable', False):
                     self._disable_user(self.context)
                 return HTTPFound(self.request.route_path("users"))
         html_form = form.render()

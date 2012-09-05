@@ -29,11 +29,13 @@ from autonomie.models.model import User
 from autonomie.models.model import Company
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
-from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms import pwdSchema
+from autonomie.utils.views import cancel_btn
+from autonomie.views.forms import get_password_change_schema
 from autonomie.views.forms import get_user_schema
+from autonomie.views.forms import get_user_del_schema
+from autonomie.views.render_api import format_account
 
 from .base import ListView
 
@@ -46,7 +48,7 @@ def account(request):
         Account handling page
     """
     avatar = request.user
-    pwdformschema = pwdSchema.bind(check=True)
+    pwdformschema = get_password_change_schema()
     pwdform = Form(pwdformschema, buttons=(submit_btn,))
     html_form = pwdform.render({'login':avatar.login})
     if "submit" in request.params:
@@ -56,7 +58,7 @@ def account(request):
         except ValidationFailure, e:
             html_form = e.render()
         else:
-            log.debug(u"# User {0} has changed his password #".format(
+            log.info(u"# User {0} has changed his password #".format(
                                                     request.user.login))
             dbsession = request.dbsession()
             new_pass = datas['pwd']
@@ -91,7 +93,6 @@ class UserView(ListView):
                 action=self.request.route_path('users', _query=dict(new=1)),
                 buttons=(submit_btn,))
         return form
-
 
     @view_config(route_name='users', renderer='users.mako',
             permission='view')
@@ -142,6 +143,8 @@ class UserView(ListView):
                         path="user", id=user.id))
             self.actionmenu.add(ViewLink(u"Éditer", "edit",
                           path="user", id=user.id, _query=dict(action="edit")))
+            self.actionmenu.add(ViewLink(u"Supprimer", "delete",
+                        path="user", id=user.id, _query=dict(action="delete")))
 
     @view_config(route_name='users', renderer='user_edit.mako',
                         request_method='POST', permission='add')
@@ -151,8 +154,7 @@ class UserView(ListView):
         """
             Add / Edit a user
         """
-        log.debug(u"# In UserView.user #")
-        log.debug(u" + request's context {0}".format(self.request.context))
+        log.debug(u"# In UserView.user_edit #")
         if self.request.context.__name__ == 'user':
             user = self.request.context
             edit = True
@@ -191,21 +193,18 @@ class UserView(ListView):
                         company = Company.query().filter(
                                Company.name==company_name).first()
                         if not company:
-                            log.debug(u" + Adding company : %s" % company_name)
+                            log.info(u" + Adding company : %s" % company_name)
                             company = Company()
                             company.name = company_name
                             company.goal = u"Entreprise de {0}".format(
-                                user.firstname, user.lastname)
+                                format_account(user))
                             company = self.dbsession.merge(company)
-                            log.debug(u"Flushing")
                             self.dbsession.flush()
-                            log.debug(u"Adding company to the user")
                         user.companies.append(company)
-                log.debug(u" + Adding/Editing user : {0}" .format(user.login))
+                log.info(u" + Adding/Editing user : {0}" .format(user.login))
                 user = self.dbsession.merge(user)
-                log.debug(u"Flushing")
                 self.dbsession.flush()
-                self.request.session.flash(validate_msg, queue="main")
+                self.session.flash(validate_msg, queue="main")
                 return HTTPFound(self.request.route_path("user", id=user.id))
         else:
             html_form = form.render({'user':user.appstruct(),
@@ -224,3 +223,66 @@ class UserView(ListView):
         return dict(title=u"{0} {1}".format(user.lastname, user.firstname),
                     user=user,
                     action_menu=self.actionmenu)
+
+    @view_config(route_name='user', renderer='user_edit.mako',
+                        request_param='action=delete', permission='delete')
+    def user_del(self):
+        """
+            deletes a user and its related components
+            - Company
+            - Projects
+            - Phases
+            - Documents
+        """
+        self._set_item_menu(self.context, edit=True)
+        log.debug(u"Deleting a user")
+        schema = get_user_del_schema(self.context)
+        form = Form(schema, buttons=(submit_btn, cancel_btn,))
+        if "cancel" in self.request.params:
+            user_view = self.request.route_path("user", id=self.context.id)
+            return HTTPFound(user_view)
+        elif "submit" in self.request.params:
+            controls = self.request.params.items()
+            try:
+                datas = form.validate(controls)
+            except ValidationFailure, err:
+                html_form = err.render()
+            else:
+                log.debug(datas)
+                if datas.get('companies', False):
+                    self._disable_companies()
+                elif datas.get('disable', False):
+                    self._disable_user()
+                return HTTPFound(self.request.route_path("users"))
+        html_form = form.render()
+        title = u"Suppression du compte {0}".format(self.context.login)
+        return dict(title=title,
+                    html_form=html_form,
+                    action_menu=self.actionmenu)
+
+    def _disable_user(self):
+        """
+            disable the current user
+        """
+        self.context.disable()
+        self.dbsession.merge(self.context)
+        message = u"L'utilisateur {0} a bien été désactivé.".format(
+                                                format_account(self.context))
+        self.session.flash(message, queue="main")
+
+    def _disable_companies(self):
+        """
+            disable all companies related to this user
+        """
+        for company in self.context.companies:
+            company.disable()
+            self.dbsession.merge(company)
+            message = u"L'entreprise '{0}' a bien été désactivée.".format(
+                                                company.name)
+            self.session.flash(message, queue="main")
+            for employee in company.employees:
+                employee.disable()
+                self.dbsession.merge(employee)
+                message = u"L'utilisateur '{0}' a été désactivé.".format(
+                                                format_account(employee))
+                self.session.flash(message, queue="main")

@@ -138,18 +138,21 @@ class UserView(ListView):
         self.actionmenu.add(SearchForm(u"Nom ou entreprise"))
         return ret_dict
 
-    def _get_users(self):
+    @staticmethod
+    def _get_users():
         """
             return the user query
         """
-        return User.query().outerjoin(User.companies)
+        return User.query(ordered=False).outerjoin(User.companies)
 
-    def _filter_search(self, query, search):
+    @staticmethod
+    def _filter_search(query, search):
         """
             Return a filtered query
         """
-        return query.filter( or_(User.lastname.like(search+"%"),
-                     User.companies.any(Company.name.like(search+"%"))))
+        return query.filter( or_(User.lastname.like("%"+search+"%"),
+                        User.firstname.like("%"+search+"%"),
+                     User.companies.any(Company.name.like("%"+search+"%"))))
 
     @view_config(route_name='users', renderer='user_edit.mako',
                         request_method='POST', permission='add')

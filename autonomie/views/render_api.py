@@ -51,7 +51,7 @@ def format_status(task):
                                         format_date(task.statusDate))
     return status_str + suffix
 
-def format_account(account):
+def format_account(account, reverse=False):
     """
         return {firstname} {lastname}
     """
@@ -61,13 +61,18 @@ def format_account(account):
     else:
         firstname = "Inconnu"
         lastname = ""
-    return format_name(firstname, lastname)
+    return format_name(firstname, lastname, reverse)
 
-def format_name(firstname, lastname):
+def format_name(firstname, lastname, reverse=False):
     """
         format firstname and lastname in a common format
     """
-    return u"{0} {1}".format(firstname.capitalize(), lastname.upper())
+    firstname = firstname.capitalize()
+    lastname = lastname.upper()
+    if reverse:
+        return u"{0} {1}".format(lastname, firstname)
+    else:
+        return u"{0} {1}".format(firstname, lastname)
 
 def format_amount(amount, trim=True):
     """

@@ -17,7 +17,7 @@
         % if users:
             % for user in users:
                 <tr>
-                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user, inverse=True)}</td>
+                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user, reverse=True)}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.email}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >
                         <ul>

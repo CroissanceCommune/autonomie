@@ -51,7 +51,7 @@ class User(DBBASE):
     lastname = Column("account_lastname", String(50))
     primary_group = Column("account_primary_group",
                             Integer)
-    active = Column("account_active", String(1), default='Y')
+    active = Column("account_status", String(1), default='Y')
     email = Column("account_email", String(100))
     companies = relationship("Company",
                              secondary=COMPANY_EMPLOYEE,

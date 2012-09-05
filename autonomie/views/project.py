@@ -100,6 +100,7 @@ class ProjectView(ListView):
 
     def __init__(self, request):
         ListView.__init__(self, request)
+        self._set_actionmenu()
 
     def _set_actionmenu(self):
         """

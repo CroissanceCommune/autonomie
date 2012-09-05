@@ -24,9 +24,9 @@ class TestFormModels(BaseTestCase):
                                                     "user1_login")
 
     def test_fpassword(self):
-        from autonomie.views.forms import pwdSchema
+        from autonomie.views.forms import get_password_change_schema
         from autonomie.views.forms.user import auth
-        schema = pwdSchema.bind(check=True)
+        schema = get_password_change_schema()
         form = Form(schema)
         ok_values = dict(login='user1_login', password='user1')
         self.assertIsNone(auth(None, ok_values))

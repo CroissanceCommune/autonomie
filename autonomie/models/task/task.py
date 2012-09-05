@@ -54,13 +54,13 @@ class Task(DBBASE):
     CAEStatus = Column('CAEStatus', String(10))
     statusComment = Column("statusComment", Text)
     statusPerson = Column("statusPerson",
-                          ForeignKey('egw_accounts.account_id'))
+                          ForeignKey('accounts.id'))
     statusDate = Column("statusDate", CustomDateType,
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp)
     taskDate = Column("taskDate", CustomDateType2)
     IDEmployee = Column("IDEmployee",
-                            ForeignKey('egw_accounts.account_id'))
+                            ForeignKey('accounts.id'))
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = Column("updateDate", CustomDateType,

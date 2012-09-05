@@ -32,7 +32,7 @@ from autonomie.models import DBBASE
 COMPANY_EMPLOYEE = Table('coop_company_employee', DBBASE.metadata,
     Column("IDCompany", Integer, ForeignKey('coop_company.IDCompany')),
     # IDEmployee est identique dans la table coop_employee
-    Column("IDEmployee", Integer, ForeignKey('egw_accounts.account_id')),
+    Column("IDEmployee", Integer, ForeignKey('accounts.id')),
         mysql_charset='utf8', mysql_engine='MyISAM',
     )
 
@@ -42,17 +42,17 @@ class User(DBBASE):
     """
         User model
     """
-    __tablename__ = 'egw_accounts'
+    __tablename__ = 'accounts'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column('account_id', Integer, primary_key=True)
-    login = Column('account_lid', String(64))
-    pwd = Column("account_pwd", String(100))
-    firstname = Column("account_firstname", String(50))
-    lastname = Column("account_lastname", String(50))
-    primary_group = Column("account_primary_group",
+    id = Column('id', Integer, primary_key=True)
+    login = Column('login', String(64))
+    pwd = Column("password", String(100))
+    firstname = Column("firstname", String(50))
+    lastname = Column("lastname", String(50))
+    primary_group = Column("primary_group",
                             Integer)
-    active = Column("account_status", String(1), default='Y')
-    email = Column("account_email", String(100))
+    active = Column("active", String(1), default='Y')
+    email = Column("email", String(100))
     companies = relationship("Company",
                              secondary=COMPANY_EMPLOYEE,
                              backref="employees")

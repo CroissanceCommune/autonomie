@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 04 sept. 2012 18:21:54 CEST
+# * Last Modified : mer. 05 sept. 2012 17:45:51 CEST
 #
 # * Project : autonomie
 #
@@ -201,7 +201,7 @@ class Holliday(DBBASE):
     __tablename__ = "coop_holliday"
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column(Integer, primary_key=True)
-    user_id = Column("user_id", Integer, ForeignKey('egw_accounts.account_id'))
+    user_id = Column("user_id", Integer, ForeignKey('accounts.id'))
     start_date = Column(Date)
     end_date = Column(Date)
     user = relationship("User",

@@ -36,12 +36,12 @@ from autonomie.views.forms import ClientSchema
 from .base import ListView
 
 log = logging.getLogger(__name__)
-def get_client_form(company, edit=False, path=""):
+def get_client_form(company, edit=False):
     """
         Returns the client add/edit form
     """
     schema = ClientSchema().bind(edit=edit, company=company)
-    form = Form(schema, actions=path, buttons=(submit_btn,))
+    form = Form(schema, buttons=(submit_btn,))
     return form
 
 class ClientView(ListView):
@@ -82,9 +82,7 @@ class ClientView(ListView):
 
         # Add form
         if has_permission('add', self.context, self.request):
-            submit_path = self.request.route_path('company_clients',
-                                                  id=company.id)
-            form = get_client_form(company, path=submit_path)
+            form = get_client_form(company)
             popup = PopUp("addform", u'Ajouter un client', form.render())
             popups = {popup.name:popup}
             self.actionmenu.add(popup.open_btn())

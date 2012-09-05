@@ -59,14 +59,14 @@ def build_client_values(clients):
     return [build_client_value(client)
                             for client in clients]
 
-def get_project_form(clients, default_client=None, edit=False, path=""):
+def get_project_form(clients, default_client=None, edit=False):
     """
         Returns the project add/edit form
     """
     choices = build_client_values(clients)
     default = build_client_value(default_client)
     schema = ProjectSchema().bind(edit=edit, choices=choices, default=default)
-    form = Form(schema, actions=path, buttons=(submit_btn,))
+    form = Form(schema, buttons=(submit_btn,))
     return form
 
 class ProjectView(ListView):
@@ -417,6 +417,5 @@ supprimé".format(project.name) )
         """
             return a popup object for add project
         """
-        url = self.request.route_path('company_projects', id=self.context.id)
-        form = get_project_form(clients=self.context.clients, path=url)
+        form = get_project_form(clients=self.context.clients)
         return  PopUp('add', u"Ajouter un projet", form.render())

@@ -8,8 +8,8 @@
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
-            <th>${sortable("Nom", "account_lastname")}</th>
-            <th>${sortable("E-mail", "account_email")}</th>
+            <th>${sortable("Nom", "lastname")}</th>
+            <th>${sortable("E-mail", "email")}</th>
             <th>Entreprises</th>
         </tr>
     </thead>
@@ -17,7 +17,7 @@
         % if users:
             % for user in users:
                 <tr>
-                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.lastname.upper()} ${user.firstname.capitalize()}</td>
+                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user, inverse=True)}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.email}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >
                         <ul>
@@ -33,24 +33,4 @@
         % endif
 </tbody></table>
 ${pager(users)}
-% if html_form is not UNDEFINED:
-    <div id='addform'>
-        ${html_form|n}
-    </div>
-% endif
-</%block>
-<%block name='footerjs'>
-% if html_form is not UNDEFINED:
-    $( function() {
-    $("#addform").dialog({ autoOpen: false,
-    modal:true,
-    width:"auto",
-    title:"Ajouter un compte utilisateur",
-    open: function(event, ui){
-    $('.ui-widget-overlay').css('width','100%');
-    $('.ui-widget-overlay').css('height','100%');
-    }
-    });
-    });
-% endif
 </%block>

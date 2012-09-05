@@ -30,6 +30,7 @@ from autonomie.models.model import Company
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
+from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
 from autonomie.utils.views import cancel_btn
 from autonomie.views.forms import get_password_change_schema
@@ -77,8 +78,9 @@ class UserView(ListView):
     """
         User related views
     """
-    columns = ("account_lastname", "account_email", )
-    default_sort = 'account_lastname'
+    columns = dict(lastname=User.lastname,
+                    email=User.email)
+    default_sort = 'lastname'
     default_direction = 'asc'
 
     def _get_user_form(self, edit=False):
@@ -86,13 +88,14 @@ class UserView(ListView):
             Return the user add form
         """
         schema = get_user_schema(self.request, edit)
-        if edit:
-            form = Form(schema, buttons=(submit_btn,))
-        else:
-            form = Form(schema,
-                action=self.request.route_path('users', _query=dict(new=1)),
-                buttons=(submit_btn,))
-        return form
+        return Form(schema, buttons=(submit_btn,))
+
+    def _get_add_popup(self):
+        """
+            return the add user popup
+        """
+        form = self._get_user_form()
+        return PopUp('add', u"Ajouter un compte", form.render())
 
     @view_config(route_name='users', renderer='users.mako',
             permission='view')
@@ -113,12 +116,9 @@ class UserView(ListView):
                         action_menu=self.actionmenu)
         self._set_item_menu()
         if has_permission('add', self.request.context, self.request):
-            # Add user form
-            form = self._get_user_form(edit=False)
-            ret_dict['html_form'] = form.render()
-            add_link = ViewLink(u"Ajouter un utilisateur", "add",
-                                js="$('#addform').dialog('open');")
-            self.actionmenu.add(add_link)
+            popup = self._get_add_popup()
+            ret_dict['popups'] = {popup.name:popup}
+            self.actionmenu.add(popup.open_btn())
         self.actionmenu.add(SearchForm(u"Nom ou entreprise"))
         return ret_dict
 

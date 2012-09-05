@@ -43,7 +43,7 @@ def format_status(task):
     status_str = STATUS.get(task.CAEStatus, DEF_STATUS).format(genre=genre)
     if task.type_ == 'cancelinvoice':
         if task.is_resulted():
-            status_str = u"Réglé"
+            status_str = u"Validé"
         elif task.is_paid():
             status_str = u"Payé partiellement"
     suffix = u" par {0} le {1}"\
@@ -67,7 +67,7 @@ def format_name(firstname, lastname):
     """
         format firstname and lastname in a common format
     """
-    return u"{0} {1}".format(lastname.upper(), firstname.capitalize())
+    return u"{0} {1}".format(firstname.capitalize(), lastname.upper())
 
 def format_amount(amount, trim=True):
     """

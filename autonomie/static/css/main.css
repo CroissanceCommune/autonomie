@@ -178,3 +178,30 @@ textarea{
   float:left;
   margin-right:3px;
 }
+.section-header a{
+    display:block;
+    padding-left:10px;
+    padding-bottom:5px;
+    padding-top:5px;
+    color:#111;
+    font-weight:bold;
+    vertical-align:middle;
+    font-size:24px;
+    text-transform:capitalize;
+}
+.section-header a:hover{
+    text-decoration:none;
+    color:#333;
+    font-weight:bold;
+    background-color:#f5f5f5;
+}
+h3.floatted{
+    font-size:16px;
+    font-weight:100;
+}
+.section-content{
+    margin:4px;
+    margin-left:27px;
+    padding-left:10px;
+    border-left:2px solid #d1d1d1;
+}

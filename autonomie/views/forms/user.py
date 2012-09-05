@@ -24,13 +24,14 @@ from autonomie.models.model import User
 from autonomie.models.model import Company
 from autonomie.views.forms.widgets import get_mail_input
 from autonomie.views.forms.widgets import deferred_edit_widget
+from autonomie.utils.security import MANAGER_ROLES
+from autonomie.utils.security import ADMIN_ROLES
 
 log = logging.getLogger(__name__)
 def unique_login(node, value):
     """
         Test login unicity against database
     """
-    log.debug(" + Testing login unicity")
     result = User.query().filter_by(login=value).first()
     if result:
         message = u"Le login '{0}' n'est pas disponible.".format(
@@ -46,7 +47,6 @@ def auth(form, value):
     log.debug(u"   +  Login {0}".format(login))
     password = value.get('password')
     result = User.query().filter_by(login=login).first()
-    log.debug(result)
     if not result or not result.auth(password):
         log.debug(u"    - Authentication Error")
         message = u"Erreur d'authentification"
@@ -59,9 +59,7 @@ def deferred_login_validator(node, kw):
     """
         Dynamically choose the validator user for validating the login
     """
-    log.debug(" + Attaching a validator")
     if not kw.get('edit'):
-        log.debug(" + attached")
         return unique_login
     return None
 
@@ -75,42 +73,37 @@ def deferred_pwd_validator(node, kw):
     else:
         return None
 
-def _check_pwd(node, kw):
+@colander.deferred
+def deferred_company_input(node, kw):
     """
-        modify the schema regarding if it's a self modify pass form
-        or an admin modify pass form
+        Deferred company list
     """
-    if not kw.get('check'):
-        node.validator = None
-        del node['login']
-        del node['password']
-        node['pwd'].title = "Mot de passe"
-        node['pwd'].missing = None
+    companies = kw.get('companies')
+    wid = widget.AutocompleteInputWidget(values=companies,
+            template="autonomie:deform_templates/autocomple_input.pt")
+    return wid
 
-# Admins can do what they want
-ADMIN_ROLES = [
-         (u"3", u'Entrepreneur'),
-         (u"1", u'Administrateur'),
-         (u"2", u'Membre de la coopérative'),
-        ]
+@colander.deferred
+def deferred_missing_password(node, kw):
+    """
+        deferred missing password
+    """
+    if kw.get('edit'):
+        return ""
+    else:
+        return colander.required
 
-# Managers can't set the admin status
-MANAGER_ROLES = [(u"3", u'Entrepreneur'), (u"2", u'Membre de la coopérative'),]
+def get_companies_choices():
+    """
+        Return companies choices for autocomplete
+    """
+    return [comp.name for comp in Company.query([Company.name]).all()]
 
-class FAccount(colander.MappingSchema):
+
+class AccountSchema(colander.MappingSchema):
     """
         Form Schema for an account creation
     """
-    #account_id
-    #account_pwd
-    #account_lastpwd_change
-    #account_status
-    #account_expires
-    #account_type
-    #person_id
-    #account_primary_group
-    #account_challenge
-    #account_response
     login = colander.SchemaNode(colander.String(),
                             title=u"Identifiant",
                             validator=deferred_login_validator,
@@ -131,7 +124,7 @@ class FAccount(colander.MappingSchema):
                         default=u"3"
                         )
 
-class FPassword(colander.MappingSchema):
+class PasswordChangeSchema(colander.MappingSchema):
     """
         Password modification form
     """
@@ -144,27 +137,6 @@ class FPassword(colander.MappingSchema):
     pwd = colander.SchemaNode(colander.String(),
                         widget = widget.CheckedPasswordWidget(),
                         title="Nouveau mot de passe")
-
-pwdSchema = FPassword(validator=auth,
-                      after_bind=_check_pwd,
-                      title=u'Modification de mot de passe')
-
-@colander.deferred
-def deferred_company_input(node, kw):
-    """
-        Deferred company list
-    """
-    companies = kw.get('companies')
-    wid = widget.AutocompleteInputWidget(values=companies,
-            template="autonomie:deform_templates/autocomple_input.pt")
-    return wid
-
-@colander.deferred
-def deferred_missing_password(node, kw):
-    if kw.get('edit'):
-        return ""
-    else:
-        return colander.required
 
 class CompanySchema(colander.SequenceSchema):
     company = colander.SchemaNode(colander.String(),
@@ -182,33 +154,41 @@ class Password(colander.MappingSchema):
                 title=u"",
                 missing=deferred_missing_password)
 
-class FUser(colander.MappingSchema):
+class UserFormSchema(colander.MappingSchema):
     """
         Schema for user add
     """
-    user = FAccount(title=u"Utilisateur")
+    user = AccountSchema(title=u"Utilisateur")
     companies = CompanySchema(title=u"Entreprise(s)",
                 widget=widget.SequenceWidget(
                 add_subitem_text_template=u"Ajouter une entreprise"),
                 )
     password = Password(title=u"Mot de passe")
 
-#FPassword(validator=auth,
-#                         after_bind=_check_pwd,
-#                         title=u"Mot de passe")
+class AuthSchema(colander.MappingSchema):
+    """
+        Schema for authentication form
+    """
+    login = colander.SchemaNode(colander.String(),
+                                title="Identifiant")
+    password = colander.SchemaNode(colander.String(),
+                                   widget=widget.PasswordWidget(),
+                                   title="Mot de passe")
+    nextpage = colander.SchemaNode(colander.String(),
+                               widget=widget.HiddenWidget())
 
-def get_companies_choices():
+def get_auth_schema():
     """
-        Return companies choices for autocomplete
+        return the authentication form schema
     """
-    return [comp.name for comp in Company.query([Company.name]).all()]
+    return AuthSchema(title=u"Authentification", validator=auth)
 
 def get_user_schema(request, edit):
     """
         Return the user schema
         user:the avatar of the user in the current session
     """
-    schema = FUser().clone()
+    schema = UserFormSchema().clone()
     user = request.user
     if user.is_admin():
         companies = get_companies_choices()
@@ -229,15 +209,35 @@ def get_user_schema(request, edit):
         del schema['password']
         return schema.bind(edit=True)
 
-class FAuth(colander.MappingSchema):
+def get_password_change_schema():
     """
-        Schema for authentication form
+        Return the password changing schema
     """
-    login = colander.SchemaNode(colander.String(),
-                                title="Identifiant")
-    password = colander.SchemaNode(colander.String(),
-                                   widget=widget.PasswordWidget(),
-                                   title="Mot de passe")
-    nextpage = colander.SchemaNode(colander.String(),
-                               widget=widget.HiddenWidget())
-authSchema = FAuth(title=u"Authentification", validator=auth)
+    return PasswordChangeSchema(validator=auth,
+                                title=u'Modification de mot de passe')
+
+class DeleteUserSchema(colander.MappingSchema):
+    disable = colander.SchemaNode(colander.Boolean(),
+                default=True,
+                title=u"Désactiver cet utilisateur",
+                description=u"Désactiver un utilisateur l'empêche de se \
+                       connecter mais permet de conserver l'intégralité \
+                       des informations concernant son activité.")
+    companies = colander.SchemaNode(colander.Boolean(),
+                                  title=u"Désactiver ses entreprises",
+                description=u"Entraîne automatiquement la désactivation \
+                        des employés.",
+                                  default=True)
+
+def get_user_del_schema(user):
+    """
+        Return the user delete form schema
+    """
+    schema = DeleteUserSchema().clone()
+    for companies in user.companies:
+        if len(companies.employees) > 1:
+            schema['companies'].default = False
+            schema['companies'].description += u"Attention : Au moins l'une \
+            de ses entreprises a plusieurs employés"
+            break
+    return schema

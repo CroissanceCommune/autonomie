@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 17 juil. 2012 21:35:51 CEST
+# * Last Modified : mer. 05 sept. 2012 09:17:19 CEST
 #
 # * Project :
 #
@@ -28,7 +28,7 @@ from deform import Form
 from deform import Button
 from deform import ValidationFailure
 
-from autonomie.views.forms import authSchema
+from autonomie.views.forms import get_auth_schema
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def login_view(request):
     """
         The login view
     """
-    form = Form(authSchema,
+    form = Form(get_auth_schema(),
                 buttons=(Button(name="submit",
                                 title="Connexion",
                                 type='submit'),))

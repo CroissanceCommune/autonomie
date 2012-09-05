@@ -143,8 +143,8 @@ class UserView(ListView):
                         path="user", id=user.id))
             self.actionmenu.add(ViewLink(u"Éditer", "edit",
                           path="user", id=user.id, _query=dict(action="edit")))
-            self.actionmenu.add(ViewLink(u"Supprimer", "delete",
-                        path="user", id=user.id, _query=dict(action="delete")))
+            self.actionmenu.add(ViewLink(u"Désactiver", "edit",
+                       path="user", id=user.id, _query=dict(action="disable")))
 
     @view_config(route_name='users', renderer='user_edit.mako',
                         request_method='POST', permission='add')
@@ -225,17 +225,13 @@ class UserView(ListView):
                     action_menu=self.actionmenu)
 
     @view_config(route_name='user', renderer='user_edit.mako',
-                        request_param='action=delete', permission='delete')
-    def user_del(self):
+                        request_param='action=disable', permission='edit')
+    def disable_user(self):
         """
-            deletes a user and its related components
-            - Company
-            - Projects
-            - Phases
-            - Documents
+            disable a user and its enteprises
         """
         self._set_item_menu(self.context, edit=True)
-        log.debug(u"Deleting a user")
+        log.debug(u"Disabling a user")
         schema = get_user_del_schema(self.context)
         form = Form(schema, buttons=(submit_btn, cancel_btn,))
         if "cancel" in self.request.params:
@@ -252,23 +248,26 @@ class UserView(ListView):
                 if datas.get('companies', False):
                     self._disable_companies()
                 elif datas.get('disable', False):
-                    self._disable_user()
+                    self._disable_user(self.context)
                 return HTTPFound(self.request.route_path("users"))
         html_form = form.render()
-        title = u"Suppression du compte {0}".format(self.context.login)
+        title = u"Désactivation du compte {0}".format(self.context.login)
         return dict(title=title,
                     html_form=html_form,
                     action_menu=self.actionmenu)
 
-    def _disable_user(self):
+    def _disable_user(self, user):
         """
             disable the current user
         """
-        self.context.disable()
-        self.dbsession.merge(self.context)
-        message = u"L'utilisateur {0} a bien été désactivé.".format(
-                                                format_account(self.context))
-        self.session.flash(message, queue="main")
+        if user.enabled():
+            user.disable()
+            self.dbsession.merge(user)
+            log.info(u"The user {0} has been disabled".format(
+                                                        format_account(user)))
+            message = u"L'utilisateur {0} a été désactivé.".format(
+                                                        format_account(user))
+            self.session.flash(message, queue="main")
 
     def _disable_companies(self):
         """
@@ -281,8 +280,4 @@ class UserView(ListView):
                                                 company.name)
             self.session.flash(message, queue="main")
             for employee in company.employees:
-                employee.disable()
-                self.dbsession.merge(employee)
-                message = u"L'utilisateur '{0}' a été désactivé.".format(
-                                                format_account(employee))
-                self.session.flash(message, queue="main")
+                self._disable_user(employee)

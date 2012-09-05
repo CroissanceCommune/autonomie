@@ -22,6 +22,11 @@ update egw_accounts as egwa left outer join coop_company_employee as cce on egwa
 update egw_accounts set account_status='A' where account_primary_group in (1,2);
 update egw_accounts set account_status='Y' WHERE account_status='A';
 update egw_accounts set account_status='N' WHERE account_status!='Y';
+create table tmp like coop_company_employee;
+alter table tmp add unique index (IDCompany, IDEmployee);
+insert into tmp select * from coop_company_employee on duplicate key update tmp.IDCompany=coop_company_employee.IDCompany;
+rename table coop_company_employee to deleteme, tmp to coop_company_employee;
+drop table deleteme;
 """)
 
 

@@ -126,3 +126,9 @@ class User(DBBASE):
             disable a user
         """
         self.active = "N"
+
+    def enabled(self):
+        """
+            is he enabled ?
+        """
+        return self.active == 'Y'

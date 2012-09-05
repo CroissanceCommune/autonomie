@@ -26,4 +26,5 @@ def get_page_url(request, page):
     args['page'] = str(page)
     return current_route_url(request, page=page, _query=args)
 
-submit_btn = Button(name="submit", type="submit", title=u"Validez")
+submit_btn = Button(name="submit", type="submit", title=u"Valider")
+cancel_btn = Button(name="cancel", type="submit", title=u"Annuler")

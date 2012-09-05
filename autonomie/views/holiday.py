@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# * File Name : holliday.py
+# * File Name : holiday.py
 #
 # * Copyright (C) 2010 Gaston TJEBBES <g.t@majerti.fr>
 # * Company : Majerti ( http://www.majerti.fr )
@@ -14,7 +14,7 @@
 #
 
 """
-    Simple stuff for handling hollidays declaration/view
+    Simple stuff for handling holidays declaration/view
 """
 
 import logging
@@ -27,12 +27,12 @@ from deform import ValidationFailure
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.model import Holliday
+from autonomie.models.model import Holiday
 from autonomie.models.model import User
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms.holliday import HollidaysSchema
-from autonomie.views.forms.holliday import searchSchema
+from autonomie.views.forms.holiday import HolidaysSchema
+from autonomie.views.forms.holiday import searchSchema
 from .base import BaseView
 
 log = logging.getLogger(__name__)
@@ -44,19 +44,19 @@ def get_user_choices(dbsession):
                         for user in User.query().all()])
     return choices
 
-class HollidayView(BaseView):
+class HolidayView(BaseView):
     """
-        All hollidays-related views
+        All holidays-related views
     """
-    @view_config(route_name="holliday", renderer="holliday.mako",
+    @view_config(route_name="holiday", renderer="holiday.mako",
                                                             permission="view")
-    def holliday(self):
+    def holiday(self):
         """
-            Allows a simple user to set his hollidays
+            Allows a simple user to set his holidays
         """
-        schema = HollidaysSchema()
+        schema = HolidaysSchema()
         form = Form(schema, buttons=(submit_btn,))
-        hollidays = Holliday.query(self.dbsession,user_id=self.request.user.id)
+        holidays = Holiday.query(self.dbsession,user_id=self.request.user.id)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
             log.debug(datas)
@@ -66,36 +66,36 @@ class HollidayView(BaseView):
                 html_form = errform.render()
             else:
                 # Validation OK
-                for holliday in hollidays:
-                    self.dbsession.delete(holliday)
+                for holiday in holidays:
+                    self.dbsession.delete(holiday)
                     self.dbsession.flush()
-                for data in appstruct['hollidays']:
-                    holliday = Holliday(user_id=self.request.user.id)
-                    merge_session_with_post(holliday, data)
-                    self.dbsession.merge(holliday)
+                for data in appstruct['holidays']:
+                    holiday = Holiday(user_id=self.request.user.id)
+                    merge_session_with_post(holiday, data)
+                    self.dbsession.merge(holiday)
                 self.dbsession.flush()
                 self.request.session.flash(
                         u"Vos déclarations de congés ont bien été modifiées",
                         queue="main")
-                return HTTPFound(self.request.route_path("holliday"))
+                return HTTPFound(self.request.route_path("holiday"))
         else:
-            appstruct = [{'start_date':holliday.start_date,
-                         'end_date':holliday.end_date}
-                         for holliday in hollidays]
-            html_form = form.render({'hollidays':appstruct})
+            appstruct = [{'start_date':holiday.start_date,
+                         'end_date':holiday.end_date}
+                         for holiday in holidays]
+            html_form = form.render({'holidays':appstruct})
         return dict(title=u"Déclarer mes congés",
                     html_form=html_form)
 
-    @view_config(route_name="hollidays", renderer="hollidays.mako",
+    @view_config(route_name="holidays", renderer="holidays.mako",
                                         permission="manage")
-    def hollidays(self):
+    def holidays(self):
         """
-            Display the hollidays of the current month
+            Display the holidays of the current month
         """
         schema = searchSchema.bind(
                 choices=get_user_choices(self.dbsession))
         form = Form(schema, buttons=(submit_btn,))
-        hollidays = []
+        holidays = []
         start_date = None
         end_date = None
         if 'submit' in self.request.params:
@@ -109,15 +109,15 @@ class HollidayView(BaseView):
                 start_date = appstruct.get('start_date')
                 end_date = appstruct.get('end_date')
                 user_id = appstruct.get('user_id')
-                hollidays = Holliday.query(self.dbsession)
-                hollidays = hollidays.filter(
-                                or_(Holliday.start_date.between(start_date,
+                holidays = Holiday.query(self.dbsession)
+                holidays = holidays.filter(
+                                or_(Holiday.start_date.between(start_date,
                                                                 end_date),
-                                    Holliday.end_date.between(start_date,
+                                    Holiday.end_date.between(start_date,
                                                                     end_date)))
                 if user_id:
-                    hollidays = hollidays.filter(Holliday.user_id==user_id)
-                hollidays=hollidays.all()
+                    holidays = holidays.filter(Holiday.user_id==user_id)
+                holidays=holidays.all()
                 html_form = form.render(appstruct)
                 log.debug(u"Rendering with appstruct : %s" % appstruct)
         else:
@@ -125,7 +125,7 @@ class HollidayView(BaseView):
         return dict(
                     title=u"Les congés des entrepreneurs",
                     html_form=html_form,
-                    hollidays=hollidays,
+                    holidays=holidays,
                     start_date=start_date,
                     end_date=end_date
                     )

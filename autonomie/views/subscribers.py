@@ -98,7 +98,7 @@ def get_admin_menus(cid):
     menu = Menu("base/mainmenu.mako")
     menu.add(MainMenuItem(u"Factures", "manage", path="invoices",
         icon="icon-white icon-list-alt"))
-    menu.add(MainMenuItem(u"Congés", "manage", path="hollidays",
+    menu.add(MainMenuItem(u"Congés", "manage", path="holidays",
         icon="icon-white icon-plane"
         ))
     menu.add(MainMenuItem(u"Comptabilité", "manage", path="operations",

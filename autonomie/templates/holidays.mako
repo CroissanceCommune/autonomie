@@ -1,5 +1,5 @@
 <%doc>
-Template for hollidays search
+Template for holidays search
 </%doc>
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="print_date" />
@@ -14,10 +14,10 @@ Template for hollidays search
 </div>
 <div class='row'>
     <div class='span6 offset3'>
-        % if hollidays:
-        % for holliday in hollidays:
-            %if holliday.user:
-                ${holliday.user.lastname} ${holliday.user.firstname} : du ${print_date(max(holliday.start_date, start_date))} au ${print_date(min(holliday.end_date, end_date))}
+        % if holidays:
+        % for holiday in holidays:
+            %if holiday.user:
+                ${api.format_account(holiday.user)} : du ${print_date(max(holiday.start_date, start_date))} au ${print_date(min(holiday.end_date, end_date))}
                 <br />
             % endif
         % endfor

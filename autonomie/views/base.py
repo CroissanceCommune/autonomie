@@ -190,7 +190,7 @@ class TaskView(BaseView):
             Adds a default phase to an existing project
         """
         default_phase = Phase(name=u"Phase par défaut")
-        default_phase.id_project = self.project.id
+        default_phase.project_id = self.project.id
         default_phase = self.dbsession.merge(default_phase)
         self.dbsession.flush()
         return default_phase

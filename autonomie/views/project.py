@@ -95,7 +95,6 @@ class ProjectView(ListView):
     columns = dict(code=Project.code,
                     name=Project.name,
                     client=Client.name)
-    #("coop_project.code", "coop_project.name")
     default_sort = 'name'
 
     def __init__(self, request):
@@ -288,7 +287,7 @@ succès".format(project.name)
             phasename = self.request.params.get('phase')
             phase = Phase()
             phase.name = phasename
-            phase.id_project = project.id
+            phase.project_id = project.id
             self.dbsession.add(phase)
             self.request.session.flash(u"La phase {0} a bien été \
 rajoutée".format(phasename), queue="main")

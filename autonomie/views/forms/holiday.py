@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# * File Name : holliday.py
+# * File Name : holiday.py
 #
 # * Copyright (C) 2010 Gaston TJEBBES <g.t@majerti.fr>
 # * Company : Majerti ( http://www.majerti.fr )
@@ -13,7 +13,7 @@
 # * Project :
 #
 """
-    form schemas for holliday declaration
+    form schemas for holiday declaration
 """
 import colander
 import logging
@@ -31,20 +31,20 @@ def date_validator(form, value):
         exc['start_date'] = u"Doit précéder la date de fin"
         raise exc
 
-class HollidaySchema(colander.MappingSchema):
+class HolidaySchema(colander.MappingSchema):
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
             widget=get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
             widget=get_date_input())
 
-class HollidaysList(colander.SequenceSchema):
-    holliday = HollidaySchema(title=u"Période", validator=date_validator)
+class HolidaysList(colander.SequenceSchema):
+    holiday = HolidaySchema(title=u"Période", validator=date_validator)
 
-class HollidaysSchema(colander.MappingSchema):
-    hollidays = HollidaysList(title=u"",
+class HolidaysSchema(colander.MappingSchema):
+    holidays = HolidaysList(title=u"",
                 widget=widget.SequenceWidget(min_len=1))
 
-class SearchHollidaysSchema(colander.MappingSchema):
+class SearchHolidaysSchema(colander.MappingSchema):
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
             widget=get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
@@ -53,7 +53,7 @@ class SearchHollidaysSchema(colander.MappingSchema):
                        widget=deferred_autocomplete_widget,
                        missing=None)
 
-searchSchema = SearchHollidaysSchema(
+searchSchema = SearchHolidaysSchema(
                         title=u"Rechercher les congés des entrepreneurs",
                         validator=date_validator)
 

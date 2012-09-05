@@ -71,7 +71,7 @@
                   </a>
                   </li>
                   <li>
-                  <a href="${request.route_path('holliday')}">
+                  <a href="${request.route_path('holiday')}">
                     <span class='icon-plane'></span>
                     Mes congés
                   </a>

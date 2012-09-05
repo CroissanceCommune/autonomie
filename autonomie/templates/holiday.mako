@@ -1,5 +1,5 @@
 <%doc>
-Template for holliday declarations
+Template for holiday declarations
 </%doc>
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>

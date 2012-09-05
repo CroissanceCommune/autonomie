@@ -60,7 +60,7 @@ def account(request):
             html_form = e.render()
         else:
             log.info(u"# User {0} has changed his password #".format(
-                                                    request.user.login))
+                                                    avatar.login))
             dbsession = request.dbsession()
             new_pass = datas['pwd']
             avatar.set_password(new_pass)
@@ -82,6 +82,23 @@ class UserView(ListView):
                     email=User.email)
     default_sort = 'lastname'
     default_direction = 'asc'
+
+    def __init__(self, request):
+        ListView.__init__(self, request)
+        self._set_actionmenu()
+
+    def _set_actionmenu(self):
+        """
+            set the action menu
+        """
+        self.actionmenu.add(ViewLink(u"Annuaire", "view", path="users"))
+        if self.context.__name__ == 'user':
+            self.actionmenu.add(ViewLink(u"Voir", "view", path="user",
+                                                           id=self.context.id))
+            self.actionmenu.add(ViewLink(u"Éditer", "edit", path="user",
+                               id=self.context.id, _query=dict(action="edit")))
+            self.actionmenu.add(ViewLink(u"Désactiver", "edit", path="user",
+                            id=self.context.id, _query=dict(action="disable")))
 
     def _get_user_form(self, edit=False):
         """
@@ -114,7 +131,6 @@ class UserView(ListView):
         ret_dict = dict(title=u"Annuaire des utilisateurs",
                         users=records,
                         action_menu=self.actionmenu)
-        self._set_item_menu()
         if has_permission('add', self.request.context, self.request):
             popup = self._get_add_popup()
             ret_dict['popups'] = {popup.name:popup}
@@ -135,17 +151,6 @@ class UserView(ListView):
         return query.filter( or_(User.lastname.like(search+"%"),
                      User.companies.any(Company.name.like(search+"%"))))
 
-    def _set_item_menu(self, user=None, edit=False):
-        self.actionmenu.add(ViewLink(u"Annuaire", "view",
-                                     path="users"))
-        if edit:
-            self.actionmenu.add(ViewLink(u"Voir", "view",
-                        path="user", id=user.id))
-            self.actionmenu.add(ViewLink(u"Éditer", "edit",
-                          path="user", id=user.id, _query=dict(action="edit")))
-            self.actionmenu.add(ViewLink(u"Désactiver", "edit",
-                       path="user", id=user.id, _query=dict(action="disable")))
-
     @view_config(route_name='users', renderer='user_edit.mako',
                         request_method='POST', permission='add')
     @view_config(route_name='user', renderer='user_edit.mako',
@@ -165,7 +170,6 @@ class UserView(ListView):
             edit = False
             title = u"Ajout d'un nouveau compte"
             validate_msg = u"Le compte a bien été ajouté"
-        self._set_item_menu(user, edit=edit)
 
         form = self._get_user_form(edit=edit)
         if 'submit' in self.request.params:
@@ -197,11 +201,12 @@ class UserView(ListView):
                             company = Company()
                             company.name = company_name
                             company.goal = u"Entreprise de {0}".format(
-                                format_account(user))
+                                                         format_account(user))
                             company = self.dbsession.merge(company)
                             self.dbsession.flush()
                         user.companies.append(company)
-                log.info(u" + Adding/Editing user : {0}" .format(user.login))
+                log.info(u" + Adding/Editing user : {0}" .format(
+                                                         format_account(user)))
                 user = self.dbsession.merge(user)
                 self.dbsession.flush()
                 self.session.flash(validate_msg, queue="main")
@@ -218,10 +223,8 @@ class UserView(ListView):
         """
             User view
         """
-        user = self.request.context
-        self._set_item_menu(user, edit=True)
-        return dict(title=u"{0} {1}".format(user.lastname, user.firstname),
-                    user=user,
+        return dict(title=u"{0}".format(format_account(self.context)),
+                    user=self.context,
                     action_menu=self.actionmenu)
 
     @view_config(route_name='user', renderer='user_edit.mako',
@@ -230,7 +233,6 @@ class UserView(ListView):
         """
             disable a user and its enteprises
         """
-        self._set_item_menu(self.context, edit=True)
         log.debug(u"Disabling a user")
         schema = get_user_del_schema(self.context)
         form = Form(schema, buttons=(submit_btn, cancel_btn,))
@@ -251,7 +253,8 @@ class UserView(ListView):
                     self._disable_user(self.context)
                 return HTTPFound(self.request.route_path("users"))
         html_form = form.render()
-        title = u"Désactivation du compte {0}".format(self.context.login)
+        title = u"Désactivation du compte {0}".format(
+                                                 format_account(self.context))
         return dict(title=title,
                     html_form=html_form,
                     action_menu=self.actionmenu)

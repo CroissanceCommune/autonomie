@@ -16,6 +16,8 @@
     Project views
 """
 import logging
+from colorsys import hsv_to_rgb
+from random import uniform
 
 from sqlalchemy import or_
 from webhelpers.html.builder import HTML
@@ -41,6 +43,23 @@ from autonomie.views.forms import ProjectSchema
 from .base import ListView
 
 log = logging.getLogger(__name__)
+
+def rgb_to_hex(rgb):
+    """
+        return an hexadecimal version of the rgb tuple
+        for css rendering
+    """
+    return '#%02x%02x%02x' % rgb
+
+def get_color():
+    """
+        return a random color
+    """
+    h = uniform(0.1, 0.8)
+    s = uniform(0.8, 1)
+    v = uniform(0.8, 1)
+    return rgb_to_hex(tuple(255*c for c in hsv_to_rgb(h, s, v)))
+
 
 def build_client_value(client):
     """
@@ -81,9 +100,14 @@ class ProjectView(ListView):
 
     def __init__(self, request):
         ListView.__init__(self, request)
-        self.actionmenu.add(ViewLink(u"Liste des projets", "edit",
-                   path="company_projects", id=self.context.get_company_id()))
 
+    def _set_actionmenu(self):
+        """
+            Sets the action menu
+        """
+        self.actionmenu.add(ViewLink(u"Liste des projets", "edit",
+                                     path="company_projects",
+                                     id=self.context.get_company_id()))
         if self.context.__name__ == 'project':
             self.actionmenu.add(self._get_view_btn())
             self.actionmenu.add(self._get_edit_btn())
@@ -139,7 +163,7 @@ de créer de nouveaux projets", queue="main")
                           item_actions=self._get_actions())
 
         if has_permission("add", self.context, self.request):
-            popup = self._get_add_project_popup()
+            popup = self._get_add_popup()
             ret_dict['popups'] = {popup.name:popup}
             self.actionmenu.add(popup.open_btn())
         self.actionmenu.add(self._get_archived_btn(archived))
@@ -279,17 +303,6 @@ rajoutée".format(phasename), queue="main")
         """
             Company's project view
         """
-        from colorsys import hsv_to_rgb
-        from random import randint, uniform
-        def rgb_to_hex(rgb):
-            return '#%02x%02x%02x' % rgb
-
-        def get_color():
-            h = uniform(0.1, 0.8)
-            s = uniform(0.8, 1)
-            v = uniform(0.8, 1)
-            return rgb_to_hex(tuple(255*c for c in hsv_to_rgb(h, s, v)))
-
         phases = self.context.phases
         for phase in phases:
             for estimation in phase.estimations:
@@ -413,7 +426,7 @@ supprimé".format(project.name) )
             link = HTML.a(u"Afficher les projets actifs", href=url)
         return StaticWidget(link)
 
-    def _get_add_project_popup(self):
+    def _get_add_popup(self):
         """
             return a popup object for add project
         """

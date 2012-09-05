@@ -20,6 +20,7 @@ alter table coop_task add column type_ VARCHAR(30) NOT NULL;
 update coop_task as t join coop_estimation as e on t.IDTask=e.IDTask set type_='estimation';
 update coop_task as t join coop_invoice as i on t.IDTask=i.IDTask set type_='invoice';
 update coop_task as t join coop_cancelinvoice as c on t.IDTask=c.IDTask set type_='cancelinvoice';
+update coop_task set type_='task' where type_='';
 """)
 
 

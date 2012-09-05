@@ -79,7 +79,8 @@ class Task(DBBASE):
                         backref="documents")
 
     type_ = Column('type_', String(30), nullable=False)
-    __mapper_args__ = {'polymorphic_on': type_}
+    __mapper_args__ = {'polymorphic_on': type_,
+                       'polymorphic_identity':'task'}
 
     state_machine = DEFAULT_STATE_MACHINES['base']
 

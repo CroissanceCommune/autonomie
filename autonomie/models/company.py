@@ -131,3 +131,14 @@ class Company(DBBASE):
             Disable the current company
         """
         self.active = "N"
+
+    def has_invoices(self):
+        """
+            return True if this company owns invoices
+        """
+        for project in self.projects:
+            for invoice in project.invoices:
+                if invoice.has_been_validated():
+                    return True
+        return False
+

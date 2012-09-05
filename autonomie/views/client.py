@@ -52,12 +52,19 @@ class ClientView(ListView):
 
     def __init__(self, request):
         super(ClientView, self).__init__(request)
+        self._set_actionmenu()
+
+    def _set_actionmenu(self):
+        """
+            set the action menu
+        """
         self.actionmenu.add(ViewLink(u"Liste des clients", "edit",
-                    path="company_clients", id=self.context.get_company_id()))
+                                      path="company_clients",
+                                      id=self.context.get_company_id()))
 
         if self.context.__name__ == 'client':
             self.actionmenu.add(self._get_view_button())
-            if has_permission('edit', self.context, request):
+            if has_permission('edit', self.context, self.request):
                 self.actionmenu.add(self._get_edit_button())
 
     @view_config(route_name='company_clients', renderer='company_clients.mako',

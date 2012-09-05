@@ -20,6 +20,8 @@ def upgrade():
     op.execute("""
 update egw_accounts as egwa left outer join coop_company_employee as cce on egwa.account_id=cce.IDEmployee set account_status='I' where cce.IDEmployee is null;
 update egw_accounts set account_status='A' where account_primary_group in (1,2);
+update egw_accounts set account_status='Y' WHERE account_status='A';
+update egw_accounts set account_status='N' WHERE account_status!='A';
 """)
 
 

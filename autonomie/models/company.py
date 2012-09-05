@@ -119,7 +119,13 @@ class Company(DBBASE):
             Return a query
         """
         if keys:
-            return DBSESSION.query(*keys)
+            return DBSESSION.query(cls.active, *keys).filter(cls.active=="Y")
         else:
-            query = super(Company, cls).query()
-            return query.order_by(Company.name)
+            query = super(Company, cls).query().filter(cls.active=="Y")
+            return query.order_by(cls.name)
+
+    def disable(self):
+        """
+            Disable the current company
+        """
+        self.active = "N"

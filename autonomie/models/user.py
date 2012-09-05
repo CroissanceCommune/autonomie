@@ -51,7 +51,7 @@ class User(DBBASE):
     lastname = Column("account_lastname", String(50))
     primary_group = Column("account_primary_group",
                             Integer)
-    status = Column("account_status", String(1), default='A')
+    active = Column("account_active", String(1), default='Y')
     email = Column("account_email", String(100))
     companies = relationship("Company",
                              secondary=COMPANY_EMPLOYEE,
@@ -116,7 +116,13 @@ class User(DBBASE):
     def query(cls):
         """
             Query users
-            Joining companies and not showing archived users
+            Exclud archived users
         """
         query = super(User, cls).query()
-        return query.filter(User.status=='A').order_by(User.lastname)
+        return query.filter(User.active=='Y').order_by(User.lastname)
+
+    def disable(self):
+        """
+            disable a user
+        """
+        self.active = "N"

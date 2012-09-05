@@ -114,15 +114,17 @@ class Company(DBBASE):
         return self.id
 
     @classmethod
-    def query(cls, keys=None):
+    def query(cls, keys=None, active=True):
         """
             Return a query
         """
         if keys:
-            return DBSESSION.query(cls.active, *keys).filter(cls.active=="Y")
+            query = DBSESSION.query(*keys)
         else:
-            query = super(Company, cls).query().filter(cls.active=="Y")
-            return query.order_by(cls.name)
+            query = super(Company, cls).query()
+        if active:
+            query = query.filter(cls.active=="Y")
+        return query.order_by(cls.name)
 
     def disable(self):
         """

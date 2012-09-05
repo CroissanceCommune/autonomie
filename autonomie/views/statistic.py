@@ -40,8 +40,7 @@ class StatisticView(BaseView):
         """
         log.debug("# Asking for the statistics page #")
         ret_dict = dict(title=u"Statistiques")
-        companies = Company.query([Company.id, Company.name]).order_by(
-                                                            Company.name).all()
+        companies = Company.query([Company.id, Company.name]).all()
         ret_dict['companies'] = companies
         current_year = 2000
         years = range(2000, datetime.date.today().year+1)
@@ -51,10 +50,10 @@ class StatisticView(BaseView):
                 try:
                     year = int(self.request.params['year'])
                     if year not in years:
-                        raise Exception
-                    current_year = year
-                except:
-                    pass
+                        raise ValueError
+                except ValueError:
+                    year = 2000
+                current_year = year
             company = self.request.context
             projects = company.projects
             clients = company.clients
@@ -76,27 +75,3 @@ class StatisticView(BaseView):
             ret_dict['estimations'] = estimations
         ret_dict['current_year'] = current_year
         return ret_dict
-
-def sum_it(datas, key=None):
-    if key:
-        return sum([getattr(d, key)for d in datas])
-    else:
-        return sum(datas)
-
-def lenof_if(datas):
-    return len(datas)
-
-class StatElement(object):
-    def __init__(self, label, value, formatter=lambda a:a):
-        self.label = label
-        self.value = value
-        self.formatter = formatter
-
-    def set_formatter(self, formatter):
-        """
-            set a formatter
-        """
-        self.formatter = formatter
-
-    def render(self):
-        return u"{0} : {1}".format(label, self.formatter(value))

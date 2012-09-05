@@ -33,8 +33,7 @@ COMPANY_EMPLOYEE = Table('coop_company_employee', DBBASE.metadata,
     Column("IDCompany", Integer, ForeignKey('coop_company.IDCompany')),
     # IDEmployee est identique dans la table coop_employee
     Column("IDEmployee", Integer, ForeignKey('accounts.id')),
-        mysql_charset='utf8', mysql_engine='MyISAM',
-    )
+        mysql_charset='utf8', mysql_engine='MyISAM')
 
 log = logging.getLogger(__name__)
 
@@ -113,13 +112,16 @@ class User(DBBASE):
         return self.primary_group == 3
 
     @classmethod
-    def query(cls):
+    def query(cls, ordered=True):
         """
             Query users
             Exclud archived users
         """
         query = super(User, cls).query()
-        return query.filter(User.active=='Y').order_by(User.lastname)
+        query = query.filter(User.active=='Y')
+        if ordered:
+            query = query.order_by(User.lastname)
+        return query
 
     def disable(self):
         """

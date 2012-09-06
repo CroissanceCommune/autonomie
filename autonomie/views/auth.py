@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 05 sept. 2012 09:17:19 CEST
+# * Last Modified : jeu. 06 sept. 2012 15:45:19 CEST
 #
 # * Project :
 #
@@ -32,6 +32,8 @@ from autonomie.views.forms import get_auth_schema
 
 log = logging.getLogger(__name__)
 
+@view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED,
+        xhr=True, renderer='json')
 @view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
 def forbidden_view(request):
     """
@@ -44,6 +46,8 @@ def forbidden_view(request):
     log.debug(" + Not authenticated : try again")
     #redirecting to the login page with the current path as param
     loc = request.route_url('login', _query=(('nextpage', request.path),))
+    if request.is_xhr:
+        return dict(redirect=loc)
     return HTTPFound(location=loc)
 
 @view_config(route_name='login', permission=NO_PERMISSION_REQUIRED,

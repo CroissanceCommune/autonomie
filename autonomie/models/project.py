@@ -130,3 +130,17 @@ class Project(DBBASE):
                                         for cinv in self.cancelinvoices]
         all_nums.append(len(self.cancelinvoices))
         return max(all_nums) + 1
+
+    def todict(self):
+        """
+            Return a dict view of this object
+        """
+        phases = [phase.todict() for phase in self.phases]
+        return dict(id=self.id,
+                    name=self.name,
+                    code=self.code,
+                    definition=self.definition,
+                    type=self.type,
+                    archived=self.archived,
+                    phases=phases)
+

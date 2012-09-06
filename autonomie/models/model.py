@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 05 sept. 2012 20:42:01 CEST
+# * Last Modified : jeu. 06 sept. 2012 17:25:26 CEST
 #
 # * Project : autonomie
 #
@@ -99,6 +99,12 @@ class Phase(DBBASE):
         """
         return [doc for doc in self.documents if doc.type_==type_]
 
+    def todict(self):
+        """
+            return a dict version of this object
+        """
+        return dict(id=self.id,
+                    name=self.name)
 
 class Tva(DBBASE):
     """

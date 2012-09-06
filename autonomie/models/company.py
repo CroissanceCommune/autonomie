@@ -142,3 +142,23 @@ class Company(DBBASE):
                     return True
         return False
 
+    def todict(self):
+        """
+            return a dict representation
+        """
+        clients = [client.todict() for client in self.clients]
+        projects = [project.todict() for project in self.projects]
+        return dict(id=self.id,
+                    name=self.name,
+                    goal=self.goal,
+                    email=self.email,
+                    phone=self.phone,
+                    mobile=self.mobile,
+                    comments=self.comments,
+                    RIB=self.RIB,
+                    IBAN=self.IBAN,
+                    logo=self.get_logo_filepath(),
+                    header=self.get_header_filepath(),
+                    clients=clients,
+                    projects=projects)
+

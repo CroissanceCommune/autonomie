@@ -82,3 +82,21 @@ class Client(DBBASE):
             return the id of the company this client belongs to
         """
         return self.company.id
+
+    def todict(self):
+        """
+            Return a dict version of the client object
+        """
+        return dict(id=self.id,
+                    code=self.code,
+                    comments=self.comments,
+                    intraTVA=self.intraTVA,
+                    address=self.address,
+                    zipCode=self.zipCode,
+                    city=self.city,
+                    country=self.country,
+                    phone=self.phone,
+                    email=self.email,
+                    contactLastName=self.contactLastName,
+                    contactFirstName=self.contactFirstName,
+                    name=self.name)

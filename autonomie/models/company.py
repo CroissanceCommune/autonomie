@@ -59,14 +59,12 @@ class Company(DBBASE):
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp))
     active = deferred(Column("active", String(1), default="Y"))
-    IDGroup = deferred(Column("IDGroup", Integer, default=0))
     logo = deferred(Column("logo", CustomFileType("logo_", 255)),
             group='edit')
     header = deferred(Column("header", CustomFileType("header_", 255)),
             group='edit')
     logoType = deferred(Column("logoType", String(255)))
     headerType = deferred(Column("headerType", String(255)))
-    IDEGWUser = deferred(Column("IDEGWUser", Integer, default=0))
     RIB = deferred(Column("RIB", String(255)),
             group='edit')
     IBAN = deferred(Column("IBAN", String(255)),

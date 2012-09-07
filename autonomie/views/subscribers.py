@@ -180,3 +180,4 @@ def add_localizer(event):
     """
     request = event.request
     request.translate = translate
+    request.js_require = set()

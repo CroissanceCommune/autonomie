@@ -78,8 +78,8 @@ class Invoice(Task, TaskCompute):
     __mapper_args__ = {
                        'polymorphic_identity':'invoice',
                        }
-    IDTask = Column("IDTask", ForeignKey('document.IDTask'), primary_key=True)
-    IDEstimation = Column("IDEstimation", ForeignKey('estimation.IDTask'))
+    id = Column("id", ForeignKey('document.id'), primary_key=True)
+    estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
     project_id = Column("project_id", ForeignKey('project.id'))
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     number = Column("number", String(100), nullable=False)
@@ -104,7 +104,7 @@ class Invoice(Task, TaskCompute):
     #                                            order_by='Invoice.taskDate'))
     estimation = relationship("Estimation",
                       backref="invoices",
-                      primaryjoin="Invoice.IDEstimation==Estimation.IDTask")
+                      primaryjoin="Invoice.estimation_id==Estimation.id")
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
@@ -211,12 +211,12 @@ class Invoice(Task, TaskCompute):
         cancelinvoice = CancelInvoice()
         seq_number = self.project.get_next_cancelinvoice_number()
         cancelinvoice.name = CancelInvoice.get_name(seq_number)
-        cancelinvoice.IDPhase = self.IDPhase
+        cancelinvoice.phase_id = self.phase_id
         cancelinvoice.CAEStatus = 'draft'
         cancelinvoice.taskDate = datetime.date.today()
         cancelinvoice.description = self.description
 
-        cancelinvoice.IDInvoice = self.IDTask
+        cancelinvoice.invoice_id = self.id
         cancelinvoice.invoiceDate = self.taskDate
         cancelinvoice.invoiceNumber = self.officialNumber
         cancelinvoice.expenses = -1 * self.expenses
@@ -228,7 +228,7 @@ class Invoice(Task, TaskCompute):
                             cancelinvoice.taskDate)
         cancelinvoice.statusPerson = user_id
         cancelinvoice.project_id = self.project_id
-        cancelinvoice.IDEmployee = user_id
+        cancelinvoice.owner_id = user_id
         for line in self.lines:
             cancelinvoice.lines.append(line.gen_cancelinvoice_line())
         if self.discountHT:
@@ -299,21 +299,11 @@ class Invoice(Task, TaskCompute):
 class InvoiceLine(DBBASE):
     """
         Invoice lines
-        `IDInvoiceLine` int(11) NOT NULL auto_increment,
-        `IDTask` int(11) NOT NULL,
-        `rowIndex` int(11) NOT NULL,
-        `description` text,
-        `cost` int(11) default '0',
-        `quantity` double default '1',
-        `creationDate` int(11) default '0',
-        `updateDate` int(11) default '0',
-        `unity` varchar(10) default NULL,
-        PRIMARY KEY  (`IDInvoiceLine`),
     """
     __tablename__ = 'invoice_line'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("IDInvoiceLine", Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('invoice.IDTask'))
+    id = Column("id", Integer, primary_key=True)
+    task_id = Column(Integer, ForeignKey('invoice.id'))
     rowIndex = Column("rowIndex", Integer, default=1)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
@@ -365,9 +355,9 @@ class CancelInvoice(Task, TaskCompute):
     __tablename__ = 'cancelinvoice'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {'polymorphic_identity':'cancelinvoice'}
-    IDTask = Column(Integer, ForeignKey('document.IDTask'), primary_key=True)
+    id = Column(Integer, ForeignKey('document.id'), primary_key=True)
 
-    IDInvoice = Column(Integer, ForeignKey('invoice.IDTask'),
+    invoice_id = Column(Integer, ForeignKey('invoice.id'),
                                                         default=None)
     project_id = Column(Integer, ForeignKey('project.id'))
     sequenceNumber = deferred(Column(Integer), group='edit')
@@ -383,13 +373,9 @@ class CancelInvoice(Task, TaskCompute):
     project = relationship("Project", backref=backref('cancelinvoices',
                                             order_by='CancelInvoice.taskDate')
                             )
-    #phase = relationship("Phase",
-    #                      backref=backref("cancelinvoices",
-    #                                      order_by='CancelInvoice.taskDate')
-    #                      )
     invoice = relationship("Invoice",
                       backref=backref("cancelinvoice", uselist=False),
-                      primaryjoin="CancelInvoice.IDInvoice==Invoice.IDTask")
+                      primaryjoin="CancelInvoice.invoice_id==Invoice.id")
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
@@ -471,7 +457,7 @@ class ManualInvoice(DBBASE):
     """
     __tablename__ = 'manual_invoice'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id_ = Column('id', BigInteger, primary_key=True)
+    id = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)
     description = Column('libelle', String(255))
     montant_ht = Column("montant_ht", Integer)
@@ -507,14 +493,6 @@ class ManualInvoice(DBBASE):
             with other invoices
         """
         return [Payment(mode=self.paymentMode, amount=0, date=self.statusDate)]
-
-    @property
-    def id(self):
-        return None
-
-    @property
-    def IDTask(self):
-        return None
 
     @property
     def number(self):
@@ -590,21 +568,11 @@ class ManualInvoice(DBBASE):
 class CancelInvoiceLine(DBBASE):
     """
         CancelInvoice lines
-        `id` int(11) NOT NULL auto_increment,
-        `IDTask` int(11) NOT NULL,
-        `rowIndex` int(11) NOT NULL,
-        `description` text,
-        `cost` int(11) default '0',
-        `quantity` double default '1',
-        `creationDate` int(11) default '0',
-        `updateDate` int(11) default '0',
-        `unity` varchar(10) default NULL,
-        PRIMARY KEY  (`IDCancelInvoiceLine`),
     """
     __tablename__ = 'cancelinvoice_line'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column(Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('cancelinvoice.IDTask'))
+    task_id = Column(Integer, ForeignKey('cancelinvoice.id'))
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now,
                                   onupdate=datetime.datetime.now)
@@ -645,9 +613,9 @@ class Payment(DBBASE):
     mode = Column(String(50))
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
-    IDTask = Column(Integer, ForeignKey('document.IDTask'))
+    task_id = Column(Integer, ForeignKey('document.id'))
     document = relationship("Task",
-                primaryjoin="Task.IDTask==Payment.IDTask",
+                primaryjoin="Task.id==Payment.task_id",
                 backref=backref('payments', order_by='Payment.date'))
 
     def get_amount(self):

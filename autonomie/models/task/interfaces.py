@@ -137,7 +137,6 @@ class IInvoice(Interface):
     officialNumber = Attribute("""official number used in sage""")
     taskDate = Attribute("""Date of the task""")
     id = Attribute("""the document sql id""")
-    IDTask = Attribute("""Another name for the id""")
     number = Attribute("""the document's non official number""")
     description = Attribute("""the document description string""")
 

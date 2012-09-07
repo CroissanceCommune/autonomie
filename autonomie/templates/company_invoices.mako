@@ -144,8 +144,8 @@
                     </td>
                     <td>
                         <blockquote>
-                            %if invoice.IDTask:
-                                <a href="${request.route_path(invoice.type_, id=invoice.IDTask)}"
+                            %if hasattr(invoice, 'type_'):
+                                <a href="${request.route_path(invoice.type_, id=invoice.id)}"
                                 title='Voir le document'>${invoice.number}</a>
                             %else:
                                 ${invoice.number}
@@ -177,9 +177,9 @@
 
                     </td>
                     <td>
-                        %if invoice.IDTask:
+                        %if hasattr(invoice, 'type_'):
                             <a class='btn'
-                                href='${request.route_path(invoice.type_, id=invoice.IDTask, _query=dict(view="pdf"))}'
+                                href='${request.route_path(invoice.type_, id=invoice.id, _query=dict(view="pdf"))}'
                                 title="Télécharger la version PDF">
                                 <i class='icon icon-file'></i>
                            </a>

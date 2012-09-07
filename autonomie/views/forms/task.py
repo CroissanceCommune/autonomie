@@ -202,7 +202,7 @@ class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
-    IDPhase = colander.SchemaNode(
+    phase_id = colander.SchemaNode(
                 colander.String(),
                 title=u"Phase où insérer le devis",
                 widget=deferred_phases_widget,
@@ -378,7 +378,7 @@ def get_invoice_schema():
     """
     schema = TaskSchema().clone()
     title = u"Phase où insérer la facture"
-    schema['common']['IDPhase'].title = title
+    schema['common']['phase_id'].title = title
     title = u"Date de la facture"
     schema['common']['taskDate'].title = title
     title = u"Objet de la facture"
@@ -395,7 +395,7 @@ def get_cancel_invoice_schema():
     """
     schema = TaskSchema().clone()
     title = u"Phase où insérer l'avoir"
-    schema['common']['IDPhase'].title = title
+    schema['common']['phase_id'].title = title
     title = u"Date de l'avoir"
     schema['common']['taskDate'].title = title
     title = u"Objet de l'avoir"
@@ -487,7 +487,7 @@ class SequenceWrapper:
 class InvoiceMatch(MappingWrapper):
     matching_map = (
                         #task attrs
-                         ('IDPhase','common'),
+                         ('phase_id','common'),
                          ('taskDate','common'),
                          ('description', 'common'),
                         #both estimation and invoice attrs
@@ -503,7 +503,7 @@ class InvoiceMatch(MappingWrapper):
 
 class EstimationMatch(MappingWrapper):
     matching_map = (
-                         ('IDPhase','common'),
+                         ('phase_id','common'),
                          ('taskDate','common'),
                          ('description', 'common'),
 
@@ -525,7 +525,7 @@ class EstimationMatch(MappingWrapper):
 class CancelInvoiceMatch(MappingWrapper):
     matching_map = (
                         #task attrs
-                         ('IDPhase','common'),
+                         ('phase_id','common'),
                          ('taskDate','common'),
                          ('description', 'common'),
                         #both estimation and invoice attrs

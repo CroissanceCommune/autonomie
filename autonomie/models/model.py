@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 07 sept. 2012 17:46:21 CEST
+# * Last Modified : ven. 07 sept. 2012 20:37:38 CEST
 #
 # * Project : autonomie
 #
@@ -56,16 +56,10 @@ log = logging.getLogger(__name__)
 class Phase(DBBASE):
     """
         Phase d'un projet
-        `IDPhase` int(11) NOT NULL auto_increment,
-        `IDProject` int(11) NOT NULL,
-        `name` varchar(150) NOT NULL,
-        `IDPreviousPhase` int(11) NOT NULL default '0',
-        `creationDate` int(11) NOT NULL,
-        `updateDate` int(11) NOT NULL,
     """
     __tablename__ = 'phase'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column('IDPhase', Integer, primary_key=True)
+    id = Column('id', Integer, primary_key=True)
     project_id = Column('project_id', Integer,
                         ForeignKey('project.id'))
     name = Column("name", String(150), default=u'Phase par défaut')
@@ -126,19 +120,13 @@ class Tva(DBBASE):
 
 class TaskStatus(DBBASE):
     """
-        `IDTask` int(11) NOT NULL,
-        `statusCode` varchar(10) NOT NULL,
-        `statusComment` text,
-        `statusPerson` int(11) default NULL,
-        `statusDate` int(11) default NULL,
-        KEY `IDTask` (`IDTask`),
-        KEY `statusCode` (`statusCode`)
+        Task status, should be used to record the document's status
     """
     __tablename__ = 'task_status'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("id", Integer, primary_key=True)
-    id_task = Column('IDTask', Integer,
-                        ForeignKey('document.IDTask'))
+    task_id = Column('task_id', Integer,
+                        ForeignKey('document.id'))
     statusCode = Column("statusCode", String(10))
     statusComment = Column("statusComment", Text)
     statusDate = Column("statusDate", Integer)

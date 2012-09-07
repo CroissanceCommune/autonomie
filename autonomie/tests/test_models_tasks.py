@@ -68,7 +68,7 @@ PROJECT = dict(id=1, name=u'project1', code=u"PRO1", company_id=1,
         client_id=1)
 CLIENT = dict(id=1, name=u"client1", code=u"CLI1", company_id=1)
 
-ESTIMATION = dict(IDPhase=1,
+ESTIMATION = dict(phase_id=1,
                 project_id=1,
                 name=u"Devis 2",
                 sequenceNumber=2,
@@ -87,9 +87,9 @@ ESTIMATION = dict(IDPhase=1,
                 manualDeliverables=1,
                 statusComment=u"Aucun commentaire",
                 number=u"estnumber")
-INVOICE = dict(IDPhase=1,
+INVOICE = dict(phase_id=1,
                 project_id=1,
-                IDEmployee=2,
+                owner_id=2,
                 statusPerson=2,
                 name=u"Facture 2",
                 sequenceNumber=2,
@@ -105,9 +105,9 @@ INVOICE = dict(IDPhase=1,
                 description=u"Description de la facture",
                 statusComment=u"Aucun commentaire",
                 number=u"invoicenumber")
-CANCELINVOICE = dict(IDPhase=1,
+CANCELINVOICE = dict(phase_id=1,
                 project_id=1,
-                IDEmployee=2,
+                owner_id=2,
                 statusPerson=2,
                 name=u"Avoir 2",
                 sequenceNumber=2,
@@ -431,7 +431,7 @@ class TestEstimation(BaseTestCase):
         est.phase = phase
         self.assertEqual(est.statusPersonAccount, user)
         self.assertEqual(est.project, project)
-        est.IDEmployee = user.id
+        est.owner_id = user.id
         est = self.session.merge(est)
         self.session.flush()
         newest = est.duplicate(user, project, phase)
@@ -522,14 +522,14 @@ class TestInvoice(BaseViewTest):
         phase = self.session.query(Phase).first()
         inv = get_invoice(user, project)
         inv.phase = phase
-        inv.IDEmployee = user.id
+        inv.owner_id = user.id
         inv = self.session.merge(inv)
         self.session.flush()
         newest = inv.duplicate(user, project, phase)
         self.session.merge(newest)
         self.session.flush()
-        self.assertEqual(newest.IDPhase, phase.id)
-        self.assertEqual(newest.IDEmployee, user.id)
+        self.assertEqual(newest.phase_id, phase.id)
+        self.assertEqual(newest.owner_id, user.id)
         self.assertEqual(newest.statusPerson, user.id)
         self.assertEqual(newest.project_id, project.id)
 
@@ -564,7 +564,7 @@ class TestInvoice(BaseViewTest):
         inv = self.session.merge(inv)
         self.session.flush()
         invoice = self.session.query(Invoice)\
-                .filter(Invoice.IDTask==inv.id).first()
+                .filter(Invoice.id==inv.id).first()
         self.assertEqual(invoice.CAEStatus, 'paid')
         self.assertEqual(len(invoice.payments), 1)
         self.assertEqual(invoice.payments[0].amount, 150)
@@ -689,19 +689,19 @@ class TestPayment(BaseTestCase):
 class TestPolymorphic(BaseTestCase):
     def test_invoice(self):
         inv = get_invoice(stripped=True)
-        inv.IDPhase = 16
+        inv.phase_id = 16
         self.session.add(inv)
         self.session.flush()
-        task = self.session.query(Task).filter(Task.IDPhase==16).first()
+        task = self.session.query(Task).filter(Task.phase_id==16).first()
         self.assertTrue(isinstance(task, Invoice))
 
     def test_payment(self):
         invoice = get_invoice(stripped=True)
-        invoice.IDPhase = 17
+        invoice.phase_id = 17
         invoice.record_payment(**PAYMENTS[0])
         self.session.add(invoice)
         self.session.flush()
-        p1 = self.session.query(Payment).join(Task).filter(Task.IDPhase==17).first()
+        p1 = self.session.query(Payment).join(Task).filter(Task.phase_id==17).first()
         self.assertTrue(isinstance(p1.document, Invoice))
         self.assertFalse(isinstance(p1.document, CancelInvoice))
 

@@ -32,6 +32,22 @@ def table_exists(tbl):
         pass
     return ret
 
+def rename_column(tbl, column_name, name, type_=sa.Integer, nullable=False, **kw):
+    if column_exists(tbl, column_name):
+        op.alter_column(tbl, column_name, name=name, type_=type_, nullable=nullable, **kw)
+
+
+def column_exists(tbl, column_name):
+    from autonomie.models import DBSESSION
+    conn = DBSESSION.connection()
+    ret = False
+    try:
+        conn.execute("select %s from %s" % (column_name, tbl))
+        ret = True
+    except:
+        pass
+    return ret
+
 def upgrade():
     force_rename_table("egw_accounts", "accounts")
     force_rename_table("egw_config", "config")
@@ -44,7 +60,7 @@ def upgrade():
     force_rename_table("coop_task_status", "task_status")
     force_rename_table("coop_holliday", "holiday")
     force_rename_table("symf_operation_treso", "operation_tresorerie")
-    force_rename_table("coop_task", "document")
+    force_rename_table("coop_task", "task")
     force_rename_table("coop_invoice", "invoice")
     force_rename_table("coop_invoice_line", "invoice_line")
     force_rename_table("coop_cancel_invoice", "cancelinvoice")
@@ -54,29 +70,6 @@ def upgrade():
     force_rename_table("coop_estimation", "estimation")
     force_rename_table("coop_estimation_line", "estimation_line")
     force_rename_table("coop_estimation_payment", "estimation_payment")
-
-    #rename table egw_accounts to accounts;
-    #rename table egw_config to config;
-    #rename table coop_customer to customer;
-    #rename table coop_company to company;
-    #rename table coop_company_employee to company_employee;
-    #rename table coop_project to project;
-
-    #rename table coop_phase to phase;
-    #rename table coop_tva to tva;
-    #rename table coop_task_status to task_status;
-    #rename table coop_holliday to holiday;
-    #rename table symf_operation_treso to operation_tresorerie;
-    #rename table coop_task to document;
-    #rename table coop_invoice to invoice;
-    #rename table coop_invoice_line to invoice_line;
-    #rename table coop_cancel_invoice to cancelinvoice;
-    #rename table coop_cancel_invoice_line to cancelinvoice_line;
-    #rename table coop_payment to payment;
-    #rename table symf_facture_manuelle to manualinvoice;
-    #rename table coop_estimation to estimation;
-    #rename table coop_estimation_line to estimation_line;
-    #rename table coop_estimation_payment to estimation_payment;
     op.execute("""
 alter table accounts change account_id id int(11) NOT NULL AUTO_INCREMENT;
 alter table accounts change account_lid login varchar(64) NOT NULL;
@@ -86,21 +79,45 @@ alter table accounts change account_lastname lastname varchar(50) DEFAULT NULL;
 alter table accounts change account_primary_group primary_group int(11) NOT NULL DEFAULT '0';
 alter table accounts change account_status active varchar(1) NOT NULL DEFAULT 'Y';
 alter table accounts change account_email email varchar(100) DEFAULT NULL;
-alter table project change IDProject id int(11) NOT NULL AUTO_INCREMENT;
-alter table invoice change IDProject project_id int(11) NOT NULL;
-alter table estimation change IDProject project_id int(11) NOT NULL;
-alter table cancelinvoice change IDProject project_id int(11) NOT NULL;
 """)
-    op.alter_column("phase", column_name='IDProject', name='project_id',
-            type_=sa.Integer)
-    op.alter_column("company", column_name='IDCompany', name='id',
-            type_=sa.Integer)
-    op.alter_column("customer", column_name='IDCompany', name='company_id',
-            type_=sa.Integer)
-    op.alter_column("project", column_name='IDCompany', name='company_id',
-            type_=sa.Integer)
-    op.alter_column("company_employee", column_name='IDCompany', name='company_id',
-            type_=sa.Integer)
+    # IDProject
+    rename_column("project", "IDProject", "id")
+    rename_column("invoice", "IDProject", "project_id")
+    rename_column("estimation", "IDProject", "project_id")
+    rename_column("cancelinvoice", "IDProject", "project_id")
+    rename_column("phase", 'IDProject', 'project_id')
+    # IDCompany
+    rename_column("company", 'IDCompany', 'id')
+    rename_column("customer", 'IDCompany', 'company_id')
+    rename_column("project", 'IDCompany', 'company_id')
+    rename_column("company_employee", 'IDCompany', 'company_id')
+    # IDTask
+    rename_column("task", 'IDTask', 'id')
+    rename_column("estimation", 'IDTask', 'id')
+    rename_column("invoice", 'IDTask', 'id')
+    rename_column("invoice", 'IDEstimation', 'estimation_id')
+    rename_column("cancelinvoice", 'IDTask', 'id')
+    rename_column("cancelinvoice", 'IDInvoice', "invoice_id")
+
+    rename_column("estimation_line", 'IDTask', 'task_id')
+    rename_column("estimation_line", 'IDWorkLine', 'id')
+    rename_column("estimation_payment", 'IDTask', 'task_id')
+    rename_column("estimation_payment", 'IDPaymentLine', 'id')
+    rename_column("invoice_line", 'IDTask', 'task_id')
+    rename_column("invoice_line", 'IDInvoiceLine', 'id')
+    rename_column("payment", 'IDTask', 'task_id')
+    rename_column("cancelinvoice_line", 'IDTask', 'task_id')
+
+    rename_column("task_status", 'IDTask', 'task_id')
+
+    # IDPhase
+    rename_column("phase", "IDPhase", "id")
+    rename_column("task", "IDPhase", "phase_id")
+
+    # IDEmployee
+    rename_column("company_employee", 'IDEmployee', 'account_id')
+    rename_column("task", "IDEmployee", 'owner_id')
+
 
 
 def downgrade():

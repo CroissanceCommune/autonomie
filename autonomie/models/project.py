@@ -58,7 +58,7 @@ class Project(DBBASE):
             Returns the estimation with id taskid
         """
         for estimation in self.estimations:
-            if estimation.IDTask == int(taskid):
+            if estimation.id == int(taskid):
                 return estimation
         raise KeyError("No such task in this project")
 
@@ -67,7 +67,7 @@ class Project(DBBASE):
             Returns the estimation with id taskid
         """
         for invoice in self.invoices:
-            if invoice.IDTask == int(taskid):
+            if invoice.id == int(taskid):
                 return invoice
         raise KeyError("No such task in this project")
 

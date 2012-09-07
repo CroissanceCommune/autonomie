@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 05 sept. 2012 09:12:39 CEST
+# * Last Modified : ven. 07 sept. 2012 20:32:38 CEST
 #
 # * Project : autonomie
 #
@@ -212,7 +212,7 @@ class EstimationFactory(BaseDBFactory):
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
         obj = dbsession.query(Estimation).options(undefer_group('edit')).filter(
-                                           Estimation.IDTask==key).scalar()
+                                           Estimation.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__name__ = 'estimation'
@@ -236,7 +236,7 @@ class InvoiceFactory(BaseDBFactory):
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
         obj = dbsession.query(Invoice).options(undefer_group('edit')).filter(
-                                             Invoice.IDTask==key).scalar()
+                                             Invoice.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__name__ = 'invoice'
@@ -261,7 +261,7 @@ class CancelInvoiceFactory(BaseDBFactory):
             raise Exception("Missing dbsession")
         dbsession = self.dbsession()
         obj = dbsession.query(CancelInvoice).options(undefer_group('edit')
-                                  ).filter(CancelInvoice.IDTask==key).scalar()
+                                  ).filter(CancelInvoice.id==key).scalar()
         if obj is None:
             raise KeyError
         obj.__name__ = 'cancelinvoice'

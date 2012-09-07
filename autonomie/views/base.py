@@ -151,7 +151,7 @@ class TaskView(BaseView):
             self.task = self.get_task()
         else:
             self.task = self.request.context
-            self.taskid = self.task.IDTask
+            self.taskid = self.task.id
             self.project = self.task.project
             self.company = self.project.company
         self._set_actionmenu()
@@ -168,8 +168,8 @@ class TaskView(BaseView):
         else:
             raise Exception("Not implemented yet")
         phaseid = self.request.params.get('phase')
-        task.IDPhase = phaseid
-        task.IDEmployee = self.user.id
+        task.phase_id = phaseid
+        task.owner_id = self.user.id
         return task
 
     def set_lines(self):

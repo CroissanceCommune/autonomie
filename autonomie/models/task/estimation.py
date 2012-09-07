@@ -54,7 +54,7 @@ class Estimation(Task, TaskCompute):
     """
     __tablename__ = 'estimation'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    IDTask = Column("IDTask", ForeignKey('document.IDTask'),
+    id = Column("id", ForeignKey('document.id'),
                 primary_key=True, nullable=False)
     sequenceNumber = Column("sequenceNumber", Integer,
                 nullable=False)
@@ -125,7 +125,7 @@ class Estimation(Task, TaskCompute):
         duple = Estimation()
         duple.CAEStatus = u'draft'
         duple.taskDate = taskDate
-        duple.IDEmployee = self.IDEmployee
+        duple.owner_id = self.owner_id
         duple.description = self.description
         duple.sequenceNumber = seq_number
 
@@ -158,12 +158,12 @@ class Estimation(Task, TaskCompute):
             Return the args common to all the generated invoices
         """
         return dict(project_id=self.project_id,
-                    IDPhase = self.IDPhase,
+                    phase_id=phase_id,
                     CAEStatus = 'draft',
                     statusPerson = user_id,
-                    IDEmployee = user_id,
+                    owner_id=user_id,
                     tva = self.tva,
-                    IDEstimation=self.IDTask,
+                    estimation_id=self.id,
                     paymentConditions=self.paymentConditions,
                     description=self.description,
                     course=self.course)
@@ -381,24 +381,12 @@ class Estimation(Task, TaskCompute):
 
 class EstimationLine(DBBASE):
     """
-      `IDWorkLine` int(11) NOT NULL auto_increment,
-      `IDTask` int(11) NOT NULL,
-      `rowIndex` int(11) NOT NULL,          # index de la ligne
-      `description` text,                   # "Prestation"
-      `cost` int(11) default NULL,          # montant
-      `quantity` double default NULL,       #quantité
-      `creationDate` int(11) default NULL,
-      `updateDate` int(11) default NULL,
-      `unity` varchar(10) default NULL,     # unité
-      PRIMARY KEY  (`IDWorkLine`),
-      KEY `coop_estimation_line_IDTask` (`IDTask`),
-      KEY `coop_estimation_line_rowIndex` (`rowIndex`),
-      KEY `IDTask` (`IDTask`)
+        Estimation lines
     """
     __tablename__ = 'estimation_line'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("IDWorkLine", Integer, primary_key=True)
-    IDTask = Column(Integer, ForeignKey('estimation.IDTask'))
+    id = Column("id", Integer, primary_key=True)
+    task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
@@ -444,19 +432,12 @@ class EstimationLine(DBBASE):
 
 class PaymentLine(DBBASE):
     """
-        `IDPaymentLine` int(11) NOT NULL auto_increment,
-        `IDTask` int(11) NOT NULL,
-        `rowIndex` int(11) NOT NULL,
-        `description` text,
-        `amount` int(11) default NULL,
-        `creationDate` int(11) default NULL,
-        `updateDate` int(11) default NULL,
-        `paymentDate` int(11) default NULL,
+        payments lines
     """
     __tablename__ = 'estimation_payment'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("IDPaymentLine", Integer, primary_key=True, nullable=False)
-    IDTask = Column(Integer, ForeignKey('estimation.IDTask'))
+    id = Column("id", Integer, primary_key=True, nullable=False)
+    task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
     amount = Column("amount", Integer)

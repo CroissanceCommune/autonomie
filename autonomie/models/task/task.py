@@ -48,8 +48,8 @@ class Task(DBBASE):
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {'polymorphic_identity':'task'}
 
-    IDTask = Column(Integer, primary_key=True)
-    IDPhase = Column("IDPhase", ForeignKey('phase.IDPhase'))
+    id = Column(Integer, primary_key=True)
+    phase_id = Column("phase_id", ForeignKey('phase.id'))
     name = Column("name", String(255))
     CAEStatus = Column('CAEStatus', String(10))
     statusComment = Column("statusComment", Text)
@@ -59,8 +59,7 @@ class Task(DBBASE):
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp)
     taskDate = Column("taskDate", CustomDateType2)
-    IDEmployee = Column("IDEmployee",
-                            ForeignKey('accounts.id'))
+    owner_id = Column("owner_id", ForeignKey('accounts.id'))
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = Column("updateDate", CustomDateType,
@@ -71,11 +70,11 @@ class Task(DBBASE):
                         primaryjoin="Task.statusPerson==User.id",
                         backref="taskStatuses")
     owner = relationship("User",
-                        primaryjoin="Task.IDEmployee==User.id",
+                        primaryjoin="Task.owner_id==User.id",
                             backref="ownedTasks")
 
     phase = relationship("Phase",
-                        primaryjoin="Task.IDPhase==Phase.id",
+                        primaryjoin="Task.phase_id==Phase.id",
                         backref="documents")
 
     type_ = Column('type_', String(30), nullable=False)
@@ -157,8 +156,3 @@ ce document.".format(status)
             Return the id of the company owning this task
         """
         return self.project.company.id
-
-    @property
-    def id(self):
-        return self.IDTask
-

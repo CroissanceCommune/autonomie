@@ -31,8 +31,7 @@ from autonomie.models import DBBASE
 
 COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
     Column("company_id", Integer, ForeignKey('company.id')),
-    # IDEmployee est identique dans la table coop_employee
-    Column("IDEmployee", Integer, ForeignKey('accounts.id')),
+    Column("account_id", Integer, ForeignKey('accounts.id')),
         mysql_charset='utf8', mysql_engine='MyISAM')
 
 log = logging.getLogger(__name__)

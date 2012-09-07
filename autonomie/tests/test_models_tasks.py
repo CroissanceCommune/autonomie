@@ -407,12 +407,14 @@ class TestEstimation(BaseTestCase):
     def test_duplicate_estimation(self):
         user = get_user(USER2)
         project = get_project()
+        phase = MagicMock(id=16)
         est = get_estimation(user, project)
-        newest = est.duplicate(user, project)
+        newest = est.duplicate(user, project, phase)
         self.assertEqual(newest.CAEStatus, 'draft')
         self.assertEqual(newest.project, project)
         self.assertEqual(newest.statusPersonAccount, user)
         self.assertTrue(newest.number.startswith("PRO1_CLI1_D2_"))
+        self.assertTrue(newest.phase, phase)
 
     def test_duplicate_estimation_integration(self):
         """
@@ -422,19 +424,21 @@ class TestEstimation(BaseTestCase):
         """
         from autonomie.models.user import User
         from autonomie.models.model import Project
+        from autonomie.models.model import Phase
         user = self.session.query(User).first()
         project = self.session.query(Project).first()
-        print project
-        print user
+        phase = self.session.query(Phase).first()
         est = get_estimation(user, project)
+        est.phase = phase
         self.assertEqual(est.statusPersonAccount, user)
         self.assertEqual(est.project, project)
         est.IDEmployee = user.id
         est = self.session.merge(est)
         self.session.flush()
-        newest = est.duplicate(user, project)
+        newest = est.duplicate(user, project, phase)
         self.session.merge(newest)
         self.session.flush()
+        self.assertEqual(newest.phase, phase)
 
     def test_estimation_deposit(self):
         est = get_estimation()
@@ -501,6 +505,38 @@ class TestInvoice(BaseViewTest):
         self.assertEqual(cinv.total_ht(), -1 * inv.total_ht())
         today = datetime.date.today()
         self.assertEqual(cinv.taskDate, today)
+
+    def test_duplicate_invoice(self):
+        user = get_user(USER2)
+        project = get_project()
+        phase = MagicMock(id=16)
+        inv = get_invoice(user=user, project=project)
+        newinv = inv.duplicate(user, project, phase)
+        self.assertEqual(len(inv.lines), len(newinv.lines))
+        self.assertEqual(inv.project, newinv.project)
+        self.assertEqual(newinv.statusPersonAccount, user)
+        self.assertEqual(newinv.phase, phase)
+
+    def test_duplicate_invoice_integration(self):
+        from autonomie.models.user import User
+        from autonomie.models.model import Project
+        from autonomie.models.model import Phase
+        user = self.session.query(User).first()
+        project = self.session.query(Project).first()
+        phase = self.session.query(Phase).first()
+        inv = get_invoice(user, project)
+        inv.phase = phase
+        inv.IDEmployee = user.id
+        inv = self.session.merge(inv)
+        self.session.flush()
+        newest = inv.duplicate(user, project, phase)
+        self.session.merge(newest)
+        self.session.flush()
+        self.assertEqual(newest.IDPhase, phase.id)
+        self.assertEqual(newest.IDEmployee, user.id)
+        self.assertEqual(newest.statusPerson, user.id)
+        self.assertEqual(newest.project_id, project.id)
+
 
     def test_valid_invoice(self):
         inv = get_invoice(stripped=True)

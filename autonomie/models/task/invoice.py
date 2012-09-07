@@ -210,7 +210,7 @@ class Invoice(Task, TaskCompute):
         """
         cancelinvoice = CancelInvoice()
         seq_number = self.project.get_next_cancelinvoice_number()
-        cancelinvoice.name = u"Avoir {0}".format(seq_number)
+        cancelinvoice.name = CancelInvoice.get_name(seq_number)
         cancelinvoice.IDPhase = self.IDPhase
         cancelinvoice.CAEStatus = 'draft'
         cancelinvoice.taskDate = datetime.date.today()
@@ -263,6 +263,38 @@ class Invoice(Task, TaskCompute):
         if self.topay() == 0 or resulted:
             self.CAEStatus = 'resulted'
         return self
+
+    def duplicate(self, user, project, phase):
+        """
+            Duplicate the current invoice
+        """
+        seq_number = project.get_next_invoice_number()
+        date = datetime.date.today()
+
+        invoice = Invoice()
+        invoice.name = self.get_name(seq_number)
+        invoice.CAEStatus = 'draft'
+        invoice.taskDate = date
+        invoice.description = self.description
+        invoice.expenses = self.expenses
+
+        invoice.sequenceNumber = seq_number
+        invoice.number = Invoice.get_number(project, seq_number, date)
+        invoice.tva = self.tva
+        invoice.paymentConditions = self.paymentConditions
+        invoice.deposit = self.deposit
+        invoice.course = self.course
+        invoice.displayedUnits = self.displayedUnits
+        invoice.discountHT = self.discountHT
+        invoice.expenses = self.expenses
+
+        invoice.statusPersonAccount = user
+        invoice.project = project
+        invoice.phase = phase
+        invoice.owner = user
+        for line in self.lines:
+            invoice.lines.append(line.duplicate())
+        return invoice
 
 class InvoiceLine(DBBASE):
     """

@@ -114,7 +114,7 @@ class Estimation(Task, TaskCompute):
     def is_estimation(self):
         return True
 
-    def duplicate(self, user, project):
+    def duplicate(self, user, project, phase):
         """
             returns a duplicate estimation object
         """
@@ -124,7 +124,6 @@ class Estimation(Task, TaskCompute):
         log.debug("# Estimation Duplication #")
         duple = Estimation()
         duple.CAEStatus = u'draft'
-        duple.IDPhase = self.IDPhase
         duple.taskDate = taskDate
         duple.IDEmployee = self.IDEmployee
         duple.description = self.description
@@ -148,6 +147,7 @@ class Estimation(Task, TaskCompute):
 
         # Setting relationships at the end of the duplication
         log.debug("    adding relationships")
+        duple.phase = phase
         duple.statusPersonAccount = user
         duple.project = project
         log.debug("-> Returning the duplicate")

@@ -87,6 +87,7 @@ class Client(DBBASE):
         """
             Return a dict version of the client object
         """
+        projects = [project.todict() for project in self.projects]
         return dict(id=self.id,
                     code=self.code,
                     comments=self.comments,
@@ -99,4 +100,6 @@ class Client(DBBASE):
                     email=self.email,
                     contactLastName=self.contactLastName,
                     contactFirstName=self.contactFirstName,
-                    name=self.name)
+                    name=self.name,
+                    projects=projects
+                    )

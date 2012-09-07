@@ -103,7 +103,6 @@
                         <td style="text-align:right">
                             ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer ce devis", u"icon-pencil")}
                             ${table_btn(request.route_path("estimation", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
-                            ${table_btn(request.route_path("estimation", id=task.id, _query=dict(action="duplicate")), u"Dupliquer", u"Dupliquer le devis", icotext="<b>x2</b>")}
                             %if task.is_deletable():
                                 ${table_btn(request.route_path("estimation", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer le devis", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
                             %endif

@@ -1,4 +1,4 @@
-"""Adding polymorphic identity to documents
+"""1.4 : Adding polymorphic identity to documents
 
 Revision ID: 3f52b6b0ed7c
 Revises: 2cc9251fb0bb

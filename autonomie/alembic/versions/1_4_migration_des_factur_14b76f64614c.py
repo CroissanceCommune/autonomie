@@ -1,5 +1,5 @@
 #-*-coding:utf-8-*-
-"""Migration des statuts des documents vers le nouveau workflow
+"""1.4 : Migration des statuts des documents vers le nouveau workflow
 
 Revision ID: 14b76f64614c
 Revises: 3f52b6b0ed7c

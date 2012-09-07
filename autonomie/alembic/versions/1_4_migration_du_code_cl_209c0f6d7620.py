@@ -1,4 +1,4 @@
-"""Migration du code client
+"""1.4 : Migration du code client
 
 Revision ID: 209c0f6d7620
 Revises: 14b76f64614c

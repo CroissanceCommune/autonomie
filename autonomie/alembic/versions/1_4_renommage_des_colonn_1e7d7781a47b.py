@@ -1,4 +1,4 @@
-"""Renommage des colonnes utilisateurs
+"""1.4 : Renommage des colonnes utilisateurs
 
 Revision ID: 1e7d7781a47b
 Revises: 209c0f6d7620
@@ -91,7 +91,9 @@ alter table invoice change IDProject project_id int(11) NOT NULL;
 alter table estimation change IDProject project_id int(11) NOT NULL;
 alter table cancelinvoice change IDProject project_id int(11) NOT NULL;
 """)
-    op.alter_column("phase",column_name='IDProject', name='project_id',
+    op.alter_column("phase", column_name='IDProject', name='project_id',
+            type_=sa.Integer)
+    op.alter_column("company", column_name='IDCompany', name='id',
             type_=sa.Integer)
 
 

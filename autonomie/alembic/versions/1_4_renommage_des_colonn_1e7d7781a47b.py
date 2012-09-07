@@ -95,7 +95,7 @@ alter table cancelinvoice change IDProject project_id int(11) NOT NULL;
             type_=sa.Integer)
     op.alter_column("company", column_name='IDCompany', name='id',
             type_=sa.Integer)
-    op.alter_column("client", column_name='IDCompany', name='company_id',
+    op.alter_column("customer", column_name='IDCompany', name='company_id',
             type_=sa.Integer)
     op.alter_column("project", column_name='IDCompany', name='company_id',
             type_=sa.Integer)

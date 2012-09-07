@@ -78,7 +78,7 @@ class Invoice(Task, TaskCompute):
     __mapper_args__ = {
                        'polymorphic_identity':'invoice',
                        }
-    id = Column("id", ForeignKey('document.id'), primary_key=True)
+    id = Column("id", ForeignKey('task.id'), primary_key=True)
     estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
     project_id = Column("project_id", ForeignKey('project.id'))
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
@@ -355,7 +355,7 @@ class CancelInvoice(Task, TaskCompute):
     __tablename__ = 'cancelinvoice'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {'polymorphic_identity':'cancelinvoice'}
-    id = Column(Integer, ForeignKey('document.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
 
     invoice_id = Column(Integer, ForeignKey('invoice.id'),
                                                         default=None)
@@ -613,8 +613,8 @@ class Payment(DBBASE):
     mode = Column(String(50))
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
-    task_id = Column(Integer, ForeignKey('document.id'))
-    document = relationship("Task",
+    task_id = Column(Integer, ForeignKey('task.id'))
+    task = relationship("Task",
                 primaryjoin="Task.id==Payment.task_id",
                 backref=backref('payments', order_by='Payment.date'))
 

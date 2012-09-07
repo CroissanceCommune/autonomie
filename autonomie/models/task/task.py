@@ -44,7 +44,7 @@ class Task(DBBASE):
     """
         Metadata pour une tâche (estimation, invoice)
     """
-    __tablename__ = 'document'
+    __tablename__ = 'task'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     __mapper_args__ = {'polymorphic_identity':'task'}
 
@@ -75,7 +75,7 @@ class Task(DBBASE):
 
     phase = relationship("Phase",
                         primaryjoin="Task.phase_id==Phase.id",
-                        backref="documents")
+                        backref="tasks")
 
     type_ = Column('type_', String(30), nullable=False)
     __mapper_args__ = {'polymorphic_on': type_,

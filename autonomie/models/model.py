@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 07 sept. 2012 20:37:38 CEST
+# * Last Modified : sam. 08 sept. 2012 00:48:22 CEST
 #
 # * Project : autonomie
 #
@@ -77,21 +77,21 @@ class Phase(DBBASE):
 
     @property
     def estimations(self):
-        return self.get_documents_by_type('estimation')
+        return self.get_tasks_by_type('estimation')
 
     @property
     def invoices(self):
-        return self.get_documents_by_type('invoice')
+        return self.get_tasks_by_type('invoice')
 
     @property
     def cancelinvoices(self):
-        return self.get_documents_by_type('cancelinvoice')
+        return self.get_tasks_by_type('cancelinvoice')
 
-    def get_documents_by_type(self, type_):
+    def get_tasks_by_type(self, type_):
         """
-            return the documents of the passed type
+            return the tasks of the passed type
         """
-        return [doc for doc in self.documents if doc.type_==type_]
+        return [doc for doc in self.tasks if doc.type_==type_]
 
     def todict(self):
         """
@@ -120,13 +120,13 @@ class Tva(DBBASE):
 
 class TaskStatus(DBBASE):
     """
-        Task status, should be used to record the document's status
+        Task status, should be used to record the task's status
     """
     __tablename__ = 'task_status'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
     id = Column("id", Integer, primary_key=True)
     task_id = Column('task_id', Integer,
-                        ForeignKey('document.id'))
+                        ForeignKey('task.id'))
     statusCode = Column("statusCode", String(10))
     statusComment = Column("statusComment", Text)
     statusDate = Column("statusDate", Integer)

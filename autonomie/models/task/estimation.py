@@ -54,7 +54,7 @@ class Estimation(Task, TaskCompute):
     """
     __tablename__ = 'estimation'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("id", ForeignKey('document.id'),
+    id = Column("id", ForeignKey('task.id'),
                 primary_key=True, nullable=False)
     sequenceNumber = Column("sequenceNumber", Integer,
                 nullable=False)

@@ -81,37 +81,37 @@ alter table accounts change account_status active varchar(1) NOT NULL DEFAULT 'Y
 alter table accounts change account_email email varchar(100) DEFAULT NULL;
 """)
     # IDProject
-    rename_column("project", "IDProject", "id")
+    rename_column("project", "IDProject", "id", existing_autoincrement=True)
     rename_column("invoice", "IDProject", "project_id")
     rename_column("estimation", "IDProject", "project_id")
     rename_column("cancelinvoice", "IDProject", "project_id")
     rename_column("phase", 'IDProject', 'project_id')
     # IDCompany
-    rename_column("company", 'IDCompany', 'id')
+    rename_column("company", 'IDCompany', 'id', existing_autoincrement=True)
     rename_column("customer", 'IDCompany', 'company_id')
     rename_column("project", 'IDCompany', 'company_id')
     rename_column("company_employee", 'IDCompany', 'company_id')
     # IDTask
-    rename_column("task", 'IDTask', 'id')
-    rename_column("estimation", 'IDTask', 'id')
-    rename_column("invoice", 'IDTask', 'id')
+    rename_column("task", 'IDTask', 'id', existing_autoincrement=True)
+    rename_column("estimation", 'IDTask', 'id', existing_autoincrement=True)
+    rename_column("invoice", 'IDTask', 'id', existing_autoincrement=True)
     rename_column("invoice", 'IDEstimation', 'estimation_id')
-    rename_column("cancelinvoice", 'IDTask', 'id')
+    rename_column("cancelinvoice", 'IDTask', 'id', existing_autoincrement=True)
     rename_column("cancelinvoice", 'IDInvoice', "invoice_id")
 
     rename_column("estimation_line", 'IDTask', 'task_id')
-    rename_column("estimation_line", 'IDWorkLine', 'id')
+    rename_column("estimation_line", 'IDWorkLine', 'id', existing_autoincrement=True)
     rename_column("estimation_payment", 'IDTask', 'task_id')
-    rename_column("estimation_payment", 'IDPaymentLine', 'id')
+    rename_column("estimation_payment", 'IDPaymentLine', 'id', existing_autoincrement=True)
     rename_column("invoice_line", 'IDTask', 'task_id')
-    rename_column("invoice_line", 'IDInvoiceLine', 'id')
+    rename_column("invoice_line", 'IDInvoiceLine', 'id', existing_autoincrement=True)
     rename_column("payment", 'IDTask', 'task_id')
     rename_column("cancelinvoice_line", 'IDTask', 'task_id')
 
     rename_column("task_status", 'IDTask', 'task_id')
 
     # IDPhase
-    rename_column("phase", "IDPhase", "id")
+    rename_column("phase", "IDPhase", "id", existing_autoincrement=True)
     rename_column("task", "IDPhase", "phase_id")
 
     # IDEmployee

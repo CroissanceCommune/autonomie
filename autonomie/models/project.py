@@ -87,11 +87,11 @@ class Project(DBBASE):
         return self.company.id
 
     @staticmethod
-    def get_number(document_number, root_str):
+    def get_number(task_number, root_str):
         """
             return the number of the given doc
         """
-        num = document_number[len(root_str):]
+        num = task_number[len(root_str):]
         try:
             return int(num)
         except:

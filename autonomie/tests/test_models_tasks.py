@@ -46,6 +46,8 @@ from autonomie.models.task.interfaces import IPaidTask
 from autonomie.models.task.interfaces import IInvoice
 
 from autonomie.models.user import User
+from autonomie.models.model import Project
+from autonomie.models.model import Phase
 
 from autonomie.exception import Forbidden
 
@@ -422,9 +424,6 @@ class TestEstimation(BaseTestCase):
             specifically, the client is not loaded in the session
             causing the insert statement to be fired during duplication
         """
-        from autonomie.models.user import User
-        from autonomie.models.model import Project
-        from autonomie.models.model import Phase
         user = self.session.query(User).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
@@ -518,9 +517,6 @@ class TestInvoice(BaseViewTest):
         self.assertEqual(newinv.phase, phase)
 
     def test_duplicate_invoice_integration(self):
-        from autonomie.models.user import User
-        from autonomie.models.model import Project
-        from autonomie.models.model import Phase
         user = self.session.query(User).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()

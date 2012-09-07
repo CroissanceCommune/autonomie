@@ -50,7 +50,7 @@ def duplicate_task(task, **kw):
     """
         Duplicates a document
     """
-    if "project" in kw and "phase" in kw:
+    if kw.get("project") is not None and kw.get("phase") is not None:
         return task.duplicate(kw['user'], kw['project'], kw['phase'])
     else:
         raise Forbidden()

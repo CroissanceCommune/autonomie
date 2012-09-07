@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mar. 28 août 2012 17:57:59 CEST
+# * Last Modified : ven. 07 sept. 2012 19:00:28 CEST
 #
 # * Project : autonomie
 #
@@ -134,11 +134,15 @@ class ViewLink(Link):
     template = "base/button.mako"
 
     def __init__(self, label, perm=None, path=None, css="", js=None, title=None,
-            icon="", request=None, **kw):
+            icon="", request=None, confirm=None, **kw):
         self.label = label
         self.perm = perm
         self.path = path
-        self.js = js
+        if confirm:
+            self.js = u"return confirm('{0}')".format(
+                                        confirm.replace("'", "\\'"))
+        else:
+            self.js = js
         if title:
             self.title = title
         else:

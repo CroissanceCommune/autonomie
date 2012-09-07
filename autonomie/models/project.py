@@ -55,7 +55,7 @@ class Project(DBBASE):
     definition = deferred(Column("definition", Text), group='edit')
 
     id_company = Column("IDCompany", Integer,
-                                    ForeignKey('company.IDCompany'))
+                                    ForeignKey('company.id'))
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = deferred(Column("updateDate", CustomDateType,

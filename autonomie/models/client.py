@@ -62,7 +62,7 @@ class Client(DBBASE):
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp)
     id_company = Column("IDCompany", Integer,
-                                    ForeignKey('company.IDCompany'))
+                                    ForeignKey('company.id'))
     intraTVA = deferred(Column("intraTVA", String(50)), group='edit')
     address = deferred(Column("address", String(255)), group='edit')
     zipCode = deferred(Column("zipCode", String(20)), group='edit')

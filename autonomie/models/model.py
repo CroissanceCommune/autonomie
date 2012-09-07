@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 06 sept. 2012 17:25:26 CEST
+# * Last Modified : ven. 07 sept. 2012 17:46:21 CEST
 #
 # * Project : autonomie
 #
@@ -180,7 +180,7 @@ class OperationComptable(DBBASE):
     amount = Column("montant", Numeric)
     charge = Column("charge", Integer, default=0)
     company_id = Column('compagnie_id', CustomInteger,
-                            ForeignKey('company.IDCompany'))
+                            ForeignKey('company.id'))
     date = Column("date", Date(), default=datetime.date.today)
     label = Column("libelle", String(255), default="")
     company = relationship("Company",

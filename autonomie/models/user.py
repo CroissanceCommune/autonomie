@@ -30,7 +30,7 @@ from sqlalchemy.orm import relationship
 from autonomie.models import DBBASE
 
 COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
-    Column("IDCompany", Integer, ForeignKey('company.IDCompany')),
+    Column("IDCompany", Integer, ForeignKey('company.id')),
     # IDEmployee est identique dans la table coop_employee
     Column("IDEmployee", Integer, ForeignKey('accounts.id')),
         mysql_charset='utf8', mysql_engine='MyISAM')

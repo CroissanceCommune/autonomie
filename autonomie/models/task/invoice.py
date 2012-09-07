@@ -484,7 +484,7 @@ class ManualInvoice(DBBASE):
     taskDate = Column("date_emission", Date(),
                                 default=datetime.datetime.now)
     company_id = Column('compagnie_id', BigInteger,
-                            ForeignKey('company.IDCompany'))
+                            ForeignKey('company.id'))
     created_at = deferred(Column("created_at", DateTime,
                                       default=datetime.datetime.now))
     updated_at = deferred(Column("updated_at", DateTime,

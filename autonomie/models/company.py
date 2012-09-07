@@ -41,7 +41,7 @@ class Company(DBBASE):
     """
     __tablename__ = 'company'
     __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("IDCompany", Integer, primary_key=True)
+    id = Column("id", Integer, primary_key=True)
     name = Column("name", String(150))
     goal = deferred(Column("object", String(255)),
             group='edit')

@@ -24,9 +24,6 @@ from autonomie.exception import SignatureError
 
 log = logging.getLogger(__name__)
 
-BASE_STATUS_DICT = {
-        'draft':('draft', 'wait', 'duplicate', ),
-        'invalid':('draft', 'wait', 'duplicate',),}
 MANAGER_PERMS = "manage"
 
 def valid_callback(task, **kw):
@@ -46,6 +43,15 @@ def record_payment(task, **kw):
     log.debug(task)
     if "mode" in kw and "amount" in kw:
         return task.record_payment(kw['mode'], kw['amount'], kw.get('resulted'))
+    else:
+        raise Forbidden()
+
+def duplicate_task(task, **kw):
+    """
+        Duplicates a document
+    """
+    if "project" in kw and "phase" in kw:
+        return task.duplicate(kw['user'], kw['project'], kw['phase'])
     else:
         raise Forbidden()
 
@@ -74,7 +80,17 @@ def set_date(task, **kw):
     task.taskDate = datetime.date.today()
     return task
 
-def get_est_state(base_dict):
+def get_base_state():
+    """
+        return the task states
+    """
+    duplicate = ('duplicate', 'view', duplicate_task, False,)
+    result = {}
+    result['draft'] = ('draft', 'wait', duplicate, )
+    result['invalid'] = ('draft', 'wait',)
+    return result
+
+def get_est_state():
     """
         return the estimation state workflow
         draft
@@ -83,18 +99,21 @@ def get_est_state(base_dict):
         invalid
         aboest
     """
+    duplicate = ('duplicate', 'view', duplicate_task, False,)
     valid = ('valid', MANAGER_PERMS, set_date,)
     invalid = ('invalid', MANAGER_PERMS,)
     geninv = ('geninv', None, gen_invoices,)
     delete = ('delete', None, None, False,)
-    result = base_dict.copy()
-    result['wait'] = (valid, invalid, 'duplicate',)
-    result['valid'] = ('aboest', geninv, 'duplicate',)
+    result = {}
+    result['draft'] = ('draft', 'wait', duplicate, )
+    result['invalid'] = ('draft', 'wait',)
+    result['wait'] = (valid, invalid, duplicate,)
+    result['valid'] = ('aboest', geninv, duplicate,)
     result['aboest'] = (delete,)
-    result['geninv'] = ('duplicate',)
+    result['geninv'] = (duplicate,)
     return result
 
-def get_inv_state(base_dict):
+def get_inv_state():
     """
         return the invoice state workflow
         draft
@@ -105,6 +124,7 @@ def get_inv_state(base_dict):
         resulted
         aboinv
     """
+    duplicate = ('duplicate', 'view', duplicate_task, False,)
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     aboinv = ('aboinv', MANAGER_PERMS,)
@@ -112,15 +132,17 @@ def get_inv_state(base_dict):
     gencinv = ('gencinv', None, gen_cancelinvoice, False,)
     delete = ('delete', None, None, False,)
     resulted = ('resulted', MANAGER_PERMS,)
-    result = base_dict.copy()
-    result['wait'] = (valid, invalid, 'duplicate',)
-    result['valid'] = (paid, resulted, aboinv, gencinv, 'duplicate', )
-    result['paid'] = (paid, resulted, gencinv, 'duplicate',)
-    result['resulted'] = (gencinv, 'duplicate',)
+    result = {}
+    result['draft'] = ('draft', 'wait', duplicate, )
+    result['invalid'] = ('draft', 'wait',)
+    result['wait'] = (valid, invalid, duplicate,)
+    result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, )
+    result['paid'] = (paid, resulted, gencinv, duplicate,)
+    result['resulted'] = (gencinv, duplicate,)
     result['aboinv'] = (delete,)
     return result
 
-def get_cinv_state(base_dict):
+def get_cinv_state():
     """
         return the cancel invoice state workflow
         draft
@@ -130,12 +152,14 @@ def get_cinv_state(base_dict):
     """
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
-    result = base_dict.copy()
-    result['wait'] = (valid, invalid, 'duplicate',)
+    result = {}
+    result['draft'] = ('wait',)
+    result['wait'] = (valid, invalid,)
+    result['invalid'] = ('draft', 'wait',)
     return result
 
 DEFAULT_STATE_MACHINES = {
-        "base":TaskState('draft', BASE_STATUS_DICT),
-        "estimation":TaskState('draft', get_est_state(BASE_STATUS_DICT)),
-        "invoice":TaskState('draft', get_inv_state(BASE_STATUS_DICT)),
-        "cancelinvoice":TaskState('draft', get_cinv_state(BASE_STATUS_DICT))}
+        "base":TaskState('draft', get_base_state()),
+        "estimation":TaskState('draft', get_est_state()),
+        "invoice":TaskState('draft', get_inv_state()),
+        "cancelinvoice":TaskState('draft', get_cinv_state())}

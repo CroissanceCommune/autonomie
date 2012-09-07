@@ -670,3 +670,63 @@ class Payment(colander.MappingSchema):
         ne recevra plus de paiement), si le montant indiqué correspond au \
         montant de la facture celle-ci est soldée automatiquement",
             default=False)
+
+@colander.deferred
+def deferred_client_choice(node, kw):
+    clients = kw.get('clients')
+    return widget.SelectWidget(values=clients)
+
+@colander.deferred
+def deferred_default_client(node, kw):
+    return kw.get('current_client')
+
+@colander.deferred
+def deferred_project_choice(node, kw):
+    projects = kw.get('projects')
+    return widget.SelectWidget(values=projects)
+
+@colander.deferred
+def deferred_default_project(node, kw):
+    return kw.get('current_project')
+
+@colander.deferred
+def deferred_phase_choice(node, kw):
+    phases = kw.get('phases')
+    return widget.SelectWidget(values=phases)
+
+@colander.deferred
+def deferred_default_phase(node, kw):
+    return kw.get('current_phase')
+
+@colander.deferred
+def deferred_client_validator(node, kw):
+    return colander.OneOf([cli[0] for cli in kw['clients']])
+
+@colander.deferred
+def deferred_project_validator(node, kw):
+    return colander.OneOf([p.id for p in kw['all_projects']])
+
+@colander.deferred
+def deferred_phase_validator(node, kw):
+    return colander.OneOf([p.id for p in kw['all_phases']])
+
+class Duplicate(colander.MappingSchema):
+    """
+        colander schema for duplication recording
+    """
+    client = colander.SchemaNode(colander.Integer(),
+                    title=u"Client",
+                    widget=deferred_client_choice,
+                    default=deferred_default_client,
+                    validator=deferred_client_validator)
+    project = colander.SchemaNode(colander.Integer(),
+                    title=u"Projet",
+                    widget=deferred_project_choice,
+                    default=deferred_default_project,
+                    validator=deferred_project_validator)
+    phase = colander.SchemaNode(colander.Integer(),
+                    title=u"Phase",
+                    widget=deferred_phase_choice,
+                    default=deferred_default_phase,
+                    validator=deferred_phase_validator)
+

@@ -206,20 +206,20 @@ class EstimationView(TaskView):
         return self._pdf()
 
     @view_config(route_name='estimation', request_param='action=duplicate',
-            permission='edit')
+            permission='edit', renderer='base/formpage.mako')
     def duplicate(self):
         """
             Duplicates current estimation
         """
-        log.debug("# Duplicate estimation #")
-        newone = self.task.duplicate(self.user, self.project)
-        newone = self.dbsession.merge(newone)
-        self.dbsession.flush()
-        taskid = newone.IDTask
-        self.request.session.flash(u"Le devis {0} a bien été dupliqué".format(
-            self.task.number
-            ), queue='main')
-        return HTTPFound(self.request.route_path(self.route, id=taskid))
+        log.info("# Duplicate an estimation #")
+        try:
+            ret_dict = self._status()
+        except ValidationFailure, err:
+            log.exception(u"An error has been detected")
+            ret_dict = dict(html_form=err.render(),
+                    title=u"Duplication d'un document")
+        log.debug(ret_dict)
+        return ret_dict
 
     @view_config(route_name='estimation', request_param='action=delete',
             permission='edit')
@@ -278,4 +278,13 @@ class EstimationView(TaskView):
             self.request.session.flash(u"Le devis {0} a été supprimé"\
                     .format(self.task.number))
             raise self.project_view_redirect()
-
+        elif status == 'duplicate':
+            estimation = ret_data
+            log.debug(" * The estimation has been duplicated")
+            estimation = self.dbsession.merge(estimation)
+            self.dbsession.flush()
+            id_ = estimation.id
+            log.debug(u"   + The new estimation id : {0}".format(id_))
+            self.request.session.flash(u"Le devis a bien été dupliqué, vous \
+               pouvez l'éditer <a href='{0}'>Ici</a>." \
+               .format(self.request.route_path("estimation", id=id_)), "main")

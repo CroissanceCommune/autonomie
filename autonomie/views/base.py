@@ -23,11 +23,13 @@ from deform import Button
 from sqlalchemy import desc, asc
 
 from webhelpers import paginate
+from webhelpers.html import tags
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.model import Phase
+from autonomie.models.model import Project
 from autonomie.models.model import Tva
 from autonomie.utils.views import get_page_url
 from autonomie.utils.widgets import ActionMenu
@@ -37,6 +39,7 @@ from autonomie.utils.widgets import PopUp
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 from autonomie.views.forms.task import Payment
+from autonomie.views.forms.task import Duplicate
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.pdf import render_html
 
@@ -263,7 +266,7 @@ class TaskView(BaseView):
             return the form for payment registration
         """
         valid_btn = Button(name='submit', value="paid", type='submit',
-                                                        title=u"Validez")
+                                                        title=u"Valider")
         schema = Payment().bind(task=self.task)
         action = self.request.route_path(self.route,
                                          id=self.context.id,
@@ -309,13 +312,55 @@ class TaskView(BaseView):
                        request=self.request
                        )
 
+    def _duplicate_form(self):
+        """
+            Return the form for task duplication
+        """
+        self.request.js_require.add('duplicate')
+        # création du schéma pour le formulaire
+        clients = self.company.clients
+        clients_options = [(cli.id, u"%s (%s)" % (cli.name, cli.code))
+                                                for cli in clients]
+        projects = self.project.client.projects
+        projects_options = [(pro.id, u"%s (%s)" % (pro.name, pro.code))
+                                                    for pro in projects]
+        all_projects = []
+        all_phases = []
+        for client in self.company.clients:
+            for project in client.projects:
+                all_projects.append(project)
+                all_phases.extend(project.phases)
+
+        phases = self.project.phases
+        phases_options = [(phase.id, phase.name) for phase in phases]
+        schema = Duplicate().bind(
+                clients=clients_options,
+                current_client=self.project.client.id,
+                projects=projects_options,
+                current_project=self.project.id,
+                phases=phases_options,
+                current_phase=self.context.phase.id,
+                all_projects=all_projects,
+                all_phases=all_phases)
+
+        # Création de la popup pour le formulaire
+        action = self.request.route_path(self.route,
+                                         id=self.context.id,
+                                         _query=dict(action='duplicate'))
+        valid_btn = Button(name='submit', value="duplicate", type='submit',
+                                                        title=u"Valider")
+        form = Form(schema=schema, buttons=(valid_btn,), action=action)
+        return form
+
     def _duplicate_btn(self):
         """
             Return the button for asking duplication of the current document
         """
-        #TODO
-        # return the client -> project -> phase -> list
-        return []
+        title = u"Dupliquer un document"
+        form = self._duplicate_form()
+        popup = PopUp("duplicate_form", title, form.render())
+        self.popups[popup.name] = popup
+        yield popup.open_btn(css='btn btn-primary')
 
     def _valid_btn(self):
         """
@@ -428,6 +473,29 @@ class TaskView(BaseView):
 
         if hasattr(self, "_post_status_process"):
             getattr(self, "_post_status_process")(status, data)
+
+    def _pre_status_process(self, status, params):
+        """
+            Validates the duplication form before duplicating
+        """
+        log.debug("# In pre Status process #")
+        if status == "duplicate":
+            log.debug(" * Duplicating the current task")
+            form = self._duplicate_form()
+            appstruct = form.validate(params.items())
+            log.debug(" * Form has been validated")
+            project_id = appstruct.get('project')
+            project = Project.get(project_id)
+            phase_id = appstruct.get('phase')
+            phase = Phase.get(phase_id)
+            log.debug(" * Phase : %s" % phase)
+            log.debug(" * Project : %s" % project)
+            appstruct['phase'] = phase
+            appstruct['project'] = project
+            appstruct['user'] = self.user
+            log.debug("Appstruct : %s" % appstruct)
+            return appstruct
+        return params
 
     def _set_modifications(self):
         """

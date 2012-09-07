@@ -222,11 +222,22 @@ class InvoiceView(TaskView):
             self.request.session.flash(u"Un avoir a été généré, \
 vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
             self.request.route_path("cancelinvoice", id=id_)), queue="main")
+        elif status == "duplicate":
+            invoice = ret_data
+            log.debug(invoice)
+            invoice = self.dbsession.merge(invoice)
+            self.dbsession.flush()
+            id_ = invoice.id
+            log.debug(u"   + The new invoice id : {0}".format(id_))
+            self.request.session.flash(u"La facture a bien été dupliquée, \
+              vous pouvez l'éditer <a href='{0}'>Ici</a>."\
+                   .format(self.request.route_path("invoice", id=id_)), "main")
 
     def _pre_status_process(self, status, params):
         """
             Validates the current payment form before setting the status
         """
+        params = super(InvoiceView, self)._pre_status_process(status, params)
         if status == "paid":
             form = self._paid_form()
             appstruct = form.validate(params.items())
@@ -240,12 +251,28 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
         """
             register_payment view
         """
-        log.debug(u"Registering a payment")
+        log.info(u"Registering a payment")
         try:
             ret_dict = self._status()
         except ValidationFailure, err:
             log.exception(u"An error has been detected")
             ret_dict = dict(html_form=err.render(),
                     title=u"Enregistrement d'un paiement")
+        log.debug(ret_dict)
+        return ret_dict
+
+    @view_config(route_name="invoice", request_param='action=duplicate',
+                permission="view", renderer='base/formpage.mako')
+    def duplicate(self):
+        """
+            duplicate an invoice
+        """
+        log.info(u"Duplicating an invoice")
+        try:
+            ret_dict = self._status()
+        except ValidationFailure, err:
+            log.exception(u"An error has been detected")
+            ret_dict = dict(html_form=err.render(),
+                            title=u"Duplication d'un document")
         log.debug(ret_dict)
         return ret_dict

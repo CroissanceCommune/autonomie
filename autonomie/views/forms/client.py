@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 @colander.deferred
 def deferred_ccode_valid(node, kw):
     company = kw['company']
-    id_company = company.id
+    company_id = company.id
     def unique_ccode(node, value):
         """
             Test customer code unicity
@@ -37,7 +37,7 @@ def deferred_ccode_valid(node, kw):
             message = u"Le code client doit contenir 4 caractères."
             raise colander.Invalid(node, message)
         #Test unicity
-        result = Client.query().filter(Client.id_company==id_company)\
+        result = Client.query().filter(Client.company_id==company_id)\
                 .filter(Client.code==value).all()
 
         if len(result):

@@ -181,7 +181,7 @@ de créer de nouveaux projets", queue="main")
         """
             add a filter for the company on the query
         """
-        return query.filter(Project.id_company==company.id)
+        return query.filter(Project.company_id==company.id)
 
     @staticmethod
     def _filter_archived(query, archived):
@@ -218,7 +218,7 @@ de créer de nouveaux projets", queue="main")
         if self.request.context.__name__ == 'company':
             company = self.request.context
             project = Project()
-            project.id_company = company.id
+            project.company_id = company.id
             edit = False
             default_client = None
             title = u"Ajout d'un nouveau projet"

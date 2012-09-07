@@ -18,7 +18,7 @@ from .base import BaseTestCase
 
 PROJECT = dict(name=u'project1',
                code=u"PRO1",
-               id_company=1,
+               company_id=1,
                client_id=5)
 
 EST_LIST1 = ["Devis 1", "Devis 3"]

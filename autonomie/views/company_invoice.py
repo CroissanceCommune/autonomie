@@ -202,8 +202,8 @@ class CompanyInvoicesView(ListView):
         """
             add a filter on the company id
         """
-        inv = inv.filter(Project.id_company==company_id )
-        cancel_inv = cancel_inv.filter(Project.id_company==company_id )
+        inv = inv.filter(Project.company_id==company_id )
+        cancel_inv = cancel_inv.filter(Project.company_id==company_id )
         man_inv = man_inv.filter(ManualInvoice.company_id==company_id)
         return cancel_inv, inv, man_inv
 

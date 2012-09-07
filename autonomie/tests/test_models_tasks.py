@@ -64,9 +64,9 @@ USER = dict(id=2,
 
 USER2 = dict(id=3, login=u"test_user2")
 
-PROJECT = dict(id=1, name=u'project1', code=u"PRO1", id_company=1,
+PROJECT = dict(id=1, name=u'project1', code=u"PRO1", company_id=1,
         client_id=1)
-CLIENT = dict(id=1, name=u"client1", code=u"CLI1", id_company=1)
+CLIENT = dict(id=1, name=u"client1", code=u"CLI1", company_id=1)
 
 ESTIMATION = dict(IDPhase=1,
                 project_id=1,

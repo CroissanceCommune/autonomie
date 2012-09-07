@@ -115,7 +115,7 @@ class ClientView(ListView):
                    Client.name)
         clients = self.dbsession.query(*toquery)
         if company is not None:
-            clients = clients.filter(Client.id_company == company.id)
+            clients = clients.filter(Client.company_id == company.id)
         return clients
 
     def _filter_clients(self, clients, search):
@@ -140,7 +140,7 @@ class ClientView(ListView):
         if self.request.context.__name__ == 'company':
             company = self.request.context
             client = Client()
-            client.id_company = company.id
+            client.company_id = company.id
             edit = False
             title = u"Ajout d'un nouveau client"
         else:

@@ -14,22 +14,6 @@
 #
 """
     Project model
-    `IDProject` int(11) NOT NULL auto_increment,
-    `name` varchar(150) NOT NULL,
-    `customerCode` varchar(4) NOT NULL,
-    `type` varchar(150) default NULL,
-    `code` varchar(4) NOT NULL,
-    `definition` text,
-    `creationDate` int(11) NOT NULL,
-    `updateDate` int(11) NOT NULL,
-    `startingDate` int(11) default NULL,
-    `endingDate` int(11) default NULL,
-    `status` varchar(20) NOT NULL,
-    `IDCompany` int(11) NOT NULL,
-    `dispatchType` varchar(10) NOT NULL default 'PERCENT',
-    `archived` tinyint(4) NOT NULL default '0',
-    PRIMARY KEY  (`IDProject`),
-    KEY `IDCompany` (`IDCompany`)
 """
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -54,7 +38,7 @@ class Project(DBBASE):
     code = Column("code", String(4), nullable=False)
     definition = deferred(Column("definition", Text), group='edit')
 
-    id_company = Column("IDCompany", Integer,
+    company_id = Column("company_id", Integer,
                                     ForeignKey('company.id'))
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))

@@ -14,24 +14,6 @@
 #
 """
     Client model : represents customers
-    `code` varchar(4) NOT NULL,
-     `IDContact` int(11) default '0',
-     `comments` text,
-     `creationDate` int(11) NOT NULL,
-     `updateDate` int(11) NOT NULL,
-     `IDCompany` int(11) NOT NULL,
-     `intraTVA` varchar(50) default NULL,
-     `address` varchar(255) default NULL,
-     `zipCode` varchar(20) default NULL,
-     `city` varchar(255) default NULL,
-     `country` varchar(150) default NULL,
-     `phone` varchar(50) default NULL,
-     `email` varchar(255) default NULL,
-     `contactLastName` varchar(255) default NULL,
-     `name` varchar(255) default NULL,
-     `contactFirstName` varchar(255) default NULL,
-     PRIMARY KEY  (`code`),
-     KEY `IDCompany` (`IDCompany`)
 """
 import logging
 from sqlalchemy import Column
@@ -61,7 +43,7 @@ class Client(DBBASE):
     updateDate = Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp)
-    id_company = Column("IDCompany", Integer,
+    company_id = Column("company_id", Integer,
                                     ForeignKey('company.id'))
     intraTVA = deferred(Column("intraTVA", String(50)), group='edit')
     address = deferred(Column("address", String(255)), group='edit')

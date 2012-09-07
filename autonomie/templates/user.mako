@@ -15,6 +15,9 @@
                 % endfor
                 <dt>E-mail</dt><dd>${format_mail(user.email)}</dd>
             </dl>
+% if not user.enabled():
+    <span class='label label-warning'>Ce compte a été désactivé</span>
+% endif
         </div>
     </div>
     <div class='span6'>

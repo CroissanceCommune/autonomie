@@ -97,8 +97,18 @@ class UserView(ListView):
                                                            id=self.context.id))
             self.actionmenu.add(ViewLink(u"Éditer", "edit", path="user",
                                id=self.context.id, _query=dict(action="edit")))
-            self.actionmenu.add(ViewLink(u"Désactiver", "edit", path="user",
-                            id=self.context.id, _query=dict(action="disable")))
+            if self.context.enabled():
+                self.actionmenu.add(ViewLink(u"Désactiver", "manage",
+                            path="user", id=self.context.id,
+                                            _query=dict(action="disable")))
+            else:
+                message = u"Êtes-vous sûr de vouloir supprimer ce compte ? \
+Cette action n'est pas réversible."
+                self.actionmenu.add(ViewLink(u"Supprimer", "manage",
+                                            confirm=message,
+                                            path="user",
+                                            id=self.context.id,
+                                            _query=dict(action="delete")))
 
     def _get_user_form(self, edit=False):
         """
@@ -287,3 +297,22 @@ class UserView(ListView):
             self.session.flash(message, queue="main")
             for employee in company.employees:
                 self._disable_user(employee)
+
+    @view_config(route_name='user', request_param='action=delete', \
+                                                    permission='manage')
+    def delete(self):
+        """
+            disable a user and its enteprises
+        """
+        message = u"Le compte '{0}' a bien été supprimé".format(
+                                            format_account(self.context))
+        log.debug(u"# Deleting a user #")
+        try:
+            self.dbsession.delete(self.context)
+            self.dbsession.flush()
+            self.session.flash(message, 'main')
+        except:
+            message = u"Erreur à la suppression du compte de '{0}'".format(
+                                                format_account(self.context))
+            self.session.flash(message, 'error')
+        return HTTPFound(self.request.route_path("users"))

@@ -84,9 +84,8 @@ def get_base_state():
     """
         return the task states
     """
-    duplicate = ('duplicate', 'view', duplicate_task, False,)
     result = {}
-    result['draft'] = ('draft', 'wait', duplicate, )
+    result['draft'] = ('draft', 'wait', )
     result['invalid'] = ('draft', 'wait',)
     return result
 
@@ -105,7 +104,7 @@ def get_est_state():
     geninv = ('geninv', None, gen_invoices,)
     delete = ('delete', None, None, False,)
     result = {}
-    result['draft'] = ('draft', 'wait', duplicate, )
+    result['draft'] = ('draft', 'wait', )
     result['invalid'] = ('draft', 'wait',)
     result['wait'] = (valid, invalid, duplicate,)
     result['valid'] = ('aboest', geninv, duplicate,)
@@ -133,7 +132,7 @@ def get_inv_state():
     delete = ('delete', None, None, False,)
     resulted = ('resulted', MANAGER_PERMS,)
     result = {}
-    result['draft'] = ('draft', 'wait', duplicate, )
+    result['draft'] = ('draft', 'wait', )
     result['invalid'] = ('draft', 'wait',)
     result['wait'] = (valid, invalid, duplicate,)
     result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, )

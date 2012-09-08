@@ -158,7 +158,7 @@ class Estimation(Task, TaskCompute):
             Return the args common to all the generated invoices
         """
         return dict(project_id=self.project_id,
-                    phase_id=phase_id,
+                    phase_id=self.phase_id,
                     CAEStatus = 'draft',
                     statusPerson = user_id,
                     owner_id=user_id,

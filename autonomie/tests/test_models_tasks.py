@@ -702,6 +702,6 @@ class TestPolymorphic(BaseTestCase):
         self.session.add(invoice)
         self.session.flush()
         p1 = self.session.query(Payment).join(Task).filter(Task.phase_id==17).first()
-        self.assertTrue(isinstance(p1.document, Invoice))
-        self.assertFalse(isinstance(p1.document, CancelInvoice))
+        self.assertTrue(isinstance(p1.task, Invoice))
+        self.assertFalse(isinstance(p1.task, CancelInvoice))
 

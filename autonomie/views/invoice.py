@@ -105,7 +105,8 @@ class InvoiceView(TaskView):
                                 phases=self.get_phases_choice(),
                                 tvas=self.get_tvas(),
                             )
-        form = Form(schema, buttons=self.get_buttons())
+        form = Form(schema, buttons=self.get_buttons(),
+                counter=self.formcounter)
         form.widget.template = "autonomie:deform_templates/form.pt"
 
         if 'submit' in self.request.params:

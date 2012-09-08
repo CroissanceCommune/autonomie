@@ -16,6 +16,7 @@
     Base views with commonly used utilities
 """
 import logging
+import itertools
 from functools import partial
 from deform import Form
 from deform import Button
@@ -157,6 +158,7 @@ class TaskView(BaseView):
         self._set_actionmenu()
         self.popups = {}
         self.set_lines()
+        self.formcounter = itertools.count()
 
     def get_task(self):
         """
@@ -271,7 +273,8 @@ class TaskView(BaseView):
         action = self.request.route_path(self.route,
                                          id=self.context.id,
                                         _query=dict(action='payment'))
-        form = Form(schema=schema, buttons=(valid_btn,), action=action)
+        form = Form(schema=schema, buttons=(valid_btn,), action=action,
+                counter=self.formcounter)
         return form
 
     def _cancel_btn(self):
@@ -349,7 +352,8 @@ class TaskView(BaseView):
                                          _query=dict(action='duplicate'))
         valid_btn = Button(name='submit', value="duplicate", type='submit',
                                                         title=u"Valider")
-        form = Form(schema=schema, buttons=(valid_btn,), action=action)
+        form = Form(schema=schema, buttons=(valid_btn,), action=action,
+                formid="duplicate_form", counter=self.formcounter)
         return form
 
     def _duplicate_btn(self):
@@ -358,7 +362,7 @@ class TaskView(BaseView):
         """
         title = u"Dupliquer un document"
         form = self._duplicate_form()
-        popup = PopUp("duplicate_form", title, form.render())
+        popup = PopUp("duplicate_form_container", title, form.render())
         self.popups[popup.name] = popup
         yield popup.open_btn(css='btn btn-primary')
 

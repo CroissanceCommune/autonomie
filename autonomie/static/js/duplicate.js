@@ -40,7 +40,20 @@ function get_client(client_id){
     return ALREADY_LOADED[client_id];
   }
 }
-function update_deformField2(projects){
+function get_form(){
+  return $('#duplicate_form');
+}
+function get_select_client(){
+  return $(get_form().find('select')[0]);
+}
+function get_select_project(){
+  return $(get_form().find('select')[1]);
+}
+function get_select_phase(){
+  return $(get_form().find('select')[2]);
+}
+
+function update_project_select(projects){
   /*
    * Update the project select
    */
@@ -57,10 +70,10 @@ function update_deformField2(projects){
       options += project.name + '(' + project.code + ')' + "</option>";
     }
   }
-  $('#deformField2').html(options);
-  $('#deformField2').change();
+  get_select_project().html(options);
+  get_select_project().change();
 }
-function update_deformField3(phases){
+function update_phase_select(phases){
   /*
    * Update the phase select
    */
@@ -73,14 +86,14 @@ function update_deformField3(phases){
                 "</option>";
     }
   }
-  $('#deformField3').html(options);
+  get_select_phase().html(options);
 }
 function getCurrentClient(){
-  var client_id = $("#deformField1 option:selected").val();
+  var client_id = get_select_client().children('option:selected').val();
   return get_client(client_id);
 }
 function getCurrentProject(){
-  var project_id = $("#deformField2 option:selected").val();
+  var project_id = get_select_project().children('option:selected').val();
   var client = getCurrentClient();
   var ret_data = {};
   for (var i=0; i < client.projects.length; i++){
@@ -96,31 +109,31 @@ $(function(){
   /*
    * Add onchange behaviour at page load
    */
-  $('#deformField1').change(
+  get_select_client().change(
     function(){
       var client_obj = getCurrentClient();
       if (client_obj.projects){
-        update_deformField2(client_obj.projects);
+        update_project_select(client_obj.projects);
       }else{
-        update_deformField2([]);
+        update_project_select([]);
       }
     }
     );
-  $('#deformField2').change(
+  get_select_project().change(
     function(){
       var project_obj = getCurrentProject();
 
       if (project_obj !== {}){
         if (project_obj.phases){
-            update_deformField3(project_obj.phases);
+            update_phase_select(project_obj.phases);
         }else{
-          update_deformField3([]);
+          update_phase_select([]);
         }
       }else{
         window.alert("Le client et le projet ne correspondent pas.");
       }
     }
   );
-  $('#deformField1').change();
+  get_select_client().change();
 });
 

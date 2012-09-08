@@ -15,9 +15,13 @@
         </p>
         %if not task.is_editable():
             <p>
-                Vous ne pouvez plus modifier ce document car il a déjà été validé.
-                % if hasattr(task, 'officialNumber'):
-                    Il porte le numéro <b>${task.officialNumber}</b>.
+                % if task.is_waiting():
+                    Vous ne pouvez plus modifier ce document car il est en attente de validation.
+                % else:
+                    Vous ne pouvez plus modifier ce document car il a déjà été validé.
+                    % if hasattr(task, 'officialNumber'):
+                        Il porte le numéro <b>${task.officialNumber}</b>.
+                    % endif
                 % endif
             </p>
         %elif task.is_waiting():

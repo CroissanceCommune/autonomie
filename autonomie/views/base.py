@@ -158,6 +158,8 @@ class TaskView(BaseView):
         self._set_actionmenu()
         self.popups = {}
         self.set_lines()
+        # Le compteur permet à deform de donner des ids différents aux
+        # différents lorsque l'on a plusieurs formulaires dans la même page
         self.formcounter = itertools.count()
 
     def get_task(self):

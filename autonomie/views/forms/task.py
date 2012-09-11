@@ -45,6 +45,23 @@ from .custom_types import QuantityType
 from .custom_types import AmountType
 
 log = logging.getLogger(__name__)
+DAYS = (
+        ('NONE', '-'),
+        ('HOUR', u'Heure(s)'),
+        ('DAY', u'Jour(s)'),
+        ('WEEK', u'Semaine(s)'),
+        ('MONTH', u'Mois'),
+        ('FEUIL', u'Feuillet(s)'),
+        ('PACK', u'Forfait'),
+        )
+PAYMENTDISPLAYCHOICES = (
+        ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
+        ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
+        ('ALL', u"Le détail des paiements apparaît dans le PDF",),)
+
+PAYMENT_MODE_CHOICES = (('CHEQUE', u'Par chèque'),
+                        ('VIREMENT', u'Par virement'))
+
 
 def get_percents():
     """
@@ -75,19 +92,30 @@ continue ?"
     else:
         return u"Ce devis concerne-t-il une formation professionnelle continue?"
 
-DAYS = (
-        ('NONE', '-'),
-        ('HOUR', u'Heure(s)'),
-        ('DAY', u'Jour(s)'),
-        ('WEEK', u'Semaine(s)'),
-        ('MONTH', u'Mois'),
-        ('FEUIL', u'Feuillet(s)'),
-        ('PACK', u'Forfait'),
-        )
-PAYMENTDISPLAYCHOICES = (
-        ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
-        ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
-        ('ALL', u"Le détail des paiements apparaît dans le PDF",),)
+@colander.deferred
+def deferred_tvas_widget(node, kw):
+    """
+        return a tva widget
+    """
+    tvas = kw.get('tvas')
+    wid = widget.SelectWidget(values=tvas,
+                                  css_class='span1',
+                 before='autonomie:deform_templates/staticinput.mako',
+                 before_options={'label':u'Total HT', 'id':'httotal'})
+
+    return wid
+
+@colander.deferred
+def deferred_phases_widget(node, kw):
+    """
+        return phase select widget
+    """
+    choices = kw.get("phases")
+    if choices:
+        wid = widget.SelectWidget(values=choices)
+    else:
+        wid = widget.TextInputWidget()
+    return wid
 
 class EstimationLine(colander.MappingSchema):
     """
@@ -120,6 +148,32 @@ class EstimationLine(colander.MappingSchema):
                     ),
                 css_class='span2'
                 )
+    tva = colander.SchemaNode(colander.String(),
+            widget=deferred_tvas_widget,
+            default=1960,
+            title=u'TVA')
+
+class DiscountLine(colander.MappingSchema):
+    """
+        A single estimation line
+    """
+    description = colander.SchemaNode(colander.String(),
+         widget=widget.TextAreaWidget(cols=80, rows=4,
+             template='autonomie:deform_templates/prestation.mako',
+             css_class='span5'
+             ),
+         missing=u'',
+         css_class='span5')
+    amount = colander.SchemaNode(AmountType(),
+            widget=widget.TextInputWidget(
+                template='autonomie:deform_templates/lineinput.mako',
+                ),
+            css_class='span1'
+            )
+    tva = colander.SchemaNode(colander.String(),
+            widget=deferred_tvas_widget,
+            default=1960,
+            title=u'TVA')
 
 class EstimationLines(colander.SequenceSchema):
     """
@@ -134,31 +188,18 @@ estimationline_mapping_item.mako'
                      )
             )
 
-@colander.deferred
-def deferred_tvas_widget(node, kw):
+class DiscountLines(colander.SequenceSchema):
     """
-        return a tva widget
+        Sequence of estimation lines
     """
-    tvas = kw.get('tvas')
-    wid = widget.SelectWidget(values=tvas,
-                                  css_class='span1',
-                 before='autonomie:deform_templates/staticinput.mako',
-                 before_options={'label':u'Total HT', 'id':'httotal'})
-
-    return wid
-
-
-@colander.deferred
-def deferred_phases_widget(node, kw):
-    """
-        return phase select widget
-    """
-    choices = kw.get("phases")
-    if choices:
-        wid = widget.SelectWidget(values=choices)
-    else:
-        wid = widget.TextInputWidget()
-    return wid
+    discountline = DiscountLine(
+            widget=widget.MappingWidget(
+                    template='autonomie:deform_templates/\
+estimationline_mapping.mako',
+               item_template='autonomie:deform_templates/\
+estimationline_mapping_item.mako'
+                     )
+            )
 
 class TaskLinesBlock(colander.MappingSchema):
     """
@@ -172,21 +213,12 @@ class TaskLinesBlock(colander.MappingSchema):
      min_len=1
      ),
             title=u'')
-    discountHT = colander.SchemaNode(AmountType(),
-            widget=widget.TextInputWidget(
-         template='autonomie:deform_templates/wrappable_input.mako',
-         before='autonomie:deform_templates/staticinput.mako',
-         before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},
-#         after='autonomie:deform_templates/staticinput.mako',
-#         after_options={'label':u'Total HT', 'id':'httotal'}
-                ),
-            title=u"Remise en €",
-            missing=0)
-    tva = colander.SchemaNode(colander.String(),
-            widget=deferred_tvas_widget,
-            default=1960,
-            title=u'TVA')
-
+    discounts = DiscountLines(
+            widget=widget.SequenceWidget(
+    template='autonomie:deform_templates/tasklines_sequence.mako',
+    item_template='autonomie:deform_templates/tasklines_sequence_item.mako',
+    ),
+            title=u'')
     expenses = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
          template='autonomie:deform_templates/wrappable_input.mako',
@@ -238,6 +270,27 @@ class TaskNotes(colander.MappingSchema):
                 missing=u"",
                 description=u"Note complémentaires concernant \
 les prestations décrites")
+
+class TaskCommunication(colander.MappingSchema):
+    """
+        Communication avec la CAE
+    """
+    statusComment = colander.SchemaNode(
+                        colander.String(),
+                        missing=u'',
+                        title=u'Communication Entrepreneur/CAE',
+                        widget=widget.TextAreaWidget(css_class='span10'),
+                        description=u"Message à destination des membres de \
+la CAE qui valideront votre document (n'apparaît pas dans le PDF)")
+
+class TaskSchema(colander.MappingSchema):
+    """
+        colander base Schema for task edition
+    """
+    common = TaskConfiguration( title=u"")
+    lines = TaskLinesBlock(title=u"Détail des prestations",
+                           widget=widget.MappingWidget(
+      item_template='autonomie:deform_templates/estimationdetails_item.mako'))
 
 class EstimationPaymentLine(colander.MappingSchema):
     """
@@ -335,27 +388,6 @@ class InvoicePayments(colander.MappingSchema):
 dans les factures")
 
 
-class TaskCommunication(colander.MappingSchema):
-    """
-        Communication avec la CAE
-    """
-    statusComment = colander.SchemaNode(
-                        colander.String(),
-                        missing=u'',
-                        title=u'Communication Entrepreneur/CAE',
-                        widget=widget.TextAreaWidget(css_class='span10'),
-                        description=u"Message à destination des membres de \
-la CAE qui valideront votre document (n'apparaît pas dans le PDF)")
-
-class TaskSchema(colander.MappingSchema):
-    """
-        colander base Schema for task edition
-    """
-    common = TaskConfiguration( title=u"")
-    lines = TaskLinesBlock(title=u"Détail des prestations",
-                           widget=widget.MappingWidget(
-      item_template='autonomie:deform_templates/estimationdetails_item.mako'))
-
 def get_estimation_schema():
     """
         Return the schema for estimation add/edit
@@ -402,233 +434,16 @@ def get_cancel_invoice_schema():
     schema['common']['description'].title = title
     del schema['common']['course']
     title = u"Conditions de remboursement"
-    tva = schema['lines']['tva']
-    tva.before='autonomie:deform_templates/staticinput.mako',
-    tva.before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},
-    tva.after='autonomie:deform_templates/staticinput.mako',
-    tva.after_options={'label':u'Total HT', 'id':'httotal'}
+#    tva = schema['lines']['tva']
+#    tva.before='autonomie:deform_templates/staticinput.mako',
+#    tva.before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},
+#    tva.after='autonomie:deform_templates/staticinput.mako',
+#    tva.after_options={'label':u'Total HT', 'id':'httotal'}
     payments = InvoicePayments(title=title, name='payments').clone()
     payments['paymentConditions'].title = title
     payments['paymentConditions'].description = u""
     schema.add(payments)
-    del schema["lines"]["discountHT"]
     return schema
-
-class MappingWrapper:
-    """
-        Allows moving from one dict to another
-        allowing to map databases models and colander Mapping schemas
-        when db datas are dispatched through different mapping schemas
-        @param matching_map: matching_map as (
-                                    (field, colanderschemaname,multi_boolean),
-                                                                ...)
-        @param dbtype: internal dbtype name (like 'estimation', 'task' ...)
-                        corresponding to a database table
-    """
-    matching_map = None
-    dbtype = None
-
-    def toschema(self, dbdatas, appstruct):
-        """
-            convert db dict fashionned datas to the appropriate sections
-            to fit the EstimationSchema
-        """
-        for field, section in self.matching_map:
-            value = dbdatas.get(self.dbtype, {}).get(field)
-            if value is not None:
-                appstruct.setdefault(section, {})[field] = value
-        return appstruct
-
-    def todb(self, appstruct, dbdatas):
-        """
-            convert colander deserialized datas to database dbdatas
-        """
-        for field, section in self.matching_map:
-            value = appstruct.get(section, {}).get(field, None)
-            if value is not None or colander.null:
-                dbdatas.setdefault(self.dbtype, {})[field] = value
-        return dbdatas
-
-class SequenceWrapper:
-    """
-        Maps the db models with colander Sequence Schemas
-    """
-    mapping_name = ''
-    sequence_name = ''
-    dbtype = ''
-    fields = None
-    sort_key = 'rowIndex'
-    def toschema(self, dbdatas, appstruct):
-        """
-            Build schema expected datas from list of elements
-        """
-        lineslist = dbdatas.get(self.dbtype, [])
-        for line in sorted(lineslist, key=lambda line:int(line[self.sort_key])):
-            appstruct.setdefault(self.mapping_name, {})
-            appstruct[self.mapping_name].setdefault(self.sequence_name, []
-                                                    ).append(
-                    dict((key, value)for key, value in line.items()
-                                              if key in self.fields)
-                    )
-        return appstruct
-
-    def todb(self, appstruct, dbdatas):
-        """
-            convert colander deserialized datas to database dbdatas
-        """
-        all_ = appstruct.get(self.mapping_name, {}).get(self.sequence_name, [])
-        for index, line in enumerate(all_):
-            dbdatas.setdefault(self.dbtype, [])
-            line[self.sort_key] = index+1
-            dbdatas[self.dbtype].append(line)
-        return dbdatas
-
-
-class InvoiceMatch(MappingWrapper):
-    matching_map = (
-                        #task attrs
-                         ('phase_id','common'),
-                         ('taskDate','common'),
-                         ('description', 'common'),
-                        #both estimation and invoice attrs
-                         ('course', 'common'),
-                         ('displayedUnits', 'common'),
-                         ('tva', 'lines'),
-                         ('discountHT', 'lines'),
-                         ('expenses', 'lines'),
-                         ('paymentConditions', 'payments'),
-                         ('statusComment', 'communication'),
-            )
-    dbtype = 'invoice'
-
-class EstimationMatch(MappingWrapper):
-    matching_map = (
-                         ('phase_id','common'),
-                         ('taskDate','common'),
-                         ('description', 'common'),
-
-                         ('course', 'common'),
-                         ('displayedUnits', 'common'),
-                         ('tva', 'lines'),
-                         ('discountHT', 'lines'),
-                         ('expenses', 'lines'),
-                         ('exclusions', 'notes'),
-                         ('paymentConditions', 'payments'),
-
-                        #estimation only attrs
-                         ('paymentDisplay', 'payments'),
-                         ('deposit', 'payments'),
-                         ('statusComment', 'communication'),
-                         )
-    dbtype = 'estimation'
-
-class CancelInvoiceMatch(MappingWrapper):
-    matching_map = (
-                        #task attrs
-                         ('phase_id','common'),
-                         ('taskDate','common'),
-                         ('description', 'common'),
-                        #both estimation and invoice attrs
-                         ('displayedUnits', 'common'),
-                         ('tva', 'lines'),
-                         ('expenses', 'lines'),
-                         ('reimbursementConditions', 'payments'),
-            )
-    dbtype = 'cancelinvoice'
-
-class TaskLinesMatch(SequenceWrapper):
-    mapping_name = 'lines'
-    sequence_name = 'lines'
-    fields = ('description', 'cost', 'quantity', 'unity',)
-    dbtype = 'lines'
-
-class PaymentLinesMatch(SequenceWrapper):
-    mapping_name = 'payments'
-    sequence_name = 'payment_lines'
-    fields = ('description', 'paymentDate', 'amount',)
-    dbtype = "payment_lines"
-
-def get_estimation_appstruct(dbdatas):
-    """
-        return EstimationSchema-compatible appstruct
-    """
-    appstruct = {}
-    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch):
-        appstruct = matchobj().toschema(dbdatas, appstruct)
-    appstruct = set_payment_times(appstruct, dbdatas)
-    return appstruct
-
-def get_estimation_dbdatas(appstruct):
-    """
-        return dict with db compatible datas
-    """
-    dbdatas = {}
-    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch):
-        dbdatas = matchobj().todb(appstruct, dbdatas)
-    dbdatas = set_manualDeliverables(appstruct, dbdatas)
-    return dbdatas
-
-def get_invoice_appstruct(dbdatas):
-    """
-        return InvoiceSchema compatible appstruct
-    """
-    appstruct = {}
-    for matchobj in (InvoiceMatch, TaskLinesMatch):
-        appstruct = matchobj().toschema(dbdatas, appstruct)
-    return appstruct
-
-def get_invoice_dbdatas(appstruct):
-    """
-        return dict with db compatible datas
-    """
-    dbdatas = {}
-    for matchobj in (InvoiceMatch, TaskLinesMatch):
-        dbdatas = matchobj().todb(appstruct, dbdatas)
-    return dbdatas
-
-def get_cancel_invoice_appstruct(dbdatas):
-    """
-        return cancel invoice schema compatible appstruct
-    """
-    appstruct = {}
-    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
-        appstruct = matchobj().toschema(dbdatas, appstruct)
-    return appstruct
-
-def get_cancel_invoice_dbdatas(appstruct):
-    """
-        return dict with db compatible datas
-    """
-    dbdatas = {}
-    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
-        dbdatas = matchobj().todb(appstruct, dbdatas)
-    return dbdatas
-
-def set_manualDeliverables(appstruct, dbdatas):
-    """
-        Hack the dbdatas to set the manualDeliverables value
-    """
-    if dbdatas['estimation']:
-        if appstruct.get('payments', {}).get('payment_times') == -1:
-            dbdatas['estimation']['manualDeliverables'] = 1
-        else:
-            dbdatas['estimation']['manualDeliverables'] = 0
-    return dbdatas
-
-def set_payment_times(appstruct, dbdatas):
-    """
-        Hack the appstruct to set the payment_times value
-    """
-    if dbdatas.get('estimation', {}).get('manualDeliverables') == 1:
-        appstruct.setdefault('payments', {})['payment_times'] = -1
-    else:
-        appstruct.setdefault('payments', {})['payment_times'] = max(1,
-                                        len(dbdatas.get('payment_lines')))
-    return appstruct
-
-PAYMENT_MODE_CHOICES = (('CHEQUE', u'Par chèque'),
-                        ('VIREMENT', u'Par virement'))
-
 
 @colander.deferred
 def deferred_amount_default(node, kw):
@@ -729,4 +544,232 @@ class Duplicate(colander.MappingSchema):
                     widget=deferred_phase_choice,
                     default=deferred_default_phase,
                     validator=deferred_phase_validator)
+
+#  Mapper tools used to move from dbdatas format to an appstruct fitting the
+#  form schema.
+#  Dans le formulaire de création de devis par exemple, on trouve
+#  aussi bien des EstimationLine que des Estimation ou des DiscountLine et leur
+#  configuration est imbriquée. On a donc besoin de faire un mapping d'un
+#  dictionnaire contenant les modèles {'estimation':..., 'estimationlines':...}
+#  vers un dictionnaire correspondant au formulaire en place.
+class MappingWrapper:
+    """
+        Allows moving from one dict to another
+        allowing to map databases models and colander Mapping schemas
+        when db datas are dispatched through different mapping schemas
+        @param matching_map: matching_map as (
+                                  (field, colanderschemaname,multi_boolean),
+                                                                ...)
+        @param dbtype: internal dbtype name (like 'estimation', 'task' ...)
+                        corresponding to a database table
+    """
+    matching_map = None
+    dbtype = None
+
+    def toschema(self, dbdatas, appstruct):
+        """
+            convert db dict fashionned datas to the appropriate sections
+            to fit the EstimationSchema
+        """
+        for field, section in self.matching_map:
+            value = dbdatas.get(self.dbtype, {}).get(field)
+            if value is not None:
+                appstruct.setdefault(section, {})[field] = value
+        return appstruct
+
+    def todb(self, appstruct, dbdatas):
+        """
+            convert colander deserialized datas to database dbdatas
+        """
+        for field, section in self.matching_map:
+            value = appstruct.get(section, {}).get(field, None)
+            if value is not None or colander.null:
+                dbdatas.setdefault(self.dbtype, {})[field] = value
+        return dbdatas
+
+class SequenceWrapper:
+    """
+        Maps the db models with colander Sequence Schemas
+    """
+    mapping_name = ''
+    sequence_name = ''
+    dbtype = ''
+    fields = None
+    sort_key = 'rowIndex'
+    def toschema(self, dbdatas, appstruct):
+        """
+            Build schema expected datas from list of elements
+        """
+        lineslist = dbdatas.get(self.dbtype, [])
+        if self.sort_key:
+            lines = sorted(lineslist, key=lambda line:int(line[self.sort_key]))
+        else:
+            lines = lineslist
+        for line in lines:
+            appstruct.setdefault(self.mapping_name, {})
+            appstruct[self.mapping_name].setdefault(self.sequence_name, []
+                                                    ).append(
+                    dict((key, value)for key, value in line.items()
+                                              if key in self.fields)
+                    )
+        return appstruct
+
+    def todb(self, appstruct, dbdatas):
+        """
+            convert colander deserialized datas to database dbdatas
+        """
+        all_ = appstruct.get(self.mapping_name, {}).get(self.sequence_name, [])
+        for index, line in enumerate(all_):
+            dbdatas.setdefault(self.dbtype, [])
+            if self.sort_key:
+                line[self.sort_key] = index+1
+            dbdatas[self.dbtype].append(line)
+        return dbdatas
+
+
+class InvoiceMatch(MappingWrapper):
+    matching_map = (
+                        #task attrs
+                         ('phase_id','common'),
+                         ('taskDate','common'),
+                         ('description', 'common'),
+                        #both estimation and invoice attrs
+                         ('course', 'common'),
+                         ('displayedUnits', 'common'),
+                         ('expenses', 'lines'),
+                         ('paymentConditions', 'payments'),
+                         ('statusComment', 'communication'),
+            )
+    dbtype = 'invoice'
+
+class EstimationMatch(MappingWrapper):
+    matching_map = (
+                         ('phase_id','common'),
+                         ('taskDate','common'),
+                         ('description', 'common'),
+
+                         ('course', 'common'),
+                         ('displayedUnits', 'common'),
+                         ('expenses', 'lines'),
+                         ('exclusions', 'notes'),
+                         ('paymentConditions', 'payments'),
+
+                        #estimation only attrs
+                         ('paymentDisplay', 'payments'),
+                         ('deposit', 'payments'),
+                         ('statusComment', 'communication'),
+                         )
+    dbtype = 'estimation'
+
+class CancelInvoiceMatch(MappingWrapper):
+    matching_map = (
+                        #task attrs
+                         ('phase_id','common'),
+                         ('taskDate','common'),
+                         ('description', 'common'),
+                        #both estimation and invoice attrs
+                         ('displayedUnits', 'common'),
+                         ('expenses', 'lines'),
+                         ('reimbursementConditions', 'payments'),
+            )
+    dbtype = 'cancelinvoice'
+
+class TaskLinesMatch(SequenceWrapper):
+    mapping_name = 'lines'
+    sequence_name = 'lines'
+    fields = ('description', 'cost', 'quantity', 'unity', 'tva')
+    dbtype = 'lines'
+
+class PaymentLinesMatch(SequenceWrapper):
+    mapping_name = 'payments'
+    sequence_name = 'payment_lines'
+    fields = ('description', 'paymentDate', 'amount', 'tva')
+    dbtype = "payment_lines"
+
+class DiscountLinesMatch(SequenceWrapper):
+    mapping_name = 'lines'
+    sequence_name = 'discounts'
+    fields = ('description', 'amount', 'tva')
+    dbtype = "discounts"
+    sort_key = None
+
+def get_estimation_appstruct(dbdatas):
+    """
+        return EstimationSchema-compatible appstruct
+    """
+    appstruct = {}
+    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
+                                                        DiscouttLinesMatch):
+        appstruct = matchobj().toschema(dbdatas, appstruct)
+    appstruct = set_payment_times(appstruct, dbdatas)
+    return appstruct
+
+def get_estimation_dbdatas(appstruct):
+    """
+        return dict with db compatible datas
+    """
+    dbdatas = {}
+    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
+                                                      DiscouttLinesMatch):
+        dbdatas = matchobj().todb(appstruct, dbdatas)
+    dbdatas = set_manualDeliverables(appstruct, dbdatas)
+    return dbdatas
+
+def get_invoice_appstruct(dbdatas):
+    """
+        return InvoiceSchema compatible appstruct
+    """
+    appstruct = {}
+    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscouttLinesMatch):
+        appstruct = matchobj().toschema(dbdatas, appstruct)
+    return appstruct
+
+def get_invoice_dbdatas(appstruct):
+    """
+        return dict with db compatible datas
+    """
+    dbdatas = {}
+    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscouttLinesMatch):
+        dbdatas = matchobj().todb(appstruct, dbdatas)
+    return dbdatas
+
+def get_cancel_invoice_appstruct(dbdatas):
+    """
+        return cancel invoice schema compatible appstruct
+    """
+    appstruct = {}
+    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
+        appstruct = matchobj().toschema(dbdatas, appstruct)
+    return appstruct
+
+def get_cancel_invoice_dbdatas(appstruct):
+    """
+        return dict with db compatible datas
+    """
+    dbdatas = {}
+    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
+        dbdatas = matchobj().todb(appstruct, dbdatas)
+    return dbdatas
+
+def set_manualDeliverables(appstruct, dbdatas):
+    """
+        Hack the dbdatas to set the manualDeliverables value
+    """
+    if dbdatas['estimation']:
+        if appstruct.get('payments', {}).get('payment_times') == -1:
+            dbdatas['estimation']['manualDeliverables'] = 1
+        else:
+            dbdatas['estimation']['manualDeliverables'] = 0
+    return dbdatas
+
+def set_payment_times(appstruct, dbdatas):
+    """
+        Hack the appstruct to set the payment_times value
+    """
+    if dbdatas.get('estimation', {}).get('manualDeliverables') == 1:
+        appstruct.setdefault('payments', {})['payment_times'] = -1
+    else:
+        appstruct.setdefault('payments', {})['payment_times'] = max(1,
+                                        len(dbdatas.get('payment_lines')))
+    return appstruct
 

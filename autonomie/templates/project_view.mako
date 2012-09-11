@@ -27,6 +27,12 @@
                         %if project.type:
                             <dt>Type de projet :</dt> <dd>${project.type}</dd>
                         % endif
+                        % if project.startingDate:
+                            <dt>Début prévu le :</dt><dd>${api.format_date(project.startingDate)}</dd>
+                        % endif
+                        % if project.endingDate:
+                            <dt>Livraison prévue le :</dt><dd>${api.format_date(project.endingDate)}</dd>
+                        % endif
                     </dl>
                 </div>
             </div>

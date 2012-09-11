@@ -25,6 +25,7 @@ from pyramid.security import has_permission
 
 from autonomie.models.model import Estimation
 from autonomie.models.model import EstimationLine
+from autonomie.models.model import DiscountLine
 from autonomie.models.model import PaymentLine
 from autonomie.views.forms.task import get_estimation_schema
 from autonomie.views.forms.task import get_estimation_appstruct
@@ -175,6 +176,10 @@ class EstimationView(TaskView):
             eline = EstimationLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
+        for line in dbdatas['discounts']:
+            dline = DiscountLine()
+            merge_session_with_post(dline, line)
+            self.task.discounts.append(dline)
 
     @view_config(route_name='estimation',
                 renderer='tasks/view_only.mako',
@@ -273,11 +278,17 @@ class EstimationView(TaskView):
             self.request.session.flash(u"Le devis {0} a été annulé \
 (indiqué sans suite).".format(self.task.number))
         elif status == 'delete':
-            log.debug("Deleting")
-            self.dbsession.delete(self.task)
+            log.info(u"Deleting an invoice")
+            for line in self.context.lines:
+                self.dbsession.delete(line)
+            for line in self.context.discounts:
+                self.dbsession.delete(line)
+            for line in self.payment_lines:
+                self.dbsession.delete(line)
+            self.dbsession.delete(self.context)
             self.dbsession.flush()
             self.request.session.flash(u"Le devis {0} a été supprimé"\
-                    .format(self.task.number))
+                    .format(self.context.number))
             raise self.project_view_redirect()
         elif status == 'duplicate':
             estimation = ret_data

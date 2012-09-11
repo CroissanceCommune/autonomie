@@ -25,6 +25,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.model import Invoice
 from autonomie.models.model import InvoiceLine
+from autonomie.models.model import DiscountLine
 from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
@@ -167,6 +168,10 @@ class InvoiceView(TaskView):
             eline = InvoiceLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
+        for line in dbdatas['discounts']:
+            dline = DiscountLine()
+            merge_session_with_post(dline, line)
+            self.task.discounts.append(line)
 
     @view_config(route_name='invoice',
                 renderer='tasks/view_only.mako',
@@ -233,6 +238,16 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
             self.request.session.flash(u"La facture a bien été dupliquée, \
               vous pouvez l'éditer <a href='{0}'>Ici</a>."\
                    .format(self.request.route_path("invoice", id=id_)), "main")
+        elif status == 'delete':
+            log.info(u"Deleting an invoice")
+            for line in self.context.lines:
+                self.dbsession.delete(line)
+            for line in self.context.discounts:
+                self.dbsession.delete(line)
+            self.dbsession.delete(self.context)
+            self.dbsession.flush()
+            self.request.session.flash(u"La facture {0} a été supprimée"\
+                    .format(self.context.number))
 
     def _pre_status_process(self, status, params):
         """

@@ -362,7 +362,7 @@ class TaskView(BaseView):
         """
             Return the button for asking duplication of the current document
         """
-        title = u"Dupliquer un document"
+        title = u"Dupliquer le document"
         form = self._duplicate_form()
         popup = PopUp("duplicate_form_container", title, form.render())
         self.popups[popup.name] = popup

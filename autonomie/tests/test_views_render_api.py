@@ -27,7 +27,7 @@ class TestIt(BaseTestCase):
     def test_format_amount(self):
         a = 1525
         b = 1525.3
-        locale.setlocale(locale.LC_ALL, 'fr_FR')
+        locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
         self.assertEqual(render_api.format_amount(a), "15,25")
         self.assertEqual(render_api.format_amount(a, False), "15,25")
         self.assertEqual(render_api.format_amount(b), "15,25")

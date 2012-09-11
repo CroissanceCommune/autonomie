@@ -11,3 +11,4 @@ from .estimation import Estimation
 from .estimation import EstimationLine
 from .estimation import PaymentLine
 from .task import Task
+from .task import DiscountLine

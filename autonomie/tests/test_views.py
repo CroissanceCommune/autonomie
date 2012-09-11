@@ -61,5 +61,4 @@ class TestIndex(BaseViewTest):
         request._user = avatar
         request.user = avatar
         response = index(request)
-        print response
         self.assertEqual(response.status_int, 302)

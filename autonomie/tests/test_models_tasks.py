@@ -37,6 +37,7 @@ from autonomie.models.task import EstimationLine
 from autonomie.models.task import InvoiceLine
 from autonomie.models.task import PaymentLine
 from autonomie.models.task import CancelInvoiceLine
+from autonomie.models.task import DiscountLine
 from autonomie.models.task import Payment
 from autonomie.models.task.states import record_payment
 from autonomie.models.task.compute import TaskCompute
@@ -75,8 +76,6 @@ ESTIMATION = dict(phase_id=1,
                 CAEStatus="draft",
                 course="0",
                 displayedUnits="1",
-                discountHT=2000,
-                tva=1960,
                 expenses=1500,
                 deposit=20,
                 exclusions=u"Notes",
@@ -96,8 +95,6 @@ INVOICE = dict(phase_id=1,
                 CAEStatus="draft",
                 course="0",
                 displayedUnits="1",
-                discountHT=2000,
-                tva=1960,
                 expenses=1500,
                 deposit=20,
                 paymentConditions=u"Conditions de paiement",
@@ -114,7 +111,6 @@ CANCELINVOICE = dict(phase_id=1,
                 CAEStatus="draft",
                 course="0",
                 displayedUnits="1",
-                tva=1960,
                 expenses=1500,
                 paymentConditions=u"Conditions de paiement",
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
@@ -123,16 +119,19 @@ CANCELINVOICE = dict(phase_id=1,
                 number=u"cancelinvoicenumber")
 LINES = [{'description':u'text1',
           'cost':10025,
+           'tva':1960,
           'unity':'DAY',
           'quantity':1.25,
           'rowIndex':1},
          {'description':u'text2',
           'cost':7500,
+           'tva':1960,
           'unity':'month',
           'quantity':3,
           'rowIndex':2},
          {'description':u'text3',
           'cost':-5200,
+           'tva':1960,
           "quantity":1,
           "unity":"DAY",
           "rowIndex":3,}]
@@ -149,6 +148,10 @@ PAYMENT_LINES = [{'description':u"Début",
                   "amount":150,
                   "rowIndex":3}]
 
+DISCOUNTS = [{'description':u"Remise à 19.6",
+              'amount':2000,
+              'tva':1960}]
+
 PAYMENTS = [
             {'amount':1500, 'mode':'CHEQUE'},
             {'amount':1895, 'mode':'CHEQUE'},
@@ -164,15 +167,21 @@ PAYMENTS = [
 # so it fits the limit case
 #
 # Line totals should be floats (here they are *100)
-EST_LINES_TOTAL = (12531.25, 22500, -5200)
-LINES_TOTAL = sum(EST_LINES_TOTAL)
+EST_LINES_TOTAL_HT = (12531.25, 22500, -5200)
+EST_LINES_TVAS = (2456.125, 4410, -1019.2)
 
-TVA = int((LINES_TOTAL - ESTIMATION['discountHT']) \
-                * float(ESTIMATION['tva']) / 10000)
+LINES_TOTAL_HT = sum(EST_LINES_TOTAL_HT)
+LINES_TOTAL_TVAS = sum(EST_LINES_TVAS)
+
+DISCOUNT_TOTAL_HT = sum([d['amount']for d in DISCOUNTS])
+DISCOUNT_TVAS = (392,)
+DISCOUNT_TOTAL_TVAS = sum(DISCOUNT_TVAS)
+
+HT_TOTAL =  int(LINES_TOTAL_HT - DISCOUNT_TOTAL_HT)
+TVA = int(LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS)
 
 # EST_TOTAL = lines + tva + expenses rounded
-EST_TOTAL = int(LINES_TOTAL - ESTIMATION['discountHT'] \
-                        + TVA + ESTIMATION['expenses'])
+EST_TOTAL = HT_TOTAL + TVA + ESTIMATION['expenses']
 EST_DEPOSIT = int(EST_TOTAL * ESTIMATION['deposit'] / 100.0)
 PAYMENTSSUM = sum([p['amount'] for p in PAYMENT_LINES[:-1]])
 EST_SOLD = EST_TOTAL - EST_DEPOSIT - PAYMENTSSUM
@@ -205,6 +214,9 @@ def get_estimation(user=None, project=None):
     for line in LINES:
         l = EstimationLine(**line)
         est.lines.append(l)
+    for line in DISCOUNTS:
+        l = DiscountLine(**line)
+        est.discounts.append(l)
     for line in PAYMENT_LINES:
         l = PaymentLine(**line)
         est.payment_lines.append(l)
@@ -212,8 +224,6 @@ def get_estimation(user=None, project=None):
         user = get_user()
     if project is None:
         project = get_project()
-    print "Project"
-    project
     est.project = project
     est.statusPersonAccount = user
     return est
@@ -223,6 +233,9 @@ def get_invoice(user=None, project=None, stripped=False):
     for line in LINES:
         l = InvoiceLine(**line)
         inv.lines.append(l)
+    for line in DISCOUNTS:
+        l = DiscountLine(**line)
+        inv.discounts.append(l)
     if not stripped:
         if not user:
             user = get_user()
@@ -350,52 +363,67 @@ class TestTaskModels(BaseTestCase):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
 class TestComputing(BaseTestCase):
-    def test_line_total(self):
+    def test_line_total_ht(self):
         for index, line in enumerate(LINES):
             for obj in InvoiceLine, CancelInvoiceLine, EstimationLine:
                 line_obj = obj(**line)
-                self.assertEqual(line_obj.total(), EST_LINES_TOTAL[index])
+                self.assertEqual(line_obj.total_ht(), EST_LINES_TOTAL_HT[index])
+                self.assertEqual(line_obj.total(), EST_LINES_TOTAL_HT[index] +\
+                        EST_LINES_TVAS[index])
 
-    def test_lines_total(self):
+    def test_lines_total_ht(self):
         task = TaskCompute()
         task.lines = []
+        task.discounts = []
         for index, line in enumerate(LINES):
             task.lines.append(InvoiceLine(**line))
-        self.assertEqual(task.lines_total(), sum(EST_LINES_TOTAL))
+        self.assertEqual(task.lines_total_ht(), sum(EST_LINES_TOTAL_HT))
         for obj, line_obj in ((Invoice, InvoiceLine), \
                             (CancelInvoice, CancelInvoiceLine), \
                             (Estimation, EstimationLine)):
             task = get_task(factory=obj)
             for line in LINES:
                 task.lines.append(line_obj(**line))
-            self.assertEqual(task.lines_total(), sum(EST_LINES_TOTAL))
+            self.assertEqual(task.lines_total_ht(), sum(EST_LINES_TOTAL_HT))
+            for discount in DISCOUNTS:
+                task.discounts.append(DiscountLine(**discount))
+            self.assertEqual(task.discount_total_ht(), DISCOUNT_TOTAL_HT)
+
+    def test_discount_total_ht(self):
+        for i, line in enumerate( DISCOUNTS ):
+            line_obj = DiscountLine(**line)
+            self.assertEqual(line_obj.total_ht(), DISCOUNTS[i]['amount'])
+            self.assertEqual(line_obj.total(), DISCOUNTS[i]['amount'] \
+                                                    + DISCOUNT_TVAS[i])
 
     def test_total_ht(self):
         est = get_estimation()
         self.assertEqual(est.total_ht(),
-                    sum(EST_LINES_TOTAL)-ESTIMATION['discountHT'])
+                    HT_TOTAL)
 
     def test_tva_amount(self):
         task = TaskCompute()
-        task.tva = 1960
+        line = InvoiceLine(cost=5010, quantity=1, tva=1960)
+        task.lines = [line]
+        task.discounts = []
         # cf #501
         # ici 5010 correpond à 50€10
-        self.assertEqual(task.tva_amount(5010), 981)
+        self.assertEqual(task.tva_amount(), 981)
 
         est = get_estimation()
         self.assertEqual(est.tva_amount(), TVA)
 
     def test_total_ttc(self):
         line = InvoiceLine(cost=1030, quantity=1.25, rowIndex=1,
-                            description='')
+                            tva=1960, description='')
         # cf ticket #501
         # line total : 12.875
         # tva : 2.5235 -> 2.52
         # A confirmer :l'arrondi ici bas
         # => total : 15.39 (au lieu de 15.395)
         task = TaskCompute()
-        task.tva = 1960
         task.lines = [line]
+        task.discounts = []
         self.assertEqual(task.total_ttc(), 1539)
 
     def test_total(self):
@@ -585,53 +613,55 @@ class TestManualInvoice(BaseTestCase):
         m = ManualInvoice(montant_ht=1950)
         self.assertEqual(m.tva_amount(), 0)
 
-
 class TestEstimationLine(BaseTestCase):
     def test_duplicate_line(self):
         line = EstimationLine(**LINES[1])
         dline = line.duplicate()
-        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
             self.assertEqual(getattr(dline, i), getattr(line, i))
 
     def test_gen_invoiceline(self):
         line = EstimationLine(**LINES[1])
         iline = line.gen_invoice_line()
-        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
             self.assertEqual(getattr(line, i), getattr(iline, i))
 
     def test_total(self):
-        i = EstimationLine(cost=1.25, quantity=1.25)
-        self.assertEqual(i.total(), 1.5625)
+        i = EstimationLine(cost=1.25, quantity=1.25, tva=1960)
+        self.assertEqual(i.total_ht(), 1.5625)
+        self.assertEqual(i.total(), 1.86875)
 
 class TestInvoiceLine(BaseTestCase):
     def test_duplicate_line(self):
         line = InvoiceLine(**LINES[1])
         dline = line.duplicate()
-        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
             self.assertEqual(getattr(dline, i), getattr(line, i))
 
 
     def test_gen_cancelinvoice_line(self):
         line = InvoiceLine(**LINES[1])
         cline = line.gen_cancelinvoice_line()
-        for i in ('rowIndex', "description", "quantity", "unity"):
+        for i in ('rowIndex', "description", 'tva', "quantity", "unity"):
             self.assertEqual(getattr(cline, i), getattr(line, i))
         self.assertEqual(cline.cost, -1 * line.cost)
 
     def test_total(self):
-        i = InvoiceLine(cost=1.25, quantity=1.25)
-        self.assertEqual(i.total(), 1.5625)
+        i = InvoiceLine(cost=1.25, quantity=1.25, tva=1960)
+        self.assertEqual(i.total_ht(), 1.5625)
+        self.assertEqual(i.total(), 1.86875)
 
 class TestCancelInvoiceLine(BaseTestCase):
     def test_duplicate_line(self):
         line = CancelInvoiceLine(**LINES[1])
         dline = line.duplicate()
-        for i in ('rowIndex', 'cost', "description", "quantity", "unity"):
+        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
             self.assertEqual(getattr(dline, i), getattr(line, i))
 
     def test_total(self):
-        i = CancelInvoiceLine(cost=1.25, quantity=1.25)
-        self.assertEqual(i.total(), 1.5625)
+        i = CancelInvoiceLine(cost=1.25, quantity=1.25, tva=1960)
+        self.assertEqual(i.total_ht(), 1.5625)
+        self.assertEqual(i.total(), 1.86875)
 
 class TestPaymentLine(BaseTestCase):
     def test_duplicate(self):

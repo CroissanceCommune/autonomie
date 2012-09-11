@@ -163,7 +163,6 @@ class TestEstimationMatchTools(BaseTestCase):
         datas_ = deepcopy(DATAS)
         e = TaskLinesMatch()
         result = e.todb(datas_, {})
-        print result
         self.assertEqual(result['lines'], DBDATAS['lines'])
 
     def test_appstruct_to_paymentlinesdbdatas(self):

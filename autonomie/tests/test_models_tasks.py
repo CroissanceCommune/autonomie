@@ -224,8 +224,6 @@ def get_estimation(user=None, project=None):
         user = get_user()
     if project is None:
         project = get_project()
-    print "Project"
-    project
     est.project = project
     est.statusPersonAccount = user
     return est

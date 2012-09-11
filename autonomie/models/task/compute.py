@@ -30,10 +30,6 @@ class TaskCompute(object):
         expenses
         tva
     """
-    # Computing functions
-    # HT TOTAL total of lines ht
-    # TVA TOTAL BY TVA
-    #
     def lines_total_ht(self):
         """
             compute the sum of the task lines total
@@ -50,7 +46,6 @@ class TaskCompute(object):
         """
             compute the HT amount
         """
-        print "Total HT : %s" % int(self.lines_total_ht() - self.discount_total_ht())
         return int(self.lines_total_ht() - self.discount_total_ht())
 
     def get_tvas(self):
@@ -60,18 +55,13 @@ class TaskCompute(object):
         """
         ret_dict = {}
         for line in self.lines:
-            print "line: %s, %s " % (line.total_ht(), line.tva_amount())
             val = ret_dict.get(line.tva, 0)
             val += line.tva_amount()
-            print "Val : %s" % val
             ret_dict[line.tva] = val
         for discount in self.discounts:
-            print "discount: %s %s" %(discount.amount, discount.tva_amount())
             val = ret_dict.get(line.tva, 0)
             val -= discount.tva_amount()
-            print "Val : %s" % val
             ret_dict[line.tva] = val
-        print "TVA dict : %s" % ret_dict
         return ret_dict
 
     def tva_amount(self):

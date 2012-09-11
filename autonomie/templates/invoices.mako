@@ -108,12 +108,14 @@
         <th>${sortable(u"Client", 'client')}</th>
         <th>Montant HT</th>
         <th>TVA</th>
+        <th>TTC</th>
         <th>Information de paiement</th>
         <th>PDF</th>
     </thead>
     <tbody>
         <% totalht = sum([invoice.total_ht() for invoice in invoices]) %>
         <% totaltva = sum([invoice.tva_amount() for invoice in invoices]) %>
+        <% totalttc = sum([invoice.total() for invoice in invoices]) %>
         <tr>
             <td colspan='6'><strong>Total</strong></td>
             <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
@@ -182,6 +184,9 @@
                         ${api.format_amount(invoice.tva_amount())|n}&nbsp;€
                     </td>
                     <td>
+                        ${api.format_amount(invoice.total())|n}&nbsp;€
+                    </td>
+                    <td>
                         % if len(invoice.payments) == 1 and invoice.is_resulted():
                             ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0].date)}
                         % elif len(invoice.payments) > 0:
@@ -207,7 +212,7 @@
             % endfor
         % else:
             <tr>
-                <td colspan='9'>
+                <td colspan='11'>
                     Aucune facture n'a pu être retrouvée
                 </td>
             </tr>
@@ -218,7 +223,8 @@
             <td colspan='6'><strong>Total</strong></td>
             <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
             <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-            <td colspan='3'></td>
+            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+            <td colspan='2'></td>
         </tr>
     </tfoot>
 </table>

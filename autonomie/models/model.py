@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 08 sept. 2012 00:48:22 CEST
+# * Last Modified : mar. 11 sept. 2012 15:36:19 CEST
 #
 # * Project : autonomie
 #
@@ -40,11 +40,12 @@ from autonomie.models.task import Task
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
 from autonomie.models.task import CancelInvoice
-from autonomie.models.task import ManualInvoice
-from autonomie.models.task import CancelInvoiceLine
 from autonomie.models.task import EstimationLine
-from autonomie.models.task import InvoiceLine
+from autonomie.models.task import DiscountLine
 from autonomie.models.task import PaymentLine
+from autonomie.models.task import InvoiceLine
+from autonomie.models.task import CancelInvoiceLine
+from autonomie.models.task import ManualInvoice
 from autonomie.models.user import User
 
 

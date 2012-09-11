@@ -255,6 +255,8 @@ class Estimation(Task, TaskCompute):
         invoice = Invoice(**args)
         for line in self._sold_invoice_lines(account_lines):
             invoice.lines.append(line)
+        for line in self.discounts:
+            invoice.discounts.append(line.duplicate())
         return invoice
 
     def gen_invoices(self, user_id):
@@ -391,6 +393,7 @@ class EstimationLine(DBBASE):
     description = Column("description", Text)
     cost = Column(Integer, default=0)
     quantity = Column(DOUBLE, default=1)
+    tva = Column("tva", Integer, nullable=False, default=196)
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
     updateDate = deferred(Column("updateDate", CustomDateType,
@@ -409,6 +412,7 @@ class EstimationLine(DBBASE):
         newone.cost = self.cost
         newone.description = self.description
         newone.quantity = self.quantity
+        newone.tva = self.tva
         newone.unity = self.unity
         return newone
 
@@ -421,14 +425,26 @@ class EstimationLine(DBBASE):
         line.cost = self.cost
         line.description = self.description
         line.quantity = self.quantity
+        line.tva = self.tva
         line.unity = self.unity
         return line
 
-    def total(self):
+    def total_ht(self):
         """
             Compute the line's total
         """
         return float(self.cost) * float(self.quantity)
+
+    def tva_amount(self, totalht=None):
+        """
+            compute the tva amount of a line
+        """
+        totalht = self.total_ht()
+        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
+        return result
+
+    def total(self):
+        return self.tva_amount() + self.total_ht()
 
 class PaymentLine(DBBASE):
     """

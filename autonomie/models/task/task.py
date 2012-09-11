@@ -27,6 +27,7 @@ from sqlalchemy import Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
 from sqlalchemy.orm import deferred
+from sqlalchemy.orm import backref
 
 from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomDateType2
@@ -156,3 +157,44 @@ ce document.".format(status)
             Return the id of the company owning this task
         """
         return self.project.company.id
+
+class DiscountLine(DBBASE):
+    """
+         A discount line
+    """
+    __tablename__ = 'discount'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    id = Column("id", Integer, primary_key=True, nullable=False)
+    task_id = Column(Integer, ForeignKey('task.id'))
+    tva = Column("tva", Integer, nullable=False, default=196)
+    amount = Column("amount", Integer)
+    description = Column("description", Text)
+    task = relationship("Task", backref=backref('discounts',
+                    order_by='DiscountLine.tva'))
+
+    def duplicate(self):
+        """
+            return the equivalent InvoiceLine
+        """
+        line = DiscountLine()
+        line.tva = self.tva
+        line.amount = self.amount
+        line.description = self.description
+        return line
+
+    def total_ht(self):
+        """
+            Compute the line's total
+        """
+        return float(self.amount)
+
+    def tva_amount(self):
+        """
+            compute the tva amount of a line
+        """
+        totalht = self.total_ht()
+        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
+        return result
+
+    def total(self):
+        return self.tva_amount() + self.total_ht()

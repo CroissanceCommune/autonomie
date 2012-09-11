@@ -75,7 +75,7 @@ class IMoneyTask(Interface):
     """
         Interface for task handling money
     """
-    def lines_total():
+    def lines_total_ht():
         """
             Return the sum of the document lines
         """
@@ -85,14 +85,19 @@ class IMoneyTask(Interface):
             return the HT total of the document
         """
 
-    def discount_amount():
+    def discount_total_ht():
         """
-            Return the discount
+            Return the HT discount
         """
 
-    def tva_amount(totalht):
+    def get_tvas():
         """
-            compute the tva
+            Return a dict with the tva amounts stored by tva reference
+        """
+
+    def tva_amount():
+        """
+            Return the amount of Tva to be paid
         """
 
     def total_ttc():

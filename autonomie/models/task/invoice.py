@@ -83,7 +83,7 @@ class Invoice(Task, TaskCompute):
     project_id = Column("project_id", ForeignKey('project.id'))
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     number = Column("number", String(100), nullable=False)
-    tva = Column("tva", Integer, nullable=False, default=196)
+    #tva = Column("tva", Integer, nullable=False, default=196)
     paymentConditions = deferred(Column("paymentConditions", Text),
                                  group='edit')
     deposit = deferred(Column('deposit', Integer, nullable=False, default=0),
@@ -221,7 +221,7 @@ class Invoice(Task, TaskCompute):
         cancelinvoice.invoiceNumber = self.officialNumber
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.displayedUnits = self.displayedUnits
-        cancelinvoice.tva = self.tva
+       # cancelinvoice.tva = self.tva
         cancelinvoice.sequenceNumber = seq_number
         cancelinvoice.number = CancelInvoice.get_number(self.project,
                             cancelinvoice.sequenceNumber,
@@ -231,12 +231,15 @@ class Invoice(Task, TaskCompute):
         cancelinvoice.owner_id = user_id
         for line in self.lines:
             cancelinvoice.lines.append(line.gen_cancelinvoice_line())
-        if self.discountHT:
-            discount_line = CancelInvoiceLine(cost=self.discountHT,
+        rowindex = self.get_next_row_index()
+        for discount in self.discounts:
+            discount_line = CancelInvoiceLine(cost=discount.amount,
+                                          tva=discount.tva,
                                           quantity=1,
-                                          description=u"Remise HT",
-                                          rowIndex=self.get_next_row_index(),
+                                          description=discount.description,
+                                          rowIndex=rowindex,
                                           unity='NONE')
+            rowindex += 1
             cancelinvoice.lines.append(discount_line)
         return cancelinvoice
 
@@ -280,7 +283,7 @@ class Invoice(Task, TaskCompute):
 
         invoice.sequenceNumber = seq_number
         invoice.number = Invoice.get_number(project, seq_number, date)
-        invoice.tva = self.tva
+        #invoice.tva = self.tva
         invoice.paymentConditions = self.paymentConditions
         invoice.deposit = self.deposit
         invoice.course = self.course
@@ -294,6 +297,8 @@ class Invoice(Task, TaskCompute):
         invoice.owner = user
         for line in self.lines:
             invoice.lines.append(line.duplicate())
+        for line in self.discounts:
+            invoice.discounts.append(line.duplicate())
         return invoice
 
 class InvoiceLine(DBBASE):
@@ -307,6 +312,7 @@ class InvoiceLine(DBBASE):
     rowIndex = Column("rowIndex", Integer, default=1)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
+    tva = Column("tva", Integer, nullable=False, default=196)
     quantity = Column(DOUBLE, default=1)
     creationDate = deferred(Column("creationDate", CustomDateType,
                                             default=get_current_timestamp))
@@ -324,6 +330,7 @@ class InvoiceLine(DBBASE):
         newone = InvoiceLine()
         newone.rowIndex = self.rowIndex
         newone.cost = self.cost
+        newone.tva = self.tva
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
@@ -336,16 +343,29 @@ class InvoiceLine(DBBASE):
         newone = CancelInvoiceLine()
         newone.rowIndex = self.rowIndex
         newone.cost = -1 * self.cost
+        newone.tva = self.tva
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
 
-    def total(self):
+    def total_ht(self):
         """
             Compute the line's total
         """
         return float(self.cost) * float(self.quantity)
+
+    def tva_amount(self):
+        """
+            compute the tva amount of a line
+        """
+        totalht = self.total_ht()
+        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
+        return result
+
+    def total(self):
+        return self.tva_amount() + self.total_ht()
+
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
     """
@@ -362,7 +382,7 @@ class CancelInvoice(Task, TaskCompute):
     project_id = Column(Integer, ForeignKey('project.id'))
     sequenceNumber = deferred(Column(Integer), group='edit')
     number = Column(String(100))
-    tva = Column(Integer, default=1960)
+    #tva = Column(Integer, default=1960)
     reimbursementConditions = deferred(Column(String(255), default=None),
             group='edit')
     officialNumber = deferred(Column(Integer, default=None), group='edit')
@@ -487,6 +507,10 @@ class ManualInvoice(DBBASE):
         return None
 
     @property
+    def discounts(self):
+        return []
+
+    @property
     def payments(self):
         """
             Return a payment object for compatibility
@@ -582,6 +606,7 @@ class CancelInvoiceLine(DBBASE):
     rowIndex = Column(Integer)
     description = Column(Text, default="")
     cost = Column(Integer, default=0)
+    tva = Column("tva", Integer, nullable=False, default=196)
     quantity = Column(DOUBLE, default=1)
     unity = Column(String(10), default=None)
 
@@ -592,16 +617,28 @@ class CancelInvoiceLine(DBBASE):
         newone = CancelInvoiceLine()
         newone.rowIndex = self.rowIndex
         newone.cost = self.cost
+        newone.tva = self.tva
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
 
-    def total(self):
+    def total_ht(self):
         """
             Compute the line's total
         """
         return float(self.cost) * float(self.quantity)
+
+    def tva_amount(self):
+        """
+            compute the tva amount of a line
+        """
+        totalht = self.total_ht()
+        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
+        return result
+
+    def total(self):
+        return self.tva_amount() + self.total_ht()
 
 class Payment(DBBASE):
     """

@@ -17,8 +17,6 @@ from mock import MagicMock
 from .base import BaseTestCase
 DBDATAS = dict(estimation=dict(course="0",
                                 displayedUnits="1",
-                                discountHT=2000,
-                                tva=1960,
                                 expenses=1500,
                                 deposit=20,
                                 exclusions="Ne sera pas fait selon la règle",
@@ -31,16 +29,22 @@ DBDATAS = dict(estimation=dict(course="0",
                                 statusComment=u"Aucun commentaire"),
                 lines=[
                      {'description':'text1',
-                     'cost':1000,
+                     'cost':10000,
                      'unity':'days',
                      'quantity':12,
+                     'tva':1960,
                      'rowIndex':1},
                      {'description':'text2',
                      'cost':20000,
                      'unity':'month',
                      'quantity':12,
+                     'tva':700,
                      'rowIndex':2},
                      ],
+                discounts=[
+                          {'description':'remise1', 'amount':1000, 'tva':1960},
+                          {'description':'remise2', 'amount':1000, 'tva':700},
+                    ],
                 payment_lines=[
                     {'description':"Début", "paymentDate":"12-12-2012",
                                             "amount":15000, "rowIndex":1},
@@ -53,7 +57,6 @@ DBDATAS = dict(estimation=dict(course="0",
 DBDATAS2 = dict(estimation=dict(course="0",
                                 displayedUnits="1",
                                 discountHT=0,
-                                tva=0,
                                 expenses=0,
                                 deposit=0,
                                 exclusions="Ne sera pas fait selon la règle",
@@ -69,8 +72,10 @@ DBDATAS2 = dict(estimation=dict(course="0",
                      'cost':1000,
                      'unity':'days',
                      'quantity':1,
+                     'tva':0,
                      'rowIndex':1},
                      ],
+                discounts=[{'description':'remise1', 'amount':1000, 'tva':0},],
                 payment_lines=[
                     {'description':"Début", "paymentDate":"12-12-2012",
                                             "amount":15, "rowIndex":1},
@@ -78,21 +83,22 @@ DBDATAS2 = dict(estimation=dict(course="0",
                                            "amount":15, "rowIndex":2},
                     {'description':"Fin", "paymentDate":"14-12-2012",
                                             "amount":1, "rowIndex":3},
-                    ]
+                    ],
                 )
 DATAS = {'common': dict(phase_id=485,
                         taskDate="10-12-2012",
                         description="Devis pour le client test",
                         course="0",
                         displayedUnits="1",),
-        'lines':dict(discountHT=2000,
-                     tva=1960,
-                     expenses=1500,
+        'lines':dict(expenses=1500,
                      lines=[
-       {'description':'text1', 'cost':1000, 'unity':'days', 'quantity':12,},
-       {'description':'text2', 'cost':20000, 'unity':'month', 'quantity':12},
-                            ]
-                     ),
+       {'description':'text1', 'cost':10000, 'unity':'days', 'quantity':12, 'tva':1960},
+       {'description':'text2', 'cost':20000, 'unity':'month', 'quantity':12, 'tva':700},
+                            ],
+                     discounts=[
+      {'description':'remise1', 'amount':1000, 'tva':1960},
+      {'description':'remise2', 'amount':1000, 'tva':700},
+                     ],),
         'notes':dict(exclusions="Ne sera pas fait selon la règle"),
         'payments':dict(paymentDisplay='ALL',
                         deposit=20,
@@ -116,6 +122,7 @@ def get_full_estimation_model(datas):
     estpayments = [MagicMock(**line)for line in datas['payment_lines']]
     est.lines = estlines
     est.payment_lines = estpayments
+    est.discounts = [MagicMock(**line)for line in datas['discounts']]
     return est
 
 class TestEstimationMatchTools(BaseTestCase):
@@ -137,6 +144,15 @@ class TestEstimationMatchTools(BaseTestCase):
             del(line['rowIndex'])
         for i, line in enumerate(lines):
             self.assertEqual(result['lines']['lines'][i], line)
+
+    def test_discountlines_dbdatas_to_appstruct(self):
+        from autonomie.views.forms.task import DiscountLinesMatch
+        d = DiscountLinesMatch()
+        result = d.toschema(DBDATAS, {})
+        from copy import deepcopy
+        lines = deepcopy(DBDATAS['discounts'])
+        for i, line in enumerate(lines):
+            self.assertEqual(result['lines']['discounts'][i], line)
 
     def test_paymentlines_dbdatas_to_appstruct(self):
         from autonomie.views.forms.task import PaymentLinesMatch
@@ -164,6 +180,13 @@ class TestEstimationMatchTools(BaseTestCase):
         e = TaskLinesMatch()
         result = e.todb(datas_, {})
         self.assertEqual(result['lines'], DBDATAS['lines'])
+
+    def test_appstruct_to_discountlines_dbdatas(self):
+        from autonomie.views.forms.task import DiscountLinesMatch
+        datas_ = deepcopy(DATAS)
+        d = DiscountLinesMatch()
+        result = d.todb(datas_, {})
+        self.assertEqual(result['discounts'], DBDATAS['discounts'])
 
     def test_appstruct_to_paymentlinesdbdatas(self):
         from autonomie.views.forms.task import PaymentLinesMatch

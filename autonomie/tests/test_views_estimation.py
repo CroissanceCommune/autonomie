@@ -27,6 +27,15 @@ DBDATAS = dict(estimation=dict(course="0",
                                 description="Devis pour le client test",
                                 manualDeliverables=1,
                                 statusComment=u"Aucun commentaire"),
+                invoice=dict(course="0",
+                                displayedUnits="1",
+                                expenses=2000,
+                                paymentConditions="Payer à l'heure",
+                                phase_id=415,
+                                taskDate="15-12-2012",
+                                description="Facture pour le client test",
+                                statusComment=u"Aucun commentaire",
+                                ),
                 lines=[
                      {'description':'text1',
                      'cost':10000,
@@ -56,7 +65,6 @@ DBDATAS = dict(estimation=dict(course="0",
                 )
 DBDATAS2 = dict(estimation=dict(course="0",
                                 displayedUnits="1",
-                                discountHT=0,
                                 expenses=0,
                                 deposit=0,
                                 exclusions="Ne sera pas fait selon la règle",
@@ -112,20 +120,44 @@ DATAS = {'common': dict(phase_id=485,
         ),
         "communication":dict(statusComment=u"Aucun commentaire"),
                         }
+INV_DATAS = {'common': dict(phase_id=415,
+                        taskDate="15-12-2012",
+                        description="Facture pour le client test",
+                        course="0",
+                        displayedUnits="1",),
+        'lines':dict(expenses=2000,
+                     lines=[
+       {'description':'text1', 'cost':10000, 'unity':'days', 'quantity':12, 'tva':1960},
+       {'description':'text2', 'cost':20000, 'unity':'month', 'quantity':12, 'tva':700},
+                            ],
+                     discounts=[
+      {'description':'remise1', 'amount':1000, 'tva':1960},
+      {'description':'remise2', 'amount':1000, 'tva':700},
+                     ],),
+        'payments':dict(paymentConditions="Payer à l'heure"),
+        "communication":dict(statusComment=u"Aucun commentaire"),
+        }
 
 def get_full_estimation_model(datas):
     """
         Returns a simulated database model
     """
     est = MagicMock(**datas['estimation'])
-    estlines = [MagicMock(**line)for line in datas['lines']]
-    estpayments = [MagicMock(**line)for line in datas['payment_lines']]
-    est.lines = estlines
-    est.payment_lines = estpayments
+    est.lines = [MagicMock(**line)for line in datas['lines']]
+    est.payment_lines = [MagicMock(**line)for line in datas['payment_lines']]
     est.discounts = [MagicMock(**line)for line in datas['discounts']]
     return est
 
-class TestEstimationMatchTools(BaseTestCase):
+def get_full_invoice_model(datas):
+    """
+        Returns a simulated invoice database model
+    """
+    inv = MagicMock(**datas['invoice'])
+    inv.lines = [MagicMock(**line)for line in datas['lines']]
+    inv.discounts = [MagicMock(**line)for line in datas['discounts']]
+    return inv
+
+class TestMatchTools(BaseTestCase):
     def test_estimation_dbdatas_to_appstruct(self):
         from autonomie.views.forms.task import EstimationMatch
         e = EstimationMatch()
@@ -165,6 +197,13 @@ class TestEstimationMatchTools(BaseTestCase):
         for i,line in enumerate(lines):
             self.assertEqual(result['payments']['payment_lines'][i], line)
 
+    def test_invoice_dbdatas_to_appstruct(self):
+        from autonomie.views.forms.task import InvoiceMatch
+        e = InvoiceMatch()
+        result = e.toschema(DBDATAS, {})
+        for field, group in e.matching_map:
+            self.assertEqual(DBDATAS['invoice'][field], result[group][field])
+
     def test_appstruct_to_estimationdbdatas(self):
         from autonomie.views.forms.task import EstimationMatch
         datas_ = deepcopy(DATAS)
@@ -194,3 +233,10 @@ class TestEstimationMatchTools(BaseTestCase):
         datas_ = deepcopy(DATAS)
         result = p.todb(datas_, {})
         self.assertEqual(result['payment_lines'], DBDATAS['payment_lines'])
+
+    def test_appstruct_to_invoicedbdatas(self):
+        from autonomie.views.forms.task import InvoiceMatch
+        e = InvoiceMatch()
+        datas_ = deepcopy(INV_DATAS)
+        result = e.todb(datas_, {})
+        self.assertEqual(result['invoice'], DBDATAS['invoice'])

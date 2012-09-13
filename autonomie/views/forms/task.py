@@ -33,6 +33,19 @@
         commit
         merge payment conditions
         commit
+
+    formulaire :
+
+    phase, course, displayUnits
+    lignes de prestation descr, cout qtité, unité, tva
+    lignes de remise descr, cout, tva (seulement les tvas utilisées dans
+                                                    les lignes au-dessus)
+    TOTAL HT
+    for tva in used_tva:
+        TOTAL TVA tva%
+    TTC
+    Frais de port
+    TOTAL
 """
 import logging
 import datetime

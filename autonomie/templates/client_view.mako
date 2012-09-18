@@ -17,6 +17,9 @@
             </dl>
             <h3>Contact principal</h3>
             <strong>${api.format_name(client.contactFirstName, client.contactLastName)}</strong>
+            % if client.function:
+                <div>Fonction: ${format_text(client.function)}</div>
+            % endif
             <br />
             % if client.address:
                 <address>
@@ -46,6 +49,14 @@
                     %else:
                         Aucun numéro connu
                     %endif
+                </dd>
+                <dt>Fax</dt>
+                <dd>
+                    %if client.fax:
+                        ${format_phone(client.fax)}
+                    % else:
+                        Aucun numéro de fax connu
+                    % endif
                 </dd>
             </dl>
         </div>

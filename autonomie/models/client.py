@@ -51,6 +51,8 @@ class Client(DBBASE):
     city = deferred(Column("city", String(255)), group='edit')
     country = deferred(Column("country", String(150)), group='edit')
     phone = deferred(Column("phone", String(50)), group='edit')
+    fax = deferred(Column("fax", String(50)), group="edit")
+    function = deferred(Column("function", String(255)), group="edit")
     email = deferred(Column("email", String(255)), group='edit')
     contactLastName = deferred(Column("contactLastName",
                     String(255), default=None), group='edit')

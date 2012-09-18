@@ -22,36 +22,47 @@ from deform import widget
 
 from autonomie.models.model import Client
 from autonomie.views.forms.widgets import get_mail_input
+from autonomie.views.forms.widgets import DisabledInput
 
 log = logging.getLogger(__name__)
 
 @colander.deferred
-def deferred_ccode_valid(node, kw):
-    company = kw['company']
-    company_id = company.id
-    def unique_ccode(node, value):
-        """
-            Test customer code unicity
-        """
-        if len(value) != 4:
-            message = u"Le code client doit contenir 4 caractères."
-            raise colander.Invalid(node, message)
-        #Test unicity
-        result = Client.query().filter(Client.company_id==company_id)\
-                .filter(Client.code==value).all()
+def deferred_code_widget(node, kw):
+    if kw['edit']:
+        return DisabledInput()
+    else:
+        return widget.TextInputWidget(mask='****')
 
-        if len(result):
-            message = u"Vous avez déjà utilisé ce code '{0}' pour un autre \
-client".format(value)
-            raise colander.Invalid(node, message)
-    return unique_ccode
+@colander.deferred
+def deferred_ccode_valid(node, kw):
+    if not kw['edit']:
+        company = kw['company']
+        company_id = company.id
+        def unique_ccode(node, value):
+            """
+                Test customer code unicity
+            """
+            if len(value) != 4:
+                message = u"Le code client doit contenir 4 caractères."
+                raise colander.Invalid(node, message)
+            #Test unicity
+            result = Client.query().filter(Client.company_id==company_id)\
+                    .filter(Client.code==value).all()
+
+            if len(result):
+                message = u"Vous avez déjà utilisé ce code '{0}' pour un autre \
+    client".format(value)
+                raise colander.Invalid(node, message)
+        return unique_ccode
+    else:
+        return None
 
 class ClientSchema(colander.MappingSchema):
     """
         Schema for customer insertion
     """
     code = colander.SchemaNode(colander.String(),
-                             widget=widget.TextInputWidget(mask='****'),
+                             widget=deferred_code_widget,
                              title=u'Code',
                              validator=deferred_ccode_valid)
     name = colander.SchemaNode(colander.String(),
@@ -64,10 +75,18 @@ class ClientSchema(colander.MappingSchema):
                         title=u"Prénom du contact principal",
                         missing=u"",
                         validator=colander.Length(max=255))
+    function = colander.SchemaNode(colander.String(),
+                        title=u"Fonction du contact principal",
+                        missing=u"",
+                        validator=colander.Length(max=255))
     email = get_mail_input( missing=u'')
     phone = colander.SchemaNode(colander.String(),
                                 title=u'Téléphone',
                                 missing=u'',
+                                validator=colander.Length(max=50))
+    fax = colander.SchemaNode(colander.String(),
+                                title=u"Fax",
+                                missing=u"",
                                 validator=colander.Length(max=50))
     address = colander.SchemaNode(colander.String(),
                     title=u'Adresse',

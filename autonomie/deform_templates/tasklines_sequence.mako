@@ -2,11 +2,12 @@
 <div>
     <input type="hidden" name="__start__" value="${field.name}:sequence" class="deformProto" prototype="${field.widget.prototype(field)}">
     <div class='row linesblockheader'>
-        <div class='span5'>Prestation</div>
+        <div class='span4'>Prestation</div>
         <div class='span1'>Prix/unité</div>
         <div class='span1'>Quantité</div>
         <div class='span2'>Unité</div>
-        <div class='span1 offset1'>Total</div>
+        <div class='span2'>TVA</div>
+        <div class='span1'>Total</div>
     </div>
     <div class="deformSeqContainer">
 

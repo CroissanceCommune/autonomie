@@ -111,11 +111,8 @@ def deferred_tvas_widget(node, kw):
         return a tva widget
     """
     tvas = kw.get('tvas')
-    wid = widget.SelectWidget(values=tvas,
-                                  css_class='span2',
-                 before='autonomie:deform_templates/staticinput.mako',
-                 before_options={'label':u'Total HT', 'id':'httotal'})
-
+    wid = widget.SelectWidget(values=tvas, css_class='span2',
+            template='autonomie:deform_templates/tva.mako')
     return wid
 
 @colander.deferred

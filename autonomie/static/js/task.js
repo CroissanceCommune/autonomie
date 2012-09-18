@@ -54,15 +54,33 @@ function delRow(id){
  *
  */
 
-function computeEstimationRow(tag){
+function computeTaskRow(tag){
   /*
    * Compute Estimation line total
    */
+  console.log("Computing task");
   var row = $(tag);
   var totalinput = row.find(".linetotal .input");
   var cost = row.find("input[name=cost]").val();
   var quantity = row.find("input[name=quantity]").val();
-  var total = transformToCents(cost) * transformToCents(quantity);
+  var tva = getTVA(row);
+  var totalht = transformToCents(cost) * transformToCents(quantity);
+  var total = totalht + getTvaPart(totalht, tva);
+  totalinput.empty().html( formatAmount(total, false) );
+}
+function computeDiscountRow(tag){
+  /*
+   * Compute the discount row total
+   */
+  console.log('Computing discount');
+  var row = $(tag);
+  console.log(tag);
+  var totalinput = row.find(".linetotal .input");
+  var amount = row.find("input[name=amount]").val();
+  console.log(amount);
+  var tva = getTVA(row);
+  var totalht = transformToCents(amount);
+  var total = totalht + getTvaPart(totalht, tva);
   totalinput.empty().html( formatAmount(total, false) );
 }
 function computeRowsTotal(){
@@ -82,11 +100,11 @@ function getDiscount(){
    */
   return transformToCents($("input[name=discountHT]").val());
 }
-function getTVA(){
+function getTVA(row){
   /*
-   *  Returns the current tva
+   *  Returns the tva of the current line
    */
-  var tva = $("select[name=tva]").val();
+  var tva = row.find("select[name=tva]").val();
   if (tva <0){
     tva = 0;
   }
@@ -511,7 +529,11 @@ function initialize(){
      setPaymentRowsToEditable();
   }
   $(Facade).bind('linechange', function(event, element){
-    computeEstimationRow(element);
+    if ($(element).find("input[name=amount]")===[]){
+      computeTaskRow(element);
+    }else{
+      computeDiscountRow(element);
+    }
   });
   $(Facade).bind('totalchange', function(event){
     computeTotal();

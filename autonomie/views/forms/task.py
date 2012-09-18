@@ -135,12 +135,12 @@ class EstimationLine(colander.MappingSchema):
         A single estimation line
     """
     description = colander.SchemaNode(colander.String(),
-         widget=widget.TextAreaWidget(cols=80, rows=4,
+         widget=widget.TextAreaWidget(cols=60, rows=4,
              template='autonomie:deform_templates/prestation.mako',
-             css_class='span5'
+             css_class='span4'
              ),
          missing=u'',
-         css_class='span5')
+         css_class='span4')
     cost = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
                 template='autonomie:deform_templates/lineinput.mako',
@@ -164,6 +164,7 @@ class EstimationLine(colander.MappingSchema):
     tva = colander.SchemaNode(colander.String(),
             widget=deferred_tvas_widget,
             default=1960,
+            css_class='span2',
             title=u'TVA')
 
 class DiscountLine(colander.MappingSchema):
@@ -171,12 +172,12 @@ class DiscountLine(colander.MappingSchema):
         A single estimation line
     """
     description = colander.SchemaNode(colander.String(),
-         widget=widget.TextAreaWidget(cols=80, rows=4,
+         widget=widget.TextAreaWidget(cols=60, rows=4,
              template='autonomie:deform_templates/prestation.mako',
-             css_class='span5'
+             css_class='span4'
              ),
          missing=u'',
-         css_class='span5')
+         css_class='span4')
     amount = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
                 template='autonomie:deform_templates/lineinput.mako',
@@ -186,6 +187,7 @@ class DiscountLine(colander.MappingSchema):
     tva = colander.SchemaNode(colander.String(),
             widget=deferred_tvas_widget,
             default=1960,
+            css_class='span1',
             title=u'TVA')
 
 class EstimationLines(colander.SequenceSchema):
@@ -208,9 +210,9 @@ class DiscountLines(colander.SequenceSchema):
     discountline = DiscountLine(
             widget=widget.MappingWidget(
                     template='autonomie:deform_templates/\
-estimationline_mapping.mako',
+discountline_mapping.mako',
                item_template='autonomie:deform_templates/\
-estimationline_mapping_item.mako'
+discountline_mapping_item.mako'
                      )
             )
 
@@ -228,8 +230,8 @@ class TaskLinesBlock(colander.MappingSchema):
             title=u'')
     discounts = DiscountLines(
             widget=widget.SequenceWidget(
-    template='autonomie:deform_templates/tasklines_sequence.mako',
-    item_template='autonomie:deform_templates/tasklines_sequence_item.mako',
+    template='autonomie:deform_templates/discountlines_sequence.mako',
+    item_template='autonomie:deform_templates/discountlines_sequence_item.mako',
     ),
             title=u'')
     expenses = colander.SchemaNode(AmountType(),
@@ -712,7 +714,7 @@ def get_estimation_appstruct(dbdatas):
     """
     appstruct = {}
     for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
-                                                        DiscouttLinesMatch):
+                                                        DiscountLinesMatch):
         appstruct = matchobj().toschema(dbdatas, appstruct)
     appstruct = set_payment_times(appstruct, dbdatas)
     return appstruct
@@ -723,7 +725,7 @@ def get_estimation_dbdatas(appstruct):
     """
     dbdatas = {}
     for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
-                                                      DiscouttLinesMatch):
+                                                      DiscountLinesMatch):
         dbdatas = matchobj().todb(appstruct, dbdatas)
     dbdatas = set_manualDeliverables(appstruct, dbdatas)
     return dbdatas
@@ -733,7 +735,7 @@ def get_invoice_appstruct(dbdatas):
         return InvoiceSchema compatible appstruct
     """
     appstruct = {}
-    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscouttLinesMatch):
+    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscountLinesMatch):
         appstruct = matchobj().toschema(dbdatas, appstruct)
     return appstruct
 
@@ -742,7 +744,7 @@ def get_invoice_dbdatas(appstruct):
         return dict with db compatible datas
     """
     dbdatas = {}
-    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscouttLinesMatch):
+    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscountLinesMatch):
         dbdatas = matchobj().todb(appstruct, dbdatas)
     return dbdatas
 

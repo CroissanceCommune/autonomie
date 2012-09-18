@@ -234,7 +234,7 @@ class TaskLinesBlock(colander.MappingSchema):
     expenses = colander.SchemaNode(AmountType(),
             widget=widget.TextInputWidget(
          template='autonomie:deform_templates/wrappable_input.mako',
-         before='autonomie:deform_templates/staticinput.mako',
+         before='autonomie:deform_templates/tvalist.mako',
          before_options={'label':u'Montant TVA', 'id':'tvapart'},
          after='autonomie:deform_templates/staticinput.mako',
          after_options={'label':u'Total TTC', 'id':'total'}

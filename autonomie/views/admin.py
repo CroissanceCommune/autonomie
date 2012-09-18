@@ -95,7 +95,7 @@ class AdminViews(BaseView):
         """
         schema = TvaConfig()
         form = Form(schema, buttons=(submit_btn,))
-        tvas = Tva.query(self.dbsession)
+        tvas = Tva.query()
         if 'submit' in self.request.params:
             datas = self.request.params.items()
             try:

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 05 sept. 2012 20:41:15 CEST
+# * Last Modified : mar. 18 sept. 2012 15:42:43 CEST
 #
 # * Project : autonomie
 #
@@ -171,6 +171,10 @@ def main(global_config, **settings):
     # Manage main view
     config.add_route("manage",
                     "/manage")
+
+    # Test javascript view
+    config.add_route("testjs",
+                    "/testjs")
     # Set deform multi renderer handling translation and both chameleon and mako
     # templates
     set_deform_renderer()

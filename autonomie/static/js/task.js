@@ -535,7 +535,7 @@ function initialize(){
     updatePaymentRows();
   });
 
-  $('.estimationline').each(function(){
+  $('.taskline').each(function(){
     $(Facade).trigger('linechange', this);
   });
   $(Facade).trigger('totalchange');

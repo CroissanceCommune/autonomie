@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-    <div class='row estimationline' id="estimationline_${esc('id')}">
+    <div class='row taskline' id="taskline_${esc('id')}">
         <div class='span5'>
             <textarea class='span5' name="prestation_${esc('id')}">{{if prestation}}${esc('prestation')}{{/if}}</textarea>
         </div>
@@ -24,6 +24,6 @@
             <div class='input'></div>
         </div>
         <div class='span1'>
-            <button type='button' class='close' onclick="delRow('estimationline_${esc('id')}');">x</button>
+            <button type='button' class='close' onclick="delRow('taskline_${esc('id')}');">x</button>
         </div>
     </div>

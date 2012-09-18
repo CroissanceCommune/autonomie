@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 %if field.error:
-    <div class='row estimationline' style="background-color:#d54836" id="${field.oid}">
+    <div class='row taskline' style="background-color:#d54836" id="${field.oid}">
     %else:
-        <div class='row estimationline' id="${field.oid}">
+        <div class='row taskline' id="${field.oid}">
     %endif
     ${field.serialize(cstruct)|n}
     <div class='span1'>

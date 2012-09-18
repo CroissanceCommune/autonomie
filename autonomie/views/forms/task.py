@@ -112,7 +112,7 @@ def deferred_tvas_widget(node, kw):
     """
     tvas = kw.get('tvas')
     wid = widget.SelectWidget(values=tvas,
-                                  css_class='span1',
+                                  css_class='span2',
                  before='autonomie:deform_templates/staticinput.mako',
                  before_options={'label':u'Total HT', 'id':'httotal'})
 
@@ -130,7 +130,7 @@ def deferred_phases_widget(node, kw):
         wid = widget.TextInputWidget()
     return wid
 
-class EstimationLine(colander.MappingSchema):
+class TaskLine(colander.MappingSchema):
     """
         A single estimation line
     """
@@ -187,19 +187,19 @@ class DiscountLine(colander.MappingSchema):
     tva = colander.SchemaNode(colander.String(),
             widget=deferred_tvas_widget,
             default=1960,
-            css_class='span1',
+            css_class='span2 offset3',
             title=u'TVA')
 
-class EstimationLines(colander.SequenceSchema):
+class TaskLines(colander.SequenceSchema):
     """
         Sequence of estimation lines
     """
-    estimationline = EstimationLine(
+    taskline = TaskLine(
             widget=widget.MappingWidget(
                     template='autonomie:deform_templates/\
-estimationline_mapping.mako',
+taskline_mapping.mako',
                item_template='autonomie:deform_templates/\
-estimationline_mapping_item.mako'
+taskline_mapping_item.mako'
                      )
             )
 
@@ -221,7 +221,7 @@ class TaskLinesBlock(colander.MappingSchema):
         Fieldset containing the "Détail de la prestation" block
         with estimation and invoice lines and all the stuff
     """
-    lines = EstimationLines(
+    lines = TaskLines(
             widget=widget.SequenceWidget(
      template='autonomie:deform_templates/tasklines_sequence.mako',
      item_template='autonomie:deform_templates/tasklines_sequence_item.mako',
@@ -563,9 +563,9 @@ class Duplicate(colander.MappingSchema):
 #  Mapper tools used to move from dbdatas format to an appstruct fitting the
 #  form schema.
 #  Dans le formulaire de création de devis par exemple, on trouve
-#  aussi bien des EstimationLine que des Estimation ou des DiscountLine et leur
+#  aussi bien des TaskLine que des Estimation ou des DiscountLine et leur
 #  configuration est imbriquée. On a donc besoin de faire un mapping d'un
-#  dictionnaire contenant les modèles {'estimation':..., 'estimationlines':...}
+#  dictionnaire contenant les modèles {'estimation':..., 'tasklines':...}
 #  vers un dictionnaire correspondant au formulaire en place.
 class MappingWrapper:
     """

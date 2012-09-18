@@ -116,6 +116,13 @@ def deferred_tvas_widget(node, kw):
     return wid
 
 @colander.deferred
+def deferred_default_tva(node, kw):
+    """
+        return a tva widget
+    """
+    return kw.get('default_tva')
+
+@colander.deferred
 def deferred_phases_widget(node, kw):
     """
         return phase select widget
@@ -160,7 +167,7 @@ class TaskLine(colander.MappingSchema):
                 )
     tva = colander.SchemaNode(colander.String(),
             widget=deferred_tvas_widget,
-            default=1960,
+            default=deferred_default_tva,
             css_class='span2',
             title=u'TVA')
 
@@ -183,7 +190,7 @@ class DiscountLine(colander.MappingSchema):
             )
     tva = colander.SchemaNode(colander.String(),
             widget=deferred_tvas_widget,
-            default=1960,
+            default=deferred_default_tva,
             css_class='span2 offset3',
             title=u'TVA')
 

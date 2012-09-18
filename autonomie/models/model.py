@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 11 sept. 2012 15:36:19 CEST
+# * Last Modified : mar. 18 sept. 2012 19:11:47 CEST
 #
 # * Project : autonomie
 #
@@ -116,8 +116,9 @@ class Tva(DBBASE):
     default = Column("default", Integer)
 
     @classmethod
-    def query(cls, dbsession):
-        return dbsession.query(Tva).order_by('value')
+    def query(cls):
+        q = super(Tva, cls).query()
+        return q.order_by('value')
 
 class TaskStatus(DBBASE):
     """

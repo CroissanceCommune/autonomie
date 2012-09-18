@@ -103,3 +103,14 @@ class TaskCompute(object):
             return the amount to pay
         """
         return self.total() - self.paid()
+
+    def no_tva(self):
+        """
+            return True if all the tvas are below 0
+        """
+        ret = True
+        for key in self.get_tvas():
+            if key >= 0:
+                ret = False
+        return ret
+

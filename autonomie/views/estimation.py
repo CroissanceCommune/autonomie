@@ -52,22 +52,15 @@ class EstimationView(TaskView):
     route = "estimation"
     template = "tasks/estimation.mako"
 
-    def set_lines(self):
-        """
-            set the lines attributes
-        """
-        self.task_lines = self.task.lines
-        self.payment_lines = self.task.payment_lines
-
     def get_dbdatas_as_dict(self):
         """
             Returns dbdatas as a dict of dict
         """
         return {'estimation':self.task.appstruct(),
                 'lines':[line.appstruct()
-                                       for line in self.task_lines],
+                                       for line in self.task.lines],
                 'payment_lines':[line.appstruct()
-                                        for line in self.payment_lines]}
+                                      for line in self.task.payment_lines]}
 
     def is_editable(self):
         """
@@ -89,9 +82,9 @@ class EstimationView(TaskView):
             Return the estimation edit view
         """
         log.debug("#  Estimation Form #")
-        if not self.is_editable():
-            return self.redirect_to_view_only()
         if self.taskid:
+            if not self.is_editable():
+                return self.redirect_to_view_only()
             title = self.edit_title.format(task=self.task)
             edit = True
             valid_msg = u"Le devis a bien été édité."
@@ -106,8 +99,8 @@ class EstimationView(TaskView):
 
         schema = self.schema.bind(
                                 phases=self.get_phases_choice(),
-                                tvas=self.get_tvas()
-                            )
+                                tvas=self.get_tvas(),
+                                default_tva=self.default_tva())
         form = Form(schema, buttons=self.get_buttons(),
                                 counter=self.formcounter)
         form.widget.template = 'autonomie:deform_templates/form.pt'
@@ -128,7 +121,8 @@ class EstimationView(TaskView):
                 if not edit:
                     self.task.sequenceNumber = self.get_sequencenumber()
                     self.task.name = self.get_taskname()
-                    self.task.number = self.get_tasknumber(self.task.taskDate)
+                    self.task.number = self.get_tasknumber(
+                                                        self.task.taskDate)
                 try:
                     self.request.session.flash(valid_msg, queue="main")
                     self.task.project = self.project
@@ -154,6 +148,7 @@ class EstimationView(TaskView):
                     action_menu=self.actionmenu,
                     popups=self.popups
                     )
+
     def remove_lines_from_session(self):
         """
             Remove estimation lines and payment lines from the current session
@@ -162,6 +157,8 @@ class EstimationView(TaskView):
         for line in self.task.lines:
             self.dbsession.delete(line)
         for line in self.task.payment_lines:
+            self.dbsession.delete(line)
+        for line in self.task.discount_lines:
             self.dbsession.delete(line)
 
     def add_lines_to_task(self, dbdatas):
@@ -279,16 +276,16 @@ class EstimationView(TaskView):
 (indiqué sans suite).".format(self.task.number))
         elif status == 'delete':
             log.info(u"Deleting an invoice")
-            for line in self.context.lines:
+            for line in self.task.lines:
                 self.dbsession.delete(line)
-            for line in self.context.discounts:
+            for line in self.task.discounts:
                 self.dbsession.delete(line)
             for line in self.payment_lines:
                 self.dbsession.delete(line)
-            self.dbsession.delete(self.context)
+            self.dbsession.delete(self.task)
             self.dbsession.flush()
             self.request.session.flash(u"Le devis {0} a été supprimé"\
-                    .format(self.context.number))
+                    .format(self.task.number))
             raise self.project_view_redirect()
         elif status == 'duplicate':
             estimation = ret_data

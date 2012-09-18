@@ -52,19 +52,15 @@ class InvoiceView(TaskView):
     route = "invoice"
     template = "tasks/invoice.mako"
 
-    def set_lines(self):
-        """
-            set the lines attributes
-        """
-        self.task_lines = self.task.lines
-
     def get_dbdatas_as_dict(self):
         """
             Returns dbdatas as a dict of dict
         """
         return {'invoice':self.task.appstruct(),
                 'lines':[line.appstruct()
-                                       for line in self.task_lines],
+                                       for line in self.task.lines],
+                'discounts':[line.appstruct()
+                                    for line in self.task.discounts],
                 }
 
     def is_editable(self):
@@ -73,7 +69,7 @@ class InvoiceView(TaskView):
         """
         if self.task.is_editable():
             return True
-        if has_permission('manage', self.request.context, self.request):
+        if has_permission('manage', self.task, self.request):
             if self.task.is_waiting():
                 return True
         return False
@@ -87,9 +83,9 @@ class InvoiceView(TaskView):
             Return the invoice edit view
         """
         log.debug("#  Invoice Form #")
-        if not self.is_editable():
-            return self.redirect_to_view_only()
         if self.taskid:
+            if not self.is_editable():
+                return self.redirect_to_view_only()
             title = self.edit_title.format(task=self.task)
             edit = True
             valid_msg = u"La facture a bien été éditée."
@@ -105,7 +101,7 @@ class InvoiceView(TaskView):
         schema = self.schema.bind(
                                 phases=self.get_phases_choice(),
                                 tvas=self.get_tvas(),
-                            )
+                                default_tva=self.default_tva())
         form = Form(schema, buttons=self.get_buttons(),
                 counter=self.formcounter)
         form.widget.template = "autonomie:deform_templates/form.pt"
@@ -159,6 +155,8 @@ class InvoiceView(TaskView):
         # if edition we remove all invoice lines
         for line in self.task.lines:
             self.dbsession.delete(line)
+        for line in self.task.discounts:
+            self.dbsession.delete(line)
 
     def add_lines_to_task(self, dbdatas):
         """
@@ -171,7 +169,7 @@ class InvoiceView(TaskView):
         for line in dbdatas['discounts']:
             dline = DiscountLine()
             merge_session_with_post(dline, line)
-            self.task.discounts.append(line)
+            self.task.discounts.append(dline)
 
     @view_config(route_name='invoice',
                 renderer='tasks/view_only.mako',
@@ -240,14 +238,14 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
                    .format(self.request.route_path("invoice", id=id_)), "main")
         elif status == 'delete':
             log.info(u"Deleting an invoice")
-            for line in self.context.lines:
+            for line in self.task.lines:
                 self.dbsession.delete(line)
-            for line in self.context.discounts:
+            for line in self.task.discounts:
                 self.dbsession.delete(line)
-            self.dbsession.delete(self.context)
+            self.dbsession.delete(self.task)
             self.dbsession.flush()
             self.request.session.flash(u"La facture {0} a été supprimée"\
-                    .format(self.context.number))
+                    .format(self.task.number))
 
     def _pre_status_process(self, status, params):
         """

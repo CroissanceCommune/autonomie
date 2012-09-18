@@ -55,10 +55,10 @@ class CancelInvoiceView(TaskView):
         """
             Cancel invoice add/edit
         """
-        if not self.is_editable():
-            return self.redirect_to_view_only()
         log.debug("# CancelInvoice Form #")
         if self.taskid:
+            if not self.is_editable():
+                return self.redirect_to_view_only()
             title = self.edit_title.format(task=self.task)
             edit = True
             valid_msg = u"L'avoir a bien été édité."
@@ -74,6 +74,7 @@ class CancelInvoiceView(TaskView):
         #Building form
         schema = self.schema.bind(phases=self.get_phases_choice(),
                                   tvas=self.get_tvas(),
+                                  default_tva=self.default_tva(),
                                   tasktype='cancelinvoice')
         form = Form(schema, buttons=self.get_buttons())
         form.widget.template = "autonomie:deform_templates/form.pt"
@@ -124,19 +125,13 @@ class CancelInvoiceView(TaskView):
         """
         return self.task.is_editable()
 
-    def set_lines(self):
-        """
-            set the lines
-        """
-        self.task_lines = self.task.lines
-
     def get_dbdatas_as_dict(self):
         """
             Returns dbdatas as a dict of dict
         """
         return {'cancelinvoice':self.task.appstruct(),
                 'lines':[line.appstruct()
-                            for line in self.task_lines],
+                            for line in self.task.lines],
                 }
 
     def remove_lines_from_session(self):

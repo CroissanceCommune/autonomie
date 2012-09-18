@@ -157,7 +157,6 @@ class TaskView(BaseView):
             self.company = self.project.company
         self._set_actionmenu()
         self.popups = {}
-        self.set_lines()
         # Le compteur permet à deform de donner des ids différents aux
         # différents lorsque l'on a plusieurs formulaires dans la même page
         self.formcounter = itertools.count()
@@ -175,12 +174,6 @@ class TaskView(BaseView):
         task.phase_id = phaseid
         task.owner_id = self.user.id
         return task
-
-    def set_lines(self):
-        """
-            add task lines to self
-        """
-        raise Exception("Not implemented yet")
 
     def redirect_to_view_only(self):
         """
@@ -244,8 +237,18 @@ class TaskView(BaseView):
         """
             return all configured tva amounts
         """
-        tvas = Tva.query(self.dbsession)
-        return [(tva.value, tva.name)for tva in tvas]
+        tvas = Tva.query()
+        return [(unicode(tva.value), tva.name)for tva in tvas]
+
+    def default_tva(self):
+        """
+            return the default tva
+        """
+        default_tva = Tva.query().filter(Tva.default==1).first()
+        if default_tva is not None:
+            return unicode(default_tva.value)
+        else:
+            return None
 
     def _aboest_btn(self):
         """

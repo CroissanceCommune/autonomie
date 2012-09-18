@@ -75,7 +75,7 @@ function computeTaskRow(tag){
    * Compute Estimation line total
    */
   var row = $(tag);
-  var tva = getTVA(row);
+  var tva = getTva(row);
   var totalht = computeTaskRowHT(row);
   var total = totalht + getTvaPart(totalht, tva);
   var totalinput = row.find(".linetotal .input");
@@ -86,7 +86,7 @@ function computeDiscountRow(tag){
    * Compute the discount row total
    */
   var row = $(tag);
-  var tva = getTVA(row);
+  var tva = getTva(row);
   var totalht = computeDiscountRowHT(row);
   var total = totalht + getTvaPart(totalht, tva);
   var totalinput = row.find(".linetotal .input");
@@ -120,7 +120,7 @@ function getTvas(){
   $('.taskline').each(function(){
     var row = $(this);
     var totalht = computeTaskRowHT(row);
-    var tva = getTVA(row);
+    var tva = getTva(row);
     var tva_amount = getTvaPart(totalht, tva);
     if (tva in tvas){
       tva_amount = tvas[tva] + tva_amount;
@@ -130,7 +130,7 @@ function getTvas(){
   $('.discountline').each(function(){
     var row = $(this);
     var totalht = computeDiscountRowHT(row);
-    var tva = getTVA(row);
+    var tva = getTva(row);
     var tva_amount = -1 * getTvaPart(totalht, tva);
     if (tva in tvas){
       tva_amount = tvas[tva] + tva_amount;
@@ -160,7 +160,7 @@ function getDiscount(){
    */
   return transformToCents($("input[name=discountHT]").val());
 }
-function getTVA(row){
+function getTva(row){
   /*
    *  Returns the tva of the current line
    */
@@ -206,20 +206,27 @@ function formatPrice(price, rounded) {
    * Return a formatted price for display
    * @price : compute-formatted price
    */
+  var dots, splitted, cents, ret_string;
   if (rounded){
     price = Math.floor(price*100) / 100;
-  }else{
-    price = price.toFixed(4);
   }
-  price = String(price);
-  var splitted = price.split('.');
+
+  splitted = String(price).split('.');
   if (splitted[1] != undefined){
-    var cents = splitted[1];
+    cents = splitted[1];
+    if (cents.length>4){
+      dots = true;
+    }
+    cents = cents.substr(0, 4);
     cents = trailingZeros(cents, rounded);
   }else{
     cents = '00';
   }
-  return splitted[0] + "," + cents;
+  ret_string = splitted[0] + "," + cents;
+  if (dots){
+    ret_string += "...";
+  }
+  return ret_string;
 }
 function isNotFormattable(amount){
   var test = " " + amount;

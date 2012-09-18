@@ -54,45 +54,105 @@ function delRow(id){
  *
  */
 
+function computeTaskRowHT(row){
+  /*
+   * compute the HT Amount of a Task Row
+   */
+  var cost = row.find("input[name=cost]").val();
+  var quantity = row.find("input[name=quantity]").val();
+  return transformToCents(cost) * transformToCents(quantity);
+}
+function computeDiscountRowHT(row){
+  /*
+   * compute the discount row HT amount
+   */
+  var amount = row.find("input[name=amount]").val();
+  return transformToCents(amount);
+}
+
 function computeTaskRow(tag){
   /*
    * Compute Estimation line total
    */
-  console.log("Computing task");
   var row = $(tag);
-  var totalinput = row.find(".linetotal .input");
-  var cost = row.find("input[name=cost]").val();
-  var quantity = row.find("input[name=quantity]").val();
   var tva = getTVA(row);
-  var totalht = transformToCents(cost) * transformToCents(quantity);
+  var totalht = computeTaskRowHT(row);
   var total = totalht + getTvaPart(totalht, tva);
+  var totalinput = row.find(".linetotal .input");
   totalinput.empty().html( formatAmount(total, false) );
 }
 function computeDiscountRow(tag){
   /*
    * Compute the discount row total
    */
-  console.log('Computing discount');
   var row = $(tag);
-  console.log(tag);
-  var totalinput = row.find(".linetotal .input");
-  var amount = row.find("input[name=amount]").val();
-  console.log(amount);
   var tva = getTVA(row);
-  var totalht = transformToCents(amount);
+  var totalht = computeDiscountRowHT(row);
   var total = totalht + getTvaPart(totalht, tva);
+  var totalinput = row.find(".linetotal .input");
   totalinput.empty().html( formatAmount(total, false) );
 }
-function computeRowsTotal(){
+function computeDiscountsTotal(){
   /*
-   * Compute the estimation Total
-   * and subtotals
+   *  Return the sum of the discount lines amount
    */
   var sum = 0;
-  $("div.linetotal .input").each(function(){
+  $(".discountline div.linetotal .input").each(function(){
     sum += transformToCents($(this).text());
   });
   return sum;
+}
+function computeRowsTotal(){
+  /*
+   * Compute the sum of the lines
+   */
+  var sum = 0;
+  $(".taskline div.linetotal .input").each(function(){
+    sum += transformToCents($(this).text());
+  });
+  return sum;
+}
+function getTvas(){
+  /*
+   *  Compute the tva amount for the different tvas
+   */
+  var tvas = {};
+  $('.taskline').each(function(){
+    var row = $(this);
+    var totalht = computeTaskRowHT(row);
+    var tva = getTVA(row);
+    var tva_amount = getTvaPart(totalht, tva);
+    if (tva in tvas){
+      tva_amount = tvas[tva] + tva_amount;
+    }
+    tvas[tva] = tva_amount;
+  });
+  $('.discountline').each(function(){
+    var row = $(this);
+    var totalht = computeDiscountRowHT(row);
+    var tva = getTVA(row);
+    var tva_amount = -1 * getTvaPart(totalht, tva);
+    if (tva in tvas){
+      tva_amount = tvas[tva] + tva_amount;
+    }
+    tvas[tva] = tva_amount;
+  });
+  return tvas;
+
+}
+function getTvaLines(){
+  /*
+   * Return the tva display lines
+   */
+  var tags = [];
+  var tvas = getTvas();
+  for ( var key in tvas){
+    var label = key /100 + " %";
+    var value = tvas[key];
+    var template = $( '#tvaTmpl' ).template();
+    tags.push($.tmpl(template, {'label':label, 'value':formatAmount(value)}));
+  }
+  return tags;
 }
 function getDiscount(){
   /*
@@ -185,15 +245,22 @@ function computeTotal(){
    * Compute the main totals
    */
   var linestotal = computeRowsTotal();
-  var discount = getDiscount();
-  var HTTotal = linestotal - discount;
-  var tva = getTVA();
-  var tvaPart = getTvaPart( HTTotal, tva );
+  var discounttotal = computeDiscountsTotal();
+  var total_ttc = linestotal -discounttotal;
+  var tvas = getTvaLines();
+  $('#tvalist').empty();
+  for (var index in tvas){
+    var line = tvas[index];
+    $('#tvalist').append(line);
+  }
+  $('#total_ttc .input').empty().html(formatAmount(total_ttc));
+
   var expenses = getExpenses();
-  var total = HTTotal + tvaPart + expenses;
-  $('#linestotal .input').empty().html(formatAmount(linestotal, false));
-  $('#httotal .input').empty().html(formatAmount(HTTotal, false));
-  $('#tvapart .input').empty().html(formatAmount(tvaPart));
+  var total = total_ttc + expenses;
+
+//  $('#linestotal .input').empty().html(formatAmount(linestotal, false));
+//  $('#httotal .input').empty().html(formatAmount(HTTotal, false));
+//  $('#tvapart .input').empty().html(formatAmount(tvaPart));
   $('#total .input').empty().html(formatAmount(total));
   $(Facade).trigger('totalchanged');
 }
@@ -529,7 +596,7 @@ function initialize(){
      setPaymentRowsToEditable();
   }
   $(Facade).bind('linechange', function(event, element){
-    if ($(element).find("input[name=amount]")===[]){
+    if ($(element).find("input[name=amount]").length === 0){
       computeTaskRow(element);
     }else{
       computeDiscountRow(element);

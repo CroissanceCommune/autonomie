@@ -221,7 +221,6 @@ class Invoice(Task, TaskCompute):
         cancelinvoice.invoiceNumber = self.officialNumber
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.displayedUnits = self.displayedUnits
-       # cancelinvoice.tva = self.tva
         cancelinvoice.sequenceNumber = seq_number
         cancelinvoice.number = CancelInvoice.get_number(self.project,
                             cancelinvoice.sequenceNumber,
@@ -241,6 +240,16 @@ class Invoice(Task, TaskCompute):
                                           unity='NONE')
             rowindex += 1
             cancelinvoice.lines.append(discount_line)
+        for index, payment in enumerate(self.payments):
+            paid_line = CancelInvoiceLine(cost=payment.amount,
+                                          tva=0,
+                                        quantity=1,
+                                        description=u"Paiement {0}".format(
+                                                                      index+1),
+                                        rowIndex=rowindex,
+                                        unity='NONE')
+            rowindex += 1
+            cancelinvoice.lines.append(paid_line)
         return cancelinvoice
 
     def get_next_row_index(self):

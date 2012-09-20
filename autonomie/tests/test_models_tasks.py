@@ -533,6 +533,14 @@ class TestInvoice(BaseViewTest):
         today = datetime.date.today()
         self.assertEqual(cinv.taskDate, today)
 
+    def test_gen_cancelinvoice_payment(self):
+        user = User(**USER)
+        inv = get_invoice(user=user)
+        inv.payments.append(Payment(**PAYMENTS[0]))
+        cinv = inv.gen_cancelinvoice(user.id)
+        self.assertEqual(len(cinv.lines), 5)
+        self.assertEqual(cinv.lines[-1].cost, PAYMENTS[0]['amount'])
+
     def test_duplicate_invoice(self):
         user = get_user(USER2)
         project = get_project()

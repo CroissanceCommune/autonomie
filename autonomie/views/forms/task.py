@@ -54,6 +54,7 @@ import colander
 from deform import widget
 
 from autonomie.views.forms.widgets import get_date_input
+from autonomie.views.forms.widgets import CustomSequenceWidget
 from .custom_types import QuantityType
 from .custom_types import AmountType
 
@@ -226,14 +227,14 @@ class TaskLinesBlock(colander.MappingSchema):
         with estimation and invoice lines and all the stuff
     """
     lines = TaskLines(
-            widget=widget.SequenceWidget(
+            widget=CustomSequenceWidget(
      template='autonomie:deform_templates/tasklines_sequence.mako',
      item_template='autonomie:deform_templates/tasklines_sequence_item.mako',
      min_len=1
      ),
             title=u'')
     discounts = DiscountLines(
-            widget=widget.SequenceWidget(
+            widget=CustomSequenceWidget(
     template='autonomie:deform_templates/discountlines_sequence.mako',
     item_template='autonomie:deform_templates/discountlines_sequence_item.mako',
     ),
@@ -376,7 +377,7 @@ class EstimationPayments(colander.MappingSchema):
          default="SUMMARY"
                         )
     payment_lines = EstimationPaymentLines(
-               widget=widget.SequenceWidget(
+               widget=CustomSequenceWidget(
                    template='autonomie:deform_templates/\
 paymentlines_sequence.mako',
                    item_template='autonomie:deform_templates/\

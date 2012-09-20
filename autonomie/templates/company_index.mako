@@ -4,6 +4,7 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_client" />
 <%namespace file="/base/utils.mako" import="format_project" />
+<%namespace file="/base/utils.mako" import="table_btn"/>
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
 <div class='row'>
@@ -18,6 +19,7 @@
                         <th>Numéro</th>
                         <th>Client</th>
                         <th>Total</th>
+                        <th></th>
                     </thead>
                     <tbody>
                         % for invoice in elapsed_invoices[:5]:
@@ -30,6 +32,9 @@
                                 </td>
                                 <td>
                                     ${api.format_amount(invoice.total())|n}&nbsp;€
+                                </td>
+                                <td>
+                                    ${table_btn(request.route_path("invoice", id=invoice.id), u"Voir", u"Voir ce document", icon=u"icon-search")}
                                 </td>
                             </tr>
                         % endfor
@@ -89,6 +94,9 @@
                             </td>
                             <td>${task.name}</td>
                             <td>${api.format_status(task)}</td>
+                            <td>
+                                ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"icon-search")}
+                            </td>
                         </tr>
                     % endfor
                 </tbody>

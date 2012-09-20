@@ -158,7 +158,7 @@ class EstimationView(TaskView):
             self.dbsession.delete(line)
         for line in self.task.payment_lines:
             self.dbsession.delete(line)
-        for line in self.task.discount_lines:
+        for line in self.task.discounts:
             self.dbsession.delete(line)
 
     def add_lines_to_task(self, dbdatas):

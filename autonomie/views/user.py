@@ -306,13 +306,14 @@ Cette action n'est pas réversible."
         """
         message = u"Le compte '{0}' a bien été supprimé".format(
                                             format_account(self.context))
+        err_msg = u"Erreur à la suppression du compte de '{0}'".format(
+                                                format_account(self.context))
         log.debug(u"# Deleting a user #")
         try:
             self.dbsession.delete(self.context)
             self.dbsession.flush()
             self.session.flash(message, 'main')
         except:
-            message = u"Erreur à la suppression du compte de '{0}'".format(
-                                                format_account(self.context))
-            self.session.flash(message, 'error')
+            log.exception(u"Erreur à la suppression du compte")
+            self.session.flash(err_msg, 'error')
         return HTTPFound(self.request.route_path("users"))

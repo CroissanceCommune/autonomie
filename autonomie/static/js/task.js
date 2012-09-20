@@ -40,167 +40,6 @@ function transformToCents(value) {
     return result;
   }
 }
-
-function delRow(id){
-  /*
-   * Remove the estimation line of id 'id'
-   */
-  $('#' + id).remove();
-  $(Facade).trigger("linedelete");
-}
-/*
- *
- * Estimation Lines handling (computing ...)
- *
- */
-
-function computeTaskRowHT(row){
-  /*
-   * compute the HT Amount of a Task Row
-   */
-  var cost = row.find("input[name=cost]").val();
-  var quantity = row.find("input[name=quantity]").val();
-  return transformToCents(cost) * transformToCents(quantity);
-}
-function computeDiscountRowHT(row){
-  /*
-   * compute the discount row HT amount
-   */
-  var amount = row.find("input[name=amount]").val();
-  return transformToCents(amount);
-}
-
-function computeTaskRow(tag){
-  /*
-   * Compute Estimation line total
-   */
-  var row = $(tag);
-  var tva = getTva(row);
-  var totalht = computeTaskRowHT(row);
-  var total = totalht + getTvaPart(totalht, tva);
-  var totalinput = row.find(".linetotal .input");
-  totalinput.empty().html( formatAmount(total, false) );
-}
-function computeDiscountRow(tag){
-  /*
-   * Compute the discount row total
-   */
-  var row = $(tag);
-  var tva = getTva(row);
-  var totalht = computeDiscountRowHT(row);
-  var total = totalht + getTvaPart(totalht, tva);
-  var totalinput = row.find(".linetotal .input");
-  totalinput.empty().html( formatAmount(total, false) );
-}
-function computeDiscountsTotal(){
-  /*
-   *  Return the sum of the discount lines amount
-   */
-  var sum = 0;
-  $(".discountline div.linetotal .input").each(function(){
-    sum += transformToCents($(this).text());
-  });
-  return sum;
-}
-function computeRowsTotal(){
-  /*
-   * Compute the sum of the lines
-   */
-  var sum = 0;
-  $(".taskline div.linetotal .input").each(function(){
-    sum += transformToCents($(this).text());
-  });
-  return sum;
-}
-function getTvas(){
-  /*
-   *  Compute the tva amount for the different tvas
-   */
-  var tvas = {};
-  $('.taskline').each(function(){
-    var row = $(this);
-    var totalht = computeTaskRowHT(row);
-    var tva = getTva(row);
-    var tva_amount = getTvaPart(totalht, tva);
-    if (tva in tvas){
-      tva_amount = tvas[tva] + tva_amount;
-    }
-    tvas[tva] = tva_amount;
-  });
-  $('.discountline').each(function(){
-    var row = $(this);
-    var totalht = computeDiscountRowHT(row);
-    var tva = getTva(row);
-    var tva_amount = -1 * getTvaPart(totalht, tva);
-    if (tva in tvas){
-      tva_amount = tvas[tva] + tva_amount;
-    }
-    tvas[tva] = tva_amount;
-  });
-  return tvas;
-
-}
-function getTvaLines(){
-  /*
-   * Return the tva display lines
-   */
-  var tags = [];
-  var tvas = getTvas();
-  for ( var key in tvas){
-    var label = key /100 + " %";
-    var value = tvas[key];
-    var template = $( '#tvaTmpl' ).template();
-    tags.push($.tmpl(template, {'label':label, 'value':formatAmount(value)}));
-  }
-  return tags;
-}
-function getDiscount(){
-  /*
-   * Returns the current discount
-   */
-  return transformToCents($("input[name=discountHT]").val());
-}
-function getTva(row){
-  /*
-   *  Returns the tva of the current line
-   */
-  var tva = row.find("select[name=tva]").val();
-  if (tva <0){
-    tva = 0;
-  }
-  return tva;
-}
-function getTvaPart(total, tva){
-  /*
-   * returns the value of the tva
-   */
-  return total * tva / 10000;
-}
-function getExpenses(){
-  /*
-   *  Return the current expense configured
-   */
-  return transformToCents( $('input[name=expenses]').val() );
-}
-function trailingZeros(cents, rounded) {
-  /*
-   * Handle the trailing zeros needed for an amount
-   */
-   if (cents.length === 1){
-    cents += 0;
-   }
-   if ( ! rounded ){
-    if ( cents.length > 2 ){
-      if (cents.charAt(3) == "0"){
-        cents = cents.substr(0,3);
-      }
-      if (cents.charAt(2) == "0"){
-        cents = cents.substr(0,2);
-      }
-    }
-   }
-   return cents;
-}
 function formatPrice(price, rounded) {
   /*
    * Return a formatted price for display
@@ -247,27 +86,241 @@ function formatAmount( amount, rounded ){
   }
   return formatPrice( amount, rounded ) + "&nbsp;&euro;";
 }
+function trailingZeros(cents, rounded) {
+  /*
+   * Handle the trailing zeros needed for an amount
+   */
+   if (cents.length === 1){
+    cents += 0;
+   }
+   if ( ! rounded ){
+    if ( cents.length > 2 ){
+      if (cents.charAt(3) == "0"){
+        cents = cents.substr(0,3);
+      }
+      if (cents.charAt(2) == "0"){
+        cents = cents.substr(0,2);
+      }
+    }
+   }
+   return cents;
+}
+
+/*
+ *
+ * Dom manipulation
+ *
+ */
+function delRow(id){
+  /*
+   * Remove the estimation line of id 'id'
+   */
+  $('#' + id).remove();
+  $(Facade).trigger("linedelete");
+}
+function getIdFromTagId(parseStr, tagid){
+  /*
+   *  Return an id from a tagid
+   *  @param: parseStr: string to parse to get the id from the tagid
+   *  @param: tagid: id of the tag to parse
+   *  getIdFromTagId("abcdefgh_", "abcdefgh_2") => 2
+   */
+  return parseInt(tagid.substring(parseStr.length), 10);
+}
+function getNextId(selector, parseStr){
+  /*
+   * Returns the next available id
+   * @selector : jquery selector
+   * @parseStr : base string
+   */
+  var newid = 1;
+  $(selector).each(function(){
+    var tagid = this.id;
+    var lineid = getIdFromTagId(parseStr, tagid);
+    if (lineid >= newid){
+      newid = lineid + 1;
+    }
+  });
+  return newid;
+}
+function parseDate(isoDate){
+  /*
+   * Returns a js Date object
+   */
+   var splitted = isoDate.split('-');
+   var year = parseInt(splitted[0], 10);
+   var month = parseInt(splitted[1], 10) - 1;
+   var day = parseInt(splitted[2], 10);
+   return new Date(year, month, day);
+}
+function formatPaymentDate(isoDate){
+  /*
+   *  format a date from iso to display format
+   */
+  if (isoDate !== ''){
+    return $.datepicker.formatDate("dd/mm/yy", parseDate(isoDate));
+  }else{
+    return "";
+  }
+}
+
+/*
+ *
+ * Computation function
+ *
+ */
+
+function getTvaPart(total, tva){
+  return total * tva / 10000;
+}
+
+var Row = Backbone.Model.extend({
+  /*
+   * Main row model
+   */
+  initialize:function(tag){
+    this.row = $(tag);
+    this.tva = this.TVA();
+    this.ht = this.HT();
+    this.tva_amount = this.TVAPart();
+    this.ttc = this.TTC();
+  },
+  HT:function(){
+    return 0;
+  },
+  TVA:function(){
+    var tva = this.row.find("select[name=tva]").val();
+    if (tva <0){
+      tva = 0;
+    }
+    return tva;
+  },
+  TVAPart:function(){
+    return getTvaPart(this.ht, this.tva);
+  },
+  TTC:function(){
+    return this.ht + this.tva_amount;
+  },
+  update:function(){
+    var totalinput = this.row.find(".linetotal .input");
+    totalinput.empty().html( formatAmount(this.TTC(), false) );
+    return this.row;
+  }
+});
+
+var TaskRow = Row.extend({
+  /*
+   *  Task Row model
+   */
+  getCost: function(){
+    return this.row.find("input[name=cost]").val();
+  },
+  getQuantity:function(){
+    return this.row.find("input[name=quantity]").val();
+  },
+  HT:function(){
+    var q = this.getQuantity();
+    var c = this.getCost();
+    return transformToCents(c) * transformToCents(q);
+  }
+});
+var DiscountRow = Row.extend({
+  /*
+   *  Discount Row model
+   */
+  getAmount:function(){
+    var amount = this.row.find("input[name=amount]").val();
+    return transformToCents(amount);
+  },
+  HT:function(){
+    return -1 * this.getAmount();
+  }
+});
+
+var RowCollection = Backbone.Collection.extend({
+  /*
+   *  Row collection model
+   */
+  load:function(selector, factory){
+    // this in the each function will be the iterator's item
+    var _this=this;
+    $(selector).each(function(){
+      var row = new factory( "#" + $(this).attr('id'));
+      _this.add(row);
+    });
+  },
+  HT:function(){
+    var sum = 0;
+    this.each(function(item){
+      sum += item.ht;
+    });
+    return sum;
+  },
+  TTC:function(){
+    var sum = 0;
+    this.each(function(item){
+      sum += item.ttc;
+    });
+    return sum;
+  },
+  Tvas:function(){
+    var tvas = {};
+    this.each(function(item){
+      var tva_amount = item.tva_amount;
+      var tva = item.tva;
+      if (tva in tvas){
+        tva_amount += tvas[tva];
+      }
+      tvas[tva] = tva_amount;
+    });
+    return tvas;
+  }
+});
+
+var Payment = Backbone.Model.extend({
+
+});
+
+function getTvaLine(tva, tva_amount){
+  /*
+   * Return the tva display line
+   */
+  var label = tva /100 + " %";
+  var template = $( '#tvaTmpl' ).template();
+  return $.tmpl(template, {'label':label, 'value':formatAmount(tva_amount)});
+}
+function getExpenses(){
+  /*
+   *  Return the current expense configured
+   */
+  return transformToCents( $('input[name=expenses]').val() );
+}
+function getCollection(){
+  /*
+   * Return the collection of rows related to the payment information
+   */
+  var collection = new RowCollection();
+  collection.load('.taskline', TaskRow);
+  collection.load('.discountline', DiscountRow);
+  return collection;
+}
 function computeTotal(){
   /*
    * Compute the main totals
    */
-  var linestotal = computeRowsTotal();
-  var discounttotal = computeDiscountsTotal();
-  var total_ttc = linestotal -discounttotal;
-  var tvas = getTvaLines();
+  var collection = getCollection();
+  var total_ht = collection.HT();
+  var total_ttc = collection.TTC();
+  var tvas = collection.Tvas();
   $('#tvalist').empty();
   for (var index in tvas){
-    var line = tvas[index];
+    var line = getTvaLine(index, tvas[index]);
     $('#tvalist').append(line);
   }
+  $('#total_ht .input').empty().html(formatAmount(total_ht));
   $('#total_ttc .input').empty().html(formatAmount(total_ttc));
-
   var expenses = getExpenses();
   var total = total_ttc + expenses;
-
-//  $('#linestotal .input').empty().html(formatAmount(linestotal, false));
-//  $('#httotal .input').empty().html(formatAmount(HTTotal, false));
-//  $('#tvapart .input').empty().html(formatAmount(tvaPart));
   $('#total .input').empty().html(formatAmount(total));
   $(Facade).trigger('totalchanged');
 }
@@ -373,7 +426,7 @@ function addPaymentRow(args, after){
   }
   var date = new Date();
   if ((args['paymentDate'] !== undefined) && (args['paymentDate'] !== "")) {
-    date = parsePaymentDate(args['paymentDate']);
+    date = parseDate(args['paymentDate']);
   }
   // We update the date information to fit the configured
   // display format
@@ -384,54 +437,11 @@ function addPaymentRow(args, after){
                 });
   $("#paymentDate_" + args['id']).datepicker('setDate', date);
 }
-function parsePaymentDate(isoDate){
-  /*
-   * Returns a js Date object
-   */
-   var splitted = isoDate.split('-');
-   var year = parseInt(splitted[0], 10);
-   var month = parseInt(splitted[1], 10) - 1;
-   var day = parseInt(splitted[2], 10);
-   return new Date(year, month, day);
-}
-function formatPaymentDate(isoDate){
-  /*
-   *  format a date from iso to display format
-   */
-  if (isoDate !== ''){
-    return $.datepicker.formatDate("dd/mm/yy", parsePaymentDate(isoDate));
-  }else{
-    return "";
-  }
-}
 function getNbPayments(){
   /*
    * Return the number of configured payments
    */
   return parseInt($("select[name=payment_times]").val(), 10);
-}
-function getIdFromTagId(parseStr, tagid){
-  /*
-   *  Return an id from a tagid
-   *  @param: parseStr: string to parse to get the id from the tagid
-   *  @param: tagid: id of the tag to parse
-   *  getIdFromTagId("abcdefgh_", "abcdefgh_2") => 2
-   */
-  return parseInt(tagid.substring(parseStr.length), 10);
-}
-function getNextId(selector, parseStr){
-  /*
-   * Returns the next available id
-   */
-  var newid = 1;
-  $(selector).each(function(){
-    var tagid = this.id;
-    var lineid = getIdFromTagId(parseStr, tagid);
-    if (lineid >= newid){
-      newid = lineid + 1;
-    }
-  });
-  return newid;
 }
 function getRow(args){
   /*
@@ -449,13 +459,6 @@ function getPaymentRow(args){
   html = $.tmpl(  template, args );
   return html;
 }
-function computeDeposit(total, percent){
-  /*
-   *  Compute the expected account
-   */
-  var result = total * percent / 100;
-  return result;
-}
 function setDepositAmount(deposit){
   /*
    *  set the amount of the account
@@ -469,6 +472,12 @@ function setDepositAmount(deposit){
     $("#account_container").hide();
   }
 }
+function computeDeposit(total, percent){
+  /*
+   *  Compute the expected account
+   */
+  return total * percent / 100;
+}
 function getToPayAfterDeposit(){
   /*
    *  return the topay value after deposit
@@ -479,7 +488,9 @@ function getDeposit(){
   /*
    * Return the computed deposit
    */
-  return getTotal() * getDepositPercent() / 100;
+  var total = getTotal();
+  var percent = getDepositPercent();
+  return computeDeposit(total, percent);
 }
 function getDepositPercent(tag){
   /*
@@ -595,6 +606,7 @@ function initialize(){
   /*
    *  Initialize the estimation UI
    */
+  var row;
   if (getNbPayments() < 1 ){
      /*
       * Add a row if needed and update rows to fit manual configuration
@@ -604,9 +616,11 @@ function initialize(){
   }
   $(Facade).bind('linechange', function(event, element){
     if ($(element).find("input[name=amount]").length === 0){
-      computeTaskRow(element);
+      row = new TaskRow(element);
+      row.update();
     }else{
-      computeDiscountRow(element);
+      row = new DiscountRow(element);
+      row.update();
     }
   });
   $(Facade).bind('totalchange', function(event){
@@ -616,7 +630,6 @@ function initialize(){
     computeTotal();
   });
   $(Facade).bind('depositchange', function(event){
-    console.log("Deposit change fired");
     setDeposit();
     updatePaymentRows();
   });

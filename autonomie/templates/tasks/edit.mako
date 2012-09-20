@@ -6,6 +6,8 @@
 <%namespace file="/base/utils.mako" import="address"/>
 <%block name='headjs'>
 <script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery.tmpl.min.js')}"></script>
+<script type="text/javascript" src="${request.static_url('autonomie:static/js/underscore-min.js')}"></script>
+<script type="text/javascript" src="${request.static_url('autonomie:static/js/backbone-min.js')}"></script>
 <script type="text/javascript" src="${request.static_url('autonomie:static/js/task.js')}"></script>
 </%block>
 <%block name='css'>

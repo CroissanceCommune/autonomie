@@ -19,10 +19,13 @@ import os
 import cgi
 import logging
 import colander
+
 from deform.compat import url_quote
 from deform.compat import string_types
-
+from deform.i18n import _
 from deform import widget
+from translationstring import TranslationString
+
 from deform_bootstrap.widget import ChosenSingleWidget
 from pyramid.renderers import render
 
@@ -105,6 +108,9 @@ class CustomSequenceWidget(widget.SequenceWidget):
         See : https://github.com/Pylons/deform/pull/79
     """
     def prototype(self, field):
+        """
+            Build the prototype of a serialized sequence item
+        """
         # we clone the item field to bump the oid (for easier
         # automated testing; finding last node)
         item_field = field.children[0].clone()
@@ -117,21 +123,25 @@ class CustomSequenceWidget(widget.SequenceWidget):
         return proto
 
     def serialize(self, field, cstruct, readonly=False):
+        """
+            Overrided serialize method
+        """
         if (self.render_initial_item and self.min_len is None):
             # This is for compat only: ``render_initial_item=True`` should
             # now be spelled as ``min_len = 1``
             self.min_len = 1
 
-        if cstruct in (null, None):
+        if cstruct in (colander.null, None):
             if self.min_len is not None:
-                cstruct = [null] * self.min_len
+                cstruct = [colander.null] * self.min_len
             else:
                 cstruct = []
 
         cstructlen = len(cstruct)
 
         if self.min_len is not None and (cstructlen < self.min_len):
-            cstruct = list(cstruct) + ([null] * (self.min_len-cstructlen))
+            cstruct = list(cstruct) + \
+                    ([colander.null] * (self.min_len-cstructlen))
 
         item_field = field.children[0]
 
@@ -143,7 +153,8 @@ class CustomSequenceWidget(widget.SequenceWidget):
         else:
             # this serialization is being performed as a result of a
             # first-time rendering
-            subfields = [ (item_field.schema.serialize(val), item_field.clone()) for val in cstruct ]
+            subfields = [ (item_field.schema.serialize(val),
+                                    item_field.clone()) for val in cstruct ]
 
         template = readonly and self.readonly_template or self.template
         translate = field.translate

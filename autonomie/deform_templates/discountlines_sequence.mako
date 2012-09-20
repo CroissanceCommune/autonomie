@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 <div>
     <input type="hidden" name="__start__" value="${field.name}:sequence" class="deformProto" prototype="${field.widget.prototype(field)}">
-    <div class='row linesblockheader'>
+    <div id="discount_header" class='row linesblockheader' style='display:none;visible:false;'>
         <div class='span4'>Remise</div>
         <div class='span1'>Montant</div>
         <div class='span2 offset3'>TVA</div>
-        <div class='span1'>Total</div>
+        <div class='span1'>Total HT</div>
     </div>
     <div class="deformSeqContainer">
 
@@ -22,8 +22,8 @@
     </div>
     <div class='row'>
         <div class='span2 offset10'>
-            <button class='btn btn-mini btn-info pull-right' type="button" onclick='deform.appendSequenceItem($(this).parent().parent());' id="${field.oid}-seqAdd">
-                Ajouter une ligne
+            <button class='btn btn-mini btn-info pull-right' type="button" onclick='$("#discount_header").show();deform.appendSequenceItem($(this).parent().parent());' id="${field.oid}-seqAdd">
+                Ajouter une remise
             </button>
         </div>
     </div>

@@ -30,7 +30,7 @@ def upgrade():
     for est in Estimation.query().all():
         id_ = est.id
         op.execute("""
-insert discount (description, amount, tva, task_id) select "Remise", discountHT, tva, id from estimation where estimation.id='%s';
+insert discount (description, amount, tva, task_id) select "Remise", discountHT, tva, id from estimation where estimation.id='%s' and estimation.discountHT!= 0 and estimation.discountHT is not null ;
     """% (id_))
     # Factures
     op.add_column("invoice_line",

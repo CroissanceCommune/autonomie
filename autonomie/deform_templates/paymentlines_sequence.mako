@@ -3,6 +3,7 @@
     Payments table
     Uses jquery tmpl to generate the lines
 </%doc>
+<% import colander %>
 <%def name='esc(datas)'><%text>${</%text>${datas}<%text>}</%text>\
 </%def>
 <div>
@@ -93,6 +94,10 @@
         solde, soldefield = subfields[-1]
         if not isinstance(solde, dict):
             solde = {}
+        else:
+            for key, value in solde.items():
+                if value == colander.null:
+                    solde.pop(key)
         if not isinstance(solde.get('paymentDate', '0'), basestring):
             solde['paymentDate'] = '';
     %>

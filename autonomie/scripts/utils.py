@@ -16,13 +16,16 @@
     script utility, allows the use of the app's context (database, models ...)
     from within command line calls
 """
+import logging
 from docopt import docopt
 from pyramid.paster import bootstrap
+
 
 def command(func, doc):
     """
         Usefull function to wrap command line scripts
     """
+    logging.basicConfig()
     args = docopt(doc)
     pyramid_env = bootstrap(args['<config_uri>'])
     try:

@@ -15,6 +15,7 @@ from alembic import op
 from autonomie.models import DBSESSION
 from autonomie.models import model
 from autonomie.models.task import Payment
+from autonomie.alembic.utils import table_exists
 
 
 def upgrade():
@@ -34,6 +35,9 @@ def upgrade():
 update coop_task as t join coop_invoice as inv on t.IDTask=inv.IDTask set CAEStatus='resulted' WHERE t.CAEStatus='paid';
 update coop_task set CAEStatus='resulted' where CAEStatus='gencinv';
 update coop_task set CAEStatus='valid' where CAEStatus='sent' OR CAEStatus='recinv';
+""")
+    if table_exists("coop_cancel_invoice"):
+        op.execute("""
 update coop_task as t join coop_cancel_invoice as est on t.IDTask=est.IDTask SET t.CAEStatus='valid' WHERE t.CAEStatus='paid';
 """)
 

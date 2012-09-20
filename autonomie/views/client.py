@@ -36,11 +36,11 @@ from autonomie.views.forms import ClientSchema
 from .base import ListView
 
 log = logging.getLogger(__name__)
-def get_client_form(company, edit=False):
+def get_client_form(company, client=None):
     """
         Returns the client add/edit form
     """
-    schema = ClientSchema().bind(edit=edit, company=company)
+    schema = ClientSchema().bind(company=company, client=client)
     form = Form(schema, buttons=(submit_btn,))
     return form
 
@@ -138,18 +138,19 @@ class ClientView(ListView):
             * the client addform when an error has occured
         """
         if self.request.context.__name__ == 'company':
-            company = self.request.context
+            company = self.context
             client = Client()
             client.company_id = company.id
             edit = False
             title = u"Ajout d'un nouveau client"
+            form = get_client_form(company)
         else:
-            client = self.request.context
+            client = self.context
             company = client.company
             edit = True
             title = u"Édition du client : {0}".format(client.name)
+            form = get_client_form(company, client)
 
-        form = get_client_form(company, edit=edit)
         if 'submit' in self.request.params:
             # form POSTed
             datas = self.request.params.items()

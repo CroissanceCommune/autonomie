@@ -15,6 +15,7 @@
 import colander
 from mock import Mock
 from autonomie.views.forms.client import deferred_ccode_valid
+from autonomie.models.client import Client
 from .base import BaseTestCase
 
 class TestClient(BaseTestCase):
@@ -27,4 +28,11 @@ class TestClient(BaseTestCase):
 
         company = Mock(id=2)
         validator = deferred_ccode_valid("nutt", {'company':company})
+        self.assertNotRaises(validator, 'nutt', u'C001')
+
+        company = Mock(id=1)
+        client = self.session.query(Client).first()
+        # In edit mode, no error is raised for the current_client
+        validator = deferred_ccode_valid("nutt", {'company':company,
+                                                  'client':client})
         self.assertNotRaises(validator, 'nutt', u'C001')

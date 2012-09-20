@@ -27,42 +27,37 @@ from autonomie.views.forms.widgets import DisabledInput
 log = logging.getLogger(__name__)
 
 @colander.deferred
-def deferred_code_widget(node, kw):
-    if kw['edit']:
-        return DisabledInput()
-    else:
-        return widget.TextInputWidget(mask='****')
-
-@colander.deferred
 def deferred_ccode_valid(node, kw):
-    if not kw['edit']:
-        company = kw['company']
-        company_id = company.id
-        def unique_ccode(node, value):
-            """
-                Test customer code unicity
-            """
-            if len(value) != 4:
-                message = u"Le code client doit contenir 4 caractères."
-                raise colander.Invalid(node, message)
-            #Test unicity
-            result = Client.query().filter(Client.company_id==company_id)\
-                    .filter(Client.code==value).all()
+    company = kw['company']
+    company_id = company.id
+    client = kw.get('client')
+    def unique_ccode(node, value):
+        """
+            Test customer code unicity
+        """
+        if len(value) != 4:
+            message = u"Le code client doit contenir 4 caractères."
+            raise colander.Invalid(node, message)
+        #Test unicity
+        query = Client.query().filter(Client.company_id==company_id)\
+                .filter(Client.code==value)
+        if client:
+            # In edit mode, it will always fail
+            query = query.filter(Client.id!=client.id)
+        result = query.all()
 
-            if len(result):
-                message = u"Vous avez déjà utilisé ce code '{0}' pour un autre \
-    client".format(value)
-                raise colander.Invalid(node, message)
-        return unique_ccode
-    else:
-        return None
+        if len(result):
+            message = u"Vous avez déjà utilisé ce code '{0}' pour un autre \
+client".format(value)
+            raise colander.Invalid(node, message)
+    return unique_ccode
 
 class ClientSchema(colander.MappingSchema):
     """
         Schema for customer insertion
     """
     code = colander.SchemaNode(colander.String(),
-                             widget=deferred_code_widget,
+                             widget=widget.TextInputWidget(mask='****'),
                              title=u'Code',
                              validator=deferred_ccode_valid)
     name = colander.SchemaNode(colander.String(),

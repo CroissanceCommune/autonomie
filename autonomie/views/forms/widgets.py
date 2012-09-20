@@ -153,8 +153,11 @@ class CustomSequenceWidget(widget.SequenceWidget):
         else:
             # this serialization is being performed as a result of a
             # first-time rendering
-            subfields = [ (item_field.schema.serialize(val),
-                                    item_field.clone()) for val in cstruct ]
+            subfields = []
+            for val in cstruct:
+                if val is colander.null:
+                    val = item_field.schema.serialize(val)
+                subfields.append((val, item_field.clone()))
 
         template = readonly and self.readonly_template or self.template
         translate = field.translate

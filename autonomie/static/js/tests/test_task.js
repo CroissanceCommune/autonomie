@@ -24,6 +24,7 @@ function initTest(){
                 "<option selected='selected' value='500'>5%</option>" +
                 "</select>" +
                 "<div class='linetotal'><div class='input'></div></div></span>";
+  var line_total = "<div id='tasklines_ht'><div class='input'></div></div>";
   var discountline = "<span id='test-discount' class='discountline'>" +
                 "<input name='amount' value='100' />" +
                 "<select name='tva'>" +
@@ -36,13 +37,13 @@ function initTest(){
   var total = "<div id='total'><div class='input'></div></div>";
   $('#qunit-fixture').html($(taskline1));
   $('#qunit-fixture').append($(taskline2));
+  $('#qunit-fixture').append($(line_total));
   $('#qunit-fixture').append($(discountline));
   $('#qunit-fixture').append($(total_ht));
   $('#qunit-fixture').append($(tvalist));
   $('#qunit-fixture').append($(total_ttc));
   $('#qunit-fixture').append($(total));
 }
-
 
 var insecable = '\u00a0';
 module("Fonctions générales");
@@ -86,7 +87,7 @@ test("Ligne de prestation", function(){
   equal(row.tva_amount, 24.56125);
   equal(row.ttc, 149.87375);
   row.update();
-  equal("149,8737..." + insecable + "€", $('#test1 .linetotal .input').text());
+  equal("125,3125" + insecable + "€", $('#test1 .linetotal .input').text());
 });
 test("Ligne de remise", function(){
   initTest();
@@ -95,7 +96,7 @@ test("Ligne de remise", function(){
   equal(row.tva, 1960);
   equal(row.tva_amount, -19.6);
   row.update();
-  equal("-119,60" + insecable + "€", $('#test-discount .linetotal .input').text());
+  equal("-100,00" + insecable + "€", $('#test-discount .linetotal .input').text());
 });
 test("Groupe de ligne", function(){
   initTest();
@@ -115,6 +116,7 @@ module("Lignes de paiement");
 test("Contrôle sur le solde", function(){
   initTest();
   computeTotal();
+  equal($('#tasklines_ht .input').text(), "225,3125" + insecable + '€');
   equal($('#total_ht .input').text(), '125,31' + insecable + '€');
   equal($('#total .input').text(), '135,27' + insecable + '€');
   equal(getTotal(), 135.27);

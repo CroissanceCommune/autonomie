@@ -203,7 +203,7 @@ var Row = Backbone.Model.extend({
   },
   update:function(){
     var totalinput = this.row.find(".linetotal .input");
-    totalinput.empty().html( formatAmount(this.TTC(), false) );
+    totalinput.empty().html( formatAmount(this.HT(), false) );
     return this.row;
   }
 });
@@ -212,6 +212,7 @@ var TaskRow = Row.extend({
   /*
    *  Task Row model
    */
+  type:"task",
   getCost: function(){
     return this.row.find("input[name=cost]").val();
   },
@@ -228,6 +229,7 @@ var DiscountRow = Row.extend({
   /*
    *  Discount Row model
    */
+  type:"discount",
   getAmount:function(){
     var amount = this.row.find("input[name=amount]").val();
     return transformToCents(amount);
@@ -249,14 +251,20 @@ var RowCollection = Backbone.Collection.extend({
       _this.add(row);
     });
   },
-  HT:function(){
+  HT:function(type){
     var sum = 0;
     this.each(function(item){
-      sum += item.ht;
+      if (type != undefined){
+        if (item.type == type){
+          sum += item.ht;
+        }
+      }else{
+        sum += item.ht;
+      }
     });
     return sum;
   },
-  TTC:function(){
+  TTC:function(type){
     var sum = 0;
     this.each(function(item){
       sum += item.ttc;
@@ -309,9 +317,11 @@ function computeTotal(){
    * Compute the main totals
    */
   var collection = getCollection();
+  var tasklines_ht = collection.HT("task");
   var total_ht = collection.HT();
   var total_ttc = collection.TTC();
   var tvas = collection.Tvas();
+  $('#tasklines_ht .input').empty().html(formatAmount(tasklines_ht, false));
   $('#tvalist').empty();
   for (var index in tvas){
     var line = getTvaLine(index, tvas[index]);

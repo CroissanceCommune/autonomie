@@ -155,7 +155,6 @@ de créer de nouveaux projets", queue="main")
         projects = self._sort(query, sort, direction).all()
         records = self._get_pagination(projects, current_page, items_per_page)
 
-        clients = company.clients
         ret_dict =  dict(title=u"Liste des projets",
                           projects=records,
                           company=company,

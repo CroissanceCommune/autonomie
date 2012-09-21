@@ -104,10 +104,10 @@ def get_est_state():
     geninv = ('geninv', None, gen_invoices,)
     delete = ('delete', None, None, False,)
     result = {}
-    result['draft'] = ('draft', 'wait', )
-    result['invalid'] = ('draft', 'wait',)
-    result['wait'] = (valid, invalid, duplicate,)
-    result['valid'] = ('aboest', geninv, duplicate,)
+    result['draft'] = ('draft', 'wait', 'delete',)
+    result['invalid'] = ('draft', 'wait', 'delete',)
+    result['wait'] = (valid, invalid, duplicate, 'delete')
+    result['valid'] = ('aboest', geninv, duplicate, 'delete')
     result['aboest'] = (delete,)
     result['geninv'] = (duplicate,)
     return result
@@ -130,12 +130,13 @@ def get_inv_state():
     paid = ('paid', MANAGER_PERMS, record_payment,)
     gencinv = ('gencinv', None, gen_cancelinvoice, False,)
     delete = ('delete', None, None, False,)
+    mdelete = ('delete', MANAGER_PERMS, None, False,)
     resulted = ('resulted', MANAGER_PERMS,)
     result = {}
-    result['draft'] = ('draft', 'wait', )
-    result['invalid'] = ('draft', 'wait',)
-    result['wait'] = (valid, invalid, duplicate,)
-    result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, )
+    result['draft'] = ('draft', 'wait', delete,)
+    result['invalid'] = ('draft', 'wait', delete, )
+    result['wait'] = (valid, invalid, duplicate, delete, )
+    result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, mdelete, )
     result['paid'] = (paid, resulted, gencinv, duplicate,)
     result['resulted'] = (gencinv, duplicate,)
     result['aboinv'] = (delete,)
@@ -152,8 +153,8 @@ def get_cinv_state():
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     result = {}
-    result['draft'] = ('wait',)
-    result['wait'] = (valid, invalid,)
+    result['draft'] = ('wait', 'delete', )
+    result['wait'] = (valid, invalid, 'delete', )
     result['invalid'] = ('draft', 'wait',)
     return result
 

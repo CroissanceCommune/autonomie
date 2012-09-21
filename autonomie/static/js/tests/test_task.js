@@ -52,6 +52,8 @@ function initTest(){
   $('#qunit-fixture').append($(tvalist));
   $('#qunit-fixture').append($(total_ttc));
   $('#qunit-fixture').append($(total));
+  var deposit = "<select name='deposit'><option value='5'>5%</option></select>";
+  $('#qunit-fixture').append($(deposit));
 }
 
 var insecable = '\u00a0';
@@ -87,7 +89,7 @@ test("Manipulation du DOM", function(){
   var test = $('#test');
   equal($('#test').length, 0);
 });
-module("Objet ligne");
+module("Ligne de prestation et totaux");
 test("Ligne de prestation", function(){
   initTest();
   var row = new TaskRow('#test1');
@@ -121,7 +123,6 @@ test("Groupe de ligne", function(){
     equal(tvas[key], expected[key]);
   }
 });
-module("Lignes de paiement");
 test("Contrôle sur le solde", function(){
   initTest();
   computeTotal();
@@ -129,4 +130,12 @@ test("Contrôle sur le solde", function(){
   equal($('#total_ht .input').text(), '128,31' + insecable + '€');
   equal($('#total .input').text(), '138,27' + insecable + '€');
   equal(getTotal(), 138.27);
+});
+module("Ligne de configuration des paiements");
+test("Calcul de l'acompte", function(){
+  initTest();
+  $('#total .input').empty().html(formatAmount(1.07));
+  equal(computeDeposit(1.07, 5), 0.05);
+  equal(getDeposit(), 0.05);
+  equal(getToPayAfterDeposit(), 1.02);
 });

@@ -40,6 +40,12 @@ function transformToCents(value) {
     return result;
   }
 }
+function round(price){
+  /*
+   *  Round the price
+   */
+  return Math.floor(price*100) / 100;
+}
 function formatPrice(price, rounded) {
   /*
    * Return a formatted price for display
@@ -47,7 +53,7 @@ function formatPrice(price, rounded) {
    */
   var dots, splitted, cents, ret_string;
   if (rounded){
-    price = Math.floor(price*100) / 100;
+    price = round(price);
   }
 
   splitted = String(price).split('.');
@@ -493,7 +499,7 @@ function computeDeposit(total, percent){
   /*
    *  Compute the expected account
    */
-  return total * percent / 100;
+  return round(total * percent / 100);
 }
 function getToPayAfterDeposit(){
   /*

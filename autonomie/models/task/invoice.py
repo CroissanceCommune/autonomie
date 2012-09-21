@@ -310,6 +310,9 @@ class Invoice(Task, TaskCompute):
             invoice.discounts.append(line.duplicate())
         return invoice
 
+    def __repr__(self):
+        return u"<Invoice id:{s.id}>".format(s=self)
+
 class InvoiceLine(DBBASE):
     """
         Invoice lines
@@ -374,6 +377,10 @@ class InvoiceLine(DBBASE):
 
     def total(self):
         return self.tva_amount() + self.total_ht()
+
+    def __repr__(self):
+        return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
+ quantity:{s.quantity} tva:{s.tva}".format(s=self)
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
@@ -649,6 +656,10 @@ class CancelInvoiceLine(DBBASE):
     def total(self):
         return self.tva_amount() + self.total_ht()
 
+    def __repr__(self):
+        return u"<CancelInvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
+ quantity:{s.quantity} tva:{s.tva}".format(s=self)
+
 class Payment(DBBASE):
     """
         Payment entry
@@ -678,3 +689,6 @@ class Payment(DBBASE):
         else:
             return u"mode paiement inconnu"
 
+    def __repr__(self):
+        return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
+ mode:{s.mode} date:{s.date}".format(s=self)

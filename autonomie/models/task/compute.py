@@ -59,6 +59,7 @@ class TaskCompute(object):
             val += line.tva_amount()
             ret_dict[line.tva] = val
         for discount in self.discounts:
+            print discount
             val = ret_dict.get(line.tva, 0)
             val -= discount.tva_amount()
             ret_dict[line.tva] = val

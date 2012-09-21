@@ -400,6 +400,9 @@ class Estimation(Task, TaskCompute):
         """
         self.payments = lines
 
+    def __repr__(self):
+        return u"<Estimation id:{s.id}>".format(s=self)
+
 class EstimationLine(DBBASE):
     """
         Estimation lines
@@ -465,6 +468,10 @@ class EstimationLine(DBBASE):
     def total(self):
         return self.tva_amount() + self.total_ht()
 
+    def __repr__(self):
+        return u"<EstimationLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
+ quantity:{s.quantity} tva:{s.tva}".format(s=self)
+
 class PaymentLine(DBBASE):
     """
         payments lines
@@ -494,3 +501,6 @@ class PaymentLine(DBBASE):
                              description=self.description,
                              paymentDate=datetime.date.today())
 
+    def __repr__(self):
+        return u"<PaymentLine id:{s.id} task_id:{s.task_id} amount:{s.amount}\
+ date:{s.paymentDate}".format(s=self)

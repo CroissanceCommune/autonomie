@@ -133,3 +133,6 @@ class User(DBBASE):
             is he enabled ?
         """
         return self.active == 'Y'
+
+    def __repr__(self):
+        return u"<User {s.id} '{s.lastname} {s.firstname}'>".format(s=self)

@@ -169,6 +169,9 @@ ce document.".format(status)
                     return True
         return False
 
+    def __repr__(self):
+        return u"<Task status:{s.CAEStatus} id:{s.id}>".format(s=self)
+
 class DiscountLine(DBBASE):
     """
          A discount line
@@ -209,6 +212,10 @@ class DiscountLine(DBBASE):
 
     def total(self):
         return self.tva_amount() + self.total_ht()
+
+    def __repr__(self):
+        return u"<DiscountLine amount : {s.amount} tva:{s.tva} id:{s.id}>"\
+                .format(s=self)
 
 class TaskStatus(DBBASE):
     """

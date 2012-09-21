@@ -57,6 +57,7 @@ from autonomie.views.forms.widgets import get_date_input
 from autonomie.views.forms.widgets import CustomSequenceWidget
 from .custom_types import QuantityType
 from .custom_types import AmountType
+from .custom_types import Integer
 
 log = logging.getLogger(__name__)
 DAYS = (
@@ -166,7 +167,7 @@ class TaskLine(colander.MappingSchema):
                     ),
                 css_class='span2'
                 )
-    tva = colander.SchemaNode(colander.String(),
+    tva = colander.SchemaNode(Integer(),
             widget=deferred_tvas_widget,
             default=deferred_default_tva,
             css_class='span2',

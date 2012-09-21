@@ -59,6 +59,8 @@ class EstimationView(TaskView):
         return {'estimation':self.task.appstruct(),
                 'lines':[line.appstruct()
                                        for line in self.task.lines],
+                'discounts':[discount.appstruct()
+                                        for discount in self.task.discounts],
                 'payment_lines':[line.appstruct()
                                       for line in self.task.payment_lines]}
 
@@ -173,7 +175,7 @@ class EstimationView(TaskView):
             eline = EstimationLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
-        for line in dbdatas['discounts']:
+        for line in dbdatas.get('discounts', []):
             dline = DiscountLine()
             merge_session_with_post(dline, line)
             self.task.discounts.append(dline)
@@ -236,6 +238,7 @@ class EstimationView(TaskView):
         except Forbidden, err:
             self.request.session.flash(err.message, queue="error")
         else:
+            self.remove_lines_from_session()
             self.dbsession.delete(self.task)
             message = u"Le devis {0} a bien été supprimé.".format(
                                                             self.task.number)
@@ -280,8 +283,10 @@ class EstimationView(TaskView):
                 self.dbsession.delete(line)
             for line in self.task.discounts:
                 self.dbsession.delete(line)
-            for line in self.payment_lines:
+            for line in self.task.payment_lines:
                 self.dbsession.delete(line)
+            for status in self.task.statuses:
+                self.dbsession.delete(status)
             self.dbsession.delete(self.task)
             self.dbsession.flush()
             self.request.session.flash(u"Le devis {0} a été supprimé"\

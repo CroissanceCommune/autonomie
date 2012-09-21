@@ -15,9 +15,11 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('coop_task_status',
-                    sa.Column('id', sa.Integer, autoincrement=True,
-                                                        unique=True))
+    op.execute("""
+alter table coop_task_status DROP INDEX statusCode;
+alter table coop_task_status DROP INDEX IDTask;
+alter table coop_task_status add column id int(11) primary key auto_increment not null;
+            """)
     op.alter_column('coop_project', 'status', type_=sa.String(20),
                                         nullable=False, server_default="")
 

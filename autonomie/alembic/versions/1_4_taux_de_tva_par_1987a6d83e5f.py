@@ -43,7 +43,7 @@ insert discount (description, amount, tva, task_id) select "Remise", discountHT,
     for inv in Invoice.query().all():
         id_ = inv.id
         op.execute("""
-    insert discount (description, amount, tva, task_id) select "Remise", discountHT, tva, id from invoice where invoice.id='%s';
+insert discount (description, amount, tva, task_id) select "Remise", discountHT, tva, id from invoice where invoice.id='%s' and invoice.discountHT!= 0 and invoice.discountHT is not null ;
     """% (id_))
     # Avoirs
     add_column("cancelinvoice_line",

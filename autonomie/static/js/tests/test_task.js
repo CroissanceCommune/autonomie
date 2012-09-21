@@ -24,6 +24,14 @@ function initTest(){
                 "<option selected='selected' value='500'>5%</option>" +
                 "</select>" +
                 "<div class='linetotal'><div class='input'></div></div></span>";
+  var taskline3 = "<span id='test2' class='taskline'>" +
+                "<input name='cost' value='3' />" +
+                "<input name='quantity' value='1' />" +
+                "<select name='tva'>" +
+                "<option selected='selected' value='0'>5%</option>" +
+                "</select>" +
+                "<div class='linetotal'><div class='input'></div></div></span>";
+
   var line_total = "<div id='tasklines_ht'><div class='input'></div></div>";
   var discountline = "<span id='test-discount' class='discountline'>" +
                 "<input name='amount' value='100' />" +
@@ -37,6 +45,7 @@ function initTest(){
   var total = "<div id='total'><div class='input'></div></div>";
   $('#qunit-fixture').html($(taskline1));
   $('#qunit-fixture').append($(taskline2));
+  $('#qunit-fixture').append($(taskline3));
   $('#qunit-fixture').append($(line_total));
   $('#qunit-fixture').append($(discountline));
   $('#qunit-fixture').append($(total_ht));
@@ -102,11 +111,11 @@ test("Groupe de ligne", function(){
   initTest();
   var collection = new RowCollection();
   collection.load('.taskline', TaskRow);
-  equal(collection.models.length, 2);
-  equal(collection.HT(), 225.3125);
-  equal(collection.TTC(), 254.87375);
+  equal(collection.models.length, 3);
+  equal(collection.HT(), 228.3125);
+  equal(collection.TTC(), 257.87375);
   var tvas = collection.Tvas();
-  var expected = {1960:24.56125, 500:5};
+  var expected = {1960:24.56125, 500:5, 0:0};
   var index = 0;
   for (var key in tvas){
     equal(tvas[key], expected[key]);
@@ -116,8 +125,8 @@ module("Lignes de paiement");
 test("Contrôle sur le solde", function(){
   initTest();
   computeTotal();
-  equal($('#tasklines_ht .input').text(), "225,3125" + insecable + '€');
-  equal($('#total_ht .input').text(), '125,31' + insecable + '€');
-  equal($('#total .input').text(), '135,27' + insecable + '€');
-  equal(getTotal(), 135.27);
+  equal($('#tasklines_ht .input').text(), "228,3125" + insecable + '€');
+  equal($('#total_ht .input').text(), '128,31' + insecable + '€');
+  equal($('#total .input').text(), '138,27' + insecable + '€');
+  equal(getTotal(), 138.27);
 });

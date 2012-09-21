@@ -179,6 +179,7 @@ var Row = Backbone.Model.extend({
    * Main row model
    */
   initialize:function(tag){
+    this.id = Math.random();
     this.row = $(tag);
     this.tva = this.TVA();
     this.ht = this.HT();
@@ -235,6 +236,7 @@ var DiscountRow = Row.extend({
     return transformToCents(amount);
   },
   HT:function(){
+  console.log(this.getAmount());
     return -1 * this.getAmount();
   }
 });
@@ -243,11 +245,12 @@ var RowCollection = Backbone.Collection.extend({
   /*
    *  Row collection model
    */
+  elems:[],
   load:function(selector, factory){
     // this in the each function will be the iterator's item
     var _this=this;
     $(selector).each(function(){
-      var row = new factory( "#" + $(this).attr('id'));
+      var row = new factory(this);
       _this.add(row);
     });
   },
@@ -316,11 +319,15 @@ function computeTotal(){
   /*
    * Compute the main totals
    */
+  console.log("Computing total");
   var collection = getCollection();
   var tasklines_ht = collection.HT("task");
   var total_ht = collection.HT();
   var total_ttc = collection.TTC();
   var tvas = collection.Tvas();
+  console.log(total_ttc);
+  console.log(total_ht);
+  console.log(tvas);
   $('#tasklines_ht .input').empty().html(formatAmount(tasklines_ht, false));
   $('#tvalist').empty();
   for (var index in tvas){
@@ -625,6 +632,7 @@ function initialize(){
      setPaymentRowsToEditable();
   }
   $(Facade).bind('linechange', function(event, element){
+  console.log("Line changed");
     if ($(element).find("input[name=amount]").length === 0){
       row = new TaskRow(element);
       row.update();
@@ -655,6 +663,9 @@ function initialize(){
   });
 
   $('.taskline').each(function(){
+    $(Facade).trigger('linechange', this);
+  });
+  $('.discountline').each(function(){
     $(Facade).trigger('linechange', this);
   });
   $(Facade).trigger('totalchange');

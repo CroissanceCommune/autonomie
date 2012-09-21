@@ -190,7 +190,7 @@ class DiscountLine(colander.MappingSchema):
                 ),
             css_class='span1'
             )
-    tva = colander.SchemaNode(colander.String(),
+    tva = colander.SchemaNode(Integer(),
             widget=deferred_tvas_widget,
             default=deferred_default_tva,
             css_class='span2 offset3',

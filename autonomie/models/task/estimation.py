@@ -140,6 +140,11 @@ class Estimation(Task, TaskCompute):
         duple.discountHT = self.discountHT
         duple.expenses = self.expenses
         duple.paymentDisplay = self.paymentDisplay
+        # Setting relationships at the end of the duplication
+        log.debug("    adding relationships")
+        duple.phase = phase
+        duple.statusPersonAccount = user
+        duple.project = project
         for line in self.lines:
             duple.lines.append(line)
         for line in self.payment_lines:
@@ -147,11 +152,6 @@ class Estimation(Task, TaskCompute):
         for line in self.discounts:
             duple.discounts.append(line)
 
-        # Setting relationships at the end of the duplication
-        log.debug("    adding relationships")
-        duple.phase = phase
-        duple.statusPersonAccount = user
-        duple.project = project
         log.debug("-> Returning the duplicate")
         return duple
 

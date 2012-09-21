@@ -15,7 +15,7 @@
 import time
 import datetime
 import locale
-from .base import BaseTestCase
+from autonomie.tests.base import BaseTestCase
 from autonomie.views import render_api
 
 class TestIt(BaseTestCase):

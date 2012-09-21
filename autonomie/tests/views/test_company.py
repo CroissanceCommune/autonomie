@@ -16,7 +16,7 @@
 from autonomie.views.company import CompanyViews
 from autonomie.models.model import User
 
-from .base import BaseFunctionnalTest
+from autonomie.tests.base import BaseFunctionnalTest
 
 
 class TestCompany(BaseFunctionnalTest):

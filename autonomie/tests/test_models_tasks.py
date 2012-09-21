@@ -413,6 +413,17 @@ class TestComputing(BaseTestCase):
         est = get_estimation()
         self.assertEqual(est.tva_amount(), TVA)
 
+    def test_get_tvas(self):
+        task = TaskCompute()
+        task.lines = [InvoiceLine(cost=35000, quantity=1, tva=1960),
+                      InvoiceLine(cost=40000, quantity=1, tva=550)]
+        task.discounts = [DiscountLine(amount=1200, tva=550),
+                        DiscountLine(amount=15000, tva=1960)]
+        tvas = task.get_tvas()
+        self.assertEqual(tvas.keys(), [1960, 550])
+        self.assertEqual(tvas[1960], 3920)
+        self.assertEqual(tvas[550], 2134)
+
     def test_total_ttc(self):
         line = InvoiceLine(cost=1030, quantity=1.25, rowIndex=1,
                             tva=1960, description='')

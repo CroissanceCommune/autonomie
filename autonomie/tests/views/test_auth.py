@@ -18,9 +18,8 @@
 from mock import MagicMock
 from pyramid import testing
 
-from .base import BaseFunctionnalTest
-from .base import BaseViewTest
-#from webtest import TestRequest, TestResponse
+from autonomie.tests.base import BaseFunctionnalTest
+from autonomie.tests.base import BaseViewTest
 
 class TestAuth(BaseFunctionnalTest):
     """

@@ -16,7 +16,7 @@ import colander
 from mock import Mock
 from autonomie.views.forms.client import deferred_ccode_valid
 from autonomie.models.client import Client
-from .base import BaseTestCase
+from autonomie.tests.base import BaseTestCase
 
 class TestClient(BaseTestCase):
     def test_unique_ccode(self):

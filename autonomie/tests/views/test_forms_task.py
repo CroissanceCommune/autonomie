@@ -12,9 +12,15 @@
 #
 # * Project :
 #
+import colander
+import deform
 from copy import deepcopy
 from mock import MagicMock
-from .base import BaseTestCase
+
+from autonomie.tests.base import BaseTestCase
+from autonomie.views.forms.task import deferred_total_validator
+from autonomie.views.forms.task import deferred_amount_default
+
 DBDATAS = dict(estimation=dict(course="0",
                                 displayedUnits="1",
                                 expenses=1500,
@@ -240,3 +246,23 @@ class TestMatchTools(BaseTestCase):
         datas_ = deepcopy(INV_DATAS)
         result = e.todb(datas_, {})
         self.assertEqual(result['invoice'], DBDATAS['invoice'])
+
+class TestTaskForms(BaseTestCase):
+    def task(self):
+        return MagicMock(topay=lambda :7940)
+
+    def test_total_valid(self):
+        c = colander.SchemaNode(colander.Integer())
+        task = self.task()
+        validator = deferred_total_validator("nutt", {'task':task})
+        self.assertRaises(colander.Invalid, validator, c, 7941)
+        validator(c, 0)
+        validator(c, 7940)
+
+    def test_paymentform_schema(self):
+        from autonomie.views.forms.task import Payment
+        schema = Payment().bind(task=self.task())
+        form = deform.Form(schema)
+        ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'), (u'__formid__', u'deform'), (u'amount', u'79.4'), (u'mode', u'CHEQUE'), (u'submit', u'paid')]
+        form.validate(ok_values)
+

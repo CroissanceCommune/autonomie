@@ -18,7 +18,7 @@ from mock import MagicMock
 from autonomie.views.subscribers import get_cid
 from autonomie.views.subscribers import get_companies
 
-from .base import BaseViewTest
+from autonomie.tests.base import BaseViewTest
 
 def get_company(id):
     c = MagicMock()

@@ -14,7 +14,7 @@
 #
 from autonomie.views.forms.custom_types import AmountType
 from autonomie.views.forms.custom_types import specialfloat
-from .base import BaseTestCase
+from autonomie.tests.base import BaseTestCase
 
 class TestType(BaseTestCase):
     def test_amount_type(self):

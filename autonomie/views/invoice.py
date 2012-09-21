@@ -33,6 +33,8 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
+from sqlalchemy.orm.util import has_identity
+
 from .base import TaskView
 
 log = logging.getLogger(__name__)
@@ -166,7 +168,7 @@ class InvoiceView(TaskView):
             eline = InvoiceLine()
             merge_session_with_post(eline, line)
             self.task.lines.append(eline)
-        for line in dbdatas['discounts']:
+        for line in dbdatas.get('discounts', []):
             dline = DiscountLine()
             merge_session_with_post(dline, line)
             self.task.discounts.append(dline)
@@ -236,16 +238,22 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
             self.request.session.flash(u"La facture a bien été dupliquée, \
               vous pouvez l'éditer <a href='{0}'>Ici</a>."\
                    .format(self.request.route_path("invoice", id=id_)), "main")
-        elif status == 'delete':
-            log.info(u"Deleting an invoice")
-            for line in self.task.lines:
-                self.dbsession.delete(line)
-            for line in self.task.discounts:
-                self.dbsession.delete(line)
-            self.dbsession.delete(self.task)
-            self.dbsession.flush()
-            self.request.session.flash(u"La facture {0} a été supprimée"\
-                    .format(self.task.number))
+#        elif status == 'delete':
+#            session_map = self.dbsession.identity_map
+#            # Here we delete all non persisted datas
+#            self.dbsession.expunge_all()
+#            log.info(u"Deleting an invoice")
+#            for line in self.task.lines:
+#                if has_identity(line):
+#                    self.dbsession.delete(line)
+#            for line in self.task.discounts:
+#                if has_identity(line):
+#                    self.dbsession.delete(line)
+#            self.dbsession.delete(self.task)
+#            self.dbsession.flush()
+#            self.request.session.flash(u"La facture {0} a été supprimée"\
+#                    .format(self.task.number))
+#            raise HTTPFound(self.request.route_path("project", id=self.project.id))
 
     def _pre_status_process(self, status, params):
         """
@@ -290,3 +298,22 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
                             title=u"Duplication d'un document")
         log.debug(ret_dict)
         return ret_dict
+
+    @view_config(route_name='invoice', request_param='action=delete',
+            permission='edit')
+    def delete(self):
+        """
+            Delete an invoice
+        """
+        log.debug("# Deleting an invoice #")
+        try:
+            self.task.set_status("delete", self.request, self.user.id)
+        except Forbidden, err:
+            self.request.session.flash(err.message, queue="error")
+        else:
+            self.remove_lines_from_session()
+            self.dbsession.delete(self.task)
+            message = u"Le devis {0} a bien été supprimé.".format(
+                                                            self.task.number)
+            self.request.session.flash(message, queue='main')
+        return self.project_view_redirect()

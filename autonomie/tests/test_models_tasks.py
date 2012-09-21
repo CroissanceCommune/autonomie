@@ -445,6 +445,9 @@ class TestEstimation(BaseTestCase):
         self.assertEqual(newest.statusPersonAccount, user)
         self.assertTrue(newest.number.startswith("PRO1_CLI1_D2_"))
         self.assertTrue(newest.phase, phase)
+        self.assertEqual(len(est.lines), len(newest.lines))
+        self.assertEqual(len(est.payment_lines), len(newest.payment_lines))
+        self.assertEqual(len(est.discounts), len(newest.discounts))
 
     def test_duplicate_estimation_integration(self):
         """
@@ -548,6 +551,7 @@ class TestInvoice(BaseViewTest):
         inv = get_invoice(user=user, project=project)
         newinv = inv.duplicate(user, project, phase)
         self.assertEqual(len(inv.lines), len(newinv.lines))
+        self.assertEqual(len(inv.discounts), len(newinv.discounts))
         self.assertEqual(inv.project, newinv.project)
         self.assertEqual(newinv.statusPersonAccount, user)
         self.assertEqual(newinv.phase, phase)

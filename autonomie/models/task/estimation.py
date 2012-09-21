@@ -43,6 +43,7 @@ from .interfaces import IMoneyTask
 from .invoice import Invoice
 from .invoice import InvoiceLine
 from .task import Task
+from .task import DiscountLine
 from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
@@ -139,8 +140,12 @@ class Estimation(Task, TaskCompute):
         duple.discountHT = self.discountHT
         duple.expenses = self.expenses
         duple.paymentDisplay = self.paymentDisplay
-        duple.lines = self.get_duplicated_lines()
-        duple.payment_lines = self.get_duplicated_payment_lines()
+        for line in self.lines:
+            duple.lines.append(line)
+        for line in self.payment_lines:
+            duple.payment_lines.append(line)
+        for line in self.discounts:
+            duple.discounts.append(line)
 
         # Setting relationships at the end of the duplication
         log.debug("    adding relationships")
@@ -286,25 +291,6 @@ class Estimation(Task, TaskCompute):
         invoices.append(invoice)
         return invoices
 
-
-    def get_duplicated_lines(self):
-        """
-            return duplicated lines
-        """
-        newlines = []
-        for line in self.lines:
-            newlines.append(line.duplicate())
-        return newlines
-
-    def get_duplicated_payment_lines(self):
-        """
-            return duplicated payment lines
-        """
-        newlines = []
-        for line in self.payment_lines:
-            newlines.append(line.duplicate())
-        return newlines
-
     @classmethod
     def get_name(cls, seq_number):
         taskname_tmpl = u"Devis {0}"
@@ -371,6 +357,48 @@ class Estimation(Task, TaskCompute):
                 result = rest - sum(line.amount \
                         for line in self.payment_lines[:-1])
         return result
+
+    def add_line(self, line=None, **kwargs):
+        """
+            Add a line to the current task
+        """
+        if line is None:
+            line = EstimationLine(**kwargs)
+        self.lines.append(line)
+
+    def add_discount(self, line=None, **kwargs):
+        """
+            Add a discount line to the current task
+        """
+        if line is None:
+            line = DiscountLine(**kwargs)
+        self.discounts.append(line)
+
+    def add_payment(self, line=None, **kwargs):
+        """
+            Add a payment line to the current task
+        """
+        if line is None:
+            line = PaymentLine(**kwargs)
+        self.payments.append(line)
+
+    def set_lines(self, lines):
+        """
+            Set the lines
+        """
+        self.lines = lines
+
+    def set_discounts(self, lines):
+        """
+            Set the discounts
+        """
+        self.discounts = discounts
+
+    def set_payments(self, lines):
+        """
+            set the payment lines
+        """
+        self.payments = lines
 
 class EstimationLine(DBBASE):
     """

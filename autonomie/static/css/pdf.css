@@ -36,6 +36,11 @@ html{
   width:30%;
   background-color:#f6f6f6;
 }
+.lines .tva{
+  text-align:right;
+  width:10%;
+  font-size:11px;
+}
 .lines .quantity{
   text-align:center;
   width:30%;

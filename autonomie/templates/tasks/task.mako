@@ -44,6 +44,9 @@ Base template for task rendering
                         <th class="quantity">P.U. x Qté</th>
                     % endif
                     <th class="price">Prix</th>
+                    % if multiple_tvas:
+                        <th class='tva'>Tva</th>
+                    % endif
                 </tr>
             </thead>
             <tbody>
@@ -53,7 +56,14 @@ Base template for task rendering
                         %if task.displayedUnits == 1:
                             <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€&nbsp;x&nbsp;${api.format_quantity(line.quantity)} ${api.format_unity(line.unity)}</td>
                         % endif
-                        <td class="price">${api.format_amount(line.total(), trim=False)|n}&nbsp;€</td>
+                        <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
+                        % if multiple_tvas:
+                            <td class='tva'>
+                                % if line.tva>=0:
+                                    ${api.format_amount(line.tva)|n}&nbsp;%
+                                % endif
+                            </td>
+                        % endif
                     </tr>
                 % endfor
                 <tr>
@@ -61,43 +71,57 @@ Base template for task rendering
                         Total HT
                     </td>
                     <td class='price'>
-                        ${api.format_amount(task.lines_total(), trim=False)|n}&nbsp;€
-                     </td>
+                        ${api.format_amount(task.lines_total_ht(), trim=False)|n}&nbsp;€
+                    </td>
+                    % if multiple_tvas:
+                        <td></td>
+                    % endif
                  </tr>
-                 %if hasattr(task, "discountHT") and task.discountHT:
-                    <tr>
-                        <td colspan='${colspan}' class='rightalign'>
-                            Remise commerciale
-                        </td>
-                        <td class='price'>
-                            ${api.format_amount(task.discountHT)|n}&nbsp;€
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan='${colspan}' class='rightalign'>
-                         Total HT après remise
-                        </td>
-                        <td class='price'>
-                            ${api.format_amount(task.total_ht())|n}&nbsp;€
-                        </td>
-                    </tr>
-
+                 %if hasattr(task, "discounts") and task.discounts:
+                     % for discount in task.discounts:
+                         <tr>
+                            <td colspan='${colspan}' class='rightalign'>
+                                ${format_text(discount.description)}
+                            </td>
+                            <td class='price'>
+                                ${api.format_amount(discount.amount)|n}&nbsp;€
+                            </td>
+                            % if multiple_tvas:
+                                <td class='tva'>
+                                    ${api.format_amount(discount.tva)|n}&nbsp;%
+                                </td>
+                            % endif
+                        </tr>
+                    % endfor
+                        <tr>
+                            <td colspan='${colspan}' class='rightalign'>
+                                Total HT après remise
+                            </td>
+                            <td class='price'>
+                                ${api.format_amount(task.total_ht())|n}&nbsp;€
+                            </td>
+                            % if multiple_tvas:
+                                <td></td>
+                            % endif
+                        </tr>
                 % endif
-                % if task.tva<0:
+                % if task.no_tva():
                     <tr>
                         <td colspan='${colspan + 1}'class='rightalign'>
                             TVA non applicable selon l'article 259b du CGI.
                         </td>
                     </tr>
                 % else:
-                    <tr>
-                        <td colspan='${colspan}' class='rightalign'>
-                            TVA (${api.format_amount(task.tva)|n} %)
-                        </td>
-                        <td class='price'>
-                            ${api.format_amount(task.tva_amount())|n}&nbsp;€
-                        </td>
-                    </tr>
+                    %for tva, tva_amount in task.get_tvas().items():
+                        <tr>
+                            <td colspan='${colspan}' class='rightalign'>
+                                TVA (${api.format_amount(tva)|n} %)
+                            </td>
+                            <td class='price'>
+                                ${api.format_amount(tva_amount)|n}&nbsp;€
+                            </td>
+                        </tr>
+                    % endfor
                 % endif
                 %if task.expenses:
                     <tr>

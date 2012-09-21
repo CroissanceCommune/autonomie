@@ -539,14 +539,18 @@ class TaskView(BaseView):
         """
             Returns an html version of the current document
         """
+        tvas = self.task.get_tvas()
+        multiple_tvas = len([key for key in tvas.keys() if key >=0]) > 1
+
         template = self.template
         config = self.request.config
         datas = dict(
                     company=self.company,
                     project=self.project,
                     task=self.task,
-                    config=config
-                    )
+                    config=config,
+                    multiple_tvas=multiple_tvas,
+                    tvas=tvas)
         return render_html(self.request, template, datas)
 
     def _pdf(self):

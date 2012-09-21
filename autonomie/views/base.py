@@ -417,15 +417,15 @@ class TaskView(BaseView):
                      value="gencinv",
                      request=self.request)
 
-    def _delete_btn(self):
-        """
-            Return a button for deleting a document
-        """
-        yield Submit(u"Supprimer ce document",
-                  value="delete",
-                  request=self.request,
-                  confirm=u"Êtes-vous sûr de vouloir supprimer ce document ?")
-
+#    def _delete_btn(self):
+#        """
+#            Return a button for deleting a document
+#        """
+#        yield Submit(u"Supprimer ce document",
+#                  value="delete",
+#                  request=self.request,
+#                  confirm=u"Êtes-vous sûr de vouloir supprimer ce document ?")
+#
 
     def get_buttons(self):
         """

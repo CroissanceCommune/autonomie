@@ -60,3 +60,17 @@ class AmountType(colander.Number):
                             val=cstruct)
                           )
 
+class Integer(colander.Number):
+    """
+        Fix https://github.com/Pylons/colander/pull/35
+    """
+    num = int
+    def serialize(self, node, appstruct):
+        if appstruct in (colander.null, None):
+            return colander.null
+        try:
+            return str(self.num(appstruct))
+        except Exception:
+            raise colander.Invalid(node,
+                       u"'${val}' n'est pas un nombre".format(val=appstruct))
+

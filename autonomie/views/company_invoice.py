@@ -48,7 +48,7 @@ class CompanyInvoicesView(ListView):
 
     @view_config(route_name='company_invoices',
                  renderer='company_invoices.mako',
-                 permission='view')
+                 permission='edit')
     def company_invoices(self):
         """
             List invoices for the given company
@@ -274,7 +274,7 @@ class CompanyInvoicesView(ListView):
 
     @view_config(route_name='company_treasury',
                  renderer='company_treasury.mako',
-                 permission='view')
+                 permission='edit')
     def company_treasury(self):
         """
             View for the treasury view

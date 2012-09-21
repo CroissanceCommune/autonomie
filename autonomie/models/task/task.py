@@ -96,7 +96,6 @@ class Task(DBBASE):
         """
             set the status of a task through the state machine
         """
-        self.statusPerson = user_id
         return self.state_machine.process(self, request, user_id, status, **kw)
 
     def is_invoice(self):
@@ -126,6 +125,8 @@ class Task(DBBASE):
             message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à \
 ce document.".format(status)
             raise Forbidden(message)
+        self.statuses.append(TaskStatus(statusCode=status,
+                                        statusPerson=self.statusPerson))
         return status
 
     def get_next_actions(self):
@@ -157,6 +158,16 @@ ce document.".format(status)
             Return the id of the company owning this task
         """
         return self.project.company.id
+
+    def is_deletable(self, request):
+        """
+            Return True if the task is deletable
+        """
+        for action in self.get_next_actions():
+            if action.name == 'delete':
+                if action.allowed(self, request):
+                    return True
+        return False
 
 class DiscountLine(DBBASE):
     """
@@ -198,3 +209,21 @@ class DiscountLine(DBBASE):
 
     def total(self):
         return self.tva_amount() + self.total_ht()
+
+class TaskStatus(DBBASE):
+    """
+        Task status, should be used to record the task's status
+    """
+    __tablename__ = 'task_status'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    id = Column("id", Integer, primary_key=True)
+    task_id = Column('task_id', Integer,
+                        ForeignKey('task.id'))
+    statusCode = Column("statusCode", String(10))
+    statusComment = Column("statusComment", Text)
+    statusPerson = Column("statusPerson", Integer,
+                        ForeignKey('accounts.id'))
+    statusDate = Column("statusDate", CustomDateType,
+                                default=get_current_timestamp)
+    task = relationship("Task", backref="statuses")
+    statusPersonAccount = relationship("User", backref="task_statuses")

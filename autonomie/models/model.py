@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mar. 18 sept. 2012 19:11:47 CEST
+# * Last Modified : ven. 21 sept. 2012 12:04:27 CEST
 #
 # * Project : autonomie
 #
@@ -119,20 +119,6 @@ class Tva(DBBASE):
     def query(cls):
         q = super(Tva, cls).query()
         return q.order_by('value')
-
-class TaskStatus(DBBASE):
-    """
-        Task status, should be used to record the task's status
-    """
-    __tablename__ = 'task_status'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("id", Integer, primary_key=True)
-    task_id = Column('task_id', Integer,
-                        ForeignKey('task.id'))
-    statusCode = Column("statusCode", String(10))
-    statusComment = Column("statusComment", Text)
-    statusDate = Column("statusDate", Integer)
-    task = relationship("Task", backref="taskstatus")
 
 class Config(DBBASE):
     """

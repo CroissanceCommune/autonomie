@@ -84,9 +84,6 @@ class Estimation(Task, TaskCompute):
                             backref=backref('estimations',
                                             order_by='Estimation.taskDate')
                             )
-    #phase =  relationship("Phase",
-    #                      backref=backref("estimations",
-    #                      order_by='Estimation.taskDate'))
     __mapper_args__ = {
                         'polymorphic_identity':'estimation',
                        }
@@ -319,12 +316,6 @@ class Estimation(Task, TaskCompute):
         pcode = project.code
         ccode = project.client.code
         return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
-
-    def is_deletable(self):
-        """
-            Returns True if the estimation could be deleted
-        """
-        return self.CAEStatus not in ('geninv',)
 
     def is_cancelled(self):
         """

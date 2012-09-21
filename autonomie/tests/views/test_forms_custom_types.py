@@ -12,8 +12,10 @@
 #
 # * Project :
 #
+import colander
 from autonomie.views.forms.custom_types import AmountType
 from autonomie.views.forms.custom_types import specialfloat
+from autonomie.views.forms.custom_types import Integer
 from autonomie.tests.base import BaseTestCase
 
 class TestType(BaseTestCase):
@@ -25,3 +27,8 @@ class TestType(BaseTestCase):
     def test_specialfloat(self):
         a = u"495, 4 5€"
         self.assertEqual(specialfloat( "", a), 495.45)
+
+    def test_integer(self):
+        i = Integer()
+        self.assertEqual(colander.null, i.serialize(None, None))
+        self.assertEqual("0", i.serialize(None, 0))

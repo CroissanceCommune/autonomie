@@ -508,16 +508,23 @@ class TestEstimation(BaseTestCase):
         for inv in invoices:
             self.session.add(inv)
             self.session.flush()
+        invoices = Invoice.query().filter(Invoice.estimation_id==est.id).all()
         #deposit :
         deposit = invoices[0]
         self.assertEqual(deposit.taskDate, datetime.date.today())
         self.assertEqual(deposit.total_ht(), est.deposit_amount())
+        self.assertEqual(deposit.lines[0].tva, 0)
         #intermediate invoices:
         intermediate_invoices = invoices[1:-1]
         for index, line in enumerate(PAYMENT_LINES[:-1]):
             inv = intermediate_invoices[index]
-            self.assertEqual(inv.total_ht(), line['amount'])
+            self.assertEqual(inv.total(), line['amount'])
             self.assertEqual(inv.taskDate, line['paymentDate'])
+            print inv.lines
+            raise
+            self.assertEqual(inv.lines[0].tva, 0)
+        total = sum([inv.total() for inv in invoices])
+        self.assertEqual(total, est.total())
 
 class TestInvoice(BaseViewTest):
     def test_get_name(self):

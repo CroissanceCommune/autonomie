@@ -146,11 +146,11 @@ class Estimation(Task, TaskCompute):
         duple.statusPersonAccount = user
         duple.project = project
         for line in self.lines:
-            duple.lines.append(line)
+            duple.lines.append(line.duplicate())
         for line in self.payment_lines:
-            duple.payment_lines.append(line)
+            duple.payment_lines.append(line.duplicate())
         for line in self.discounts:
-            duple.discounts.append(line)
+            duple.discounts.append(line.duplicate())
 
         log.debug("-> Returning the duplicate")
         return duple
@@ -174,7 +174,7 @@ class Estimation(Task, TaskCompute):
         """
             Return an account invoiceline
         """
-        return InvoiceLine(cost=amount, description=description)
+        return InvoiceLine(cost=amount, description=description, tva=0)
 
     def _account_invoice(self, args, count=0):
         """

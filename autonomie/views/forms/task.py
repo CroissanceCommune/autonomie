@@ -454,6 +454,7 @@ def get_cancel_invoice_schema():
     schema['common']['description'].title = title
     del schema['common']['course']
     title = u"Conditions de remboursement"
+    del schema['lines']['discounts']
 #    tva = schema['lines']['tva']
 #    tva.before='autonomie:deform_templates/staticinput.mako',
 #    tva.before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},

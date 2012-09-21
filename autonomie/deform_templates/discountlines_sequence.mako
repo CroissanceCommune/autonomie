@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 <div>
+    <div class='control-group estimationamounts offset8' id='tasklines_ht'>
+        <div class='control-label'>
+            Total HT avant remise
+        </div>
+        <div class='controls'>
+            <div class='input'></div>
+        </div>
+    </div>
     <input type="hidden" name="__start__" value="${field.name}:sequence" class="deformProto" prototype="${field.widget.prototype(field)}">
     <div id="discount_header" class='row linesblockheader' style='display:none;visible:false;'>
         <div class='span4'>Remise</div>

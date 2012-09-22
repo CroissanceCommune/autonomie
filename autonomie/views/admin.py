@@ -55,7 +55,8 @@ class AdminViews(BaseView):
             Main parameters administration
         """
         # static assets path
-        root_path = self.request.config.get('files_dir', '/tmp')
+        root_path = self.request.registry.settings.get('autonomie.assets')
+#        root_path = self.request.config.get('files_dir', '/tmp')
         schema = MainConfig().bind(
                                    session=self.request.session,
                                    rootpath=root_path,

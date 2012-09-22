@@ -79,7 +79,8 @@ class CompanyViews(BaseView):
             Company edition page
         """
         company = self.request.context
-        root_path = self.request.config.get('files_dir', '/tmp')
+        root_path = self.request.registry.settings.get('autonomie.assets',
+                                                                   '/tmp')
         company_path = os.path.join(root_path, company.get_path())
         company_url = os.path.join("/assets", company.get_path())
         schema = get_company_schema(self.request, True,

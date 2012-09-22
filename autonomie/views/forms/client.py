@@ -59,7 +59,8 @@ class ClientSchema(colander.MappingSchema):
     code = colander.SchemaNode(colander.String(),
                              widget=widget.TextInputWidget(mask='****'),
                              title=u'Code',
-                             validator=deferred_ccode_valid)
+                             validator=deferred_ccode_valid,
+                             description=u"Ce code est unique")
     name = colander.SchemaNode(colander.String(),
                             title=u"Nom de l'entreprise",
                             validator=colander.Length(max=255))

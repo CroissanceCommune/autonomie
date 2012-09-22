@@ -44,14 +44,15 @@ class CompanySchema(colander.MappingSchema):
         Company add/edit form schema
     """
     name = colander.SchemaNode(colander.String(),
-                               widget=deferred_edit_widget,
+                               widget=deferred_edit_adminonly_widget,
                                title=u'Nom')
     goal = colander.SchemaNode(colander.String(),
                                 title=u'Objet')
     logo = colander.SchemaNode(FileData(),
                             widget=deferred_upload_widget(path=LOGO_PATH),
                             title=u'Logo',
-                            validator=validate_image_mime)
+                            validator=validate_image_mime,
+        description=u"Charger un fichier de type image *.png *.jpeg *.jpg ...")
     email = get_mail_input(missing=u'')
     phone = colander.SchemaNode(colander.String(),
                             title=u'Téléphone',
@@ -69,7 +70,9 @@ class CompanySchema(colander.MappingSchema):
                             missing=u'')
     header = colander.SchemaNode(FileData(),
                             widget=deferred_upload_widget(path=HEADER_PATH),
-                            title=u'Entête des PDF',
+                            title=u'Entête des fichiers PDF',
+     description=u"Charger un fichier de type image *.png *.jpeg *.jpg ... \
+Le fichier est idéalement au format 20/4 (par exemple 1000px x 200 px)",
                             validator=validate_image_mime
                             )
 

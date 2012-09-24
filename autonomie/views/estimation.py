@@ -136,7 +136,9 @@ class EstimationView(TaskView):
                     self._set_modifications()
                     self.request.registry.notify(StatusChanged(self.request,
                                                     self.task))
-                    log.debug(" > Estimation has been added/edited succesfully")
+                    debug = " > Estimation has been added/edited succesfully"
+                    log.debug(debug)
+
                 except Forbidden, e:
                     self.request.session.pop_flash("main")
                     self.request.session.flash(e.message, queue='error')

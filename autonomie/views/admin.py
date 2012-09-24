@@ -43,14 +43,18 @@ class AdminViews(BaseView):
     """
         Main class for admin views
     """
-    @view_config(route_name='admin_index', renderer='admin/index.mako', permission='admin')
+    @view_config(route_name='admin_index',
+                 renderer='admin/index.mako',
+                 permission='admin')
     def admin_index(self):
         """
             Index of the administration page
         """
         return dict(title=u"Administration du site")
 
-    @view_config(route_name="admin_main", renderer="admin/main.mako", permission='admin')
+    @view_config(route_name="admin_main",
+                 renderer="admin/main.mako",
+                 permission='admin')
     def admin_main(self):
         """
             Main parameters administration
@@ -89,7 +93,9 @@ class AdminViews(BaseView):
         return dict(title=u"Configuration générale",
                     html_form=html_form)
 
-    @view_config(route_name='admin_tva', renderer="admin/tva.mako", permission='admin')
+    @view_config(route_name='admin_tva',
+                 renderer="admin/tva.mako",
+                 permission='admin')
     def admin_tva(self):
         """
             Tva configuration

@@ -175,8 +175,8 @@ def main(global_config, **settings):
     # Test javascript view
     config.add_route("testjs",
                     "/testjs")
-    # Set deform multi renderer handling translation and both chameleon and mako
-    # templates
+    # Set deform multi renderer handling translation and both chameleon and
+    # mako templates
     set_deform_renderer()
     config.scan('autonomie.views')
     config.add_translation_dirs("colander:locale/", "deform:locale")

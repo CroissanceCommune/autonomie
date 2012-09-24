@@ -21,7 +21,8 @@ import logging
 from sqlalchemy import and_
 from pyramid.view import view_config
 
-from autonomie.models.model import Task, Invoice, Estimation, Phase, CancelInvoice
+from autonomie.models.model import Task, Invoice, Estimation, Phase, \
+        CancelInvoice
 
 log = logging.getLogger(__name__)
 

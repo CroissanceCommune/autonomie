@@ -44,7 +44,9 @@ def record_payment(task, **kw):
     log.debug("recording a payment")
     log.debug(task)
     if "mode" in kw and "amount" in kw:
-        return task.record_payment(kw['mode'], kw['amount'], kw.get('resulted'))
+        return task.record_payment(kw['mode'],
+                                   kw['amount'],
+                                   kw.get('resulted'))
     else:
         raise Forbidden()
 

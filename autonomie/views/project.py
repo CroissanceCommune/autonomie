@@ -408,7 +408,8 @@ supprimé".format(project.name) )
         """
             return the toggle button which show the details
         """
-        return ToggleLink(u"Afficher les détails", target="project-description")
+        return ToggleLink(u"Afficher les détails",
+                          target="project-description")
 
     @staticmethod
     def _get_phase_btn():

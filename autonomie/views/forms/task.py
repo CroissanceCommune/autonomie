@@ -107,7 +107,9 @@ def deferred_course_title(node, kw):
         return u"Cette facture concerne-t-elle une formation professionnelle \
 continue ?"
     else:
-        return u"Ce devis concerne-t-il une formation professionnelle continue?"
+        return u"Ce devis concerne-t-il une formation professionnelle \
+continue ?"
+
 
 @colander.deferred
 def deferred_tvas_widget(node, kw):

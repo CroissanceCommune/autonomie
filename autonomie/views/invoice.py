@@ -252,7 +252,8 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
 #            self.dbsession.flush()
 #            self.request.session.flash(u"La facture {0} a été supprimée"\
 #                    .format(self.task.number))
-#            raise HTTPFound(self.request.route_path("project", id=self.project.id))
+#            raise HTTPFound(self.request.route_path("project",
+#                            id=self.project.id))
 
     def _pre_status_process(self, status, params):
         """

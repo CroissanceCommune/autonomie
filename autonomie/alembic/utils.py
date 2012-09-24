@@ -37,12 +37,16 @@ def table_exists(tbl):
         pass
     return ret
 
-def rename_column(tbl, column_name, name, type_=sa.Integer, nullable=False, autoincrement=False, **kw):
+
+def rename_column(tbl, column_name, name, type_=sa.Integer, nullable=False,
+                  autoincrement=False, **kw):
     if column_exists(tbl, column_name):
         if autoincrement:
-            op.execute("Alter table `%s` change `%s` `%s` int(11) NOT NULL AUTO_INCREMENT;" % (tbl, column_name, name))
+            op.execute("Alter table `%s` change `%s` `%s` int(11) NOT NULL "
+                       "AUTO_INCREMENT;" % (tbl, column_name, name))
         else:
-            op.alter_column(tbl, column_name, name=name, type_=type_, nullable=nullable, **kw)
+            op.alter_column(tbl, column_name, name=name, type_=type_,
+                            nullable=nullable, **kw)
 
 
 def column_exists(tbl, column_name):

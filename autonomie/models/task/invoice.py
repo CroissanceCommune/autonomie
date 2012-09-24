@@ -662,8 +662,9 @@ class CancelInvoiceLine(DBBASE):
         return self.tva_amount() + self.total_ht()
 
     def __repr__(self):
-        return u"<CancelInvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
- quantity:{s.quantity} tva:{s.tva}".format(s=self)
+        return u"<CancelInvoiceLine id:{s.id} task_id:{s.task_id} \
+cost:{s.cost} quantity:{s.quantity} tva:{s.tva}".format(s=self)
+
 
 class Payment(DBBASE):
     """

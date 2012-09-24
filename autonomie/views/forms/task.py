@@ -84,7 +84,7 @@ def get_percents():
     """
         Return percents for select widget
     """
-    percent_options = [(0,'Aucun'), (5,'5%')]
+    percent_options = [(0, 'Aucun'), (5, '5%')]
     for i in range(10, 110, 10):
         percent_options.append((i, "%d %%" % i))
     return percent_options

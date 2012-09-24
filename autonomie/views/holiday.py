@@ -58,7 +58,7 @@ class HolidayView(BaseView):
         """
         schema = HolidaysSchema()
         form = Form(schema, buttons=(submit_btn,))
-        holidays = Holiday.query(self.dbsession,user_id=self.request.user.id)
+        holidays = Holiday.query(self.dbsession, user_id=self.request.user.id)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
             log.debug(datas)

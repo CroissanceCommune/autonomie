@@ -66,7 +66,7 @@ def get_next_officialNumber():
         b = 0
     if not c:
         c = 0
-    next_ = max(a,b,c) + 1
+    next_ = max(a, b, c) + 1
     return int(next_)
 
 

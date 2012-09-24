@@ -90,7 +90,7 @@ class CustomFileType(TypeDecorator):
             Get the datas from database
         """
         if value:
-            return dict(filename = value,
+            return dict(filename=value,
                         uid=self.prefix + value)
         else:
             return dict(filename="",

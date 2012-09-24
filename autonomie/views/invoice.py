@@ -144,7 +144,7 @@ class InvoiceView(TaskView):
         return dict(title=title,
                     client=self.project.client,
                     company=self.company,
-                    html_form = html_form,
+                    html_form=html_form,
                     action_menu=self.actionmenu,
                     popups=self.popups
                     )

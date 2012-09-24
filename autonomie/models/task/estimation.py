@@ -394,7 +394,7 @@ class Estimation(Task, TaskCompute):
         """
             Set the discounts
         """
-        self.discounts = discounts
+        self.discounts = lines
 
     def set_payments(self, lines):
         """

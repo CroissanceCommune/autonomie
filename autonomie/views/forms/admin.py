@@ -44,46 +44,56 @@ def deferred_upload_widget(node, kw):
     store_directory = os.path.join(root_path, "main")
     tmpstore = FileTempStore(session, store_directory, store_url, 'logo.png')
     return widget.FileUploadWidget(tmpstore,
-            template="autonomie:deform_templates/fileupload.mako" )
+            template="autonomie:deform_templates/fileupload.mako")
+
 
 class EstimationConfig(colander.MappingSchema):
     """
         Schema for estimation configuration
     """
-    footer = colander.SchemaNode(colander.String(),
-                            title=u"Informations sur l'acceptation des devis",
-                            widget=widget.TextAreaWidget(cols=80, rows=2),
-                            missing=u"")
+    footer = colander.SchemaNode(
+        colander.String(),
+        title=u"Informations sur l'acceptation des devis",
+        widget=widget.TextAreaWidget(cols=80, rows=2),
+        missing=u"")
+
 
 class InvoiceConfig(colander.MappingSchema):
     """
         Schema for invoice configuration
     """
-    payment = colander.SchemaNode(colander.String(),
-                           title=u"Information de paiement pour les factures",
-                           widget=widget.TextAreaWidget(cols=80, rows=2),
-                           missing=u"")
-    late = colander.SchemaNode(colander.String(),
-                           title=u"Informations sur les délais de paiement",
-                           widget=widget.TextAreaWidget(cols=80, rows=2),
-                           missing=u"")
+    payment = colander.SchemaNode(
+        colander.String(),
+        title=u"Information de paiement pour les factures",
+        widget=widget.TextAreaWidget(cols=80, rows=2),
+        missing=u"")
+    late = colander.SchemaNode(
+        colander.String(),
+        title=u"Informations sur les délais de paiement",
+        widget=widget.TextAreaWidget(cols=80, rows=2),
+        missing=u"")
+
 
 class DocumentConfig(colander.MappingSchema):
     """
         Schema for document (estimation/invoice ...) configuration
     """
-    footertitle = colander.SchemaNode(colander.String(),
-                                title=u"Titre du pied de page",
-                                widget=widget.TextAreaWidget(cols=80, rows=2),
-                                missing=u"")
-    footercourse = colander.SchemaNode(colander.String(),
-                                title=u"Pied de page des documents liées aux formations",
-                                widget=widget.TextAreaWidget(cols=80, rows=2),
-                                missing=u'')
-    footercontent = colander.SchemaNode(colander.String(),
-                                title=u"Contenu du pied de page",
-                                widget=widget.TextAreaWidget(cols=80, rows=2),
-                                missing=u'')
+    footertitle = colander.SchemaNode(
+        colander.String(),
+        title=u"Titre du pied de page",
+        widget=widget.TextAreaWidget(cols=80, rows=2),
+        missing=u"")
+    footercourse = colander.SchemaNode(
+        colander.String(),
+        title=u"Pied de page des documents liées aux formations",
+        widget=widget.TextAreaWidget(cols=80, rows=2),
+        missing=u'')
+    footercontent = colander.SchemaNode(
+        colander.String(),
+        title=u"Contenu du pied de page",
+        widget=widget.TextAreaWidget(cols=80, rows=2),
+        missing=u'')
+
     estimation = EstimationConfig(title=u'Devis')
     invoice = InvoiceConfig(title=u"Factures")
 
@@ -97,14 +107,16 @@ class SiteConfig(colander.MappingSchema):
                 widget=deferred_upload_widget,
                 title=u'Logo du site',
                 validator=validate_image_mime,
-                default={"filename":"logo.png", "uid":"MAINLOGO"})
-    welcome = colander.SchemaNode(colander.String(),
-                                title=u"Texte d'accueil",
-                                widget=widget.RichTextWidget(cols=80, rows=2,
-                                    theme="advanced"),
-                                missing=u'')
-    files_dir = colander.SchemaNode(colander.String(),
-                 title=u"Chemin de stockage des fichiers (logo, entête)...")
+                default={"filename": "logo.png", "uid": "MAINLOGO"})
+    welcome = colander.SchemaNode(
+        colander.String(),
+        title=u"Texte d'accueil",
+        widget=widget.RichTextWidget(cols=80, rows=2, theme="advanced"),
+        missing=u'')
+    files_dir = colander.SchemaNode(
+        colander.String(),
+        title=u"Chemin de stockage des fichiers (logo, entête)...")
+
 
 class MainConfig(colander.MappingSchema):
     """
@@ -118,15 +130,19 @@ class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
     """
-    name = colander.SchemaNode(colander.String(),
-                                title=u"Libellé du taux de TVA",
-                                css_class='span2')
-    value = colander.SchemaNode(AmountType(),
-                                title=u"Montant",
-                                css_class='span2')
-    default = colander.SchemaNode(colander.Integer(),
-                    title=u"Valeur par défaut ?",
-                    widget=widget.CheckboxWidget(true_val="1", false_val="0"))
+    name = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé du taux de TVA",
+        css_class='span2')
+    value = colander.SchemaNode(
+        AmountType(),
+        title=u"Montant",
+        css_class='span2')
+    default = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Valeur par défaut ?",
+        widget=widget.CheckboxWidget(true_val="1", false_val="0"))
+
 
 class TvaSequence(colander.SequenceSchema):
     tva = TvaItem(title=u"")
@@ -140,15 +156,16 @@ def get_config_appstruct(config_dict):
     """
         transform Config datas to ConfigSchema compatible appstruct
     """
-    appstruct = {'site':{'welcome':None,
-                        'files_dir':None},
-            'document':{'estimation':{'footer':None,},
-                        'invoice':{'payment':None,
-                                   'late':None},
-                        'footertitle':None,
-                        'footercourse':None,
-                        'footercontent':None},
-                }
+    appstruct = {
+        'site':     {'welcome': None,
+                     'files_dir': None},
+        'document': {'estimation':  {'footer': None, },
+                     'invoice':     {'payment': None,
+                                     'late': None},
+                     'footertitle': None,
+                     'footercourse': None,
+                     'footercontent': None},
+    }
     appstruct['site']['welcome'] = config_dict.get('welcome')
     appstruct['site']['files_dir'] = config_dict.get('files_dir')
     appstruct['document']['footertitle'] = config_dict.get(

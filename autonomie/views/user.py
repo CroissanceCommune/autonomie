@@ -162,14 +162,17 @@ Cette action n'est pas réversible."
         """
             Return a filtered query
         """
-        return query.filter( or_(User.lastname.like("%"+search+"%"),
-                        User.firstname.like("%"+search+"%"),
-                     User.companies.any(Company.name.like("%"+search+"%"))))
+        return query.filter(
+            or_(User.lastname.like("%" + search + "%"),
+                User.firstname.like("%" + search + "%"),
+                User.companies.any(Company.name.like("%" + search + "%"))
+            )
+        )
 
     @view_config(route_name='users', renderer='user_edit.mako',
-                        request_method='POST', permission='add')
+                 request_method='POST', permission='add')
     @view_config(route_name='user', renderer='user_edit.mako',
-                        request_param='action=edit', permission='edit')
+                 request_param='action=edit', permission='edit')
     def user_edit(self):
         """
             Add / Edit a user

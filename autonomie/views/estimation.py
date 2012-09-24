@@ -58,13 +58,13 @@ class EstimationView(TaskView):
         """
             Returns dbdatas as a dict of dict
         """
-        return {'estimation':self.task.appstruct(),
-                'lines':[line.appstruct()
-                                       for line in self.task.lines],
-                'discounts':[discount.appstruct()
-                                        for discount in self.task.discounts],
-                'payment_lines':[line.appstruct()
-                                      for line in self.task.payment_lines]}
+        return {'estimation': self.task.appstruct(),
+                'lines': [line.appstruct()
+                          for line in self.task.lines],
+                'discounts': [discount.appstruct()
+                              for discount in self.task.discounts],
+                'payment_lines': [line.appstruct()
+                                  for line in self.task.payment_lines]}
 
     def is_editable(self):
         """
@@ -273,14 +273,16 @@ class EstimationView(TaskView):
         """
             Handle specific status changes
         """
+        flash = self.request.session.flash
         if status == "geninv":
             for invoice in ret_data:
                 self.dbsession.merge(invoice)
-            self.request.session.flash(u"Vos factures ont bien été générées",
-                                    queue='main')
+            flash(u"Vos factures ont bien été générées", queue='main')
+
         elif status == "aboest":
-            self.request.session.flash(u"Le devis {0} a été annulé \
-(indiqué sans suite).".format(self.task.number))
+            mess = u"Le devis {0} a été annulé (indiqué sans suite)."
+            flash(mess.format(self.task.number))
+
         elif status == 'delete':
             log.info(u"Deleting an invoice")
             for line in self.task.lines:
@@ -293,8 +295,7 @@ class EstimationView(TaskView):
                 self.dbsession.delete(status)
             self.dbsession.delete(self.task)
             self.dbsession.flush()
-            self.request.session.flash(u"Le devis {0} a été supprimé"\
-                    .format(self.task.number))
+            flash(u"Le devis {0} a été supprimé".format(self.task.number))
             raise self.project_view_redirect()
 
         elif status == 'duplicate':
@@ -304,6 +305,8 @@ class EstimationView(TaskView):
             self.dbsession.flush()
             id_ = estimation.id
             log.debug(u"   + The new estimation id : {0}".format(id_))
-            self.request.session.flash(u"Le devis a bien été dupliqué, vous \
-               pouvez l'éditer <a href='{0}'>Ici</a>." \
-               .format(self.request.route_path("estimation", id=id_)), "main")
+
+            mess = u"Le devis a bien été dupliqué, vous pouvez l'éditer \
+<a href='{0}'>Ici</a>."
+            fmess = mess.format(self.request.route_path("estimation", id=id_))
+            flash(fmess, "main")

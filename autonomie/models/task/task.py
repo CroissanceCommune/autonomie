@@ -57,27 +57,35 @@ class Task(DBBASE):
     statusComment = Column("statusComment", Text)
     statusPerson = Column("statusPerson",
                           ForeignKey('accounts.id'))
-    statusDate = Column("statusDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+    statusDate = Column(
+        "statusDate",
+        CustomDateType,
+        default=get_current_timestamp,
+        onupdate=get_current_timestamp)
     taskDate = Column("taskDate", CustomDateType2)
     owner_id = Column("owner_id", ForeignKey('accounts.id'))
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+    creationDate = deferred(
+        Column("creationDate", CustomDateType,
+               default=get_current_timestamp)
+    )
+    updateDate = Column(
+        "updateDate", CustomDateType,
+        default=get_current_timestamp,
+        onupdate=get_current_timestamp)
     description = Column("description", Text)
-    statusPersonAccount = relationship("User",
-                        primaryjoin="Task.statusPerson==User.id",
-                        backref="taskStatuses")
-    owner = relationship("User",
-                        primaryjoin="Task.owner_id==User.id",
-                            backref="ownedTasks")
+    statusPersonAccount = relationship(
+        "User",
+        primaryjoin="Task.statusPerson==User.id",
+        backref="taskStatuses")
+    owner = relationship(
+        "User",
+        primaryjoin="Task.owner_id==User.id",
+        backref="ownedTasks")
 
-    phase = relationship("Phase",
-                        primaryjoin="Task.phase_id==Phase.id",
-                        backref="tasks")
+    phase = relationship(
+        "Phase",
+        primaryjoin="Task.phase_id==Phase.id",
+        backref="tasks")
 
     type_ = Column('type_', String(30), nullable=False)
     __mapper_args__ = {'polymorphic_on': type_,

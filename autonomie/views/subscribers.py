@@ -117,9 +117,11 @@ def company_menu(request, companies, cid):
     """
         Add the company choose menu
     """
-    menu = HTML.li(HTML.h2(get_company( request, cid ).name))
-    menu = MainMenuItem(get_company( request, cid ).name, "view",
-                    path="company", id=cid, _query=dict(action="index"))
+    menu = HTML.li(HTML.h2(get_company(request, cid).name))
+    menu = MainMenuItem(
+        get_company(request, cid).name, "view",
+        path="company", id=cid, _query=dict(action="index")
+    )
     if len(companies) > 1:
         if request.context.__name__ == 'company':
             options = ((request.current_route_path(id=company.id),

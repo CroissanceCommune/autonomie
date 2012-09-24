@@ -158,11 +158,11 @@ de créer de nouveaux projets", queue="main")
         projects = self._sort(query, sort, direction).all()
         records = self._get_pagination(projects, current_page, items_per_page)
 
-        ret_dict =  dict(title=u"Liste des projets",
-                          projects=records,
-                          company=company,
-                          action_menu=self.actionmenu,
-                          item_actions=self._get_actions())
+        ret_dict = dict(title=u"Liste des projets",
+                        projects=records,
+                        company=company,
+                        action_menu=self.actionmenu,
+                        item_actions=self._get_actions())
 
         if has_permission("add", self.context, self.request):
             popup = self._get_add_popup()
@@ -199,8 +199,10 @@ de créer de nouveaux projets", queue="main")
         """
             filter the query on the searched argument
         """
-        return query.filter( or_(Project.name.like("%" + search + "%"),
-                        Client.name.like("%" + search +"%")))
+        return query.filter(
+            or_(Project.name.like("%" + search + "%"),
+                Client.name.like("%" + search + "%"))
+        )
 
     @view_config(route_name='company_projects',  \
                  renderer='project.mako', \

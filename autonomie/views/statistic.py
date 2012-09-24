@@ -61,12 +61,20 @@ class StatisticView(BaseView):
             invoices = []
             estimations = []
             for proj in projects:
-                invoices.extend([inv for inv in proj.invoices
-                                        if inv.taskDate.year >= current_year])
-                estimations.extend([est for est in proj.estimations \
-                        if est.taskDate.year >= current_year])
-            prospects = [cli for cli in clients if True not in [
-                            len(proj.invoices)>0 for proj in cli.projects]]
+                invoices.extend(
+                    [inv
+                     for inv in proj.invoices
+                     if inv.taskDate.year >= current_year]
+                )
+                estimations.extend(
+                    [est
+                     for est in proj.estimations
+                     if est.taskDate.year >= current_year]
+                )
+            prospects = [cli
+                         for cli in clients
+                         if True not in [len(proj.invoices) > 0
+                                         for proj in cli.projects]]
             #Return the stats
             ret_dict['current_company'] = company
             ret_dict['projects'] = projects

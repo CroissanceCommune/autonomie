@@ -20,11 +20,11 @@ from pyramid.view import view_config
 
 
 @view_config(route_name='company', renderer='json', request_method='GET',
-            xhr=True, permission='edit')
+             xhr=True, permission='edit')
 @view_config(route_name='client', renderer='json', request_method='GET',
-            xhr=True, permission='edit')
+             xhr=True, permission='edit')
 @view_config(route_name='project', renderer='json', request_method='GET',
-            xhr=True, permission='edit')
+             xhr=True, permission='edit')
 def json_project(request):
     """
         Return a json representation of the project

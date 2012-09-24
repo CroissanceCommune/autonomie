@@ -125,14 +125,17 @@ class ClientView(ListView):
         """
             Return a filtered query
         """
-        clients = clients.filter(or_(Client.name.like("%"+search+"%"),
-                               Client.contactLastName.like("%"+search+"%")))
+        clients = clients.filter(
+            or_(Client.name.like("%" + search + "%"),
+                Client.contactLastName.like("%" + search + "%")
+            )
+        )
         return clients
 
-    @view_config(route_name='company_clients', renderer='client.mako',\
-                        request_method='POST', permission='edit')
-    @view_config(route_name='client', renderer='client.mako',\
-                                request_param='action=edit', permission='edit')
+    @view_config(route_name='company_clients', renderer='client.mako',
+                 request_method='POST', permission='edit')
+    @view_config(route_name='client', renderer='client.mako',
+                request_param='action=edit', permission='edit')
     def client(self):
         """
             Return :
@@ -183,8 +186,8 @@ succès".format(client.name)
                     company=company,
                     action_menu=self.actionmenu)
 
-    @view_config(route_name='client', renderer='client_view.mako', \
-                            request_method='GET', permission='view')
+    @view_config(route_name='client', renderer='client_view.mako',
+                 request_method='GET', permission='view')
     def client_view(self):
         """
             Return the view of a client

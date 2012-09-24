@@ -126,16 +126,16 @@ def format_long_date(date):
         return a long printable version of the date obj
     """
     if isinstance(date, datetime.date):
-        resp = u"{0}".format(date.strftime("%e %B %Y")\
-                                            .decode('utf-8')\
-                                            .capitalize())
+        resp = u"{0}".format(
+            date.strftime("%e %B %Y").decode('utf-8').capitalize()
+        )
     elif not date:
         resp = u""
     else:
         date = datetime.datetime.fromtimestamp(float(date))
-        resp = u"{0}".format(date.strftime("%e %B %Y")\
-                                            .decode('utf-8')\
-                                            .capitalize())
+        resp = u"{0}".format(
+            date.strftime("%e %B %Y").decode('utf-8').capitalize()
+        )
     return resp
 
 

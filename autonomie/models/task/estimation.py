@@ -61,19 +61,20 @@ class Estimation(Task, TaskCompute):
     number = Column("number", String(100), nullable=False)
     tva = Column("tva", Integer, nullable=False, default=196)
     deposit = Column("deposit", Integer, default=0)
-    paymentConditions = deferred(Column("paymentConditions", Text),
-                        group='edit')
-    exclusions = deferred(Column("exclusions", Text),
-                        group='edit')
+    paymentConditions = deferred(
+        Column("paymentConditions", Text),
+        group='edit')
+    exclusions = deferred(Column("exclusions", Text), group='edit')
     project_id = Column("project_id", ForeignKey('project.id'))
-    manualDeliverables = deferred(Column("manualDeliverables", Integer),
-                        group='edit')
-    course = deferred(Column('course', Integer,
-                                    nullable=False, default=0),
-                                    group='edit')
-    displayedUnits = deferred(Column('displayedUnits', Integer,
-                                    nullable=False, default=0),
-                                    group='edit')
+    manualDeliverables = deferred(
+        Column("manualDeliverables", Integer),
+        group='edit')
+    course = deferred(
+        Column('course', Integer, nullable=False, default=0),
+        group='edit')
+    displayedUnits = deferred(
+        Column('displayedUnits', Integer, nullable=False, default=0),
+        group='edit')
     discountHT = Column('discountHT', Integer, default=0)
     expenses = deferred(
         Column('expenses', Integer, default=0),

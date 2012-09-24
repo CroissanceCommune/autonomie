@@ -66,7 +66,7 @@ class CompanyInvoicesView(ListView):
         year = self.request.params.get('year', current_year)
 
         invoices = self.get_invoices(company.id, search, client,
-                                        year, paid,sort, direction)
+                                     year, paid, sort, direction)
         records = self._get_pagination(invoices, current_page, items_per_page)
         return dict(title=u"Factures",
                     company=company,
@@ -130,7 +130,7 @@ class CompanyInvoicesView(ListView):
             company_id = None
 
         invoices = self.get_invoices(company_id, search, client,
-                    year, paid,sort, direction)
+                                     year, paid, sort, direction)
         records = self._get_pagination(invoices, current_page, items_per_page)
 
         return dict(title=u"Factures",

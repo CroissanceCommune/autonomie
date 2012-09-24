@@ -60,7 +60,7 @@ class StatusChanged(object):
         settings = get_current_registry().settings
         if self.request.user.email:
             mail = self.request.user.email
-        elif settings.has_key('mail.default_sender'):
+        elif 'mail.default_sender' in settings:
             mail = settings['mail.default_sender']
         else:
             log.info(u"The current user : {0} has not set his email".format(

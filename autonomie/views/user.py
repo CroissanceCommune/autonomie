@@ -204,11 +204,11 @@ Cette action n'est pas réversible."
                 # Création (ou non) de la/des entreprise(s)
                 # Création du lien entre les deux
                 merge_session_with_post(user, app_datas['user'])
-                if app_datas.has_key('password'):
+                if 'password' in app_datas:
                     if app_datas['password']['pwd']:
                         user.set_password(app_datas['password']['pwd'])
                 #avoid creating duplicate companies at this level
-                if app_datas.has_key('companies'):
+                if 'companies' in app_datas:
                     companies = set(app_datas.get('companies'))
                     user.companies = []
                     for company_name in companies:

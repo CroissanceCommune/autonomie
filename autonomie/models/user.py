@@ -115,7 +115,7 @@ class User(DBBASE):
     def query(cls, ordered=True):
         """
             Query users
-            Exclud archived users
+            Exclude archived users
         """
         query = super(User, cls).query()
         query = query.filter(User.active == 'Y')

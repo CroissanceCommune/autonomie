@@ -1,4 +1,4 @@
-"""1.4 : fiche_client ajout du numéro de fax et du champ fonction
+"""1.4 : fiche_client ajout du numero de fax et du champ fonction
 
 Revision ID: 1dce987687aa
 Revises: 1987a6d83e5f

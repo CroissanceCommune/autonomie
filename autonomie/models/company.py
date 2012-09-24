@@ -34,6 +34,7 @@ from autonomie.models import DBSESSION
 
 log = logging.getLogger(__name__)
 
+
 class Company(DBBASE):
     """
         Company model
@@ -159,4 +160,3 @@ class Company(DBBASE):
                     header=self.get_header_filepath(),
                     clients=clients,
                     projects=projects)
-

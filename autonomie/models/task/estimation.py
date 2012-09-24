@@ -48,6 +48,7 @@ from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
 
+
 @implementer(IValidatedTask, IMoneyTask)
 class Estimation(Task, TaskCompute):
     """
@@ -405,6 +406,7 @@ class Estimation(Task, TaskCompute):
     def __repr__(self):
         return u"<Estimation id:{s.id}>".format(s=self)
 
+
 class EstimationLine(DBBASE):
     """
         Estimation lines
@@ -473,6 +475,7 @@ class EstimationLine(DBBASE):
     def __repr__(self):
         return u"<EstimationLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
  quantity:{s.quantity} tva:{s.tva}".format(s=self)
+
 
 class PaymentLine(DBBASE):
     """

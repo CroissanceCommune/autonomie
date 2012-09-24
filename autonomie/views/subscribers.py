@@ -45,6 +45,7 @@ def get_cid(request):
         cid = request.context.get_company_id()
     return cid
 
+
 def get_companies(request):
     """
         Return available companies from the request object
@@ -56,6 +57,7 @@ def get_companies(request):
         companies = request.user.companies
     return companies
 
+
 def get_company(request, cid):
     """
         Return the current company object
@@ -64,6 +66,7 @@ def get_company(request, cid):
         company = Company.get(cid)
         request._company = company
     return request._company
+
 
 def get_user_menu(cid, css=None):
     """
@@ -91,6 +94,7 @@ def get_user_menu(cid, css=None):
                                 path="company", id=cid))
     return menu
 
+
 def get_admin_menus(cid):
     """
         Return the menu for admin or managers
@@ -108,6 +112,7 @@ def get_admin_menus(cid):
         icon="icon-white icon-cog"))
     submenu = get_user_menu(cid, "nav-pills")
     return menu, submenu
+
 
 def company_menu(request, companies, cid):
     """
@@ -131,6 +136,7 @@ def company_menu(request, companies, cid):
                 tags.select("companies", default, options, **html_attrs))
         menu = StaticWidget(menu, "view")
     return menu
+
 
 @subscriber(BeforeRender)
 def add_menu(event):
@@ -172,6 +178,7 @@ def add_renderer_globals(event):
         request = get_current_request()
     event['_'] = request.translate
     event['api'] = api
+
 
 @subscriber(NewRequest)
 def add_localizer(event):

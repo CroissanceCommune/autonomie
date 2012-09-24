@@ -34,6 +34,7 @@ from autonomie.utils.avatar import get_avatar
 from autonomie.utils.config import get_config
 from autonomie.utils.renderer import set_deform_renderer
 
+
 def main(global_config, **settings):
     """
         Main function : returns a Pyramid WSGI application.
@@ -43,7 +44,6 @@ def main(global_config, **settings):
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
     acl_policy = ACLAuthorizationPolicy()
-
 
     config = Configurator(settings=settings,
                         authentication_policy=auth_policy,

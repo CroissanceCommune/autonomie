@@ -28,6 +28,8 @@ from autonomie.utils.security import MANAGER_ROLES
 from autonomie.utils.security import ADMIN_ROLES
 
 log = logging.getLogger(__name__)
+
+
 def unique_login(node, value):
     """
         Test login unicity against database
@@ -37,6 +39,7 @@ def unique_login(node, value):
         message = u"Le login '{0}' n'est pas disponible.".format(
                                                             value)
         raise colander.Invalid(node, message)
+
 
 def auth(form, value):
     """
@@ -54,6 +57,7 @@ def auth(form, value):
         exc['password'] = message
         raise exc
 
+
 @colander.deferred
 def deferred_login_validator(node, kw):
     """
@@ -62,6 +66,7 @@ def deferred_login_validator(node, kw):
     if not kw.get('edit'):
         return unique_login
     return None
+
 
 @colander.deferred
 def deferred_pwd_validator(node, kw):
@@ -73,6 +78,7 @@ def deferred_pwd_validator(node, kw):
     else:
         return None
 
+
 @colander.deferred
 def deferred_company_input(node, kw):
     """
@@ -83,6 +89,7 @@ def deferred_company_input(node, kw):
             template="autonomie:deform_templates/autocomple_input.pt")
     return wid
 
+
 @colander.deferred
 def deferred_missing_password(node, kw):
     """
@@ -92,6 +99,7 @@ def deferred_missing_password(node, kw):
         return ""
     else:
         return colander.required
+
 
 def get_companies_choices():
     """
@@ -165,6 +173,7 @@ class UserFormSchema(colander.MappingSchema):
                 )
     password = Password(title=u"Mot de passe")
 
+
 class AuthSchema(colander.MappingSchema):
     """
         Schema for authentication form
@@ -183,6 +192,7 @@ def get_auth_schema():
     """
     return AuthSchema(title=u"Authentification", validator=auth)
 
+
 def get_user_schema(request, edit):
     """
         Return the user schema
@@ -193,6 +203,7 @@ def get_user_schema(request, edit):
     if user.is_admin():
         companies = get_companies_choices()
         return schema.bind(edit=edit, companies=companies)
+
     elif user.is_manager():
         companies = get_companies_choices()
         # manager can't set admin rights
@@ -201,6 +212,7 @@ def get_user_schema(request, edit):
         group.validator = colander.OneOf([x[0] for x in roles])
         group.widget = widget.RadioChoiceWidget(values=roles)
         return schema.bind(edit=edit, companies=companies)
+
     else:
         # Non admin users are limited
         del schema['user']['code_compta']
@@ -208,6 +220,7 @@ def get_user_schema(request, edit):
         del schema['companies']
         del schema['password']
         return schema.bind(edit=True)
+
 
 def get_password_change_schema():
     """

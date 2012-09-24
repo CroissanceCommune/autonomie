@@ -44,12 +44,14 @@ from .base import ListView
 
 log = logging.getLogger(__name__)
 
+
 def rgb_to_hex(rgb):
     """
         return an hexadecimal version of the rgb tuple
         for css rendering
     """
     return '#%02x%02x%02x' % rgb
+
 
 def get_color():
     """
@@ -70,6 +72,7 @@ def build_client_value(client):
     else:
         return (u" - ", u"Sélectionnez")
 
+
 def build_client_values(clients):
     """
         Build human understandable client labels
@@ -77,6 +80,7 @@ def build_client_values(clients):
     """
     return [build_client_value(client)
                             for client in clients]
+
 
 def get_project_form(clients, default_client=None, edit=False):
     """
@@ -87,6 +91,7 @@ def get_project_form(clients, default_client=None, edit=False):
     schema = ProjectSchema().bind(edit=edit, choices=choices, default=default)
     form = Form(schema, buttons=(submit_btn,))
     return form
+
 
 class ProjectView(ListView):
     """
@@ -115,7 +120,6 @@ class ProjectView(ListView):
                 self.actionmenu.add(self._get_detail_btn())
                 self.actionmenu.add(self._get_phase_btn())
 
-
     def redirect_to_clients(self, company):
         """
             Force project page to be redirected to client page
@@ -126,7 +130,6 @@ des clients", queue="main")
 de créer de nouveaux projets", queue="main")
         raise HTTPFound(self.request.route_path("company_clients",
                                                 id=company.id))
-
 
     @view_config(route_name='company_projects',
                  renderer='company_projects.mako',\
@@ -377,6 +380,7 @@ supprimé".format(project.name) )
                                       title=u"Supprimer le projet",
                                       _query=dict(action="delete"),
                                       icon="icon-trash")
+
             def is_deletable_perm(context, req):
                 """
                     Return True if the current item (context) is deletable
@@ -413,6 +417,7 @@ supprimé".format(project.name) )
         """
         return ToggleLink(u"Ajouter une phase", target="project-addphase",
                                                             css="addphase")
+
     def _get_archived_btn(self, archived):
         """
             return the show archived button

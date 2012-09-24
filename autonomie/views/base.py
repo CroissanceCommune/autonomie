@@ -47,6 +47,7 @@ from autonomie.utils.pdf import render_html
 
 log = logging.getLogger(__name__)
 
+
 class BaseView(object):
     """
         Base View object
@@ -76,6 +77,7 @@ class BaseView(object):
             raise HTTPForbidden()
         return company
 
+
 class ListView(BaseView):
     """
         Base view object for listing elements
@@ -83,6 +85,7 @@ class ListView(BaseView):
     columns = dict()
     default_sort = 'name'
     default_direction = 'asc'
+
     def _get_pagination_args(self):
         """
             Returns arguments for element listing
@@ -129,6 +132,7 @@ class ListView(BaseView):
         else:
             func = desc
         return query.order_by(func(column))
+
 
 class TaskView(BaseView):
     """

@@ -32,6 +32,7 @@ STATUS = dict((
             ("resulted", u"Paiement reçu",),
             ))
 
+
 def format_status(task):
     """
         return a formatted status string
@@ -51,6 +52,7 @@ def format_status(task):
                                         format_date(task.statusDate))
     return status_str + suffix
 
+
 def format_account(account, reverse=False):
     """
         return {firstname} {lastname}
@@ -63,6 +65,7 @@ def format_account(account, reverse=False):
         lastname = ""
     return format_name(firstname, lastname, reverse)
 
+
 def format_name(firstname, lastname, reverse=False):
     """
         format firstname and lastname in a common format
@@ -73,6 +76,7 @@ def format_name(firstname, lastname, reverse=False):
         return u"{0} {1}".format(lastname, firstname)
     else:
         return u"{0} {1}".format(firstname, lastname)
+
 
 def format_amount(amount, trim=True):
     """
@@ -92,6 +96,7 @@ def format_amount(amount, trim=True):
     resp = resp.replace(' ', '&nbsp;')
     return resp
 
+
 def format_quantity(quantity):
     """
         format the quantity
@@ -100,6 +105,7 @@ def format_quantity(quantity):
         return locale.format('%g', quantity, grouping=True)
     else:
         return ""
+
 
 def format_short_date(date):
     """
@@ -113,6 +119,7 @@ def format_short_date(date):
         resp = datetime.datetime.fromtimestamp(float(date)).strftime(
                                                             "%d/%m/%Y %H:%M")
     return resp
+
 
 def format_long_date(date):
     """
@@ -131,6 +138,7 @@ def format_long_date(date):
                                             .capitalize())
     return resp
 
+
 def format_date(date, short=True):
     """
         return a pretty print version of the date object
@@ -139,6 +147,7 @@ def format_date(date, short=True):
         return format_short_date(date)
     else:
         return format_long_date(date)
+
 
 def format_paymentmode(paymentmode):
     """
@@ -150,6 +159,7 @@ def format_paymentmode(paymentmode):
         return u"par virement"
     else:
         return u"mode paiement inconnu"
+
 
 def format_unity(unity, pretty=False):
     """
@@ -189,4 +199,3 @@ api = Api(format_amount=format_amount,
           format_long_date=format_long_date,
           format_quantity=format_quantity,
           format_unity=format_unity)
-

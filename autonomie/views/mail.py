@@ -26,6 +26,7 @@ from autonomie.views.render_api import format_status
 
 log = logging.getLogger(__name__)
 
+
 class StatusChanged(object):
     """
         Event raised when a document status changes
@@ -112,6 +113,7 @@ a été {3}.".format( self.document.number,
         else:
             return False
 
+
 def get_status_verb(status):
     """
         Return the verb associated to the current status
@@ -153,4 +155,3 @@ email(s)")
             log.debug(" - No email has been set for the recipient")
     else:
         log.debug(" - It's not a key event, nothing to do")
-

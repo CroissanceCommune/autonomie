@@ -24,6 +24,7 @@ from autonomie.views.forms.widgets import  get_date_input
 
 log = logging.getLogger(__name__)
 
+
 def date_validator(form, value):
     if value['start_date'] >= value['end_date']:
         exc = colander.Invalid(form,
@@ -31,18 +32,22 @@ def date_validator(form, value):
         exc['start_date'] = u"Doit précéder la date de fin"
         raise exc
 
+
 class HolidaySchema(colander.MappingSchema):
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
             widget=get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
             widget=get_date_input())
 
+
 class HolidaysList(colander.SequenceSchema):
     holiday = HolidaySchema(title=u"Période", validator=date_validator)
+
 
 class HolidaysSchema(colander.MappingSchema):
     holidays = HolidaysList(title=u"",
                 widget=widget.SequenceWidget(min_len=1))
+
 
 class SearchHolidaysSchema(colander.MappingSchema):
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
@@ -56,4 +61,3 @@ class SearchHolidaysSchema(colander.MappingSchema):
 searchSchema = SearchHolidaysSchema(
                         title=u"Rechercher les congés des entrepreneurs",
                         validator=date_validator)
-

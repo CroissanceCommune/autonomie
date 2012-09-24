@@ -33,6 +33,7 @@ from .base import ListView
 
 log = logging.getLogger(__name__)
 
+
 class CompanyInvoicesView(ListView):
     """
         Treasury and invoice view
@@ -93,6 +94,7 @@ class CompanyInvoicesView(ListView):
             We consider that all documents should be dated after 2000
         """
         inv, man_inv = self._get_taskdates()
+
         @cache_region("long_term", "taskyears")
         def years():
             """
@@ -295,4 +297,3 @@ class CompanyInvoicesView(ListView):
                 years=self._get_years(),
                 current_year=year,
                 today=today)
-

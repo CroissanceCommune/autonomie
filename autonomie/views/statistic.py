@@ -26,6 +26,7 @@ from .base import BaseView
 
 log = logging.getLogger(__name__)
 
+
 class StatisticView(BaseView):
     """
         View displaying statistics

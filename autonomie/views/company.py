@@ -31,6 +31,7 @@ from .base import BaseView
 
 log = logging.getLogger(__name__)
 
+
 class CompanyViews(BaseView):
     """
         all company related views

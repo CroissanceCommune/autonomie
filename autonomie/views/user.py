@@ -42,6 +42,7 @@ from .base import ListView
 
 log = logging.getLogger(__name__)
 
+
 @view_config(route_name='account', renderer='account.mako',
         permission='view')
 def account(request):
@@ -73,6 +74,7 @@ def account(request):
                 html_form=html_form,
                 account=avatar
                 )
+
 
 class UserView(ListView):
     """

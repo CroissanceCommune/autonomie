@@ -5,6 +5,7 @@ import transaction
 from autonomie.models import DBSESSION
 from autonomie.models import DBMETADATA
 
+
 def run_migrations_online():
     if DBSESSION.bind is None:
         raise ValueError(

@@ -35,6 +35,7 @@ from .base import ListView
 
 log = logging.getLogger(__name__)
 
+
 class Column(object):
     """
         Column object
@@ -68,6 +69,7 @@ class Column(object):
             return self.getfunc(obj)
         else:
             return None
+
 
 class ComptabilityView(ListView):
     """

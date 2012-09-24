@@ -18,6 +18,7 @@
 
 from pyramid.view import view_config
 
+
 @view_config(route_name='company', renderer='json', request_method='GET',
             xhr=True, permission='edit')
 @view_config(route_name='client', renderer='json', request_method='GET',

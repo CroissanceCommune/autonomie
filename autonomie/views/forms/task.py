@@ -87,6 +87,7 @@ def get_percents():
         percent_options.append((i, "%d %%" % i))
     return percent_options
 
+
 def get_payment_times():
     """
         Return options for payment times select
@@ -95,6 +96,7 @@ def get_payment_times():
     for i in range(1, 12):
         payment_times.append((i, '%d fois' % i))
     return payment_times
+
 
 @colander.deferred
 def deferred_course_title(node, kw):
@@ -117,12 +119,14 @@ def deferred_tvas_widget(node, kw):
             template='autonomie:deform_templates/tva.mako')
     return wid
 
+
 @colander.deferred
 def deferred_default_tva(node, kw):
     """
         return a tva widget
     """
     return kw.get('default_tva')
+
 
 @colander.deferred
 def deferred_phases_widget(node, kw):
@@ -135,6 +139,7 @@ def deferred_phases_widget(node, kw):
     else:
         wid = widget.TextInputWidget()
     return wid
+
 
 class TaskLine(colander.MappingSchema):
     """
@@ -425,6 +430,7 @@ def get_estimation_schema():
                                  name='communication'))
     return schema
 
+
 def get_invoice_schema():
     """
         Return the schema for invoice add/edit
@@ -441,6 +447,7 @@ def get_invoice_schema():
     schema.add(TaskCommunication(title=u'Communication Entrepreneur/CAE',
                                  name='communication'))
     return schema
+
 
 def get_cancel_invoice_schema():
     """
@@ -467,6 +474,7 @@ def get_cancel_invoice_schema():
     schema.add(payments)
     return schema
 
+
 @colander.deferred
 def deferred_amount_default(node, kw):
     """
@@ -474,6 +482,7 @@ def deferred_amount_default(node, kw):
     """
     task = kw.get('task')
     return task.topay()
+
 
 @colander.deferred
 def deferred_total_validator(node, kw):
@@ -486,6 +495,7 @@ def deferred_total_validator(node, kw):
     min_msg = u"Le montant doit être positif"
     return colander.Range(min=0, max=task.topay(), min_err=min_msg,
                                                    max_err=max_msg)
+
 
 class Payment(colander.MappingSchema):
     """
@@ -513,39 +523,48 @@ def deferred_client_choice(node, kw):
     clients = kw.get('clients')
     return widget.SelectWidget(values=clients)
 
+
 @colander.deferred
 def deferred_default_client(node, kw):
     return kw.get('current_client')
+
 
 @colander.deferred
 def deferred_project_choice(node, kw):
     projects = kw.get('projects')
     return widget.SelectWidget(values=projects)
 
+
 @colander.deferred
 def deferred_default_project(node, kw):
     return kw.get('current_project')
+
 
 @colander.deferred
 def deferred_phase_choice(node, kw):
     phases = kw.get('phases')
     return widget.SelectWidget(values=phases)
 
+
 @colander.deferred
 def deferred_default_phase(node, kw):
     return kw.get('current_phase')
+
 
 @colander.deferred
 def deferred_client_validator(node, kw):
     return colander.OneOf([cli[0] for cli in kw['clients']])
 
+
 @colander.deferred
 def deferred_project_validator(node, kw):
     return colander.OneOf([p.id for p in kw['all_projects']])
 
+
 @colander.deferred
 def deferred_phase_validator(node, kw):
     return colander.OneOf([p.id for p in kw['all_phases']])
+
 
 class Duplicate(colander.MappingSchema):
     """
@@ -574,6 +593,8 @@ class Duplicate(colander.MappingSchema):
 #  configuration est imbriquée. On a donc besoin de faire un mapping d'un
 #  dictionnaire contenant les modèles {'estimation':..., 'tasklines':...}
 #  vers un dictionnaire correspondant au formulaire en place.
+
+
 class MappingWrapper:
     """
         Allows moving from one dict to another
@@ -609,6 +630,7 @@ class MappingWrapper:
                 dbdatas.setdefault(self.dbtype, {})[field] = value
         return dbdatas
 
+
 class SequenceWrapper:
     """
         Maps the db models with colander Sequence Schemas
@@ -618,6 +640,7 @@ class SequenceWrapper:
     dbtype = ''
     fields = None
     sort_key = 'rowIndex'
+
     def toschema(self, dbdatas, appstruct):
         """
             Build schema expected datas from list of elements
@@ -664,6 +687,7 @@ class InvoiceMatch(MappingWrapper):
             )
     dbtype = 'invoice'
 
+
 class EstimationMatch(MappingWrapper):
     matching_map = (
                          ('phase_id','common'),
@@ -683,6 +707,7 @@ class EstimationMatch(MappingWrapper):
                          )
     dbtype = 'estimation'
 
+
 class CancelInvoiceMatch(MappingWrapper):
     matching_map = (
                         #task attrs
@@ -696,11 +721,13 @@ class CancelInvoiceMatch(MappingWrapper):
             )
     dbtype = 'cancelinvoice'
 
+
 class TaskLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
     sequence_name = 'lines'
     fields = ('description', 'cost', 'quantity', 'unity', 'tva')
     dbtype = 'lines'
+
 
 class PaymentLinesMatch(SequenceWrapper):
     mapping_name = 'payments'
@@ -708,12 +735,14 @@ class PaymentLinesMatch(SequenceWrapper):
     fields = ('description', 'paymentDate', 'amount', 'tva')
     dbtype = "payment_lines"
 
+
 class DiscountLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
     sequence_name = 'discounts'
     fields = ('description', 'amount', 'tva')
     dbtype = "discounts"
     sort_key = None
+
 
 def get_estimation_appstruct(dbdatas):
     """
@@ -726,6 +755,7 @@ def get_estimation_appstruct(dbdatas):
     appstruct = set_payment_times(appstruct, dbdatas)
     return appstruct
 
+
 def get_estimation_dbdatas(appstruct):
     """
         return dict with db compatible datas
@@ -737,6 +767,7 @@ def get_estimation_dbdatas(appstruct):
     dbdatas = set_manualDeliverables(appstruct, dbdatas)
     return dbdatas
 
+
 def get_invoice_appstruct(dbdatas):
     """
         return InvoiceSchema compatible appstruct
@@ -745,6 +776,7 @@ def get_invoice_appstruct(dbdatas):
     for matchobj in (InvoiceMatch, TaskLinesMatch, DiscountLinesMatch):
         appstruct = matchobj().toschema(dbdatas, appstruct)
     return appstruct
+
 
 def get_invoice_dbdatas(appstruct):
     """
@@ -755,6 +787,7 @@ def get_invoice_dbdatas(appstruct):
         dbdatas = matchobj().todb(appstruct, dbdatas)
     return dbdatas
 
+
 def get_cancel_invoice_appstruct(dbdatas):
     """
         return cancel invoice schema compatible appstruct
@@ -764,6 +797,7 @@ def get_cancel_invoice_appstruct(dbdatas):
         appstruct = matchobj().toschema(dbdatas, appstruct)
     return appstruct
 
+
 def get_cancel_invoice_dbdatas(appstruct):
     """
         return dict with db compatible datas
@@ -772,6 +806,7 @@ def get_cancel_invoice_dbdatas(appstruct):
     for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
         dbdatas = matchobj().todb(appstruct, dbdatas)
     return dbdatas
+
 
 def set_manualDeliverables(appstruct, dbdatas):
     """
@@ -784,6 +819,7 @@ def set_manualDeliverables(appstruct, dbdatas):
             dbdatas['estimation']['manualDeliverables'] = 0
     return dbdatas
 
+
 def set_payment_times(appstruct, dbdatas):
     """
         Hack the appstruct to set the payment_times value
@@ -794,4 +830,3 @@ def set_payment_times(appstruct, dbdatas):
         appstruct.setdefault('payments', {})['payment_times'] = max(1,
                                         len(dbdatas.get('payment_lines')))
     return appstruct
-

@@ -32,6 +32,7 @@ from autonomie.views.forms import get_auth_schema
 
 log = logging.getLogger(__name__)
 
+
 @view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED,
         xhr=True, renderer='json')
 @view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
@@ -49,6 +50,7 @@ def forbidden_view(request):
     if request.is_xhr:
         return dict(redirect=loc)
     return HTTPFound(location=loc)
+
 
 @view_config(route_name='login', permission=NO_PERMISSION_REQUIRED,
                                                         renderer='login.mako')
@@ -93,6 +95,7 @@ def login_view(request):
             'message':fail_message
             }
 
+
 @view_config(route_name='logout', permission=NO_PERMISSION_REQUIRED)
 def logout_view(request):
     """
@@ -101,4 +104,3 @@ def logout_view(request):
     headers = forget(request)
     loc = request.route_url('index')
     return HTTPFound(location=loc, headers=headers)
-

@@ -26,6 +26,7 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
 from autonomie.models import DBBASE
 
+
 class Project(DBBASE):
     """
         The project model
@@ -127,4 +128,3 @@ class Project(DBBASE):
                     type=self.type,
                     archived=self.archived,
                     phases=phases)
-

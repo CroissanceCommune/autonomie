@@ -16,6 +16,7 @@
 from alembic import op
 import sqlalchemy as sa
 
+
 def force_rename_table(old, new):
     from autonomie.models import DBSESSION
     conn = DBSESSION.connection()
@@ -23,6 +24,7 @@ def force_rename_table(old, new):
         if table_exists(new):
             op.drop_table(new)
         op.rename_table(old, new)
+
 
 def table_exists(tbl):
     from autonomie.models import DBSESSION
@@ -53,6 +55,7 @@ def column_exists(tbl, column_name):
     except:
         pass
     return ret
+
 
 def add_column(tbl, column):
     if not column_exists(tbl, column.name):

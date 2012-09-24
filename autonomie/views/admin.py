@@ -38,6 +38,7 @@ from .base import BaseView
 
 log = logging.getLogger(__name__)
 
+
 class AdminViews(BaseView):
     """
         Main class for admin views
@@ -62,7 +63,6 @@ class AdminViews(BaseView):
                                    rootpath=root_path,
                                    rooturl="/assets/")
         form = Form(schema, buttons=(submit_btn,))
-
 
         if 'submit' in self.request.params:
             datas = self.request.params.items()
@@ -124,4 +124,3 @@ class AdminViews(BaseView):
         return dict(title=u"Configuration des taux de TVA",
                     tvas=tvas,
                     html_form=html_form)
-

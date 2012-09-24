@@ -40,6 +40,7 @@ from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
 
+
 @implementer(ITask)
 class Task(DBBASE):
     """
@@ -83,7 +84,6 @@ class Task(DBBASE):
                        'polymorphic_identity':'task'}
 
     state_machine = DEFAULT_STATE_MACHINES['base']
-
 
     def __init__(self, **kwargs):
         if not 'CAEStatus' in kwargs:
@@ -172,6 +172,7 @@ ce document.".format(status)
     def __repr__(self):
         return u"<Task status:{s.CAEStatus} id:{s.id}>".format(s=self)
 
+
 class DiscountLine(DBBASE):
     """
          A discount line
@@ -216,6 +217,7 @@ class DiscountLine(DBBASE):
     def __repr__(self):
         return u"<DiscountLine amount : {s.amount} tva:{s.tva} id:{s.id}>"\
                 .format(s=self)
+
 
 class TaskStatus(DBBASE):
     """

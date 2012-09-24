@@ -39,6 +39,7 @@ from .base import TaskView
 
 log = logging.getLogger(__name__)
 
+
 class InvoiceView(TaskView):
     """
         All invoice related views

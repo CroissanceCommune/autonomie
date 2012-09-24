@@ -20,6 +20,7 @@ from autonomie.models import DBMETADATA
 from autonomie.models import DBBASE
 from autonomie.scripts.migrate import fetch_head
 
+
 def initialize_sql(engine):
     """
         Initialize the database engine

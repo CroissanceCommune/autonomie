@@ -37,6 +37,8 @@ from autonomie.views.mail import StatusChanged
 from .base import TaskView
 
 log = logging.getLogger(__name__)
+
+
 class EstimationView(TaskView):
     """
         All estimation related views
@@ -292,6 +294,7 @@ class EstimationView(TaskView):
             self.request.session.flash(u"Le devis {0} a été supprimé"\
                     .format(self.task.number))
             raise self.project_view_redirect()
+
         elif status == 'duplicate':
             estimation = ret_data
             log.debug(" * The estimation has been duplicated")

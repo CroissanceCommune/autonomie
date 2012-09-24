@@ -17,6 +17,7 @@
 """
 import colander
 
+
 def specialfloat(self, value):
     """
         preformat the value before passing it to the float function
@@ -25,11 +26,13 @@ def specialfloat(self, value):
         value = value.replace(u'€', '').replace(u',', '.').replace(u' ', '')
     return float(value)
 
+
 class QuantityType(colander.Number):
     """
         Preformat unicode supposed to be numeric entries
     """
     num = specialfloat
+
 
 class AmountType(colander.Number):
     """
@@ -37,6 +40,7 @@ class AmountType(colander.Number):
         then *100 to store it into database
     """
     num = specialfloat
+
     def serialize(self, node, appstruct):
         if appstruct is colander.null:
             return colander.null
@@ -48,6 +52,7 @@ class AmountType(colander.Number):
                           u"\"{val}\" n'est pas un montant valide".format(
                                 val=appstruct),
                           )
+
     def deserialize(self, node, cstruct):
         if cstruct != 0 and not cstruct:
             return colander.null
@@ -60,11 +65,13 @@ class AmountType(colander.Number):
                             val=cstruct)
                           )
 
+
 class Integer(colander.Number):
     """
         Fix https://github.com/Pylons/colander/pull/35
     """
     num = int
+
     def serialize(self, node, appstruct):
         if appstruct in (colander.null, None):
             return colander.null
@@ -73,4 +80,3 @@ class Integer(colander.Number):
         except Exception:
             raise colander.Invalid(node,
                        u"'${val}' n'est pas un nombre".format(val=appstruct))
-

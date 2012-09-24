@@ -36,6 +36,7 @@ COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
 
 log = logging.getLogger(__name__)
 
+
 class User(DBBASE):
     """
         User model
@@ -120,6 +121,7 @@ class User(DBBASE):
         query = query.filter(User.active=='Y')
         if ordered:
             query = query.order_by(User.lastname)
+
         return query
 
     def disable(self):

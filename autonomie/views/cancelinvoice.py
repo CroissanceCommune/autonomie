@@ -34,6 +34,7 @@ from autonomie.exception import Forbidden
 from .base import TaskView
 log = logging.getLogger(__name__)
 
+
 class CancelInvoiceView(TaskView):
     """
         all views for cancelled invoices

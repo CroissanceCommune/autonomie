@@ -17,6 +17,7 @@
     Used to compute invoice, estimation or cancelinvoice totals
 """
 
+
 class TaskCompute(object):
     """
         class A(TaskCompute):
@@ -113,4 +114,3 @@ class TaskCompute(object):
             if key >= 0:
                 ret = False
         return ret
-

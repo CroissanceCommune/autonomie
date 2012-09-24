@@ -36,6 +36,8 @@ from autonomie.views.forms import ClientSchema
 from .base import ListView
 
 log = logging.getLogger(__name__)
+
+
 def get_client_form(company, client=None):
     """
         Returns the client add/edit form
@@ -43,6 +45,7 @@ def get_client_form(company, client=None):
     schema = ClientSchema().bind(company=company, client=client)
     form = Form(schema, buttons=(submit_btn,))
     return form
+
 
 class ClientView(ListView):
     """

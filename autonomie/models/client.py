@@ -29,6 +29,7 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models import DBBASE
 log = logging.getLogger(__name__)
 
+
 class Client(DBBASE):
     """
         Client model

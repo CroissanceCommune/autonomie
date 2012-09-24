@@ -52,6 +52,7 @@ from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
 
+
 def get_next_officialNumber():
     """
         Return the next available official number
@@ -67,6 +68,7 @@ def get_next_officialNumber():
         c = 0
     next_ = max(a,b,c) + 1
     return int(next_)
+
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class Invoice(Task, TaskCompute):
@@ -313,6 +315,7 @@ class Invoice(Task, TaskCompute):
     def __repr__(self):
         return u"<Invoice id:{s.id}>".format(s=self)
 
+
 class InvoiceLine(DBBASE):
     """
         Invoice lines
@@ -382,6 +385,7 @@ class InvoiceLine(DBBASE):
         return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
  quantity:{s.quantity} tva:{s.tva}".format(s=self)
 
+
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
     """
@@ -415,7 +419,6 @@ class CancelInvoice(Task, TaskCompute):
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
-
 
     def is_editable(self, manage=False):
         if manage:
@@ -486,6 +489,7 @@ class CancelInvoice(Task, TaskCompute):
         self.officialNumber = get_next_officialNumber()
         self.taskDate = datetime.date.today()
 
+
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):
     """
@@ -518,6 +522,7 @@ class ManualInvoice(DBBASE):
     company = relationship("Company",
                 primaryjoin="Company.id==ManualInvoice.company_id",
                   backref='manual_invoices')
+
     @property
     def statusComment(self):
         return None
@@ -570,7 +575,6 @@ class ManualInvoice(DBBASE):
             raise Forbidden(u'Mode de paiement inconnu')
         return paymentMode
 
-
     def is_cancelinvoice(self):
         """
             return false
@@ -604,6 +608,7 @@ class ManualInvoice(DBBASE):
             tva = 0
         tva = max(tva, 0)
         return int(float(total_ht) * (tva / 10000.0))
+
 
 class CancelInvoiceLine(DBBASE):
     """

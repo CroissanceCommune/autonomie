@@ -16,7 +16,6 @@
 import datetime
 import logging
 
-
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import BigInteger
@@ -54,6 +53,7 @@ from autonomie.exception import Forbidden
 
 log = logging.getLogger(__name__)
 
+
 class Phase(DBBASE):
     """
         Phase d'un projet
@@ -70,6 +70,7 @@ class Phase(DBBASE):
     updateDate = deferred(Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp))
+
     def is_default(self):
         """
             return True is this phase is a default one
@@ -101,6 +102,7 @@ class Phase(DBBASE):
         return dict(id=self.id,
                     name=self.name)
 
+
 class Tva(DBBASE):
     """
         `id` int(2) NOT NULL auto_increment,
@@ -120,6 +122,7 @@ class Tva(DBBASE):
         q = super(Tva, cls).query()
         return q.order_by('value')
 
+
 class Config(DBBASE):
     """
         Table containing the main configuration
@@ -133,6 +136,7 @@ class Config(DBBASE):
     app = Column("config_app", String(50), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
+
 
 class OperationComptable(DBBASE):
     """

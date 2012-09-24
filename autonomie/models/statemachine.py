@@ -18,6 +18,7 @@
 from pyramid.security import has_permission
 from autonomie.exception import Forbidden
 
+
 class State(object):
     """
         a state object with a name, permission and a callback callbacktion
@@ -51,6 +52,7 @@ class State(object):
             return self.callback(task, user_id=user_id, **kw)
         else:
             return task
+
 
 class TaskState(object):
     """

@@ -26,11 +26,13 @@ from autonomie.views.forms.widgets import DisabledInput
 
 log = logging.getLogger(__name__)
 
+
 @colander.deferred
 def deferred_ccode_valid(node, kw):
     company = kw['company']
     company_id = company.id
     client = kw.get('client')
+
     def unique_ccode(node, value):
         """
             Test customer code unicity
@@ -51,6 +53,7 @@ def deferred_ccode_valid(node, kw):
 client".format(value)
             raise colander.Invalid(node, message)
     return unique_ccode
+
 
 class ClientSchema(colander.MappingSchema):
     """

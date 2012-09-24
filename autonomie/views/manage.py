@@ -25,6 +25,7 @@ from autonomie.models.model import Task, Invoice, Estimation, Phase, CancelInvoi
 
 log = logging.getLogger(__name__)
 
+
 @view_config(route_name="manage", renderer="manage.mako", permission="manage")
 def manage(request):
     """
@@ -40,4 +41,3 @@ def manage(request):
     return dict(title=u"Documents en attente de validation",
                 tasks=documents,
                )
-

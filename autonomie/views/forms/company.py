@@ -29,6 +29,7 @@ log = logging.getLogger(__name__)
 HEADER_PATH = "header"
 LOGO_PATH = "logo"
 
+
 @colander.deferred
 def deferred_edit_adminonly_widget(node, kw):
     """
@@ -38,6 +39,7 @@ def deferred_edit_adminonly_widget(node, kw):
         return deferred_edit_widget(node, dict(edit=True))
     else:
         return deferred_edit_widget(node, dict(edit=False))
+
 
 class CompanySchema(colander.MappingSchema):
     """
@@ -75,6 +77,7 @@ class CompanySchema(colander.MappingSchema):
 Le fichier est idéalement au format 20/4 (par exemple 1000px x 200 px)",
                             validator=validate_image_mime
                             )
+
 
 def get_company_schema(request, edit, rootpath, rooturl):
     schema = CompanySchema().clone()

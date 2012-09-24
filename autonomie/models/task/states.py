@@ -26,6 +26,7 @@ log = logging.getLogger(__name__)
 
 MANAGER_PERMS = "manage"
 
+
 def valid_callback(task, **kw):
     """
         callback for the task validation
@@ -33,6 +34,7 @@ def valid_callback(task, **kw):
     task = set_date(task)
     task.valid_callback()
     return task
+
 
 def record_payment(task, **kw):
     """
@@ -46,6 +48,7 @@ def record_payment(task, **kw):
     else:
         raise Forbidden()
 
+
 def duplicate_task(task, **kw):
     """
         Duplicates a task
@@ -54,6 +57,7 @@ def duplicate_task(task, **kw):
         return task.duplicate(kw['user'], kw['project'], kw['phase'])
     else:
         raise Forbidden()
+
 
 def gen_cancelinvoice(task, **kw):
     """
@@ -64,6 +68,7 @@ def gen_cancelinvoice(task, **kw):
     else:
         raise SignatureError()
 
+
 def gen_invoices(task, **kw):
     """
         gen_invoices for the given task
@@ -73,12 +78,14 @@ def gen_invoices(task, **kw):
     else:
         raise SignatureError()
 
+
 def set_date(task, **kw):
     """
         set the date of the current task
     """
     task.taskDate = datetime.date.today()
     return task
+
 
 def get_base_state():
     """
@@ -88,6 +95,7 @@ def get_base_state():
     result['draft'] = ('draft', 'wait', )
     result['invalid'] = ('draft', 'wait',)
     return result
+
 
 def get_est_state():
     """
@@ -111,6 +119,7 @@ def get_est_state():
     result['aboest'] = (delete,)
     result['geninv'] = (duplicate,)
     return result
+
 
 def get_inv_state():
     """
@@ -141,6 +150,7 @@ def get_inv_state():
     result['resulted'] = (gencinv, duplicate,)
     result['aboinv'] = (delete,)
     return result
+
 
 def get_cinv_state():
     """

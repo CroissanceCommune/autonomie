@@ -31,6 +31,7 @@ from .custom_types import AmountType
 
 log = logging.getLogger(__name__)
 
+
 @colander.deferred
 def deferred_upload_widget(node, kw):
     """
@@ -87,7 +88,6 @@ class DocumentConfig(colander.MappingSchema):
     invoice = InvoiceConfig(title=u"Factures")
 
 
-
 class SiteConfig(colander.MappingSchema):
     """
         Site configuration
@@ -113,6 +113,7 @@ class MainConfig(colander.MappingSchema):
     site = SiteConfig()
     document = DocumentConfig(title=u'Document (devis et factures)')
 
+
 class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
@@ -130,8 +131,10 @@ class TvaItem(colander.MappingSchema):
 class TvaSequence(colander.SequenceSchema):
     tva = TvaItem(title=u"")
 
+
 class TvaConfig(colander.MappingSchema):
     tvas = TvaSequence(title=u"", missing=u'')
+
 
 def get_config_appstruct(config_dict):
     """
@@ -164,6 +167,7 @@ def get_config_appstruct(config_dict):
                                                         'coop_invoicelate')
     return appstruct
 
+
 def get_config_dbdatas(appstruct):
     """
         Returns dict with db compatible datas
@@ -187,6 +191,7 @@ def get_config_dbdatas(appstruct):
     dbdatas['files_dir'] = appstruct.get('site', {}).get('files_dir')
     return dbdatas
 
+
 def get_element_by_name(list_, name):
     """
         Return an element from list_ which has the name "name"
@@ -196,6 +201,7 @@ def get_element_by_name(list_, name):
         if element.name == name:
             found = element
     return found
+
 
 def merge_dbdatas(dbdatas, appstruct):
     """
@@ -211,4 +217,3 @@ def merge_dbdatas(dbdatas, appstruct):
         else:
             dbdata.value = value
     return dbdatas
-

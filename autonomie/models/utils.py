@@ -20,6 +20,7 @@ import datetime
 
 DEFAULT_DATE = datetime.date(2000, 1, 1)
 
+
 def format_to_taskdate(value):
     """
         format a datetime.date object to a 'taskdate' format:
@@ -34,6 +35,7 @@ def format_to_taskdate(value):
         return int(value.strftime("%Y%m%d"))
     else:
         return int(value)
+
 
 def format_from_taskdate(value):
     """
@@ -62,6 +64,7 @@ def format_from_taskdate(value):
             return datetime.date(year, 1, 1)
     else:
         return DEFAULT_DATE
+
 
 def get_current_timestamp():
     """

@@ -65,8 +65,8 @@ class CompanyViews(BaseView):
         ret_val['tasks'] = all_tasks[:5]
 
         # recovering elapsed invoices for warning
-        elapsed_invoices = [invoice \
-                        for invoice in all_invoices if invoice.is_tolate()]
+        elapsed_invoices = [invoice
+                            for invoice in all_invoices if invoice.is_tolate()]
         elapsed_invoices = sorted(elapsed_invoices,
                                   key=lambda a: a.taskDate,
                                   reverse=True)

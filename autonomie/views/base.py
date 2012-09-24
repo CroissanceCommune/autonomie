@@ -202,9 +202,9 @@ class TaskView(BaseView):
         """
             returns the options for phase select
         """
-        phase_choices = ((phase.id, phase.name) \
-                        for phase in self.project.phases)
-        if not self.project.phases: # On a pas de phase dans le projet
+        phase_choices = ((phase.id, phase.name)
+                         for phase in self.project.phases)
+        if not self.project.phases:  # On a pas de phase dans le projet
             default_phase = self.add_default_phase()
             phase_choices = ((default_phase.id, default_phase.name),)
         return phase_choices

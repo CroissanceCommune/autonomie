@@ -132,7 +132,7 @@ de créer de nouveaux projets", queue="main")
                                                 id=company.id))
 
     @view_config(route_name='company_projects',
-                 renderer='company_projects.mako',\
+                 renderer='company_projects.mako',
                  request_method='GET',
                  permission='edit')
     def company_projects(self):
@@ -204,12 +204,12 @@ de créer de nouveaux projets", queue="main")
                 Client.name.like("%" + search + "%"))
         )
 
-    @view_config(route_name='company_projects',  \
-                 renderer='project.mako', \
+    @view_config(route_name='company_projects',
+                 renderer='project.mako',
                  request_method='POST',
                  permission='edit')
-    @view_config(route_name='project', \
-                 renderer='project.mako', \
+    @view_config(route_name='project',
+                 renderer='project.mako',
                  request_param='action=edit',
                  permission='edit')
     def project(self):

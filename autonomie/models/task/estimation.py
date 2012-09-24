@@ -356,8 +356,8 @@ class Estimation(Task, TaskCompute):
                 line_amount = self.paymentline_amount()
                 result = rest - ((payment_lines_num - 1) * line_amount)
             else:
-                result = rest - sum(line.amount \
-                        for line in self.payment_lines[:-1])
+                result = rest - sum(line.amount
+                                    for line in self.payment_lines[:-1])
         return result
 
     def add_line(self, line=None, **kwargs):

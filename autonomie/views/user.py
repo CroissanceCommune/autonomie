@@ -303,8 +303,9 @@ Cette action n'est pas réversible."
             for employee in company.employees:
                 self._disable_user(employee)
 
-    @view_config(route_name='user', request_param='action=delete', \
-                                                    permission='manage')
+    @view_config(route_name='user',
+                 request_param='action=delete',
+                 permission='manage')
     def delete(self):
         """
             disable a user and its enteprises

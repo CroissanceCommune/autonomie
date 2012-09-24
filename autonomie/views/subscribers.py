@@ -17,7 +17,6 @@
     Add menus to the returned datas before rendering
     Add a translation stuff to the templating context
 """
-import logging
 from webhelpers.html import tags
 from webhelpers.html import HTML
 
@@ -33,6 +32,9 @@ from autonomie.utils.widgets import MainMenuItem
 from autonomie.utils.widgets import MenuDropDown
 from autonomie.utils.widgets import StaticWidget
 
+from autonomie.views.render_api import api
+
+
 def get_cid(request):
     """
         Return the current cid from the request
@@ -45,6 +47,7 @@ def get_cid(request):
         cid = request.context.get_company_id()
     return cid
 
+
 def get_companies(request):
     """
         Return available companies from the request object
@@ -56,6 +59,7 @@ def get_companies(request):
         companies = request.user.companies
     return companies
 
+
 def get_company(request, cid):
     """
         Return the current company object
@@ -64,6 +68,7 @@ def get_company(request, cid):
         company = Company.get(cid)
         request._company = company
     return request._company
+
 
 def get_user_menu(cid, css=None):
     """
@@ -91,6 +96,7 @@ def get_user_menu(cid, css=None):
                                 path="company", id=cid))
     return menu
 
+
 def get_admin_menus(cid):
     """
         Return the menu for admin or managers
@@ -109,13 +115,16 @@ def get_admin_menus(cid):
     submenu = get_user_menu(cid, "nav-pills")
     return menu, submenu
 
+
 def company_menu(request, companies, cid):
     """
         Add the company choose menu
     """
-    menu = HTML.li(HTML.h2(get_company( request, cid ).name))
-    menu = MainMenuItem(get_company( request, cid ).name, "view",
-                    path="company", id=cid, _query=dict(action="index"))
+    menu = HTML.li(HTML.h2(get_company(request, cid).name))
+    menu = MainMenuItem(
+        get_company(request, cid).name, "view",
+        path="company", id=cid, _query=dict(action="index")
+    )
     if len(companies) > 1:
         if request.context.__name__ == 'company':
             options = ((request.current_route_path(id=company.id),
@@ -125,12 +134,13 @@ def company_menu(request, companies, cid):
             options = ((request.route_path("company", id=company.id),
                     company.name) for company in companies)
             default = request.route_path("company", id=cid)
-        html_attrs = {'class':'floatted company-search',
-                      'id':"company-select-menu"}
+        html_attrs = {'class': 'floatted company-search',
+                      'id': "company-select-menu"}
         menu = HTML.li(
                 tags.select("companies", default, options, **html_attrs))
         menu = StaticWidget(menu, "view")
     return menu
+
 
 @subscriber(BeforeRender)
 def add_menu(event):
@@ -154,13 +164,12 @@ def add_menu(event):
         if menu:
             menu.add(MainMenuItem(u"Annuaire", "view",
                         icon="icon-white icon-book", path="users"))
-            event.update({'menu':menu})
+            event.update({'menu': menu})
         if submenu:
             companies = get_companies(request)
             submenu.insert(company_menu(request, companies, cid))
-            event.update({'submenu':submenu})
+            event.update({'submenu': submenu})
 
-from autonomie.views.render_api import api
 
 @subscriber(BeforeRender)
 def add_renderer_globals(event):
@@ -172,6 +181,7 @@ def add_renderer_globals(event):
         request = get_current_request()
     event['_'] = request.translate
     event['api'] = api
+
 
 @subscriber(NewRequest)
 def add_localizer(event):

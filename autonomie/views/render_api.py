@@ -32,6 +32,7 @@ STATUS = dict((
             ("resulted", u"Paiement reçu",),
             ))
 
+
 def format_status(task):
     """
         return a formatted status string
@@ -51,6 +52,7 @@ def format_status(task):
                                         format_date(task.statusDate))
     return status_str + suffix
 
+
 def format_account(account, reverse=False):
     """
         return {firstname} {lastname}
@@ -63,6 +65,7 @@ def format_account(account, reverse=False):
         lastname = ""
     return format_name(firstname, lastname, reverse)
 
+
 def format_name(firstname, lastname, reverse=False):
     """
         format firstname and lastname in a common format
@@ -73,6 +76,7 @@ def format_name(firstname, lastname, reverse=False):
         return u"{0} {1}".format(lastname, firstname)
     else:
         return u"{0} {1}".format(firstname, lastname)
+
 
 def format_amount(amount, trim=True):
     """
@@ -85,12 +89,13 @@ def format_amount(amount, trim=True):
                 # On a 2 chiffres après la virgule (pas plus)
                 trim = True
         if trim:
-            amount = int(amount)/100.0
+            amount = int(amount) / 100.0
             resp = locale.format("%.2f", amount, grouping=True)
         else:
-            resp = locale.format("%g", amount/100.0, grouping=True)
+            resp = locale.format("%g", amount / 100.0, grouping=True)
     resp = resp.replace(' ', '&nbsp;')
     return resp
+
 
 def format_quantity(quantity):
     """
@@ -100,6 +105,7 @@ def format_quantity(quantity):
         return locale.format('%g', quantity, grouping=True)
     else:
         return ""
+
 
 def format_short_date(date):
     """
@@ -114,22 +120,24 @@ def format_short_date(date):
                                                             "%d/%m/%Y %H:%M")
     return resp
 
+
 def format_long_date(date):
     """
         return a long printable version of the date obj
     """
     if isinstance(date, datetime.date):
-        resp = u"{0}".format(date.strftime("%e %B %Y")\
-                                            .decode('utf-8')\
-                                            .capitalize())
+        resp = u"{0}".format(
+            date.strftime("%e %B %Y").decode('utf-8').capitalize()
+        )
     elif not date:
         resp = u""
     else:
         date = datetime.datetime.fromtimestamp(float(date))
-        resp = u"{0}".format(date.strftime("%e %B %Y")\
-                                            .decode('utf-8')\
-                                            .capitalize())
+        resp = u"{0}".format(
+            date.strftime("%e %B %Y").decode('utf-8').capitalize()
+        )
     return resp
+
 
 def format_date(date, short=True):
     """
@@ -139,6 +147,7 @@ def format_date(date, short=True):
         return format_short_date(date)
     else:
         return format_long_date(date)
+
 
 def format_paymentmode(paymentmode):
     """
@@ -150,6 +159,7 @@ def format_paymentmode(paymentmode):
         return u"par virement"
     else:
         return u"mode paiement inconnu"
+
 
 def format_unity(unity, pretty=False):
     """
@@ -189,4 +199,3 @@ api = Api(format_amount=format_amount,
           format_long_date=format_long_date,
           format_quantity=format_quantity,
           format_unity=format_unity)
-

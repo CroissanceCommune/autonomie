@@ -29,12 +29,13 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models import DBBASE
 log = logging.getLogger(__name__)
 
+
 class Client(DBBASE):
     """
         Client model
     """
     __tablename__ = 'customer'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     code = Column('code', String(4))
     comments = deferred(Column("comments", Text), group='edit')

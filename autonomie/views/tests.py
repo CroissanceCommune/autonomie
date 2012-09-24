@@ -17,11 +17,10 @@
     It's not really automated, but it's better than nuts
 """
 
-import logging
 from pyramid.view import view_config
 
-@view_config(route_name='testjs', permission="admin", \
-                        renderer='/tests/base.mako')
+
+@view_config(route_name='testjs', permission="admin",
+             renderer='/tests/base.mako')
 def testjs(request):
     return dict(title=u"Page de test pour les composantes javascript")
-

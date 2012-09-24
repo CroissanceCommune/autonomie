@@ -20,6 +20,7 @@ import datetime
 
 DEFAULT_DATE = datetime.date(2000, 1, 1)
 
+
 def format_to_taskdate(value):
     """
         format a datetime.date object to a 'taskdate' format:
@@ -35,6 +36,7 @@ def format_to_taskdate(value):
     else:
         return int(value)
 
+
 def format_from_taskdate(value):
     """
         return a datetime.date object from an integer in 'taskdate' format
@@ -48,12 +50,12 @@ def format_from_taskdate(value):
             year = 2000
         try:
             month = int(value[4:6])
-            assert month in range(1,13)
+            assert month in range(1, 13)
         except:
             month = 1
         try:
             day = int(value[6:8])
-            assert day in range(1,32)
+            assert day in range(1, 32)
         except:
             day = 1
         try:
@@ -62,6 +64,7 @@ def format_from_taskdate(value):
             return datetime.date(year, 1, 1)
     else:
         return DEFAULT_DATE
+
 
 def get_current_timestamp():
     """

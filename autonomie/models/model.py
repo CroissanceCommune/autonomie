@@ -16,7 +16,6 @@
 import datetime
 import logging
 
-
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import BigInteger
@@ -33,33 +32,18 @@ from sqlalchemy.orm import deferred
 from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomInteger
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.client import Client
-from autonomie.models.company import Company
-from autonomie.models.project import Project
-from autonomie.models.task import Task
-from autonomie.models.task import Estimation
-from autonomie.models.task import Invoice
-from autonomie.models.task import CancelInvoice
-from autonomie.models.task import EstimationLine
-from autonomie.models.task import DiscountLine
-from autonomie.models.task import PaymentLine
-from autonomie.models.task import InvoiceLine
-from autonomie.models.task import CancelInvoiceLine
-from autonomie.models.task import ManualInvoice
-from autonomie.models.user import User
-
 
 from autonomie.models import DBBASE
-from autonomie.exception import Forbidden
 
 log = logging.getLogger(__name__)
+
 
 class Phase(DBBASE):
     """
         Phase d'un projet
     """
     __tablename__ = 'phase'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     project_id = Column('project_id', Integer,
                         ForeignKey('project.id'))
@@ -70,6 +54,7 @@ class Phase(DBBASE):
     updateDate = deferred(Column("updateDate", CustomDateType,
                                         default=get_current_timestamp,
                                         onupdate=get_current_timestamp))
+
     def is_default(self):
         """
             return True is this phase is a default one
@@ -92,7 +77,7 @@ class Phase(DBBASE):
         """
             return the tasks of the passed type
         """
-        return [doc for doc in self.tasks if doc.type_==type_]
+        return [doc for doc in self.tasks if doc.type_ == type_]
 
     def todict(self):
         """
@@ -100,6 +85,7 @@ class Phase(DBBASE):
         """
         return dict(id=self.id,
                     name=self.name)
+
 
 class Tva(DBBASE):
     """
@@ -109,7 +95,7 @@ class Tva(DBBASE):
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
     __tablename__ = 'tva'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(8), nullable=False)
     value = Column("value", Integer)
@@ -120,6 +106,7 @@ class Tva(DBBASE):
         q = super(Tva, cls).query()
         return q.order_by('value')
 
+
 class Config(DBBASE):
     """
         Table containing the main configuration
@@ -129,10 +116,11 @@ class Config(DBBASE):
           PRIMARY KEY  (`config_app`,`config_name`)
     """
     __tablename__ = 'config'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     app = Column("config_app", String(50), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
+
 
 class OperationComptable(DBBASE):
     """
@@ -151,7 +139,7 @@ class OperationComptable(DBBASE):
         UNIQUE KEY `id` (`id`)
     """
     __tablename__ = 'operation_tresorerie'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', BigInteger, primary_key=True)
     amount = Column("montant", Numeric)
     charge = Column("charge", Integer, default=0)
@@ -180,7 +168,7 @@ class Holiday(DBBASE):
         end_date
     """
     __tablename__ = "holiday"
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column(Integer, primary_key=True)
     user_id = Column("user_id", Integer, ForeignKey('accounts.id'))
     start_date = Column(Date)
@@ -200,5 +188,5 @@ class Holiday(DBBASE):
         """
         q = dbsession.query(cls)
         if user_id:
-            q = q.filter(cls.user_id==user_id)
+            q = q.filter(cls.user_id == user_id)
         return q.order_by("start_date")

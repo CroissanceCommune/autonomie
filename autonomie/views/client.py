@@ -36,6 +36,8 @@ from autonomie.views.forms import ClientSchema
 from .base import ListView
 
 log = logging.getLogger(__name__)
+
+
 def get_client_form(company, client=None):
     """
         Returns the client add/edit form
@@ -43,6 +45,7 @@ def get_client_form(company, client=None):
     schema = ClientSchema().bind(company=company, client=client)
     form = Form(schema, buttons=(submit_btn,))
     return form
+
 
 class ClientView(ListView):
     """
@@ -91,7 +94,7 @@ class ClientView(ListView):
         if has_permission('add', self.context, self.request):
             form = get_client_form(company)
             popup = PopUp("addform", u'Ajouter un client', form.render())
-            popups = {popup.name:popup}
+            popups = {popup.name: popup}
             self.actionmenu.add(popup.open_btn())
 
         # Search form
@@ -122,14 +125,17 @@ class ClientView(ListView):
         """
             Return a filtered query
         """
-        clients = clients.filter(or_(Client.name.like("%"+search+"%"),
-                               Client.contactLastName.like("%"+search+"%")))
+        clients = clients.filter(
+            or_(Client.name.like("%" + search + "%"),
+                Client.contactLastName.like("%" + search + "%")
+            )
+        )
         return clients
 
-    @view_config(route_name='company_clients', renderer='client.mako',\
-                        request_method='POST', permission='edit')
-    @view_config(route_name='client', renderer='client.mako',\
-                                request_param='action=edit', permission='edit')
+    @view_config(route_name='company_clients', renderer='client.mako',
+                 request_method='POST', permission='edit')
+    @view_config(route_name='client', renderer='client.mako',
+                request_param='action=edit', permission='edit')
     def client(self):
         """
             Return :
@@ -180,8 +186,8 @@ succès".format(client.name)
                     company=company,
                     action_menu=self.actionmenu)
 
-    @view_config(route_name='client', renderer='client_view.mako', \
-                            request_method='GET', permission='view')
+    @view_config(route_name='client', renderer='client_view.mako',
+                 request_method='GET', permission='view')
     def client_view(self):
         """
             Return the view of a client

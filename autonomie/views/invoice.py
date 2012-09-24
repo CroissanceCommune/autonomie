@@ -33,11 +33,10 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
-from sqlalchemy.orm.util import has_identity
-
 from .base import TaskView
 
 log = logging.getLogger(__name__)
+
 
 class InvoiceView(TaskView):
     """
@@ -58,11 +57,11 @@ class InvoiceView(TaskView):
         """
             Returns dbdatas as a dict of dict
         """
-        return {'invoice':self.task.appstruct(),
-                'lines':[line.appstruct()
-                                       for line in self.task.lines],
-                'discounts':[line.appstruct()
-                                    for line in self.task.discounts],
+        return {'invoice': self.task.appstruct(),
+                'lines': [line.appstruct()
+                          for line in self.task.lines],
+                'discounts': [line.appstruct()
+                              for line in self.task.discounts],
                 }
 
     def is_editable(self):
@@ -145,7 +144,7 @@ class InvoiceView(TaskView):
         return dict(title=title,
                     client=self.project.client,
                     company=self.company,
-                    html_form = html_form,
+                    html_form=html_form,
                     action_menu=self.actionmenu,
                     popups=self.popups
                     )
@@ -215,9 +214,10 @@ class InvoiceView(TaskView):
         """
             Change the current task's status
         """
+        flash = self.request.session.flash
         if status == "valid":
-            self.request.session.flash(u"La facture porte le numéro \
-<b>{0}</b>".format(self.task.officialNumber), queue='main')
+            message = u"La facture porte le numéro <b>{0}</b>"
+            flash(message.format(self.task.officialNumber), queue='main')
 
         elif status == 'gencinv':
             cancelinvoice = ret_data
@@ -225,9 +225,13 @@ class InvoiceView(TaskView):
             self.dbsession.flush()
             id_ = cancelinvoice.id
             log.debug(u"   + The cancel id : {0}".format(id_))
-            self.request.session.flash(u"Un avoir a été généré, \
-vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
-            self.request.route_path("cancelinvoice", id=id_)), queue="main")
+
+            mess = u"Un avoir a été généré, vous pouvez l'éditer \
+<a href='{0}'>Ici</a>."
+            fmess = mess.format(self.request.route_path("cancelinvoice",
+                                                           id=id_))
+            flash(fmess, queue="main")
+
         elif status == "duplicate":
             invoice = ret_data
             log.debug(invoice)
@@ -235,9 +239,11 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
             self.dbsession.flush()
             id_ = invoice.id
             log.debug(u"   + The new invoice id : {0}".format(id_))
-            self.request.session.flash(u"La facture a bien été dupliquée, \
-              vous pouvez l'éditer <a href='{0}'>Ici</a>."\
-                   .format(self.request.route_path("invoice", id=id_)), "main")
+            mess = u"La facture a bien été dupliquée, vous pouvez l'éditer \
+<a href='{0}'>Ici</a>."
+            fmess = mess.format(self.request.route_path("invoice", id=id_))
+            self.request.session.flash(fmess, "main")
+
 #        elif status == 'delete':
 #            session_map = self.dbsession.identity_map
 #            # Here we delete all non persisted datas
@@ -253,7 +259,8 @@ vous pouvez l'éditer <a href='{0}'>Ici</a>.".format(
 #            self.dbsession.flush()
 #            self.request.session.flash(u"La facture {0} a été supprimée"\
 #                    .format(self.task.number))
-#            raise HTTPFound(self.request.route_path("project", id=self.project.id))
+#            raise HTTPFound(self.request.route_path("project",
+#                            id=self.project.id))
 
     def _pre_status_process(self, status, params):
         """

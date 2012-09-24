@@ -5,12 +5,12 @@ import transaction
 from autonomie.models import DBSESSION
 from autonomie.models import DBMETADATA
 
+
 def run_migrations_online():
     if DBSESSION.bind is None:
         raise ValueError(
-            "\nYou must Autonomie's migration using the 'autonomie-migrate' \
-            script"
-            "\nand not through 'alembic' directly."
+"\nYou must do Autonomie migrations using the 'autonomie-migrate' script"
+"\nand not through 'alembic' directly."
             )
 
     transaction.begin()

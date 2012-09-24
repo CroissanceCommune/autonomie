@@ -22,15 +22,16 @@ from deform import widget
 
 from autonomie.models.model import Client
 from autonomie.views.forms.widgets import get_mail_input
-from autonomie.views.forms.widgets import DisabledInput
 
 log = logging.getLogger(__name__)
+
 
 @colander.deferred
 def deferred_ccode_valid(node, kw):
     company = kw['company']
     company_id = company.id
     client = kw.get('client')
+
     def unique_ccode(node, value):
         """
             Test customer code unicity
@@ -39,11 +40,11 @@ def deferred_ccode_valid(node, kw):
             message = u"Le code client doit contenir 4 caractères."
             raise colander.Invalid(node, message)
         #Test unicity
-        query = Client.query().filter(Client.company_id==company_id)\
-                .filter(Client.code==value)
+        query = Client.query().filter(Client.company_id == company_id)\
+                .filter(Client.code == value)
         if client:
             # In edit mode, it will always fail
-            query = query.filter(Client.id!=client.id)
+            query = query.filter(Client.id != client.id)
         result = query.all()
 
         if len(result):
@@ -51,6 +52,7 @@ def deferred_ccode_valid(node, kw):
 client".format(value)
             raise colander.Invalid(node, message)
     return unique_ccode
+
 
 class ClientSchema(colander.MappingSchema):
     """
@@ -75,7 +77,7 @@ class ClientSchema(colander.MappingSchema):
                         title=u"Fonction du contact principal",
                         missing=u"",
                         validator=colander.Length(max=255))
-    email = get_mail_input( missing=u'')
+    email = get_mail_input(missing=u'')
     phone = colander.SchemaNode(colander.String(),
                                 title=u'Téléphone',
                                 missing=u'',

@@ -19,6 +19,7 @@ import logging
 import colander
 log = logging.getLogger(__name__)
 
+
 def validate_image_mime(node, value):
     """
         Validate mime types for image files

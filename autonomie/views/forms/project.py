@@ -27,7 +27,6 @@ from autonomie.views.forms.widgets import get_date_input
 log = logging.getLogger(__name__)
 
 
-
 class ProjectSchema(colander.MappingSchema):
     """
         Schema for project
@@ -58,6 +57,7 @@ class ProjectSchema(colander.MappingSchema):
     client_id = colander.SchemaNode(colander.Integer(),
                                     title=u"Client",
                                     widget=deferred_autocomplete_widget)
+
 
 class PhaseSchema(colander.MappingSchema):
     """

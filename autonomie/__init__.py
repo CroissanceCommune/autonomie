@@ -17,12 +17,10 @@ import locale
 from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from pyramid_beaker import set_cache_regions_from_settings
-from sqlalchemy import engine_from_config, create_engine
+from sqlalchemy import engine_from_config
 
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-
-from pyramid.threadlocal import get_current_registry
 
 from autonomie.utils.security import RootFactory
 from autonomie.utils.security import BaseDBFactory
@@ -34,6 +32,7 @@ from autonomie.utils.avatar import get_avatar
 from autonomie.utils.config import get_config
 from autonomie.utils.renderer import set_deform_renderer
 
+
 def main(global_config, **settings):
     """
         Main function : returns a Pyramid WSGI application.
@@ -43,7 +42,6 @@ def main(global_config, **settings):
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
     acl_policy = ACLAuthorizationPolicy()
-
 
     config = Configurator(settings=settings,
                         authentication_policy=auth_policy,
@@ -61,7 +59,7 @@ def main(global_config, **settings):
     config.set_default_permission('view')
 
     # Adding some properties to the request object
-    config.set_request_property(lambda _:dbsession, 'dbsession', reify=True)
+    config.set_request_property(lambda _: dbsession, 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
     config.set_request_property(get_config, 'config')
 
@@ -83,15 +81,15 @@ def main(global_config, **settings):
                     '/account')
 
     # Holiday routes
-    config.add_route('holiday', # Add
+    config.add_route('holiday',  # Add
                     '/holiday')
-    config.add_route('holidays', # view
+    config.add_route('holidays',  # view
                     '/holidays')
 
     config.add_route('statistic',
                     '/statistics/{id:\d+}',
                     traverse='/companies/{id}')
-    config.add_route('statistics', # view
+    config.add_route('statistics',  # view
                     '/statistics')
     # Company Routes
     config.add_route('company',
@@ -177,8 +175,8 @@ def main(global_config, **settings):
     # Test javascript view
     config.add_route("testjs",
                     "/testjs")
-    # Set deform multi renderer handling translation and both chameleon and mako
-    # templates
+    # Set deform multi renderer handling translation and both chameleon and
+    # mako templates
     set_deform_renderer()
     config.scan('autonomie.views')
     config.add_translation_dirs("colander:locale/", "deform:locale")

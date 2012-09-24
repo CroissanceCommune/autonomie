@@ -31,6 +31,7 @@ from .base import BaseView
 
 log = logging.getLogger(__name__)
 
+
 class CompanyViews(BaseView):
     """
         all company related views
@@ -59,16 +60,16 @@ class CompanyViews(BaseView):
             all_invoices.extend(project.invoices)
 
         all_tasks = sorted(all_tasks,
-                            key=lambda a:a.statusDate,
+                            key=lambda a: a.statusDate,
                             reverse=True)
         ret_val['tasks'] = all_tasks[:5]
 
         # recovering elapsed invoices for warning
-        elapsed_invoices = [invoice \
-                        for invoice in all_invoices if invoice.is_tolate()]
+        elapsed_invoices = [invoice
+                            for invoice in all_invoices if invoice.is_tolate()]
         elapsed_invoices = sorted(elapsed_invoices,
-                                key=lambda a:a.taskDate,
-                                reverse=True)
+                                  key=lambda a: a.taskDate,
+                                  reverse=True)
         ret_val['elapsed_invoices'] = elapsed_invoices
         return ret_val
 

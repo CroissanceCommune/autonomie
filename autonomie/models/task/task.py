@@ -40,14 +40,15 @@ from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
 
+
 @implementer(ITask)
 class Task(DBBASE):
     """
         Metadata pour une tâche (estimation, invoice)
     """
     __tablename__ = 'task'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    __mapper_args__ = {'polymorphic_identity':'task'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __mapper_args__ = {'polymorphic_identity': 'task'}
 
     id = Column(Integer, primary_key=True)
     phase_id = Column("phase_id", ForeignKey('phase.id'))
@@ -56,34 +57,41 @@ class Task(DBBASE):
     statusComment = Column("statusComment", Text)
     statusPerson = Column("statusPerson",
                           ForeignKey('accounts.id'))
-    statusDate = Column("statusDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+    statusDate = Column(
+        "statusDate",
+        CustomDateType,
+        default=get_current_timestamp,
+        onupdate=get_current_timestamp)
     taskDate = Column("taskDate", CustomDateType2)
     owner_id = Column("owner_id", ForeignKey('accounts.id'))
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
+    creationDate = deferred(
+        Column("creationDate", CustomDateType,
+               default=get_current_timestamp)
+    )
+    updateDate = Column(
+        "updateDate", CustomDateType,
+        default=get_current_timestamp,
+        onupdate=get_current_timestamp)
     description = Column("description", Text)
-    statusPersonAccount = relationship("User",
-                        primaryjoin="Task.statusPerson==User.id",
-                        backref="taskStatuses")
-    owner = relationship("User",
-                        primaryjoin="Task.owner_id==User.id",
-                            backref="ownedTasks")
+    statusPersonAccount = relationship(
+        "User",
+        primaryjoin="Task.statusPerson==User.id",
+        backref="taskStatuses")
+    owner = relationship(
+        "User",
+        primaryjoin="Task.owner_id==User.id",
+        backref="ownedTasks")
 
-    phase = relationship("Phase",
-                        primaryjoin="Task.phase_id==Phase.id",
-                        backref="tasks")
+    phase = relationship(
+        "Phase",
+        primaryjoin="Task.phase_id==Phase.id",
+        backref="tasks")
 
     type_ = Column('type_', String(30), nullable=False)
     __mapper_args__ = {'polymorphic_on': type_,
-                       'polymorphic_identity':'task'}
+                       'polymorphic_identity': 'task'}
 
     state_machine = DEFAULT_STATE_MACHINES['base']
-
 
     def __init__(self, **kwargs):
         if not 'CAEStatus' in kwargs:
@@ -172,12 +180,13 @@ ce document.".format(status)
     def __repr__(self):
         return u"<Task status:{s.CAEStatus} id:{s.id}>".format(s=self)
 
+
 class DiscountLine(DBBASE):
     """
          A discount line
     """
     __tablename__ = 'discount'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('task.id'))
     tva = Column("tva", Integer, nullable=False, default=196)
@@ -217,12 +226,13 @@ class DiscountLine(DBBASE):
         return u"<DiscountLine amount : {s.amount} tva:{s.tva} id:{s.id}>"\
                 .format(s=self)
 
+
 class TaskStatus(DBBASE):
     """
         Task status, should be used to record the task's status
     """
     __tablename__ = 'task_status'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     task_id = Column('task_id', Integer,
                         ForeignKey('task.id'))

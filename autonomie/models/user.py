@@ -36,12 +36,13 @@ COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
 
 log = logging.getLogger(__name__)
 
+
 class User(DBBASE):
     """
         User model
     """
     __tablename__ = 'accounts'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     login = Column('login', String(64))
     pwd = Column("password", String(100))
@@ -114,12 +115,14 @@ class User(DBBASE):
     def query(cls, ordered=True):
         """
             Query users
-            Exclud archived users
+            Exclude archived users
         """
         query = super(User, cls).query()
-        query = query.filter(User.active=='Y')
+        query = query.filter(User.active == 'Y')
+
         if ordered:
             query = query.order_by(User.lastname)
+
         return query
 
     def disable(self):

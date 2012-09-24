@@ -18,6 +18,7 @@
 from zope.interface import Attribute
 from zope.interface import Interface
 
+
 class ITask(Interface):
     """
         Task interface, need to be implemented by all documents
@@ -36,6 +37,7 @@ class ITask(Interface):
         """
             Is the current task a cancelled invoice ?
         """
+
 
 class IValidatedTask(ITask):
     """
@@ -70,6 +72,7 @@ class IValidatedTask(ITask):
         """
             Has the current document been cancelled
         """
+
 
 class IMoneyTask(Interface):
     """
@@ -184,4 +187,3 @@ class IInvoice(Interface):
         """
             Return True if the task is resulted (definitively paid)
         """
-

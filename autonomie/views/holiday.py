@@ -37,12 +37,14 @@ from .base import BaseView
 
 log = logging.getLogger(__name__)
 
+
 def get_user_choices(dbsession):
     choices = [(0, u'Tous les entrepreneurs')]
     choices.extend([(unicode(user.id),
                      u"{0} {1}".format(user.lastname, user.firstname),)
                         for user in User.query().all()])
     return choices
+
 
 class HolidayView(BaseView):
     """
@@ -56,7 +58,7 @@ class HolidayView(BaseView):
         """
         schema = HolidaysSchema()
         form = Form(schema, buttons=(submit_btn,))
-        holidays = Holiday.query(self.dbsession,user_id=self.request.user.id)
+        holidays = Holiday.query(self.dbsession, user_id=self.request.user.id)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
             log.debug(datas)
@@ -82,7 +84,7 @@ class HolidayView(BaseView):
             appstruct = [{'start_date':holiday.start_date,
                          'end_date':holiday.end_date}
                          for holiday in holidays]
-            html_form = form.render({'holidays':appstruct})
+            html_form = form.render({'holidays': appstruct})
         return dict(title=u"Déclarer mes congés",
                     html_form=html_form)
 
@@ -116,8 +118,8 @@ class HolidayView(BaseView):
                                     Holiday.end_date.between(start_date,
                                                                     end_date)))
                 if user_id:
-                    holidays = holidays.filter(Holiday.user_id==user_id)
-                holidays=holidays.all()
+                    holidays = holidays.filter(Holiday.user_id == user_id)
+                holidays = holidays.all()
                 html_form = form.render(appstruct)
                 log.debug(u"Rendering with appstruct : %s" % appstruct)
         else:

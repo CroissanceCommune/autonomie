@@ -44,12 +44,14 @@ from .base import ListView
 
 log = logging.getLogger(__name__)
 
+
 def rgb_to_hex(rgb):
     """
         return an hexadecimal version of the rgb tuple
         for css rendering
     """
     return '#%02x%02x%02x' % rgb
+
 
 def get_color():
     """
@@ -58,7 +60,7 @@ def get_color():
     h = uniform(0.1, 0.8)
     s = uniform(0.8, 1)
     v = uniform(0.8, 1)
-    return rgb_to_hex(tuple(255*c for c in hsv_to_rgb(h, s, v)))
+    return rgb_to_hex(tuple(255 * c for c in hsv_to_rgb(h, s, v)))
 
 
 def build_client_value(client):
@@ -70,6 +72,7 @@ def build_client_value(client):
     else:
         return (u" - ", u"Sélectionnez")
 
+
 def build_client_values(clients):
     """
         Build human understandable client labels
@@ -77,6 +80,7 @@ def build_client_values(clients):
     """
     return [build_client_value(client)
                             for client in clients]
+
 
 def get_project_form(clients, default_client=None, edit=False):
     """
@@ -87,6 +91,7 @@ def get_project_form(clients, default_client=None, edit=False):
     schema = ProjectSchema().bind(edit=edit, choices=choices, default=default)
     form = Form(schema, buttons=(submit_btn,))
     return form
+
 
 class ProjectView(ListView):
     """
@@ -115,7 +120,6 @@ class ProjectView(ListView):
                 self.actionmenu.add(self._get_detail_btn())
                 self.actionmenu.add(self._get_phase_btn())
 
-
     def redirect_to_clients(self, company):
         """
             Force project page to be redirected to client page
@@ -127,9 +131,8 @@ de créer de nouveaux projets", queue="main")
         raise HTTPFound(self.request.route_path("company_clients",
                                                 id=company.id))
 
-
     @view_config(route_name='company_projects',
-                 renderer='company_projects.mako',\
+                 renderer='company_projects.mako',
                  request_method='GET',
                  permission='edit')
     def company_projects(self):
@@ -155,21 +158,21 @@ de créer de nouveaux projets", queue="main")
         projects = self._sort(query, sort, direction).all()
         records = self._get_pagination(projects, current_page, items_per_page)
 
-        ret_dict =  dict(title=u"Liste des projets",
-                          projects=records,
-                          company=company,
-                          action_menu=self.actionmenu,
-                          item_actions=self._get_actions())
+        ret_dict = dict(title=u"Liste des projets",
+                        projects=records,
+                        company=company,
+                        action_menu=self.actionmenu,
+                        item_actions=self._get_actions())
 
         if has_permission("add", self.context, self.request):
             popup = self._get_add_popup()
-            ret_dict['popups'] = {popup.name:popup}
+            ret_dict['popups'] = {popup.name: popup}
             self.actionmenu.add(popup.open_btn())
         self.actionmenu.add(self._get_archived_btn(archived))
         self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
         return ret_dict
 
-    def _get_projects(self):# company, search, sort, direction, archived):
+    def _get_projects(self):  # company, search, sort, direction, archived):
         """
             query projects against the database
         """
@@ -180,7 +183,7 @@ de créer de nouveaux projets", queue="main")
         """
             add a filter for the company on the query
         """
-        return query.filter(Project.company_id==company.id)
+        return query.filter(Project.company_id == company.id)
 
     @staticmethod
     def _filter_archived(query, archived):
@@ -196,15 +199,17 @@ de créer de nouveaux projets", queue="main")
         """
             filter the query on the searched argument
         """
-        return query.filter( or_(Project.name.like("%" + search + "%"),
-                        Client.name.like("%" + search +"%")))
+        return query.filter(
+            or_(Project.name.like("%" + search + "%"),
+                Client.name.like("%" + search + "%"))
+        )
 
-    @view_config(route_name='company_projects',  \
-                 renderer='project.mako', \
+    @view_config(route_name='company_projects',
+                 renderer='project.mako',
                  request_method='POST',
                  permission='edit')
-    @view_config(route_name='project', \
-                 renderer='project.mako', \
+    @view_config(route_name='project',
+                 renderer='project.mako',
                  request_param='action=edit',
                  permission='edit')
     def project(self):
@@ -347,7 +352,7 @@ rajoutée".format(phasename), queue="main")
         project = self.request.context
         self.dbsession.delete(project)
         self.request.session.flash(u"Le projet '{0}' a bien été \
-supprimé".format(project.name) )
+supprimé".format(project.name))
         return HTTPFound(self.request.referer)
 
     def _get_actions(self):
@@ -377,6 +382,7 @@ supprimé".format(project.name) )
                                       title=u"Supprimer le projet",
                                       _query=dict(action="delete"),
                                       icon="icon-trash")
+
             def is_deletable_perm(context, req):
                 """
                     Return True if the current item (context) is deletable
@@ -404,7 +410,8 @@ supprimé".format(project.name) )
         """
             return the toggle button which show the details
         """
-        return ToggleLink(u"Afficher les détails", target="project-description")
+        return ToggleLink(u"Afficher les détails",
+                          target="project-description")
 
     @staticmethod
     def _get_phase_btn():
@@ -413,6 +420,7 @@ supprimé".format(project.name) )
         """
         return ToggleLink(u"Ajouter une phase", target="project-addphase",
                                                             css="addphase")
+
     def _get_archived_btn(self, archived):
         """
             return the show archived button
@@ -430,4 +438,4 @@ supprimé".format(project.name) )
             return a popup object for add project
         """
         form = get_project_form(clients=self.context.clients)
-        return  PopUp('add', u"Ajouter un projet", form.render())
+        return PopUp('add', u"Ajouter un projet", form.render())

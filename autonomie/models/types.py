@@ -25,12 +25,14 @@ from sqlalchemy.types import String as String_type
 from autonomie.models.utils import format_to_taskdate
 from autonomie.models.utils import format_from_taskdate
 
+
 class CustomDateType(TypeDecorator):
     """
         Custom date type used because our database is using
         integers to store date's timestamp
     """
     impl = Integer_type
+
     def process_bind_param(self, value, dialect):
         if value is None or not value:
             return int(time.time())
@@ -46,6 +48,7 @@ class CustomDateType(TypeDecorator):
         else:
             return datetime.datetime.now()
 
+
 class CustomDateType2(TypeDecorator):
     """
         Custom date type used because our database is using
@@ -53,11 +56,13 @@ class CustomDateType2(TypeDecorator):
         YYYYMMDD
     """
     impl = Integer_type
+
     def process_bind_param(self, value, dialect):
         return format_to_taskdate(value)
 
     def process_result_value(self, value, dialect):
         return format_from_taskdate(value)
+
 
 class CustomFileType(TypeDecorator):
     """
@@ -65,6 +70,7 @@ class CustomFileType(TypeDecorator):
         the database element
     """
     impl = String_type
+
     def __init__(self, prefix, *args, **kw):
         TypeDecorator.__init__(self, *args, **kw)
         self.prefix = prefix
@@ -84,17 +90,19 @@ class CustomFileType(TypeDecorator):
             Get the datas from database
         """
         if value:
-            return dict(filename = value,
+            return dict(filename=value,
                         uid=self.prefix + value)
         else:
             return dict(filename="",
                         uid=self.prefix)
+
 
 class CustomInteger(TypeDecorator):
     """
         Custom integer, allow long to int automatic conversion
     """
     impl = Integer_type
+
     def process_bind_param(self, value, dialect):
         """
             On insertion

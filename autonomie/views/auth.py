@@ -32,6 +32,7 @@ from autonomie.views.forms import get_auth_schema
 
 log = logging.getLogger(__name__)
 
+
 @view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED,
         xhr=True, renderer='json')
 @view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
@@ -50,6 +51,7 @@ def forbidden_view(request):
         return dict(redirect=loc)
     return HTTPFound(location=loc)
 
+
 @view_config(route_name='login', permission=NO_PERMISSION_REQUIRED,
                                                         renderer='login.mako')
 def login_view(request):
@@ -64,7 +66,7 @@ def login_view(request):
     # avoid looping
     if nextpage == request.route_url('login'):
         nextpage = request.route_url('index')
-    app_struct = {'nextpage':nextpage}
+    app_struct = {'nextpage': nextpage}
     myform = form.render(app_struct)
     fail_message = None
     if 'submit' in request.params:
@@ -76,9 +78,9 @@ def login_view(request):
             log.exception(" - Authentication error")
             myform = e.render()
             fail_message = u"Erreur d'authentification"
-            return {'title':"Authentification",
-                    'html_form':myform,
-                    'message':fail_message
+            return {'title': "Authentification",
+                    'html_form': myform,
+                    'message': fail_message
                     }
         else:
             login = datas['login']
@@ -88,10 +90,11 @@ def login_view(request):
             remember(request, login)
             return HTTPFound(location=nextpage)
     return {
-            'title':"Bienvenue dans Autonomie",
-            'html_form':myform,
-            'message':fail_message
+            'title': "Bienvenue dans Autonomie",
+            'html_form': myform,
+            'message': fail_message
             }
+
 
 @view_config(route_name='logout', permission=NO_PERMISSION_REQUIRED)
 def logout_view(request):
@@ -101,4 +104,3 @@ def logout_view(request):
     headers = forget(request)
     loc = request.route_url('index')
     return HTTPFound(location=loc, headers=headers)
-

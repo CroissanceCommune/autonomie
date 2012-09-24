@@ -34,6 +34,7 @@ from autonomie.scripts.utils import command
 SCRIPT_DIR = pkg_resources.resource_filename('autonomie', 'alembic')
 DEFAULT_LOCATION = 'autonomie:alembic'
 
+
 class ScriptDirectoryWithDefaultEnvPy(ScriptDirectory):
     """
         Wrapper for the ScriptDirectory object
@@ -46,6 +47,7 @@ class ScriptDirectoryWithDefaultEnvPy(ScriptDirectory):
     def run_env(self):
         dir_, filename = self.env_py_location.rsplit(os.path.sep, 1)
         load_python_file(dir_, filename)
+
 
 class PackageEnvironment(object):
     """
@@ -103,6 +105,7 @@ class PackageEnvironment(object):
         script_dir.__class__ = ScriptDirectoryWithDefaultEnvPy
         return script_dir
 
+
 def upgrade(sql_url=None):
     """
         upgrade the content of DEFAULT_LOCATION
@@ -127,6 +130,7 @@ def upgrade(sql_url=None):
         )
     print
 
+
 def list_all():
     """
         list all available revisions
@@ -150,6 +154,7 @@ def list_all():
     pkg_env.run_env(current_revision)
     print
 
+
 def fetch(revision=None):
     """
         fetch a revision without migrating
@@ -165,11 +170,13 @@ def fetch(revision=None):
         return []
     PackageEnvironment(DEFAULT_LOCATION).run_env(do_stamp)
 
+
 def fetch_head():
     """
         fetch the latest revision
     """
     fetch(None)
+
 
 def revision(message):
     template_args = {}
@@ -183,7 +190,7 @@ def revision(message):
 
 
 def migrate():
-    __doc__ = """Migrate autonomie's database
+    """Migrate autonomie's database
     Usage:
         migrate <config_uri> list_all
         migrate <config_uri> upgrade
@@ -213,6 +220,6 @@ def migrate():
             func = revision
         return func(*args)
     try:
-        return command(callback, __doc__)
+        return command(callback, migrate.__doc__)
     finally:
         pass

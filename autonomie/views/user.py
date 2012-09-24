@@ -42,6 +42,7 @@ from .base import ListView
 
 log = logging.getLogger(__name__)
 
+
 @view_config(route_name='account', renderer='account.mako',
         permission='view')
 def account(request):
@@ -51,7 +52,7 @@ def account(request):
     avatar = request.user
     pwdformschema = get_password_change_schema()
     pwdform = Form(pwdformschema, buttons=(submit_btn,))
-    html_form = pwdform.render({'login':avatar.login})
+    html_form = pwdform.render({'login': avatar.login})
     if "submit" in request.params:
         controls = request.params.items()
         try:
@@ -73,6 +74,7 @@ def account(request):
                 html_form=html_form,
                 account=avatar
                 )
+
 
 class UserView(ListView):
     """
@@ -143,7 +145,7 @@ Cette action n'est pas réversible."
                         action_menu=self.actionmenu)
         if has_permission('add', self.request.context, self.request):
             popup = self._get_add_popup()
-            ret_dict['popups'] = {popup.name:popup}
+            ret_dict['popups'] = {popup.name: popup}
             self.actionmenu.add(popup.open_btn())
         self.actionmenu.add(SearchForm(u"Nom ou entreprise"))
         return ret_dict
@@ -160,14 +162,17 @@ Cette action n'est pas réversible."
         """
             Return a filtered query
         """
-        return query.filter( or_(User.lastname.like("%"+search+"%"),
-                        User.firstname.like("%"+search+"%"),
-                     User.companies.any(Company.name.like("%"+search+"%"))))
+        return query.filter(
+            or_(User.lastname.like("%" + search + "%"),
+                User.firstname.like("%" + search + "%"),
+                User.companies.any(Company.name.like("%" + search + "%"))
+            )
+        )
 
     @view_config(route_name='users', renderer='user_edit.mako',
-                        request_method='POST', permission='add')
+                 request_method='POST', permission='add')
     @view_config(route_name='user', renderer='user_edit.mako',
-                        request_param='action=edit', permission='edit')
+                 request_param='action=edit', permission='edit')
     def user_edit(self):
         """
             Add / Edit a user
@@ -199,16 +204,16 @@ Cette action n'est pas réversible."
                 # Création (ou non) de la/des entreprise(s)
                 # Création du lien entre les deux
                 merge_session_with_post(user, app_datas['user'])
-                if app_datas.has_key('password'):
+                if 'password' in app_datas:
                     if app_datas['password']['pwd']:
                         user.set_password(app_datas['password']['pwd'])
                 #avoid creating duplicate companies at this level
-                if app_datas.has_key('companies'):
+                if 'companies' in app_datas:
                     companies = set(app_datas.get('companies'))
                     user.companies = []
                     for company_name in companies:
                         company = Company.query().filter(
-                               Company.name==company_name).first()
+                               Company.name == company_name).first()
                         if not company:
                             log.info(u" + Adding company : %s" % company_name)
                             company = Company()
@@ -225,7 +230,7 @@ Cette action n'est pas réversible."
                 self.session.flash(validate_msg, queue="main")
                 return HTTPFound(self.request.route_path("user", id=user.id))
         else:
-            html_form = form.render({'user':user.appstruct(),
+            html_form = form.render({'user': user.appstruct(),
                         'companies': [comp.name for comp in user.companies]})
         return dict(title=title,
                     html_form=html_form,
@@ -298,8 +303,9 @@ Cette action n'est pas réversible."
             for employee in company.employees:
                 self._disable_user(employee)
 
-    @view_config(route_name='user', request_param='action=delete', \
-                                                    permission='manage')
+    @view_config(route_name='user',
+                 request_param='action=delete',
+                 permission='manage')
     def delete(self):
         """
             disable a user and its enteprises

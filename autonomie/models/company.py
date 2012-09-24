@@ -34,13 +34,14 @@ from autonomie.models import DBSESSION
 
 log = logging.getLogger(__name__)
 
+
 class Company(DBBASE):
     """
         Company model
         Store all company specific stuff (headers, logos, RIB, ...)
     """
     __tablename__ = 'company'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(150))
     goal = deferred(Column("object", String(255)),
@@ -121,7 +122,7 @@ class Company(DBBASE):
         else:
             query = super(Company, cls).query()
         if active:
-            query = query.filter(cls.active=="Y")
+            query = query.filter(cls.active == "Y")
         return query.order_by(cls.name)
 
     def disable(self):
@@ -159,4 +160,3 @@ class Company(DBBASE):
                     header=self.get_header_filepath(),
                     clients=clients,
                     projects=projects)
-

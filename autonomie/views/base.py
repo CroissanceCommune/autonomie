@@ -24,7 +24,6 @@ from deform import Button
 from sqlalchemy import desc, asc
 
 from webhelpers import paginate
-from webhelpers.html import tags
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
@@ -47,12 +46,13 @@ from autonomie.utils.pdf import render_html
 
 log = logging.getLogger(__name__)
 
+
 class BaseView(object):
     """
         Base View object
     """
     def __init__(self, request):
-        log.debug("We are in the view : %s"  %self)
+        log.debug("We are in the view : %s" % self)
         self.request = request
         self.context = request.context
         self.dbsession = request.dbsession()
@@ -76,6 +76,7 @@ class BaseView(object):
             raise HTTPForbidden()
         return company
 
+
 class ListView(BaseView):
     """
         Base view object for listing elements
@@ -83,6 +84,7 @@ class ListView(BaseView):
     columns = dict()
     default_sort = 'name'
     default_direction = 'asc'
+
     def _get_pagination_args(self):
         """
             Returns arguments for element listing
@@ -129,6 +131,7 @@ class ListView(BaseView):
         else:
             func = desc
         return query.order_by(func(column))
+
 
 class TaskView(BaseView):
     """
@@ -199,9 +202,9 @@ class TaskView(BaseView):
         """
             returns the options for phase select
         """
-        phase_choices = ((phase.id, phase.name) \
-                        for phase in self.project.phases)
-        if not self.project.phases: # On a pas de phase dans le projet
+        phase_choices = ((phase.id, phase.name)
+                         for phase in self.project.phases)
+        if not self.project.phases:  # On a pas de phase dans le projet
             default_phase = self.add_default_phase()
             phase_choices = ((default_phase.id, default_phase.name),)
         return phase_choices
@@ -244,7 +247,7 @@ class TaskView(BaseView):
         """
             return the default tva
         """
-        default_tva = Tva.query().filter(Tva.default==1).first()
+        default_tva = Tva.query().filter(Tva.default == 1).first()
         if default_tva is not None:
             return unicode(default_tva.value)
         else:
@@ -540,7 +543,7 @@ class TaskView(BaseView):
             Returns an html version of the current document
         """
         tvas = self.task.get_tvas()
-        multiple_tvas = len([key for key in tvas.keys() if key >=0]) > 1
+        multiple_tvas = len([key for key in tvas.keys() if key >= 0]) > 1
 
         template = self.template
         config = self.request.config

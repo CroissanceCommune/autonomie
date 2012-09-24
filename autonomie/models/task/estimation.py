@@ -48,46 +48,46 @@ from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
 
+
 @implementer(IValidatedTask, IMoneyTask)
 class Estimation(Task, TaskCompute):
     """
         Estimation Model
     """
     __tablename__ = 'estimation'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("id", ForeignKey('task.id'),
-                primary_key=True, nullable=False)
-    sequenceNumber = Column("sequenceNumber", Integer,
-                nullable=False)
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    id = Column("id", ForeignKey('task.id'), primary_key=True, nullable=False)
+    sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     number = Column("number", String(100), nullable=False)
     tva = Column("tva", Integer, nullable=False, default=196)
     deposit = Column("deposit", Integer, default=0)
-    paymentConditions = deferred(Column("paymentConditions", Text),
-                        group='edit')
-    exclusions = deferred(Column("exclusions", Text),
-                        group='edit')
+    paymentConditions = deferred(
+        Column("paymentConditions", Text),
+        group='edit')
+    exclusions = deferred(Column("exclusions", Text), group='edit')
     project_id = Column("project_id", ForeignKey('project.id'))
-    manualDeliverables = deferred(Column("manualDeliverables", Integer),
-                        group='edit')
-    course = deferred(Column('course', Integer,
-                                    nullable=False, default=0),
-                                    group='edit')
-    displayedUnits = deferred(Column('displayedUnits', Integer,
-                                    nullable=False, default=0),
-                                    group='edit')
+    manualDeliverables = deferred(
+        Column("manualDeliverables", Integer),
+        group='edit')
+    course = deferred(
+        Column('course', Integer, nullable=False, default=0),
+        group='edit')
+    displayedUnits = deferred(
+        Column('displayedUnits', Integer, nullable=False, default=0),
+        group='edit')
     discountHT = Column('discountHT', Integer, default=0)
-    expenses = deferred(Column('expenses', Integer, default=0),
-                                group='edit')
-    paymentDisplay = deferred(Column('paymentDisplay', String(20),
-                                                default="SUMMARY"),
-                                                group='edit')
-    project = relationship("Project",
-                            backref=backref('estimations',
-                                            order_by='Estimation.taskDate')
-                            )
-    __mapper_args__ = {
-                        'polymorphic_identity':'estimation',
-                       }
+    expenses = deferred(
+        Column('expenses', Integer, default=0),
+        group='edit')
+    paymentDisplay = deferred(
+        Column('paymentDisplay', String(20), default="SUMMARY"),
+        group='edit')
+    project = relationship(
+        "Project",
+        backref=backref('estimations', order_by='Estimation.taskDate')
+    )
+
+    __mapper_args__ = {'polymorphic_identity': 'estimation', }
 
     state_machine = DEFAULT_STATE_MACHINES['estimation']
 
@@ -161,8 +161,8 @@ class Estimation(Task, TaskCompute):
         """
         return dict(project_id=self.project_id,
                     phase_id=self.phase_id,
-                    CAEStatus = 'draft',
-                    statusPerson = user_id,
+                    CAEStatus='draft',
+                    statusPerson=user_id,
                     owner_id=user_id,
                     estimation_id=self.id,
                     paymentConditions=self.paymentConditions,
@@ -195,7 +195,7 @@ class Estimation(Task, TaskCompute):
         args['taskDate'] = datetime.date.today()
         invoice = self._account_invoice(args)
         amount = self.deposit_amount()
-        description=u"Facture d'accompte"
+        description = u"Facture d'accompte"
         line = self._account_invoiceline(amount, description, tva)
         invoice.lines.append(line)
         return invoice, line.duplicate()
@@ -303,7 +303,7 @@ class Estimation(Task, TaskCompute):
         tasknumber_tmpl = u"{0}_{1}_D{2}_{3:%m%y}"
         pcode = project.code
         ccode = project.client.code
-        return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
+        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
 
     def is_cancelled(self):
         """
@@ -354,10 +354,10 @@ class Estimation(Task, TaskCompute):
         else:
             if self.manualDeliverables == 0:
                 line_amount = self.paymentline_amount()
-                result = rest - ((payment_lines_num-1) * line_amount)
+                result = rest - ((payment_lines_num - 1) * line_amount)
             else:
-                result = rest - sum(line.amount \
-                        for line in self.payment_lines[:-1])
+                result = rest - sum(line.amount
+                                    for line in self.payment_lines[:-1])
         return result
 
     def add_line(self, line=None, **kwargs):
@@ -405,12 +405,13 @@ class Estimation(Task, TaskCompute):
     def __repr__(self):
         return u"<Estimation id:{s.id}>".format(s=self)
 
+
 class EstimationLine(DBBASE):
     """
         Estimation lines
     """
     __tablename__ = 'estimation_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)
@@ -474,12 +475,13 @@ class EstimationLine(DBBASE):
         return u"<EstimationLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
  quantity:{s.quantity} tva:{s.tva}".format(s=self)
 
+
 class PaymentLine(DBBASE):
     """
         payments lines
     """
     __tablename__ = 'estimation_payment'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)

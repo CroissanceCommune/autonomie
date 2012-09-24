@@ -28,6 +28,8 @@ from autonomie.utils.security import MANAGER_ROLES
 from autonomie.utils.security import ADMIN_ROLES
 
 log = logging.getLogger(__name__)
+
+
 def unique_login(node, value):
     """
         Test login unicity against database
@@ -37,6 +39,7 @@ def unique_login(node, value):
         message = u"Le login '{0}' n'est pas disponible.".format(
                                                             value)
         raise colander.Invalid(node, message)
+
 
 def auth(form, value):
     """
@@ -54,6 +57,7 @@ def auth(form, value):
         exc['password'] = message
         raise exc
 
+
 @colander.deferred
 def deferred_login_validator(node, kw):
     """
@@ -62,6 +66,7 @@ def deferred_login_validator(node, kw):
     if not kw.get('edit'):
         return unique_login
     return None
+
 
 @colander.deferred
 def deferred_pwd_validator(node, kw):
@@ -73,6 +78,7 @@ def deferred_pwd_validator(node, kw):
     else:
         return None
 
+
 @colander.deferred
 def deferred_company_input(node, kw):
     """
@@ -83,6 +89,7 @@ def deferred_company_input(node, kw):
             template="autonomie:deform_templates/autocomple_input.pt")
     return wid
 
+
 @colander.deferred
 def deferred_missing_password(node, kw):
     """
@@ -92,6 +99,7 @@ def deferred_missing_password(node, kw):
         return ""
     else:
         return colander.required
+
 
 def get_companies_choices():
     """
@@ -104,84 +112,105 @@ class AccountSchema(colander.MappingSchema):
     """
         Form Schema for an account creation
     """
-    login = colander.SchemaNode(colander.String(),
-                            title=u"Identifiant",
-                            validator=deferred_login_validator,
-                            widget=deferred_edit_widget)
-    firstname = colander.SchemaNode(colander.String(),
-                           title=u"Prénom" )
-    lastname = colander.SchemaNode(colander.String(),
-                            title=u"Nom")
+    login = colander.SchemaNode(
+        colander.String(),
+        title=u"Identifiant",
+        validator=deferred_login_validator,
+        widget=deferred_edit_widget)
+    firstname = colander.SchemaNode(
+        colander.String(),
+        title=u"Prénom")
+    lastname = colander.SchemaNode(
+        colander.String(),
+        title=u"Nom")
     email = get_mail_input(missing=u"")
-    code_compta = colander.SchemaNode(colander.String(),
-                            title=u"Code compta",
-                            description=u"Code comptabilité utilisé dans Sage",
-                            missing="")
-    primary_group = colander.SchemaNode(colander.String(),
-                        title=u"Rôle de l'utilisateur",
-                        validator=colander.OneOf([x[0] for x in ADMIN_ROLES]),
-                        widget=widget.RadioChoiceWidget(values=ADMIN_ROLES),
-                        default=u"3"
-                        )
+    code_compta = colander.SchemaNode(
+        colander.String(),
+        title=u"Code compta",
+        description=u"Code comptabilité utilisé dans Sage",
+        missing="")
+    primary_group = colander.SchemaNode(
+        colander.String(),
+        title=u"Rôle de l'utilisateur",
+        validator=colander.OneOf([x[0] for x in ADMIN_ROLES]),
+        widget=widget.RadioChoiceWidget(values=ADMIN_ROLES),
+        default=u"3")
+
 
 class PasswordChangeSchema(colander.MappingSchema):
     """
         Password modification form
     """
-    login = colander.SchemaNode(colander.String(),
-                                       widget=widget.HiddenWidget())
-    password = colander.SchemaNode(colander.String(),
-                                         widget=widget.PasswordWidget(),
-                                            title="Mot de passe actuel",
-                                            default=u'')
-    pwd = colander.SchemaNode(colander.String(),
-                        widget = widget.CheckedPasswordWidget(),
-                        title="Nouveau mot de passe")
+    login = colander.SchemaNode(
+        colander.String(),
+        widget=widget.HiddenWidget()
+    )
+    password = colander.SchemaNode(
+        colander.String(),
+        widget=widget.PasswordWidget(),
+        title="Mot de passe actuel",
+        default=u'')
+    pwd = colander.SchemaNode(
+        colander.String(),
+        widget=widget.CheckedPasswordWidget(),
+        title="Nouveau mot de passe")
+
 
 class CompanySchema(colander.SequenceSchema):
-    company = colander.SchemaNode(colander.String(),
-                            title=u"Nom de l'entreprise",
-                            widget=deferred_company_input,
-                            )
+    company = colander.SchemaNode(
+        colander.String(),
+        title=u"Nom de l'entreprise",
+        widget=deferred_company_input)
+
 
 class Password(colander.MappingSchema):
     """
         Schema for password set
     """
-    pwd = colander.SchemaNode(colander.String(),
-                validator=colander.Length(min=4),
-                widget=widget.CheckedPasswordWidget(size=20),
-                title=u"",
-                missing=deferred_missing_password)
+    pwd = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=4),
+        widget=widget.CheckedPasswordWidget(size=20),
+        title=u"",
+        missing=deferred_missing_password)
+
 
 class UserFormSchema(colander.MappingSchema):
     """
         Schema for user add
     """
     user = AccountSchema(title=u"Utilisateur")
-    companies = CompanySchema(title=u"Entreprise(s)",
-                widget=widget.SequenceWidget(
-                add_subitem_text_template=u"Ajouter une entreprise"),
-                )
+    companies = CompanySchema(
+        title=u"Entreprise(s)",
+        widget=widget.SequenceWidget(
+            add_subitem_text_template=u"Ajouter une entreprise")
+    )
     password = Password(title=u"Mot de passe")
+
 
 class AuthSchema(colander.MappingSchema):
     """
         Schema for authentication form
     """
-    login = colander.SchemaNode(colander.String(),
-                                title="Identifiant")
-    password = colander.SchemaNode(colander.String(),
-                                   widget=widget.PasswordWidget(),
-                                   title="Mot de passe")
-    nextpage = colander.SchemaNode(colander.String(),
-                               widget=widget.HiddenWidget())
+    login = colander.SchemaNode(
+        colander.String(),
+        title="Identifiant")
+    password = colander.SchemaNode(
+        colander.String(),
+        widget=widget.PasswordWidget(),
+        title="Mot de passe")
+    nextpage = colander.SchemaNode(
+        colander.String(),
+        widget=widget.HiddenWidget()
+    )
+
 
 def get_auth_schema():
     """
         return the authentication form schema
     """
     return AuthSchema(title=u"Authentification", validator=auth)
+
 
 def get_user_schema(request, edit):
     """
@@ -193,6 +222,7 @@ def get_user_schema(request, edit):
     if user.is_admin():
         companies = get_companies_choices()
         return schema.bind(edit=edit, companies=companies)
+
     elif user.is_manager():
         companies = get_companies_choices()
         # manager can't set admin rights
@@ -201,6 +231,7 @@ def get_user_schema(request, edit):
         group.validator = colander.OneOf([x[0] for x in roles])
         group.widget = widget.RadioChoiceWidget(values=roles)
         return schema.bind(edit=edit, companies=companies)
+
     else:
         # Non admin users are limited
         del schema['user']['code_compta']
@@ -209,25 +240,30 @@ def get_user_schema(request, edit):
         del schema['password']
         return schema.bind(edit=True)
 
+
 def get_password_change_schema():
     """
         Return the password changing schema
     """
-    return PasswordChangeSchema(validator=auth,
-                                title=u'Modification de mot de passe')
+    return PasswordChangeSchema(
+        validator=auth,
+        title=u'Modification de mot de passe')
+
 
 class DeleteUserSchema(colander.MappingSchema):
-    disable = colander.SchemaNode(colander.Boolean(),
-                default=True,
-                title=u"Désactiver cet utilisateur",
-                description=u"Désactiver un utilisateur l'empêche de se \
-                       connecter mais permet de conserver l'intégralité \
-                       des informations concernant son activité.")
-    companies = colander.SchemaNode(colander.Boolean(),
-                                  title=u"Désactiver ses entreprises",
-                description=u"Entraîne automatiquement la désactivation \
-                        des employés.",
-                                  default=True)
+    disable = colander.SchemaNode(
+        colander.Boolean(),
+        default=True,
+        title=u"Désactiver cet utilisateur",
+        description=u"""Désactiver un utilisateur l'empêche de se
+connecter mais permet de conserver l'intégralité
+des informations concernant son activité.""")
+    companies = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Désactiver ses entreprises",
+        description=u"Entraîne automatiquement la désactivation des employés.",
+        default=True)
+
 
 def get_user_del_schema(user):
     """

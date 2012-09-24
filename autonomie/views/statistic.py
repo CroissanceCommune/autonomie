@@ -26,6 +26,7 @@ from .base import BaseView
 
 log = logging.getLogger(__name__)
 
+
 class StatisticView(BaseView):
     """
         View displaying statistics
@@ -43,7 +44,7 @@ class StatisticView(BaseView):
         companies = Company.query([Company.id, Company.name]).all()
         ret_dict['companies'] = companies
         current_year = 2000
-        years = range(2000, datetime.date.today().year+1)
+        years = range(2000, datetime.date.today().year + 1)
         ret_dict['years'] = years
         if self.request.context.__name__ == 'company':
             if 'year' in self.request.params:
@@ -60,12 +61,20 @@ class StatisticView(BaseView):
             invoices = []
             estimations = []
             for proj in projects:
-                invoices.extend([inv for inv in proj.invoices
-                                        if inv.taskDate.year >= current_year])
-                estimations.extend([est for est in proj.estimations \
-                        if est.taskDate.year >= current_year])
-            prospects = [cli for cli in clients if True not in [
-                            len(proj.invoices)>0 for proj in cli.projects]]
+                invoices.extend(
+                    [inv
+                     for inv in proj.invoices
+                     if inv.taskDate.year >= current_year]
+                )
+                estimations.extend(
+                    [est
+                     for est in proj.estimations
+                     if est.taskDate.year >= current_year]
+                )
+            prospects = [cli
+                         for cli in clients
+                         if True not in [len(proj.invoices) > 0
+                                         for proj in cli.projects]]
             #Return the stats
             ret_dict['current_company'] = company
             ret_dict['projects'] = projects

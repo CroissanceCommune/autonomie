@@ -21,6 +21,7 @@ from pyramid.httpexceptions import HTTPFound
 
 log = logging.getLogger(__name__)
 
+
 @view_config(route_name='index', renderer='index.mako')
 def index(request):
     """

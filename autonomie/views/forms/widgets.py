@@ -34,20 +34,23 @@ from autonomie.utils.fileupload import FileTempStore
 log = logging.getLogger(__name__)
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
 
+
 class DisabledInput(widget.Widget):
     """
         A non editable input
     """
     template = "autonomie:deform_templates/disabledinput.mako"
+
     def serialize(self, field, cstruct=None, readonly=True):
         if cstruct is colander.null:
             cstruct = u''
         quoted = cgi.escape(cstruct, quote='"')
-        params = {'name': field.name, 'value':quoted}
+        params = {'name': field.name, 'value': quoted}
         return render(self.template, params)
 
     def deserialize(self, field, pstruct):
         return pstruct
+
 
 class CustomDateInputWidget(widget.Widget):
     """
@@ -78,7 +81,7 @@ class CustomDateInputWidget(widget.Widget):
     template = 'autonomie:deform_templates/dateinput.pt'
     readonly_template = 'readonly/textinput'
     size = None
-    requirements = ( ('jqueryui', None), )
+    requirements = (('jqueryui', None), )
     default_options = (('dateFormat', 'yy-mm-dd'),)
 
     def __init__(self, *args, **kwargs):
@@ -102,6 +105,7 @@ class CustomDateInputWidget(widget.Widget):
         if date in ('', colander.null):
             return colander.null
         return date
+
 
 class CustomSequenceWidget(widget.SequenceWidget):
     """
@@ -141,7 +145,7 @@ class CustomSequenceWidget(widget.SequenceWidget):
 
         if self.min_len is not None and (cstructlen < self.min_len):
             cstruct = list(cstruct) + \
-                    ([colander.null] * (self.min_len-cstructlen))
+                    ([colander.null] * (self.min_len - cstructlen))
 
         item_field = field.children[0]
 
@@ -178,6 +182,7 @@ class CustomSequenceWidget(widget.SequenceWidget):
                               item_field=item_field,
                               add_subitem_text=add_subitem_text)
 
+
 def get_mail_input(missing=None):
     """
         Return a generic customized mail input field
@@ -187,6 +192,7 @@ def get_mail_input(missing=None):
                             validator=colander.Email(MAIL_ERROR_MESSAGE),
                             missing=missing)
 
+
 def get_date_input(**kw):
     """
         Return a date input displaying a french user friendly format
@@ -194,6 +200,7 @@ def get_date_input(**kw):
     date_input = CustomDateInputWidget(**kw)
     date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
+
 
 def deferred_upload_widget(path):
     """
@@ -215,6 +222,7 @@ def deferred_upload_widget(path):
                     template="autonomie:deform_templates/fileupload.mako")
     return configured_widget
 
+
 @colander.deferred
 def deferred_edit_widget(node, kw):
     """
@@ -226,6 +234,7 @@ def deferred_edit_widget(node, kw):
     else:
         wid = widget.TextInputWidget()
     return wid
+
 
 def get_deferred_edit_widget(**options):
     """
@@ -240,6 +249,7 @@ def get_deferred_edit_widget(**options):
         return wid
     return deferred_edit_widget
 
+
 @colander.deferred
 def deferred_autocomplete_widget(node, kw):
     """
@@ -251,4 +261,3 @@ def deferred_autocomplete_widget(node, kw):
     else:
         wid = widget.TextInputWidget()
     return wid
-

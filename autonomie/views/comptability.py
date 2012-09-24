@@ -15,7 +15,6 @@
 """
     all comptability related views
 """
-import datetime
 import logging
 
 from sqlalchemy import or_
@@ -34,6 +33,7 @@ from autonomie.views.forms import OperationSchema
 from .base import ListView
 
 log = logging.getLogger(__name__)
+
 
 class Column(object):
     """
@@ -69,6 +69,7 @@ class Column(object):
         else:
             return None
 
+
 class ComptabilityView(ListView):
     """
         All views related to the comptability
@@ -100,10 +101,13 @@ class ComptabilityView(ListView):
 
         # Getting available options for searching
         all_operations = query.all()
-        years = sorted( set([i.year for i in all_operations]) )
-        companies = sorted( set([
-            (i.company_id, i.company.name) for i in all_operations
-                                ]))
+        years = sorted(
+            set([i.year for i in all_operations])
+        )
+        companies = sorted(
+            set([(i.company_id, i.company.name)
+                 for i in all_operations])
+        )
 
         if search:
             query = self._filter_search(query, search)
@@ -144,24 +148,24 @@ class ComptabilityView(ListView):
         """
             Filter the search regarding the search query
         """
-        return query.filter(OperationComptable.company_id==company_id)
+        return query.filter(OperationComptable.company_id == company_id)
 
     @staticmethod
     def _filter_year(query, year):
         """
             Filter the search on the year
         """
-        return query.filter(OperationComptable.year==year)
+        return query.filter(OperationComptable.year == year)
 
     @staticmethod
     def _filter_search(query, search):
         """
             Filter the search on the label
         """
-        return query.filter(or_(OperationComptable.label.like("%"+search+"%"),
-                                OperationComptable.amount==search
-                                )
-                            )
+        return query.filter(
+            or_(OperationComptable.label.like("%" + search + "%"),
+                OperationComptable.amount == search)
+        )
 
     @view_config(route_name="operations",
                     renderer="comptability/operation_edit.mako",

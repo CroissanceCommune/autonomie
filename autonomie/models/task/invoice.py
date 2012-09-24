@@ -52,6 +52,7 @@ from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
 
+
 def get_next_officialNumber():
     """
         Return the next available official number
@@ -65,8 +66,9 @@ def get_next_officialNumber():
         b = 0
     if not c:
         c = 0
-    next_ = max(a,b,c) + 1
+    next_ = max(a, b, c) + 1
     return int(next_)
+
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class Invoice(Task, TaskCompute):
@@ -74,9 +76,9 @@ class Invoice(Task, TaskCompute):
         Invoice Model
     """
     __tablename__ = 'invoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     __mapper_args__ = {
-                       'polymorphic_identity':'invoice',
+                       'polymorphic_identity': 'invoice',
                        }
     id = Column("id", ForeignKey('task.id'), primary_key=True)
     estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
@@ -92,19 +94,22 @@ class Invoice(Task, TaskCompute):
                       group='edit')
     officialNumber = Column("officialNumber", Integer)
     paymentMode = Column("paymentMode", String(10))
-    displayedUnits = deferred(Column('displayedUnits', Integer,
-                                    nullable=False, default=0),
-                                    group='edit')
+    displayedUnits = deferred(
+        Column('displayedUnits', Integer, nullable=False, default=0),
+        group='edit')
     discountHT = Column('discountHT', Integer, default=0)
     expenses = deferred(Column('expenses', Integer, default=0), group='edit')
 
-    project = relationship("Project", backref=backref('invoices',
-                                            order_by='Invoice.taskDate'))
+    project = relationship(
+        "Project",
+        backref=backref('invoices', order_by='Invoice.taskDate')
+    )
     #phase =  relationship("Phase", backref=backref("invoices",
     #                                            order_by='Invoice.taskDate'))
-    estimation = relationship("Estimation",
-                      backref="invoices",
-                      primaryjoin="Invoice.estimation_id==Estimation.id")
+    estimation = relationship(
+        "Estimation",
+        backref="invoices",
+        primaryjoin="Invoice.estimation_id==Estimation.id")
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
@@ -179,7 +184,7 @@ class Invoice(Task, TaskCompute):
             tasknumber_tmpl = u"{0}_{1}_F{2}_{3:%m%y}"
         pcode = project.code
         ccode = project.client.code
-        return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
+        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):
@@ -200,8 +205,8 @@ class Invoice(Task, TaskCompute):
         """
         current_year = datetime.date.today().year
         return DBSESSION.query(func.max(Invoice.officialNumber)).filter(
-                Invoice.taskDate.between(current_year*10000,
-                                         (current_year+1)*10000
+                Invoice.taskDate.between(current_year * 10000,
+                                         (current_year + 1) * 10000
                                     ))
 
     def gen_cancelinvoice(self, user_id):
@@ -241,13 +246,13 @@ class Invoice(Task, TaskCompute):
             rowindex += 1
             cancelinvoice.lines.append(discount_line)
         for index, payment in enumerate(self.payments):
-            paid_line = CancelInvoiceLine(cost=payment.amount,
-                                          tva=0,
-                                        quantity=1,
-                                        description=u"Paiement {0}".format(
-                                                                      index+1),
-                                        rowIndex=rowindex,
-                                        unity='NONE')
+            paid_line = CancelInvoiceLine(
+                cost=payment.amount,
+                tva=0,
+                quantity=1,
+                description=u"Paiement {0}".format(index + 1),
+                rowIndex=rowindex,
+                unity='NONE')
             rowindex += 1
             cancelinvoice.lines.append(paid_line)
         return cancelinvoice
@@ -313,12 +318,13 @@ class Invoice(Task, TaskCompute):
     def __repr__(self):
         return u"<Invoice id:{s.id}>".format(s=self)
 
+
 class InvoiceLine(DBBASE):
     """
         Invoice lines
     """
     __tablename__ = 'invoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('invoice.id'))
     rowIndex = Column("rowIndex", Integer, default=1)
@@ -382,6 +388,7 @@ class InvoiceLine(DBBASE):
         return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
  quantity:{s.quantity} tva:{s.tva}".format(s=self)
 
+
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
     """
@@ -389,8 +396,8 @@ class CancelInvoice(Task, TaskCompute):
         Could also be called negative invoice
     """
     __tablename__ = 'cancelinvoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    __mapper_args__ = {'polymorphic_identity':'cancelinvoice'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
 
     invoice_id = Column(Integer, ForeignKey('invoice.id'),
@@ -415,7 +422,6 @@ class CancelInvoice(Task, TaskCompute):
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
-
 
     def is_editable(self, manage=False):
         if manage:
@@ -476,7 +482,7 @@ class CancelInvoice(Task, TaskCompute):
         tasknumber_tmpl = u"{0}_{1}_A{2}_{3:%m%y}"
         pcode = project.code
         ccode = project.client.code
-        return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
+        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
 
     def valid_callback(self):
         """
@@ -486,13 +492,14 @@ class CancelInvoice(Task, TaskCompute):
         self.officialNumber = get_next_officialNumber()
         self.taskDate = datetime.date.today()
 
+
 @implementer(IInvoice)
 class ManualInvoice(DBBASE):
     """
         Modèle pour les factures manuelles (ancienne version)
     """
     __tablename__ = 'manual_invoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)
     description = Column('libelle', String(255))
@@ -518,6 +525,7 @@ class ManualInvoice(DBBASE):
     company = relationship("Company",
                 primaryjoin="Company.id==ManualInvoice.company_id",
                   backref='manual_invoices')
+
     @property
     def statusComment(self):
         return None
@@ -570,7 +578,6 @@ class ManualInvoice(DBBASE):
             raise Forbidden(u'Mode de paiement inconnu')
         return paymentMode
 
-
     def is_cancelinvoice(self):
         """
             return false
@@ -605,12 +612,13 @@ class ManualInvoice(DBBASE):
         tva = max(tva, 0)
         return int(float(total_ht) * (tva / 10000.0))
 
+
 class CancelInvoiceLine(DBBASE):
     """
         CancelInvoice lines
     """
     __tablename__ = 'cancelinvoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column(Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('cancelinvoice.id'))
     created_at = Column(DateTime, default=datetime.datetime.now)
@@ -657,15 +665,16 @@ class CancelInvoiceLine(DBBASE):
         return self.tva_amount() + self.total_ht()
 
     def __repr__(self):
-        return u"<CancelInvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
- quantity:{s.quantity} tva:{s.tva}".format(s=self)
+        return u"<CancelInvoiceLine id:{s.id} task_id:{s.task_id} \
+cost:{s.cost} quantity:{s.quantity} tva:{s.tva}".format(s=self)
+
 
 class Payment(DBBASE):
     """
         Payment entry
     """
     __tablename__ = 'payment'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column(Integer, primary_key=True)
     mode = Column(String(50))
     amount = Column(Integer)

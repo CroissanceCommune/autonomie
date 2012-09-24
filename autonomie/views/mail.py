@@ -26,6 +26,7 @@ from autonomie.views.render_api import format_status
 
 log = logging.getLogger(__name__)
 
+
 class StatusChanged(object):
     """
         Event raised when a document status changes
@@ -59,7 +60,7 @@ class StatusChanged(object):
         settings = get_current_registry().settings
         if self.request.user.email:
             mail = self.request.user.email
-        elif settings.has_key('mail.default_sender'):
+        elif 'mail.default_sender' in settings:
             mail = settings['mail.default_sender']
         else:
             log.info(u"The current user : {0} has not set his email".format(
@@ -72,7 +73,7 @@ class StatusChanged(object):
         """
             return the subject of the email
         """
-        return u"{0} : {1}".format( self.document.name,
+        return u"{0} : {1}".format(self.document.name,
                                     format_status(self.document))
 
     @property
@@ -83,17 +84,17 @@ class StatusChanged(object):
         status_verb = get_status_verb(self.document.CAEStatus)
         if self.document.is_invoice():
             body = u"La facture {0} du projet {1} (avec le client {2}) \
-a été {3}e.".format( self.document.number,
-                     self.document.project.name,
-                     self.document.project.client.name,
-                     status_verb)
-            addr = self.request.route_url("invoice", id=self.document.id)
-        else:
-            body = u"Le devis {0} du projet {1} (avec le client {2}) \
-a été {3}.".format( self.document.number,
+a été {3}e.".format(self.document.number,
                     self.document.project.name,
                     self.document.project.client.name,
                     status_verb)
+            addr = self.request.route_url("invoice", id=self.document.id)
+        else:
+            body = u"Le devis {0} du projet {1} (avec le client {2}) \
+a été {3}.".format(self.document.number,
+                   self.document.project.name,
+                   self.document.project.client.name,
+                   status_verb)
             addr = self.request.route_url("estimation", id=self.document.id)
         body += u"\n\n"
         body += addr
@@ -111,6 +112,7 @@ a été {3}.".format( self.document.number,
             return True
         else:
             return False
+
 
 def get_status_verb(status):
     """
@@ -153,4 +155,3 @@ email(s)")
             log.debug(" - No email has been set for the recipient")
     else:
         log.debug(" - It's not a key event, nothing to do")
-

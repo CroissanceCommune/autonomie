@@ -21,9 +21,11 @@ import logging
 from sqlalchemy import and_
 from pyramid.view import view_config
 
-from autonomie.models.model import Task, Invoice, Estimation, Phase, CancelInvoice
+from autonomie.models.model import Task, Invoice, Estimation, Phase, \
+        CancelInvoice
 
 log = logging.getLogger(__name__)
+
 
 @view_config(route_name="manage", renderer="manage.mako", permission="manage")
 def manage(request):
@@ -33,11 +35,10 @@ def manage(request):
     documents = Task.query()\
             .with_polymorphic([Invoice, CancelInvoice, Estimation])\
             .join(Task.phase)\
-            .filter(and_(Task.CAEStatus=='wait', Phase.name!=None))\
+            .filter(and_(Task.CAEStatus == 'wait', Phase.name is not None))\
             .order_by(Task.statusDate).all()
     for document in documents:
         document.url = request.route_path(document.type_, id=document.id)
     return dict(title=u"Documents en attente de validation",
                 tasks=documents,
                )
-

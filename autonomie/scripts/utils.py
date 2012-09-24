@@ -33,4 +33,3 @@ def command(func, doc):
     finally:
         pyramid_env['closer']()
     return 0
-

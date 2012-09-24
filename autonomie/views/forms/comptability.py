@@ -21,6 +21,7 @@ from deform import widget
 
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
 
+
 class OperationSchema(colander.MappingSchema):
     """
         Schéma for comptability operations insertion/edition

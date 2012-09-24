@@ -16,11 +16,13 @@
     Specific exception
 """
 
+
 class Forbidden(Exception):
     """
         Forbidden exception, used to raise a forbidden action error
     """
     message = u"Vous n'êtes pas autorisé à effectuer cette action"
+
 
 class SignatureError(Forbidden):
     """

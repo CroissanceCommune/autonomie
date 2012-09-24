@@ -1,4 +1,4 @@
-"""1_4_fiche_client
+"""1.4 : fiche_client ajout du numéro de fax et du champ fonction
 
 Revision ID: 1dce987687aa
 Revises: 1987a6d83e5f
@@ -17,6 +17,7 @@ from autonomie.alembic.utils import column_exists
 
 
 def upgrade():
+    print "Fiche client"
     if not column_exists("customer", "fax"):
         op.add_column("customer", sa.Column("fax", sa.String(50),
                                                             nullable=True))

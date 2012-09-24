@@ -30,17 +30,21 @@ Serve autonomie::
 Alembic migration
 -----------------
 
-Migrate::
-
-    autonomie-migrate app.ini upgrade
-
 Add a new revision::
 
     export REV_DESC="My revision description"
     alembic -c app.ini -n alembic revision -m$REV_DESC
-    git add $(ls -1tr autonomie/alembic/versions/|tail -n1)
+    cd autonomie/alembic/versions
+    git add $(ls -1tr|tail -n1)
+
+Add the other modified files::
+
+    git add ...
     git commit -m "[alembic] $REV_DESC"
 
+Then, migrate::
+
+    autonomie-migrate app.ini upgrade
 
 Debian dependencies
 -------------------

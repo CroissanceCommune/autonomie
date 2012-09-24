@@ -352,7 +352,7 @@ rajoutée".format(phasename), queue="main")
         project = self.request.context
         self.dbsession.delete(project)
         self.request.session.flash(u"Le projet '{0}' a bien été \
-supprimé".format(project.name) )
+supprimé".format(project.name))
         return HTTPFound(self.request.referer)
 
     def _get_actions(self):

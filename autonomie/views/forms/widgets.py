@@ -81,7 +81,7 @@ class CustomDateInputWidget(widget.Widget):
     template = 'autonomie:deform_templates/dateinput.pt'
     readonly_template = 'readonly/textinput'
     size = None
-    requirements = ( ('jqueryui', None), )
+    requirements = (('jqueryui', None), )
     default_options = (('dateFormat', 'yy-mm-dd'),)
 
     def __init__(self, *args, **kwargs):

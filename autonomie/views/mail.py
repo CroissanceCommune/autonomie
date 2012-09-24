@@ -73,7 +73,7 @@ class StatusChanged(object):
         """
             return the subject of the email
         """
-        return u"{0} : {1}".format( self.document.name,
+        return u"{0} : {1}".format(self.document.name,
                                     format_status(self.document))
 
     @property
@@ -84,17 +84,17 @@ class StatusChanged(object):
         status_verb = get_status_verb(self.document.CAEStatus)
         if self.document.is_invoice():
             body = u"La facture {0} du projet {1} (avec le client {2}) \
-a été {3}e.".format( self.document.number,
-                     self.document.project.name,
-                     self.document.project.client.name,
-                     status_verb)
-            addr = self.request.route_url("invoice", id=self.document.id)
-        else:
-            body = u"Le devis {0} du projet {1} (avec le client {2}) \
-a été {3}.".format( self.document.number,
+a été {3}e.".format(self.document.number,
                     self.document.project.name,
                     self.document.project.client.name,
                     status_verb)
+            addr = self.request.route_url("invoice", id=self.document.id)
+        else:
+            body = u"Le devis {0} du projet {1} (avec le client {2}) \
+a été {3}.".format(self.document.number,
+                   self.document.project.name,
+                   self.document.project.client.name,
+                   status_verb)
             addr = self.request.route_url("estimation", id=self.document.id)
         body += u"\n\n"
         body += addr

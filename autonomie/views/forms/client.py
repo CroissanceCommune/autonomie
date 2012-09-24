@@ -77,7 +77,7 @@ class ClientSchema(colander.MappingSchema):
                         title=u"Fonction du contact principal",
                         missing=u"",
                         validator=colander.Length(max=255))
-    email = get_mail_input( missing=u'')
+    email = get_mail_input(missing=u'')
     phone = colander.SchemaNode(colander.String(),
                                 title=u'Téléphone',
                                 missing=u'',

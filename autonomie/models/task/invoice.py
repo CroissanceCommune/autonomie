@@ -184,7 +184,7 @@ class Invoice(Task, TaskCompute):
             tasknumber_tmpl = u"{0}_{1}_F{2}_{3:%m%y}"
         pcode = project.code
         ccode = project.client.code
-        return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
+        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):
@@ -482,7 +482,7 @@ class CancelInvoice(Task, TaskCompute):
         tasknumber_tmpl = u"{0}_{1}_A{2}_{3:%m%y}"
         pcode = project.code
         ccode = project.client.code
-        return tasknumber_tmpl.format( pcode, ccode, seq_number, taskDate)
+        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
 
     def valid_callback(self):
         """

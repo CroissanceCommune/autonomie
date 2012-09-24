@@ -77,7 +77,7 @@ class Phase(DBBASE):
         """
             return the tasks of the passed type
         """
-        return [doc for doc in self.tasks if doc.type_==type_]
+        return [doc for doc in self.tasks if doc.type_ == type_]
 
     def todict(self):
         """
@@ -188,5 +188,5 @@ class Holiday(DBBASE):
         """
         q = dbsession.query(cls)
         if user_id:
-            q = q.filter(cls.user_id==user_id)
+            q = q.filter(cls.user_id == user_id)
         return q.order_by("start_date")

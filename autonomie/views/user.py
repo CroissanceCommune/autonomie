@@ -213,7 +213,7 @@ Cette action n'est pas réversible."
                     user.companies = []
                     for company_name in companies:
                         company = Company.query().filter(
-                               Company.name==company_name).first()
+                               Company.name == company_name).first()
                         if not company:
                             log.info(u" + Adding company : %s" % company_name)
                             company = Company()

@@ -195,7 +195,7 @@ class Estimation(Task, TaskCompute):
         args['taskDate'] = datetime.date.today()
         invoice = self._account_invoice(args)
         amount = self.deposit_amount()
-        description=u"Facture d'accompte"
+        description = u"Facture d'accompte"
         line = self._account_invoiceline(amount, description, tva)
         invoice.lines.append(line)
         return invoice, line.duplicate()
@@ -354,7 +354,7 @@ class Estimation(Task, TaskCompute):
         else:
             if self.manualDeliverables == 0:
                 line_amount = self.paymentline_amount()
-                result = rest - ((payment_lines_num-1) * line_amount)
+                result = rest - ((payment_lines_num - 1) * line_amount)
             else:
                 result = rest - sum(line.amount \
                         for line in self.payment_lines[:-1])

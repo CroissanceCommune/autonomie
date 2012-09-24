@@ -60,7 +60,7 @@ def get_color():
     h = uniform(0.1, 0.8)
     s = uniform(0.8, 1)
     v = uniform(0.8, 1)
-    return rgb_to_hex(tuple(255*c for c in hsv_to_rgb(h, s, v)))
+    return rgb_to_hex(tuple(255 * c for c in hsv_to_rgb(h, s, v)))
 
 
 def build_client_value(client):
@@ -183,7 +183,7 @@ de créer de nouveaux projets", queue="main")
         """
             add a filter for the company on the query
         """
-        return query.filter(Project.company_id==company.id)
+        return query.filter(Project.company_id == company.id)
 
     @staticmethod
     def _filter_archived(query, archived):

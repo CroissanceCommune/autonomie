@@ -148,14 +148,14 @@ class ComptabilityView(ListView):
         """
             Filter the search regarding the search query
         """
-        return query.filter(OperationComptable.company_id==company_id)
+        return query.filter(OperationComptable.company_id == company_id)
 
     @staticmethod
     def _filter_year(query, year):
         """
             Filter the search on the year
         """
-        return query.filter(OperationComptable.year==year)
+        return query.filter(OperationComptable.year == year)
 
     @staticmethod
     def _filter_search(query, search):

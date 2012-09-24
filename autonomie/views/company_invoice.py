@@ -204,9 +204,9 @@ class CompanyInvoicesView(ListView):
         """
             add a filter on the company id
         """
-        inv = inv.filter(Project.company_id==company_id )
-        cancel_inv = cancel_inv.filter(Project.company_id==company_id )
-        man_inv = man_inv.filter(ManualInvoice.company_id==company_id)
+        inv = inv.filter(Project.company_id == company_id)
+        cancel_inv = cancel_inv.filter(Project.company_id == company_id)
+        man_inv = man_inv.filter(ManualInvoice.company_id == company_id)
         return cancel_inv, inv, man_inv
 
     @staticmethod
@@ -244,12 +244,12 @@ class CompanyInvoicesView(ListView):
         if status == "paid":
             inv = inv.filter(Invoice.CAEStatus.in_(inv_paid))
             cinv = cinv.filter(CancelInvoice.CAEStatus.in_(cinv_valid))
-            man_inv = man_inv.filter(ManualInvoice.payment_ok==1)
+            man_inv = man_inv.filter(ManualInvoice.payment_ok == 1)
         elif status == "notpaid":
             inv = inv.filter(Invoice.CAEStatus.in_(inv_notpaid))
             # A cancel invoice is always paid
-            cinv = cinv.filter(CancelInvoice.CAEStatus=="nutt")
-            man_inv = man_inv.filter(ManualInvoice.payment_ok==0)
+            cinv = cinv.filter(CancelInvoice.CAEStatus == "nutt")
+            man_inv = man_inv.filter(ManualInvoice.payment_ok == 0)
         else:
             inv = inv.filter(Invoice.CAEStatus.in_(inv_validated))
             cinv = cinv.filter(CancelInvoice.CAEStatus.in_(cinv_valid))
@@ -261,7 +261,7 @@ class CompanyInvoicesView(ListView):
             add a filter on dates to the invoices sqla queries
         """
         fday = datetime.date(int(year), 1, 1)
-        lday = datetime.date(int(year)+1, 1, 1)
+        lday = datetime.date(int(year) + 1, 1, 1)
         inv = inv.filter(
                         Invoice.taskDate.between(
                                 format_to_taskdate(fday),

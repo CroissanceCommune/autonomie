@@ -205,8 +205,8 @@ class Invoice(Task, TaskCompute):
         """
         current_year = datetime.date.today().year
         return DBSESSION.query(func.max(Invoice.officialNumber)).filter(
-                Invoice.taskDate.between(current_year*10000,
-                                         (current_year+1)*10000
+                Invoice.taskDate.between(current_year * 10000,
+                                         (current_year + 1) * 10000
                                     ))
 
     def gen_cancelinvoice(self, user_id):

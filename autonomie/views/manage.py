@@ -35,7 +35,7 @@ def manage(request):
     documents = Task.query()\
             .with_polymorphic([Invoice, CancelInvoice, Estimation])\
             .join(Task.phase)\
-            .filter(and_(Task.CAEStatus=='wait', Phase.name!=None))\
+            .filter(and_(Task.CAEStatus == 'wait', Phase.name is not None))\
             .order_by(Task.statusDate).all()
     for document in documents:
         document.url = request.route_path(document.type_, id=document.id)

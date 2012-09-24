@@ -89,10 +89,10 @@ def format_amount(amount, trim=True):
                 # On a 2 chiffres après la virgule (pas plus)
                 trim = True
         if trim:
-            amount = int(amount)/100.0
+            amount = int(amount) / 100.0
             resp = locale.format("%.2f", amount, grouping=True)
         else:
-            resp = locale.format("%g", amount/100.0, grouping=True)
+            resp = locale.format("%g", amount / 100.0, grouping=True)
     resp = resp.replace(' ', '&nbsp;')
     return resp
 

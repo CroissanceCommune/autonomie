@@ -122,7 +122,7 @@ class Company(DBBASE):
         else:
             query = super(Company, cls).query()
         if active:
-            query = query.filter(cls.active=="Y")
+            query = query.filter(cls.active == "Y")
         return query.order_by(cls.name)
 
     def disable(self):

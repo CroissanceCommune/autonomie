@@ -118,8 +118,8 @@ class HolidayView(BaseView):
                                     Holiday.end_date.between(start_date,
                                                                     end_date)))
                 if user_id:
-                    holidays = holidays.filter(Holiday.user_id==user_id)
-                holidays=holidays.all()
+                    holidays = holidays.filter(Holiday.user_id == user_id)
+                holidays = holidays.all()
                 html_form = form.render(appstruct)
                 log.debug(u"Rendering with appstruct : %s" % appstruct)
         else:

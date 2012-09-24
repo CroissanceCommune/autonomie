@@ -145,7 +145,7 @@ class CustomSequenceWidget(widget.SequenceWidget):
 
         if self.min_len is not None and (cstructlen < self.min_len):
             cstruct = list(cstruct) + \
-                    ([colander.null] * (self.min_len-cstructlen))
+                    ([colander.null] * (self.min_len - cstructlen))
 
         item_field = field.children[0]
 

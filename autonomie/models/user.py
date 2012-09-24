@@ -118,7 +118,8 @@ class User(DBBASE):
             Exclud archived users
         """
         query = super(User, cls).query()
-        query = query.filter(User.active=='Y')
+        query = query.filter(User.active == 'Y')
+
         if ordered:
             query = query.order_by(User.lastname)
 

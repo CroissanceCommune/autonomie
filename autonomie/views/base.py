@@ -52,7 +52,7 @@ class BaseView(object):
         Base View object
     """
     def __init__(self, request):
-        log.debug("We are in the view : %s"  %self)
+        log.debug("We are in the view : %s" % self)
         self.request = request
         self.context = request.context
         self.dbsession = request.dbsession()
@@ -247,7 +247,7 @@ class TaskView(BaseView):
         """
             return the default tva
         """
-        default_tva = Tva.query().filter(Tva.default==1).first()
+        default_tva = Tva.query().filter(Tva.default == 1).first()
         if default_tva is not None:
             return unicode(default_tva.value)
         else:
@@ -543,7 +543,7 @@ class TaskView(BaseView):
             Returns an html version of the current document
         """
         tvas = self.task.get_tvas()
-        multiple_tvas = len([key for key in tvas.keys() if key >=0]) > 1
+        multiple_tvas = len([key for key in tvas.keys() if key >= 0]) > 1
 
         template = self.template
         config = self.request.config

@@ -40,11 +40,11 @@ def deferred_ccode_valid(node, kw):
             message = u"Le code client doit contenir 4 caractères."
             raise colander.Invalid(node, message)
         #Test unicity
-        query = Client.query().filter(Client.company_id==company_id)\
-                .filter(Client.code==value)
+        query = Client.query().filter(Client.company_id == company_id)\
+                .filter(Client.code == value)
         if client:
             # In edit mode, it will always fail
-            query = query.filter(Client.id!=client.id)
+            query = query.filter(Client.id != client.id)
         result = query.all()
 
         if len(result):

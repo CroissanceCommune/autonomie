@@ -32,6 +32,9 @@ from autonomie.utils.widgets import MainMenuItem
 from autonomie.utils.widgets import MenuDropDown
 from autonomie.utils.widgets import StaticWidget
 
+from autonomie.views.render_api import api
+
+
 def get_cid(request):
     """
         Return the current cid from the request
@@ -167,7 +170,6 @@ def add_menu(event):
             submenu.insert(company_menu(request, companies, cid))
             event.update({'submenu': submenu})
 
-from autonomie.views.render_api import api
 
 @subscriber(BeforeRender)
 def add_renderer_globals(event):

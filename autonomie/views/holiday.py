@@ -84,7 +84,7 @@ class HolidayView(BaseView):
             appstruct = [{'start_date':holiday.start_date,
                          'end_date':holiday.end_date}
                          for holiday in holidays]
-            html_form = form.render({'holidays':appstruct})
+            html_form = form.render({'holidays': appstruct})
         return dict(title=u"Déclarer mes congés",
                     html_form=html_form)
 

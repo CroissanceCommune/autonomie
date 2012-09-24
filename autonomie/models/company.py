@@ -41,7 +41,7 @@ class Company(DBBASE):
         Store all company specific stuff (headers, logos, RIB, ...)
     """
     __tablename__ = 'company'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(150))
     goal = deferred(Column("object", String(255)),

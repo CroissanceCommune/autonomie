@@ -45,7 +45,7 @@ class DisabledInput(widget.Widget):
         if cstruct is colander.null:
             cstruct = u''
         quoted = cgi.escape(cstruct, quote='"')
-        params = {'name': field.name, 'value':quoted}
+        params = {'name': field.name, 'value': quoted}
         return render(self.template, params)
 
     def deserialize(self, field, pstruct):

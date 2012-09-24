@@ -42,7 +42,7 @@ class User(DBBASE):
         User model
     """
     __tablename__ = 'accounts'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     login = Column('login', String(64))
     pwd = Column("password", String(100))

@@ -130,9 +130,9 @@ class CancelInvoiceView(TaskView):
         """
             Returns dbdatas as a dict of dict
         """
-        return {'cancelinvoice':self.task.appstruct(),
-                'lines':[line.appstruct()
-                            for line in self.task.lines],
+        return {'cancelinvoice': self.task.appstruct(),
+                'lines': [line.appstruct()
+                          for line in self.task.lines],
                 }
 
     def remove_lines_from_session(self):

@@ -120,7 +120,7 @@ class AdminViews(BaseView):
             appstruct = [{'name':tva.name,
                           'value':tva.value,
                           "default":tva.default}for tva in tvas]
-            html_form=form.render({'tvas':appstruct})
+            html_form = form.render({'tvas': appstruct})
         return dict(title=u"Configuration des taux de TVA",
                     tvas=tvas,
                     html_form=html_form)

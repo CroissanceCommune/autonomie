@@ -59,7 +59,7 @@ def main(global_config, **settings):
     config.set_default_permission('view')
 
     # Adding some properties to the request object
-    config.set_request_property(lambda _:dbsession, 'dbsession', reify=True)
+    config.set_request_property(lambda _: dbsession, 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
     config.set_request_property(get_config, 'config')
 

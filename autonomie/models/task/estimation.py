@@ -55,11 +55,9 @@ class Estimation(Task, TaskCompute):
         Estimation Model
     """
     __tablename__ = 'estimation'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    id = Column("id", ForeignKey('task.id'),
-                primary_key=True, nullable=False)
-    sequenceNumber = Column("sequenceNumber", Integer,
-                nullable=False)
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    id = Column("id", ForeignKey('task.id'), primary_key=True, nullable=False)
+    sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     number = Column("number", String(100), nullable=False)
     tva = Column("tva", Integer, nullable=False, default=196)
     deposit = Column("deposit", Integer, default=0)
@@ -77,18 +75,18 @@ class Estimation(Task, TaskCompute):
                                     nullable=False, default=0),
                                     group='edit')
     discountHT = Column('discountHT', Integer, default=0)
-    expenses = deferred(Column('expenses', Integer, default=0),
-                                group='edit')
-    paymentDisplay = deferred(Column('paymentDisplay', String(20),
-                                                default="SUMMARY"),
-                                                group='edit')
-    project = relationship("Project",
-                            backref=backref('estimations',
-                                            order_by='Estimation.taskDate')
-                            )
-    __mapper_args__ = {
-                        'polymorphic_identity':'estimation',
-                       }
+    expenses = deferred(
+        Column('expenses', Integer, default=0),
+        group='edit')
+    paymentDisplay = deferred(
+        Column('paymentDisplay', String(20), default="SUMMARY"),
+        group='edit')
+    project = relationship(
+        "Project",
+        backref=backref('estimations', order_by='Estimation.taskDate')
+    )
+
+    __mapper_args__ = {'polymorphic_identity': 'estimation', }
 
     state_machine = DEFAULT_STATE_MACHINES['estimation']
 
@@ -412,7 +410,7 @@ class EstimationLine(DBBASE):
         Estimation lines
     """
     __tablename__ = 'estimation_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)
@@ -482,7 +480,7 @@ class PaymentLine(DBBASE):
         payments lines
     """
     __tablename__ = 'estimation_payment'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)

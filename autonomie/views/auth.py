@@ -66,7 +66,7 @@ def login_view(request):
     # avoid looping
     if nextpage == request.route_url('login'):
         nextpage = request.route_url('index')
-    app_struct = {'nextpage':nextpage}
+    app_struct = {'nextpage': nextpage}
     myform = form.render(app_struct)
     fail_message = None
     if 'submit' in request.params:
@@ -78,9 +78,9 @@ def login_view(request):
             log.exception(" - Authentication error")
             myform = e.render()
             fail_message = u"Erreur d'authentification"
-            return {'title':"Authentification",
-                    'html_form':myform,
-                    'message':fail_message
+            return {'title': "Authentification",
+                    'html_form': myform,
+                    'message': fail_message
                     }
         else:
             login = datas['login']
@@ -90,9 +90,9 @@ def login_view(request):
             remember(request, login)
             return HTTPFound(location=nextpage)
     return {
-            'title':"Bienvenue dans Autonomie",
-            'html_form':myform,
-            'message':fail_message
+            'title': "Bienvenue dans Autonomie",
+            'html_form': myform,
+            'message': fail_message
             }
 
 

@@ -169,7 +169,7 @@ def get_cinv_state():
     return result
 
 DEFAULT_STATE_MACHINES = {
-        "base":TaskState('draft', get_base_state()),
-        "estimation":TaskState('draft', get_est_state()),
-        "invoice":TaskState('draft', get_inv_state()),
-        "cancelinvoice":TaskState('draft', get_cinv_state())}
+        "base": TaskState('draft', get_base_state()),
+        "estimation": TaskState('draft', get_est_state()),
+        "invoice": TaskState('draft', get_inv_state()),
+        "cancelinvoice": TaskState('draft', get_cinv_state())}

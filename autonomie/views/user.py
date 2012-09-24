@@ -52,7 +52,7 @@ def account(request):
     avatar = request.user
     pwdformschema = get_password_change_schema()
     pwdform = Form(pwdformschema, buttons=(submit_btn,))
-    html_form = pwdform.render({'login':avatar.login})
+    html_form = pwdform.render({'login': avatar.login})
     if "submit" in request.params:
         controls = request.params.items()
         try:
@@ -145,7 +145,7 @@ Cette action n'est pas réversible."
                         action_menu=self.actionmenu)
         if has_permission('add', self.request.context, self.request):
             popup = self._get_add_popup()
-            ret_dict['popups'] = {popup.name:popup}
+            ret_dict['popups'] = {popup.name: popup}
             self.actionmenu.add(popup.open_btn())
         self.actionmenu.add(SearchForm(u"Nom ou entreprise"))
         return ret_dict
@@ -227,7 +227,7 @@ Cette action n'est pas réversible."
                 self.session.flash(validate_msg, queue="main")
                 return HTTPFound(self.request.route_path("user", id=user.id))
         else:
-            html_form = form.render({'user':user.appstruct(),
+            html_form = form.render({'user': user.appstruct(),
                         'companies': [comp.name for comp in user.companies]})
         return dict(title=title,
                     html_form=html_form,

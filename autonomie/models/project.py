@@ -32,7 +32,7 @@ class Project(DBBASE):
         The project model
     """
     __tablename__ = 'project'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(255))
     client_id = Column("client_id", Integer,  ForeignKey('customer.id'))

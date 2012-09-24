@@ -43,7 +43,7 @@ class Phase(DBBASE):
         Phase d'un projet
     """
     __tablename__ = 'phase'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     project_id = Column('project_id', Integer,
                         ForeignKey('project.id'))
@@ -95,7 +95,7 @@ class Tva(DBBASE):
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
     __tablename__ = 'tva'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(8), nullable=False)
     value = Column("value", Integer)
@@ -116,7 +116,7 @@ class Config(DBBASE):
           PRIMARY KEY  (`config_app`,`config_name`)
     """
     __tablename__ = 'config'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     app = Column("config_app", String(50), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
@@ -139,7 +139,7 @@ class OperationComptable(DBBASE):
         UNIQUE KEY `id` (`id`)
     """
     __tablename__ = 'operation_tresorerie'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', BigInteger, primary_key=True)
     amount = Column("montant", Numeric)
     charge = Column("charge", Integer, default=0)
@@ -168,7 +168,7 @@ class Holiday(DBBASE):
         end_date
     """
     __tablename__ = "holiday"
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column(Integer, primary_key=True)
     user_id = Column("user_id", Integer, ForeignKey('accounts.id'))
     start_date = Column(Date)

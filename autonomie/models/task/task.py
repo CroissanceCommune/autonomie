@@ -47,8 +47,8 @@ class Task(DBBASE):
         Metadata pour une tâche (estimation, invoice)
     """
     __tablename__ = 'task'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    __mapper_args__ = {'polymorphic_identity':'task'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __mapper_args__ = {'polymorphic_identity': 'task'}
 
     id = Column(Integer, primary_key=True)
     phase_id = Column("phase_id", ForeignKey('phase.id'))
@@ -81,7 +81,7 @@ class Task(DBBASE):
 
     type_ = Column('type_', String(30), nullable=False)
     __mapper_args__ = {'polymorphic_on': type_,
-                       'polymorphic_identity':'task'}
+                       'polymorphic_identity': 'task'}
 
     state_machine = DEFAULT_STATE_MACHINES['base']
 
@@ -178,7 +178,7 @@ class DiscountLine(DBBASE):
          A discount line
     """
     __tablename__ = 'discount'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('task.id'))
     tva = Column("tva", Integer, nullable=False, default=196)
@@ -224,7 +224,7 @@ class TaskStatus(DBBASE):
         Task status, should be used to record the task's status
     """
     __tablename__ = 'task_status'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     task_id = Column('task_id', Integer,
                         ForeignKey('task.id'))

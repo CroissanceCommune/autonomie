@@ -647,7 +647,8 @@ class SequenceWrapper:
         """
         lineslist = dbdatas.get(self.dbtype, [])
         if self.sort_key:
-            lines = sorted(lineslist, key=lambda line:int(line[self.sort_key]))
+            lines = sorted(lineslist,
+                           key=lambda line: int(line[self.sort_key]))
         else:
             lines = lineslist
         for line in lines:

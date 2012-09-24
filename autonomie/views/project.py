@@ -166,7 +166,7 @@ de créer de nouveaux projets", queue="main")
 
         if has_permission("add", self.context, self.request):
             popup = self._get_add_popup()
-            ret_dict['popups'] = {popup.name:popup}
+            ret_dict['popups'] = {popup.name: popup}
             self.actionmenu.add(popup.open_btn())
         self.actionmenu.add(self._get_archived_btn(archived))
         self.actionmenu.add(SearchForm(u"Projet ou nom du client"))

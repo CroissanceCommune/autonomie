@@ -94,7 +94,7 @@ class ClientView(ListView):
         if has_permission('add', self.context, self.request):
             form = get_client_form(company)
             popup = PopUp("addform", u'Ajouter un client', form.render())
-            popups = {popup.name:popup}
+            popups = {popup.name: popup}
             self.actionmenu.add(popup.open_btn())
 
         # Search form

@@ -129,8 +129,8 @@ def company_menu(request, companies, cid):
             options = ((request.route_path("company", id=company.id),
                     company.name) for company in companies)
             default = request.route_path("company", id=cid)
-        html_attrs = {'class':'floatted company-search',
-                      'id':"company-select-menu"}
+        html_attrs = {'class': 'floatted company-search',
+                      'id': "company-select-menu"}
         menu = HTML.li(
                 tags.select("companies", default, options, **html_attrs))
         menu = StaticWidget(menu, "view")
@@ -159,11 +159,11 @@ def add_menu(event):
         if menu:
             menu.add(MainMenuItem(u"Annuaire", "view",
                         icon="icon-white icon-book", path="users"))
-            event.update({'menu':menu})
+            event.update({'menu': menu})
         if submenu:
             companies = get_companies(request)
             submenu.insert(company_menu(request, companies, cid))
-            event.update({'submenu':submenu})
+            event.update({'submenu': submenu})
 
 from autonomie.views.render_api import api
 

@@ -76,9 +76,9 @@ class Invoice(Task, TaskCompute):
         Invoice Model
     """
     __tablename__ = 'invoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     __mapper_args__ = {
-                       'polymorphic_identity':'invoice',
+                       'polymorphic_identity': 'invoice',
                        }
     id = Column("id", ForeignKey('task.id'), primary_key=True)
     estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
@@ -321,7 +321,7 @@ class InvoiceLine(DBBASE):
         Invoice lines
     """
     __tablename__ = 'invoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column("id", Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('invoice.id'))
     rowIndex = Column("rowIndex", Integer, default=1)
@@ -393,8 +393,8 @@ class CancelInvoice(Task, TaskCompute):
         Could also be called negative invoice
     """
     __tablename__ = 'cancelinvoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
-    __mapper_args__ = {'polymorphic_identity':'cancelinvoice'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
 
     invoice_id = Column(Integer, ForeignKey('invoice.id'),
@@ -496,7 +496,7 @@ class ManualInvoice(DBBASE):
         Modèle pour les factures manuelles (ancienne version)
     """
     __tablename__ = 'manual_invoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)
     description = Column('libelle', String(255))
@@ -615,7 +615,7 @@ class CancelInvoiceLine(DBBASE):
         CancelInvoice lines
     """
     __tablename__ = 'cancelinvoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column(Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('cancelinvoice.id'))
     created_at = Column(DateTime, default=datetime.datetime.now)
@@ -670,7 +670,7 @@ class Payment(DBBASE):
         Payment entry
     """
     __tablename__ = 'payment'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset":'utf8'}
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
     id = Column(Integer, primary_key=True)
     mode = Column(String(50))
     amount = Column(Integer)

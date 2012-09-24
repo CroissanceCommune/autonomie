@@ -30,24 +30,11 @@ Serve autonomie::
 Alembic migration
 -----------------
 
+Alembic is used every time we changed the database schema.
+
 Add a new revision::
 
-    export REV_DESC="My revision description"
-    export CURRENT_VERSION=$(cat ./CURRENT_VERSION)
-    alembic -c app.ini -n alembic revision -m"$CURRENT_VERSION $REV_DESC"
-
-Edit the script::
-
-    cd autonomie/alembic/versions
-    export LAST_FILE=$(ls -1tr|tail -n1)
-    vi ${LAST_FILE}
-    # Add your mysql migration stuff (alter table add/drop column ...)
-    git add ${LAST_FILE}
-
-Add the other modified files::
-
-    git add ...
-    git commit -m "[alembic] $REV_DESC"
+    tools/new_alembic_revision.sh
 
 Then, migrate::
 

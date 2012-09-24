@@ -438,4 +438,4 @@ supprimé".format(project.name))
             return a popup object for add project
         """
         form = get_project_form(clients=self.context.clients)
-        return  PopUp('add', u"Ajouter un projet", form.render())
+        return PopUp('add', u"Ajouter un projet", form.render())

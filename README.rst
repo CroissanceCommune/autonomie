@@ -36,7 +36,10 @@ Migrate::
 
 Add a new revision::
 
-    alembic -c app.ini -n alembic revision -m"my revision description"
+    export REV_DESC="My revision description"
+    alembic -c app.ini -n alembic revision -m$REV_DESC
+    git add $(ls -1tr autonomie/alembic/versions/|tail -n1)
+    git commit -m "[alembic] $REV_DESC"
 
 
 Debian dependencies

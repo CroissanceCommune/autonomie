@@ -17,12 +17,10 @@ import locale
 from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from pyramid_beaker import set_cache_regions_from_settings
-from sqlalchemy import engine_from_config, create_engine
+from sqlalchemy import engine_from_config
 
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-
-from pyramid.threadlocal import get_current_registry
 
 from autonomie.utils.security import RootFactory
 from autonomie.utils.security import BaseDBFactory

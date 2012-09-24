@@ -15,7 +15,6 @@
 """
     all comptability related views
 """
-import datetime
 import logging
 
 from sqlalchemy import or_

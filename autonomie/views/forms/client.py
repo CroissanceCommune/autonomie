@@ -22,7 +22,6 @@ from deform import widget
 
 from autonomie.models.model import Client
 from autonomie.views.forms.widgets import get_mail_input
-from autonomie.views.forms.widgets import DisabledInput
 
 log = logging.getLogger(__name__)
 

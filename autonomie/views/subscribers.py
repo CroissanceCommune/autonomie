@@ -17,7 +17,6 @@
     Add menus to the returned datas before rendering
     Add a translation stuff to the templating context
 """
-import logging
 from webhelpers.html import tags
 from webhelpers.html import HTML
 

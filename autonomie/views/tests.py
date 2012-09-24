@@ -17,7 +17,6 @@
     It's not really automated, but it's better than nuts
 """
 
-import logging
 from pyramid.view import view_config
 
 @view_config(route_name='testjs', permission="admin", \

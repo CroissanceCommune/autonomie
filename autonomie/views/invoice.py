@@ -33,8 +33,6 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
-from sqlalchemy.orm.util import has_identity
-
 from .base import TaskView
 
 log = logging.getLogger(__name__)

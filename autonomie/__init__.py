@@ -81,15 +81,15 @@ def main(global_config, **settings):
                     '/account')
 
     # Holiday routes
-    config.add_route('holiday', # Add
+    config.add_route('holiday',  # Add
                     '/holiday')
-    config.add_route('holidays', # view
+    config.add_route('holidays',  # view
                     '/holidays')
 
     config.add_route('statistic',
                     '/statistics/{id:\d+}',
                     traverse='/companies/{id}')
-    config.add_route('statistics', # view
+    config.add_route('statistics',  # view
                     '/statistics')
     # Company Routes
     config.add_route('company',

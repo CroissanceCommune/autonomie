@@ -172,7 +172,7 @@ de créer de nouveaux projets", queue="main")
         self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
         return ret_dict
 
-    def _get_projects(self):# company, search, sort, direction, archived):
+    def _get_projects(self):  # company, search, sort, direction, archived):
         """
             query projects against the database
         """

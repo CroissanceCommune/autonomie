@@ -124,4 +124,4 @@ format = %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
 #Alembic conf
 [alembic]
 script_location = autonomie:alembic
-file_template = %%(rev)s_%%(slug)s
+file_template = %%(slug)s_%%(rev)s

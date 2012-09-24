@@ -4,6 +4,10 @@ Autonomie README
 Getting Started
 ---------------
 
+The fr_FR.UTF8 locale must be installed::
+
+    dpkg-reconfigure locales
+
 Create the mysql tables::
 
     create database egw;

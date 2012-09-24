@@ -183,7 +183,7 @@ def revision(message):
 
 
 def migrate():
-    __doc__ = """Migrate autonomie's database
+    """Migrate autonomie's database
     Usage:
         migrate <config_uri> list_all
         migrate <config_uri> upgrade
@@ -213,6 +213,6 @@ def migrate():
             func = revision
         return func(*args)
     try:
-        return command(callback, __doc__)
+        return command(callback, migrate.__doc__)
     finally:
         pass

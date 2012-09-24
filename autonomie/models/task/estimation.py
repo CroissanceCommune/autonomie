@@ -164,17 +164,16 @@ class Estimation(Task, TaskCompute):
                     CAEStatus = 'draft',
                     statusPerson = user_id,
                     owner_id=user_id,
-                    tva = self.tva,
                     estimation_id=self.id,
                     paymentConditions=self.paymentConditions,
                     description=self.description,
                     course=self.course)
 
-    def _account_invoiceline(self, amount, description):
+    def _account_invoiceline(self, amount, description, tva=1960):
         """
             Return an account invoiceline
         """
-        return InvoiceLine(cost=amount, description=description, tva=0)
+        return InvoiceLine(cost=amount, description=description, tva=tva)
 
     def _account_invoice(self, args, count=0):
         """
@@ -189,7 +188,7 @@ class Estimation(Task, TaskCompute):
         args['displayedUnits'] = 0
         return Invoice(**args)
 
-    def _deposit_invoice(self, args):
+    def _deposit_invoice(self, args, tva):
         """
             Return the deposit
         """
@@ -197,11 +196,11 @@ class Estimation(Task, TaskCompute):
         invoice = self._account_invoice(args)
         amount = self.deposit_amount()
         description=u"Facture d'accompte"
-        line = self._account_invoiceline(amount, description)
+        line = self._account_invoiceline(amount, description, tva)
         invoice.lines.append(line)
         return invoice, line.duplicate()
 
-    def _intermediate_invoices(self, args, paymentline, count):
+    def _intermediate_invoices(self, args, paymentline, count, tva):
         """
             return an intermediary invoice described by "paymentline"
         """
@@ -212,7 +211,7 @@ class Estimation(Task, TaskCompute):
         else:
             amount = self.paymentline_amount()
         description = paymentline.description
-        line = self._account_invoiceline(amount, description)
+        line = self._account_invoiceline(amount, description, tva)
         invoice.lines.append(line)
         return invoice, line.duplicate()
 
@@ -269,8 +268,11 @@ class Estimation(Task, TaskCompute):
         lines = []
         common_args = self._common_args_for_generation(user_id)
         count = 0
+        # Fix temporaire pour le montant de la tva pour les accomptes et autres
+        tvas = self.get_tvas().keys()
+        tva = tvas[0]
         if self.deposit > 0:
-            deposit, line = self._deposit_invoice(common_args.copy())
+            deposit, line = self._deposit_invoice(common_args.copy(), tva)
             invoices.append(deposit)
             # We remember the lines to display them in the laste invoice
             lines.append(line)
@@ -279,7 +281,7 @@ class Estimation(Task, TaskCompute):
         for paymentline in self.payment_lines[:-1]:
             invoice, line = self._intermediate_invoices(common_args.copy(),
                                                             paymentline,
-                                                            count)
+                                                            count, tva)
             invoices.append(invoice)
             lines.append(line)
             count += 1

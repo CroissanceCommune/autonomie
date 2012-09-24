@@ -513,14 +513,16 @@ class TestEstimation(BaseTestCase):
         deposit = invoices[0]
         self.assertEqual(deposit.taskDate, datetime.date.today())
         self.assertEqual(deposit.total_ht(), est.deposit_amount())
-        self.assertEqual(deposit.lines[0].tva, 0)
+        self.assertEqual(deposit.lines[0].tva, 1960)
         #intermediate invoices:
         intermediate_invoices = invoices[1:-1]
         for index, line in enumerate(PAYMENT_LINES[:-1]):
             inv = intermediate_invoices[index]
+            # ce test échouera jusqu'à ce qu'on ait trouvé une solution
+            # alternative à la configuration des accomptes
             self.assertEqual(inv.total(), line['amount'])
             self.assertEqual(inv.taskDate, line['paymentDate'])
-            self.assertEqual(inv.lines[0].tva, 0)
+            self.assertEqual(inv.lines[0].tva, 1960)
         total = sum([inv.total() for inv in invoices])
         self.assertEqual(total, est.total())
 

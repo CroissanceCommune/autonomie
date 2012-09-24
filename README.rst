@@ -33,9 +33,12 @@ Alembic migration
 Add a new revision::
 
     export REV_DESC="My revision description"
-    alembic -c app.ini -n alembic revision -m$REV_DESC
+    export CURRENT_VERSION=$(cat ./CURRENT_VERSION)
+    alembic -c app.ini -n alembic revision -m"$CURRENT_VERSION $REV_DESC"
     cd autonomie/alembic/versions
-    git add $(ls -1tr|tail -n1)
+    export LAST_FILE=$(ls -1tr|tail -n1)
+    mv $LAST_FILE ${CURRENT_VERSION}_${LAST_FILE}
+    git add ${CURRENT_VERSION}_${LAST_FILE}
 
 Add the other modified files::
 

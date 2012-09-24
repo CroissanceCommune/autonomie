@@ -169,7 +169,7 @@
                     </td>
                     <td>
                         % if len(invoice.payments) == 1 and invoice.is_resulted():
-                            ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0].amount)}
+                            ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0].date)}
                         % elif len(invoice.payments) > 0:
                             <ul>
                                 % for payment in invoice.payments:

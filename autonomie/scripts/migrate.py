@@ -25,6 +25,8 @@ from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic.environment import EnvironmentContext
 from alembic.util import load_python_file
+from alembic.util import rev_id
+from alembic import autogenerate as autogen
 
 from autonomie.models import DBSESSION
 from autonomie.scripts.utils import command
@@ -169,17 +171,30 @@ def fetch_head():
     """
     fetch(None)
 
+def revision(message):
+    template_args = {}
+    imports = set()
+    def get_rev(rev, context):
+        autogen._produce_migration_diffs(context, template_args, imports)
+        return []
+    env = PackageEnvironment(DEFAULT_LOCATION)
+    env.run_env(get_rev)
+    env.script_dir.generate_revision(rev_id(), message, **template_args)
+
+
 def migrate():
     __doc__ = """Migrate autonomie's database
     Usage:
         migrate <config_uri> list_all
         migrate <config_uri> upgrade
         migrate <config_uri> fetch [--rev=<rev>]
+        migrate <config_uri> revision [--m=<message>]
 
     o stamp : join a specific migration revision without launching migration
               scripts
     o list_all : all the revisions
     o upgrade : upgrade the app to the latest revision
+    o revision : auto-generate a migration file with the given message
 
     Options:
         -h --help     Show this screen.
@@ -193,6 +208,9 @@ def migrate():
         elif arguments['fetch']:
             args = (arguments['--rev'],)
             func = fetch
+        elif arguments['revision']:
+            args = (arguments['--m'],)
+            func = revision
         return func(*args)
     try:
         return command(callback, __doc__)

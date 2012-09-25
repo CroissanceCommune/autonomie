@@ -63,7 +63,7 @@ class User(DBBASE):
         """
             Return a md5 encoded password
         """
-        if type(password) == unicode:
+        if isinstance(password, unicode):
             password = password.encode('utf-8')
         return md5(password).hexdigest()
 
@@ -79,8 +79,7 @@ class User(DBBASE):
         """
         if password:
             return self.pwd == self._encode_pass(password)
-        else:
-            return False
+        return False
 
     def get_company(self, cid):
         """

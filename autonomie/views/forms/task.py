@@ -369,7 +369,7 @@ class EstimationPaymentLines(colander.SequenceSchema):
 
 class EstimationPayments(colander.MappingSchema):
     """
-        Gestion des accomptes
+        Gestion des acomptes
     """
     deposit = colander.SchemaNode(
         colander.Integer(),

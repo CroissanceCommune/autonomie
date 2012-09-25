@@ -195,7 +195,7 @@ class Estimation(Task, TaskCompute):
         args['taskDate'] = datetime.date.today()
         invoice = self._account_invoice(args)
         amount = self.deposit_amount()
-        description = u"Facture d'accompte"
+        description = u"Facture d'acompte"
         line = self._account_invoiceline(amount, description, tva)
         invoice.lines.append(line)
         return invoice, line.duplicate()
@@ -268,7 +268,7 @@ class Estimation(Task, TaskCompute):
         lines = []
         common_args = self._common_args_for_generation(user_id)
         count = 0
-        # Fix temporaire pour le montant de la tva pour les accomptes et autres
+        # Fix temporaire pour le montant de la tva pour les acomptes et autres
         tvas = self.get_tvas().keys()
         tva = tvas[0]
         if self.deposit > 0:

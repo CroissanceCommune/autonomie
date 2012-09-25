@@ -81,7 +81,7 @@
         <div class='span2 offset2 paymentamount'>Montant</div>
     </div>
     <div id='account_container' style='display:none;'>
-        <div class='span5' style="margin-left:0px;">Facture d'accompte</div>
+        <div class='span5' style="margin-left:0px;">Facture d'acompte</div>
         <div class='span2'>À la commande</div>
         <div class='span2 offset2 paymentamount' id='account_amount'><div class='input'>0,00 €</div></div>
     </div>

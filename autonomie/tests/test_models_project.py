@@ -23,8 +23,8 @@ PROJECT = dict(name=u'project1',
 
 EST_LIST1 = ["Devis 1", "Devis 3"]
 EST_LIST2 = ["Devis 1", "Devis deoko"]
-INV_LIST1 = ['Facture 1', "Facture d'accompte 2", "Facture 5"]
-INV_LIST2 = ['Facture 1', "Facture d'accompte 1", "Facture d'accompte 2"]
+INV_LIST1 = ['Facture 1', "Facture d'acompte 2", "Facture 5"]
+INV_LIST2 = ['Facture 1', "Facture d'acompte 1", "Facture d'acompte 2"]
 CINV_LIST1 = ["Avoir 1", "Avoir 4"]
 
 def get_project():

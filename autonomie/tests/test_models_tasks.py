@@ -519,7 +519,7 @@ class TestEstimation(BaseTestCase):
         for index, line in enumerate(PAYMENT_LINES[:-1]):
             inv = intermediate_invoices[index]
             # ce test échouera jusqu'à ce qu'on ait trouvé une solution
-            # alternative à la configuration des accomptes
+            # alternative à la configuration des acomptes
             self.assertEqual(inv.total(), line['amount'])
             self.assertEqual(inv.taskDate, line['paymentDate'])
             self.assertEqual(inv.lines[0].tva, 1960)

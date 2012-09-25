@@ -116,7 +116,9 @@
                         %for tva, tva_amount in task.get_tvas().items():
                             <tr>
                                 <td colspan='${colspan}' class='rightalign'>
-                                    TVA (${api.format_amount(tva)|n} %)
+                                    % if line.tva>0:
+                                        TVA (${api.format_amount(tva)|n} %)
+                                    % endif
                                 </td>
                                 <td class='price'>
                                     ${api.format_amount(tva_amount)|n}&nbsp;€

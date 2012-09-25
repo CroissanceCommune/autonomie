@@ -1,5 +1,5 @@
 <%doc>
-Base template for task rendering
+    Base template for task rendering
 </%doc>
 <%namespace file="/base/utils.mako" import="address" />
 <%namespace file="/base/utils.mako" import="format_text" />
@@ -16,6 +16,7 @@ Base template for task rendering
         </%block>
     </head>
     <body>
+        <div id='content'>
         <div class='header'>
             <img src='/assets/${company.get_header_filepath()}' alt='${company.name}' width='100%'/>
         </div>
@@ -27,8 +28,8 @@ Base template for task rendering
             </div>
         </div>
         <div class="informationblock">
-        <%block name='information'>
-        </%block>
+            <%block name='information'>
+            </%block>
         </div>
         %if task.displayedUnits == 1:
             <% colspan = 2 %>
@@ -36,63 +37,63 @@ Base template for task rendering
             <% colspan = 1 %>
         % endif
         <div class='row'>
-        <table class="lines span12">
-            <thead>
-                <tr>
-                    <th class="description">Intitulé des postes</th>
-                    %if task.displayedUnits == 1:
-                        <th class="quantity">P.U. x Qté</th>
-                    % endif
-                    <th class="price">Prix</th>
-                    % if multiple_tvas:
-                        <th class='tva'>Tva</th>
-                    % endif
-                </tr>
-            </thead>
-            <tbody>
-                % for line in task.lines:
+            <table class="lines span12">
+                <thead>
                     <tr>
-                        <td class="description">${format_text(line.description)}</td>
+                        <th class="description">Intitulé des postes</th>
                         %if task.displayedUnits == 1:
-                            <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€&nbsp;x&nbsp;${api.format_quantity(line.quantity)} ${api.format_unity(line.unity)}</td>
+                            <th class="quantity">P.U. x Qté</th>
                         % endif
-                        <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
+                        <th class="price">Prix</th>
                         % if multiple_tvas:
-                            <td class='tva'>
-                                % if line.tva>=0:
-                                    ${api.format_amount(line.tva)|n}&nbsp;%
-                                % endif
-                            </td>
+                            <th class='tva'>Tva</th>
                         % endif
                     </tr>
-                % endfor
-                <tr>
-                    <td colspan='${colspan}' class='rightalign'>
-                        Total HT
-                    </td>
-                    <td class='price'>
-                        ${api.format_amount(task.lines_total_ht(), trim=False)|n}&nbsp;€
-                    </td>
-                    % if multiple_tvas:
-                        <td></td>
-                    % endif
-                 </tr>
-                 %if hasattr(task, "discounts") and task.discounts:
-                     % for discount in task.discounts:
-                         <tr>
-                            <td colspan='${colspan}' class='rightalign'>
-                                ${format_text(discount.description)}
-                            </td>
-                            <td class='price'>
-                                ${api.format_amount(discount.amount)|n}&nbsp;€
-                            </td>
+                </thead>
+                <tbody>
+                    % for line in task.lines:
+                        <tr>
+                            <td class="description">${format_text(line.description)}</td>
+                            %if task.displayedUnits == 1:
+                                <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€&nbsp;x&nbsp;${api.format_quantity(line.quantity)} ${api.format_unity(line.unity)}</td>
+                            % endif
+                            <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
                             % if multiple_tvas:
                                 <td class='tva'>
-                                    ${api.format_amount(discount.tva)|n}&nbsp;%
+                                    % if line.tva>=0:
+                                        ${api.format_amount(line.tva)|n}&nbsp;%
+                                    % endif
                                 </td>
                             % endif
                         </tr>
                     % endfor
+                    <tr>
+                        <td colspan='${colspan}' class='rightalign'>
+                            Total HT
+                        </td>
+                        <td class='price'>
+                            ${api.format_amount(task.lines_total_ht(), trim=False)|n}&nbsp;€
+                        </td>
+                        % if multiple_tvas:
+                            <td></td>
+                        % endif
+                    </tr>
+                    %if hasattr(task, "discounts") and task.discounts:
+                        % for discount in task.discounts:
+                            <tr>
+                                <td colspan='${colspan}' class='rightalign'>
+                                    ${format_text(discount.description)}
+                                </td>
+                                <td class='price'>
+                                    ${api.format_amount(discount.amount)|n}&nbsp;€
+                                </td>
+                                % if multiple_tvas:
+                                    <td class='tva'>
+                                        ${api.format_amount(discount.tva)|n}&nbsp;%
+                                    </td>
+                                % endif
+                            </tr>
+                        % endfor
                         <tr>
                             <td colspan='${colspan}' class='rightalign'>
                                 Total HT après remise
@@ -104,51 +105,53 @@ Base template for task rendering
                                 <td></td>
                             % endif
                         </tr>
-                % endif
-                % if task.no_tva():
-                    <tr>
-                        <td colspan='${colspan + 1}'class='rightalign'>
-                            TVA non applicable selon l'article 259b du CGI.
-                        </td>
-                    </tr>
-                % else:
-                    %for tva, tva_amount in task.get_tvas().items():
+                    % endif
+                    % if task.no_tva():
                         <tr>
-                            <td colspan='${colspan}' class='rightalign'>
-                                TVA (${api.format_amount(tva)|n} %)
-                            </td>
-                            <td class='price'>
-                                ${api.format_amount(tva_amount)|n}&nbsp;€
+                            <td colspan='${colspan + 1}'class='rightalign'>
+                                TVA non applicable selon l'article 259b du CGI.
                             </td>
                         </tr>
-                    % endfor
-                % endif
-                %if task.expenses:
+                    % else:
+                        %for tva, tva_amount in task.get_tvas().items():
+                            <tr>
+                                <td colspan='${colspan}' class='rightalign'>
+                                    TVA (${api.format_amount(tva)|n} %)
+                                </td>
+                                <td class='price'>
+                                    ${api.format_amount(tva_amount)|n}&nbsp;€
+                                </td>
+                            </tr>
+                        % endfor
+                    % endif
+                    %if task.expenses:
+                        <tr>
+                            <td colspan='${colspan}' class='rightalign'>
+                                Frais liés à la prestation
+                            </td>
+                            <td class='price'>
+                                ${api.format_amount(task.expenses_amount())|n}&nbsp;€
+                            </td>
+                        </tr>
+                    %endif
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
-                            Frais liés à la prestation
+                            Total TTC
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.expenses_amount())|n}&nbsp;€
+                            ${api.format_amount(task.total())|n}&nbsp;€
                         </td>
                     </tr>
-                %endif
-                <tr>
-                    <td colspan='${colspan}' class='rightalign'>
-                        Total TTC
-                    </td>
-                    <td class='price'>
-                        ${api.format_amount(task.total())|n}&nbsp;€
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <%block name="notes_and_conditions">
+                </tbody>
+            </table>
+        </div>
+        <%block name="notes_and_conditions">
         ## All infos beetween document lines and footer text (notes, payment conditions ...)
-    </%block>
+        </%block>
 
-        <div id="footer">
+    </div>
+    ## end of content
+        <div class='row' id='footer'>
             % if config.has_key('coop_pdffootertitle'):
                 <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
             %endif

@@ -14,19 +14,19 @@
 <%block name='header'>
 <style>
     @page {
-    size: a4 portrait;
-    margin:1cm;
-    margin-bottom:3.5cm;
-    % if not task.has_been_validated() and not task.is_cancelled():
-        background-image: url("${request.static_url('autonomie:static/watermark_estimation.jpg', _app_url='')}");
-    % endif
-    @frame footer {
-    -pdf-frame-content: footer;
-    bottom: 0cm;
-    margin-left: 1cm;
-    margin-right: 1cm;
-    height:3cm;
-    }
+        size: a4 portrait;
+        margin:1cm;
+        margin-bottom:3.5cm;
+        % if not task.has_been_validated() and not task.is_cancelled():
+            background-image: url("${request.static_url('autonomie:static/watermark_estimation.jpg', _app_url='')}");
+        % endif
+        @frame footer{
+            -pdf-frame-content: footer;
+            bottom: 0cm;
+            margin-left: 1cm;
+            margin-right: 1cm;
+            height:3cm;
+            }
     }
 </style>
 </%block>
@@ -98,13 +98,15 @@
                 % endif
             </tbody>
         </table>
-    %else:
-        %if task.paymentConditions:
-            ${table(u"Conditions de paiement", task.paymentConditions)}
-        % endif
-    </div>
+</div>
+%else:
+    %if task.paymentConditions:
+        ${table(u"Conditions de paiement", task.paymentConditions)}
+    % endif
 % endif
 % if config.has_key('coop_estimationfooter'):
+<div class='row'>
     ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
+</div>
 %endif
 </%block>

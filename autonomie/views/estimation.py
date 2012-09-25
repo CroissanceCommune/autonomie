@@ -23,10 +23,10 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie.models.model import Estimation
-from autonomie.models.model import EstimationLine
-from autonomie.models.model import DiscountLine
-from autonomie.models.model import PaymentLine
+from autonomie.models.task.estimation import Estimation
+from autonomie.models.task.estimation import EstimationLine
+from autonomie.models.task.estimation import PaymentLine
+from autonomie.models.task.task import DiscountLine
 from autonomie.views.forms.task import get_estimation_schema
 from autonomie.views.forms.task import get_estimation_appstruct
 from autonomie.views.forms.task import get_estimation_dbdatas

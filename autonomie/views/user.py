@@ -25,8 +25,8 @@ from pyramid.security import has_permission
 from deform import Form
 from deform import ValidationFailure
 
-from autonomie.models.model import User
-from autonomie.models.model import Company
+from autonomie.models.user import User
+from autonomie.models.company import Company
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm

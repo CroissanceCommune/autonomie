@@ -26,8 +26,8 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.views.forms.task import get_cancel_invoice_schema
 from autonomie.views.forms.task import get_cancel_invoice_appstruct
 from autonomie.views.forms.task import get_cancel_invoice_dbdatas
-from autonomie.models.model import CancelInvoice
-from autonomie.models.model import CancelInvoiceLine
+from autonomie.models.task.invoice import CancelInvoice
+from autonomie.models.task.invoice import CancelInvoiceLine
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 

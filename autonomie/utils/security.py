@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : ven. 07 sept. 2012 20:32:38 CEST
+# * Last Modified : mar. 25 sept. 2012 02:08:09 CEST
 #
 # * Project : autonomie
 #
@@ -20,13 +20,13 @@ from pyramid.security import ALL_PERMISSIONS
 from pyramid.security import DENY_ALL
 from sqlalchemy.orm import undefer_group
 
-from autonomie.models.model import Project
-from autonomie.models.model import Company
-from autonomie.models.model import Client
-from autonomie.models.model import Estimation
-from autonomie.models.model import Invoice
-from autonomie.models.model import CancelInvoice
-from autonomie.models.model import User
+from autonomie.models.project import Project
+from autonomie.models.company import Company
+from autonomie.models.client import Client
+from autonomie.models.task.estimation import Estimation
+from autonomie.models.task.invoice import Invoice
+from autonomie.models.task.invoice import CancelInvoice
+from autonomie.models.user import User
 from autonomie.models.model import OperationComptable
 
 log = logging.getLogger(__name__)

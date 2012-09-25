@@ -20,7 +20,7 @@ import datetime
 
 from pyramid.view import view_config
 
-from autonomie.models.model import Company
+from autonomie.models.company import Company
 
 from .base import BaseView
 

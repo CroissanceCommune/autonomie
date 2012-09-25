@@ -29,7 +29,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.model import Phase
-from autonomie.models.model import Project
+from autonomie.models.project import Project
 from autonomie.models.model import Tva
 from autonomie.utils.views import get_page_url
 from autonomie.utils.widgets import ActionMenu

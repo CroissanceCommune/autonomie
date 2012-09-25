@@ -21,12 +21,12 @@ import datetime
 from beaker.cache import cache_region
 from pyramid.view import view_config
 
-from autonomie.models.model import Invoice
-from autonomie.models.model import CancelInvoice
-from autonomie.models.model import ManualInvoice
-from autonomie.models.model import Company
-from autonomie.models.model import Project
-from autonomie.models.model import Client
+from autonomie.models.task.invoice import Invoice
+from autonomie.models.task.invoice import CancelInvoice
+from autonomie.models.task.invoice import ManualInvoice
+from autonomie.models.company import Company
+from autonomie.models.project import Project
+from autonomie.models.client import Client
 from autonomie.models.types import format_to_taskdate
 
 from .base import ListView

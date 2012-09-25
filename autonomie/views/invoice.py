@@ -23,9 +23,9 @@ from pyramid.view import view_config
 from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.model import Invoice
-from autonomie.models.model import InvoiceLine
-from autonomie.models.model import DiscountLine
+from autonomie.models.task.invoice import Invoice
+from autonomie.models.task.invoice import InvoiceLine
+from autonomie.models.task.task import DiscountLine
 from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas

@@ -14,7 +14,7 @@
 #
 
 from autonomie.views.company import CompanyViews
-from autonomie.models.model import User
+from autonomie.models.user import User
 
 from autonomie.tests.base import BaseFunctionnalTest
 

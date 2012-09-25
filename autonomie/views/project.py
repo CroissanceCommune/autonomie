@@ -28,9 +28,9 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie.models.model import Project
+from autonomie.models.project import Project
 from autonomie.models.model import Phase
-from autonomie.models.model import Client
+from autonomie.models.client import Client
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import ToggleLink
 from autonomie.utils.widgets import ItemActionLink

@@ -28,7 +28,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.model import Holiday
-from autonomie.models.model import User
+from autonomie.models.user import User
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.holiday import HolidaysSchema

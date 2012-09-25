@@ -25,7 +25,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.model import OperationComptable
-from autonomie.models.model import Company
+from autonomie.models.company import Company
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import OperationSchema

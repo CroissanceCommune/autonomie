@@ -26,7 +26,7 @@ from pyramid.events import NewRequest
 from pyramid.threadlocal import get_current_request
 
 from autonomie.i18n import translate
-from autonomie.models.model import Company
+from autonomie.models.company import Company
 from autonomie.utils.widgets import Menu
 from autonomie.utils.widgets import MainMenuItem
 from autonomie.utils.widgets import MenuDropDown

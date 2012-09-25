@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : lun. 27 août 2012 18:27:32 CEST
+# * Last Modified : mar. 25 sept. 2012 02:09:09 CEST
 #
 # * Project : Autonomie
 #
@@ -15,6 +15,8 @@
 """
 import logging
 from pyramid.security import authenticated_userid
+
+from autonomie.models.user import User
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +48,5 @@ def get_user(login, request, dbsession=None):
     if not dbsession:
         dbsession = request.dbsession
     if not hasattr(request, '_user'):
-        from autonomie.models.model import User
         request._user = dbsession.query(User).filter_by(login=login).first()
     return request._user

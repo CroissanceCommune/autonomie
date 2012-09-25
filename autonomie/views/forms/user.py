@@ -20,8 +20,8 @@ import logging
 
 from deform import widget
 
-from autonomie.models.model import User
-from autonomie.models.model import Company
+from autonomie.models.user import User
+from autonomie.models.company import Company
 from autonomie.views.forms.widgets import get_mail_input
 from autonomie.views.forms.widgets import deferred_edit_widget
 from autonomie.utils.security import MANAGER_ROLES

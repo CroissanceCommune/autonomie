@@ -18,7 +18,7 @@
     <body>
         <div id='content'>
         <div class='header'>
-            <img src='/assets/${company.get_header_filepath()}' alt='${company.name}' width='100%'/>
+            <img src='/assets/${company.get_header_filepath()}' alt='${company.name}'/>
         </div>
         <div class='row'>
             <div class='addressblock'>

@@ -29,6 +29,10 @@ from sqlalchemy.orm import relationship
 
 from autonomie.models import DBBASE
 
+ADMIN_PRIMARY_GROUP = 1
+MANAGER_PRIMARY_GROUP = 2
+CONTRACTOR_PRIMARY_GROUP = 3
+
 COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
     Column("company_id", Integer, ForeignKey('company.id')),
     Column("account_id", Integer, ForeignKey('accounts.id')),
@@ -96,19 +100,19 @@ class User(DBBASE):
         """
             return true if the user is and administrator
         """
-        return self.primary_group == 1
+        return self.primary_group == ADMIN_PRIMARY_GROUP
 
     def is_manager(self):
         """
             return True if the user is a manager
         """
-        return self.primary_group == 2
+        return self.primary_group == MANAGER_PRIMARY_GROUP
 
     def is_contractor(self):
         """
             return True if the user is a contractor
         """
-        return self.primary_group == 3
+        return self.primary_group == CONTRACTOR_PRIMARY_GROUP
 
     @classmethod
     def query(cls, ordered=True):

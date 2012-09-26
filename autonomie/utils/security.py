@@ -47,28 +47,6 @@ DEFAULT_PERM = [
 ]
 
 
-def wrap_db_objects():
-    """
-        Add acls and names to the db objects used as context
-    """
-    Company.__acl__ = property(get_company_acl)
-    Project.__acl__ = property(get_client_or_project_acls)
-    Client.__acl__ = property(get_client_or_project_acls)
-    Estimation.__acl__ = property(get_task_acl)
-    Invoice.__acl__ = property(get_task_acl)
-    CancelInvoice.__acl__ = property(get_task_acl)
-    User.__acl__ = property(get_user_acl)
-    OperationComptable.__acl__ = property(get_task_acl)
-
-
-class BaseDBFactory(object):
-    """
-        Base class for dbrelated objects
-    """
-    __acl__ = DEFAULT_PERM[:]
-    dbsession = None
-
-
 class RootFactory(dict):
     """
        Ressource factory, returns the appropriate resource regarding
@@ -99,15 +77,28 @@ class RootFactory(dict):
         self['operations'] = OperationFactory(self, 'operations')
 
 
-def get_company_acl(self):
+class BaseDBFactory(object):
     """
-        Compute the company's acls
+        Base class for dbrelated objects
     """
-    acl = DEFAULT_PERM[:]
-    acl.append((Allow, Authenticated, 'view',))
-    acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
-                        for user in self.employees])
-    return acl
+    __acl__ = DEFAULT_PERM[:]
+    dbsession = None
+
+    def _get_item(self, klass, key, object_name):
+        if self.dbsession is None:
+            raise Exception("Missing dbsession")
+
+        dbsession = self.dbsession()
+        obj = dbsession.query(klass)\
+                       .options(undefer_group('edit'))\
+                       .filter(klass.id == key)\
+                       .scalar()
+
+        if obj is None:
+            raise KeyError
+
+        obj.__name__ = object_name
+        return obj
 
 
 class CompanyFactory(BaseDBFactory):
@@ -122,33 +113,7 @@ class CompanyFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
-
-        dbsession = self.dbsession()
-        obj = dbsession.query(Company)\
-                       .options(undefer_group('edit'))\
-                       .filter(Company.id == key)\
-                       .scalar()
-
-        if obj is None:
-            raise KeyError
-        obj.__name__ = 'company'
-        return obj
-
-
-def get_client_or_project_acls(self):
-    """
-        Compute the project's acls
-    """
-    acl = DEFAULT_PERM[:]
-    acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
-                        for user in self.company.employees])
-    #log.debug("# Getting acls for the current project or client : ")
-    #log.debug(acl)
-    return acl
+        return self._get_item(Company, key, "company")
 
 
 class ProjectFactory(BaseDBFactory):
@@ -163,21 +128,7 @@ class ProjectFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
-
-        dbsession = self.dbsession()
-        obj = dbsession.query(Project)\
-                       .options(undefer_group('edit'))\
-                       .filter(Project.id == key)\
-                       .scalar()
-
-        if obj is None:
-            raise KeyError
-        obj.__name__ = 'project'
-        return obj
+        return self._get_item(Project, key, 'project')
 
 
 class ClientFactory(BaseDBFactory):
@@ -192,32 +143,7 @@ class ClientFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
-
-        dbsession = self.dbsession()
-        obj = dbsession.query(Client)\
-                       .options(undefer_group('edit'))\
-                       .filter(Client.id == key)\
-                       .scalar()
-        if obj is None:
-            raise KeyError
-        obj.__name__ = 'client'
-        return obj
-
-
-def get_task_acl(self):
-    """
-        return the acls of the current task object
-    """
-    acl = DEFAULT_PERM[:]
-    acl.extend([(Allow, u"%s" % user.login, ("view", "edit", "add"))
-                for user in self.project.company.employees])
-    #log.debug("# Getting acls for the current task : ")
-    #log.debug(acl)
-    return acl
+        return self._get_item(Client, key, 'client')
 
 
 class EstimationFactory(BaseDBFactory):
@@ -232,22 +158,7 @@ class EstimationFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
-
-        dbsession = self.dbsession()
-        obj = dbsession.query(Estimation)\
-                       .options(undefer_group('edit'))\
-                       .filter(Estimation.id == key)\
-                       .scalar()
-
-        if obj is None:
-            raise KeyError
-
-        obj.__name__ = 'estimation'
-        return obj
+        return self._get_item(Estimation, key, 'estimation')
 
 
 class InvoiceFactory(BaseDBFactory):
@@ -262,22 +173,7 @@ class InvoiceFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
-
-        dbsession = self.dbsession()
-        obj = dbsession.query(Invoice)\
-                       .options(undefer_group('edit'))\
-                       .filter(Invoice.id == key)\
-                       .scalar()
-
-        if obj is None:
-            raise KeyError
-
-        obj.__name__ = 'invoice'
-        return obj
+        return self._get_item(Invoice, key, 'invoice')
 
 
 class CancelInvoiceFactory(BaseDBFactory):
@@ -292,32 +188,7 @@ class CancelInvoiceFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
-
-        dbsession = self.dbsession()
-        obj = dbsession.query(CancelInvoice)\
-                       .options(undefer_group('edit'))\
-                       .filter(CancelInvoice.id == key)\
-                       .scalar()
-
-        if obj is None:
-            raise KeyError
-
-        obj.__name__ = 'cancelinvoice'
-        return obj
-
-
-def get_user_acl(self):
-    """
-        Get acls for user account edition
-    """
-    acl = DEFAULT_PERM[:]
-    acl.append((Allow, u"%s" % self.login, ("view", "edit", "add")))
-    acl.append((Allow, Authenticated, ('view')))
-    return acl
+        return self._get_item(CancelInvoice, key, 'cancelinvoices')
 
 
 class UserFactory(BaseDBFactory):
@@ -332,30 +203,7 @@ class UserFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
-
-        dbsession = self.dbsession()
-        obj = dbsession.query(User)\
-                       .options(undefer_group('edit'))\
-                       .filter(User.id == key)\
-                       .scalar()
-
-        if obj is None:
-            raise KeyError
-
-        obj.__name__ = 'user'
-        return obj
-
-
-def get_base_acl(self):
-    """
-        return the base acls
-    """
-    acl = DEFAULT_PERM[:]
-    return acl
+        return self._get_item(User, key, 'user')
 
 
 class OperationFactory(BaseDBFactory):
@@ -370,19 +218,83 @@ class OperationFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        #log.debug("We are in the __getitem__")
-        #log.debug(key)
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
+        return self._get_item(OperationComptable, key, 'operation')
 
-        dbsession = self.dbsession()
-        obj = dbsession.query(OperationComptable)\
-                       .options(undefer_group('edit'))\
-                       .filter(OperationComptable.id == key)\
-                       .scalar()
 
-        if obj is None:
-            raise KeyError
+def get_base_acl(self):
+    """
+        return the base acls
+    """
+    acl = DEFAULT_PERM[:]
+    return acl
 
-        obj.__name__ = 'operation'
-        return obj
+
+def get_company_acl(self):
+    """
+        Compute the company's acls
+    """
+    acl = DEFAULT_PERM[:]
+    acl.append((Allow, Authenticated, 'view',))
+    acl.extend(
+        [(Allow,
+          u"%s" % user.login,
+          ("view", "edit", "add"))
+         for user in self.employees]
+    )
+    return acl
+
+
+def get_user_acl(self):
+    """
+        Get acls for user account edition
+    """
+    acl = DEFAULT_PERM[:]
+    acl.append(
+        (Allow,
+         u"%s" % self.login,
+         ("view", "edit", "add"))
+    )
+    acl.append((Allow, Authenticated, ('view')))
+    return acl
+
+
+def get_task_acl(self):
+    """
+        return the acls of the current task object
+    """
+    acl = DEFAULT_PERM[:]
+    acl.extend(
+        [(Allow,
+          u"%s" % user.login,
+          ("view", "edit", "add"))
+         for user in self.project.company.employees]
+    )
+    return acl
+
+
+def get_client_or_project_acls(self):
+    """
+        Compute the project's acls
+    """
+    acl = DEFAULT_PERM[:]
+    acl.extend(
+        [(Allow,
+          u"%s" % user.login,
+          ("view", "edit", "add"))
+         for user in self.company.employees]
+    )
+    return acl
+
+
+def wrap_db_objects():
+    """
+        Add acls and names to the db objects used as context
+    """
+    Company.__acl__ = property(get_company_acl)
+    Project.__acl__ = property(get_client_or_project_acls)
+    Client.__acl__ = property(get_client_or_project_acls)
+    Estimation.__acl__ = property(get_task_acl)
+    Invoice.__acl__ = property(get_task_acl)
+    CancelInvoice.__acl__ = property(get_task_acl)
+    User.__acl__ = property(get_user_acl)
+    OperationComptable.__acl__ = property(get_task_acl)

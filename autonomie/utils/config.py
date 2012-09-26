@@ -16,6 +16,7 @@
     Simple utilities to access main configuration
 """
 
+
 def get_config(request, dbsession=None):
     """
         Return a dictionnary with the config objects

@@ -24,6 +24,7 @@ from datetime import timedelta
 
 log = logging.getLogger(__name__)
 
+
 def pop_absolute_urls(filepath):
     """
         pop all directories informations included in a filename
@@ -31,6 +32,7 @@ def pop_absolute_urls(filepath):
     """
     filepath = filepath.replace('\\', '/')
     return os.path.basename(filepath)
+
 
 class FileTempStore(dict):
     """
@@ -49,14 +51,17 @@ class FileTempStore(dict):
             FileTempStore(session, "/tmp/logo", "/assets/logo/", "logo.png")
     """
     session_key = 'deform_uploads'
+
     def __init__(self, session, path, url, default_filename=None):
         self.session = session
         self.store_directory = path
         self.store_url = url
         self.default_filename = default_filename
+
         if not os.path.isdir(self.store_directory):
             os.system("mkdir -p %s" % self.store_directory)
-        if not self.session.has_key(self.session_key):
+
+        if not self.session_key in self.session:
             self.session[self.session_key] = {}
 
     def preview_url(self, uid, filename=None):
@@ -76,7 +81,8 @@ class FileTempStore(dict):
             filepath = os.path.join(self.store_url, filename)
         else:
             filepath = None
-        log.debug(u" -> The filepath where to find our file is : %s" % filepath)
+        log.debug(u" -> The filepath where to find our file is : %s"
+                  % filepath)
         return filepath
 
     def get(self, uid, default=None):
@@ -105,7 +111,7 @@ class FileTempStore(dict):
                 del self.session[self.session_key][key]
 
         if not uid in self.session[self.session_key]:
-            raise AttributeError, u"Name '{0}' does not exists".format(uid)
+            raise AttributeError(u"Name '{0}' does not exists".format(uid))
 
         # reset last timestamp
         self.session[self.session_key][uid]['time'] = datetime.now()
@@ -146,7 +152,7 @@ class FileTempStore(dict):
                 'filename': filename,
                 'mimetype': value.get('mimetype'),
                 'size': value.get('size'),
-                'preview_url':value.get('preview_url')
+                'preview_url': value.get('preview_url')
                 }
             }
         self.session.persist()

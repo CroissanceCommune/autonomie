@@ -21,6 +21,7 @@ from deform.form import Form
 
 log = logging.getLogger(__name__)
 
+
 def merge_session_with_post(session, app_struct):
     """
         Merge Deform validated datas with SQLAlchemy's objects
@@ -30,6 +31,7 @@ def merge_session_with_post(session, app_struct):
     for key, value in app_struct.items():
         setattr(session, key, value)
     return session
+
 
 class XHttpForm(Form):
     """
@@ -72,4 +74,3 @@ class XHttpForm(Form):
         html += Form.render(self, appstruct, readonly)
         html += "<script>deform.load()</script>"
         return html
-

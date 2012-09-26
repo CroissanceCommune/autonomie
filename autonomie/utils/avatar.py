@@ -14,17 +14,17 @@
     avatar related utilities
 """
 import logging
-from pyramid.security import authenticated_userid
+#from pyramid.security import authenticated_userid
 
 from autonomie.models.user import User
 
 log = logging.getLogger(__name__)
 
+
 def get_groups(login, request):
     """
         return the current user's groups
     """
-    dbsession = request.dbsession
     user = get_user(login, request)
     if user.is_admin():
         return ['group:admin']
@@ -33,13 +33,15 @@ def get_groups(login, request):
     else:
         return ['group:entrepreneur']
 
+
 def get_avatar(request, dbsession=None):
     """
         Returns the current User object
     """
-    login = authenticated_userid(request)
-    user = get_user(login, request, dbsession)
+    #login = authenticated_userid(request)
+    #user = get_user(login, request, dbsession)
     return request._user
+
 
 def get_user(login, request, dbsession=None):
     """

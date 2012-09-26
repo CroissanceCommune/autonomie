@@ -63,6 +63,7 @@ class MultiRendererFactory(object):
         else:
             return render(template_name, kw)
 
+
 def set_deform_renderer():
     """
         Returns a deform renderer allowing translation and multi-rendering
@@ -75,4 +76,3 @@ def set_deform_renderer():
     renderer = MultiRendererFactory(search_path=deform_template_dirs,
                                     translator=translate)
     Form.default_renderer = renderer
-

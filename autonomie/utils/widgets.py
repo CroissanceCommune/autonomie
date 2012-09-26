@@ -13,7 +13,6 @@
 """
     Widget library
 """
-import cgi
 import urllib
 import logging
 
@@ -26,12 +25,14 @@ from autonomie.utils.pdf import render_html
 
 log = logging.getLogger(__name__)
 
+
 def mako_renderer(tmpl, **kw):
     """
         A mako renderer to be used inside deform special widgets
     """
     template = Template(resource_filename(__name__, tmpl))
     return template.render(**kw)
+
 
 class Link:
     """
@@ -42,6 +43,7 @@ class Link:
         self.label = label
         self.title = title
         self.icon = icon
+
 
 class Widget(object):
     """
@@ -61,13 +63,15 @@ class Widget(object):
             return an html output of the widget
         """
         request = self.request or request
-        return render_html( request, self.template, {'elem':self})
+        return render_html(request, self.template, {'elem': self})
+
 
 class PermWidget(object):
     """
         widget with permission
     """
     perm = None
+
     def set_special_perm_func(self, func):
         """
             Allows to insert a specific permission function
@@ -84,6 +88,7 @@ class PermWidget(object):
         if right and hasattr(self, "special_perm_func"):
             right = self.special_perm_func(context, request)
         return right
+
 
 class StaticWidget(PermWidget):
     """
@@ -104,14 +109,17 @@ class StaticWidget(PermWidget):
         else:
             return ""
 
+
 class Link(Widget, PermWidget):
     template = None
+
 
 class JsLink(Link):
     """
         Simple Javascript Link
     """
     template = "base/jsbutton.mako"
+
     def __init__(self, label, perm=None, css="", js=None, title=None, icon=""):
         self.label = label
         self.perm = perm
@@ -129,12 +137,13 @@ class JsLink(Link):
         """
         return self.js
 
+
 class ViewLink(Link):
 
     template = "base/button.mako"
 
-    def __init__(self, label, perm=None, path=None, css="", js=None, title=None,
-            icon="", request=None, confirm=None, **kw):
+    def __init__(self, label, perm=None, path=None, css="", js=None,
+                 title=None, icon="", request=None, confirm=None, **kw):
         self.label = label
         self.perm = perm
         self.path = path
@@ -174,15 +183,17 @@ class ViewLink(Link):
         """
         request = self.request or request
         cur_path = request.current_route_path()
-        if request.GET.has_key('action'):
+        if 'action' in request.GET:
             cur_path += "?action=%s" % request.GET['action']
         return urllib.unquote(cur_path) == self.url(request)
+
 
 class ItemActionLink(ViewLink):
     """
         Action button used in item list
     """
     template = "base/itemactionlink.mako"
+
     def url(self, context, request):
         """
             Returns the url associated with current btn
@@ -192,7 +203,9 @@ class ItemActionLink(ViewLink):
                                   **self.url_kw)
 
     def render(self, request, item):
-        return render_html( request, self.template, {'elem':self, 'item':item})
+        return render_html(request, self.template, {'elem': self,
+                                                    'item': item})
+
 
 class Submit(Widget):
     """
@@ -210,7 +223,7 @@ class Submit(Widget):
     name = "submit"
     css = "btn btn-primary"
     js = None
-    type_='submit'
+    type_ = 'submit'
     icon = None
 
     def __init__(self, label, value, title=None,
@@ -224,16 +237,19 @@ class Submit(Widget):
         if request:
             self.request = request
 
+
 class ToggleLink(Link):
     template = "base/togglelink.mako"
-    def __init__(self, label, perm=None, target=None, title=None, css="", \
-                                                                icon=""):
+
+    def __init__(self, label, perm=None, target=None, title=None, css="",
+                 icon=""):
         self.label = label
         self.perm = perm
         self.target = target
         self.title = title or label
         self.css = css
         self.icon = icon
+
 
 class SearchForm(Widget):
     template = "base/searchform.mako"
@@ -250,8 +266,10 @@ class SearchForm(Widget):
         """
         self.widgets.append(widget)
 
+
 class Menu(Widget):
     template = None
+
     def __init__(self, template=None, css=None):
         self.items = []
         if template:
@@ -271,28 +289,34 @@ class Menu(Widget):
         """
         self.items.insert(index, item)
 
+
 class ActionMenu(Menu):
     """
         Represent the ActionMenu
     """
     template = "base/actionmenu.mako"
 
+
 class MenuDropDown(Menu, PermWidget):
     template = "base/dropdown.mako"
+
     def __init__(self, label, perm=None, title=None, template=None):
         Menu.__init__(self, template)
         self.label = label
         self.perm = perm
         self.title = title or label
 
+
 class MainMenuItem(ViewLink):
     template = "base/mainmenu_item.mako"
+
 
 class ButtonLink(Widget):
 
     template = "base/button.mako"
 
-    def __init__(self, label, path, js=None, title=None, icon="", css='',**kw):
+    def __init__(self, label, path, js=None, title=None,
+                 icon="", css='', **kw):
         self.label = label
         self.path = path
         self.js = js
@@ -319,9 +343,10 @@ class ButtonLink(Widget):
         """
         request = self.request or request
         cur_path = request.current_route_path()
-        if request.GET.has_key('action'):
+        if 'action' in request.GET:
             cur_path += "?action=%s" % request.GET['action']
         return urllib.unquote(cur_path) == self.url(request)
+
 
 class ButtonJsLink(ButtonLink):
 
@@ -335,6 +360,7 @@ class ButtonJsLink(ButtonLink):
             return True if it's selected
         """
         return False
+
 
 class PopUp(object):
     """

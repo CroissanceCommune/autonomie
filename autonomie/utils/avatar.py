@@ -14,7 +14,7 @@
     avatar related utilities
 """
 import logging
-#from pyramid.security import authenticated_userid
+from pyramid.security import authenticated_userid
 
 from autonomie.models.user import User
 
@@ -38,8 +38,8 @@ def get_avatar(request, dbsession=None):
     """
         Returns the current User object
     """
-    #login = authenticated_userid(request)
-    #user = get_user(login, request, dbsession)
+    login = authenticated_userid(request)
+    get_user(login, request, dbsession)
     return request._user
 
 

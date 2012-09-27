@@ -15,7 +15,6 @@
     Needs to be initialized at module top level
     to avoid problems with the model autoload methods
 """
-import types
 
 from sqlalchemy.ext import declarative
 from sqlalchemy import MetaData
@@ -24,8 +23,12 @@ from sqlalchemy.orm import scoped_session
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
+import autonomie.models.types as types
+
+
 DBSESSION = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DBMETADATA = MetaData()
+
 
 class ORMClass(object):
     """
@@ -45,8 +48,10 @@ class ORMClass(object):
         """
         return DBSESSION.query(cls).get(id_)
 
+
 DBBASE = declarative.declarative_base(cls=ORMClass)
 DBBASE.metadata = DBMETADATA
+
 
 def record_to_appstruct(self):
     """

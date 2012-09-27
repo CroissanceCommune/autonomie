@@ -181,9 +181,11 @@ def fetch_head():
 def revision(message):
     template_args = {}
     imports = set()
+
     def get_rev(rev, context):
         autogen._produce_migration_diffs(context, template_args, imports)
         return []
+
     env = PackageEnvironment(DEFAULT_LOCATION)
     env.run_env(get_rev)
     env.script_dir.generate_revision(rev_id(), message, **template_args)

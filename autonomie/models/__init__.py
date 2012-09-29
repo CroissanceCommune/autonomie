@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 29 août 2012 10:51:14 CEST
+# * Last Modified : sam. 29 sept. 2012 18:06:53 CEST
 #
 # * Project : autonomie
 #
@@ -22,9 +22,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 
 from zope.sqlalchemy import ZopeTransactionExtension
-
-import autonomie.models.types as types
-
 
 DBSESSION = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DBMETADATA = MetaData()

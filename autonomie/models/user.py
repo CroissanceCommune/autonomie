@@ -75,6 +75,7 @@ class User(DBBASE):
         """
             Set the user's password
         """
+        log.info(u"Modifying password : '{0}'".format(self.login))
         self.pwd = self._encode_pass(password)
 
     def auth(self, password):

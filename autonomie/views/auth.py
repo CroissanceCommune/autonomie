@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : jeu. 06 sept. 2012 15:45:19 CEST
+# * Last Modified : mar. 02 oct. 2012 15:39:51 CEST
 #
 # * Project :
 #
@@ -40,16 +40,18 @@ def forbidden_view(request):
     """
         The forbidden view (handles the redirection to login form)
     """
-    log.warn("# An access has been forbidden #")
-    if authenticated_userid(request):
-        log.warn(" + An authenticated user tried to connect")
-        return HTTPForbidden()
-    log.debug(" + Not authenticated : try again")
-    #redirecting to the login page with the current path as param
-    loc = request.route_url('login', _query=(('nextpage', request.path),))
-    if request.is_xhr:
-        return dict(redirect=loc)
-    return HTTPFound(location=loc)
+    login = authenticated_userid(request)
+    if login:
+        log.warn(u"An access has been forbidden to '{0}'".format(login))
+        redirect = HTTPForbidden()
+    else:
+        log.debug(u"An access has been forbidden to a unauthenticated user")
+        #redirecting to the login page with the current path as param
+        loc = request.route_url('login', _query=(('nextpage', request.path),))
+        if request.is_xhr:
+            redirect = dict(redirect=loc)
+        redirect = HTTPFound(location=loc)
+    return redirect
 
 
 @view_config(route_name='login', permission=NO_PERMISSION_REQUIRED,
@@ -70,8 +72,8 @@ def login_view(request):
     myform = form.render(app_struct)
     fail_message = None
     if 'submit' in request.params:
-        log.debug("# Authentication process #")
         controls = request.params.items()
+        log.info(u"Authenticating : '{0}'".format(controls.get('login')))
         try:
             datas = form.validate(controls)
         except ValidationFailure, e:
@@ -84,8 +86,7 @@ def login_view(request):
                     }
         else:
             login = datas['login']
-            log.info(u"User '{0}' has been authenticated".format(login))
-            log.debug(u"  + Redirecting to {0}".format(nextpage))
+            log.info(u" + '{0}' has been authenticated".format(login))
             # Storing the datas in the request object
             remember(request, login)
             return HTTPFound(location=nextpage)

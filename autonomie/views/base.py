@@ -52,7 +52,7 @@ class BaseView(object):
         Base View object
     """
     def __init__(self, request):
-        log.debug("We are in the view : %s" % self)
+        log.debug(u"We are in the view : %s" % self)
         self.request = request
         self.context = request.context
         self.dbsession = request.dbsession()
@@ -170,7 +170,7 @@ class TaskView(BaseView):
         """
         if self.model:
             task = self.model()
-            log.debug(" + A new task has been built")
+            log.debug(u" + A new task has been built")
         else:
             raise Exception("Not implemented yet")
         phaseid = self.request.params.get('phase')
@@ -436,11 +436,11 @@ class TaskView(BaseView):
         """
         btns = []
         actions = self.task.get_next_actions()
-        log.debug("   + Available actions :")
+        log.debug(u"   + Available actions :")
         for action in actions:
-            log.debug("    * {0}".format(action.name))
+            log.debug(u"    * {0}".format(action.name))
             if action.allowed(self.context, self.request):
-                log.debug("     -> is allowed for the current user")
+                log.debug(u"     -> is allowed for the current user")
                 if hasattr(self, "_%s_btn" % action.name):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.extend(func())
@@ -474,7 +474,7 @@ class TaskView(BaseView):
         if hasattr(self, "_pre_status_process"):
             params = getattr(self, "_pre_status_process")(status, params)
 
-        log.debug(" pre status process is OK")
+        log.debug(u" pre status process is OK")
 
         data = self.task.set_status(status,
                                     self.request,
@@ -490,22 +490,22 @@ class TaskView(BaseView):
         """
             Validates the duplication form before duplicating
         """
-        log.debug("# In pre Status process #")
+        log.debug(u"# In pre Status process #")
         if status == "duplicate":
-            log.debug(" * Duplicating the current task")
+            log.debug(u" * Duplicating the current task")
             form = self._duplicate_form()
             appstruct = form.validate(params.items())
-            log.debug(" * Form has been validated")
+            log.debug(u" * Form has been validated")
             project_id = appstruct.get('project')
             project = Project.get(project_id)
             phase_id = appstruct.get('phase')
             phase = Phase.get(phase_id)
-            log.debug(" * Phase : %s" % phase)
-            log.debug(" * Project : %s" % project)
+            log.debug(u" * Phase : %s" % phase)
+            log.debug(u" * Project : %s" % project)
             appstruct['phase'] = phase
             appstruct['project'] = project
             appstruct['user'] = self.user
-            log.debug("Appstruct : %s" % appstruct)
+            log.debug(u"Appstruct : %s" % appstruct)
             return appstruct
         return params
 
@@ -513,7 +513,7 @@ class TaskView(BaseView):
         """
             Set the modifications in the database
         """
-        log.debug(" = > Flushing modification to the database")
+        log.debug(u" = > Flushing modification to the database")
         self.task = self.dbsession.merge(self.task)
         self.dbsession.flush()
 
@@ -521,7 +521,7 @@ class TaskView(BaseView):
         """
             Change the status of the document
         """
-        log.debug("# Document status modification #")
+        log.debug(u"# Document status modification #")
         log.debug(self.request.params)
         valid_msg = u"Le statut a bien été modifié"
         if 'submit' in self.request.params:
@@ -560,7 +560,7 @@ class TaskView(BaseView):
         """
             Returns a page displaying an html rendering of the current task
         """
-        log.debug("# Generating the pdf file #")
+        log.debug(u"# Generating the pdf file #")
         filename = u"{0}.pdf".format(self.task.number)
         write_pdf(self.request, filename, self._html())
         return self.request.response

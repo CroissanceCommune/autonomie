@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 02 oct. 2012 18:50:57 CEST
+# * Last Modified : mar. 02 oct. 2012 18:57:08 CEST
 #
 # * Project :
 #
@@ -73,7 +73,7 @@ def login_view(request):
     fail_message = None
     if 'submit' in request.params:
         controls = request.params.items()
-        log.info(u"Authenticating : '{0}'".format(controls.get('login')))
+        log.info(u"Authenticating : '{0}'".format(request.params.get('login')))
         try:
             datas = form.validate(controls)
         except ValidationFailure, e:

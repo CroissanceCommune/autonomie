@@ -17,6 +17,7 @@
     Add menus to the returned datas before rendering
     Add a translation stuff to the templating context
 """
+import logging
 from webhelpers.html import tags
 from webhelpers.html import HTML
 
@@ -34,6 +35,7 @@ from autonomie.utils.widgets import StaticWidget
 
 from autonomie.views.render_api import api
 
+log = logging.getLogger(__name__)
 
 def get_cid(request):
     """
@@ -182,6 +184,12 @@ def add_renderer_globals(event):
     event['_'] = request.translate
     event['api'] = api
 
+def get_req_uri(request):
+    """
+        Return the requested uri
+    """
+    return request.path_url + request.query_string
+
 
 @subscriber(NewRequest)
 def add_localizer(event):
@@ -191,3 +199,10 @@ def add_localizer(event):
     request = event.request
     request.translate = translate
     request.js_require = set()
+    method = request.method
+    req_uri = get_req_uri(request)
+    http_version = request.http_version
+    referer = request.referer
+    user_agent = request.user_agent
+    log.info(u"method:'%s' - uri:'%s', http_version:'%s' -  referer:'%s' - \
+agent:'%s'" % (method, req_uri, http_version, referer, user_agent))

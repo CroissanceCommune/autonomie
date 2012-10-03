@@ -56,13 +56,7 @@ cache.long_term.expire = 20
 
 [pipeline:main]
 pipeline =
-    translogger
     autonomie
-
-#### LOGGING CONFIGURATION ####
-[filter:translogger]
-use = egg:paste#translogger
-setup_console_handler = False
 
 [server:main]
 use = egg:waitress#main
@@ -71,13 +65,13 @@ port = 8080
 
 # Begin logging configuration
 [loggers]
-keys = root, autonomie, sqlalchemy
+keys = root, autonomie, sqlfile, alembic, wsgi
 
 [handlers]
-keys = console, file, sqlfile
+keys = console, file, sqlfile, wsgi
 
 [formatters]
-keys = generic
+keys = sqlfile, full, wsgi
 
 [logger_root]
 level = ERROR
@@ -87,8 +81,9 @@ handlers = console, file
 level = DEBUG
 handlers = console, file
 qualname = autonomie
+propagate = 0
 
-[logger_sqlalchemy]
+[logger_sqlfile]
 level = INFO
 #level = DEBUG
 #level = INFO
@@ -99,26 +94,49 @@ propagate = 0
 # level = DEBUG logs SQL queries and results.
 # level = WARN logs neither. (Recommended for production systems.)
 
+[logger_alembic]
+level = DEBUG
+handlers = sqlfile
+qualname = alembic
+
 [handler_console]
-class = StreamHandler
+class = autonomie.log.CustomStreamHandler
 args = (sys.stderr,)
 level = NOTSET
-formatter = generic
+formatter = full
 
 [handler_file]
-class = FileHandler
+class = autonomie.log.CustomFileHandler
 args = ('%(here)s/logfile.log','a')
 level = DEBUG
-formatter = generic
+formatter = full
 
 [handler_sqlfile]
 class = FileHandler
 args = ('%(here)s/sql.log','a')
 level = DEBUG
-formatter = generic
+formatter = sqlfile
 
-[formatter_generic]
-format = %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
+[formatter_sqlfile]
+format = %(asctime) %(message)s
+
+[formatter_full]
+format =  %(ip)s - %(asctime)-15s %(levelname)-5.5s USER : %(user)-8s %(message)s ([%(name)s])
+
+[logger_wsgi]
+level = DEBUG
+handlers = wsgi, console
+qualname = wsgi
+propagate = 0
+
+[handler_wsgi]
+class = FileHandler
+args = ('%(here)s/logfile.log','a')
+level = DEBUG
+formatter = wsgi
+
+[formatter_wsgi]
+format = %(message)s
 
 # End logging configuration
 #Alembic conf

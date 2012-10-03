@@ -56,7 +56,6 @@ class CancelInvoiceView(TaskView):
         """
             Cancel invoice add/edit
         """
-        log.debug("# CancelInvoice Form #")
         if self.taskid:
             if not self.is_editable():
                 return self.redirect_to_view_only()
@@ -81,17 +80,15 @@ class CancelInvoiceView(TaskView):
         form.widget.template = "autonomie:deform_templates/form.pt"
 
         if 'submit' in self.request.params:
-            log.debug(" + Values have been submitted")
             datas = self.request.params.items()
-            log.debug(datas)
+            log.debug(u"Cancelinvoice form submission : {0}".format(datas))
             try:
                 appstruct = form.validate(datas)
             except ValidationFailure, e:
                 html_form = e.render()
             else:
-                log.debug("  + Values are valid")
                 dbdatas = get_cancel_invoice_dbdatas(appstruct)
-                log.debug(dbdatas)
+                log.debug(u"Values are valid : {0}".format(dbdatas))
                 merge_session_with_post(self.task, dbdatas['cancelinvoice'])
                 if not edit:
                     self.task.sequenceNumber = self.get_sequencenumber()

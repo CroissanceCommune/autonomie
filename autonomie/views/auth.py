@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 02 oct. 2012 18:57:08 CEST
+# * Last Modified : mer. 03 oct. 2012 19:12:13 CEST
 #
 # * Project :
 #
@@ -77,7 +77,7 @@ def login_view(request):
         try:
             datas = form.validate(controls)
         except ValidationFailure, e:
-            log.exception(" - Authentication error")
+            log.exception(u" - Authentication error")
             myform = e.render()
             fail_message = u"Erreur d'authentification"
             return {'title': "Authentification",

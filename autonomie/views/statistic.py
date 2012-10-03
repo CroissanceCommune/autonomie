@@ -39,7 +39,6 @@ class StatisticView(BaseView):
         """
             the stats view
         """
-        log.debug("# Asking for the statistics page #")
         ret_dict = dict(title=u"Statistiques")
         companies = Company.query([Company.id, Company.name]).all()
         ret_dict['companies'] = companies

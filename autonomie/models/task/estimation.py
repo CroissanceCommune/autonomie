@@ -119,7 +119,6 @@ class Estimation(Task, TaskCompute):
         seq_number = project.get_next_estimation_number()
         taskDate = datetime.date.today()
 
-        log.debug("# Estimation Duplication #")
         duple = Estimation()
         duple.CAEStatus = u'draft'
         duple.taskDate = taskDate
@@ -141,7 +140,6 @@ class Estimation(Task, TaskCompute):
         duple.expenses = self.expenses
         duple.paymentDisplay = self.paymentDisplay
         # Setting relationships at the end of the duplication
-        log.debug("    adding relationships")
         duple.phase = phase
         duple.statusPersonAccount = user
         duple.project = project
@@ -151,8 +149,6 @@ class Estimation(Task, TaskCompute):
             duple.payment_lines.append(line.duplicate())
         for line in self.discounts:
             duple.discounts.append(line.duplicate())
-
-        log.debug("-> Returning the duplicate")
         return duple
 
     def _common_args_for_generation(self, user_id):

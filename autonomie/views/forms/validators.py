@@ -24,11 +24,7 @@ def validate_image_mime(node, value):
     """
         Validate mime types for image files
     """
-    log.debug("In validating mimetype")
-    log.debug(value)
     if value.get('mimetype'):
-        log.debug("On a un fp dans value")
-
         if not value['mimetype'].startswith('image/'):
             message = u"Veuillez télécharger un fichier de type jpg, png, \
 bmp ou gif"

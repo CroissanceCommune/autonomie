@@ -89,11 +89,13 @@ class CompanyViews(BaseView):
         form = Form(schema, buttons=(submit_btn, ))
         if 'submit' in self.request.params:
             datas = self.request.params.items()
+            log.debug(u"Company form submission : {0}".format(datas))
             try:
                 app_datas = form.validate(datas)
             except ValidationFailure, errform:
                 html_form = errform.render()
             else:
+                log.debug(u"Values are valid : {0}".format(app_datas))
                 company = merge_session_with_post(company, app_datas)
                 self.dbsession.merge(company)
                 message = u"Votre entreprise a bien été éditée"
@@ -124,7 +126,6 @@ class CompanyViews(BaseView):
         """
             Company main view
         """
-        log.debug("View company")
         company = self.request.context
         self._set_item_menu(company)
         link_list = []

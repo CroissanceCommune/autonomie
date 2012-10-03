@@ -68,7 +68,7 @@ class FileTempStore(dict):
         """
             Returns the url for the preview
         """
-        log.debug("Asking for a preview URl")
+        log.debug(u"Asking for a preview URl")
         log.debug(u" + uid : %s" % uid)
         filepath = None
         if self.default_filename:
@@ -99,7 +99,7 @@ class FileTempStore(dict):
         """
             Retrieves the file contents of a given file
         """
-        log.debug("In __getitem__")
+        log.debug(u"In __getitem__")
         log.debug(u" + uid %s" % uid)
 
         # We erase elements in the for loop
@@ -126,7 +126,7 @@ class FileTempStore(dict):
         """
             Saves the file contents to a file
         """
-        log.debug("In __setitem__")
+        log.debug(u"In __setitem__")
         log.debug(u" + uid : %s" % uid)
         log.debug(u" + value : %s" % value)
         filedata = value.get('fp')

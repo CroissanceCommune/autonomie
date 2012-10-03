@@ -271,12 +271,10 @@ class Invoice(Task, TaskCompute):
         """
             Validate a record payment
         """
-        log.debug("Invoice payment recording")
-        log.debug("  o There was to pay : %s" % self.topay())
-        log.debug("    ->Is recorded : %s" % amount)
+        log.info(u"Amount : {0}".format(amount))
         payment = Payment(mode=mode, amount=amount)
         self.payments.append(payment)
-        log.debug("     -> There still to pay : %s" % self.topay())
+        log.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() == 0 or resulted:
             self.CAEStatus = 'resulted'
         return self

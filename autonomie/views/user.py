@@ -177,7 +177,6 @@ Cette action n'est pas réversible."
         """
             Add / Edit a user
         """
-        log.debug(u"# In UserView.user_edit #")
         if self.request.context.__name__ == 'user':
             user = self.request.context
             edit = True
@@ -192,13 +191,13 @@ Cette action n'est pas réversible."
         form = self._get_user_form(edit=edit)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
-            log.debug(u" + Submitted datas")
-            log.debug(datas)
+            log.debug(u"User form submission : {0}".format(datas))
             try:
                 app_datas = form.validate(datas)
             except ValidationFailure, errform:
                 html_form = errform.render()
             else:
+                log.debug(u"Values are valid : {0}".format(app_datas))
                 # Validation OK
                 # Création/édition du compte de l'utilisateur
                 # Création (ou non) de la/des entreprise(s)
@@ -215,7 +214,7 @@ Cette action n'est pas réversible."
                         company = Company.query().filter(
                                Company.name == company_name).first()
                         if not company:
-                            log.info(u" + Adding company : %s" % company_name)
+                            log.info(u"Adding company : %s" % company_name)
                             company = Company()
                             company.name = company_name
                             company.goal = u"Entreprise de {0}".format(
@@ -223,7 +222,7 @@ Cette action n'est pas réversible."
                             company = self.dbsession.merge(company)
                             self.dbsession.flush()
                         user.companies.append(company)
-                log.info(u" + Adding/Editing user : {0}" .format(
+                log.info(u"Adding/Editing user : {0}" .format(
                                                          format_account(user)))
                 user = self.dbsession.merge(user)
                 self.dbsession.flush()
@@ -251,7 +250,6 @@ Cette action n'est pas réversible."
         """
             disable a user and its enteprises
         """
-        log.debug(u"Disabling a user")
         schema = get_user_del_schema(self.context)
         form = Form(schema, buttons=(submit_btn, cancel_btn,))
         if "cancel" in self.request.params:
@@ -264,7 +262,6 @@ Cette action n'est pas réversible."
             except ValidationFailure, err:
                 html_form = err.render()
             else:
-                log.debug(datas)
                 if datas.get('companies', False):
                     self._disable_companies()
                 if datas.get('disable', False):
@@ -295,6 +292,7 @@ Cette action n'est pas réversible."
             disable all companies related to this user
         """
         for company in self.context.companies:
+            log.info(u"The company {0} has been disabled".format(company.name))
             company.disable()
             self.dbsession.merge(company)
             message = u"L'entreprise '{0}' a bien été désactivée.".format(
@@ -314,8 +312,8 @@ Cette action n'est pas réversible."
                                             format_account(self.context))
         err_msg = u"Erreur à la suppression du compte de '{0}'".format(
                                                 format_account(self.context))
-        log.debug(u"# Deleting a user #")
         try:
+            log.debug(u"Deleting account : {0}".format(self.context))
             self.dbsession.delete(self.context)
             self.dbsession.flush()
             self.session.flash(message, 'main')

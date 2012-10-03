@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mar. 25 sept. 2012 02:08:09 CEST
+# * Last Modified : mer. 03 oct. 2012 15:34:43 CEST
 #
 # * Project : autonomie
 #
@@ -59,10 +59,8 @@ class RootFactory(dict):
         """
             Default permissions
         """
-        #log.debug("# Getting root acls : ")
         acl = DEFAULT_PERM[:]
         acl.append((Allow, Authenticated, 'view',))
-        #log.debug(acl)
         return acl
 
     def __init__(self, request):

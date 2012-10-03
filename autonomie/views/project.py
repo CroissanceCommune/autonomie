@@ -139,7 +139,6 @@ de créer de nouveaux projets", queue="main")
         """
             Return the list of projects
         """
-        log.debug("Getting projects")
         company = self.request.context
         # If not client have been added, redirecting to clients page
         if not company.clients:
@@ -215,9 +214,7 @@ de créer de nouveaux projets", queue="main")
     def project(self):
         """
             Returns:
-            * the company edit form
-            or
-            * the company add form when an error has occured
+                the project add/edit form
         """
         if self.request.context.__name__ == 'company':
             company = self.request.context
@@ -242,12 +239,13 @@ de créer de nouveaux projets", queue="main")
         if 'submit' in self.request.params:
             # form POSTed
             datas = self.request.params.items()
+            log.debug(u"Project form submission: {0}".format(datas))
             try:
                 app_datas = form.validate(datas)
-                log.debug(app_datas)
             except ValidationFailure, errform:
                 html_form = errform.render()
             else:
+                log.debug(u"Values are valid : {0}".format(app_datas))
                 project = merge_session_with_post(project, app_datas)
                 # The returned project is a persistent object
                 project = self.dbsession.merge(project)

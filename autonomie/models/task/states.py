@@ -41,8 +41,7 @@ def record_payment(task, **kw):
         record a payment for the given task
         expecting a paymendMode to be passed throught kw
     """
-    log.debug("recording a payment")
-    log.debug(task)
+    log.info(u"Recording a payment for {0}".format(task))
     if "mode" in kw and "amount" in kw:
         return task.record_payment(kw['mode'],
                                    kw['amount'],

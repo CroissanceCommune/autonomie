@@ -61,12 +61,13 @@ class HolidayView(BaseView):
         holidays = Holiday.query(self.dbsession, user_id=self.request.user.id)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
-            log.debug(datas)
+            log.debug(u"Holiday form submission : {0}".format(datas))
             try:
                 appstruct = form.validate(datas)
             except ValidationFailure, errform:
                 html_form = errform.render()
             else:
+                log.debug(u"Values are valid : {0}".format(appstruct))
                 # Validation OK
                 for holiday in holidays:
                     self.dbsession.delete(holiday)
@@ -121,7 +122,6 @@ class HolidayView(BaseView):
                     holidays = holidays.filter(Holiday.user_id == user_id)
                 holidays = holidays.all()
                 html_form = form.render(appstruct)
-                log.debug(u"Rendering with appstruct : %s" % appstruct)
         else:
             html_form = form.render()
         return dict(

@@ -63,7 +63,7 @@ class StatusChanged(object):
         elif 'mail.default_sender' in settings:
             mail = settings['mail.default_sender']
         else:
-            log.info(u"The current user : {0} has not set his email".format(
+            log.info(u"'{0}' has not set his email".format(
                                                     self.request.user.login))
             mail = "Unknown"
         return self.format_mail(mail)
@@ -133,14 +133,10 @@ def send_mail(event):
     """
         send a mail to dests with subject and body beeing set
     """
-    log.debug("# A status Changed event has been fired #")
     if event.is_key_event():
         recipients = event.recipients
         if recipients:
-            log.debug(u" + It's a key event, we send an email to {0}".format(
-                                                            recipients))
-            log.debug(event.subject)
-            log.debug(event.body)
+            log.info(u"Sending an email to '{0}'".format(recipients))
             try:
                 mailer = get_mailer(event.request)
                 message = Message(subject=event.subject,
@@ -149,9 +145,5 @@ def send_mail(event):
                       body=event.body)
                 mailer.send_immediately(message)
             except:
-                log.exception(" - An error has occured while sending the \
+                log.exception(u" - An error has occured while sending the \
 email(s)")
-        else:
-            log.debug(" - No email has been set for the recipient")
-    else:
-        log.debug(" - It's not a key event, nothing to do")

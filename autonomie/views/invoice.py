@@ -83,7 +83,6 @@ class InvoiceView(TaskView):
         """
             Return the invoice edit view
         """
-        log.debug("#  Invoice Form #")
         if self.taskid:
             if not self.is_editable():
                 return self.redirect_to_view_only()
@@ -108,17 +107,15 @@ class InvoiceView(TaskView):
         form.widget.template = "autonomie:deform_templates/form.pt"
 
         if 'submit' in self.request.params:
-            log.debug(" + Values have been submitted")
             datas = self.request.params.items()
-            log.debug(datas)
+            log.debug(u"Invoice form has been validated : {0}".format(datas))
             try:
                 appstruct = form.validate(datas)
             except ValidationFailure, err:
                 html_form = err.render()
             else:
-                log.debug("  + Values are valid")
                 dbdatas = get_invoice_dbdatas(appstruct)
-                log.debug(dbdatas)
+                log.debug(u"Values are valid : {0}".format(dbdatas))
                 merge_session_with_post(self.task, dbdatas['invoice'])
                 if not edit:
                     self.task.sequenceNumber = self.get_sequencenumber()
@@ -224,7 +221,7 @@ class InvoiceView(TaskView):
             cancelinvoice = self.dbsession.merge(cancelinvoice)
             self.dbsession.flush()
             id_ = cancelinvoice.id
-            log.debug(u"   + The cancel id : {0}".format(id_))
+            log.debug(u"Generated cancelinvoice {0}".format(id_))
 
             mess = u"Un avoir a été généré, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
@@ -234,11 +231,10 @@ class InvoiceView(TaskView):
 
         elif status == "duplicate":
             invoice = ret_data
-            log.debug(invoice)
             invoice = self.dbsession.merge(invoice)
             self.dbsession.flush()
             id_ = invoice.id
-            log.debug(u"   + The new invoice id : {0}".format(id_))
+            log.debug(u"Duplicated invoice : {0}".format(id_))
             mess = u"La facture a bien été dupliquée, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
             fmess = mess.format(self.request.route_path("invoice", id=id_))
@@ -270,7 +266,7 @@ class InvoiceView(TaskView):
         if status == "paid":
             form = self._paid_form()
             appstruct = form.validate(params.items())
-            log.debug("Appstruct : %s" % appstruct)
+            log.debug(u"Appstruct : {0}".format(appstruct))
             return appstruct
         return params
 
@@ -280,14 +276,13 @@ class InvoiceView(TaskView):
         """
             register_payment view
         """
-        log.info(u"Registering a payment")
+        log.info(u"'{0}' is registering a payment".format(self.user.login))
         try:
             ret_dict = self._status()
         except ValidationFailure, err:
             log.exception(u"An error has been detected")
             ret_dict = dict(html_form=err.render(),
                     title=u"Enregistrement d'un paiement")
-        log.debug(ret_dict)
         return ret_dict
 
     @view_config(route_name="invoice", request_param='action=duplicate',
@@ -296,14 +291,12 @@ class InvoiceView(TaskView):
         """
             duplicate an invoice
         """
-        log.info(u"Duplicating an invoice")
         try:
             ret_dict = self._status()
         except ValidationFailure, err:
-            log.exception(u"An error has been detected")
+            log.exception(u"Duplication error")
             ret_dict = dict(html_form=err.render(),
                             title=u"Duplication d'un document")
-        log.debug(ret_dict)
         return ret_dict
 
     @view_config(route_name='invoice', request_param='action=delete',
@@ -312,10 +305,12 @@ class InvoiceView(TaskView):
         """
             Delete an invoice
         """
-        log.debug("# Deleting an invoice #")
+        log.info(u"User : {0} deletes invoice : {1}".format(self.user.login,
+                                                            self.task.id))
         try:
             self.task.set_status("delete", self.request, self.user.id)
         except Forbidden, err:
+            log.exception(u"Forbidden operation")
             self.request.session.flash(err.message, queue="error")
         else:
             self.remove_lines_from_session()

@@ -85,7 +85,6 @@ class EstimationView(TaskView):
         """
             Return the estimation edit view
         """
-        log.debug("#  Estimation Form #")
         if self.taskid:
             if not self.is_editable():
                 return self.redirect_to_view_only()
@@ -110,17 +109,16 @@ class EstimationView(TaskView):
         form.widget.template = 'autonomie:deform_templates/form.pt'
 
         if 'submit' in self.request.params:
-            log.debug(" + Values have been submitted")
             datas = self.request.params.items()
-            log.debug(datas)
+            log.debug(u"Estimation form submission : {0}".format(datas))
             try:
                 appstruct = form.validate(datas)
             except ValidationFailure, e:
+                log.exception(u" - Values are not valid")
                 html_form = e.render()
             else:
-                log.debug("  + Values are valid")
                 dbdatas = get_estimation_dbdatas(appstruct)
-                log.debug(dbdatas)
+                log.debug(u"Values are valid : {0}".format(dbdatas))
                 merge_session_with_post(self.task, dbdatas['estimation'])
                 if not edit:
                     self.task.sequenceNumber = self.get_sequencenumber()
@@ -220,14 +218,12 @@ class EstimationView(TaskView):
         """
             Duplicates current estimation
         """
-        log.info("# Duplicate an estimation #")
         try:
             ret_dict = self._status()
         except ValidationFailure, err:
-            log.exception(u"An error has been detected")
+            log.exception(u"Error duplicating an estimation")
             ret_dict = dict(html_form=err.render(),
                     title=u"Duplication d'un document")
-        log.debug(ret_dict)
         return ret_dict
 
     @view_config(route_name='estimation', request_param='action=delete',
@@ -236,10 +232,11 @@ class EstimationView(TaskView):
         """
             Delete an estimation
         """
-        log.debug("# Deleting an estimation #")
+        log.info(u"# Deleting estimation {0}".format(self.task.number))
         try:
             self.task.set_status("delete", self.request, self.user.id)
         except Forbidden, err:
+            log.exception(u"Forbidden operation")
             self.request.session.flash(err.message, queue="error")
         else:
             self.remove_lines_from_session()
@@ -255,7 +252,6 @@ class EstimationView(TaskView):
             ( when no form is displayed : the estimation itself is not
             editable anymore )
         """
-        log.debug("# Invoice Generation #")
         for invoice in self.task.gen_invoices(self.user.id):
             self.dbsession.merge(invoice)
         self.request.session.flash(u"Vos factures ont bien été générées",
@@ -284,7 +280,6 @@ class EstimationView(TaskView):
             flash(mess.format(self.task.number))
 
         elif status == 'delete':
-            log.info(u"Deleting an invoice")
             for line in self.task.lines:
                 self.dbsession.delete(line)
             for line in self.task.discounts:
@@ -300,11 +295,9 @@ class EstimationView(TaskView):
 
         elif status == 'duplicate':
             estimation = ret_data
-            log.debug(" * The estimation has been duplicated")
             estimation = self.dbsession.merge(estimation)
             self.dbsession.flush()
             id_ = estimation.id
-            log.debug(u"   + The new estimation id : {0}".format(id_))
 
             mess = u"Le devis a bien été dupliqué, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."

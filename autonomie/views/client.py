@@ -78,7 +78,6 @@ class ClientView(ListView):
             Return the list of all the clients
             The list is wrapped in a pagination tool
         """
-        log.debug("Getting clients")
         search, sort, direction, current_page, items_per_page = \
                                                 self._get_pagination_args()
         company = self.request.context
@@ -160,11 +159,13 @@ class ClientView(ListView):
         if 'submit' in self.request.params:
             # form POSTed
             datas = self.request.params.items()
+            log.debug(u"Client form submission : {0}".format(datas))
             try:
                 app_datas = form.validate(datas)
             except ValidationFailure, errform:
                 html_form = errform.render()
             else:
+                log.debug(u"Values are valid : {0}".format(app_datas))
                 client = merge_session_with_post(client, app_datas)
                 client = self.dbsession.merge(client)
                 self.dbsession.flush()

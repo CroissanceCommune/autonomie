@@ -56,7 +56,6 @@ class CompanyInvoicesView(ListView):
         """
         company = self.request.context
         current_year = datetime.date.today().year
-        log.debug("Getting invoices")
         search, sort, direction, current_page, items_per_page = \
                     self._get_pagination_args()
         client = self.request.params.get('client')
@@ -116,7 +115,6 @@ class CompanyInvoicesView(ListView):
             Return all invoices
         """
         current_year = datetime.date.today().year
-        log.debug("# Getting invoices #")
         search, sort, direction, current_page, items_per_page = \
                     self._get_pagination_args()
         client = self.request.params.get('client')
@@ -285,7 +283,6 @@ class CompanyInvoicesView(ListView):
         today = datetime.date.today()
         current_year = today.year
         year = self.request.params.get('year', current_year)
-        log.debug("Getting invoices")
         invoices = self.get_invoices(company_id=company.id,
                                          paid="paid",
                                          year=year,

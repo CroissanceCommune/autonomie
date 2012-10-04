@@ -28,7 +28,7 @@ from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie.models.model import Phase
+from autonomie.models.project import Phase
 from autonomie.models.project import Project
 from autonomie.models.model import Tva
 from autonomie.utils.views import get_page_url

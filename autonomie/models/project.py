@@ -21,6 +21,7 @@ from sqlalchemy import String
 from sqlalchemy import ForeignKey
 from sqlalchemy import Text
 from sqlalchemy.orm import deferred
+from sqlalchemy.orm import relationship
 
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
@@ -128,3 +129,52 @@ class Project(DBBASE):
                     type=self.type,
                     archived=self.archived,
                     phases=phases)
+
+class Phase(DBBASE):
+    """
+        Phase d'un projet
+    """
+    __tablename__ = 'phase'
+    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    id = Column('id', Integer, primary_key=True)
+    project_id = Column('project_id', Integer,
+                        ForeignKey('project.id'))
+    name = Column("name", String(150), default=u'Phase par défaut')
+    project = relationship("Project", backref="phases")
+    creationDate = deferred(Column("creationDate", CustomDateType,
+                                            default=get_current_timestamp))
+    updateDate = deferred(Column("updateDate", CustomDateType,
+                                        default=get_current_timestamp,
+                                        onupdate=get_current_timestamp))
+
+    def is_default(self):
+        """
+            return True is this phase is a default one
+        """
+        return self.name in (u'Phase par défaut', u"default", u"défaut",)
+
+    @property
+    def estimations(self):
+        return self.get_tasks_by_type('estimation')
+
+    @property
+    def invoices(self):
+        return self.get_tasks_by_type('invoice')
+
+    @property
+    def cancelinvoices(self):
+        return self.get_tasks_by_type('cancelinvoice')
+
+    def get_tasks_by_type(self, type_):
+        """
+            return the tasks of the passed type
+        """
+        return [doc for doc in self.tasks if doc.type_ == type_]
+
+    def todict(self):
+        """
+            return a dict version of this object
+        """
+        return dict(id=self.id,
+                    name=self.name)
+

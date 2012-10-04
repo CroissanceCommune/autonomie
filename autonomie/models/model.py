@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : ven. 21 sept. 2012 12:04:27 CEST
+# * Last Modified : jeu. 04 oct. 2012 16:17:49 CEST
 #
 # * Project : autonomie
 #
@@ -36,55 +36,6 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models import DBBASE
 
 log = logging.getLogger(__name__)
-
-
-class Phase(DBBASE):
-    """
-        Phase d'un projet
-    """
-    __tablename__ = 'phase'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
-    id = Column('id', Integer, primary_key=True)
-    project_id = Column('project_id', Integer,
-                        ForeignKey('project.id'))
-    name = Column("name", String(150), default=u'Phase par défaut')
-    project = relationship("Project", backref="phases")
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
-
-    def is_default(self):
-        """
-            return True is this phase is a default one
-        """
-        return self.name in (u'Phase par défaut', u"default", u"défaut",)
-
-    @property
-    def estimations(self):
-        return self.get_tasks_by_type('estimation')
-
-    @property
-    def invoices(self):
-        return self.get_tasks_by_type('invoice')
-
-    @property
-    def cancelinvoices(self):
-        return self.get_tasks_by_type('cancelinvoice')
-
-    def get_tasks_by_type(self, type_):
-        """
-            return the tasks of the passed type
-        """
-        return [doc for doc in self.tasks if doc.type_ == type_]
-
-    def todict(self):
-        """
-            return a dict version of this object
-        """
-        return dict(id=self.id,
-                    name=self.name)
 
 
 class Tva(DBBASE):

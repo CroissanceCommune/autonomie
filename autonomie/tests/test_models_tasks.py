@@ -48,7 +48,7 @@ from autonomie.models.task.interfaces import IInvoice
 
 from autonomie.models.user import User
 from autonomie.models.project import Project
-from autonomie.models.model import Phase
+from autonomie.models.project import Phase
 
 from autonomie.exception import Forbidden
 

@@ -3,7 +3,8 @@ from setuptools import setup
 
 entry_points = {
     "paste.app_factory": ["main=autonomie:main",],
-    "console_scripts": ["autonomie-migrate = autonomie.scripts:migrate"]
+    "console_scripts": ["autonomie-migrate = autonomie.scripts:migrate",
+                        "autonomie-admin = autonomie.scripts:add_admin_cmd"]
 }
 
 setup(

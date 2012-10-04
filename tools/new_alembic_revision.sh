@@ -8,7 +8,7 @@ export CURRENT_VERSION=$(cat ./CURRENT_VERSION)
 
 alembic -c app.ini -n alembic revision -m"$CURRENT_VERSION : $REV_DESC"
 
-echo "You can now edit autonomie/alembic/versions/$(ls -1tr autonomie/alembic/versions/*.py|tail -n1)"
+echo "You can now edit $(ls -1tr autonomie/alembic/versions/*.py|tail -n1)"
 echo "with your mysql migration stuff (alter table add/drop column ...)"
 echo
 

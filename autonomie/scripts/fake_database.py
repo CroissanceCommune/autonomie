@@ -1,3 +1,4 @@
+#-*-coding:utf-8-*-
 """
     Script for populating a fake database
 """

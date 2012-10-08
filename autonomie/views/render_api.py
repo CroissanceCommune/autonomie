@@ -70,6 +70,10 @@ def format_name(firstname, lastname, reverse=False):
     """
         format firstname and lastname in a common format
     """
+    if firstname is None:
+        firstname = ""
+    if lastname is None:
+        lastname = ""
     firstname = firstname.capitalize()
     lastname = lastname.upper()
     if reverse:

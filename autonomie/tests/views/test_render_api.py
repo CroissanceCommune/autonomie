@@ -38,3 +38,8 @@ class TestIt(BaseTestCase):
         self.assertEqual(render_api.format_unity('NUTT'), u'-')
         self.assertEqual(render_api.format_unity('NUTT', pretty=True), u'')
 
+    def test_format_name(self):
+        self.assertEqual(render_api.format_name(None, u"LastName"),
+                                                         u" LASTNAME")
+        self.assertEqual(render_api.format_name(u"Firstname", None),
+                                                        u"Firstname ")

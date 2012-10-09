@@ -62,7 +62,7 @@ def account(request):
         else:
             log.info(u"# User {0} has changed his password #".format(
                                                     avatar.login))
-            dbsession = request.dbsession()
+            dbsession = request.dbsession
             new_pass = datas['pwd']
             avatar.set_password(new_pass)
             dbsession.merge(avatar)

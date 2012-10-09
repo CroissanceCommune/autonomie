@@ -55,7 +55,7 @@ class BaseView(object):
         log.debug(u"We are in the view : %s" % self)
         self.request = request
         self.context = request.context
-        self.dbsession = request.dbsession()
+        self.dbsession = request.dbsession
         self.session = request.session
         self.user = request.user
         self.actionmenu = ActionMenu()

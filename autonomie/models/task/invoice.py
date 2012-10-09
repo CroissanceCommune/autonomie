@@ -204,7 +204,7 @@ class Invoice(Task, TaskCompute):
             taskdate is a string (YYYYMMDD)
         """
         current_year = datetime.date.today().year
-        return DBSESSION.query(func.max(Invoice.officialNumber)).filter(
+        return DBSESSION().query(func.max(Invoice.officialNumber)).filter(
                 Invoice.taskDate.between(current_year * 10000,
                                          (current_year + 1) * 10000
                                     ))
@@ -466,7 +466,7 @@ class CancelInvoice(Task, TaskCompute):
             ManualInvoice table
         """
         current_year = datetime.date.today().year
-        return DBSESSION.query(func.max(CancelInvoice.officialNumber)).filter(
+        return DBSESSION().query(func.max(CancelInvoice.officialNumber)).filter(
                     func.year(CancelInvoice.taskDate) == current_year)
 
     def is_tolate(self):
@@ -595,7 +595,7 @@ class ManualInvoice(DBBASE):
             ManualInvoice table
         """
         current_year = datetime.date.today().year
-        return DBSESSION.query(func.max(ManualInvoice.officialNumber)).filter(
+        return DBSESSION().query(func.max(ManualInvoice.officialNumber)).filter(
                     func.year(ManualInvoice.taskDate) == current_year)
 
     def total_ht(self):

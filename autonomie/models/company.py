@@ -118,7 +118,7 @@ class Company(DBBASE):
             Return a query
         """
         if keys:
-            query = DBSESSION.query(*keys)
+            query = DBSESSION().query(*keys)
         else:
             query = super(Company, cls).query()
         if active:

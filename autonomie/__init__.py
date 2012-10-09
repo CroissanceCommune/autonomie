@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : sam. 22 sept. 2012 12:26:43 CEST
+# * Last Modified : lun. 08 oct. 2012 16:53:27 CEST
 #
 # * Project : autonomie
 #
@@ -59,7 +59,7 @@ def main(global_config, **settings):
     config.set_default_permission('view')
 
     # Adding some properties to the request object
-    config.set_request_property(lambda _: dbsession, 'dbsession', reify=True)
+    config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
     config.set_request_property(get_config, 'config')
 

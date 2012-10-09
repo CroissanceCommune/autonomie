@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 29 sept. 2012 18:06:53 CEST
+# * Last Modified : lun. 08 oct. 2012 16:56:49 CEST
 #
 # * Project : autonomie
 #
@@ -36,14 +36,14 @@ class ORMClass(object):
         """
             return a query
         """
-        return DBSESSION.query(cls)
+        return DBSESSION().query(cls)
 
     @classmethod
     def get(cls, id_):
         """
             Return a query
         """
-        return DBSESSION.query(cls).get(id_)
+        return DBSESSION().query(cls).get(id_)
 
 
 DBBASE = declarative.declarative_base(cls=ORMClass)

@@ -61,8 +61,6 @@ alter table accounts change account_status active varchar(1) NOT NULL DEFAULT 'Y
     op.execute("""
 alter table accounts change account_email email varchar(100) DEFAULT NULL;
 """)
-    op.execute("""
-""")
     # IDProject
     rename_column("project", "IDProject", "id", autoincrement=True)
     rename_column("invoice", "IDProject", "project_id")

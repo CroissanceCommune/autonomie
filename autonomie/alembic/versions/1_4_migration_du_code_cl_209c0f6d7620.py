@@ -21,10 +21,20 @@ import sqlalchemy as sa
 def upgrade():
     op.execute("""
 alter table coop_customer drop primary key;
+""")
+    op.execute("""
 alter table coop_customer add column id int(11) auto_increment not null FIRST, add primary key(id);
+""")
+    op.execute("""
 update coop_project as p join coop_customer as c on p.customerCode=c.code set p.customerCode=c.id;
+""")
+    op.execute("""
 alter table coop_project change customerCode client_id int(11) default null;
+""")
+    op.execute("""
 update symf_facture_manuelle as s join coop_customer as c on s.client_id=c.code set s.client_id=c.id;
+""")
+    op.execute("""
 alter table symf_facture_manuelle change client_id client_id int(11) default null;
 """)
 

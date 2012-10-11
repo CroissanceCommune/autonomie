@@ -57,7 +57,11 @@ insert into payment (mode, amount, date, task_id) VALUE ('%s', '%s', '%s', '%s')
     # Ref #551
     op.execute("""
 update coop_task as t join coop_invoice as inv on t.IDTask=inv.IDTask set CAEStatus='resulted' WHERE t.CAEStatus='paid';
+""")
+    op.execute("""
 update coop_task set CAEStatus='resulted' where CAEStatus='gencinv';
+""")
+    op.execute("""
 update coop_task set CAEStatus='valid' where CAEStatus='sent' OR CAEStatus='recinv';
 """)
     if table_exists("coop_cancel_invoice"):

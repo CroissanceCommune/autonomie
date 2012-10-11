@@ -17,7 +17,6 @@ from autonomie.alembic.utils import column_exists
 
 
 def upgrade():
-    print "Fiche client"
     if not column_exists("customer", "fax"):
         op.add_column("customer", sa.Column("fax", sa.String(50),
                                                             nullable=True))

@@ -39,13 +39,29 @@ def upgrade():
     force_rename_table("coop_estimation_payment", "estimation_payment")
     op.execute("""
 alter table accounts change account_id id int(11) NOT NULL AUTO_INCREMENT;
+""")
+    op.execute("""
 alter table accounts change account_lid login varchar(64) NOT NULL;
+""")
+    op.execute("""
 alter table accounts change account_pwd password varchar(100) NOT NULL;
+""")
+    op.execute("""
 alter table accounts change account_firstname firstname varchar(50) DEFAULT NULL;
+""")
+    op.execute("""
 alter table accounts change account_lastname lastname varchar(50) DEFAULT NULL;
+""")
+    op.execute("""
 alter table accounts change account_primary_group primary_group int(11) NOT NULL DEFAULT '0';
+""")
+    op.execute("""
 alter table accounts change account_status active varchar(1) NOT NULL DEFAULT 'Y';
+""")
+    op.execute("""
 alter table accounts change account_email email varchar(100) DEFAULT NULL;
+""")
+    op.execute("""
 """)
     # IDProject
     rename_column("project", "IDProject", "id", autoincrement=True)

@@ -18,7 +18,11 @@ from autonomie.alembic.utils import table_exists
 def upgrade():
     op.execute("""
 alter table coop_task add column type_ VARCHAR(30) NOT NULL;
+""")
+    op.execute("""
 update coop_task as t join coop_estimation as e on t.IDTask=e.IDTask set type_='estimation';
+""")
+    op.execute("""
 update coop_task as t join coop_invoice as i on t.IDTask=i.IDTask set type_='invoice';
 """)
     if table_exists("coop_cancel_invoice"):

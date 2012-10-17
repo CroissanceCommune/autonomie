@@ -109,9 +109,6 @@ def get_admin_menus(cid):
     menu.add(MainMenuItem(u"Congés", "manage", path="holidays",
         icon="icon-white icon-plane"
         ))
-    menu.add(MainMenuItem(u"Comptabilité", "manage", path="operations",
-        icon="icon-white icon-info-sign",
-        ))
     menu.add(MainMenuItem(u"Configuration", "admin", path="admin_index",
         icon="icon-white icon-cog"))
     submenu = get_user_menu(cid, "nav-pills")

@@ -27,6 +27,7 @@ from sqlalchemy.orm import deferred
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models import DBBASE
+
 log = logging.getLogger(__name__)
 
 

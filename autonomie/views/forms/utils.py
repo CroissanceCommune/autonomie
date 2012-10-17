@@ -41,6 +41,7 @@ class BaseFormView(FormView):
     def __init__(self, request):
         super(BaseFormView, self).__init__(request)
         self.dbsession = self.request.dbsession
+        self.session = self.request.session
 
     def __call__(self):
         result = super(BaseFormView, self).__call__()

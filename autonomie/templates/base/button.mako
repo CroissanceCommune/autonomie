@@ -9,6 +9,9 @@
         % if hasattr(elem, "css") and elem.css:
             class="${elem.css}"
         % endif
+        % if hasattr(elem, 'title'):
+            title="${elem.title}"
+        % endif
         >
         %if elem.icon:
             <i class='${elem.icon}'></i>

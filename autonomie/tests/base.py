@@ -81,7 +81,7 @@ class BaseViewTest(BaseTestCase):
             post.update({'csrf_token': def_csrf})
         request = testing.DummyRequest(post)
         request.session = self.make_session(request)
-        request.dbsession = lambda :self.session
+        request.dbsession = self.session
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
         request.session.get_csrf_token = csrf_token

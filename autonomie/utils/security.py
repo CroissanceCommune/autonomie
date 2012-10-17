@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 03 oct. 2012 15:34:43 CEST
+# * Last Modified : mer. 17 oct. 2012 07:20:04 CEST
 #
 # * Project : autonomie
 #
@@ -27,7 +27,6 @@ from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import CancelInvoice
 from autonomie.models.user import User
-from autonomie.models.model import OperationComptable
 
 log = logging.getLogger(__name__)
 
@@ -72,7 +71,6 @@ class RootFactory(dict):
         self['invoices'] = InvoiceFactory(self, 'invoices')
         self['cancelinvoices'] = CancelInvoiceFactory(self, 'cancelinvoices')
         self['users'] = UserFactory(self, 'users')
-        self['operations'] = OperationFactory(self, 'operations')
 
 
 class BaseDBFactory(object):
@@ -204,21 +202,6 @@ class UserFactory(BaseDBFactory):
         return self._get_item(User, key, 'user')
 
 
-class OperationFactory(BaseDBFactory):
-    """
-        Handle access to a comptability operation entry
-    """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(OperationComptable, key, 'operation')
-
-
 def get_base_acl(self):
     """
         return the base acls
@@ -295,4 +278,3 @@ def wrap_db_objects():
     Invoice.__acl__ = property(get_task_acl)
     CancelInvoice.__acl__ = property(get_task_acl)
     User.__acl__ = property(get_user_acl)
-    OperationComptable.__acl__ = property(get_task_acl)

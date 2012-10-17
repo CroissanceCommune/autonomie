@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : sam. 20 oct. 2012 06:52:55 CEST
+# * Last Modified : mer. 17 oct. 2012 07:20:27 CEST
 #
 # * Project : autonomie
 #
@@ -158,13 +158,6 @@ def main(global_config, **settings):
     config.add_route("user",
                      "/users/{id:\d+}",
                      traverse="/users/{id}")
-
-    # Operations comptables
-    config.add_route("operations",
-                    "/operations")
-    config.add_route("operation",
-                    "/operations/{id:\d+}",
-                    traverse="/operations/{id}")
 
     # Manage main view
     config.add_route("manage",

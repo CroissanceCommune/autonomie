@@ -26,3 +26,5 @@ from .project import phaseSchema
 from .admin import MainConfig
 from .admin import TvaConfig
 from .comptability import OperationSchema
+from .utils import BaseFormView
+

@@ -37,9 +37,10 @@ def deferred_upload_widget(node, kw):
     """
         Returns a fileupload widget to allow logo upload
     """
-    session = kw['session']
-    root_path = kw['rootpath']
-    root_url = kw['rooturl']
+    request = kw['request']
+    session = request.session
+    root_path = request.registry.settings.get('autonomie.assets')
+    root_url = "/assets/"
     store_url = os.path.join(root_url, "main")
     store_directory = os.path.join(root_path, "main")
     tmpstore = FileTempStore(session, store_directory, store_url, 'logo.png')

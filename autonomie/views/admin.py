@@ -14,18 +14,13 @@
 #
 """
     Administration views
-    - user account handling
-    - company account handling
-    - config database configuration
-    - welcome message delivery
+    - config table configuration
+    - welcome message
+    - logo upload
 """
 import logging
 
-from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from deform import Form
-from deform import ValidationFailure
-
 from autonomie.models.config import Config
 from autonomie.models.tva import Tva
 from autonomie.utils.forms import merge_session_with_post
@@ -34,98 +29,104 @@ from autonomie.views.forms import MainConfig
 from autonomie.views.forms import TvaConfig
 from autonomie.views.forms.admin import get_config_appstruct
 from autonomie.views.forms.admin import merge_dbdatas
-from .base import BaseView
+from autonomie.views.forms import BaseFormView
+from autonomie.utils.widgets import ActionMenu
+from autonomie.utils.widgets import ViewLink
 
 log = logging.getLogger(__name__)
 
+def index(request):
+    """
+        Return datas for the index view
+    """
+    menu = ActionMenu()
+    menu.add(ViewLink(u"Configuration générale", path='admin_main',
+           title=u"Configuration générale de votre installation d'autonomie"))
+    menu.add(ViewLink(u"Configuration des taux de TVA", path='admin_tva',
+            title=u"Configuration des taux de TVA proposés dans les devis et \
+factures"))
+    return dict(title=u"Administration du site", action_menu=menu)
 
-class AdminViews(BaseView):
+
+class AdminMain(BaseFormView):
     """
-        Main class for admin views
+        Main configuration view
     """
-    @view_config(route_name='admin_index',
+    add_template_vars = ('title',)
+    title = u"Configuration générale"
+    validation_msg = u"La configuration a bien été modifiée"
+    schema = MainConfig()
+    buttons = (submit_btn,)
+
+    def before(self, form):
+        """
+            Add the appstruct to the form
+        """
+        config_dict = self.request.config
+        appstruct = get_config_appstruct(config_dict)
+        form.appstruct = appstruct
+
+    def submit_success(self, appstruct):
+        """
+            Insert config informations into database
+        """
+        # la table config étant un stockage clé valeur
+        # le merge_session_with_post ne peut être utilisé
+        dbdatas = self.dbsession.query(Config).all()
+        dbdatas = merge_dbdatas(dbdatas, appstruct)
+        for dbdata in dbdatas:
+            self.dbsession.merge(dbdata)
+        self.dbsession.flush()
+        self.request.session.flash(self.validation_msg, queue='main')
+        return HTTPFound(self.request.route_path("admin_main"))
+
+
+class AdminTva(BaseFormView):
+    """
+        Tva administration view
+        Set tvas used in invoices, estimations and cancelinvoices
+    """
+    add_template_vars = ('title',)
+    title = u"Configuration des taux de TVA"
+    validation_msg = u"Les taux de TVA ont bien été modifiés"
+    schema = TvaConfig()
+    buttons = (submit_btn,)
+
+    def before(self, form):
+        """
+            Add appstruct to the current form object
+        """
+        appstruct = [{'name':tva.name,
+                      'value':tva.value,
+                      "default":tva.default}for tva in Tva.query().all()]
+        form.appstruct = {'tvas':appstruct}
+
+    def submit_success(self, appstruct):
+        """
+            fired on submit success, set Tvas
+        """
+        for tva in Tva.query().all():
+            self.dbsession.delete(tva)
+            self.dbsession.flush()
+        for data in appstruct['tvas']:
+            tva = Tva()
+            merge_session_with_post(tva, data)
+            self.dbsession.merge(tva)
+        self.dbsession.flush()
+        self.request.session.flash(self.validation_msg, queue='main')
+        return HTTPFound(self.request.route_path("admin_tva"))
+
+
+def includeme(config):
+    """
+        Add module's views
+    """
+    config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')
-    def admin_index(self):
-        """
-            Index of the administration page
-        """
-        return dict(title=u"Administration du site")
-
-    @view_config(route_name="admin_main",
+    config.add_view(AdminMain, route_name="admin_main",
                  renderer="admin/main.mako",
                  permission='admin')
-    def admin_main(self):
-        """
-            Main parameters administration
-        """
-        # static assets path
-        root_path = self.request.registry.settings.get('autonomie.assets')
-        schema = MainConfig().bind(
-                                   session=self.request.session,
-                                   rootpath=root_path,
-                                   rooturl="/assets/")
-        form = Form(schema, buttons=(submit_btn,))
-
-        if 'submit' in self.request.params:
-            datas = self.request.params.items()
-            try:
-                appstruct = form.validate(datas)
-            except ValidationFailure, errform:
-                html_form = errform.render()
-            else:
-                # Validation OK
-                # la table config étant un stockage clé valeur
-                # le merge_session_with_post ne peut être utilisé
-                dbdatas = self.dbsession.query(Config).all()
-                dbdatas = merge_dbdatas(dbdatas, appstruct)
-                for dbdata in dbdatas:
-                    self.dbsession.merge(dbdata)
-                self.dbsession.flush()
-                self.request.session.flash(
-                        u"La configuration a bien été modifiée", queue='main')
-                return HTTPFound(self.request.route_path("admin_main"))
-        else:
-            config_dict = self.request.config
-            appstruct = get_config_appstruct(config_dict)
-            html_form = form.render(appstruct)
-        return dict(title=u"Configuration générale",
-                    html_form=html_form)
-
-    @view_config(route_name='admin_tva',
+    config.add_view(AdminTva, route_name='admin_tva',
                  renderer="admin/tva.mako",
                  permission='admin')
-    def admin_tva(self):
-        """
-            Tva configuration
-        """
-        schema = TvaConfig()
-        form = Form(schema, buttons=(submit_btn,))
-        tvas = Tva.query()
-        if 'submit' in self.request.params:
-            datas = self.request.params.items()
-            try:
-                appstruct = form.validate(datas)
-            except ValidationFailure, errform:
-                html_form = errform.render()
-            else:
-                # Validation OK
-                for tva in tvas:
-                    self.dbsession.delete(tva)
-                    self.dbsession.flush()
-                for data in appstruct['tvas']:
-                    tva = Tva()
-                    dbdatas = merge_session_with_post(tva, data)
-                    self.dbsession.merge(tva)
-                self.dbsession.flush()
-                self.request.session.flash(
-                    u"Les taux de TVA ont bien été modifiés", queue='main')
-                return HTTPFound(self.request.route_path("admin_tva"))
-        else:
-            appstruct = [{'name':tva.name,
-                          'value':tva.value,
-                          "default":tva.default}for tva in tvas]
-            html_form = form.render({'tvas': appstruct})
-        return dict(title=u"Configuration des taux de TVA",
-                    tvas=tvas,
-                    html_form=html_form)

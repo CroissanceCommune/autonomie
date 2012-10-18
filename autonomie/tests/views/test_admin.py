@@ -13,7 +13,6 @@
 # * Project :
 #
 from autonomie.models import tva
-
 from autonomie.views.admin import AdminTva
 from autonomie.tests.base import BaseFunctionnalTest
 
@@ -25,3 +24,6 @@ class TestTvaView(BaseFunctionnalTest):
         view = AdminTva(self.get_csrf_request())
         view.submit_success(appstruct)
         self.assertEqual(len(self.session.query(tva.Tva).all()), 2)
+        appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1}]}
+        view.submit_success(appstruct)
+        self.assertEqual(len(self.session.query(tva.Tva).all()), 1)

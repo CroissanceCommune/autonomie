@@ -23,6 +23,7 @@ from sqlalchemy import Text
 from sqlalchemy import String
 from autonomie.models import DBBASE
 
+
 class Config(DBBASE):
     """
         Table containing the main configuration
@@ -37,3 +38,10 @@ class Config(DBBASE):
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
 
+
+def get_config():
+    """
+        Return a dictionnary with the config objects
+    """
+    return dict((entry.name, entry.value)
+                for entry in Config.query().all())

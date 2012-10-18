@@ -63,7 +63,7 @@ class TestAvatar(BaseViewTest):
 
 class TestConfig(BaseTestCase):
     def test_load_value(self):
-        from autonomie.utils.config import get_config
-        all_ = get_config(testing.DummyRequest())
+        from autonomie.models.config import get_config
+        all_ = get_config()
         self.assertTrue("hostname" in all_.keys()
                         and "coop_interviewergroup" in all_.keys())

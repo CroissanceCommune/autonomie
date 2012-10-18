@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 17 oct. 2012 08:12:57 CEST
+# * Last Modified : jeu. 18 oct. 2012 21:50:00 CEST
 #
 # * Project : autonomie
 #
@@ -27,9 +27,9 @@ from autonomie.utils.security import BaseDBFactory
 from autonomie.utils.security import wrap_db_objects
 
 from autonomie.models.initialize import initialize_sql
+from autonomie.models.config import get_config
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
-from autonomie.utils.config import get_config
 from autonomie.utils.renderer import set_deform_renderer
 
 
@@ -61,7 +61,7 @@ def main(global_config, **settings):
     # Adding some properties to the request object
     config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
-    config.set_request_property(get_config, 'config')
+    config.set_request_property(lambda _:get_config(), 'config')
 
     config.add_static_view('static', 'autonomie:static', cache_max_age=3600)
     config.add_static_view('deformstatic', "deform:static", cache_max_age=3600)

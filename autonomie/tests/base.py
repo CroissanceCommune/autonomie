@@ -22,8 +22,9 @@ from paste.deploy.loadwsgi import appconfig
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 
-from autonomie.models import DBSESSION
+import autonomie.models
 from autonomie.models import DBBASE  # base declarative object
+from sqlalchemy.orm import scoped_session
 
 here = os.path.dirname(__file__)
 settings = appconfig('config:' + os.path.join(here, '../../', 'test.ini'),
@@ -35,23 +36,20 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.engine = engine_from_config(settings, prefix='sqlalchemy.')
-        cls.DBSession = sessionmaker()
         cls.connection = cls.engine.connect()
-        DBSESSION.configure(bind=cls.connection)
+        cls.DBSession = scoped_session(sessionmaker(bind=cls.connection))
+        autonomie.models.DBSESSION = cls.DBSession
 
     def setUp(self):
         # begin a non-ORM transaction
         self.trans = self.connection.begin()
-
-        # bind an individual DBSESSION to the connection
-        self.DBSession.configure(bind=self.connection)
-        from functools import partial
-        self.session = self.DBSession(bind=self.connection)
+        # Get a new session
+        self.session = self.DBSession()
         DBBASE.session = self.session
 
     def tearDown(self):
         # rollback - everything that happened with the
-        # DBSESSION above (including calls to commit())
+        # dbsession above (including calls to commit())
         # is rolled back.
         testing.tearDown()
         self.trans.rollback()

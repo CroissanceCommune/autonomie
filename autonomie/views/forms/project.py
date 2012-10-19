@@ -20,11 +20,56 @@ import logging
 
 from deform import widget
 
-from autonomie.views.forms.widgets import get_deferred_edit_widget
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
 from autonomie.views.forms.widgets import get_date_input
+from autonomie.views.forms.widgets import DisabledInput
 
 log = logging.getLogger(__name__)
+
+
+def build_client_value(client=None):
+    """
+        return the tuple for building client select
+    """
+    if client:
+        return (str(client.id), client.name)
+    else:
+        return ("0", u"Sélectionnez")
+
+
+def build_client_values(clients):
+    """
+        Build human understandable client labels
+        allowing efficient discrimination
+    """
+    options = [build_client_value()]
+    options.extend([build_client_value(client)
+                            for client in clients])
+    return options
+
+def get_clients_from_request(request):
+    if request.context.__name__ == 'project':
+        clients = request.context.company.clients
+    elif request.context.__name__ == 'company':
+        clients = request.context.clients
+    else:
+        clients = []
+    return clients
+
+@colander.deferred
+def deferred_client_list(node, kw):
+    request = kw['request']
+    clients = get_clients_from_request(request)
+    return deferred_autocomplete_widget(node,
+                        {'choices':build_client_values(clients)})
+
+@colander.deferred
+def deferred_code_widget(node, kw):
+    if kw['request'].context.__name__ == 'project':
+        wid = DisabledInput()
+    else:
+        wid = widget.TextInputWidget(mask='****')
+    return wid
 
 
 class ProjectSchema(colander.MappingSchema):
@@ -36,7 +81,7 @@ class ProjectSchema(colander.MappingSchema):
             validator=colander.Length(max=150), css_class='floatted')
     code = colander.SchemaNode(colander.String(),
             title=u"Code du projet",
-            widget=get_deferred_edit_widget(mask='****'),
+            widget=deferred_code_widget,
             validator=colander.Length(4))
     type = colander.SchemaNode(colander.String(),
             title="Type de projet",
@@ -56,7 +101,7 @@ class ProjectSchema(colander.MappingSchema):
                                     widget=get_date_input())
     client_id = colander.SchemaNode(colander.Integer(),
                                     title=u"Client",
-                                    widget=deferred_autocomplete_widget)
+                                    widget=deferred_client_list)
 
 
 class PhaseSchema(colander.MappingSchema):

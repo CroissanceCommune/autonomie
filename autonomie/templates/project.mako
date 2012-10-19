@@ -31,7 +31,7 @@
 % endif
 <div class='row'>
     <div class='span6 offset3'>
-        ${html_form|n}
+        ${form|n}
     </div>
 </div>
 </%block>

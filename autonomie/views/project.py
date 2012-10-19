@@ -14,6 +14,10 @@
 #
 """
     Project views
+    Context could be either company:
+        add and list view
+    or project :
+        simple view, add_phase, edit, ...
 """
 import logging
 from colorsys import hsv_to_rgb
@@ -21,10 +25,9 @@ from random import uniform
 
 from sqlalchemy import or_
 from webhelpers.html.builder import HTML
-from deform import ValidationFailure
 from deform import Form
 
-from pyramid.view import view_config
+from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
@@ -40,6 +43,7 @@ from autonomie.utils.widgets import SearchForm
 from autonomie.utils.views import submit_btn
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
+from autonomie.views.forms import BaseFormView
 from .base import ListView
 
 log = logging.getLogger(__name__)
@@ -63,37 +67,27 @@ def get_color():
     return rgb_to_hex(tuple(255 * c for c in hsv_to_rgb(h, s, v)))
 
 
-def build_client_value(client):
-    """
-        return the tuple for building client select
-    """
-    if client:
-        return (client.id, client.name)
-    else:
-        return (u" - ", u"Sélectionnez")
-
-
-def build_client_values(clients):
-    """
-        Build human understandable client labels
-        allowing efficient discrimination
-    """
-    return [build_client_value(client)
-                            for client in clients]
-
-
-def get_project_form(clients, default_client=None, edit=False):
+def get_project_form(request):
     """
         Returns the project add/edit form
     """
-    choices = build_client_values(clients)
-    default = build_client_value(default_client)
-    schema = ProjectSchema().bind(edit=edit, choices=choices, default=default)
+    schema = ProjectSchema().bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
     return form
 
 
-class ProjectView(ListView):
+def redirect_to_clients(request, company):
+    """
+        Force project page to be redirected to client page
+    """
+    request.session.flash(u"Vous avez été redirigé vers la liste \
+des clients", queue="main")
+    request.session.flash(u"Vous devez créer des clients afin \
+de créer de nouveaux projets", queue="main")
+    raise HTTPFound(request.route_path("company_clients",
+                                                id=company.id))
+
+class ProjectList(ListView):
     """
         All the projects views are grouped in this class
     """
@@ -103,46 +97,17 @@ class ProjectView(ListView):
     default_sort = 'name'
 
     def __init__(self, request):
-        ListView.__init__(self, request)
-        self._set_actionmenu()
+        super(ProjectList, self).__init__(request)
+        populate_actionmenu(self.request)
 
-    def _set_actionmenu(self):
-        """
-            Sets the action menu
-        """
-        self.actionmenu.add(ViewLink(u"Liste des projets", "edit",
-                                     path="company_projects",
-                                     id=self.context.get_company_id()))
-        if self.context.__name__ == 'project':
-            self.actionmenu.add(self._get_view_btn())
-            self.actionmenu.add(self._get_edit_btn())
-            if has_permission('edit', self.context, self.request):
-                self.actionmenu.add(self._get_detail_btn())
-                self.actionmenu.add(self._get_phase_btn())
-
-    def redirect_to_clients(self, company):
-        """
-            Force project page to be redirected to client page
-        """
-        self.request.session.flash(u"Vous avez été redirigé vers la liste \
-des clients", queue="main")
-        self.request.session.flash(u"Vous devez créer des clients afin \
-de créer de nouveaux projets", queue="main")
-        raise HTTPFound(self.request.route_path("company_clients",
-                                                id=company.id))
-
-    @view_config(route_name='company_projects',
-                 renderer='company_projects.mako',
-                 request_method='GET',
-                 permission='edit')
-    def company_projects(self):
+    def __call__(self):
         """
             Return the list of projects
         """
         company = self.request.context
         # If not client have been added, redirecting to clients page
         if not company.clients:
-            self.redirect_to_clients(company)
+            redirect_to_clients(self.request, company)
         search, sort, direction, current_page, items_per_page = \
                                                 self._get_pagination_args()
 
@@ -203,156 +168,6 @@ de créer de nouveaux projets", queue="main")
                 Client.name.like("%" + search + "%"))
         )
 
-    @view_config(route_name='company_projects',
-                 renderer='project.mako',
-                 request_method='POST',
-                 permission='edit')
-    @view_config(route_name='project',
-                 renderer='project.mako',
-                 request_param='action=edit',
-                 permission='edit')
-    def project(self):
-        """
-            Returns:
-                the project add/edit form
-        """
-        if self.request.context.__name__ == 'company':
-            company = self.request.context
-            project = Project()
-            project.company_id = company.id
-            edit = False
-            default_client = None
-            title = u"Ajout d'un nouveau projet"
-        else:
-            project = self.request.context
-            company = project.company
-            edit = True
-            default_client = project.client
-            title = u"Édition du projet : {0}".format(project.name)
-        if not company.clients:
-            self.redirect_to_clients(company)
-
-        clients = company.clients
-        form = get_project_form(clients,
-                                default_client,
-                                edit=edit)
-        if 'submit' in self.request.params:
-            # form POSTed
-            datas = self.request.params.items()
-            log.debug(u"Project form submission: {0}".format(datas))
-            try:
-                app_datas = form.validate(datas)
-            except ValidationFailure, errform:
-                html_form = errform.render()
-            else:
-                log.debug(u"Values are valid : {0}".format(app_datas))
-                project = merge_session_with_post(project, app_datas)
-                # The returned project is a persistent object
-                project = self.dbsession.merge(project)
-                self.dbsession.flush()
-                if edit:
-                    message = u"Le projet <b>{0}</b> a été édité avec \
-succès".format(project.name)
-                else:
-                    default_phase = Phase()
-                    default_phase.project = project
-                    self.dbsession.merge(default_phase)
-                    message = u"Le projet <b>{0}</b> a été ajouté avec \
-succès".format(project.name)
-                self.request.session.flash(message, queue='main')
-                # Flusing the session launches sql queries
-                return HTTPFound(self.request.route_path('project',
-                                            id=project.id))
-        else:
-            html_form = form.render(project.appstruct())
-        return dict(title=title,
-                    project=project,
-                    html_form=html_form,
-                    company=company,
-                    action_menu=self.actionmenu
-                    )
-
-    @view_config(route_name="project",
-                 request_param="action=addphase",
-                 permission='edit'
-                )
-    def add_phase(self):
-        """
-            Add a phase to the current project
-        """
-        project = self.request.context
-        if not self.request.params.get('phase'):
-            self.request.session.flash(u"Le nom de la phase est obligatoire",
-                                                                queue='error')
-            anchor = "showphase"
-        else:
-            phasename = self.request.params.get('phase')
-            phase = Phase()
-            phase.name = phasename
-            phase.project_id = project.id
-            self.dbsession.add(phase)
-            self.request.session.flash(u"La phase {0} a bien été \
-rajoutée".format(phasename), queue="main")
-            anchor = ""
-        return HTTPFound(self.request.route_path('project',
-                                id=project.id,
-                                _anchor=anchor))
-
-    @view_config(route_name='project', renderer='project_view.mako',
-            permission='view'
-            )
-    def project_view(self):
-        """
-            Company's project view
-        """
-        phases = self.context.phases
-        for phase in phases:
-            for estimation in phase.estimations:
-                estimation.color = get_color()
-        for phase in phases:
-            for invoice in phase.invoices:
-                if invoice.estimation:
-                    invoice.color = invoice.estimation.color
-                else:
-                    invoice.color = get_color()
-        for phase in phases:
-            for cancelinvoice in phase.cancelinvoices:
-                cancelinvoice.color = cancelinvoice.invoice.color
-
-        return dict(title=u"Projet : {0}".format(self.context.name),
-                    project=self.context,
-                    action_menu=self.actionmenu,
-                    company=self.context.company)
-
-    @view_config(route_name="project",
-                request_param="action=archive",
-                permission='edit')
-    def archive(self):
-        """
-            Archive the current project
-        """
-        project = self.request.context
-
-        project.archived = 1
-        self.dbsession.merge(project)
-        self.request.session.flash(u"Le projet '{0}' a été archivé".format(
-                                project.name), queue='main'
-                                    )
-        return HTTPFound(self.request.referer)
-
-    @view_config(route_name="project",
-                request_param="action=delete",
-                permission='edit')
-    def delete(self):
-        """
-            Delete the current project
-        """
-        project = self.request.context
-        self.dbsession.delete(project)
-        self.request.session.flash(u"Le projet '{0}' a bien été \
-supprimé".format(project.name))
-        return HTTPFound(self.request.referer)
-
     def _get_actions(self):
         """
             Return action buttons with permission handling
@@ -390,35 +205,6 @@ supprimé".format(project.name))
             btns.append(del_link)
         return btns
 
-    def _get_view_btn(self):
-        """
-            return the View button
-        """
-        return ViewLink(u"Voir", path="project", id=self.context.id)
-
-    def _get_edit_btn(self):
-        """
-            return the Edit button
-        """
-        return ViewLink(u"Éditer",  path="project", id=self.context.id,
-                                            _query=dict(action="edit"))
-
-    @staticmethod
-    def _get_detail_btn():
-        """
-            return the toggle button which show the details
-        """
-        return ToggleLink(u"Afficher les détails",
-                          target="project-description")
-
-    @staticmethod
-    def _get_phase_btn():
-        """
-            return the toggle button for phase addition
-        """
-        return ToggleLink(u"Ajouter une phase", target="project-addphase",
-                                                            css="addphase")
-
     def _get_archived_btn(self, archived):
         """
             return the show archived button
@@ -435,5 +221,202 @@ supprimé".format(project.name))
         """
             return a popup object for add project
         """
-        form = get_project_form(clients=self.context.clients)
+        form = get_project_form(self.request)
         return PopUp('add', u"Ajouter un projet", form.render())
+
+def project_addphase(request):
+    """
+        Add a phase to the current project
+    """
+    #TODO : utiliser deform pour manager l'ajout de phase (pour le principe)
+    # This one should be a Form View
+    project = request.context
+    if not request.params.get('phase'):
+        request.session.flash(u"Le nom de la phase est obligatoire",
+                                                            queue='error')
+        anchor = "showphase"
+    else:
+        phasename = request.params.get('phase')
+        phase = Phase()
+        phase.name = phasename
+        phase.project_id = project.id
+        request.dbsession.add(phase)
+        request.session.flash(u"La phase {0} a bien été \
+rajoutée".format(phasename), queue="main")
+        anchor = ""
+    return HTTPFound(request.route_path('project', id=project.id,
+                                                    _anchor=anchor))
+
+def project_archive(request):
+    """
+        Archive the current project
+    """
+    project = request.context
+    project.archived = 1
+    request.dbsession.merge(project)
+    request.session.flash(u"Le projet '{0}' a été archivé".format(
+                            project.name), queue='main'
+                                )
+    return HTTPFound(request.referer)
+
+def project_delete(request):
+    """
+        Delete the current project
+    """
+    project = request.context
+    request.dbsession.delete(project)
+    request.session.flash(u"Le projet '{0}' a bien été supprimé".format(
+                                                            project.name))
+    return HTTPFound(request.referer)
+
+def project_view(request):
+    """
+        Return datas for displaying one project
+    """
+    populate_actionmenu(request, request.context)
+    phases = request.context.phases
+    for phase in phases:
+        for estimation in phase.estimations:
+            estimation.color = get_color()
+    for phase in phases:
+        for invoice in phase.invoices:
+            if invoice.estimation:
+                invoice.color = invoice.estimation.color
+            else:
+                invoice.color = get_color()
+    for phase in phases:
+        for cancelinvoice in phase.cancelinvoices:
+            cancelinvoice.color = cancelinvoice.invoice.color
+    return dict(title=u"Projet : {0}".format(request.context.name),
+                project=request.context,
+                company=request.context.company)
+
+
+class ProjectAdd(BaseFormView):
+    add_template_vars = ('title',)
+    title = u"Ajout d'un nouveau projet"
+    schema = ProjectSchema()
+    buttons = (submit_btn,)
+
+    def before(self, form):
+        populate_actionmenu(self.request)
+        # If there's no client, redirect to client view
+        if len(self.request.context.clients) == 0:
+            redirect_to_clients(self.request, self.request.context)
+
+    def submit_success(self, appstruct):
+        """
+            Add a project with a default phase in the database
+        """
+        project = Project()
+        project.company_id = self.request.context.id
+        project = merge_session_with_post(project, appstruct)
+        self.dbsession.add(project)
+        self.dbsession.flush()
+        # Add a default phase to the project
+        default_phase = Phase()
+        default_phase.project = project
+        self.dbsession.add(default_phase)
+        message = u"Le projet <b>{0}</b> a été ajouté avec succès".format(
+                                                                project.name)
+        self.request.session.flash(message, queue='main')
+        return HTTPFound(self.request.route_path('project', id=project.id))
+
+
+class ProjectEdit(BaseFormView):
+    add_template_vars = ('title', 'project',)
+    schema = ProjectSchema()
+    buttons = (submit_btn,)
+
+    def before(self, form):
+        """
+            populate the form with the current datas
+        """
+        form.appstruct = self.request.context.appstruct()
+        populate_actionmenu(self.request, self.request.context)
+
+    def submit_success(self, appstruct):
+        """
+            Flush project edition to the database
+        """
+        project = merge_session_with_post(self.request.context, appstruct)
+        self.dbsession.merge(project)
+        self.dbsession.flush()
+        message = u"Le projet <b>{0}</b> a été édité avec succès".format(
+                                                                  project.name)
+        self.request.session.flash(message, queue='main')
+        return HTTPFound(self.request.route_path('project', id=project.id))
+
+    @reify
+    def title(self):
+        return u"Édition du projet : {0}".format(self.request.context.name)
+
+    @reify
+    def project(self):
+        return self.request.context
+
+
+def populate_actionmenu(request, project=None):
+    """
+        add items to the "actionmenu"
+    """
+    company_id = request.context.get_company_id()
+    request.actionmenu.add(get_list_view_btn(company_id))
+    if project is not None:
+        request.actionmenu.add(get_view_btn(project.id))
+        if has_permission("edit", project, request):
+            request.actionmenu.add(get_edit_btn(project.id))
+            request.actionmenu.add(get_detail_btn())
+            request.actionmenu.add(get_phase_btn())
+
+def get_list_view_btn(cid):
+    return ViewLink(u"Liste des projets", "edit",
+                         path="company_projects",
+                                          id=cid)
+
+def get_view_btn(id_):
+    return ViewLink(u"Voir", path="project", id=id_)
+
+def get_edit_btn(id_):
+    return ViewLink(u"Éditer",  path="project", id=id_,
+                                    _query=dict(action="edit"))
+
+def get_detail_btn():
+    return ToggleLink(u"Afficher les détails", target="project-description")
+
+def get_phase_btn():
+    return ToggleLink(u"Ajouter une phase", target="project-addphase",
+                                                       css="addphase")
+
+def includeme(config):
+    config.add_view(ProjectAdd,
+                    route_name='company_projects',
+                    renderer='project.mako',
+                    request_method='POST',
+                    permission='edit')
+    config.add_view(ProjectEdit,
+                    route_name='project',
+                    renderer='project.mako',
+                    request_param='action=edit',
+                    permission='edit')
+    config.add_view(project_view,
+                    route_name='project',
+                    renderer='project_view.mako',
+                    permission='view')
+    config.add_view(project_delete,
+                    route_name="project",
+                    request_param="action=delete",
+                    permission='edit')
+    config.add_view(project_archive,
+                    route_name="project",
+                    request_param="action=archive",
+                    permission='edit')
+    config.add_view(project_addphase,
+                    route_name="project",
+                    request_param="action=addphase",
+                    permission='edit')
+    config.add_view(ProjectList,
+                    route_name='company_projects',
+                    renderer='company_projects.mako',
+                    request_method='GET',
+                    permission='edit')

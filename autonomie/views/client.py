@@ -19,10 +19,9 @@ import logging
 
 from sqlalchemy import or_
 
-from deform import ValidationFailure
 from deform import Form
 
-from pyramid.view import view_config
+from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
@@ -33,47 +32,32 @@ from autonomie.utils.widgets import SearchForm
 from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import ClientSchema
+from autonomie.views.forms import BaseFormView
 from .base import ListView
 
 log = logging.getLogger(__name__)
 
 
-def get_client_form(company, client=None):
+def get_client_form(request):
     """
         Returns the client add/edit form
     """
-    schema = ClientSchema().bind(company=company, client=client)
+    schema = ClientSchema().bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
     return form
 
 
-class ClientView(ListView):
+class ClientList(ListView):
     """
         Client views
     """
     columns = ("code", "name", "contactLastName",)
 
     def __init__(self, request):
-        super(ClientView, self).__init__(request)
-        self._set_actionmenu()
+        super(ClientList, self).__init__(request)
+        populate_actionmenu(self.request)
 
-    def _set_actionmenu(self):
-        """
-            set the action menu
-        """
-        self.actionmenu.add(ViewLink(u"Liste des clients", "edit",
-                                      path="company_clients",
-                                      id=self.context.get_company_id()))
-
-        if self.context.__name__ == 'client':
-            self.actionmenu.add(self._get_view_button())
-            if has_permission('edit', self.context, self.request):
-                self.actionmenu.add(self._get_edit_button())
-
-    @view_config(route_name='company_clients', renderer='company_clients.mako',
-                                               request_method='GET',
-                                               permission='edit')
-    def company_clients(self):
+    def __call__(self):
         """
             Return the list of all the clients
             The list is wrapped in a pagination tool
@@ -91,7 +75,7 @@ class ClientView(ListView):
 
         # Add form
         if has_permission('add', self.context, self.request):
-            form = get_client_form(company)
+            form = get_client_form(self.request)
             popup = PopUp("addform", u'Ajouter un client', form.render())
             popups = {popup.name: popup}
             self.actionmenu.add(popup.open_btn())
@@ -131,83 +115,116 @@ class ClientView(ListView):
         )
         return clients
 
-    @view_config(route_name='company_clients', renderer='client.mako',
-                 request_method='POST', permission='edit')
-    @view_config(route_name='client', renderer='client.mako',
-                request_param='action=edit', permission='edit')
-    def client(self):
-        """
-            Return :
-            * the client editform
-            or
-            * the client addform when an error has occured
-        """
-        if self.request.context.__name__ == 'company':
-            company = self.context
-            client = Client()
-            client.company_id = company.id
-            edit = False
-            title = u"Ajout d'un nouveau client"
-            form = get_client_form(company)
-        else:
-            client = self.context
-            company = client.company
-            edit = True
-            title = u"Édition du client : {0}".format(client.name)
-            form = get_client_form(company, client)
 
-        if 'submit' in self.request.params:
-            # form POSTed
-            datas = self.request.params.items()
-            log.debug(u"Client form submission : {0}".format(datas))
-            try:
-                app_datas = form.validate(datas)
-            except ValidationFailure, errform:
-                html_form = errform.render()
-            else:
-                log.debug(u"Values are valid : {0}".format(app_datas))
-                client = merge_session_with_post(client, app_datas)
-                client = self.dbsession.merge(client)
-                self.dbsession.flush()
-                if edit:
-                    message = u"Le client <b>{0}</b> a été édité avec \
-succès".format(client.name)
-                else:
-                    #TODO : auto add a new project
-                    message = u"Le client <b>{0}</b> a été ajouté avec \
-succès".format(client.name)
-                self.request.session.flash(message, queue='main')
-                return HTTPFound(self.request.route_path('client',
-                                            id=client.id))
-        else:
-            html_form = form.render(client.appstruct())
-        return dict(title=title,
-                    client=client,
-                    html_form=html_form,
-                    company=company,
-                    action_menu=self.actionmenu)
+def client_view(request):
+    """
+        Return the view of a client
+    """
+    populate_actionmenu(request, request.context)
+    return dict(title=u"Client : {0}".format(request.context.name),
+                client=request.context)
 
-    @view_config(route_name='client', renderer='client_view.mako',
-                 request_method='GET', permission='view')
-    def client_view(self):
-        """
-            Return the view of a client
-        """
-        return dict(title=u"Client : {0}".format(self.context.name),
-                    client=self.context,
-                    company=self.context.company,
-                    action_menu=self.actionmenu
-                    )
 
-    def _get_view_button(self):
-        """
-            return a view button
-        """
-        return ViewLink(u"Voir", "view", path="client", id=self.context.id)
+class ClientAdd(BaseFormView):
+    add_template_vars = ('title',)
+    title = u"Ajouter un client"
+    schema = ClientSchema()
+    buttons = (submit_btn,)
 
-    def _get_edit_button(self):
+    def before(self, form):
+        populate_actionmenu(self.request)
+
+    def submit_success(self, appstruct):
+        client = Client()
+        client.company = self.request.context
+        client = merge_session_with_post(client, appstruct)
+        self.dbsession.add(client)
+        self.dbsession.flush()
+        message = u"Le client <b>{0}</b> a été ajouté avec succès".format(
+                                                                client.name)
+        self.session.flash(message)
+        return HTTPFound(self.request.route_path('client', id=client.id))
+
+
+class ClientEdit(BaseFormView):
+    add_template_vars = ('title',)
+    schema = ClientSchema()
+    buttons = (submit_btn,)
+
+    @reify
+    def title(self):
+        return u"Éditer le client '{0}'".format(self.request.context.name)
+
+    def before(self, form):
         """
-            Return an edit button
+            prepopulate the form and the actionmenu
         """
-        return ViewLink(u"Éditer", "edit", path="client", id=self.context.id,
-                                            _query=dict(action="edit"))
+        form.appstruct = self.request.context.appstruct()
+        populate_actionmenu(self.request, self.request.context)
+
+    def submit_success(self, appstruct):
+        """
+            Edit the database entry
+        """
+        client = merge_session_with_post(self.request.context, appstruct)
+        client = self.dbsession.merge(client)
+        self.dbsession.flush()
+        message = u"Le client <b>{0}</b> a été édité avec succès".format(
+                                                                client.name)
+        self.session.flash(message, queue='main')
+        return HTTPFound(self.request.route_path('client', id=client.id))
+
+
+def populate_actionmenu(request, client=None):
+    """
+        populate the actionmenu
+    """
+    company_id = request.context.get_company_id()
+    request.actionmenu.add(get_list_view_btn(company_id))
+    if client:
+        request.actionmenu.add(get_view_btn(client.id))
+        if has_permission('edit', request.context, request):
+            request.actionmenu.add(get_edit_btn(client.id))
+
+def get_list_view_btn(id_):
+    return ViewLink(u"Liste des clients", "edit", path="company_clients",
+                                                                    id=id_)
+
+def get_view_btn(client_id):
+    return ViewLink(u"Voir", "view", path="client", id=client_id)
+
+def get_edit_btn(client_id):
+    return ViewLink(u"Éditer", "edit", path="client", id=client_id,
+                                        _query=dict(action="edit"))
+
+def includeme(config):
+    """
+        Add module's views
+    """
+    config.add_view(ClientAdd,
+                    route_name='company_clients',
+                    renderer='client.mako',
+                    request_method='POST',
+                    permission='edit')
+    config.add_view(ClientAdd,
+                    route_name='company_clients',
+                    renderer='client.mako',
+                    request_param='action=add',
+                    permission='edit')
+    config.add_view(ClientEdit,
+                    route_name='client',
+                    renderer='client.mako',
+                    request_param='action=edit',
+                    permission='edit')
+
+    config.add_view(ClientList,
+                    route_name='company_clients',
+                    renderer='company_clients.mako',
+                    request_method='GET',
+                    permission='edit')
+
+    config.add_view(client_view,
+                    route_name='client',
+                    renderer='client_view.mako',
+                    request_method='GET',
+                    permission='view')

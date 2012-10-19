@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : ven. 07 sept. 2012 19:00:28 CEST
+# * Last Modified : ven. 19 oct. 2012 15:31:44 CEST
 #
 # * Project : autonomie
 #
@@ -288,6 +288,12 @@ class Menu(Widget):
             Insert an item in the menu
         """
         self.items.insert(index, item)
+
+    def void(self):
+        """
+            Return True if the menu is void
+        """
+        return not bool(len(self.items))
 
 
 class ActionMenu(Menu):

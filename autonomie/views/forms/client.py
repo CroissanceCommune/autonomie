@@ -25,12 +25,25 @@ from autonomie.views.forms.widgets import get_mail_input
 
 log = logging.getLogger(__name__)
 
+def get_client_from_request(request):
+    if request.context.__name__ == 'client':
+        return request.context
+    else:
+        return None
+
+def get_company_id_from_request(request):
+    if request.context.__name__ =='company':
+        return request.context.id
+    elif request.context.__name__ == 'client':
+        return request.context.company.id
+    else:
+        return -1
 
 @colander.deferred
 def deferred_ccode_valid(node, kw):
-    company = kw['company']
-    company_id = company.id
-    client = kw.get('client')
+    request = kw['request']
+    company_id = get_company_id_from_request(request)
+    client = get_client_from_request(request)
 
     def unique_ccode(node, value):
         """

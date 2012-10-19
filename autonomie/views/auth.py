@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 03 oct. 2012 19:12:13 CEST
+# * Last Modified : ven. 19 oct. 2012 14:08:12 CEST
 #
 # * Project :
 #
@@ -65,7 +65,7 @@ def login_view(request):
                                 title="Connexion",
                                 type='submit'),))
     nextpage = request.params.get('nextpage') or request.route_url('index')
-    # avoid looping
+    # avoid redirection looping
     if nextpage == request.route_url('login'):
         nextpage = request.route_url('index')
     app_struct = {'nextpage': nextpage}

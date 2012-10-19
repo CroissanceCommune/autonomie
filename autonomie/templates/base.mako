@@ -117,8 +117,10 @@
     <div class='container'>
       <div class='subnav'>
         <%block name="actionmenu">
-        % if action_menu is not UNDEFINED:
-          ${action_menu.render(request)|n}
+        % if action_menu is not UNDEFINED and not action_menu.void():
+            ${action_menu.render(request)|n}
+        % elif not request.actionmenu.void():
+            ${request.actionmenu.render(request)|n}
         % endif
         </%block>
       </div>

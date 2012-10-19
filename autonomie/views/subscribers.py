@@ -32,6 +32,7 @@ from autonomie.utils.widgets import Menu
 from autonomie.utils.widgets import MainMenuItem
 from autonomie.utils.widgets import MenuDropDown
 from autonomie.utils.widgets import StaticWidget
+from autonomie.utils.widgets import ActionMenu
 
 from autonomie.views.render_api import api
 
@@ -171,14 +172,20 @@ def add_menu(event):
 
 
 @subscriber(BeforeRender)
-def add_renderer_globals(event):
+def add_translation(event):
     """
-        Add some global functions to allow translation in mako templates
+        Add a translation func to the templating context
     """
     request = event['req']
     if not request:
         request = get_current_request()
     event['_'] = request.translate
+
+@subscriber(BeforeRender)
+def add_api(event):
+    """
+        Add an api to the templating context
+    """
     event['api'] = api
 
 def get_req_uri(request):
@@ -187,15 +194,12 @@ def get_req_uri(request):
     """
     return request.path_url + request.query_string
 
-
 @subscriber(NewRequest)
-def add_localizer(event):
+def log_request(event):
     """
-        Add some translation tool to the request object
+        Log each request
     """
     request = event.request
-    request.translate = translate
-    request.js_require = set()
     method = request.method
     req_uri = get_req_uri(request)
     http_version = request.http_version
@@ -203,3 +207,14 @@ def add_localizer(event):
     user_agent = request.user_agent
     log.info(u"method:'%s' - uri:'%s', http_version:'%s' -  referer:'%s' - \
 agent:'%s'" % (method, req_uri, http_version, referer, user_agent))
+
+@subscriber(NewRequest)
+def add_request_attributes(event):
+    """
+        Add usefull tools to the request object
+        that may be used inside the views
+    """
+    request = event.request
+    request.translate = translate
+    request.js_require = set()
+    request.actionmenu = ActionMenu()

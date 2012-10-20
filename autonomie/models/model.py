@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : jeu. 04 oct. 2012 16:17:49 CEST
+# * Last Modified : sam. 20 oct. 2012 06:47:44 CEST
 #
 # * Project : autonomie
 #
@@ -29,33 +29,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 from sqlalchemy.orm import deferred
 
-from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomInteger
-from autonomie.models.utils import get_current_timestamp
 
 from autonomie.models import DBBASE
 
 log = logging.getLogger(__name__)
-
-
-class Tva(DBBASE):
-    """
-        `id` int(2) NOT NULL auto_increment,
-        `name` varchar(8) NOT NULL,
-        `value` int(5)
-        `default` int(2) default 0 #rajouté par mise à jour 1.2
-    """
-    __tablename__ = 'tva'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
-    id = Column('id', Integer, primary_key=True)
-    name = Column("name", String(8), nullable=False)
-    value = Column("value", Integer)
-    default = Column("default", Integer)
-
-    @classmethod
-    def query(cls):
-        q = super(Tva, cls).query()
-        return q.order_by('value')
 
 
 class Config(DBBASE):

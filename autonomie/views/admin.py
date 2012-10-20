@@ -27,7 +27,7 @@ from deform import Form
 from deform import ValidationFailure
 
 from autonomie.models.model import Config
-from autonomie.models.model import Tva
+from autonomie.models.tva import Tva
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import MainConfig

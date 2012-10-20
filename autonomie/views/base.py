@@ -30,7 +30,7 @@ from pyramid.security import has_permission
 
 from autonomie.models.project import Phase
 from autonomie.models.project import Project
-from autonomie.models.model import Tva
+from autonomie.models.tva import Tva
 from autonomie.utils.views import get_page_url
 from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import Submit

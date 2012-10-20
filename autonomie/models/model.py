@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 20 oct. 2012 06:47:44 CEST
+# * Last Modified : sam. 20 oct. 2012 06:51:00 CEST
 #
 # * Project : autonomie
 #
@@ -34,21 +34,6 @@ from autonomie.models.types import CustomInteger
 from autonomie.models import DBBASE
 
 log = logging.getLogger(__name__)
-
-
-class Config(DBBASE):
-    """
-        Table containing the main configuration
-          `config_app` varchar(50) NOT NULL,
-          `config_name` varchar(255) NOT NULL,
-          `config_value` text,
-          PRIMARY KEY  (`config_app`,`config_name`)
-    """
-    __tablename__ = 'config'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
-    app = Column("config_app", String(50), primary_key=True)
-    name = Column("config_name", String(255), primary_key=True)
-    value = Column("config_value", Text())
 
 
 class OperationComptable(DBBASE):

@@ -22,7 +22,7 @@ import logging
 from deform import widget
 from deform import FileData
 
-from autonomie.models.model import Config
+from autonomie.models.config import Config
 from autonomie.views.forms.validators import validate_image_mime
 from autonomie.utils.fileupload import FileTempStore
 

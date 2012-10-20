@@ -26,7 +26,7 @@ from pyramid.httpexceptions import HTTPFound
 from deform import Form
 from deform import ValidationFailure
 
-from autonomie.models.model import Config
+from autonomie.models.config import Config
 from autonomie.models.tva import Tva
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
@@ -61,7 +61,6 @@ class AdminViews(BaseView):
         """
         # static assets path
         root_path = self.request.registry.settings.get('autonomie.assets')
-#        root_path = self.request.config.get('files_dir', '/tmp')
         schema = MainConfig().bind(
                                    session=self.request.session,
                                    rootpath=root_path,

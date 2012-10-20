@@ -15,14 +15,11 @@
 """
     Simple utilities to access main configuration
 """
-
+from autonomie.models.config import Config
 
 def get_config(request, dbsession=None):
     """
         Return a dictionnary with the config objects
     """
-    from autonomie.models.model import Config
-    if not dbsession:
-        dbsession = request.dbsession
     return dict((entry.name, entry.value)
-                for entry in dbsession.query(Config).all())
+                for entry in Config.query().all())

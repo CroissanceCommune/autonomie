@@ -58,7 +58,7 @@ class HolidayView(BaseView):
         """
         schema = HolidaysSchema()
         form = Form(schema, buttons=(submit_btn,))
-        holidays = Holiday.query(self.dbsession, user_id=self.request.user.id)
+        holidays = Holiday.query(user_id=self.request.user.id)
         if 'submit' in self.request.params:
             datas = self.request.params.items()
             log.debug(u"Holiday form submission : {0}".format(datas))
@@ -112,7 +112,7 @@ class HolidayView(BaseView):
                 start_date = appstruct.get('start_date')
                 end_date = appstruct.get('end_date')
                 user_id = appstruct.get('user_id')
-                holidays = Holiday.query(self.dbsession)
+                holidays = Holiday.query()
                 holidays = holidays.filter(
                                 or_(Holiday.start_date.between(start_date,
                                                                 end_date),

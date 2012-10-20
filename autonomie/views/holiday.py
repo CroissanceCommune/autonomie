@@ -27,7 +27,7 @@ from deform import ValidationFailure
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.model import Holiday
+from autonomie.models.holiday import Holiday
 from autonomie.models.user import User
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn

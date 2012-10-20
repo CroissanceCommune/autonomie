@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : sam. 20 oct. 2012 06:51:00 CEST
+# * Last Modified : sam. 20 oct. 2012 07:07:18 CEST
 #
 # * Project : autonomie
 #
@@ -26,7 +26,6 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import backref
 from sqlalchemy.orm import deferred
 
 from autonomie.models.types import CustomInteger
@@ -72,35 +71,3 @@ class OperationComptable(DBBASE):
     year = Column("annee", BigInteger)
     type = Column("type", Text)
 
-
-class Holiday(DBBASE):
-    """
-        Holidays table
-        Stores the start and end date for holiday declaration
-        user_id
-        start_date
-        end_date
-    """
-    __tablename__ = "holiday"
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
-    id = Column(Integer, primary_key=True)
-    user_id = Column("user_id", Integer, ForeignKey('accounts.id'))
-    start_date = Column(Date)
-    end_date = Column(Date)
-    user = relationship("User",
-                        backref=backref("holidays",
-                                        order_by="Holiday.start_date"),
-                        primaryjoin="Holiday.user_id==User.id"
-                        )
-
-    @classmethod
-    def query(cls, dbsession, user_id=None):
-        """
-            query the database for the current class instances
-            @dbsession : instanciated dbsession
-            @user_id: id of the user we want the holiday from
-        """
-        q = dbsession.query(cls)
-        if user_id:
-            q = q.filter(cls.user_id == user_id)
-        return q.order_by("start_date")

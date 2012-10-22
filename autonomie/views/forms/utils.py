@@ -20,6 +20,7 @@ import colander
 
 from deform import Form
 from pyramid_deform import FormView
+from autonomie.utils.views import submit_btn
 
 class CustomForm(Form):
     """
@@ -36,7 +37,8 @@ class BaseFormView(FormView):
         Allows to easily build form views
     """
     form_class = CustomForm
-    add_template_vars = ()
+    add_template_vars = ('title',)
+    buttons = (submit_btn,)
 
     def __init__(self, request):
         super(BaseFormView, self).__init__(request)

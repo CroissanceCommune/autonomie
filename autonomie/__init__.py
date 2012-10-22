@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 19 oct. 2012 18:41:21 CEST
+# * Last Modified : lun. 22 oct. 2012 15:44:42 CEST
 #
 # * Project : autonomie
 #
@@ -89,10 +89,8 @@ def main(global_config, **settings):
                     traverse='/companies/{id}')
     config.add_route('statistics',  # view
                     '/statistics')
-    # Company Routes
-    config.add_route('company',
-                     '/company/{id:\d+}',
-                     traverse='/companies/{id}')
+    # Company Handling
+    config.include("autonomie.views.company")
     # * Clients
     config.add_route('company_clients',
                      '/company/{id:\d+}/clients',

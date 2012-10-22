@@ -15,7 +15,6 @@
 """
     Specific tools for handling widgets
 """
-import os
 import cgi
 import logging
 import colander
@@ -201,27 +200,13 @@ def get_date_input(**kw):
     date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
 
-
-def deferred_upload_widget(path):
+def get_fileupload_widget(store_url, store_path, session):
     """
-        return a deferred fileupload widget
+        return a file upload widget
     """
-    @colander.deferred
-    def configured_widget(node, kw):
-        """
-            returns a already pre-configured upload widget
-        """
-        session = kw['session']
-        root_path = kw['rootpath']
-        root_url = kw['rooturl']
-        # path becomes : /assets/company_id/header (or logo)
-        store_url = os.path.join(root_url, path)
-        store_directory = os.path.join(root_path, path)
-        tmpstore = FileTempStore(session, store_directory, store_url)
-        return widget.FileUploadWidget(tmpstore,
-                    template="autonomie:deform_templates/fileupload.mako")
-    return configured_widget
-
+    tmpstore = FileTempStore(session, store_path, store_url)
+    return widget.FileUploadWidget(tmpstore,
+                template="autonomie:deform_templates/fileupload.mako")
 
 @colander.deferred
 def deferred_edit_widget(node, kw):

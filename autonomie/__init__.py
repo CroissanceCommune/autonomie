@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 22 oct. 2012 15:44:42 CEST
+# * Last Modified : lun. 22 oct. 2012 16:51:54 CEST
 #
 # * Project : autonomie
 #
@@ -91,15 +91,10 @@ def main(global_config, **settings):
                     '/statistics')
     # Company Handling
     config.include("autonomie.views.company")
-    # * Clients
-    config.add_route('company_clients',
-                     '/company/{id:\d+}/clients',
-                     traverse='/companies/{id}')
     # * Projects
-    config.add_route('company_projects',
-                     '/company/{id:\d+}/projects',
-                     traverse='/companies/{id}')
     config.include("autonomie.views.project")
+    # Customer handling
+    config.include("autonomie.views.client")
     # * Invoices
     config.add_route('company_invoices',
                      '/company/{id:\d+}/invoices',
@@ -108,16 +103,6 @@ def main(global_config, **settings):
     config.add_route('company_treasury',
                      '/company/{id:\d+}/treasury',
                      traverse='/companies/{id}')
-
-    # Client route
-    config.add_route('client',
-                     '/clients/{id}',
-                     traverse='/clients/{id}')
-    config.include("autonomie.views.client")
-    # Project route
-    config.add_route('project',
-                     '/projects/{id:\d+}',
-                     traverse='/projects/{id}')
 
     #Tasks (estimation and invoice) routes
     config.add_route('estimations',

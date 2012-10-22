@@ -286,7 +286,10 @@ def project_view(request):
                 invoice.color = get_color()
     for phase in phases:
         for cancelinvoice in phase.cancelinvoices:
-            cancelinvoice.color = cancelinvoice.invoice.color
+            if cancelinvoice.invoice:
+                cancelinvoice.color = cancelinvoice.invoice.color
+            else:
+                cancelinvoice.color = get_color()
     return dict(title=u"Projet : {0}".format(request.context.name),
                 project=request.context,
                 company=request.context.company)
@@ -389,6 +392,12 @@ def get_phase_btn():
                                                        css="addphase")
 
 def includeme(config):
+    config.add_route('company_projects',
+                     '/company/{id:\d+}/projects',
+                     traverse='/companies/{id}')
+    config.add_route('project',
+                     '/projects/{id:\d+}',
+                     traverse='/projects/{id}')
     config.add_view(ProjectAdd,
                     route_name='company_projects',
                     renderer='project.mako',

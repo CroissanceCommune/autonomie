@@ -201,6 +201,12 @@ def includeme(config):
     """
         Add module's views
     """
+    config.add_route('client',
+                     '/clients/{id}',
+                     traverse='/clients/{id}')
+    config.add_route('company_clients',
+                     '/company/{id:\d+}/clients',
+                     traverse='/companies/{id}')
     config.add_view(ClientAdd,
                     route_name='company_clients',
                     renderer='client.mako',

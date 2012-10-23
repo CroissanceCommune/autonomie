@@ -30,6 +30,15 @@ from autonomie.utils.security import ADMIN_ROLES
 log = logging.getLogger(__name__)
 
 
+def is_useredit_form(request):
+    """
+        return True if the current request concerns user edition
+    """
+    if request.context.__name__ == 'user':
+        return True
+    else:
+        return False
+
 def unique_login(node, value):
     """
         Test login unicity against database
@@ -63,28 +72,24 @@ def deferred_login_validator(node, kw):
     """
         Dynamically choose the validator user for validating the login
     """
-    if not kw.get('edit'):
+    if not is_useredit_form(kw['request']):
         return unique_login
     return None
 
 
-@colander.deferred
-def deferred_pwd_validator(node, kw):
+def get_companies_choices():
     """
-        Returns auth func if check is True in the binding parameters
+        Return companies choices for autocomplete
     """
-    if kw.get('check'):
-        return auth
-    else:
-        return None
+    return [comp.name for comp in Company.query([Company.name]).all()]
 
 
 @colander.deferred
 def deferred_company_input(node, kw):
     """
-        Deferred company list
+        Deferred company autocomplete input widget
     """
-    companies = kw.get('companies')
+    companies = get_companies_choices()
     wid = widget.AutocompleteInputWidget(values=companies,
             template="autonomie:deform_templates/autocomple_input.pt")
     return wid
@@ -93,19 +98,81 @@ def deferred_company_input(node, kw):
 @colander.deferred
 def deferred_missing_password(node, kw):
     """
-        deferred missing password
+        set the password to required in case of add form
     """
-    if kw.get('edit'):
+    if is_useredit_form(kw['request']):
         return ""
     else:
         return colander.required
 
 
-def get_companies_choices():
+@colander.deferred
+def deferred_primary_group_widget(node, kw):
     """
-        Return companies choices for autocomplete
+        Return the primary group widget regarding the current user
     """
-    return [comp.name for comp in Company.query([Company.name]).all()]
+    user = kw['request'].user
+    if user.is_admin():
+        roles = ADMIN_ROLES
+    elif user.is_manager():
+        roles = MANAGER_ROLES
+    else:
+        roles = []
+    return widget.RadioChoiceWidget(values=roles)
+
+
+@colander.deferred
+def deferred_primary_group_validator(node, kw):
+    """
+        return the validator for primary group configuration
+        regarding the current user
+    """
+    user = kw['request'].user
+    if user.is_admin():
+        roles = ADMIN_ROLES
+    elif user.is_manager():
+        roles = MANAGER_ROLES
+    else:
+        roles = []
+    return colander.OneOf([x[0] for x in roles])
+
+
+@colander.deferred
+def deferred_company_disable_description(node, kw):
+    """
+        Return the description for the company disabling checkbox
+    """
+    description = u"Entraîne automatiquement la désactivation des employés."
+    for company in kw['request'].context.companies:
+        if len(company.employees) > 1:
+            description += u"Attention : Au moins l'une de ses entreprises a \
+plusieurs employés"
+            break
+    return description
+
+
+@colander.deferred
+def deferred_company_disable_default(node, kw):
+    """
+        return False is one of the user's companies have some employees
+    """
+    for company in kw['request'].context.companies:
+        if len(company.employees) > 1:
+            return False
+    return True
+
+
+def remove_fields(schema, kw):
+    """
+        remove fields after user form schema binding when the authenticated
+        user is a contractor
+    """
+    if kw['request'].user.is_contractor():
+        # Non admin users are limited
+        del schema['user']['code_compta']
+        del schema['user']['primary_group']
+        del schema['companies']
+        del schema['password']
 
 
 class AccountSchema(colander.MappingSchema):
@@ -156,6 +223,10 @@ class PasswordChangeSchema(colander.MappingSchema):
         title="Nouveau mot de passe")
 
 
+PASSWORDSCHEMA = PasswordChangeSchema(validator=auth,
+                                      title=u'Modification de mot de passe')
+
+
 class CompanySchema(colander.SequenceSchema):
     company = colander.SchemaNode(
         colander.String(),
@@ -188,6 +259,24 @@ class UserFormSchema(colander.MappingSchema):
     password = Password(title=u"Mot de passe")
 
 
+USERSCHEMA = UserFormSchema(after_bind=remove_fields)
+
+
+class UserDisableSchema(colander.MappingSchema):
+    disable = colander.SchemaNode(
+        colander.Boolean(),
+        default=True,
+        title=u"Désactiver cet utilisateur",
+        description=u"""Désactiver un utilisateur l'empêche de se
+connecter mais permet de conserver l'intégralité
+des informations concernant son activité.""")
+    companies = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Désactiver ses entreprises",
+        description=deferred_company_disable_description,
+        default=deferred_company_disable_default)
+
+
 class AuthSchema(colander.MappingSchema):
     """
         Schema for authentication form
@@ -201,8 +290,7 @@ class AuthSchema(colander.MappingSchema):
         title="Mot de passe")
     nextpage = colander.SchemaNode(
         colander.String(),
-        widget=widget.HiddenWidget()
-    )
+        widget=widget.HiddenWidget())
 
 
 def get_auth_schema():
@@ -211,69 +299,3 @@ def get_auth_schema():
     """
     return AuthSchema(title=u"Authentification", validator=auth)
 
-
-def get_user_schema(request, edit):
-    """
-        Return the user schema
-        user:the avatar of the user in the current session
-    """
-    schema = UserFormSchema().clone()
-    user = request.user
-    if user.is_admin():
-        companies = get_companies_choices()
-        return schema.bind(edit=edit, companies=companies)
-
-    elif user.is_manager():
-        companies = get_companies_choices()
-        # manager can't set admin rights
-        roles = MANAGER_ROLES
-        group = schema['user']['primary_group']
-        group.validator = colander.OneOf([x[0] for x in roles])
-        group.widget = widget.RadioChoiceWidget(values=roles)
-        return schema.bind(edit=edit, companies=companies)
-
-    else:
-        # Non admin users are limited
-        del schema['user']['code_compta']
-        del schema['user']['primary_group']
-        del schema['companies']
-        del schema['password']
-        return schema.bind(edit=True)
-
-
-def get_password_change_schema():
-    """
-        Return the password changing schema
-    """
-    return PasswordChangeSchema(
-        validator=auth,
-        title=u'Modification de mot de passe')
-
-
-class DeleteUserSchema(colander.MappingSchema):
-    disable = colander.SchemaNode(
-        colander.Boolean(),
-        default=True,
-        title=u"Désactiver cet utilisateur",
-        description=u"""Désactiver un utilisateur l'empêche de se
-connecter mais permet de conserver l'intégralité
-des informations concernant son activité.""")
-    companies = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Désactiver ses entreprises",
-        description=u"Entraîne automatiquement la désactivation des employés.",
-        default=True)
-
-
-def get_user_del_schema(user):
-    """
-        Return the user delete form schema
-    """
-    schema = DeleteUserSchema().clone()
-    for companies in user.companies:
-        if len(companies.employees) > 1:
-            schema['companies'].default = False
-            schema['companies'].description += u"Attention : Au moins l'une \
-            de ses entreprises a plusieurs employés"
-            break
-    return schema

@@ -1,6 +1,7 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%block name='content'>
+<% account = request.user %>
 <div class="row" style="margin-top:10px">
     <div class='span4 offset1'>
         <div class="well">

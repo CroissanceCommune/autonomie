@@ -16,9 +16,6 @@
     Form Schemas for autonomie
 """
 from .user import get_auth_schema
-from .user import get_password_change_schema
-from .user import get_user_schema
-from .user import get_user_del_schema
 from .client import ClientSchema
 from .project import ProjectSchema
 from .project import phaseSchema

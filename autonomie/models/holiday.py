@@ -23,6 +23,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 
 from autonomie.models import DBBASE
+from autonomie.models import default_table_args
 
 class Holiday(DBBASE):
     """
@@ -33,7 +34,7 @@ class Holiday(DBBASE):
         end_date
     """
     __tablename__ = "holiday"
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     user_id = Column("user_id", Integer, ForeignKey('accounts.id'))
     start_date = Column(Date)

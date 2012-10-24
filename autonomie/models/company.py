@@ -31,6 +31,7 @@ from autonomie.models.types import CustomFileType
 
 from autonomie.models import DBBASE
 from autonomie.models import DBSESSION
+from autonomie.models import default_table_args
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class Company(DBBASE):
         Store all company specific stuff (headers, logos, RIB, ...)
     """
     __tablename__ = 'company'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(150))
     goal = deferred(Column("object", String(255)),

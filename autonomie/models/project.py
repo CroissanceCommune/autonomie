@@ -26,6 +26,7 @@ from sqlalchemy.orm import relationship
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
 from autonomie.models import DBBASE
+from autonomie.models import default_table_args
 
 
 class Project(DBBASE):
@@ -33,7 +34,7 @@ class Project(DBBASE):
         The project model
     """
     __tablename__ = 'project'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(255))
     client_id = Column("client_id", Integer,  ForeignKey('customer.id'))
@@ -135,7 +136,7 @@ class Phase(DBBASE):
         Phase d'un projet
     """
     __tablename__ = 'phase'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column('id', Integer, primary_key=True)
     project_id = Column('project_id', Integer,
                         ForeignKey('project.id'))

@@ -42,6 +42,7 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.exception import Forbidden
 from autonomie.models import DBSESSION
 from autonomie.models import DBBASE
+from autonomie.models import default_table_args
 
 from .compute import TaskCompute
 from .interfaces import IMoneyTask
@@ -76,7 +77,7 @@ class Invoice(Task, TaskCompute):
         Invoice Model
     """
     __tablename__ = 'invoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     __mapper_args__ = {
                        'polymorphic_identity': 'invoice',
                        }
@@ -322,7 +323,7 @@ class InvoiceLine(DBBASE):
         Invoice lines
     """
     __tablename__ = 'invoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('invoice.id'))
     rowIndex = Column("rowIndex", Integer, default=1)
@@ -394,7 +395,7 @@ class CancelInvoice(Task, TaskCompute):
         Could also be called negative invoice
     """
     __tablename__ = 'cancelinvoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
 
@@ -497,7 +498,7 @@ class ManualInvoice(DBBASE):
         Modèle pour les factures manuelles (ancienne version)
     """
     __tablename__ = 'manual_invoice'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)
     description = Column('libelle', String(255))
@@ -616,7 +617,7 @@ class CancelInvoiceLine(DBBASE):
         CancelInvoice lines
     """
     __tablename__ = 'cancelinvoice_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('cancelinvoice.id'))
     created_at = Column(DateTime, default=datetime.datetime.now)
@@ -672,7 +673,7 @@ class Payment(DBBASE):
         Payment entry
     """
     __tablename__ = 'payment'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     mode = Column(String(50))
     amount = Column(Integer)

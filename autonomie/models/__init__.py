@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 24 oct. 2012 18:02:39 CEST
+# * Last Modified : mer. 24 oct. 2012 18:40:58 CEST
 #
 # * Project : autonomie
 #
@@ -59,3 +59,7 @@ def record_to_appstruct(self):
 # Add a bounded method to the DBBASE object
 #DBBASE.appstruct = types.MethodType( record_to_appstruct, DBBASE )
 DBBASE.appstruct = record_to_appstruct
+
+
+default_table_args = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+#default_table_args = {'mysql_engine': 'InnoDB', "mysql_charset": 'utf8'}

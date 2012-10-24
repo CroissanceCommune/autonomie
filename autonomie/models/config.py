@@ -22,6 +22,7 @@ from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import String
 from autonomie.models import DBBASE
+from autonomie.models import default_table_args
 
 
 class Config(DBBASE):
@@ -33,7 +34,7 @@ class Config(DBBASE):
           PRIMARY KEY  (`config_app`,`config_name`)
     """
     __tablename__ = 'config'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     app = Column("config_app", String(50), primary_key=True)
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())

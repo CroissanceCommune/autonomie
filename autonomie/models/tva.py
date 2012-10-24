@@ -20,6 +20,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 
 from autonomie.models import DBBASE
+from autonomie.models import default_table_args
 
 class Tva(DBBASE):
     """
@@ -29,7 +30,7 @@ class Tva(DBBASE):
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
     __tablename__ = 'tva'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(8), nullable=False)
     value = Column("value", Integer)

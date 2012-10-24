@@ -33,6 +33,7 @@ from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomDateType2
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models import DBBASE
+from autonomie.models import default_table_args
 from autonomie.exception import Forbidden
 
 from .interfaces import ITask
@@ -47,7 +48,7 @@ class Task(DBBASE):
         Metadata pour une tâche (estimation, invoice)
     """
     __tablename__ = 'task'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'task'}
 
     id = Column(Integer, primary_key=True)
@@ -186,7 +187,7 @@ class DiscountLine(DBBASE):
          A discount line
     """
     __tablename__ = 'discount'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('task.id'))
     tva = Column("tva", Integer, nullable=False, default=196)
@@ -232,7 +233,7 @@ class TaskStatus(DBBASE):
         Task status, should be used to record the task's status
     """
     __tablename__ = 'task_status'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
     task_id = Column('task_id', Integer,
                         ForeignKey('task.id'))

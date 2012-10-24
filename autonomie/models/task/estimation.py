@@ -36,6 +36,7 @@ from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomDateType2
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models import DBBASE
+from autonomie.models import default_table_args
 
 from .compute import TaskCompute
 from .interfaces import IValidatedTask
@@ -55,7 +56,7 @@ class Estimation(Task, TaskCompute):
         Estimation Model
     """
     __tablename__ = 'estimation'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column("id", ForeignKey('task.id'), primary_key=True, nullable=False)
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     number = Column("number", String(100), nullable=False)
@@ -407,7 +408,7 @@ class EstimationLine(DBBASE):
         Estimation lines
     """
     __tablename__ = 'estimation_line'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)
@@ -477,7 +478,7 @@ class PaymentLine(DBBASE):
         payments lines
     """
     __tablename__ = 'estimation_payment'
-    __table_args__ = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+    __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('estimation.id'))
     rowIndex = Column("rowIndex", Integer)

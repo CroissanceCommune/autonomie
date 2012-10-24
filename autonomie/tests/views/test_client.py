@@ -26,7 +26,10 @@ class Base(BaseFunctionnalTest):
         view.submit_success(APPSTRUCT)
 
     def getOne(self):
-        return Client.query().filter(Client.name=='Company').first()
+        try:
+            return Client.query().filter(Client.name=='Company').one()
+        except:
+            return None
 
 class TestClientAdd(Base):
     def test_success(self):
@@ -46,7 +49,7 @@ class TestClientEdit(Base):
         appstruct['contactLastName'] = u"Changed Lastname"
         view = ClientEdit(req)
         view.submit_success(appstruct)
-        client = Client.query().filter(Client.name=='Company').first()
+        client = self.getOne()
         self.assertEqual(client.contactLastName, u'Changed Lastname')
 
 

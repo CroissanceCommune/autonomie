@@ -64,7 +64,7 @@ def create_test_db():
     """
         Create the test database and grant rights
     """
-    launch_sql_cmd('CREATE DATABASE IF NOT EXISTS "{db}" character set utf8;')
+    launch_sql_cmd('CREATE DATABASE IF NOT EXISTS "{db}" CHARACTER SET utf8 COLLATE utf8_bin;')
 
 
 def grant_user():

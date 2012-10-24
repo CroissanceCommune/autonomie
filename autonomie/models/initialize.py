@@ -16,7 +16,6 @@
     Initialization function
 """
 from autonomie.models import DBSESSION
-from autonomie.models import DBMETADATA
 from autonomie.models import DBBASE
 from autonomie.scripts.migrate import fetch_head
 
@@ -26,7 +25,7 @@ def initialize_sql(engine):
         Initialize the database engine
     """
     DBSESSION.configure(bind=engine)
-    DBMETADATA.bind = engine
+    DBBASE.metadata.bind = engine
     if not engine.table_names():
         fetch_head()
     DBBASE.metadata.create_all(engine)

@@ -3,7 +3,7 @@ import traceback
 import transaction
 
 from autonomie.models import DBSESSION
-from autonomie.models import DBMETADATA
+from autonomie.models import DBBASE
 
 
 def run_migrations_online():
@@ -18,7 +18,7 @@ def run_migrations_online():
 
     context.configure(
         connection=connection,
-        target_metadata=DBMETADATA,
+        target_metadata=DBBASE.metadata,
         )
 
     try:

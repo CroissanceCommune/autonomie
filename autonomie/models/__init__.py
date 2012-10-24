@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 08 oct. 2012 16:56:49 CEST
+# * Last Modified : mer. 24 oct. 2012 18:02:39 CEST
 #
 # * Project : autonomie
 #
@@ -24,7 +24,6 @@ from sqlalchemy.orm import scoped_session
 from zope.sqlalchemy import ZopeTransactionExtension
 
 DBSESSION = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
-DBMETADATA = MetaData()
 
 
 class ORMClass(object):
@@ -47,7 +46,6 @@ class ORMClass(object):
 
 
 DBBASE = declarative.declarative_base(cls=ORMClass)
-DBBASE.metadata = DBMETADATA
 
 
 def record_to_appstruct(self):

@@ -506,20 +506,20 @@ class ManualInvoice(DBBASE):
     payment_ok = Column("paiement_ok", Integer)
     statusDate = Column("paiement_date", Date())
     paymentMode = Column("paiement_comment", String(255))
-    client_id = Column('client_id', String(5),
-                            ForeignKey('customer.id'))
     taskDate = Column("date_emission", Date(),
                                 default=datetime.datetime.now)
-    company_id = Column('compagnie_id', BigInteger,
-                            ForeignKey('company.id'))
     created_at = deferred(Column("created_at", DateTime,
                                       default=datetime.datetime.now))
     updated_at = deferred(Column("updated_at", DateTime,
                                       default=datetime.datetime.now,
                                       onupdate=datetime.datetime.now))
+    client_id = Column('client_id', Integer,
+                            ForeignKey('customer.id'))
     client = relationship("Client",
                 primaryjoin="Client.id==ManualInvoice.client_id",
                 backref='manual_invoices')
+    company_id = Column('compagnie_id', Integer,
+                            ForeignKey('company.id'))
     company = relationship("Company",
                 primaryjoin="Company.id==ManualInvoice.company_id",
                   backref='manual_invoices')

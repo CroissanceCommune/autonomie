@@ -30,7 +30,10 @@ class Base(BaseFunctionnalTest):
         view.submit_success(APPSTRUCT)
 
     def getOne(self):
-        return Project.query().filter(Project.name=="Projéct&$").first()
+        try:
+            return Project.query().filter(Project.name=="Projéct&$").one()
+        except:
+            return None
 
 class TestProjectAdd(Base):
     def test_success(self):
@@ -62,7 +65,6 @@ class TestActions(Base):
         project = self.getOne()
         req.context = project
         project_delete(req)
-        self.session.commit()
         self.assertEqual(self.getOne(), None)
 
     def test_archive(self):

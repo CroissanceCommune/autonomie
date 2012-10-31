@@ -32,4 +32,10 @@ A la fin de chaque test, on revert les actions prévues (flusher ou commiter ver
         self.trans = self.trans.rollback()
         ...
 
-.. note:: Compte tenu du fait que l'on utilise scoped_session pour wrapper le session maker, on est sûr que celui-ci nous renvoie une seule et même session au sein de chaque test.
+.. note::
+
+    Compte tenu du fait que l'on utilise scoped_session pour wrapper le session maker, on est sûr que celui-ci nous renvoie une seule et même session au sein de chaque test.
+
+.. note::
+
+    Les tables de la base de données doivent être en innoDB (ou autre type transactionnel), pas en MyIsam.

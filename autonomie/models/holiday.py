@@ -44,15 +44,3 @@ class Holiday(DBBASE):
                                         order_by="Holiday.start_date"),
                         primaryjoin="Holiday.user_id==User.id"
                         )
-
-    @classmethod
-    def query(cls, dbsession, user_id=None):
-        """
-            query the database for the current class instances
-            @dbsession : instanciated dbsession
-            @user_id: id of the user we want the holiday from
-        """
-        q = super(Holiday, self).query()
-        if user_id:
-            q = q.filter(cls.user_id == user_id)
-        return q.order_by("start_date")

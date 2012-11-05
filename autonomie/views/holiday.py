@@ -21,113 +21,113 @@ import logging
 
 from sqlalchemy import or_
 
-from deform import Form
-from deform import ValidationFailure
-
-from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.holiday import Holiday
-from autonomie.models.user import User
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.utils.views import submit_btn
+from autonomie.views.forms.utils import BaseFormView
 from autonomie.views.forms.holiday import HolidaysSchema
 from autonomie.views.forms.holiday import searchSchema
-from .base import BaseView
+
 
 log = logging.getLogger(__name__)
 
 
-def get_user_choices(dbsession):
-    choices = [(0, u'Tous les entrepreneurs')]
-    choices.extend([(unicode(user.id),
-                     u"{0} {1}".format(user.lastname, user.firstname),)
-                        for user in User.query().all()])
-    return choices
-
-
-class HolidayView(BaseView):
+def get_holidays(start_date=None, end_date=None, user_id=None):
     """
-        All holidays-related views
+        Return the user's declared holidays
     """
-    @view_config(route_name="holiday", renderer="holiday.mako",
-                                                            permission="view")
-    def holiday(self):
-        """
-            Allows a simple user to set his holidays
-        """
-        schema = HolidaysSchema()
-        form = Form(schema, buttons=(submit_btn,))
-        holidays = Holiday.query(user_id=self.request.user.id)
-        if 'submit' in self.request.params:
-            datas = self.request.params.items()
-            log.debug(u"Holiday form submission : {0}".format(datas))
-            try:
-                appstruct = form.validate(datas)
-            except ValidationFailure, errform:
-                html_form = errform.render()
-            else:
-                log.debug(u"Values are valid : {0}".format(appstruct))
-                # Validation OK
-                for holiday in holidays:
-                    self.dbsession.delete(holiday)
-                    self.dbsession.flush()
-                for data in appstruct['holidays']:
-                    holiday = Holiday(user_id=self.request.user.id)
-                    merge_session_with_post(holiday, data)
-                    self.dbsession.merge(holiday)
-                self.dbsession.flush()
-                self.request.session.flash(
-                        u"Vos déclarations de congés ont bien été modifiées",
-                        queue="main")
-                return HTTPFound(self.request.route_path("holiday"))
-        else:
-            appstruct = [{'start_date':holiday.start_date,
-                         'end_date':holiday.end_date}
-                         for holiday in holidays]
-            html_form = form.render({'holidays': appstruct})
-        return dict(title=u"Déclarer mes congés",
-                    html_form=html_form)
+    holidays = Holiday.query()
+    if start_date and end_date:
+        holidays = holidays.filter(
+            or_(Holiday.start_date.between(start_date, end_date),
+                Holiday.end_date.between(start_date, end_date)))
+    if user_id:
+        holidays = holidays.filter(Holiday.user_id==user_id)
+    holidays.order_by("start_date")
+    return holidays
 
-    @view_config(route_name="holidays", renderer="holidays.mako",
-                                        permission="manage")
+
+class HolidayRegister(BaseFormView):
+    """
+        Page for holiday registering
+    """
+    schema = HolidaysSchema()
+    title = u"Déclarer mes congés"
+
+    def before(self, form):
+        holidays = get_holidays(user_id=self.request.user.id)
+        appstruct = {'holidays' : [{'start_date':holiday.start_date,
+                                    'end_date':holiday.end_date}
+                                              for holiday in holidays]}
+        form.appstruct = appstruct
+
+    def submit_success(self, appstruct):
+        """
+            Set the user's holidays in the database
+        """
+        self._purge_holidays()
+        for data in appstruct['holidays']:
+            holiday = Holiday(user_id=self.request.user.id)
+            merge_session_with_post(holiday, data)
+            self.dbsession.merge(holiday)
+        self.dbsession.flush()
+        self.request.session.flash(
+                u"Vos déclarations de congés ont bien été modifiées",
+                queue="main")
+        return HTTPFound(self.request.route_path("holiday"))
+
+    def _purge_holidays(self):
+        """
+            Purge the user's holidays
+        """
+        for holiday in get_holidays(user_id=self.request.user.id):
+            self.dbsession.delete(holiday)
+            self.dbsession.flush()
+
+
+class HolidayView(BaseFormView):
+    """
+        Holiday search/consultation views
+    """
+    add_template_vars = ('title', 'holidays', 'start_date', 'end_date')
+    schema = searchSchema
+    title = u"Les congés des entrepreneurs"
+
+    def __init__(self, request):
+        super(HolidayView, self).__init__(request)
+        self._start_date = None
+        self._end_date = None
+        self.search_result = []
+
+    @property
     def holidays(self):
-        """
-            Display the holidays of the current month
-        """
-        schema = searchSchema.bind(
-                choices=get_user_choices(self.dbsession))
-        form = Form(schema, buttons=(submit_btn,))
-        holidays = []
-        start_date = None
-        end_date = None
-        if 'submit' in self.request.params:
-            datas = self.request.params.items()
-            try:
-                appstruct = form.validate(datas)
-            except ValidationFailure, errform:
-                html_form = errform.render()
-            else:
-                # Validation OK
-                start_date = appstruct.get('start_date')
-                end_date = appstruct.get('end_date')
-                user_id = appstruct.get('user_id')
-                holidays = Holiday.query()
-                holidays = holidays.filter(
-                                or_(Holiday.start_date.between(start_date,
-                                                                end_date),
-                                    Holiday.end_date.between(start_date,
-                                                                    end_date)))
-                if user_id:
-                    holidays = holidays.filter(Holiday.user_id == user_id)
-                holidays = holidays.all()
-                html_form = form.render(appstruct)
-        else:
-            html_form = form.render()
-        return dict(
-                    title=u"Les congés des entrepreneurs",
-                    html_form=html_form,
-                    holidays=holidays,
-                    start_date=start_date,
-                    end_date=end_date
-                    )
+        return self.search_result
+
+    @property
+    def start_date(self):
+        return self._start_date
+
+    @property
+    def end_date(self):
+        return self._end_date
+
+    def submit_success(self, appstruct):
+        self._start_date = appstruct.get('start_date')
+        self._end_date = appstruct.get('end_date')
+        user_id = appstruct.get('user_id')
+        self.search_result = get_holidays(self._start_date, self._end_date,
+                                                                 user_id)
+
+
+def includeme(config):
+    config.add_route('holiday', '/holiday')
+    config.add_route('holidays', '/holidays')
+    config.add_view(HolidayRegister,
+                    route_name="holiday",
+                    renderer="holiday.mako",
+                    permission="view")
+    config.add_view(HolidayView,
+                    route_name="holidays",
+                    renderer="holidays.mako",
+                    permission="manage")

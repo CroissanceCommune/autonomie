@@ -5,7 +5,7 @@ Template for holiday declarations
 <%block name='content'>
 <div class='row' style="padding-top:10px;">
     <div class='span6 offset3'>
-        ${html_form|n}
+        ${form|n}
     </div>
 </div>
 </%block>

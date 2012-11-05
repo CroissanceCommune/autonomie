@@ -6,7 +6,7 @@ Template for holidays search
 <%block name='content'>
 <div class='row' style="padding-top:10px;">
     <div class='span6 offset3'>
-        ${html_form|n}
+        ${form|n}
         %if start_date and end_date:
             <h3>Congès entre le ${print_date(start_date)} et le ${print_date(end_date)}</h3>
         % endif

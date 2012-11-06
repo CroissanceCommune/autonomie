@@ -90,7 +90,6 @@ class HolidayView(BaseFormView):
     """
         Holiday search/consultation views
     """
-    add_template_vars = ('title', 'holidays', 'start_date', 'end_date')
     schema = searchSchema
     title = u"Les congés des entrepreneurs"
 
@@ -100,24 +99,14 @@ class HolidayView(BaseFormView):
         self._end_date = None
         self.search_result = []
 
-    @property
-    def holidays(self):
-        return self.search_result
-
-    @property
-    def start_date(self):
-        return self._start_date
-
-    @property
-    def end_date(self):
-        return self._end_date
-
     def submit_success(self, appstruct):
-        self._start_date = appstruct.get('start_date')
-        self._end_date = appstruct.get('end_date')
+        start_date = appstruct.get('start_date')
+        end_date = appstruct.get('end_date')
         user_id = appstruct.get('user_id')
-        self.search_result = get_holidays(self._start_date, self._end_date,
-                                                                 user_id)
+        search_result = get_holidays(start_date, end_date, user_id)
+        return dict(holidays=search_result,
+                    start_date=start_date,
+                    end_date=end_date)
 
 
 def includeme(config):

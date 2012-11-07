@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 17 oct. 2012 07:20:04 CEST
+# * Last Modified : mer. 07 nov. 2012 17:17:33 CET
 #
 # * Project : autonomie
 #
@@ -81,8 +81,7 @@ class BaseDBFactory(object):
     dbsession = None
 
     def _get_item(self, klass, key, object_name):
-        if self.dbsession is None:
-            raise Exception("Missing dbsession")
+        assert self.dbsession is not None, "Missing dbsession"
 
         dbsession = self.dbsession()
         obj = dbsession.query(klass)\

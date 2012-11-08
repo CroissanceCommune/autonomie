@@ -17,6 +17,8 @@
 """
 import logging
 import itertools
+import colander
+
 from functools import partial
 from deform import Form
 from deform import Button
@@ -561,3 +563,138 @@ class TaskView(BaseView):
         filename = u"{0}.pdf".format(self.task.number)
         write_pdf(self.request, filename, self._html())
         return self.request.response
+
+def html(request, template):
+    """
+        return the html output of a given task
+    """
+    task = request.context
+    tvas = task.get_tvas()
+    if len([value for value in tvas.keys() if value >=0]) > 1:
+        multiple_tvas = True
+    else:
+        multiple_tvas = False
+    datas = dict(company=task.project.company,
+                 project=task.project,
+                 task=task,
+                 config=request.config,
+                 multiple_tvas=multiple_tvas,
+                 tvas=tvas)
+    return render_html(request, template, datas)
+
+def make_pdf_view(template):
+    def pdf(request):
+        """
+            Returns a page displaying an html rendering of the given task
+        """
+        log.debug(u"# Generating the pdf file #")
+        filename = u"{0}.pdf".format(request.context.number)
+        write_pdf(request, filename, html(request, template))
+        return request.response
+    return pdf
+
+
+class BaseListView():
+    """
+        New styled based List view
+    """
+    add_template_vars = ('title',)
+    schema = None
+    default_sort = 'name'
+    sort_columns = ('name',)
+    default_direction = 'asc'
+    filters = ()
+
+    def __init__(self, request):
+        self.request = request
+        self.session = self.request.session
+
+    def query(self):
+        """
+            main query
+        """
+        pass
+
+    def _filter(self, query, appstruct):
+        """
+            filter the query with the configured filters
+        """
+        for filter_name in self.filters:
+            func = getattr(self, "filter_%s" % filter_name)
+            query = func(query, appstruct)
+        return query
+
+    def _sort(self, query, appstruct):
+        """
+            Sort the results
+        """
+        sort_column = appstruct['sort']
+        sort_direction = appstruct['direction']
+        if sort_direction == 'asc':
+            func = asc
+        else:
+            func = desc
+        return query.order_by(func(sort_column))
+
+    def _paginate(self, query, appstruct):
+        """
+            wraps the current SQLA query with a pagination tool
+        """
+        # Url builder for page links
+        page_url = partial(get_page_url, request=self.request)
+        current_page = appstruct['page']
+        items_per_page = appstruct['items_per_page']
+        return paginate.Page(query,
+                             current_page,
+                             url=page_url,
+                             items_per_page=items_per_page)
+
+    def _get_bind_params(self):
+        """
+            return the params passed to the form schema's bind method
+        """
+        return dict(request=self.request,
+                    default_sort=self.default_sort,
+                    default_direction=self.default_direction,
+                    sort_columns=self.sort_columns)
+
+    def __call__(self):
+        query = self.query()
+        schema = self.schema.bind(**self._get_bind_params())
+        try:
+            appstruct = schema.deserialize(self.request.GET)
+        except colander.Invalid:
+            # If values are not valid, we want the default ones to be provided
+            # see the schema definition
+            appstruct = schema.deserialize({})
+
+        query = self._filter(query, appstruct)
+        query = self._sort(query, appstruct)
+        records = self._paginate(query, appstruct)
+        result = dict(records=records)
+        result.update(self.default_form_values(appstruct))
+        result.update(self.more_template_vars())
+        self.populate_actionmenu(appstruct)
+        return result
+
+    def default_form_values(self, appstruct):
+        """
+            Return the default value to pass to the forms
+        """
+        return appstruct
+
+    def more_template_vars(self):
+        """
+            Add template vars to the response dict
+        """
+        result = {}
+        for name in self.add_template_vars:
+            result[name] = getattr(self, name)
+        return result
+
+    def populate_actionmenu(self, appstruct):
+        """
+            Used to populate an actionmenu (if there's one in the page)
+        """
+        pass
+

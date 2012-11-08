@@ -79,6 +79,13 @@ class BaseView(object):
         return company
 
 
+def toint(value, default):
+    try:
+        return int(value)
+    except:
+        return default
+
+
 class ListView(BaseView):
     """
         Base view object for listing elements
@@ -87,11 +94,10 @@ class ListView(BaseView):
     default_sort = 'name'
     default_direction = 'asc'
 
-    def _get_pagination_args(self):
-        """
-            Returns arguments for element listing
-        """
-        search = self.request.params.get("search", "")
+    def _get_search_arg(self):
+        return self.request.params.get("search", "")
+
+    def _get_sort_key(self):
         sort_key = self.request.params.get('sort', self.default_sort)
         if sort_key not in self.columns:
             sort_key = self.default_sort
@@ -99,18 +105,34 @@ class ListView(BaseView):
             sort = self.columns[sort_key]
         else:
             sort = sort_key
+        return sort
 
+    def _get_sort_direction(self):
         direction = self.request.params.get("direction",
                                     self.default_direction)
         if direction not in ['asc', 'desc']:
             direction = self.default_direction
+        return direction
 
-        default_item_pp = int(self.request.cookies.get('items_per_page', 10))
-        items_per_page = int(self.request.params.get('nb', default_item_pp))
+    def _get_item_pp_arg(self):
+        default_item_pp = toint(self.request.cookies.get('items_per_page'), 10)
+        items_per_page = toint(self.request.params.get('nb'), default_item_pp)
         self.request.response.set_cookie("items_per_page", str(items_per_page))
         self.request.cookies['items_per_page'] = str(items_per_page)
+        return items_per_page
 
-        current_page = int(self.request.params.get("page", 1))
+    def _get_current_page(self):
+        return toint(self.request.params.get("page"), 1)
+
+    def _get_pagination_args(self):
+        """
+            Returns arguments for element listing
+        """
+        search = self._get_search_arg()
+        sort = self._get_sort_key()
+        direction = self._get_sort_direction()
+        current_page = self._get_current_page()
+        items_per_page = self._get_item_pp_arg()
         return search, sort, direction, current_page, items_per_page
 
     def _get_pagination(self, records, current_page, items_per_page):

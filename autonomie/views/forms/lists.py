@@ -30,9 +30,12 @@ def deferred_default_direction(node, kw):
     return kw['default_direction']
 
 
-class BaseSearchSchema(colander.MappingSchema):
+class BaseListsSchema(colander.MappingSchema):
     """
-        Base Search form schema
+        Base List schema used to validate the common list view options
+        raw search
+        pagination arguments
+        sort parameters
     """
     search = colander.SchemaNode(colander.String(), missing=u'')
     items_per_page = colander.SchemaNode(colander.Integer(), missing=10)

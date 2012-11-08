@@ -33,7 +33,8 @@ from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import ClientSchema
 from autonomie.views.forms import BaseFormView
-from .base import ListView
+from autonomie.views.forms.client import ClientSearchSchema
+from .base import BaseListView
 
 log = logging.getLogger(__name__)
 
@@ -47,73 +48,36 @@ def get_client_form(request):
     return form
 
 
-class ClientList(ListView):
-    """
-        Client views
-    """
-    columns = ("code", "name", "contactLastName",)
+class ClientsList(BaseListView):
+    title = u"Liste des clients"
+    schema = ClientSearchSchema()
+    filters = ('name_or_contact',)
+    sort_columns = {'name':Client.name,
+                    "code":Client.code,
+                    "contactLastName":Client.contactLastName}
 
-    def __init__(self, request):
-        super(ClientList, self).__init__(request)
-        populate_actionmenu(self.request)
-
-    def __call__(self):
-        """
-            Return the list of all the clients
-            The list is wrapped in a pagination tool
-        """
-        search, sort, direction, current_page, items_per_page = \
-                                                self._get_pagination_args()
+    def query(self):
         company = self.request.context
-        # Request database
-        clients = self._get_clients(company)
-        clients = self._filter_clients(clients, search)
-        clients = clients.order_by(sort + " " + direction).all()
+        return Client.query().filter(Client.company_id == company.id)
 
-        # Get pagination
-        records = self._get_pagination(clients, current_page, items_per_page)
+    def filter_name_or_contact(self, records, appstruct):
+        search = appstruct['search']
+        if search:
+            records = records.filter(
+                or_(Client.name.like("%" + search + "%"),
+                    Client.contactLastName.like("%" + search + "%")))
+        return records
 
-        # Add form
-        if has_permission('add', self.context, self.request):
+    def populate_actionmenu(self, appstruct):
+        populate_actionmenu(self.request)
+        if has_permission('add', self.request.context, self.request):
             form = get_client_form(self.request)
             popup = PopUp("addform", u'Ajouter un client', form.render())
-            popups = {popup.name: popup}
-            self.actionmenu.add(popup.open_btn())
-
-        # Search form
-        self.actionmenu.add(SearchForm(u"Entreprise ou contact principal"))
-
-        return dict(title=u"Liste des clients",
-                    clients=records,
-                    company=company,
-                    popups=popups,
-                    action_menu=self.actionmenu
-                    )
-
-    def _get_clients(self, company=None):
-        """
-            query clients against the database
-        """
-        toquery = (Client.id,
-                   Client.code,
-                   Client.contactLastName,
-                   Client.contactFirstName,
-                   Client.name)
-        clients = self.dbsession.query(*toquery)
-        if company is not None:
-            clients = clients.filter(Client.company_id == company.id)
-        return clients
-
-    def _filter_clients(self, clients, search):
-        """
-            Return a filtered query
-        """
-        clients = clients.filter(
-            or_(Client.name.like("%" + search + "%"),
-                Client.contactLastName.like("%" + search + "%")
-            )
-        )
-        return clients
+            self.request.popups = {popup.name: popup}
+            self.request.actionmenu.add(popup.open_btn())
+        searchform = SearchForm(u"Entreprise ou contact principal")
+        searchform.set_defaults(appstruct)
+        self.request.actionmenu.add(searchform)
 
 
 def client_view(request):
@@ -126,7 +90,6 @@ def client_view(request):
 
 
 class ClientAdd(BaseFormView):
-    add_template_vars = ('title',)
     title = u"Ajouter un client"
     schema = ClientSchema()
     buttons = (submit_btn,)
@@ -147,7 +110,6 @@ class ClientAdd(BaseFormView):
 
 
 class ClientEdit(BaseFormView):
-    add_template_vars = ('title',)
     schema = ClientSchema()
     buttons = (submit_btn,)
 
@@ -159,7 +121,6 @@ class ClientEdit(BaseFormView):
         """
             prepopulate the form and the actionmenu
         """
-        form.appstruct = self.request.context.appstruct()
         populate_actionmenu(self.request, self.request.context)
 
     def submit_success(self, appstruct):
@@ -173,6 +134,12 @@ class ClientEdit(BaseFormView):
                                                                 client.name)
         self.session.flash(message, queue='main')
         return HTTPFound(self.request.route_path('client', id=client.id))
+
+    def appstruct(self):
+        """
+            Populate the form with the current edited context (client)
+        """
+        return self.request.context.appstruct()
 
 
 def populate_actionmenu(request, client=None):
@@ -223,7 +190,7 @@ def includeme(config):
                     request_param='action=edit',
                     permission='edit')
 
-    config.add_view(ClientList,
+    config.add_view(ClientsList,
                     route_name='company_clients',
                     renderer='company_clients.mako',
                     request_method='GET',

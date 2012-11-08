@@ -14,8 +14,8 @@
         </tr>
     </thead>
     <tbody>
-        % if clients:
-            % for client in clients:
+        % if records:
+            % for client in records:
                 <tr class='tableelement' id="${client.id}">
                     <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.code}</td>
                     <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.name}</td>
@@ -34,5 +34,5 @@
         % endif
     </tbody>
 </table>
-${pager(clients)}
+${pager(records)}
 </%block>

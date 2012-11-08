@@ -22,6 +22,7 @@ from deform import widget
 
 from autonomie.models.client import Client
 from autonomie.views.forms.widgets import get_mail_input
+from autonomie.views.forms.lists import BaseListsSchema
 
 log = logging.getLogger(__name__)
 
@@ -124,3 +125,7 @@ class ClientSchema(colander.MappingSchema):
             widget=widget.TextAreaWidget(cols=80, rows=4),
             title=u'Commentaires',
             missing=u'')
+
+
+class ClientSearchSchema(BaseListsSchema):
+    pass

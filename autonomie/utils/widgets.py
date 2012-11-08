@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : ven. 19 oct. 2012 15:31:44 CEST
+# * Last Modified : jeu. 08 nov. 2012 19:13:18 CET
 #
 # * Project : autonomie
 #
@@ -259,6 +259,13 @@ class SearchForm(Widget):
         self.submit_text = submit
         self.id_ = id_
         self.widgets = []
+        self.defaults = {}
+
+    def set_defaults(self, defaults):
+        """
+            stores default values for the form
+        """
+        self.defaults = defaults
 
     def insert(self, widget):
         """

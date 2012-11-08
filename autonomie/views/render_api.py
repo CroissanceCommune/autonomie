@@ -185,6 +185,25 @@ def format_unity(unity, pretty=False):
     return labels.get(unity, default)
 
 
+def urlupdate(request, args_dict):
+    """
+        Return the current url with updated GET params
+        It allows to keep url params when :
+        * sorting
+        * searching
+        * moving from one page to another
+
+        if current url ends with :
+            <url>?foo=1&bar=2
+        when passing {'foo':5}, we get :
+            <url>?foo=5&bar=2
+    """
+    get_args = request.GET.copy()
+    get_args.update(args_dict)
+    path = request.current_route_path(_query=get_args)
+    return path
+
+
 class Api(object):
     """
         Api object passed to the templates hosting all commands we will use
@@ -202,4 +221,5 @@ api = Api(format_amount=format_amount,
           format_short_date=format_short_date,
           format_long_date=format_long_date,
           format_quantity=format_quantity,
-          format_unity=format_unity)
+          format_unity=format_unity,
+          urlupdate=urlupdate)

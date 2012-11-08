@@ -29,7 +29,7 @@ pager template
 %endif
 <% args_dict = dict(direction=direction, sort=column) %>
 
-<a href="${urlbuild(args_dict)}" class='${css_class}'>
+<a href="${api.urlupdate(request, args_dict)}" class='${css_class}'>
     %if direction =='asc':
         <i class="icon-chevron-up"></i>
     %else:

@@ -23,6 +23,7 @@ from deform import widget
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
 from autonomie.views.forms.widgets import get_date_input
 from autonomie.views.forms.widgets import DisabledInput
+from autonomie.views.forms.lists import BaseListsSchema
 
 log = logging.getLogger(__name__)
 
@@ -111,3 +112,8 @@ class PhaseSchema(colander.MappingSchema):
     name = colander.SchemaNode(colander.String(),
                                validator=colander.Length(max=150))
 phaseSchema = PhaseSchema()
+
+class ProjectsListSchema(BaseListsSchema):
+    archived = colander.SchemaNode(colander.String(),
+                                    missing="0",
+                                    validator=colander.OneOf(('0', '1')))

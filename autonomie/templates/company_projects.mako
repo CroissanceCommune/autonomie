@@ -14,8 +14,8 @@
         </tr>
     </thead>
     <tbody>
-        % if projects:
-            % for project in projects:
+        % if records:
+            % for project in records:
                 <tr class='tableelement' id="${project.id}">
                     <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.code}</td>
                     <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.name}</td>
@@ -36,5 +36,5 @@
         % endif
     </tbody>
 </table>
-${pager(projects)}
+${pager(records)}
 </%block>

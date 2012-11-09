@@ -44,7 +44,8 @@ from autonomie.utils.views import submit_btn
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms import ProjectSchema
 from autonomie.views.forms import BaseFormView
-from .base import ListView
+from autonomie.views.forms.project import ProjectsListSchema
+from .base import BaseListView
 
 log = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ def get_project_form(request):
     return form
 
 
-def redirect_to_clients(request, company):
+def redirect_to_clientslist(request, company):
     """
         Force project page to be redirected to client page
     """
@@ -87,86 +88,76 @@ de créer de nouveaux projets", queue="main")
     raise HTTPFound(request.route_path("company_clients",
                                                 id=company.id))
 
-class ProjectList(ListView):
-    """
-        All the projects views are grouped in this class
-    """
-    columns = dict(code=Project.code,
-                    name=Project.name,
-                    client=Client.name)
-    default_sort = 'name'
 
-    def __init__(self, request):
-        super(ProjectList, self).__init__(request)
-        populate_actionmenu(self.request)
+class ProjectsList(BaseListView):
+    """
+        The project list view is compound of :
+            * the list of projects with action buttons (view, delete ...)
+            * an action menu with:
+                * links
+                * an add projectform popup
+                * a searchform
+    """
+    add_template_vars = ('title', 'item_actions',)
+    title = u"Liste des projets"
+    schema = ProjectsListSchema()
+    filters = ('archived', 'name_or_client')
+    default_sort = "name"
+    sort_columns = {'name':Project.name,
+                    "code":Project.code,
+                    "client":Client.name}
 
-    def __call__(self):
-        """
-            Return the list of projects
-        """
+    def query(self):
         company = self.request.context
-        # If not client have been added, redirecting to clients page
+        # We can't have projects without having clients
         if not company.clients:
-            redirect_to_clients(self.request, company)
-        search, sort, direction, current_page, items_per_page = \
-                                                self._get_pagination_args()
+            redirect_to_clientslist(self.request, company)
+        return Project.query().join("client").filter(
+                            Project.company_id == company.id)
 
-        archived = self.request.params.get('archived', '0')
-
-        query = self._get_projects()
-        if company:
-            query = self._filter_company(query, company)
-        query = self._filter_archived(query, archived)
-        if search:
-            query = self._filter_search(query, search)
-        projects = self._sort(query, sort, direction).all()
-        records = self._get_pagination(projects, current_page, items_per_page)
-
-        ret_dict = dict(title=u"Liste des projets",
-                        projects=records,
-                        company=company,
-                        action_menu=self.actionmenu,
-                        item_actions=self._get_actions())
-
-        if has_permission("add", self.context, self.request):
-            popup = self._get_add_popup()
-            ret_dict['popups'] = {popup.name: popup}
-            self.actionmenu.add(popup.open_btn())
-        self.actionmenu.add(self._get_archived_btn(archived))
-        self.actionmenu.add(SearchForm(u"Projet ou nom du client"))
-        return ret_dict
-
-    def _get_projects(self):  # company, search, sort, direction, archived):
-        """
-            query projects against the database
-        """
-        return self.dbsession.query(Project).join(Project.client)
-
-    @staticmethod
-    def _filter_company(query, company):
-        """
-            add a filter for the company on the query
-        """
-        return query.filter(Project.company_id == company.id)
-
-    @staticmethod
-    def _filter_archived(query, archived):
-        """
-            add a filter to query only archived projects
-        """
-        if archived not in ("1", "0"):
-            archived = "0"
+    def filter_archived(self, query, appstruct):
+        archived = appstruct['archived']
         return query.filter(Project.archived == archived)
 
-    @staticmethod
-    def _filter_search(query, search):
+    def filter_name_or_client(self, query, appstruct):
+        search = appstruct['search']
+        if search:
+            query = query.filter(
+                        or_(Project.name.like("%" + search + "%"),
+                            Client.name.like("%" + search + "%")))
+        return query
+
+    def populate_actionmenu(self, appstruct):
+        populate_actionmenu(self.request)
+        if has_permission('add', self.request.context, self.request):
+            form = get_project_form(self.request)
+            popup = PopUp('add', u"Ajouter un projet", form.render())
+            self.request.popups = {popup.name: popup}
+            self.request.actionmenu.add(popup.open_btn())
+        self.request.actionmenu.add(self._get_archived_btn(appstruct))
+        searchform = SearchForm(u"Projet ou nom du client")
+        searchform.set_defaults(appstruct)
+        self.request.actionmenu.add(searchform)
+
+    def _get_archived_btn(self, appstruct):
         """
-            filter the query on the searched argument
+            return the show archived button
         """
-        return query.filter(
-            or_(Project.name.like("%" + search + "%"),
-                Client.name.like("%" + search + "%"))
-        )
+        archived = appstruct['archived']
+        if archived == '0':
+            url = self.request.current_route_path(_query=dict(archived="1"))
+            link = HTML.a(u"Afficher les projets archivés",  href=url)
+        else:
+            url = self.request.current_route_path(_query=dict(archived="0"))
+            link = HTML.a(u"Afficher les projets actifs", href=url)
+        return StaticWidget(link)
+
+    @property
+    def item_actions(self):
+        """
+            return action buttons builder
+        """
+        return self._get_actions()
 
     def _get_actions(self):
         """
@@ -205,24 +196,6 @@ class ProjectList(ListView):
             btns.append(del_link)
         return btns
 
-    def _get_archived_btn(self, archived):
-        """
-            return the show archived button
-        """
-        if archived == '0':
-            url = self.request.current_route_path(_query=dict(archived="1"))
-            link = HTML.a(u"Afficher les projets archivés",  href=url)
-        else:
-            url = self.request.current_route_path(_query=dict(archived="0"))
-            link = HTML.a(u"Afficher les projets actifs", href=url)
-        return StaticWidget(link)
-
-    def _get_add_popup(self):
-        """
-            return a popup object for add project
-        """
-        form = get_project_form(self.request)
-        return PopUp('add', u"Ajouter un projet", form.render())
 
 def project_addphase(request):
     """
@@ -246,6 +219,7 @@ rajoutée".format(phasename), queue="main")
         anchor = ""
     return HTTPFound(request.route_path('project', id=project.id,
                                                     _anchor=anchor))
+
 
 def project_archive(request):
     """
@@ -305,7 +279,7 @@ class ProjectAdd(BaseFormView):
         populate_actionmenu(self.request)
         # If there's no client, redirect to client view
         if len(self.request.context.clients) == 0:
-            redirect_to_clients(self.request, self.request.context)
+            redirect_to_clientslist(self.request, self.request.context)
 
     def submit_success(self, appstruct):
         """
@@ -424,7 +398,7 @@ def includeme(config):
                     route_name="project",
                     request_param="action=addphase",
                     permission='edit')
-    config.add_view(ProjectList,
+    config.add_view(ProjectsList,
                     route_name='company_projects',
                     renderer='company_projects.mako',
                     request_method='GET',

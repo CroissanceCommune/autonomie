@@ -623,7 +623,7 @@ class BaseListView():
     add_template_vars = ('title',)
     schema = None
     default_sort = 'name'
-    sort_columns = ('name',)
+    sort_columns = {'name':'name'}
     default_direction = 'asc'
     filters = ()
 
@@ -650,7 +650,9 @@ class BaseListView():
         """
             Sort the results
         """
-        sort_column = appstruct['sort']
+        sort_column_key = appstruct['sort']
+        sort_column = self.sort_columns[sort_column_key]
+
         sort_direction = appstruct['direction']
         if sort_direction == 'asc':
             func = asc

@@ -8,7 +8,7 @@ Template for holidays search
     <div class='span6 offset3'>
         ${form|n}
         %if start_date and end_date:
-            <h3>Congès entre le ${print_date(start_date)} et le ${print_date(end_date)}</h3>
+            <h3>Congés entre le ${print_date(start_date)} et le ${print_date(end_date)}</h3>
         % endif
     </div>
 </div>

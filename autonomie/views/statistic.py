@@ -22,20 +22,17 @@ from pyramid.view import view_config
 
 from autonomie.models.company import Company
 
-from .base import BaseView
-
 log = logging.getLogger(__name__)
 
 
-class StatisticView(BaseView):
+class StatisticView(object):
     """
         View displaying statistics
     """
-    @view_config(route_name="statistics", permission="manage",
-                                          renderer="statistics.mako")
-    @view_config(route_name="statistic", permission="manage",
-                                          renderer="statistics.mako")
-    def statistics(self):
+    def __init__(self, request):
+        self.request = request
+
+    def __call__(self):
         """
             the stats view
         """
@@ -51,7 +48,7 @@ class StatisticView(BaseView):
                     year = int(self.request.params['year'])
                     if year not in years:
                         raise ValueError
-                except ValueError:
+                except:
                     year = 2000
                 current_year = year
             company = self.request.context
@@ -83,3 +80,22 @@ class StatisticView(BaseView):
             ret_dict['estimations'] = estimations
         ret_dict['current_year'] = current_year
         return ret_dict
+
+
+def includeme(config):
+    """
+        Route/views declaration for statistic prototype view
+    """
+    config.add_route('statistic',
+                     '/statistics/{id:\d+}',
+                     traverse='/companies/{id}')
+    config.add_route('statistics',
+                    '/statistics')
+    config.add_view(StatisticView,
+                    route_name="statistics",
+                    permission="manage",
+                    renderer="statistics.mako")
+    config.add_view(StatisticView,
+                    route_name="statistic",
+                    permission="manage",
+                    renderer="statistics.mako")

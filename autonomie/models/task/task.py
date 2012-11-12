@@ -96,7 +96,7 @@ class Task(DBBASE):
 
     def __init__(self, **kwargs):
         if not 'CAEStatus' in kwargs:
-            self.CAEStatus = 'draft'
+            self.CAEStatus = self.state_machine.default_state
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -124,7 +124,7 @@ class Task(DBBASE):
         log.debug(u"# CAEStatus change #")
 
         actual_status = self.CAEStatus
-        if actual_status is None and status == 'draft':
+        if actual_status is None and status == self.state_machine.default_state:
             return status
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
 

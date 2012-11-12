@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 12 nov. 2012 11:00:02 CET
+# * Last Modified : lun. 12 nov. 2012 11:07:15 CET
 #
 # * Project : autonomie
 #
@@ -33,13 +33,16 @@ from autonomie.utils.avatar import get_avatar
 from autonomie.utils.renderer import set_deform_renderer
 
 
-AUTONOMIE_MODULES = ("autonomie.views.holiday",
-                     "autonomie.views.company",
-                     "autonomie.views.project",
-                     "autonomie.views.client",
-                     "autonomie.views.admin",
+AUTONOMIE_MODULES = (
+                     "autonomie.views.auth",
                      "autonomie.views.user",
-                     "autonomie.views.manage")
+                     "autonomie.views.company",
+                     "autonomie.views.client",
+                     "autonomie.views.project",
+                     "autonomie.views.admin",
+                     "autonomie.views.manage",
+                     "autonomie.views.holiday",
+                     )
 
 
 def main(global_config, **settings):
@@ -82,8 +85,6 @@ def main(global_config, **settings):
 
     # Common routes
     config.add_route('index', '/')
-    config.add_route('login', '/login')
-    config.add_route('logout', '/logout')
     config.add_route('account',
                     '/account')
 

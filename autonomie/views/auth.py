@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : ven. 19 oct. 2012 14:08:12 CEST
+# * Last Modified : lun. 12 nov. 2012 11:04:15 CET
 #
 # * Project :
 #
@@ -15,7 +15,6 @@
 """
 import logging
 
-from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPForbidden
 
@@ -33,9 +32,6 @@ from autonomie.views.forms import get_auth_schema
 log = logging.getLogger(__name__)
 
 
-@view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED,
-        xhr=True, renderer='json')
-@view_config(context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
 def forbidden_view(request):
     """
         The forbidden view (handles the redirection to login form)
@@ -54,8 +50,6 @@ def forbidden_view(request):
     return redirect
 
 
-@view_config(route_name='login', permission=NO_PERMISSION_REQUIRED,
-                                                        renderer='login.mako')
 def login_view(request):
     """
         The login view
@@ -76,9 +70,9 @@ def login_view(request):
         log.info(u"Authenticating : '{0}'".format(request.params.get('login')))
         try:
             datas = form.validate(controls)
-        except ValidationFailure, e:
+        except ValidationFailure, err:
             log.exception(u" - Authentication error")
-            myform = e.render()
+            myform = err.render()
             fail_message = u"Erreur d'authentification"
             return {'title': "Authentification",
                     'html_form': myform,
@@ -97,7 +91,6 @@ def login_view(request):
             }
 
 
-@view_config(route_name='logout', permission=NO_PERMISSION_REQUIRED)
 def logout_view(request):
     """
         The logout view
@@ -105,3 +98,26 @@ def logout_view(request):
     headers = forget(request)
     loc = request.route_url('index')
     return HTTPFound(location=loc, headers=headers)
+
+
+def includeme(config):
+    """
+        Add auth related routes/views
+    """
+    config.add_route('login', '/login')
+    config.add_route('logout', '/logout')
+    config.add_view(forbidden_view,
+                    context=HTTPForbidden,
+                    permission=NO_PERMISSION_REQUIRED,
+                    xhr=True,
+                    renderer='json')
+    config.add_view(forbidden_view,
+                    context=HTTPForbidden,
+                    permission=NO_PERMISSION_REQUIRED)
+    config.add_view(logout_view,
+                    route_name='logout',
+                    permission=NO_PERMISSION_REQUIRED)
+    config.add_view(login_view,
+                    route_name='login',
+                    permission=NO_PERMISSION_REQUIRED,
+                    renderer='login.mako')

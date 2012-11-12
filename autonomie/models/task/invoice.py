@@ -497,7 +497,7 @@ class ManualInvoice(DBBASE):
     """
         Modèle pour les factures manuelles (ancienne version)
     """
-    __tablename__ = 'manual_invoice'
+    __tablename__ = 'manualinvoice'
     __table_args__ = default_table_args
     id = Column('id', BigInteger, primary_key=True)
     officialNumber = Column('sequence_id', BigInteger)

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : dim. 24 juin 2012 03:19:40 CEST
+# * Last Modified : lun. 12 nov. 2012 11:06:43 CET
 #
 # * Project : autonomie
 #
@@ -15,14 +15,12 @@
 """
 import logging
 
-from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 
 log = logging.getLogger(__name__)
 
 
-@view_config(route_name='index', renderer='index.mako')
 def index(request):
     """
         Index page
@@ -42,3 +40,11 @@ def index(request):
         return dict(
                     title=u"Bienvenue dans Autonomie",
                     companies=user.companies)
+
+
+def includeme(config):
+    """
+        Adding the index view on module inclusion
+    """
+    config.add_route("index", "/")
+    config.add_view(index, route_name='index', renderer='index.mako')

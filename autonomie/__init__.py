@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 12 nov. 2012 11:07:15 CET
+# * Last Modified : lun. 12 nov. 2012 11:07:51 CET
 #
 # * Project : autonomie
 #
@@ -37,6 +37,7 @@ AUTONOMIE_MODULES = (
                      "autonomie.views.auth",
                      "autonomie.views.user",
                      "autonomie.views.company",
+                     "autonomie.views.index",
                      "autonomie.views.client",
                      "autonomie.views.project",
                      "autonomie.views.admin",
@@ -84,7 +85,6 @@ def main(global_config, **settings):
                                                           cache_max_age=3600)
 
     # Common routes
-    config.add_route('index', '/')
     config.add_route('account',
                     '/account')
 

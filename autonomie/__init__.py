@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 05 nov. 2012 16:21:55 CET
+# * Last Modified : lun. 12 nov. 2012 11:00:02 CET
 #
 # * Project : autonomie
 #
@@ -31,6 +31,15 @@ from autonomie.models.config import get_config
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
 from autonomie.utils.renderer import set_deform_renderer
+
+
+AUTONOMIE_MODULES = ("autonomie.views.holiday",
+                     "autonomie.views.company",
+                     "autonomie.views.project",
+                     "autonomie.views.client",
+                     "autonomie.views.admin",
+                     "autonomie.views.user",
+                     "autonomie.views.manage")
 
 
 def main(global_config, **settings):
@@ -84,14 +93,9 @@ def main(global_config, **settings):
                     traverse='/companies/{id}')
     config.add_route('statistics',  # view
                     '/statistics')
-    # Holiday Handling
-    config.include('autonomie.views.holiday')
-    # Company Handling
-    config.include("autonomie.views.company")
-    # * Projects
-    config.include("autonomie.views.project")
-    # Customer handling
-    config.include("autonomie.views.client")
+
+    for module in AUTONOMIE_MODULES:
+        config.include(module)
     # * Invoices
     config.add_route('company_invoices',
                      '/company/{id:\d+}/invoices',
@@ -125,12 +129,6 @@ def main(global_config, **settings):
     config.add_route("cancelinvoice",
                     "/cancelinvoices/{id:\d+}",
                     traverse='/cancelinvoices/{id}')
-
-    config.include("autonomie.views.admin")
-    config.include("autonomie.views.user")
-
-    # Manage main view
-    config.include("autonomie.views.manage")
 
     # Test javascript view
     config.add_route("testjs",

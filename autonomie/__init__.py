@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 12 nov. 2012 11:12:48 CET
+# * Last Modified : lun. 12 nov. 2012 17:05:29 CET
 #
 # * Project : autonomie
 #
@@ -43,6 +43,7 @@ AUTONOMIE_MODULES = (
                      "autonomie.views.admin",
                      "autonomie.views.manage",
                      "autonomie.views.holiday",
+                     "autonomie.views.tests",
                      )
 
 
@@ -121,9 +122,6 @@ def main(global_config, **settings):
                     "/cancelinvoices/{id:\d+}",
                     traverse='/cancelinvoices/{id}')
 
-    # Test javascript view
-    config.add_route("testjs",
-                    "/testjs")
     # Set deform multi renderer handling translation and both chameleon and
     # mako templates
     set_deform_renderer()

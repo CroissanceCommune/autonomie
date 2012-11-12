@@ -169,8 +169,12 @@ def get_cinv_state():
     result['invalid'] = ('draft', 'wait',)
     return result
 
+def get_maninv_state():
+    return dict(valid=('resulted',))
+
 DEFAULT_STATE_MACHINES = {
         "base": TaskState('draft', get_base_state()),
         "estimation": TaskState('draft', get_est_state()),
         "invoice": TaskState('draft', get_inv_state()),
-        "cancelinvoice": TaskState('draft', get_cinv_state())}
+        "cancelinvoice": TaskState('draft', get_cinv_state()),
+        "manualinvoice":TaskState("valid", get_maninv_state())}

@@ -665,6 +665,14 @@ class ManualInvoice(Task):
     def is_viewable(self):
         return False
 
+    @property
+    def project(self):
+        """
+            Return a fake project used to access client and company
+            on an uniform way
+        """
+        return FakeProject(client=self.client, company=self.company)
+
     @classmethod
     def get_officialNumber(cls):
         """
@@ -674,3 +682,8 @@ class ManualInvoice(Task):
         current_year = datetime.date.today().year
         return DBSESSION().query(func.max(ManualInvoice.officialNumber)).filter(
                     func.year(ManualInvoice.taskDate) == current_year)
+
+class FakeProject(object):
+    def __init__(self, **kw):
+        for key, value in kw.items():
+            setattr(self, key, value)

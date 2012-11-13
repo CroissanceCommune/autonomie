@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 12 nov. 2012 17:05:29 CET
+# * Last Modified : mar. 13 nov. 2012 10:14:25 CET
 #
 # * Project : autonomie
 #
@@ -40,6 +40,7 @@ AUTONOMIE_MODULES = (
                      "autonomie.views.index",
                      "autonomie.views.client",
                      "autonomie.views.project",
+                     "autonomie.views.company_invoice",
                      "autonomie.views.admin",
                      "autonomie.views.manage",
                      "autonomie.views.holiday",
@@ -88,10 +89,6 @@ def main(global_config, **settings):
 
     for module in AUTONOMIE_MODULES:
         config.include(module)
-    # * Invoices
-    config.add_route('company_invoices',
-                     '/company/{id:\d+}/invoices',
-                     traverse='/companies/{id}')
     # * Treasury
     config.add_route('company_treasury',
                      '/company/{id:\d+}/treasury',
@@ -111,9 +108,6 @@ def main(global_config, **settings):
     config.add_route('invoice',
                      '/invoices/{id:\d+}',
                      traverse='/invoices/{id}')
-
-    config.add_route("invoices",
-                    "/invoices")
 
     config.add_route("cancelinvoices",
                      "/projects/{id:\d+}/cancelinvoices",

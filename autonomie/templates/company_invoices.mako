@@ -18,48 +18,47 @@
     <div class='span7'>
         <form class='navbar-form form-search form-horizontal' id='search_form' method='GET'>
             <div style="padding-bottom:3px">
-            <select id='client-select' name='client' data-placeholder="Sélectionner un client">
-                <option value=''></option>
-                %for client in company.clients:
-                    %if client.id == current_client:
-                        <option selected='1' value='${client.id}'>${client.name} (${client.code})</option>
-                    %else:
-                        <option value='${client.id}'>${client.name} (${client.code})</option>
-                    %endif
-                %endfor
-            </select>
-            <select name='year' id='year-select' class='span2' data-placeholder="Sélectionner une année">
-                %for year in years:
-                    %if unicode(current_year) == unicode(year):
-                        <option selected="1" value='${year}'>${year}</option>
-                    %else:
-                        <option value='${year}'>${year}</option>
-                    %endif
-                %endfor
-            </select>
-            <select name='paid' id='paid-select'>
-                %for value, label in (('both', u"Toutes les factures"), ("paid", u"Les factures payées"), ("notpaid", u"Seulement les impayés")):
-                    %if current_paid == value:
-                        <option selected="1" value='${value}'>${label}</option>
-                    %else:
-                        <option value='${value}'>${label}</option>
-                    %endif
-                %endfor
-            </select>
-            <select class='span1' name='nb'>
-                % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'10000'),):
-                    <% nb_item = request.GET.get("nb") %>
-                    % if nb_item == value or request.cookies.get('items_per_page') == value:
-                        <option value="${value}" selected='true'>${text}</option>
-                    %else:
-                        <option value="${value}">${text}</option>
-                    %endif
-                % endfor
-            </select>
+                <select id='client-select' name='client_id' data-placeholder="Sélectionner un client">
+                    <option value='-1'></option>
+                    %for client in clients:
+                        %if client.id == client_id:
+                            <option selected='1' value='${client.id}'>${client.name} (${client.code})</option>
+                        %else:
+                            <option value='${client.id}'>${client.name} (${client.code})</option>
+                        %endif
+                    %endfor
+                </select>
+                <select name='year' id='year-select' class='span2' data-placeholder="Sélectionner une année">
+                    %for year_option in years:
+                        %if unicode(year) == unicode(year_option):
+                            <option selected="1" value='${year_option}'>${year_option}</option>
+                        %else:
+                            <option value='${year_option}'>${year_option}</option>
+                        %endif
+                    %endfor
+                </select>
+                <select name='status' id='paid-select'>
+                    %for label, value in status_options:
+                        %if value == status:
+                            <option selected="1" value='${value}'>${label}</option>
+                        %else:
+                            <option value='${value}'>${label}</option>
+                        %endif
+                    %endfor
+                </select>
+                <select class='span1' name='items_per_page'>
+                    % for label, value in items_per_page_options:
+                        % if int(value) == int(items_per_page):
+                            <option value="${value}" selected='true'>${label}</option>
+                        %else:
+                            <option value="${value}">${label}</option>
+                        %endif
+                    % endfor
+                </select>
             </div>
             <div class='floatted' style="padding-right:3px">
-                    <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}" />
-                    <span class="help-block">Identifiant du document</span>
+                <input type='text' name='search' class='input-medium search-query' value="${search}" />
+                <span class="help-block">Identifiant du document</span>
             </div>
             <button type="submit" class="btn btn-primary">Filtrer</button>
         </form>
@@ -101,116 +100,118 @@
         <th>PDF</th>
     </thead>
     <tbody>
-        <% totalht = sum([invoice.total_ht() for invoice in invoices]) %>
-        <% totaltva = sum([invoice.tva_amount() for invoice in invoices]) %>
-        <% totalttc = sum([invoice.total() for invoice in invoices]) %>
+        <% totalht = sum([document.total_ht() for document in records]) %>
+        <% totaltva = sum([document.tva_amount() for document in records]) %>
+        <% totalttc = sum([document.total() for document in records]) %>
         <tr>
             <td colspan='5'><strong>Total</strong></td>
             <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
             <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
-        ## invoices are : Invoices, ManualInvoices or CancelInvoices
-        % if invoices:
-            % for invoice in invoices:
-                    %if invoice.is_cancelled():
-                        <tr class='invoice_cancelled_tr'>
-                            <td class='invoice_cancelled'>
-                                <span class="label label-important">
-                                    <i class="icon-white icon-remove"></i>
-                                </span>
-                    % elif invoice.is_tolate():
-                        <tr class='invoice_tolate_tr'>
-                            <td class='invoice_tolate'>
-                                <br />
-                    % elif invoice.is_paid():
-                        <tr class='invoice_paid_tr'>
-                            <td class='invoice_paid'>
-                    % elif invoice.is_resulted():
-                        <tr class='invoice_resulted_tr'>
-                            <td class='invoice_resulted'>
-                    % else:
-                        <tr>
-                            <td class='invoice_notpaid'>
-                                <br />
-                    % endif
-                    %if hasattr(invoice, "statusComment") and invoice.statusComment:
-                        <span class="ui-icon ui-icon-comment" title="${invoice.statusComment}"></span>
+        ## records are : Invoices, ManualInvoices or CancelInvoices
+     % if records:
+     % for document in records:
+     % if document.is_cancelled():
+        <tr class='invoice_cancelled_tr'>
+            <td class='invoice_cancelled'>
+                <span class="label label-important">
+                    <i class="icon-white icon-remove"></i>
+                </span>
+     % elif document.is_tolate():
+        <tr class='invoice_tolate_tr'>
+            <td class='invoice_tolate'>
+                <br />
+     % elif document.is_paid():
+        <tr class='invoice_paid_tr'>
+            <td class='invoice_paid'>
+     % elif document.is_resulted():
+        <tr class='invoice_resulted_tr'>
+            <td class='invoice_resulted'>
+     % else:
+         <tr>
+             <td class='invoice_notpaid'>
+                 <br />
+     % endif
+     %if document.statusComment:
+         <span class="ui-icon ui-icon-comment" title="${document.statusComment}"></span>
+     %endif
+             </td>
+             <td>
+                 ${document.officialNumber}
+             </td>
+             <td>
+                 ${api.format_date(document.taskDate)}
+             </td>
+             <td>
+                <blockquote>
+                    %if document.is_viewable():
+                        <a href="${request.route_path(document.type_, id=document.id)}"
+                            title='Voir le document'>${document.number}</a>
+                    %else:
+                        ${document.number}
                     %endif
-                </td>
-                    <td>
-                        ${invoice.officialNumber}
-                    </td>
-                    <td>
-                        ${api.format_date(invoice.taskDate)}
-                    </td>
-                    <td>
-                        <blockquote>
-                            %if hasattr(invoice, 'type_'):
-                                <a href="${request.route_path(invoice.type_, id=invoice.id)}"
-                                title='Voir le document'>${invoice.number}</a>
-                            %else:
-                                ${invoice.number}
-                            %endif
-                            <small>${format_text(invoice.description)}
-                        </blockquote>
-                    </td>
-                    <td class='invoice_company_name'>
-                        ${format_client(invoice.get_client())}
-                    </td>
-                    <td>
-                        <strong>${api.format_amount(invoice.total_ht())|n}&nbsp;€</strong>
-                    </td>
-                    <td>
-                        ${api.format_amount(invoice.tva_amount())|n}&nbsp;€
-                    </td>
-                    <td>
-                        ${api.format_amount(invoice.total())|n}&nbsp;€
-                    </td>
-                    <td>
-                        % if len(invoice.payments) == 1 and invoice.is_resulted():
-                            ${api.format_paymentmode(invoice.payments[0].mode)} le ${api.format_date(invoice.payments[0].date)}
-                        % elif len(invoice.payments) > 0:
-                            <ul>
-                                % for payment in invoice.payments:
-                                    <li>
-                                    ${api.format_amount(payment.amount)|n}&nbsp;€ ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
-                                    </li>
-                                % endfor
-                            </ul>
-                        % endif
+                    <small>${format_text(document.description)}
+                </blockquote>
+             </td>
+             <td class='invoice_company_name'>
+                 ${format_client(document.get_client())}
+             </td>
+             <td>
+                 <strong>
+                    ${api.format_amount(document.total_ht())|n}&nbsp;€
+                 </strong>
+             </td>
+             <td>
+                 ${api.format_amount(document.tva_amount())|n}&nbsp;€
+             </td>
+             <td>
+                 ${api.format_amount(document.total())|n}&nbsp;€
+             </td>
+             <td>
+                 % if len(document.payments) == 1 and document.is_resulted():
+                     ${api.format_paymentmode(document.payments[0].mode)} le ${api.format_date(document.payments[0].date)}
+                 % elif len(document.payments) > 0:
+                     <ul>
+                         % for payment in document.payments:
+                             <li>
+                                 ${api.format_amount(payment.amount)|n}&nbsp;€ ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
+                             </li>
+                         % endfor
+                     </ul>
+                 % endif
 
-                    </td>
-                    <td>
-                        %if hasattr(invoice, 'type_'):
-                            <a class='btn'
-                                href='${request.route_path(invoice.type_, id=invoice.id, _query=dict(view="pdf"))}'
-                                title="Télécharger la version PDF">
-                                <i class='icon icon-file'></i>
-                           </a>
-                        %endif
-                    </td>
-                </tr>
-            % endfor
-        % else:
-            <tr>
-                <td colspan='10'>
-                    Aucune facture n'a pu être retrouvée
-                </td>
-            </tr>
-        % endif
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan='5'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
-            <td colspan='2'></td>
-        </tr>
-    </tfoot>
+              </td>
+              <td>
+                  % if document.is_viewable():
+                      <a class='btn'
+                          href='${request.route_path(document.type_, id=document.id, _query=dict(view="pdf"))}'
+                          title="Télécharger la version PDF">
+                          <i class='icon icon-file'></i>
+                      </a>
+                  % endif
+              </td>
+          </tr>
+      % endfor
+  % else:
+      <tr>
+          <td colspan='10'>
+              Aucune facture n'a pu être retrouvée
+          </td>
+      </tr>
+  % endif
+  </tbody>
+  <tfoot>
+      <tr>
+          <td colspan='5'><strong>Total</strong></td>
+          <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
+          <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
+          <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+          <td colspan='2'></td>
+      </tr>
+  </tfoot>
 </table>
-${pager(invoices)}
+${pager(records)}
 </%block>
 <%block name='footerjs'>
 $('#client-select').chosen({allow_single_deselect: true});

@@ -19,8 +19,8 @@ import logging
 import datetime
 
 from beaker.cache import cache_region
-from pyramid.view import view_config
 
+from autonomie.models.task.task import Task
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import CancelInvoice
 from autonomie.models.task.invoice import ManualInvoice
@@ -28,269 +28,253 @@ from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.client import Client
 from autonomie.models.types import format_to_taskdate
+from autonomie.views.forms.invoices import InvoicesListSchema
+from autonomie.views.forms.invoices import STATUS_OPTIONS
+from sqlalchemy import or_, and_
+from sqlalchemy.orm import aliased
 
-from .base import ListView
+from .base import BaseListView
 
 log = logging.getLogger(__name__)
 
+p1 = aliased(Project)
+p2 = aliased(Project)
+c1 = aliased(Client)
+c2 = aliased(Client)
+c3 = aliased(Client)
 
-class CompanyInvoicesView(ListView):
+def get_taskdates(dbsession):
     """
-        Treasury and invoice view
+        Return all taskdates
     """
-    columns = dict(taskDate=("taskDate",),
-                   number=("number",),
-                   client=("project", "client", "name",),
-                   company=("project", "company", "name",),
-                   officialNumber=("officialNumber",)
-                   )
+    @cache_region("long_term", "taskdates")
+    def taskdates():
+        """
+            Cached version
+        """
+        return dbsession.query(Invoice.taskDate), \
+               dbsession.query(ManualInvoice.taskDate)
+    return taskdates()
+
+def get_years(dbsession):
+    """
+        We consider that all documents should be dated after 2000
+    """
+    inv, man_inv = get_taskdates(dbsession)
+
+    @cache_region("long_term", "taskyears")
+    def years():
+        """
+            cached version
+        """
+        return sorted(
+                set([i.taskDate.year for i in inv.all()
+                        ]).union(
+                 set([i.taskDate.year for i in man_inv.all()
+                     ]))
+            )
+    return years()
+
+class InvoicesList(BaseListView):
+    """
+        Used as base for company invoices listing
+    """
+    title = u""
+    schema = InvoicesListSchema()
+    filters = ('company', 'officialNumber', 'client', 'status', 'taskDate')
+    sort_columns = dict(taskDate=("taskDate",),
+               number=("number",),
+               client=("project", "client", "name",),
+               company=("project", "company", "name",),
+               officialNumber=("officialNumber",))
+
     default_sort = "officialNumber"
     default_direction = 'desc'
 
-    @view_config(route_name='company_invoices',
-                 renderer='company_invoices.mako',
-                 permission='edit')
-    def company_invoices(self):
-        """
-            List invoices for the given company
-        """
-        company = self.request.context
-        current_year = datetime.date.today().year
-        search, sort, direction, current_page, items_per_page = \
-                    self._get_pagination_args()
-        client = self.request.params.get('client')
-        if client == '-1':
-            client = None
-        paid = self.request.params.get('paid', 'both')
-        year = self.request.params.get('year', current_year)
+    def query(self):
+        query = Task.query()\
+                .with_polymorphic([Invoice, CancelInvoice, ManualInvoice])\
+                     .outerjoin(p1, Invoice.project)\
+                     .outerjoin(p2, CancelInvoice.project)\
+                     .outerjoin(c1, p1.client)\
+                     .outerjoin(c2, p2.client)\
+                     .outerjoin(c3, ManualInvoice.client)
+        if self.request.context == 'company':
+            company_id = self.request.context.id
+            query = query.filter(or_(p1.company_id == company_id,
+                                    p2.company_id == company_id,
+                                    ManualInvoice.company_id == company_id))
+        return query
 
-        invoices = self.get_invoices(company.id, search, client,
-                                     year, paid, sort, direction)
-        records = self._get_pagination(invoices, current_page, items_per_page)
-        return dict(title=u"Factures",
-                    company=company,
-                    invoices=records,
-                    current_client=client,
-                    current_year=year,
-                    current_paid=paid,
-                    years=self._get_years())
+    def filter_company(self, query, appstruct):
+        company_id = self._get_company_id(appstruct)
+        if company_id != -1:
+            query = query.filter(or_(p1.company_id == company_id,
+                                    p2.company_id == company_id,
+                                    ManualInvoice.company_id == company_id))
+        return query
 
-    def _get_taskdates(self):
+    def _get_company_id(self, appstruct):
         """
-            Return all taskdates
+            Return the company id : should be overriden
         """
-        @cache_region("long_term", "taskdates")
-        def taskdates():
-            """
-                Cached version
-            """
-            return self.dbsession.query(Invoice.taskDate), \
-                self.dbsession.query(ManualInvoice.taskDate)
-        return taskdates()
+        return -1
 
-    def _get_years(self):
-        """
-            We consider that all documents should be dated after 2000
-        """
-        inv, man_inv = self._get_taskdates()
 
-        @cache_region("long_term", "taskyears")
-        def years():
-            """
-                cached version
-            """
-            return sorted(
-                    set([i.taskDate.year for i in inv.all()
-                            ]).union(
-                     set([i.taskDate.year for i in man_inv.all()
-                         ]))
-                )
-        return years()
+    def filter_officialNumber(self, query, appstruct):
+        number = appstruct['search']
+        if number != -1:
+            query = query.filter(or_(Invoice.officialNumber == number,
+                                CancelInvoice.officialNumber == number,
+                                ManualInvoice.officialNumber == number))
+        return query
 
-    @view_config(route_name="invoices",
-                renderer="invoices.mako",
-                permission="manage")
-    def invoices(self):
-        """
-            Return all invoices
-        """
-        current_year = datetime.date.today().year
-        search, sort, direction, current_page, items_per_page = \
-                    self._get_pagination_args()
-        client = self.request.params.get('client')
-        if client == '-1':
-            client = None
-        paid = self.request.params.get('paid', 'both')
-        year = self.request.params.get('year', current_year)
+    def filter_client(self, query, appstruct):
+        client_id = appstruct['client_id']
+        if client_id != -1:
+            query = query.filter(or_(p1.client_id == client_id,
+                                     p2.client_id == client_id,
+                                     ManualInvoice.client_id == client_id))
+        return query
 
-        company_id = self.request.params.get('company')
-        if company_id == '-1':
-            company_id = None
+    def filter_taskDate(self, query, appstruct):
+        year = appstruct['year']
+        fday = datetime.date(year, 1, 1)
+        lday = datetime.date(year + 1, 1, 1)
+        query = query.filter(Task.taskDate.between(
+                                format_to_taskdate(fday),
+                                format_to_taskdate(lday)))
+        return query
 
-        invoices = self.get_invoices(company_id, search, client,
-                                     year, paid, sort, direction)
-        records = self._get_pagination(invoices, current_page, items_per_page)
-
-        return dict(title=u"Factures",
-                    invoices=records,
-                    current_client=client,
-                    current_year=year,
-                    current_paid=paid,
-                    years=self._get_years(),
-                    current_company=company_id,
-                    companies=Company.query(active=False).all())
-
-    def get_invoices(self, company_id=None, search=None, client=None,
-                           year=None, paid=None, sort=None, direction="asc"):
-        """
-            Return the invoices
-        """
-        cancel_inv, inv, man_inv = self._get_invoices()
-        if company_id:
-            cancel_inv, inv, man_inv = self._filter_by_company(cancel_inv,
-                                                    inv, man_inv, company_id)
-        if search:
-            cancel_inv, inv, man_inv = self._filter_by_number(cancel_inv,
-                                                    inv, man_inv, search)
-        #If we search an invoice number, we don't need more filter
+    def filter_status(self, query, appstruct):
+        status = appstruct['status']
+        if status == 'paid':
+            query = self._filter_paid(query)
+        elif status == 'notpaid':
+            query = self._filter_not_paid(query)
         else:
-            if client:
-                cancel_inv, inv, man_inv = self._filter_by_client(cancel_inv,
-                                                        inv, man_inv, client)
-            cancel_inv, inv, man_inv = self._filter_by_status(cancel_inv,
-                                                        inv, man_inv, paid)
-        if year:
-            cancel_inv, inv, man_inv = self._filter_by_date(cancel_inv,
-                                                        inv, man_inv, year)
+            query = self._filter_valid(query)
+        return query
 
-        all_inv = inv.all()
-        all_inv.extend(cancel_inv)
-        all_inv.extend(man_inv)
+    def _filter_paid(self, query):
+        inv_paid = Invoice.paid_states
+        cinv_valid = CancelInvoice.valid_states
+        maninv_paid = ManualInvoice.paid_states
+        return query.filter(or_(and_(Task.CAEStatus.in_(inv_paid),
+                                     Task.type_=='invoice'),
+                                and_(Task.CAEStatus.in_(cinv_valid),
+                                     Task.type_=='cancelinvoice'),
+                                and_(Task.CAEStatus.in_(maninv_paid),
+                                     Task.type_=='manualinvoice')))
+
+    def _filter_not_paid(self, query):
+        inv_notpaid = Invoice.not_paid_states
+        maninv_notpaid = ManualInvoice.not_paid_states
+        return query.filter(or_(and_(Task.CAEStatus.in_(inv_notpaid),
+                                     Task.type_=='invoice'),
+                                and_(Task.CAEStatus.in_(maninv_notpaid),
+                                    Task.type_=='manualinvoice')))
+
+    def _filter_valid(self, query):
+        inv_validated = Invoice.valid_states
+        cinv_valid = CancelInvoice.valid_states
+        return query.filter(or_(and_(Task.CAEStatus.in_(inv_validated),
+                                     Task.type_=='invoice'),
+                                and_(Task.CAEStatus.in_(cinv_valid),
+                                    Task.type_=='cancelinvoice'),
+                                Task.type_=='manualinvoice'))
+
+    def default_form_values(self, appstruct):
+        super(InvoicesList, self).default_form_values(appstruct)
+        appstruct['years'] = get_years(self.request.dbsession)
+        appstruct['status_options'] = STATUS_OPTIONS
+        return appstruct
+
+    def _sort(self, query, appstruct):
+        """
+            Custom sort function
+            Since we're using polymorphism, we can't order by child specific
+            attributes
+        """
+        direction = appstruct['direction']
         if direction == 'asc':
             reverse = False
         else:
             reverse = True
 
-        def sort_key(a):
+        sort_key = appstruct['sort']
+        sort = self.sort_columns[sort_key]
+
+        def sort_func(a):
             """
                 dinamycally built sort_key func
+                sort is a path of attributes like (a,b,c) which gives a.b.c
             """
             res = a
             for e in sort:
                 res = getattr(res, e)
             return res
-        inv = inv.all()
-        inv.extend(cancel_inv.all())
-        inv.extend(man_inv.all())
-        invoices = sorted(inv, key=sort_key, reverse=reverse)
+
+        invoices = query.all()
+        invoices = sorted(invoices, key=sort_func, reverse=reverse)
         return invoices
 
-    def _get_invoices(self):
-        """
-            request filter invoices by clients
-        """
-        join_args = ("project", "client", "company",)
-        cancel_inv = self.dbsession.query(CancelInvoice).join(*join_args)
-        inv = self.dbsession.query(Invoice).join(*join_args)
-        man_inv = self.dbsession.query(ManualInvoice)\
-                                .join(ManualInvoice.client)\
-                                .join(Client.company)
-        return cancel_inv, inv, man_inv
+class CompanyInvoicesList(InvoicesList):
+    def _get_company_id(self, appstruct):
+        return self.request.context.id
 
-    @staticmethod
-    def _filter_by_company(cancel_inv, inv, man_inv, company_id):
-        """
-            add a filter on the company id
-        """
-        inv = inv.filter(Project.company_id == company_id)
-        cancel_inv = cancel_inv.filter(Project.company_id == company_id)
-        man_inv = man_inv.filter(ManualInvoice.company_id == company_id)
-        return cancel_inv, inv, man_inv
+    def default_form_values(self, appstruct):
+        values = super(CompanyInvoicesList, self).default_form_values(appstruct)
+        values["clients"] = self.request.context.clients
+        return values
 
-    @staticmethod
-    def _filter_by_number(cancel_inv, inv, man_inv, number):
-        """
-            add a filter on the numbers to invoices sqla queries
-        """
-        inv = inv.filter(Invoice.officialNumber == number)
-        cancel_inv = cancel_inv.filter(CancelInvoice.officialNumber == number)
-        man_inv = man_inv.filter(
-                             ManualInvoice.officialNumber == number)
-        return cancel_inv, inv, man_inv
+class GlobalInvoicesList(InvoicesList):
+    def _get_company_id(self, appstruct):
+        return appstruct['company_id']
 
-    @staticmethod
-    def _filter_by_client(cancel_inv, inv, man_inv, client):
-        """
-            add a filter on the client to invoices sqla queries
-        """
-        inv = inv.filter(Project.client_id == client)
-        cancel_inv = cancel_inv.filter(Project.client_id == client)
-        man_inv = man_inv.filter(ManualInvoice.client_id == client)
-        return cancel_inv, inv, man_inv
+    def default_form_values(self, appstruct):
+        values = super(GlobalInvoicesList, self).default_form_values(appstruct)
+        values['companies'] = Company.query(active=False).all()
+        return values
 
-    @staticmethod
-    def _filter_by_status(cinv, inv, man_inv, status):
-        """
-            add a filter on the status to invoices sqla queries
-        """
-        inv_paid = Invoice.paid_states
-        inv_notpaid = Invoice.not_paid_states
-        inv_validated = Invoice.valid_states
+#def company_treasury(request):
+#    """
+#        View for the treasury view
+#    """
+#    company = request.context
+#    today = datetime.date.today()
+#    current_year = today.year
+#    year = request.params.get('year', current_year)
+#    invoices = self.get_invoices(company_id=company.id,
+#                                     paid="paid",
+#                                     year=year,
+#                                     sort=('taskDate',))
+#    return dict(
+#            title=u"Trésorerie",
+#            invoices=invoices,
+#            company=company,
+#            years=self._get_years(),
+#            current_year=year,
+#            today=today)
 
-        cinv_valid = CancelInvoice.valid_states
+def includeme(config):
+    # Company invoices view
+    config.add_route('company_invoices',
+                     '/company/{id:\d+}/invoices',
+                     traverse='/companies/{id}')
+    # Global invoices view
+    config.add_route("invoices",
+                    "/invoices")
 
-        if status == "paid":
-            inv = inv.filter(Invoice.CAEStatus.in_(inv_paid))
-            cinv = cinv.filter(CancelInvoice.CAEStatus.in_(cinv_valid))
-            man_inv = man_inv.filter(ManualInvoice.payment_ok == 1)
-        elif status == "notpaid":
-            inv = inv.filter(Invoice.CAEStatus.in_(inv_notpaid))
-            # A cancel invoice is always paid
-            cinv = cinv.filter(CancelInvoice.CAEStatus == "nutt")
-            man_inv = man_inv.filter(ManualInvoice.payment_ok == 0)
-        else:
-            inv = inv.filter(Invoice.CAEStatus.in_(inv_validated))
-            cinv = cinv.filter(CancelInvoice.CAEStatus.in_(cinv_valid))
-        return cinv, inv, man_inv
-
-    @staticmethod
-    def _filter_by_date(cancel_inv, inv, man_inv, year):
-        """
-            add a filter on dates to the invoices sqla queries
-        """
-        fday = datetime.date(int(year), 1, 1)
-        lday = datetime.date(int(year) + 1, 1, 1)
-        inv = inv.filter(
-                        Invoice.taskDate.between(
-                                format_to_taskdate(fday),
-                                format_to_taskdate(lday))
-                        )
-        cancel_inv = cancel_inv.filter(CancelInvoice.taskDate.between(
-                                format_to_taskdate(fday),
-                                format_to_taskdate(lday)))
-        man_inv = man_inv.filter(
-                        ManualInvoice.taskDate.between(fday, lday))
-        return cancel_inv, inv, man_inv
-
-    @view_config(route_name='company_treasury',
-                 renderer='company_treasury.mako',
-                 permission='edit')
-    def company_treasury(self):
-        """
-            View for the treasury view
-        """
-        company = self.request.context
-        today = datetime.date.today()
-        current_year = today.year
-        year = self.request.params.get('year', current_year)
-        invoices = self.get_invoices(company_id=company.id,
-                                         paid="paid",
-                                         year=year,
-                                         sort=('taskDate',))
-        return dict(
-                title=u"Trésorerie",
-                invoices=invoices,
-                company=company,
-                years=self._get_years(),
-                current_year=year,
-                today=today)
+    config.add_view(CompanyInvoicesList,
+                    route_name='company_invoices',
+                    renderer='company_invoices.mako',
+                    permission='edit')
+    config.add_view(GlobalInvoicesList,
+                    route_name="invoices",
+                    renderer="invoices.mako",
+                    permission="manage")
+#    config.add_view(company_treasury,
+#                    route_name='company_treasury',
+#                    renderer='company_treasury.mako',
+#                    permission='edit')

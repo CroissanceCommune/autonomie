@@ -165,6 +165,9 @@ class Invoice(Task, TaskCompute):
             tolate = False
         return self.CAEStatus in ('valid', 'paid', ) and tolate
 
+    def is_viewable(self):
+        return True
+
     @classmethod
     def get_name(cls, seq_number, account=False, sold=False):
         """
@@ -453,6 +456,9 @@ class CancelInvoice(Task, TaskCompute):
     def is_cancelinvoice(self):
         return True
 
+    def is_viewable(self):
+        return True
+
     @classmethod
     def get_name(cls, seq_number):
         """
@@ -655,6 +661,9 @@ class ManualInvoice(Task):
 
     def get_client(self):
         return self.client
+
+    def is_viewable(self):
+        return False
 
     @classmethod
     def get_officialNumber(cls):

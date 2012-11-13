@@ -67,22 +67,27 @@ def upgrade():
         m.company_id = manualinv.company_id
         m.description = manualinv.description
         m.CAEStatus = 'valid'
-        if manualinv.payment_ok == '1':
+        if manualinv.payment_ok == '1' or manualinv.montant_ht < 0:
             m.CAEStatus = "resulted"
+        if manualinv.montant_ht < 0:
+            if manualinv.paymentMode == u"chèque":
+                payment_mode = "CHEQUE"
+            elif manualinv.paymentMode == u"virement":
+                payment_mode = "VIREMENT"
+            else:
+                payment_mode = None
+            if payment_mode:
+                # We don't care about amounts since there is only one payment
+                payment = Payment(mode=payment_mode, date=manualinv.statusDate,
+                                amount=0)
+                m.payments.append(payment)
         m.statusDate = manualinv.statusDate
-        if manualinv.paymentMode == u"chèque":
-            payment_mode = "CHEQUE"
-        elif manualinv.paymentMode == u"virement":
-            payment_mode = "VIREMENT"
-        # We don't care about amounts since there is only one payment
-        payment = Payment(mode=payment_mode, date=manualinv.statusDate,
-                            amount=0)
-        m.payments.append(payment)
         m.taskDate = manualinv.taskDate
         m.creationDate = manualinv.created_at
         m.updateDate = manualinv.updated_at
         m.phase_id = 0
         m.name = u"Facture manuelle %s" % manualinv.officialNumber
+        m.officialNumber = manualinv.officialNumber
         m.owner_id = 0
         DBSESSION.add(m)
 

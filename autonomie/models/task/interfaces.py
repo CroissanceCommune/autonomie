@@ -188,7 +188,7 @@ class IInvoice(Interface):
             Return the client this document is related to
         """
 
-    def is_viewable(self):
+    def is_viewable():
         """
             Return True if the document has associated views
         """

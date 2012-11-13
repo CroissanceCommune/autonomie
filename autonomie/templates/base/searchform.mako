@@ -9,7 +9,7 @@ Template used to render a search form
         %endif
     </div>
     <select name='items_per_page'>
-        % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'10000'),):
+        % for text, value in items_per_page_options:
             % if int(value) == int(elem.defaults['items_per_page']):
                 <option value="${value}" selected='true'>${text}</option>
             %else:

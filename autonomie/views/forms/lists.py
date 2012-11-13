@@ -15,6 +15,13 @@
 import colander
 
 
+ITEMS_PER_PAGE_OPTIONS = (('10 par page', u'10'),
+                          ('20 par page', u'20'),
+                          ('30 par page', u'30'),
+                          ("40 par page", u'40'),
+                          ('50 par page', u'50'),
+                          ('Tous', u'10000'))
+
 @colander.deferred
 def deferred_default_sort(node, kw):
     return kw['default_sort']

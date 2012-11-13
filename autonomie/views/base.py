@@ -42,6 +42,7 @@ from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 from autonomie.views.forms.task import Payment
 from autonomie.views.forms.task import Duplicate
+from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.pdf import render_html
 
@@ -616,7 +617,7 @@ def make_pdf_view(template):
     return pdf
 
 
-class BaseListView():
+class BaseListView(object):
     """
         New styled based List view
     """
@@ -705,6 +706,7 @@ class BaseListView():
         """
             Return the default value to pass to the forms
         """
+        appstruct['items_per_page_options'] = ITEMS_PER_PAGE_OPTIONS
         return appstruct
 
     def more_template_vars(self):

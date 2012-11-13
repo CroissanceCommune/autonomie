@@ -26,6 +26,7 @@ from sqlalchemy import String
 from sqlalchemy import ForeignKey
 from sqlalchemy import Date
 from sqlalchemy import BigInteger
+from sqlalchemy import Float
 from sqlalchemy import DateTime
 from sqlalchemy import Text
 from sqlalchemy import func
@@ -492,126 +493,6 @@ class CancelInvoice(Task, TaskCompute):
         self.taskDate = datetime.date.today()
 
 
-@implementer(IInvoice)
-class ManualInvoice(DBBASE):
-    """
-        Modèle pour les factures manuelles (ancienne version)
-    """
-    __tablename__ = 'manualinvoice'
-    __table_args__ = default_table_args
-    id = Column('id', BigInteger, primary_key=True)
-    officialNumber = Column('sequence_id', BigInteger)
-    description = Column('libelle', String(255))
-    montant_ht = Column("montant_ht", Integer)
-    tva = Column("tva", Integer)
-    payment_ok = Column("paiement_ok", Integer)
-    statusDate = Column("paiement_date", Date())
-    paymentMode = Column("paiement_comment", String(255))
-    taskDate = Column("date_emission", Date(),
-                                default=datetime.datetime.now)
-    created_at = deferred(Column("created_at", DateTime,
-                                      default=datetime.datetime.now))
-    updated_at = deferred(Column("updated_at", DateTime,
-                                      default=datetime.datetime.now,
-                                      onupdate=datetime.datetime.now))
-    client_id = Column('client_id', Integer,
-                            ForeignKey('customer.id'))
-    client = relationship("Client",
-                primaryjoin="Client.id==ManualInvoice.client_id",
-                backref='manual_invoices')
-    company_id = Column('compagnie_id', Integer,
-                            ForeignKey('company.id'))
-    company = relationship("Company",
-                primaryjoin="Company.id==ManualInvoice.company_id",
-                  backref='manual_invoices')
-
-    @property
-    def statusComment(self):
-        return None
-
-    @property
-    def discounts(self):
-        return []
-
-    @property
-    def payments(self):
-        """
-            Return a payment object for compatibility
-            with other invoices
-        """
-        return [Payment(mode=self.paymentMode, amount=0, date=self.statusDate)]
-
-    @property
-    def number(self):
-        """
-            return the invoice number
-        """
-        return u"FACT_MAN_{0}".format(self.officialNumber)
-
-    def get_company(self):
-        return self.company
-
-    def get_client(self):
-        return self.client
-
-    def is_paid(self):
-        return False
-
-    def is_resulted(self):
-        return self.payment_ok == 1
-
-    def is_cancelled(self):
-        return False
-
-    def is_tolate(self):
-        today = datetime.date.today()
-        elapsed = today - self.taskDate
-        return not self.is_resulted() and elapsed > datetime.timedelta(days=45)
-
-    @validates("paymentMode")
-    def validate_paymentMode(self, key, paymentMode):
-        """
-            Validate the paymentMode
-        """
-        if not paymentMode in (u'chèque', u'virement'):
-            raise Forbidden(u'Mode de paiement inconnu')
-        return paymentMode
-
-    def is_cancelinvoice(self):
-        """
-            return false
-        """
-        return False
-
-    def is_invoice(self):
-        """
-            return false
-        """
-        return False
-
-    @classmethod
-    def get_officialNumber(cls):
-        """
-            Return the greatest officialNumber actually used in the
-            ManualInvoice table
-        """
-        current_year = datetime.date.today().year
-        return DBSESSION().query(func.max(ManualInvoice.officialNumber)).filter(
-                    func.year(ManualInvoice.taskDate) == current_year)
-
-    def total_ht(self):
-        return int(self.montant_ht * 100)
-
-    def tva_amount(self):
-        total_ht = self.total_ht()
-        if self.tva:
-            tva = int(self.tva)
-        else:
-            tva = 0
-        tva = max(tva, 0)
-        return int(float(total_ht) * (tva / 10000.0))
-
-
 class CancelInvoiceLine(DBBASE):
     """
         CancelInvoice lines
@@ -700,3 +581,87 @@ class Payment(DBBASE):
     def __repr__(self):
         return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
  mode:{s.mode} date:{s.date}".format(s=self)
+
+
+@implementer(IInvoice)
+class ManualInvoice(Task):
+    __tablename__ = 'manualinv'
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'manualinvoice'}
+    id = Column("id", ForeignKey('task.id'), primary_key=True)
+    officialNumber = Column("officialNumber", Integer, nullable=False,
+                                                           default=0)
+    montant_ht = Column("montant_ht", Integer)
+    tva = Column("tva", Integer)
+    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    company_id = Column('compagnie_id', Integer, ForeignKey('company.id'))
+    client = relationship("Client",
+                primaryjoin="Client.id==ManualInvoice.client_id",
+                backref='manual_invoices')
+    company_id = Column('compagnie_id', Integer,
+                            ForeignKey('company.id'))
+    company = relationship("Company",
+                primaryjoin="Company.id==ManualInvoice.company_id",
+                  backref='manual_invoices')
+    # State machine handling
+    state_machine = DEFAULT_STATE_MACHINES['manualinvoice']
+    paid_states = ('resulted',)
+    not_paid_states = ('valid',)
+    valid_states = paid_states + not_paid_states
+
+    @property
+    def number(self):
+        """
+            return the invoice number
+        """
+        return u"FACT_MAN_{0}".format(self.officialNumber)
+
+    # IInvoice interface
+    def total_ht(self):
+        return int(self.montant_ht * 100)
+
+    def tva_amount(self):
+        total_ht = self.total_ht()
+        if self.tva:
+            tva = int(self.tva)
+        else:
+            tva = 0
+        tva = max(tva, 0)
+        return int(float(total_ht) * (tva / 10000.0))
+
+    def total(self):
+        return self.total_ht() + self.tva_amount()
+
+    def is_cancelled(self):
+        return False
+
+    def is_tolate(self):
+        today = datetime.date.today()
+        elapsed = today - self.taskDate
+        if elapsed > datetime.timedelta(days=45):
+            tolate = True
+        else:
+            tolate = False
+        return not self.is_resulted() and tolate
+
+    def is_paid(self):
+        return False
+
+    def is_resulted(self):
+        return self.CAEStatus in self.paid_states
+
+    def get_company(self):
+        return self.company
+
+    def get_client(self):
+        return self.client
+
+    @classmethod
+    def get_officialNumber(cls):
+        """
+            Return the greatest officialNumber actually used in the
+            ManualInvoice table
+        """
+        current_year = datetime.date.today().year
+        return DBSESSION().query(func.max(ManualInvoice.officialNumber)).filter(
+                    func.year(ManualInvoice.taskDate) == current_year)

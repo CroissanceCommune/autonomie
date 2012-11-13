@@ -31,14 +31,11 @@ def get_date(value):
         return datetime.datetime.now()
 
 def upgrade():
-    from autonomie.models import DBSESSION
-    from autonomie.models.task import Payment
     from alembic.context import get_bind
     conn = get_bind()
     result = conn.execute("""
 select invoice.IDTask, invoice.tva, invoice.discountHT, invoice.expenses, invoice.paymentMode, task.statusDate from coop_invoice as invoice join coop_task as task on task.IDTask=invoice.IDTask where task.CAEStatus='paid';
 """).fetchall()
-    dbsession = DBSESSION
     for i in result:
         id_, tva, discountHT, expenses, paymentMode, statusDate = i
         lines = conn.execute("""

@@ -140,27 +140,22 @@ class IInvoice(Interface):
         See templates/invoices.mako (under invoice.model) to see the expected
         common informations
     """
-    statusComment = Attribute("""statusComment to allow discussion""")
-    statusDate = Attribute("""The date the status has last been changed""")
     officialNumber = Attribute("""official number used in sage""")
-    taskDate = Attribute("""Date of the task""")
-    id = Attribute("""the document sql id""")
     number = Attribute("""the document's non official number""")
-    description = Attribute("""the document description string""")
 
-    def get_company():
+    def total_ht():
         """
-            Return the company this task is related to
-        """
-
-    def get_client():
-        """
-            Return the client this document is related to
+            Return the HT total of the current document
         """
 
-    def is_paid():
+    def tva_amount():
         """
-            Has the current task been paid
+            Return the sum of the tvas
+        """
+
+    def total():
+        """
+            Return the TTC total
         """
 
     def is_cancelled():
@@ -173,17 +168,27 @@ class IInvoice(Interface):
             Is it too late
         """
 
-    def is_invoice():
+    def is_paid():
         """
-            is the current task an invoice ?
-        """
-
-    def is_cancelinvoice():
-        """
-            Is the current task a cancelled invoice ?
+            Has the current task been paid
         """
 
     def is_resulted():
         """
             Return True if the task is resulted (definitively paid)
+        """
+
+    def get_company():
+        """
+            Return the company this task is related to
+        """
+
+    def get_client():
+        """
+            Return the client this document is related to
+        """
+
+    def is_viewable(self):
+        """
+            Return True if the document has associated views
         """

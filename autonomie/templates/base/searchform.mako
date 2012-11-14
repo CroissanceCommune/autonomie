@@ -1,6 +1,7 @@
 <%doc>
 Template used to render a search form
 </%doc>
+<% from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS %>
 <form class='navbar-form offset1 pull-right form-search form-inline' id='${elem.id_}' method='GET'>
     <div class='floatted'>
         <input type='text' name='search' class='input-medium search-query' value="${elem.defaults['search']}">
@@ -9,7 +10,7 @@ Template used to render a search form
         %endif
     </div>
     <select name='items_per_page'>
-        % for text, value in items_per_page_options:
+        % for text, value in ITEMS_PER_PAGE_OPTIONS:
             % if int(value) == int(elem.defaults['items_per_page']):
                 <option value="${value}" selected='true'>${text}</option>
             %else:

@@ -81,7 +81,6 @@ class InvoicesList(BaseListView):
     """
     title = u""
     schema = InvoicesListSchema()
-    filters = ('company', 'officialNumber', 'client', 'status', 'taskDate')
     sort_columns = dict(taskDate=("taskDate",),
                number=("number",),
                client=("project", "client", "name",),

@@ -59,7 +59,6 @@ class UserList(BaseListView):
     # The columns that allow sorting
     sort_columns = dict(name=User.lastname,
                         email=User.email)
-    filters = ('name_search',)
 
     def query(self):
         """

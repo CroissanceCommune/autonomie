@@ -51,7 +51,6 @@ def get_client_form(request):
 class ClientsList(BaseListView):
     title = u"Liste des clients"
     schema = ClientSearchSchema()
-    filters = ('name_or_contact',)
     sort_columns = {'name':Client.name,
                     "code":Client.code,
                     "contactLastName":Client.contactLastName}

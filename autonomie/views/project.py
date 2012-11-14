@@ -101,7 +101,6 @@ class ProjectsList(BaseListView):
     add_template_vars = ('title', 'item_actions',)
     title = u"Liste des projets"
     schema = ProjectsListSchema()
-    filters = ('archived', 'name_or_client')
     default_sort = "name"
     sort_columns = {'name':Project.name,
                     "code":Project.code,

@@ -34,80 +34,65 @@ from autonomie.utils.views import submit_btn
 from autonomie.utils.views import cancel_btn
 from autonomie.views.render_api import format_account
 from autonomie.views.forms.user import USERSCHEMA
+from autonomie.views.forms.user import UserListSchema
 from autonomie.views.forms.user import PASSWORDSCHEMA
 from autonomie.views.forms.user import UserDisableSchema
 from autonomie.views.forms.utils import BaseFormView
 
-from .base import ListView
+from .base import BaseListView
 
 log = logging.getLogger(__name__)
 
 
-class UserList(ListView):
+def get_user_form(request):
     """
-        User related views
+        Return the user add form
     """
-    columns = dict(lastname=User.lastname,
-                    email=User.email)
-    default_sort = 'lastname'
-    default_direction = 'asc'
+    schema = USERSCHEMA.bind(request=request)
+    return Form(schema, buttons=(submit_btn,))
 
-    def __init__(self, request):
-        ListView.__init__(self, request)
-        populate_actionmenu(request)
 
-    def _get_user_form(self):
-        """
-            Return the user add form
-        """
-        schema = USERSCHEMA.bind(request=self.request)
-        return Form(schema, buttons=(submit_btn,))
+class UserList(BaseListView):
+    title = u"Annuaire des utilisateurs"
+    # The schema used to validate our search/filter form
+    schema = UserListSchema()
+    # The columns that allow sorting
+    sort_columns = dict(name=User.lastname,
+                        email=User.email)
+    filters = ('name_search',)
 
-    def _get_add_popup(self):
+    def query(self):
         """
-            return the add user popup
-        """
-        form = self._get_user_form()
-        return PopUp('add', u"Ajouter un compte", form.render())
-
-    def __call__(self):
-        """
-            User directory
-        """
-        search, sort, direction, current_page, items_per_page = \
-                                                self._get_pagination_args()
-        query = self._get_users()
-        if search:
-            query = self._filter_search(query, search)
-        users = query.order_by(sort + " " + direction).all()
-
-        records = self._get_pagination(users, current_page, items_per_page)
-        ret_dict = dict(title=u"Annuaire des utilisateurs",
-                        users=records)
-        if has_permission('add', self.request.context, self.request):
-            popup = self._get_add_popup()
-            ret_dict['popups'] = {popup.name: popup}
-            self.request.actionmenu.add(popup.open_btn())
-        self.request.actionmenu.add(SearchForm(u"Nom ou entreprise"))
-        return ret_dict
-
-    @staticmethod
-    def _get_users():
-        """
-            return the user query
+            Return the main query for our list view
         """
         return User.query(ordered=False).outerjoin(User.companies)
 
-    @staticmethod
-    def _filter_search(query, search):
+    def filter_name_search(self, query, appstruct):
         """
-            Return a filtered query
+            filter the query with the provided search argument
         """
-        return query.filter(
+        search = appstruct['search']
+        if search:
+            query = query.filter(
             or_(User.lastname.like("%" + search + "%"),
                 User.firstname.like("%" + search + "%"),
-                User.companies.any(Company.name.like("%" + search + "%"))
-            ))
+                User.companies.any(Company.name.like("%" + search + "%"))))
+        return query
+
+    def populate_actionmenu(self, appstruct):
+        """
+            Add items to the action menu (directory link,
+            add user link and popup for user with add permission ...)
+        """
+        populate_actionmenu(self.request)
+        if has_permission('add', self.request.context, self.request):
+            form = get_user_form(self.request)
+            popup = PopUp("add", u'Ajouter un compte', form.render())
+            self.request.popups = {popup.name: popup}
+            self.request.actionmenu.add(popup.open_btn())
+        searchform = SearchForm(u"Nom ou entreprise")
+        searchform.set_defaults(appstruct)
+        self.request.actionmenu.add(searchform)
 
 
 class UserAccount(BaseFormView):

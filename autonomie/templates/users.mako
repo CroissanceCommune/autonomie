@@ -8,14 +8,14 @@
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
-            <th>${sortable("Nom", "lastname")}</th>
+            <th>${sortable("Nom", "name")}</th>
             <th>${sortable("E-mail", "email")}</th>
             <th>Entreprises</th>
         </tr>
     </thead>
     <tbody>
-        % if users:
-            % for user in users:
+        % if records:
+            % for user in records:
                 <tr>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user, reverse=True)}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.email}</td>
@@ -32,5 +32,5 @@
             <tr><td colspan='3'>Aucun utilisateur n'est présent dans la base</td></tr>
         % endif
 </tbody></table>
-${pager(users)}
+${pager(records)}
 </%block>

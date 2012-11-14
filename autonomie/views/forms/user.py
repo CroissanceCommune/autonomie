@@ -26,6 +26,7 @@ from autonomie.views.forms.widgets import get_mail_input
 from autonomie.views.forms.widgets import deferred_edit_widget
 from autonomie.utils.security import MANAGER_ROLES
 from autonomie.utils.security import ADMIN_ROLES
+from autonomie.views.forms.lists import BaseListsSchema
 
 log = logging.getLogger(__name__)
 
@@ -299,3 +300,5 @@ def get_auth_schema():
     """
     return AuthSchema(title=u"Authentification", validator=auth)
 
+class UserListSchema(BaseListsSchema):
+    pass

@@ -15,6 +15,7 @@
 """
     Base views with commonly used utilities
 """
+import inspect
 import logging
 import itertools
 import colander
@@ -619,14 +620,37 @@ def make_pdf_view(template):
 
 class BaseListView(object):
     """
-        New styled based List view
+        A base list view used to provide an easy way to list elements
+
+        * It launches a query to retrieve records
+        * Validates GET params regarding the given schema
+        * filter the query with the provided filter_* methods
+        * Launches complementary methods to populate request vars like popup
+          or actionmenu
+
+        @param add_template_vars: list of attributes (or properties)
+                                  that will be automatically added
+                                  to the response dict
+
+        @param schema: Schema used to validate the GET params provided in the
+                        url, the schema should inherit from
+                        autonomie.views.forms.lists.BaseListsSchema to preserve
+                        most of the processed automation
+        @param sort_columns: dict of {'sort_column_key':'sort_column'...}.
+            Allows to generate the validator for the sort availabilities and
+            to automatically add a order_by clause to the query. sort_column
+            may be equal to Table.attribute if join clauses are present in the
+            main query.
+        @default_sort: the default sort_column_key to be used
+        @default_direction: the default sort direction (one of ['asc', 'desc'])
+
+        A subclass shoud provide at least a schema and a query method
     """
     add_template_vars = ('title',)
     schema = None
     default_sort = 'name'
     sort_columns = {'name':'name'}
     default_direction = 'asc'
-    filters = ()
 
     def __init__(self, request):
         self.request = request
@@ -634,22 +658,32 @@ class BaseListView(object):
 
     def query(self):
         """
-            main query
+            The main query, should be overrided by a subclass
         """
         pass
+
+    def _get_filters(self):
+        """
+            Return the list of the filter_... methods attached to the current
+            object
+        """
+        for method_name, method in inspect.getmembers(self, inspect.ismethod):
+            if method_name.startswith('filter_'):
+                yield method
 
     def _filter(self, query, appstruct):
         """
             filter the query with the configured filters
         """
-        for filter_name in self.filters:
-            func = getattr(self, "filter_%s" % filter_name)
-            query = func(query, appstruct)
+        for method in self._get_filters():
+            query = method(query, appstruct)
         return query
 
     def _sort(self, query, appstruct):
         """
-            Sort the results
+            Sort the results regarding the default values and
+            the sort_columns dict, maybe overriden to provide a custom sort
+            method
         """
         sort_column_key = appstruct['sort']
         sort_column = self.sort_columns[sort_column_key]
@@ -663,7 +697,7 @@ class BaseListView(object):
 
     def _paginate(self, query, appstruct):
         """
-            wraps the current SQLA query with a pagination tool
+            wraps the current SQLA query with pagination
         """
         # Url builder for page links
         page_url = partial(get_page_url, request=self.request)
@@ -677,6 +711,8 @@ class BaseListView(object):
     def _get_bind_params(self):
         """
             return the params passed to the form schema's bind method
+            if subclass override this method, it should call the super
+            one's too
         """
         return dict(request=self.request,
                     default_sort=self.default_sort,
@@ -684,6 +720,9 @@ class BaseListView(object):
                     sort_columns=self.sort_columns)
 
     def __call__(self):
+        """
+            This method is a used in pyramid to make a class a view
+        """
         query = self.query()
         schema = self.schema.bind(**self._get_bind_params())
         try:
@@ -705,6 +744,7 @@ class BaseListView(object):
     def default_form_values(self, appstruct):
         """
             Return the default value to pass to the forms
+            Here we return the items_per_page_options and the appstruct
         """
         appstruct['items_per_page_options'] = ITEMS_PER_PAGE_OPTIONS
         return appstruct
@@ -712,6 +752,8 @@ class BaseListView(object):
     def more_template_vars(self):
         """
             Add template vars to the response dict
+            List the attributes configured in the add_template_vars attribute
+            and add them
         """
         result = {}
         for name in self.add_template_vars:
@@ -721,6 +763,8 @@ class BaseListView(object):
     def populate_actionmenu(self, appstruct):
         """
             Used to populate an actionmenu (if there's one in the page)
+            actionmenu is a request attribute used to automate the integration
+            of actionmenus in pages
         """
         pass
 

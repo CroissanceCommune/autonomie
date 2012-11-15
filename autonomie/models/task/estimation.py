@@ -314,7 +314,7 @@ class Estimation(Task, TaskCompute):
             Compute the amount of the deposit
         """
         if self.deposit > 0:
-            total = self.total()
+            total = self.total_ht()
             return int(total * int(self.deposit) / 100.0)
         return 0
 
@@ -326,33 +326,50 @@ class Estimation(Task, TaskCompute):
 
     def paymentline_amount(self):
         """
-            Compute payment lines amounts in case of equal division
+            Compute payment lines amounts in case of equal payment repartition
             (when manualDeliverables is 0)
             (when the user has checked 3 times)
         """
-        total = self.total()
+        total = self.total_ht()
         deposit = self.deposit_amount()
         rest = total - deposit
         return int(rest / self.get_nb_payment_lines())
+
+    # Computations for estimation display
+    def deposit_amount_ttc(self):
+        """
+            Return the ttc amount of the deposit (for estimation display)
+        """
+        if self.deposit > 0:
+            total_ttc = self.total_ttc()
+            return int(total_ttc * int(self.deposit) / 100.0)
+        return 0
 
     def sold(self):
         """
             Compute the sold amount to finish on an exact value
             if we divide 10 in 3, we'd like to have something like :
                 3.33 3.33 3.34
+            (for estimation display)
         """
         result = 0
-        total = self.total()
-        deposit = self.deposit_amount()
-        rest = total - deposit
+        total_ttc = self.total()
+        deposit_ttc = self.deposit_amount_ttc()
+        rest = total_ttc - deposit_ttc
+
         payment_lines_num = self.get_nb_payment_lines()
         if payment_lines_num == 1 or not self.get_nb_payment_lines():
+            # No other payment line
             result = rest
         else:
             if self.manualDeliverables == 0:
+                # Amounts has to be divided
                 line_amount = self.paymentline_amount()
                 result = rest - ((payment_lines_num - 1) * line_amount)
             else:
+                # Ici la donnée est fausse (on va rajouter de la tva sur les
+                # montants des lignes de paiement configurées manuellement
+                # Donc le solde caluclé ici est faux
                 result = rest - sum(line.amount
                                     for line in self.payment_lines[:-1])
         return result

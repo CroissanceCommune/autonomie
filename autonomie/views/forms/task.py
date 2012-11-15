@@ -101,6 +101,11 @@ def get_payment_times():
 
 
 @colander.deferred
+def deferred_task_date(node, kw):
+    return datetime.date.today()
+
+
+@colander.deferred
 def deferred_course_title(node, kw):
     """
         deferred title
@@ -271,7 +276,7 @@ class TaskConfiguration(colander.MappingSchema):
         colander.Date(),
         title=u"Date du devis",
         widget=get_date_input(),
-        default=datetime.date.today()
+        default=deferred_task_date
     )
     description = colander.SchemaNode(
         colander.String(),

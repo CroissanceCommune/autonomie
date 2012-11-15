@@ -68,7 +68,7 @@
                         <tr>
                             <td>Acompte</td>
                             <td>à la commande</td>
-                            <td class='price'>${api.format_amount(task.deposit_amount())|n}&nbsp;€</td>
+                            <td class='price'>${api.format_amount(task.deposit_amount_ttc())|n}&nbsp;€</td>
                         </tr>
                     % endif
                     ## Les paiements intermédiaires

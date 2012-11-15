@@ -51,12 +51,12 @@ class TestFormsUser(BaseTestCase):
         appstruct = {'login':'test_forms_user', 'password':u"Tést$"}
         self.assertRaises(Invalid, auth, form, appstruct)
 
-    def default_disable(self):
+    def test_default_disable(self):
         companies = [MagicMock(employees=range(2))]
         user = MagicMock(companies=companies)
-        req = MagicMock(user=user)
-        self.assertFalse(deferred_default_company_disable("", {'request', req}))
+        req = MagicMock(context=user)
+        self.assertFalse(deferred_company_disable_default("", {'request': req}))
         companies = [MagicMock(employees=[1])]
         user = MagicMock(companies=companies)
-        req = MagickMock(user=user)
-        self.assertTrue(deferred_default_company_disable("", {'request', req}))
+        req = MagicMock(context=user)
+        self.assertTrue(deferred_company_disable_default("", {'request': req}))

@@ -27,35 +27,35 @@ from sqlalchemy import DateTime
 from autonomie.models import DBBASE
 from autonomie.models.task.invoice import Payment
 
-class OldManualInvoice(DBBASE):
-    """
-        Modèle pour les factures manuelles (ancienne version)
-    """
-    __tablename__ = 'manualinvoice'
-    id = Column('id', BigInteger, primary_key=True)
-    officialNumber = Column('sequence_id', BigInteger)
-    description = Column('libelle', String(255))
-    montant_ht = Column("montant_ht", Integer)
-    tva = Column("tva", Integer)
-    payment_ok = Column("paiement_ok", Integer)
-    statusDate = Column("paiement_date", Date())
-    paymentMode = Column("paiement_comment", String(255))
-    taskDate = Column("date_emission", Date(),
-                                default=datetime.datetime.now)
-    created_at = Column("created_at", DateTime,
-                                      default=datetime.datetime.now)
-    updated_at = Column("updated_at", DateTime,
-                                      default=datetime.datetime.now,
-                                      onupdate=datetime.datetime.now)
-    client_id = Column('client_id', Integer,
-                            ForeignKey('customer.code'))
-
-    company_id = Column('compagnie_id', Integer,
-                            ForeignKey('company.id'))
-
-
 def upgrade():
     # Fix an error in table names for some installations
+    class OldManualInvoice(DBBASE):
+        """
+            Modèle pour les factures manuelles (ancienne version)
+        """
+        __tablename__ = 'manualinvoice'
+        id = Column('id', BigInteger, primary_key=True)
+        officialNumber = Column('sequence_id', BigInteger)
+        description = Column('libelle', String(255))
+        montant_ht = Column("montant_ht", Integer)
+        tva = Column("tva", Integer)
+        payment_ok = Column("paiement_ok", Integer)
+        statusDate = Column("paiement_date", Date())
+        paymentMode = Column("paiement_comment", String(255))
+        taskDate = Column("date_emission", Date(),
+                                    default=datetime.datetime.now)
+        created_at = Column("created_at", DateTime,
+                                        default=datetime.datetime.now)
+        updated_at = Column("updated_at", DateTime,
+                                        default=datetime.datetime.now,
+                                        onupdate=datetime.datetime.now)
+        client_id = Column('client_id', Integer,
+                                ForeignKey('customer.code'))
+
+        company_id = Column('compagnie_id', Integer,
+                                ForeignKey('company.id'))
+
+
     if not table_exists("manualinvoice"):
         force_rename_table('manual_invoice', 'manualinvoice')
     from autonomie.models import DBSESSION

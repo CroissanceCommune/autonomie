@@ -113,7 +113,7 @@ def get_est_state():
     geninv = ('geninv', None, gen_invoices,)
     delete = ('delete', None, None, False,)
     result = {}
-    result['draft'] = ('draft', 'wait', 'delete',)
+    result['draft'] = ('draft', 'wait', 'delete', valid)
     result['invalid'] = ('draft', 'wait', 'delete',)
     result['wait'] = (valid, invalid, duplicate, 'delete')
     result['valid'] = ('aboest', geninv, duplicate, 'delete')
@@ -143,7 +143,7 @@ def get_inv_state():
     mdelete = ('delete', MANAGER_PERMS, None, False,)
     resulted = ('resulted', MANAGER_PERMS,)
     result = {}
-    result['draft'] = ('draft', 'wait', delete,)
+    result['draft'] = ('draft', 'wait', delete, valid)
     result['invalid'] = ('draft', 'wait', delete, )
     result['wait'] = (valid, invalid, duplicate, delete, )
     result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, mdelete, )
@@ -164,7 +164,7 @@ def get_cinv_state():
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     result = {}
-    result['draft'] = ('wait', 'delete', )
+    result['draft'] = ('wait', 'delete', valid )
     result['wait'] = (valid, invalid, 'delete', )
     result['invalid'] = ('draft', 'wait',)
     return result

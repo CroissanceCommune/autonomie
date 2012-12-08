@@ -17,26 +17,23 @@
                 size: a4 portrait;
                 margin:1cm;
                 margin-bottom:3.5cm;
-                % if not task.has_been_validated() and not task.is_paid():
-                    background-image: url("${request.static_url('autonomie:static/watermark_invoice.jpg', _app_url='')}");
-                % endif
                 @frame footer {
                     -pdf-frame-content: footer;
                     bottom: 0cm;
                     margin-left: 1cm;
                     margin-right: 1cm;
-                    height:3cm;
+                    % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
+                        height:4cm;
+                    % else:
+                        height:2cm;
+                    % endif
                 }
             }
         </style>
 </%block>
 <%block name='information'>
-<strong>Facture N° </strong>${task.officialNumber}-${task.number}<br />
-    % if task.estimation:
-        <span  style='color:#999'> <strong style='color:#999'>Référence devis N° </strong>${task.estimation.number}</span> <br />
-        <br />
-    % endif
-    <strong>Objet : </strong>${format_text(task.description)}<br />
+<strong>Facture N° </strong>0001<br />
+<strong>Objet : </strong>${format_text(task.description)}<br />
 </%block>
 <%block name="notes_and_conditions">
 %if task.paymentConditions:

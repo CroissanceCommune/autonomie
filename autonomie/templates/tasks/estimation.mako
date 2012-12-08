@@ -25,7 +25,12 @@
             bottom: 0cm;
             margin-left: 1cm;
             margin-right: 1cm;
-            height:3cm;
+            % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
+                height: 4cm;
+            % else:
+                height:3cm;
+            % endif
+
             }
     }
 </style>

@@ -97,3 +97,21 @@ class BaseFunctionnalTest(BaseViewTest):
         self.app = TestApp(self.app)
         self.config = testing.setUp()
         super(BaseFunctionnalTest, self).setUp()
+
+def printstatus(obj):
+    """
+        print an object's status regarding the sqla's session
+    """
+    from sqlalchemy.orm import object_session
+    from sqlalchemy.orm.util import has_identity
+    if object_session(obj) is None and not has_identity(obj):
+        print "Sqlalchemy status : transient"
+    elif object_session(obj) is not None and not has_identity(obj):
+        print "Sqlalchemy status : pending"
+    elif object_session(obj) is None and has_identity(obj):
+        print "Sqlalchemy status : detached"
+    elif object_session(obj) is not None and has_identity(obj):
+        print "Sqlalchemy status : persistent"
+    else:
+        print "Unknown Status"
+

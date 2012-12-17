@@ -600,7 +600,6 @@ class ManualInvoice(Task):
     montant_ht = Column("montant_ht", Integer)
     tva = Column("tva", Integer)
     client_id = Column('client_id', Integer, ForeignKey('customer.id'))
-    company_id = Column('compagnie_id', Integer, ForeignKey('company.id'))
     client = relationship("Client",
                 primaryjoin="Client.id==ManualInvoice.client_id",
                 backref='manual_invoices')

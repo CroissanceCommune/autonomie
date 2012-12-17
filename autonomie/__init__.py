@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 13 nov. 2012 10:14:25 CET
+# * Last Modified : sam. 08 déc. 2012 20:24:21 CET
 #
 # * Project : autonomie
 #
@@ -45,6 +45,7 @@ AUTONOMIE_MODULES = (
                      "autonomie.views.manage",
                      "autonomie.views.holiday",
                      "autonomie.views.tests",
+                     "autonomie.views.estimation",
                      )
 
 

@@ -35,6 +35,7 @@ from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
 from .base import TaskView
+from .base import make_pdf_view
 
 log = logging.getLogger(__name__)
 
@@ -203,15 +204,6 @@ class EstimationView(TaskView):
                     popups=self.popups
                     )
 
-    @view_config(route_name='estimation',
-                request_param='view=pdf',
-                permission='view')
-    def pdf(self):
-        """
-            Returns a page displaying an html rendering of the given task
-        """
-        return self._pdf()
-
     @view_config(route_name='estimation', request_param='action=duplicate',
             permission='edit', renderer='base/formpage.mako')
     def duplicate(self):
@@ -256,6 +248,9 @@ class EstimationView(TaskView):
             self.dbsession.merge(invoice)
         self.request.session.flash(u"Vos factures ont bien été générées",
                                 queue='main')
+
+
+
 
     @view_config(route_name="estimation", request_param='action=status',
                  permission="edit")
@@ -303,3 +298,11 @@ class EstimationView(TaskView):
 <a href='{0}'>Ici</a>."
             fmess = mess.format(self.request.route_path("estimation", id=id_))
             flash(fmess, "main")
+
+def includeme(config):
+    config.add_view(make_pdf_view("tasks/estimation.mako"),
+                    route_name='estimation',
+                    request_param='view=pdf',
+                    permission='view')
+
+

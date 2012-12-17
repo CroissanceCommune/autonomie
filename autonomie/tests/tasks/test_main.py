@@ -39,7 +39,6 @@ from autonomie.models.task import PaymentLine
 from autonomie.models.task import CancelInvoiceLine
 from autonomie.models.task import DiscountLine
 from autonomie.models.task import Payment
-from autonomie.models.task.states import record_payment
 from autonomie.models.task.compute import TaskCompute
 from autonomie.models.task.interfaces import ITask
 from autonomie.models.task.interfaces import IValidatedTask
@@ -63,13 +62,14 @@ USER = dict(id=2,
             firstname=u"user1_firstname",
             lastname=u"user1_lastname")
 
-USER2 = dict(id=3, login=u"test_user2")
+USER2 = dict(login=u"test_user2")
 
 PROJECT = dict(id=1, name=u'project1', code=u"PRO1", company_id=1,
         client_id=1)
 CLIENT = dict(id=1, name=u"client1", code=u"CLI1", company_id=1)
 
-ESTIMATION = dict(phase_id=1,
+ESTIMATION = dict(
+                phase_id=1,
                 project_id=1,
                 name=u"Devis 2",
                 sequenceNumber=2,
@@ -218,7 +218,7 @@ def get_task(factory):
     task.owner = user
     return task
 
-def get_estimation(user=None, project=None):
+def get_estimation(user=None, project=None, phase=None):
     est = Estimation(**ESTIMATION)
     for line in LINES:
         l = EstimationLine(**line)
@@ -235,6 +235,8 @@ def get_estimation(user=None, project=None):
         project = get_project()
     est.project = project
     est.statusPersonAccount = user
+    if phase is None:
+        est.phase = Phase(name="test phase", project=project)
     return est
 
 def get_invoice(user=None, project=None, stripped=False):
@@ -327,7 +329,7 @@ class TestTaskModels(BaseTestCase):
     def test_status_change(self):
         # Estimation
         task = get_task(factory=Estimation)
-        for st in ("valid", "geninv", "aboest", "invalid"):
+        for st in ("geninv", "aboest", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "wait"), "wait")
         task.CAEStatus = "wait"
@@ -346,7 +348,7 @@ class TestTaskModels(BaseTestCase):
 
         # Invoice
         task = get_task(factory=Invoice)
-        for st in ("valid", "aboinv", "invalid"):
+        for st in ("aboinv", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
         self.assertEqual(task.validate_status("nutt", "wait"), "wait")
         task.CAEStatus = "wait"
@@ -366,7 +368,6 @@ class TestTaskModels(BaseTestCase):
         # CancelInvoice
         task = get_task(factory=CancelInvoice)
         # Removing Direct validation of the cancelinvoice
-        task.CAEStatus = 'wait'
         task.CAEStatus = "valid"
         for st in ("draft",):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
@@ -534,245 +535,4 @@ class TestEstimation(BaseTestCase):
             self.assertEqual(inv.lines[0].tva, 1960)
         total = sum([inv.total() for inv in invoices])
         self.assertEqual(total, est.total())
-
-class TestInvoice(BaseViewTest):
-    def test_get_name(self):
-        self.assertEqual(Invoice.get_name(5), u"Facture 5")
-        self.assertEqual(Invoice.get_name(5, sold=True), u"Facture de solde")
-        self.assertEqual(Invoice.get_name(5, account=True),
-                                                      u"Facture d'acompte 5")
-
-    def test_get_number(self):
-        project = get_project()
-        seq_number = 15
-        date = datetime.date(1969, 07, 31)
-        self.assertEqual(Invoice.get_number(project, seq_number, date),
-                        u"PRO1_CLI1_F15_0769")
-        self.assertEqual(Invoice.get_number(project, seq_number, date,
-                        deposit=True), u"PRO1_CLI1_FA15_0769")
-
-#    def test_gen_cancelinvoice(self):
-#        user = User(**USER)
-#        self.session.add(user)
-#        inv = get_invoice(user=user)
-#        self.session.add(inv)
-#        cinv = inv.gen_cancelinvoice(user.id)
-#        self.session.add(cinv)
-#        self.session.flush()
-#
-#        self.assertEqual(cinv.name, "Avoir 2")
-#        self.assertEqual(cinv.total_ht(), -1 * inv.total_ht())
-#        today = datetime.date.today()
-#        self.assertEqual(cinv.taskDate, today)
-
-    def test_gen_cancelinvoice_payment(self):
-        user = User(**USER)
-        inv = get_invoice(user=user)
-        inv.payments.append(Payment(**PAYMENTS[0]))
-        cinv = inv.gen_cancelinvoice(user.id)
-        self.assertEqual(len(cinv.lines), 5)
-        self.assertEqual(cinv.lines[-1].cost, PAYMENTS[0]['amount'])
-
-    def test_duplicate_invoice(self):
-        user = get_user(USER2)
-        project = get_project()
-        phase = MagicMock(id=16)
-        inv = get_invoice(user=user, project=project)
-        newinv = inv.duplicate(user, project, phase)
-        self.assertEqual(len(inv.lines), len(newinv.lines))
-        self.assertEqual(len(inv.discounts), len(newinv.discounts))
-        self.assertEqual(inv.project, newinv.project)
-        self.assertEqual(newinv.statusPersonAccount, user)
-        self.assertEqual(newinv.phase, phase)
-
-    def test_duplicate_invoice_integration(self):
-        user = self.session.query(User).first()
-        project = self.session.query(Project).first()
-        phase = self.session.query(Phase).first()
-        inv = get_invoice(user, project)
-        inv.phase = phase
-        inv.owner_id = user.id
-        inv = self.session.merge(inv)
-        self.session.flush()
-        newest = inv.duplicate(user, project, phase)
-        self.session.merge(newest)
-        self.session.flush()
-        self.assertEqual(newest.phase_id, phase.id)
-        self.assertEqual(newest.owner_id, user.id)
-        self.assertEqual(newest.statusPerson, user.id)
-        self.assertEqual(newest.project_id, project.id)
-
-
-    def test_valid_invoice(self):
-        inv = get_invoice(stripped=True)
-        self.session.add(inv)
-        self.session.flush()
-        self.config.testing_securitypolicy(userid='test', permissive=True)
-        request = testing.DummyRequest()
-        inv.set_status('wait', request, 1)
-        self.session.merge(inv)
-        self.session.flush()
-        inv.set_status('valid', request, 1)
-        today = datetime.date.today()
-        self.assertEqual(inv.taskDate, today)
-        self.assertEqual(inv.officialNumber, 1)
-
-    def test_valid_payment(self):
-        inv = get_invoice(stripped=True)
-        self.session.add(inv)
-        self.session.flush()
-        self.config.testing_securitypolicy(userid='test', permissive=True)
-        request = testing.DummyRequest()
-        inv.set_status('wait', request, 1)
-        self.session.merge(inv)
-        self.session.flush()
-        inv.set_status('valid', request, 1)
-        self.session.merge(inv)
-        self.session.flush()
-        inv.set_status("paid", request, 1, amount=150, mode="CHEQUE")
-        inv = self.session.merge(inv)
-        self.session.flush()
-        invoice = self.session.query(Invoice)\
-                .filter(Invoice.id==inv.id).first()
-        self.assertEqual(invoice.CAEStatus, 'paid')
-        self.assertEqual(len(invoice.payments), 1)
-        self.assertEqual(invoice.payments[0].amount, 150)
-
-class TestCancelInvoice(BaseTestCase):
-    def test_get_name(self):
-        self.assertEqual(CancelInvoice.get_name(5), u"Avoir 5")
-
-    def test_get_number(self):
-        project = get_project()
-        seq_number = 15
-        date = datetime.date(1969, 07, 31)
-        self.assertEqual(CancelInvoice.get_number(project, seq_number, date),
-                        u"PRO1_CLI1_A15_0769")
-
-class TestManualInvoice(BaseTestCase):
-    def test_tva_amount(self):
-        m = ManualInvoice(montant_ht=1950)
-        self.assertEqual(m.tva_amount(), 0)
-
-class TestEstimationLine(BaseTestCase):
-    def test_duplicate_line(self):
-        line = EstimationLine(**LINES[1])
-        dline = line.duplicate()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
-            self.assertEqual(getattr(dline, i), getattr(line, i))
-
-    def test_gen_invoiceline(self):
-        line = EstimationLine(**LINES[1])
-        iline = line.gen_invoice_line()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
-            self.assertEqual(getattr(line, i), getattr(iline, i))
-
-    def test_total(self):
-        i = EstimationLine(cost=1.25, quantity=1.25, tva=1960)
-        self.assertEqual(i.total_ht(), 1.5625)
-        self.assertEqual(i.total(), 1.86875)
-
-class TestInvoiceLine(BaseTestCase):
-    def test_duplicate_line(self):
-        line = InvoiceLine(**LINES[1])
-        dline = line.duplicate()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
-            self.assertEqual(getattr(dline, i), getattr(line, i))
-
-
-    def test_gen_cancelinvoice_line(self):
-        line = InvoiceLine(**LINES[1])
-        cline = line.gen_cancelinvoice_line()
-        for i in ('rowIndex', "description", 'tva', "quantity", "unity"):
-            self.assertEqual(getattr(cline, i), getattr(line, i))
-        self.assertEqual(cline.cost, -1 * line.cost)
-
-    def test_total(self):
-        i = InvoiceLine(cost=1.25, quantity=1.25, tva=1960)
-        self.assertEqual(i.total_ht(), 1.5625)
-        self.assertEqual(i.total(), 1.86875)
-
-class TestCancelInvoiceLine(BaseTestCase):
-    def test_duplicate_line(self):
-        line = CancelInvoiceLine(**LINES[1])
-        dline = line.duplicate()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
-            self.assertEqual(getattr(dline, i), getattr(line, i))
-
-    def test_total(self):
-        i = CancelInvoiceLine(cost=1.25, quantity=1.25, tva=1960)
-        self.assertEqual(i.total_ht(), 1.5625)
-        self.assertEqual(i.total(), 1.86875)
-
-class TestPaymentLine(BaseTestCase):
-    def test_duplicate(self):
-        line = PaymentLine(**PAYMENT_LINES[0])
-        dline = line.duplicate()
-        for i in ('rowIndex', 'description', 'amount'):
-            self.assertEqual(getattr(line, i), getattr(dline, i))
-        today = datetime.date.today()
-        self.assertEqual(dline.paymentDate, today)
-
-class TestPayment(BaseTestCase):
-
-    def get_task(self):
-        task = get_invoice(stripped=True)
-        for i in PAYMENTS:
-            task.payments.append(Payment(**i))
-        return task
-
-    def test_record_payment(self):
-        task = self.get_task()
-        request_params = {'amount':1500, 'mode':'cheque'}
-        record_payment(task, **request_params)
-        self.assertEqual(len(task.payments), 3)
-        self.assertEqual(task.payments[2].amount, 1500)
-        self.session.add(task)
-        self.session.flush()
-
-    def test_payment_get_amount(self):
-        payment = Payment(**PAYMENTS[1])
-        self.assertEqual(payment.get_amount(), 1895)
-
-    def test_invoice_topay(self):
-        task = self.get_task()
-        self.assertEqual(task.paid(), 3395)
-        self.assertEqual(task.topay(), EST_TOTAL - 3395)
-
-    def test_resulted_manual(self):
-        task = self.get_task()
-        task.CAEStatus = 'wait'
-        task.CAEStatus = 'valid'
-        task.CAEStatus = 'paid'
-        request_params = {'amount':0, 'mode':'cheque', 'resulted':True}
-        record_payment(task, **request_params)
-        self.assertEqual(task.CAEStatus, 'resulted')
-
-    def test_resulted_auto(self):
-        task = self.get_task()
-        task.CAEStatus = 'wait'
-        task.CAEStatus = 'valid'
-        task.CAEStatus = 'paid'
-        request_params = {'amount':int(task.topay()), 'mode':'cheque'}
-        record_payment(task, **request_params)
-        self.assertEqual(task.CAEStatus, 'resulted')
-
-class TestPolymorphic(BaseTestCase):
-    def test_invoice(self):
-        inv = get_invoice(stripped=True)
-        inv.phase_id = 16
-        self.session.add(inv)
-        self.session.flush()
-        task = self.session.query(Task).filter(Task.phase_id==16).first()
-        self.assertTrue(isinstance(task, Invoice))
-
-    def test_payment(self):
-        invoice = get_invoice(stripped=True)
-        invoice.phase_id = 17
-        invoice.record_payment(**PAYMENTS[0])
-        self.session.add(invoice)
-        self.session.flush()
-        p1 = self.session.query(Payment).join(Task).filter(Task.phase_id==17).first()
-        self.assertTrue(isinstance(p1.task, Invoice))
-        self.assertFalse(isinstance(p1.task, CancelInvoice))
 

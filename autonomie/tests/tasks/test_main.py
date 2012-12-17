@@ -24,9 +24,7 @@
 import datetime
 from zope.interface.verify import verifyObject
 from mock import MagicMock
-from pyramid import testing
-from .base import BaseTestCase
-from .base import BaseViewTest
+from autonomie.tests.base import BaseTestCase
 
 from autonomie.models.task import Task
 from autonomie.models.task import Estimation
@@ -38,7 +36,6 @@ from autonomie.models.task import InvoiceLine
 from autonomie.models.task import PaymentLine
 from autonomie.models.task import CancelInvoiceLine
 from autonomie.models.task import DiscountLine
-from autonomie.models.task import Payment
 from autonomie.models.task.compute import TaskCompute
 from autonomie.models.task.interfaces import ITask
 from autonomie.models.task.interfaces import IValidatedTask

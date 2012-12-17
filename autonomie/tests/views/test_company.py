@@ -34,7 +34,7 @@ class Base(BaseFunctionnalTest):
 
 class TestCompany(BaseFunctionnalTest):
     def test_company_index(self):
-        avatar = self.session.query(User).first()
+        avatar = User.get(3)
         self.config.add_route('company', '/company/{cid}')
         self.config.add_static_view('static', 'autonomie:static')
         request = self.get_csrf_request()

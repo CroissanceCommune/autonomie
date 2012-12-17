@@ -35,10 +35,10 @@ class TestUserModel(BaseTestCase):
         self.assertTrue(a.auth(strange))
 
     def test_get_company(self):
-        user1 = User.get(1)
+        user1 = User.get(3)
         cid = 1
         company = user1.get_company(cid)
-        self.assertEqual(company.name, 'company1')
+        self.assertEqual(company.name, u'Laveur de K-ro')
         self.assertRaises(KeyError, user1.get_company, 3000)
 
     def test_role(self):

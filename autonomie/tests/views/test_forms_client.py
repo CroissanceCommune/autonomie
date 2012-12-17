@@ -25,21 +25,21 @@ class TestClient(BaseTestCase):
         return deferred_ccode_valid("nutt", {'request':request})
 
     def test_unique_ccode(self):
-        # A C001 exists in the database for the company with id 1
+        # A IMDD exists in the database for the company with id 1
         company = Mock(id=1, __name__='company')
         validator = self.makeOne(company)
-        self.assertRaises(colander.Invalid, validator, 'nutt', u'C001')
+        self.assertRaises(colander.Invalid, validator, 'nutt', u'IMDD')
         self.assertNotRaises(validator, 'nutt', u'C002')
 
         company = Mock(id=2, __name__='company')
         validator = self.makeOne(company)
-        self.assertNotRaises(validator, 'nutt', u'C001')
+        self.assertNotRaises(validator, 'nutt', u'IMDD')
 
         # In edit mode, no error is raised for the current_client
         client = self.session.query(Client).first()
         client.__name__ = 'client'
         validator = self.makeOne(client)
-        self.assertNotRaises(validator, 'nutt', u'C001')
+        self.assertNotRaises(validator, 'nutt', u'IMDD')
 
     def test_get_client_from_request(self):
         context = Mock(__name__='client')

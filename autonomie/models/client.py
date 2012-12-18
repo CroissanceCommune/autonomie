@@ -90,3 +90,11 @@ class Client(DBBASE):
                     name=self.name,
                     projects=projects
                     )
+
+    @property
+    def full_address(self):
+        address = u"{name}\n{address}\n{zipCode} {city}".format(name=self.name,
+                address=self.address, zipCode=self.zipCode, city=self.city)
+        if self.country is not "France":
+            address += u"\n{0}".format(self.country)
+        return address

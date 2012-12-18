@@ -72,7 +72,8 @@ class CancelInvoiceView(TaskView):
         appstruct = appstruct = get_cancel_invoice_appstruct(dbdatas)
 
         #Building form
-        schema = self.schema.bind(phases=self.get_phases_choice(),
+        schema = self.schema.bind(client=self.project.client,
+                                  phases=self.get_phases_choice(),
                                   tvas=self.get_tvas(),
                                   default_tva=self.default_tva(),
                                   tasktype='cancelinvoice')

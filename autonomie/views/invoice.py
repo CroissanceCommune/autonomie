@@ -99,6 +99,7 @@ class InvoiceView(TaskView):
         appstruct = get_invoice_appstruct(dbdatas)
 
         schema = self.schema.bind(
+                                client=self.project.client,
                                 phases=self.get_phases_choice(),
                                 tvas=self.get_tvas(),
                                 default_tva=self.default_tva())

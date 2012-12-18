@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : mer. 11 janv. 2012
-# * Last Modified : mer. 24 oct. 2012 18:40:58 CEST
+# * Last Modified : mar. 18 déc. 2012 15:14:18 CET
 #
 # * Project : autonomie
 #
@@ -61,5 +61,5 @@ def record_to_appstruct(self):
 DBBASE.appstruct = record_to_appstruct
 
 
-default_table_args = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
-#default_table_args = {'mysql_engine': 'InnoDB', "mysql_charset": 'utf8'}
+#default_table_args = {'mysql_engine': 'MyISAM', "mysql_charset": 'utf8'}
+default_table_args = {'mysql_engine': 'InnoDB', "mysql_charset": 'utf8'}

@@ -56,14 +56,15 @@ class TestAvatar(BaseViewTest):
         request._user = Mock(name="username")
         avatar = get_avatar(request, self.session)
         self.assertEqual(avatar, request._user)
-        self.config.testing_securitypolicy(userid="user1_login")
+        self.config.testing_securitypolicy(userid="contractor1")
         request = testing.DummyRequest()
         avatar = get_avatar(request, self.session)
-        self.assertEqual(avatar.lastname, "user1_lastname")
+        self.assertEqual(avatar.lastname, "LASTNAME_contractor1")
 
 class TestConfig(BaseTestCase):
     def test_load_value(self):
-        from autonomie.models.config import get_config
+        from autonomie.models.config import get_config, Config
+        self.session.add(Config(app="test", name="name", value="value"))
+        self.session.flush()
         all_ = get_config()
-        self.assertTrue("hostname" in all_.keys()
-                        and "coop_interviewergroup" in all_.keys())
+        self.assertTrue("name" in all_.keys() and all_["name"] == "value")

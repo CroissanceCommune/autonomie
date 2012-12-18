@@ -103,7 +103,8 @@ class ClientSchema(colander.MappingSchema):
     address = colander.SchemaNode(colander.String(),
                     title=u'Adresse',
                     missing=u'',
-                    validator=colander.Length(max=255))
+                    validator=colander.Length(max=255),
+                    widget=widget.TextAreaWidget(cols=25, rows=1))
     zipCode = colander.SchemaNode(colander.String(),
                     title=u'Code postal',
                     missing=u'',
@@ -122,7 +123,7 @@ class ClientSchema(colander.MappingSchema):
                     validator=colander.Length(max=50),
                     missing=u'')
     comments = colander.SchemaNode(colander.String(),
-            widget=widget.TextAreaWidget(cols=80, rows=4),
+            widget=widget.TextAreaWidget(cols=25, rows=2),
             title=u'Commentaires',
             missing=u'')
 

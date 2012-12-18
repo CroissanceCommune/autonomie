@@ -24,7 +24,7 @@
             <div class='addressblock'>
                 ${api.format_date(task.taskDate, False)}
                 <br />
-                ${address(project.client, 'client')}
+                ${format_text(task.address)}
             </div>
         </div>
         <div class="informationblock">

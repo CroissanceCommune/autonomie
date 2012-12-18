@@ -32,7 +32,8 @@
         </style>
 </%block>
 <%block name='information'>
-<strong>Facture N° </strong>0001<br />
+<strong>Facture N°</strong>${task.officialNumber}<br />
+<strong>Libellé : </strong>${task.number}<br />
 <strong>Objet : </strong>${format_text(task.description)}<br />
 </%block>
 <%block name="notes_and_conditions">

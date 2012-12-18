@@ -31,9 +31,10 @@
         </style>
 </%block>
         <%block name='information'>
-        <strong>Avoir N° </strong>${task.officialNumber}-${task.number}<br />
+        <strong>Avoir N°</strong>${task.officialNumber}<br />
+        <strong>Libellé : </strong>${task.number}<br />
         % if task.invoice:
-            <span  style='color:#999'> <strong style='color:#999'>Référence facture N° </strong>${task.invoice.number}</span> <br />
+            <span  style='color:#999'> <strong style='color:#999'>Référence facture N°</strong>${task.invoice.officialNumber} (${task.invoice.number})</span> <br />
                 <br />
             % endif
             <strong>Objet : </strong>${format_text(task.description)}<br />

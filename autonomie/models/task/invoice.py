@@ -101,6 +101,7 @@ class Invoice(Task, TaskCompute):
         group='edit')
     discountHT = Column('discountHT', Integer, default=0)
     expenses = deferred(Column('expenses', Integer, default=0), group='edit')
+    address = Column("address", Text, default="")
 
     project = relationship(
         "Project",
@@ -415,6 +416,7 @@ class CancelInvoice(Task, TaskCompute):
     paymentMode = deferred(Column(String(80), default=None), group='edit')
     displayedUnits = Column(Integer, default=0)
     expenses = deferred(Column(Integer, default=0), group='edit')
+    address = Column("address", Text, default="")
 
     project = relationship("Project", backref=backref('cancelinvoices',
                                             order_by='CancelInvoice.taskDate')

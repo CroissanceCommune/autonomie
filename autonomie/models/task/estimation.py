@@ -83,6 +83,7 @@ class Estimation(Task, TaskCompute):
     paymentDisplay = deferred(
         Column('paymentDisplay', String(20), default="SUMMARY"),
         group='edit')
+    address = Column("address", Text, default="")
     project = relationship(
         "Project",
         backref=backref('estimations', order_by='Estimation.taskDate')

@@ -106,6 +106,11 @@ def deferred_task_date(node, kw):
 
 
 @colander.deferred
+def deferred_default_address(node, kw):
+    return kw['client'].full_address
+
+
+@colander.deferred
 def deferred_course_title(node, kw):
     """
         deferred title
@@ -271,7 +276,8 @@ class TaskConfiguration(colander.MappingSchema):
     address = colander.SchemaNode(
             colander.String(),
             title=u"Adresse du client",
-            widget=widget.TextAreaWidget(rows=4, cols=60))
+            widget=widget.TextAreaWidget(rows=4, cols=60),
+            default=deferred_default_address)
     phase_id = colander.SchemaNode(
         colander.String(),
         title=u"Phase où insérer le devis",

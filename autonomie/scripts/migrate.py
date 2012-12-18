@@ -128,6 +128,34 @@ def upgrade(sql_url=None):
         starting_rev=None,
         destination_rev=revision,
         )
+
+    fetch(revision)
+    print
+
+
+def downgrade(revision):
+    """
+        downgrade the content of DEFAULT_LOCATION
+    """
+    pkg_env = PackageEnvironment(DEFAULT_LOCATION)
+
+    print(u'Downgrading {0} to {1}:'.format(pkg_env.location, revision))
+
+    def downgrade_func(rev, context):
+        if rev == revision:
+            print(u'  - already reached.')
+            return []
+        print(u'  - downgrading from {0} to {1}...'.format(
+            rev, revision))
+        return context.script._downgrade_revs(revision, rev)
+
+    pkg_env.run_env(
+        downgrade_func,
+        starting_rev=None,
+        destination_rev=revision,
+        )
+
+    fetch(revision)
     print
 
 
@@ -198,12 +226,13 @@ def migrate():
         migrate <config_uri> upgrade
         migrate <config_uri> fetch [--rev=<rev>]
         migrate <config_uri> revision [--m=<message>]
+        migrate <config_uri> downgrade [--rev=<rev>]
 
-    o stamp : join a specific migration revision without launching migration
-              scripts
     o list_all : all the revisions
     o upgrade : upgrade the app to the latest revision
     o revision : auto-generate a migration file with the given message
+    o fetch : set the revision
+    o downgrade : downgrade the database
 
     Options:
         -h --help     Show this screen.
@@ -220,6 +249,9 @@ def migrate():
         elif arguments['revision']:
             args = (arguments['--m'],)
             func = revision
+        elif arguments['downgrade']:
+            args = (arguments['--rev'],)
+            func = downgrade
         return func(*args)
     try:
         return command(callback, migrate.__doc__)

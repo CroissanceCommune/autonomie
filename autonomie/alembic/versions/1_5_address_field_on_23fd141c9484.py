@@ -18,6 +18,18 @@ def upgrade():
     for table in ("estimation", "invoice", "cancelinvoice"):
         op.add_column(table, sa.Column("address", sa.Text, default=""))
 
+    from autonomie.models import DBSESSION
+    from autonomie.models.task import Invoice, CancelInvoice, Estimation
+    for obj in (Invoice, CancelInvoice, Estimation):
+        for doc in obj.query():
+            if doc.project is not None and doc.project.client is not None:
+                doc.address = doc.project.client.full_address
+                DBSESSION.merge(doc)
+
+
+
 def downgrade():
     for table in ("estimation", "invoice", "cancelinvoice"):
         op.drop_column(table, "address")
+
+

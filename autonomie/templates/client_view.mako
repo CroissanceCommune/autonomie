@@ -23,11 +23,7 @@
             <br />
             % if client.address:
                 <address>
-                    ${client.address}<br />
-                    ${client.zipCode} ${client.city}
-                    % if client.country and client.country!= 'France':
-                        <br />${client.country}
-                    % endif
+                    ${format_text(client.full_address)}
                 </address>
             %else:
                 Aucun adresse connue

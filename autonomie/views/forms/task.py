@@ -268,6 +268,10 @@ class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
+    address = colander.SchemaNode(
+            colander.String(),
+            title=u"Adresse du client",
+            widget=widget.TextAreaWidget(rows=4, cols=60))
     phase_id = colander.SchemaNode(
         colander.String(),
         title=u"Phase où insérer le devis",
@@ -701,6 +705,7 @@ class InvoiceMatch(MappingWrapper):
         ('taskDate', 'common'),
         ('description', 'common'),
         #both estimation and invoice attrs
+        ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),
@@ -716,6 +721,7 @@ class EstimationMatch(MappingWrapper):
         ('taskDate', 'common'),
         ('description', 'common'),
 
+        ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),
@@ -736,7 +742,8 @@ class CancelInvoiceMatch(MappingWrapper):
         ('phase_id', 'common'),
         ('taskDate', 'common'),
         ('description', 'common'),
-        #both estimation and invoice attrs
+
+        ('address', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),
         ('reimbursementConditions', 'payments'),

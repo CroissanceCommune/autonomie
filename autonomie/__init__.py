@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 19 déc. 2012 09:25:45 CET
+# * Last Modified : mer. 19 déc. 2012 22:20:55 CET
 #
 # * Project : autonomie
 #
@@ -55,7 +55,6 @@ def main(global_config, **settings):
         Main function : returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
-#    session_factory = session_factory_from_settings(settings)
     session_factory = get_session_factory(settings)
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
@@ -128,3 +127,8 @@ def main(global_config, **settings):
     locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
 
     return config.make_wsgi_app()
+
+
+def formalchemy(config):
+    config.include("autonomie.fainit")
+    config.include("autonomie.faroutes")

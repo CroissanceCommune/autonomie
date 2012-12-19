@@ -5,3 +5,6 @@
 mako_compiled_templates
 *.log
 data
+*.egg
+dist
+build

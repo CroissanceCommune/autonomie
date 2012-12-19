@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : sam. 08 déc. 2012 20:24:21 CET
+# * Last Modified : mer. 19 déc. 2012 09:25:45 CET
 #
 # * Project : autonomie
 #
@@ -31,6 +31,7 @@ from autonomie.models.config import get_config
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
 from autonomie.utils.renderer import set_deform_renderer
+from autonomie.utils.session import get_session_factory
 
 
 AUTONOMIE_MODULES = (
@@ -54,7 +55,8 @@ def main(global_config, **settings):
         Main function : returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
-    session_factory = session_factory_from_settings(settings)
+#    session_factory = session_factory_from_settings(settings)
+    session_factory = get_session_factory(settings)
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
     acl_policy = ACLAuthorizationPolicy()

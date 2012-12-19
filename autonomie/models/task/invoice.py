@@ -223,6 +223,7 @@ class Invoice(Task, TaskCompute):
         seq_number = self.project.get_next_cancelinvoice_number()
         cancelinvoice.name = CancelInvoice.get_name(seq_number)
         cancelinvoice.phase_id = self.phase_id
+        cancelinvoice.address = self.address
         cancelinvoice.CAEStatus = 'draft'
         cancelinvoice.taskDate = datetime.date.today()
         cancelinvoice.description = self.description
@@ -293,6 +294,7 @@ class Invoice(Task, TaskCompute):
         date = datetime.date.today()
 
         invoice = Invoice()
+        invoice.address = self.address
         invoice.name = self.get_name(seq_number)
         invoice.CAEStatus = 'draft'
         invoice.taskDate = date

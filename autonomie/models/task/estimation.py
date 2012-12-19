@@ -141,6 +141,7 @@ class Estimation(Task, TaskCompute):
         duple.discountHT = self.discountHT
         duple.expenses = self.expenses
         duple.paymentDisplay = self.paymentDisplay
+        duple.address = self.address
         # Setting relationships at the end of the duplication
         duple.phase = phase
         duple.statusPersonAccount = user
@@ -177,6 +178,7 @@ class Estimation(Task, TaskCompute):
         """
             Return an account invoice
         """
+        args['address'] = self.address
         args['sequenceNumber'] = self.project.get_next_invoice_number() + count
         args['name'] = Invoice.get_name(count + 1, account=True)
         args['number'] = Invoice.get_number(self.project,
@@ -242,6 +244,7 @@ class Estimation(Task, TaskCompute):
         """
             Return the sold invoice
         """
+        args["address"] = self.address
         args['taskDate'] = paymentline.paymentDate
         args['sequenceNumber'] = self.project.get_next_invoice_number() + count
         args['name'] = self._sold_invoice_name(args['sequenceNumber'], count)

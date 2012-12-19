@@ -292,6 +292,9 @@ class AuthSchema(colander.MappingSchema):
     nextpage = colander.SchemaNode(
         colander.String(),
         widget=widget.HiddenWidget())
+    remember_me = colander.SchemaNode(colander.Boolean(),
+                                      widget=widget.CheckboxWidget(),
+                                      title="Rester connecté")
 
 
 def get_auth_schema():

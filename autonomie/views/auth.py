@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : lun. 12 nov. 2012 11:04:15 CET
+# * Last Modified : mer. 19 déc. 2012 09:48:32 CET
 #
 # * Project :
 #
@@ -22,6 +22,7 @@ from pyramid.security import authenticated_userid
 from pyramid.security import forget
 from pyramid.security import remember
 from pyramid.security import NO_PERMISSION_REQUIRED
+from pyramid.threadlocal import get_current_registry
 
 from deform import Form
 from deform import Button
@@ -48,6 +49,17 @@ def forbidden_view(request):
             redirect = dict(redirect=loc)
         redirect = HTTPFound(location=loc)
     return redirect
+
+
+def get_longtimeout():
+    settings = get_current_registry().settings
+    default = 3600
+    longtimeout = settings.get("session.longtimeout", default)
+    try:
+        longtimeout = int(longtimeout)
+    except:
+        longtimeout = default
+    return longtimeout
 
 
 def login_view(request):
@@ -83,7 +95,13 @@ def login_view(request):
             log.info(u" + '{0}' has been authenticated".format(login))
             # Storing the datas in the request object
             remember(request, login)
-            return HTTPFound(location=nextpage)
+            remember_me = datas.get('remember_me', False)
+            response = HTTPFound(location=nextpage)
+            if remember_me:
+                log.debug("  * The user wants to be remembered")
+                longtimeout = get_longtimeout()
+                response.set_cookie('remember_me', "ok", max_age=longtimeout)
+            return response
     return {
             'title': "Bienvenue dans Autonomie",
             'html_form': myform,
@@ -95,9 +113,11 @@ def logout_view(request):
     """
         The logout view
     """
-    headers = forget(request)
     loc = request.route_url('index')
-    return HTTPFound(location=loc, headers=headers)
+    headers = forget(request)
+    response = HTTPFound(location=loc, headers=headers)
+    response.delete_cookie("remember_me")
+    return response
 
 
 def includeme(config):

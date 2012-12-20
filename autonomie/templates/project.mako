@@ -1,5 +1,5 @@
 <%inherit file="base.mako"></%inherit>
-<%namespace file="base/utils.mako" import="address" />
+<%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
 % if hasattr(project, "id") and project.id:
     <div class='row collapse' id='project-addphase'>
@@ -13,22 +13,28 @@
         </div>
     </div>
 % endif
-% if hasattr(project, "client") and project.client:
 <div class='row collapse' id='project-description'>
         <div class="span8 offset2">
     <div class="well">
-        <h3>Client</h3>
-        ${address(project.client, "client")}
+                    <h3>Client(s)</h3>
+                    % for client in project.clients:
+                        <div class='well'>
+                            <address>
+                                ${format_text(client.full_address)}
+                            </address>
+                        </div>
+                    % endfor
         %if project.type:
             <b>Type de projet :</b> ${project.type}
         % endif
         <br />
-        <h3>Définition du projet</h3>
-        ${project.definition}
+        % if project.definition:
+            <h3>Définition du projet</h3>
+            ${project.definition}
+        % endif
     </div>
 </div>
 </div>
-% endif
 <div class='row'>
     <div class='span6 offset3'>
         ${form|n}

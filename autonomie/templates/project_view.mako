@@ -1,6 +1,5 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="base/utils.mako" import="print_date" />
-<%namespace file="base/utils.mako" import="address" />
 <%namespace file="base/utils.mako" import="table_btn" />
 <%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
@@ -19,10 +18,12 @@
         <div class="well">
             <div class='row'>
                 <div class='span3'>
+                    <h3>Client(s)</h3>
                     % for client in project.clients:
-                        <div>
-                        <h3>Client</h3>
-                        ${format_text(client.full_address)}
+                        <div class='well'>
+                            <address>
+                                ${format_text(client.full_address)}
+                            </address>
                         </div>
                     % endfor
                 </div>

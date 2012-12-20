@@ -99,10 +99,11 @@ class InvoiceView(TaskView):
         appstruct = get_invoice_appstruct(dbdatas)
 
         schema = self.schema.bind(
-                                client=self.project.client,
+                                request=self.request,
                                 phases=self.get_phases_choice(),
                                 tvas=self.get_tvas(),
                                 default_tva=self.default_tva())
+        self.request.js_require.add('address')
         form = Form(schema, buttons=self.get_buttons(),
                 counter=self.formcounter)
         form.widget.template = "autonomie:deform_templates/form.pt"
@@ -140,7 +141,6 @@ class InvoiceView(TaskView):
         else:
             html_form = form.render(appstruct)
         return dict(title=title,
-                    client=self.project.client,
                     company=self.company,
                     html_form=html_form,
                     action_menu=self.actionmenu,

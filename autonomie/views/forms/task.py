@@ -53,6 +53,7 @@ import datetime
 import colander
 from deform import widget
 
+from autonomie.views.forms.widgets import deferred_autocomplete_widget
 from autonomie.views.forms.widgets import get_date_input
 from autonomie.views.forms.widgets import CustomSequenceWidget
 from .custom_types import QuantityType
@@ -105,9 +106,60 @@ def deferred_task_date(node, kw):
     return datetime.date.today()
 
 
+def build_client_value(client=None):
+    """
+        return the tuple for building client select
+    """
+    if client:
+        return (str(client.id), client.name)
+    else:
+        return ("0", u"Sélectionnez")
+
+
+def build_client_values(clients):
+    """
+        Build human understandable client labels
+        allowing efficient discrimination
+    """
+    options = [build_client_value()]
+    options.extend([build_client_value(client)
+                            for client in clients])
+    return options
+
+
+def get_clients_from_request(request):
+    clients = []
+    if request.context.__name__ == 'project':
+        clients = request.context.clients
+    elif request.context.__name__ in ('invoice', 'estimation', 'cancelinvoice'):
+        if request.context.project is not None:
+            clients = request.context.project.clients
+    return clients
+
+
 @colander.deferred
-def deferred_default_address(node, kw):
-    return kw['client'].full_address
+def deferred_client_list(node, kw):
+    request = kw['request']
+    clients = get_clients_from_request(request)
+    return deferred_autocomplete_widget(node,
+            {'choices':build_client_values(clients)})
+
+
+@colander.deferred
+def deferred_client_validator(node, kw):
+    request = kw['request']
+    clients = get_clients_from_request(request)
+    client_ids = [client.id for client in clients]
+    def client_oneof(value):
+        if value in ("0", 0):
+            return u"Veuillez choisir un client"
+        elif value not in client_ids:
+            print "client_ids"
+            print "############################"
+            print client_ids
+            return u"Entrée invalide"
+        return True
+    return colander.Function(client_oneof)
 
 
 @colander.deferred
@@ -273,11 +325,15 @@ class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
+    client_id = colander.SchemaNode(
+                colander.Integer(),
+                title=u"Choix du client",
+                widget=deferred_client_list,
+                validator=deferred_client_validator)
     address = colander.SchemaNode(
             colander.String(),
             title=u"Adresse du client",
-            widget=widget.TextAreaWidget(rows=4, cols=60),
-            default=deferred_default_address)
+            widget=widget.TextAreaWidget(rows=4, cols=60))
     phase_id = colander.SchemaNode(
         colander.String(),
         title=u"Phase où insérer le devis",
@@ -711,6 +767,7 @@ class InvoiceMatch(MappingWrapper):
         ('taskDate', 'common'),
         ('description', 'common'),
         #both estimation and invoice attrs
+        ('client_id', 'common'),
         ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
@@ -727,6 +784,7 @@ class EstimationMatch(MappingWrapper):
         ('taskDate', 'common'),
         ('description', 'common'),
 
+        ('client_id', 'common'),
         ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
@@ -749,6 +807,7 @@ class CancelInvoiceMatch(MappingWrapper):
         ('taskDate', 'common'),
         ('description', 'common'),
 
+        ('client_id', 'common'),
         ('address', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),

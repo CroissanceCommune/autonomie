@@ -19,8 +19,12 @@
         <div class="well">
             <div class='row'>
                 <div class='span3'>
-                    <h3>Client</h3>
-                    ${address(project.client, "client")}
+                    % for client in project.clients:
+                        <div>
+                        <h3>Client</h3>
+                        ${format_text(client.full_address)}
+                        </div>
+                    % endfor
                 </div>
                 <div class="span3">
                     <dl>

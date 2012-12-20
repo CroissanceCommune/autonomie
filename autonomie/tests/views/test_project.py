@@ -19,15 +19,15 @@ from autonomie.views.project import (ProjectAdd, ProjectEdit,
 
 from autonomie.tests.base import BaseFunctionnalTest
 
-APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "client_id":"1"}
+APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "clients":[]}
 
 class Base(BaseFunctionnalTest):
-    def addOne(self):
+    def addOne(self, appstruct=APPSTRUCT):
         self.config.add_route('project', '/')
         req = self.get_csrf_request()
         req.context = MagicMock(id=1)
         view = ProjectAdd(req)
-        view.submit_success(APPSTRUCT)
+        view.submit_success(appstruct)
 
     def getOne(self):
         try:
@@ -40,11 +40,25 @@ class TestProjectAdd(Base):
         self.addOne()
         project = self.getOne()
         self.assertEqual(project.code, "ABDC")
-        self.assertEqual(project.client_id, 1)
         self.assertEqual(project.company_id, 1)
 
+    def test_client_not_exist(self):
+        appstruct = {'name':u'Projéct&$', "code":"ABDC", "clients":["11111"]}
+        self.addOne(appstruct)
+        project = self.getOne()
+        self.assertEqual(len(project.clients), 0)
+
+    def test_client(self):
+        from autonomie.models.client import Client
+        print Client.get(1)
+        appstruct = {'name':u'Projéct&$', "code":"ABDC", "clients":["1"]}
+        self.addOne(appstruct)
+        project = self.getOne()
+        self.assertEqual(len(project.clients), 1)
+
+
 class TestProjectEdit(Base):
-    def test_client_edit(self):
+    def test_edit(self):
         self.addOne()
         project = self.getOne()
         req = self.get_csrf_request()
@@ -56,6 +70,30 @@ class TestProjectEdit(Base):
         view.submit_success(appstruct)
         project = self.getOne()
         self.assertEqual(project.definition, definition)
+
+    def test_client_remove(self):
+        appstruct = {'name':u'Projéct&$', "code":"ABDC", "clients":["1"]}
+        self.addOne(appstruct)
+        project = self.getOne()
+        req = self.get_csrf_request()
+        req.context = project
+        appstruct["clients"] = []
+        view = ProjectEdit(req)
+        view.submit_success(appstruct)
+        project = self.getOne()
+        self.assertEqual(len(project.clients), 0)
+
+    def test_client_add(self):
+        self.addOne()
+        project = self.getOne()
+        req = self.get_csrf_request()
+        req.context = project
+        appstruct = APPSTRUCT.copy()
+        appstruct['clients'] = ["1"]
+        view = ProjectEdit(req)
+        view.submit_success(appstruct)
+        project = self.getOne()
+        self.assertEqual(len(project.clients), 1)
 
 class TestActions(Base):
     def test_delete(self):

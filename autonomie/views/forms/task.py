@@ -56,6 +56,7 @@ from deform import widget
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
 from autonomie.views.forms.widgets import get_date_input
 from autonomie.views.forms.widgets import CustomSequenceWidget
+from autonomie.models.tva import Tva
 from .custom_types import QuantityType
 from .custom_types import AmountType
 from .custom_types import Integer
@@ -162,17 +163,36 @@ def deferred_client_validator(node, kw):
     return colander.Function(client_oneof)
 
 
+def get_tasktype_from_request(request):
+    route_name = request.matched_route.name
+    for predicate in ('estimation', 'invoice', 'cancelinvoice'):
+        if route_name.startswith(predicate):
+            return predicate
+    raise Exception(u"You shouldn't have come here with the current route %s"\
+% route_name)
+
+
 @colander.deferred
 def deferred_course_title(node, kw):
     """
         deferred title
     """
-    if kw.get('tasktype') == "invoice":
+    request = kw['request']
+    tasktype = get_tasktype_from_request(request)
+    if tasktype == "invoice":
         return u"Cette facture concerne-t-elle une formation professionnelle \
 continue ?"
-    else:
+    elif tasktype == "cancelinvoice":
+        return u"Cet avoir concerne-t-il une formation professionnelle \
+continue ?"
+
+    elif tasktype == "estimation":
         return u"Ce devis concerne-t-il une formation professionnelle \
 continue ?"
+
+
+def get_tva_choices():
+    return [(unicode(tva.value), tva.name)for tva in Tva.query()]
 
 
 @colander.deferred
@@ -180,7 +200,8 @@ def deferred_tvas_widget(node, kw):
     """
         return a tva widget
     """
-    tvas = kw.get('tvas')
+    request = kw['request']
+    tvas = get_tva_choices()
     wid = widget.SelectWidget(
         values=tvas,
         css_class='span2',
@@ -193,7 +214,24 @@ def deferred_default_tva(node, kw):
     """
         return a tva widget
     """
-    return kw.get('default_tva')
+    default_tva = Tva.query().filter(Tva.default == 1).first()
+    if default_tva is not None:
+        return unicode(default_tva.value)
+    else:
+        return None
+
+
+def get_phase_choices(phases):
+    return ((phase.id, phase.name) for phase in phases)
+
+
+def get_phases_from_request(request):
+    phases = []
+    if request.context.__name__ == 'project':
+        phases = request.context.phases
+    elif request.context.__name__ in ('invoice', 'cancelinvoice', 'estimation'):
+        phases = request.context.project.phases
+    return phases
 
 
 @colander.deferred
@@ -201,11 +239,10 @@ def deferred_phases_widget(node, kw):
     """
         return phase select widget
     """
-    choices = kw.get("phases")
-    if choices:
-        wid = widget.SelectWidget(values=choices)
-    else:
-        wid = widget.TextInputWidget()
+    request = kw['request']
+    phases = get_phases_from_request(request)
+    choices = get_phase_choices(phases)
+    wid = widget.SelectWidget(values=choices)
     return wid
 
 

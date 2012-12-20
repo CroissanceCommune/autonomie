@@ -72,11 +72,7 @@ class CancelInvoiceView(TaskView):
         appstruct = appstruct = get_cancel_invoice_appstruct(dbdatas)
 
         #Building form
-        schema = self.schema.bind(request=self.request,
-                                  phases=self.get_phases_choice(),
-                                  tvas=self.get_tvas(),
-                                  default_tva=self.default_tva(),
-                                  tasktype='cancelinvoice')
+        schema = self.schema.bind(request=self.request)
         self.request.js_require.add('address')
         form = Form(schema, buttons=self.get_buttons())
         form.widget.template = "autonomie:deform_templates/form.pt"

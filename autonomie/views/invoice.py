@@ -98,11 +98,7 @@ class InvoiceView(TaskView):
         # Get colander's schema compatible datas
         appstruct = get_invoice_appstruct(dbdatas)
 
-        schema = self.schema.bind(
-                                request=self.request,
-                                phases=self.get_phases_choice(),
-                                tvas=self.get_tvas(),
-                                default_tva=self.default_tva())
+        schema = self.schema.bind(request=self.request)
         self.request.js_require.add('address')
         form = Form(schema, buttons=self.get_buttons(),
                 counter=self.formcounter)

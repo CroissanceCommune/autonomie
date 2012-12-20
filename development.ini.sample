@@ -47,6 +47,7 @@ session.cookie_on_exception = true
 session.auto=True
 session.secret=mysecretpassphraseforsessionencoding
 session.timeout=3600
+session.longtimeout=64000
 cache.regions = default_term, second, short_term, long_term
 cache.type = memory
 cache.second.expire = 1

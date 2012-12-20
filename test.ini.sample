@@ -14,6 +14,7 @@ testdb.mysql_cmd=mysql --defaults-file=/etc/mysql/debian.cnf
 testdb.sampledb=sample_db/dbautonomie.sql
 testdb.sampledatas=sample_db/testdatas.sql
 testdb.updatedir=sample_db/updates
+session.longtimeout=3600
 
 [pipeline:main]
 pipeline =

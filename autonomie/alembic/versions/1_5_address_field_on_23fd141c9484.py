@@ -1,4 +1,4 @@
-"""1.5 : Address field on documents
+"""1.5 Documents : Address field and client reference
 
 Revision ID: 23fd141c9484
 Revises: 2a7a5275c441
@@ -17,6 +17,10 @@ import sqlalchemy as sa
 def upgrade():
     for table in ("estimation", "invoice", "cancelinvoice"):
         op.add_column(table, sa.Column("address", sa.Text, default=""))
+        op.add_column(table,
+                sa.Column("client_id",
+                          sa.Integer,
+                          sa.ForeignKey("customer.id")))
 
     from autonomie.models import DBSESSION
     from autonomie.models.task import Invoice, CancelInvoice, Estimation
@@ -24,12 +28,13 @@ def upgrade():
         for doc in obj.query():
             if doc.project is not None and doc.project.client is not None:
                 doc.address = doc.project.client.full_address
+                doc.client_id = doc.project.client.id
                 DBSESSION.merge(doc)
-
 
 
 def downgrade():
     for table in ("estimation", "invoice", "cancelinvoice"):
         op.drop_column(table, "address")
+        op.drop_column(table, "client_id")
 
 

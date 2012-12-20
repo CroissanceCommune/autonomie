@@ -73,6 +73,27 @@ def deferred_code_widget(node, kw):
     return wid
 
 
+@colander.deferred
+def deferred_client_validator(node, kw):
+    request = kw['request']
+    clients = get_clients_from_request(request)
+    client_ids = [client.id for client in clients]
+    def client_oneof(value):
+        if value in ("0", 0):
+            return u"Veuillez choisir un client"
+        elif value not in client_ids:
+            return u"Entrée invalide"
+        return True
+    return colander.Function(client_oneof)
+
+
+class ClientSchema(colander.SequenceSchema):
+    client_id = colander.SchemaNode(colander.Integer(),
+            title=u"Client",
+            widget=deferred_client_list,
+            validator=deferred_client_validator)
+
+
 class ProjectSchema(colander.MappingSchema):
     """
         Schema for project
@@ -89,20 +110,22 @@ class ProjectSchema(colander.MappingSchema):
             validator=colander.Length(max=150),
             missing=u'')
     definition = colander.SchemaNode(colander.String(),
-                         widget=widget.TextAreaWidget(cols=80, rows=4),
-                         title=u'Définition',
-                         missing=u'')
+            widget=widget.TextAreaWidget(cols=80, rows=4),
+            title=u'Définition',
+            missing=u'')
     startingDate = colander.SchemaNode(colander.Date(),
-                                        title=u"Date de début",
-                                        missing=u"",
-                                        widget=get_date_input())
+            title=u"Date de début",
+            missing=u"",
+            widget=get_date_input())
     endingDate = colander.SchemaNode(colander.Date(),
-                                        title=u"Date de fin",
-                                    missing=u"",
-                                    widget=get_date_input())
-    client_id = colander.SchemaNode(colander.Integer(),
-                                    title=u"Client",
-                                    widget=deferred_client_list)
+            title=u"Date de fin",
+            missing=u"",
+            widget=get_date_input())
+    clients = ClientSchema(
+            title=u"Clients",
+            widget=widget.SequenceWidget(
+                min_len=1,
+                add_subitem_text_template=u"Ajouter un client"),)
 
 
 class PhaseSchema(colander.MappingSchema):
@@ -110,8 +133,11 @@ class PhaseSchema(colander.MappingSchema):
         Schema for phase
     """
     name = colander.SchemaNode(colander.String(),
-                               validator=colander.Length(max=150))
+            validator=colander.Length(max=150))
+
+
 phaseSchema = PhaseSchema()
+
 
 class ProjectsListSchema(BaseListsSchema):
     archived = colander.SchemaNode(colander.String(),

@@ -136,27 +136,6 @@ class TaskView(BaseView):
                             _query=dict(view='html')
                             ))
 
-    def add_default_phase(self):
-        """
-            Adds a default phase to an existing project
-        """
-        default_phase = Phase(name=u"Phase par défaut")
-        default_phase.project_id = self.project.id
-        default_phase = self.dbsession.merge(default_phase)
-        self.dbsession.flush()
-        return default_phase
-
-    def get_phases_choice(self):
-        """
-            returns the options for phase select
-        """
-        phase_choices = ((phase.id, phase.name)
-                         for phase in self.project.phases)
-        if not self.project.phases:  # On a pas de phase dans le projet
-            default_phase = self.add_default_phase()
-            phase_choices = ((default_phase.id, default_phase.name),)
-        return phase_choices
-
     def get_sequencenumber(self):
         """
             set the sequence number
@@ -183,23 +162,6 @@ class TaskView(BaseView):
             get the status asked when validating the form
         """
         return self.request.params['submit']
-
-    def get_tvas(self):
-        """
-            return all configured tva amounts
-        """
-        tvas = Tva.query()
-        return [(unicode(tva.value), tva.name)for tva in tvas]
-
-    def default_tva(self):
-        """
-            return the default tva
-        """
-        default_tva = Tva.query().filter(Tva.default == 1).first()
-        if default_tva is not None:
-            return unicode(default_tva.value)
-        else:
-            return None
 
     def _aboest_btn(self):
         """

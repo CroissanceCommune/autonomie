@@ -9,7 +9,7 @@
         <tr>
             <th>${sortable(u"Code", "code")}</th>
             <th>${sortable(u"Nom", "name")}</th>
-            <th>${sortable(u"Client", "client")}</th>
+            <th>Clients</th>
             <th style="text-align:center">Actions</th>
         </tr>
     </thead>
@@ -19,7 +19,15 @@
                 <tr class='tableelement' id="${project.id}">
                     <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.code}</td>
                     <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.name}</td>
-                    <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.client.name}</td>
+                    <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>
+                        <ul>
+                            % for client in project.clients:
+                                <li>
+                                ${client.name}
+                                </li>
+                            % endfor
+                        </ul>
+                    </td>
                     <td style="text-align:right">
                         % for btn in item_actions:
                             ${btn.render(request, project)|n}

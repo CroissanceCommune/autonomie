@@ -286,7 +286,7 @@ class ProjectAdd(BaseFormView):
         """
         project = Project()
         project.company_id = self.request.context.id
-        client_ids = appstruct.pop("clients")
+        client_ids = appstruct.pop("clients", [])
         project = merge_session_with_post(project, appstruct)
         for client_id in client_ids:
             client = Client.get(client_id)
@@ -321,7 +321,7 @@ class ProjectEdit(BaseFormView):
         """
             Flush project edition to the database
         """
-        client_ids = appstruct.pop("clients")
+        client_ids = appstruct.pop("clients", [])
         project = merge_session_with_post(self.request.context, appstruct)
         project.clients = []
         for client_id in client_ids:

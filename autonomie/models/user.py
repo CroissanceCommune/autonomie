@@ -35,9 +35,10 @@ MANAGER_PRIMARY_GROUP = 2
 CONTRACTOR_PRIMARY_GROUP = 3
 
 COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
-    Column("company_id", Integer, ForeignKey('company.id')),
-    Column("account_id", Integer, ForeignKey('accounts.id')),
-        mysql_charset='utf8', mysql_engine='MyISAM')
+        Column("company_id", Integer, ForeignKey('company.id')),
+        Column("account_id", Integer, ForeignKey('accounts.id')),
+        mysql_charset=default_table_args['mysql_charset'],
+        mysql_engine=default_table_args['mysql_engine'])
 
 log = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 #-*-coding:utf-8-*-
-"""1.5 : Moving manualinvoice as task with polymorphism
+"""1.5 ManualInvoice : moving as task with polymorphism
 
 Revision ID: 2a7a5275c441
 Revises: 41116dd5c5c8

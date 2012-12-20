@@ -15,6 +15,7 @@
 """
     Project model
 """
+from sqlalchemy import Table
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
@@ -28,6 +29,11 @@ from autonomie.models.types import CustomDateType
 from autonomie.models import DBBASE
 from autonomie.models import default_table_args
 
+ProjectClient = Table('project_client', DBBASE.metadata,
+        Column("project_id", Integer, ForeignKey('project.id')),
+        Column("client_id", Integer, ForeignKey('customer.id')),
+        mysql_charset=default_table_args['mysql_charset'],
+        mysql_engine=default_table_args['mysql_engine'])
 
 class Project(DBBASE):
     """
@@ -55,6 +61,10 @@ class Project(DBBASE):
 
     type = deferred(Column('type', String(150)), group='edit')
     archived = Column("archived", String(255), default=0)
+
+    clients = relationship("Client",
+                            secondary=ProjectClient,
+                            backref='projects')
 
     def get_estimation(self, taskid):
         """

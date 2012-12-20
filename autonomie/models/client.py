@@ -62,7 +62,6 @@ class Client(DBBASE):
     name = Column("name", String(255), default=None)
     contactFirstName = deferred(Column("contactFirstName",
                     String(255), default=None), group='edit')
-    projects = relationship("Project", backref="client")
 
     def get_company_id(self):
         """

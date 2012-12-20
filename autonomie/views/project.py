@@ -104,14 +104,14 @@ class ProjectsList(BaseListView):
     default_sort = "name"
     sort_columns = {'name':Project.name,
                     "code":Project.code,
-                    "client":Client.name}
+                    }
 
     def query(self):
         company = self.request.context
         # We can't have projects without having clients
         if not company.clients:
             redirect_to_clientslist(self.request, company)
-        return Project.query().join("client").filter(
+        return Project.query().outerjoin(Project.clients).filter(
                             Project.company_id == company.id)
 
     def filter_archived(self, query, appstruct):
@@ -122,8 +122,8 @@ class ProjectsList(BaseListView):
         search = appstruct['search']
         if search:
             query = query.filter(
-                        or_(Project.name.like("%" + search + "%"),
-                            Client.name.like("%" + search + "%")))
+                or_(Project.name.like("%" + search + "%"),
+                    Project.clients.any(Client.name.like("%" + search + "%"))))
         return query
 
     def populate_actionmenu(self, appstruct):
@@ -286,7 +286,12 @@ class ProjectAdd(BaseFormView):
         """
         project = Project()
         project.company_id = self.request.context.id
+        client_ids = appstruct.pop("clients")
         project = merge_session_with_post(project, appstruct)
+        for client_id in client_ids:
+            client = Client.get(client_id)
+            if client:
+                project.clients.append(client)
         self.dbsession.add(project)
         self.dbsession.flush()
         # Add a default phase to the project
@@ -309,13 +314,20 @@ class ProjectEdit(BaseFormView):
             populate the form with the current datas
         """
         form.appstruct = self.request.context.appstruct()
+        form.appstruct['clients'] = [c.id for c in self.request.context.clients]
         populate_actionmenu(self.request, self.request.context)
 
     def submit_success(self, appstruct):
         """
             Flush project edition to the database
         """
+        client_ids = appstruct.pop("clients")
         project = merge_session_with_post(self.request.context, appstruct)
+        project.clients = []
+        for client_id in client_ids:
+            client = Client.get(client_id)
+            if client is not None:
+                project.clients.append(client)
         self.dbsession.merge(project)
         self.dbsession.flush()
         message = u"Le projet <b>{0}</b> a été édité avec succès".format(

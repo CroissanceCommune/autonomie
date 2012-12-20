@@ -67,6 +67,7 @@ class Estimation(Task, TaskCompute):
         group='edit')
     exclusions = deferred(Column("exclusions", Text), group='edit')
     project_id = Column("project_id", ForeignKey('project.id'))
+    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
     manualDeliverables = deferred(
         Column("manualDeliverables", Integer),
         group='edit')
@@ -88,6 +89,10 @@ class Estimation(Task, TaskCompute):
         "Project",
         backref=backref('estimations', order_by='Estimation.taskDate')
     )
+    client = relationship(
+            "Client",
+            primaryjoin="Client.id==Estimation.client_id",
+            backref=backref('estimations', order_by='Estimation.taskDate'))
 
     __mapper_args__ = {'polymorphic_identity': 'estimation', }
 
@@ -437,14 +442,19 @@ class EstimationLine(DBBASE):
     cost = Column(Integer, default=0)
     quantity = Column(DOUBLE, default=1)
     tva = Column("tva", Integer, nullable=False, default=196)
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
+    creationDate = deferred(
+        Column("creationDate",
+            CustomDateType,
+            default=get_current_timestamp))
+    updateDate = deferred(
+        Column("updateDate",
+            CustomDateType,
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp))
     unity = Column("unity", String(10))
-    task = relationship("Estimation", backref=backref("lines",
-                            order_by='EstimationLine.rowIndex'))
+    task = relationship(
+        "Estimation",
+        backref=backref("lines", order_by='EstimationLine.rowIndex'))
 
     def duplicate(self):
         """
@@ -505,14 +515,19 @@ class PaymentLine(DBBASE):
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
     amount = Column("amount", Integer)
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
+    creationDate = deferred(
+        Column("creationDate",
+            CustomDateType,
+            default=get_current_timestamp))
+    updateDate = deferred(
+        Column("updateDate",
+            CustomDateType,
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp))
     paymentDate = Column("paymentDate", CustomDateType2(11))
-    estimation = relationship("Estimation", backref=backref('payment_lines',
-                    order_by='PaymentLine.rowIndex'))
+    estimation = relationship(
+        "Estimation",
+        backref=backref('payment_lines', order_by='PaymentLine.rowIndex'))
 
     def duplicate(self):
         """

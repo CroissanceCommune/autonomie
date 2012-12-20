@@ -87,13 +87,15 @@ class Invoice(Task, TaskCompute):
     project_id = Column("project_id", ForeignKey('project.id'))
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
     number = Column("number", String(100), nullable=False)
-    #tva = Column("tva", Integer, nullable=False, default=196)
-    paymentConditions = deferred(Column("paymentConditions", Text),
-                                 group='edit')
-    deposit = deferred(Column('deposit', Integer, nullable=False, default=0),
-                       group='edit')
-    course = deferred(Column('course', Integer, nullable=False, default=0),
-                      group='edit')
+    paymentConditions = deferred(
+        Column("paymentConditions", Text),
+        group='edit')
+    deposit = deferred(
+        Column('deposit', Integer, nullable=False, default=0),
+        group='edit')
+    course = deferred(
+        Column('course', Integer, nullable=False, default=0),
+        group='edit')
     officialNumber = Column("officialNumber", Integer)
     paymentMode = Column("paymentMode", String(10))
     displayedUnits = deferred(
@@ -103,10 +105,15 @@ class Invoice(Task, TaskCompute):
     expenses = deferred(Column('expenses', Integer, default=0), group='edit')
     address = Column("address", Text, default="")
 
+    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    client = relationship(
+        "Client",
+        primaryjoin="Client.id==Invoice.client_id",
+        backref=backref('invoices', order_by='Invoice.taskDate'))
+
     project = relationship(
         "Project",
-        backref=backref('invoices', order_by='Invoice.taskDate')
-    )
+        backref=backref('invoices', order_by='Invoice.taskDate'))
     #phase =  relationship("Phase", backref=backref("invoices",
     #                                            order_by='Invoice.taskDate'))
     estimation = relationship(
@@ -338,14 +345,20 @@ class InvoiceLine(DBBASE):
     cost = Column(Integer, default=0)
     tva = Column("tva", Integer, nullable=False, default=196)
     quantity = Column(DOUBLE, default=1)
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
+    creationDate = deferred(
+        Column("creationDate",
+               CustomDateType,
+               default=get_current_timestamp))
+    updateDate = deferred(
+        Column("updateDate",
+               CustomDateType,
+               default=get_current_timestamp,
+               onupdate=get_current_timestamp))
     unity = Column("unity", String(10))
-    task = relationship("Invoice", backref=backref("lines",
-                            order_by='InvoiceLine.rowIndex'))
+    task = relationship(
+        "Invoice",
+        backref=backref("lines",
+                        order_by='InvoiceLine.rowIndex'))
 
     def duplicate(self):
         """
@@ -409,23 +422,29 @@ class CancelInvoice(Task, TaskCompute):
     invoice_id = Column(Integer, ForeignKey('invoice.id'),
                                                         default=None)
     project_id = Column(Integer, ForeignKey('project.id'))
+    client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    client = relationship(
+        "Client",
+        primaryjoin="Client.id==CancelInvoice.client_id",
+        backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
     sequenceNumber = deferred(Column(Integer), group='edit')
     number = Column(String(100))
-    #tva = Column(Integer, default=1960)
-    reimbursementConditions = deferred(Column(String(255), default=None),
-            group='edit')
+    reimbursementConditions = deferred(
+        Column(String(255), default=None),
+        group='edit')
     officialNumber = deferred(Column(Integer, default=None), group='edit')
     paymentMode = deferred(Column(String(80), default=None), group='edit')
     displayedUnits = Column(Integer, default=0)
     expenses = deferred(Column(Integer, default=0), group='edit')
     address = Column("address", Text, default="")
 
-    project = relationship("Project", backref=backref('cancelinvoices',
-                                            order_by='CancelInvoice.taskDate')
-                            )
-    invoice = relationship("Invoice",
-                      backref=backref("cancelinvoice", uselist=False),
-                      primaryjoin="CancelInvoice.invoice_id==Invoice.id")
+    project = relationship(
+        "Project",
+        backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
+    invoice = relationship(
+        "Invoice",
+        backref=backref("cancelinvoice", uselist=False),
+        primaryjoin="CancelInvoice.invoice_id==Invoice.id")
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
@@ -511,12 +530,17 @@ class CancelInvoiceLine(DBBASE):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('cancelinvoice.id'))
-    created_at = Column(DateTime, default=datetime.datetime.now)
-    updated_at = Column(DateTime, default=datetime.datetime.now,
-                                  onupdate=datetime.datetime.now)
-    task = relationship("CancelInvoice", backref="lines",
-                            order_by='CancelInvoiceLine.rowIndex'
-                        )
+    created_at = Column(
+        DateTime,
+        default=datetime.datetime.now)
+    updated_at = Column(
+        DateTime,
+        default=datetime.datetime.now,
+        onupdate=datetime.datetime.now)
+    task = relationship(
+        "CancelInvoice",
+        backref="lines",
+        order_by='CancelInvoiceLine.rowIndex')
     rowIndex = Column(Integer)
     description = Column(Text, default="")
     cost = Column(Integer, default=0)
@@ -570,9 +594,10 @@ class Payment(DBBASE):
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
     task_id = Column(Integer, ForeignKey('task.id'))
-    task = relationship("Task",
-                primaryjoin="Task.id==Payment.task_id",
-                backref=backref('payments', order_by='Payment.date'))
+    task = relationship(
+        "Task",
+        primaryjoin="Task.id==Payment.task_id",
+        backref=backref('payments', order_by='Payment.date'))
 
     def get_amount(self):
         return self.amount
@@ -599,19 +624,26 @@ class ManualInvoice(Task):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'manualinvoice'}
     id = Column("id", ForeignKey('task.id'), primary_key=True)
-    officialNumber = Column("officialNumber", Integer, nullable=False,
-                                                           default=0)
+    officialNumber = Column(
+        "officialNumber",
+        Integer,
+        nullable=False,
+        default=0)
     montant_ht = Column("montant_ht", Integer)
     tva = Column("tva", Integer)
     client_id = Column('client_id', Integer, ForeignKey('customer.id'))
-    client = relationship("Client",
-                primaryjoin="Client.id==ManualInvoice.client_id",
-                backref='manual_invoices')
-    company_id = Column('compagnie_id', Integer,
-                            ForeignKey('company.id'))
-    company = relationship("Company",
-                primaryjoin="Company.id==ManualInvoice.company_id",
-                  backref='manual_invoices')
+    client = relationship(
+        "Client",
+        primaryjoin="Client.id==ManualInvoice.client_id",
+        backref='manual_invoices')
+    company_id = Column(
+        'compagnie_id',
+        Integer,
+        ForeignKey('company.id'))
+    company = relationship(
+        "Company",
+        primaryjoin="Company.id==ManualInvoice.company_id",
+        backref='manual_invoices')
     # State machine handling
     state_machine = DEFAULT_STATE_MACHINES['manualinvoice']
     paid_states = ('resulted',)

@@ -41,7 +41,7 @@ from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import PopUp
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
-from autonomie.views.forms.task import Payment
+from autonomie.views.forms.task import PaymentSchema
 from autonomie.views.forms.task import Duplicate
 from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
 from autonomie.utils.pdf import write_pdf
@@ -187,7 +187,7 @@ class TaskView(BaseView):
         """
         valid_btn = Button(name='submit', value="paid", type='submit',
                                                         title=u"Valider")
-        schema = Payment().bind(task=self.task)
+        schema = PaymentSchema().bind(request=self.request)
         action = self.request.route_path(self.route,
                                          id=self.context.id,
                                         _query=dict(action='payment'))
@@ -462,15 +462,6 @@ class TaskView(BaseView):
                     multiple_tvas=multiple_tvas,
                     tvas=tvas)
         return render_html(self.request, self.template, datas)
-
-    def _pdf(self):
-        """
-            Returns a page displaying an html rendering of the current task
-        """
-        log.debug(u"# Generating the pdf file #")
-        filename = u"{0}.pdf".format(self.task.number)
-        write_pdf(self.request, filename, self._html())
-        return self.request.response
 
 def html(request, template):
     """

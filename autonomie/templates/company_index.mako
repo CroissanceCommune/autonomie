@@ -28,7 +28,7 @@
                                     ${invoice.officialNumber}
                                 </td>
                                 <td>
-                                    ${format_client(invoice.project.client)}
+                                    ${format_client(invoice.client)}
                                 </td>
                                 <td>
                                     ${api.format_amount(invoice.total())|n}&nbsp;€
@@ -90,7 +90,7 @@
                                 ${format_project(task.project)}
                             </td>
                             <td>
-                                ${format_client(task.project.client)}
+                                ${format_client(task.client)}
                             </td>
                             <td>${task.name}</td>
                             <td>${api.format_status(task)}</td>

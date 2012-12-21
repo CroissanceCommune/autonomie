@@ -61,6 +61,13 @@ class StatusView(object):
             func = getattr(self, "post_%s_process" % status)
             func(task, status, params)
 
+    def set_status(self, task, status):
+        pre_params = self.get_request_params()
+        params = self.pre_status_process(task, status, pre_params)
+        post_params = self.status_process(params, status)
+        self.post_status_process(task, status, post_params)
+        return task
+
     def merge(self):
         return self.request.dbsession.merge(self.request.context)
 
@@ -76,10 +83,7 @@ class StatusView(object):
         if "submit" in self.request.params:
             try:
                 status = self.get_task_status()
-                pre_params = self.get_request_params()
-                params = self.pre_status_process(task, status, pre_params)
-                post_params = self.status_process(params, status)
-                self.post_status_process(task, status, post_params)
+                task = self.set_status(task, status)
                 task = self.request.dbsession.merge(task)
                 self.request.registry.notify(StatusChanged(self.request, task))
                 self.session.flash(self.valid_msg, queue="main")

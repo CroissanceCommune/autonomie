@@ -12,7 +12,6 @@
             <br />
         </div>
     </div>
-% endif
 <div class='row collapse' id='project-description'>
         <div class="span8 offset2">
     <div class="well">
@@ -35,6 +34,7 @@
     </div>
 </div>
 </div>
+% endif
 <div class='row'>
     <div class='span6 offset3'>
         ${form|n}

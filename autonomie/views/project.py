@@ -388,6 +388,11 @@ def includeme(config):
                     renderer='project.mako',
                     request_method='POST',
                     permission='edit')
+    config.add_view(ProjectAdd,
+                    route_name='company_projects',
+                    renderer='project.mako',
+                    request_param='action=add',
+                    permission='edit')
     config.add_view(ProjectEdit,
                     route_name='project',
                     renderer='project.mako',

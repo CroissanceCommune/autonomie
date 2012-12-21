@@ -39,7 +39,7 @@ class StatusView(object):
         self.session = self.request.session
 
     def get_task_status(self):
-        return self.request.context.CAEStatus
+        return self.request.params['submit']
 
     def get_request_params(self):
         return dict(self.request.params.items())
@@ -83,9 +83,9 @@ class StatusView(object):
         if "submit" in self.request.params:
             try:
                 status = self.get_task_status()
-                task = self.set_status(task, status)
+                task, status = self.set_status(task, status)
                 task = self.request.dbsession.merge(task)
-                self.request.registry.notify(StatusChanged(self.request, task))
+                self.notify(self.request, task)
                 self.session.flash(self.valid_msg, queue="main")
                 log.debug(u" + The status has been set to {0}".format(status))
             except Forbidden, e:

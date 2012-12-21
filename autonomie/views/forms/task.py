@@ -166,7 +166,7 @@ def deferred_client_validator(node, kw):
 def get_tasktype_from_request(request):
     route_name = request.matched_route.name
     for predicate in ('estimation', 'invoice', 'cancelinvoice'):
-        if route_name.startswith(predicate):
+        if route_name in [predicate, "project_%ss" % predicate]:
             return predicate
     raise Exception(u"You shouldn't have come here with the current route %s"\
 % route_name)

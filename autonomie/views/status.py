@@ -44,7 +44,10 @@ class StatusView(object):
     def get_request_params(self):
         return dict(self.request.params.items())
 
-    def pre_status_process(self, status, params):
+    def pre_status_process(self, task, status, params):
+        if hasattr(self, "pre_%s_process" % status):
+            func = getattr(self, "pre_%s_process" % status)
+            return func(task, status, params)
         return params
 
     def status_process(self, params, status):
@@ -74,7 +77,7 @@ class StatusView(object):
             try:
                 status = self.get_task_status()
                 pre_params = self.get_request_params()
-                params = self.pre_status_process(status, pre_params)
+                params = self.pre_status_process(task, status, pre_params)
                 post_params = self.status_process(params, status)
                 self.post_status_process(task, status, post_params)
                 task = self.request.dbsession.merge(task)

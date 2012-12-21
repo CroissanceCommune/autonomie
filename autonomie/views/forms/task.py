@@ -598,7 +598,7 @@ def deferred_amount_default(node, kw):
     """
         default value for the payment amount
     """
-    task = kw.get('task')
+    task = kw['request'].context
     return task.topay()
 
 
@@ -607,7 +607,7 @@ def deferred_total_validator(node, kw):
     """
         validate the amount to keep the sum under the total
     """
-    task = kw.get('task')
+    task = kw['request'].context
     max_msg = u"Le montant ne doit pas dépasser %s\
 (total ttc - somme des paiements enregistrés)" % (task.topay() / 100.0)
     min_msg = u"Le montant doit être positif"

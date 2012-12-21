@@ -37,6 +37,7 @@ from autonomie.views.status import StatusView
 
 from .base import TaskView
 from .base import make_pdf_view
+from .base import make_task_delete_view
 
 log = logging.getLogger(__name__)
 
@@ -270,35 +271,14 @@ class EstimationStatus(StatusView):
             fmess = mess.format(self.request.route_path("estimation", id=id_))
             self.session.flash(fmess)
 
-def delete(request):
-    """
-        Delete an estimation
-    """
-    task = request.context
-    project = task.project
-    log.info(u"# Deleting estimation {0}".format(task.number))
-    try:
-        task.set_status("delete", request, request.user.id)
-    except Forbidden, err:
-        log.exception(u"Forbidden operation")
-        request.session.flash(err.message, queue="error")
-    except:
-        log.exception(u"Unknown error")
-        request.session.flash(u"Une erreur inconnue s'est produite",
-                queue="error")
-    else:
-        request.dbsession.delete(task)
-        message = u"Le devis {0} a bien été supprimé.".format(task.number)
-        request.session.flash(message, queue='main')
-    return HTTPFound(request.route_path('project', id=project.id))
-
 
 def includeme(config):
     config.add_view(make_pdf_view("tasks/estimation.mako"),
                     route_name='estimation',
                     request_param='view=pdf',
                     permission='view')
-    config.add_view(delete,
+    delete_msg = u"Le devis {task.number} a bien été supprimé."
+    config.add_view(make_task_delete_view(delete_msg),
                     route_name='estimation',
                     request_param='action=delete',
                     permission='edit')

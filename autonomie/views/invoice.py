@@ -34,6 +34,8 @@ from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 
 from .base import TaskView
+from .base import make_pdf_view
+from .base import make_task_delete_view
 
 log = logging.getLogger(__name__)
 
@@ -187,15 +189,6 @@ class InvoiceView(TaskView):
                     submit_buttons=self.get_buttons(),
                     )
 
-    @view_config(route_name='invoice',
-                request_param='view=pdf',
-                permission='view')
-    def pdf(self):
-        """
-            Returns a page displaying an html rendering of the given task
-        """
-        return self._pdf()
-
     @view_config(route_name="invoice", request_param='action=status',
                 permission="edit")
     def status(self):
@@ -296,23 +289,14 @@ class InvoiceView(TaskView):
                             title=u"Duplication d'un document")
         return ret_dict
 
-    @view_config(route_name='invoice', request_param='action=delete',
-            permission='edit')
-    def delete(self):
-        """
-            Delete an invoice
-        """
-        log.info(u"User : {0} deletes invoice : {1}".format(self.user.login,
-                                                            self.task.id))
-        try:
-            self.task.set_status("delete", self.request, self.user.id)
-        except Forbidden, err:
-            log.exception(u"Forbidden operation")
-            self.request.session.flash(err.message, queue="error")
-        else:
-            self.remove_lines_from_session()
-            self.dbsession.delete(self.task)
-            message = u"Le devis {0} a bien été supprimé.".format(
-                                                            self.task.number)
-            self.request.session.flash(message, queue='main')
-        return self.project_view_redirect()
+
+def includeme(config):
+    delete_msg = u"La facture {task.number} a bien été supprimée."
+    config.add_view(make_pdf_view("tasks/invoice.mako"),
+                    route_name='invoice',
+                    request_param='view=pdf',
+                    permission='view')
+    config.add_view(make_task_delete_view(delete_msg),
+                    route_name='invoice',
+                    request_param='action=delete',
+                    permission='edit')

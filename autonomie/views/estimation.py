@@ -238,38 +238,33 @@ class EstimationStatus(StatusView):
         project_id = self.request.context.project.id
         return HTTPFound(self.request.route_path('project', id=project_id))
 
-    def post_status_process(self, task, status, params):
-        """
-            Handle specific status changes
-        """
-        dbsession = self.request.session
-        if status == "geninv":
-            for invoice in params:
-                dbsession.merge(invoice)
-            msg = u"Vos factures ont bien été générées"
-            self.session.flash(msg)
+    def post_geninv_process(self, task, status, params):
+        for invoice in params:
+            self.request.dbsession.merge(invoice)
+        msg = u"Vos factures ont bien été générées"
+        self.session.flash(msg)
 
-        elif status == "aboest":
-            msg = u"Le devis {0} a été annulé (indiqué sans suite)."
-            self.session.flash(msg.format(task.number))
+    def post_aboest_process(self, task, status, params):
+        msg = u"Le devis {0} a été annulé (indiqué sans suite)."
+        self.session.flash(msg.format(task.number))
 
-        elif status == 'delete':
-            msg = u"Le devis {0} a été supprimé"
-            dbsession.delete(task)
-            dbsession.flush()
-            self.session.flash(msg.format(task.number))
-            raise self.redirect()
+    def post_delete_process(self, task, status, params):
+        msg = u"Le devis {0} a été supprimé"
+        self.request.dbsession.delete(task)
+        self.request.dbsession.flush()
+        self.session.flash(msg.format(task.number))
+        # Here we force redirection, nothing has to be merged
+        raise self.redirect()
 
-        elif status == 'duplicate':
-            estimation = params
-            estimation = dbsession.merge(estimation)
-            dbsession.flush()
-            id_ = estimation.id
-
-            mess = u"Le devis a bien été dupliqué, vous pouvez l'éditer \
+    def post_duplicate_process(self, task, status, params):
+        estimation = params
+        estimation = self.request.dbsession.merge(estimation)
+        self.request.dbsession.flush()
+        id_ = estimation.id
+        msg = u"Le devis a bien été dupliqué, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
-            fmess = mess.format(self.request.route_path("estimation", id=id_))
-            self.session.flash(fmess)
+        msg = msg.format(self.request.route_path("estimation", id=id_))
+        self.session.flash(msg)
 
 
 def includeme(config):

@@ -33,6 +33,7 @@ from autonomie.views.forms.task import get_estimation_dbdatas
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
+from autonomie.views.status import StatusView
 
 from .base import TaskView
 from .base import make_pdf_view
@@ -215,26 +216,6 @@ class EstimationView(TaskView):
                     title=u"Duplication d'un document")
         return ret_dict
 
-    @view_config(route_name='estimation', request_param='action=delete',
-            permission='edit')
-    def delete(self):
-        """
-            Delete an estimation
-        """
-        log.info(u"# Deleting estimation {0}".format(self.task.number))
-        try:
-            self.task.set_status("delete", self.request, self.user.id)
-        except Forbidden, err:
-            log.exception(u"Forbidden operation")
-            self.request.session.flash(err.message, queue="error")
-        else:
-            self.remove_lines_from_session()
-            self.dbsession.delete(self.task)
-            message = u"Le devis {0} a bien été supprimé.".format(
-                                                            self.task.number)
-            self.request.session.flash(message, queue='main')
-        return self.project_view_redirect()
-
     def gen_invoices(self):
         """
             Called when an estimation status is changed
@@ -247,59 +228,90 @@ class EstimationView(TaskView):
                                 queue='main')
 
 
+class EstimationStatus(StatusView):
+    """
+        Handle the estimation status processing
+    """
 
+    def redirect(self):
+        project_id = self.request.context.project.id
+        return HTTPFound(self.request.route_path('project', id=project_id))
 
-    @view_config(route_name="estimation", request_param='action=status',
-                 permission="edit")
-    def status(self):
-        """
-            Status change view
-        """
-        return self._status()
-
-    def _post_status_process(self, status, ret_data):
+    def post_status_process(self, task, status, params):
         """
             Handle specific status changes
         """
-        flash = self.request.session.flash
+        dbsession = self.request.session
         if status == "geninv":
-            for invoice in ret_data:
-                self.dbsession.merge(invoice)
-            flash(u"Vos factures ont bien été générées", queue='main')
+            for invoice in params:
+                dbsession.merge(invoice)
+            msg = u"Vos factures ont bien été générées"
+            self.session.flash(msg)
 
         elif status == "aboest":
-            mess = u"Le devis {0} a été annulé (indiqué sans suite)."
-            flash(mess.format(self.task.number))
+            msg = u"Le devis {0} a été annulé (indiqué sans suite)."
+            self.session.flash(msg.format(task.number))
 
         elif status == 'delete':
-            for line in self.task.lines:
-                self.dbsession.delete(line)
-            for line in self.task.discounts:
-                self.dbsession.delete(line)
-            for line in self.task.payment_lines:
-                self.dbsession.delete(line)
-            for status in self.task.statuses:
-                self.dbsession.delete(status)
-            self.dbsession.delete(self.task)
-            self.dbsession.flush()
-            flash(u"Le devis {0} a été supprimé".format(self.task.number))
-            raise self.project_view_redirect()
+            msg = u"Le devis {0} a été supprimé"
+            for line in task.lines:
+                dbsession.delete(line)
+            for line in task.discounts:
+                dbsession.delete(line)
+            for line in task.payment_lines:
+                dbsession.delete(line)
+            for status in task.statuses:
+                dbsession.delete(status)
+            dbsession.delete(task)
+            dbsession.flush()
+            self.session.flash(msg.format(task.number))
+            raise self.redirect()
 
         elif status == 'duplicate':
-            estimation = ret_data
-            estimation = self.dbsession.merge(estimation)
-            self.dbsession.flush()
+            estimation = params
+            estimation = dbsession.merge(estimation)
+            dbsession.flush()
             id_ = estimation.id
 
             mess = u"Le devis a bien été dupliqué, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
             fmess = mess.format(self.request.route_path("estimation", id=id_))
-            flash(fmess, "main")
+            self.session.flash(fmess)
+
+def delete(request):
+    """
+        Delete an estimation
+    """
+    task = request.context
+    project = task.project
+    log.info(u"# Deleting estimation {0}".format(task.number))
+    try:
+        task.set_status("delete", request, request.user.id)
+    except Forbidden, err:
+        log.exception(u"Forbidden operation")
+        request.session.flash(err.message, queue="error")
+    except:
+        log.exception(u"Unknown error")
+        request.session.flash(u"Une erreur inconnue s'est produite",
+                queue="error")
+    else:
+        request.dbsession.delete(task)
+        message = u"Le devis {0} a bien été supprimé.".format(task.number)
+        request.session.flash(message, queue='main')
+    return HTTPFound(request.route_path('project', id=project.id))
+
 
 def includeme(config):
     config.add_view(make_pdf_view("tasks/estimation.mako"),
                     route_name='estimation',
                     request_param='view=pdf',
                     permission='view')
-
+    config.add_view(delete,
+                    route_name='estimation',
+                    request_param='action=delete',
+                    permission='edit')
+    config.add_view(EstimationStatus,
+                    route_name="estimation",
+                    request_param='action=status',
+                    permission="edit")
 

@@ -35,9 +35,9 @@ else
 
 fi
 
-echo "Deleting database"
-echo "drop database ${DBNAME};" | ${MYSQL_CMD}
-echo "create database ${DBNAME};" | ${MYSQL_CMD}
-echo "grant all privileges on ${DBNAME}.* to ${DBUSER}@localhost identified by '${DBPASS}';" | ${MYSQL_CMD}
-echo "flush privileges;" | ${MYSQL_CMD}
+echo "Deleting database ${DBNAME}"
+echo "drop database ${DBNAME};" | ${MYSQLCMD}
+echo "create database ${DBNAME};" | ${MYSQLCMD}
+echo "grant all privileges on ${DBNAME}.* to ${DBUSER}@localhost identified by '${DBPASS}';" | ${MYSQLCMD}
+echo "flush privileges;" | ${MYSQLCMD}
 echo "Database reseted"

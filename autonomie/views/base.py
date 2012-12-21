@@ -652,3 +652,33 @@ class BaseListView(object):
         """
         pass
 
+
+def make_task_delete_view(valid_msg):
+    """
+        Return a task deletion view
+        :param valid_msg: string called with task object as format argument
+    """
+    def delete(request):
+        """
+            delete a task
+        """
+        task = request.context
+        user = request.user
+        project = task.project
+        log.info(u"# {user.login} deletes {s.__name__} {s.number}".format(
+                    user=user, s=task))
+        try:
+            task.set_status("delete", request, request.user.id)
+        except Forbidden, err:
+            log.exception(u"Forbidden operation")
+            request.session.flash(err.message, queue="error")
+        except:
+            log.exception(u"Unknown error")
+            request.session.flash(u"Une erreur inconnue s'est produite",
+                    queue="error")
+        else:
+            request.dbsession.delete(task)
+            message = valid_msg.format(task)
+            request.session.flash(message, queue='main')
+        return HTTPFound(request.route_path('project', id=project.id))
+    return delete

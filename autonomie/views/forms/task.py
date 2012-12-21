@@ -615,7 +615,7 @@ def deferred_total_validator(node, kw):
                                                    max_err=max_msg)
 
 
-class Payment(colander.MappingSchema):
+class PaymentSchema(colander.MappingSchema):
     """
         colander schema for payment recording
     """

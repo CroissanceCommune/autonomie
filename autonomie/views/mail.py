@@ -86,14 +86,14 @@ class StatusChanged(object):
             body = u"La facture {0} du projet {1} (avec le client {2}) \
 a été {3}e.".format(self.document.number,
                     self.document.project.name,
-                    self.document.project.client.name,
+                    self.document.client.name,
                     status_verb)
             addr = self.request.route_url("invoice", id=self.document.id)
         else:
             body = u"Le devis {0} du projet {1} (avec le client {2}) \
 a été {3}.".format(self.document.number,
                    self.document.project.name,
-                   self.document.project.client.name,
+                   self.document.client.name,
                    status_verb)
             addr = self.request.route_url("estimation", id=self.document.id)
         body += u"\n\n"

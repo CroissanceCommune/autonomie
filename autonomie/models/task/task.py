@@ -157,10 +157,7 @@ ce document.".format(status)
         """
             Return the client of the current task
         """
-        if self.project:
-            return self.project.client
-        else:
-            return None
+        return self.client
 
     def get_company_id(self):
         """

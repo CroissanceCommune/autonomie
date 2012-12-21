@@ -198,7 +198,7 @@ def get_client():
 
 def get_project():
     project = MagicMock(**PROJECT)
-    project.client = get_client()
+    project.clients.append(get_client())
     project.get_next_estimation_number = lambda :2
     project.get_next_invoice_number = lambda :2
     project.get_next_cancelinvoice_number = lambda :2

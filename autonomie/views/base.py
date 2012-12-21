@@ -242,7 +242,7 @@ class TaskView(BaseView):
         clients = self.company.clients
         clients_options = [(cli.id, u"%s (%s)" % (cli.name, cli.code))
                                                 for cli in clients]
-        projects = self.project.client.projects
+        projects = self.task.client.projects
         projects_options = [(pro.id, u"%s (%s)" % (pro.name, pro.code))
                                                     for pro in projects]
         all_projects = []
@@ -256,7 +256,7 @@ class TaskView(BaseView):
         phases_options = [(phase.id, phase.name) for phase in phases]
         schema = Duplicate().bind(
                 clients=clients_options,
-                current_client=self.project.client.id,
+                current_client=self.context.client.id,
                 projects=projects_options,
                 current_project=self.project.id,
                 phases=phases_options,

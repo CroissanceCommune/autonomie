@@ -85,7 +85,7 @@ def add_client(company, client_name, client_code, client_lastname):
 
 def add_project(client, company, project_name, project_code):
     project = Project(name=project_name, code=project_code)
-    project.client = client
+    project.clients.append(client)
     project.company = company
 
     session = DBSESSION()

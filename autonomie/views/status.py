@@ -54,7 +54,9 @@ class StatusView(object):
                                         **params)
 
     def post_status_process(self, task, status, params):
-        pass
+        if hasattr(self, "post_%s_process" % status):
+            func = getattr(self, "post_%s_process" % status)
+            func(task, status, params)
 
     def merge(self):
         return self.request.dbsession.merge(self.request.context)
@@ -67,7 +69,7 @@ class StatusView(object):
         return HTTPNotFound()
 
     def __call__(self):
-        project = self.request.context.project
+        task = self.request.context
         if "submit" in self.request.params:
             try:
                 status = self.get_task_status()

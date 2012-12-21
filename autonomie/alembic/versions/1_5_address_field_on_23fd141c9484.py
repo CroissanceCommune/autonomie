@@ -12,6 +12,9 @@ down_revision = '2a7a5275c441'
 
 from alembic import op
 import sqlalchemy as sa
+from autonomie.models import DBSESSION
+from autonomie.models.task import Invoice, CancelInvoice, Estimation
+from autonomie.models.client import Client
 
 
 def upgrade():
@@ -22,14 +25,14 @@ def upgrade():
                           sa.Integer,
                           sa.ForeignKey("customer.id")))
 
-    from autonomie.models import DBSESSION
-    from autonomie.models.task import Invoice, CancelInvoice, Estimation
     for obj in (Invoice, CancelInvoice, Estimation):
         for doc in obj.query():
-            if doc.project is not None and doc.project.client is not None:
-                doc.address = doc.project.client.full_address
-                doc.client_id = doc.project.client.id
-                DBSESSION.merge(doc)
+            if doc.project is not None and doc.project.client_id is not None:
+                client = Client.get(doc.project.client_id)
+                if client is not None:
+                    doc.address = client.full_address
+                    doc.client_id = client.id
+                    DBSESSION.merge(doc)
 
 
 def downgrade():

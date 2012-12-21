@@ -254,14 +254,6 @@ class EstimationStatus(StatusView):
 
         elif status == 'delete':
             msg = u"Le devis {0} a été supprimé"
-            for line in task.lines:
-                dbsession.delete(line)
-            for line in task.discounts:
-                dbsession.delete(line)
-            for line in task.payment_lines:
-                dbsession.delete(line)
-            for status in task.statuses:
-                dbsession.delete(status)
             dbsession.delete(task)
             dbsession.flush()
             self.session.flash(msg.format(task.number))

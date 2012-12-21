@@ -339,7 +339,7 @@ class InvoiceLine(DBBASE):
     __tablename__ = 'invoice_line'
     __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey('invoice.id'))
+    task_id = Column(Integer, ForeignKey('invoice.id', ondelete="cascade"))
     rowIndex = Column("rowIndex", Integer, default=1)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
@@ -357,8 +357,8 @@ class InvoiceLine(DBBASE):
     unity = Column("unity", String(10))
     task = relationship(
         "Invoice",
-        backref=backref("lines",
-                        order_by='InvoiceLine.rowIndex'))
+        backref=backref("lines", order_by='InvoiceLine.rowIndex',
+                        cascade="all, delete-orphan"))
 
     def duplicate(self):
         """
@@ -529,7 +529,7 @@ class CancelInvoiceLine(DBBASE):
     __tablename__ = 'cancelinvoice_line'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey('cancelinvoice.id'))
+    task_id = Column(Integer, ForeignKey('cancelinvoice.id', ondelete="cascade"))
     created_at = Column(
         DateTime,
         default=datetime.datetime.now)
@@ -539,8 +539,9 @@ class CancelInvoiceLine(DBBASE):
         onupdate=datetime.datetime.now)
     task = relationship(
         "CancelInvoice",
-        backref="lines",
-        order_by='CancelInvoiceLine.rowIndex')
+        backref=backref("lines",
+            order_by='CancelInvoiceLine.rowIndex',
+            cascade="all, delete-orphan"))
     rowIndex = Column(Integer)
     description = Column(Text, default="")
     cost = Column(Integer, default=0)
@@ -593,11 +594,13 @@ class Payment(DBBASE):
     mode = Column(String(50))
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
-    task_id = Column(Integer, ForeignKey('task.id'))
+    task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
     task = relationship(
         "Task",
         primaryjoin="Task.id==Payment.task_id",
-        backref=backref('payments', order_by='Payment.date'))
+        backref=backref('payments',
+            order_by='Payment.date',
+            cascade="all, delete-orphan"))
 
     def get_amount(self):
         return self.amount

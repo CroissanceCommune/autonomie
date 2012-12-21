@@ -436,7 +436,7 @@ class EstimationLine(DBBASE):
     __tablename__ = 'estimation_line'
     __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey('estimation.id'))
+    task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
     cost = Column(Integer, default=0)
@@ -454,7 +454,8 @@ class EstimationLine(DBBASE):
     unity = Column("unity", String(10))
     task = relationship(
         "Estimation",
-        backref=backref("lines", order_by='EstimationLine.rowIndex'))
+        backref=backref("lines", order_by='EstimationLine.rowIndex',
+                        cascade="all, delete-orphan"))
 
     def duplicate(self):
         """
@@ -511,7 +512,7 @@ class PaymentLine(DBBASE):
     __tablename__ = 'estimation_payment'
     __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True, nullable=False)
-    task_id = Column(Integer, ForeignKey('estimation.id'))
+    task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
     rowIndex = Column("rowIndex", Integer)
     description = Column("description", Text)
     amount = Column("amount", Integer)
@@ -527,7 +528,8 @@ class PaymentLine(DBBASE):
     paymentDate = Column("paymentDate", CustomDateType2(11))
     task = relationship(
         "Estimation",
-        backref=backref('payment_lines', order_by='PaymentLine.rowIndex'))
+        backref=backref('payment_lines', order_by='PaymentLine.rowIndex',
+            cascade="all, delete-orphan"))
 
     def duplicate(self):
         """

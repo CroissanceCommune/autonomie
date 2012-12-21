@@ -186,12 +186,14 @@ class DiscountLine(DBBASE):
     __tablename__ = 'discount'
     __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True, nullable=False)
-    task_id = Column(Integer, ForeignKey('task.id'))
+    task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
     tva = Column("tva", Integer, nullable=False, default=196)
     amount = Column("amount", Integer)
     description = Column("description", Text)
-    task = relationship("Task", backref=backref('discounts',
-                    order_by='DiscountLine.tva'))
+    task = relationship("Task",
+        backref=backref('discounts',
+            order_by='DiscountLine.tva',
+            cascade="all, delete-orphan"))
 
     def duplicate(self):
         """
@@ -232,13 +234,16 @@ class TaskStatus(DBBASE):
     __tablename__ = 'task_status'
     __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
-    task_id = Column('task_id', Integer,
-                        ForeignKey('task.id'))
+    task_id = Column('task_id',
+        Integer,
+        ForeignKey('task.id', ondelete="cascade"))
     statusCode = Column("statusCode", String(10))
     statusComment = Column("statusComment", Text)
-    statusPerson = Column("statusPerson", Integer,
-                        ForeignKey('accounts.id'))
-    statusDate = Column("statusDate", CustomDateType,
-                                default=get_current_timestamp)
-    task = relationship("Task", backref="statuses")
+    statusPerson = Column("statusPerson", Integer, ForeignKey('accounts.id'))
+    statusDate = Column("statusDate",
+        CustomDateType,
+        default=get_current_timestamp)
+    task = relationship("Task",
+        backref=backref("statuses",
+            cascade="all, delete-orphan"))
     statusPersonAccount = relationship("User", backref="task_statuses")

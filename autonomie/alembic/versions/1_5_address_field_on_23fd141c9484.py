@@ -32,12 +32,20 @@ def upgrade():
                 if client is not None:
                     doc.address = client.full_address
                     doc.client_id = client.id
-                    DBSESSION.merge(doc)
+            if len(doc._number) > 10:
+                doc._number = doc._number[10:]
+            DBSESSION.merge(doc)
 
 
 def downgrade():
     for table in ("estimation", "invoice", "cancelinvoice"):
         op.drop_column(table, "address")
         op.drop_column(table, "client_id")
+
+    for obj in (Invoice, CancelInvoice, Estimation):
+        for doc in obj.query():
+            if doc.project is not None and doc.client is not None:
+                doc._number = "%s_%s_%s" % (doc.project.code, doc.client.code, doc._number)
+                DBSESSION().merge(doc)
 
 

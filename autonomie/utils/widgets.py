@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : jeu. 08 nov. 2012 19:13:18 CET
+# * Last Modified : mer. 26 déc. 2012 15:02:46 CET
 #
 # * Project : autonomie
 #
@@ -49,6 +49,7 @@ class Widget(object):
     """
         Base widget
     """
+    name = None
     template = None
     request = None
 

@@ -129,7 +129,7 @@
             </div>
         %endif
         <h3 class='floatted' style='padding-right:10px;font-weight:100;'>Facture(s)</h3>
-        <a class='btn' href='${request.route_path("project_invoices", id=project.id, _query=dict(phase=phase.id))}'>
+        <a class='btn' href='${request.route_path("invoices", id=project.id, _query=dict(phase=phase.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>
         </a>
         %if phase.invoices:

@@ -273,6 +273,12 @@ def duplicate(request):
 
 
 def includeme(config):
+    config.add_route('invoices',
+                     '/projects/{id:\d+}/invoices',
+                     traverse='/projects/{id}')
+    config.add_route('invoice',
+                     '/invoices/{id:\d+}',
+                     traverse='/invoices/{id}')
     delete_msg = u"La facture {task.number} a bien été supprimée."
     config.add_view(make_pdf_view("tasks/invoice.mako"),
                     route_name='invoice',
@@ -304,7 +310,7 @@ def includeme(config):
                     renderer='base/formpage.mako')
 
     config.add_view(InvoiceAdd,
-                    route_name="project_invoices",
+                    route_name="invoices",
                     renderer='tasks/edit.mako',
                     permission='edit')
     config.add_view(InvoiceEdit,

@@ -18,8 +18,6 @@
 import logging
 
 from deform import ValidationFailure
-from deform import Form
-from pyramid.view import view_config
 from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 
@@ -32,262 +30,262 @@ from autonomie.views.forms.task import get_invoice_dbdatas
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
+from autonomie.views.taskaction import StatusView
+from autonomie.utils.widgets import ViewLink
 
-from .base import TaskView
-from .base import make_pdf_view
-from .base import make_task_delete_view
+from autonomie.utils.views import submit_btn
+from autonomie.views.taskaction import TaskFormView
+from autonomie.views.taskaction import get_paid_form
+from autonomie.views.taskaction import context_is_editable
+
+from autonomie.views.taskaction import make_pdf_view
+from autonomie.views.taskaction import make_html_view
+from autonomie.views.taskaction import make_task_delete_view
 
 log = logging.getLogger(__name__)
 
+def add_lines_to_invoice(task, appstruct):
+    """
+        Add the lines to the current invoice
+    """
+    # Needed for edition only
+    task.lines = []
+    task.discounts = []
+    for line in appstruct['lines']:
+        task.lines.append(InvoiceLine(**line))
+    for line in appstruct.get('discounts', []):
+        task.discounts.append(DiscountLine(**line))
+    return task
 
-class InvoiceView(TaskView):
+def populate_actionmenu(request, invoice=None):
     """
-        All invoice related views
-        form
-        pdf
-        html
+        Add buttons in the request actionmenu attribute
     """
-    type_ = "invoice"
-    model = Invoice
+    if invoice is None:
+        project = request.context
+    else:
+        project = invoice.project
+    request.actionmenu.add(get_project_redirect_btn(request, project.id))
+
+def get_project_redirect_btn(request, id_):
+    """
+        Button for "go back to project" link
+    """
+    return ViewLink(u"Revenir au projet", "edit", path="project", id=id_)
+
+class InvoiceAdd(TaskFormView):
+    """
+        Invoice Add view
+    """
+    title = "Nouvelle facture"
     schema = get_invoice_schema()
-    add_title = u"Nouvelle facture"
-    edit_title = u"Édition de la facture {task.number}"
-    route = "invoice"
-    template = "tasks/invoice.mako"
+    buttons = (submit_btn,)
+    model = Invoice
+    add_template_vars = ('title', 'company',)
+
+    @property
+    def company(self):
+        # Current context is a project
+        return self.context.company
+
+    def before(self, form):
+        super(InvoiceAdd, self).before(form)
+        populate_actionmenu(self.request)
+        self.request.js_require.add('address')
+        form.widget.template = "autonomie:deform_templates/form.pt"
+
+    def submit_success(self, appstruct):
+        log.debug("Submitting invoice add")
+        appstruct = get_invoice_dbdatas(appstruct)
+
+        # Since the call to get_next_invoice_number commits the current
+        # transaction, it needs to be called before creating our invoice, to
+        # avoid missing arguments errors
+        snumber = self.context.get_next_invoice_number()
+
+        invoice = Invoice()
+        invoice.project = self.context
+        invoice.owner = self.request.user
+        invoice = merge_session_with_post(invoice, appstruct["invoice"])
+        invoice.set_sequenceNumber(snumber)
+        invoice.set_number()
+        invoice.set_name()
+        try:
+            invoice = self.set_task_status(invoice)
+            # Line handling
+            invoice = add_lines_to_invoice(invoice, appstruct)
+            self.dbsession.add(invoice)
+            self.dbsession.flush()
+            self.session.flash(u"La facture a bien été ajoutée.")
+        except Forbidden, err:
+            self.request.session.flash(err.message, queue='error')
+        return HTTPFound(self.request.route_path("project",
+                                                 id=self.context.id))
+
+    def set_task_status(self, invoice):
+        # self.request.POST is a locked dict, we need a non locked one
+        params = dict(self.request.POST)
+        status = params['submit']
+        invoice.set_status(status, self.request, self.request.user.id, **params)
+        self.request.registry.notify(StatusChanged(self.request, invoice))
+        return invoice
+
+class InvoiceEdit(TaskFormView):
+    """
+        Invoice edition view
+        current context is an invoice
+    """
+    schema = get_invoice_schema()
+    buttons = (submit_btn,)
+    model = Invoice
+    add_template_vars = ('title', 'company',)
+
+    @property
+    def company(self):
+        # Current context is an invoice
+        return self.context.project.company
+
+    @property
+    def title(self):
+        return u"Édition de la facture {task.number}".format(task=self.context)
 
     def get_dbdatas_as_dict(self):
         """
             Returns dbdatas as a dict of dict
         """
-        return {'invoice': self.task.appstruct(),
+        return {'invoice': self.context.appstruct(),
                 'lines': [line.appstruct()
-                          for line in self.task.lines],
+                          for line in self.context.lines],
                 'discounts': [line.appstruct()
-                              for line in self.task.discounts],
+                              for line in self.context.discounts],
                 }
 
-    def is_editable(self):
-        """
-            Return True if the current task can be edited by the current user
-        """
-        if self.task.is_editable():
-            return True
-        if has_permission('manage', self.task, self.request):
-            if self.task.is_waiting():
-                return True
-        return False
+    def before(self, form):
+        if not context_is_editable(self.request, self.context):
+            raise HTTPFound(self.request.route_path("invoice",
+                                id=self.context.id,
+                                _query=dict(view='html')))
 
-    @view_config(route_name="project_invoices", renderer='tasks/edit.mako',
-            permission='edit')
-    @view_config(route_name='invoice', renderer='tasks/edit.mako',
-            permission='edit')
-    def invoice_form(self):
-        """
-            Return the invoice edit view
-        """
-        if self.taskid:
-            if not self.is_editable():
-                return self.redirect_to_view_only()
-            title = self.edit_title.format(task=self.task)
-            edit = True
-            valid_msg = u"La facture a bien été éditée."
-        else:
-            title = self.add_title
-            edit = False
-            valid_msg = u"La facture a bien été ajoutée."
-
-        dbdatas = self.get_dbdatas_as_dict()
-        # Get colander's schema compatible datas
-        appstruct = get_invoice_appstruct(dbdatas)
-
-        schema = self.schema.bind(request=self.request)
+        super(InvoiceEdit, self).before(form)
+        populate_actionmenu(self.request, self.context)
         self.request.js_require.add('address')
-        form = Form(schema, buttons=self.get_buttons(),
-                counter=self.formcounter)
         form.widget.template = "autonomie:deform_templates/form.pt"
 
-        if 'submit' in self.request.params:
-            datas = self.request.params.items()
-            log.debug(u"Invoice form has been validated : {0}".format(datas))
-            try:
-                appstruct = form.validate(datas)
-            except ValidationFailure, err:
-                html_form = err.render()
-            else:
-                dbdatas = get_invoice_dbdatas(appstruct)
-                log.debug(u"Values are valid : {0}".format(dbdatas))
-                merge_session_with_post(self.task, dbdatas['invoice'])
-                if not edit:
-                    self.task.sequenceNumber = self.get_sequencenumber()
-                    self.task.name = self.get_taskname()
-                    self.task.number = self.get_tasknumber(self.task.taskDate)
-                try:
-                    self.request.session.flash(valid_msg, queue="main")
-                    self.task.project = self.project
-                    self.remove_lines_from_session()
-                    self.add_lines_to_task(dbdatas)
-                    self._status_process()
-                    self._set_modifications()
-                    self.request.registry.notify(StatusChanged(self.request,
-                                                    self.task))
-                except Forbidden, err:
-                    self.request.session.pop_flash("main")
-                    self.request.session.flash(err.message, queue='error')
+    def appstruct(self):
+        """
+            Return the current edited context as a colander data model
+        """
+        dbdatas = self.get_dbdatas_as_dict()
+        # Get colander's schema compatible datas
+        return get_invoice_appstruct(dbdatas)
 
-                # Redirecting to the project page
-                return self.project_view_redirect()
-        else:
-            html_form = form.render(appstruct)
-        return dict(title=title,
-                    company=self.company,
-                    html_form=html_form,
-                    action_menu=self.actionmenu,
-                    popups=self.popups
-                    )
+    def submit_success(self, appstruct):
+        log.debug("Submitting invoice edit")
+        appstruct = get_invoice_dbdatas(appstruct)
 
-    def remove_lines_from_session(self):
-        """
-            Remove invoice lines and payment lines from the current session
-        """
-        # if edition we remove all invoice lines
-        for line in self.task.lines:
-            self.dbsession.delete(line)
-        for line in self.task.discounts:
-            self.dbsession.delete(line)
+        # Since the call to get_next_invoice_number commits the current
+        # transaction, it needs to be called before creating our invoice, to
+        # avoid missing arguments errors
 
-    def add_lines_to_task(self, dbdatas):
-        """
-            Add the lines to the current invoice
-        """
-        for line in dbdatas['lines']:
-            eline = InvoiceLine()
-            merge_session_with_post(eline, line)
-            self.task.lines.append(eline)
-        for line in dbdatas.get('discounts', []):
-            dline = DiscountLine()
-            merge_session_with_post(dline, line)
-            self.task.discounts.append(dline)
-
-    @view_config(route_name='invoice',
-                renderer='tasks/view_only.mako',
-                permission='view',
-                request_param='view=html')
-    def html(self):
-        """
-            Returns a page displaying an html rendering of the given task
-        """
-        if self.is_editable():
-            return HTTPFound(self.request.route_path('invoice',
-                                                id=self.task.id))
-        title = u"Facture numéro : {0}".format(self.task.number)
-        return dict(
-                    title=title,
-                    task=self.task,
-                    html_datas=self._html(),
-                    action_menu=self.actionmenu,
-                    popups=self.popups,
-                    submit_buttons=self.get_buttons(),
-                    )
-
-    @view_config(route_name="invoice", request_param='action=status',
-                permission="edit")
-    def status(self):
-        """
-            Status change view
-        """
-        return self._status()
-
-    def _post_status_process(self, status, ret_data):
-        """
-            Change the current task's status
-        """
-        flash = self.request.session.flash
-        if status == "valid":
-            message = u"La facture porte le numéro <b>{0}</b>"
-            flash(message.format(self.task.officialNumber), queue='main')
-
-        elif status == 'gencinv':
-            cancelinvoice = ret_data
-            cancelinvoice = self.dbsession.merge(cancelinvoice)
-            self.dbsession.flush()
-            id_ = cancelinvoice.id
-            log.debug(u"Generated cancelinvoice {0}".format(id_))
-
-            mess = u"Un avoir a été généré, vous pouvez l'éditer \
-<a href='{0}'>Ici</a>."
-            fmess = mess.format(self.request.route_path("cancelinvoice",
-                                                           id=id_))
-            flash(fmess, queue="main")
-
-        elif status == "duplicate":
-            invoice = ret_data
+        invoice = self.context
+        invoice = merge_session_with_post(invoice, appstruct["invoice"])
+        try:
+            invoice = self.set_task_status(invoice)
+            # Line handling
+            invoice = add_lines_to_invoice(invoice, appstruct)
             invoice = self.dbsession.merge(invoice)
             self.dbsession.flush()
-            id_ = invoice.id
-            log.debug(u"Duplicated invoice : {0}".format(id_))
-            mess = u"La facture a bien été dupliquée, vous pouvez l'éditer \
+            self.session.flash(u"La facture a bien été éditée.")
+        except Forbidden, err:
+            self.request.session.flash(err.message, queue='error')
+        return HTTPFound(self.request.route_path("project",
+                                                 id=self.context.project.id))
+
+    def set_task_status(self, invoice):
+        # self.request.POST is a locked dict, we need a non locked one
+        params = dict(self.request.POST)
+        status = params['submit']
+        invoice.set_status(status, self.request, self.request.user.id, **params)
+        log.debug("Has been raised")
+        self.request.registry.notify(StatusChanged(self.request, invoice))
+        return invoice
+
+
+class InvoiceStatus(StatusView):
+    """
+        Handle the invoice status processing
+        Is called when the status btn from the html view or
+        the edit view are pressed
+
+        context is an invoice
+    """
+
+    def redirect(self):
+        project_id = self.request.context.project.id
+        return HTTPFound(self.request.route_path('project', id=project_id))
+
+    def post_valid_process(self, task, status, params):
+        msg = u"La facture porte le numéro <b>{0}</b>"
+        self.session.flash(msg.format(task.officialNumber))
+
+    def post_gencinv_process(self, task, status, params):
+        cancelinvoice = params
+        cancelinvoice = self.request.dbsession.merge(cancelinvoice)
+        self.request.dbsession.flush()
+        id_ = cancelinvoice.id
+        log.debug(u"Generated cancelinvoice {0}".format(id_))
+        msg = u"Un avoir a été généré, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
-            fmess = mess.format(self.request.route_path("invoice", id=id_))
-            self.request.session.flash(fmess, "main")
+        msg = msg.format(self.request.route_path("cancelinvoice", id=id_))
+        self.session.flash(msg)
 
-#        elif status == 'delete':
-#            session_map = self.dbsession.identity_map
-#            # Here we delete all non persisted datas
-#            self.dbsession.expunge_all()
-#            log.info(u"Deleting an invoice")
-#            for line in self.task.lines:
-#                if has_identity(line):
-#                    self.dbsession.delete(line)
-#            for line in self.task.discounts:
-#                if has_identity(line):
-#                    self.dbsession.delete(line)
-#            self.dbsession.delete(self.task)
-#            self.dbsession.flush()
-#            self.request.session.flash(u"La facture {0} a été supprimée"\
-#                    .format(self.task.number))
-#            raise HTTPFound(self.request.route_path("project",
-#                            id=self.project.id))
+    def post_duplicate_process(self, task, status, params):
+        invoice = params
+        invoice = self.request.dbsession.merge(invoice)
+        self.request.dbsession.flush()
+        id_ = invoice.id
+        log.debug(u"Duplicated invoice : {0}".format(id_))
+        msg = u"La facture a bien été dupliquée, vous pouvez l'éditer \
+<a href='{0}'>Ici</a>."
+        msg = msg.format(self.request.route_path("invoice", id=id_))
+        self.request.session.flash(msg, "main")
 
-    def _pre_status_process(self, status, params):
+    def pre_paid_process(self, task, status, params):
         """
-            Validates the current payment form before setting the status
+            Validate a payment form's data
         """
-        params = super(InvoiceView, self)._pre_status_process(status, params)
-        if status == "paid":
-            form = self._paid_form()
-            appstruct = form.validate(params.items())
-            log.debug(u"Appstruct : {0}".format(appstruct))
-            return appstruct
-        return params
+        form = get_paid_form(self.request)
+        # We don't try except on the data validation, since this is done in the
+        # original wrapping call (see register_payment)
+        appstruct = form.validate(params.items())
+        return appstruct
 
-    @view_config(route_name="invoice", request_param='action=payment',
-                permission="manage", renderer='base/formpage.mako')
-    def register_payment(self):
-        """
-            register_payment view
-        """
-        log.info(u"'{0}' is registering a payment".format(self.user.login))
-        try:
-            ret_dict = self._status()
-        except ValidationFailure, err:
-            log.exception(u"An error has been detected")
-            ret_dict = dict(html_form=err.render(),
-                    title=u"Enregistrement d'un paiement")
-        return ret_dict
 
-    @view_config(route_name="invoice", request_param='action=duplicate',
-                permission="view", renderer='base/formpage.mako')
-    def duplicate(self):
-        """
-            duplicate an invoice
-        """
-        try:
-            ret_dict = self._status()
-        except ValidationFailure, err:
-            log.exception(u"Duplication error")
-            ret_dict = dict(html_form=err.render(),
-                            title=u"Duplication d'un document")
-        return ret_dict
+def register_payment(request):
+    """
+        register_payment view
+    """
+    log.info(u"'{0}' is registering a payment".format(request.user.login))
+    try:
+        ret_dict = InvoiceStatus(request)()
+    except ValidationFailure, err:
+        log.exception(u"An error has been detected")
+        ret_dict = dict(html_form=err.render(),
+                        title=u"Enregistrement d'un paiement")
+    return ret_dict
+
+
+def duplicate(request):
+    """
+        duplicate an invoice
+    """
+    try:
+        ret_dict = InvoiceStatus(request)()
+    except ValidationFailure, err:
+        log.exception(u"Duplication error")
+        ret_dict = dict(html_form=err.render(),
+                        title=u"Duplication d'un document")
+    return ret_dict
 
 
 def includeme(config):
@@ -296,7 +294,38 @@ def includeme(config):
                     route_name='invoice',
                     request_param='view=pdf',
                     permission='view')
+    config.add_view(make_html_view(Invoice,
+                                   "tasks/invoice.mako",
+                                   populate_actionmenu),
+                route_name='invoice',
+                renderer='tasks/view_only.mako',
+                permission='view',
+                request_param='view=html')
+
     config.add_view(make_task_delete_view(delete_msg),
                     route_name='invoice',
                     request_param='action=delete',
+                    permission='edit')
+    config.add_view(InvoiceStatus,
+                    route_name='invoice',
+                    request_param='action=status',
+                    permission='edit')
+    config.add_view(register_payment,
+                    route_name="invoice",
+                    request_param='action=payment',
+                    permission="manage",
+                    renderer='base/formpage.mako')
+    config.add_view(duplicate,
+                    route_name="invoice",
+                    request_param='action=duplicate',
+                    permission="view",
+                    renderer='base/formpage.mako')
+
+    config.add_view(InvoiceAdd,
+                    route_name="project_invoices",
+                    renderer='tasks/edit.mako',
+                    permission='edit')
+    config.add_view(InvoiceEdit,
+                    route_name="invoice",
+                    renderer='tasks/edit.mako',
                     permission='edit')

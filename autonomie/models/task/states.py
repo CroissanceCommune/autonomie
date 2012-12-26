@@ -67,8 +67,8 @@ def gen_cancelinvoice(task, **kw):
     """
         gen the cancelinvoice for the given task
     """
-    if 'user_id' in kw:
-        return task.gen_cancelinvoice(kw['user_id'])
+    if 'user' in kw:
+        return task.gen_cancelinvoice(kw['user'])
     else:
         raise SignatureError()
 

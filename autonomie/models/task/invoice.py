@@ -86,7 +86,7 @@ class Invoice(Task, TaskCompute):
     estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
     project_id = Column("project_id", ForeignKey('project.id'))
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
-    number = Column("number", String(100), nullable=False)
+    _number = Column("number", String(100), nullable=False)
     paymentConditions = deferred(
         Column("paymentConditions", Text),
         group='edit')
@@ -189,15 +189,37 @@ class Invoice(Task, TaskCompute):
             taskname_tmpl = u"Facture {0}"
         return taskname_tmpl.format(seq_number)
 
-    @classmethod
-    def get_number(cls, project, seq_number, taskDate, deposit=False):
+    @property
+    def number(self):
+        tasknumber_tmpl = u"{s.project.code}_{s.client.code}_{s._number}"
+        return tasknumber_tmpl.format(s=self)
+
+    def set_project(self, project):
+        self.project = project
+
+    def set_number(self, deposit=False):
         if deposit:
-            tasknumber_tmpl = u"{0}_{1}_FA{2}_{3:%m%y}"
+            tasknumber_tmpl = u"FA{s.sequenceNumber}_{s.taskDate:%m%y}"
         else:
-            tasknumber_tmpl = u"{0}_{1}_F{2}_{3:%m%y}"
-        pcode = project.code
-        ccode = project.client.code
-        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
+            tasknumber_tmpl = u"F{s.sequenceNumber}_{s.taskDate:%m%y}"
+        self._number = tasknumber_tmpl.format(s=self)
+
+    def set_sequenceNumber(self, snumber):
+        """
+            Set the sequencenumber of an invoice
+            :param snumber: sequence number get through
+                project.get_next_invoice_number()
+        """
+        self.sequenceNumber = snumber
+
+    def set_name(self, deposit=False, sold=False):
+        if deposit:
+            taskname_tmpl = u"Facture d'acompte {0}"
+        elif sold:
+            taskname_tmpl = u"Facture de solde"
+        else:
+            taskname_tmpl = u"Facture {0}"
+        self.name = taskname_tmpl.format(self.sequenceNumber)
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):
@@ -222,31 +244,28 @@ class Invoice(Task, TaskCompute):
                                          (current_year + 1) * 10000
                                     ))
 
-    def gen_cancelinvoice(self, user_id):
+    def gen_cancelinvoice(self, user):
         """
             Return a cancel invoice with self's informations
         """
-        cancelinvoice = CancelInvoice()
         seq_number = self.project.get_next_cancelinvoice_number()
-        cancelinvoice.name = CancelInvoice.get_name(seq_number)
-        cancelinvoice.phase_id = self.phase_id
+        cancelinvoice = CancelInvoice()
+        cancelinvoice.taskDate = datetime.date.today()
+        cancelinvoice.set_sequenceNumber(seq_number)
+        cancelinvoice.set_name()
+        cancelinvoice.set_number()
         cancelinvoice.address = self.address
         cancelinvoice.CAEStatus = 'draft'
-        cancelinvoice.taskDate = datetime.date.today()
         cancelinvoice.description = self.description
 
-        cancelinvoice.invoice_id = self.id
-        cancelinvoice.invoiceDate = self.taskDate
-        cancelinvoice.invoiceNumber = self.officialNumber
+        cancelinvoice.invoice = self
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.displayedUnits = self.displayedUnits
-        cancelinvoice.sequenceNumber = seq_number
-        cancelinvoice.number = CancelInvoice.get_number(self.project,
-                            cancelinvoice.sequenceNumber,
-                            cancelinvoice.taskDate)
-        cancelinvoice.statusPerson = user_id
-        cancelinvoice.project_id = self.project_id
-        cancelinvoice.owner_id = user_id
+        cancelinvoice.statusPersonAccount = user
+        cancelinvoice.project = self.project
+        cancelinvoice.owner = user
+        cancelinvoice.phase = self.phase
+        cancelinvoice.client = self.client
         for line in self.lines:
             cancelinvoice.lines.append(line.gen_cancelinvoice_line())
         rowindex = self.get_next_row_index()
@@ -293,7 +312,7 @@ class Invoice(Task, TaskCompute):
             self.CAEStatus = 'resulted'
         return self
 
-    def duplicate(self, user, project, phase):
+    def duplicate(self, user, project, phase, client):
         """
             Duplicate the current invoice
         """
@@ -301,16 +320,24 @@ class Invoice(Task, TaskCompute):
         date = datetime.date.today()
 
         invoice = Invoice()
-        invoice.address = self.address
-        invoice.name = self.get_name(seq_number)
-        invoice.CAEStatus = 'draft'
+        invoice.statusPersonAccount = user
+        invoice.phase = phase
+        invoice.owner = user
+        invoice.client = client
+        invoice.project = project
         invoice.taskDate = date
+        invoice.set_sequenceNumber(seq_number)
+        invoice.set_number()
+        invoice.set_name()
+        if client.id == self.client_id:
+            invoice.address = self.address
+        else:
+            invoice.address = client.full_adress
+
+        invoice.CAEStatus = 'draft'
         invoice.description = self.description
         invoice.expenses = self.expenses
 
-        invoice.sequenceNumber = seq_number
-        invoice.number = Invoice.get_number(project, seq_number, date)
-        #invoice.tva = self.tva
         invoice.paymentConditions = self.paymentConditions
         invoice.deposit = self.deposit
         invoice.course = self.course
@@ -318,10 +345,6 @@ class Invoice(Task, TaskCompute):
         invoice.discountHT = self.discountHT
         invoice.expenses = self.expenses
 
-        invoice.statusPersonAccount = user
-        invoice.project = project
-        invoice.phase = phase
-        invoice.owner = user
         for line in self.lines:
             invoice.lines.append(line.duplicate())
         for line in self.discounts:
@@ -428,7 +451,7 @@ class CancelInvoice(Task, TaskCompute):
         primaryjoin="Client.id==CancelInvoice.client_id",
         backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
     sequenceNumber = deferred(Column(Integer), group='edit')
-    number = Column(String(100))
+    _number = Column(String(100))
     reimbursementConditions = deferred(
         Column(String(255), default=None),
         group='edit')
@@ -482,13 +505,9 @@ class CancelInvoice(Task, TaskCompute):
     def is_viewable(self):
         return True
 
-    @classmethod
-    def get_name(cls, seq_number):
-        """
-            return an cancelinvoice name
-        """
+    def set_name(self):
         taskname_tmpl = u"Avoir {0}"
-        return taskname_tmpl.format(seq_number)
+        self.name = taskname_tmpl.format(self.sequenceNumber)
 
     @classmethod
     def get_officialNumber(cls):
@@ -506,12 +525,22 @@ class CancelInvoice(Task, TaskCompute):
         """
         return False
 
-    @classmethod
-    def get_number(cls, project, seq_number, taskDate):
-        tasknumber_tmpl = u"{0}_{1}_A{2}_{3:%m%y}"
-        pcode = project.code
-        ccode = project.client.code
-        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
+    def set_sequenceNumber(self, snumber):
+        """
+            Set the sequencenumber of an invoice
+            :param snumber: sequence number get through
+                project.get_next_invoice_number()
+        """
+        self.sequenceNumber = snumber
+
+    def set_number(self):
+        tasknumber_tmpl = u"A{s.sequenceNumber}_{s.taskDate:%m%y}"
+        self._number = tasknumber_tmpl.format(s=self)
+
+    @property
+    def number(self):
+        tasknumber_tmpl = u"{s.project.code}_{s.client.code}_{s._number}"
+        return tasknumber_tmpl.format(s=self)
 
     def valid_callback(self):
         """

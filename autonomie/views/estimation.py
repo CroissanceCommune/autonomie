@@ -267,7 +267,7 @@ class EstimationAdd(TaskFormView):
             estimation = add_lines_to_estimation(estimation, appstruct)
             self.dbsession.add(estimation)
             self.dbsession.flush()
-            self.session.flash(u"La facture a bien été ajoutée.")
+            self.session.flash(u"Le devis a bien été ajoutée.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",
@@ -343,7 +343,7 @@ class EstimationEdit(TaskFormView):
             estimation = add_lines_to_estimation(estimation, appstruct)
             estimation = self.dbsession.merge(estimation)
             self.dbsession.flush()
-            self.session.flash(u"La facture a bien été éditée.")
+            self.session.flash(u"Le devis a bien été éditée.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",
@@ -367,6 +367,13 @@ class EstimationStatus(StatusView):
     def redirect(self):
         project_id = self.request.context.project.id
         return HTTPFound(self.request.route_path('project', id=project_id))
+
+    def pre_geninv_process(self, task, status, params):
+        """
+            add a user param for invoice generation
+        """
+        params['user'] = self.request.user
+        return params
 
     def post_geninv_process(self, task, status, params):
         for invoice in params:

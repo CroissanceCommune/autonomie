@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 26 déc. 2012 21:55:29 CET
+# * Last Modified : mer. 26 déc. 2012 23:20:15 CET
 #
 # * Project : autonomie
 #
@@ -48,6 +48,7 @@ AUTONOMIE_MODULES = (
                      "autonomie.views.tests",
                      "autonomie.views.estimation",
                      "autonomie.views.invoice",
+                     "autonomie.views.cancelinvoice",
                      )
 
 
@@ -96,15 +97,6 @@ def main(global_config, **settings):
     config.add_route('company_treasury',
                      '/company/{id:\d+}/treasury',
                      traverse='/companies/{id}')
-
-    #Tasks (estimation and invoice) routes
-
-    config.add_route("project_cancelinvoices",
-                     "/projects/{id:\d+}/cancelinvoices",
-                     traverse='/projects/{id}')
-    config.add_route("cancelinvoice",
-                    "/cancelinvoices/{id:\d+}",
-                    traverse='/cancelinvoices/{id}')
 
     # Set deform multi renderer handling translation and both chameleon and
     # mako templates

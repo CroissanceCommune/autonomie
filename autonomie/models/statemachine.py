@@ -113,8 +113,11 @@ class TaskState(object):
         """
         return [st_obj.name for st_obj in self.transitions.get(state, [])]
 
-    def get_next_states(self, state):
+    def get_next_states(self, state=None):
         """
             return the next state objects after state
         """
-        return self.transitions.get(state, [])
+        if state is None:
+            return self.transitions.get(self.default_state, [])
+        else:
+            return self.transitions.get(state, [])

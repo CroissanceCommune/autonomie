@@ -18,6 +18,7 @@ from autonomie.tests.base import BaseTestCase, printstatus
 from autonomie.models.task import (CancelInvoice, ManualInvoice,
                                     Invoice, InvoiceLine, DiscountLine)
 from autonomie.models.user import User
+from autonomie.models.client import Client
 from autonomie.models.project import Phase, Project
 
 LINES = [{'description':u'text1',
@@ -39,19 +40,24 @@ INVOICE = dict( name=u"Facture 2",
                 sequenceNumber=2,
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
-                number=u"invoicenumber",
+                _number=u"invoicenumber",
                 expenses=0)
 
 class TestCancelInvoice(BaseTestCase):
-    def test_get_name(self):
-        self.assertEqual(CancelInvoice.get_name(5), u"Avoir 5")
+    def test_set_name(self):
+        cinv = CancelInvoice()
+        cinv.set_sequenceNumber(5)
+        cinv.set_name()
+        self.assertEqual(cinv.name, u"Avoir 5")
 
     def test_get_number(self):
-        project = MagicMock(code="PRO1", client=MagicMock(code="CLI1"))
-        seq_number = 15
-        date = datetime.date(1969, 07, 31)
-        self.assertEqual(CancelInvoice.get_number(project, seq_number, date),
-                        u"PRO1_CLI1_A15_0769")
+        cinv = CancelInvoice()
+        cinv.project = MagicMock(code="PRO1")
+        cinv.client = MagicMock(code="CLI1")
+        cinv.taskDate = datetime.date(1969, 07, 31)
+        cinv.set_sequenceNumber(15)
+        cinv.set_number()
+        self.assertEqual(cinv.number, u"PRO1_CLI1_A15_0769")
 
 class TestManualInvoice(BaseTestCase):
     def test_tva_amount(self):
@@ -68,20 +74,29 @@ class TestInvoice(BaseTestCase):
             inv.discounts.append(DiscountLine(**discount))
         return inv
 
-    def test_get_name(self):
-        self.assertEqual(Invoice.get_name(5), u"Facture 5")
-        self.assertEqual(Invoice.get_name(5, sold=True), u"Facture de solde")
-        self.assertEqual(Invoice.get_name(5, account=True),
-                                                      u"Facture d'acompte 5")
+    def test_set_name(self):
+        invoice = Invoice()
+        invoice.set_sequenceNumber(5)
+        invoice.set_name()
+        self.assertEqual(invoice.name, u"Facture 5")
+        invoice.set_name(sold=True)
+        self.assertEqual(invoice.name, u"Facture de solde")
+        invoice.set_name(deposit=True)
+        self.assertEqual(invoice.name, u"Facture d'acompte 5")
 
-    def test_get_number(self):
-        project = MagicMock(code="PRO1", client=MagicMock(code="CLI1"))
+    def test_set_number(self):
+        invoice = Invoice()
+        invoice.client = MagicMock(code="CLI1")
+        invoice.project = MagicMock(code="PRO1")
         seq_number = 15
+        invoice.set_sequenceNumber(15)
+        invoice.set_name()
         date = datetime.date(1969, 07, 31)
-        self.assertEqual(Invoice.get_number(project, seq_number, date),
-                        u"PRO1_CLI1_F15_0769")
-        self.assertEqual(Invoice.get_number(project, seq_number, date,
-                        deposit=True), u"PRO1_CLI1_FA15_0769")
+        invoice.taskDate = date
+        invoice.set_number()
+        self.assertEqual(invoice.number, u"PRO1_CLI1_F15_0769")
+        invoice.set_number(deposit=True)
+        self.assertEqual(invoice.number, u"PRO1_CLI1_FA15_0769")
 
     def test_gen_cancelinvoice(self):
         user = User.query().first()
@@ -93,7 +108,7 @@ class TestInvoice(BaseTestCase):
 
         self.session.add(inv)
         self.session.flush()
-        cinv = inv.gen_cancelinvoice(user.id)
+        cinv = inv.gen_cancelinvoice(user)
         self.session.add(cinv)
         self.session.flush()
 
@@ -110,13 +125,14 @@ class TestInvoice(BaseTestCase):
         inv.owner = user
         inv.statusPersonAccount = user
         inv.record_payment(mode="c", amount=1500)
-        cinv = inv.gen_cancelinvoice(user.id)
+        cinv = inv.gen_cancelinvoice(user)
         self.assertEqual(len(cinv.lines),
                           len(inv.lines) + len(inv.discounts) + 1)
         self.assertEqual(cinv.lines[-1].cost, 1500)
 
     def test_duplicate_invoice(self):
         user = self.session.query(User).first()
+        client = self.session.query(Client).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
         inv = self.getOne()
@@ -124,8 +140,9 @@ class TestInvoice(BaseTestCase):
         inv.statusPersonAccount = user
         inv.project = project
         inv.phase = phase
+        inv.client = client
 
-        newinv = inv.duplicate(user, project, phase)
+        newinv = inv.duplicate(user, project, phase, client)
         self.assertEqual(len(inv.lines), len(newinv.lines))
         self.assertEqual(len(inv.discounts), len(newinv.discounts))
         self.assertEqual(inv.project, newinv.project)
@@ -137,14 +154,17 @@ class TestInvoice(BaseTestCase):
         printstatus(user)
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
+        client = self.session.query(Client).first()
+
         inv = self.getOne()
         inv.phase = phase
+        inv.client = client
         inv.owner = user
         inv.statusPersonAccount = user
         inv.project = project
         self.session.add(inv)
         self.session.flush()
-        newest = inv.duplicate(user, project, phase)
+        newest = inv.duplicate(user, project, phase, client)
         self.session.add(newest)
         self.session.flush()
         self.assertEqual(newest.phase_id, phase.id)

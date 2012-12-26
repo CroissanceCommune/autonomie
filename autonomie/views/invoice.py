@@ -30,13 +30,14 @@ from autonomie.views.forms.task import get_invoice_dbdatas
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
-from autonomie.views.taskaction import StatusView
 from autonomie.utils.widgets import ViewLink
 
 from autonomie.utils.views import submit_btn
 from autonomie.views.taskaction import TaskFormView
 from autonomie.views.taskaction import get_paid_form
 from autonomie.views.taskaction import context_is_editable
+from autonomie.views.taskaction import StatusView
+from autonomie.views.taskaction import populate_actionmenu
 
 from autonomie.views.taskaction import make_pdf_view
 from autonomie.views.taskaction import make_html_view
@@ -56,22 +57,6 @@ def add_lines_to_invoice(task, appstruct):
     for line in appstruct.get('discounts', []):
         task.discounts.append(DiscountLine(**line))
     return task
-
-def populate_actionmenu(request, invoice=None):
-    """
-        Add buttons in the request actionmenu attribute
-    """
-    if invoice is None:
-        project = request.context
-    else:
-        project = invoice.project
-    request.actionmenu.add(get_project_redirect_btn(request, project.id))
-
-def get_project_redirect_btn(request, id_):
-    """
-        Button for "go back to project" link
-    """
-    return ViewLink(u"Revenir au projet", "edit", path="project", id=id_)
 
 class InvoiceAdd(TaskFormView):
     """
@@ -157,8 +142,7 @@ class InvoiceEdit(TaskFormView):
                 'lines': [line.appstruct()
                           for line in self.context.lines],
                 'discounts': [line.appstruct()
-                              for line in self.context.discounts],
-                }
+                              for line in self.context.discounts]}
 
     def before(self, form):
         if not context_is_editable(self.request, self.context):
@@ -167,7 +151,7 @@ class InvoiceEdit(TaskFormView):
                                 _query=dict(view='html')))
 
         super(InvoiceEdit, self).before(form)
-        populate_actionmenu(self.request, self.context)
+        populate_actionmenu(self.request)
         self.request.js_require.add('address')
         form.widget.template = "autonomie:deform_templates/form.pt"
 
@@ -294,9 +278,7 @@ def includeme(config):
                     route_name='invoice',
                     request_param='view=pdf',
                     permission='view')
-    config.add_view(make_html_view(Invoice,
-                                   "tasks/invoice.mako",
-                                   populate_actionmenu),
+    config.add_view(make_html_view(Invoice, "tasks/invoice.mako"),
                 route_name='invoice',
                 renderer='tasks/view_only.mako',
                 permission='view',

@@ -77,8 +77,8 @@ def gen_invoices(task, **kw):
     """
         gen_invoices for the given task
     """
-    if "user_id" in kw:
-        return task.gen_invoices(kw['user_id'])
+    if "user" in kw:
+        return task.gen_invoices(kw['user'])
     else:
         raise SignatureError()
 

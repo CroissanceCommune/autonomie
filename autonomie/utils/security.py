@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 07 nov. 2012 17:17:33 CET
+# * Last Modified : mer. 26 déc. 2012 23:25:46 CET
 #
 # * Project : autonomie
 #
@@ -183,7 +183,7 @@ class CancelInvoiceFactory(BaseDBFactory):
         """
             Returns the traversed object
         """
-        return self._get_item(CancelInvoice, key, 'cancelinvoices')
+        return self._get_item(CancelInvoice, key, 'cancelinvoice')
 
 
 class UserFactory(BaseDBFactory):

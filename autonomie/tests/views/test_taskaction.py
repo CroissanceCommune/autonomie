@@ -30,7 +30,7 @@ class TestFuncs(BaseViewTest):
 
     def test_context_is_not_task(self):
         context = MagicMock()
-        for i in ("invoices", "cancelinvoices", "estimations"):
+        for i in ("project_invoices", "project_cancelinvoices", "project_estimations"):
             context.__name__ = i
             self.assertFalse(context_is_task(context))
 

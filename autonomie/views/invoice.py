@@ -273,7 +273,7 @@ def duplicate(request):
 
 
 def includeme(config):
-    config.add_route('invoices',
+    config.add_route('project_invoices',
                      '/projects/{id:\d+}/invoices',
                      traverse='/projects/{id}')
     config.add_route('invoice',
@@ -310,7 +310,7 @@ def includeme(config):
                     renderer='base/formpage.mako')
 
     config.add_view(InvoiceAdd,
-                    route_name="invoices",
+                    route_name="project_invoices",
                     renderer='tasks/edit.mako',
                     permission='edit')
     config.add_view(InvoiceEdit,

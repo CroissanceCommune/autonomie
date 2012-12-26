@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 26 déc. 2012 21:42:18 CET
+# * Last Modified : mer. 26 déc. 2012 21:55:29 CET
 #
 # * Project : autonomie
 #
@@ -98,14 +98,8 @@ def main(global_config, **settings):
                      traverse='/companies/{id}')
 
     #Tasks (estimation and invoice) routes
-    config.add_route('estimations',
-                     '/projects/{id:\d+}/estimations',
-                      traverse='/projects/{id}')
-    config.add_route('estimation',
-                     '/estimations/{id:\d+}',
-                      traverse='/estimations/{id}')
 
-    config.add_route("cancelinvoices",
+    config.add_route("project_cancelinvoices",
                      "/projects/{id:\d+}/cancelinvoices",
                      traverse='/projects/{id}')
     config.add_route("cancelinvoice",

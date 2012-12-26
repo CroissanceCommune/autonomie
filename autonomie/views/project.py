@@ -167,10 +167,10 @@ class ProjectsList(BaseListView):
                 path="project", icon="icon-search"))
         btns.append(ItemActionLink(u"Devis", "edit", css="btn",
             title=u"Nouveau devis",
-            path="estimations", icon=("icon-file", )))
+            path="project_estimations", icon=("icon-file", )))
         btns.append(ItemActionLink(u"Facture", "edit", css="btn",
             title=u"Nouvelle facture",
-            path="invoices", icon=("icon-file", )))
+            path="project_invoices", icon=("icon-file", )))
         if self.request.params.get('archived', '0') == '0':
             btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
                    confirm=u'Êtes-vous sûr de vouloir archiver ce projet ?',

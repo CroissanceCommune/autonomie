@@ -332,7 +332,7 @@ class Invoice(Task, TaskCompute):
         if client.id == self.client_id:
             invoice.address = self.address
         else:
-            invoice.address = client.full_adress
+            invoice.address = client.full_address
 
         invoice.CAEStatus = 'draft'
         invoice.description = self.description
@@ -451,7 +451,7 @@ class CancelInvoice(Task, TaskCompute):
         primaryjoin="Client.id==CancelInvoice.client_id",
         backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
     sequenceNumber = deferred(Column(Integer), group='edit')
-    _number = Column(String(100))
+    _number = Column("number", String(100))
     reimbursementConditions = deferred(
         Column(String(255), default=None),
         group='edit')

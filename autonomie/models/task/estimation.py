@@ -139,7 +139,7 @@ class Estimation(Task, TaskCompute):
         if client.id == self.client_id:
             estimation.address = self.address
         else:
-            estimation.address = client.full_adress
+            estimation.address = client.full_address
 
         estimation.description = self.description
         estimation.CAEStatus = "draft"

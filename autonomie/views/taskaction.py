@@ -512,7 +512,7 @@ def make_task_delete_view(valid_msg):
                     queue="error")
         else:
             request.dbsession.delete(task)
-            message = valid_msg.format(task)
+            message = valid_msg.format(task=task)
             request.session.flash(message, queue='main')
         return HTTPFound(request.route_path('project', id=project.id))
     return delete

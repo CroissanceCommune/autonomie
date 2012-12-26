@@ -18,7 +18,7 @@
         <dt>Prestataire</dt>
         <dd>${address(company, 'company')}</dd>
         </dl>
-${html_form|n}
+${form|n}
 </%block>
 <%block name='footerjs'>
 initialize();

@@ -59,7 +59,7 @@ class Estimation(Task, TaskCompute):
     __table_args__ = default_table_args
     id = Column("id", ForeignKey('task.id'), primary_key=True, nullable=False)
     sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
-    number = Column("number", String(100), nullable=False)
+    _number = Column("number", String(100), nullable=False)
     tva = Column("tva", Integer, nullable=False, default=196)
     deposit = Column("deposit", Integer, default=0)
     paymentConditions = deferred(
@@ -119,59 +119,47 @@ class Estimation(Task, TaskCompute):
     def is_estimation(self):
         return True
 
-    def duplicate(self, user, project, phase):
+    def duplicate(self, user, project, phase, client):
         """
             returns a duplicate estimation object
         """
         seq_number = project.get_next_estimation_number()
-        taskDate = datetime.date.today()
+        date = datetime.date.today()
 
-        duple = Estimation()
-        duple.CAEStatus = u'draft'
-        duple.taskDate = taskDate
-        duple.owner_id = self.owner_id
-        duple.description = self.description
-        duple.sequenceNumber = seq_number
+        estimation = Estimation()
+        estimation.statusPersonAccount = user
+        estimation.phase = phase
+        estimation.owner = user
+        estimation.client = client
+        estimation.project = project
+        estimation.taskDate = date
+        estimation.set_sequenceNumber(seq_number)
+        estimation.set_number()
+        estimation.set_name()
+        if client.id == self.client_id:
+            estimation.address = self.address
+        else:
+            estimation.address = client.full_adress
 
-        duple.name = self.get_name(seq_number)
-        duple.number = self.get_number(project, seq_number, taskDate)
+        estimation.description = self.description
+        estimation.CAEStatus = "draft"
 
-        duple.tva = self.tva
-        duple.deposit = self.deposit
-        duple.paymentConditions = self.paymentConditions
-        duple.exclusions = self.exclusions
-        duple.manualDeliverables = self.manualDeliverables
-        duple.course = self.course
-        duple.displayedUnits = self.displayedUnits
-        duple.discountHT = self.discountHT
-        duple.expenses = self.expenses
-        duple.paymentDisplay = self.paymentDisplay
-        duple.address = self.address
-        # Setting relationships at the end of the duplication
-        duple.phase = phase
-        duple.statusPersonAccount = user
-        duple.project = project
+        estimation.deposit = self.deposit
+        estimation.paymentConditions = self.paymentConditions
+        estimation.exclusions = self.exclusions
+        estimation.manualDeliverables = self.manualDeliverables
+        estimation.course = self.course
+        estimation.displayedUnits = self.displayedUnits
+        estimation.discountHT = self.discountHT
+        estimation.expenses = self.expenses
+        estimation.paymentDisplay = self.paymentDisplay
         for line in self.lines:
-            duple.lines.append(line.duplicate())
+            estimation.lines.append(line.duplicate())
         for line in self.payment_lines:
-            duple.payment_lines.append(line.duplicate())
+            estimation.payment_lines.append(line.duplicate())
         for line in self.discounts:
-            duple.discounts.append(line.duplicate())
-        return duple
-
-    def _common_args_for_generation(self, user_id):
-        """
-            Return the args common to all the generated invoices
-        """
-        return dict(project_id=self.project_id,
-                    phase_id=self.phase_id,
-                    CAEStatus='draft',
-                    statusPerson=user_id,
-                    owner_id=user_id,
-                    estimation_id=self.id,
-                    paymentConditions=self.paymentConditions,
-                    description=self.description,
-                    course=self.course)
+            estimation.discounts.append(line.duplicate())
+        return estimation
 
     def _account_invoiceline(self, amount, description, tva=1960):
         """
@@ -179,38 +167,29 @@ class Estimation(Task, TaskCompute):
         """
         return InvoiceLine(cost=amount, description=description, tva=tva)
 
-    def _account_invoice(self, args, count=0):
+    def _make_deposit(self, invoice, tva):
         """
-            Return an account invoice
+            Return a deposit invoice
         """
-        args['address'] = self.address
-        args['sequenceNumber'] = self.project.get_next_invoice_number() + count
-        args['name'] = Invoice.get_name(count + 1, account=True)
-        args['number'] = Invoice.get_number(self.project,
-                                            args['sequenceNumber'],
-                                            args['taskDate'],
-                                            deposit=True)
-        args['displayedUnits'] = 0
-        return Invoice(**args)
+        invoice.taskDate = datetime.date.today()
+        invoice.displayedUnits = 0
+        invoice.set_name(deposit=True)
+        invoice.set_number(deposit=True)
 
-    def _deposit_invoice(self, args, tva):
-        """
-            Return the deposit
-        """
-        args['taskDate'] = datetime.date.today()
-        invoice = self._account_invoice(args)
         amount = self.deposit_amount()
         description = u"Facture d'acompte"
         line = self._account_invoiceline(amount, description, tva)
         invoice.lines.append(line)
         return invoice, line.duplicate()
 
-    def _intermediate_invoices(self, args, paymentline, count, tva):
+    def _make_intermediary(self, invoice, paymentline, tva):
         """
             return an intermediary invoice described by "paymentline"
         """
-        args['taskDate'] = paymentline.paymentDate
-        invoice = self._account_invoice(args, count)
+        invoice.taskDate = paymentline.paymentDate
+        invoice.displayedUnits = 0
+        invoice.set_name()
+        invoice.set_number()
         if self.manualDeliverables:
             amount = paymentline.amount
         else:
@@ -219,16 +198,6 @@ class Estimation(Task, TaskCompute):
         line = self._account_invoiceline(amount, description, tva)
         invoice.lines.append(line)
         return invoice, line.duplicate()
-
-    def _sold_invoice_name(self, seq_number, count):
-        """
-            Return the name of the last invoice
-        """
-        if count > 0:
-            sold = True
-        else:
-            sold = False
-        return Invoice.get_name(seq_number, sold=sold)
 
     def _sold_invoice_lines(self, account_lines):
         """
@@ -245,71 +214,96 @@ class Estimation(Task, TaskCompute):
             sold_lines.append(line)
         return sold_lines
 
-    def _sold_invoice(self, args, paymentline, count, account_lines):
+    def _make_sold(self, invoice, paymentline, paid_lines, is_sold):
         """
             Return the sold invoice
         """
-        args["address"] = self.address
-        args['taskDate'] = paymentline.paymentDate
-        args['sequenceNumber'] = self.project.get_next_invoice_number() + count
-        args['name'] = self._sold_invoice_name(args['sequenceNumber'], count)
-        args['number'] = Invoice.get_number(self.project,
-                                            args['sequenceNumber'],
-                                            args['taskDate'])
-        args['displayedUnits'] = self.displayedUnits
-        args['expenses'] = self.expenses
-        args['discountHT'] = self.discountHT
-        invoice = Invoice(**args)
-        for line in self._sold_invoice_lines(account_lines):
+        invoice.taskDate = paymentline.paymentDate
+        invoice.set_name(sold=is_sold)
+        invoice.set_number()
+
+        invoice.displayedUnits = self.displayedUnits
+        invoice.expenses = self.expenses
+        for line in self._sold_invoice_lines(paid_lines):
             invoice.lines.append(line)
         for line in self.discounts:
             invoice.discounts.append(line.duplicate())
         return invoice
 
-    def gen_invoices(self, user_id):
+    def _get_common_invoice(self, seq_number, user):
+        """
+            Return an invoice object with common args for
+            all the generated invoices
+        """
+        inv = Invoice()
+        # Relationship
+        inv.client = self.client
+        inv.project = self.project
+        inv.phase = self.phase
+        inv.owner = user
+        inv.statusPersonAccount = user
+        inv.estimation = self
+
+        # Common args
+        inv.paymentConditions=self.paymentConditions
+        inv.description=self.description
+        inv.course=self.course
+        inv.address = self.address
+        inv.CAEStatus = "draft"
+        inv.set_sequenceNumber(seq_number)
+        return inv
+
+    def gen_invoices(self, user):
         """
             Return the invoices based on the current estimation
         """
         invoices = []
+        # Used to mark the existence of intermediary invoices
+        is_sold = len(self.payment_lines) > 1
+        # Used to store the amount of the intermediary invoices
         lines = []
-        common_args = self._common_args_for_generation(user_id)
-        count = 0
+        # Sequence number that will be incremented by hand
+        seq_number = self.project.get_next_invoice_number()
         # Fix temporaire pour le montant de la tva pour les acomptes et autres
+        # On prend la première tva qu'on trouve
         tvas = self.get_tvas().keys()
         tva = tvas[0]
         if self.deposit > 0:
-            deposit, line = self._deposit_invoice(common_args.copy(), tva)
+            invoice = self._get_common_invoice(seq_number, user)
+            deposit, line = self._make_deposit(invoice, tva)
             invoices.append(deposit)
-            # We remember the lines to display them in the laste invoice
+            # We remember the lines to display them in the last invoice
             lines.append(line)
-            count += 1
+            seq_number += 1
         # all payment lines specified (less the last one)
-        for paymentline in self.payment_lines[:-1]:
-            invoice, line = self._intermediate_invoices(common_args.copy(),
-                                                            paymentline,
-                                                            count, tva)
+        for pline in self.payment_lines[:-1]:
+            invoice = self._get_common_invoice(seq_number, user)
+            invoice, line = self._make_intermediary(invoice, pline, tva)
             invoices.append(invoice)
             lines.append(line)
-            count += 1
+            seq_number += 1
 
-        invoice = self._sold_invoice(common_args.copy(),
-                                     self.payment_lines[-1],
-                                     count,
-                                     lines)
+        invoice = self._get_common_invoice(seq_number, user)
+        pline = self.payment_lines[-1]
+        invoice = self._make_sold(invoice, pline, lines, is_sold)
         invoices.append(invoice)
         return invoices
 
-    @classmethod
-    def get_name(cls, seq_number):
+    def set_name(self):
         taskname_tmpl = u"Devis {0}"
-        return taskname_tmpl.format(seq_number)
+        self.name = taskname_tmpl.format(self.sequenceNumber)
 
-    @classmethod
-    def get_number(cls, project, seq_number, taskDate):
-        tasknumber_tmpl = u"{0}_{1}_D{2}_{3:%m%y}"
-        pcode = project.code
-        ccode = project.client.code
-        return tasknumber_tmpl.format(pcode, ccode, seq_number, taskDate)
+    def set_number(self):
+        tasknumber_tmpl = u"D{s.sequenceNumber}_{s.taskDate:%m%y}"
+        self._number = tasknumber_tmpl.format(s=self)
+
+    def set_sequenceNumber(self, snumber):
+        self.sequenceNumber = snumber
+
+    @property
+    def number(self):
+        tasknumber_tmpl = u"{s.project.code}_{s.client.code}_{s._number}"
+        return tasknumber_tmpl.format(s=self)
 
     def is_cancelled(self):
         """

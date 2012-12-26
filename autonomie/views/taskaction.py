@@ -432,13 +432,29 @@ def html(request, template):
     return render_html(request, template, datas)
 
 
-def make_html_view(model, template, populate_menu_func):
+def get_project_redirect_btn(request, id_):
+    """
+        Button for "go back to project" link
+    """
+    return ViewLink(u"Revenir au projet", "edit", path="project", id=id_)
+
+
+def populate_actionmenu(request):
+    """
+        Add buttons in the request actionmenu attribute
+    """
+    if context_is_task(request.context):
+        project = request.context.project
+    else:
+        project = request.context
+    request.actionmenu.add(get_project_redirect_btn(request, project.id))
+
+
+def make_html_view(model, template):
     """
         Return an html view function
         :model: model class
         :template: model rendering template
-        :populate_menu_func: function to be thrown on the request
-                             to populate the actionmenu
     """
     def html_view(request):
         """
@@ -448,7 +464,7 @@ def make_html_view(model, template, populate_menu_func):
             return HTTPFound(request.route_path(request.context.__name__,
                                                 id=request.context.id))
         title = u"Facture numéro : {0}".format(request.context.number)
-        populate_menu_func(request, request.context)
+        populate_actionmenu(request)
         html_datas = html(request, template)
         button_handler = TaskFormActions(request, model)
         submit_buttons = button_handler.get_buttons()

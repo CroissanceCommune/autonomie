@@ -45,175 +45,6 @@ from autonomie.views.taskaction import populate_actionmenu
 log = logging.getLogger(__name__)
 
 
-#class EstimationView(TaskView):
-#    """
-#        All estimation related views
-#        form
-#        pdf
-#        html
-#    """
-#    model = Estimation
-#    type_ = "estimation"
-#    schema = get_estimation_schema()
-#    add_title = u"Nouveau devis"
-#    edit_title = u"Édition du devis {task.number}"
-#    route = "estimation"
-#    template = "tasks/estimation.mako"
-#
-#    def get_dbdatas_as_dict(self):
-#        """
-#            Returns dbdatas as a dict of dict
-#        """
-#        return {'estimation': self.task.appstruct(),
-#                'lines': [line.appstruct()
-#                          for line in self.task.lines],
-#                'discounts': [discount.appstruct()
-#                              for discount in self.task.discounts],
-#                'payment_lines': [line.appstruct()
-#                                  for line in self.task.payment_lines]}
-#
-#    def is_editable(self):
-#        """
-#            Return True if the current task can be edited by the current user
-#        """
-#        if self.task.is_editable():
-#            return True
-#        if has_permission('manage', self.request.context, self.request):
-#            if self.task.is_waiting():
-#                return True
-#        return False
-#
-#    @view_config(route_name="estimations", renderer='tasks/edit.mako',
-#                permission='edit')
-#    @view_config(route_name='estimation', renderer='tasks/edit.mako',
-#                permission='edit')
-#    def form(self):
-#        """
-#            Return the estimation edit view
-#        """
-#        if self.taskid:
-#            if not self.is_editable():
-#                return self.redirect_to_view_only()
-#            title = self.edit_title.format(task=self.task)
-#            edit = True
-#            valid_msg = u"Le devis a bien été édité."
-#        else:
-#            title = self.add_title
-#            edit = False
-#            valid_msg = u"Le devis a bien été ajouté."
-#
-#        dbdatas = self.get_dbdatas_as_dict()
-#        # Get colander's schema compatible datas
-#        appstruct = get_estimation_appstruct(dbdatas)
-#
-#        schema = self.schema.bind(request=self.request)
-#        self.request.js_require.add('address')
-#        form = Form(schema, buttons=self.get_buttons(),
-#                                counter=self.formcounter)
-#        form.widget.template = 'autonomie:deform_templates/form.pt'
-#
-#        if 'submit' in self.request.params:
-#            datas = self.request.params.items()
-#            log.debug(u"Estimation form submission : {0}".format(datas))
-#            try:
-#                appstruct = form.validate(datas)
-#            except ValidationFailure, e:
-#                log.exception(u" - Values are not valid")
-#                html_form = e.render()
-#            else:
-#                dbdatas = get_estimation_dbdatas(appstruct)
-#                log.debug(u"Values are valid : {0}".format(dbdatas))
-#                merge_session_with_post(self.task, dbdatas['estimation'])
-#                if not edit:
-#                    self.task.sequenceNumber = self.get_sequencenumber()
-#                    self.task.name = self.get_taskname()
-#                    self.task.number = self.get_tasknumber(
-#                                                        self.task.taskDate)
-#                try:
-#                    self.request.session.flash(valid_msg, queue="main")
-#                    self.task.project = self.project
-#                    self.remove_lines_from_session()
-#                    self.add_lines_to_task(dbdatas)
-#                    self._status_process()
-#                    self._set_modifications()
-#                    self.request.registry.notify(StatusChanged(self.request,
-#                                                    self.task))
-#                    debug = " > Estimation has been added/edited succesfully"
-#                    log.debug(debug)
-#
-#                except Forbidden, e:
-#                    self.request.session.pop_flash("main")
-#                    self.request.session.flash(e.message, queue='error')
-#
-#                # Redirecting to the project page
-#                return self.project_view_redirect()
-#        else:
-#            html_form = form.render(appstruct)
-#        return dict(title=title,
-#                    company=self.company,
-#                    html_form=html_form,
-#                    action_menu=self.actionmenu,
-#                    popups=self.popups
-#                    )
-#
-#    def remove_lines_from_session(self):
-#        """
-#            Remove estimation lines and payment lines from the current session
-#        """
-#        # if edition we remove all estimation and payment lines
-#        for line in self.task.lines:
-#            self.dbsession.delete(line)
-#        for line in self.task.payment_lines:
-#            self.dbsession.delete(line)
-#        for line in self.task.discounts:
-#            self.dbsession.delete(line)
-#
-#    @view_config(route_name='estimation',
-#                renderer='tasks/view_only.mako',
-#                request_param='view=html',
-#                permission='view')
-#    def html(self):
-#        """
-#            Returns a page displaying an html rendering of the given task
-#        """
-#        if self.is_editable():
-#            return HTTPFound(self.request.route_path(self.route,
-#                                                     id=self.task.id))
-#        title = u"Devis numéro : {0}".format(self.task.number)
-#        return dict(
-#                    title=title,
-#                    task=self.task,
-#                    html_datas=self._html(),
-#                    action_menu=self.actionmenu,
-#                    submit_buttons=self.get_buttons(),
-#                    popups=self.popups
-#                    )
-#
-#    @view_config(route_name='estimation', request_param='action=duplicate',
-#            permission='edit', renderer='base/formpage.mako')
-#    def duplicate(self):
-#        """
-#            Duplicates current estimation
-#        """
-#        try:
-#            ret_dict = self._status()
-#        except ValidationFailure, err:
-#            log.exception(u"Error duplicating an estimation")
-#            ret_dict = dict(html_form=err.render(),
-#                    title=u"Duplication d'un document")
-#        return ret_dict
-#
-#    def gen_invoices(self):
-#        """
-#            Called when an estimation status is changed
-#            ( when no form is displayed : the estimation itself is not
-#            editable anymore )
-#        """
-#        for invoice in self.task.gen_invoices(self.user.id):
-#            self.dbsession.merge(invoice)
-#        self.request.session.flash(u"Vos factures ont bien été générées",
-#                                queue='main')
-#
 def add_lines_to_estimation(task, appstruct):
     """
         Add the lines to the current estimation
@@ -231,6 +62,10 @@ def add_lines_to_estimation(task, appstruct):
 
 
 class EstimationAdd(TaskFormView):
+    """
+        Estimation add view
+        context is a project
+    """
     title = "Nouveau devis"
     schema = get_estimation_schema()
     buttons = (submit_btn,)
@@ -282,6 +117,10 @@ class EstimationAdd(TaskFormView):
 
 
 class EstimationEdit(TaskFormView):
+    """
+        estimation edit view
+        current context is an estimation
+    """
     schema = get_estimation_schema()
     buttons = (submit_btn,)
     model = Estimation

@@ -110,8 +110,7 @@ class UserAccount(BaseFormView):
         new_pass = appstruct['pwd']
         self.request.user.set_password(new_pass)
         self.dbsession.merge(self.request.user)
-        self.request.session.flash(u"Votre mot de passe a bien été modifié",
-                                                                    'main')
+        self.request.session.flash(u"Votre mot de passe a bien été modifié")
 
 
 def user_view(request):
@@ -135,7 +134,7 @@ def user_delete(request):
         request.dbsession.flush()
         message = u"Le compte '{0}' a bien été supprimé".format(
                                         format_account(account))
-        request.session.flash(message, 'main')
+        request.session.flash(message)
     except:
         log.exception(u"Erreur à la suppression du compte")
         err_msg = u"Erreur à la suppression du compte de '{0}'".format(
@@ -185,7 +184,7 @@ class UserDisable(BaseFormView):
                                                         format_account(user)))
             message = u"L'utilisateur {0} a été désactivé.".format(
                                                         format_account(user))
-            self.session.flash(message, queue="main")
+            self.session.flash(message)
 
     def _disable_companies(self):
         """
@@ -197,7 +196,7 @@ class UserDisable(BaseFormView):
             log.info(u"The company {0} has been disabled".format(company.name))
             message = u"L'entreprise '{0}' a bien été désactivée.".format(
                                                 company.name)
-            self.session.flash(message, queue="main")
+            self.session.flash(message)
             for employee in company.employees:
                 self._disable_user(employee)
 
@@ -265,7 +264,7 @@ class UserAdd(BaseUserForm):
         log.info(u"Add user : {0}" .format(format_account(user)))
         user = self.dbsession.merge(user)
         self.dbsession.flush()
-        self.session.flash(self.validate_msg, queue="main")
+        self.session.flash(self.validate_msg)
         return HTTPFound(self.request.route_path("user", id=user.id))
 
 
@@ -297,7 +296,7 @@ class UserEdit(BaseUserForm):
         log.info(u"Edit user : {0}" .format(format_account(user)))
         user = self.dbsession.merge(user)
         self.dbsession.flush()
-        self.session.flash(self.validate_msg, queue="main")
+        self.session.flash(self.validate_msg)
         return HTTPFound(self.request.route_path("user", id=user.id))
 
 

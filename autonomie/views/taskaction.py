@@ -388,12 +388,12 @@ class StatusView(object):
                 task, status = self.set_status(task, status)
                 task = self.request.dbsession.merge(task)
                 self.notify(task)
-                self.session.flash(self.valid_msg, queue="main")
+                self.session.flash(self.valid_msg)
                 log.debug(u" + The status has been set to {0}".format(status))
             except Forbidden, e:
                 log.exception(u" !! Unauthorized action by : {0}"\
                         .format(self.request.user.login))
-                self.session.pop_flash("main")
+                self.session.pop_flash("")
                 self.session.flash(e.message, queue='error')
         return self.redirect()
 
@@ -513,6 +513,6 @@ def make_task_delete_view(valid_msg):
         else:
             request.dbsession.delete(task)
             message = valid_msg.format(task=task)
-            request.session.flash(message, queue='main')
+            request.session.flash(message)
         return HTTPFound(request.route_path('project', id=project.id))
     return delete

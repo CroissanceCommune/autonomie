@@ -82,9 +82,9 @@ def redirect_to_clientslist(request, company):
         Force project page to be redirected to client page
     """
     request.session.flash(u"Vous avez été redirigé vers la liste \
-des clients", queue="main")
+des clients")
     request.session.flash(u"Vous devez créer des clients afin \
-de créer de nouveaux projets", queue="main")
+de créer de nouveaux projets")
     raise HTTPFound(request.route_path("company_clients",
                                                 id=company.id))
 
@@ -214,7 +214,7 @@ def project_addphase(request):
         phase.project_id = project.id
         request.dbsession.add(phase)
         request.session.flash(u"La phase {0} a bien été \
-rajoutée".format(phasename), queue="main")
+rajoutée".format(phasename))
         anchor = ""
     return HTTPFound(request.route_path('project', id=project.id,
                                                     _anchor=anchor))
@@ -227,9 +227,8 @@ def project_archive(request):
     project = request.context
     project.archived = 1
     request.dbsession.merge(project)
-    request.session.flash(u"Le projet '{0}' a été archivé".format(
-                            project.name), queue='main'
-                                )
+    request.session.flash(u"Le projet '{0}' a été archivé"\
+            .format(project.name))
     return HTTPFound(request.referer)
 
 def project_delete(request):
@@ -300,7 +299,7 @@ class ProjectAdd(BaseFormView):
         self.dbsession.add(default_phase)
         message = u"Le projet <b>{0}</b> a été ajouté avec succès".format(
                                                                 project.name)
-        self.request.session.flash(message, queue='main')
+        self.request.session.flash(message)
         return HTTPFound(self.request.route_path('project', id=project.id))
 
 
@@ -332,7 +331,7 @@ class ProjectEdit(BaseFormView):
         self.dbsession.flush()
         message = u"Le projet <b>{0}</b> a été édité avec succès".format(
                                                                   project.name)
-        self.request.session.flash(message, queue='main')
+        self.request.session.flash(message)
         return HTTPFound(self.request.route_path('project', id=project.id))
 
     @reify

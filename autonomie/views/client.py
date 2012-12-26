@@ -131,7 +131,7 @@ class ClientEdit(BaseFormView):
         self.dbsession.flush()
         message = u"Le client <b>{0}</b> a été édité avec succès".format(
                                                                 client.name)
-        self.session.flash(message, queue='main')
+        self.session.flash(message)
         return HTTPFound(self.request.route_path('client', id=client.id))
 
     def appstruct(self):

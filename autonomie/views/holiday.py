@@ -73,8 +73,7 @@ class HolidayRegister(BaseFormView):
             self.dbsession.merge(holiday)
         self.dbsession.flush()
         self.request.session.flash(
-                u"Vos déclarations de congés ont bien été modifiées",
-                queue="main")
+            u"Vos déclarations de congés ont bien été modifiées")
         return HTTPFound(self.request.route_path("holiday"))
 
     def _purge_holidays(self):

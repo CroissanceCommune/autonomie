@@ -232,7 +232,7 @@ class InvoiceStatus(StatusView):
         msg = u"La facture a bien été dupliquée, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
         msg = msg.format(self.request.route_path("invoice", id=id_))
-        self.request.session.flash(msg, "main")
+        self.request.session.flash(msg)
 
     def pre_paid_process(self, task, status, params):
         """

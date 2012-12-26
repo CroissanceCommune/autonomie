@@ -108,7 +108,7 @@ class CompanyAdd(BaseFormView):
         self.dbsession.add(company)
         self.dbsession.flush()
         message = u"L'entreprise '{0}' a bien été ajoutée".format(company.name)
-        self.session.flash(message, queue='main')
+        self.session.flash(message)
         return HTTPFound(self.request.route_path("company", id=company.id))
 
 
@@ -143,7 +143,7 @@ class CompanyEdit(BaseFormView):
         company = self.dbsession.merge(company)
         self.dbsession.flush()
         message = u"Votre entreprise a bien été éditée"
-        self.session.flash(message, queue='main')
+        self.session.flash(message)
         return HTTPFound(self.request.route_path("company", id=company.id))
 
 def populate_actionmenu(request, company=None):

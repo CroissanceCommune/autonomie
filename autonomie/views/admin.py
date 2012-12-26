@@ -77,7 +77,7 @@ class AdminMain(BaseFormView):
         for dbdata in dbdatas:
             self.dbsession.merge(dbdata)
         self.dbsession.flush()
-        self.request.session.flash(self.validation_msg, queue='main')
+        self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_main"))
 
 
@@ -113,7 +113,7 @@ class AdminTva(BaseFormView):
             merge_session_with_post(tva, data)
             self.dbsession.merge(tva)
         self.dbsession.flush()
-        self.request.session.flash(self.validation_msg, queue='main')
+        self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_tva"))
 
 

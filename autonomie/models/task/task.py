@@ -86,7 +86,8 @@ class Task(DBBASE):
     phase = relationship(
         "Phase",
         primaryjoin="Task.phase_id==Phase.id",
-        backref="tasks")
+        backref="tasks",
+        lazy="joined")
 
     type_ = Column('type_', String(30), nullable=False)
     __mapper_args__ = {'polymorphic_on': type_,

@@ -168,23 +168,6 @@ log = logging.getLogger(__name__)
 #        for line in self.task.discounts:
 #            self.dbsession.delete(line)
 #
-#    def add_lines_to_task(self, dbdatas):
-#        """
-#            Add the lines to the current estimation
-#        """
-#        for line in dbdatas['payment_lines']:
-#            pline = PaymentLine()
-#            merge_session_with_post(pline, line)
-#            self.task.payment_lines.append(pline)
-#        for line in dbdatas['lines']:
-#            eline = EstimationLine()
-#            merge_session_with_post(eline, line)
-#            self.task.lines.append(eline)
-#        for line in dbdatas.get('discounts', []):
-#            dline = DiscountLine()
-#            merge_session_with_post(dline, line)
-#            self.task.discounts.append(dline)
-#
 #    @view_config(route_name='estimation',
 #                renderer='tasks/view_only.mako',
 #                request_param='view=html',
@@ -231,6 +214,21 @@ log = logging.getLogger(__name__)
 #        self.request.session.flash(u"Vos factures ont bien été générées",
 #                                queue='main')
 #
+def add_lines_to_estimation(task, appstruct):
+    """
+        Add the lines to the current estimation
+    """
+    task.lines = []
+    task.discounts = []
+    task.payment_lines = []
+    for line in appstruct['payment_lines']:
+        task.payment_lines.append(PaymentLine(**line))
+    for line in appstruct['lines']:
+        task.lines.append(EstimationLine(**line))
+    for line in appstruct.get('discounts', []):
+        task.discounts.append(DiscountLine(**line))
+    return task
+
 
 class EstimationAdd(TaskFormView):
     title = "Nouveau devis"
@@ -283,6 +281,84 @@ class EstimationAdd(TaskFormView):
         return estimation
 
 
+class EstimationEdit(TaskFormView):
+    schema = get_estimation_schema()
+    buttons = (submit_btn,)
+    model = Estimation
+    add_template_vars = ('title', 'company',)
+
+    @property
+    def company(self):
+        # Current context is an estimation
+        return self.context.project.company
+
+    @property
+    def title(self):
+        return u"Édition du devis {task.number}".format(task=self.context)
+
+    def get_dbdatas_as_dict(self):
+        """
+            Returns dbdatas as a dict of dict
+        """
+        return {'estimation': self.context.appstruct(),
+                'lines': [line.appstruct()
+                          for line in self.context.lines],
+                'discounts': [line.appstruct()
+                          for line in self.context.discounts],
+                'payment_lines': [line.appstruct()
+                          for line in self.context.payment_lines]}
+
+    def before(self, form):
+        if not context_is_editable(self.request, self.context):
+            raise HTTPFound(self.request.route_path("estimation",
+                                id=self.context.id,
+                                _query=dict(view='html')))
+
+        super(EstimationEdit, self).before(form)
+        populate_actionmenu(self.request)
+        self.request.js_require.add('address')
+        form.widget.template = "autonomie:deform_templates/form.pt"
+
+    def appstruct(self):
+        """
+            Return the current edited context as a colander data model
+        """
+        dbdatas = self.get_dbdatas_as_dict()
+        # Get colander's schema compatible datas
+        return get_estimation_appstruct(dbdatas)
+
+    def submit_success(self, appstruct):
+        log.debug("Submitting estimation edit")
+        appstruct = get_estimation_dbdatas(appstruct)
+
+        # Since the call to get_next_estimation_number commits the current
+        # transaction, it needs to be called before creating our estimation, to
+        # avoid missing arguments errors
+
+        estimation = self.context
+        estimation = merge_session_with_post(estimation, appstruct["estimation"])
+        try:
+            estimation = self.set_task_status(estimation)
+            # Line handling
+            estimation = add_lines_to_estimation(estimation, appstruct)
+            estimation = self.dbsession.merge(estimation)
+            self.dbsession.flush()
+            self.session.flash(u"La facture a bien été éditée.")
+        except Forbidden, err:
+            self.request.session.flash(err.message, queue='error')
+        return HTTPFound(self.request.route_path("project",
+                                                 id=self.context.project.id))
+
+    def set_task_status(self, estimation):
+        # self.request.POST is a locked dict, we need a non locked one
+        params = dict(self.request.POST)
+        status = params['submit']
+        estimation.set_status(status, self.request, self.request.user.id, **params)
+        log.debug("Has been raised")
+        self.request.registry.notify(StatusChanged(self.request, estimation))
+        return estimation
+
+
 class EstimationStatus(StatusView):
     """
         Handle the estimation status processing
@@ -315,16 +391,34 @@ class EstimationStatus(StatusView):
         estimation = self.request.dbsession.merge(estimation)
         self.request.dbsession.flush()
         id_ = estimation.id
+        log.debug("Post processing")
         msg = u"Le devis a bien été dupliqué, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
         msg = msg.format(self.request.route_path("estimation", id=id_))
         self.session.flash(msg)
 
 
+def duplicate(request):
+    """
+        duplicate an invoice
+    """
+    try:
+        ret_dict = EstimationStatus(request)()
+    except ValidationFailure, err:
+        log.exception(u"Duplication error")
+        ret_dict = dict(html_form=err.render(),
+                        title=u"Duplication d'un document")
+    return ret_dict
+
+
 def includeme(config):
     config.add_route('project_estimations',
                     '/projects/{id:\d+}/estimations',
-                    traverse='/estimations/{id}')
+                    traverse='/projects/{id}')
+    config.add_route('estimation',
+                     '/estimations/{id:\d+}',
+                      traverse='/estimations/{id}')
+
     config.add_view(make_pdf_view("tasks/estimation.mako"),
                     route_name='estimation',
                     request_param='view=pdf',
@@ -343,6 +437,15 @@ def includeme(config):
                     route_name="project_estimations",
                     renderer='tasks/edit.mako',
                     permission='edit')
+    config.add_view(EstimationEdit,
+                    route_name='estimation',
+                    renderer='tasks/edit.mako',
+                    permission='edit')
+    config.add_view(duplicate,
+                    route_name="estimation",
+                    request_param='action=duplicate',
+                    permission="view",
+                    renderer='base/formpage.mako')
 
     config.add_view(EstimationStatus,
                     route_name="estimation",

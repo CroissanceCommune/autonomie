@@ -36,6 +36,5 @@ class TestMainView(BaseFunctionnalTest):
                      "document":{'footertitle':'testvalue2'}}
         view = AdminMain(self.get_csrf_request())
         view.submit_success(appstruct)
-        print get_config()
         self.assertTrue(get_config()['welcome'] == u'testvalue')
         self.assertTrue(get_config()['coop_pdffootertitle'] == u'testvalue2')

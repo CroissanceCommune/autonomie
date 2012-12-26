@@ -54,8 +54,11 @@ def duplicate_task(task, **kw):
     """
         Duplicates a task
     """
-    if kw.get("project") is not None and kw.get("phase") is not None:
-        return task.duplicate(kw['user'], kw['project'], kw['phase'])
+    project = kw.get("project")
+    phase = kw.get("phase")
+    client = kw.get('client')
+    if project is not None and phase is not None and client is not None:
+        return task.duplicate(kw['user'], project, phase, client)
     else:
         raise Forbidden()
 

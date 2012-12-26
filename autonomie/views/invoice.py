@@ -212,6 +212,10 @@ class InvoiceStatus(StatusView):
         msg = u"La facture porte le numéro <b>{0}</b>"
         self.session.flash(msg.format(task.officialNumber))
 
+    def pre_gencinv_process(self, task, status, params):
+        params['user'] = self.request.user
+        return params
+
     def post_gencinv_process(self, task, status, params):
         cancelinvoice = params
         cancelinvoice = self.request.dbsession.merge(cancelinvoice)

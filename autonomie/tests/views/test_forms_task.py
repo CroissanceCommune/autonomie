@@ -259,19 +259,22 @@ class TestMatchTools(BaseTestCase):
 
 class TestTaskForms(BaseTestCase):
     def task(self):
-        return MagicMock(topay=lambda :7940)
+        return MagicMock(topay=lambda :7940, __name__='invoice')
+
+    def request(self):
+        task = self.task()
+        return MagicMock(context=task)
 
     def test_total_valid(self):
         c = colander.SchemaNode(colander.Integer())
-        task = self.task()
-        validator = deferred_total_validator("nutt", {'task':task})
+        validator = deferred_total_validator("nutt", {'request':self.request()})
         self.assertRaises(colander.Invalid, validator, c, 7941)
         validator(c, 0)
         validator(c, 7940)
 
     def test_paymentform_schema(self):
-        from autonomie.views.forms.task import Payment
-        schema = Payment().bind(task=self.task())
+        from autonomie.views.forms.task import PaymentSchema
+        schema = PaymentSchema().bind(request=self.request())
         form = deform.Form(schema)
         ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'), (u'__formid__', u'deform'), (u'amount', u'79.4'), (u'mode', u'CHEQUE'), (u'submit', u'paid')]
         form.validate(ok_values)

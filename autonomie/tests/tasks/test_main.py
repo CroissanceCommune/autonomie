@@ -82,7 +82,7 @@ ESTIMATION = dict(
                 description=u"Description du devis",
                 manualDeliverables=1,
                 statusComment=u"Aucun commentaire",
-                number=u"estnumber")
+                _number=u"estnumber")
 INVOICE = dict(phase_id=1,
                 project_id=1,
                 owner_id=2,
@@ -98,7 +98,7 @@ INVOICE = dict(phase_id=1,
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 statusComment=u"Aucun commentaire",
-                number=u"invoicenumber")
+                _number=u"invoicenumber")
 CANCELINVOICE = dict(phase_id=1,
                 project_id=1,
                 owner_id=2,
@@ -113,7 +113,7 @@ CANCELINVOICE = dict(phase_id=1,
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de l'avoir",
                 statusComment=u"Aucun commentaire",
-                number=u"cancelinvoicenumber")
+                _number=u"cancelinvoicenumber")
 LINES = [{'description':u'text1',
           'cost':10025,
            'tva':1960,

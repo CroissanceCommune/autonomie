@@ -141,7 +141,6 @@ class IInvoice(Interface):
         common informations
     """
     officialNumber = Attribute("""official number used in sage""")
-    number = Attribute("""the document's non official number""")
 
     def total_ht():
         """

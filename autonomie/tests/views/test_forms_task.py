@@ -259,7 +259,14 @@ class TestMatchTools(BaseTestCase):
 
 class TestTaskForms(BaseTestCase):
     def task(self):
-        return MagicMock(topay=lambda :7940, __name__='invoice')
+        return MagicMock(topay=lambda :7940, __name__='invoice',
+                project=self.project())
+
+    def project(self):
+        return MagicMock(clients=self.clients(), id=1, __name__='project')
+
+    def clients(self):
+        return [MagicMock(id=1), MagicMock(id=2)]
 
     def request(self):
         task = self.task()
@@ -279,3 +286,9 @@ class TestTaskForms(BaseTestCase):
         ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'), (u'__formid__', u'deform'), (u'amount', u'79.4'), (u'mode', u'CHEQUE'), (u'submit', u'paid')]
         form.validate(ok_values)
 
+    def test_client_validator(self):
+        from autonomie.views.forms.task import deferred_client_validator
+        func = deferred_client_validator("nutt", {'request':self.request()})
+        self.assertRaises(colander.Invalid, func, "nutt", 0)
+        self.assertRaises(colander.Invalid, func, "nutt", 15)
+        self.assertNotRaises(func, "nutt", 1)

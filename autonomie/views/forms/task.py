@@ -155,9 +155,6 @@ def deferred_client_validator(node, kw):
         if value in ("0", 0):
             return u"Veuillez choisir un client"
         elif value not in client_ids:
-            print "client_ids"
-            print "############################"
-            print client_ids
             return u"Entrée invalide"
         return True
     return colander.Function(client_oneof)

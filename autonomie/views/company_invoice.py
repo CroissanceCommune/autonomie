@@ -83,7 +83,7 @@ class InvoicesList(BaseListView):
     schema = InvoicesListSchema()
     sort_columns = dict(taskDate=("taskDate",),
                number=("number",),
-               client=("project", "client", "name",),
+               client=("client", "name",),
                company=("project", "company", "name",),
                officialNumber=("officialNumber",))
 
@@ -95,8 +95,8 @@ class InvoicesList(BaseListView):
                 .with_polymorphic([Invoice, CancelInvoice, ManualInvoice])\
                      .outerjoin(p1, Invoice.project)\
                      .outerjoin(p2, CancelInvoice.project)\
-                     .outerjoin(c1, p1.client)\
-                     .outerjoin(c2, p2.client)\
+                     .outerjoin(c1, Invoice.client)\
+                     .outerjoin(c2, CancelInvoice.client)\
                      .outerjoin(c3, ManualInvoice.client)
         if self.request.context == 'company':
             company_id = self.request.context.id

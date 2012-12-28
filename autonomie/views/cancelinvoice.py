@@ -42,93 +42,6 @@ from autonomie.views.taskaction import make_task_delete_view
 log = logging.getLogger(__name__)
 
 
-#class CancelInvoiceView(TaskView):
-#    """
-#        all views for cancelled invoices
-#    """
-#    type_ = "cancelinvoice"
-#    model = CancelInvoice
-#    schema = get_cancel_invoice_schema()
-#    add_title = u"Nouvel avoir"
-#    edit_title = u"Édition de l'avoir {task.number}"
-#    route = "cancelinvoice"
-#    template = "tasks/cancelinvoice.mako"
-#
-#    def form(self):
-#        """
-#            Cancel invoice add/edit
-#        """
-#        if self.taskid:
-#            if not self.is_editable():
-#                return self.redirect_to_view_only()
-#            title = self.edit_title.format(task=self.task)
-#            edit = True
-#            valid_msg = u"L'avoir a bien été édité."
-#        else:
-#            title = self.add_title
-#            edit = False
-#            valid_msg = u"L'avoir a bien été ajouté."
-#
-#        #Retrieving datas
-#        dbdatas = self.get_dbdatas_as_dict()
-#        appstruct = appstruct = get_cancel_invoice_appstruct(dbdatas)
-#
-#        #Building form
-#        schema = self.schema.bind(request=self.request)
-#        self.request.js_require.add('address')
-#        form = Form(schema, buttons=self.get_buttons())
-#        form.widget.template = "autonomie:deform_templates/form.pt"
-#
-#        if 'submit' in self.request.params:
-#            datas = self.request.params.items()
-#            log.debug(u"Cancelinvoice form submission : {0}".format(datas))
-#            try:
-#                appstruct = form.validate(datas)
-#            except ValidationFailure, e:
-#                html_form = e.render()
-#            else:
-#                dbdatas = get_cancel_invoice_dbdatas(appstruct)
-#                log.debug(u"Values are valid : {0}".format(dbdatas))
-#                merge_session_with_post(self.task, dbdatas['cancelinvoice'])
-#                if not edit:
-#                    self.task.sequenceNumber = self.get_sequencenumber()
-#                    self.task.name = self.get_taskname()
-#                    self.task.number = self.get_tasknumber(self.task.taskDate)
-#                try:
-#                    self.request.session.flash(valid_msg, queue="main")
-#                    self.task.project = self.project
-#                    self.remove_lines_from_session()
-#                    self.add_lines_to_task(dbdatas)
-#                    self._status_process()
-#                    self._set_modifications()
-#                except Forbidden, e:
-#                    self.request.session.pop_flash("main")
-#                    self.request.session.flash(e.message, queue='error')
-#
-#                # Redirecting to the project page
-#                return self.project_view_redirect()
-#
-#        else:
-#            html_form = form.render(appstruct)
-#        return dict(title=title,
-#                    company=self.company,
-#                    html_form=html_form,
-#                    popups=self.popups,
-#                    action_menu=self.actionmenu)
-#
-#    def get_dbdatas_as_dict(self):
-#        """
-#            Returns dbdatas as a dict of dict
-#        """
-#        return {'cancelinvoice': self.task.appstruct(),
-#                'lines': [line.appstruct()
-#                          for line in self.task.lines],
-#                }
-#
-#    @view_config(route_name="cancelinvoice", renderer="tasks/edit.mako",
-#                permission='edit')
-#    @view_config(route_name="cancelinvoice", permission="edit",
-#                                   request_param='action=status')
 def add_lines_to_cancelinvoice(task, appstruct):
     """
         Add the lines to the current cancelinvoice
@@ -182,7 +95,7 @@ class CancelInvoiceAdd(TaskFormView):
             cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
             self.dbsession.add(cinvoice)
             self.dbsession.flush()
-            self.session.flash(u"La facture a bien été ajoutée.")
+            self.session.flash(u"L'avoir a bien été ajoutée.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",
@@ -214,7 +127,7 @@ class CancelInvoiceEdit(TaskFormView):
 
     @property
     def title(self):
-        return u"Édition de la facture {task.number}".format(task=self.context)
+        return u"Édition de l'avoir {task.number}".format(task=self.context)
 
     def get_dbdatas_as_dict(self):
         """
@@ -261,7 +174,7 @@ class CancelInvoiceEdit(TaskFormView):
             cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
             cinvoice = self.dbsession.merge(cinvoice)
             self.dbsession.flush()
-            self.session.flash(u"La facture a bien été éditée.")
+            self.session.flash(u"L'avoir a bien été éditée.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",

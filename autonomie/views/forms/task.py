@@ -56,6 +56,7 @@ from deform import widget
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
 from autonomie.views.forms.widgets import get_date_input
 from autonomie.views.forms.widgets import CustomSequenceWidget
+from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.tva import Tva
 from .custom_types import QuantityType
 from .custom_types import AmountType
@@ -190,6 +191,9 @@ continue ?"
 
 
 def get_tva_choices():
+    """
+        Return data structure for tva select widget options
+    """
     return [(unicode(tva.value), tva.name)for tva in Tva.query()]
 
 
@@ -198,7 +202,6 @@ def deferred_tvas_widget(node, kw):
     """
         return a tva widget
     """
-    request = kw['request']
     tvas = get_tva_choices()
     wid = widget.SelectWidget(
         values=tvas,
@@ -220,10 +223,16 @@ def deferred_default_tva(node, kw):
 
 
 def get_phase_choices(phases):
+    """
+        Return data structure for phase select options
+    """
     return ((phase.id, phase.name) for phase in phases)
 
 
 def get_phases_from_request(request):
+    """
+        Get the phases from the current project regarding request context
+    """
     phases = []
     if request.context.__name__ == 'project':
         phases = request.context.phases
@@ -579,11 +588,6 @@ def get_cancel_invoice_schema():
     del schema['common']['course']
     title = u"Conditions de remboursement"
     del schema['lines']['discounts']
-#    tva = schema['lines']['tva']
-#    tva.before='autonomie:deform_templates/staticinput.mako',
-#    tva.before_options={'label':u'Total HT avant Remise', 'id':'linestotal'},
-#    tva.after='autonomie:deform_templates/staticinput.mako',
-#    tva.after_options={'label':u'Total HT', 'id':'httotal'}
     payments = InvoicePayments(title=title, name='payments').clone()
     payments['paymentConditions'].title = title
     payments['paymentConditions'].description = u""
@@ -613,27 +617,39 @@ def deferred_total_validator(node, kw):
                                                    max_err=max_msg)
 
 
+@colander.deferred
+def deferred_payment_mode_widget(node, kw):
+    """
+        dynamically retrieves the payment modes
+    """
+    modes = [(mode.label, mode.label) for mode in PaymentMode.query()]
+    return widget.SelectWidget(values=modes)
+
+
+@colander.deferred
+def deferred_payment_mode_validator(node, kw):
+    return colander.OneOf([mode.label for mode in PaymentMode.query()])
+
+
 class PaymentSchema(colander.MappingSchema):
     """
         colander schema for payment recording
     """
     amount = colander.SchemaNode(AmountType(),
-                                 title=u"Montant",
-                                 validator=deferred_total_validator,
-                                 default=deferred_amount_default
-                                )
+            title=u"Montant",
+            validator=deferred_total_validator,
+            default=deferred_amount_default)
     mode = colander.SchemaNode(colander.String(),
-                    title=u"Mode de paiement",
-                    widget=widget.SelectWidget(values=PAYMENT_MODE_CHOICES),
-               default=PAYMENT_MODE_CHOICES[0][0],
-               validator=colander.OneOf([x[0] for x in PAYMENT_MODE_CHOICES]))
+            title=u"Mode de paiement",
+            widget=deferred_payment_mode_widget,
+            validator=deferred_payment_mode_validator)
     resulted = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Soldé",
-        description="""Indique que le document est soldé (
+            colander.Boolean(),
+            title=u"Soldé",
+            description="""Indique que le document est soldé (
 ne recevra plus de paiement), si le montant indiqué correspond au
 montant de la facture celle-ci est soldée automatiquement""",
-        default=False)
+            default=False)
 
 
 #  Mapper tools used to move from dbdatas format to an appstruct fitting the

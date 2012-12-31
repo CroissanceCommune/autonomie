@@ -23,10 +23,12 @@ import logging
 from pyramid.httpexceptions import HTTPFound
 from autonomie.models.config import Config
 from autonomie.models.tva import Tva
+from autonomie.models.task.invoice import PaymentMode
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms import MainConfig
-from autonomie.views.forms import TvaConfig
+from autonomie.views.forms.admin import MainConfig
+from autonomie.views.forms.admin import TvaConfig
+from autonomie.views.forms.admin import PaymentModeConfig
 from autonomie.views.forms.admin import get_config_appstruct
 from autonomie.views.forms.admin import merge_dbdatas
 from autonomie.views.forms import BaseFormView
@@ -39,13 +41,22 @@ def index(request):
     """
         Return datas for the index view
     """
-    menu = ActionMenu()
-    menu.add(ViewLink(u"Configuration générale", path='admin_main',
-           title=u"Configuration générale de votre installation d'autonomie"))
-    menu.add(ViewLink(u"Configuration des taux de TVA", path='admin_tva',
-            title=u"Configuration des taux de TVA proposés dans les devis et \
+    request.actionmenu.add(ViewLink(u"Configuration générale",
+        path='admin_main',
+        title=u"Configuration générale de votre installation d'autonomie"))
+    request.actionmenu.add(ViewLink(u"Configuration des taux de TVA",
+        path='admin_tva',
+        title=u"Configuration des taux de TVA proposés dans les devis et \
 factures"))
-    return dict(title=u"Administration du site", action_menu=menu)
+    request.actionmenu.add(ViewLink(u"Configuration des modes de paiement",
+        path="admin_paymentmode",
+        title=u"Configuration des modes de paiement des factures"))
+    return dict(title=u"Administration du site")
+
+
+def populate_actionmenu(request):
+    request.actionmenu.add(ViewLink(u"Revenir à l'index", path="admin_index",
+        title=u"Revenir à l'index de l'administration"))
 
 
 class AdminMain(BaseFormView):
@@ -65,6 +76,7 @@ class AdminMain(BaseFormView):
         config_dict = self.request.config
         appstruct = get_config_appstruct(config_dict)
         form.appstruct = appstruct
+        populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
         """
@@ -86,7 +98,6 @@ class AdminTva(BaseFormView):
         Tva administration view
         Set tvas used in invoices, estimations and cancelinvoices
     """
-    add_template_vars = ('title',)
     title = u"Configuration des taux de TVA"
     validation_msg = u"Les taux de TVA ont bien été modifiés"
     schema = TvaConfig()
@@ -100,6 +111,7 @@ class AdminTva(BaseFormView):
                       'value':tva.value,
                       "default":tva.default}for tva in Tva.query().all()]
         form.appstruct = {'tvas':appstruct}
+        populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
         """
@@ -107,14 +119,40 @@ class AdminTva(BaseFormView):
         """
         for tva in Tva.query().all():
             self.dbsession.delete(tva)
-            self.dbsession.flush()
         for data in appstruct['tvas']:
             tva = Tva()
             merge_session_with_post(tva, data)
-            self.dbsession.merge(tva)
-        self.dbsession.flush()
+            self.dbsession.add(tva)
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_tva"))
+
+
+class AdminPaymentMode(BaseFormView):
+    """
+        Payment Mode administration view
+        Allows to set different payment mode
+    """
+    title = u"Configuration des modes de paiement"
+    validation_msg = u"Les modes de paiement ont bien été modifiés"
+    schema = PaymentModeConfig()
+    buttons = (submit_btn,)
+
+    def before(self, form):
+        """
+            Add appstruct to the current form object
+        """
+        appstruct = [mode.label for mode in PaymentMode.query()]
+        form.appstruct = {'paymentmodes':appstruct}
+        populate_actionmenu(self.request)
+
+    def submit_success(self, appstruct):
+        for mode in PaymentMode.query():
+            self.dbsession.delete(mode)
+        for data in appstruct['paymentmodes']:
+            mode = PaymentMode(label=data)
+            self.dbsession.add(mode)
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path("admin_paymentmode"))
 
 
 def includeme(config):
@@ -122,12 +160,10 @@ def includeme(config):
         Add module's views
     """
     # Administration routes
-    config.add_route("admin_index",
-                     "/admin")
-    config.add_route("admin_main",
-                    "/admin/main")
-    config.add_route("admin_tva",
-                    "/admin/tva")
+    config.add_route("admin_index", "/admin")
+    config.add_route("admin_main", "/admin/main")
+    config.add_route("admin_tva", "/admin/tva")
+    config.add_route("admin_paymentmode", "admin/paymentmode")
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')
@@ -135,5 +171,8 @@ def includeme(config):
                  renderer="admin/main.mako",
                  permission='admin')
     config.add_view(AdminTva, route_name='admin_tva',
-                 renderer="admin/tva.mako",
+                 renderer="base/formpage.mako",
                  permission='admin')
+    config.add_view(AdminPaymentMode, route_name='admin_paymentmode',
+                renderer="base/formpage.mako",
+                permission='admin')

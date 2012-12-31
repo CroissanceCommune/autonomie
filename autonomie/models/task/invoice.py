@@ -650,6 +650,16 @@ class Payment(DBBASE):
  mode:{s.mode} date:{s.date}".format(s=self)
 
 
+class PaymentMode(DBBASE):
+    """
+        Payment mode entry
+    """
+    __tablename__ = "paymentmode"
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(String(120))
+
+
 @implementer(IInvoice)
 class ManualInvoice(Task):
     __tablename__ = 'manualinv'

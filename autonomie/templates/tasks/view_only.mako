@@ -72,7 +72,7 @@
                 Paiement reçu :
                 <ul>
                 % for payment in task.payments:
-                    <li>${api.format_amount(payment.amount)|n} € ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}</li>
+                    <li>${api.format_amount(payment.amount)|n} € le ${api.format_date(payment.date)} (${api.format_paymentmode(payment.mode)}) </li>
                 % endfor
                 </ul>
             % endif

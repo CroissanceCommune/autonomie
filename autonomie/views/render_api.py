@@ -156,13 +156,10 @@ def format_date(date, short=True):
 def format_paymentmode(paymentmode):
     """
        format payment modes for display
+       Since #662 ( Permettre la configuration des modes de paiement )
+       no formatting is necessary
     """
-    if paymentmode in ("CHEQUE", u"chèque"):
-        return u"par chèque"
-    elif paymentmode in ("VIREMENT", u"virement"):
-        return u"par virement"
-    else:
-        return u"mode paiement inconnu"
+    return paymentmode
 
 
 def format_unity(unity, pretty=False):

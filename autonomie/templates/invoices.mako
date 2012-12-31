@@ -189,12 +189,12 @@
             </td>
             <td>
                 % if len(document.payments) == 1 and document.is_resulted():
-                    ${api.format_paymentmode(document.payments[0].mode)} le ${api.format_date(document.payments[0].date)}
+                    Le ${api.format_date(document.payments[0].date)} (${api.format_paymentmode(document.payments[0].mode)})
                 % elif len(document.payments) > 0:
                     <ul>
                         % for payment in document.payments:
                             <li>
-                            ${api.format_amount(payment.amount)|n}&nbsp;€ ${api.format_paymentmode(payment.mode)} le ${api.format_date(payment.date)}
+                            ${api.format_amount(payment.amount)|n}&nbsp;€ le ${api.format_date(payment.date)} (${api.format_paymentmode(payment.mode)})
                             </li>
                         % endfor
                     </ul>

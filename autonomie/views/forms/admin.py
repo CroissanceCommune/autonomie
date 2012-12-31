@@ -149,6 +149,19 @@ class TvaConfig(colander.MappingSchema):
     tvas = TvaSequence(title=u"", missing=u'')
 
 
+class PaymentModeSequence(colander.SequenceSchema):
+    """
+        Single payment mode configuration scheme
+    """
+    label = colander.SchemaNode(colander.String(), title=u"Libellé")
+
+class PaymentModeConfig(colander.MappingSchema):
+    """
+        Main configuration form model
+    """
+    paymentmodes = PaymentModeSequence(title=u"", missing=u"")
+
+
 def get_config_appstruct(config_dict):
     """
         transform Config datas to ConfigSchema compatible appstruct

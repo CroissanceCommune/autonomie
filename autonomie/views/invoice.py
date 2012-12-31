@@ -258,7 +258,7 @@ def register_payment(request):
         ret_dict = InvoiceStatus(request)()
     except ValidationFailure, err:
         log.exception(u"An error has been detected")
-        ret_dict = dict(html_form=err.render(),
+        ret_dict = dict(form=err.render(),
                         title=u"Enregistrement d'un paiement")
     return ret_dict
 
@@ -271,7 +271,7 @@ def duplicate(request):
         ret_dict = InvoiceStatus(request)()
     except ValidationFailure, err:
         log.exception(u"Duplication error")
-        ret_dict = dict(html_form=err.render(),
+        ret_dict = dict(form=err.render(),
                         title=u"Duplication d'un document")
     return ret_dict
 

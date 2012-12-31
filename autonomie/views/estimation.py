@@ -252,7 +252,7 @@ def duplicate(request):
         ret_dict = EstimationStatus(request)()
     except ValidationFailure, err:
         log.exception(u"Duplication error")
-        ret_dict = dict(html_form=err.render(),
+        ret_dict = dict(form=err.render(),
                         title=u"Duplication d'un document")
     return ret_dict
 

@@ -3,5 +3,5 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-${html_form|n}
+${form|n}
 </%block>

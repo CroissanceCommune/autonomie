@@ -77,9 +77,6 @@ PAYMENTDISPLAYCHOICES = (
         ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
         ('ALL', u"Le détail des paiements apparaît dans le PDF",),)
 
-PAYMENT_MODE_CHOICES = (('CHEQUE', u'Par chèque'),
-                        ('VIREMENT', u'Par virement'))
-
 TEMPLATES_URL = 'autonomie:deform_templates/'
 
 

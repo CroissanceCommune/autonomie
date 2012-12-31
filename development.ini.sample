@@ -55,6 +55,11 @@ cache.short_term.expire = 60
 cache.default_term.expire = 300
 cache.long_term.expire = 20
 
+# static file path
+autonomie.static=autonomie:static
+# Assets (logo ...) storage path
+autonomie.assets=/tmp/
+
 [pipeline:main]
 pipeline =
     autonomie

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mer. 26 déc. 2012 23:20:15 CET
+# * Last Modified : lun. 31 déc. 2012 08:33:14 CET
 #
 # * Project : autonomie
 #
@@ -82,13 +82,13 @@ def main(global_config, **settings):
     config.set_request_property(get_avatar, 'user', reify=True)
     config.set_request_property(lambda _:get_config(), 'config')
 
-    config.add_static_view('static', 'autonomie:static', cache_max_age=3600)
+    statics = settings.get('autonomie.statics', 'autonomie:static')
+    config.add_static_view('static', statics, cache_max_age=3600)
     config.add_static_view('deformstatic', "deform:static", cache_max_age=3600)
 
     # Adding a static view to the configured assets
-    config.add_static_view('assets', settings.get('autonomie.assets',
-                                                  '/var/intranet_files'),
-                                                          cache_max_age=3600)
+    assets = settings.get('autonomie.assets', '/var/intranet_files')
+    config.add_static_view('assets', assets, cache_max_age=3600)
 
 
     for module in AUTONOMIE_MODULES:

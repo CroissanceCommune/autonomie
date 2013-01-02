@@ -9,6 +9,8 @@ from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.project import Phase
 from autonomie.models.client import Client
+from autonomie.models.task.invoice import PaymentMode
+from autonomie.models.tva import Tva
 from autonomie.scripts.utils import command
 
 GROUPS = {
@@ -96,6 +98,7 @@ def add_project(client, company, project_name, project_code):
                                                             project_name)
     return project
 
+
 def add_phase(project, phase_name):
     phase = Phase(name=phase_name)
     phase.project = project
@@ -108,7 +111,32 @@ def add_phase(project, phase_name):
 
     return phase
 
+
+def add_payment_mode(label):
+    p = PaymentMode(label=label)
+    session = DBSESSION()
+    session.add(p)
+    session.flush()
+
+
+def add_tva(value, default=0):
+    t = Tva(name="%s %%" % (value/100.0), value=value, default=default)
+    session = DBSESSION()
+    session.add(t)
+    session.flush()
+
+
+def set_configuration():
+    add_payment_mode(u"par chèque")
+    add_payment_mode(u"par virement")
+
+    add_tva(0)
+    add_tva(700)
+    add_tva(1960, 1)
+
+
 def fake_database_fill(arguments):
+    set_configuration()
     # Adding admins
     add_simple_admin("admin1")
 

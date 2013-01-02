@@ -19,6 +19,7 @@ from mock import MagicMock
 
 from autonomie.tests.base import BaseTestCase
 from autonomie.views.forms.task import deferred_total_validator
+from autonomie.views.forms.task import deferred_payment_mode_validator
 from autonomie.views.forms.task import deferred_amount_default
 
 DBDATAS = dict(estimation=dict(course="0",
@@ -272,19 +273,26 @@ class TestTaskForms(BaseTestCase):
         task = self.task()
         return MagicMock(context=task)
 
-    def test_total_valid(self):
+    def test_paymentform_schema_ok(self):
+        from autonomie.views.forms.task import PaymentSchema
+        schema = PaymentSchema().bind(request=self.request())
+        form = deform.Form(schema)
+        ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'),
+                     (u'__formid__', u'deform'), (u'amount', u'79.4'),
+                     (u'mode', u'par chèque'), (u'submit', u'paid')]
+        form.validate(ok_values)
+
+    def test_total_validator(self):
         c = colander.SchemaNode(colander.Integer())
         validator = deferred_total_validator("nutt", {'request':self.request()})
         self.assertRaises(colander.Invalid, validator, c, 7941)
         validator(c, 0)
         validator(c, 7940)
 
-    def test_paymentform_schema(self):
-        from autonomie.views.forms.task import PaymentSchema
-        schema = PaymentSchema().bind(request=self.request())
-        form = deform.Form(schema)
-        ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'), (u'__formid__', u'deform'), (u'amount', u'79.4'), (u'mode', u'CHEQUE'), (u'submit', u'paid')]
-        form.validate(ok_values)
+    def test_mode_validator(self):
+        c = colander.SchemaNode(colander.String())
+        validator = deferred_payment_mode_validator("nutt", {'request':self.request()})
+        self.assertRaises(colander.Invalid, validator, c, u'pièce en chocolat')
 
     def test_client_validator(self):
         from autonomie.views.forms.task import deferred_client_validator

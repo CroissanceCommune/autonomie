@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usefull function used to manage databases installation
+# Useful function used to manage databases installation
 having_root_pwd() {
     log "Have you got the root password"
     if [ "$BDD_ROOT_PWD" == "" ]

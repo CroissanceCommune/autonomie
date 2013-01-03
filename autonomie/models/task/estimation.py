@@ -168,7 +168,7 @@ class Estimation(Task, EstimationCompute):
         """
         return InvoiceLine(cost=amount, description=description, tva=tva)
 
-    def _make_deposit(self, invoice, tva):
+    def _make_deposit(self, invoice):
         """
             Return a deposit invoice
         """
@@ -177,13 +177,13 @@ class Estimation(Task, EstimationCompute):
         invoice.set_name(deposit=True)
         invoice.set_number(deposit=True)
 
-        amount = self.deposit_amount()
-        description = u"Facture d'acompte"
-        line = self._account_invoiceline(amount, description, tva)
-        invoice.lines.append(line)
-        return invoice, line.duplicate()
+        for tva, amount in self.deposit_amounts().items():
+            description = u"Facture d'acompte"
+            line = self._account_invoiceline(amount, description, tva)
+            invoice.lines.append(line)
+        return invoice, [line.duplicate() for line in invoice.lines]
 
-    def _make_intermediary(self, invoice, paymentline, tva):
+    def _make_intermediary(self, invoice, paymentline, amounts):
         """
             return an intermediary invoice described by "paymentline"
         """
@@ -191,14 +191,11 @@ class Estimation(Task, EstimationCompute):
         invoice.displayedUnits = 0
         invoice.set_name()
         invoice.set_number()
-        if self.manualDeliverables:
-            amount = paymentline.amount
-        else:
-            amount = self.paymentline_amount()
-        description = paymentline.description
-        line = self._account_invoiceline(amount, description, tva)
-        invoice.lines.append(line)
-        return invoice, line.duplicate()
+        for tva, amount in amounts.items():
+            description = paymentline.description
+            line = self._account_invoiceline(amount, description, tva)
+            invoice.lines.append(line)
+        return invoice, [line.duplicate() for line in invoice.lines]
 
     def _sold_invoice_lines(self, account_lines):
         """
@@ -262,31 +259,36 @@ class Estimation(Task, EstimationCompute):
         # Used to mark the existence of intermediary invoices
         is_sold = len(self.payment_lines) > 1
         # Used to store the amount of the intermediary invoices
-        lines = []
+        paid_lines = []
         # Sequence number that will be incremented by hand
         seq_number = self.project.get_next_invoice_number()
-        # Fix temporaire pour le montant de la tva pour les acomptes et autres
-        # On prend la première tva qu'on trouve
-        tvas = self.get_tvas().keys()
-        tva = tvas[0]
         if self.deposit > 0:
             invoice = self._get_common_invoice(seq_number, user)
-            deposit, line = self._make_deposit(invoice, tva)
+            deposit, lines = self._make_deposit(invoice)
             invoices.append(deposit)
             # We remember the lines to display them in the last invoice
-            lines.append(line)
+            paid_lines.extend(lines)
             seq_number += 1
-        # all payment lines specified (less the last one)
-        for pline in self.payment_lines[:-1]:
-            invoice = self._get_common_invoice(seq_number, user)
-            invoice, line = self._make_intermediary(invoice, pline, tva)
-            invoices.append(invoice)
-            lines.append(line)
-            seq_number += 1
+
+        if self.manualDeliverables == 1:
+            payments = self.manual_payment_line_amounts()
+            # all payment lines specified (less the last one)
+            for index, amounts in enumerate(payments[:-1]):
+                line = self.payment_lines[index]
+                invoice = self._get_common_invoice(seq_number, user)
+                invoice, lines = self._make_intermediary(invoice, line, amounts)
+                paid_lines.extend(lines)
+                seq_number += 1
+        else:
+            amounts = self.paymentline_amounts()
+            for line in self.payment_lines[:-1]:
+                self._make_intermediary(invoice, line, amounts)
+                paid_lines.extend(lines)
+                seq_number += 1
 
         invoice = self._get_common_invoice(seq_number, user)
         pline = self.payment_lines[-1]
-        invoice = self._make_sold(invoice, pline, lines, is_sold)
+        invoice = self._make_sold(invoice, pline, paid_lines, is_sold)
         invoices.append(invoice)
         return invoices
 

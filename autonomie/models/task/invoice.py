@@ -44,6 +44,7 @@ from autonomie.models import default_table_args
 
 from .compute import TaskCompute
 from .compute import LineCompute
+from .compute import InvoiceCompute
 from .interfaces import IMoneyTask
 from .interfaces import IInvoice
 from .interfaces import IPaidTask
@@ -71,7 +72,7 @@ def get_next_officialNumber():
 
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
-class Invoice(Task, TaskCompute):
+class Invoice(Task, InvoiceCompute):
     """
         Invoice Model
     """

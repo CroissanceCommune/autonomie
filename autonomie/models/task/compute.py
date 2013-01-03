@@ -35,8 +35,6 @@ class TaskCompute(object):
     lines = []
     # Should have a total_ht and a tva method
     discounts = []
-    # Should have an amount attribute
-    payments = []
     expenses = None
 
     def lines_total_ht(self):
@@ -98,21 +96,6 @@ class TaskCompute(object):
         result = int(self.expenses)
         return result
 
-    def paid(self):
-        """
-            return the amount that has already been paid
-        """
-        if self.payments:
-            return sum([payment.amount for payment in self.payments])
-        else:
-            return 0
-
-    def topay(self):
-        """
-            return the amount to pay
-        """
-        return self.total() - self.paid()
-
     def no_tva(self):
         """
             return True if all the tvas are below 0
@@ -121,7 +104,29 @@ class TaskCompute(object):
         for key in self.get_tvas():
             if key >= 0:
                 ret = False
+                break
         return ret
+
+
+class InvoiceCompute(TaskCompute):
+    """
+        Invoice computing object
+        Handles payments
+    """
+    # Should have an amount attribute
+    payments = []
+
+    def paid(self):
+        """
+            return the amount that has already been paid
+        """
+        return sum([payment.amount for payment in self.payments])
+
+    def topay(self):
+        """
+            return the amount to pay
+        """
+        return self.total() - self.paid()
 
 class EstimationCompute(TaskCompute):
     """

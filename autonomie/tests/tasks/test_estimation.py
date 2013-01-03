@@ -169,20 +169,6 @@ class TestEstimation(BaseTestCase):
         self.session.flush()
         self.assertEqual(newest.phase, phase)
 
-    def test_estimation_deposit(self):
-        est = self.getOne()
-        self.assertEqual(est.deposit_amount(), EST_DEPOSIT_HT)
-
-    def test_sold(self):
-        est = self.getOne()
-        self.assertEqual(est.sold(), EST_SOLD)
-
-    def test_payments_sum(self):
-        est = self.getOne()
-        self.assertEqual(est.sold() + est.deposit_amount_ttc()
-                + sum([p.amount for p in est.payment_lines[:-1]]),
-                est.total())
-
     def test_gen_invoice(self):
         user = self.session.query(User).first()
         client = self.session.query(Client).first()
@@ -208,11 +194,10 @@ class TestEstimation(BaseTestCase):
         intermediate_invoices = invoices[1:-1]
         for index, line in enumerate(PAYMENT_LINES[:-1]):
             inv = intermediate_invoices[index]
-            # ce test échouera jusqu'à ce qu'on ait trouvé une solution
-            # alternative à la configuration des acomptes
             self.assertEqual(inv.total_ht(), line['amount'])
             self.assertEqual(inv.taskDate, line['paymentDate'])
             self.assertEqual(inv.lines[0].tva, 1960)
+        # Ici on a un soucis d'arrondi
         total = sum([inv.total() for inv in invoices])
         self.assertEqual(total, est.total())
 

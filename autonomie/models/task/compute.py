@@ -152,12 +152,51 @@ class EstimationCompute(TaskCompute):
     manualDeliverables = None
     payment_lines = None
 
+    def get_default_tva(self):
+        """
+            Silly hack to get a default tva for deposit and intermediary
+            payments (configured ttc)
+        """
+        tvas = self.get_tvas().keys()
+        return tvas[0]
 
-    # Computing
+    @staticmethod
+    def add_ht_by_tva(ret_dict, lines, operation=operator.add):
+        """
+            Add ht sums by tva to ret_dict for the given lines
+        """
+        for line in lines:
+            val = ret_dict.get(line.tva, 0)
+            ht_amount = operation(val, line.total_ht())
+            ret_dict[line.tva] = ht_amount
+        return ret_dict
+
+    def tva_parts(self):
+        """
+            Return a list of tuples
+                dict(tva=(ht, tva_part,))
+            for each tva value
+        """
+        ret_dict = {}
+        ret_dict = self.add_ht_by_tva(ret_dict, self.lines)
+        ret_dict = self.add_ht_by_tva(ret_dict, self.discounts, operator.sub)
+        return ret_dict
+
+    def deposit_amounts(self):
+        """
+            Return the lines of the deposit for the different amount of tvas
+        """
+        ret_dict = {}
+        for tva, total_ht in self.tva_parts().items():
+            ret_dict[tva] = int(total_ht * int(self.deposit) / 100.0)
+        return ret_dict
+
     def deposit_amount(self):
         """
             Compute the amount of the deposit
         """
+        import warnings
+        warnings.warn("deprecated", DeprecationWarning)
         if self.deposit > 0:
             total = self.total_ht()
             return int(total * int(self.deposit) / 100.0)
@@ -186,9 +225,22 @@ class EstimationCompute(TaskCompute):
             Return the ttc amount of the deposit (for estimation display)
         """
         if self.deposit > 0:
-            total_ttc = self.total_ttc()
-            return int(total_ttc * int(self.deposit) / 100.0)
+            total_ttc = 0
+            for tva, total_ht in self.deposit_amounts().items():
+                line = LineCompute(cost=total_ht, tva=tva)
+                total_ttc += line.total()
+            return int(total_ttc)
         return 0
+
+    def paymentline_amount_ttc(self):
+        """
+            Return the ttc amount of payment (in equal repartition)
+        """
+        total_ttc = 0
+        for tva, total_ht in self.paymentline_amounts().items():
+            line = LineCompute(cost=total_ht, tva=tva)
+            total_ttc += int(line.total())
+        return total_ttc
 
     def sold(self):
         """
@@ -208,15 +260,14 @@ class EstimationCompute(TaskCompute):
             result = rest
         else:
             if self.manualDeliverables == 0:
-                # Amounts has to be divided
-                line_amount = self.paymentline_amount()
-                result = rest - ((payment_lines_num - 1) * line_amount)
+                line_ttc = self.paymentline_amount_ttc()
+                result = rest - ((payment_lines_num - 1) * line_ttc)
             else:
-                # Ici la donnée est fausse (on va rajouter de la tva sur les
-                # montants des lignes de paiement configurées manuellement
-                # Donc le solde caluclé ici est faux
-                result = rest - sum(line.amount
-                                    for line in self.payment_lines[:-1])
+                sold_lines = self.manual_payment_line_amounts()[-1]
+                result = 0
+                for tva, total_ht in sold_lines.items():
+                    line = LineCompute(tva=tva, cost=total_ht)
+                    result += line.total()
         return result
 
 class LineCompute(object):

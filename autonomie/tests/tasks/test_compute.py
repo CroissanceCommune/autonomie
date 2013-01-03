@@ -14,7 +14,7 @@
 #
 from autonomie.tests.base import BaseTestCase
 from autonomie.models.task.compute import (LineCompute, TaskCompute,
-        EstimationCompute, InvoiceCompute)
+        EstimationCompute, InvoiceCompute, reverse_tva, compute_tva)
 
 TASK = {"expenses":1500,}
 LINES = [{'cost':10025, 'tva':1960, 'quantity':1.25},
@@ -175,34 +175,83 @@ class TestEstimationCompute(BaseTestCase):
         task.expenses = 0
         task.deposit = 20
         task.manualDeliverables = 0
-        task.lines = [DummyLine(cost=10000, quantity=1, tva=1960)]
+        task.lines = [DummyLine(cost=5000, quantity=1, tva=1960),
+                      DummyLine(cost=5000, quantity=1, tva=1960),
+                      DummyLine(cost=1000, quantity=1, tva=500)]
         task.discounts = []
-        task.payment_lines = [Dummy(amount=1000),
-                              Dummy(amount=1000),
-                              Dummy(amount=150)]
+        task.payment_lines = [Dummy(amount=4000),
+                              Dummy(amount=6000),
+        # le dernier montant ne compte pas (le solde est calculé)
+                              Dummy(amount=50)]
         return task
 
-    def test_deposit_amount(self):
+    def test_add_ht_by_tva(self):
+        lines = [DummyLine(cost=5000, quantity=1, tva=1960),
+                DummyLine(cost=1000, quantity=1, tva=500)]
         task = self.getOne()
-        self.assertEqual(task.deposit_amount(), 2000)
+        dico = {}
+        task.add_ht_by_tva(dico, lines)
+        self.assertEqual(dico.keys(), [1960, 500])
 
+    #Deposit
+    def test_deposit_amounts(self):
+        task = self.getOne()
+        amounts = task.deposit_amounts()
+        self.assertEqual(amounts.keys(), [1960, 500])
+        self.assertEqual(amounts[1960], 2000)
+        self.assertEqual(amounts[500], 200)
+
+    def test_deposit_amount_ttc(self):
+        task = self.getOne()
+        # 2602 = 2000 * 119.6 / 100 + 200 * 105/100
+        self.assertEqual(task.deposit_amount_ttc(), 2602)
+
+    # Payment lines (with equal repartition)
     def test_get_nb_payment_lines(self):
         task = self.getOne()
         self.assertEqual(task.get_nb_payment_lines(), 3)
 
-    def test_paymentline_amount(self):
+    def test_paymentline_amounts(self):
         task = self.getOne()
-        self.assertEqual(task.paymentline_amount(), 2666)
+        amounts = task.paymentline_amounts()
+        self.assertEqual(amounts.keys(), [1960, 500])
+        self.assertEqual(int(amounts[1960]), 2666)
+        self.assertEqual(int(amounts[500]), 266)
 
-    def test_deposit_amount_ttc(self):
+    def test_paymentline_amount_ttc(self):
         task = self.getOne()
-        # 2392 = 2000 * 119.6 / 100
-        self.assertEqual(task.deposit_amount_ttc(), 2392)
+        # 3467 = int(2666.666.. * 119.6/100 + 266.66.. * 105/100.0)
+        self.assertEqual(task.paymentline_amount_ttc(), 3469)
 
     def test_sold(self):
         task = self.getOne()
-        # 9568 = 11960 - 2392 - 2666 - 2666
-        self.assertEqual(task.sold(), 4236)
+        sold = task.sold()
+        deposit = task.deposit_amount_ttc()
+        paymentline = task.paymentline_amount_ttc()
+        nblines = task.get_nb_payment_lines() -1
+        self.assertEqual(sold + deposit + paymentline * nblines, task.total())
+
+    # Payment lines (with non manual repartition)
+    def test_manual_payment_line_amounts(self):
+        def compute_payment_ttc(payment):
+            total = 0
+            for tva, ht in payment.items():
+                line = DummyLine(tva=tva, cost=ht)
+                total += line.total()
+            return total
+
+        task = self.getOne()
+        task.manualDeliverables = 1
+        payments = task.manual_payment_line_amounts()
+        self.assertEqual(payments[0].keys(), [1960])
+        self.assertEqual(payments[1].keys(), [1960, 500])
+        self.assertEqual(payments[2].keys(), [500])
+        deposit = task.deposit_amount_ttc()
+        amount1 = compute_payment_ttc(payments[0])
+        amount2 = compute_payment_ttc(payments[1])
+        self.assertEqual(amount1, 4000)
+        self.assertEqual(amount2, 6000)
+        self.assertEqual(task.sold() + deposit + amount1 + amount2, task.total())
 
 
 class TestLineCompute(BaseTestCase):

@@ -208,16 +208,72 @@ class EstimationCompute(TaskCompute):
         """
         return len(self.payment_lines)
 
-    def paymentline_amount(self):
+    def paymentline_amounts(self):
         """
             Compute payment lines amounts in case of equal payment repartition
             (when manualDeliverables is 0)
             (when the user has selected 3 time-payment)
         """
-        total = self.total_ht()
-        deposit = self.deposit_amount()
-        rest = total - deposit
-        return int(rest / self.get_nb_payment_lines())
+        ret_dict = {}
+        totals = self.tva_parts()
+        deposits = self.deposit_amounts()
+        # num_parts set the number of equal parts
+        num_parts = self.get_nb_payment_lines()
+        for tva, total_ht in totals.items():
+            rest = total_ht - deposits[tva]
+            line_ht = rest / num_parts
+            ret_dict[tva] = line_ht
+        return ret_dict
+
+    def manual_payment_line_amounts(self):
+        """
+            Computes the ht and tva needed to reach each line total
+            return a list of dict:
+                [{tva1:ht_amount, tva2:ht_amount}]
+            each dict represents a configured payment line
+        """
+        # Cette méthode recompose un paiement qui a été configuré TTC, sous
+        # forme de part HT + TVA au regard des différentes tva configurées dans
+        # le devis
+        ret_data = []
+        parts = self.tva_parts()
+        # On enlève déjà ce qui est inclu dans l'accompte
+        for tva, ht_amount in self.deposit_amounts().items():
+            parts[tva] -= ht_amount
+
+        for payment in self.payment_lines[:-1]:
+            print "# Payment"
+            payment_ttc = payment.amount
+            payment_lines = {}
+
+            for tva, total_ht in parts.items():
+                print " * payment_ttc : %s" % payment_ttc
+                payment_ht = reverse_tva(payment_ttc, tva)
+                print " * payment_ht (tva %s) : %s " % (tva, payment_ht)
+                if total_ht >= payment_ht:
+                    # Le total ht de cette tranche de tva est suffisant pour
+                    # recouvrir notre paiement
+                    # on la récupère
+                    payment_lines[tva] = payment_ht
+                    # On enlève ce qu'on vient de prendre de la tranche de tva
+                    # pour le calcul des autres paiements
+                    parts[tva] = total_ht - payment_ht
+                    ret_data.append(payment_lines)
+                    print "---> we fetched it"
+                    break
+                else:
+                    # On a besoin d'une autre tranche de tva pour atteindre
+                    # notre paiement, on prend déjà ce qu'il y a
+                    payment_lines[tva] = parts.pop(tva)
+                    # On enlève la part qu'on a récupéré dans cette tranche de
+                    # tva du total de notre paiement
+                    payment_ttc -= total_ht + compute_tva(total_ht, tva)
+
+        # Ce qui reste c'est donc pour notre facture de solde
+        print "# Adding the sold"
+        sold = parts
+        ret_data.append(sold)
+        return ret_data
 
     # Computations for estimation display
     def deposit_amount_ttc(self):

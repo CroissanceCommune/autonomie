@@ -24,9 +24,6 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import ForeignKey
-from sqlalchemy import Date
-from sqlalchemy import BigInteger
-from sqlalchemy import Float
 from sqlalchemy import DateTime
 from sqlalchemy import Text
 from sqlalchemy import func
@@ -46,6 +43,7 @@ from autonomie.models import DBBASE
 from autonomie.models import default_table_args
 
 from .compute import TaskCompute
+from .compute import LineCompute
 from .interfaces import IMoneyTask
 from .interfaces import IInvoice
 from .interfaces import IPaidTask
@@ -355,7 +353,7 @@ class Invoice(Task, TaskCompute):
         return u"<Invoice id:{s.id}>".format(s=self)
 
 
-class InvoiceLine(DBBASE):
+class InvoiceLine(DBBASE, LineCompute):
     """
         Invoice lines
     """
@@ -408,23 +406,6 @@ class InvoiceLine(DBBASE):
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
-
-    def total_ht(self):
-        """
-            Compute the line's total
-        """
-        return float(self.cost) * float(self.quantity)
-
-    def tva_amount(self):
-        """
-            compute the tva amount of a line
-        """
-        totalht = self.total_ht()
-        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
-        return result
-
-    def total(self):
-        return self.tva_amount() + self.total_ht()
 
     def __repr__(self):
         return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
@@ -551,7 +532,7 @@ class CancelInvoice(Task, TaskCompute):
         self.taskDate = datetime.date.today()
 
 
-class CancelInvoiceLine(DBBASE):
+class CancelInvoiceLine(DBBASE, LineCompute):
     """
         CancelInvoice lines
     """
@@ -590,23 +571,6 @@ class CancelInvoiceLine(DBBASE):
         newone.quantity = self.quantity
         newone.unity = self.unity
         return newone
-
-    def total_ht(self):
-        """
-            Compute the line's total
-        """
-        return float(self.cost) * float(self.quantity)
-
-    def tva_amount(self):
-        """
-            compute the tva amount of a line
-        """
-        totalht = self.total_ht()
-        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
-        return result
-
-    def total(self):
-        return self.tva_amount() + self.total_ht()
 
     def __repr__(self):
         return u"<CancelInvoiceLine id:{s.id} task_id:{s.task_id} \

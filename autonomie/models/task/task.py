@@ -38,6 +38,7 @@ from autonomie.exception import Forbidden
 
 from .interfaces import ITask
 from .states import DEFAULT_STATE_MACHINES
+from .compute import LineCompute
 
 log = logging.getLogger(__name__)
 
@@ -180,7 +181,7 @@ ce document.".format(status)
         return u"<Task status:{s.CAEStatus} id:{s.id}>".format(s=self)
 
 
-class DiscountLine(DBBASE):
+class DiscountLine(DBBASE, LineCompute):
     """
          A discount line
     """

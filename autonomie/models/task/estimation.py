@@ -39,6 +39,7 @@ from autonomie.models import DBBASE
 from autonomie.models import default_table_args
 
 from .compute import EstimationCompute
+from .compute import LineCompute
 from .interfaces import IValidatedTask
 from .interfaces import IMoneyTask
 from .invoice import Invoice
@@ -357,7 +358,7 @@ class Estimation(Task, EstimationCompute):
         return u"<Estimation id:{s.id}>".format(s=self)
 
 
-class EstimationLine(DBBASE):
+class EstimationLine(DBBASE, LineCompute):
     """
         Estimation lines
     """
@@ -410,23 +411,6 @@ class EstimationLine(DBBASE):
         line.tva = self.tva
         line.unity = self.unity
         return line
-
-    def total_ht(self):
-        """
-            Compute the line's total
-        """
-        return float(self.cost) * float(self.quantity)
-
-    def tva_amount(self, totalht=None):
-        """
-            compute the tva amount of a line
-        """
-        totalht = self.total_ht()
-        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
-        return result
-
-    def total(self):
-        return self.tva_amount() + self.total_ht()
 
     def __repr__(self):
         return u"<EstimationLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\

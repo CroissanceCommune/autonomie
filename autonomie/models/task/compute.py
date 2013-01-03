@@ -31,8 +31,11 @@ class TaskCompute(object):
         expenses
         tva
     """
+    # Should have a total_ht and a tva method
     lines = []
+    # Should have a total_ht and a tva method
     discounts = []
+    # Should have an amount attribute
     payments = []
     expenses = None
 
@@ -99,8 +102,8 @@ class TaskCompute(object):
         """
             return the amount that has already been paid
         """
-        if hasattr(self, "payments"):
-            return sum([payment.get_amount() for payment in self.payments])
+        if self.payments:
+            return sum([payment.amount for payment in self.payments])
         else:
             return 0
 
@@ -195,3 +198,31 @@ class EstimationCompute(TaskCompute):
                 result = rest - sum(line.amount
                                     for line in self.payment_lines[:-1])
         return result
+
+class LineCompute(object):
+    """
+        Computing tool for line objects
+    """
+    cost = None
+    tva = None
+    quantity = 1
+
+    def total_ht(self):
+        """
+            Compute the line's total
+        """
+        return float(self.cost) * float(self.quantity)
+
+    def tva_amount(self):
+        """
+            compute the tva amount of a line
+        """
+        totalht = self.total_ht()
+        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
+        return result
+
+    def total(self):
+        """
+            Compute the ttc amount of the line
+        """
+        return self.tva_amount() + self.total_ht()

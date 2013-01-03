@@ -410,7 +410,7 @@ class InvoiceLine(DBBASE, LineCompute):
 
     def __repr__(self):
         return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
- quantity:{s.quantity} tva:{s.tva}".format(s=self)
+ quantity:{s.quantity} tva:{s.tva}>".format(s=self)
 
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)

@@ -17,13 +17,14 @@
     Used to compute invoice, estimation or cancelinvoice totals
 """
 import operator
+import math
 
 
 def reverse_tva(total_ttc, tva):
     """
         Compute total_ht from total_ttc
     """
-    return float(total_ttc) * 10000.0 / (max(int(tva), 0) + 10000.0)
+    return math.ceil(float(total_ttc) * 10000.0 / (max(int(tva), 0) + 10000.0))
 
 
 def compute_tva(total_ht, tva):
@@ -227,7 +228,11 @@ class EstimationCompute(TaskCompute):
 
     def manual_payment_line_amounts(self):
         """
-            Computes the ht and tva needed to reach each line total
+            Computes the ht and tva needed to reach each payment line total
+
+            self.payment_lines are configured with TTC amounts
+
+
             return a list of dict:
                 [{tva1:ht_amount, tva2:ht_amount}]
             each dict represents a configured payment line
@@ -242,14 +247,11 @@ class EstimationCompute(TaskCompute):
             parts[tva] -= ht_amount
 
         for payment in self.payment_lines[:-1]:
-            print "# Payment"
             payment_ttc = payment.amount
             payment_lines = {}
 
             for tva, total_ht in parts.items():
-                print " * payment_ttc : %s" % payment_ttc
                 payment_ht = reverse_tva(payment_ttc, tva)
-                print " * payment_ht (tva %s) : %s " % (tva, payment_ht)
                 if total_ht >= payment_ht:
                     # Le total ht de cette tranche de tva est suffisant pour
                     # recouvrir notre paiement
@@ -259,7 +261,6 @@ class EstimationCompute(TaskCompute):
                     # pour le calcul des autres paiements
                     parts[tva] = total_ht - payment_ht
                     ret_data.append(payment_lines)
-                    print "---> we fetched it"
                     break
                 else:
                     # On a besoin d'une autre tranche de tva pour atteindre
@@ -270,7 +271,6 @@ class EstimationCompute(TaskCompute):
                     payment_ttc -= total_ht + compute_tva(total_ht, tva)
 
         # Ce qui reste c'est donc pour notre facture de solde
-        print "# Adding the sold"
         sold = parts
         ret_data.append(sold)
         return ret_data

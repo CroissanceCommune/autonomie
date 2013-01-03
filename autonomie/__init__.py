@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 31 déc. 2012 11:42:23 CET
+# * Last Modified : jeu. 03 janv. 2013 12:52:01 CET
 #
 # * Project : autonomie
 #
@@ -84,11 +84,11 @@ def main(global_config, **settings):
 
     statics = settings.get('autonomie.statics', 'static')
     config.add_static_view(statics, "autonomie:static", cache_max_age=3600)
-    config.add_static_view(statics + "/deform",
+    config.add_static_view(statics + "-deform",
             "deform:static",
             cache_max_age=3600)
-    config.add_static_view(statics + "/deform-bootstrap",
-            "deform-bootstrap:static",
+    config.add_static_view(statics + "-deform_bootstrap",
+            "deform_bootstrap:static",
             cache_max_age=3600)
 
     # Adding a static view to the configured assets

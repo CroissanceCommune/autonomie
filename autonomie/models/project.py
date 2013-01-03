@@ -160,7 +160,7 @@ class Phase(DBBASE):
 
     def is_default(self):
         """
-            return True is this phase is a default one
+            return True if this phase is a default one
         """
         return self.name in (u'Phase par défaut', u"default", u"défaut",)
 

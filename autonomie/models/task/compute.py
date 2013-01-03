@@ -211,7 +211,9 @@ class LineCompute(object):
         """
             Compute the line's total
         """
-        return float(self.cost) * float(self.quantity)
+        # Discount have amount attr not cost
+        cost = getattr(self, "amount", self.cost)
+        return float(cost) * float(self.quantity)
 
     def tva_amount(self):
         """

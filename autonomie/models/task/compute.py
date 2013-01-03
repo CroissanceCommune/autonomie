@@ -16,6 +16,21 @@
     Task computing tool
     Used to compute invoice, estimation or cancelinvoice totals
 """
+import operator
+
+
+def reverse_tva(total_ttc, tva):
+    """
+        Compute total_ht from total_ttc
+    """
+    return float(total_ttc) * 10000.0 / (max(int(tva), 0) + 10000.0)
+
+
+def compute_tva(total_ht, tva):
+    """
+        Compute the tva for the given ht total
+    """
+    return float(total_ht) * (max(int(tva), 0) / 10000.0)
 
 
 class TaskCompute(object):
@@ -212,6 +227,11 @@ class LineCompute(object):
     tva = None
     quantity = 1
 
+    def __init__(self, cost, tva, quantity=1):
+        self.cost = cost
+        self.tva = tva
+        self.quantity = quantity
+
     def total_ht(self):
         """
             Compute the line's total
@@ -225,8 +245,7 @@ class LineCompute(object):
             compute the tva amount of a line
         """
         totalht = self.total_ht()
-        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
-        return result
+        return compute_tva(totalht, self.tva)
 
     def total(self):
         """

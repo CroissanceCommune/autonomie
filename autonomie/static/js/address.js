@@ -44,12 +44,7 @@ function getCurrentClient(){
   }
 }
 function getClientAddress(client){
-  var address = client.address;
-  address += "\n" + client.zipCode + " " + client.city;
-  if (client.country != 'France'){
-    address += "\n" + client.country;
-  }
-  return address;
+  return client.full_address;
 }
 function set_client_address(client){
   /*

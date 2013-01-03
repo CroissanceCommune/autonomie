@@ -87,13 +87,14 @@ class Client(DBBASE):
                     contactLastName=self.contactLastName,
                     contactFirstName=self.contactFirstName,
                     name=self.name,
-                    projects=projects
+                    projects=projects,
+                    full_address=self.full_address
                     )
 
     @property
     def full_address(self):
         address = u"{name}\n{address}\n{zipCode} {city}".format(name=self.name,
                 address=self.address, zipCode=self.zipCode, city=self.city)
-        if self.country is not "France":
+        if self.country not in ("France", "france"):
             address += u"\n{0}".format(self.country)
         return address

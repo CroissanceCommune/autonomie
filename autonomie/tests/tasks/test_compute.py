@@ -175,9 +175,10 @@ class TestEstimationCompute(BaseTestCase):
         task.expenses = 0
         task.deposit = 20
         task.manualDeliverables = 0
-        task.lines = [DummyLine(cost=10000, quantity=1, tva=0)]
+        task.lines = [DummyLine(cost=10000, quantity=1, tva=1960)]
         task.discounts = []
-        task.payment_lines = [Dummy(amount=1000), Dummy(amount=1000),
+        task.payment_lines = [Dummy(amount=1000),
+                              Dummy(amount=1000),
                               Dummy(amount=150)]
         return task
 
@@ -195,11 +196,13 @@ class TestEstimationCompute(BaseTestCase):
 
     def test_deposit_amount_ttc(self):
         task = self.getOne()
-        self.assertEqual(task.deposit_amount_ttc(), 2000)
+        # 2392 = 2000 * 119.6 / 100
+        self.assertEqual(task.deposit_amount_ttc(), 2392)
 
     def test_sold(self):
         task = self.getOne()
-        self.assertEqual(task.sold(), 2668)
+        # 9568 = 11960 - 2392 - 2666 - 2666
+        self.assertEqual(task.sold(), 4236)
 
 
 class TestLineCompute(BaseTestCase):

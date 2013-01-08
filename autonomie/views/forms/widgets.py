@@ -200,11 +200,11 @@ def get_date_input(**kw):
     date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
 
-def get_fileupload_widget(store_url, store_path, session):
+def get_fileupload_widget(store_url, store_path, session, filters=None):
     """
         return a file upload widget
     """
-    tmpstore = FileTempStore(session, store_path, store_url)
+    tmpstore = FileTempStore(session, store_path, store_url, filters=filters)
     return widget.FileUploadWidget(tmpstore,
                 template="autonomie:deform_templates/fileupload.mako")
 

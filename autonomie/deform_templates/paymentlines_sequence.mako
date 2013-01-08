@@ -130,8 +130,13 @@
                         sub[0]['paymentDate'] = " ";
                     %>
                 %endif
+                var description = "";
+                % for description_line in sub[0].get('description', "Paiement").splitlines():
+                    description += "${description_line}\n";
+                % endfor
+
                 var line = {amount:formatAmount("${sub[0].get('amount', '0')}"),
-                    description:"${sub[0].get('description', "Paiement")}",
+                    description:description,
                     paymentDate:"${sub[0].get('paymentDate', '')}",
                     readonly:true};
                 % if sub[1].error:

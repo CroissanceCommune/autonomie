@@ -43,6 +43,7 @@ class ImageResizer(object):
         """
             Complete the image to get at last my proportions, not more
         """
+        img_buf.seek(0)
         img_obj = Image.open(img_buf)
 
         width, height = img_obj.size
@@ -53,7 +54,7 @@ class ImageResizer(object):
         else:
             new_width = int(height * self.proportions)
             new_height = height
-            padding = (width - new_width) / 2
+            padding = (new_width - width) / 2
             layer = self.get_white_layer(new_width, new_height)
             layer.paste(img_obj, (padding, 0))
             mybuffer = StringIO()

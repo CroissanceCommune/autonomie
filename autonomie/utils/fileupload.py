@@ -17,6 +17,7 @@
     store the file and the main information used to handle it
     Usefull for preview_urls
 """
+import StringIO
 import os
 import logging
 from datetime import datetime
@@ -44,15 +45,18 @@ class FileTempStore(dict):
         session : pyramid session
         path : the path to store (retrieve) the file from
         url : the base url used to access the file
+        filters : list of callables that take a file object as parameter
         Example :
             to upload a file to /tmp/logo/ and access it through /assets/logo
             FileTempStore(session, "/tmp/logo", "/assets/logo/")
             if you want to force the logo file to be called logo.png
             FileTempStore(session, "/tmp/logo", "/assets/logo/", "logo.png")
+            if you want to pass the logo file through a resize function
+            FileTempStore(session, "/tmp/logo", "/assets/logo/", [resize])
     """
     session_key = 'deform_uploads'
 
-    def __init__(self, session, path, url, default_filename=None):
+    def __init__(self, session, path, url, default_filename=None, filters=None):
         self.session = session
         self.store_directory = path
         self.store_url = url
@@ -63,6 +67,10 @@ class FileTempStore(dict):
 
         if not self.session_key in self.session:
             self.session[self.session_key] = {}
+
+        if filters and not hasattr(filters, '__iter__'):
+            filters = [filters]
+        self.filters = filters or []
 
     def preview_url(self, uid, filename=None):
         """
@@ -122,6 +130,36 @@ class FileTempStore(dict):
         value['uid'] = uid
         return value
 
+    def write_file(self, fpath, fdata):
+        """
+            Writes file datas to a file
+        """
+        log.debug(u"Writing file datas to : %s" % fpath)
+        with file(fpath, 'w') as fbuf:
+            fbuf.write(fdata.read())
+
+    def filter_data(self, fbuf):
+        """
+            Pass file datas through filters
+        """
+        log.debug(u"Filtering out image datas")
+        if self.filters:
+            # Use an intermediary buffer
+            fdata = StringIO.StringIO()
+            fdata.write(fbuf.read())
+            for filter_ in self.filters:
+                fdata = filter_(fdata)
+                fdata.seek(0)
+            return fdata
+        else:
+            return fbuf
+
+    def get_filepath(self, filename):
+        """
+            Return the destination file path
+        """
+        return os.path.join(self.store_directory, filename)
+
     def __setitem__(self, uid, value):
         """
             Saves the file contents to a file
@@ -129,20 +167,18 @@ class FileTempStore(dict):
         log.debug(u"In __setitem__")
         log.debug(u" + uid : %s" % uid)
         log.debug(u" + value : %s" % value)
-        filedata = value.get('fp')
+
         filename = self.default_filename or value['filename']
         filename = pop_absolute_urls(filename)
-        if filedata:
-            filepath = os.path.join(self.store_directory, filename)
-            log.debug(u"Writing file datas to : %s" % filepath)
-            with file(filepath, 'w') as fbuf:
-                if isinstance(filedata, file):
-                    fbuf.write(filedata.read())
-                else:
-                    fbuf.write(filedata)
-            del value['fp']
+
+        filedata = value.pop('fp', None)
+        if filedata is not None:
+            filedata = self.filter_data(filedata)
+            filepath = self.get_filepath(filename)
+            self.write_file(filepath, filedata)
         else:
             log.debug(u"No file data where transmitted")
+
         if filename:
             value['preview_url'] = self.preview_url(uid, filename)
 

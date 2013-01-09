@@ -69,6 +69,7 @@ test("Transformations des strings en centimes", function(){
   equal(isNotFormattable("150 €"), true);
   equal(isNotFormattable("150 "), false);
   equal(formatAmount(125), "125,00&nbsp;&euro;");
+  equal(formatAmount(583.06), formatAmount(583.06, false));
   equal(trailingZeros("1", false), "10");
   equal(trailingZeros("15", false), "15");
   equal(trailingZeros("1500", false), "15");

@@ -42,9 +42,20 @@ function transformToCents(value) {
 }
 function round(price){
   /*
-   *  Round the price
+   *  Round the price (in our comptability model, we floor it)
+   *  We need an epsilon value that handle the 0.999999... case
+   *  e.g:
+   *  583.06*100 = 58305.99999999999
+   *  We'd like to round it to 58306, not 58305 like we will do with 58305.99
    */
-  return Math.floor(price*100) / 100;
+  var passed_to_cents = price * 100;
+  var epsilon = Math.round(passed_to_cents) - passed_to_cents;
+  if (epsilon < 0.000001){
+    passed_to_cents = Math.round(passed_to_cents);
+  }else{
+    passed_to_cents = Math.floor(passed_to_cents);
+  }
+  return passed_to_cents / 100;
 }
 function formatPrice(price, rounded) {
   /*

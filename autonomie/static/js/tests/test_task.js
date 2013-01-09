@@ -66,10 +66,10 @@ test("Transformations des strings en centimes", function(){
   equal(formatPrice(1.256, true), "1,25");
   equal(formatPrice(1.255555, false), "1,2555...");
   equal(formatPrice(1.2555, false), "1,2555");
+  equal(formatPrice(583.06), formatPrice(583.06, false));
   equal(isNotFormattable("150 €"), true);
   equal(isNotFormattable("150 "), false);
   equal(formatAmount(125), "125,00&nbsp;&euro;");
-  equal(formatAmount(583.06), formatAmount(583.06, false));
   equal(trailingZeros("1", false), "10");
   equal(trailingZeros("15", false), "15");
   equal(trailingZeros("1500", false), "15");

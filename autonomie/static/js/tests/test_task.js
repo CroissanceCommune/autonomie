@@ -57,39 +57,6 @@ function initTest(){
 }
 
 var insecable = '\u00a0';
-module("Fonctions générales");
-test("Transformations des strings en centimes", function(){
-  equal(transformToCents(), 0.0);
-  equal(transformToCents("15,25"), 15.25);
-  equal(transformToCents("15,25658"), 15.25658);
-  equal(formatPrice(1), "1,00");
-  equal(formatPrice(1.256, true), "1,25");
-  equal(formatPrice(1.255555, false), "1,2555...");
-  equal(formatPrice(1.2555, false), "1,2555");
-  equal(formatPrice(583.06), formatPrice(583.06, false));
-  equal(isNotFormattable("150 €"), true);
-  equal(isNotFormattable("150 "), false);
-  equal(formatAmount(125), "125,00&nbsp;&euro;");
-  equal(trailingZeros("1", false), "10");
-  equal(trailingZeros("15", false), "15");
-  equal(trailingZeros("1500", false), "15");
-  equal(trailingZeros("1550", false), "155");
-  equal(getIdFromTagId("abcdefgh_", "abcdefgh_2"), 2);
-  // L'objet Date prend les mois en partant de janvier->0
-  pdate = parseDate("2012-12-25");
-  edate = new Date(2012, 11, 25);
-  equal(pdate.year, edate.year);
-  equal(pdate.month, edate.month);
-  equal(pdate.day, edate.day);
-});
-
-test("Manipulation du DOM", function(){
-  var line = "<div id='test'>Test</div>";
-  $('#qunit-fixture').html($(line));
-  delRow('test');
-  var test = $('#test');
-  equal($('#test').length, 0);
-});
 module("Ligne de prestation et totaux");
 test("Ligne de prestation", function(){
   initTest();
@@ -136,7 +103,6 @@ module("Ligne de configuration des paiements");
 test("Calcul de l'acompte", function(){
   initTest();
   $('#total .input').empty().html(formatAmount(1.07));
-  equal(computeDeposit(1.07, 5), 0.05);
   equal(getDeposit(), 0.05);
   equal(getToPayAfterDeposit(), 1.02);
 });

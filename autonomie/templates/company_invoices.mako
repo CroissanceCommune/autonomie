@@ -16,7 +16,7 @@
 </ul>
 <div class='row'>
     <div class='span7'>
-        <form class='navbar-form form-search form-horizontal' id='search_form' method='GET'>
+        <form class='form-search form-horizontal' id='search_form' method='GET'>
             <div style="padding-bottom:3px">
                 <select id='client-select' name='client_id' data-placeholder="Sélectionner un client">
                     <option value='-1'></option>

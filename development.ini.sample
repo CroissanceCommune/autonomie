@@ -59,8 +59,14 @@ autonomie.static=static
 # Assets (logo ...) storage path
 autonomie.assets=/tmp/
 
+[filter:fanstatic]
+use = egg:fanstatic#fanstatic
+bundle=True
+minified=True
+
 [pipeline:main]
 pipeline =
+    fanstatic
     autonomie
 
 [server:main]

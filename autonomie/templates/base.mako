@@ -15,18 +15,6 @@
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/jquery-1.7.1.min.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('deform:static/scripts/jquery.form.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/jquery-ui-1.8.18.custom.min.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('deform:static/scripts/deform.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/deform_bootstrap.js')}"></script>
-    ##    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/bootstrap.min.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('autonomie:static/js/bootstrap.min.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/bootstrap-typeahead.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.jquery.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery.ui.datepicker-fr.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery.maskedinput-1.3.min.js')}"></script>
-    <script type="text/javascript" src="${request.static_url('autonomie:static/js/main.js')}"></script>
     % for js_script in request.js_require:
       <script type="text/javascript" src="${request.static_url('autonomie:static/js/%s.js' % (js_script,))}"></script>
     % endfor

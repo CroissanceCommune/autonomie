@@ -27,6 +27,7 @@ from js.jqueryui import ui_datepicker_fr
 from js.jquery_form import jquery_form
 from js.deform_bootstrap import deform_bootstrap_js
 from js.chosen import chosen_jquery
+from js.jquery_qunit import jquery_qunit
 
 lib_autonomie = Library("fanstatic", "static")
 
@@ -43,6 +44,7 @@ backbone_marionnette = Resource(lib_autonomie, "js/backbone.marionette.js",
 
 dom = Resource(lib_autonomie, "js/dom.js", depends=[jquery])
 duplicate = Resource(lib_autonomie, "js/duplicate.js", depends=[jquery])
+math = Resource(lib_autonomie, "js/math.js")
 jquery_maskedinput = Resource(lib_autonomie, "js/jquery.maskedinput-1.3.min.js",
         depends=[jquery])
 jquery_tmpl = Resource(lib_autonomie, "js/jquery.tmpl.min.js",
@@ -52,7 +54,7 @@ discount = Resource(lib_autonomie, "js/discount.js",
 address = Resource(lib_autonomie, "js/address.js")
 date = Resource(lib_autonomie, "js/date.js")
 task = Resource(lib_autonomie, "js/task.js", depends=[date, jquery_tmpl,
-                            address, discount, duplicate, dom])
+                            address, discount, math, duplicate, dom])
 
 # Main javascript requirements
 main_js = Group([main,
@@ -69,3 +71,12 @@ task_js = Group([main,
                  ui_datepicker_fr,
                  deform_bootstrap_js,
                  task])
+
+# Test tools
+test_js = Group([main,
+                 bootstrap_js,
+                 jquery_form,
+                 ui_datepicker_fr,
+                 deform_bootstrap_js,
+                 task,
+                 jquery_qunit])

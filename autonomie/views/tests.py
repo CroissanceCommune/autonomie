@@ -16,13 +16,14 @@
     View for testing js scripts with qunit
     It's not really automated, but it's better than nuts
 """
-
+from autonomie.resources import test_js
 
 
 def testjs(request):
     """
         Only the template is interesting in this view
     """
+    test_js.need()
     return dict(title=u"Page de test pour les composantes javascript")
 
 

@@ -32,12 +32,11 @@ function setPopUp(id, title){
     height:"auto",
     title:title,
     open: function(event, ui){
-      width =
-    $('.ui-widget').css('width','60%');
-  $('.ui-widget').css('height','80%');
-  $('.ui-widget').css('left', '20%');
-  $('.ui-widget').css('top', '10%');
-  $('.ui-widget-content').css('height','auto');
+      $('.ui-widget').css('width','60%');
+      $('.ui-widget').css('height','80%');
+      $('.ui-widget').css('left', '20%');
+      $('.ui-widget').css('top', '10%');
+      $('.ui-widget-content').css('height','auto');
     }
       });
 }

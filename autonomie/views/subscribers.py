@@ -34,6 +34,8 @@ from autonomie.utils.widgets import MenuDropDown
 from autonomie.utils.widgets import StaticWidget
 from autonomie.utils.widgets import ActionMenu
 
+from autonomie.resources import main_js
+
 from autonomie.views.render_api import api
 
 log = logging.getLogger(__name__)
@@ -219,3 +221,7 @@ def add_request_attributes(event):
     request.js_require = set()
     request.actionmenu = ActionMenu()
     request.popups = {}
+
+@subscriber(NewRequest)
+def add_main_js(event):
+    main_js.need()

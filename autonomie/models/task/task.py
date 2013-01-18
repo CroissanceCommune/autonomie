@@ -87,7 +87,7 @@ class Task(DBBASE):
     phase = relationship(
         "Phase",
         primaryjoin="Task.phase_id==Phase.id",
-        backref="tasks",
+        backref=backref("tasks", order_by='Task.taskDate'),
         lazy="joined")
 
     type_ = Column('type_', String(30), nullable=False)

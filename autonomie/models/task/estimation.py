@@ -382,7 +382,7 @@ class EstimationLine(DBBASE, LineCompute):
             CustomDateType,
             default=get_current_timestamp,
             onupdate=get_current_timestamp))
-    unity = Column("unity", String(10))
+    unity = Column("unity", String(100))
     task = relationship(
         "Estimation",
         backref=backref("lines", order_by='EstimationLine.rowIndex',

@@ -296,6 +296,7 @@ class TaskLine(colander.MappingSchema):
         colander.String(),
         widget=deferred_unity_widget,
         validator=deferred_unity_validator,
+        missing=u"",
         css_class='span2')
     tva = colander.SchemaNode(
         Integer(),

@@ -39,6 +39,7 @@ from autonomie.views.forms.task import PaymentSchema
 from autonomie.views.forms.utils import BaseFormView
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.pdf import render_html
+from autonomie.resources import task_js
 
 DOCUMENT_TYPES = ('estimation', 'invoice', 'cancelinvoice')
 
@@ -401,6 +402,7 @@ class StatusView(object):
 class TaskFormView(BaseFormView):
     model = None
     def __init__(self, request):
+        task_js.need()
         super(TaskFormView, self).__init__(request)
         self.buttonmaker = TaskFormActions(request, model=self.model)
         self.context = self.request.context

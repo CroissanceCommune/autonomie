@@ -24,11 +24,13 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.models.config import Config
 from autonomie.models.tva import Tva
 from autonomie.models.task.invoice import PaymentMode
+from autonomie.models.task import WorkUnit
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.admin import MainConfig
 from autonomie.views.forms.admin import TvaConfig
 from autonomie.views.forms.admin import PaymentModeConfig
+from autonomie.views.forms.admin import WorkUnitConfig
 from autonomie.views.forms.admin import get_config_appstruct
 from autonomie.views.forms.admin import merge_dbdatas
 from autonomie.views.forms import BaseFormView
@@ -51,6 +53,10 @@ factures"))
     request.actionmenu.add(ViewLink(u"Configuration des modes de paiement",
         path="admin_paymentmode",
         title=u"Configuration des modes de paiement des factures"))
+    request.actionmenu.add(ViewLink(u"Configuration des unités de prestation",
+        path="admin_workunit",
+        title=u"Configuration des unités de prestation proposées \
+dans les formulaires"))
     return dict(title=u"Administration du site")
 
 
@@ -155,6 +161,34 @@ class AdminPaymentMode(BaseFormView):
         return HTTPFound(self.request.route_path("admin_paymentmode"))
 
 
+class AdminWorkUnit(BaseFormView):
+    """
+        Work Unit administration view
+        Allows to configure custom unities
+    """
+    title = u"Configuration des unités de prestation"
+    validation_msg = u"Les unités de prestation ont bien été modifiées"
+    schema = WorkUnitConfig()
+    buttons = (submit_btn,)
+
+    def before(self, form):
+        """
+            Add appstruct to the current form object
+        """
+        appstruct = [mode.label for mode in WorkUnit.query()]
+        form.appstruct = {'workunits':appstruct}
+        populate_actionmenu(self.request)
+
+    def submit_success(self, appstruct):
+        for unit in WorkUnit.query():
+            self.dbsession.delete(unit)
+        for data in appstruct['workunits']:
+            unit = WorkUnit(label=data)
+            self.dbsession.add(unit)
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path("admin_workunit"))
+
+
 def includeme(config):
     """
         Add module's views
@@ -164,6 +198,7 @@ def includeme(config):
     config.add_route("admin_main", "/admin/main")
     config.add_route("admin_tva", "/admin/tva")
     config.add_route("admin_paymentmode", "admin/paymentmode")
+    config.add_route("admin_workunit", "admin/workunit")
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')
@@ -174,5 +209,8 @@ def includeme(config):
                  renderer="base/formpage.mako",
                  permission='admin')
     config.add_view(AdminPaymentMode, route_name='admin_paymentmode',
+                renderer="base/formpage.mako",
+                permission='admin')
+    config.add_view(AdminWorkUnit, route_name='admin_workunit',
                 renderer="base/formpage.mako",
                 permission='admin')

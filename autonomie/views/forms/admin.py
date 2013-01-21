@@ -162,6 +162,19 @@ class PaymentModeConfig(colander.MappingSchema):
     paymentmodes = PaymentModeSequence(title=u"", missing=u"")
 
 
+class WorkUnitSequence(colander.SequenceSchema):
+    """
+        Single work untit configuration scheme
+    """
+    label = colander.SchemaNode(colander.String(), title=u"Libellé")
+
+class WorkUnitConfig(colander.MappingSchema):
+    """
+        Main configuration form model
+    """
+    workunits = WorkUnitSequence(title=u"", missing=u"")
+
+
 def get_config_appstruct(config_dict):
     """
         transform Config datas to ConfigSchema compatible appstruct

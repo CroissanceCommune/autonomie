@@ -4,15 +4,6 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="esc"/>
 <%namespace file="/base/utils.mako" import="address"/>
-<%block name='headjs'>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/jquery.tmpl.min.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/underscore-min.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/backbone-min.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/math.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/dom.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/date.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/task.js')}"></script>
-</%block>
 <%block name='css'>
 <link href="${request.static_url('autonomie:static/css/task.css')}" rel="stylesheet"  type="text/css" />
 </%block>

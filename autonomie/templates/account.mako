@@ -40,7 +40,7 @@
         </div>
     </div>
     <div class='span5 offset1'>
-        ${html_form|n}
+        ${form|n}
     </div>
 </div>
 </%block>

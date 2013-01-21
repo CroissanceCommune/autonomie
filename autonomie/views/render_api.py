@@ -162,26 +162,6 @@ def format_paymentmode(paymentmode):
     return paymentmode
 
 
-def format_unity(unity, pretty=False):
-    """
-        format the unity of a document (days, weeks ...)
-    """
-    if pretty:
-        default = u""
-    else:
-        default = u"-"
-    labels = dict(
-            NONE=default,
-            HOUR=u"heure(s)",
-            DAY=u"jour(s)",
-            WEEK=u"semaine(s)",
-            MONTH=u"mois",
-            FEUIL=u"feuillet(s)",
-            PACK=u"forfait",
-            )
-    return labels.get(unity, default)
-
-
 def urlupdate(request, args_dict):
     """
         Return the current url with updated GET params
@@ -218,5 +198,4 @@ api = Api(format_amount=format_amount,
           format_short_date=format_short_date,
           format_long_date=format_long_date,
           format_quantity=format_quantity,
-          format_unity=format_unity,
           urlupdate=urlupdate)

@@ -57,6 +57,7 @@ from autonomie.views.forms.widgets import deferred_autocomplete_widget
 from autonomie.views.forms.widgets import get_date_input
 from autonomie.views.forms.widgets import CustomSequenceWidget
 from autonomie.models.task.invoice import PaymentMode
+from autonomie.models.task import WorkUnit
 from autonomie.models.tva import Tva
 from .custom_types import QuantityType
 from .custom_types import AmountType
@@ -194,6 +195,25 @@ def get_tva_choices():
     return [(unicode(tva.value), tva.name)for tva in Tva.query()]
 
 
+def get_unities():
+    unities =  ["",]
+    unities.extend([workunit.label  for workunit in WorkUnit.query()])
+    return unities
+
+
+@colander.deferred
+def deferred_unity_widget(node, kw):
+    unities = get_unities()
+    return widget.SelectWidget(
+                     values=zip(unities, unities),
+                     template=TEMPLATES_URL + 'unity.mako')
+
+
+@colander.deferred
+def deferred_unity_validator(node, kw):
+    return colander.OneOf(get_unities())
+
+
 @colander.deferred
 def deferred_tvas_widget(node, kw):
     """
@@ -274,9 +294,8 @@ class TaskLine(colander.MappingSchema):
         css_class='span1')
     unity = colander.SchemaNode(
         colander.String(),
-        widget=widget.SelectWidget(
-            values=DAYS,
-            template=TEMPLATES_URL + 'unity.mako'),
+        widget=deferred_unity_widget,
+        validator=deferred_unity_validator,
         css_class='span2')
     tva = colander.SchemaNode(
         Integer(),

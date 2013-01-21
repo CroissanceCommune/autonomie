@@ -206,11 +206,11 @@ def includeme(config):
                  renderer="admin/main.mako",
                  permission='admin')
     config.add_view(AdminTva, route_name='admin_tva',
-                 renderer="base/formpage.mako",
+                 renderer="base/simpleformpage.mako",
                  permission='admin')
     config.add_view(AdminPaymentMode, route_name='admin_paymentmode',
-                renderer="base/formpage.mako",
+                renderer="base/simpleformpage.mako",
                 permission='admin')
     config.add_view(AdminWorkUnit, route_name='admin_workunit',
-                renderer="base/formpage.mako",
+                renderer="base/simpleformpage.mako",
                 permission='admin')

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : jeu. 03 janv. 2013 12:52:01 CET
+# * Last Modified : lun. 21 janv. 2013 11:40:44 CET
 #
 # * Project : autonomie
 #
@@ -49,6 +49,8 @@ AUTONOMIE_MODULES = (
                      "autonomie.views.estimation",
                      "autonomie.views.invoice",
                      "autonomie.views.cancelinvoice",
+                     "autonomie.views.json",
+                     "autonomie.views.subscribers",
                      )
 
 
@@ -106,7 +108,6 @@ def main(global_config, **settings):
     # Set deform multi renderer handling translation and both chameleon and
     # mako templates
     set_deform_renderer()
-    config.scan('autonomie.views')
     config.add_translation_dirs("colander:locale/", "deform:locale")
     locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
     locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")

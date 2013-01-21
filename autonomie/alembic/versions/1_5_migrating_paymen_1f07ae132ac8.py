@@ -46,4 +46,4 @@ def downgrade():
             p.mode = u"liquide"
         else:
             p.mode = "inconnu"
-        DBSESSION().merge(payment)
+        DBSESSION().merge(p)

@@ -22,6 +22,7 @@ from fanstatic import Resource
 from js.bootstrap import bootstrap_js
 from js.jquery import jquery
 from js.jqueryui import ui_dialog
+from js.jqueryui import ui_sortable
 from js.jqueryui import ui_datepicker_fr
 #from js.jqueryui import bootstrap as jqueryui_bootstrap_theme
 from js.jquery_form import jquery_form
@@ -31,7 +32,7 @@ from js.jquery_qunit import jquery_qunit
 
 lib_autonomie = Library("fanstatic", "static")
 
-main = Resource(lib_autonomie, "js/main.js", depends=[ui_dialog])
+main = Resource(lib_autonomie, "js/main.js", depends=[ui_dialog, ui_sortable])
 
 underscore = Resource(lib_autonomie, "js/underscore.js",
         minified="js/underscore-min.js")

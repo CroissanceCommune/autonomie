@@ -146,7 +146,8 @@ class TvaSequence(colander.SequenceSchema):
 
 
 class TvaConfig(colander.MappingSchema):
-    tvas = TvaSequence(title=u"", missing=u'')
+    tvas = TvaSequence(title=u"", missing=u'',
+            widget=widget.SequenceWidget(orderable=True))
 
 
 class PaymentModeSequence(colander.SequenceSchema):
@@ -159,7 +160,8 @@ class PaymentModeConfig(colander.MappingSchema):
     """
         Main configuration form model
     """
-    paymentmodes = PaymentModeSequence(title=u"", missing=u"")
+    paymentmodes = PaymentModeSequence(title=u"", missing=u"",
+            widget=widget.SequenceWidget(orderable=True))
 
 
 class WorkUnitSequence(colander.SequenceSchema):
@@ -172,7 +174,8 @@ class WorkUnitConfig(colander.MappingSchema):
     """
         Main configuration form model
     """
-    workunits = WorkUnitSequence(title=u"", missing=u"")
+    workunits = WorkUnitSequence(title=u"", missing=u"",
+            widget=widget.SequenceWidget(orderable=True))
 
 
 def get_config_appstruct(config_dict):

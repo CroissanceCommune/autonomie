@@ -43,6 +43,7 @@ c1 = aliased(Client)
 c2 = aliased(Client)
 c3 = aliased(Client)
 
+
 def get_taskdates(dbsession):
     """
         Return all taskdates
@@ -55,6 +56,7 @@ def get_taskdates(dbsession):
         return dbsession.query(Invoice.taskDate), \
                dbsession.query(ManualInvoice.taskDate)
     return taskdates()
+
 
 def get_years(dbsession):
     """
@@ -74,6 +76,16 @@ def get_years(dbsession):
                      ]))
             )
     return years()
+
+
+def get_year_range(year):
+    """
+        Return the first january of the current and the next year
+    """
+    fday = datetime.date(year, 1, 1)
+    lday = datetime.date(year + 1, 1, 1)
+    return fday, lday
+
 
 class InvoicesList(BaseListView):
     """
@@ -138,8 +150,7 @@ class InvoicesList(BaseListView):
 
     def filter_taskDate(self, query, appstruct):
         year = appstruct['year']
-        fday = datetime.date(year, 1, 1)
-        lday = datetime.date(year + 1, 1, 1)
+        fday, lday = get_year_range(year)
         query = query.filter(Task.taskDate.between(
                                 format_to_taskdate(fday),
                                 format_to_taskdate(lday)))
@@ -236,25 +247,35 @@ class GlobalInvoicesList(InvoicesList):
         values['companies'] = Company.query(active=False).all()
         return values
 
-#def company_treasury(request):
-#    """
-#        View for the treasury view
-#    """
-#    company = request.context
-#    today = datetime.date.today()
-#    current_year = today.year
-#    year = request.params.get('year', current_year)
-#    invoices = self.get_invoices(company_id=company.id,
-#                                     paid="paid",
-#                                     year=year,
-#                                     sort=('taskDate',))
-#    return dict(
-#            title=u"Trésorerie",
-#            invoices=invoices,
-#            company=company,
-#            years=self._get_years(),
-#            current_year=year,
-#            today=today)
+# A bit silly but will be removed soon
+def company_treasury(request):
+    """
+        View for the treasury view
+    """
+    invoices = Invoice.query().join(Project).filter(Invoice.CAEStatus=='resulted')
+
+    company = request.context
+    invoices = invoices.filter(Project.company_id==company.id)
+
+    today = datetime.date.today()
+    current_year = today.year
+    year = request.params.get('year', current_year)
+    try:
+        year = int(year)
+    except:
+        year = current_year
+    fday, lday = get_year_range(year)
+    invoices = invoices.filter(Invoice.taskDate.between(
+                            format_to_taskdate(fday),
+                            format_to_taskdate(lday)))
+    invoices = invoices.order_by(Invoice.taskDate)
+    return dict(
+            title=u"Trésorerie",
+            invoices=invoices,
+            company=company,
+            years=get_years(request.dbsession),
+            current_year=year,
+            today=today)
 
 def includeme(config):
     # Company invoices view
@@ -273,7 +294,7 @@ def includeme(config):
                     route_name="invoices",
                     renderer="invoices.mako",
                     permission="manage")
-#    config.add_view(company_treasury,
-#                    route_name='company_treasury',
-#                    renderer='company_treasury.mako',
-#                    permission='edit')
+    config.add_view(company_treasury,
+                    route_name='company_treasury',
+                    renderer='company_treasury.mako',
+                    permission='edit')

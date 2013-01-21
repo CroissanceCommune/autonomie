@@ -60,7 +60,7 @@ class HolidayRegister(BaseFormView):
         appstruct = {'holidays' : [{'start_date':holiday.start_date,
                                     'end_date':holiday.end_date}
                                               for holiday in holidays]}
-        form.appstruct = appstruct
+        form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
         """

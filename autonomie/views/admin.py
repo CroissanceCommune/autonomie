@@ -81,7 +81,7 @@ class AdminMain(BaseFormView):
         """
         config_dict = self.request.config
         appstruct = get_config_appstruct(config_dict)
-        form.appstruct = appstruct
+        form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
@@ -116,7 +116,7 @@ class AdminTva(BaseFormView):
         appstruct = [{'name':tva.name,
                       'value':tva.value,
                       "default":tva.default}for tva in Tva.query().all()]
-        form.appstruct = {'tvas':appstruct}
+        form.set_appstruct({'tvas':appstruct})
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
@@ -148,7 +148,7 @@ class AdminPaymentMode(BaseFormView):
             Add appstruct to the current form object
         """
         appstruct = [mode.label for mode in PaymentMode.query()]
-        form.appstruct = {'paymentmodes':appstruct}
+        form.set_appstruct({'paymentmodes':appstruct})
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
@@ -176,7 +176,7 @@ class AdminWorkUnit(BaseFormView):
             Add appstruct to the current form object
         """
         appstruct = [mode.label for mode in WorkUnit.query()]
-        form.appstruct = {'workunits':appstruct}
+        form.set_appstruct({'workunits':appstruct})
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):

@@ -312,8 +312,9 @@ class ProjectEdit(BaseFormView):
         """
             populate the form with the current datas
         """
-        form.appstruct = self.request.context.appstruct()
-        form.appstruct['clients'] = [c.id for c in self.request.context.clients]
+        appstruct = self.request.context.appstruct()
+        appstruct['clients'] = [c.id for c in self.request.context.clients]
+        form.set_appstruct(appstruct)
         populate_actionmenu(self.request, self.request.context)
 
     def submit_success(self, appstruct):

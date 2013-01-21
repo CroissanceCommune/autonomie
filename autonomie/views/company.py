@@ -132,7 +132,8 @@ class CompanyEdit(BaseFormView):
         """
             prepopulate the form and the actionmenu
         """
-        form.appstruct = self.request.context.appstruct()
+        appstruct = self.request.context.appstruct()
+        form.set_appstruct(appstruct)
         populate_actionmenu(self.request, self.request.context)
 
     def submit_success(self, appstruct):

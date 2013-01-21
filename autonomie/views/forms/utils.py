@@ -15,28 +15,13 @@
 """
     Form view tool to easily build form views
 """
-
-import colander
-
-from deform import Form
 from pyramid_deform import FormView
 from autonomie.utils.views import submit_btn
-
-class CustomForm(Form):
-    """
-        A deform Form that allows 'appstruct' to be set on the instance.
-    """
-    def render(self, appstruct=None, readonly=False):
-        if appstruct is None:
-            appstruct = getattr(self, 'appstruct', colander.null)
-        return super(CustomForm, self).render(appstruct, readonly)
-
 
 class BaseFormView(FormView):
     """
         Allows to easily build form views
     """
-    form_class = CustomForm
     add_template_vars = ('title',)
     buttons = (submit_btn,)
 

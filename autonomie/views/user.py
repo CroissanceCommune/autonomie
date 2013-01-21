@@ -102,7 +102,8 @@ class UserAccount(BaseFormView):
     title = u"Mon compte"
 
     def before(self, form):
-        form.appstruct = {'login': self.request.user.login}
+        appstruct = {'login': self.request.user.login}
+        form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
         log.info(u"# User {0} has changed his password #".format(
@@ -278,8 +279,9 @@ class UserEdit(BaseUserForm):
 
     def before(self, form):
         user = self.request.context
-        form.appstruct = {'user': user.appstruct(),
-                         'companies': [comp.name for comp in  user.companies]}
+        appstruct = {'user': user.appstruct(),
+                     'companies': [comp.name for comp in  user.companies]}
+        form.set_appstruct(appstruct)
         populate_actionmenu(self.request, self.request.context)
 
     def submit_success(self, appstruct):

@@ -21,7 +21,6 @@ import logging
 from webhelpers.html import tags
 from webhelpers.html import HTML
 
-from pyramid.events import subscriber
 from pyramid.events import BeforeRender
 from pyramid.events import NewRequest
 from pyramid.threadlocal import get_current_request
@@ -33,12 +32,11 @@ from autonomie.utils.widgets import MainMenuItem
 from autonomie.utils.widgets import MenuDropDown
 from autonomie.utils.widgets import StaticWidget
 from autonomie.utils.widgets import ActionMenu
-
 from autonomie.resources import main_js
-
 from autonomie.views.render_api import api
 
 log = logging.getLogger(__name__)
+
 
 def get_cid(request):
     """
@@ -144,7 +142,6 @@ def company_menu(request, companies, cid):
     return menu
 
 
-@subscriber(BeforeRender)
 def add_menu(event):
     """
         Add the menu to the returned datas (before rendering)
@@ -173,7 +170,6 @@ def add_menu(event):
             event.update({'submenu': submenu})
 
 
-@subscriber(BeforeRender)
 def add_translation(event):
     """
         Add a translation func to the templating context
@@ -183,12 +179,13 @@ def add_translation(event):
         request = get_current_request()
     event['_'] = request.translate
 
-@subscriber(BeforeRender)
+
 def add_api(event):
     """
         Add an api to the templating context
     """
     event['api'] = api
+
 
 def get_req_uri(request):
     """
@@ -196,7 +193,7 @@ def get_req_uri(request):
     """
     return request.path_url + request.query_string
 
-@subscriber(NewRequest)
+
 def log_request(event):
     """
         Log each request
@@ -210,7 +207,7 @@ def log_request(event):
     log.info(u"method:'%s' - uri:'%s', http_version:'%s' -  referer:'%s' - \
 agent:'%s'" % (method, req_uri, http_version, referer, user_agent))
 
-@subscriber(NewRequest)
+
 def add_request_attributes(event):
     """
         Add usefull tools to the request object
@@ -222,6 +219,20 @@ def add_request_attributes(event):
     request.actionmenu = ActionMenu()
     request.popups = {}
 
-@subscriber(NewRequest)
+
 def add_main_js(event):
+    """
+        Add the main required javascript dependency
+    """
     main_js.need()
+
+
+def includeme(config):
+    """
+        Bind the subscribers to the pyramid events
+    """
+    for before in (add_menu, add_translation, add_api, add_main_js):
+        config.add_subscriber(before, BeforeRender)
+
+    for new_req in (log_request, add_request_attributes):
+        config.add_subscriber(new_req, NewRequest)

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 21 janv. 2013 11:40:44 CET
+# * Last Modified : lun. 21 janv. 2013 17:15:21 CET
 #
 # * Project : autonomie
 #
@@ -32,6 +32,7 @@ from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
 from autonomie.utils.renderer import set_deform_renderer
 from autonomie.utils.session import get_session_factory
+from autonomie.utils.deform_bootstrap_fix import add_resources_to_registry
 
 
 AUTONOMIE_MODULES = (
@@ -111,6 +112,7 @@ def main(global_config, **settings):
     config.add_translation_dirs("colander:locale/", "deform:locale")
     locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
     locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
+    add_resources_to_registry()
 
     return config.make_wsgi_app()
 

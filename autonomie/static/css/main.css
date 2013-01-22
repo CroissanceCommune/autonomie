@@ -8,6 +8,9 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+body{
+  padding:0px;
+}
 header .navbar{
   margin-bottom:0px;
 }

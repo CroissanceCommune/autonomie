@@ -74,15 +74,15 @@
         % endif
         <h3 class='floatted' style="padding-right:10px;">Devis</h3>
         <a class='btn' href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'>
-            <span class='ui-icon ui-icon-plusthick'></span>
+            <span class='ui-icon ui-icon-plusthick'></span>Nouveau devis
         </a>
         % if  phase.estimations:
             <table class='table table-striped table-condensed'>
                 <thead>
                     <th></th>
                     <th>Document</th>
-                    <th>Nom</th>
-                    <th>État</th>
+                    <th class='visible-desktop'>Nom</th>
+                    <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>
                 %for task in phase.estimations:
@@ -96,8 +96,8 @@
                         </td>
                         <% task.url = request.route_path("estimation", id=task.id) %>
                         <td class='rowlink' onclick="document.location='${task.url}'">${task.number}</td>
-                        <td class='rowlink' onclick="document.location='${task.url}'">${task.name}</td>
-                        <td class='rowlink' onclick="document.location='${task.url}'">
+                        <td class='rowlink visible-desktop' onclick="document.location='${task.url}'">${task.name}</td>
+                        <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">
                             %if task.is_cancelled():
                                 <span class="label label-important">
                                     <i class="icon-white icon-remove"></i>
@@ -130,7 +130,7 @@
         %endif
         <h3 class='floatted' style='padding-right:10px;font-weight:100;'>Facture(s)</h3>
         <a class='btn' href='${request.route_path("project_invoices", id=project.id, _query=dict(phase=phase.id))}'>
-            <span class='ui-icon ui-icon-plusthick'></span>
+            <span class='ui-icon ui-icon-plusthick'></span>Nouvelle facture
         </a>
         %if phase.invoices:
             <table class='table table-striped table-condensed'>
@@ -138,8 +138,8 @@
                     <th></th>
                     <th>Numéro</th>
                     <th>Document</th>
-                    <th>Nom</th>
-                    <th>État</th>
+                    <th class='visible-desktop'>Nom</th>
+                    <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>
                 %for task in phase.invoices:
@@ -155,8 +155,8 @@
                         <td onclick="document.location='${task.url}'" class='rowlink'>
                             ${task.officialNumber}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>${task.name}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>
+                        <td onclick="document.location='${task.url}'" class='rowlink visible-desktop'>${task.name}</td>
+                        <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>
                             %if task.is_cancelled():
                                 <span class="label label-important">
                                     <i class="icon-white icon-remove"></i>

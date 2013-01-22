@@ -74,6 +74,20 @@ def deferred_code_widget(node, kw):
 
 
 @colander.deferred
+def deferred_default_client(node, kw):
+    """
+        Return the client provided as request arg if there is one
+    """
+    request = kw['request']
+    clients = get_clients_from_request(request)
+    client = request.params.get('client')
+    if client in [str(c.id) for c in clients]:
+        return [int(client)]
+    else:
+        return colander.null
+
+
+@colander.deferred
 def deferred_client_validator(node, kw):
     request = kw['request']
     clients = get_clients_from_request(request)
@@ -125,7 +139,8 @@ class ProjectSchema(colander.MappingSchema):
             title=u"Clients",
             widget=widget.SequenceWidget(
                 min_len=1,
-                add_subitem_text_template=u"Ajouter un client"),)
+                add_subitem_text_template=u"Ajouter un client"),
+            default=deferred_default_client)
 
 
 class PhaseSchema(colander.MappingSchema):

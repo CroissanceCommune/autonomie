@@ -59,6 +59,9 @@
     </div>
     <div class='span9'>
         <h2>Projets</h2>
+        <a class='btn' href='${request.route_path("company_projects", id=client.company.id, _query=dict(action="add", client=client.id))}'>
+            <span class='ui-icon ui-icon-plusthick'></span>Nouveau projet
+        </a>
         %if client.projects:
             <table class="table table-striped table-condensed">
                 <thead>

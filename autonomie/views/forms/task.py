@@ -383,6 +383,13 @@ class TaskLinesBlock(colander.MappingSchema):
             template=TEMPLATES_URL + 'discountlines_sequence.mako',
             item_template=TEMPLATES_URL + 'discountlines_sequence_item.mako'),
         title=u'')
+    expenses_ht = colander.SchemaNode(
+            AmountType(),
+            widget=widget.TextInputWidget(
+                template=TEMPLATES_URL + 'wrappable_input.mako',
+                ),
+            title=u"Frais forfaitaires (HT)",
+            missing=0)
     expenses = colander.SchemaNode(
         AmountType(),
         widget=widget.TextInputWidget(
@@ -392,7 +399,7 @@ class TaskLinesBlock(colander.MappingSchema):
             after=TEMPLATES_URL + 'staticinput.mako',
             after_options={'label': u'Total TTC', 'id': 'total'}
         ),
-        title=u'Frais TTC',
+        title=u'Frais Réel (TTC)',
         missing=0)
 
 
@@ -784,6 +791,7 @@ class InvoiceMatch(MappingWrapper):
         ('course', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),
+        ('expenses_ht', 'lines'),
         ('paymentConditions', 'payments'),
         ('statusComment', 'communication'),
     )
@@ -801,6 +809,7 @@ class EstimationMatch(MappingWrapper):
         ('course', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),
+        ('expenses_ht', 'lines'),
         ('exclusions', 'notes'),
         ('paymentConditions', 'payments'),
 
@@ -823,6 +832,7 @@ class CancelInvoiceMatch(MappingWrapper):
         ('address', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),
+        ('expenses_ht', 'lines'),
         ('reimbursementConditions', 'payments'),
     )
     dbtype = 'cancelinvoice'

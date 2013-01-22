@@ -59,6 +59,9 @@
 .visible-desktop {
   display: block;
 }
+th.visible-desktop, td.visible-desktop{
+  display:table-cell;
+}
 .hidden-phone {
   display: block;
 }

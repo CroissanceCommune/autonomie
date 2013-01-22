@@ -21,7 +21,6 @@ function delRow(id){
   $('#' + id).remove();
   $(Facade).trigger("linedelete");
 }
-
 var Row = Backbone.Model.extend({
   /*
    * Main row model
@@ -56,7 +55,6 @@ var Row = Backbone.Model.extend({
     return this.row;
   }
 });
-
 var TaskRow = Row.extend({
   /*
    *  Task Row model
@@ -88,7 +86,19 @@ var DiscountRow = Row.extend({
     return -1 * this.getAmount();
   }
 });
-
+var ExpenseRow = Row.extend({
+  /*
+   * HT Expense row
+   */
+  type:'expense',
+  TVA:function(){
+    // This tva value should be set dynamically
+    return 1960;
+  },
+  HT:function(){
+    return transformToCents(this.row.val());
+  }
+});
 var RowCollection = Backbone.Collection.extend({
   /*
    *  Row collection model
@@ -154,6 +164,12 @@ function getExpenses(){
    */
   return transformToCents( $('input[name=expenses]').val() );
 }
+function getExpensesHT() {
+  /*
+   * Return the current HT expenses configured
+   */
+  return transformToCents( $('input[name=expenses_ht]').val() );
+}
 function getCollection(){
   /*
    * Return the collection of rows related to the payment information
@@ -161,6 +177,7 @@ function getCollection(){
   var collection = new RowCollection();
   collection.load('.taskline', TaskRow);
   collection.load('.discountline', DiscountRow);
+  collection.add(new ExpenseRow('input[name=expenses_ht]'));
   return collection;
 }
 function computeTotal(){
@@ -171,6 +188,7 @@ function computeTotal(){
   var collection = getCollection();
   var tasklines_ht = collection.HT("task");
   var total_ht = collection.HT();
+
   var total_ttc = collection.TTC();
   var tvas = collection.Tvas();
   console.log(total_ttc);

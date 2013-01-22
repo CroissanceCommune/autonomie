@@ -67,12 +67,27 @@
                             % endif
                         </tr>
                     % endfor
+                    % if task.expenses_ht > 0:
+                        <tr>
+                            <td class='description' colspan='${colspan}'>
+                                Frais forfaitaires
+                            </td>
+                            <td class="price">
+                                ${api.format_amount(task.expenses_ht)|n}&nbsp;€
+                            </td>
+                            % if multiple_tvas:
+                                <td class='tva'>
+                                    ${api.format_amount(task.expenses_tva)|n}&nbsp;%
+                                </td>
+                            % endif
+                        </tr>
+                    % endif
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
                             Total HT
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.lines_total_ht(), trim=False)|n}&nbsp;€
+                            ${api.format_amount(task.lines_total_ht() + task.expenses_ht, trim=False)|n}&nbsp;€
                         </td>
                         % if multiple_tvas:
                             <td></td>
@@ -81,7 +96,7 @@
                     %if hasattr(task, "discounts") and task.discounts:
                         % for discount in task.discounts:
                             <tr>
-                                <td colspan='${colspan}' class='rightalign'>
+                                <td colspan='${colspan}' class='description'>
                                     ${format_text(discount.description)}
                                 </td>
                                 <td class='price'>
@@ -129,7 +144,7 @@
                     %if task.expenses:
                         <tr>
                             <td colspan='${colspan}' class='rightalign'>
-                                Frais liés à la prestation
+                                Frais de port
                             </td>
                             <td class='price'>
                                 ${api.format_amount(task.expenses_amount())|n}&nbsp;€

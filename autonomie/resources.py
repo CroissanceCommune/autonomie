@@ -23,6 +23,7 @@ from js.bootstrap import bootstrap_js
 from js.jquery import jquery
 from js.jqueryui import ui_dialog
 from js.jqueryui import ui_sortable
+from js.jqueryui import ui_autocomplete
 from js.jqueryui import ui_datepicker_fr
 #from js.jqueryui import bootstrap as jqueryui_bootstrap_theme
 from js.jquery_form import jquery_form
@@ -61,6 +62,7 @@ task = Resource(lib_autonomie, "js/task.js", depends=[date, jquery_tmpl,
 main_js = Group([main,
                  bootstrap_js,
                  jquery_form,
+                 ui_autocomplete,
                  ui_datepicker_fr,
                  jquery_maskedinput,
                  deform_bootstrap_js,

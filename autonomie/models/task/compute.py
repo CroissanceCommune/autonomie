@@ -40,18 +40,14 @@ class TaskCompute(object):
             pass
 
         A.total()
-        expects some attributes to be filled
-        lines
-        payments
-        discountHT
-        expenses
-        tva
     """
     # Should have a total_ht and a tva method
     lines = []
     # Should have a total_ht and a tva method
     discounts = []
-    expenses = None
+    expenses = 0
+    expenses_ht = 0
+    expenses_tva = 1960
 
     def lines_total_ht(self):
         """
@@ -69,7 +65,8 @@ class TaskCompute(object):
         """
             compute the HT amount
         """
-        return int(self.lines_total_ht() - self.discount_total_ht())
+        return int(self.lines_total_ht() - self.discount_total_ht() +
+                    self.expenses_ht)
 
     def get_tvas(self):
         """
@@ -85,6 +82,12 @@ class TaskCompute(object):
             val = ret_dict.get(discount.tva, 0)
             val -= discount.tva_amount()
             ret_dict[discount.tva] = val
+        expense = self.get_expense_ht()
+        tva_amount = expense.tva_amount()
+        if tva_amount > 0:
+            val = ret_dict.get(expense.tva, 0)
+            val += expense.tva_amount()
+            ret_dict[expense.tva] = val
         return ret_dict
 
     def tva_amount(self):
@@ -111,6 +114,12 @@ class TaskCompute(object):
         """
         result = int(self.expenses)
         return result
+
+    def get_expense_ht(self):
+        """
+            Return a line object for the HT expense handling
+        """
+        return LineCompute(tva=self.expenses_tva, cost=self.expenses_ht)
 
     def no_tva(self):
         """

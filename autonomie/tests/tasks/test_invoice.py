@@ -41,7 +41,8 @@ INVOICE = dict( name=u"Facture 2",
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 _number=u"invoicenumber",
-                expenses=0)
+                expenses=0,
+                expenses_ht=0)
 
 class TestCancelInvoice(BaseTestCase):
     def test_set_name(self):
@@ -148,6 +149,8 @@ class TestInvoice(BaseTestCase):
         self.assertEqual(inv.project, newinv.project)
         self.assertEqual(newinv.statusPersonAccount, user)
         self.assertEqual(newinv.phase, phase)
+        for key in "client", "address", "expenses", "expenses_ht":
+            self.assertEqual(getattr(newinv, key), getattr(inv, key))
 
     def test_duplicate_invoice_integration(self):
         user = self.session.query(User).first()

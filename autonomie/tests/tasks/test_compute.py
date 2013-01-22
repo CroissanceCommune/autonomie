@@ -16,7 +16,7 @@ from autonomie.tests.base import BaseTestCase
 from autonomie.models.task.compute import (LineCompute, TaskCompute,
         EstimationCompute, InvoiceCompute, reverse_tva, compute_tva)
 
-TASK = {"expenses":1500,}
+TASK = {"expenses":1500, "expenses_ht":1000}
 LINES = [{'cost':10025, 'tva':1960, 'quantity':1.25},
          {'cost':7500,  'tva':1960, 'quantity':3},
          {'cost':-5200, 'tva':1960, 'quantity':1}]
@@ -37,13 +37,14 @@ TASK_LINES_TVAS = (2456.125, 4410, -1019.2)
 
 LINES_TOTAL_HT = sum(TASK_LINES_TOTAL_HT)
 LINES_TOTAL_TVAS = sum(TASK_LINES_TVAS)
+EXPENSE_TVA = 196
 
 DISCOUNT_TOTAL_HT = sum([d['amount']for d in DISCOUNTS])
 DISCOUNT_TVAS = (392,)
 DISCOUNT_TOTAL_TVAS = sum(DISCOUNT_TVAS)
 
-HT_TOTAL =  int(LINES_TOTAL_HT - DISCOUNT_TOTAL_HT)
-TVA = int(LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS)
+HT_TOTAL =  int(LINES_TOTAL_HT - DISCOUNT_TOTAL_HT + TASK['expenses_ht'])
+TVA = int(LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS + EXPENSE_TVA)
 
 # TASK_TOTAL = lines + tva + expenses rounded
 TASK_TOTAL = HT_TOTAL + TVA + TASK['expenses']

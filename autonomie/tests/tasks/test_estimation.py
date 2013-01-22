@@ -131,6 +131,8 @@ class TestEstimation(BaseTestCase):
         est.client = client
         est.statusPersonAccount = user
         newest = est.duplicate(user, project, phase, client)
+        for key in "client", "address", "expenses", "expenses_ht":
+            self.assertEqual(getattr(newest, key), getattr(est, key))
         self.assertEqual(newest.CAEStatus, 'draft')
         self.assertEqual(newest.project, project)
         self.assertEqual(newest.statusPersonAccount, user)
@@ -139,8 +141,6 @@ class TestEstimation(BaseTestCase):
         self.assertEqual(len(est.lines), len(newest.lines))
         self.assertEqual(len(est.payment_lines), len(newest.payment_lines))
         self.assertEqual(len(est.discounts), len(newest.discounts))
-        self.assertEqual(newest.client, est.client)
-        self.assertEqual(newest.address, est.address)
 
     def test_duplicate_estimation_integration(self):
         """

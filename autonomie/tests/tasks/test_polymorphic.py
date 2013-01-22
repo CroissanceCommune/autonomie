@@ -25,7 +25,8 @@ INVOICE = dict( name=u"Facture 2",
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 _number=u"invoicenumber",
-                expenses=0)
+                expenses=0,
+                expenses_ht=0)
 
 class TestPolymorphic(BaseTestCase):
     def setitUp(self):

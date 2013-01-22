@@ -82,6 +82,9 @@ class Estimation(Task, EstimationCompute):
     expenses = deferred(
         Column('expenses', Integer, default=0),
         group='edit')
+    expenses_ht = deferred(
+        Column(Integer, default=0),
+        group='edit')
     paymentDisplay = deferred(
         Column('paymentDisplay', String(20), default="SUMMARY"),
         group='edit')
@@ -153,6 +156,7 @@ class Estimation(Task, EstimationCompute):
         estimation.displayedUnits = self.displayedUnits
         estimation.discountHT = self.discountHT
         estimation.expenses = self.expenses
+        estimation.expenses_ht = self.expenses_ht
         estimation.paymentDisplay = self.paymentDisplay
         for line in self.lines:
             estimation.lines.append(line.duplicate())
@@ -222,6 +226,7 @@ class Estimation(Task, EstimationCompute):
 
         invoice.displayedUnits = self.displayedUnits
         invoice.expenses = self.expenses
+        invoice.expenses_ht = self.expenses_ht
         for line in self._sold_invoice_lines(paid_lines):
             invoice.lines.append(line)
         for line in self.discounts:

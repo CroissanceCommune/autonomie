@@ -34,8 +34,8 @@ from autonomie.views.forms.admin import WorkUnitConfig
 from autonomie.views.forms.admin import get_config_appstruct
 from autonomie.views.forms.admin import merge_dbdatas
 from autonomie.views.forms import BaseFormView
-from autonomie.utils.widgets import ActionMenu
 from autonomie.utils.widgets import ViewLink
+from js.tinymce import tinymce
 
 log = logging.getLogger(__name__)
 
@@ -61,6 +61,9 @@ dans les formulaires"))
 
 
 def populate_actionmenu(request):
+    """
+        Add a back to index link
+    """
     request.actionmenu.add(ViewLink(u"Revenir à l'index", path="admin_index",
         title=u"Revenir à l'index de l'administration"))
 
@@ -83,6 +86,7 @@ class AdminMain(BaseFormView):
         appstruct = get_config_appstruct(config_dict)
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
+        tinymce.need()
 
     def submit_success(self, appstruct):
         """
@@ -152,6 +156,9 @@ class AdminPaymentMode(BaseFormView):
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
+        """
+            handle successfull payment mode configuration
+        """
         for mode in PaymentMode.query():
             self.dbsession.delete(mode)
         for data in appstruct['paymentmodes']:
@@ -180,6 +187,9 @@ class AdminWorkUnit(BaseFormView):
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
+        """
+            Handle successfull work unit configuration
+        """
         for unit in WorkUnit.query():
             self.dbsession.delete(unit)
         for data in appstruct['workunits']:

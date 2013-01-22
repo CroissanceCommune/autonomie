@@ -215,7 +215,6 @@ def add_request_attributes(event):
     """
     request = event.request
     request.translate = translate
-    request.js_require = set()
     request.actionmenu = ActionMenu()
     request.popups = {}
 

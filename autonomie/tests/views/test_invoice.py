@@ -66,7 +66,6 @@ class Base(BaseFunctionnalTest):
             request.matched_route = "invoice"
             request.context = task
         request.user = self.user()
-        request.js_require = set()
         request.actionmenu = set()
         return request
 

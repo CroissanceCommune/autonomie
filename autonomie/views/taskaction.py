@@ -65,7 +65,6 @@ def get_duplicate_form(request, counter=None):
     """
         Return the form for task duplication
     """
-    request.js_require.add('duplicate')
     schema = DuplicateSchema().bind(request=request)
     action = request.route_path(request.context.__name__,
                                 id=request.context.id,

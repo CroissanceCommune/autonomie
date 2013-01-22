@@ -70,7 +70,6 @@ class CancelInvoiceAdd(TaskFormView):
     def before(self, form):
         super(CancelInvoiceAdd, self).before(form)
         populate_actionmenu(self.request)
-        self.request.js_require.add('address')
         form.widget.template = "autonomie:deform_templates/form.pt"
 
     def submit_success(self, appstruct):
@@ -147,7 +146,6 @@ class CancelInvoiceEdit(TaskFormView):
 
         super(CancelInvoiceEdit, self).before(form)
         populate_actionmenu(self.request)
-        self.request.js_require.add('address')
         form.widget.template = "autonomie:deform_templates/form.pt"
 
     def appstruct(self):

@@ -15,9 +15,6 @@
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    % for js_script in request.js_require:
-      <script type="text/javascript" src="${request.static_url('autonomie:static/js/%s.js' % (js_script,))}"></script>
-    % endfor
     <%block name="headjs" />
 
     <link href="${request.static_url('autonomie:static/css/default.css')}" rel="stylesheet"  type="text/css" />

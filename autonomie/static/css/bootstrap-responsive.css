@@ -59,7 +59,7 @@
 .visible-desktop {
   display: block;
 }
-th.visible-desktop, td.visible-desktop{
+th.visible-desktop, td.visible-desktop, th.hidden-phone, td.hidden-phone{
   display:table-cell;
 }
 .hidden-phone {

@@ -239,6 +239,20 @@ def deferred_default_tva(node, kw):
         return None
 
 
+@colander.deferred
+def deferred_default_phase(node, kw):
+    """
+        Return the default phase if one is present in the request arguments
+    """
+    request = kw['request']
+    phases = get_phases_from_request(request)
+    phase = request.params.get('phase')
+    if phase in [str(p.id) for p in phases]:
+        return int(phase)
+    else:
+        return colander.null
+
+
 def get_phase_choices(phases):
     """
         Return data structure for phase select options
@@ -398,7 +412,8 @@ class TaskConfiguration(colander.MappingSchema):
     phase_id = colander.SchemaNode(
         colander.String(),
         title=u"Phase où insérer le devis",
-        widget=deferred_phases_widget)
+        widget=deferred_phases_widget,
+        default=deferred_default_phase)
     taskDate = colander.SchemaNode(
         colander.Date(),
         title=u"Date du devis",

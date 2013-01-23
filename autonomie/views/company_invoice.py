@@ -44,6 +44,9 @@ c2 = aliased(Client)
 c3 = aliased(Client)
 
 
+#Here we do some multiple function stuff to allow caching to work
+# Beaker caching is done through signature (dbsession is changing each time, so
+# it won't cache if it's an argument of the cached function
 def get_taskdates(dbsession):
     """
         Return all taskdates
@@ -53,8 +56,8 @@ def get_taskdates(dbsession):
         """
             Cached version
         """
-        return dbsession.query(Invoice.taskDate), \
-               dbsession.query(ManualInvoice.taskDate)
+        return dbsession.query(Invoice.financial_year), \
+               dbsession.query(ManualInvoice.financial_year)
     return taskdates()
 
 
@@ -69,11 +72,8 @@ def get_years(dbsession):
         """
             cached version
         """
-        return sorted(
-                set([i.taskDate.year for i in inv.all()
-                        ]).union(
-                 set([i.taskDate.year for i in man_inv.all()
-                     ]))
+        return sorted(set([i.financial_year for i in inv.all()])\
+            .union(set([i.financial_year for i in man_inv.all()]))
             )
     return years()
 
@@ -150,10 +150,9 @@ class InvoicesList(BaseListView):
 
     def filter_taskDate(self, query, appstruct):
         year = appstruct['year']
-        fday, lday = get_year_range(year)
-        query = query.filter(Task.taskDate.between(
-                                format_to_taskdate(fday),
-                                format_to_taskdate(lday)))
+        query = query.filter(or_(Invoice.financial_year == year,
+                                CancelInvoice.financial_year == year,
+                                ManualInvoice.financial_year == year))
         return query
 
     def filter_status(self, query, appstruct):
@@ -264,10 +263,7 @@ def company_treasury(request):
         year = int(year)
     except:
         year = current_year
-    fday, lday = get_year_range(year)
-    invoices = invoices.filter(Invoice.taskDate.between(
-                            format_to_taskdate(fday),
-                            format_to_taskdate(lday)))
+    invoices = invoices.filter(Invoice.financial_year == year)
     invoices = invoices.order_by(Invoice.taskDate)
     return dict(
             title=u"Trésorerie",

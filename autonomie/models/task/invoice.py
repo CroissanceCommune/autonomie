@@ -104,6 +104,7 @@ class Invoice(Task, InvoiceCompute):
     expenses = deferred(Column('expenses', Integer, default=0), group='edit')
     expenses_ht = deferred(Column(Integer, default=0, nullable=False),
                         group='edit')
+    financial_year = deferred(Column(Integer, default=0), group='edit')
     address = Column("address", Text, default="")
 
     client_id = Column('client_id', Integer, ForeignKey('customer.id'))
@@ -262,6 +263,7 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.invoice = self
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.expenses_ht = -1 * self.expenses_ht
+        cancelinvoice.financial_year = self.financial_year
         cancelinvoice.displayedUnits = self.displayedUnits
         cancelinvoice.statusPersonAccount = user
         cancelinvoice.project = self.project
@@ -346,6 +348,7 @@ class Invoice(Task, InvoiceCompute):
         invoice.discountHT = self.discountHT
         invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
+        invoice.financial_year = date.year
 
         for line in self.lines:
             invoice.lines.append(line.duplicate())
@@ -447,6 +450,7 @@ class CancelInvoice(Task, TaskCompute):
     expenses_ht = deferred(Column(Integer, default=0, nullable=False),
                                                             group='edit')
     address = Column("address", Text, default="")
+    financial_year = deferred(Column(Integer, default=0), group='edit')
 
     project = relationship(
         "Project",

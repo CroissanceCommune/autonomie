@@ -152,6 +152,22 @@ class TestInvoice(BaseTestCase):
         for key in "client", "address", "expenses", "expenses_ht":
             self.assertEqual(getattr(newinv, key), getattr(inv, key))
 
+    def test_duplicate_invoice_financial_year(self):
+        user = self.session.query(User).first()
+        client = self.session.query(Client).first()
+        project = self.session.query(Project).first()
+        phase = self.session.query(Phase).first()
+        inv = self.getOne()
+        inv.owner = user
+        inv.statusPersonAccount = user
+        inv.project = project
+        inv.phase = phase
+        inv.client = client
+        inv.financial_year = 1900
+
+        newinv = inv.duplicate(user, project, phase, client)
+        self.assertEqual(newinv.financial_year, datetime.date.today().year)
+
     def test_duplicate_invoice_integration(self):
         user = self.session.query(User).first()
         printstatus(user)

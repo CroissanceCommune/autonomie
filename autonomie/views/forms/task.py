@@ -226,10 +226,8 @@ def deferred_unity_validator(node, kw):
 def deferred_financial_year_widget(node, kw):
     request = kw['request']
     if request.user.is_admin() or request.user.is_manager():
-        log.debug("Is an manager")
         return widget.TextInputWidget(mask='9999')
     else:
-        log.debug("Is not")
         return widget.HiddenWidget()
 
 

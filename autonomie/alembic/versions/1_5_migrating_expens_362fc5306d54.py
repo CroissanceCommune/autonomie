@@ -16,8 +16,10 @@ import sqlalchemy as sa
 
 def upgrade():
     for table in "invoice", "estimation", "cancelinvoice":
-        op.add_column(table, sa.Column("expenses_ht", sa.Integer, default=0))
+        op.add_column(table, sa.Column("expenses_ht", sa.Integer, default=0,
+                                                            nullable=False))
 
 
 def downgrade():
-    op.drop_column("invoice", "expenses_ht")
+    for table in "invoice", "estimation", "cancelinvoice":
+        op.drop_column(table, "expenses_ht")

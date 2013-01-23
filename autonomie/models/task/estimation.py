@@ -83,7 +83,7 @@ class Estimation(Task, EstimationCompute):
         Column('expenses', Integer, default=0),
         group='edit')
     expenses_ht = deferred(
-        Column(Integer, default=0),
+        Column(Integer, default=0, nullable=False),
         group='edit')
     paymentDisplay = deferred(
         Column('paymentDisplay', String(20), default="SUMMARY"),

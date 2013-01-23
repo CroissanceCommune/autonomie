@@ -249,7 +249,7 @@ def deferred_default_tva(node, kw):
     """
         return a tva widget
     """
-    default_tva = Tva.query().filter(Tva.default == 1).first()
+    default_tva = Tva.get_default()
     if default_tva is not None:
         return unicode(default_tva.value)
     else:
@@ -407,6 +407,8 @@ class TaskLinesBlock(colander.MappingSchema):
                 ),
             title=u"Frais forfaitaires (HT)",
             missing=0)
+    default_tva = colander.SchemaNode(colander.Integer(),
+            widget=widget.HiddenWidget(), default=deferred_default_tva)
     expenses = colander.SchemaNode(
         AmountType(),
         widget=widget.TextInputWidget(

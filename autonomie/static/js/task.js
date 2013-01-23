@@ -93,7 +93,8 @@ var ExpenseRow = Row.extend({
   type:'expense',
   TVA:function(){
     // This tva value should be set dynamically
-    return 1960;
+    var tva = $('input[name=default_tva]').val();
+    return transformToCents(tva);
   },
   HT:function(){
     return transformToCents(this.row.val());

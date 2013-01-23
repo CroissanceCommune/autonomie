@@ -18,6 +18,18 @@
 """
 import operator
 import math
+from autonomie.models.tva import Tva
+
+
+def get_default_tva():
+    """
+        Return the default tva
+    """
+    default_tva = Tva.get_default()
+    if default_tva:
+        return default_tva.value
+    else:
+        return 1960
 
 
 def reverse_tva(total_ttc, tva):
@@ -115,11 +127,16 @@ class TaskCompute(object):
         result = int(self.expenses)
         return result
 
+    def get_expenses_tva(self):
+        if self.expenses_tva == -1:
+            self.expenses_tva = get_default_tva()
+        return self.expenses_tva
+
     def get_expense_ht(self):
         """
             Return a line object for the HT expense handling
         """
-        return LineCompute(tva=self.expenses_tva, cost=self.expenses_ht)
+        return LineCompute(tva=self.get_expenses_tva(), cost=self.expenses_ht)
 
     def no_tva(self):
         """

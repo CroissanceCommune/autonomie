@@ -102,7 +102,8 @@ class Invoice(Task, InvoiceCompute):
         group='edit')
     discountHT = Column('discountHT', Integer, default=0)
     expenses = deferred(Column('expenses', Integer, default=0), group='edit')
-    expenses_ht = Column(Integer, default=0, nullable=False)
+    expenses_ht = deferred(Column(Integer, default=0, nullable=False),
+                        group='edit')
     address = Column("address", Text, default="")
 
     client_id = Column('client_id', Integer, ForeignKey('customer.id'))
@@ -443,7 +444,8 @@ class CancelInvoice(Task, TaskCompute):
     paymentMode = deferred(Column(String(80), default=None), group='edit')
     displayedUnits = Column(Integer, default=0)
     expenses = deferred(Column(Integer, default=0), group='edit')
-    expenses_ht = Column(Integer, default=0)
+    expenses_ht = deferred(Column(Integer, default=0, nullable=False),
+                                                            group='edit')
     address = Column("address", Text, default="")
 
     project = relationship(

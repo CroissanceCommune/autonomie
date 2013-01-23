@@ -153,7 +153,8 @@ def get_inv_state():
     delete = ('delete', None, None, False,)
     mdelete = ('delete', MANAGER_PERMS, None, False,)
     resulted = ('resulted', MANAGER_PERMS,)
-    financial_year = ('set_financial_year', 'view', set_financial_year, False,)
+    financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
+            False,)
     result = {}
     result['draft'] = ('draft', 'wait', delete, valid,)
     result['invalid'] = ('draft', 'wait', delete, )
@@ -176,7 +177,8 @@ def get_cinv_state():
     """
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
-    financial_year = ('set_financial_year', 'view', set_financial_year, False,)
+    financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
+                        False,)
     result = {}
     result['draft'] = ('wait', 'delete', valid )
     result['wait'] = (valid, invalid, 'delete', financial_year,)

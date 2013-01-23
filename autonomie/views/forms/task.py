@@ -223,6 +223,17 @@ def deferred_unity_validator(node, kw):
 
 
 @colander.deferred
+def deferred_financial_year_widget(node, kw):
+    request = kw['request']
+    if request.user.is_admin() or request.user.is_manager():
+        log.debug("Is an manager")
+        return widget.TextInputWidget(mask='9999')
+    else:
+        log.debug("Is not")
+        return widget.HiddenWidget()
+
+
+@colander.deferred
 def deferred_tvas_widget(node, kw):
     """
         return a tva widget
@@ -603,6 +614,7 @@ def get_estimation_schema():
 
 FINANCIAL_YEAR = colander.SchemaNode(colander.Integer(),
         name="financial_year", title=u"Année comptable de référence",
+        widget=deferred_financial_year_widget,
         default=deferred_default_year)
 
 

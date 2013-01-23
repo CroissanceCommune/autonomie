@@ -33,11 +33,6 @@ class TestIt(BaseTestCase):
         self.assertEqual(render_api.format_amount(b), "15,25")
         self.assertEqual(render_api.format_amount(b, False), "15,253")
 
-    def test_get_unity(self):
-        self.assertEqual(render_api.format_unity('HOUR'), u'heure(s)')
-        self.assertEqual(render_api.format_unity('NUTT'), u'-')
-        self.assertEqual(render_api.format_unity('NUTT', pretty=True), u'')
-
     def test_format_name(self):
         self.assertEqual(render_api.format_name(None, u"LastName"),
                                                          u" LASTNAME")

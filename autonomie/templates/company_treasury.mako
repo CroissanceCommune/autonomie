@@ -9,7 +9,7 @@
     </li>
 </ul>
 <div>
-    <form class='navbar-form form-search form-horizontal' id='search_form' method='GET'>
+    <form class='form-search form-horizontal' id='search_form' method='GET'>
                 <select name='year' id='year-select' class='span2'>
                     %for year in years:
                         %if unicode(current_year) == unicode(year):

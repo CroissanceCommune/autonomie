@@ -40,3 +40,8 @@ class Tva(DBBASE):
     def query(cls):
         q = super(Tva, cls).query()
         return q.order_by('value')
+
+    @classmethod
+    def get_default(cls):
+        return super(Tva, cls).query().filter(cls.default==1).first()
+

@@ -106,6 +106,14 @@ def deferred_task_date(node, kw):
     return datetime.date.today()
 
 
+@colander.deferred
+def deferred_default_year(node, kw):
+    """
+        Return the current year
+    """
+    return datetime.date.today().year
+
+
 def build_client_value(client=None):
     """
         return the tuple for building client select
@@ -593,6 +601,11 @@ def get_estimation_schema():
     return schema
 
 
+FINANCIAL_YEAR = colander.SchemaNode(colander.Integer(),
+        name="financial_year", title=u"Année comptable de référence",
+        default=deferred_default_year)
+
+
 def get_invoice_schema():
     """
         Return the schema for invoice add/edit
@@ -600,6 +613,8 @@ def get_invoice_schema():
     schema = TaskSchema().clone()
     title = u"Phase où insérer la facture"
     schema['common']['phase_id'].title = title
+    # Ref #689
+    schema['common'].add_before('description', FINANCIAL_YEAR)
     title = u"Date de la facture"
     schema['common']['taskDate'].title = title
     title = u"Objet de la facture"
@@ -620,6 +635,8 @@ def get_cancel_invoice_schema():
     schema = TaskSchema().clone()
     title = u"Phase où insérer l'avoir"
     schema['common']['phase_id'].title = title
+    # Ref #689
+    schema['common'].add_before('description', FINANCIAL_YEAR)
     title = u"Date de l'avoir"
     schema['common']['taskDate'].title = title
     title = u"Objet de l'avoir"
@@ -689,6 +706,13 @@ class PaymentSchema(colander.MappingSchema):
 ne recevra plus de paiement), si le montant indiqué correspond au
 montant de la facture celle-ci est soldée automatiquement""",
             default=False)
+
+
+class FinancialYearSchema(colander.MappingSchema):
+    """
+        colander Schema for financial year setting
+    """
+    financial_year = FINANCIAL_YEAR
 
 
 #  Mapper tools used to move from dbdatas format to an appstruct fitting the
@@ -784,6 +808,7 @@ class InvoiceMatch(MappingWrapper):
         #task attrs
         ('phase_id', 'common'),
         ('taskDate', 'common'),
+        ('financial_year', 'common'),
         ('description', 'common'),
         #both estimation and invoice attrs
         ('client_id', 'common'),
@@ -803,7 +828,6 @@ class EstimationMatch(MappingWrapper):
         ('phase_id', 'common'),
         ('taskDate', 'common'),
         ('description', 'common'),
-
         ('client_id', 'common'),
         ('address', 'common'),
         ('course', 'common'),
@@ -826,8 +850,8 @@ class CancelInvoiceMatch(MappingWrapper):
         #task attrs
         ('phase_id', 'common'),
         ('taskDate', 'common'),
+        ('financial_year', 'common'),
         ('description', 'common'),
-
         ('client_id', 'common'),
         ('address', 'common'),
         ('displayedUnits', 'common'),

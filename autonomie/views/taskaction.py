@@ -35,6 +35,7 @@ from autonomie.models.client import Client
 from autonomie.models.project import Project
 from autonomie.models.project import Phase
 from autonomie.views.forms.duplicate import DuplicateSchema
+from autonomie.views.forms.task import FinancialYearSchema
 from autonomie.views.forms.task import PaymentSchema
 from autonomie.views.forms.utils import BaseFormView
 from autonomie.utils.pdf import write_pdf
@@ -73,6 +74,22 @@ def get_duplicate_form(request, counter=None):
                                                     title=u"Valider")
     form = Form(schema=schema, buttons=(valid_btn,), action=action,
             formid="duplicate_form", counter=counter)
+    return form
+
+
+def get_set_financial_year_form(request, counter=None):
+    """
+        Return the form to set the financial year of an
+        invoice or a cancelinvoice
+    """
+    schema = FinancialYearSchema().bind(request=request)
+    action = request.route_path(request.context.__name__,
+            id=request.context.id,
+            _query=dict(action='set_financial_year'))
+    valid_btn = Button(name='submit', value="set_financial_year", type='submit',
+                title=u"Valider")
+    form = Form(schema=schema, buttons=(valid_btn,), action=action,
+            formid="set_financial_year_form", counter=counter)
     return form
 
 
@@ -209,6 +226,28 @@ class TaskFormActions(object):
             title = u"Dupliquer le document"
             form = self._duplicate_form()
             popup = PopUp("duplicate_form_container", title, form.render())
+            self.request.popups[popup.name] = popup
+            yield popup.open_btn(css='btn btn-primary')
+
+    def _set_financial_year_form(self):
+        """
+            Return the form for setting the financial year of a document
+        """
+        form = get_set_financial_year_form(self.request, self.formcounter)
+        form.set_appstruct({'financial_year':self.context.financial_year})
+        self.formcounter = form.counter
+        return form
+
+    def _set_financial_year_btn(self):
+        """
+            Return the button for the popup with the financial year set form
+            of the current document
+        """
+        if context_is_task(self.context):
+            title = u"Année comptable de référence"
+            form = self._set_financial_year_form()
+            popup = PopUp("set_financial_year_form_container", title,
+                                                        form.render())
             self.request.popups[popup.name] = popup
             yield popup.open_btn(css='btn btn-primary')
 

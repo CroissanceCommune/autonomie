@@ -34,6 +34,7 @@ from autonomie.views.taskaction import TaskFormView
 from autonomie.views.taskaction import context_is_editable
 from autonomie.views.taskaction import StatusView
 from autonomie.views.taskaction import populate_actionmenu
+from autonomie.views.taskaction import get_set_financial_year_form
 
 from autonomie.views.taskaction import make_pdf_view
 from autonomie.views.taskaction import make_html_view
@@ -189,6 +190,28 @@ class CancelInvoiceEdit(TaskFormView):
 
 
 class CancelInvoiceStatus(StatusView):
+
+    def pre_set_financial_year_process(self, task, status, params):
+        """
+            Handle form validation before setting the financial year of
+            the current task
+        """
+        form = get_set_financial_year_form(self.request)
+        # if an error is raised here, it will be cached a level higher
+        appstruct = form.validate(params.items())
+        log.debug(u" * Form has been validated")
+        return appstruct
+
+    def post_set_financial_year_process(self, task, status, params):
+        cancelinvoice = params
+        cancelinvoice = self.request.dbsession.merge(cancelinvoice)
+        log.debug(u"Set financial year of the cancelinvoice :{0}"\
+                .format(cancelinvoice.id))
+        msg = u"L'année comptable de référence a bien été modifiée"
+        msg = msg.format(self.request.route_path("cancelinvoice",
+                                                id=cancelinvoice.id))
+        self.request.session.flash(msg)
+
     def post_valid_process(self, task, status, params):
         msg = u"L'avoir porte le numéro <b>{0}</b>"
         self.session.flash(msg.format(task.officialNumber))

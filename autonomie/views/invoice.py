@@ -35,6 +35,7 @@ from autonomie.utils.widgets import ViewLink
 from autonomie.utils.views import submit_btn
 from autonomie.views.taskaction import TaskFormView
 from autonomie.views.taskaction import get_paid_form
+from autonomie.views.taskaction import get_set_financial_year_form
 from autonomie.views.taskaction import context_is_editable
 from autonomie.views.taskaction import StatusView
 from autonomie.views.taskaction import populate_actionmenu
@@ -206,6 +207,17 @@ class InvoiceStatus(StatusView):
         project_id = self.request.context.project.id
         return HTTPFound(self.request.route_path('project', id=project_id))
 
+    def pre_set_financial_year_process(self, task, status, params):
+        """
+            Handle form validation before setting the financial year of
+            the current task
+        """
+        form = get_set_financial_year_form(self.request)
+        # if an error is raised here, it will be cached a level higher
+        appstruct = form.validate(params.items())
+        log.debug(u" * Form has been validated")
+        return appstruct
+
     def post_valid_process(self, task, status, params):
         msg = u"La facture porte le numéro <b>{0}</b>"
         self.session.flash(msg.format(task.officialNumber))
@@ -234,6 +246,14 @@ class InvoiceStatus(StatusView):
         msg = u"La facture a bien été dupliquée, vous pouvez l'éditer \
 <a href='{0}'>Ici</a>."
         msg = msg.format(self.request.route_path("invoice", id=id_))
+        self.request.session.flash(msg)
+
+    def post_set_financial_year_process(self, task, status, params):
+        invoice = params
+        invoice = self.request.dbsession.merge(invoice)
+        log.debug(u"Set financial year of the invoice :{0}".format(invoice.id))
+        msg = u"L'année comptable de référence a bien été modifiée"
+        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
         self.request.session.flash(msg)
 
     def pre_paid_process(self, task, status, params):
@@ -274,6 +294,19 @@ def duplicate(request):
     return ret_dict
 
 
+def set_financial_year(request):
+    """
+        Set the financial year of a document
+    """
+    try:
+        ret_dict = InvoiceStatus(request)()
+    except ValidationFailure, err:
+        log.exception(u"Financial year set error")
+        ret_dict = dict(form=err.render(),
+                title=u"Année comptable de référence")
+    return ret_dict
+
+
 def includeme(config):
     config.add_route('project_invoices',
                      '/projects/{id:\d+}/invoices',
@@ -308,6 +341,11 @@ def includeme(config):
     config.add_view(duplicate,
                     route_name="invoice",
                     request_param='action=duplicate',
+                    permission="view",
+                    renderer='base/formpage.mako')
+    config.add_view(set_financial_year,
+                    route_name="invoice",
+                    request_param='action=set_financial_year',
                     permission="view",
                     renderer='base/formpage.mako')
 

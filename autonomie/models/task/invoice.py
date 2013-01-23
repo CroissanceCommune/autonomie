@@ -648,6 +648,7 @@ class ManualInvoice(Task):
     montant_ht = Column("montant_ht", Integer)
     tva = Column("tva", Integer)
     client_id = Column('client_id', Integer, ForeignKey('customer.id'))
+    financial_year = Column(Integer, nullable=False)
     client = relationship(
         "Client",
         primaryjoin="Client.id==ManualInvoice.client_id",

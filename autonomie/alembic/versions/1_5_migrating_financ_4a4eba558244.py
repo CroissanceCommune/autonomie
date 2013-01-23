@@ -12,21 +12,19 @@ down_revision = '362fc5306d54'
 
 from alembic import op
 import sqlalchemy as sa
-from autonomie.models.task import Invoice, CancelInvoice
+from autonomie.models.task import Invoice, CancelInvoice, ManualInvoice
 from autonomie.models import DBSESSION
 
 def upgrade():
-    for table in "invoice", "cancelinvoice":
+    for table in "invoice", "cancelinvoice", "manualinv":
         op.add_column(table, sa.Column("financial_year", sa.Integer,
             nullable=False))
-    for invoice in Invoice.query():
-        invoice.financial_year = invoice.taskDate.year
-        DBSESSION.merge(invoice)
-    for cancelinvoice in CancelInvoice.query():
-        cancelinvoice.financial_year = cancelinvoice.taskDate.year
-        DBSESSION.merge(cancelinvoice)
+    for type_ in (Invoice, CancelInvoice, ManualInvoice):
+        for document in type_.query():
+            document.financial_year = document.taskDate.year
+            DBSESSION.merge(document)
 
 
 def downgrade():
-    for table in "invoice", "cancelinvoice":
+    for table in "invoice", "cancelinvoice", "manualinv":
         op.drop_column(table, "financial_year")

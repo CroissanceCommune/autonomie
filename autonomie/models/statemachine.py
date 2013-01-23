@@ -53,6 +53,10 @@ class State(object):
         else:
             return task
 
+    def __repr__(self):
+        return "< State %s allowed for %s (CAEState : %s)>" % (
+                self.name, self.permission, self.cae_state,)
+
 
 class TaskState(object):
     """

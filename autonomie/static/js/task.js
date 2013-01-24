@@ -133,17 +133,55 @@ var RowCollection = Backbone.Collection.extend({
     });
     return sum;
   },
-  Tvas:function(){
+  Tvas:function(type){
     var tvas = {};
+    var tva_amount;
+    var tva;
     this.each(function(item){
-      var tva_amount = item.tva_amount;
-      var tva = item.tva;
-      if (tva in tvas){
-        tva_amount += tvas[tva];
+      if (type !== undefined){
+        if (item.type == type){
+          tva_amount = item.tva_amount;
+          tva = item.tva;
+          if (tva in tvas){
+            tva_amount += tvas[tva];
+          }
+          tvas[tva] = tva_amount;
+        }
+      } else {
+        tva_amount = item.tva_amount;
+        tva = item.tva;
+        if (tva in tvas){
+          tva_amount += tvas[tva];
+        }
+        tvas[tva] = tva_amount;
       }
-      tvas[tva] = tva_amount;
     });
     return tvas;
+  },
+  HT_per_Tvas:function(type){
+    var hts = {};
+    var tva;
+    var ht;
+    this.each(function(item){
+      if (type !== undefined){
+        if (item.type == type){
+          ht = item.ht;
+          tva = item.tva;
+          if (tva in hts){
+            ht += hts[tva];
+          }
+          hts[tva] = ht;
+        }
+      } else {
+        ht = item.ht;
+        tva = item.tva;
+        if (tva in hts){
+          ht += hts[tva];
+        }
+        hts[tva] = ht;
+      }
+    });
+    return hts;
   }
 });
 

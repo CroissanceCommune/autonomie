@@ -27,6 +27,7 @@ from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.estimation import EstimationLine
 from autonomie.models.task.estimation import PaymentLine
 from autonomie.models.task.task import DiscountLine
+from autonomie.models.tva import Tva
 from autonomie.views.forms.task import get_estimation_schema
 from autonomie.views.forms.task import get_estimation_appstruct
 from autonomie.views.forms.task import get_estimation_dbdatas
@@ -70,12 +71,16 @@ class EstimationAdd(TaskFormView):
     schema = get_estimation_schema()
     buttons = (submit_btn,)
     model = Estimation
-    add_template_vars = ('title', 'company',)
+    add_template_vars = ('title', 'company', 'tvas')
 
     @property
     def company(self):
         # Current context is a project
         return self.context.company
+
+    @property
+    def tvas(self):
+        return Tva.query().all()
 
     def before(self, form):
         super(EstimationAdd, self).before(form)
@@ -123,12 +128,16 @@ class EstimationEdit(TaskFormView):
     schema = get_estimation_schema()
     buttons = (submit_btn,)
     model = Estimation
-    add_template_vars = ('title', 'company',)
+    add_template_vars = ('title', 'company', 'tvas')
 
     @property
     def company(self):
         # Current context is an estimation
         return self.context.project.company
+
+    @property
+    def tvas(self):
+        return Tva.query().all()
 
     @property
     def title(self):

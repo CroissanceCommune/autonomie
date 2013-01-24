@@ -61,12 +61,16 @@ class CancelInvoiceAdd(TaskFormView):
     schema = get_cancel_invoice_schema()
     buttons = (submit_btn,)
     model = CancelInvoice
-    add_template_vars = ('title', 'company',)
+    add_template_vars = ('title', 'company', 'tvas')
 
     @property
     def company(self):
         # Current context is a project
         return self.context.company
+
+    @property
+    def tvas(self):
+        return Tva.query().all()
 
     def before(self, form):
         super(CancelInvoiceAdd, self).before(form)
@@ -118,12 +122,16 @@ class CancelInvoiceEdit(TaskFormView):
     schema = get_cancel_invoice_schema()
     buttons = (submit_btn,)
     model = CancelInvoice
-    add_template_vars = ('title', 'company',)
+    add_template_vars = ('title', 'company', 'tvas')
 
     @property
     def company(self):
         # Current context is an cancelinvoice
         return self.context.project.company
+
+    @property
+    def tvas(self):
+        return Tva.query().all()
 
     @property
     def title(self):

@@ -24,6 +24,7 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import InvoiceLine
 from autonomie.models.task.task import DiscountLine
+from autonomie.models.tva import Tva
 from autonomie.views.forms.task import get_invoice_schema
 from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
@@ -67,12 +68,16 @@ class InvoiceAdd(TaskFormView):
     schema = get_invoice_schema()
     buttons = (submit_btn,)
     model = Invoice
-    add_template_vars = ('title', 'company',)
+    add_template_vars = ('title', 'company', 'tvas')
 
     @property
     def company(self):
         # Current context is a project
         return self.context.company
+
+    @property
+    def tvas(self):
+        return Tva.query().all()
 
     def before(self, form):
         super(InvoiceAdd, self).before(form)
@@ -123,12 +128,16 @@ class InvoiceEdit(TaskFormView):
     schema = get_invoice_schema()
     buttons = (submit_btn,)
     model = Invoice
-    add_template_vars = ('title', 'company',)
+    add_template_vars = ('title', 'company', 'tvas')
 
     @property
     def company(self):
         # Current context is an invoice
         return self.context.project.company
+
+    @property
+    def tvas(self):
+        return Tva.query().all()
 
     @property
     def title(self):

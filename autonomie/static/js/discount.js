@@ -157,7 +157,9 @@ var discount = {
   },
   create_percent_based_discounts:function(){
     var collection = getCollection();
-    var hts = collection.HT_per_Tvas();
+    // We don't want expenses to be part of the discount computation
+    var hts = _.extend(collection.HT_per_Tvas('task'),
+                      collection.HT_per_Tvas('discounts'));
     var percent = this.get_percent();
     var description = this.get_description();
     for (var tva in hts){

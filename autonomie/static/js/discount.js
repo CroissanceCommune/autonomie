@@ -56,6 +56,33 @@ var DiscountList =  Backbone.Marionette.CollectionView.extend({
   itemView: DiscountView
 });
 
+function showError(control, error){
+  /*"""
+   * shows error 'message' to the group group in a twitter bootstrap
+   * friendly manner
+   */
+  var group = control.parents(".control-group");
+  group.addClass("error");
+  if (group.find(".help-inline").length === 0){
+    group.find(".controls").append(
+    "<span class=\"help-inline error-message\"></span>");
+  }
+  var target = group.find(".help-inline");
+  return target.text(error);
+}
+var regexp = {
+  number: /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/,
+  isNumber:function(value){
+    return _.isNumber(value) || (_.isString(value) && value.match(this.number));
+  },
+  hasValue:function(value) {
+      return !(_.isNull(value) || _.isUndefined(value) ||
+                    (_.isString(value) && trim(value) === ''));
+  },
+  isInRange:function(value, min, max){
+    return this.isNumber(value) && value >= min && value <= max;
+  }
+};
 var discount = {
   el:null,
   select:null,
@@ -69,16 +96,25 @@ var discount = {
     return this.select.children('option:selected').val();
   },
   get_description:function(){
-    return this.el.find("textarea[name=discount_temp_description]").val();
+    return this.get_description_textarea().val();
+  },
+  get_description_textarea:function(){
+    return this.el.find("textarea[name=discount_temp_description]");
   },
   get_percent:function(){
-    return this.el.find("input[name=discount_temp_percent]").val();
+    return this.get_percent_input().val();
+  },
+  get_percent_input:function(){
+    return this.el.find("input[name=discount_temp_percent]");
   },
   get_percent_tag:function(){
     return $("#percent_configuration");
   },
   get_value:function(){
-    return this.el.find("input[name=discount_temp_value]").val();
+    return this.get_value_input().val();
+  },
+  get_value_input:function(){
+    return this.el.find("input[name=discount_temp_value]");
   },
   get_value_tag:function(){
     return $("#value_configuration");
@@ -87,8 +123,12 @@ var discount = {
     return "700";
   },
   void_all:function(){
-    this.percent_input.val('');
-    this.value_input.val('');
+    this.get_percent_input().val('');
+    this.get_value_input().val('');
+    this.get_description_textarea().val();
+    this.el.find(".control-group").removeClass('error');
+    this.el.find(".help-inline.error-message").remove();
+    this.select.change();
   },
   set_switch:function(){
     var this_ = this;
@@ -108,8 +148,9 @@ var discount = {
     this.value_tag = this.get_value_tag();
     this.percent_tag = this.get_percent_tag();
     this.select = this.get_select();
-    this.el.dialog('open');
     this.set_switch();
+    this.void_all();
+    this.el.dialog('open');
   },
   close:function(){
     this.el.dialog('close');
@@ -133,11 +174,40 @@ var discount = {
   },
   validate:function(){
     if (this.get_selected() == 'percent'){
-      this.create_percent_based_discounts();
+      if (this.validate_percent()){
+        this.create_percent_based_discounts();
+       this.el.dialog('close');
+      }
     }else{
-      this.create_value_based_discounts();
+      if (this.validate_value()){
+        this.create_value_based_discounts();
+       this.el.dialog('close');
+      }
     }
-    this.el.dialog('close');
+  },
+  validate_percent:function(){
+    var percent = this.get_percent();
+    var tag = this.el.find("input[name=discount_temp_percent]");
+    if (regexp.isNumber(percent)){
+      if (regexp.isInRange(percent, 1, 99)){
+        return true;
+      }else{
+        showError(tag, "n'est pas compris entre 1 et 99");
+      }
+    }else{
+      showError(tag, "n'est pas un nombre");
+    }
+    return false;
+  },
+  validate_value:function(){
+    var value = this.get_value();
+    var tag = this.el.find("input[name=discount_temp_value]");
+    if (regexp.isNumber(value)){
+      return true;
+    }else{
+      showError(tag, "n'est pas un nombre");
+    }
+    return false;
   },
   add_line:function(description, value, tva){
     deform.appendSequenceItem(this.container);

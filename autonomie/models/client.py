@@ -14,6 +14,16 @@
 #
 """
     Client model : represents customers
+    Stores the company and its main contact
+
+    >>> from autonomie.models.client import Client
+    >>> c = Client()
+    >>> c.contactLastName = u"Dupont"
+    >>> c.contactFirstName = u"Jean"
+    >>> c.name = u"Compagnie Dupont avec un t"
+    >>> c.code = u"DUPT"
+    >>> DBSESSION.add(c)
+
 """
 import logging
 from sqlalchemy import Column
@@ -35,6 +45,16 @@ log = logging.getLogger(__name__)
 class Client(DBBASE):
     """
         Client model
+        Stores the company and its main contact
+        :param name: name of the company
+        :param code: internal code of the customer (unique regarding the owner)
+        :param multiline address: address of the company
+        :param zipCode: zipcode of the company
+        :param city: city
+        :param country: country, default France
+        :param contactLastName: lastname of the contact
+        :param contactFirstName: firstname of the contact
+        :param function: function of the contact
     """
     __tablename__ = 'customer'
     __table_args__ = default_table_args
@@ -52,7 +72,8 @@ class Client(DBBASE):
     address = deferred(Column("address", String(255)), group='edit')
     zipCode = deferred(Column("zipCode", String(20)), group='edit')
     city = deferred(Column("city", String(255)), group='edit')
-    country = deferred(Column("country", String(150)), group='edit')
+    country = deferred(Column("country", String(150), default=u'France'),
+                                                            group='edit')
     phone = deferred(Column("phone", String(50)), group='edit')
     fax = deferred(Column("fax", String(50)), group="edit")
     function = deferred(Column("function", String(255)), group="edit")
@@ -65,13 +86,13 @@ class Client(DBBASE):
 
     def get_company_id(self):
         """
-            return the id of the company this client belongs to
+            :returns: the id of the company this client belongs to
         """
         return self.company.id
 
     def todict(self):
         """
-            Return a dict version of the client object
+            :returns: a dict version of the client object
         """
         projects = [project.todict() for project in self.projects]
         return dict(id=self.id,
@@ -93,6 +114,9 @@ class Client(DBBASE):
 
     @property
     def full_address(self):
+        """
+            :returns: the client address formatted in french format
+        """
         address = u"{name}\n{address}\n{zipCode} {city}".format(name=self.name,
                 address=self.address, zipCode=self.zipCode, city=self.city)
         if self.country not in ("France", "france"):

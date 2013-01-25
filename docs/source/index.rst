@@ -17,6 +17,8 @@ Contents:
 
 .. include:: hogan.rst
 
+.. include:: views.rst
+
 Indices and tables
 ==================
 

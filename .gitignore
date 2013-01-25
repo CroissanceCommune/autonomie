@@ -8,3 +8,4 @@ data
 *.egg
 dist
 build
+.ropeproject

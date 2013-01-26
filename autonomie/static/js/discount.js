@@ -179,11 +179,13 @@ var discount = {
       if (this.validate_percent()){
         this.create_percent_based_discounts();
        this.el.dialog('close');
+      $(Facade).trigger('totalchanged');
       }
     }else{
       if (this.validate_value()){
         this.create_value_based_discounts();
-       this.el.dialog('close');
+        this.el.dialog('close');
+        $(Facade).trigger('totalchanged');
       }
     }
   },
@@ -217,5 +219,6 @@ var discount = {
     line.children().find("textarea").val(description);
     line.children().find("input[name=amount]").val(value);
     line.children().find("select[name=tva]").val(tva);
+    $(Facade).trigger("linechange", line);
   }
 };

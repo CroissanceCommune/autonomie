@@ -39,7 +39,7 @@ ${form|n}
                 <div class="control-group">
                     <label class='control-label' for="discount_temp_tva">Tva</label>
                     <div class="controls">
-                        <select id="discount_temp_tva" name="tva">
+                        <select name="discount_temp_tva" >
                             % for tva in tvas:
                                 <option value="${tva.value}"
                                 % if tva.default == 1:

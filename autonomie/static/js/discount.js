@@ -9,53 +9,6 @@
  *
  * Tools to handle discount configuration
  */
-var Discount = Backbone.Model.extend({
-  /* Common model for discounts */
-});
-
-var PercentDiscount = Discount.extend({
-  /*
-   * Percent based discount
-   * Is a percent of some lines of all of them
-   */
-  defaults:{
-    percent:0,
-    selectors:[]
-  },
-  totalHT:function(){
-    $(selectors).each(function(selector){
-
-    });
-  },
-  HTs:function(){
-  /*
-   * Return the discount HT value
-   */
-    percent(totalHT(), this.percent);
-  }
-});
-
-var StaticDiscount = Discount.extend({
-  /*
-   * Static discount with cost and tva
-   */
-  defaults:{
-    cost:0,
-    quantity:1
-  },
-  HT:function(){
-    return transformToCents(-1 * this.cost);
-  }
-});
-
-var DiscountView = Backbone.Marionette.ItemView.extend({
-  template:"#discount_item"
-});
-
-var DiscountList =  Backbone.Marionette.CollectionView.extend({
-  itemView: DiscountView
-});
-
 function showError(control, error){
   /*"""
    * shows error 'message' to the group group in a twitter bootstrap
@@ -70,7 +23,10 @@ function showError(control, error){
   var target = group.find(".help-inline");
   return target.text(error);
 }
-var regexp = {
+var validators = {
+  /* """
+   * Form Validation tool
+   */
   number: /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/,
   isNumber:function(value){
     return _.isNumber(value) || (_.isString(value) && value.match(this.number));
@@ -84,43 +40,88 @@ var regexp = {
   }
 };
 var discount = {
+  /*"""
+   * Discount handling object
+   * Handle the popup used to configure discounts and add lines regarding
+   * the configured values
+   */
   el:null,
   select:null,
   percent_tag:null,
   value_tag:null,
   container:null,
+
   get_select:function(){
+    /*"""
+     * Return the select used to choose the discount type
+     */
     return this.el.find("select");
   },
   get_selected:function(){
+    /*"""
+     * Return the current selected value
+     */
     return this.select.children('option:selected').val();
   },
   get_description:function(){
+    /*"""
+     *Return the current configured description
+     */
     return this.get_description_textarea().val();
   },
   get_description_textarea:function(){
+    /*"""
+     *  Return the configured description
+     */
     return this.el.find("textarea[name=discount_temp_description]");
   },
   get_percent:function(){
+    /*"""
+     * Return the percents that have been configured
+     */
     return this.get_percent_input().val();
   },
   get_percent_input:function(){
+    /*"""
+     * Return the input used to configure the percents
+     */
     return this.el.find("input[name=discount_temp_percent]");
   },
   get_percent_tag:function(){
+    /*"""
+     * Return the container for percent configuration
+     */
     return $("#percent_configuration");
   },
   get_value:function(){
+    /*"""
+     *  Return the value for simple discount configuration
+     */
     return this.get_value_input().val();
   },
   get_value_input:function(){
+    /*"""
+     *  Return the input used to configure the value of our dicount
+     */
     return this.el.find("input[name=discount_temp_value]");
   },
   get_value_tag:function(){
+    /*"""
+     *  Return the container for discount by-value configuration
+     */
     return $("#value_configuration");
   },
+  get_tva_select:function(){
+    /*"""
+     * Return the tva select object
+     */
+    return this.el.find("select[name=discount_temp_tva]");
+  },
   get_tva:function(){
-    return "700";
+    /*"""
+     *  Return the current configured tva
+     */
+    return this.get_tva_select().val();
   },
   void_all:function(){
     this.get_percent_input().val('');
@@ -179,21 +180,19 @@ var discount = {
       if (this.validate_percent()){
         this.create_percent_based_discounts();
        this.el.dialog('close');
-      $(Facade).trigger('totalchanged');
       }
     }else{
       if (this.validate_value()){
         this.create_value_based_discounts();
         this.el.dialog('close');
-        $(Facade).trigger('totalchanged');
       }
     }
   },
   validate_percent:function(){
     var percent = this.get_percent();
     var tag = this.el.find("input[name=discount_temp_percent]");
-    if (regexp.isNumber(percent)){
-      if (regexp.isInRange(percent, 1, 99)){
+    if (validators.isNumber(percent)){
+      if (validators.isInRange(percent, 1, 99)){
         return true;
       }else{
         showError(tag, "n'est pas compris entre 1 et 99");
@@ -206,7 +205,7 @@ var discount = {
   validate_value:function(){
     var value = this.get_value();
     var tag = this.el.find("input[name=discount_temp_value]");
-    if (regexp.isNumber(value)){
+    if (validators.isNumber(value)){
       return true;
     }else{
       showError(tag, "n'est pas un nombre");
@@ -220,5 +219,6 @@ var discount = {
     line.children().find("input[name=amount]").val(value);
     line.children().find("select[name=tva]").val(tva);
     $(Facade).trigger("linechange", line);
+    $(Facade).trigger('totalchange', line);
   }
 };

@@ -25,6 +25,7 @@ from js.jqueryui import ui_dialog
 from js.jqueryui import ui_sortable
 from js.jqueryui import ui_autocomplete
 from js.jqueryui import ui_datepicker_fr
+from js.jquery_maskedinput import jquery_maskedinput
 #from js.jqueryui import bootstrap as jqueryui_bootstrap_theme
 from js.jquery_form import jquery_form
 from js.deform_bootstrap import deform_bootstrap_js
@@ -47,8 +48,7 @@ backbone_marionnette = Resource(lib_autonomie, "js/backbone.marionette.js",
 dom = Resource(lib_autonomie, "js/dom.js", depends=[jquery])
 duplicate = Resource(lib_autonomie, "js/duplicate.js", depends=[jquery])
 math = Resource(lib_autonomie, "js/math.js")
-jquery_maskedinput = Resource(lib_autonomie, "js/jquery.maskedinput-1.3.min.js",
-        depends=[jquery])
+
 jquery_tmpl = Resource(lib_autonomie, "js/jquery.tmpl.min.js",
         depends=[jquery])
 discount = Resource(lib_autonomie, "js/discount.js",

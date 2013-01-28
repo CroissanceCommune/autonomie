@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <%block name="header">
     <title>${title}</title>
-    <link rel="shortcut icon" href="" type="image/x-icon" />
+    <link rel="shortcut icon" href="${request.static_url('autonomie:static/img/favicon.ico')}" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" comment="">
     <meta name="KEYWORDS" CONTENT="">

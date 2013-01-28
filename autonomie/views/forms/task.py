@@ -408,7 +408,10 @@ class TaskLinesBlock(colander.MappingSchema):
             title=u"Frais forfaitaires (HT)",
             missing=0)
     default_tva = colander.SchemaNode(colander.Integer(),
-            widget=widget.HiddenWidget(), default=deferred_default_tva)
+            title=u"",
+            widget=widget.HiddenWidget(
+                template=TEMPLATES_URL + 'hiddeninput.mako',
+                ), default=deferred_default_tva)
     expenses = colander.SchemaNode(
         AmountType(),
         widget=widget.TextInputWidget(

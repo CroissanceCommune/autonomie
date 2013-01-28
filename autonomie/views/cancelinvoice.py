@@ -25,6 +25,7 @@ from autonomie.views.forms.task import get_cancel_invoice_appstruct
 from autonomie.views.forms.task import get_cancel_invoice_dbdatas
 from autonomie.models.task.invoice import CancelInvoice
 from autonomie.models.task.invoice import CancelInvoiceLine
+from autonomie.models.tva import Tva
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged

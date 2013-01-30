@@ -14,11 +14,13 @@ from alembic import op
 import sqlalchemy as sa
 from autonomie.models.task import Invoice, CancelInvoice, ManualInvoice
 from autonomie.models import DBSESSION
+from autonomie.alembic.utils import column_exist
 
 def upgrade():
     for table in "invoice", "cancelinvoice", "manualinv":
-        op.add_column(table, sa.Column("financial_year", sa.Integer,
-            nullable=False))
+        if not column_exist(table, "financial_year"):
+            op.add_column(table, sa.Column("financial_year", sa.Integer,
+                                                        nullable=False))
     for type_ in (Invoice, CancelInvoice, ManualInvoice):
         for document in type_.query():
             document.financial_year = document.taskDate.year

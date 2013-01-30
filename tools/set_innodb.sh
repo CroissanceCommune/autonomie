@@ -3,9 +3,7 @@ if [ "$1" == '-f' ]
 then
     echo "Forcing"
     MYSQLCMD='mysql -u root'
-    DBNAME='egw'
-    DBUSER='egw'
-    DBPASS='egw'
+    DBNAME='autonomie'
 else
     echo "Enter the mysql command line needed to have root access (default: 'mysql -u root')"
     read MYSQLCMD

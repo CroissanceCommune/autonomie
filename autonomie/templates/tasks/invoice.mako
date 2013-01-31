@@ -28,7 +28,7 @@
                     % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
                         height:4cm;
                     % else:
-                        height:2cm;
+                        height:3cm;
                     % endif
                 }
             }

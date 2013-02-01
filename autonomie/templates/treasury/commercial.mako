@@ -18,5 +18,45 @@
 </div>
 </div>
 <div class='row'>
+    <div class='span2 offset8'>
+        ${form.render()|n}
+    </div>
 </div>
+<div class='row'>
+    <table class='table table-striped table-bordered' style="margin-top:15px">
+        <thead>
+            <th>Description</th>
+            % for i in range(1, 13):
+                <th>${api.month_name(i)}</th>
+            % endfor
+        </thead>
+        <tbody>
+            <tr><td>CA prévisionnel</td>
+                % for i in range(1, 13):
+                    <td id='ca_prev_${i}'></td>
+                % endfor
+            </tr>
+            <tr><td>CA réalisé</td>
+                % for i in range(1, 13):
+                    <td>${api.format_amount(realised_number[i])|n}</td>
+                % endfor
+            </tr>
+            <tr><td>Écart</td>
+                % for i in range(1, 13):
+                    <td id='gap_${i}'></td>
+                % endfor
+            </tr>
+            <tr><td>Pourcentage</td>
+                % for i in range(1, 13):
+                    <td id='gap_percent_${i}'></td>
+                % endfor
+            </tr>
+        </tbody>
+    </table>
+</div>
+</%block>
+<%block name='footerjs'>
+$('#year_form').find('select').change(function(){
+    $('#year_form').submit();
+    });
 </%block>

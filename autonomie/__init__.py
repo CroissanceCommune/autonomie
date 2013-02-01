@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 01 févr. 2013 13:56:15 CET
+# * Last Modified : ven. 01 févr. 2013 18:18:38 CET
 #
 # * Project : autonomie
 #
@@ -112,7 +112,7 @@ def main(global_config, **settings):
     # Set deform multi renderer handling translation and both chameleon and
     # mako templates
     set_deform_renderer()
-    set_json_renderer()
+    set_json_renderer(config)
     config.add_translation_dirs("colander:locale/", "deform:locale")
     locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
     locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")

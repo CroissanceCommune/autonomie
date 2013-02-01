@@ -84,7 +84,7 @@
                             %if task.manualDeliverables == 1:
                                 <td>${api.format_amount(line.amount)|n}&nbsp;€</td>
                             %else:
-                                <td class='price'>${api.format_amount(task.paymentline_amount())|n}&nbsp;€</td>
+                                <td class='price'>${api.format_amount(task.paymentline_amount_ttc())|n}&nbsp;€</td>
                             %endif
                         </tr>
                     % endfor

@@ -9,7 +9,7 @@ For that, you need :
 * Install nodejs : https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager
 * npm install hogan.js
 * find the hogan/<version>/bin/hulk command
-* hulk autonomie/hogan/\*.mustache > autonomie/static/js/templates/template.js
+* hulk autonomie/hogan/\*.mustache > autonomie/static/js/template.js
 
 template.js is the js librarie containing all the templates, maybe it should be
 splitted one day. It can be imported this way:

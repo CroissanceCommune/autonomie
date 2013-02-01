@@ -17,6 +17,7 @@
 """
 import datetime
 import locale
+import calendar
 
 DEF_STATUS = u"Statut inconnu"
 STATUS = dict((
@@ -181,6 +182,16 @@ def urlupdate(request, args_dict):
     return path
 
 
+def month_name(index):
+    """
+        Return the name of the month number "index"
+    """
+    if index in range(1,13):
+        return calendar.month_name[index].decode('utf-8')
+    else:
+        return u""
+
+
 class Api(object):
     """
         Api object passed to the templates hosting all commands we will use
@@ -198,4 +209,5 @@ api = Api(format_amount=format_amount,
           format_short_date=format_short_date,
           format_long_date=format_long_date,
           format_quantity=format_quantity,
-          urlupdate=urlupdate)
+          urlupdate=urlupdate,
+          month_name=month_name)

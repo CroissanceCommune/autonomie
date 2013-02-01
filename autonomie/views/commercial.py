@@ -16,27 +16,49 @@
     Commercial Management module
 """
 import datetime
-from fanstatic import Resource
+import colander
+from deform import Form
 
 from autonomie.models.task import Estimation
+from autonomie.models.task import Invoice
 from autonomie.models.client import Client
 from autonomie.models.project import Project
+from autonomie.views.forms.commercial import CommercialFormSchema
 
 def get_year_range(year):
     """
         Return year range enclosing the current year
     """
-    return datetime.date(year-1, 1,1), datetime.date(year, 1,1)
+    return datetime.date(year, 1, 1), datetime.date(year+1, 1, 1)
+
+
+def get_month_range(month, year):
+    """
+        Return month range enclosing the current month
+    """
+    if month == 12:
+        nxt_year = year + 1
+        nxt_month = 1
+    else:
+        nxt_year = year
+        nxt_month = month +1
+    return datetime.date(year, month, 1), datetime.date(nxt_year, nxt_month, 1)
+
+
+
 
 def display(request):
-    default_year = datetime.date.today().year
     company = request.context
 
-    year = request.params.get('year', "")
-    if year.isdigit() and len(year) == 4:
-        year = int(year)
-    else:
-        year = default_year
+    schema = CommercialFormSchema().bind(request=request)
+    form = Form(schema=schema, buttons=(), method='GET', formid='year_form')
+    try:
+        appstruct = schema.deserialize(request.GET)
+    except colander.Invalid:
+        appstruct = schema.deserialize({})
+    form.set_appstruct(appstruct)
+
+    year = appstruct['year']
     before, after = get_year_range(year)
     estimations = Estimation.query().join(Project)\
                     .filter(Project.company_id==company.id)\
@@ -47,13 +69,27 @@ def display(request):
     for client in all_clients:
         for invoice in client.invoices:
             if invoice.financial_year == year:
-                clients += 1
-                break
+                if invoice.CAEStatus in Invoice.valid_states:
+                    clients += 1
+                    break
+
+    realised_number = dict()
+    for month in range(1, 13):
+        before, after = get_month_range(month, year)
+        invoices = Invoice.query().join(Project)\
+                    .filter(Project.company_id==company.id)\
+                    .filter(Invoice.taskDate.between(before, after))\
+                    .filter(Invoice.CAEStatus.in_(Invoice.valid_states))
+        val = sum([invoice.total_ht() for invoice in invoices])
+        realised_number[month] = val
+
 
     return dict(title=u"Gestion commerciale",
                 estimations=estimations.count(),
                 validated_estimations=validated_estimations.count(),
-                clients=clients)
+                clients=clients,
+                realised_number=realised_number,
+                form=form)
 
 def includeme(config):
     config.add_route("commercial_handling", "/company/{id:\d+}/commercial",

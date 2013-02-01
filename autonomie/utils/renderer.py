@@ -16,11 +16,13 @@
     MultiRenderer tools to allow multiple renderers to be used with deform
 """
 import logging
+import datetime
 import os
 
 from pkg_resources import resource_filename
 
 from pyramid.renderers import render
+from pyramid.renderers import JSON
 
 from deform.form import Form
 from deform.template import ZPTRendererFactory
@@ -76,3 +78,17 @@ def set_deform_renderer():
     renderer = MultiRendererFactory(search_path=deform_template_dirs,
                                     translator=translate)
     Form.default_renderer = renderer
+
+
+def set_json_renderer(config):
+    """
+        Customize json renderer to allow datetime rendering
+    """
+    json_renderer = JSON()
+    def toisoformat(obj, request):
+        return obj.isoformat()
+    json_renderer.add_adapter(datetime.datetime, toisoformat)
+    json_renderer.add_adapter(datetime.date, toisoformat)
+    config.add_renderer('json', json_renderer)
+    return config
+

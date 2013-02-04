@@ -25,25 +25,30 @@ function showError(control, error){
   var target = group.find(".help-inline");
   return target.text(error);
 }
-function hideError(control, all){
+function hideFormError(form){
+  /*"""
+   * Remove bootstrap style errors from the whole form
+   */
+    form.find(".alert").remove();
+    var groups = form.find(".control-group");
+    groups.removeClass("error");
+    groups.find(".help-inline.error-message").remove();
+    groups.find(".help-inline .error").remove();
+    return form;
+}
+function hideFieldError(control){
   /*"""
    */
    var group = control.parents(".control-group");
    group.removeClass("error");
    group.find(".help-inline.error-message").remove();
-   if (all !== undefined){
-    var form = group.closest('form');
-    form.find(".alert").remove();
-   }
    return form;
 }
 _.extend(Backbone.Validation.callbacks, {
   valid: function(view, attr, selector) {
     var control, group;
     control = view.$('[' + selector + '=' + attr + ']');
-    group = control.parents(".control-group");
-    group.removeClass("error");
-     return group.find(".help-inline.error-message").remove();
+    hideFieldError(control);
   },
   invalid: function(view, attr, error, selector) {
     var control, group, position, target;

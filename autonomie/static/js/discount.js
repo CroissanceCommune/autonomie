@@ -9,20 +9,6 @@
  *
  * Tools to handle discount configuration
  */
-function showError(control, error){
-  /*"""
-   * shows error 'message' to the group group in a twitter bootstrap
-   * friendly manner
-   */
-  var group = control.parents(".control-group");
-  group.addClass("error");
-  if (group.find(".help-inline").length === 0){
-    group.find(".controls").append(
-    "<span class=\"help-inline error-message\"></span>");
-  }
-  var target = group.find(".help-inline");
-  return target.text(error);
-}
 var validators = {
   /* """
    * Form Validation tool

@@ -10,6 +10,33 @@
  * Adapted the original : https://gist.github.com/2909552
  *
  */
+
+function showError(control, error){
+  /*"""
+   * shows error 'message' to the group group in a twitter bootstrap
+   * friendly manner
+   */
+  var group = control.parents(".control-group");
+  group.addClass("error");
+  if (group.find(".help-inline").length === 0){
+    group.find(".controls").append(
+    "<span class=\"help-inline error-message\"></span>");
+  }
+  var target = group.find(".help-inline");
+  return target.text(error);
+}
+function hideError(control, all){
+  /*"""
+   */
+   var group = control.parents(".control-group");
+   group.removeClass("error");
+   group.find(".help-inline.error-message").remove();
+   if (all !== undefined){
+    var form = group.closest('form');
+    form.find(".alert").remove();
+   }
+   return form;
+}
 _.extend(Backbone.Validation.callbacks, {
   valid: function(view, attr, selector) {
     var control, group;
@@ -21,12 +48,6 @@ _.extend(Backbone.Validation.callbacks, {
   invalid: function(view, attr, error, selector) {
     var control, group, position, target;
     control = view.$('[' + selector + '=' + attr + ']');
-    group = control.parents(".control-group");
-    group.addClass("error");
-    if (group.find(".help-inline").length === 0) {
-      group.find(".controls").append("<span class=\"help-inline error-message\"></span>");
-    }
-    target = group.find(".help-inline");
-    return target.text(error);
+    showError(control, error);
   }
 });

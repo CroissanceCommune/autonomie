@@ -21,8 +21,8 @@
 from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import String
-from autonomie.models import DBBASE
-from autonomie.models import default_table_args
+from autonomie.models.base import DBBASE
+from autonomie.models.base import default_table_args
 
 
 class Config(DBBASE):

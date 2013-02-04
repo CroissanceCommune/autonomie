@@ -19,8 +19,8 @@ from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import Integer
 
-from autonomie.models import default_table_args
-from autonomie.models import DBBASE
+from autonomie.models.base import default_table_args
+from autonomie.models.base import DBBASE
 
 class WorkUnit(DBBASE):
     """

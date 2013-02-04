@@ -15,8 +15,8 @@
 """
     Initialization function
 """
-from autonomie.models import DBSESSION
-from autonomie.models import DBBASE
+from autonomie.models.base import DBSESSION
+from autonomie.models.base import DBBASE
 from autonomie.scripts.migrate import fetch_head
 
 

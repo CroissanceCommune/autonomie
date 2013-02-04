@@ -26,8 +26,8 @@ from sqlalchemy.orm import relationship
 
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
-from autonomie.models import DBBASE
-from autonomie.models import default_table_args
+from autonomie.models.base import DBBASE
+from autonomie.models.base import default_table_args
 
 ProjectClient = Table('project_client', DBBASE.metadata,
         Column("project_id", Integer, ForeignKey('project.id')),

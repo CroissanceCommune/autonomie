@@ -38,9 +38,9 @@ from sqlalchemy.dialects.mysql import DOUBLE
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
 from autonomie.exception import Forbidden
-from autonomie.models import DBSESSION
-from autonomie.models import DBBASE
-from autonomie.models import default_table_args
+from autonomie.models.base import DBSESSION
+from autonomie.models.base import DBBASE
+from autonomie.models.base import default_table_args
 
 from .compute import TaskCompute
 from .compute import LineCompute

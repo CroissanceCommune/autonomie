@@ -29,9 +29,9 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
 from autonomie.models.types import CustomFileType
 
-from autonomie.models import DBBASE
-from autonomie.models import DBSESSION
-from autonomie.models import default_table_args
+from autonomie.models.base import DBBASE
+from autonomie.models.base import DBSESSION
+from autonomie.models.base import default_table_args
 
 log = logging.getLogger(__name__)
 

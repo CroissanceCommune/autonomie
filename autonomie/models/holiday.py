@@ -22,8 +22,8 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 
-from autonomie.models import DBBASE
-from autonomie.models import default_table_args
+from autonomie.models.base import DBBASE
+from autonomie.models.base import default_table_args
 
 class Holiday(DBBASE):
     """

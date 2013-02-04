@@ -103,9 +103,12 @@ class HolidayView(BaseFormView):
         end_date = appstruct.get('end_date')
         user_id = appstruct.get('user_id')
         search_result = get_holidays(start_date, end_date, user_id)
-        return dict(holidays=search_result,
+        result = dict(holidays=search_result,
                     start_date=start_date,
                     end_date=end_date)
+        form = self.form_class(self.schema, buttons=self.buttons)
+        result['form'] = form.render(appstruct)
+        return result
 
 
 def includeme(config):

@@ -208,3 +208,13 @@ h3.floatted{
     padding-left:10px;
     border-left:2px solid #d1d1d1;
 }
+.deform button{
+  padding:4px 10px;
+  font-size:1em;
+}
+form.deform{
+  margin-bottom:0px;
+}
+.form-actions{
+  margin-bottom:5px;
+}

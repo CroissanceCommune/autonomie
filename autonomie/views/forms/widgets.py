@@ -19,6 +19,8 @@ import cgi
 import logging
 import colander
 
+from beaker.cache import cache_region
+from sqlalchemy import distinct
 from deform.compat import url_quote
 from deform.compat import string_types
 from deform.i18n import _
@@ -29,6 +31,8 @@ from deform_bootstrap.widget import ChosenSingleWidget
 from pyramid.renderers import render
 
 from autonomie.utils.fileupload import FileTempStore
+from autonomie.models.task import Invoice
+
 
 log = logging.getLogger(__name__)
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
@@ -246,3 +250,26 @@ def deferred_autocomplete_widget(node, kw):
     else:
         wid = widget.TextInputWidget()
     return wid
+
+
+def get_years(dbsession):
+    """
+        Return a cached query for the available years
+    """
+    @cache_region("long_term", "taskdates")
+    def taskyears():
+        """
+            return the distinct financial years available in the database
+        """
+        return dbsession.query(distinct(Invoice.financial_year))\
+                .order_by(Invoice.financial_year).all()
+    return taskyears()
+
+
+@colander.deferred
+def deferred_year_select_widget(node, kw):
+    """
+        Return a deferred year select widget
+    """
+    years = get_years(kw['request'].dbsession)
+    return widget.SelectWidget(values=[(year[0], year[0])for year in years])

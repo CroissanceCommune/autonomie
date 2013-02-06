@@ -24,10 +24,8 @@ from functools import partial
 from sqlalchemy import desc, asc
 
 from webhelpers import paginate
-from pyramid.httpexceptions import HTTPForbidden
 
 from autonomie.utils.views import get_page_url
-from autonomie.utils.widgets import ActionMenu
 from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
 
 
@@ -35,36 +33,11 @@ log = logging.getLogger(__name__)
 
 
 class BaseView(object):
-    """
-        Base View object
-    """
     def __init__(self, request):
-        log.debug(u"We are in the view : %s" % self)
         self.request = request
-        self.context = request.context
-        self.dbsession = request.dbsession
-        self.session = request.session
-        self.user = request.user
-        self.actionmenu = ActionMenu()
+        self.session = self.request.session
 
-    def get_company_id(self):
-        """
-            Return current company Id
-        """
-        return self.request.matchdict.get('cid')
-
-    def get_current_company(self):
-        """
-            Returns the current company
-        """
-        try:
-            company = self.user.get_company(self.get_company_id())
-        except KeyError:
-            raise HTTPForbidden()
-        return company
-
-
-class BaseListView(object):
+class BaseListView(BaseView):
     """
         A base list view used to provide an easy way to list elements
 
@@ -97,10 +70,6 @@ class BaseListView(object):
     default_sort = 'name'
     sort_columns = {'name':'name'}
     default_direction = 'asc'
-
-    def __init__(self, request):
-        self.request = request
-        self.session = self.request.session
 
     def query(self):
         """

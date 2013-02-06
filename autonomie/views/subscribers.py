@@ -93,6 +93,9 @@ def get_user_menu(cid, css=None):
         gestion.add(MainMenuItem(u"Trésorerie", "view",
             icon="icon-info-sign",
                                 path="company_treasury", id=cid))
+        gestion.add(MainMenuItem(u"Gestion commerciale",
+            icon="icon-list-alt",
+            path="commercial_handling", id=cid))
         menu.add(gestion)
         menu.add(MainMenuItem(u"Paramètres", "view",
             icon="icon-white icon-cog",

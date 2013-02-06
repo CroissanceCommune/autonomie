@@ -22,8 +22,8 @@ from paste.deploy.loadwsgi import appconfig
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 
-import autonomie.models
-from autonomie.models import DBBASE  # base declarative object
+import autonomie.models.base
+from autonomie.models.base import DBBASE  # base declarative object
 from sqlalchemy.orm import scoped_session
 
 here = os.path.dirname(__file__)
@@ -38,7 +38,7 @@ class BaseTestCase(unittest.TestCase):
         cls.engine = engine_from_config(settings, prefix='sqlalchemy.')
         cls.connection = cls.engine.connect()
         cls.DBSession = scoped_session(sessionmaker(bind=cls.connection))
-        autonomie.models.DBSESSION = cls.DBSession
+        autonomie.models.base.DBSESSION = cls.DBSession
 
     def setUp(self):
         # begin a non-ORM transaction

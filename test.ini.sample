@@ -15,6 +15,12 @@ testdb.sampledb=sample_db/dbautonomie.sql
 testdb.sampledatas=sample_db/testdatas.sql
 testdb.updatedir=sample_db/updates
 session.longtimeout=3600
+cache.regions = default_term, second, short_term, long_term
+cache.type = memory
+cache.second.expire = 1
+cache.short_term.expire = 1
+cache.default_term.expire = 1
+cache.long_term.expire = 1
 
 [pipeline:main]
 pipeline =

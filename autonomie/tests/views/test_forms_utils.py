@@ -13,16 +13,9 @@
 # * Project :
 #
 import colander
-from autonomie.views.forms.utils import BaseFormView, CustomForm
+from autonomie.views.forms.utils import BaseFormView
 
 from autonomie.tests.base import BaseTestCase, BaseViewTest
-
-class TestCustomForm(BaseTestCase):
-    def test_render(self):
-        schema = DummySchema()
-        form = CustomForm(schema)
-        form.appstruct = {'test':u'A value'}
-        self.assertTrue('A value' in form.render())
 
 class TestBaseFormView(BaseViewTest):
     def make_one(self, req):

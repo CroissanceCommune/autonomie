@@ -16,51 +16,29 @@ import colander
 from datetime import date
 from deform import widget
 
-from beaker.cache import cache_region
-from autonomie.models.task import Invoice
-
-
-def get_taskdates(dbsession):
-    """
-        Return all taskdates
-    """
-    @cache_region("long_term", "taskdates")
-    def taskdates():
-        """
-            Cached version
-        """
-        return dbsession.query(Invoice.financial_year)
-    return taskdates()
-
-
-def get_years(dbsession):
-    """
-        We consider that all documents should be dated after 2000
-    """
-    inv = get_taskdates(dbsession)
-
-    @cache_region("long_term", "taskyears")
-    def years():
-        """
-            cached version
-        """
-        return sorted(set([i.financial_year for i in inv.all()]))
-    return years()
-
+from autonomie.views.forms.widgets import deferred_year_select_widget
+from .custom_types import AmountType
 
 @colander.deferred
 def default_year(node, kw):
     return date.today().year
 
 
-@colander.deferred
-def deferred_year_select_widget(node, kw):
-    years = get_years(kw['request'].dbsession)
-    return widget.SelectWidget(values=[(year, year)for year in years])
-
-
 class CommercialFormSchema(colander.MappingSchema):
     year = colander.SchemaNode(colander.Integer(),
             widget=deferred_year_select_widget,
             default=default_year,
-            missing=default_year)
+            missing=default_year,
+            title=u"")
+
+
+class CommercialSetFormSchema(colander.MappingSchema):
+    month = colander.SchemaNode(colander.Integer(),
+                                widget=widget.HiddenWidget(),
+                                title=u'',
+                                validator=colander.Range(1,12))
+    value = colander.SchemaNode(AmountType(), title=u"CA prévisionnel")
+    comment = colander.SchemaNode(colander.String(),
+                                 widget=widget.TextAreaWidget(cols=25, rows=1),
+                                    title=u"Commentaire",
+                                    missing=u"")

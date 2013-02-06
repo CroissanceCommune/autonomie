@@ -17,13 +17,25 @@
 """
 import datetime
 import colander
+from sqlalchemy import extract
 from deform import Form
+from deform.exception import ValidationFailure
+from fanstatic import Resource
+from pyramid.httpexceptions import HTTPFound
 
+from autonomie.utils.views import submit_btn
+from autonomie.utils.forms import merge_session_with_post
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
 from autonomie.models.client import Client
 from autonomie.models.project import Project
+from autonomie.models.treasury import TurnoverProjection
+from autonomie.views.base import BaseView
 from autonomie.views.forms.commercial import CommercialFormSchema
+from autonomie.views.forms.commercial import CommercialSetFormSchema
+from autonomie.resources import lib_autonomie, backbone
+
+commercial_js = Resource(lib_autonomie, "js/commercial.js", depends=[backbone])
 
 def get_year_range(year):
     """
@@ -45,56 +57,178 @@ def get_month_range(month, year):
     return datetime.date(year, month, 1), datetime.date(nxt_year, nxt_month, 1)
 
 
+def get_current_url(request):
+    """
+        return the current url with arguments
+    """
+    return request.path_url + "?" + request.query_string
 
 
-def display(request):
-    company = request.context
+def get_form(counter):
+    """
+        Return the form for turnover projection configuration
+    """
+    schema = CommercialSetFormSchema()
+    return Form(schema=schema, buttons=(submit_btn,), formid='setform',
+                counter=counter)
 
-    schema = CommercialFormSchema().bind(request=request)
-    form = Form(schema=schema, buttons=(), method='GET', formid='year_form')
-    try:
-        appstruct = schema.deserialize(request.GET)
-    except colander.Invalid:
-        appstruct = schema.deserialize({})
-    form.set_appstruct(appstruct)
+class DisplayCommercialHandling(BaseView):
+    """
+        Commercial handling view
+        Allows to get commercial informations by year through GET
+        Allows to set turnover projections through POST
+    """
+    title = u"Gestion commerciale"
+    year_form_schema = CommercialFormSchema()
+    form_schema = CommercialSetFormSchema()
 
-    year = appstruct['year']
-    before, after = get_year_range(year)
-    estimations = Estimation.query().join(Project)\
-                    .filter(Project.company_id==company.id)\
-                    .filter(Estimation.taskDate.between(before, after))
-    validated_estimations = estimations.filter(Estimation.CAEStatus=='geninv')
-    all_clients = Client.query().filter(Client.company_id==company.id)
-    clients = 0
-    for client in all_clients:
-        for invoice in client.invoices:
-            if invoice.financial_year == year:
-                if invoice.CAEStatus in Invoice.valid_states:
-                    clients += 1
-                    break
+    def __init__(self, request):
+        super(DisplayCommercialHandling, self).__init__(request)
+        commercial_js.need()
+        self.year = self.submit_year()['year']
 
-    realised_number = dict()
-    for month in range(1, 13):
-        before, after = get_month_range(month, year)
-        invoices = Invoice.query().join(Project)\
-                    .filter(Project.company_id==company.id)\
-                    .filter(Invoice.taskDate.between(before, after))\
+    def submit_year(self):
+        """
+            Validate the year form datas
+        """
+        schema = self.year_form_schema.bind(request=self.request)
+        try:
+            appstruct = schema.deserialize(self.request.GET)
+        except colander.Invalid:
+            appstruct = schema.deserialize({})
+        return appstruct
+
+    def get_year_form(self):
+        """
+            Return the year selection form
+        """
+        schema = self.year_form_schema.bind(request=self.request)
+        form = Form(schema=schema, buttons=(), method='GET', formid='year_form')
+        form.set_appstruct(self.submit_year())
+        return form
+
+    def estimations(self):
+        """
+            Query for estimations
+        """
+        return Estimation.query().join(Project)\
+                    .filter(Project.company_id==self.request.context.id)\
+                    .filter(extract('year', Estimation.taskDate)==self.year)
+
+    def validated_estimations(self):
+        """
+            Query for estimations where an invoice has been generated
+        """
+        return self.estimations()\
+                .filter(Estimation.CAEStatus=='geninv')
+
+    def clients(self):
+        """
+            Return the number of real clients (with invoices)
+            for the current year
+        """
+        company_id = self.request.context.id
+        result = 0
+        for client in Client.query().filter(Client.company_id==company_id):
+            for invoice in client.invoices:
+                if invoice.financial_year == self.year:
+                    if invoice.CAEStatus in Invoice.valid_states:
+                        result += 1
+                        break
+        return result
+
+    def turnovers(self):
+        """
+            Return the realised turnovers
+        """
+        result = dict()
+        for month in range(1, 13):
+            invoices = Invoice.query().join(Project)\
+                    .filter(Project.company_id==self.request.context.id)\
+                    .filter(extract('year', Invoice.taskDate)==self.year)\
+                    .filter(extract('month', Invoice.taskDate)==month)\
                     .filter(Invoice.CAEStatus.in_(Invoice.valid_states))
-        val = sum([invoice.total_ht() for invoice in invoices])
-        realised_number[month] = val
+            val = sum([invoice.total_ht() for invoice in invoices])
+            result[month] = val
+        return result
+
+    def turnover_projections(self):
+        """
+            Return a query for turnover projections
+        """
+        return TurnoverProjection.query()\
+                .filter(TurnoverProjection.company_id==self.request.context.id)\
+                .filter(TurnoverProjection.year==self.year)
+
+    def submit_success(self, appstruct):
+        """
+            Add/Edit a turnover projection in the database
+        """
+        appstruct['year'] = self.year
+        appstruct['company_id'] = self.request.context.id
+        projection = self.turnover_projections()\
+                .filter(TurnoverProjection.month==appstruct['month'])\
+                .first() \
+                or TurnoverProjection()
+        projection = merge_session_with_post(projection, appstruct)
+        if projection.id is not None:
+            projection = self.request.dbsession.merge(projection)
+        else:
+            self.request.dbsession.add(projection)
+        url = get_current_url(self.request)
+        return HTTPFound(url)
+
+    def __call__(self):
+        year_form = self.get_year_form()
+        # Passing a counter to avoid DOM conflict in field ids
+        form = get_form(year_form.counter)
+        if "submit" in self.request.POST:
+            try:
+                appstruct = form.validate(self.request.POST.items())
+                self.submit_success(appstruct)
+            except ValidationFailure as e:
+                form = e
+        turnover_projections = dict((t.month, t)
+                        for t in self.turnover_projections())
+        return dict(title=self.title,
+                    estimations=self.estimations().count(),
+                    validated_estimations=self.validated_estimations().count(),
+                    clients=self.clients(),
+                    turnovers=self.turnovers(),
+                    turnover_projections=turnover_projections,
+                    year_form=year_form,
+                    form=form,
+                    compute_difference=compute_difference,
+                    compute_percent=compute_percent)
 
 
-    return dict(title=u"Gestion commerciale",
-                estimations=estimations.count(),
-                validated_estimations=validated_estimations.count(),
-                clients=clients,
-                realised_number=realised_number,
-                form=form)
+def compute_difference(index, projections, turnovers):
+    """
+        Compute the difference beetween the projection and the real value
+    """
+    proj = projections.get(index)
+    if proj:
+        return turnovers[index] - proj.value
+    else:
+        return None
+
+
+def compute_percent(index, projections, turnovers):
+    """
+        Compute the percent the difference represents
+    """
+    diff = compute_difference(index, projections, turnovers)
+    if diff:
+        proj = projections[index].value
+        if proj:
+            return diff / projections[index].value
+    return None
+
 
 def includeme(config):
     config.add_route("commercial_handling", "/company/{id:\d+}/commercial",
                         traverse='/companies/{id}')
-    config.add_view(display,
+    config.add_view(DisplayCommercialHandling,
                     route_name="commercial_handling",
                     renderer="treasury/commercial.mako",
-                    permission="manage")
+                    permission="edit")

@@ -19,7 +19,7 @@
 </div>
 <div class='row'>
     <div class='span2 offset8'>
-        ${form.render()|n}
+        ${year_form.render()|n}
     </div>
 </div>
 <div class='row'>
@@ -33,30 +33,50 @@
         <tbody>
             <tr><td>CA prévisionnel</td>
                 % for i in range(1, 13):
-                    <td id='ca_prev_${i}'></td>
+                    <% turnover = turnover_projections.get(i) %>
+                        % if turnover:
+                            <td id='ca_prev_${i}' title='${turnover.comment}'>
+                                 ${api.format_amount(turnover.value)|n}
+                        % else:
+                            <td id='ca_prev_${i}'>
+                        % endif
+                        <a href='#setform'
+                            % if turnover:
+                                title='${turnover.comment}' onclick='setTurnoverProjectionForm("${i}", "${turnover.value/100.0}", this);'>
+                            % else:
+                                onclick='setTurnoverProjectionForm("${i}");'>
+                            % endif
+                            <i class="icon icon-pencil"></i>
+                        </a>
+                    </td>
                 % endfor
             </tr>
             <tr><td>CA réalisé</td>
                 % for i in range(1, 13):
-                    <td>${api.format_amount(realised_number[i])|n}</td>
+                    <td>${api.format_amount(turnovers[i])|n}</td>
                 % endfor
             </tr>
             <tr><td>Écart</td>
                 % for i in range(1, 13):
-                    <td id='gap_${i}'></td>
+                    <td id='gap_${i}'>
+                        ${api.format_amount(compute_difference(i, turnover_projections, turnovers))|n}
+                    </td>
                 % endfor
             </tr>
             <tr><td>Pourcentage</td>
                 % for i in range(1, 13):
-                    <td id='gap_percent_${i}'></td>
+                    <td id='gap_percent_${i}'>
+                        ${compute_percent(i, turnover_projections, turnovers)}&nbsp;%
+                    </td>
                 % endfor
             </tr>
         </tbody>
     </table>
 </div>
-</%block>
-<%block name='footerjs'>
-$('#year_form').find('select').change(function(){
-    $('#year_form').submit();
-    });
+<div class='row'>
+    <div class='span6 offset2 well' id="form_container">
+        <a class="close" onclick="$('#form_container').fadeOut('slow');" title="Enlever">×</a>
+        ${form.render()|n}
+    </div>
+</div>
 </%block>

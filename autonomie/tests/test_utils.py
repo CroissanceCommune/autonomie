@@ -13,11 +13,10 @@
 # * Project : autonomie
 #
 import colander
-from deform.form import Form
 from pyramid import testing
 from mock import Mock
 
-from autonomie.utils.forms import merge_session_with_post, XHttpForm
+from autonomie.utils.forms import merge_session_with_post
 
 from .base import BaseTestCase
 from .base import BaseViewTest
@@ -34,16 +33,6 @@ class TestFormUtils(BaseTestCase):
         self.assertTrue(session.name == 'Dupont')
         self.assertTrue("admin" in session.accounts)
 
-    def test_xhttpform(self):
-        schema = DummySchema()
-        f = XHttpForm(schema)
-        f.add_message("Jean is wrong")
-        f.add_message("Jean is right")
-        html = f.render()
-        self.assertTrue("Jean is wrong" in html)
-        self.assertTrue('Jean is right' in html)
-        f.reset_messages()
-        self.assertTrue("Jean is wrong" not in f.render())
 
 class TestAvatar(BaseViewTest):
     """
@@ -60,6 +49,7 @@ class TestAvatar(BaseViewTest):
         request = testing.DummyRequest()
         avatar = get_avatar(request, self.session)
         self.assertEqual(avatar.lastname, "LASTNAME_contractor1")
+
 
 class TestConfig(BaseTestCase):
     def test_load_value(self):

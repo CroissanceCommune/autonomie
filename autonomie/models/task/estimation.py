@@ -287,7 +287,8 @@ class Estimation(Task, EstimationCompute):
         else:
             amounts = self.paymentline_amounts()
             for line in self.payment_lines[:-1]:
-                self._make_intermediary(invoice, line, amounts)
+                invoice = self._get_common_invoice(seq_number, user)
+                invoice, lines = self._make_intermediary(invoice, line, amounts)
                 paid_lines.extend(lines)
                 seq_number += 1
 

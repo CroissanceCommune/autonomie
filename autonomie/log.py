@@ -32,7 +32,7 @@ def get_ip(request):
         Return the client's ip or None
     """
     if request:
-        return request.client_addr
+        return request.remote_addr
     else:
         return "None"
 

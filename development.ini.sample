@@ -76,29 +76,23 @@ port = 8080
 
 # Begin logging configuration
 [loggers]
-keys = root, autonomie, sqlfile, alembic, wsgi
+keys = root, sql, alembic
 
 [handlers]
-keys = console, file, sqlfile, wsgi
+keys = console, file, sql
 
 [formatters]
-keys = sqlfile, full, wsgi
+keys = sqlfile, full
 
 [logger_root]
 level = ERROR
 handlers = console, file
 
-[logger_autonomie]
-level = DEBUG
-handlers = console, file
-qualname = autonomie
-propagate = 0
-
-[logger_sqlfile]
+[logger_sql]
 level = INFO
 #level = DEBUG
 #level = INFO
-handlers = sqlfile
+handlers = sql
 qualname = sqlalchemy.engine
 propagate = 0
 # level = INFO logs SQL queries.
@@ -107,8 +101,9 @@ propagate = 0
 
 [logger_alembic]
 level = DEBUG
-handlers = sqlfile
+handlers = sql
 qualname = alembic
+propagate=0
 
 [handler_console]
 class = autonomie.log.CustomStreamHandler
@@ -122,32 +117,17 @@ args = ('%(here)s/logfile.log','a')
 level = DEBUG
 formatter = full
 
-[handler_sqlfile]
+[handler_sql]
 class = FileHandler
 args = ('%(here)s/sql.log','a')
 level = DEBUG
-formatter = sqlfile
+formatter = sql
 
-[formatter_sqlfile]
-format = %(asctime) %(message)s
+[formatter_light]
+format = %(message)s
 
 [formatter_full]
 format =  %(ip)s - %(asctime)-15s %(levelname)-5.5s USER : %(user)-8s %(message)s ([%(name)s])
-
-[logger_wsgi]
-level = DEBUG
-handlers = wsgi, console
-qualname = wsgi
-propagate = 0
-
-[handler_wsgi]
-class = FileHandler
-args = ('%(here)s/logfile.log','a')
-level = DEBUG
-formatter = wsgi
-
-[formatter_wsgi]
-format = %(message)s
 
 # End logging configuration
 #Alembic conf

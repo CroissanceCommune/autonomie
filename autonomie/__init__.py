@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 01 févr. 2013 18:18:38 CET
+# * Last Modified : lun. 11 févr. 2013 11:58:26 CET
 #
 # * Project : autonomie
 #
@@ -37,7 +37,7 @@ from autonomie.utils.deform_bootstrap_fix import add_resources_to_registry
 
 
 AUTONOMIE_MODULES = (
-                    "autonomie.views.static",
+                    #"autonomie.views.static",
                      "autonomie.views.auth",
                      "autonomie.views.user",
                      "autonomie.views.company",

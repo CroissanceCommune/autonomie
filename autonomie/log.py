@@ -17,16 +17,14 @@
 """
 import logging
 from pyramid.threadlocal import get_current_request
-from pyramid.security import authenticated_userid
 
 
 def get_user(request):
     """
         Return the current user or anonymous
     """
-    if request:
-        login = authenticated_userid(request)
-        return login
+    if request and hasattr(request, "_user"):
+        return request._user.login
     else:
         return "Anonymous"
 

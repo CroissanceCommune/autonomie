@@ -24,9 +24,9 @@ def get_user(request):
         Return the current user or anonymous
     """
     if request and hasattr(request, "_user"):
-        return request._user.login
-    else:
-        return "Anonymous"
+        if hasattr(request._user, "login"):
+            return request._user.login
+    return "Anonymous"
 
 def get_ip(request):
     """

@@ -30,8 +30,8 @@ def make_root_static_view(filename, ctype):
     """
     fpath = resource_filename("autonomie", os.path.join("static", filename))
     file_datas = open(fpath).read()
-    file_response =  Response(content_type=ctype, body=file_datas)
     def static_view(context, request):
+        file_response =  Response(content_type=ctype, body=file_datas)
         return file_response
     return static_view
 

@@ -16,6 +16,7 @@
     Command to add an admin to autonomie
 """
 import os
+from transaction import commit
 from autonomie.scripts.utils import command
 from autonomie.models import DBSESSION
 from autonomie.models.user import User
@@ -53,6 +54,7 @@ def add_admin(arguments):
     db = DBSESSION()
     db.add(user)
     db.flush()
+    commit()
     print u"Creating account %s with password %s" % (login, unicode(password))
     return user
 

@@ -19,6 +19,7 @@
 import logging
 from docopt import docopt
 from pyramid.paster import bootstrap
+from transaction import commit
 
 
 def command(func, doc):
@@ -32,4 +33,5 @@ def command(func, doc):
         func(args)
     finally:
         pyramid_env['closer']()
+    commit()
     return 0

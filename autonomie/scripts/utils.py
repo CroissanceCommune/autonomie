@@ -21,6 +21,7 @@ from docopt import docopt
 from pyramid.paster import bootstrap
 from transaction import commit
 from pyramid.paster import setup_logging
+from transaction import commit
 
 
 def command(func, doc):

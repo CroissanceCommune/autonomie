@@ -80,6 +80,10 @@ class CompanySchema(colander.MappingSchema):
     name = colander.SchemaNode(colander.String(),
                                widget=deferred_edit_adminonly_widget,
                                title=u'Nom')
+    code_compta = colander.SchemaNode(colander.String(),
+                            title=u"Code compta",
+                            description=u"Code comptabilité utilisé dans Sage",
+                            missing="")
     goal = colander.SchemaNode(colander.String(),
                                 title=u'Objet')
     logo = colander.SchemaNode(FileData(),

@@ -145,7 +145,6 @@ def set_configuration():
     add_unity(u"jour(s)")
     add_unity(u"mois")
     add_unity(u"forfait")
-    add_unity(u"kg")
 
 
 def fake_database_fill(arguments):

@@ -18,21 +18,22 @@
 import logging
 from pyramid.threadlocal import get_current_request
 
+
 def get_user(request):
     """
         Return the current user or anonymous
     """
-    if request and request.user:
-        return request.user.login
-    else:
-        return "Anonymous"
+    if request and hasattr(request, "_user"):
+        if hasattr(request._user, "login"):
+            return request._user.login
+    return "Anonymous"
 
 def get_ip(request):
     """
         Return the client's ip or None
     """
     if request:
-        return request.client_addr
+        return request.remote_addr
     else:
         return "None"
 

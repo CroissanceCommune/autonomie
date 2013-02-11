@@ -12,6 +12,7 @@ from autonomie.models.client import Client
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.tva import Tva
 from autonomie.scripts.utils import command
+from autonomie.models.task.unity import WorkUnit
 
 GROUPS = {
     ADMIN_PRIMARY_GROUP: "admin",
@@ -125,6 +126,12 @@ def add_tva(value, default=0):
     session.add(t)
     session.flush()
 
+def add_unity(label):
+    t = WorkUnit(label=label)
+    session = DBSESSION()
+    session.add(t)
+    session.flush()
+
 
 def set_configuration():
     add_payment_mode(u"par chèque")
@@ -133,6 +140,11 @@ def set_configuration():
     add_tva(0)
     add_tva(700)
     add_tva(1960, 1)
+
+    add_unity(u"heure(s)")
+    add_unity(u"jour(s)")
+    add_unity(u"mois")
+    add_unity(u"forfait")
 
 
 def fake_database_fill(arguments):

@@ -383,7 +383,6 @@ class StatusView(object):
         appstruct['project'] = project
         appstruct['client'] = client
         appstruct['user'] = self.request.user
-        log.debug(u"Appstruct : %s" % appstruct)
         return appstruct
 
     def pre_status_process(self, task, status, params):

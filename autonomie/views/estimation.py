@@ -90,8 +90,8 @@ class EstimationAdd(TaskFormView):
     def submit_success(self, appstruct):
         log.debug("Submitting estimation add")
         appstruct = get_estimation_dbdatas(appstruct)
-        # Next invoice number for current project
-        snumber = self.context.get_next_invoice_number()
+        # Next estimation number for current project
+        snumber = self.context.get_next_estimation_number()
 
         estimation = Estimation()
         estimation.project = self.context

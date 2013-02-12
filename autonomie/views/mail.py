@@ -17,7 +17,6 @@
 """
 import logging
 
-from pyramid.events import subscriber
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from pyramid.threadlocal import get_current_registry
@@ -32,6 +31,7 @@ class StatusChanged(object):
         Event raised when a document status changes
     """
     def __init__(self, request, document):
+        print "Status changed"
         self.request = request
         self.document = document
 
@@ -128,12 +128,12 @@ def get_status_verb(status):
         return u""
 
 
-@subscriber(StatusChanged)
 def send_mail(event):
     """
         send a mail to dests with subject and body beeing set
     """
     if event.is_key_event():
+        print "It's a key event"
         recipients = event.recipients
         if recipients:
             log.info(u"Sending an email to '{0}'".format(recipients))
@@ -147,3 +147,6 @@ def send_mail(event):
             except:
                 log.exception(u" - An error has occured while sending the \
 email(s)")
+
+def includeme(config):
+    config.add_subscriber(send_mail, StatusChanged)

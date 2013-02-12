@@ -177,6 +177,7 @@ class Estimation(Task, EstimationCompute):
             Return a deposit invoice
         """
         invoice.taskDate = datetime.date.today()
+        invoice.financial_year = invoice.taskDate.year
         invoice.displayedUnits = 0
         invoice.set_name(deposit=True)
         invoice.set_number(deposit=True)
@@ -192,6 +193,7 @@ class Estimation(Task, EstimationCompute):
             return an intermediary invoice described by "paymentline"
         """
         invoice.taskDate = paymentline.paymentDate
+        invoice.financial_year = paymentline.paymentDate.year
         invoice.displayedUnits = 0
         invoice.set_name()
         invoice.set_number()
@@ -221,6 +223,7 @@ class Estimation(Task, EstimationCompute):
             Return the sold invoice
         """
         invoice.taskDate = paymentline.paymentDate
+        invoice.financial_year = paymentline.paymentDate.year
         invoice.set_name(sold=is_sold)
         invoice.set_number()
 

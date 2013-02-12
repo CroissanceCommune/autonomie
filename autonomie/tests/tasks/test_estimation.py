@@ -191,6 +191,7 @@ class TestEstimation(BaseTestCase):
         #deposit :
         deposit = invoices[0]
         self.assertEqual(deposit.taskDate, datetime.date.today())
+        self.assertEqual(deposit.financial_year, datetime.date.today().year)
         self.assertEqual(deposit.total(), est.deposit_amount_ttc())
         #intermediate invoices:
         intermediate_invoices = invoices[1:-1]
@@ -199,6 +200,7 @@ class TestEstimation(BaseTestCase):
             # Here, the rounding strategy should be reviewed
             self.assertPresqueEqual(inv.total(), line['amount'])
             self.assertEqual(inv.taskDate, line['paymentDate'])
+            self.assertEqual(inv.financial_year, line['paymentDate'].year)
         for inv in invoices:
             print inv.total()
         total = sum([inv.total() for inv in invoices])

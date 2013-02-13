@@ -15,9 +15,10 @@
 """
 import os
 from mock import Mock
+from pyramid.exceptions import HTTPForbidden, HTTPNotFound
 from autonomie.tests.base import DATASDIR, BaseViewTest
-from autonomie.views.treasury_files import (Treasury,
-        isprefixed, code_is_not_null)
+from autonomie.views.treasury_files import (Treasury, isprefixed,
+        code_is_not_null, IncomeStatement, SalarySheet, file_display)
 
 CODE = "125"
 
@@ -39,8 +40,8 @@ class TestDirectory(BaseViewTest):
         super(TestDirectory, self).setUp()
         #make_directories()
 
-    def get_request(self):
-        request = self.get_csrf_request()
+    def get_request(self, post={}):
+        request = self.get_csrf_request(post)
         request.registry.settings["autonomie.ftpdir"] = DATASDIR
         return request
 
@@ -53,18 +54,18 @@ class TestDirectory(BaseViewTest):
 
     def test_list_files(self):
         path = os.path.join(DATASDIR, "tresorerie", "2010", "1")
-        request = self.get_csrf_request()
+        request = self.get_request()
         view = Treasury(request)
         self.assertEqual(len(view.list_files(path, prefix='')), 0)
         self.assertEqual(len(view.list_files(path, prefix='12')), 0)
-        self.assertEqual(len(view.list_files(path, prefix='1256')), 0)
-        self.assertEqual(len(view.list_files(path, prefix='125')), 4)
+        self.assertEqual(len(view.list_files(path, prefix=CODE+'6')), 0)
+        self.assertEqual(len(view.list_files(path, prefix=CODE)), 4)
 
     def test_list_files_sorted(self):
-        request = self.get_csrf_request()
+        request = self.get_request()
         path = os.path.join(DATASDIR, "tresorerie", "2010", "1")
         view = Treasury(request)
-        files = view.list_files(path, prefix='125')
+        files = view.list_files(path, prefix=CODE)
         prev = files[0]
         for f_ in files[1:]:
             self.assertTrue(cmp(f_.name, prev.name), 1)
@@ -81,3 +82,54 @@ class TestDirectory(BaseViewTest):
         self.assertTrue(code_is_not_null("2"))
         for i in '0', '', None:
             self.assertFalse(code_is_not_null(i))
+
+    def test_view(self):
+        request = self.get_request()
+        request.context = Mock(code_compta=CODE)
+        self.config.add_route('treasury_files', '/')
+        for factory in IncomeStatement, SalarySheet, Treasury:
+            view = factory(request)
+            result = view.__call__()
+            self.assertEqual(len(result['documents'].keys()), 2)
+            self.assertEqual(len(result['documents']['2010']), 12)
+
+    def test_nutt(self):
+        request = self.get_request()
+        request.context = Mock(code_compta="")
+        self.config.add_route('treasury_files', '/')
+        for factory in IncomeStatement, SalarySheet, Treasury:
+            view = factory(request)
+            self.assertEqual(view.__call__()['documents'], {})
+
+
+    def test_file(self):
+        request = self.get_request({'name':'/resultat/2011/1/125_1_test.pdf'})
+        request.context = Mock(code_compta=CODE)
+        result = file_display(request)
+        self.assertEqual(result.content_disposition,
+                "attachment; filename=125_1_test.pdf")
+        self.assertEqual(result.content_type, "application/pdf")
+
+    def test_forbidden_nocode(self):
+        request = self.get_request({'name':'/resultat/2011/1/125_test.pdf'})
+        request.context = Mock(code_compta="")
+        result = file_display(request)
+        self.assertTrue(isinstance(result, HTTPForbidden))
+
+    def test_forbidden_wrond_code(self):
+        request = self.get_request({'name':'/resultat/2011/1/125_test.pdf'})
+        request.context = Mock(code_compta=CODE + "1")
+        result = file_display(request)
+        self.assertTrue(isinstance(result, HTTPForbidden))
+
+    def test_forbidden_notsubdir(self):
+        request = self.get_request({'name':'../../test/125_test.pdf'})
+        request.context = Mock(code_compta=CODE)
+        result = file_display(request)
+        self.assertTrue(isinstance(result, HTTPForbidden))
+
+    def test_notfound(self):
+        request = self.get_request({'name':'/resultat/2011/1/125_test2.pdf'})
+        request.context = Mock(code_compta=CODE)
+        result = file_display(request)
+        self.assertTrue(isinstance(result, HTTPNotFound))

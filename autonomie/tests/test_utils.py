@@ -17,6 +17,8 @@ from pyramid import testing
 from mock import Mock
 
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.files import (encode_path, decode_path, issubdir,
+        filesizeformat)
 
 from .base import BaseTestCase
 from .base import BaseViewTest
@@ -58,3 +60,21 @@ class TestConfig(BaseTestCase):
         self.session.flush()
         all_ = get_config()
         self.assertTrue("name" in all_.keys() and all_["name"] == "value")
+
+
+class TestFileSystem(BaseTestCase):
+    def test_encode_decode(self):
+        st = u"$deù % ù$ùdeù % - /// //  \ \dekodok %spkoij  idje  ' kopk \""
+        encoded = encode_path(st)
+        self.assertEqual(decode_path(encoded), st)
+
+    def test_issubdir(self):
+        self.assertTrue(issubdir("/root/foo", "/root/foo/bar"))
+        self.assertFalse(issubdir("/root/foo", "/root/bar"))
+        self.assertFalse(issubdir("/root/foo", "/root/../../foo/bar"))
+
+    def test_filesizeformat(self):
+        self.assertEqual(filesizeformat(1024, 0), "1ko")
+        self.assertEqual(filesizeformat(1024, 1), "1.0ko")
+        self.assertEqual(filesizeformat(1024*1024, 0), "1Mo")
+        self.assertEqual(filesizeformat(1024*1024, 1), "1.0Mo")

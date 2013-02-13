@@ -20,6 +20,8 @@ import logging
 from docopt import docopt
 from pyramid.paster import bootstrap
 from transaction import commit
+from pyramid.paster import setup_logging
+from transaction import commit
 
 
 def command(func, doc):
@@ -29,6 +31,7 @@ def command(func, doc):
     logging.basicConfig()
     args = docopt(doc)
     pyramid_env = bootstrap(args['<config_uri>'])
+    setup_logging(args['<config_uri>'])
     try:
         func(args)
     finally:

@@ -167,5 +167,9 @@ path = request.current_route_path(_query=get_args)
                     <dd>${format_phone(getattr(company, attr))}</dd>
                 % endif
             % endfor
+            % if request.user.is_manager() or request.user.is_admin():
+                <dt>Code comptable</dt>
+                <dd>${company.code_compta}</dd>
+            % endif
         </dl>
 </%def>

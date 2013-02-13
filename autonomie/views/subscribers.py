@@ -82,20 +82,33 @@ def get_user_menu(cid, css=None):
         menu = Menu("base/mainmenu.mako", css=css)
         menu.add(MainMenuItem(u"Clients", "view",
             icon="icon-white icon-user",
-                                path="company_clients", id=cid))
+            path="company_clients",
+            id=cid))
         menu.add(MainMenuItem(u"Projets", "view",
             icon="icon-white icon-folder-open",
-                                path="company_projects", id=cid))
+            path="company_projects",
+            id=cid))
         gestion = MenuDropDown(u"Gestion", "view")
         gestion.add(MainMenuItem(u"Factures", "view",
             icon="icon-list-alt",
-                                path="company_invoices", id=cid))
+            path="company_invoices",
+            id=cid))
         gestion.add(MainMenuItem(u"Trésorerie", "view",
             icon="icon-info-sign",
-                                path="company_treasury", id=cid))
+            path="treasury",
+            id=cid))
+        gestion.add(MainMenuItem(u"Compte de résultat", "view",
+            icon="icon-info-sign",
+            path="incomestatement",
+            id=cid))
+        gestion.add(MainMenuItem(u"Bulletin de salaire",
+            icon="icon-info-sign",
+            path="salarysheet",
+            id=cid))
         gestion.add(MainMenuItem(u"Gestion commerciale",
             icon="icon-list-alt",
-            path="commercial_handling", id=cid))
+            path="commercial_handling",
+            id=cid))
         menu.add(gestion)
         menu.add(MainMenuItem(u"Paramètres", "view",
             icon="icon-white icon-cog",

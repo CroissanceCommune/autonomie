@@ -170,7 +170,6 @@ def remove_fields(schema, kw):
     """
     if kw['request'].user.is_contractor():
         # Non admin users are limited
-        del schema['user']['code_compta']
         del schema['user']['primary_group']
         del schema['companies']
         del schema['password']
@@ -192,11 +191,6 @@ class AccountSchema(colander.MappingSchema):
         colander.String(),
         title=u"Nom")
     email = get_mail_input(missing=u"")
-    code_compta = colander.SchemaNode(
-        colander.String(),
-        title=u"Code compta",
-        description=u"Code comptabilité utilisé dans Sage",
-        missing="")
     primary_group = colander.SchemaNode(
         colander.String(),
         title=u"Rôle de l'utilisateur",

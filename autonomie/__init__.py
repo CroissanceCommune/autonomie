@@ -56,6 +56,7 @@ AUTONOMIE_MODULES = (
                      "autonomie.views.json",
                      "autonomie.views.subscribers",
                      "autonomie.views.commercial",
+                     "autonomie.views.treasury_files",
                      )
 
 

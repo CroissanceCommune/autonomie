@@ -21,6 +21,7 @@ import mimetypes
 
 import datetime
 from pyramid.httpexceptions import HTTPForbidden
+from pyramid.httpexceptions import HTTPNotFound
 from autonomie.views.base import BaseView
 from autonomie.utils.pdf import force_ascii
 from autonomie.utils.files import encode_path
@@ -226,16 +227,22 @@ def file_display(request):
     company_code = request.context.code_compta
     if code_is_not_null(company_code) and isprefixed(filename, company_code):
         if issubdir(root_path, filepath):
-            file_obj = File(filename, filepath)
-            file_obj.as_response(request)
-            return request.response
+            if os.path.isfile(filepath):
+                file_obj = File(filename, filepath)
+                file_obj.as_response(request)
+                return request.response
+            else:
+                log.warn("File not found")
+                log.warn(filepath)
+                return HTTPNotFound()
         else:
             log.warn("Given filepath is not a subdirectory")
             log.warn(filepath)
             log.warn(root_path)
+            return HTTPForbidden()
     else:
         log.warn("Current context has no code")
-    return HTTPForbidden()
+        return HTTPForbidden()
 
 
 class Treasury(DisplayDirectoryView):

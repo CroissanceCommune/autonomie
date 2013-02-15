@@ -31,7 +31,6 @@ class StatusChanged(object):
         Event raised when a document status changes
     """
     def __init__(self, request, document):
-        print "Status changed"
         self.request = request
         self.document = document
 
@@ -133,7 +132,6 @@ def send_mail(event):
         send a mail to dests with subject and body beeing set
     """
     if event.is_key_event():
-        print "It's a key event"
         recipients = event.recipients
         if recipients:
             log.info(u"Sending an email to '{0}'".format(recipients))

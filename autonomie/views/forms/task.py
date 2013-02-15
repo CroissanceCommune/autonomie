@@ -436,7 +436,7 @@ class TaskConfiguration(colander.MappingSchema):
                 validator=deferred_client_validator)
     address = colander.SchemaNode(
             colander.String(),
-            title=u"Adresse du client",
+            title=u"Nom et adresse du client",
             widget=widget.TextAreaWidget(rows=4, cols=60))
     phase_id = colander.SchemaNode(
         colander.String(),

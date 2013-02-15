@@ -127,7 +127,7 @@
       % endif
       </%block>
       <%block name='pop_message'>
-      % for num, message in enumerate(request.session.pop_flash(queue="")):
+      % for message in request.session.pop_flash(queue=""):
         <div class='row'>
           <div class='span6 offset3'>
             <div class="alert alert-success">
@@ -137,7 +137,7 @@
           </div>
         </div>
       % endfor
-      % for num, message in enumerate(request.session.pop_flash(queue="error")):
+      % for message in request.session.pop_flash(queue="error"):
         <div class='row'>
           <div class='span6 offset3'>
             <div class="alert alert-error">

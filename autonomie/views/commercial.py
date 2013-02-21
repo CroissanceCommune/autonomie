@@ -217,11 +217,11 @@ def compute_percent(index, projections, turnovers):
     """
         Compute the percent the difference represents
     """
-    diff = compute_difference(index, projections, turnovers)
-    if diff:
+    turnover = turnovers[index]
+    if turnover:
         proj = projections[index].value
         if proj:
-            return diff / projections[index].value
+            return proj / turnover
     return None
 
 

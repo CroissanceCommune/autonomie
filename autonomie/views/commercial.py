@@ -221,7 +221,7 @@ def compute_percent(index, projections, turnovers):
     if turnover:
         proj = projections[index].value
         if proj:
-            return proj / turnover
+            return proj*100.0 / turnover
     return None
 
 

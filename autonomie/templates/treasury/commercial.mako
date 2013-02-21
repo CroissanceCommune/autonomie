@@ -66,7 +66,7 @@
             <tr><td>Pourcentage</td>
                 % for i in range(1, 13):
                     <td id='gap_percent_${i}'>
-                        ${api.format_amount(compute_percent(i, turnover_projections, turnovers)*100)}&nbsp;%
+                        ${compute_percent(i, turnover_projections, turnovers)}&nbsp;%
                     </td>
                 % endfor
             </tr>

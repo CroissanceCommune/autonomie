@@ -41,6 +41,7 @@ from autonomie.views.forms.utils import BaseFormView
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.pdf import render_html
 from autonomie.resources import task_js
+from autonomie.resources import duplicate as duplicate_js
 
 DOCUMENT_TYPES = ('estimation', 'invoice', 'cancelinvoice')
 
@@ -66,6 +67,7 @@ def get_duplicate_form(request, counter=None):
     """
         Return the form for task duplication
     """
+    duplicate_js.need()
     schema = DuplicateSchema().bind(request=request)
     action = request.route_path(request.context.__name__,
                                 id=request.context.id,

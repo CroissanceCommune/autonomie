@@ -22,12 +22,12 @@
         </div>
         <div class='row'>
             <div class='addressblock'>
-                ${api.format_date(task.taskDate, False)}
-                <br />
                 ${format_text(task.address)}
             </div>
         </div>
         <div class="informationblock">
+            Le ${api.format_date(task.taskDate, False)},
+            <br />
             <%block name='information'>
             </%block>
         </div>

@@ -95,7 +95,7 @@ def get_payment_times():
     """
         Return options for payment times select
     """
-    payment_times = [(-1, u'Configuration manuel')]
+    payment_times = [(-1, u'Configuration manuelle')]
     for i in range(1, 12):
         payment_times.append((i, '%d fois' % i))
     return payment_times

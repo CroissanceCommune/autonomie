@@ -38,4 +38,31 @@ function getNextId(selector, parseStr){
   });
   return newid;
 }
-
+$.fn.serializeObject = function(){
+  /*
+   * Add an object serialization to $(object)
+   * Usefull to get form datas as an object
+   */
+  var result = {};
+  var data = this.serializeArray();
+  $.each(data, function() {
+    if (result[this.name] !== undefined) {
+      if (!result[this.name].push) {
+        result[this.name] = [result[this.name]];
+      }
+      result[this.name].push(this.value || '');
+    } else {
+      result[this.name] = this.value || '';
+    }
+  });
+  return result;
+};
+function resetForm(form){
+  /*
+   *  Void all fields in a form
+   *  @param form: jquery object
+   */
+  form.find('input:text, input:password, input:file, select, textarea').val('');
+  var checkables = form.find('input:radio, input:checkbox');
+  checkables.removeAttr('checked').removeAttr('selected');
+}

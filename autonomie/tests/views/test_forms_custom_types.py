@@ -22,7 +22,8 @@ class TestType(BaseTestCase):
     def test_amount_type(self):
         a = AmountType()
         self.assertEqual(a.serialize(None, 15000), "150.0")
-        self.assertEqual(a.deserialize(None, "79.4"), 7940)
+        self.assertEqual(a.deserialize(None, u"79.4"), 7940)
+        self.assertEqual(a.deserialize(None, u"292,65"), 29265)
 
     def test_specialfloat(self):
         a = u"495, 4 5€"

@@ -16,6 +16,7 @@
     Custom colander types
 """
 import colander
+from autonomie.utils.math_utils import amount
 
 
 def specialfloat(self, value):
@@ -58,7 +59,7 @@ class AmountType(colander.Number):
             return colander.null
 
         try:
-            return int(self.num(cstruct) * 100.0)
+            return amount(self.num(cstruct))
         except Exception:
             raise colander.Invalid(node,
                           u"\"{val}\" n'est pas un montant valide".format(

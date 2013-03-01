@@ -15,10 +15,7 @@ function transformToCents(value) {
   /*
    * Transform the value to cents
    */
-  var cents;
-  var centimes;
-  var sval = "" + value;
-  var i;
+  var result;
 
   if ((value === undefined)||(value === null)){
     value = "0.00";

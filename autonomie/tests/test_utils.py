@@ -19,6 +19,8 @@ from mock import Mock
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.files import (encode_path, decode_path, issubdir,
         filesizeformat)
+from autonomie.utils.math_utils import floor
+from autonomie.utils.math_utils import amount
 
 from .base import BaseTestCase
 from .base import BaseViewTest
@@ -78,3 +80,19 @@ class TestFileSystem(BaseTestCase):
         self.assertEqual(filesizeformat(1024, 1), "1.0ko")
         self.assertEqual(filesizeformat(1024*1024, 0), "1Mo")
         self.assertEqual(filesizeformat(1024*1024, 1), "1.0Mo")
+
+class TestMathUtils(BaseTestCase):
+    def test_floor(self):
+        # Ref #727
+        a = 292.65 * 100.0
+        self.assertEqual(floor(a), 29265)
+        a = 29264.91
+        self.assertEqual(floor(a), 29264)
+
+    def test_amount(self):
+        # Ref #727
+        a = 192.65
+        self.assertEqual(amount(a), 19265)
+        a = 192.6555
+        self.assertEqual(amount(a), 19265)
+        self.assertEqual(amount(a, 4), 1926555)

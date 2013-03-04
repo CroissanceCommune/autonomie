@@ -102,8 +102,15 @@
             solde['paymentDate'] = '';
     %>
     <script type='text/javascript'>
+        var description = "";
+        % for line in solde.get('description', "Solde").splitlines():
+            description += "${line}";
+            % if not loop.last:
+                description += "\n";
+            % endif
+        % endfor
         var solde = {amount:formatAmount("${solde.get('amount', '0')}"),
-            description:"${solde.get('description', "Solde")}",
+            description:description,
             paymentDate:"${solde.get('paymentDate')}",
             readonly:true,
             id:1000};

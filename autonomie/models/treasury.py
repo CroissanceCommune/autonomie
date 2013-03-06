@@ -13,11 +13,16 @@
 # * Project : Autonomie
 #
 """
-    Treasury related models
+    Models related to the treasury module
 """
+from datetime import date
 from sqlalchemy import Column
+from sqlalchemy import Date
 from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import Float
 from sqlalchemy import Text
+from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
@@ -44,3 +49,101 @@ class TurnoverProjection(DBBASE):
             backref=backref("turnoverprojections",
                 order_by="TurnoverProjection.month",
                 cascade="all, delete-orphan"))
+
+
+class ExpenseType(DBBASE):
+    """
+        Base Type for expenses
+        :param label: Label of the expense type that will be used in the UI
+        :param code: Analytic code related to this expense
+        :param type: Column for polymorphic discrimination
+    """
+    __tablename__ = 'expense_type'
+    __table_args__ = default_table_args
+    __mapper_args__ = dict(polymorphic_on="type",
+                           polymorphic_identity="expense",
+                           with_polymorphic='*')
+    id = Column(Integer, primary_key=True)
+    type = Column(String(30), nullable=False)
+    label = Column(String(50))
+    code = Column(String(15))
+
+
+class ExpenseKmType(ExpenseType):
+    """
+        Type of expenses related to kilometric fees
+    """
+    __tablename__ = 'expensekm_type'
+    __table_args__ = default_table_args
+    __mapper_args__ = dict(polymorphic_identity='expensekm')
+    id = Column(Integer, ForeignKey('expense_type.id'), primary_key=True)
+    amount = Column(Float(precision=4))
+
+
+class ExpenseTelType(ExpenseType):
+    """
+        Type of expenses related to telefonic fees
+    """
+    __tablename__ = 'expensetel_type'
+    __table_args__ = default_table_args
+    __mapper_args__ = dict(polymorphic_identity='expensetel')
+    id = Column(Integer, ForeignKey('expense_type.id'), primary_key=True)
+    percentage = Column(Integer)
+
+
+class ExpenseSheet(DBBASE):
+    """
+        Model representing a whole ExpenseSheet
+        An expensesheet is related to a company and an employee (one user may
+        have multiple expense sheets if it has multiple companies)
+        :param company_id: The user's company id
+        :param user_id: The user's id
+        :param year: The year the expense is related to
+        :param month: The month the expense is related to
+        :param status: Status of the sheet
+        :param comments: Comments added to this expense sheet
+        :param status_user: The user related to statuschange
+        :param lines: expense lines of this sheet
+    """
+    __tablename__ = 'expense_sheet'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    month = Column(Integer)
+    year = Column(Integer)
+    company_id = Column(Integer, ForeignKey("company.id", ondelete="cascade"))
+    user_id = Column(Integer, ForeignKey("accounts.id", ondelete="cascade"))
+    status = Column(String(10))
+    comments = Column(Text)
+    status_user_id = Column(Integer, ForeignKey("accounts.id"))
+    status_date = Column(Date(), default=date.today(), onupdate=date.today())
+    company = relationship("Company",
+            backref=backref("expenses",
+                order_by="ExpenseSheet.month",
+                cascade="all, delete-orphan"))
+    user = relationship("User",
+            primaryjoin="ExpenseSheet.user_id==User.id",
+            backref=backref("expenses",
+                order_by="ExpenseSheet.month",
+                cascade="all, delete-orphan"))
+    status_user = relationship("User",
+            primaryjoin="ExpenseSheet.status_user_id==User.id")
+
+
+class ExpenseLine(DBBASE):
+    """
+        Model representing an expense line
+    """
+    __tablename__ = 'expense_line'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    date = Column(Date())
+    ht = Column(Integer)
+    tva = Column(Integer)
+    code = Column(String(15))
+    valid = Column(Boolean(), default=False)
+    sheet_id = Column(Integer,
+            ForeignKey("expense_sheet.id", ondelete="cascade"))
+    sheet = relationship("ExpenseSheet",
+                backref=backref("lines",
+                    order_by="ExpenseLine.date",
+                    cascade="all, delete-orphan"))

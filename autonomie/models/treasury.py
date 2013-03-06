@@ -21,6 +21,7 @@ from sqlalchemy import Date
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Float
+from sqlalchemy import Enum
 from sqlalchemy import Text
 from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
@@ -137,6 +138,8 @@ class ExpenseLine(DBBASE):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     date = Column(Date())
+    category = Column(Enum([1, 2]))
+    description = Column(String(255))
     ht = Column(Integer)
     tva = Column(Integer)
     code = Column(String(15))

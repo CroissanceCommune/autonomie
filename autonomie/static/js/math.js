@@ -13,7 +13,7 @@
 
 function transformToCents(value) {
   /*
-   * Transform the value to cents
+   * Transform the value to a float
    */
   var result;
 

@@ -8,6 +8,8 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+// Important point : handle redirection by json dict for ajax calls
+// Expects a redirect value to be returned with the 302 code
 $(document).ready(
     function() {
       $('body').ajaxComplete(

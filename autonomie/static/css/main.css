@@ -218,3 +218,6 @@ form.deform{
 .form-actions{
   margin-bottom:5px;
 }
+.input-append input:focus{
+  z-index:auto;
+}

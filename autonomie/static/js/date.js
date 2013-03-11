@@ -23,7 +23,7 @@ function formatPaymentDate(isoDate){
   /*
    *  format a date from iso to display format
    */
-  if (isoDate !== ''){
+  if ((isoDate !== '') && (isoDate !== null)){
     return $.datepicker.formatDate("dd/mm/yy", parseDate(isoDate));
   }else{
     return "";

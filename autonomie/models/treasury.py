@@ -113,7 +113,7 @@ class ExpenseSheet(DBBASE):
     year = Column(Integer)
     company_id = Column(Integer, ForeignKey("company.id", ondelete="cascade"))
     user_id = Column(Integer, ForeignKey("accounts.id", ondelete="cascade"))
-    status = Column(String(10))
+    status = Column(String(10), default='draft')
     comments = Column(Text)
     status_user_id = Column(Integer, ForeignKey("accounts.id"))
     status_date = Column(Date(), default=date.today(), onupdate=date.today())
@@ -129,24 +129,94 @@ class ExpenseSheet(DBBASE):
     status_user = relationship("User",
             primaryjoin="ExpenseSheet.status_user_id==User.id")
 
+    def __json__(self, request):
+        return dict(id=self.id,
+                    lines=[line.__json__(request) for line in self.lines],
+                    kmlines=[line.__json__(request) for line in self.kmlines],
+                    month=self.month,
+                    year=self.year)
 
-class ExpenseLine(DBBASE):
+
+class BaseExpenseLine(DBBASE):
     """
-        Model representing an expense line
+        Base models for expense lines
+        :param type: Column for polymorphic discrimination
+        :param date: Date of the expense
+        :param description: description of the expense
+        :param code: analytic code related to this expense
+        :param valid: validation status of the expense
+        :param sheet_id: id of the expense sheet this expense is related to
     """
-    __tablename__ = 'expense_line'
+    __tablename__ = 'baseexpense_line'
     __table_args__ = default_table_args
+    __mapper_args__ = dict(polymorphic_on="type",
+            polymorphic_identity="line",
+            with_polymorphic='*')
     id = Column(Integer, primary_key=True)
+    type = Column(String(30), nullable=False)
     date = Column(Date())
-    category = Column(Enum([1, 2]))
     description = Column(String(255))
-    ht = Column(Integer)
-    tva = Column(Integer)
+    category = Column(Enum('1', '2'), default='1')
     code = Column(String(15))
-    valid = Column(Boolean(), default=False)
+    valid = Column(Boolean(), default=True)
     sheet_id = Column(Integer,
             ForeignKey("expense_sheet.id", ondelete="cascade"))
+
+
+class ExpenseLine(BaseExpenseLine):
+    """
+        Common Expense line
+    """
+    __tablename__ = "expense_line"
+    __table_args__ = default_table_args
+    __mapper_args__ = dict(polymorphic_identity='expenseline')
+    id = Column(Integer, ForeignKey('baseexpense_line.id'), primary_key=True)
+    ht = Column(Integer)
+    tva = Column(Integer)
     sheet = relationship("ExpenseSheet",
                 backref=backref("lines",
                     order_by="ExpenseLine.date",
                     cascade="all, delete-orphan"))
+
+    def __json__(self, request):
+        return dict(
+                    id=self.id,
+                    date=self.date,
+                    valid=self.valid,
+                    category=self.category,
+                    description=self.description,
+                    ht=self.ht,
+                    tva=self.tva,
+                    code=self.code)
+
+
+class ExpenseKmLine(BaseExpenseLine):
+    """
+        Model representing a specific expense related to kilometric fees
+        :param start: starting point
+        :param end: endpoint
+        :param km: Number of kilometers
+    """
+    __tablename__ = "expensekm_line"
+    __table_args__ = default_table_args
+    __mapper_args__ = dict(polymorphic_identity='expensekmline')
+    id = Column(Integer, ForeignKey('baseexpense_line.id'), primary_key=True)
+    start = Column(String(150), default="")
+    end = Column(String(150), default="")
+    km = Column(Integer)
+    sheet = relationship("ExpenseSheet",
+                backref=backref("kmlines",
+                    order_by="ExpenseLine.date",
+                    cascade="all, delete-orphan"))
+
+    def __json__(self, request):
+        return dict(id=self.id,
+                    date=self.date,
+                    valid=self.valid,
+                    category=self.category,
+                    description=self.description,
+                    km=self.km,
+                    start=self.start,
+                    end=self.end)
+
+

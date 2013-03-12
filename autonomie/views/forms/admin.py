@@ -182,8 +182,10 @@ class ExpenseConfig(colander.MappingSchema):
     """
         Schema for the configuration of different expense types
     """
-    label = colander.SchemaNode(colander.String(), title=u"Libellé")
-    code = colander.SchemaNode(colander.String(), title=u"Code analytique")
+    label = colander.SchemaNode(colander.String(), title=u"Libellé",
+            validator=colander.Length(max=50))
+    code = colander.SchemaNode(colander.String(), title=u"Code analytique",
+            validator=colander.Length(max=15))
 
 class ExpenseKmConfig(ExpenseConfig):
     """
@@ -198,7 +200,8 @@ class ExpenseTelConfig(ExpenseConfig):
         Schema for telefonic expenses
     """
     percentage = colander.SchemaNode(colander.Integer(),
-                                title=u"Pourcentage remboursé")
+                                title=u"Pourcentage remboursé",
+                                validator=colander.Range(1, 100))
 
 
 class ExpensesConfig(colander.SequenceSchema):

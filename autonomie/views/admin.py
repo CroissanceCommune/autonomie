@@ -217,29 +217,30 @@ class AdminExpense(BaseFormView):
 ont été configurés"
     schema = ExpenseTypesConfig()
     buttons = (submit_btn,)
-    factories = {'expenses':ExpenseType,
-                 'expenseskm':ExpenseKmType,
-                 'expensestel':ExpenseTelType}
+    factories = {'expenses':(ExpenseType, 'expense'),
+                 'expenseskm':(ExpenseKmType, 'expensekm'),
+                 'expensestel':(ExpenseTelType, 'expensetel')}
 
     def before(self, form):
         """
             Add appstruct to the current form object
         """
         appstruct = {}
-        for key, factory in self.factories.items():
-            appstruct[key] = [e.appstruct() for e in factory.query()]
+        for key, (factory, polytype) in self.factories.items():
+            appstruct[key] = [e.appstruct() for e in factory.query()\
+                                            .filter(factory.type==polytype)]
         form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
         """
             Handle successfull expense configuration
         """
-        for factory in self.factories.values():
-            for element in factory.query():
+        for (factory, polytype) in self.factories.values():
+            for element in factory.query().filter(factory.type==polytype):
                 self.dbsession.delete(element)
         self.dbsession.flush()
 
-        for key, factory in self.factories.items():
+        for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
                 type_ = factory()
                 merge_session_with_post(type_, data)

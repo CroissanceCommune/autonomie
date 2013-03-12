@@ -13,6 +13,9 @@ from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.tva import Tva
 from autonomie.scripts.utils import command
 from autonomie.models.task.unity import WorkUnit
+from autonomie.models.treasury import ExpenseKmType
+from autonomie.models.treasury import ExpenseTelType
+from autonomie.models.treasury import ExpenseType
 
 GROUPS = {
     ADMIN_PRIMARY_GROUP: "admin",
@@ -132,6 +135,16 @@ def add_unity(label):
     session.add(t)
     session.flush()
 
+def add_expense_type(type_, **kwargs):
+    if type_ == 'km':
+        e = ExpenseKmType(**kwargs)
+    elif type_ == 'tel':
+        e = ExpenseTelType(**kwargs)
+    else:
+        e = ExpenseType(**kwargs)
+    session = DBSESSION()
+    session.add(e)
+    session.flush()
 
 def set_configuration():
     add_payment_mode(u"par chèque")
@@ -145,6 +158,14 @@ def set_configuration():
     add_unity(u"jour(s)")
     add_unity(u"mois")
     add_unity(u"forfait")
+
+    add_expense_type("", label=u"Restauration", code='0001')
+    add_expense_type("", label=u"Transport", code='0002')
+    add_expense_type("", label=u"Matériel", code="0003")
+    add_expense_type("km", label=u"Scooter", code="0004", amount='0.124')
+    add_expense_type("km", label=u"Voiture", code="0005", amount="0.235")
+    add_expense_type("tel", label=u"Adsl-Tel fix", code="0006", percentage="80")
+    add_expense_type("tel", label=u"Mobile", code="0007", percentage="80")
 
 
 def fake_database_fill(arguments):

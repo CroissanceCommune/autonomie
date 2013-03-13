@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 26 déc. 2012 23:25:46 CET
+# * Last Modified : jeu. 07 mars 2013 15:04:29 CET
 #
 # * Project : autonomie
 #
@@ -17,7 +17,6 @@ import logging
 from pyramid.security import Allow
 from pyramid.security import Authenticated
 from pyramid.security import ALL_PERMISSIONS
-from pyramid.security import DENY_ALL
 from sqlalchemy.orm import undefer_group
 
 from autonomie.models.project import Project
@@ -79,6 +78,10 @@ class BaseDBFactory(object):
     """
     __acl__ = DEFAULT_PERM[:]
     dbsession = None
+    def __init__(self, parent, name):
+        self.__parent__ = parent
+        self.__name__ = name
+
 
     def _get_item(self, klass, key, object_name):
         assert self.dbsession is not None, "Missing dbsession"
@@ -100,10 +103,6 @@ class CompanyFactory(BaseDBFactory):
     """
         Handle access to a project
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -115,10 +114,6 @@ class ProjectFactory(BaseDBFactory):
     """
         Handle access to a project
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -130,10 +125,6 @@ class ClientFactory(BaseDBFactory):
     """
         Handle access to a client
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -145,10 +136,6 @@ class EstimationFactory(BaseDBFactory):
     """
         Handle access to a client
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -160,10 +147,6 @@ class InvoiceFactory(BaseDBFactory):
     """
         Handle access to an invoice
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -175,10 +158,6 @@ class CancelInvoiceFactory(BaseDBFactory):
     """
         Handle access to a cancelinvoice
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -190,10 +169,6 @@ class UserFactory(BaseDBFactory):
     """
         Handle access to a user account
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object

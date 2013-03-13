@@ -18,6 +18,7 @@
 import cgi
 import logging
 import colander
+from datetime import date
 
 from beaker.cache import cache_region
 from sqlalchemy import distinct
@@ -273,3 +274,11 @@ def deferred_year_select_widget(node, kw):
     """
     years = get_years(kw['request'].dbsession)
     return widget.SelectWidget(values=[(year[0], year[0])for year in years])
+
+
+@colander.deferred
+def deferred_today(node, kw):
+    """
+        return a deferred value for "today"
+    """
+    return date.today()

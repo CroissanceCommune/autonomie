@@ -49,9 +49,11 @@ _backbone_tuning = Resource(lib_autonomie, "js/backbone-tuning.js",
         depends=[_backbone_marionnette, _hogan, main])
 _backbone_validation_bootstrap = Resource(lib_autonomie,
         "js/backbone-validation-bootstrap.js", depends=[_backbone_validation])
+_backbone_popup = Resource(lib_autonomie,
+        "js/backbone-popup.js", depends=[_backbone_marionnette]);
 
 backbone = Group([_backbone_validation_bootstrap,
-                  _backbone_tuning])
+                  _backbone_tuning, _backbone_popup])
 
 templates = Resource(lib_autonomie,
         "js/template.js", depends=[_hogan])

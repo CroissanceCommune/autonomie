@@ -217,6 +217,7 @@ class ExpenseKmLine(BaseExpenseLine):
                     description=self.description,
                     km=self.km,
                     start=self.start,
-                    end=self.end)
+                    end=self.end,
+                    code=self.code)
 
 

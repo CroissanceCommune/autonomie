@@ -50,7 +50,9 @@ class User(DBBASE):
     __tablename__ = 'accounts'
     __table_args__ = default_table_args
     id = Column('id', Integer, primary_key=True)
-    login = Column('login', String(64))
+    login = Column('login',
+            String(64, collation="utf8_bin"),
+             unique=True, nullable=False)
     pwd = Column("password", String(100))
     firstname = Column("firstname", String(50))
     lastname = Column("lastname", String(50))

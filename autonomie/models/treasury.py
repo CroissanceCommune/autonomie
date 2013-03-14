@@ -30,6 +30,9 @@ from sqlalchemy.orm import backref
 
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
+from autonomie.models.statemachine import StateMachine
+
+MANAGER_PERMS = "manage"
 
 class TurnoverProjection(DBBASE):
     """
@@ -92,6 +95,28 @@ class ExpenseTelType(ExpenseType):
     percentage = Column(Integer)
 
 
+def build_state_machine():
+    """
+        Return a state machine that allows ExpenseSheet status handling
+    """
+    reset = ('reset', None, None, False,)
+    valid = ('valid', MANAGER_PERMS, )
+    invalid = ('invalid', MANAGER_PERMS,)
+    states = {}
+    states['draft'] = ('draft', 'wait', reset, valid,)
+    states['invalid'] = ('draft', 'wait',)
+    states['wait'] = (valid, invalid,)
+    return states
+
+
+class ExpenseStates(StateMachine):
+    """
+        Expense state machine
+    """
+    status_attr = "valid"
+    userid_attr = "status_user_id"
+
+
 class ExpenseSheet(DBBASE):
     """
         Model representing a whole ExpenseSheet
@@ -129,6 +154,9 @@ class ExpenseSheet(DBBASE):
     status_user = relationship("User",
             primaryjoin="ExpenseSheet.status_user_id==User.id")
 
+    state_machine = ExpenseStates('draft', build_state_machine())
+
+
     def __json__(self, request):
         return dict(id=self.id,
                     lines=[line.__json__(request) for line in self.lines],
@@ -136,6 +164,12 @@ class ExpenseSheet(DBBASE):
                     month=self.month,
                     year=self.year)
 
+
+    def set_status(self, status, request, user_id, **kw):
+        """
+            Set the status of a task through a state machine
+        """
+        return self.state_machine.process(self, request, user_id, status, **kw)
 
 class BaseExpenseLine(DBBASE):
     """

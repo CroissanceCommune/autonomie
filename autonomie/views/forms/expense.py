@@ -56,7 +56,8 @@ class PeriodSelectSchema(colander.MappingSchema):
             title=u"")
     month = colander.SchemaNode(colander.Integer(),
             widget=widget.SelectWidget(values=[(month, month_name(month))
-                                                for month in range(1,13)]),
+                                                for month in range(1,13)],
+                                                css_class='input-small'),
             default=default_month,
             missing=default_month,
             title=u"")

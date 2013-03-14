@@ -273,7 +273,8 @@ def deferred_year_select_widget(node, kw):
         Return a deferred year select widget
     """
     years = get_years(kw['request'].dbsession)
-    return widget.SelectWidget(values=[(year[0], year[0])for year in years])
+    return widget.SelectWidget(values=[(year[0], year[0])for year in years],
+                css_class='input-small')
 
 
 @colander.deferred

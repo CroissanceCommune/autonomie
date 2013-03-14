@@ -38,7 +38,7 @@ from autonomie.views.taskaction import TaskFormView
 from autonomie.views.taskaction import get_paid_form
 from autonomie.views.taskaction import get_set_financial_year_form
 from autonomie.views.taskaction import context_is_editable
-from autonomie.views.taskaction import StatusView
+from autonomie.views.taskaction import TaskStatusView
 from autonomie.views.taskaction import populate_actionmenu
 
 from autonomie.views.taskaction import make_pdf_view
@@ -203,7 +203,7 @@ class InvoiceEdit(TaskFormView):
         return invoice
 
 
-class InvoiceStatus(StatusView):
+class InvoiceStatus(TaskStatusView):
     """
         Handle the invoice status processing
         Is called when the status btn from the html view or

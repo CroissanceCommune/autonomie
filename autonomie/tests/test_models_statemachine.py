@@ -19,7 +19,7 @@ from .base import BaseViewTest
 from mock import MagicMock
 from pyramid.security import Allow, ALL_PERMISSIONS, Authenticated, Deny
 from pyramid import testing
-from autonomie.models.statemachine import TaskState
+from autonomie.models.statemachine import TaskStates
 from autonomie.exception import Forbidden
 
 def get_task():
@@ -29,7 +29,7 @@ def get_task():
 class TestTaskState(BaseViewTest):
     def setUp(self):
         super(TestTaskState, self).setUp()
-        self.state_machine = TaskState()
+        self.state_machine = TaskStates()
         self.state_machine.add_transition(
                 'draft', 'wait', "edit", lambda task, user_id:(task, 2))
 

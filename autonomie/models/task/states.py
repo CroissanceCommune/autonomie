@@ -18,7 +18,7 @@
 import logging
 import datetime
 
-from autonomie.models.statemachine import TaskState
+from autonomie.models.statemachine import TaskStates
 from autonomie.exception import Forbidden
 from autonomie.exception import SignatureError
 
@@ -187,11 +187,14 @@ def get_cinv_state():
     return result
 
 def get_maninv_state():
+    """
+        Return the states for manual invoices
+    """
     return dict(valid=('resulted',))
 
 DEFAULT_STATE_MACHINES = {
-        "base": TaskState('draft', get_base_state()),
-        "estimation": TaskState('draft', get_est_state()),
-        "invoice": TaskState('draft', get_inv_state()),
-        "cancelinvoice": TaskState('draft', get_cinv_state()),
-        "manualinvoice":TaskState("valid", get_maninv_state())}
+        "base": TaskStates('draft', get_base_state()),
+        "estimation": TaskStates('draft', get_est_state()),
+        "invoice": TaskStates('draft', get_inv_state()),
+        "cancelinvoice": TaskStates('draft', get_cinv_state()),
+        "manualinvoice":TaskStates("valid", get_maninv_state())}

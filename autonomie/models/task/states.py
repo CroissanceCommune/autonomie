@@ -18,13 +18,20 @@
 import logging
 import datetime
 
-from autonomie.models.statemachine import TaskStates
+from autonomie.models.statemachine import StateMachine
 from autonomie.exception import Forbidden
 from autonomie.exception import SignatureError
 
 log = logging.getLogger(__name__)
 
 MANAGER_PERMS = "manage"
+
+class TaskStates(StateMachine):
+    """
+        Task statemachine
+    """
+    status_attr = "CAEStatus"
+    userid_attr = "statusPerson"
 
 
 def valid_callback(task, **kw):

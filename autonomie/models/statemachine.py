@@ -132,11 +132,3 @@ class StateMachine(object):
             return self.transitions.get(self.default_state, [])
         else:
             return self.transitions.get(state, [])
-
-
-class TaskStates(StateMachine):
-    """
-        Task statemachine
-    """
-    status_attr = "CAEStatus"
-    userid_attr = "statusPerson"

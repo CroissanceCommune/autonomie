@@ -19,19 +19,19 @@ from .base import BaseViewTest
 from mock import MagicMock
 from pyramid.security import Allow, ALL_PERMISSIONS, Authenticated, Deny
 from pyramid import testing
-from autonomie.models.statemachine import TaskStates
+from autonomie.models.statemachine import StateMachine, TaskStates
 from autonomie.exception import Forbidden
 
-def get_task():
-    return MagicMock(CAEStatus='draft',
-                    statusPerson="toto")
+class TestStateMachine(BaseViewTest):
+    def get_model(self):
+        return MagicMock(status='draft',
+                    user_id="toto")
 
-class TestTaskState(BaseViewTest):
     def setUp(self):
-        super(TestTaskState, self).setUp()
-        self.state_machine = TaskStates()
+        super(TestStateMachine, self).setUp()
+        self.state_machine = StateMachine()
         self.state_machine.add_transition(
-                'draft', 'wait', "edit", lambda task, user_id:(task, 2))
+                'draft', 'wait', "edit", lambda model, user_id:(model, 2))
 
     def test_add_transition(self):
         self.state_machine.add_transition('wait', "valid")
@@ -39,46 +39,57 @@ class TestTaskState(BaseViewTest):
                     self.state_machine.get_transition('wait', 'valid').name,
                                                             'valid')
 
-    def test_process_ok(self):
-        self.config.testing_securitypolicy(userid='test',
-                                        permissive=True)
-        request = testing.DummyRequest()
-        task = get_task()
-        process_result = self.state_machine.process(task,
-                                                    request,
-                                                    'test',
-                                                    'wait')
-        self.assertEqual(process_result, (task, 2))
-        self.assertEqual(task.statusPerson, 'test')
-        self.assertEqual(task.CAEStatus, 'wait')
-
     def test_process_failure(self):
         self.config.testing_securitypolicy(userid='test',
                                             groupids=["group:pabon"],
                                             permissive=False)
         request = testing.DummyRequest()
-        task = get_task()
-        self.assertRaises(Forbidden, self.state_machine.process, task,
+        model = self.get_model()
+        self.assertRaises(Forbidden, self.state_machine.process, model,
                                                     request, 'test',
                                                      'wait')
-        self.assertRaises(Forbidden, self.state_machine.process, task,
+        self.assertRaises(Forbidden, self.state_machine.process, model,
                                                 request, 'test',
                                                    'invalid')
 
 
     def test_process_caestate(self):
         self.state_machine.add_transition(
-              'draft', 'delete', 'edit', lambda task, user_id:(task, user_id),
+              'draft', 'delete', 'edit', lambda model, user_id:(model, user_id),
                 cae=False)
         self.config.testing_securitypolicy(userid='test',
                                          permissive=True)
         request = testing.DummyRequest()
-        task = get_task()
-        process_result = self.state_machine.process(task,
+        model = self.get_model()
+        process_result = self.state_machine.process(model,
                                                     request,
-                                                    'test',
+                                                    5,
                                                     'delete')
-        self.assertEqual(process_result, (task, 'test'))
-        # Because delete state has a False cae attr, it doesn't affect the task
+        self.assertEqual(process_result, (model, 5))
+        # Because delete state has a False cae attr, it doesn't affect the model
         # object
-        self.assertEqual(task.CAEStatus, 'draft')
+        self.assertEqual(model.status, 'draft')
+
+
+class TestTaskState(BaseViewTest):
+    def get_model(self):
+        return MagicMock(CAEStatus='draft',
+                         statusPerson="toto")
+
+    def setUp(self):
+        super(TestTaskState, self).setUp()
+        self.state_machine = TaskStates()
+        self.state_machine.add_transition(
+                'draft', 'wait', "edit", lambda model, user_id:(model, 2))
+
+    def test_affected_attrs(self):
+        self.config.testing_securitypolicy(userid='test',
+                                        permissive=True)
+        request = testing.DummyRequest()
+        model = self.get_model()
+        process_result = self.state_machine.process(model,
+                                                    request,
+                                                    5,
+                                                    'wait')
+        self.assertEqual(model.statusPerson, 5)
+        self.assertEqual(model.CAEStatus, 'wait')

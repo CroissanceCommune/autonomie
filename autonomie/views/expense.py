@@ -22,7 +22,12 @@ import colander
 from fanstatic import Resource
 from deform import Form
 from pyramid.renderers import render
+from pyramid.security import has_permission
+from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPTemporaryRedirect
 
+from autonomie.exception import Forbidden
+from autonomie.views.mail import StatusChanged
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms.expense import ExpenseStatusSchema
 from autonomie.views.forms.expense import PeriodSelectSchema
@@ -36,9 +41,13 @@ from autonomie.models.treasury import ExpenseSheet
 from autonomie.models.treasury import ExpenseLine
 from autonomie.models.treasury import ExpenseKmLine
 from autonomie.views.base import BaseView
+from autonomie.views.render_api import month_name
+from autonomie.views.render_api import format_account
 from autonomie.views.forms.utils import BaseFormView
 from autonomie.utils.rest import RestError
 from autonomie.utils.rest import RestJsonRepr
+from autonomie.utils.views import submit_btn
+from autonomie.utils.widgets import Submit
 from autonomie.resources import lib_autonomie
 from js.jqueryui import effects_highlight
 from js.jqueryui import effects_shake
@@ -67,6 +76,11 @@ def expense_options():
     options["teltypes"] = [{"label":e.label, "value":e.code,
                                         "percentage":e.percentage}
                                                for e in ExpenseTelType.query()]
+    options['categories'] = [{'value':'1',
+                            'label':'Frais direct de fonctionnement'},
+                            {'value':'2',
+                            'label':"Frais concernant directement votre \
+activite aupres de vos clients"}]
     return options
 
 class ExpenseSheetJson(RestJsonRepr):
@@ -86,87 +100,175 @@ class ExpenseLineJson(RestJsonRepr):
 
 
 class ExpenseKmLineJson(RestJsonRepr):
+    """
+        Json wrapper for expense kilometric lines
+    """
     schema = ExpenseKmLineSchema()
 
 
-class ExpensePage(BaseFormView):
+def company_expenses(request):
     """
-        Display the expense page
+        View that lists the expenseSheets related to the current company
+    """
+    return dict(title=u"Accès aux notes de frais des employés de {0}"\
+            .format(request.context.name),
+            users=request.context.employees)
+
+
+def get_period_form(request, action_url=""):
+    """
+        Return a form to select the period of the expense sheet
+    """
+    schema = PeriodSelectSchema().bind(request=request)
+    form = Form(schema=schema, buttons=(submit_btn,), method='GET',
+                            formid='period_form', action=action_url)
+    return form
+
+
+def get_period(request):
+    """
+        Return the period configured in the current request
+    """
+    schema = PeriodSelectSchema().bind(request=request)
+    try:
+        appstruct = schema.deserialize(request.GET)
+    except colander.Invalid:
+        appstruct = schema.deserialize({})
+    year = appstruct['year']
+    month = appstruct['month']
+    return year, month
+
+
+def get_expense_sheet(year, month, cid, uid):
+    """
+        Return the expense sheet for the given 4-uple
+    """
+    return ExpenseSheet.query()\
+                .filter(ExpenseSheet.year==year)\
+                .filter(ExpenseSheet.month==month)\
+                .filter(ExpenseSheet.company_id==cid)\
+                .filter(ExpenseSheet.user_id==uid).first()
+
+def get_new_expense_sheet(year, month, cid, uid):
+    """
+        Return a new expense sheet for the given 4-uple
+    """
+    expense = ExpenseSheet()
+    expense.year = year
+    expense.month = month
+    expense.company_id = cid
+    expense.user_id = uid
+    for type_ in ExpenseTelType.query():
+        line = ExpenseLine(code=type_.code, ht=0, tva=0,
+                description=type_.label)
+        expense.lines.append(line)
+    return expense
+
+def expenses_access(request):
+    """
+        get/initialize the expense corresponding to the 4-uple:
+            (year, month, user_id, company_id)
+        Redirect to the expected expense page
+        Should be called with post args
+    """
+    year, month = get_period(request)
+    cid = request.context.id
+    uid = request.matchdict.get('uid')
+    expense = get_expense_sheet(year, month, cid, uid)
+    if not expense:
+        # If it has not already been accessed, we create a new one and
+        # we flush it to ensure we can access its id in the view
+        expense = get_new_expense_sheet(year, month, cid, uid)
+        request.dbsession.add(expense)
+        request.dbsession.flush()
+    # Here we use a temporary redirect since the expense we redirect too may
+    # have change if it was reset
+    return HTTPTemporaryRedirect(request.route_path("expense", id=expense.id))
+
+
+class ExpenseSheetView(BaseFormView):
+    """
+        ExpenseSheet view
     """
     schema = ExpenseStatusSchema()
-    period_schema = PeriodSelectSchema()
-    title = u"Notes de frais"
-    buttons = ()
-    add_template_vars = ('title', 'jsoptions', 'expensesheet', 'period_form')
+    add_template_vars = ('title', 'jsoptions', 'expensesheet', 'period_form',
+                        'edit')
 
     def __init__(self, request):
-        super(ExpensePage, self).__init__(request)
+        super(ExpenseSheetView, self).__init__(request)
         expense_js.need()
-        self.year = None
-        self.month = None
+        self.month = self.request.context.month
+        self.year = self.request.context.year
         self.period_form = self.get_period_form()
-        self.expense = self._expense()
 
     def get_period_form(self):
-        """
-            Return the form used for the expense period selection
-        """
-        schema = self.period_schema.bind(request=self.request)
-        form = Form(schema=schema, buttons=(), method='GET',
-                                        formid='period_form')
-        form.set_appstruct(self.submit_period())
-        return form
+        cid = self.request.context.company_id
+        uid = self.request.context.user_id
+        url = self.request.route_url("user_expenses", id=cid, uid=uid)
+        return get_period_form(self.request, url)
 
-    def submit_period(self):
+    @property
+    def title(self):
         """
-            Handle the period form submission
-            An expense sheet is related to a period that is selected
-            through GET params
+            Return the title of the page
         """
-        schema = self.period_schema.bind(request=self.request)
-        try:
-            appstruct = schema.deserialize(self.request.GET)
-        except colander.Invalid:
-            appstruct = schema.deserialize({})
-        self.year = appstruct['year']
-        self.month = appstruct['month']
-        return appstruct
+        return u"Notes de frais de {0} {1}"\
+                .format(month_name(self.month), self.year)
 
-    def _expense(self):
+    @property
+    def buttons(self):
         """
-            Return the expense we are currently editing
-            An expense is selected regarding a 4-uple:
-                (user_id, company_id, year, month)
+            Return the buttons used for form submission
         """
-        cid = self.request.context.id
-        user_id = self.request.matchdict['uid']
-        expense = ExpenseSheet.query()\
-                .filter(ExpenseSheet.year==self.year)\
-                .filter(ExpenseSheet.month==self.month)\
-                .filter(ExpenseSheet.company_id==cid)\
-                .filter(ExpenseSheet.user_id==user_id).first()
-        if not expense:
-            # If it has not already been accessed, we create a new one and
-            # we flush it to ensure we can access its id in the view
-            expense = ExpenseSheet()
-            expense.year = self.year
-            expense.month = self.month
-            expense.company_id = cid
-            expense.user_id = user_id
-            for type_ in ExpenseTelType.query():
-                line = ExpenseLine(code=type_.code, ht=0, tva=0,
-                        description=type_.label)
-                expense.lines.append(line)
-            self.dbsession.add(expense)
-            self.dbsession.flush()
-        return expense
+        btns = []
+        log.debug(u"   + Available actions :")
+        for action in self.request.context.get_next_actions():
+            log.debug(u"    * {0}".format(action.name))
+            if action.allowed(self.request.context, self.request):
+                log.debug(u"     -> is allowed for the current user")
+                if hasattr(self, "_%s_btn" % action.name):
+                    func = getattr(self, "_%s_btn" % action.name)
+                    btns.append(func())
+        return btns
+
+    def _reset_btn(self):
+        """
+            Return a reset button
+        """
+        return Submit(u"Réinitialiser", "reset", name="reset",
+                        request=self.request,
+                        confirm=u"Êtes-vous sûr de vouloir réinitialiser \
+cette feuille de notes de frais (toutes les modifications apportées seront \
+perdues) ?")
+
+    def _wait_btn(self):
+        """
+            Return a button for requesting validation
+        """
+        return Submit(u"Demander la validation", "wait", request=self.request)
+
+    def _valid_btn(self):
+        """
+            Return a validation button
+        """
+        return Submit(u"Valider", "valid", request=self.request)
+
+    def _invalid_btn(self):
+        """
+            Return an invalidation button
+        """
+        return Submit(u"Invalider", "invalid", request=self.request)
+
+    @property
+    def edit(self):
+        return has_permission("edit", self.request.context, self.request)
 
     @property
     def expensesheet(self):
         """
             Returns a json representation of the current expense sheet
         """
-        return render('json', ExpenseSheetJson(self.expense))
+        return render('json', ExpenseSheetJson(self.request.context))
 
     @property
     def jsoptions(self):
@@ -179,16 +281,54 @@ class ExpensePage(BaseFormView):
         """
             Prepopulate the form
         """
+        self.period_form.set_appstruct(self.request.context.appstruct())
         # Here we override the form counter to avoid field ids conflict
         form.counter = self.period_form.counter
-        form.set_appstruct(self.expense.appstruct())
+        form.set_appstruct(self.request.context.appstruct())
+        # Ici on spécifie un template qui permet de rendre nos boutons de
+        # formulaires
+        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def submit_success(self, appstruct):
         """
-            Handle submission of the expense status form
+            Handle submission of the expense page
         """
-        # Maybe one submit func for each available status should be fun
-        pass
+        log.debug("Submitting expense sheet status form")
+        merge_session_with_post(self.request.context, appstruct)
+        try:
+            expense = self.set_expense_status(self.request.context)
+        except Forbidden, err:
+            self.request.session.flash(err.message, queue='error')
+        return HTTPFound(self.request.route_url("expense",
+                                                id=self.request.context.id))
+
+    def set_expense_status(self, expense):
+        """
+            Handle expense submission
+        """
+        params = dict(self.request.POST)
+        status = params['submit']
+        expense.set_status(status, self.request, self.request.user.id, **params)
+        #self.request.registry.notify(StatusChanged(self.request, expense))
+        return expense
+
+    def reset_success(self, appstruct):
+        """
+            Reset an expense
+        """
+        log.debug(u"Resetting the expense")
+        if self.request.context.status == 'draft':
+            self.dbsession.delete(self.request.context)
+            self.session.flash(u"Votre feuille de notes de frais de {0} {1} a \
+bien été réinitialisée".format(month_name(self.month), self.year))
+        else:
+            self.session.flash(u"Vous n'êtes pas autorisé à réinitialiser \
+cette feuille de notes de frais")
+        cid = self.request.context.company_id
+        uid = self.request.context.user_id
+        url = self.request.route_url("user_expenses", id=cid, uid=uid,
+                _query=dict(year=self.year, month=self.month))
+        return HTTPFound(url)
 
 
 class RestExpenseLine(BaseView):
@@ -211,7 +351,6 @@ class RestExpenseLine(BaseView):
             get an expense line
         """
         lid = self.request.matchdict.get('lid')
-        expense = self.request.context
         for line in getattr(self.request.context, self.key):
             if line.id == int(lid):
                 return line
@@ -318,6 +457,9 @@ def add_rest_iface(config, route_name, factory):
 def includeme(config):
     traverse = '/companies/{id}'
     config.add_route("company_expenses",
+            "/company/{id}/expenses/",
+            traverse=traverse)
+    config.add_route("user_expenses",
             "/company/{id}/{uid}/expenses/",
             traverse=traverse)
     config.add_route("expense",
@@ -337,9 +479,14 @@ def includeme(config):
             "/expenses/{id:\d+}/kmlines/{lid}",
             traverse="/expenses/{id}")
 
-    config.add_view(ExpensePage,
-            route_name="company_expenses",
-            renderer="treasury/expenses.mako")
+    config.add_view(company_expenses,
+                    route_name="company_expenses",
+                    renderer="treasury/expenses.mako")
+    config.add_view(expenses_access,
+            route_name="user_expenses")
+    config.add_view(ExpenseSheetView,
+            route_name="expense",
+            renderer="treasury/expense.mako")
 
     add_rest_iface(config, "expenseline", RestExpenseLine)
     add_rest_iface(config, "expensekmline", RestExpenseKmLine)

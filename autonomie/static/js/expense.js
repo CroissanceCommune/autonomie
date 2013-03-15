@@ -246,7 +246,8 @@ var ExpenseLineView = Backbone.Marionette.ItemView.extend({
     var total = this.model.total();
     return {typelabel:typelabel,
             edit_url:edit_url,
-            total:formatAmount(total)};
+            total:formatAmount(total),
+            edit:AppOptions['edit']};
   },
   initialize: function(){
     /*
@@ -370,6 +371,7 @@ var ExpenseKmLineView = Backbone.Marionette.ItemView.extend({
     var edit_url = "#kmlines/" + this.model.cid + "/edit";
     return {typelabel:selected_type[0]['label'],
             edit_url:edit_url,
+            edit:AppOptions['edit'],
             total:formatAmount(total)};
   },
   initialize: function(){
@@ -389,6 +391,9 @@ var ExpensesKmView = Backbone.Marionette.CompositeView.extend({
   childrenContainer: "tbody",
   ui: {
     total: '#km_total'
+  },
+  templateHelpers:function(){
+    return {edit:AppOptions['edit']};
   },
   onRender:function(collectionView){
     this.ui.total.html(formatAmount(collectionView.collection.total()));
@@ -564,7 +569,7 @@ var ExpenseAdd = BaseFormView.extend({
     /*
      * Return the options for expense categories
      */
-    return AppOptions['expensecategories'];
+    return AppOptions['categories'];
   },
   getTypeOptions: function(){
     /*
@@ -605,7 +610,7 @@ var ExpenseEdit = ExpenseAdd.extend({
     /*
      * Return the options for expense categories
      */
-    var category_options = AppOptions['expensecategories'];
+    var category_options = AppOptions['categories'];
     var category = this.model.get('category');
     return this.updateSelectOptions(category_options, category);
 

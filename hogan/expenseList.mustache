@@ -8,7 +8,9 @@
         <th>Montant HT</th>
         <th>Tva</th>
         <th>Total</th>
+        {{#edit}}
         <th>Actions</th>
+            {{/edit}}
     </thead>
     <tbody class='internal'>
     </tbody>
@@ -16,7 +18,9 @@
         <tr>
             <td colspan='5'>Total</td>
             <td id='internal_total'></td>
+        {{#edit}}
             <td></td>
+            {{/edit}}
         </tr>
     </tfoot>
 </table>
@@ -30,7 +34,9 @@
         <th>Montant HT</th>
         <th>Tva</th>
         <th>Total</th>
+        {{#edit}}
         <th>Actions</th>
+        {{/edit}}
     </thead>
     <tbody class='activity'>
     </tbody>
@@ -38,7 +44,9 @@
         <tr>
             <td colspan='5'>Total</td>
             <td id='activity_total'></td>
+        {{#edit}}
             <td></td>
+            {{/edit}}
         </tr>
     </tfoot>
 </table>

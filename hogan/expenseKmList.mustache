@@ -8,7 +8,9 @@
         <th>Point d'arrivée</th>
         <th>Kms</th>
         <th>Indemnités</th>
+        {{#edit}}
         <th>Actions</th>
+        {{/edit}}
     </thead>
     <tbody class='internal'>
     </tbody>
@@ -16,7 +18,9 @@
         <tr>
             <td colspan='6'>Total</td>
             <td id='km_total'></td>
+            {{#edit}}
             <td></td>
+            {{/edit}}
         </tr>
     </tfoot>
 </table>

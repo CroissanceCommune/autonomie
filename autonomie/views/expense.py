@@ -379,7 +379,8 @@ class RestExpenseLine(BaseView):
         line = self.factory(**appstruct)
         line.sheet = self.request.context
         self.request.dbsession.add(line)
-        return self.schema.serialize(appstruct)
+        self.request.dbsession.flush()
+        return self.model_wrapper(line)
 
     def delete(self):
         """
@@ -406,7 +407,8 @@ class RestExpenseLine(BaseView):
             raise RestError(err.asdict(), 400)
         line = merge_session_with_post(line, appstruct)
         self.request.dbsession.merge(line)
-        return self.schema.serialize(appstruct)
+        self.request.dbsession.flush()
+        return self.model_wrapper(line)
 
 
 class RestExpenseKmLine(RestExpenseLine):

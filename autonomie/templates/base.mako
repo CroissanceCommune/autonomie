@@ -32,7 +32,7 @@
   </head>
   <body>
     <header>
-    <div class="navbar">
+    <div class="navbar navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
@@ -44,7 +44,7 @@
               ${menu.render(request)|n}
             % endif
             %if request.user:
-              <div class="btn-group pull-right">
+              <div class="pull-right">
                 <a class="btn dropdown-toggle" href="#" data-toggle="dropdown">
                   <i class="icon-user"></i>
                   ${request.user.lastname} ${request.user.firstname}

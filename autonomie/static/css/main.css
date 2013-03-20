@@ -32,8 +32,9 @@ header .navbar li:hover{
 }
 .pagetitle h2{
   float:left;
-  font-size:16px;
-  margin-right:50px;
+  font-size:18px;
+  line-height:15px;
+  margin:3px 50px 3px 0px;
 }
 .form-actions{ /* deform_bootstrap modification */
   background:none;
@@ -189,7 +190,7 @@ textarea{
     color:#111;
     font-weight:bold;
     vertical-align:middle;
-    font-size:24px;
+    font-size:16px;
     text-transform:capitalize;
 }
 .section-header a:hover{

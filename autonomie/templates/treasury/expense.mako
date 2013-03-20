@@ -40,8 +40,8 @@
 ${period_form.render()|n}
 <hr />
 % if edit:
-<a href="#lines/add" class='btn btn-large' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
-<a href="#kmlines/add" class='btn btn-large' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>
+    <a href="#lines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais</a>
+    <a href="#kmlines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>
 % endif
 <div class='row'>
     <div class='span12' id="expenses"></div>

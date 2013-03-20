@@ -113,7 +113,7 @@ class ExpenseStates(StateMachine):
     """
         Expense state machine
     """
-    status_attr = "valid"
+    status_attr = "status"
     userid_attr = "status_user_id"
 
 
@@ -171,6 +171,13 @@ class ExpenseSheet(DBBASE):
         """
         return self.state_machine.process(self, request, user_id, status, **kw)
 
+    def get_next_actions(self):
+        """
+            Return the next available actions regarding the current status
+        """
+        return self.state_machine.get_next_states(self.status)
+
+
 class BaseExpenseLine(DBBASE):
     """
         Base models for expense lines
@@ -188,7 +195,7 @@ class BaseExpenseLine(DBBASE):
             with_polymorphic='*')
     id = Column(Integer, primary_key=True)
     type = Column(String(30), nullable=False)
-    date = Column(Date())
+    date = Column(Date(), default=date.today())
     description = Column(String(255))
     category = Column(Enum('1', '2'), default='1')
     code = Column(String(15))

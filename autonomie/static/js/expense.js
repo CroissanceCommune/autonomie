@@ -331,6 +331,8 @@ var BaseExpenseLineView = Backbone.Marionette.ItemView.extend({
      */
     var top = this.$el.offset().top - 50;
     $('html, body').animate({scrollTop: top});
+    // Silly hack to provide highlights on webkit browsers
+    this.$el.css("backgroundColor", "#fff");
     this.$el.effect('highlight', {color:color}, 1500,
                     function(){if (callback !== undefined){ callback();}
                 });

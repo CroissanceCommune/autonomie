@@ -29,10 +29,16 @@
         left:50px;
         z-index:2000;
     }
+    table thead th{
+        background-color:#D9EDF7;
+    }
+    table tfoot td{
+        background-color:#FCF8E3;
+    }
 </style>
 <br />
 ${period_form.render()|n}
-
+<hr />
 % if edit:
 <a href="#lines/add" class='btn btn-large' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
 <a href="#kmlines/add" class='btn btn-large' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>

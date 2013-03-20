@@ -1,6 +1,11 @@
 <div>
 <table class="table table-bordered table-condensed">
-    <caption>Frais liés au fonctionnement de l'entreprise</caption>
+    <caption>
+    Frais liés au fonctionnement de l'entreprise
+    {{#edit}}
+    <a href="#lines/add" class='btn' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+    {{/edit}}
+    </caption>
     <thead>
         <th class='span3'>Type de frais</th>
         <th>Date</th>
@@ -26,7 +31,12 @@
 </table>
 <br />
 <table class="table table-bordered table-condensed">
-    <caption>Frais liés à l'activité</caption>
+    <caption>
+    Frais liés à l'activité
+    {{#edit}}
+    <a href="#lines/add" class='btn' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+    {{/edit}}
+    </caption>
     <thead>
         <th class='span3'>Type de frais</th>
         <th>Date</th>

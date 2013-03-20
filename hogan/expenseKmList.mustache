@@ -1,6 +1,12 @@
 <div>
+
     <table class="table table-striped table-bordered table-condensed">
-        <caption>Frais kilométriques liés au fonctionnement de l'entreprise</caption>
+        <caption>
+        Frais kilométriques liés au fonctionnement de l'entreprise
+            {{#edit}}
+<a href="#kmlines/add" class='btn' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+            {{/edit}}
+        </caption>
         <thead>
             <th>Date</th>
             <th>Type</th>
@@ -27,7 +33,12 @@
     </table>
     <br/>
     <table class="table table-striped table-bordered table-condensed">
-        <caption>Frais kilométriques liés à l'activité</caption>
+        <caption>
+            Frais kilométriques liés à l'activité
+            {{#edit}}
+<a href="#kmlines/add" class='btn' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+            {{/edit}}
+        </caption>
         <thead>
             <th>Date</th>
             <th>Type</th>

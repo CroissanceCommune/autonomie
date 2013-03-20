@@ -4,7 +4,7 @@
 <%namespace file="/base/utils.mako" import="searchform"/>
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>
             <th>${sortable("Code", "code")}</th>

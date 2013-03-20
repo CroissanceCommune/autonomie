@@ -66,10 +66,12 @@ class PeriodSelectSchema(colander.MappingSchema):
 
 class ExpenseStatusSchema(colander.MappingSchema):
     comment = colander.SchemaNode(colander.String(),
-            widget=widget.TextAreaWidget(cols=25, rows=4),
+            widget=widget.TextAreaWidget(cols=80, rows=2),
                                     title=u"Communication avec la CAE",
-                                    missing=u"",
-                                    default=u"")
+            description=u"Message à destination des membres de la CAE qui \
+valideront votre feuille de notes de frais",
+            missing=u"",
+            default=u"")
 
 
 class BaseLineSchema(colander.MappingSchema):

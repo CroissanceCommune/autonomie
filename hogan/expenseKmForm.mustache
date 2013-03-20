@@ -1,10 +1,22 @@
 <form id='expenseKmForm' class='form' action='#' onsubmit='return false;'>
 
 <div class="control-group">
+<label class="control-label" for='category'>Catégorie de frais</label>
+<div class='controls'>
+{{#category_options }}
+<label class="radio">
+<input type='radio' name='category' value='{{value}}' {{#selected}}checked{{/selected}}> {{label}}
+</label>
+{{/category_options }}
+</div>
+</div>
+
+<div class="control-group">
+<label class="control-label" for='code'>Véhicule</label>
 <div class='controls'>
 {{#type_options}}
 <label class="radio">
-<input type='radio' name='type' value='{{value}}' {{#selected}}checked{{/selected}}> {{label}}
+<input type='radio' name='code' value='{{value}}' {{#selected}}checked{{/selected}}> {{label}}
 </label>
 {{/type_options}}
 </div>

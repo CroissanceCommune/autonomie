@@ -42,7 +42,7 @@
               ${menu.render(request)|n}
             % endif
             %if request.user:
-              <div class="pull-right">
+                <div class="pull-right btn-group">
                 <a class="btn dropdown-toggle" href="#" data-toggle="dropdown">
                   <i class="icon-user"></i>
                   ${request.user.lastname} ${request.user.firstname}
@@ -76,7 +76,7 @@
       </div>
     </div>
     % if submenu is not UNDEFINED and submenu:
-      <div class="navbar">
+        <div class="navbar navbar-inverse">
         <div class="navbar-inner">
           <div class="container">
             <a class="btn btn-navbar" data-target=".submenu" data-toggle="collapse">

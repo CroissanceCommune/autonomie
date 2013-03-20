@@ -54,6 +54,20 @@ def format_status(task):
     return status_str + suffix
 
 
+def format_expense_status(expense):
+    """
+        Return a formatted status string for the expense
+    """
+    status_str = STATUS.get(expense.status, DEF_STATUS).format(genre=u"e")
+    if expense.status_user:
+        account = format_account(expense.status_user)
+    else:
+        account = format_account(expense.user)
+    date = format_date(expense.status_date)
+    suffix = u" par {0} le {1}".format(account, date)
+    return status_str + suffix
+
+
 def format_account(account, reverse=False):
     """
         return {firstname} {lastname}
@@ -203,6 +217,7 @@ class Api(object):
 api = Api(format_amount=format_amount,
           format_date=format_date,
           format_status=format_status,
+          format_expense_status=format_expense_status,
           format_account=format_account,
           format_name=format_name,
           format_paymentmode=format_paymentmode,

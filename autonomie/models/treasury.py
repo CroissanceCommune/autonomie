@@ -177,6 +177,12 @@ class ExpenseSheet(DBBASE):
         """
         return self.state_machine.get_next_states(self.status)
 
+    def get_company_id(self):
+        """
+            Return the if of the company associated to this model
+        """
+        return self.company_id
+
 
 class BaseExpenseLine(DBBASE):
     """

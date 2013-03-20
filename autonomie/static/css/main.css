@@ -116,16 +116,12 @@ textarea{
   font-size:11px;
   font-style:italic;
 }
-.company-search{
+.company-search, .company-search option{
   color: #CCCCCC;
-  -moz-transition: none 0s ease 0s;
   background-color: #626262;
+}
+.company-search{
   border: 1px solid #151515;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset, 0 1px 0 rgba(255, 255, 255, 0.15);
-  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-size: 13px;
-  font-weight: normal;
-  line-height: 1;
   padding: 4px 9px;
   margin-top:6px;
 }

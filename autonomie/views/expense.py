@@ -191,8 +191,7 @@ class ExpenseSheetView(BaseFormView):
         ExpenseSheet view
     """
     schema = ExpenseStatusSchema()
-    add_template_vars = ('title', 'jsoptions', 'expensesheet', 'period_form',
-                        'edit')
+    add_template_vars = ('title', 'loadurl', 'period_form', "edit")
 
     def __init__(self, request):
         super(ExpenseSheetView, self).__init__(request)
@@ -264,18 +263,11 @@ perdues) ?")
         return has_permission("edit", self.request.context, self.request)
 
     @property
-    def expensesheet(self):
+    def loadurl(self):
         """
             Returns a json representation of the current expense sheet
         """
-        return render('json', ExpenseSheetJson(self.request.context))
-
-    @property
-    def jsoptions(self):
-        """
-            Return the js options needed for the client side app setup
-        """
-        return render('json', expense_options())
+        return self.request.route_path("expense", id=self.request.context.id)
 
     def before(self, form):
         """
@@ -329,6 +321,14 @@ cette feuille de notes de frais")
         url = self.request.route_url("user_expenses", id=cid, uid=uid,
                 _query=dict(year=self.year, month=self.month))
         return HTTPFound(url)
+
+
+def expensesheet(request):
+    """
+        Return an json encoded expensesheet
+    """
+    return dict(expense=ExpenseSheetJson(request.context),
+                options=expense_options())
 
 
 class RestExpenseLine(BaseView):
@@ -489,6 +489,10 @@ def includeme(config):
     config.add_view(ExpenseSheetView,
             route_name="expense",
             renderer="treasury/expense.mako")
+    config.add_view(expensesheet,
+                    route_name="expense",
+                    xhr=True,
+                    renderer="json")
 
     add_rest_iface(config, "expenseline", RestExpenseLine)
     add_rest_iface(config, "expensekmline", RestExpenseKmLine)

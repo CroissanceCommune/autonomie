@@ -20,6 +20,7 @@ from fanstatic import Group
 from fanstatic import Library
 from fanstatic import Resource
 from js.bootstrap import bootstrap
+from js.bootstrap import bootstrap_responsive_css
 from js.jquery import jquery
 from js.jqueryui import ui_dialog
 from js.jqueryui import ui_sortable
@@ -77,6 +78,7 @@ task = Resource(lib_autonomie, "js/task.js",
 # Main javascript requirements
 main_js = Group([main,
                  bootstrap,
+                 bootstrap_responsive_css,
                  jquery_form,
                  ui_autocomplete,
                  ui_datepicker_fr,
@@ -86,6 +88,7 @@ main_js = Group([main,
 # Javascript requirements for task pages/forms
 task_js = Group([main,
                  bootstrap,
+                 bootstrap_responsive_css,
                  jquery_form,
                  ui_datepicker_fr,
                  deform_bootstrap_js,
@@ -94,6 +97,7 @@ task_js = Group([main,
 # Test tools
 test_js = Group([main,
                  bootstrap,
+                 bootstrap_responsive_css,
                  jquery_form,
                  ui_datepicker_fr,
                  deform_bootstrap_js,

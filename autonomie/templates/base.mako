@@ -22,8 +22,6 @@
     <link href="${request.static_url('deform:static/css/form.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform:static/css/beautify.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
-    ##    <link href="${request.static_url('deform_bootstrap:static/deform_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
-    <link href="${request.static_url('autonomie:static/css/bootstrap.min.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/chosen_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/theme/jquery-ui-1.8.16.custom.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/bootstrap-responsive.css')}" type="text/css" rel="stylesheet"/>

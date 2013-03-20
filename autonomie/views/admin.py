@@ -230,6 +230,7 @@ ont été configurés"
             appstruct[key] = [e.appstruct() for e in factory.query()\
                                             .filter(factory.type==polytype)]
         form.set_appstruct(appstruct)
+        populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
         """

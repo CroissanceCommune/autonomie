@@ -9,7 +9,7 @@
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
 % for user in users:
-    <table class="table table-condensed table-borderer">
+    <table class="table table-condensed table-bordered">
         <caption><b>Feuille de notes de frais de ${api.format_account(user)}</b></caption>
     <thead>
         <th>Période</th>

@@ -19,8 +19,13 @@ from .base import BaseViewTest
 from mock import MagicMock
 from pyramid.security import Allow, ALL_PERMISSIONS, Authenticated, Deny
 from pyramid import testing
-from autonomie.models.statemachine import StateMachine, TaskStates
+from autonomie.models.statemachine import StateMachine
 from autonomie.exception import Forbidden
+
+class DummyStates(StateMachine):
+    status_attr = "CAEStatus"
+    userid_attr = "statusPerson"
+
 
 class TestStateMachine(BaseViewTest):
     def get_model(self):
@@ -71,14 +76,14 @@ class TestStateMachine(BaseViewTest):
         self.assertEqual(model.status, 'draft')
 
 
-class TestTaskState(BaseViewTest):
+class TestCustomStateMachine(BaseViewTest):
     def get_model(self):
         return MagicMock(CAEStatus='draft',
                          statusPerson="toto")
 
     def setUp(self):
-        super(TestTaskState, self).setUp()
-        self.state_machine = TaskStates()
+        super(TestCustomStateMachine, self).setUp()
+        self.state_machine = DummyStates()
         self.state_machine.add_transition(
                 'draft', 'wait', "edit", lambda model, user_id:(model, 2))
 

@@ -211,8 +211,10 @@ class ExpenseSheetView(BaseFormView):
         """
             Return the title of the page
         """
-        return u"Notes de frais de {0} {1}"\
-                .format(month_name(self.month), self.year)
+        return u"Notes de frais de {0} pour la période de {1} {2}"\
+                .format(format_account(self.request.context.user),
+                        month_name(self.month),
+                        self.year)
 
     @property
     def buttons(self):

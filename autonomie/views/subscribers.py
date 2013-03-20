@@ -110,9 +110,14 @@ def get_user_menu(cid, css=None):
             path="commercial_handling",
             id=cid))
         menu.add(gestion)
-        menu.add(MainMenuItem(u"Paramètres", "view",
+        params = MenuDropDown(u"Paramètres", "view")
+        params.add(MainMenuItem(u"Paramètres", "view",
             icon="icon-white icon-cog",
                                 path="company", id=cid))
+        params.add(MainMenuItem(u"Notes de frais", "view",
+            icon="icon-white icon-cog",
+            path="company_expenses", id=cid))
+        menu.add(params)
     return menu
 
 

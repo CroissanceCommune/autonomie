@@ -897,9 +897,9 @@ var ExpenseSheet = Backbone.Model.extend({
   urlRoot:"/expenses/",
   initialize: function(options){
     this.lines = new ExpenseLineCollection(options['lines']);
-    this.lines.url = this.urlRoot + this.id + "/lines/";
+    this.lines.url = this.urlRoot + this.id + "/lines";
     this.kmlines = new ExpenseKmCollection(options['kmlines']);
-    this.kmlines.url = this.urlRoot + this.id + "/kmlines/";
+    this.kmlines.url = this.urlRoot + this.id + "/kmlines";
   }
 });
 

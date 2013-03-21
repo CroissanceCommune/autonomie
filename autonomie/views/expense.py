@@ -48,6 +48,8 @@ from autonomie.utils.rest import RestError
 from autonomie.utils.rest import RestJsonRepr
 from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import Submit
+from autonomie.utils.export import make_excel_view
+from autonomie.utils.export import ExcelExpense
 from autonomie.resources import lib_autonomie
 from js.jqueryui import effects_highlight
 from js.jqueryui import effects_shake
@@ -272,7 +274,8 @@ perdues) ?")
         """
             Returns a json representation of the current expense sheet
         """
-        return self.request.route_path("expense", id=self.request.context.id)
+        return self.request.route_path("expensejson",
+                id=self.request.context.id)
 
     def before(self, form):
         """
@@ -493,8 +496,17 @@ def add_rest_iface(config, route_name, factory, redirect_view):
             route_name=route_name + "s")
 
 
+def excel_filename(request):
+    """
+        return an excel filename based on the request context
+    """
+    exp = request.context
+    return u"ndf_{0}_{1}_{2}_{3}.xlsx".format(exp.year, exp.month,
+            exp.user.lastname, exp.user.firstname)
+
 
 def includeme(config):
+    # Routes
     traverse = '/companies/{id}'
     config.add_route("company_expenses",
             "/company/{id}/expenses",
@@ -502,36 +514,48 @@ def includeme(config):
     config.add_route("user_expenses",
             "/company/{id}/{uid}/expenses",
             traverse=traverse)
+    traverse = "/expenses/{id}"
+
     config.add_route("expense",
             "/expenses/{id:\d+}",
-            traverse="/expenses/{id}")
+            traverse=traverse)
+    config.add_route("expensejson",
+            "/expenses/{id:\d+}.json",
+            traverse=traverse)
+    config.add_route("expensexlsx",
+            "/expenses/{id:\d+}.xlsx",
+            traverse=traverse)
     config.add_route("expenselines",
             "/expenses/{id:\d+}/lines",
-            traverse="/expenses/{id}")
+            traverse=traverse)
     config.add_route("expenseline",
             "/expenses/{id:\d+}/lines/{lid}",
-            traverse="/expenses/{id}")
-
+            traverse=traverse)
     config.add_route("expensekmlines",
             "/expenses/{id:\d+}/kmlines",
-            traverse="/expenses/{id}")
+            traverse=traverse)
     config.add_route("expensekmline",
             "/expenses/{id:\d+}/kmlines/{lid}",
-            traverse="/expenses/{id}")
-
+            traverse=traverse)
+    #views
     config.add_view(company_expenses,
-                    route_name="company_expenses",
-                    renderer="treasury/expenses.mako")
+            route_name="company_expenses",
+            renderer="treasury/expenses.mako")
     config.add_view(expenses_access,
             route_name="user_expenses")
     config.add_view(ExpenseSheetView,
             route_name="expense",
             renderer="treasury/expense.mako")
     config.add_view(expensesheet,
-                    route_name="expense",
-                    xhr=True,
-                    renderer="json")
+            route_name="expensejson",
+            xhr=True,
+            renderer="json")
 
+    # Excel export
+    config.add_view(make_excel_view(excel_filename, ExcelExpense),
+            route_name="expensexlsx")
+
+    # Rest interface
     add_rest_iface(config, "expenseline", RestExpenseLine,
             redirect_to_expense)
     add_rest_iface(config, "expensekmline", RestExpenseKmLine,

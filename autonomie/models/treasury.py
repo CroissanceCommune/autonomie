@@ -183,6 +183,14 @@ class ExpenseSheet(DBBASE):
         """
         return self.company_id
 
+    @property
+    def total(self):
+        """
+            return the total of the current expense
+        """
+        return sum([line.total for line in self.lines]) \
+                + sum([line.total for line in self.kmlines])
+
 
 class BaseExpenseLine(DBBASE):
     """
@@ -237,6 +245,21 @@ class ExpenseLine(BaseExpenseLine):
                     code=self.code)
 
 
+    @property
+    def total(self):
+        """
+            return the total
+        """
+        result = self.ht + self.tva
+        teltype = ExpenseTelType.query()\
+                .filter(ExpenseTelType.code == self.code).first()
+        if teltype is not None:
+            percentage = teltype.percentage
+            result = result * percentage / 100.0
+        return result
+
+
+
 class ExpenseKmLine(BaseExpenseLine):
     """
         Model representing a specific expense related to kilometric fees
@@ -267,4 +290,9 @@ class ExpenseKmLine(BaseExpenseLine):
                     end=self.end,
                     code=self.code)
 
+    @property
+    def total(self):
+        indemnity = ExpenseKmType.query().filter(
+                ExpenseKmType.code == self.code).first().amount
+        return indemnity * self.km
 

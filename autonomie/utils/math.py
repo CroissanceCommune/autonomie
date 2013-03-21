@@ -15,7 +15,7 @@
 """
     Provide common functions for mathematic operations
 """
-def amount_formatting(val):
+def integer_to_amount(val):
     """
         Format an amount (stored as integer in the db)
         :param val: value returned by the database

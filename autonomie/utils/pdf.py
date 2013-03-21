@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 06-02-2012
-# * Last Modified : ven. 13 juil. 2012 13:25:38 CEST
+# * Last Modified : jeu. 21 mars 2013 11:29:43 CET
 #
 # * Project : coopagestv2
 #
@@ -25,13 +25,7 @@ from xhtml2pdf import pisa
 from pyramid.renderers import render
 from pyramid.threadlocal import get_current_request
 
-
-def force_ascii(datas):
-    """
-        Return enforced ascii string
-        éko=>ko
-    """
-    return "".join((i for i in datas if ord(i) < 128))
+from autonomie.utils.string import force_ascii
 
 
 def render_html(request, template, datas):

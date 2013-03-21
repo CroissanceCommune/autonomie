@@ -38,19 +38,19 @@ class ExcelExpense(object):
         Wrapper for excel export of an expense object
     """
     expense_columns = [('Date', 'date', None, 'A', 'A'),
-                       ('Code analytique', 'code', None, 'B', 'C'),
-                       ('Description', 'description', None, 'D', 'G'),
-                       ('HT', 'ht', integer_to_amount, 'H', 'H'),
-                       ('TVA', 'tva', integer_to_amount, 'I', 'I'),
-                       ('Total', 'total', integer_to_amount, 'J', 'J')]
+            ('Code analytique', 'code', None, 'B', 'C'),
+            ('Description', 'description', None, 'D', 'G'),
+            ('HT', 'ht', integer_to_amount, 'H', 'H'),
+            ('TVA', 'tva', integer_to_amount, 'I', 'I'),
+            ('Total', 'total', integer_to_amount, 'J', 'J', '0.00')]
 
     expensekm_columns = [('Date', 'date', None, 'A', 'A'),
-                         ('Code analytique', 'code', None, 'B', 'C'),
-                         ('Prestation', 'description', None, 'D', 'F'),
-                         ('Départ', 'start', None, 'G', 'G'),
-                         ('Arrivée', 'end', None, 'H', 'H'),
-                         ('Kms', 'km', integer_to_amount, 'I', 'I'),
-                         ('Indemnités', 'total', integer_to_amount, 'J', 'J')]
+            ('Code analytique', 'code', None, 'B', 'C'),
+            ('Prestation', 'description', None, 'D', 'F'),
+            ('Départ', 'start', None, 'G', 'G'),
+            ('Arrivée', 'end', None, 'H', 'H'),
+            ('Kms', 'km', integer_to_amount, 'I', 'I'),
+            ('Indemnités', 'total', integer_to_amount, 'J', 'J', '0.00')]
 
     def __init__(self, expensesheet):
         self.book = openpyxl.workbook.Workbook()
@@ -129,6 +129,8 @@ class ExcelExpense(object):
                 if column[2] is not None:
                     val = column[2](val)
                 cell.value = val
+                if len(column) == 6:
+                    cell.style.number_format.format_code = column[5]
             self.index += 1
 
         cell = self.get_merged_cells('A', 'I')
@@ -138,8 +140,9 @@ class ExcelExpense(object):
         cell = self.get_merged_cells('J', 'J')
         cell.style.font.bold = True
         cell.value = integer_to_amount(sum([line.total for line in lines]))
+        cell.style.number_format.format_code = '0.00'
         self.set_color(cell, Color.footer)
-        self.index += 2
+        self.index += 4
 
     def write_expense_table(self, category):
         """
@@ -153,6 +156,7 @@ class ExcelExpense(object):
                             if lin.category == category]
         columns = self.expensekm_columns
         self.write_table(columns, kmlines)
+        self.index += 2
 
     def write_full_line(self, txt, start="A", end="J"):
         """
@@ -197,6 +201,7 @@ CLIENTS"
         cell.style.font.bold = True
         cell.style.font.size = 16
         cell.value = integer_to_amount(self.model.total)
+        cell.style.number_format.format_code = '0.00'
         self.set_color(cell, Color.footer)
         self.index += 2
 
@@ -206,6 +211,12 @@ CLIENTS"
         """
         cell = self.get_merged_cells('D', 'J')
         cell.value = u"Accord après vérification"
+        self.index +=1
+        self.worksheet.merge_cells(
+                start_row=self.index,
+                end_row=self.index +4,
+                start_column=4,
+                end_column=6)
 
     def render(self):
         """
@@ -222,6 +233,13 @@ CLIENTS"
         self.write_internal_expenses()
         self.write_activity_expenses()
         self.write_total()
+        self.write_accord()
+
+        for let in LETTERS:
+            col_dim = self.worksheet.column_dimensions.get(let)
+            if col_dim:
+                col_dim.width = 13
+
         result = StringIO.StringIO()
         self.book.save(result)
         return result

@@ -4,8 +4,8 @@
 <%inherit file="/base.mako"></%inherit >
 <%block name="content">
 <br />
-<h3>Devis/Factures/Avoirs</h3>
 <table class="table table-striped table-condensed table-hover table-bordered">
+    <caption>Devis, Factures et Avoirs</caption>
     <thead>
         <tr>
             <th>Entreprise</th>
@@ -30,8 +30,8 @@
     </tbody>
 </table>
 <br />
-<h3>Feuilles de notes de frais</h3>
 <table class="table table-striped table-condensed table-hover table-bordered">
+<caption>Feuilles de notes de frais</caption>
     <thead>
         <tr>
             <th>Période</th>

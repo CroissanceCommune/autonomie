@@ -83,6 +83,7 @@ def expense_options():
 activite aupres de vos clients"}]
     return options
 
+
 class ExpenseSheetJson(RestJsonRepr):
     """
         Wrapper for ExpenseSheet objects that allows to convert our sheet to
@@ -149,6 +150,7 @@ def get_expense_sheet(year, month, cid, uid):
                 .filter(ExpenseSheet.company_id==cid)\
                 .filter(ExpenseSheet.user_id==uid).first()
 
+
 def get_new_expense_sheet(year, month, cid, uid):
     """
         Return a new expense sheet for the given 4-uple
@@ -163,6 +165,7 @@ def get_new_expense_sheet(year, month, cid, uid):
                 description=type_.label)
         expense.lines.append(line)
     return expense
+
 
 def expenses_access(request):
     """
@@ -429,55 +432,88 @@ class RestExpenseKmLine(RestExpenseLine):
     model_wrapper = ExpenseKmLineJson
 
 
-def add_rest_iface(config, route_name, factory):
+def redirect_to_expense(request):
+    """
+        View that redirects to the main view
+        It's used to avoid the redirection to ajax specific views after
+        login process
+
+        A n ajax request is made while not auth, we redirect to login, after
+        successfull login, the user is redirected to the rest api route, and
+        this view allows to redirect him to the original main view
+    """
+    expense = request.context
+    url = request.route_path("expense", id=expense.id)
+    return HTTPTemporaryRedirect(url)
+
+
+def add_rest_iface(config, route_name, factory, redirect_view):
+    """
+        Add a rest iface associating the factory's methods to the different
+        request methods of the routes based on route_name :
+            route_name : route name of a single item (items/{id})
+            route_name + "s" : route name of the items model (items)
+        del - > route_name, DELETE
+        put - > route_name, PUT
+        get - > route_name, GET
+        post - > route_name+"s", POST
+    """
     config.add_view(factory,
             attr='get',
             route_name=route_name,
             renderer="json",
             request_method='GET',
-            permission='view')
+            permission='view',
+            xhr=True)
     config.add_view(factory,
             attr='post',
             # C pas beau je sais
             route_name=route_name + "s",
             renderer="json",
             request_method='POST',
-            permission='add')
+            permission='add',
+            xhr=True)
     config.add_view(factory,
             attr='put',
             route_name=route_name,
             renderer="json",
             request_method='PUT',
-            permission="edit")
+            permission="edit",
+            xhr=True)
     config.add_view(factory,
             attr='delete',
             route_name=route_name,
             renderer="json",
             request_method='DELETE',
-            permission="edit")
+            permission="edit",
+            xhr=True)
+    config.add_view(redirect_view,
+            route_name=route_name)
+    config.add_view(redirect_view,
+            route_name=route_name + "s")
 
 
 
 def includeme(config):
     traverse = '/companies/{id}'
     config.add_route("company_expenses",
-            "/company/{id}/expenses/",
+            "/company/{id}/expenses",
             traverse=traverse)
     config.add_route("user_expenses",
-            "/company/{id}/{uid}/expenses/",
+            "/company/{id}/{uid}/expenses",
             traverse=traverse)
     config.add_route("expense",
             "/expenses/{id:\d+}",
             traverse="/expenses/{id}")
     config.add_route("expenselines",
-            "/expenses/{id:\d+}/lines/",
+            "/expenses/{id:\d+}/lines",
             traverse="/expenses/{id}")
     config.add_route("expenseline",
             "/expenses/{id:\d+}/lines/{lid}",
             traverse="/expenses/{id}")
 
     config.add_route("expensekmlines",
-            "/expenses/{id:\d+}/kmlines/",
+            "/expenses/{id:\d+}/kmlines",
             traverse="/expenses/{id}")
     config.add_route("expensekmline",
             "/expenses/{id:\d+}/kmlines/{lid}",
@@ -496,19 +532,7 @@ def includeme(config):
                     xhr=True,
                     renderer="json")
 
-    add_rest_iface(config, "expenseline", RestExpenseLine)
-    add_rest_iface(config, "expensekmline", RestExpenseKmLine)
-
-
-
-#    config.add_view(expense_get,
-#                    route_name="expense",
-#                    renderer="json",
-#                    request_method="GET",
-#                    xhr=True)
-#
-##    config.add_view(ExpenseJSON,
-#                    route_name="expenses",
-#                    renderer="json",
-#                    request_method="GET",
-#                    xhr=True)
+    add_rest_iface(config, "expenseline", RestExpenseLine,
+            redirect_to_expense)
+    add_rest_iface(config, "expensekmline", RestExpenseKmLine,
+            redirect_to_expense)

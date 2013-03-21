@@ -37,9 +37,9 @@
     }
 </style>
 <br />
+<a class='btn rfloatted' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
 ${period_form.render()|n}
 <hr />
-<a class='btn pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>XLSX</a>
 % if edit:
     <a href="#lines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais</a>
     <a href="#kmlines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>

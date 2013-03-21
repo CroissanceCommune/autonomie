@@ -19,7 +19,8 @@ import fanstatic
 from fanstatic import Group
 from fanstatic import Library
 from fanstatic import Resource
-from js.bootstrap import bootstrap_js
+from js.bootstrap import bootstrap
+from js.bootstrap import bootstrap_responsive_css
 from js.jquery import jquery
 from js.jqueryui import ui_dialog
 from js.jqueryui import ui_sortable
@@ -49,9 +50,11 @@ _backbone_tuning = Resource(lib_autonomie, "js/backbone-tuning.js",
         depends=[_backbone_marionnette, _hogan, main])
 _backbone_validation_bootstrap = Resource(lib_autonomie,
         "js/backbone-validation-bootstrap.js", depends=[_backbone_validation])
+_backbone_popup = Resource(lib_autonomie,
+        "js/backbone-popup.js", depends=[_backbone_marionnette]);
 
 backbone = Group([_backbone_validation_bootstrap,
-                  _backbone_tuning])
+                  _backbone_tuning, _backbone_popup])
 
 templates = Resource(lib_autonomie,
         "js/template.js", depends=[_hogan])
@@ -74,7 +77,8 @@ task = Resource(lib_autonomie, "js/task.js",
 
 # Main javascript requirements
 main_js = Group([main,
-                 bootstrap_js,
+                 bootstrap,
+                 bootstrap_responsive_css,
                  jquery_form,
                  ui_autocomplete,
                  ui_datepicker_fr,
@@ -83,7 +87,8 @@ main_js = Group([main,
                  chosen_jquery])
 # Javascript requirements for task pages/forms
 task_js = Group([main,
-                 bootstrap_js,
+                 bootstrap,
+                 bootstrap_responsive_css,
                  jquery_form,
                  ui_datepicker_fr,
                  deform_bootstrap_js,
@@ -91,7 +96,8 @@ task_js = Group([main,
 
 # Test tools
 test_js = Group([main,
-                 bootstrap_js,
+                 bootstrap,
+                 bootstrap_responsive_css,
                  jquery_form,
                  ui_datepicker_fr,
                  deform_bootstrap_js,

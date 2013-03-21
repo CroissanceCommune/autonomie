@@ -34,6 +34,7 @@ from autonomie.utils.widgets import PopUp
 from autonomie.models.client import Client
 from autonomie.models.project import Project
 from autonomie.models.project import Phase
+from autonomie.views.base import BaseView
 from autonomie.views.forms.duplicate import DuplicateSchema
 from autonomie.views.forms.task import FinancialYearSchema
 from autonomie.views.forms.task import PaymentSchema
@@ -340,30 +341,101 @@ class TaskFormActions(object):
                      request=self.request)
 
 
-class StatusView(object):
+class StatusView(BaseView):
     """
-        View for task status handling, allows to easily process states
-        on documents
+        View for status handling
+
         See the call method for the workflow and the params
         passed to the methods
     """
     valid_msg = u"Le statut a bien été modifié"
 
-    def __init__(self, request):
-        self.request = request
-        self.session = self.request.session
-
-    def get_task_status(self):
+    def redirect(self):
         """
-            Get the task status that has been asked
+            Redirect function to be used after status processing
+        """
+        return HTTPNotFound()
+
+    def _get_status(self):
+        """
+            Get the status that has been asked for
         """
         return self.request.params['submit']
 
-    def get_request_params(self):
+    def _get_request_params(self):
         """
             return the request params as a dict (a non locked one)
         """
         return dict(self.request.params.items())
+
+    def pre_status_process(self, item, status, params):
+        """
+            Launch pre process functions
+        """
+        if hasattr(self, "pre_%s_process" % status):
+            func = getattr(self, "pre_%s_process" % status)
+            return func(item, status, params)
+        return params
+
+    def status_process(self, params, status):
+        """
+            Definitively Set the status of the element
+        """
+        return self.request.context.set_status(status,
+                                        self.request,
+                                        self.request.user.id,
+                                        **params)
+
+    def post_status_process(self, item, status, params):
+        """
+            Launch post status process functions
+        """
+        if hasattr(self, "post_%s_process" % status):
+            func = getattr(self, "post_%s_process" % status)
+            func(item, status, params)
+
+    def set_status(self, item, status):
+        """
+            handle the status pre/set/post workflow
+        """
+        pre_params = self._get_request_params()
+        params = self.pre_status_process(item, status, pre_params)
+        post_params = self.status_process(params, status)
+        self.post_status_process(item, status, post_params)
+        return item, status
+
+    def notify(self, item):
+        """
+            Notify the change to the registry
+        """
+        self.request.registry.notify(StatusChanged(self.request, item))
+
+    def __call__(self):
+        """
+            Main entry for this view object
+        """
+        item = self.request.context
+        if "submit" in self.request.params:
+            try:
+                status = self._get_status()
+                item, status = self.set_status(item, status)
+                item = self.request.dbsession.merge(item)
+                self.notify(item)
+                self.session.flash(self.valid_msg)
+                log.debug(u" + The status has been set to {0}".format(status))
+            except Forbidden, e:
+                log.exception(u" !! Unauthorized action by : {0}"\
+                        .format(self.request.user.login))
+                self.session.pop_flash("")
+                self.session.flash(e.message, queue='error')
+        return self.redirect()
+
+
+class TaskStatusView(StatusView):
+    """
+        View for task status handling, allows to easily process states
+        on documents
+    """
 
     def pre_duplicate_process(self, task, status, params):
         """
@@ -386,56 +458,6 @@ class StatusView(object):
         appstruct['client'] = client
         appstruct['user'] = self.request.user
         return appstruct
-
-    def pre_status_process(self, task, status, params):
-        if hasattr(self, "pre_%s_process" % status):
-            func = getattr(self, "pre_%s_process" % status)
-            return func(task, status, params)
-        return params
-
-    def status_process(self, params, status):
-        return self.request.context.set_status(status,
-                                        self.request,
-                                        self.request.user.id,
-                                        **params)
-
-    def post_status_process(self, task, status, params):
-        if hasattr(self, "post_%s_process" % status):
-            func = getattr(self, "post_%s_process" % status)
-            func(task, status, params)
-
-    def set_status(self, task, status):
-        pre_params = self.get_request_params()
-        params = self.pre_status_process(task, status, pre_params)
-        post_params = self.status_process(params, status)
-        self.post_status_process(task, status, post_params)
-        return task, status
-
-    def merge(self):
-        return self.request.dbsession.merge(self.request.context)
-
-    def notify(self, task):
-        self.request.registry.notify(StatusChanged(self.request, task))
-
-    def redirect(self):
-        return HTTPNotFound()
-
-    def __call__(self):
-        task = self.request.context
-        if "submit" in self.request.params:
-            try:
-                status = self.get_task_status()
-                task, status = self.set_status(task, status)
-                task = self.request.dbsession.merge(task)
-                self.notify(task)
-                self.session.flash(self.valid_msg)
-                log.debug(u" + The status has been set to {0}".format(status))
-            except Forbidden, e:
-                log.exception(u" !! Unauthorized action by : {0}"\
-                        .format(self.request.user.login))
-                self.session.pop_flash("")
-                self.session.flash(e.message, queue='error')
-        return self.redirect()
 
 
 class TaskFormView(BaseFormView):

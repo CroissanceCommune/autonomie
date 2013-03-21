@@ -1,0 +1,67 @@
+<div>
+<table class="table table-bordered table-condensed">
+    <caption>
+    Frais liés au fonctionnement de l'entreprise
+    {{#edit}}
+    <div style="display:inline-block">
+    <a href="#lines/add" class='btn visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+    </div>
+    {{/edit}}
+    </caption>
+    <thead>
+        <th>Date</th>
+        <th class='span3'>Type de frais</th>
+        <th class='span3'>Description</th>
+        <th>Montant HT</th>
+        <th>Tva</th>
+        <th>Total</th>
+        {{#edit}}
+        <th>Actions</th>
+            {{/edit}}
+    </thead>
+    <tbody class='internal'>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan='5'>Total</td>
+            <td id='internal_total'></td>
+        {{#edit}}
+            <td></td>
+            {{/edit}}
+        </tr>
+    </tfoot>
+</table>
+<br />
+<table class="table table-bordered table-condensed">
+    <caption>
+    Frais liés à l'activité
+    {{#edit}}
+    <div style="display:inline-block">
+    <a href="#lines/add" class='btn visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+    </div>
+    {{/edit}}
+    </caption>
+    <thead>
+        <th class='span3'>Type de frais</th>
+        <th>Date</th>
+        <th class='span3'>Description</th>
+        <th>Montant HT</th>
+        <th>Tva</th>
+        <th>Total</th>
+        {{#edit}}
+        <th>Actions</th>
+        {{/edit}}
+    </thead>
+    <tbody class='activity'>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan='5'>Total</td>
+            <td id='activity_total'></td>
+        {{#edit}}
+            <td></td>
+            {{/edit}}
+        </tr>
+    </tfoot>
+</table>
+</div>

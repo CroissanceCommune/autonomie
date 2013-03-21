@@ -25,12 +25,17 @@ from autonomie.models.config import Config
 from autonomie.models.tva import Tva
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
+from autonomie.models.treasury import ExpenseType
+from autonomie.models.treasury import ExpenseKmType
+from autonomie.models.treasury import ExpenseTelType
+
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.admin import MainConfig
 from autonomie.views.forms.admin import TvaConfig
 from autonomie.views.forms.admin import PaymentModeConfig
 from autonomie.views.forms.admin import WorkUnitConfig
+from autonomie.views.forms.admin import ExpenseTypesConfig
 from autonomie.views.forms.admin import get_config_appstruct
 from autonomie.views.forms.admin import merge_dbdatas
 from autonomie.views.forms import BaseFormView
@@ -57,6 +62,9 @@ factures"))
         path="admin_workunit",
         title=u"Configuration des unités de prestation proposées \
 dans les formulaires"))
+    request.actionmenu.add(ViewLink(u"Configuration des notes de frais",
+        path="admin_expense",
+        title=u"Configuration des type de notes de frais"))
     return dict(title=u"Administration du site")
 
 
@@ -199,6 +207,49 @@ class AdminWorkUnit(BaseFormView):
         return HTTPFound(self.request.route_path("admin_workunit"))
 
 
+class AdminExpense(BaseFormView):
+    """
+        Expense administration view
+        Allows to configure expense types and codes
+    """
+    title = u"Configuration des notes de frais"
+    validation_msg = u"Les différents paramètres des notes de frais \
+ont été configurés"
+    schema = ExpenseTypesConfig()
+    buttons = (submit_btn,)
+    factories = {'expenses':(ExpenseType, 'expense'),
+                 'expenseskm':(ExpenseKmType, 'expensekm'),
+                 'expensestel':(ExpenseTelType, 'expensetel')}
+
+    def before(self, form):
+        """
+            Add appstruct to the current form object
+        """
+        appstruct = {}
+        for key, (factory, polytype) in self.factories.items():
+            appstruct[key] = [e.appstruct() for e in factory.query()\
+                                            .filter(factory.type==polytype)]
+        form.set_appstruct(appstruct)
+        populate_actionmenu(self.request)
+
+    def submit_success(self, appstruct):
+        """
+            Handle successfull expense configuration
+        """
+        for (factory, polytype) in self.factories.values():
+            for element in factory.query().filter(factory.type==polytype):
+                self.dbsession.delete(element)
+        self.dbsession.flush()
+
+        for key, (factory, polytype) in self.factories.items():
+            for data in appstruct[key]:
+                type_ = factory()
+                merge_session_with_post(type_, data)
+                self.dbsession.add(type_)
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path("admin_expense"))
+
+
 def includeme(config):
     """
         Add module's views
@@ -209,6 +260,7 @@ def includeme(config):
     config.add_route("admin_tva", "/admin/tva")
     config.add_route("admin_paymentmode", "admin/paymentmode")
     config.add_route("admin_workunit", "admin/workunit")
+    config.add_route("admin_expense", "admin/expense")
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')
@@ -222,5 +274,8 @@ def includeme(config):
                 renderer="base/simpleformpage.mako",
                 permission='admin')
     config.add_view(AdminWorkUnit, route_name='admin_workunit',
+                renderer="base/simpleformpage.mako",
+                permission='admin')
+    config.add_view(AdminExpense, route_name='admin_expense',
                 renderer="base/simpleformpage.mako",
                 permission='admin')

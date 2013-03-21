@@ -54,6 +54,7 @@ import colander
 from deform import widget
 
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
+from autonomie.views.forms.widgets import deferred_today
 from autonomie.views.forms.widgets import get_date_input
 from autonomie.views.forms.widgets import CustomSequenceWidget
 from autonomie.models.task.invoice import PaymentMode
@@ -99,11 +100,6 @@ def get_payment_times():
     for i in range(1, 12):
         payment_times.append((i, '%d fois' % i))
     return payment_times
-
-
-@colander.deferred
-def deferred_task_date(node, kw):
-    return datetime.date.today()
 
 
 @colander.deferred
@@ -447,7 +443,7 @@ class TaskConfiguration(colander.MappingSchema):
         colander.Date(),
         title=u"Date du devis",
         widget=get_date_input(),
-        default=deferred_task_date
+        default=deferred_today
     )
     description = colander.SchemaNode(
         colander.String(),

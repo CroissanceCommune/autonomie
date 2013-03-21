@@ -42,7 +42,7 @@ def dec_round(dec, precision):
     """
         Return a decimal object rounded to precision
     """
-    return dec.quantize(Decimal(str(10**-precision)), ROUND_DOWN)
+    return dec.quantize(Decimal(str(math.pow(10, -precision))), ROUND_DOWN)
 
 
 def amount(value, precision=2):
@@ -57,3 +57,12 @@ def amount(value, precision=2):
     converter = math.pow(10, precision)
     result = floor(value * converter)
     return result
+
+
+def integer_to_amount(value, precision=2):
+    """
+        Convert an integer value to a float with precision numbers after comma
+    """
+    flat_point = Decimal(str(math.pow(10, -precision)))
+    val = Decimal(str(value)) * flat_point
+    return float(Decimal(str(val)).quantize(flat_point, ROUND_DOWN))

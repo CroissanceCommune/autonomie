@@ -21,6 +21,7 @@ import logging
 from sqlalchemy import and_
 
 from autonomie.models.task.task import Task
+from autonomie.models.treasury import ExpenseSheet
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import CancelInvoice
 from autonomie.models.task.estimation import Estimation
@@ -40,9 +41,15 @@ def manage(request):
             .order_by(Task.statusDate).all()
     for document in documents:
         document.url = request.route_path(document.type_, id=document.id)
+
+    expenses = ExpenseSheet.query()\
+            .filter(ExpenseSheet.status == 'wait')\
+            .order_by(ExpenseSheet.month).all()
+    for expense in expenses:
+        expense.url = request.route_path("expense", id=expense.id)
     return dict(title=u"Documents en attente de validation",
                 tasks=documents,
-               )
+                expenses = expenses)
 
 def includeme(config):
     config.add_route("manage",

@@ -1,0 +1,12 @@
+<div
+{{#error}}
+class="alert alert-error">
+<i class="icon-warning-sign"></i>
+{{/error}}
+{{^error}}
+class="alert alert-success">
+<i class="icon-ok"></i>
+{{/error}}
+<button class="close" data-dismiss="alert" type="button">×</button>
+{{msg}}
+</div>

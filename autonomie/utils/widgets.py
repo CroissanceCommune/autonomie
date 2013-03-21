@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : mer. 26 déc. 2012 15:02:46 CET
+# * Last Modified : jeu. 14 mars 2013 20:15:08 CET
 #
 # * Project : autonomie
 #
@@ -32,17 +32,6 @@ def mako_renderer(tmpl, **kw):
     """
     template = Template(resource_filename(__name__, tmpl))
     return template.render(**kw)
-
-
-class Link:
-    """
-        Simple object to build a link
-    """
-    def __init__(self, href="#", label=None, title=None, icon=None):
-        self.href = href
-        self.label = label
-        self.title = title
-        self.icon = icon
 
 
 class Widget(object):
@@ -221,16 +210,16 @@ class Submit(Widget):
         @_type: type of the button
     """
     template = "base/submit.mako"
-    name = "submit"
     css = "btn btn-primary"
     js = None
     type_ = 'submit'
     icon = None
 
     def __init__(self, label, value, title=None,
-                            request=None, confirm=None):
+                            request=None, confirm=None, name="submit"):
         self.label = label
         self.value = value
+        self.name = name
         self.title = title or self.label
         if confirm:
             self.js = u"return confirm('{0}')".format(

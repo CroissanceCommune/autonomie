@@ -22,17 +22,15 @@
     <link href="${request.static_url('deform:static/css/form.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform:static/css/beautify.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/jquery_chosen/chosen.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
-    ##    <link href="${request.static_url('deform_bootstrap:static/deform_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
-    <link href="${request.static_url('autonomie:static/css/bootstrap.min.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('deform_bootstrap:static/chosen_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/theme/jquery-ui-1.8.16.custom.css')}" type="text/css" rel="stylesheet"/>
-    <link href="${request.static_url('autonomie:static/css/bootstrap-responsive.css')}" type="text/css" rel="stylesheet"/>
+    ##<link href="${request.static_url('autonomie:static/css/bootstrap-responsive.css')}" type="text/css" rel="stylesheet"/>
     <link href="${request.static_url('autonomie:static/css/main.css')}" rel="stylesheet"  type="text/css" />
     <%block name="css" />
   </head>
   <body>
     <header>
-    <div class="navbar">
+    <div class="navbar navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
@@ -44,7 +42,7 @@
               ${menu.render(request)|n}
             % endif
             %if request.user:
-              <div class="btn-group pull-right">
+                <div class="pull-right btn-group">
                 <a class="btn dropdown-toggle" href="#" data-toggle="dropdown">
                   <i class="icon-user"></i>
                   ${request.user.lastname} ${request.user.firstname}
@@ -78,7 +76,7 @@
       </div>
     </div>
     % if submenu is not UNDEFINED and submenu:
-      <div class="navbar">
+        <div class="navbar navbar-inverse">
         <div class="navbar-inner">
           <div class="container">
             <a class="btn btn-navbar" data-target=".submenu" data-toggle="collapse">

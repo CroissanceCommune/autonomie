@@ -178,6 +178,62 @@ class WorkUnitConfig(colander.MappingSchema):
             widget=widget.SequenceWidget(orderable=True))
 
 
+class ExpenseConfig(colander.MappingSchema):
+    """
+        Schema for the configuration of different expense types
+    """
+    label = colander.SchemaNode(colander.String(), title=u"Libellé",
+            validator=colander.Length(max=50))
+    code = colander.SchemaNode(colander.String(), title=u"Code analytique",
+            validator=colander.Length(max=15))
+
+class ExpenseKmConfig(ExpenseConfig):
+    """
+        Schema for the configuration of vehicle related expenses
+    """
+    amount = colander.SchemaNode(colander.Float(),
+            title=u"Tarif", description=u"Tarif au km")
+
+
+class ExpenseTelConfig(ExpenseConfig):
+    """
+        Schema for telefonic expenses
+    """
+    percentage = colander.SchemaNode(colander.Integer(),
+                                title=u"Pourcentage remboursé",
+                                validator=colander.Range(1, 100))
+
+
+class ExpensesConfig(colander.SequenceSchema):
+    """
+        The sequence Schema associated with the ExpenseConfig
+    """
+    expense = ExpenseConfig(title=u"")
+
+
+class ExpensesKmConfig(colander.SequenceSchema):
+    """
+        The sequence Schema associated with the ExpenseKmConfig
+    """
+    expense = ExpenseKmConfig(title=u"")
+
+
+class ExpensesTelConfig(colander.SequenceSchema):
+    """
+        The sequence Schema associated with the ExpenseTelConfig
+    """
+    expense = ExpenseTelConfig(title=u"")
+
+
+class ExpenseTypesConfig(colander.MappingSchema):
+    """
+        Expense Configuration form model
+    """
+    expenses = ExpensesConfig(title=u'Frais généraux')
+    expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
+    expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
+
+
 def get_config_appstruct(config_dict):
     """
         transform Config datas to ConfigSchema compatible appstruct

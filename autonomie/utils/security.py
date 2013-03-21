@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 26 déc. 2012 23:25:46 CET
+# * Last Modified : jeu. 07 mars 2013 15:04:29 CET
 #
 # * Project : autonomie
 #
@@ -17,7 +17,6 @@ import logging
 from pyramid.security import Allow
 from pyramid.security import Authenticated
 from pyramid.security import ALL_PERMISSIONS
-from pyramid.security import DENY_ALL
 from sqlalchemy.orm import undefer_group
 
 from autonomie.models.project import Project
@@ -27,6 +26,7 @@ from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import CancelInvoice
 from autonomie.models.user import User
+from autonomie.models.treasury import ExpenseSheet
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +71,7 @@ class RootFactory(dict):
         self['invoices'] = InvoiceFactory(self, 'invoices')
         self['cancelinvoices'] = CancelInvoiceFactory(self, 'cancelinvoices')
         self['users'] = UserFactory(self, 'users')
+        self['expenses'] = ExpenseSheetFactory(self, "expenses")
 
 
 class BaseDBFactory(object):
@@ -79,6 +80,10 @@ class BaseDBFactory(object):
     """
     __acl__ = DEFAULT_PERM[:]
     dbsession = None
+    def __init__(self, parent, name):
+        self.__parent__ = parent
+        self.__name__ = name
+
 
     def _get_item(self, klass, key, object_name):
         assert self.dbsession is not None, "Missing dbsession"
@@ -100,10 +105,6 @@ class CompanyFactory(BaseDBFactory):
     """
         Handle access to a project
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -115,10 +116,6 @@ class ProjectFactory(BaseDBFactory):
     """
         Handle access to a project
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -130,10 +127,6 @@ class ClientFactory(BaseDBFactory):
     """
         Handle access to a client
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -145,10 +138,6 @@ class EstimationFactory(BaseDBFactory):
     """
         Handle access to a client
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -160,10 +149,6 @@ class InvoiceFactory(BaseDBFactory):
     """
         Handle access to an invoice
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -175,10 +160,6 @@ class CancelInvoiceFactory(BaseDBFactory):
     """
         Handle access to a cancelinvoice
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
@@ -190,15 +171,22 @@ class UserFactory(BaseDBFactory):
     """
         Handle access to a user account
     """
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
-
     def __getitem__(self, key):
         """
             Returns the traversed object
         """
         return self._get_item(User, key, 'user')
+
+
+class ExpenseSheetFactory(BaseDBFactory):
+    """
+        Handle access to expense sheets
+    """
+    def __getitem__(self, key):
+        """
+            Returns the traversed object
+        """
+        return self._get_item(ExpenseSheet, key, "expensesheet")
 
 
 def get_base_acl(self):
@@ -266,6 +254,20 @@ def get_client_or_project_acls(self):
     return acl
 
 
+def get_expensesheet_acl(self):
+    """
+        Compute the expense Sheet acl
+    """
+    if self.status in ('draft', 'invalid'):
+        user_rights = ("view", "edit", "add")
+    else:
+        user_rights = ("view",)
+    acl = DEFAULT_PERM[:]
+    acl.extend([(Allow, u"%s" % user.login, user_rights)
+            for user in self.company.employees])
+    return acl
+
+
 def wrap_db_objects():
     """
         Add acls and names to the db objects used as context
@@ -277,3 +279,4 @@ def wrap_db_objects():
     Invoice.__acl__ = property(get_task_acl)
     CancelInvoice.__acl__ = property(get_task_acl)
     User.__acl__ = property(get_user_acl)
+    ExpenseSheet.__acl__ = property(get_expensesheet_acl)

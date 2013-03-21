@@ -22,17 +22,21 @@ from autonomie.exception import Forbidden
 class State(object):
     """
         a state object with a name, permission and a callback callbacktion
-        name:the state name
-        permission: the permission needed to set this state
-        callback: a callback function to call on state process
-        cae_state: True if this state is a CAE state
-                                 (it should be set as CAEStatus on the object)
+        :param name: The state name
+        :param permission: The permission needed to set this state
+        :param callback: A callback function to call on state process
+        :param model_state: True if this state is a CAE state
+        :param status_attr: The attribute storing the model's status
+        :param userid_attr: The attribute storing the status person's id
     """
-    def __init__(self, name, permission=None, callback=None, cae_state=True):
+    def __init__(self, name, permission=None, callback=None, model_state=True,
+            status_attr="status", userid_attr="user_id"):
         self.name = name
         self.permission = permission or "edit"
         self.callback = callback
-        self.cae_state = cae_state
+        self.model_state = model_state
+        self.status_attr = status_attr
+        self.userid_attr = userid_attr
 
     def allowed(self, context, request):
         """
@@ -41,28 +45,30 @@ class State(object):
         """
         return has_permission(self.permission, context, request)
 
-    def process(self, task, user_id, **kw):
+    def process(self, model, user_id, **kw):
         """
             process the expected actions after status change
         """
-        if self.cae_state:
-            task.statusPerson = user_id
-            task.CAEStatus = self.name
+        if self.model_state:
+            setattr(model, self.status_attr, self.name)
+            setattr(model, self.userid_attr, user_id)
         if self.callback:
-            return self.callback(task, user_id=user_id, **kw)
+            return self.callback(model, user_id=user_id, **kw)
         else:
-            return task
+            return model
 
     def __repr__(self):
-        return "< State %s allowed for %s (CAEState : %s)>" % (
-                self.name, self.permission, self.cae_state,)
+        return "< State %s allowed for %s (ModelState : %s)>" % (
+                self.name, self.permission, self.model_state,)
 
 
-class TaskState(object):
+class StateMachine(object):
     """
         a state machine storing the transitions as:
             (state, new_state) : (permission, callback)
     """
+    status_attr = "status"
+    userid_attr = "user_id"
     def __init__(self, default_state='draft', transition_dict=None):
         self.default_state = default_state
         self.transitions = dict()
@@ -84,22 +90,23 @@ class TaskState(object):
         """
             adds a transition to the state machine
         """
-        state_obj = State(next_, perm, callback, cae)
+        state_obj = State(next_, perm, callback, cae, self.status_attr,
+                                                    self.userid_attr)
         self.transitions.setdefault(state, []).append(state_obj)
 
-    def process(self, task, request, user_id, new_state, **kw):
+    def process(self, model, request, user_id, new_state, **kw):
         """
             process the state change
         """
-        state = task.CAEStatus
+        state = getattr(model, self.status_attr)
 
         state_obj = self.get_transition(state, new_state)
         if state_obj is None:
             raise Forbidden()
-        elif not state_obj.allowed(task, request):
+        elif not state_obj.allowed(model, request):
             raise Forbidden()
         else:
-            return state_obj.process(task, user_id=user_id, **kw)
+            return state_obj.process(model, user_id=user_id, **kw)
 
     def get_transition(self, state, new_state):
         """

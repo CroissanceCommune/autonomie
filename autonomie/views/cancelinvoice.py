@@ -33,7 +33,7 @@ from autonomie.views.mail import StatusChanged
 from autonomie.utils.views import submit_btn
 from autonomie.views.taskaction import TaskFormView
 from autonomie.views.taskaction import context_is_editable
-from autonomie.views.taskaction import StatusView
+from autonomie.views.taskaction import TaskStatusView
 from autonomie.views.taskaction import populate_actionmenu
 from autonomie.views.taskaction import get_set_financial_year_form
 
@@ -198,7 +198,7 @@ class CancelInvoiceEdit(TaskFormView):
         return cinvoice
 
 
-class CancelInvoiceStatus(StatusView):
+class CancelInvoiceStatus(TaskStatusView):
 
     def pre_set_financial_year_process(self, task, status, params):
         """

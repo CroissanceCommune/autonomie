@@ -12,25 +12,3 @@
 Backbone.Marionette.Renderer.render = function(template_obj, data){
   return template_obj.render(data);
 };
-var ModalRegion = Backbone.Marionette.Region.extend({
-  el: "modal",
-    constructor: function(){
-      Backbone.Marionette.Region.prototype.constructor.apply(this, arguments);
-      this.on("show", this.showModal, this);
-      setPopUp(this.el, "Title");
-    },
-    getEl: function(selector){
-      var $el = $("#" + selector);
-      $el.on("hidden", this.close);
-      return $el;
-    },
-    showModal: function(view){
-      view.on("close", this.hideModal, this);
-      console.log("Showing the modal");
-      this.$el.dialog('open');
-    },
-    hideModal: function(){
-      console.log("Hiding the modal");
-      this.$el.dialog('close');
-    }
-});

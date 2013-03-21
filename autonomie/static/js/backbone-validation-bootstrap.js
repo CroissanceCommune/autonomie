@@ -42,7 +42,7 @@ function hideFieldError(control){
    var group = control.parents(".control-group");
    group.removeClass("error");
    group.find(".help-inline.error-message").remove();
-   return form;
+   return control;
 }
 _.extend(Backbone.Validation.callbacks, {
   valid: function(view, attr, selector) {

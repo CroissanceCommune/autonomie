@@ -22,8 +22,11 @@ from autonomie.utils.files import (encode_path, decode_path, issubdir,
 from autonomie.utils.math_utils import floor
 from autonomie.utils.math_utils import amount
 
+from autonomie.utils.rest import RestJsonRepr, RestError
+
 from .base import BaseTestCase
 from .base import BaseViewTest
+from autonomie.tests.base import BaseFunctionnalTest
 
 class DummySchema(colander.MappingSchema):
     lastname = colander.SchemaNode(colander.String(), title='Nom')
@@ -96,3 +99,43 @@ class TestMathUtils(BaseTestCase):
         a = 192.6555
         self.assertEqual(amount(a), 19265)
         self.assertEqual(amount(a, 4), 1926555)
+
+class DummyModel(dict):
+    def appstruct(self):
+        return self
+
+
+class DummySchema:
+    def serialize(self, datadict):
+        return {'schemakey':datadict['schemakey']*2}
+
+    def bind(self, **params):
+        self.bind_params = params
+        return self
+
+
+class DummyJsonRepr(RestJsonRepr):
+    schema = DummySchema()
+
+
+class TestRestJsonRepr(BaseTestCase):
+    def test_json(self):
+        datas = DummyModel(schemakey=10, otherkey="dummy")
+        jsonrepr = DummyJsonRepr(datas)
+        self.assertEqual(set(jsonrepr.__json__('request').keys())\
+                .difference(datas.keys()), set([]))
+
+    def test_bind_params(self):
+        jsonrepr = DummyJsonRepr({}, bind_params=dict(test=5))
+        schema = jsonrepr.get_schema("request")
+        self.assertEqual(schema.bind_params.keys(), ['test'])
+        jsonrepr = DummyJsonRepr({})
+        schema = jsonrepr.get_schema("request")
+        self.assertEqual(schema.bind_params.keys(), ['request'])
+
+
+class TestRestError(BaseFunctionnalTest):
+    def test_it(self):
+        err = RestError({}, 151)
+        self.assertEqual(err.status, u"151 Continue")
+        self.assertEqual(err.content_type, 'application/json')

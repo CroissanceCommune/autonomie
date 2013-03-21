@@ -17,6 +17,7 @@
 """
 import logging
 import datetime
+import colander
 import os
 
 from pkg_resources import resource_filename
@@ -89,6 +90,7 @@ def set_json_renderer(config):
         return obj.isoformat()
     json_renderer.add_adapter(datetime.datetime, toisoformat)
     json_renderer.add_adapter(datetime.date, toisoformat)
+    json_renderer.add_adapter(colander._null, lambda _,r:"null")
     config.add_renderer('json', json_renderer)
     return config
 

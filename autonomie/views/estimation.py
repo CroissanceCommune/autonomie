@@ -35,7 +35,7 @@ from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.views.mail import StatusChanged
 from autonomie.utils.views import submit_btn
-from autonomie.views.taskaction import StatusView
+from autonomie.views.taskaction import TaskStatusView
 from autonomie.views.taskaction import TaskFormView
 from autonomie.views.taskaction import make_pdf_view
 from autonomie.views.taskaction import make_html_view
@@ -205,7 +205,7 @@ class EstimationEdit(TaskFormView):
         return estimation
 
 
-class EstimationStatus(StatusView):
+class EstimationStatus(TaskStatusView):
     """
         Handle the estimation status processing
     """

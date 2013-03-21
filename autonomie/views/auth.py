@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : mer. 19 déc. 2012 09:48:32 CET
+# * Last Modified : ven. 08 mars 2013 16:08:41 CET
 #
 # * Project :
 #
@@ -37,6 +37,7 @@ def forbidden_view(request):
     """
         The forbidden view (handles the redirection to login form)
     """
+    log.debug("We are in a forbidden view")
     login = authenticated_userid(request)
     if login:
         log.warn(u"An access has been forbidden to '{0}'".format(login))
@@ -47,7 +48,8 @@ def forbidden_view(request):
         loc = request.route_url('login', _query=(('nextpage', request.path),))
         if request.is_xhr:
             redirect = dict(redirect=loc)
-        redirect = HTTPFound(location=loc)
+        else:
+            redirect = HTTPFound(location=loc)
     return redirect
 
 

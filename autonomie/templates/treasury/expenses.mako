@@ -22,6 +22,7 @@
                 <td>${api.format_expense_status(expense)}</td>
                 <td>
                     <a class='btn' href="${request.route_path('expense', id=expense.id)}">Voir</a>
+                    <a class='btn' href="${request.route_path('expensexlsx', id=expense.id)}">Export</a>
                 </td>
             </tr>
         % endfor

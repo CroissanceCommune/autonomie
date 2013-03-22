@@ -262,7 +262,9 @@ def project_view(request):
                 cancelinvoice.color = cancelinvoice.invoice.color
             else:
                 cancelinvoice.color = get_color()
-    return dict(title=u"Projet : {0}".format(request.context.name),
+    title = u"Projet : {0} ({1})".format(request.context.name,
+            ", ".join((client.name for client in request.context.clients)))
+    return dict(title=title,
                 project=request.context,
                 company=request.context.company)
 

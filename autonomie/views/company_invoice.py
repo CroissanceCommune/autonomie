@@ -243,7 +243,7 @@ class GlobalInvoicesList(InvoicesList):
 
     def default_form_values(self, appstruct):
         values = super(GlobalInvoicesList, self).default_form_values(appstruct)
-        values['companies'] = Company.query(active=False).all()
+        values['companies'] = Company.query().all()
         return values
 
 # A bit silly but will be removed soon

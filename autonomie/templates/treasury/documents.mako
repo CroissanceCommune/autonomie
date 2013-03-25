@@ -48,9 +48,15 @@
                     </tr>
                 % endfor
             % endfor
+            % if not months:
+                <tr><td colspan='5'>Aucun document n'est disponible</td></tr>
+            % endif
                 </tbody>
             </table>
         </div>
     % endfor
+    % if not keys:
+        <div>Aucun document n'est disponible</div>
+    % endif
 </div>
 </%block>

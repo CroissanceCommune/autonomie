@@ -27,6 +27,9 @@
         </td>
     </tr>
 % endfor
+% if not tasks:
+    <tr><td colspan='3'>Aucun document en attente</td></tr>
+% endif
     </tbody>
 </table>
 <br />
@@ -49,6 +52,9 @@
         </td>
     </tr>
 % endfor
+% if not expenses:
+    <tr><td colspan='3'>Aucun document en attente</td></tr>
+% endif
     </tbody>
 </table>
 </%block>

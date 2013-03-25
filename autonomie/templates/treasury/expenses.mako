@@ -10,7 +10,13 @@
 <%block name="content">
 % for user in users:
     <table class="table table-condensed table-bordered">
-        <caption><b>Feuille de notes de frais de ${api.format_account(user)}</b></caption>
+        <caption>
+            <b>Feuille de notes de frais de ${api.format_account(user)}</b>
+            <a href="${request.route_path('user_expenses', id=request.context.id, uid=user.id)}" class='btn'>
+                <i class='icon icon-search'></i>
+                Ce mois-ci (${api.month_name(today.month)} ${today.year})
+            </a>
+        </caption>
     <thead>
         <th>Période</th>
         <th>Statut</th>
@@ -20,9 +26,9 @@
         % for expense in user.expenses:
             <tr><td>${api.month_name(expense.month)} ${expense.year}</td>
                 <td>${api.format_expense_status(expense)}</td>
-                <td>
-                    <a class='btn' href="${request.route_path('expense', id=expense.id)}">Voir</a>
-                    <a class='btn' href="${request.route_path('expensexlsx', id=expense.id)}">Export</a>
+                <td style='text-align:right'>
+                    <a class='btn' href="${request.route_path('expense', id=expense.id)}"><i class='icon icon-search'></i>Voir</a>
+                    <a class='btn' href="${request.route_path('expensexlsx', id=expense.id)}"><i class='icon icon-file'></i>Export</a>
                 </td>
             </tr>
         % endfor

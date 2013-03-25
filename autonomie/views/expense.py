@@ -17,17 +17,15 @@
 """
 import logging
 import colander
-
+import datetime
 
 from fanstatic import Resource
 from deform import Form
-from pyramid.renderers import render
 from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPTemporaryRedirect
 
 from autonomie.exception import Forbidden
-from autonomie.views.mail import StatusChanged
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms.expense import ExpenseStatusSchema
 from autonomie.views.forms.expense import PeriodSelectSchema
@@ -113,9 +111,11 @@ def company_expenses(request):
     """
         View that lists the expenseSheets related to the current company
     """
+    today = datetime.date.today()
     return dict(title=u"Accès aux notes de frais des employés de {0}"\
             .format(request.context.name),
-            users=request.context.employees)
+            users=request.context.employees,
+            today=today)
 
 
 def get_period_form(request, action_url=""):
@@ -309,7 +309,6 @@ perdues) ?")
         params = dict(self.request.POST)
         status = params['submit']
         expense.set_status(status, self.request, self.request.user.id, **params)
-        #self.request.registry.notify(StatusChanged(self.request, expense))
         return expense
 
     def reset_success(self, appstruct):

@@ -36,6 +36,7 @@ from autonomie.models.project import Project
 from autonomie.models.project import Phase
 from autonomie.views.base import BaseView
 from autonomie.views.forms.duplicate import DuplicateSchema
+from autonomie.views.forms.duplicate import PhaseChangeSchema
 from autonomie.views.forms.task import FinancialYearSchema
 from autonomie.views.forms.task import PaymentSchema
 from autonomie.views.forms.utils import BaseFormView
@@ -77,6 +78,21 @@ def get_duplicate_form(request, counter=None):
                                                     title=u"Valider")
     form = Form(schema=schema, buttons=(valid_btn,), action=action,
             formid="duplicate_form", counter=counter)
+    return form
+
+
+def get_phasechange_form(request, counter=None):
+    """
+        Return the used to move a task from one phase to another
+    """
+    schema = PhaseChangeSchema().bind(request=request)
+    action = request.route_path(request.context.__name__,
+            id=request.context.id,
+            _query=dict(action='status'))
+    valid_btn = Button(name='submit', value="phasechange", type='submit',
+            title=u"Valider")
+    form = Form(schema=schema, buttons=(valid_btn,), action=action,
+            formid="phasechange", counter=counter)
     return form
 
 
@@ -229,6 +245,26 @@ class TaskFormActions(object):
             title = u"Dupliquer le document"
             form = self._duplicate_form()
             popup = PopUp("duplicate_form_container", title, form.render())
+            self.request.popups[popup.name] = popup
+            yield popup.open_btn(css='btn btn-primary')
+
+    def _phasechange_form(self):
+        """
+            return the form used to change a task's phase
+        """
+        form = get_phasechange_form(self.request, self.formcounter)
+        self.formcounter = form.counter
+        return form
+
+    def _phasechange_btn(self):
+        """
+            Return the button for moving the current task to another phase
+        """
+        if context_is_task(self.context) and \
+                len(self.context.project.phases)> 1:
+            title = u"Déplacer vers une autre phase"
+            form = self._phasechange_form()
+            popup = PopUp("phasechange_form_container", title, form.render())
             self.request.popups[popup.name] = popup
             yield popup.open_btn(css='btn btn-primary')
 
@@ -458,6 +494,25 @@ class TaskStatusView(StatusView):
         appstruct['client'] = client
         appstruct['user'] = self.request.user
         return appstruct
+
+    def pre_phasechange_process(self, task, status, params):
+        """
+            pre process method for phase changing
+        """
+        form = get_phasechange_form(self.request)
+        appstruct = form.validate(params.items())
+        log.debug(u" * Form has been validated")
+        phase_id = appstruct.get('phase')
+        phase = Phase.get(phase_id)
+        appstruct['phase'] = phase
+        return appstruct
+
+    def post_phasechange_process(self, task, status, params):
+        log.debug(u"CHANGING THE PHASE OF THE CURRENT TASK")
+        task = self.request.dbsession.merge(task)
+        log.debug(u"Moved document to another phase")
+        msg = u"Le document a bien été déplacé"
+        self.request.session.flash(msg)
 
 
 class TaskFormView(BaseFormView):

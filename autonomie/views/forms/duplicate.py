@@ -142,3 +142,14 @@ class DuplicateSchema(colander.MappingSchema):
         default=deferred_default_phase,
         validator=deferred_phase_validator)
 
+
+class PhaseChangeSchema(colander.MappingSchema):
+    """
+        Colander schema for moving a task from a phase to another
+    """
+    phase = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Phase",
+        widget=deferred_phase_choice,
+        default=deferred_default_phase,
+        validator=deferred_phase_validator)

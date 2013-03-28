@@ -70,6 +70,18 @@ def duplicate_task(task, **kw):
         raise Forbidden()
 
 
+def phasechange_task(task, **kw):
+    """
+        Change a task's phase
+    """
+    phase = kw.get("phase")
+    if phase is not None:
+        task.phase = phase
+        return task
+    else:
+        raise Forbidden()
+
+
 def gen_cancelinvoice(task, **kw):
     """
         gen the cancelinvoice for the given task
@@ -126,6 +138,7 @@ def get_est_state():
         aboest
     """
     duplicate = ('duplicate', 'view', duplicate_task, False,)
+    phasechange = ("phasechange", "view", phasechange_task, False,)
     valid = ('valid', MANAGER_PERMS, set_date,)
     invalid = ('invalid', MANAGER_PERMS,)
     geninv = ('geninv', None, gen_invoices,)
@@ -133,10 +146,10 @@ def get_est_state():
     result = {}
     result['draft'] = ('draft', 'wait', 'delete', valid)
     result['invalid'] = ('draft', 'wait', 'delete',)
-    result['wait'] = (valid, invalid, duplicate, 'delete')
-    result['valid'] = ('aboest', geninv, duplicate, 'delete')
-    result['aboest'] = (delete,)
-    result['geninv'] = (duplicate,)
+    result['wait'] = (valid, invalid, duplicate, 'delete', phasechange)
+    result['valid'] = ('aboest', geninv, duplicate, 'delete', phasechange)
+    result['aboest'] = (delete, phasechange)
+    result['geninv'] = (duplicate, phasechange)
     return result
 
 
@@ -152,6 +165,7 @@ def get_inv_state():
         aboinv
     """
     duplicate = ('duplicate', 'view', duplicate_task, False,)
+    phasechange = ("phasechange", "view", phasechange_task, False,)
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     aboinv = ('aboinv', MANAGER_PERMS,)
@@ -165,12 +179,14 @@ def get_inv_state():
     result = {}
     result['draft'] = ('draft', 'wait', delete, valid,)
     result['invalid'] = ('draft', 'wait', delete, )
-    result['wait'] = (valid, invalid, duplicate, delete, financial_year,)
+    result['wait'] = (valid, invalid, duplicate, delete, financial_year,
+            phasechange,)
     result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, mdelete,
-                                                            financial_year, )
-    result['paid'] = (paid, resulted, gencinv, duplicate, financial_year, )
-    result['resulted'] = (gencinv, duplicate, financial_year, )
-    result['aboinv'] = (delete, )
+            phasechange, financial_year, )
+    result['paid'] = (paid, resulted, gencinv, duplicate, financial_year,
+            phasechange,)
+    result['resulted'] = (gencinv, duplicate, financial_year, phasechange,)
+    result['aboinv'] = (delete, phasechange)
     return result
 
 
@@ -182,15 +198,16 @@ def get_cinv_state():
         valid
         invalid
     """
+    phasechange = ("phasechange", "view", phasechange_task, False,)
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
                         False,)
     result = {}
     result['draft'] = ('wait', 'delete', valid )
-    result['wait'] = (valid, invalid, 'delete', financial_year,)
-    result['invalid'] = ('draft', 'wait',)
-    result['valid'] = (financial_year,)
+    result['wait'] = (valid, invalid, 'delete', financial_year, phasechange,)
+    result['invalid'] = ('draft', 'wait', phasechange,)
+    result['valid'] = (financial_year, phasechange,)
     return result
 
 def get_maninv_state():

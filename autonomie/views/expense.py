@@ -46,6 +46,8 @@ from autonomie.utils.rest import RestError
 from autonomie.utils.rest import RestJsonRepr
 from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import Submit
+from autonomie.utils.widgets import PopUp
+from autonomie.utils.widgets import ViewLink
 from autonomie.utils.export import make_excel_view
 from autonomie.utils.export import ExcelExpense
 from autonomie.resources import lib_autonomie
@@ -107,17 +109,6 @@ class ExpenseKmLineJson(RestJsonRepr):
     schema = ExpenseKmLineSchema()
 
 
-def company_expenses(request):
-    """
-        View that lists the expenseSheets related to the current company
-    """
-    today = datetime.date.today()
-    return dict(title=u"Accès aux notes de frais des employés de {0}"\
-            .format(request.context.name),
-            users=request.context.employees,
-            today=today)
-
-
 def get_period_form(request, action_url=""):
     """
         Return a form to select the period of the expense sheet
@@ -167,6 +158,48 @@ def get_new_expense_sheet(year, month, cid, uid):
                 description=type_.label)
         expense.lines.append(line)
     return expense
+
+
+def get_expensesheet_years(expenses):
+    """
+        List of years an expensesheet has been retrieved for
+    """
+    return set([exp.year for exp in expenses])
+
+
+def get_expensesheet_by_year(company):
+    """
+        Return expenses stored by year and users for display purpose
+    """
+    result = {}
+    for year in get_expensesheet_years(company.expenses):
+        result[year] = []
+        for user in company.employees:
+            expenses = [exp for exp in user.expenses if exp.year == year]
+            result[year].append((user, expenses))
+    return result
+
+
+def company_expenses(request):
+    """
+        View that lists the expenseSheets related to the current company
+    """
+    expense_sheets = get_expensesheet_by_year(request.context)
+    user_buttons = {}
+    cid = request.context.id
+    # We add a period form for each user
+    for user in request.context.employees:
+        uid = user.id
+        action_url = request.route_url("user_expenses", id=cid, uid=uid)
+        form = get_period_form(request, action_url)
+        popup = PopUp("user_expense_{0}".format(uid), u"Aller à", form.render())
+        request.popups[popup.name] = popup
+        user_buttons[user.id] = popup.open_btn(css="btn")
+    return dict(title=u"Accès aux notes de frais des employés de {0}"\
+            .format(request.context.name),
+            expense_sheets=expense_sheets,
+            user_buttons=user_buttons,
+            current_year=datetime.date.today().year)
 
 
 def expenses_access(request):
@@ -288,6 +321,9 @@ perdues) ?")
         # Ici on spécifie un template qui permet de rendre nos boutons de
         # formulaires
         form.widget.template = "autonomie:deform_templates/form.pt"
+        btn = ViewLink(u"Revenir à la liste", "view", path="company_expenses",
+                id=self.request.context.company.id)
+        self.request.actionmenu.add(btn)
 
     def submit_success(self, appstruct):
         """

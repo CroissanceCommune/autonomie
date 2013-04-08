@@ -206,9 +206,10 @@ def compute_difference(index, projections, turnovers):
     """
         Compute the difference beetween the projection and the real value
     """
-    proj = projections.get(index)
-    if proj:
-        return turnovers[index] - proj.value
+    projection = projections.get(index)
+    if projection:
+        turnover = turnovers.get(index, 0)
+        return turnover - projection.value
     else:
         return None
 
@@ -217,11 +218,12 @@ def compute_percent(index, projections, turnovers):
     """
         Compute the percent the difference represents
     """
-    turnover = turnovers[index]
+    turnover = turnovers.get(index)
     if turnover:
-        proj = projections[index].value
-        if proj:
-            return turnover * 100.0 / proj
+        projection = projections.get(index)
+        if projection:
+            if projection.value:
+                return turnover * 100.0 / projection.value
     return None
 
 

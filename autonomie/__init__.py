@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : ven. 15 févr. 2013 16:36:27 CET
+# * Last Modified : lun. 08 avril 2013 17:08:02 CEST
 #
 # * Project : autonomie
 #
@@ -14,6 +14,8 @@
     Main file for our pyramid application
 """
 import locale
+locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
+locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
 from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from pyramid_beaker import set_cache_regions_from_settings
@@ -117,8 +119,6 @@ def main(global_config, **settings):
     set_deform_renderer()
     set_json_renderer(config)
     config.add_translation_dirs("colander:locale/", "deform:locale")
-    locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
-    locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
     add_resources_to_registry()
 
     return config.make_wsgi_app()

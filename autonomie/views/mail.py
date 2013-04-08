@@ -25,14 +25,29 @@ from autonomie.views.render_api import format_status
 
 log = logging.getLogger(__name__)
 
+# Events for which a mail will be sended
+EVENTS = {"valid":u"validé",
+            "invalid": u"invalidé",
+            "paid": u"partiellement payé",
+            "resulted": u"payé"}
+
+
+MAIL_TMPL = u"""{docname} {docnumber} du projet {project} avec le client {client} a été {status_verb}{gender}.
+
+{addr}
+
+Commentaires associés au document :
+    {comment}"""
+
 
 class StatusChanged(object):
     """
         Event raised when a document status changes
     """
-    def __init__(self, request, document):
+    def __init__(self, request, document, status):
         self.request = request
         self.document = document
+        self.new_status = status
 
     def format_mail(self, mail):
         """
@@ -80,34 +95,37 @@ class StatusChanged(object):
         """
             return the body of the email
         """
-        status_verb = get_status_verb(self.document.CAEStatus)
+        status_verb = get_status_verb(self.new_status)
+        addr = self.request.route_url(self.document.type_, id=self.document.id)
+        docnumber = self.document.number
+        client = self.document.client.name
+        project = self.document.project.name
         if self.document.is_invoice():
-            body = u"La facture {0} du projet {1} (avec le client {2}) \
-a été {3}e.".format(self.document.number,
-                    self.document.project.name,
-                    self.document.client.name,
-                    status_verb)
-            addr = self.request.route_url("invoice", id=self.document.id)
+            docname = u"La facture"
+            gender = u"e"
         else:
-            body = u"Le devis {0} du projet {1} (avec le client {2}) \
-a été {3}.".format(self.document.number,
-                   self.document.project.name,
-                   self.document.client.name,
-                   status_verb)
-            addr = self.request.route_url("estimation", id=self.document.id)
-        body += u"\n\n"
-        body += addr
+            docname = u"Le devis"
+            gender = u""
         if self.document.statusComment:
-            body += u"\n\nCommentaires associés aux document :"
-            body += self.document.statusComment
-        return body
+            comment = self.document.statusComment
+        else:
+            comment = u"Aucun"
+        return MAIL_TMPL.format(docname=docname,
+                docnumber=docnumber,
+                client=client,
+                project=project,
+                status_verb=status_verb,
+                gender=gender,
+                addr=addr,
+                comment=comment)
+
 
     def is_key_event(self):
         """
             Return True if the new status requires a mail to be sent
         """
-        if self.document.CAEStatus in ("valid", "invalid", "paid") and \
-                                    not self.document.is_cancelinvoice():
+        if self.new_status in EVENTS.keys() \
+                and not self.document.is_cancelinvoice():
             return True
         else:
             return False
@@ -117,14 +135,7 @@ def get_status_verb(status):
     """
         Return the verb associated to the current status
     """
-    if status == 'valid':
-        return u"validé"
-    elif status == 'invalid':
-        return u"invalidé"
-    elif status == "paid":
-        return u"payé"
-    else:
-        return u""
+    return EVENTS.get(status, u"")
 
 
 def send_mail(event):
@@ -133,6 +144,7 @@ def send_mail(event):
     """
     if event.is_key_event():
         recipients = event.recipients
+        print event.body
         if recipients:
             log.info(u"Sending an email to '{0}'".format(recipients))
             try:

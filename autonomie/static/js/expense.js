@@ -352,7 +352,8 @@ var ExpenseLineView = BaseExpenseLineView.extend({
   },
   ui:{
     htinput:'input[name=ht]',
-    tvainput:'input[name=tva]'
+    tvainput:'input[name=tva]',
+    total:'span[class=total]'
   },
   templateHelpers:function(){
     /*
@@ -388,6 +389,7 @@ var ExpenseLineView = BaseExpenseLineView.extend({
           success:function(){
             displayServerSuccess("Les informations ont bien été enregistrées");
             this_.highlight();
+            this_.setTotal();
           },
           error:function(){
             displayServerError("Une erreur est survenue lors la sauvegarde" +
@@ -395,6 +397,11 @@ var ExpenseLineView = BaseExpenseLineView.extend({
           },
           wait:true});
     Backbone.Validation.unbind(this);
+  },
+  setTotal: function(){
+    var total = this.model.total();
+    total = formatAmount(total);
+    this.ui.total.html(total);
   }
 });
 

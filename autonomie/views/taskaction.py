@@ -440,11 +440,11 @@ class StatusView(BaseView):
         self.post_status_process(item, status, post_params)
         return item, status
 
-    def notify(self, item):
+    def notify(self, item, status):
         """
             Notify the change to the registry
         """
-        self.request.registry.notify(StatusChanged(self.request, item))
+        self.request.registry.notify(StatusChanged(self.request, item, status))
 
     def __call__(self):
         """
@@ -456,7 +456,7 @@ class StatusView(BaseView):
                 status = self._get_status()
                 item, status = self.set_status(item, status)
                 item = self.request.dbsession.merge(item)
-                self.notify(item)
+                self.notify(item, status)
                 self.session.flash(self.valid_msg)
                 log.debug(u" + The status has been set to {0}".format(status))
             except Forbidden, e:
@@ -529,6 +529,15 @@ class TaskFormView(BaseFormView):
         # Ici on spécifie un template qui permet de rendre nos boutons de
         # formulaires
         form.widget.template = "autonomie:deform_templates/form.pt"
+
+    def set_task_status(self, task):
+        # self.request.POST is a locked dict, we need a non locked one
+        params = dict(self.request.POST)
+        status = params['submit']
+        task.set_status(status, self.request, self.request.user.id, **params)
+        self.request.registry.notify(StatusChanged(self.request, task,
+            status))
+        return task
 
 
 def html(request, template):

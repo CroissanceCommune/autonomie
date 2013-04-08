@@ -18,7 +18,6 @@
 import logging
 
 from deform import ValidationFailure
-from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.task.invoice import Invoice
@@ -30,8 +29,6 @@ from autonomie.views.forms.task import get_invoice_appstruct
 from autonomie.views.forms.task import get_invoice_dbdatas
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
-from autonomie.views.mail import StatusChanged
-from autonomie.utils.widgets import ViewLink
 
 from autonomie.utils.views import submit_btn
 from autonomie.views.taskaction import TaskFormView
@@ -112,14 +109,6 @@ class InvoiceAdd(TaskFormView):
         return HTTPFound(self.request.route_path("project",
                                                  id=self.context.id))
 
-    def set_task_status(self, invoice):
-        # self.request.POST is a locked dict, we need a non locked one
-        params = dict(self.request.POST)
-        status = params['submit']
-        invoice.set_status(status, self.request, self.request.user.id, **params)
-        self.request.registry.notify(StatusChanged(self.request, invoice))
-        return invoice
-
 class InvoiceEdit(TaskFormView):
     """
         Invoice edition view
@@ -192,15 +181,6 @@ class InvoiceEdit(TaskFormView):
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",
                                                  id=self.context.project.id))
-
-    def set_task_status(self, invoice):
-        # self.request.POST is a locked dict, we need a non locked one
-        params = dict(self.request.POST)
-        status = params['submit']
-        invoice.set_status(status, self.request, self.request.user.id, **params)
-        log.debug("Has been raised")
-        self.request.registry.notify(StatusChanged(self.request, invoice))
-        return invoice
 
 
 class InvoiceStatus(TaskStatusView):

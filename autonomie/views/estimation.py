@@ -17,11 +17,8 @@
 """
 import logging
 from deform import ValidationFailure
-from deform import Form
 
-from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.estimation import EstimationLine
@@ -33,7 +30,6 @@ from autonomie.views.forms.task import get_estimation_appstruct
 from autonomie.views.forms.task import get_estimation_dbdatas
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
-from autonomie.views.mail import StatusChanged
 from autonomie.utils.views import submit_btn
 from autonomie.views.taskaction import TaskStatusView
 from autonomie.views.taskaction import TaskFormView
@@ -112,13 +108,6 @@ class EstimationAdd(TaskFormView):
         return HTTPFound(self.request.route_path("project",
                                                  id=self.context.id))
 
-    def set_task_status(self, estimation):
-        params = dict(self.request.POST)
-        status = params['submit']
-        estimation.set_status(status, self.request, self.request.user.id, **params)
-        self.request.registry.notify(StatusChanged(self.request, estimation))
-        return estimation
-
 
 class EstimationEdit(TaskFormView):
     """
@@ -194,15 +183,6 @@ class EstimationEdit(TaskFormView):
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",
                                                  id=self.context.project.id))
-
-    def set_task_status(self, estimation):
-        # self.request.POST is a locked dict, we need a non locked one
-        params = dict(self.request.POST)
-        status = params['submit']
-        estimation.set_status(status, self.request, self.request.user.id, **params)
-        log.debug("Has been raised")
-        self.request.registry.notify(StatusChanged(self.request, estimation))
-        return estimation
 
 
 class EstimationStatus(TaskStatusView):

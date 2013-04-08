@@ -17,7 +17,6 @@
 """
 import logging
 
-
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.views.forms.task import get_cancel_invoice_schema
@@ -28,7 +27,6 @@ from autonomie.models.task.invoice import CancelInvoiceLine
 from autonomie.models.tva import Tva
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
-from autonomie.views.mail import StatusChanged
 
 from autonomie.utils.views import submit_btn
 from autonomie.views.taskaction import TaskFormView
@@ -106,14 +104,6 @@ class CancelInvoiceAdd(TaskFormView):
         return HTTPFound(self.request.route_path("project",
                                                  id=self.context.id))
 
-    def set_task_status(self, cinvoice):
-        # self.request.POST is a locked dict, we need a non locked one
-        params = dict(self.request.POST)
-        status = params['submit']
-        cinvoice.set_status(status, self.request, self.request.user.id, **params)
-        self.request.registry.notify(StatusChanged(self.request, cinvoice))
-        return cinvoice
-
 
 class CancelInvoiceEdit(TaskFormView):
     """
@@ -171,8 +161,8 @@ class CancelInvoiceEdit(TaskFormView):
         appstruct = get_cancel_invoice_dbdatas(appstruct)
 
         # Since the call to get_next_cancelinvoice_number commits the current
-        # transaction, it needs to be called before creating our cancelinvoice, to
-        # avoid missing arguments errors
+        # transaction, it needs to be called before creating our cancelinvoice,
+        # to avoid missing arguments errors
 
         cinvoice = self.context
         cinvoice = merge_session_with_post(cinvoice, appstruct["cancelinvoice"])
@@ -187,15 +177,6 @@ class CancelInvoiceEdit(TaskFormView):
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",
                                                  id=self.context.project.id))
-
-    def set_task_status(self, cinvoice):
-        # self.request.POST is a locked dict, we need a non locked one
-        params = dict(self.request.POST)
-        status = params['submit']
-        cinvoice.set_status(status, self.request, self.request.user.id, **params)
-        log.debug("Has been raised")
-        self.request.registry.notify(StatusChanged(self.request, cinvoice))
-        return cinvoice
 
 
 class CancelInvoiceStatus(TaskStatusView):

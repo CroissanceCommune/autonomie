@@ -93,18 +93,18 @@ def get_user_menu(cid, css=None):
             icon="icon-list-alt",
             path="company_invoices",
             id=cid))
-        gestion.add(MainMenuItem(u"Trésorerie", "view",
-            icon="icon-info-sign",
-            path="treasury",
-            id=cid))
-        gestion.add(MainMenuItem(u"Compte de résultat", "view",
-            icon="icon-info-sign",
-            path="incomestatement",
-            id=cid))
-        gestion.add(MainMenuItem(u"Bulletin de salaire",
-            icon="icon-info-sign",
-            path="salarysheet",
-            id=cid))
+#        gestion.add(MainMenuItem(u"Trésorerie", "view",
+#            icon="icon-info-sign",
+#            path="treasury",
+#            id=cid))
+#        gestion.add(MainMenuItem(u"Compte de résultat", "view",
+#            icon="icon-info-sign",
+#            path="incomestatement",
+#            id=cid))
+#        gestion.add(MainMenuItem(u"Bulletin de salaire",
+#            icon="icon-info-sign",
+#            path="salarysheet",
+#            id=cid))
         gestion.add(MainMenuItem(u"Gestion commerciale",
             icon="icon-list-alt",
             path="commercial_handling",

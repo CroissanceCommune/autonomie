@@ -21,7 +21,7 @@ from autonomie.models.company import Company
 from autonomie.models.treasury import (ExpenseType, ExpenseKmType,
                 ExpenseSheet, ExpenseLine, ExpenseKmLine)
 from autonomie.utils.rest import RestError
-from autonomie.views.expense import (RestExpenseLine, ExpensePage,
+from autonomie.views.expense import (RestExpenseLine, get_expense_sheet,
         RestExpenseKmLine, ExpenseKmLineJson, ExpenseLineJson)
 from autonomie.views.forms.expense import ExpenseKmLineSchema, ExpenseLineSchema
 from autonomie.tests.base import BaseFunctionnalTest
@@ -34,18 +34,17 @@ class BaseRest(BaseFunctionnalTest):
     def user(self):
         return User.query().first()
 
-    def sheet(self):
-        request = self.get_csrf_request()
-        request.context = self.company()
-        request.matchdict = {'uid':self.user().id}
-        page = ExpensePage(request)
-        return page._expense()
-
+    def sheet(self, request):
+        year = date.today().year
+        month = date.today().month
+        cid = self.company().id
+        uid = self.user().id
+        return get_expense_sheet(request, year, month, cid, uid)
 
 class TestRestExpenseLine(BaseRest):
     def test_getOne(self):
         request = self.get_csrf_request()
-        request.context = self.sheet()
+        request.context = self.sheet(request)
         line = request.context.lines[0]
         request.matchdict = {'lid':line.id}
         view = RestExpenseLine(request)
@@ -56,22 +55,22 @@ class TestRestExpenseLine(BaseRest):
 
     def test_post(self):
         request = self.get_csrf_request()
-        request.context = self.sheet()
+        request.context = self.sheet(request)
         appstruct = {'ht':'150.0',
                      'tva':'15',
                      'description':'Test',
                      'date':'2112-10-12',
                      'category':'1',
-                     'code':'0001'}
+                     'type_id':5}
         request.json_body = appstruct
         view = RestExpenseLine(request)
         view.post()
-        sheet = self.sheet()
+        sheet = self.sheet(request)
         line = sheet.lines[-1]
         self.assertEqual(line.tva, 1500)
         self.assertEqual(line.ht, 15000)
         self.assertEqual(line.date, date(2112, 10, 12))
-        self.assertEqual(line.code, u"0001")
+        self.assertEqual(line.type_id, 5)
         self.assertEqual(line.category, u"1")
         self.assertTrue(isinstance(line, ExpenseLine))
 
@@ -79,26 +78,27 @@ class TestRestExpenseLine(BaseRest):
 class TestRestExpenseKmLine(BaseRest):
     def addOne(self):
         request = self.get_csrf_request()
-        request.context = self.sheet()
+        request.context = self.sheet(request)
         appstruct = {'km':'150.0',
                      'start':'point a',
                      'end':'point b',
                      'description':'Test',
                      'date':'2112-10-12',
                      'category':'1',
-                     'code':'0004'}
+                     'type_id':1}
         request.json_body = appstruct
         view = RestExpenseKmLine(request)
         view.post()
 
     def getOne(self):
-        sheet = self.sheet()
+        request = self.get_csrf_request()
+        sheet = self.sheet(request)
         return sheet.kmlines[-1]
 
     def getIt(self):
         elem = self.getOne()
         request = self.get_csrf_request()
-        request.context = self.sheet()
+        request.context = self.sheet(request)
         request.matchdict['lid'] = elem.id
         view = RestExpenseKmLine(request)
         return view.getOne()
@@ -116,7 +116,7 @@ class TestRestExpenseKmLine(BaseRest):
         self.assertEqual(line.start, u"point a")
         self.assertEqual(line.end, u"point b")
         self.assertEqual(line.date, date(2112, 10, 12))
-        self.assertEqual(line.code, u"0004")
+        self.assertEqual(line.type_id, 1)
         self.assertEqual(line.category, u"1")
         self.assertTrue(isinstance(line, ExpenseKmLine))
 
@@ -129,9 +129,9 @@ class TestRestExpenseKmLine(BaseRest):
                      "date":line.date.isoformat(),
                      "description":line.description,
                      "category":line.category,
-                     "code":line.code}
+                     "type_id":line.type_id}
         request = self.get_csrf_request()
-        request.context = self.sheet()
+        request.context = self.sheet(request)
         request.matchdict['lid'] = line.id
         request.json_body = appstruct
         view = RestExpenseKmLine(request)
@@ -140,4 +140,4 @@ class TestRestExpenseKmLine(BaseRest):
         self.assertEqual(line.km, 1200)
         self.assertEqual(line.start, u"point a2")
         self.assertEqual(line.end, u"point b2")
-        self.assertEqual(line.code, u"0004")
+        self.assertEqual(line.type_id, 1)

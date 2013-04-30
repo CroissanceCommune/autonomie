@@ -70,12 +70,12 @@ def expense_options():
         Return options related to the expense configuration
     """
     options = dict()
-    options["expensetypes"] = [{"label":e.label, "value":e.code}
+    options["expensetypes"] = [{"label":e.label, "value":str(e.id)}
              for e in ExpenseType.query().filter(ExpenseType.type=='expense')]
-    options["kmtypes"] =  [{"label":e.label, "value":e.code,
+    options["kmtypes"] =  [{"label":e.label, "value":str(e.id),
                                         "amount":e.amount}
                                                 for e in ExpenseKmType.query()]
-    options["teltypes"] = [{"label":e.label, "value":e.code,
+    options["teltypes"] = [{"label":e.label, "value":str(e.id),
                                         "percentage":e.percentage}
                                                for e in ExpenseTelType.query()]
     options['categories'] = [{'value':'1',
@@ -133,7 +133,7 @@ def get_period(request):
     return year, month
 
 
-def get_expense_sheet(year, month, cid, uid):
+def _get_expense_sheet(year, month, cid, uid):
     """
         Return the expense sheet for the given 4-uple
     """
@@ -154,7 +154,7 @@ def get_new_expense_sheet(year, month, cid, uid):
     expense.company_id = cid
     expense.user_id = uid
     for type_ in ExpenseTelType.query():
-        line = ExpenseLine(code=type_.code, ht=0, tva=0,
+        line = ExpenseLine(type_id=type_.id, ht=0, tva=0,
                 description=type_.label)
         expense.lines.append(line)
     return expense
@@ -164,7 +164,11 @@ def get_expensesheet_years(expenses):
     """
         List of years an expensesheet has been retrieved for
     """
-    return set([exp.year for exp in expenses])
+    years = set([exp.year for exp in expenses])
+    if not years:
+        return [datetime.date.today().year]
+    else:
+        return years
 
 
 def get_expensesheet_by_year(company):
@@ -202,6 +206,17 @@ def company_expenses(request):
             current_year=datetime.date.today().year)
 
 
+def get_expense_sheet(request, year, month, cid, uid):
+    expense = _get_expense_sheet(year, month, cid, uid)
+    if not expense:
+        # If it has not already been accessed, we create a new one and
+        # we flush it to ensure we can access its id in the view
+        expense = get_new_expense_sheet(year, month, cid, uid)
+        request.dbsession.add(expense)
+        request.dbsession.flush()
+    return expense
+
+
 def expenses_access(request):
     """
         get/initialize the expense corresponding to the 4-uple:
@@ -212,13 +227,7 @@ def expenses_access(request):
     year, month = get_period(request)
     cid = request.context.id
     uid = request.matchdict.get('uid')
-    expense = get_expense_sheet(year, month, cid, uid)
-    if not expense:
-        # If it has not already been accessed, we create a new one and
-        # we flush it to ensure we can access its id in the view
-        expense = get_new_expense_sheet(year, month, cid, uid)
-        request.dbsession.add(expense)
-        request.dbsession.flush()
+    expense = get_expense_sheet(request, year, month, cid, uid)
     # Here we use a temporary redirect since the expense we redirect too may
     # have change if it was reset
     return HTTPTemporaryRedirect(request.route_path("expense", id=expense.id))

@@ -212,10 +212,14 @@ class BaseExpenseLine(DBBASE):
     date = Column(Date(), default=date.today())
     description = Column(String(255))
     category = Column(Enum('1', '2'), default='1')
-    code = Column(String(15))
     valid = Column(Boolean(), default=True)
+    type_id = Column(Integer)
     sheet_id = Column(Integer,
             ForeignKey("expense_sheet.id", ondelete="cascade"))
+    type_object = relationship("ExpenseType",
+            primaryjoin='BaseExpenseLine.type_id==ExpenseType.id',
+            uselist=False,
+            foreign_keys='ExpenseType.id')
 
 
 class ExpenseLine(BaseExpenseLine):
@@ -242,7 +246,7 @@ class ExpenseLine(BaseExpenseLine):
                     description=self.description,
                     ht=self.ht,
                     tva=self.tva,
-                    code=self.code)
+                    type_id=self.type_id)
 
 
     @property
@@ -251,13 +255,10 @@ class ExpenseLine(BaseExpenseLine):
             return the total
         """
         result = self.ht + self.tva
-        teltype = ExpenseTelType.query()\
-                .filter(ExpenseTelType.code == self.code).first()
-        if teltype is not None:
-            percentage = teltype.percentage
+        if self.type_object.type == 'expensetel':
+            percentage = self.type_object.percentage
             result = result * percentage / 100.0
         return result
-
 
 
 class ExpenseKmLine(BaseExpenseLine):
@@ -271,6 +272,7 @@ class ExpenseKmLine(BaseExpenseLine):
     __table_args__ = default_table_args
     __mapper_args__ = dict(polymorphic_identity='expensekmline')
     id = Column(Integer, ForeignKey('baseexpense_line.id'), primary_key=True)
+    type_label = Column(String(50))
     start = Column(String(150), default="")
     end = Column(String(150), default="")
     km = Column(Integer)
@@ -285,14 +287,21 @@ class ExpenseKmLine(BaseExpenseLine):
                     valid=self.valid,
                     category=self.category,
                     description=self.description,
+                    type_label=self.type_label,
                     km=self.km,
                     start=self.start,
                     end=self.end,
-                    code=self.code)
+                    type_id=self.type_id)
 
     @property
     def total(self):
-        indemnity = ExpenseKmType.query().filter(
-                ExpenseKmType.code == self.code).first().amount
+        indemnity = self.type_object.amount
         return indemnity * self.km
 
+    @property
+    def vehicle(self):
+        return self.type_object.label
+
+    @property
+    def ht(self):
+        return self.total

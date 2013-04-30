@@ -17,6 +17,8 @@
 """
 import datetime
 import colander
+from decimal import Decimal
+
 from sqlalchemy import extract
 from deform import Form
 from deform.exception import ValidationFailure
@@ -25,8 +27,10 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.utils.views import submit_btn
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.math_utils import dec_round
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
+from autonomie.models.task import CancelInvoice
 from autonomie.models.client import Client
 from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
@@ -144,12 +148,18 @@ class DisplayCommercialHandling(BaseView):
         result = dict()
         for month in range(1, 13):
             invoices = Invoice.query().join(Project)\
-                    .filter(Project.company_id==self.request.context.id)\
-                    .filter(extract('year', Invoice.taskDate)==self.year)\
-                    .filter(extract('month', Invoice.taskDate)==month)\
-                    .filter(Invoice.CAEStatus.in_(Invoice.valid_states))
-            val = sum([invoice.total_ht() for invoice in invoices])
-            result[month] = val
+               .filter(Project.company_id==self.request.context.id)\
+               .filter(extract('year', Invoice.taskDate)==self.year)\
+               .filter(extract('month', Invoice.taskDate)==month)\
+               .filter(Invoice.CAEStatus.in_(Invoice.valid_states))
+            invoice_sum = sum([invoice.total_ht() for invoice in invoices])
+            cinvoices = CancelInvoice.query().join(Project)\
+               .filter(Project.company_id==self.request.context.id)\
+               .filter(extract('year', CancelInvoice.taskDate)==self.year)\
+               .filter(extract('month', CancelInvoice.taskDate)==month)\
+               .filter(CancelInvoice.CAEStatus.in_(CancelInvoice.valid_states))
+            cinvoice_sum = sum([cinvoice.total_ht() for cinvoice in cinvoices])
+            result[month] = invoice_sum + cinvoice_sum
         return result
 
     def turnover_projections(self):
@@ -223,7 +233,8 @@ def compute_percent(index, projections, turnovers):
         projection = projections.get(index)
         if projection:
             if projection.value:
-                return turnover * 100.0 / projection.value
+                value = turnover * 100.0 / projection.value
+                return float(dec_round(Decimal(value), 2))
     return None
 
 

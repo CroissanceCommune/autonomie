@@ -23,7 +23,7 @@ import datetime
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPNotFound
 from autonomie.views.base import BaseView
-from autonomie.utils.pdf import force_ascii
+from autonomie.utils.ascii import force_ascii
 from autonomie.utils.files import encode_path
 from autonomie.utils.files import decode_path
 from autonomie.utils.files import issubdir

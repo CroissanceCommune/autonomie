@@ -20,8 +20,9 @@ import openpyxl
 from openpyxl.style import Color, Fill
 import cStringIO as StringIO
 
-from autonomie.utils.string import force_ascii
+from autonomie.utils.ascii import force_ascii
 from autonomie.utils.math_utils import integer_to_amount
+
 
 LETTERS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',)
 

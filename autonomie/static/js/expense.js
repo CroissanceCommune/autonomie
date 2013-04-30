@@ -54,11 +54,11 @@ var BaseExpenseModel = Backbone.Model.extend({
    */
   getType:function(arr){
     /*
-     * Retrieve the element from arr where its code is the same as the model's
+     * Retrieve the element from arr where its type_id is the same as the model's
      * current one
      */
-    var code = this.get('code');
-    return _.find(arr, function(type){return type['value'] === code;});
+    var type_id = this.get('type_id');
+    return _.find(arr, function(type){return type['value'] === type_id;});
   },
   getTypeOptions: function(){
     /*
@@ -86,7 +86,7 @@ var ExpenseLine = BaseExpenseModel.extend({
    *
    *  An expense line should be a tel expense or a more general one
    *
-   *  It's composed of HT value, TVA value, description, analytic code, date
+   *  It's composed of HT value, TVA value, description, expensetype id, date
    *
    *  altdate is used for display
    */
@@ -109,7 +109,7 @@ var ExpenseLine = BaseExpenseModel.extend({
       required:true,
       msg:"est requise"
     },
-    code:{
+    type_id:{
       required:true,
       msg:"est requis"
     },
@@ -168,7 +168,7 @@ var ExpenseKmLine = BaseExpenseModel.extend({
    *
    *  Km fees are compound of :
    *  * kilometers
-   *  * analytic code
+   *  * expense type id
    *  * start point
    *  * end point
    *  * description
@@ -189,7 +189,7 @@ var ExpenseKmLine = BaseExpenseModel.extend({
       required:true,
       msg:"est requise"
     },
-    code:{
+    type_id:{
       required:true,
       msg:"est requis"
     },
@@ -209,7 +209,7 @@ var ExpenseKmLine = BaseExpenseModel.extend({
     /*
      *  Return the reference used for compensation of km fees
      */
-    var elem = _.where(AppOptions['kmtypes'], {value:this.get('code')})[0];
+    var elem = _.where(AppOptions['kmtypes'], {value:this.get('type_id')})[0];
     if (elem === undefined){
       return 0;
     }
@@ -677,8 +677,8 @@ var ExpenseKmEdit = ExpenseKmAdd.extend({
   },
   getTypeOptions: function(){
     var type_options = AppOptions['kmtypes'];
-    var code = this.model.get('code');
-    return this.updateSelectOptions(type_options, code);
+    var type_id = this.model.get('type_id');
+    return this.updateSelectOptions(type_options, type_id);
   },
   submit: function(e){
     var collection = this.model.collection;
@@ -724,8 +724,8 @@ var ExpenseEdit = ExpenseAdd.extend({
      *  Return the options for the expense types
      */
     var type_options = AppOptions['expensetypes'];
-    var code = this.model.get('code');
-    return this.updateSelectOptions(type_options, code);
+    var type_id = this.model.get('type_id');
+    return this.updateSelectOptions(type_options, type_id);
   },
   submit: function(e){
     var collection = this.model.collection;

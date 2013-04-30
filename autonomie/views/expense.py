@@ -79,10 +79,10 @@ def expense_options():
                                         "percentage":e.percentage}
                                                for e in ExpenseTelType.query()]
     options['categories'] = [{'value':'1',
-                            'label':'Frais direct de fonctionnement'},
+                            'label':u'Frais direct de fonctionnement'},
                             {'value':'2',
-                            'label':"Frais concernant directement votre \
-activite aupres de vos clients"}]
+                            'label':u"Frais concernant directement votre \
+activité auprès de vos clients"}]
     return options
 
 

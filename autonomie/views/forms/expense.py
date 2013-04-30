@@ -40,12 +40,12 @@ def default_month(node, kw):
 
 
 @colander.deferred
-def deferred_code_validator(node, kw):
+def deferred_type_id_validator(node, kw):
     """
-        Return a validator for the analytic code
+        Return a validator for the expensetype
     """
-    codes = [t.code for t in ExpenseType.query()]
-    return colander.OneOf(codes)
+    ids = [t.id for t in ExpenseType.query()]
+    return colander.OneOf(ids)
 
 
 class PeriodSelectSchema(colander.MappingSchema):
@@ -84,8 +84,8 @@ class BaseLineSchema(colander.MappingSchema):
             validator=colander.OneOf(('1', '2')))
     description = colander.SchemaNode(colander.String(), missing=u'')
     valid = colander.SchemaNode(colander.Boolean(), missing=False)
-    code = colander.SchemaNode(colander.String(),
-            validator=deferred_code_validator)
+    type_id = colander.SchemaNode(colander.Integer(),
+            validator=deferred_type_id_validator)
 
 class ExpenseKmLineSchema(BaseLineSchema):
     """

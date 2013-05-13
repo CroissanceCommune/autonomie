@@ -50,19 +50,10 @@ from autonomie.utils.widgets import PopUp
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.export import make_excel_view
 from autonomie.utils.export import ExcelExpense
-from autonomie.resources import lib_autonomie
-from js.jqueryui import effects_highlight
-from js.jqueryui import effects_shake
-from autonomie.resources import backbone
-from autonomie.resources import templates
-from autonomie.resources import tools
+from autonomie.resources import expense_js
 
 
 log = logging.getLogger(__name__)
-
-
-expense_js = Resource(lib_autonomie, "js/expense.js", depends=[backbone,
-    templates, tools, effects_highlight, effects_shake])
 
 
 def expense_options():

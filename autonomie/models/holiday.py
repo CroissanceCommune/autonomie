@@ -44,3 +44,9 @@ class Holiday(DBBASE):
                                         order_by="Holiday.start_date"),
                         primaryjoin="Holiday.user_id==User.id"
                         )
+    def __json__(self, request):
+        return dict(
+                id=self.id,
+                user_id=self.user_id,
+                start_date=self.start_date,
+                end_date=self.end_date)

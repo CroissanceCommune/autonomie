@@ -26,26 +26,6 @@ MyApp.on("initialize:after", function(){
 });
 
 
-function _displayServerMessage(options){
-  /*
-   * """ Display a message from the server
-   */
-  var msgdiv = templates.serverMessage.render(options);
-  $(msgdiv).prependTo("#messageboxes").fadeIn('slow').delay(8000).fadeOut(
-  'fast', function() { $(this).remove(); });
-}
-function displayServerError(msg){
-  /*
-   *  Show errors in a message box
-   */
-  _displayServerMessage({msg:msg, error:true});
-}
-function displayServerSuccess(msg){
-  /*
-   *  Show errors in a message box
-   */
-  _displayServerMessage({msg:msg});
-}
 
 /******************************** Models ********************************/
 var BaseExpenseModel = Backbone.Model.extend({

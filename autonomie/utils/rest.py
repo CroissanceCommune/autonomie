@@ -16,6 +16,7 @@
     Rest related utilities
 """
 from pyramid.httpexceptions import HTTPError
+from pyramid.httpexceptions import HTTPTemporaryRedirect
 from pyramid.response import Response
 
 from pyramid.renderers import render
@@ -117,3 +118,57 @@ class RestJsonRepr(object):
                 result[key] = value
         result = self.postformat(result)
         return result
+
+
+def add_rest_views(config, route_name, factory):
+    """
+        Add a rest iface associating the factory's methods to the different
+        request methods of the routes based on route_name :
+            route_name : route name of a single item (items/{id})
+            route_name + "s" : route name of the items model (items)
+        del - > route_name, DELETE
+        put - > route_name, PUT
+        get - > route_name, GET
+        post - > route_name+"s", POST
+    """
+    config.add_view(factory,
+            attr='get',
+            route_name=route_name,
+            renderer="json",
+            request_method='GET',
+            permission='view',
+            xhr=True)
+    config.add_view(factory,
+            attr='post',
+            # C pas beau je sais
+            route_name=route_name + "s",
+            renderer="json",
+            request_method='POST',
+            permission='add',
+            xhr=True)
+    config.add_view(factory,
+            attr='put',
+            route_name=route_name,
+            renderer="json",
+            request_method='PUT',
+            permission="edit",
+            xhr=True)
+    config.add_view(factory,
+            attr='delete',
+            route_name=route_name,
+            renderer="json",
+            request_method='DELETE',
+            permission="edit",
+            xhr=True)
+
+
+def make_redirect_view(route_name):
+    """
+        Returns a redirect function that redirects to route_name
+        It supposes the route route_name is expecting a id key
+    """
+    def view(request):
+        id = request.context.id
+        url = request.route_path(route_name, id=id)
+        return HTTPTemporaryRedirect(url)
+    return view

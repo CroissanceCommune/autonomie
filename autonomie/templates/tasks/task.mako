@@ -179,5 +179,12 @@
                 ${format_text(config.get('coop_pdffootertext'))}
             % endif
         </div>
+        <pdf:nextpage />
+        <div>
+            % if config.has_key('coop_cgv'):
+                <% data = config.get('coop_cgv').replace(u'\n', u'') %>
+                ${format_text(data)}
+            % endif
+        </div>
     </body>
 </html>

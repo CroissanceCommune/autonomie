@@ -79,6 +79,13 @@ class DocumentConfig(colander.MappingSchema):
     """
         Schema for document (estimation/invoice ...) configuration
     """
+    cgv = colander.SchemaNode(
+            colander.String(),
+            title=u"Conditions générales de vente",
+            widget=widget.RichTextWidget(cols=80, rows=2, theme="advanced"),
+            description=u"Les conditions générales sont placées en dernière \
+page des documents (devis/factures/avoirs)",
+            missing=u'')
     footertitle = colander.SchemaNode(
         colander.String(),
         title=u"Titre du pied de page",
@@ -245,7 +252,8 @@ def get_config_appstruct(config_dict):
                                      'late': None},
                      'footertitle': None,
                      'footercourse': None,
-                     'footercontent': None},
+                     'footercontent': None,
+                     'cgv':None},
     }
     appstruct['site']['welcome'] = config_dict.get('welcome')
     appstruct['document']['footertitle'] = config_dict.get(
@@ -254,6 +262,7 @@ def get_config_appstruct(config_dict):
                                                       'coop_pdffootercourse')
     appstruct['document']['footercontent'] = config_dict.get(
                                                         'coop_pdffootertext')
+    appstruct['document']['cgv'] = config_dict.get('coop_cgv')
 
     appstruct['document']['estimation']['footer'] = config_dict.get(
                                                        'coop_estimationfooter')
@@ -276,6 +285,7 @@ def get_config_dbdatas(appstruct):
                                                              'footercourse')
     dbdatas['coop_pdffootertext'] = appstruct.get('document', {}).get(
                                                              'footercontent')
+    dbdatas['coop_cgv'] = appstruct.get('document', {}).get('cgv')
 
     dbdatas['coop_estimationfooter'] = appstruct.get('document', {}).get(
                                                 'estimation', {}).get('footer')

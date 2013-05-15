@@ -19,7 +19,6 @@ import logging
 import colander
 import datetime
 
-from fanstatic import Resource
 from deform import Form
 from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
@@ -44,6 +43,8 @@ from autonomie.views.render_api import format_account
 from autonomie.views.forms.utils import BaseFormView
 from autonomie.utils.rest import RestError
 from autonomie.utils.rest import RestJsonRepr
+from autonomie.utils.rest import add_rest_views
+from autonomie.utils.rest import make_redirect_view
 from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import Submit
 from autonomie.utils.widgets import PopUp
@@ -470,67 +471,6 @@ class RestExpenseKmLine(RestExpenseLine):
     model_wrapper = ExpenseKmLineJson
 
 
-def redirect_to_expense(request):
-    """
-        View that redirects to the main view
-        It's used to avoid the redirection to ajax specific views after
-        login process
-
-        A n ajax request is made while not auth, we redirect to login, after
-        successfull login, the user is redirected to the rest api route, and
-        this view allows to redirect him to the original main view
-    """
-    expense = request.context
-    url = request.route_path("expense", id=expense.id)
-    return HTTPTemporaryRedirect(url)
-
-
-def add_rest_iface(config, route_name, factory, redirect_view):
-    """
-        Add a rest iface associating the factory's methods to the different
-        request methods of the routes based on route_name :
-            route_name : route name of a single item (items/{id})
-            route_name + "s" : route name of the items model (items)
-        del - > route_name, DELETE
-        put - > route_name, PUT
-        get - > route_name, GET
-        post - > route_name+"s", POST
-    """
-    config.add_view(factory,
-            attr='get',
-            route_name=route_name,
-            renderer="json",
-            request_method='GET',
-            permission='view',
-            xhr=True)
-    config.add_view(factory,
-            attr='post',
-            # C pas beau je sais
-            route_name=route_name + "s",
-            renderer="json",
-            request_method='POST',
-            permission='add',
-            xhr=True)
-    config.add_view(factory,
-            attr='put',
-            route_name=route_name,
-            renderer="json",
-            request_method='PUT',
-            permission="edit",
-            xhr=True)
-    config.add_view(factory,
-            attr='delete',
-            route_name=route_name,
-            renderer="json",
-            request_method='DELETE',
-            permission="edit",
-            xhr=True)
-    config.add_view(redirect_view,
-            route_name=route_name)
-    config.add_view(redirect_view,
-            route_name=route_name + "s")
-
-
 def excel_filename(request):
     """
         return an excel filename based on the request context
@@ -591,7 +531,10 @@ def includeme(config):
             route_name="expensexlsx")
 
     # Rest interface
-    add_rest_iface(config, "expenseline", RestExpenseLine,
-            redirect_to_expense)
-    add_rest_iface(config, "expensekmline", RestExpenseKmLine,
-            redirect_to_expense)
+    redirect_to_expense = make_redirect_view("expense")
+    add_rest_views(config, "expenseline", RestExpenseLine)
+    config.add_view(redirect_to_expense, route_name="expenseline")
+    config.add_view(redirect_to_expense, route_name="expenselines")
+    add_rest_views(config, "expensekmline", RestExpenseKmLine)
+    config.add_view(redirect_to_expense, route_name="expensekmline")
+    config.add_view(redirect_to_expense, route_name="expensekmlines")

@@ -23,18 +23,6 @@
     #period_form .controls{
         margin-left:0px;
     }
-    #messageboxes{
-        position:fixed;
-        bottom:0px;
-        left:50px;
-        z-index:2000;
-    }
-    table thead th{
-        background-color:#D9EDF7;
-    }
-    table tfoot td{
-        background-color:#FCF8E3;
-    }
 </style>
 <br />
 <a class='btn rfloatted' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>Export</a>

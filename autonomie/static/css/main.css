@@ -229,3 +229,16 @@ table caption{
   text-align:left;
   padding:15px;
 }
+/* Box used to display ajax calls success or errors */
+#messageboxes{
+    position:fixed;
+    bottom:0px;
+    left:50px;
+    z-index:2000;
+}
+table.opa thead th{
+  background-color:#D9EDF7;
+}
+table.opa tfoot td{
+  background-color:#FCF8E3;
+}

@@ -115,10 +115,21 @@ task = Resource(
         "js/task.js",
         depends=[tools, jquery_tmpl, address, discount, duplicate, backbone,
             templates])
+message_js = Resource(
+        lib_autonomie,
+        "js/message.js",
+        depends=[templates, jquery])
 expense_js = Resource(
         lib_autonomie,
         "js/expense.js",
-        depends=[backbone, templates, tools, effects_highlight, effects_shake])
+        depends=[backbone, templates, tools, effects_highlight, effects_shake,
+            message_js])
+
+holiday_js = Resource(
+        lib_autonomie,
+        "js/holiday.js",
+        depends=[backbone, templates, tools, effects_highlight, effects_shake,
+            message_js])
 
 # Main javascript requirements
 main_js = Group([main,

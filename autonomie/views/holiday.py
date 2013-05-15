@@ -18,16 +18,22 @@
 """
 
 import logging
+import colander
 
 from sqlalchemy import or_
 
-from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.holiday import Holiday
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.utils.rest import RestJsonRepr
+from autonomie.utils.rest import RestError
+from autonomie.utils.rest import add_rest_views
+from autonomie.utils.rest import make_redirect_view
+from autonomie.views.base import BaseView
 from autonomie.views.forms.utils import BaseFormView
-from autonomie.views.forms.holiday import HolidaysSchema
+from autonomie.views.forms.holiday import HolidaySchema
 from autonomie.views.forms.holiday import searchSchema
+from autonomie.resources import holiday_js
 
 
 log = logging.getLogger(__name__)
@@ -48,44 +54,112 @@ def get_holidays(start_date=None, end_date=None, user_id=None):
     return holidays
 
 
-class HolidayRegister(BaseFormView):
+class HolidayJson(RestJsonRepr):
     """
-        Page for holiday registering
+        Wraps a holiday to a json representation
     """
-    schema = HolidaysSchema()
-    title = u"Déclarer mes congés"
+    schema = HolidaySchema()
 
-    def before(self, form):
-        holidays = get_holidays(user_id=self.request.user.id)
-        appstruct = {'holidays' : [{'start_date':holiday.start_date,
-                                    'end_date':holiday.end_date}
-                                              for holiday in holidays]}
-        form.set_appstruct(appstruct)
 
-    def submit_success(self, appstruct):
+class RestHoliday(BaseView):
+    """
+        Json-Rest api for holidays handling
+        /holidays/{id}
+    """
+    _schema = HolidaySchema()
+    factory = Holiday
+    model_wrapper = HolidayJson
+
+    @property
+    def schema(self):
+        # Ensure all our colander.deferred values are set
+        return self._schema.bind()
+
+    def getOne(self):
         """
-            Set the user's holidays in the database
+            get an expense line
         """
-        self._purge_holidays()
-        for data in appstruct['holidays']:
-            holiday = Holiday(user_id=self.request.user.id)
-            merge_session_with_post(holiday, data)
-            self.dbsession.merge(holiday)
-        self.dbsession.flush()
-        self.request.session.flash(
-            u"Vos déclarations de congés ont bien été modifiées")
-        return HTTPFound(self.request.route_path("holiday"))
+        lid = self.request.matchdict.get('lid')
+        for holiday in self.request.context.holidays:
+            if holiday.id == int(lid):
+                return holiday
+        raise RestError({}, 404)
 
-    def _purge_holidays(self):
+    def get(self):
         """
-            Purge the user's holidays
+            Rest get method : return a line
         """
-        for holiday in get_holidays(user_id=self.request.user.id):
-            self.dbsession.delete(holiday)
-            self.dbsession.flush()
+        log.debug("In the get method")
+        return self.model_wrapper(self.getOne())
+
+    def post(self):
+        """
+            Rest post method : add a line
+        """
+        log.debug("In the post method")
+        appstruct = self.request.json_body
+        try:
+            appstruct = self.schema.deserialize(appstruct)
+        except colander.Invalid, err:
+            import traceback
+            traceback.print_exc()
+            log.exception("  - Erreur")
+            raise RestError(err.asdict(), 400)
+        line = self.factory(**appstruct)
+        line.user = self.request.context
+        self.request.dbsession.add(line)
+        self.request.dbsession.flush()
+        return self.model_wrapper(line)
+
+    def delete(self):
+        """
+            Rest delete method : delete a line
+        """
+        log.debug("In the delete method")
+        line = self.getOne()
+        self.request.dbsession.delete(line)
+        return dict(status="success")
+
+    def put(self):
+        """
+            Rest put method : update a line
+        """
+        log.debug("In the put method")
+        line = self.getOne()
+        appstruct = self.request.json_body
+        try:
+            appstruct = self.schema.deserialize(appstruct)
+        except colander.Invalid, err:
+            import traceback
+            traceback.print_exc()
+            log.exception("  - Erreur")
+            raise RestError(err.asdict(), 400)
+        line = merge_session_with_post(line, appstruct)
+        self.request.dbsession.merge(line)
+        self.request.dbsession.flush()
+        return self.model_wrapper(line)
 
 
-class HolidayView(BaseFormView):
+def holidays_json(request):
+    """
+        json view for holidays
+    """
+    holidays = [HolidayJson(holiday) for holiday in Holiday.query()\
+            .filter(Holiday.user_id==request.context.id)]
+    return dict(holidays=holidays,
+            user_id=str(request.context.id))
+
+
+def user_holidays_index(request):
+    """
+        Base view for holidays editing
+    """
+    load_url = request.route_path("user_holidays", id=request.context.id)
+    holiday_js.need()
+    return dict(title=u"Déclarer mes congés", loadurl=load_url)
+
+
+class AdminHolidayView(BaseFormView):
     """
         Holiday search/consultation views
     """
@@ -93,7 +167,7 @@ class HolidayView(BaseFormView):
     title = u"Les congés des entrepreneurs"
 
     def __init__(self, request):
-        super(HolidayView, self).__init__(request)
+        super(AdminHolidayView, self).__init__(request)
         self._start_date = None
         self._end_date = None
         self.search_result = []
@@ -112,13 +186,35 @@ class HolidayView(BaseFormView):
 
 
 def includeme(config):
-    config.add_route('holiday', '/holiday')
-    config.add_route('holidays', '/holidays')
-    config.add_view(HolidayRegister,
-                    route_name="holiday",
-                    renderer="holiday.mako",
-                    permission="view")
-    config.add_view(HolidayView,
+    # Manager View
+    config.add_route(
+            'holidays',
+            '/holidays')
+    config.add_view(AdminHolidayView,
                     route_name="holidays",
                     renderer="holidays.mako",
                     permission="manage")
+    # User views
+    # Here we use the users traversal to provide acl checks
+    config.add_route(
+            'user_holidays',
+            '/user/{id:\d+}/holidays',
+            traverse="/users/{id}")
+    config.add_route(
+            'user_holiday',
+            '/user/{id:\d+}/holidays/{lid:\d+}',
+            traverse="/users/{id}")
+
+    config.add_view(user_holidays_index,
+                    route_name="user_holidays",
+                    renderer="user_holidays.mako",
+                    permission="view")
+
+    config.add_view(holidays_json,
+                    route_name='user_holidays',
+                    xhr=True,
+                    renderer="json")
+    add_rest_views(config, "user_holiday", RestHoliday)
+    config.add_view(
+            make_redirect_view("user_holidays"),
+            route_name="user_holiday")

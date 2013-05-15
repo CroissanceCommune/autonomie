@@ -72,6 +72,7 @@ var ExpenseLine = BaseExpenseModel.extend({
    */
   // default values for an expenseline
   defaults:{
+    category: null,
     description:"",
     ht:0,
     tva:0
@@ -155,6 +156,7 @@ var ExpenseKmLine = BaseExpenseModel.extend({
    *
    */
   defaults:{
+    category:null,
     start:"",
     end:"",
     description:""
@@ -274,7 +276,7 @@ var ExpenseKmCollection = Backbone.Collection.extend({
 
 
 /********************  Views  *********************************/
-var BaseExpenseLineView = Backbone.Marionette.ItemView.extend({
+var BaseExpenseLineView = BaseTableLineView.extend({
   /*
    * Base item view for expense lines
    */
@@ -291,31 +293,6 @@ var BaseExpenseLineView = Backbone.Marionette.ItemView.extend({
         }}
       );});
     }
-  },
-  highlight: function( callback ){
-    /*
-     * Ok highlight
-     */
-    this._highlight("#ceff99", callback);
-  },
-  error: function(callback){
-    /*
-     * Error highlight
-     */
-    this._highlight("#F9AAAA", callback);
-  },
-  _highlight: function(color, callback){
-    /*
-     * scroll to the view, highlight with the given color and launch the
-     * callback
-     */
-    var top = this.$el.offset().top - 50;
-    $('html, body').animate({scrollTop: top});
-    // Silly hack to provide highlights on webkit browsers
-    this.$el.css("backgroundColor", "#fff");
-    this.$el.effect('highlight', {color:color}, 1500,
-                    function(){if (callback !== undefined){ callback();}
-                });
   }
 });
 
@@ -498,17 +475,11 @@ var ExpensesKmView = BaseExpenseCollectionView.extend({
 });
 
 
-var BaseFormView = Backbone.Marionette.CompositeView.extend({
+var BaseExpenseFormView = BaseFormView.extend({
   /*
    * Base form view
    */
-  dateAltField:null,
-  initialize: function(options){
-    this.destCollection = options['destCollection'];
-    this.modelObject = options['modelObject'];
-    this.model = new this.modelObject({});
-    Backbone.Validation.bind(this);
-  },
+  submit: Autonomie.addsubmit,
   templateHelpers: function(){
     /*
      * Add datas to the template context
@@ -532,66 +503,23 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     /*
      * Set the datepicker and its date (that need to be passed through setDate)
      */
-    this.ui.date.datepicker({
-          altField:this.dateAltField,
-          altFormat:"yy-mm-dd",
-          dateFormat:"dd/mm/yy"
-          });
-      var date = this.model.get('date');
-      if ((date !== null) && (date !== undefined)){
-        date = parseDate(date);
-        this.ui.date.datepicker('setDate', date);
-      }
-  },
-  onBeforeClose:function(){
-    this.reset();
-  },
-  onClose:function(){
-    MyApp.router.navigate("index", {trigger: true});
-  },
-  reset:function(){
-    /*
-     *  Reset the form (set all fields to blank)
-     */
-    resetForm(this.ui.form);
-  },
-  submit: function(e){
-    /*
-     *  Handle form submission
-     */
-    e.preventDefault();
-    var this_ = this;
-    var data = this.ui.form.serializeObject();
-    this.destCollection.create(data,
-      { success:function(){
-          displayServerSuccess("Vos données ont bien été sauvegardées");
-          this_.close();
-         },
-        error: function(){
-          displayServerError("Une erreur a été rencontrée lors de la " +
-            "sauvegarde de vos données");
-        },
-        wait:true,
-        sort:true}
-    );
+    this.setDatePicker("expenseForm", this.ui.date, "date");
   }
 });
 
 
-var ExpenseAdd = BaseFormView.extend({
+var ExpenseAdd = BaseExpenseFormView.extend({
   /*
    *  Expense add form
    */
   template: templates.expenseForm,
-  dateAltField:"#expenseForm input[name=date]",
-  events: {
-    'click button[name=submit]':'submit',
-    'click button[name=cancel]':'close'
-  },
   // The most used UI elements
   ui:{
     form:"#expenseForm",
     date:"#expenseForm input[name=altdate]"
+  },
+  initialize: function(options){
+    Autonomie.addFormInitialize.call(this, options);
   },
   getCategoryOptions:function(){
     /*
@@ -608,16 +536,11 @@ var ExpenseAdd = BaseFormView.extend({
 });
 
 
-var ExpenseKmAdd = BaseFormView.extend({
+var ExpenseKmAdd = BaseExpenseFormView.extend({
   /*
    * Form to add km fees expenses
    */
-  events: {
-    'click button[name=submit]':'submit',
-    'click button[name=cancel]':'close'
-  },
   template:templates.expenseKmForm,
-  dateAltField:"#expenseKmForm input[name=date]",
   // The most used UI elements (are cached)
   ui:{
     form:"#expenseKmForm",
@@ -638,57 +561,13 @@ var ExpenseKmAdd = BaseFormView.extend({
 });
 
 
-var ExpenseKmEdit = ExpenseKmAdd.extend({
-  /*
-   * Km expense edition
-   */
-  initialize:function(){
-    // bind model validation to our view (and its model)
-    Backbone.Validation.bind(this);
-  },
-  getCategoryOptions:function(){
-    /*
-     * Return the options for expense categories
-     */
-    var category_options = AppOptions['categories'];
-    var category = this.model.get('category');
-    return this.updateSelectOptions(category_options, category);
-
-  },
-  getTypeOptions: function(){
-    var type_options = AppOptions['kmtypes'];
-    var type_id = this.model.get('type_id');
-    return this.updateSelectOptions(type_options, type_id);
-  },
-  submit: function(e){
-    var collection = this.model.collection;
-    e.preventDefault();
-    var this_ = this;
-    var data = this.ui.form.serializeObject();
-    this.model.save(data, {
-      success:function(){
-        collection.remove(this_.model);
-        collection.add(this_.model);
-        displayServerSuccess("Vos données ont bien été sauvegardées");
-        this_.close();
-      },
-      error:function(model, xhr, options){
-        displayServerError("Une erreur a été rencontrée lors de la " +
-            "sauvegarde de vos données");
-      },
-      wait:true
-    });
-  }
-});
-
-
 var ExpenseEdit = ExpenseAdd.extend({
   /*
    *  Expense edit form
    */
-  initialize:function(){
-    // bind model validation to our view (and its model)
-    Backbone.Validation.bind(this);
+  submit: Autonomie.editsubmit,
+  initialize: function(options){
+    Autonomie.editFormInitialize.call(this, options);
   },
   getCategoryOptions:function(){
     /*
@@ -706,25 +585,31 @@ var ExpenseEdit = ExpenseAdd.extend({
     var type_options = AppOptions['expensetypes'];
     var type_id = this.model.get('type_id');
     return this.updateSelectOptions(type_options, type_id);
+  }
+});
+
+
+var ExpenseKmEdit = ExpenseKmAdd.extend({
+  /*
+   * Km expense edition
+   */
+  submit: Autonomie.editsubmit,
+  initialize: function(options){
+    Autonomie.editFormInitialize.call(this, options);
   },
-  submit: function(e){
-    var collection = this.model.collection;
-    e.preventDefault();
-    var this_ = this;
-    var data = this.ui.form.serializeObject();
-    this.model.save(data, {
-      success:function(){
-        collection.remove(this_.model);
-        collection.add(this_.model);
-        displayServerSuccess("Vos données ont bien été sauvegardées");
-        this_.close();
-      },
-      error:function(model, xhr, options){
-        displayServerError("Une erreur a été rencontrée lors de la " +
-            "sauvegarde de vos données");
-      },
-      wait:true
-    });
+  getCategoryOptions:function(){
+    /*
+     * Return the options for expense categories
+     */
+    var category_options = AppOptions['categories'];
+    var category = this.model.get('category');
+    return this.updateSelectOptions(category_options, category);
+
+  },
+  getTypeOptions: function(){
+    var type_options = AppOptions['kmtypes'];
+    var type_id = this.model.get('type_id');
+    return this.updateSelectOptions(type_options, type_id);
   }
 });
 

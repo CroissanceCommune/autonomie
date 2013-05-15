@@ -57,7 +57,7 @@
                   </a>
                   </li>
                   <li>
-                  <a href="${request.route_path('holiday')}">
+                  <a href="${request.route_path('user_holidays', id=request.user.id)}">
                     <span class='icon-plane'></span>
                     Mes congés
                   </a>

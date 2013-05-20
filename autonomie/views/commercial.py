@@ -234,7 +234,7 @@ def compute_percent(index, projections, turnovers):
         if projection:
             if projection.value:
                 value = turnover * 100.0 / projection.value
-                return float(dec_round(Decimal(value), 2))
+                return float(dec_round(Decimal(str(value)), 2))
     return None
 
 

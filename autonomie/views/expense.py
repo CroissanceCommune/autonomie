@@ -188,7 +188,7 @@ def company_expenses(request):
         uid = user.id
         action_url = request.route_url("user_expenses", id=cid, uid=uid)
         form = get_period_form(request, action_url)
-        popup = PopUp("user_expense_{0}".format(uid), u"Aller à", form.render())
+        popup = PopUp("user_expense_{0}".format(uid), u"Créer", form.render())
         request.popups[popup.name] = popup
         user_buttons[user.id] = popup.open_btn(css="btn")
     return dict(title=u"Accès aux notes de frais des employés de {0}"\

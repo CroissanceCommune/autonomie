@@ -176,10 +176,27 @@ def get_expensesheet_by_year(company):
     return result
 
 
+def expense_configured():
+    """
+        Return True if the expenses were already configured
+    """
+    l = 0
+    for factory in (ExpenseType, ExpenseKmType, ExpenseTelType):
+        l += factory.query().count()
+    return l > 0
+
+
 def company_expenses(request):
     """
         View that lists the expenseSheets related to the current company
     """
+    title = u"Accès aux notes de frais des employés de {0}"\
+            .format(request.context.name)
+    if not expense_configured():
+        return dict(title=title,
+            conf_msg=u"La déclaration des notes de frais n'est pas encore \
+accessible.")
+
     expense_sheets = get_expensesheet_by_year(request.context)
     user_buttons = {}
     cid = request.context.id
@@ -191,8 +208,7 @@ def company_expenses(request):
         popup = PopUp("user_expense_{0}".format(uid), u"Créer", form.render())
         request.popups[popup.name] = popup
         user_buttons[user.id] = popup.open_btn(css="btn")
-    return dict(title=u"Accès aux notes de frais des employés de {0}"\
-            .format(request.context.name),
+    return dict(title=title,
             expense_sheets=expense_sheets,
             user_buttons=user_buttons,
             current_year=datetime.date.today().year)

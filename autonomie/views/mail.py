@@ -144,7 +144,6 @@ def send_mail(event):
     """
     if event.is_key_event():
         recipients = event.recipients
-        print event.body
         if recipients:
             log.info(u"Sending an email to '{0}'".format(recipients))
             try:

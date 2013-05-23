@@ -180,7 +180,7 @@
             % endif
         </div>
         <pdf:nextpage />
-        <div>
+        <div id="cgv">
             % if config.has_key('coop_cgv'):
                 <% data = config.get('coop_cgv').replace(u'\n', u'') %>
                 ${format_text(data)}

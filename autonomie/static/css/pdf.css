@@ -71,3 +71,11 @@ html{
   text-align:center;
   padding:5px;
 }
+#cgv p{
+  font-size:8px;
+  padding:0px;
+  margin:0px;
+}
+#cgv h1, #cgv h2, #cgv h3, #cgv h4, #cgv h5{
+  margin: 2px;
+}

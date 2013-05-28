@@ -143,8 +143,8 @@ class InvoicesList(BaseListView):
     def filter_client(self, query, appstruct):
         client_id = appstruct['client_id']
         if client_id != -1:
-            query = query.filter(or_(p1.client_id == client_id,
-                                     p2.client_id == client_id,
+            query = query.filter(or_(Invoice.client_id == client_id,
+                                     CancelInvoice.client_id == client_id,
                                      ManualInvoice.client_id == client_id))
         return query
 

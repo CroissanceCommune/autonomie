@@ -54,7 +54,7 @@ class TestCommercial(BaseFunctionnalTest):
                                                   projections, turnovers))
         p = Mock(value=10)
         projections = {0:p}
-        turnovers = [10]
+        turnovers = {0:10}
         self.assertEqual(None, compute_difference(1, projections, turnovers))
         self.assertEqual(0, compute_difference(0, projections, turnovers))
 

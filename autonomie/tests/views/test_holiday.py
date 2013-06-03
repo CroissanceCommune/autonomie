@@ -15,26 +15,51 @@
 from datetime import date
 from autonomie.models.holiday import Holiday
 from mock import Mock
-from autonomie.views.holiday import HolidayRegister, HolidayView, get_holidays
+from autonomie.models.user import User
+from autonomie.views.holiday import (RestHoliday,
+                                    get_holidays)
+#HolidayRegister, HolidayView,
 from autonomie.tests.base import BaseFunctionnalTest
 
 class TestHolidayRegister(BaseFunctionnalTest):
+    def user(self):
+        return User.query().first()
+
     def test_success(self):
-        self.config.add_route("holiday", "/")
+#        self.config.add_route("user_holiday", "/")
+        user = self.user()
+
+        # Add
         request = self.get_csrf_request()
-        request.user = Mock(id=1)
-        appstruct = {'holidays':[{'start_date':date(2010, 11,1),
-                                    'end_date':date(2010, 11, 5)},
-                                {'start_date':date(2010, 5, 8),
-                                    'end_date':date(2010, 5, 25)}]}
-        view = HolidayRegister(request)
-        view.submit_success(appstruct)
-        self.assertEqual(len(get_holidays(user_id=1).all()), 2)
-        appstruct = {'holidays':[{'start_date':date(2010, 11,1),
-                                  'end_date':date(2010, 11, 5)}]}
-        request = self.get_csrf_request()
-        request.user = Mock(id=1)
-        view = HolidayRegister(request)
-        view.submit_success(appstruct)
-        self.assertEqual(len(get_holidays(user_id=1).all()), 1)
+        request.context = user
+        appstruct = {"start_date": "2013-04-15", "end_date": "2013-04-28"}
+        request.json_body = appstruct
+        view = RestHoliday(request)
+        view.post()
+        holidays = get_holidays(user_id=user.id).all()
+        self.assertEqual(len(holidays), 1)
+
+        # Add second one
+        appstruct = {"start_date": "2013-04-01", "end_date": "2013-04-05"}
+        request.json_body = appstruct
+        view = RestHoliday(request)
+        view.post()
+        holidays = get_holidays(user_id=user.id).all()
+        self.assertEqual(len(holidays), 2)
+
+        # Delete
+        request.matchdict['lid'] = holidays[1].id
+        view = RestHoliday(request)
+        view.delete()
+        self.assertEqual(len(get_holidays(user_id=user.id).all()), 1)
+
+        #edition + delete
+        appstruct = {"start_date": "2013-04-13", "end_date": "2013-04-27"}
+        request.json_body = appstruct
+        request.matchdict['lid'] = holidays[0].id
+        view = RestHoliday(request)
+        view.put()
+
+        holiday = get_holidays(user_id=user.id).all()[0]
+        self.assertEqual(holiday.start_date.day, 13)
 

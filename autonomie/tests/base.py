@@ -21,6 +21,7 @@ from mock import Mock
 from paste.deploy.loadwsgi import appconfig
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
+from autonomie.utils.widgets import ActionMenu
 
 import autonomie.models.base
 from autonomie.models.base import DBBASE  # base declarative object
@@ -83,6 +84,7 @@ class BaseViewTest(BaseTestCase):
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
         request.session.get_csrf_token = csrf_token
+        request.actionmenu = ActionMenu()
         return request
 
 class BaseFunctionnalTest(BaseViewTest):

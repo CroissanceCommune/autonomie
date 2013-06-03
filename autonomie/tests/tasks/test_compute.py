@@ -205,7 +205,7 @@ class TestEstimationCompute(BaseTestCase):
     def test_deposit_amount_ttc(self):
         task = self.getOne()
         # 2606.78 = 2004 * 119.6 / 100 + 200 * 105/100
-        self.assertEqual(task.deposit_amount_ttc(), 2606.78)
+        self.assertEqual(task.deposit_amount_ttc(), 2606)
 
     # Payment lines (with equal repartition)
     def test_get_nb_payment_lines(self):
@@ -250,9 +250,9 @@ class TestEstimationCompute(BaseTestCase):
         deposit = task.deposit_amount_ttc()
         amount1 = compute_payment_ttc(payments[0])
         amount2 = compute_payment_ttc(payments[1])
-        self.assertEqual(amount1, 4000)
-        self.assertEqual(amount2, 6000)
-        self.assertEqual(task.sold() + deposit + amount1 + amount2, task.total())
+        self.assertEqual(int(amount1), 4000)
+        self.assertEqual(int(amount2), 6000)
+        self.assertEqual(int(task.sold() + deposit + amount1 + amount2), task.total())
 
 
 class TestLineCompute(BaseTestCase):

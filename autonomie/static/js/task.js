@@ -284,8 +284,8 @@ function computeDividedAmount(total, nbpayments){
    * Compute the divided amounts for payments rows
    */
   if (nbpayments > 1){
-    var p = total * 100 / nbpayments;
-    return Math.round( p / 100 );
+    var p = Math.round(total * 100 / nbpayments);
+    return  p / 100;
   }else{
     return 0;
   }

@@ -106,3 +106,9 @@ test("Calcul de l'acompte", function(){
   equal(getDeposit(), 0.05);
   equal(getToPayAfterDeposit(), 1.02);
 });
+module("Ligne de paiements", function(){
+  test("Calcul des montants des paiements divisés", function(){
+    var total_after_deposit = "12566.38";
+    equal(computeDivdedAmount(total_after_deposit, 2), 6283.19);
+  });
+});

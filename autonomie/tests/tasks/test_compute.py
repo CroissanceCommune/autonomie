@@ -173,7 +173,7 @@ class TestInvoiceCompute(BaseTestCase):
 class TestEstimationCompute(BaseTestCase):
     def getOne(self):
         task = DummyEstimation()
-        task.expenses = 0
+        task.expenses_ht = 20
         task.deposit = 20
         task.manualDeliverables = 0
         task.lines = [DummyLine(cost=5000, quantity=1, tva=1960),
@@ -199,13 +199,13 @@ class TestEstimationCompute(BaseTestCase):
         task = self.getOne()
         amounts = task.deposit_amounts()
         self.assertEqual(amounts.keys(), [1960, 500])
-        self.assertEqual(amounts[1960], 2000)
+        self.assertEqual(amounts[1960], 2004)
         self.assertEqual(amounts[500], 200)
 
     def test_deposit_amount_ttc(self):
         task = self.getOne()
-        # 2602 = 2000 * 119.6 / 100 + 200 * 105/100
-        self.assertEqual(task.deposit_amount_ttc(), 2602)
+        # 2606.78 = 2004 * 119.6 / 100 + 200 * 105/100
+        self.assertEqual(task.deposit_amount_ttc(), 2606.78)
 
     # Payment lines (with equal repartition)
     def test_get_nb_payment_lines(self):
@@ -216,13 +216,13 @@ class TestEstimationCompute(BaseTestCase):
         task = self.getOne()
         amounts = task.paymentline_amounts()
         self.assertEqual(amounts.keys(), [1960, 500])
-        self.assertEqual(int(amounts[1960]), 2666)
+        self.assertEqual(int(amounts[1960]), 2672)
         self.assertEqual(int(amounts[500]), 266)
 
     def test_paymentline_amount_ttc(self):
         task = self.getOne()
-        # 3467 = int(2666.666.. * 119.6/100 + 266.66.. * 105/100.0)
-        self.assertEqual(task.paymentline_amount_ttc(), 3469)
+        # 3475 = int(2672 * 119.6/100 + 266 * 105/100.0)
+        self.assertEqual(task.paymentline_amount_ttc(), 3475)
 
     def test_sold(self):
         task = self.getOne()
@@ -267,5 +267,3 @@ class TestLineCompute(BaseTestCase):
             self.assertEqual(line_obj.total_ht(), DISCOUNTS[index]['amount'])
             self.assertEqual(line_obj.total(), DISCOUNTS[index]['amount'] \
                     + DISCOUNT_TVAS[index])
-
-

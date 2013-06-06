@@ -82,7 +82,7 @@ keys = root, sql, alembic
 keys = console, file, sql
 
 [formatters]
-keys = sqlfile, full
+keys = full, light
 
 [logger_root]
 level = ERROR
@@ -121,7 +121,7 @@ formatter = full
 class = FileHandler
 args = ('%(here)s/sql.log','a')
 level = DEBUG
-formatter = sql
+formatter = light
 
 [formatter_light]
 format = %(message)s

@@ -590,7 +590,15 @@ def make_html_view(model, template):
         if context_is_editable(request, request.context):
             return HTTPFound(request.route_path(request.context.__name__,
                                                 id=request.context.id))
-        title = u"Facture numéro : {0}".format(request.context.number)
+        if context.__name__ == 'invoice':
+            label = u"Facture"
+        elif context.__name__ == 'estimation':
+            label = u"Estimation"
+        elif context.__name__ == 'cancelinvoice':
+            label = u"Avoir"
+        else:
+            label = u"Objet"
+        title = u"{0} numéro : {1}".format(label, request.context.number)
         populate_actionmenu(request)
         html_datas = html(request, template)
         button_handler = TaskFormActions(request, model)

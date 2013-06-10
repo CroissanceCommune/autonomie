@@ -78,7 +78,6 @@
             % endif
         % endif
     </div>
-    <div style='border:1px solid #888'>
             % if task.is_estimation():
                 <% route = request.route_path('estimation', id=task.id, _query=dict(action='status')) %>
             % elif task.is_invoice():
@@ -86,7 +85,8 @@
             % else:
                 <% route = request.route_path('cancelinvoice', id=task.id, _query=dict(action='status')) %>
             % endif
-        <form id="deform" class="deform form-horizontal deform"
+            <div class="well">
+            <form id="deform" class="deform"
             accept-charset="utf-8"
             enctype="multipart/form-data"
             method="POST"
@@ -95,6 +95,8 @@
                 ${button.render(request)|n}
             % endfor
         </form>
+    </div>
+    <div style='border:1px solid #888'>
         ${html_datas|n}
     </div>
 </div>

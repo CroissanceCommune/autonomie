@@ -48,6 +48,14 @@ class StatusChanged(object):
         self.request = request
         self.document = document
         self.new_status = status
+        # Silly hack :
+        # When a payment is registered, the new status is "paid",
+        # if the resulted box has been checked, it's set to resulted later on.
+        # So here, we got the paid status, but in reality, the status has
+        # already been set to resulted. This hack avoid to send emails with the
+        # wrong message
+        if status == 'paid' and self.document.CAEStatus == 'resulted':
+            self.new_status = 'resulted'
 
     def format_mail(self, mail):
         """

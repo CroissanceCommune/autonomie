@@ -9,7 +9,10 @@ Autonomie
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+
+    rest.rst
+
 
 .. include:: components.rst
 

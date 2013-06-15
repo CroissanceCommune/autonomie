@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : jeu. 14 mars 2013 20:15:08 CET
+# * Last Modified : sam. 15 juin 2013 17:32:23 CEST
 #
 # * Project : autonomie
 #
@@ -308,10 +308,6 @@ class MenuDropDown(Menu, PermWidget):
         self.label = label
         self.perm = perm
         self.title = title or label
-
-
-class MainMenuItem(ViewLink):
-    template = "base/mainmenu_item.mako"
 
 
 class ButtonLink(Widget):

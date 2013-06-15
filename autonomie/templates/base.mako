@@ -30,65 +30,8 @@
   </head>
   <body>
     <header>
-    <div class="navbar navbar-inverse">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
-          <a class="btn btn-navbar" data-target=".menu" data-toggle="collapse">
-            >>>
-          </a>
-          <div class="nav-collapse menu">
-            % if menu is not UNDEFINED and menu:
-              ${menu.render(request)|n}
-            % endif
-            %if request.user:
-                <div class="pull-right btn-group">
-                <a class="btn dropdown-toggle" href="#" data-toggle="dropdown">
-                  <i class="icon-user"></i>
-                  ${request.user.lastname} ${request.user.firstname}
-                  <span class="caret"></span>
-                </a>
-
-                <ul class='dropdown-menu'>
-                  <li>
-                  <a href="${request.route_path('account')}">
-                    <span class='ui-icon ui-icon-gear'></span>
-                    Mon compte
-                  </a>
-                  </li>
-                  <li>
-                  <a href="${request.route_path('user_holidays', id=request.user.id)}">
-                    <span class='icon-plane'></span>
-                    Mes congés
-                  </a>
-                  </li>
-                  <li class="divider"></li>
-                  <li>
-                  <a href="/logout">
-                    <span class='ui-icon ui-icon-close'></span>
-                    Déconnexion</a>
-                  </li>
-                </ul>
-              % endif
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    % if submenu is not UNDEFINED and submenu:
-        <div class="navbar navbar-inverse">
-        <div class="navbar-inner">
-          <div class="container">
-            <a class="btn btn-navbar" data-target=".submenu" data-toggle="collapse">
-              >>>
-            </a>
-            <div class='nav-collapse submenu'>
-              ${submenu.render(request)|n}
-            </div>
-          </div>
-        </div>
-      </div>
-    % endif
+            ${request.layout_manager.render_panel('menu')}
+            ${request.layout_manager.render_panel('submenu')}
     </header>
     <%block name="headtitle">
     <div class='pagetitle visible-desktop hidden-tablet'>

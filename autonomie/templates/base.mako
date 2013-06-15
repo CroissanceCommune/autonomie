@@ -50,23 +50,6 @@
         % endif
         </%block>
       </div>
-      <%block name="breadcrumb_block">
-      % if breadcrumb is not UNDEFINED:
-        <ul class="breadcrumb">
-          % for link in breadcrumb.links:
-            % if link['active']:
-              <li class='active'>
-              ${link['label']}
-            % else:
-              <li>
-              <a href="${link['url']}">${link['label']}</a>
-              <span class='delimiter'>></span>
-            % endif
-            </li>
-          % endfor
-        </ul>
-      % endif
-      </%block>
       <%block name='pop_message'>
       % for message in request.session.pop_flash(queue=""):
         <div class='row'>
@@ -90,30 +73,18 @@
       % endfor
       </%block>
       <%block name='content' />
-      % if popups is not UNDEFINED:
-        % for name, popup in popups.items():
-          <div id="${name}">
-            ${popup.html|n}
-          </div>
-        % endfor
-      % elif request.popups is not UNDEFINED:
+      % if request.popups is not UNDEFINED:
           % for name, popup in request.popups.items():
-          <div id="${name}">
-            ${popup.html|n}
-          </div>
+              <div id="${name}" style="display:none;">
+                ${popup.html|n}
+              </div>
         % endfor
       % endif
     </div>
     <script type='text/javascript'>
       <%block name='footerjs' />
       $('#company-select-menu').change(function(){window.location = $(this).val();});
-      % if popups is not UNDEFINED:
-        $( function() {
-          % for name, popup in popups.items():
-            setPopUp("${name}", "${popup.title}");
-          % endfor
-        });
-      % elif request.popups is not UNDEFINED:
+      % if request.popups is not UNDEFINED:
         $( function() {
           % for name, popup in request.popups.items():
             setPopUp("${name}", "${popup.title}");

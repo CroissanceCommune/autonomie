@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : sam. 15 juin 2013 17:32:23 CEST
+# * Last Modified : sam. 15 juin 2013 17:35:06 CEST
 #
 # * Project : autonomie
 #
@@ -298,16 +298,6 @@ class ActionMenu(Menu):
         Represent the ActionMenu
     """
     template = "base/actionmenu.mako"
-
-
-class MenuDropDown(Menu, PermWidget):
-    template = "base/dropdown.mako"
-
-    def __init__(self, label, perm=None, title=None, template=None):
-        Menu.__init__(self, template)
-        self.label = label
-        self.perm = perm
-        self.title = title or label
 
 
 class ButtonLink(Widget):

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : lun. 08 avril 2013 17:08:02 CEST
+# * Last Modified : sam. 15 juin 2013 17:30:00 CEST
 #
 # * Project : autonomie
 #
@@ -39,28 +39,52 @@ from autonomie.utils.deform_bootstrap_fix import add_resources_to_registry
 
 
 AUTONOMIE_MODULES = (
-                     "autonomie.views.static",
-                     "autonomie.views.mail",
-                     "autonomie.views.auth",
-                     "autonomie.views.user",
-                     "autonomie.views.company",
-                     "autonomie.views.index",
-                     "autonomie.views.client",
-                     "autonomie.views.project",
-                     "autonomie.views.company_invoice",
-                     "autonomie.views.admin",
-                     "autonomie.views.manage",
-                     "autonomie.views.holiday",
-                     "autonomie.views.tests",
-                     "autonomie.views.estimation",
-                     "autonomie.views.invoice",
-                     "autonomie.views.cancelinvoice",
-                     "autonomie.views.json",
-                     "autonomie.views.subscribers",
-                     "autonomie.views.commercial",
-                     "autonomie.views.treasury_files",
-                     "autonomie.views.expense",
-                     )
+    "autonomie.views.static",
+    "autonomie.views.mail",
+    "autonomie.views.auth",
+    "autonomie.views.user",
+    "autonomie.views.company",
+    "autonomie.views.index",
+    "autonomie.views.client",
+    "autonomie.views.project",
+    "autonomie.views.company_invoice",
+    "autonomie.views.admin",
+    "autonomie.views.manage",
+    "autonomie.views.holiday",
+    "autonomie.views.tests",
+    "autonomie.views.estimation",
+    "autonomie.views.invoice",
+    "autonomie.views.cancelinvoice",
+    "autonomie.views.json",
+    "autonomie.views.subscribers",
+    "autonomie.views.commercial",
+    "autonomie.views.treasury_files",
+    "autonomie.views.expense",
+    "autonomie.panels.menu",
+    )
+
+
+def add_static_views(config, settings):
+    """
+        Add the static views used in Autonomie
+    """
+    statics = settings.get('autonomie.statics', 'static')
+    config.add_static_view(
+            statics,
+            "autonomie:static",
+            cache_max_age=3600)
+    config.add_static_view(
+            statics + "-deform",
+            "deform:static",
+            cache_max_age=3600)
+    config.add_static_view(
+            statics + "-deform_bootstrap",
+            "deform_bootstrap:static",
+            cache_max_age=3600)
+
+    # Adding a static view to the configured assets
+    assets = settings.get('autonomie.assets', '/var/intranet_files')
+    config.add_static_view('assets', assets, cache_max_age=3600)
 
 
 def main(global_config, **settings):
@@ -83,40 +107,25 @@ def main(global_config, **settings):
     dbsession = initialize_sql(engine)
     wrap_db_objects()
     BaseDBFactory.dbsession = dbsession
-    config._set_root_factory(RootFactory)
 
     # Application main configuration
+    config._set_root_factory(RootFactory)
     config.set_default_permission('view')
 
-    # Adding some properties to the request object
+    # Adding some usefull properties to the request object
     config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
     config.set_request_property(lambda _:get_config(), 'config')
 
-    statics = settings.get('autonomie.statics', 'static')
-    config.add_static_view(statics, "autonomie:static", cache_max_age=3600)
-    config.add_static_view(statics + "-deform",
-            "deform:static",
-            cache_max_age=3600)
-    config.add_static_view(statics + "-deform_bootstrap",
-            "deform_bootstrap:static",
-            cache_max_age=3600)
-
-    # Adding a static view to the configured assets
-    assets = settings.get('autonomie.assets', '/var/intranet_files')
-    config.add_static_view('assets', assets, cache_max_age=3600)
-
+    add_static_views(config, settings)
 
     for module in AUTONOMIE_MODULES:
         config.include(module)
-    # * Treasury
-    config.add_route('company_treasury',
-                     '/company/{id:\d+}/treasury',
-                     traverse='/companies/{id}')
 
-    # Set deform multi renderer handling translation and both chameleon and
+    # Set deform multi renderer handling translation for both chameleon and
     # mako templates
     set_deform_renderer()
+    # Set json renderer
     set_json_renderer(config)
     config.add_translation_dirs("colander:locale/", "deform:locale")
     add_resources_to_registry()
@@ -125,5 +134,10 @@ def main(global_config, **settings):
 
 
 def formalchemy(config):
+    """
+        Set formalchemy's configuration
+    """
+    #FIXME : Not used yet, it is still a very buggy module (and maybe it will
+    #           not change)
     config.include("autonomie.fainit")
     config.include("autonomie.faroutes")

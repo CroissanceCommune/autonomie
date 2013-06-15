@@ -244,7 +244,7 @@ def menu_panel(context, request):
         if len(companies) > 1:
             menu.insert(company_choice(request, companies, cid))
     else:
-        return {}
+        return {"usermenu": get_usermenu(request)}
 
     href = request.route_path("users")
     menu.add_item(u"Annuaire", icon="icon-book", href=href)

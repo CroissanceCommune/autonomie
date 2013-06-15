@@ -38,7 +38,6 @@
         </ul>
     </li>
 </%def>
-
 % if  menu is not UNDEFINED:
     <div class="navbar navbar-inverse">
       <div class="navbar-inner">
@@ -66,20 +65,33 @@
                     <li class='divider-vertical'></li>
                 % endfor
             </ul>
+% elif usermenu is not UNDEFINED:
+    ## Is there is no menu, but there is a usermenu, we need to display it
+    <div class="navbar navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
+          <a class="btn btn-navbar" data-target=".menu" data-toggle="collapse">
+            >>>
+          </a>
+          <div class="nav-collapse menu">
 % endif
 % if usermenu is not UNDEFINED:
-    <div class="pull-right btn-group">
-        <a class="btn dropdown-toggle" href="#" data-toggle="dropdown">
-          <i class="icon-user"></i>
-          ${request.user.lastname} ${request.user.firstname}
-          <span class="caret"></span>
-        </a>
-            <ul class='dropdown-menu'>
-                % for item in usermenu.items:
-                ${render_item(item)}
-            % endfor
+    <ul class="nav pull-right">
+        <li class="dropdown pull-right">
+            <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                <i class="icon-white icon-user"></i>
+              ${request.user.lastname} ${request.user.firstname}
+              <span class="caret"></span>
+            </a>
+                <ul class='dropdown-menu'>
+                    % for item in usermenu.items:
+                    ${render_item(item)}
+                    <li class="divider"></li>
+                % endfor
             </ul>
-    </div>
+        </li>
+     </ul>
 </div>
 </div>
 </div>

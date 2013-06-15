@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : sam. 15 juin 2013 17:35:06 CEST
+# * Last Modified : sam. 15 juin 2013 17:42:21 CEST
 #
 # * Project : autonomie
 #
@@ -100,37 +100,11 @@ class StaticWidget(PermWidget):
             return ""
 
 
-class Link(Widget, PermWidget):
-    template = None
-
-
-class JsLink(Link):
+class ItemActionLink(Widget, PermWidget):
     """
-        Simple Javascript Link
+        Action button used in item list
     """
-    template = "base/jsbutton.mako"
-
-    def __init__(self, label, perm=None, css="", js=None, title=None, icon=""):
-        self.label = label
-        self.perm = perm
-        self.js = js
-        if title:
-            self.title = title
-        else:
-            self.title = self.label
-        self.css = css
-        self.icon = icon
-
-    def onclick(self):
-        """
-            Return the onclick behaviour
-        """
-        return self.js
-
-
-class ViewLink(Link):
-
-    template = "base/button.mako"
+    template = "base/itemactionlink.mako"
 
     def __init__(self, label, perm=None, path=None, css="", js=None,
                  title=None, icon="", request=None, confirm=None, **kw):
@@ -151,15 +125,13 @@ class ViewLink(Link):
         self.icon = icon
         self.request = request
 
-    def url(self, request):
+    def url(self, context, request):
         """
-            Returns the button's url
+            Returns the url associated with current btn
         """
-        request = self.request or request
-        if self.path:
-            return request.route_path(self.path, **self.url_kw)
-        else:
-            return u"#{0}".format(self.perm)
+        return request.route_path(self.path,
+                                  id=context.id,
+                                  **self.url_kw)
 
     def onclick(self):
         """
@@ -176,21 +148,6 @@ class ViewLink(Link):
         if 'action' in request.GET:
             cur_path += "?action=%s" % request.GET['action']
         return urllib.unquote(cur_path) == self.url(request)
-
-
-class ItemActionLink(ViewLink):
-    """
-        Action button used in item list
-    """
-    template = "base/itemactionlink.mako"
-
-    def url(self, context, request):
-        """
-            Returns the url associated with current btn
-        """
-        return request.route_path(self.path,
-                                  id=context.id,
-                                  **self.url_kw)
 
     def render(self, request, item):
         return render_html(request, self.template, {'elem': self,
@@ -228,7 +185,7 @@ class Submit(Widget):
             self.request = request
 
 
-class ToggleLink(Link):
+class ToggleLink(Widget, PermWidget):
     template = "base/togglelink.mako"
 
     def __init__(self, label, perm=None, target=None, title=None, css="",
@@ -262,42 +219,6 @@ class SearchForm(Widget):
             Insert elements in the form before the main ones
         """
         self.widgets.append(widget)
-
-
-class Menu(Widget):
-    template = None
-
-    def __init__(self, template=None, css=None):
-        self.items = []
-        if template:
-            self.set_template(template)
-        if css:
-            self.css = css
-
-    def add(self, item):
-        """
-            Add an item to the menu
-        """
-        self.items.append(item)
-
-    def insert(self, item, index=0):
-        """
-            Insert an item in the menu
-        """
-        self.items.insert(index, item)
-
-    def void(self):
-        """
-            Return True if the menu is void
-        """
-        return not bool(len(self.items))
-
-
-class ActionMenu(Menu):
-    """
-        Represent the ActionMenu
-    """
-    template = "base/actionmenu.mako"
 
 
 class ButtonLink(Widget):
@@ -366,3 +287,39 @@ class PopUp(object):
 
     def _get_js_link(self):
         return u"$('#{0}').dialog('open');".format(self.name)
+
+
+class Menu(Widget):
+    template = None
+
+    def __init__(self, template=None, css=None):
+        self.items = []
+        if template:
+            self.set_template(template)
+        if css:
+            self.css = css
+
+    def add(self, item):
+        """
+            Add an item to the menu
+        """
+        self.items.append(item)
+
+    def insert(self, item, index=0):
+        """
+            Insert an item in the menu
+        """
+        self.items.insert(index, item)
+
+    def void(self):
+        """
+            Return True if the menu is void
+        """
+        return not bool(len(self.items))
+
+
+class ActionMenu(Menu):
+    """
+        Represent the ActionMenu
+    """
+    template = "base/actionmenu.mako"

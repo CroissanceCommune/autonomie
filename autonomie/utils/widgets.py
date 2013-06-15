@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : sam. 15 juin 2013 17:42:21 CEST
+# * Last Modified : sam. 15 juin 2013 18:29:06 CEST
 #
 # * Project : autonomie
 #
@@ -99,12 +99,9 @@ class StaticWidget(PermWidget):
         else:
             return ""
 
+class ViewLink(Widget, PermWidget):
 
-class ItemActionLink(Widget, PermWidget):
-    """
-        Action button used in item list
-    """
-    template = "base/itemactionlink.mako"
+    template = "base/button.mako"
 
     def __init__(self, label, perm=None, path=None, css="", js=None,
                  title=None, icon="", request=None, confirm=None, **kw):
@@ -125,13 +122,15 @@ class ItemActionLink(Widget, PermWidget):
         self.icon = icon
         self.request = request
 
-    def url(self, context, request):
+    def url(self, request):
         """
-            Returns the url associated with current btn
+            Returns the button's url
         """
-        return request.route_path(self.path,
-                                  id=context.id,
-                                  **self.url_kw)
+        request = self.request or request
+        if self.path:
+            return request.route_path(self.path, **self.url_kw)
+        else:
+            return u"#{0}".format(self.perm)
 
     def onclick(self):
         """
@@ -149,9 +148,25 @@ class ItemActionLink(Widget, PermWidget):
             cur_path += "?action=%s" % request.GET['action']
         return urllib.unquote(cur_path) == self.url(request)
 
+
+class ItemActionLink(ViewLink):
+    """
+        Action button used in item list
+    """
+    template = "base/itemactionlink.mako"
+
+    def url(self, context, request):
+        """
+            Returns the url associated with current btn
+        """
+        return request.route_path(self.path,
+                                  id=context.id,
+                                  **self.url_kw)
+
     def render(self, request, item):
         return render_html(request, self.template, {'elem': self,
                                                     'item': item})
+
 
 
 class Submit(Widget):

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 19-10-2011
-# * Last Modified : sam. 15 juin 2013 18:29:06 CEST
+# * Last Modified : sam. 15 juin 2013 18:39:09 CEST
 #
 # * Project : autonomie
 #
@@ -298,7 +298,11 @@ class PopUp(object):
 
     def open_btn(self, label=None, factory=ButtonJsLink, **kw):
         label = label or self.title
-        return factory(label, js=self._get_js_link(), path=self.name, **kw)
+        return factory(
+                label,
+                js=self._get_js_link(),
+                path="popup-%s" % self.name,
+                **kw)
 
     def _get_js_link(self):
         return u"$('#{0}').dialog('open');".format(self.name)

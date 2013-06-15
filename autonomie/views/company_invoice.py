@@ -246,32 +246,6 @@ class GlobalInvoicesList(InvoicesList):
         values['companies'] = Company.query().all()
         return values
 
-# A bit silly but will be removed soon
-def company_treasury(request):
-    """
-        View for the treasury view
-    """
-    invoices = Invoice.query().join(Project).filter(Invoice.CAEStatus=='resulted')
-
-    company = request.context
-    invoices = invoices.filter(Project.company_id==company.id)
-
-    today = datetime.date.today()
-    current_year = today.year
-    year = request.params.get('year', current_year)
-    try:
-        year = int(year)
-    except:
-        year = current_year
-    invoices = invoices.filter(Invoice.financial_year == year)
-    invoices = invoices.order_by(Invoice.taskDate)
-    return dict(
-            title=u"Trésorerie",
-            invoices=invoices,
-            company=company,
-            years=get_years(request.dbsession),
-            current_year=year,
-            today=today)
 
 def includeme(config):
     # Company invoices view
@@ -290,7 +264,3 @@ def includeme(config):
                     route_name="invoices",
                     renderer="invoices.mako",
                     permission="manage")
-    config.add_view(company_treasury,
-                    route_name='company_treasury',
-                    renderer='company_treasury.mako',
-                    permission='edit')

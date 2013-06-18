@@ -18,6 +18,9 @@
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
@@ -35,6 +38,7 @@ class Tva(DBBASE):
     name = Column("name", String(8), nullable=False)
     value = Column("value", Integer)
     default = Column("default", Integer)
+    compte_cg = Column("compte_cg", String(125), default="")
 
     @classmethod
     def query(cls):
@@ -45,3 +49,12 @@ class Tva(DBBASE):
     def get_default(cls):
         return super(Tva, cls).query().filter(cls.default==1).first()
 
+class Product(DBBASE):
+    __tablename__ = 'product'
+    __table_args__ = default_table_args
+    id = Column('id', Integer, primary_key=True)
+    name = Column("name", String(8), nullable=False)
+    compte_cg = Column("compte_cg", String(125))
+    tva_id = Column(Integer, ForeignKey("tva.id", ondelete="cascade"))
+    tva = relationship("Tva",
+            backref=backref("products", cascade="all, delete-orphan"))

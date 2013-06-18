@@ -140,6 +140,18 @@ class MainConfig(colander.MappingSchema):
     document = DocumentConfig(title=u'Document (devis et factures)')
 
 
+class Product(colander.MappingSchema):
+    """
+        Form schema for a single product configuration
+    """
+    name = colander.SchemaNode(colander.String(), title=u"Libellé")
+    compte_cg = colander.SchemaNode(colander.String(),
+                                    title=u"Compte CG")
+
+
+class ProductSequence(colander.SequenceSchema):
+    product = Product(title=u"Compte produit")
+
 class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
@@ -152,14 +164,19 @@ class TvaItem(colander.MappingSchema):
         AmountType(),
         title=u"Montant",
         css_class='span2')
+    compte_cg = colander.SchemaNode(
+            colander.String(),
+            title=u"Compte CG de Tva")
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",
         widget=widget.CheckboxWidget(true_val="1", false_val="0"))
+    products = ProductSequence(title=u"",
+            widget=widget.SequenceWidget(orderable=False))
 
 
 class TvaSequence(colander.SequenceSchema):
-    tva = TvaItem(title=u"")
+    tva = TvaItem(title=u"Taux de Tva")
 
 
 class TvaConfig(colander.MappingSchema):

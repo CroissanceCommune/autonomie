@@ -22,7 +22,9 @@ import logging
 
 from pyramid.httpexceptions import HTTPFound
 from autonomie.models.config import Config
-from autonomie.models.tva import Tva
+from autonomie.models.tva import (
+        Tva,
+        Product)
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.treasury import ExpenseType
@@ -31,13 +33,14 @@ from autonomie.models.treasury import ExpenseTelType
 
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms.admin import MainConfig
-from autonomie.views.forms.admin import TvaConfig
-from autonomie.views.forms.admin import PaymentModeConfig
-from autonomie.views.forms.admin import WorkUnitConfig
-from autonomie.views.forms.admin import ExpenseTypesConfig
-from autonomie.views.forms.admin import get_config_appstruct
-from autonomie.views.forms.admin import merge_dbdatas
+from autonomie.views.forms.admin import (
+        MainConfig,
+        TvaConfig,
+        PaymentModeConfig,
+        WorkUnitConfig,
+        ExpenseTypesConfig,
+        get_config_appstruct,
+        merge_dbdatas,)
 from autonomie.views.forms import BaseFormView
 from autonomie.utils.widgets import ViewLink
 from js.tinymce import tinymce
@@ -127,7 +130,12 @@ class AdminTva(BaseFormView):
         """
         appstruct = [{'name':tva.name,
                       'value':tva.value,
-                      "default":tva.default}for tva in Tva.query().all()]
+                      "default":tva.default,
+                      "compte_cg":tva.compte_cg,
+                      "products":[{"name":product.name,
+                                   "compte_cg":product.compte_cg}
+                                   for product in tva.products]}
+                                   for tva in Tva.query().all()]
         form.set_appstruct({'tvas':appstruct})
         populate_actionmenu(self.request)
 
@@ -138,9 +146,15 @@ class AdminTva(BaseFormView):
         for tva in Tva.query().all():
             self.dbsession.delete(tva)
         for data in appstruct['tvas']:
+            products = data.pop('products')
             tva = Tva()
             merge_session_with_post(tva, data)
             self.dbsession.add(tva)
+            for product in products:
+                product_obj = Product()
+                merge_session_with_post(product_obj, product)
+                product_obj.tva = tva
+                self.dbsession.add(product_obj)
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_tva"))
 
@@ -284,14 +298,14 @@ def includeme(config):
                  renderer="admin/main.mako",
                  permission='admin')
     config.add_view(AdminTva, route_name='admin_tva',
-                 renderer="base/simpleformpage.mako",
+                 renderer="admin/main.mako",
                  permission='admin')
     config.add_view(AdminPaymentMode, route_name='admin_paymentmode',
-                renderer="base/simpleformpage.mako",
+                renderer="admin/main.mako",
                 permission='admin')
     config.add_view(AdminWorkUnit, route_name='admin_workunit',
-                renderer="base/simpleformpage.mako",
+                renderer="admin/main.mako",
                 permission='admin')
     config.add_view(AdminExpense, route_name='admin_expense',
-                renderer="base/simpleformpage.mako",
+                renderer="admin/main.mako",
                 permission='admin')

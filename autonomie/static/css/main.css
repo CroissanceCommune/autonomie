@@ -14,14 +14,14 @@ body{
 header .navbar{
   margin-bottom:0px;
 }
+header .navbar li:hover{
+  background-color:#3c3c3c;
+}
 header .navbar .navbar-inner{
   padding-left:15%;
 }
-header #logout_link{
-  padding-right:10%;
-}
-header .navbar li:hover{
-  background-color:#3c3c3c;
+header .navbar .nav > li > a{
+  padding:10px 5px;
 }
 .pagetitle{
   padding:10px 0 5px 15%;

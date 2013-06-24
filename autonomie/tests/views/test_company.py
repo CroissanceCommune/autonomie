@@ -20,7 +20,11 @@ from autonomie.models.company import Company
 
 from autonomie.tests.base import BaseFunctionnalTest
 
-APPSTRUCT = {'name':u"Compané $& test", "goal":u"Be the best"}
+APPSTRUCT = {
+    'name':u"Compané $& test",
+    "goal":u"Be the best",
+    "compte_cg_banque": u"compte0652589"
+        }
 
 class Base(BaseFunctionnalTest):
     def addOne(self):
@@ -44,14 +48,15 @@ class TestCompany(BaseFunctionnalTest):
         response = company_index(request)
         self.assertEqual(avatar.companies[0].name, response['company'].name )
 
-class TestClientAdd(Base):
+class TestCompanyAdd(Base):
     def test_success(self):
         self.addOne()
         company = self.getOne()
         self.assertEqual(company.goal, APPSTRUCT['goal'])
         self.assertEqual(company.name, APPSTRUCT['name'])
+        self.assertEqual(company.compte_cg_banque, APPSTRUCT['compte_cg_banque'])
 
-class TestClientEdit(Base):
+class TestCompanyEdit(Base):
     def test_success(self):
         self.addOne()
         company = self.getOne()
@@ -59,12 +64,9 @@ class TestClientEdit(Base):
         req.context = company
         appstruct = APPSTRUCT.copy()
         appstruct['phone'] = "+33 0606060606"
+        appstruct['compte_cg_banque'] = u"Autre compte cg"
         view = CompanyEdit(req)
         view.submit_success(appstruct)
         company = self.getOne()
         self.assertEqual(company.phone, "+33 0606060606")
-# TODO : Company is now set in the context
-#        view is not handling the acls anymore
-#        request.matchdict['cid'] = 0
-#        response = CompanyViews(request).company_index()
-#        self.assertEqual(response.status_int, 403)
+        self.assertEqual(company.compte_cg_banque, u"Autre compte cg")

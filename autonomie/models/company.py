@@ -79,6 +79,7 @@ class Company(DBBASE):
                             backref="company")
     code_compta = deferred(Column(String(30), default=0), group="edit")
     compte_cg_banque = deferred(Column(String(125), default=""), group='edit')
+    contribution = deferred(Column(Integer, default=0), group='edit')
 
     def get_path(self):
         """

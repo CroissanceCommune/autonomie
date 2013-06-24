@@ -20,6 +20,7 @@ import colander
 import logging
 
 from deform import FileData
+from deform import widget
 
 from autonomie.views.forms.widgets import deferred_edit_widget
 from autonomie.views.forms.widgets import get_fileupload_widget
@@ -73,6 +74,19 @@ def deferred_header_widget(node, kw):
     return get_fileupload_widget(url, path, request.session,
                                     [HEADER_RESIZER.complete])
 
+
+def remove_admin_fields(schema, kw):
+    """
+        Remove admin only fields from the company schema
+    """
+    if kw['request'].user.is_contractor():
+        del schema['RIB']
+        del schema['IBAN']
+        del schema['code_compta']
+        del schema['compte_cg_banque']
+        del schema['contribution']
+
+
 class CompanySchema(colander.MappingSchema):
     """
         Company add/edit form schema
@@ -81,22 +95,9 @@ class CompanySchema(colander.MappingSchema):
             colander.String(),
             widget=deferred_edit_adminonly_widget,
             title=u'Nom')
-    code_compta = colander.SchemaNode(
-            colander.String(),
-            widget=deferred_edit_adminonly_widget,
-            title=u"Compte analytique",
-            description=u"Compte analytique utilisé dans le logiciel de compta",
-            missing="")
     goal = colander.SchemaNode(
             colander.String(),
             title=u'Objet')
-    logo = colander.SchemaNode(
-            FileData(),
-            widget=deferred_logo_widget,
-            title=u'Logo',
-            validator=validate_image_mime,
-            description=u"Charger un fichier de type image *.png *.jpeg \
-*.jpg ...")
     email = get_mail_input(missing=u'')
     phone = colander.SchemaNode(
             colander.String(),
@@ -106,11 +107,45 @@ class CompanySchema(colander.MappingSchema):
             colander.String(),
             title=u'Téléphone portable',
             missing=u'')
+    logo = colander.SchemaNode(
+            FileData(),
+            widget=deferred_logo_widget,
+            title=u'Logo',
+            validator=validate_image_mime,
+            description=u"Charger un fichier de type image *.png *.jpeg \
+*.jpg ...")
+    header = colander.SchemaNode(
+            FileData(),
+            widget=deferred_header_widget,
+            title=u'Entête des fichiers PDF',
+            description=u"Charger un fichier de type image *.png *.jpeg \
+*.jpg ... Le fichier est idéalement au format 20/4 (par exemple 1000px x \
+200 px)",
+            validator=validate_image_mime)
+    # Fields specific to the treasury
+    code_compta = colander.SchemaNode(
+            colander.String(),
+            widget=deferred_edit_adminonly_widget,
+            title=u"Compte analytique",
+            description=u"Compte analytique utilisé dans le logiciel de compta",
+            missing="")
     compte_cg_banque = colander.SchemaNode(
             colander.String(),
             widget=deferred_edit_adminonly_widget,
             title=u"Compte CG Banque",
-            missing=u"Compte CG Banque de l'entreprise")
+            missing=u"",
+            description=u"Compte CG Banque de l'entreprise")
+    contribution = colander.SchemaNode(
+            colander.Integer(),
+            widget=widget.TextInputWidget(
+                input_append="%",
+                css_class="span1"
+                ),
+            validator=colander.Range(min=0, max=100,
+                min_err=u"Veuillez fournir un nombre supérieur à 0",
+                max_err=u"Veuillez fournir un nombre inférieur à 100"),
+            title=u"Contribution à la CAE",
+            description=u"Pourcentage que cette entreprise contribue à la CAE")
     RIB = colander.SchemaNode(
             colander.String(),
             widget=deferred_edit_adminonly_widget,
@@ -121,11 +156,6 @@ class CompanySchema(colander.MappingSchema):
             widget=deferred_edit_adminonly_widget,
             title=u'IBAN',
             missing=u'')
-    header = colander.SchemaNode(
-            FileData(),
-            widget=deferred_header_widget,
-            title=u'Entête des fichiers PDF',
-            description=u"Charger un fichier de type image *.png *.jpeg \
-*.jpg ... Le fichier est idéalement au format 20/4 (par exemple 1000px x \
-200 px)",
-            validator=validate_image_mime)
+
+
+COMPANYSCHEMA = CompanySchema(after_bind=remove_admin_fields)

@@ -23,7 +23,8 @@ from autonomie.tests.base import BaseFunctionnalTest
 APPSTRUCT = {
     'name':u"Compané $& test",
     "goal":u"Be the best",
-    "compte_cg_banque": u"compte0652589"
+    "compte_cg_banque": u"compte0652589",
+    "contribution": 80
         }
 
 class Base(BaseFunctionnalTest):
@@ -55,6 +56,7 @@ class TestCompanyAdd(Base):
         self.assertEqual(company.goal, APPSTRUCT['goal'])
         self.assertEqual(company.name, APPSTRUCT['name'])
         self.assertEqual(company.compte_cg_banque, APPSTRUCT['compte_cg_banque'])
+        self.assertEqual(company.contribution, APPSTRUCT['contribution'])
 
 class TestCompanyEdit(Base):
     def test_success(self):
@@ -65,8 +67,10 @@ class TestCompanyEdit(Base):
         appstruct = APPSTRUCT.copy()
         appstruct['phone'] = "+33 0606060606"
         appstruct['compte_cg_banque'] = u"Autre compte cg"
+        appstruct['contribution'] = 70
         view = CompanyEdit(req)
         view.submit_success(appstruct)
         company = self.getOne()
         self.assertEqual(company.phone, "+33 0606060606")
         self.assertEqual(company.compte_cg_banque, u"Autre compte cg")
+        self.assertEqual(company.contribution, 70)

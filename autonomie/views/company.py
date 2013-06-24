@@ -24,7 +24,7 @@ from pyramid.security import has_permission
 from autonomie.models.company import Company
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.views.forms.utils import BaseFormView
-from autonomie.views.forms.company import CompanySchema
+from autonomie.views.forms.company import COMPANYSCHEMA
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.views import submit_btn
 
@@ -90,7 +90,7 @@ class CompanyAdd(BaseFormView):
     """
     add_template_vars = ('title',)
     title = u"Ajouter une entreprise"
-    schema = CompanySchema()
+    schema = COMPANYSCHEMA
     buttons = (submit_btn,)
 
     def before(self, form):
@@ -118,7 +118,7 @@ class CompanyEdit(BaseFormView):
         View class for company editing
     """
     add_template_vars = ('title',)
-    schema = CompanySchema()
+    schema = COMPANYSCHEMA
     buttons = (submit_btn,)
 
     @reify

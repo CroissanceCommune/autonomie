@@ -3,6 +3,7 @@ use = egg:autonomie
 
 pyramid.default_locale_name = fr
 pyramid.includes =pyramid_tm
+                    pyramid_layout
 #### CONFIGURE THOSE LINES TO ALLOW THE TESTS TO SETUP A MYSQL DATABASE ####
 sqlalchemy.url = mysql://testautonomie:password@localhost/testautonomie?charset=utf8
 sqlalchemy.echo=False

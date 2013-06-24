@@ -10,7 +10,9 @@ pyramid.debug_routematch = false
 pyramid.debug_templates = true
 pyramid.default_locale_name = fr
 pyramid.includes =   pyramid_tm
-
+                    deform_bootstrap
+                    js.deform_bootstrap
+                    pyramid_layout
 ####  MAIL FROM WITHIN THE APPLICATION ####
 # Add this one to pyramid.includes if you configured a mailbox
 #pyramid_mailer

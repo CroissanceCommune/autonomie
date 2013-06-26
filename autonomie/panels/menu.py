@@ -157,15 +157,16 @@ def get_company_menu(request, cid, css=None):
     href = request.route_path("commercial_handling", id=cid)
     gestion.add_item(u"Gestion commerciale", icon="icon-list-alt",
             href=href)
+
+    href = request.route_path("company_expenses", id=cid)
+    params.add_item(u"Notes de frais", icon="icon-cog", href=href)
+
     menu.add(gestion)
 
     params = DropDown(label=u"Paramètres")
 
     href = request.route_path("company", id=cid)
     params.add_item(u"Paramètres", icon="icon-cog", href=href)
-
-    href = request.route_path("company_expenses", id=cid)
-    params.add_item(u"Notes de frais", icon="icon-cog", href=href)
 
     menu.add(params)
     return menu

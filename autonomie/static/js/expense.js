@@ -683,7 +683,6 @@ MyApp.Controller = {
     /*
      * expenseline add route
      */
-    console.log("Add lines");
     this.initialize();
     if (this.expense_form !== null){
       this.expense_form.reset();
@@ -710,7 +709,6 @@ MyApp.Controller = {
     /*
      * expensekmline add route
      */
-    console.log("Add km lines");
     this.initialize();
     if (this.expensekm_form !== null){
       this.expensekm_form.reset();

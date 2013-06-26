@@ -546,6 +546,9 @@ var ExpenseKmAdd = BaseExpenseFormView.extend({
     form:"#expenseKmForm",
     date:"#expenseKmForm input[name=altdate]"
   },
+  initialize: function(options){
+    Autonomie.addFormInitialize.call(this, options);
+  },
   getTypeOptions: function(){
     /*
      *  Return the options for tva selection
@@ -680,6 +683,7 @@ MyApp.Controller = {
     /*
      * expenseline add route
      */
+    console.log("Add lines");
     this.initialize();
     if (this.expense_form !== null){
       this.expense_form.reset();
@@ -706,6 +710,7 @@ MyApp.Controller = {
     /*
      * expensekmline add route
      */
+    console.log("Add km lines");
     this.initialize();
     if (this.expensekm_form !== null){
       this.expensekm_form.reset();

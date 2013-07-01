@@ -480,6 +480,7 @@ var BaseExpenseFormView = BaseFormView.extend({
    * Base form view
    */
   submit: Autonomie.addsubmit,
+  formname: null,
   templateHelpers: function(){
     /*
      * Add datas to the template context
@@ -503,7 +504,7 @@ var BaseExpenseFormView = BaseFormView.extend({
     /*
      * Set the datepicker and its date (that need to be passed through setDate)
      */
-    this.setDatePicker("expenseForm", this.ui.date, "date");
+    this.setDatePicker(this.formname, this.ui.date, "date");
   }
 });
 
@@ -513,6 +514,7 @@ var ExpenseAdd = BaseExpenseFormView.extend({
    *  Expense add form
    */
   template: templates.expenseForm,
+  formname: "expenseForm",
   // The most used UI elements
   ui:{
     form:"#expenseForm",
@@ -541,6 +543,7 @@ var ExpenseKmAdd = BaseExpenseFormView.extend({
    * Form to add km fees expenses
    */
   template:templates.expenseKmForm,
+  formname: "expenseKmForm",
   // The most used UI elements (are cached)
   ui:{
     form:"#expenseKmForm",

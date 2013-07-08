@@ -219,7 +219,7 @@ class BaseExpenseLine(DBBASE):
     type_object = relationship("ExpenseType",
             primaryjoin='BaseExpenseLine.type_id==ExpenseType.id',
             uselist=False,
-            foreign_keys='ExpenseType.id')
+            foreign_keys=type_id)
 
 
 class ExpenseLine(BaseExpenseLine):

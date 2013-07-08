@@ -22,12 +22,16 @@ from autonomie.models.treasury import (ExpenseType, ExpenseKmType,
                 ExpenseSheet, ExpenseLine, ExpenseKmLine)
 from autonomie.utils.rest import RestError
 from autonomie.views.expense import (RestExpenseLine, get_expense_sheet,
-        RestExpenseKmLine, ExpenseKmLineJson, ExpenseLineJson)
+        RestExpenseKmLine, ExpenseKmLineJson, ExpenseLineJson,
+        ExpenseSheetView)
 from autonomie.views.forms.expense import ExpenseKmLineSchema, ExpenseLineSchema
 from autonomie.tests.base import BaseFunctionnalTest
 
 
-class BaseRest(BaseFunctionnalTest):
+
+
+
+class BaseExpense(BaseFunctionnalTest):
     def company(self):
         return Company.query().first()
 
@@ -41,7 +45,28 @@ class BaseRest(BaseFunctionnalTest):
         uid = self.user().id
         return get_expense_sheet(request, year, month, cid, uid)
 
-class TestRestExpenseLine(BaseRest):
+
+class TestExpenseSheet(BaseExpense):
+    def get_type(self):
+        type_ = ExpenseType(label=u"Restauration", code="000065588")
+        self.session.add(type_)
+        self.session.flush()
+        return type_
+
+    def test_reset_success(self):
+        self.config.add_route('user_expenses', '/')
+        request = self.get_csrf_request()
+        sheet = self.sheet(request)
+        type_ = self.get_type()
+        sheet.lines.append(ExpenseLine(tva=1960, ht=150, type_object=type_))
+        self.session.merge(sheet)
+        self.session.flush()
+        request.context = sheet
+        view = ExpenseSheetView(request)
+        view.reset_success(appstruct={})
+
+
+class TestRestExpenseLine(BaseExpense):
     def test_getOne(self):
         request = self.get_csrf_request()
         request.context = self.sheet(request)
@@ -75,7 +100,7 @@ class TestRestExpenseLine(BaseRest):
         self.assertTrue(isinstance(line, ExpenseLine))
 
 
-class TestRestExpenseKmLine(BaseRest):
+class TestRestExpenseKmLine(BaseExpense):
     def addOne(self):
         request = self.get_csrf_request()
         request.context = self.sheet(request)

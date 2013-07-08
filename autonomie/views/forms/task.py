@@ -53,16 +53,23 @@ import datetime
 import colander
 from deform import widget
 
-from autonomie.views.forms.widgets import deferred_autocomplete_widget
-from autonomie.views.forms.widgets import deferred_today
-from autonomie.views.forms.widgets import get_date_input
-from autonomie.views.forms.widgets import CustomSequenceWidget
+from autonomie.views.forms.widgets import (
+        deferred_autocomplete_widget,
+        deferred_today,
+        get_date_input,
+        CustomSequenceWidget,
+        )
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
-from autonomie.models.tva import Tva
-from .custom_types import QuantityType
-from .custom_types import AmountType
-from .custom_types import Integer
+from autonomie.models.tva import (
+        Tva,
+        Product,
+        )
+from .custom_types import (
+        QuantityType,
+        AmountType,
+        Integer,
+        )
 
 log = logging.getLogger(__name__)
 DAYS = (
@@ -199,6 +206,14 @@ def get_tva_choices():
     return [(unicode(tva.value), tva.name)for tva in Tva.query()]
 
 
+def get_product_choices():
+    """
+        Return data structure for tva select widget options
+    """
+    return [(p.id, u"{0} ({1})".format(p.name, p.compte_cg),)\
+            for p in Product.query()]
+
+
 def get_unities():
     unities =  ["",]
     unities.extend([workunit.label  for workunit in WorkUnit.query()])
@@ -235,7 +250,20 @@ def deferred_tvas_widget(node, kw):
     tvas = get_tva_choices()
     wid = widget.SelectWidget(
         values=tvas,
-        css_class='span2',
+        css_class='span1',
+        template=TEMPLATES_URL + 'tva.mako')
+    return wid
+
+
+@colander.deferred
+def deferred_product_widget(node, kw):
+    """
+        return a widget for product selection
+    """
+    products = get_product_choices()
+    wid = widget.SelectWidget(
+        values=products,
+        css_class='span1',
         template=TEMPLATES_URL + 'tva.mako')
     return wid
 
@@ -324,13 +352,18 @@ class TaskLine(colander.MappingSchema):
         widget=deferred_unity_widget,
         validator=deferred_unity_validator,
         missing=u"",
-        css_class='span2')
+        css_class='span1')
     tva = colander.SchemaNode(
         Integer(),
         widget=deferred_tvas_widget,
         default=deferred_default_tva,
-        css_class='span2',
+        css_class='span1',
         title=u'TVA')
+    product = colander.SchemaNode(
+            colander.String(),
+            widget=deferred_product_widget,
+            css_class="span1",
+            title=u"Code produit")
 
 
 class DiscountLine(colander.MappingSchema):

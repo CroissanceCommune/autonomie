@@ -159,7 +159,7 @@ def get_company_menu(request, cid, css=None):
             href=href)
 
     href = request.route_path("company_expenses", id=cid)
-    params.add_item(u"Notes de frais", icon="icon-cog", href=href)
+    gestion.add_item(u"Notes de frais", icon="icon-cog", href=href)
 
     menu.add(gestion)
 

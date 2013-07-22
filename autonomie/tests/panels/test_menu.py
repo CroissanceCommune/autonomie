@@ -15,8 +15,8 @@
 
 
 from mock import MagicMock
-from autonomie.views.subscribers import get_cid
-from autonomie.views.subscribers import get_companies
+from autonomie.panels.menu import get_cid
+from autonomie.panels.menu import get_companies
 
 from autonomie.tests.base import BaseViewTest
 

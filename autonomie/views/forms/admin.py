@@ -199,6 +199,10 @@ class ExpenseConfig(colander.MappingSchema):
     """
         Schema for the configuration of different expense types
     """
+    id = colander.SchemaNode(colander.Integer(),
+            widget=widget.HiddenWidget(),
+            default=None,
+            missing=None)
     label = colander.SchemaNode(colander.String(), title=u"Libellé",
             validator=colander.Length(max=50))
     code = colander.SchemaNode(colander.String(), title=u"Code analytique",

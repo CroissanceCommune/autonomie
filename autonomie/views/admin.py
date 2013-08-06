@@ -232,20 +232,36 @@ ont été configurés"
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
+    def get_all_ids(self, appstruct):
+        ids = []
+        for key in self.factories:
+            ids.extend([data['id'] for data in appstruct[key]])
+        return ids
+
     def submit_success(self, appstruct):
         """
             Handle successfull expense configuration
         """
+        all_ids = self.get_all_ids(appstruct)
+
+        # We delete the elements that are no longer in the appstruct
         for (factory, polytype) in self.factories.values():
             for element in factory.query().filter(factory.type==polytype):
-                self.dbsession.delete(element)
+                if element.id not in all_ids:
+                    self.dbsession.delete(element)
         self.dbsession.flush()
 
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
-                type_ = factory()
-                merge_session_with_post(type_, data)
-                self.dbsession.add(type_)
+                if data['id'] is not None:
+                    type_ = factory.query().filter(factory.id==data['id'])\
+                            .one()
+                    merge_session_with_post(type_, data)
+                    self.dbsession.merge(type_)
+                else:
+                    type_ = factory()
+                    merge_session_with_post(type_, data)
+                    self.dbsession.add(type_)
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_expense"))
 

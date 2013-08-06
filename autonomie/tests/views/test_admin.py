@@ -16,6 +16,7 @@ from autonomie.models import tva
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.config import get_config
+from autonomie.models.treasury import ExpenseType
 from autonomie.views.admin import AdminTva
 from autonomie.views.admin import AdminMain
 from autonomie.views.admin import AdminPaymentMode
@@ -79,12 +80,14 @@ class DummyForm(object):
 class TestExpenseView(BaseFunctionnalTest):
     def test_success(self):
         self.config.add_route('admin_expense', '/')
-        appstruct = {'expenses':[{'label':u"Restauration", "code":u"0001"},
-                                {'label':u"Déplacement", "code":u"0002"}],
-                    'expenseskm':[{'label':u"Scooter", "code":u"0003",
-                                    "amount":"0.852"}],
-                    'expensestel':[{'label':u"Adsl-Téléphone", "code":u"0004",
-                                    "percentage":"80"}]}
+        appstruct = {'expenses':[
+            {'label':u"Restauration", "code":u"0001", "id":None},
+            {'label':u"Déplacement", "code":u"0002", "id":None}],
+                    'expenseskm':[
+            {'label':u"Scooter", "code":u"0003", "amount":"0.852", "id":None}],
+                    'expensestel':[
+            {'label':u"Adsl-Téléphone", "code":u"0004", "percentage":"80",
+                "id":None}]}
         view = AdminExpense(self.get_csrf_request())
         view.submit_success(appstruct)
 
@@ -96,3 +99,20 @@ class TestExpenseView(BaseFunctionnalTest):
         self.assertEqual(form.appstruct['expenseskm'][0]['label'], u"Scooter")
         self.assertEqual(form.appstruct['expenseskm'][0]['amount'], 0.852)
         self.assertEqual(form.appstruct['expensestel'][0]['percentage'], 80)
+
+    def test_success_id_preservation(self):
+        self.config.add_route('admin_expense', '/')
+        appstruct = {'expenses':[
+            {'label':u"Restauration", "code":u"0001", "id":None}],
+                    'expenseskm':[],
+                    'expensestel':[]}
+        view = AdminExpense(self.get_csrf_request())
+        view.submit_success(appstruct)
+
+        expense = ExpenseType.query().filter(ExpenseType.code=="0001").first()
+        appstruct['expenses'][0]['id'] = expense.id
+        appstruct['expenses'][0]['code'] = u"00002"
+        view = AdminExpense(self.get_csrf_request())
+        view.submit_success(appstruct)
+        expense = ExpenseType.query().filter(ExpenseType.id==expense.id).first()
+        self.assertEqual(expense.code, u"00002")

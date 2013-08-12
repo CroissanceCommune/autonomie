@@ -58,6 +58,7 @@
         </tbody>
     </table>
     % endfor
+</div>
     % endfor
 % endif
 </%block>

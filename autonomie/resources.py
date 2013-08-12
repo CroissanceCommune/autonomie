@@ -131,10 +131,21 @@ holiday_js = Resource(
         depends=[backbone, templates, tools, effects_highlight, effects_shake,
             message_js])
 
+jquery_theme_css = Resource(
+        lib_autonomie,
+        "css/theme/jquery-ui-1.8.16.custom.css")
+main_css = Resource(
+        lib_autonomie,
+        "css/main.css",
+        depends=[bootstrap, bootstrap_responsive_css, jquery_theme_css]
+        )
+
+
 # Main javascript requirements
 main_js = Group([main,
                  bootstrap,
                  bootstrap_responsive_css,
+                 main_css,
                  jquery_form,
                  ui_autocomplete,
                  ui_datepicker_fr,

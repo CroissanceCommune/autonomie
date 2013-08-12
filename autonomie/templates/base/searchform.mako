@@ -3,7 +3,7 @@ Template used to render a search form
 </%doc>
 <% from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS %>
 <form class='navbar-form offset1 pull-right form-search form-inline' id='${elem.id_}' method='GET'>
-    <div class='floatted'>
+    <div class='pull-left'>
         <input type='text' name='search' class='input-medium search-query' value="${elem.defaults['search']}">
         % if elem.helptext:
             <span class="help-block">${elem.helptext}</span>

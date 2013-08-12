@@ -72,7 +72,7 @@
         % else:
              <div class="section-content" id='phase_${phase.id}'>
         % endif
-        <h3 class='floatted' style="padding-right:10px;">Devis</h3>
+        <h3 class='pull-left' style="padding-right:10px;">Devis</h3>
         <a class='btn' href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>Nouveau devis
         </a>
@@ -128,7 +128,7 @@
             % endif
             </div>
         %endif
-        <h3 class='floatted' style='padding-right:10px;font-weight:100;'>Facture(s)</h3>
+        <h3 class='pull-left' style='padding-right:10px;font-weight:100;'>Facture(s)</h3>
         <a class='btn' href='${request.route_path("project_invoices", id=project.id, _query=dict(phase=phase.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>Nouvelle facture
         </a>

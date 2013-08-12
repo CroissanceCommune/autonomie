@@ -200,7 +200,7 @@ def company_choice(request, companies, cid):
         options = ((request.route_path("company", id=company.id),
                 company.name) for company in companies)
         default = request.route_path("company", id=cid)
-    html_attrs = {'class': 'floatted company-search',
+    html_attrs = {'class': 'pull-left company-search',
                     'id': "company-select-menu"}
     html_code = HTML.li(
             tags.select("companies", default, options, **html_attrs))

@@ -25,7 +25,7 @@
     }
 </style>
 <br />
-<a class='btn rfloatted' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
+<a class='btn pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
 ${period_form.render()|n}
 <hr />
 % if edit:

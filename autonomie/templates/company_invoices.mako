@@ -56,7 +56,7 @@
                     % endfor
                 </select>
             </div>
-            <div class='floatted' style="padding-right:3px">
+            <div class='pull-left' style="padding-right:3px">
                 <input type='text' name='search' class='input-medium search-query' value="${search}" />
                 <span class="help-block">Identifiant du document</span>
             </div>

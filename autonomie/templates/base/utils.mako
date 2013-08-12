@@ -18,7 +18,7 @@
 </%def>
 <%def name="searchform(label='Rechercher', html='', helptext=None)">
     <form class='navbar-form pull-right form-search offset3 form-inline' id='search_form' method='GET'>
-        <div class='floatted' style='padding-right:3px'>
+        <div class='pull-left' style='padding-right:3px'>
             <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
         % if helptext:
             <span class="help-block">${helptext}</span>

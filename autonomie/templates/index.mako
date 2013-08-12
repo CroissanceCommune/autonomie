@@ -2,7 +2,7 @@
 <%block name='content'>
 % if companies:
     % for company in companies:
-        <div class="item drop-shadow round floatted">
+        <div class="item drop-shadow round pull-left">
             <a href="${company.url}" title="Accéder au gestionnaire de ${company.name}">
                 <div class="hcentered">
                     <h3>${company.name}</h3>

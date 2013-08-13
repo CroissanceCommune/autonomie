@@ -392,6 +392,7 @@ class EstimationLine(DBBASE, LineCompute):
             default=get_current_timestamp,
             onupdate=get_current_timestamp))
     unity = Column("unity", String(100))
+    product_code = Column(String(125), default="")
     task = relationship(
         "Estimation",
         backref=backref("lines", order_by='EstimationLine.rowIndex',

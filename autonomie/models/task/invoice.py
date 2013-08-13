@@ -383,6 +383,7 @@ class InvoiceLine(DBBASE, LineCompute):
                default=get_current_timestamp,
                onupdate=get_current_timestamp))
     unity = Column("unity", String(100))
+    product_code = Column(String(125), default="")
     task = relationship(
         "Invoice",
         backref=backref("lines", order_by='InvoiceLine.rowIndex',
@@ -568,6 +569,7 @@ class CancelInvoiceLine(DBBASE, LineCompute):
     tva = Column("tva", Integer, nullable=False, default=196)
     quantity = Column(DOUBLE, default=1)
     unity = Column(String(100), default=None)
+    product_code = Column(String(125), default="")
 
     def duplicate(self):
         """

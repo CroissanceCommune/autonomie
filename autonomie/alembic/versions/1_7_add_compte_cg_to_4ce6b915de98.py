@@ -23,6 +23,10 @@ def upgrade():
             sa.Column("compte_cg", sa.String(125), default=""))
     op.add_column("customer",
             sa.Column("compte_tiers", sa.String(125), default=""))
+    # Ajout du code produit au ligne des differents document
+    for table in ("estimation_line", "cancelinvoice_line", "invoice_line"):
+        op.add_column(table,
+                sa.Column("product_code", sa.String(125), default=""))
 
 
 def downgrade():
@@ -31,3 +35,5 @@ def downgrade():
     op.drop_column("company", "contribution")
     op.drop_column("customer", "compte_cg")
     op.drop_column("customer", "compte_tiers")
+    for table in ("estimation_line", "cancelinvoice_line", "invoice_line"):
+        op.drop_column(table, "product_code")

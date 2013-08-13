@@ -2,11 +2,20 @@
 <div>
     <input type="hidden" name="__start__" value="${field.name}:sequence" class="deformProto" prototype="${field.widget.prototype(field)}">
     <div class='row linesblockheader'>
-        <div class='span4'>Prestation</div>
+        % if field.schema.is_admin:
+        <div class='span3'>Prestation</div>
         <div class='span1'>Prix/unité</div>
         <div class='span1'>Quantité</div>
         <div class='span2'>Unité</div>
-        <div class='span2'>TVA</div>
+        <div class='span1'>TVA</div>
+        <div class='span2'>Code produit</div>
+        % else:
+            <div class='span4'>Prestation</div>
+            <div class='span1'>Prix/unité</div>
+            <div class='span1'>Quantité</div>
+            <div class='span2'>Unité</div>
+            <div class='span2'>TVA</div>
+        % endif
         <div class='span1'>Total HT</div>
     </div>
     <div class="deformSeqContainer">

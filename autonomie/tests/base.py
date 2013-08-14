@@ -81,6 +81,7 @@ class BaseViewTest(BaseTestCase):
         request = testing.DummyRequest(post)
         request.session = self.make_session(request)
         request.dbsession = self.session
+        request.config = {}
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
         request.session.get_csrf_token = csrf_token

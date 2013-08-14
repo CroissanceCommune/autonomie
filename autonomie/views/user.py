@@ -237,6 +237,7 @@ class BaseUserForm(BaseFormView):
         company = Company()
         company.name = name
         company.goal = u"Entreprise de {0}".format(format_account(user))
+        company.contribution = self.request.config.get('contribution_cae')
         company = self.dbsession.merge(company)
         self.dbsession.flush()
         return company

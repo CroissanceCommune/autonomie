@@ -282,7 +282,7 @@ def build_cae_config_schema():
     fields =(
     ('compte_cg_contribution', u"Compte CG contribution", u"Compte CG \
 correspondant à la contribution des entrepreneurs à la CAE"),
-    ('compte_rrr', u"Compte RRR", u"Compte Remise Ristourne et ",),
+    ('compte_rrr', u"Compte RRR", u"Compte Rabais, Remises et Ristournes",),
     ('compte_frais_annexes', u"Compte de frais annexes", '',),
     ('compte_cg_assurance', u"Compte CG assurance", '',),
     ('compte_cg_debiteur', u"Compte CG de débiteur", '',),
@@ -295,7 +295,10 @@ correspondant à la contribution des entrepreneurs à la CAE"),
     ("taux_assurance", u"Taux d'assurance", "",),
     ("taux_cgscop", u"Taux CGSCOP", "",),
     ("taux_rg_interne", u"Taux RG Interne", "",),
-    ("taux_rg_client", u"Taux RG Client", "",),)
+    ("taux_rg_client", u"Taux RG Client", "",),
+    ("contribution_cae", u"Pourcentage de la contribution",
+        u"Valeur par défaut de la contribution (nombre entre 1 et 100). \
+        Elle peut être individualisée sur les pages entreprises",),)
     schema = CaeConfig().clone()
     for key, title, description in fields:
         schema.add(colander.SchemaNode(
@@ -304,6 +307,7 @@ correspondant à la contribution des entrepreneurs à la CAE"),
                 description=description,
                 missing=u"",
                 name=key))
+
     return schema
 
 

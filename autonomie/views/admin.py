@@ -30,6 +30,7 @@ from autonomie.models.task import WorkUnit
 from autonomie.models.treasury import ExpenseType
 from autonomie.models.treasury import ExpenseKmType
 from autonomie.models.treasury import ExpenseTelType
+from autonomie.models.company import Company
 
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
@@ -325,6 +326,13 @@ class AdminCae(BaseFormView):
                 self.dbsession.merge(dbdata)
             else:
                 self.dbsession.add(dbdata)
+            # If we set the contribution_cae value, we want it to be the default
+            # for every company that has no contribution value set
+            if dbdata.name == 'contribution_cae':
+                for comp in Company.query():
+                    if comp.contribution is None:
+                        comp.contribution = dbdata.value
+                        self.dbsession.merge(comp)
         self.dbsession.flush()
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_cae"))

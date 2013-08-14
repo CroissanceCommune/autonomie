@@ -75,6 +75,16 @@ def deferred_header_widget(node, kw):
                                     [HEADER_RESIZER.complete])
 
 
+@colander.deferred
+def deferred_default_contribution(node, kw):
+    """
+        Return the default contribution
+    """
+    request = kw['request']
+    request.config.get('contribution_cae')
+    return request.config.get('contribution_cae')
+
+
 def remove_admin_fields(schema, kw):
     """
         Remove admin only fields from the company schema
@@ -143,6 +153,7 @@ class CompanySchema(colander.MappingSchema):
                 min_err=u"Veuillez fournir un nombre supérieur à 0",
                 max_err=u"Veuillez fournir un nombre inférieur à 100"),
             title=u"Contribution à la CAE",
+            default=deferred_default_contribution,
             description=u"Pourcentage que cette entreprise contribue à la CAE")
     RIB = colander.SchemaNode(
             colander.String(),

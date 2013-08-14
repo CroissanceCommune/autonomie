@@ -18,7 +18,7 @@ def upgrade():
     op.add_column("tva", sa.Column("compte_cg", sa.String(125), default=""))
     op.add_column("company", sa.Column("compte_cg_banque", sa.String(125),
         default=""))
-    op.add_column("company", sa.Column("contribution", sa.Integer, default=0))
+    op.add_column("company", sa.Column("contribution", sa.Integer))
     op.add_column("customer",
             sa.Column("compte_cg", sa.String(125), default=""))
     op.add_column("customer",

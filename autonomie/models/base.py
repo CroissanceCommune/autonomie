@@ -55,7 +55,8 @@ def record_to_appstruct(self):
         usefull to autofill an editform directly from db recovered datas
     """
     return dict([(k, self.__dict__[k])
-                for k in sorted(self.__dict__) if '_sa_' != k[:4]])
+                for k in sorted(self.__dict__) if '_sa_' != k[:4]
+                and self.__dict__[k] is not None ])
 
 # Add a bounded method to the DBBASE object
 #DBBASE.appstruct = types.MethodType( record_to_appstruct, DBBASE )

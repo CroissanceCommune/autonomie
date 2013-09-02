@@ -37,6 +37,17 @@ Color.Crimson = "FFDC143C"
 Color.header = "FFD9EDF7"
 Color.footer = "FFFCF8E3"
 
+def get_xls_column_keys():
+    res = []
+    for let in ascii_uppercase:
+        res.append(let)
+
+    for leta in ascii_uppercase:
+        for letb in ascii_uppercase:
+            res.append('%s%s'% (leta, letb))
+    return res
+
+ASCII_UPPERCASE = get_xls_column_keys()
 
 class ExcelExpense(object):
     """
@@ -94,10 +105,10 @@ class ExcelExpense(object):
         # We set the appropriate letter to each column
         index = 0
         for col in columns:
-            letter = ascii_uppercase[index]
+            letter = ASCII_UPPERCASE[index]
             width = col.get('width')
             if width:
-                last_letter = ascii_uppercase[index+width]
+                last_letter = ASCII_UPPERCASE[index+width]
                 index += width + 1
             else:
                 last_letter = letter
@@ -184,7 +195,9 @@ class ExcelExpense(object):
         """
             return the value for a given cell for the current line
         """
-        if column.has_key('key'):
+        if line.type_object is None:
+            val = ""
+        elif column.has_key('key'):
             val = getattr(line, column['key'], '')
             formatter = column.get('formatter')
             if val and formatter:
@@ -221,7 +234,8 @@ class ExcelExpense(object):
             cell.style.number_format.format_code = '0.00'
             if column.has_key('code'):
                 val = sum([line.ht for line in lines \
-                                     if line.type_object.code==column['code']])
+                                     if line.type_object \
+                                     and line.type_object.code==column['code']])
                 cell.value = integer_to_amount(val)
             elif column.get('key') == 'description':
                 cell.value = "Totaux"
@@ -347,7 +361,7 @@ CLIENTS"
         self.write_total()
         self.write_accord()
 
-        for let in ascii_uppercase:
+        for let in ASCII_UPPERCASE:
             col_dim = self.worksheet.column_dimensions.get(let)
             if col_dim:
                 col_dim.width = 13
@@ -356,7 +370,7 @@ CLIENTS"
         self.worksheet.title = u"Journal de bord"
         self.write_km_book()
 
-        for let in ascii_uppercase:
+        for let in ASCII_UPPERCASE:
             col_dim = self.worksheet.column_dimensions.get(let)
             if col_dim:
                 col_dim.width = 13

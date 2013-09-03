@@ -131,6 +131,15 @@ var ExpenseLine = BaseExpenseModel.extend({
      */
     return this.getType(AppOptions['teltypes']) !== undefined;
   },
+  hasNoType: function(){
+  var isnottel = _.isUndefined(this.getType(AppOptions['teltypes']));
+  var isnotexp = _.isUndefined(this.getType(AppOptions['expensetypes']));
+    if (isnottel && isnotexp){
+      return true;
+    }else{
+      return false;
+    }
+  },
   getTypeOptions: function(){
     var arr;
     if (this.isSpecial()){
@@ -329,6 +338,9 @@ var ExpenseLineView = BaseExpenseLineView.extend({
      * View constructor
      */
     // bind the model change to the view rendering
+    if (this.model.hasNoType()){
+      this.template = templates.expenseorphan;
+    }
     if (this.model.isSpecial()){
       this.template = templates.expensetel;
     }else{

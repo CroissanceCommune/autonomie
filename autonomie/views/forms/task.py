@@ -208,9 +208,9 @@ def get_tva_choices():
 
 def get_product_choices():
     """
-        Return data structure for tva select widget options
+        Return data structure for product code select widget options
     """
-    return [(p.id, u"{0} ({1})".format(p.name, p.compte_cg),)\
+    return [(p.compte_cg, u"{0} ({1})".format(p.name, p.compte_cg),)\
             for p in Product.query()]
 
 
@@ -228,9 +228,27 @@ def deferred_unity_widget(node, kw):
                      template=TEMPLATES_URL + 'unity.mako')
 
 
+def _is_in(datas):
+    def func(value):
+        return value in datas
+    return func
+
+
 @colander.deferred
 def deferred_unity_validator(node, kw):
-    return colander.OneOf(get_unities())
+    return colander.Function(_is_in(get_unities()))
+
+
+@colander.deferred
+def deferred_tva_validator(node, kw):
+    options = [int(option[0]) for option in get_tva_choices()]
+    return colander.Function(_is_in(options))
+
+
+@colander.deferred
+def deferred_product_validator(node, kw):
+    options = [option[0] for option in get_product_choices()]
+    return colander.Function(_is_in(options))
 
 
 @colander.deferred
@@ -357,11 +375,14 @@ class TaskLine(colander.MappingSchema):
         Integer(),
         widget=deferred_tvas_widget,
         default=deferred_default_tva,
+        validator=deferred_tva_validator,
         css_class='span1',
         title=u'TVA')
     product_code = colander.SchemaNode(
             colander.String(),
             widget=deferred_product_widget,
+            validator=deferred_product_validator,
+            missing="",
             css_class="span2",
             title=u"Code produit")
 

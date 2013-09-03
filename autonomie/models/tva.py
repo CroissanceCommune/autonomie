@@ -49,6 +49,15 @@ class Tva(DBBASE):
     def get_default(cls):
         return super(Tva, cls).query().filter(cls.default==1).first()
 
+    def __json__(self, request):
+        return dict(
+                id=self.id,
+                value=self.value,
+                name=self.name,
+                products=[product.__json__(request) \
+                        for product in self.products]
+                )
+
 class Product(DBBASE):
     __tablename__ = 'product'
     __table_args__ = default_table_args
@@ -58,3 +67,10 @@ class Product(DBBASE):
     tva_id = Column(Integer, ForeignKey("tva.id", ondelete="cascade"))
     tva = relationship("Tva",
             backref=backref("products", cascade="all, delete-orphan"))
+
+    def __json__(self, request):
+        return dict(
+                id=self.id,
+                name=self.name,
+                compte_cg=self.compte_cg
+                )

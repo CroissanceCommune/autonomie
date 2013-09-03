@@ -12,6 +12,7 @@
  * Facade is the facade object used to dispatch events beetween elements
  * since the model is quite simple we don't build a real mvc and keep it flat
  */
+var AppOptions;
 var Facade = new Object();
 
 function delRow(id){
@@ -518,10 +519,34 @@ function setPaymentRowsToEditable(){
     setPaymentRows();
   }
 }
+function fetchFormOptions(){
+  /*
+   * Get form options from the server
+   */
+  if (AppOptions['loadurl'] !== undefined){
+    $.ajax({
+      url: AppOptions['loadurl'],
+      dataType: 'json',
+      async: false,
+      mimeType: "textPlain",
+      data: {},
+      success: function(data) {
+        _.extend(AppOptions, data);
+      },
+      error: function(){
+        alert("Une erreur a été rencontrée, contactez votre administrateur.");
+      }
+    });
+
+  }else{
+    alert("Une erreur a été rencontrée, contactez votre administrateur.");
+  }
+}
 function initialize(){
   /*
-   *  Initialize the estimation UI
+   *  Initialize the document edition UI
    */
+  fetchFormOptions();
   var row;
   if (getNbPayments() < 1 ){
      /*
@@ -531,7 +556,6 @@ function initialize(){
      setPaymentRowsToEditable();
   }
   $(Facade).bind('linechange', function(event, element){
-  console.log("Line changed");
     if ($(element).find("input[name=amount]").length === 0){
       row = new TaskRow(element);
       row.update();
@@ -569,8 +593,12 @@ function initialize(){
   });
   $(Facade).trigger('totalchange');
   $('select[name=tva]').change(function(){
+    onTvaSelect(this);
     $(Facade).trigger('totalchange');
   });
+  cleanProductSelects();
   $('#deform textarea').first().focus();
 }
-
+$(function(){
+  initialize();
+});

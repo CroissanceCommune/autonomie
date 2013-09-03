@@ -27,17 +27,19 @@ from deform import Form
 from autonomie.models.user import User
 from autonomie.models.company import Company
 from autonomie.utils.forms import merge_session_with_post
+from autonomie.views.forms.utils import BaseFormView
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
 from autonomie.utils.views import cancel_btn
 from autonomie.views.render_api import format_account
-from autonomie.views.forms.user import USERSCHEMA
-from autonomie.views.forms.user import UserListSchema
-from autonomie.views.forms.user import PASSWORDSCHEMA
-from autonomie.views.forms.user import UserDisableSchema
-from autonomie.views.forms.utils import BaseFormView
+from autonomie.views.forms.user import (
+        USERSCHEMA,
+        UserListSchema,
+        PASSWORDSCHEMA,
+        UserDisableSchema,
+        )
 
 from .base import BaseListView
 
@@ -53,6 +55,11 @@ def get_user_form(request):
 
 
 class UserList(BaseListView):
+    """
+        List the users
+        Allows to search for companies or user name
+        Sorting is allowed on names and emails
+    """
     title = u"Annuaire des utilisateurs"
     # The schema used to validate our search/filter form
     schema = UserListSchema()
@@ -66,7 +73,8 @@ class UserList(BaseListView):
         """
         return User.query(ordered=False).outerjoin(User.companies)
 
-    def filter_name_search(self, query, appstruct):
+    @staticmethod
+    def filter_name_search(query, appstruct):
         """
             filter the query with the provided search argument
         """
@@ -102,10 +110,16 @@ class UserAccount(BaseFormView):
     title = u"Mon compte"
 
     def before(self, form):
+        """
+            Called before view execution
+        """
         appstruct = {'login': self.request.user.login}
         form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
+        """
+            Called on submission success
+        """
         log.info(u"# User {0} has changed his password #".format(
                         self.request.user.login))
         new_pass = appstruct['pwd']
@@ -153,6 +167,9 @@ class UserDisable(BaseFormView):
 
     @reify
     def title(self):
+        """
+            title of the form
+        """
         return u"Désactivation du compte {0}".format(
                                          format_account(self.request.context))
 
@@ -244,10 +261,16 @@ class BaseUserForm(BaseFormView):
 
 
 class UserAdd(BaseUserForm):
+    """
+        User add form, automatically add companies if new one are specified
+    """
     title = u"Ajout d'un nouveau compte"
     validate_msg = u"Le compte a bien été ajouté"
 
     def before(self, form):
+        """
+            populate the actionmenu before entering the view
+        """
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
@@ -271,14 +294,23 @@ class UserAdd(BaseUserForm):
 
 
 class UserEdit(BaseUserForm):
+    """
+        User edition view
+    """
     validate_msg = u"Le compte a bien été édité"
 
     @reify
     def title(self):
+        """
+            form title
+        """
         return u"Édition de {0}".format(
                                         format_account(self.request.context))
 
     def before(self, form):
+        """
+            Set the context datas in the view attributes before view execution
+        """
         user = self.request.context
         appstruct = {'user': user.appstruct(),
                      'companies': [comp.name for comp in  user.companies]}
@@ -319,20 +351,35 @@ def populate_actionmenu(request, user=None):
 
 
 def get_list_view_btn():
+    """
+        Return a link to the user list
+    """
     return ViewLink(u"Annuaire", "view", path="users")
 
 def get_view_btn(user_id):
+    """
+        Return a link for user view
+    """
     return ViewLink(u"Voir", "view", path="user", id=user_id)
 
 def get_edit_btn(user_id):
+    """
+        Return a link for user edition
+    """
     return ViewLink(u"Éditer", "edit", path="user", id=user_id,
                                         _query=dict(action="edit"))
 
 def get_disable_btn(user_id):
+    """
+        Return the button used to disable an account
+    """
     return ViewLink(u"Désactiver", "manage", path="user", id=user_id,
                                         _query=dict(action="disable"))
 
 def get_del_btn(user_id):
+    """
+        Return the button used to delete an account
+    """
     message = u"Êtes-vous sûr de vouloir supprimer ce compte ? \
 Cette action n'est pas réversible."
     return ViewLink(u"Supprimer", "manage", confirm=message, path="user",
@@ -340,6 +387,9 @@ Cette action n'est pas réversible."
 
 
 def includeme(config):
+    """
+        Declare all the routes and views related to this model
+    """
     config.add_route("users",
                     "/users")
     config.add_route("user",

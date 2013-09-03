@@ -21,36 +21,50 @@ import datetime
 
 from deform import Form
 from pyramid.security import has_permission
-from pyramid.httpexceptions import HTTPFound
-from pyramid.httpexceptions import HTTPTemporaryRedirect
+from pyramid.httpexceptions import (
+        HTTPFound,
+        HTTPTemporaryRedirect,
+        )
 
 from autonomie.exception import Forbidden
-from autonomie.utils.forms import merge_session_with_post
-from autonomie.views.forms.expense import ExpenseStatusSchema
-from autonomie.views.forms.expense import PeriodSelectSchema
-from autonomie.views.forms.expense import ExpenseLineSchema
-from autonomie.views.forms.expense import ExpenseKmLineSchema
-from autonomie.views.forms.expense import ExpenseSheetSchema
-from autonomie.models.treasury import ExpenseType
-from autonomie.models.treasury import ExpenseTelType
-from autonomie.models.treasury import ExpenseKmType
-from autonomie.models.treasury import ExpenseSheet
-from autonomie.models.treasury import ExpenseLine
-from autonomie.models.treasury import ExpenseKmLine
+from autonomie.views.forms.expense import (
+        ExpenseStatusSchema,
+        PeriodSelectSchema,
+        ExpenseLineSchema,
+        ExpenseKmLineSchema,
+        ExpenseSheetSchema,
+)
+from autonomie.models.treasury import (
+        ExpenseType,
+        ExpenseTelType,
+        ExpenseKmType,
+        ExpenseSheet,
+        ExpenseLine,
+        ExpenseKmLine,
+)
 from autonomie.views.base import BaseView
-from autonomie.views.render_api import month_name
-from autonomie.views.render_api import format_account
+from autonomie.views.render_api import (
+        month_name,
+        format_account,
+        )
 from autonomie.views.forms.utils import BaseFormView
-from autonomie.utils.rest import RestError
-from autonomie.utils.rest import RestJsonRepr
-from autonomie.utils.rest import add_rest_views
-from autonomie.utils.rest import make_redirect_view
+from autonomie.utils.rest import (
+        RestError,
+        RestJsonRepr,
+        add_rest_views,
+        make_redirect_view,
+)
 from autonomie.utils.views import submit_btn
-from autonomie.utils.widgets import Submit
-from autonomie.utils.widgets import PopUp
-from autonomie.utils.widgets import ViewLink
-from autonomie.utils.export import make_excel_view
-from autonomie.utils.export import ExcelExpense
+from autonomie.utils.widgets import (
+        Submit,
+        PopUp,
+        ViewLink,
+        )
+from autonomie.utils.export import (
+        make_excel_view,
+        ExcelExpense,
+        )
+from autonomie.utils.forms import merge_session_with_post
 from autonomie.resources import expense_js
 
 
@@ -215,6 +229,10 @@ accessible.")
 
 
 def get_expense_sheet(request, year, month, cid, uid):
+    """
+        Return an expense sheet for the given period, add new one if there's no
+        one yet
+    """
     expense = _get_expense_sheet(year, month, cid, uid)
     if not expense:
         # If it has not already been accessed, we create a new one and
@@ -256,6 +274,9 @@ class ExpenseSheetView(BaseFormView):
         self.period_form = self.get_period_form()
 
     def get_period_form(self):
+        """
+            Return the form used to ask a period
+        """
         cid = self.request.context.company_id
         uid = self.request.context.user_id
         url = self.request.route_url("user_expenses", id=cid, uid=uid)
@@ -317,6 +338,9 @@ perdues) ?")
 
     @property
     def edit(self):
+        """
+            return True if the current context is editable by the current user
+        """
         return has_permission("edit", self.request.context, self.request)
 
     @property
@@ -403,6 +427,9 @@ class RestExpenseLine(BaseView):
 
     @property
     def schema(self):
+        """
+            Return a bound schema
+        """
         # Ensure all our colander.deferred values are set
         return self._schema.bind()
 
@@ -497,6 +524,9 @@ def excel_filename(request):
 
 
 def includeme(config):
+    """
+        Declare all the routes and views related to this module
+    """
     # Routes
     traverse = '/companies/{id}'
     config.add_route("company_expenses",

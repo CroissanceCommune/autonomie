@@ -19,24 +19,28 @@ import logging
 
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.views.forms.task import get_cancel_invoice_schema
-from autonomie.views.forms.task import get_cancel_invoice_appstruct
-from autonomie.views.forms.task import get_cancel_invoice_dbdatas
-from autonomie.models.task.invoice import CancelInvoice
-from autonomie.models.task.invoice import CancelInvoiceLine
+from autonomie.views.forms.task import (
+    get_cancel_invoice_schema,
+    get_cancel_invoice_appstruct,
+    get_cancel_invoice_dbdatas,
+    )
+from autonomie.models.task.invoice import (
+        CancelInvoice,
+        CancelInvoiceLine,
+        )
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.exception import Forbidden
-
 from autonomie.utils.views import submit_btn
-from autonomie.views.taskaction import TaskFormView
-from autonomie.views.taskaction import context_is_editable
-from autonomie.views.taskaction import TaskStatusView
-from autonomie.views.taskaction import populate_actionmenu
-from autonomie.views.taskaction import get_set_financial_year_form
-
-from autonomie.views.taskaction import make_pdf_view
-from autonomie.views.taskaction import make_html_view
-from autonomie.views.taskaction import make_task_delete_view
+from autonomie.exception import Forbidden
+from autonomie.views.taskaction import (
+    TaskFormView,
+    context_is_editable,
+    TaskStatusView,
+    populate_actionmenu,
+    get_set_financial_year_form,
+    make_pdf_view,
+    make_html_view,
+    make_task_delete_view,
+    )
 
 log = logging.getLogger(__name__)
 
@@ -232,7 +236,3 @@ def includeme(config):
                     route_name='cancelinvoice',
                     request_param='action=delete',
                     permission='edit')
-
-
-
-

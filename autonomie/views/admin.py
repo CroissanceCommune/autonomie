@@ -27,9 +27,11 @@ from autonomie.models.tva import (
         Product)
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
-from autonomie.models.treasury import ExpenseType
-from autonomie.models.treasury import ExpenseKmType
-from autonomie.models.treasury import ExpenseTelType
+from autonomie.models.treasury import (
+        ExpenseType,
+        ExpenseKmType,
+        ExpenseTelType,
+)
 from autonomie.models.company import Company
 
 from autonomie.utils.forms import merge_session_with_post

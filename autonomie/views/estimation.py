@@ -20,23 +20,29 @@ from deform import ValidationFailure
 
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.task.estimation import Estimation
-from autonomie.models.task.estimation import EstimationLine
-from autonomie.models.task.estimation import PaymentLine
+from autonomie.models.task.estimation import (
+        Estimation,
+        EstimationLine,
+        PaymentLine,
+)
 from autonomie.models.task.task import DiscountLine
-from autonomie.views.forms.task import get_estimation_schema
-from autonomie.views.forms.task import get_estimation_appstruct
-from autonomie.views.forms.task import get_estimation_dbdatas
+from autonomie.views.forms.task import (
+        get_estimation_schema,
+        get_estimation_appstruct,
+        get_estimation_dbdatas,
+)
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.utils.views import submit_btn
-from autonomie.views.taskaction import TaskStatusView
-from autonomie.views.taskaction import TaskFormView
-from autonomie.views.taskaction import make_pdf_view
-from autonomie.views.taskaction import make_html_view
-from autonomie.views.taskaction import make_task_delete_view
-from autonomie.views.taskaction import context_is_editable
-from autonomie.views.taskaction import populate_actionmenu
+from autonomie.views.taskaction import (
+        TaskStatusView,
+        TaskFormView,
+        context_is_editable,
+        populate_actionmenu,
+        make_pdf_view,
+        make_html_view,
+        make_task_delete_view,
+)
 
 log = logging.getLogger(__name__)
 
@@ -224,7 +230,7 @@ class EstimationStatus(TaskStatusView):
 
 def duplicate(request):
     """
-        duplicate an invoice
+        duplicate an estimation
     """
     try:
         ret_dict = EstimationStatus(request)()

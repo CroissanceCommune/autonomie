@@ -253,11 +253,15 @@ ont été configurés"
         appstruct = {}
         for key, (factory, polytype) in self.factories.items():
             appstruct[key] = [e.appstruct() for e in factory.query()\
-                                            .filter(factory.type==polytype)]
+                                            .filter(factory.type==polytype)\
+                                            .filter(factory.active==True)]
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
     def get_all_ids(self, appstruct):
+        """
+            Return the ids of the options still present in the submitted form
+        """
         ids = []
         for key in self.factories:
             ids.extend([data['id'] for data in appstruct[key]])
@@ -273,13 +277,16 @@ ont été configurés"
         for (factory, polytype) in self.factories.values():
             for element in factory.query().filter(factory.type==polytype):
                 if element.id not in all_ids:
-                    self.dbsession.delete(element)
+                    element.active = False
+                    self.dbsession.merge(element)
         self.dbsession.flush()
 
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
                 if data['id'] is not None:
-                    type_ = factory.query().filter(factory.id==data['id'])\
+                    type_ = factory.query()\
+                            .filter(factory.id==data['id'])\
+                            .filter(factory.active==True)\
                             .one()
                     merge_session_with_post(type_, data)
                     self.dbsession.merge(type_)
@@ -299,9 +306,6 @@ class AdminCae(BaseFormView):
     validation_msg = u"Les informations ont bien été enregistrées"
     schema = CAECONFIG
     buttons = (submit_btn, )
-
-    def get_model(self):
-        return Cae.query().first()
 
     def before(self, form):
         """

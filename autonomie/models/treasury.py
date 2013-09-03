@@ -16,20 +16,27 @@
     Models related to the treasury module
 """
 from datetime import date
-from sqlalchemy import Column
-from sqlalchemy import Date
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Float
-from sqlalchemy import Enum
-from sqlalchemy import Text
-from sqlalchemy import Boolean
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import backref
+from sqlalchemy import (
+        Column,
+        Date,
+        Integer,
+        String,
+        Float,
+        Enum,
+        Text,
+        Boolean,
+        ForeignKey,
+        )
+from sqlalchemy.orm import (
+    relationship,
+    backref,
+    )
 
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+        DBBASE,
+        default_table_args,
+        )
+
 from autonomie.models.statemachine import StateMachine
 
 MANAGER_PERMS = "manage"
@@ -71,6 +78,7 @@ class ExpenseType(DBBASE):
     type = Column(String(30), nullable=False)
     label = Column(String(50))
     code = Column(String(15))
+    active = Column(Boolean(), default=True)
 
 
 class ExpenseKmType(ExpenseType):

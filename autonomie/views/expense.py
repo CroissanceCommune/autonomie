@@ -77,13 +77,18 @@ def expense_options():
     """
     options = dict()
     options["expensetypes"] = [{"label":e.label, "value":str(e.id)}
-             for e in ExpenseType.query().filter(ExpenseType.type=='expense')]
+             for e in ExpenseType.query()\
+                     .filter(ExpenseType.type=='expense')\
+                     .filter(ExpenseType.active==True)]
+
     options["kmtypes"] =  [{"label":e.label, "value":str(e.id),
-                                        "amount":e.amount}
-                                                for e in ExpenseKmType.query()]
+        "amount":e.amount}
+        for e in ExpenseKmType.query().filter(ExpenseKmType.active==True)]
+
     options["teltypes"] = [{"label":e.label, "value":str(e.id),
-                                        "percentage":e.percentage}
-                                               for e in ExpenseTelType.query()]
+        "percentage":e.percentage}
+        for e in ExpenseTelType.query().filter(ExpenseTelType.active==True)]
+
     options['categories'] = [{'value':'1',
                             'label':u'Frais direct de fonctionnement'},
                             {'value':'2',
@@ -159,7 +164,7 @@ def get_new_expense_sheet(year, month, cid, uid):
     expense.month = month
     expense.company_id = cid
     expense.user_id = uid
-    for type_ in ExpenseTelType.query():
+    for type_ in ExpenseTelType.query().filter(ExpenseTelType.active==True):
         line = ExpenseLine(type_id=type_.id, ht=0, tva=0,
                 description=type_.label)
         expense.lines.append(line)

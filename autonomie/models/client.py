@@ -84,6 +84,9 @@ class Client(DBBASE):
     contactFirstName = deferred(Column("contactFirstName",
                     String(255), default=None), group='edit')
 
+    compte_cg = deferred(Column(String(125), default=""), group="edit")
+    compte_tiers = deferred(Column(String(125), default=""), group="edit")
+
     def get_company_id(self):
         """
             :returns: the id of the company this client belongs to

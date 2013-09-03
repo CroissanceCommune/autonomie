@@ -53,16 +53,23 @@ import datetime
 import colander
 from deform import widget
 
-from autonomie.views.forms.widgets import deferred_autocomplete_widget
-from autonomie.views.forms.widgets import deferred_today
-from autonomie.views.forms.widgets import get_date_input
-from autonomie.views.forms.widgets import CustomSequenceWidget
+from autonomie.views.forms.widgets import (
+        deferred_autocomplete_widget,
+        deferred_today,
+        get_date_input,
+        CustomSequenceWidget,
+        )
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
-from autonomie.models.tva import Tva
-from .custom_types import QuantityType
-from .custom_types import AmountType
-from .custom_types import Integer
+from autonomie.models.tva import (
+        Tva,
+        Product,
+        )
+from .custom_types import (
+        QuantityType,
+        AmountType,
+        Integer,
+        )
 
 log = logging.getLogger(__name__)
 DAYS = (
@@ -199,6 +206,14 @@ def get_tva_choices():
     return [(unicode(tva.value), tva.name)for tva in Tva.query()]
 
 
+def get_product_choices():
+    """
+        Return data structure for product code select widget options
+    """
+    return [(p.compte_cg, u"{0} ({1})".format(p.name, p.compte_cg),)\
+            for p in Product.query()]
+
+
 def get_unities():
     unities =  ["",]
     unities.extend([workunit.label  for workunit in WorkUnit.query()])
@@ -213,9 +228,27 @@ def deferred_unity_widget(node, kw):
                      template=TEMPLATES_URL + 'unity.mako')
 
 
+def _is_in(datas):
+    def func(value):
+        return value in datas
+    return func
+
+
 @colander.deferred
 def deferred_unity_validator(node, kw):
-    return colander.OneOf(get_unities())
+    return colander.Function(_is_in(get_unities()))
+
+
+@colander.deferred
+def deferred_tva_validator(node, kw):
+    options = [int(option[0]) for option in get_tva_choices()]
+    return colander.Function(_is_in(options))
+
+
+@colander.deferred
+def deferred_product_validator(node, kw):
+    options = [option[0] for option in get_product_choices()]
+    return colander.Function(_is_in(options))
 
 
 @colander.deferred
@@ -235,6 +268,19 @@ def deferred_tvas_widget(node, kw):
     tvas = get_tva_choices()
     wid = widget.SelectWidget(
         values=tvas,
+        css_class='span1',
+        template=TEMPLATES_URL + 'tva.mako')
+    return wid
+
+
+@colander.deferred
+def deferred_product_widget(node, kw):
+    """
+        return a widget for product selection
+    """
+    products = get_product_choices()
+    wid = widget.SelectWidget(
+        values=products,
         css_class='span2',
         template=TEMPLATES_URL + 'tva.mako')
     return wid
@@ -304,11 +350,11 @@ class TaskLine(colander.MappingSchema):
     description = colander.SchemaNode(
         colander.String(),
         widget=widget.TextAreaWidget(
-            cols=60, rows=4,
+            cols=45, rows=4,
             template=TEMPLATES_URL + 'prestation.mako',
-            css_class='span4'),
+            css_class='span3'),
          missing=u'',
-         css_class='span4')
+         css_class='span3')
     cost = colander.SchemaNode(
         AmountType(),
         widget=widget.TextInputWidget(
@@ -329,8 +375,16 @@ class TaskLine(colander.MappingSchema):
         Integer(),
         widget=deferred_tvas_widget,
         default=deferred_default_tva,
-        css_class='span2',
+        validator=deferred_tva_validator,
+        css_class='span1',
         title=u'TVA')
+    product_code = colander.SchemaNode(
+            colander.String(),
+            widget=deferred_product_widget,
+            validator=deferred_product_validator,
+            missing="",
+            css_class="span2",
+            title=u"Code produit")
 
 
 class DiscountLine(colander.MappingSchema):
@@ -502,6 +556,27 @@ class TaskSchema(colander.MappingSchema):
     )
 
 
+def remove_admin_fiels(schema, kw):
+    if kw['request'].user.is_contractor():
+        # Non admin users doesn't edit product codes
+        del schema['lines']['lines']['taskline']['product_code']
+        print schema['lines']
+        schema['lines']['lines'].is_admin = False
+        schema['lines']['lines']['taskline']['description'].css_class = 'span4'
+        schema['lines']['lines']['taskline']['description'].widget.css_class = 'span4'
+        schema['lines']['lines']['taskline']['tva'].css_class = 'span2'
+        schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span2'
+    else:
+        schema['lines']['lines'].is_admin = True
+        schema['lines']['lines']['taskline']['description'].css_class = 'span3'
+        schema['lines']['lines']['taskline']['description'].widget.css_class = 'span3'
+        schema['lines']['lines']['taskline']['tva'].css_class = 'span1'
+        schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span1'
+
+
+TASKSCHEMA = TaskSchema(after_bind=remove_admin_fiels)
+
+
 class EstimationPaymentLine(colander.MappingSchema):
     """
         Payment line
@@ -596,7 +671,7 @@ def get_estimation_schema():
     """
         Return the schema for estimation add/edit
     """
-    schema = TaskSchema().clone()
+    schema = TASKSCHEMA.clone()
     tmpl = 'autonomie:deform_templates/paymentdetails_item.mako'
     schema.add(TaskNotes(title=u"Notes", name="notes"))
     schema.add(
@@ -621,7 +696,7 @@ def get_invoice_schema():
     """
         Return the schema for invoice add/edit
     """
-    schema = TaskSchema().clone()
+    schema = TASKSCHEMA.clone()
     title = u"Phase où insérer la facture"
     schema['common']['phase_id'].title = title
     # Ref #689
@@ -643,7 +718,7 @@ def get_cancel_invoice_schema():
     """
         return the cancel invoice form schema
     """
-    schema = TaskSchema().clone()
+    schema = TASKSCHEMA.clone()
     title = u"Phase où insérer l'avoir"
     schema['common']['phase_id'].title = title
     # Ref #689
@@ -876,7 +951,7 @@ class CancelInvoiceMatch(MappingWrapper):
 class TaskLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
     sequence_name = 'lines'
-    fields = ('description', 'cost', 'quantity', 'unity', 'tva')
+    fields = ('description', 'cost', 'quantity', 'unity', 'tva', 'product_code')
     dbtype = 'lines'
 
 

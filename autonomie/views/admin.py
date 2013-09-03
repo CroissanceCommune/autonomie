@@ -22,22 +22,29 @@ import logging
 
 from pyramid.httpexceptions import HTTPFound
 from autonomie.models.config import Config
-from autonomie.models.tva import Tva
+from autonomie.models.tva import (
+        Tva,
+        Product)
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.treasury import ExpenseType
 from autonomie.models.treasury import ExpenseKmType
 from autonomie.models.treasury import ExpenseTelType
+from autonomie.models.company import Company
 
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms.admin import MainConfig
-from autonomie.views.forms.admin import TvaConfig
-from autonomie.views.forms.admin import PaymentModeConfig
-from autonomie.views.forms.admin import WorkUnitConfig
-from autonomie.views.forms.admin import ExpenseTypesConfig
-from autonomie.views.forms.admin import get_config_appstruct
-from autonomie.views.forms.admin import merge_dbdatas
+from autonomie.views.forms.admin import (
+        MainConfig,
+        TvaConfig,
+        PaymentModeConfig,
+        WorkUnitConfig,
+        ExpenseTypesConfig,
+        CAECONFIG,
+        get_config_appstruct,
+        get_config_dbdatas,
+        merge_config_datas,
+        )
 from autonomie.views.forms import BaseFormView
 from autonomie.utils.widgets import ViewLink
 from js.tinymce import tinymce
@@ -64,7 +71,11 @@ factures"))
 dans les formulaires"))
     request.actionmenu.add(ViewLink(u"Configuration des notes de frais",
         path="admin_expense",
-        title=u"Configuration des type de notes de frais"))
+        title=u"Configuration des types de notes de frais"))
+    request.actionmenu.add(ViewLink(u"Configuration des informations comptables\
+            de la CAE",
+        path="admin_cae",
+        title=u"Configuration des différents comptes analytiques de la CAE"))
     return dict(title=u"Administration du site")
 
 
@@ -103,7 +114,8 @@ class AdminMain(BaseFormView):
         # la table config étant un stockage clé valeur
         # le merge_session_with_post ne peut être utilisé
         dbdatas = self.dbsession.query(Config).all()
-        dbdatas = merge_dbdatas(dbdatas, appstruct)
+        appstruct = get_config_dbdatas(appstruct)
+        dbdatas = merge_config_datas(dbdatas, appstruct)
         for dbdata in dbdatas:
             self.dbsession.merge(dbdata)
         self.dbsession.flush()
@@ -127,7 +139,12 @@ class AdminTva(BaseFormView):
         """
         appstruct = [{'name':tva.name,
                       'value':tva.value,
-                      "default":tva.default}for tva in Tva.query().all()]
+                      "default":tva.default,
+                      "compte_cg":tva.compte_cg,
+                      "products":[{"name":product.name,
+                                   "compte_cg":product.compte_cg}
+                                   for product in tva.products]}
+                                   for tva in Tva.query().all()]
         form.set_appstruct({'tvas':appstruct})
         populate_actionmenu(self.request)
 
@@ -138,9 +155,15 @@ class AdminTva(BaseFormView):
         for tva in Tva.query().all():
             self.dbsession.delete(tva)
         for data in appstruct['tvas']:
+            products = data.pop('products')
             tva = Tva()
             merge_session_with_post(tva, data)
             self.dbsession.add(tva)
+            for product in products:
+                product_obj = Product()
+                merge_session_with_post(product_obj, product)
+                product_obj.tva = tva
+                self.dbsession.add(product_obj)
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_tva"))
 
@@ -266,6 +289,55 @@ ont été configurés"
         return HTTPFound(self.request.route_path("admin_expense"))
 
 
+class AdminCae(BaseFormView):
+    """
+        Cae information configuration
+    """
+    title = u"Configuration de la CAE"
+    validation_msg = u"Les informations ont bien été enregistrées"
+    schema = CAECONFIG
+    buttons = (submit_btn, )
+
+    def get_model(self):
+        return Cae.query().first()
+
+    def before(self, form):
+        """
+            Add the appstruct to the form
+        """
+        appstruct = self.request.config
+        form.set_appstruct(appstruct)
+        populate_actionmenu(self.request)
+
+    def submit_success(self, appstruct):
+        """
+            Insert config informations into database
+        """
+        # la table config étant un stockage clé valeur
+        # le merge_session_with_post ne peut être utilisé
+        dbdatas = self.dbsession.query(Config).all()
+        log.debug("appstruct")
+        log.debug(appstruct)
+        new_dbdatas = merge_config_datas(dbdatas, appstruct)
+        log.debug("New config")
+        for dbdata in new_dbdatas:
+            log.debug(dbdata.name)
+            if dbdata in dbdatas:
+                self.dbsession.merge(dbdata)
+            else:
+                self.dbsession.add(dbdata)
+            # If we set the contribution_cae value, we want it to be the default
+            # for every company that has no contribution value set
+            if dbdata.name == 'contribution_cae':
+                for comp in Company.query():
+                    if comp.contribution is None:
+                        comp.contribution = dbdata.value
+                        self.dbsession.merge(comp)
+        self.dbsession.flush()
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path("admin_cae"))
+
+
 def includeme(config):
     """
         Add module's views
@@ -277,6 +349,7 @@ def includeme(config):
     config.add_route("admin_paymentmode", "admin/paymentmode")
     config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_expense", "admin/expense")
+    config.add_route("admin_cae", "admin/cae")
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')
@@ -284,14 +357,17 @@ def includeme(config):
                  renderer="admin/main.mako",
                  permission='admin')
     config.add_view(AdminTva, route_name='admin_tva',
-                 renderer="base/simpleformpage.mako",
+                 renderer="admin/main.mako",
                  permission='admin')
     config.add_view(AdminPaymentMode, route_name='admin_paymentmode',
-                renderer="base/simpleformpage.mako",
+                renderer="admin/main.mako",
                 permission='admin')
     config.add_view(AdminWorkUnit, route_name='admin_workunit',
-                renderer="base/simpleformpage.mako",
+                renderer="admin/main.mako",
                 permission='admin')
     config.add_view(AdminExpense, route_name='admin_expense',
-                renderer="base/simpleformpage.mako",
+                renderer="admin/main.mako",
                 permission='admin')
+    config.add_view(AdminCae, route_name='admin_cae',
+            renderer="admin/main.mako",
+            permission="admin")

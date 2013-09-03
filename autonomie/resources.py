@@ -110,11 +110,12 @@ address = Resource(
         lib_autonomie,
         "js/address.js",
         depends=[jquery])
+tva = Resource(lib_autonomie, "js/tva.js", depends=[jquery])
 task = Resource(
         lib_autonomie,
         "js/task.js",
         depends=[tools, jquery_tmpl, address, discount, duplicate, backbone,
-            templates])
+            templates, tva])
 message_js = Resource(
         lib_autonomie,
         "js/message.js",

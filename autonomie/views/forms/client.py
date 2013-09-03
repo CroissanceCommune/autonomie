@@ -68,18 +68,27 @@ client".format(value)
     return unique_ccode
 
 
+def remove_admin_fields(schema, kw):
+    """
+        Remove admin specific fields
+    """
+    if kw['request'].user.is_contractor():
+        del schema['compte_cg']
+        del schema['compte_tiers']
+
+
 class ClientSchema(colander.MappingSchema):
     """
         Schema for customer insertion
     """
+    name = colander.SchemaNode(colander.String(),
+                            title=u"Nom de l'entreprise",
+                            validator=colander.Length(max=255))
     code = colander.SchemaNode(colander.String(),
                              widget=widget.TextInputWidget(mask='****'),
                              title=u'Code',
                              validator=deferred_ccode_valid,
                              description=u"Ce code est unique")
-    name = colander.SchemaNode(colander.String(),
-                            title=u"Nom de l'entreprise",
-                            validator=colander.Length(max=255))
     contactLastName = colander.SchemaNode(colander.String(),
                             title=u'Nom du contact principal',
                             validator=colander.Length(max=255))
@@ -122,10 +131,26 @@ class ClientSchema(colander.MappingSchema):
                     title=u"TVA intracommunautaire",
                     validator=colander.Length(max=50),
                     missing=u'')
+    # Fields specific to the treasury
+    compte_cg = colander.SchemaNode(
+            colander.String(),
+            title=u"Compte CG",
+            description=u"Compte CG utilisé pour ce client dans le logiciel \
+de compta",
+            missing="")
+    compte_tiers = colander.SchemaNode(
+            colander.String(),
+            title=u"Compte Tiers du client",
+            description=u"Compte Tiers utilisé pour ce client dans le logiciel \
+de compta",
+            missing="")
     comments = colander.SchemaNode(colander.String(),
             widget=widget.TextAreaWidget(cols=25, rows=2),
             title=u'Commentaires',
             missing=u'')
+
+
+CLIENTSCHEMA = ClientSchema(after_bind=remove_admin_fields)
 
 
 class ClientSearchSchema(BaseListsSchema):

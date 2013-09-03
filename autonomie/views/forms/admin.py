@@ -140,6 +140,18 @@ class MainConfig(colander.MappingSchema):
     document = DocumentConfig(title=u'Document (devis et factures)')
 
 
+class Product(colander.MappingSchema):
+    """
+        Form schema for a single product configuration
+    """
+    name = colander.SchemaNode(colander.String(), title=u"Libellé")
+    compte_cg = colander.SchemaNode(colander.String(),
+                                    title=u"Compte CG")
+
+
+class ProductSequence(colander.SequenceSchema):
+    product = Product(title=u"Compte produit")
+
 class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
@@ -152,14 +164,19 @@ class TvaItem(colander.MappingSchema):
         AmountType(),
         title=u"Montant",
         css_class='span2')
+    compte_cg = colander.SchemaNode(
+            colander.String(),
+            title=u"Compte CG de Tva")
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",
         widget=widget.CheckboxWidget(true_val="1", false_val="0"))
+    products = ProductSequence(title=u"",
+            widget=widget.SequenceWidget(orderable=False))
 
 
 class TvaSequence(colander.SequenceSchema):
-    tva = TvaItem(title=u"")
+    tva = TvaItem(title=u"Taux de Tva")
 
 
 class TvaConfig(colander.MappingSchema):
@@ -248,11 +265,53 @@ class ExpensesTelConfig(colander.SequenceSchema):
 
 class ExpenseTypesConfig(colander.MappingSchema):
     """
-        Expense Configuration form model
+        Expense Configuration form schema
     """
     expenses = ExpensesConfig(title=u'Frais généraux')
     expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
     expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
+
+
+class CaeConfig(colander.MappingSchema):
+    """
+        Cae configuration form schema
+    """
+    pass
+
+def build_cae_config_schema():
+    fields =(
+    ('compte_cg_contribution', u"Compte CG contribution", u"Compte CG \
+correspondant à la contribution des entrepreneurs à la CAE"),
+    ('compte_rrr', u"Compte RRR", u"Compte Rabais, Remises et Ristournes",),
+    ('compte_frais_annexes', u"Compte de frais annexes", '',),
+    ('compte_cg_assurance', u"Compte CG assurance", '',),
+    ('compte_cg_debiteur', u"Compte CG de débiteur", '',),
+    ('compte_cgscop', u"Compte CGSCOP", "",),
+    ('compte_rg', u"Compte RG", "",),
+    ('compte_debiteur', u"Compte Débiteur", "",),
+    ('numero_analytique', u"Numéro analytique de la CAE", "",),
+    ('rg_coop', u"RG COOP", "",),
+    ('rg', u"RG", "",),
+    ("taux_assurance", u"Taux d'assurance", "",),
+    ("taux_cgscop", u"Taux CGSCOP", "",),
+    ("taux_rg_interne", u"Taux RG Interne", "",),
+    ("taux_rg_client", u"Taux RG Client", "",),
+    ("contribution_cae", u"Pourcentage de la contribution",
+        u"Valeur par défaut de la contribution (nombre entre 1 et 100). \
+        Elle peut être individualisée sur les pages entreprises",),)
+    schema = CaeConfig().clone()
+    for key, title, description in fields:
+        schema.add(colander.SchemaNode(
+                colander.String(),
+                title=title,
+                description=description,
+                missing=u"",
+                name=key))
+
+    return schema
+
+
+CAECONFIG = build_cae_config_schema()
 
 
 def get_config_appstruct(config_dict):
@@ -298,6 +357,7 @@ def get_config_appstruct(config_dict):
     return appstruct
 
 
+
 def get_config_dbdatas(appstruct):
     """
         Returns dict with db compatible datas
@@ -337,12 +397,11 @@ def get_element_by_name(list_, name):
     return found
 
 
-def merge_dbdatas(dbdatas, appstruct):
+def merge_config_datas(dbdatas, appstruct):
     """
         Merge the datas returned by form validation and the original dbdatas
     """
-    new_datas = get_config_dbdatas(appstruct)
-    for name, value in new_datas.items():
+    for name, value in appstruct.items():
         dbdata = get_element_by_name(dbdatas, name)
         if not dbdata:
             # The key 'name' doesn't exist in the database, adding new one

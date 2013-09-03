@@ -20,6 +20,7 @@ selected="selected"
     "${field.oid}",
     function (oid) {
       $('#' + oid + " select").change(function(){
+          onTvaSelect(this);
           var row = $(this).parent().parent();
           $(Facade).trigger("linechange", row);
           $(Facade).trigger("totalchange", row);

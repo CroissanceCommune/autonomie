@@ -22,6 +22,7 @@ from autonomie.views.admin import AdminMain
 from autonomie.views.admin import AdminPaymentMode
 from autonomie.views.admin import AdminWorkUnit
 from autonomie.views.admin import AdminExpense
+from autonomie.views.admin import AdminCae
 from autonomie.tests.base import BaseFunctionnalTest
 
 
@@ -39,12 +40,14 @@ class TestMainView(BaseFunctionnalTest):
 class TestTvaView(BaseFunctionnalTest):
     def test_success(self):
         self.config.add_route('admin_tva', '/')
-        appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1},
-                {'name':"7%", "value":700, "default":0}]}
+        appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1,
+            "products":[]},
+            {'name':"7%", "value":700, "default":0, "products":[]}]}
         view = AdminTva(self.get_csrf_request())
         view.submit_success(appstruct)
         self.assertEqual(self.session.query(tva.Tva).count(), 2)
-        appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1}]}
+        appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1,
+            "products":[]}]}
         view.submit_success(appstruct)
         self.assertEqual(self.session.query(tva.Tva).count(), 1)
 
@@ -116,3 +119,16 @@ class TestExpenseView(BaseFunctionnalTest):
         view.submit_success(appstruct)
         expense = ExpenseType.query().filter(ExpenseType.id==expense.id).first()
         self.assertEqual(expense.code, u"00002")
+
+class TestCaeView(BaseFunctionnalTest):
+    def test_success(self):
+        self.config.add_route("admin_cae", "/")
+        appstruct = {'compte_cg_contribution':"00000668",
+                'compte_rrr':"000009558"}
+        view = AdminCae(self.get_csrf_request())
+        view.submit_success(appstruct)
+        config = get_config()
+        for key, value in appstruct.items():
+            self.assertEqual(config[key], value)
+
+

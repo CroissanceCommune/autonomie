@@ -31,7 +31,7 @@ from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms import ClientSchema
+from autonomie.views.forms import CLIENTSCHEMA
 from autonomie.views.forms import BaseFormView
 from autonomie.views.forms.client import ClientSearchSchema
 from .base import BaseListView
@@ -43,7 +43,7 @@ def get_client_form(request):
     """
         Returns the client add/edit form
     """
-    schema = ClientSchema().bind(request=request)
+    schema = CLIENTSCHEMA.bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
     return form
 
@@ -90,7 +90,7 @@ def client_view(request):
 
 class ClientAdd(BaseFormView):
     title = u"Ajouter un client"
-    schema = ClientSchema()
+    schema = CLIENTSCHEMA
     buttons = (submit_btn,)
 
     def before(self, form):
@@ -109,7 +109,7 @@ class ClientAdd(BaseFormView):
 
 
 class ClientEdit(BaseFormView):
-    schema = ClientSchema()
+    schema = CLIENTSCHEMA
     buttons = (submit_btn,)
 
     @reify

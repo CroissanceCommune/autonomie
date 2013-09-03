@@ -34,6 +34,7 @@ from autonomie.utils.widgets import PopUp
 from autonomie.models.client import Client
 from autonomie.models.project import Project
 from autonomie.models.project import Phase
+from autonomie.models.tva import Tva
 from autonomie.views.base import BaseView
 from autonomie.views.forms.duplicate import DuplicateSchema
 from autonomie.views.forms.duplicate import PhaseChangeSchema
@@ -523,7 +524,6 @@ class TaskFormView(BaseFormView):
         self.buttonmaker = TaskFormActions(request, model=self.model)
         self.context = self.request.context
 
-
     def before(self, form):
         form.buttons = self.buttonmaker.get_buttons(counter=form.counter)
         # Ici on spécifie un template qui permet de rendre nos boutons de
@@ -538,6 +538,14 @@ class TaskFormView(BaseFormView):
         self.request.registry.notify(StatusChanged(self.request, task,
             status))
         return task
+
+    @property
+    def load_options_url(self):
+        return self.request.route_path("taskoptions.json")
+
+    @property
+    def tvas(self):
+        return Tva.query().all()
 
 
 def html(request, template):
@@ -651,3 +659,21 @@ def make_task_delete_view(valid_msg):
             request.session.flash(message)
         return HTTPFound(request.route_path('project', id=project.id))
     return delete
+
+
+def task_options(request):
+    """
+        Returns the task form options as a dict
+    """
+    options = dict()
+    options['tvas'] = dict((tva.value, tva.__json__(request)) \
+            for tva in Tva.query().all())
+    return options
+
+
+def includeme(config):
+    config.add_route("taskoptions.json", "/task/options.json")
+    config.add_view(task_options,
+            route_name="taskoptions.json",
+            xhr=True,
+            renderer="json")

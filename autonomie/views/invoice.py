@@ -23,24 +23,27 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import InvoiceLine
 from autonomie.models.task.task import DiscountLine
-from autonomie.models.tva import Tva
-from autonomie.views.forms.task import get_invoice_schema
-from autonomie.views.forms.task import get_invoice_appstruct
-from autonomie.views.forms.task import get_invoice_dbdatas
+from autonomie.views.forms.task import (
+        get_invoice_schema,
+        get_invoice_appstruct,
+        get_invoice_dbdatas,
+        )
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 
 from autonomie.utils.views import submit_btn
-from autonomie.views.taskaction import TaskFormView
-from autonomie.views.taskaction import get_paid_form
-from autonomie.views.taskaction import get_set_financial_year_form
-from autonomie.views.taskaction import context_is_editable
-from autonomie.views.taskaction import TaskStatusView
-from autonomie.views.taskaction import populate_actionmenu
-
-from autonomie.views.taskaction import make_pdf_view
-from autonomie.views.taskaction import make_html_view
-from autonomie.views.taskaction import make_task_delete_view
+from autonomie.views.taskaction import (
+        TaskFormView,
+        get_paid_form,
+        get_set_financial_year_form,
+        context_is_editable,
+        TaskStatusView,
+        populate_actionmenu,
+        make_pdf_view,
+        make_html_view,
+        make_task_delete_view,
+        task_options,
+        )
 
 log = logging.getLogger(__name__)
 
@@ -65,16 +68,12 @@ class InvoiceAdd(TaskFormView):
     schema = get_invoice_schema()
     buttons = (submit_btn,)
     model = Invoice
-    add_template_vars = ('title', 'company', 'tvas')
+    add_template_vars = ('title', 'company', 'tvas', 'load_options_url', )
 
     @property
     def company(self):
         # Current context is a project
         return self.context.company
-
-    @property
-    def tvas(self):
-        return Tva.query().all()
 
     def before(self, form):
         super(InvoiceAdd, self).before(form)
@@ -117,16 +116,12 @@ class InvoiceEdit(TaskFormView):
     schema = get_invoice_schema()
     buttons = (submit_btn,)
     model = Invoice
-    add_template_vars = ('title', 'company', 'tvas')
+    add_template_vars = ('title', 'company', 'tvas', 'load_options_url', )
 
     @property
     def company(self):
         # Current context is an invoice
         return self.context.project.company
-
-    @property
-    def tvas(self):
-        return Tva.query().all()
 
     @property
     def title(self):
@@ -303,6 +298,7 @@ def includeme(config):
     config.add_route('invoice',
                      '/invoices/{id:\d+}',
                      traverse='/invoices/{id}')
+
     delete_msg = u"La facture {task.number} a bien été supprimée."
     config.add_view(make_pdf_view("tasks/invoice.mako"),
                     route_name='invoice',

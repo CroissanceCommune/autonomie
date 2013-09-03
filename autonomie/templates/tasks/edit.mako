@@ -69,9 +69,18 @@ ${form|n}
         </div>
     </div>
     <script type='text/javascript'>
-        setPopUp('discount_popup', "Remise");
+        $(function(){
+            setPopUp('discount_popup', "Remise");
+        });
     </script>
 </%block>
-<%block name='footerjs'>
-initialize();
+<%block name="footerjs">
+AppOptions = {};
+AppOptions['loadurl'] = "${load_options_url}";
+% if request.user.is_contractor():
+    AppOptions['manager'] = false;
+% else:
+    AppOptions['manager'] = true;
+% endif
 </%block>
+

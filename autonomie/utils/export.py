@@ -93,10 +93,26 @@ class ExcelExpense(object):
         if kmtype:
             columns.append({'label':"Frais de déplacement",
                 'code':kmtype.code})
-        for type_ in ExpenseType.query().filter(ExpenseType.type=="expense"):
+        commontypes = ExpenseType.query()\
+                .filter(ExpenseType.type=="expense")\
+                .filter(ExpenseType.active==True)
+        for type_ in commontypes:
             # Here's a hack to allow to group km fee types and displacement fees
             if type_.code != kmtype.code:
                 columns.append({'label':type_.label, 'code':type_.code})
+
+        types = []
+        for line in self.model.lines:
+            type_ = line.type_object
+            if not type_.active and type_.type != 'expensetel':
+                if type_.id not in types:
+                    types.append(type_.id)
+                    columns.append({
+                         'label':"%s (ce type de frais n'existe plus)"\
+                                 % (type_.label),
+                         'code':type_.code
+                     })
+
         columns.append({'label':'Tva', 'key':'tva',
             'formatter':integer_to_amount})
         columns.append({'label':'Total', 'key':'total',

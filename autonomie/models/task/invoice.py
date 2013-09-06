@@ -20,17 +20,21 @@ import logging
 
 from zope.interface import implementer
 
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy import DateTime
-from sqlalchemy import Text
-from sqlalchemy import func
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import deferred
-from sqlalchemy.orm import backref
-from sqlalchemy.orm import validates
+from sqlalchemy import (
+        Column,
+        Integer,
+        String,
+        ForeignKey,
+        DateTime,
+        Text,
+        func,
+        )
+from sqlalchemy.orm import (
+        relationship,
+        deferred,
+        backref,
+        validates,
+)
 # Aye : ici on a du double dans la bdd, en attendant une éventuelle
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
@@ -38,16 +42,22 @@ from sqlalchemy.dialects.mysql import DOUBLE
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
 from autonomie.exception import Forbidden
-from autonomie.models.base import DBSESSION
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+        DBSESSION,
+        DBBASE,
+        default_table_args,
+        )
 
-from .compute import TaskCompute
-from .compute import LineCompute
-from .compute import InvoiceCompute
-from .interfaces import IMoneyTask
-from .interfaces import IInvoice
-from .interfaces import IPaidTask
+from autonomie.compute.task import (
+        TaskCompute,
+        LineCompute,
+        InvoiceCompute,
+        )
+from .interfaces import (
+        IMoneyTask,
+        IInvoice,
+        IPaidTask,
+        )
 from .task import Task
 from .states import DEFAULT_STATE_MACHINES
 

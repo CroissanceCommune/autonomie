@@ -19,26 +19,33 @@
 import logging
 
 from zope.interface import implementer
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy import Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import validates
-from sqlalchemy.orm import deferred
-from sqlalchemy.orm import backref
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Text,
+    )
+from sqlalchemy.orm import (
+        relationship,
+        validates,
+        deferred,
+        backref,
+        )
 
-from autonomie.models.types import CustomDateType
-from autonomie.models.types import CustomDateType2
+from autonomie.models.types import (
+        CustomDateType,
+        CustomDateType2)
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+        DBBASE,
+        default_table_args,
+        )
 from autonomie.exception import Forbidden
 
 from .interfaces import ITask
 from .states import DEFAULT_STATE_MACHINES
-from .compute import LineCompute
+from autonomie.compute.task import LineCompute
 
 log = logging.getLogger(__name__)
 

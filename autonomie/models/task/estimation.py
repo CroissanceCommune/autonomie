@@ -20,32 +20,47 @@ import logging
 
 from zope.interface import implementer
 
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy import Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import deferred
-from sqlalchemy.orm import backref
+from sqlalchemy import (
+        Column,
+        Integer,
+        String,
+        ForeignKey,
+        Text,
+        )
+from sqlalchemy.orm import (
+        relationship,
+        deferred,
+        backref,
+)
 # Aye : ici on a du double dans la bdd, en attendant une éventuelle
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
 
-from autonomie.models.types import CustomDateType
-from autonomie.models.types import CustomDateType2
+from autonomie.models.types import (
+        CustomDateType,
+        CustomDateType2)
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+        DBBASE,
+        default_table_args,
+        )
 
-from .compute import EstimationCompute
-from .compute import LineCompute
-from .interfaces import IValidatedTask
-from .interfaces import IMoneyTask
-from .invoice import Invoice
-from .invoice import InvoiceLine
-from .task import Task
-from .task import DiscountLine
+from autonomie.compute.task import (
+        EstimationCompute,
+        LineCompute,
+        )
+from .interfaces import (
+        IValidatedTask,
+        IMoneyTask,
+        )
+from .invoice import (
+        Invoice,
+        InvoiceLine,
+        )
+from .task import (
+        Task,
+        DiscountLine,
+        )
 from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)

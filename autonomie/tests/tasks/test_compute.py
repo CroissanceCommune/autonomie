@@ -13,7 +13,7 @@
 # * Project :
 #
 from autonomie.tests.base import BaseTestCase
-from autonomie.models.task.compute import (LineCompute, TaskCompute,
+from autonomie.compute.task import (LineCompute, TaskCompute,
         EstimationCompute, InvoiceCompute, reverse_tva, compute_tva)
 
 TASK = {"expenses":1500, "expenses_ht":1000}

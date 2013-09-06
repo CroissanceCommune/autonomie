@@ -27,7 +27,7 @@ from webhelpers import paginate
 
 from autonomie.utils.views import get_page_url
 from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
-from autonomie.utils.csvtools import (
+from autonomie.export.csvtools import (
         write_csv_to_request,
         SqlaToCsvWriter,
         )

@@ -60,7 +60,7 @@ from autonomie.utils.widgets import (
         PopUp,
         ViewLink,
         )
-from autonomie.utils.export import (
+from autonomie.export.excel import (
         make_excel_view,
         ExcelExpense,
         )

@@ -19,7 +19,7 @@ from sqlalchemy import (
         Integer,
         String,
         )
-from autonomie.utils import csvtools
+from autonomie.export import csvtools
 from autonomie.models import DBBASE
 
 class DummyModel(DBBASE):

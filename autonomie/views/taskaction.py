@@ -40,7 +40,7 @@ from autonomie.views.forms.duplicate import DuplicateSchema
 from autonomie.views.forms.duplicate import PhaseChangeSchema
 from autonomie.views.forms.task import FinancialYearSchema
 from autonomie.views.forms.task import PaymentSchema
-from autonomie.views.forms.utils import BaseFormView
+from autonomie.views.forms import BaseFormView
 from autonomie.utils.pdf import write_pdf
 from autonomie.utils.pdf import render_html
 from autonomie.resources import task_js

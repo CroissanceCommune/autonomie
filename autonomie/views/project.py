@@ -31,20 +31,28 @@ from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie.models.project import Project
-from autonomie.models.project import Phase
+from autonomie.models.project import (
+        Project,
+        Phase,
+        )
 from autonomie.models.client import Client
-from autonomie.utils.widgets import ViewLink
-from autonomie.utils.widgets import ToggleLink
-from autonomie.utils.widgets import ItemActionLink
-from autonomie.utils.widgets import StaticWidget
-from autonomie.utils.widgets import PopUp
-from autonomie.utils.widgets import SearchForm
+from autonomie.utils.widgets import (
+        ViewLink,
+        ToggleLink,
+        ItemActionLink,
+        StaticWidget,
+        PopUp,
+        SearchForm,
+        )
 from autonomie.utils.views import submit_btn
-from autonomie.utils.forms import merge_session_with_post
-from autonomie.views.forms import ProjectSchema
-from autonomie.views.forms import BaseFormView
-from autonomie.views.forms.project import ProjectsListSchema
+from autonomie.views.forms import (
+        merge_session_with_post,
+        BaseFormView,
+        )
+from autonomie.views.forms.project import (
+        ProjectsListSchema,
+        ProjectSchema,
+        )
 from .base import BaseListView
 
 log = logging.getLogger(__name__)

@@ -22,8 +22,8 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.company import Company
-from autonomie.utils.forms import merge_session_with_post
-from autonomie.views.forms.utils import BaseFormView
+from autonomie.views.forms import merge_session_with_post
+from autonomie.views.forms import BaseFormView
 from autonomie.views.forms.company import COMPANYSCHEMA
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.views import submit_btn

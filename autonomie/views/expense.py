@@ -47,7 +47,6 @@ from autonomie.views.render_api import (
         month_name,
         format_account,
         )
-from autonomie.views.forms.utils import BaseFormView
 from autonomie.utils.rest import (
         RestError,
         RestJsonRepr,
@@ -64,7 +63,10 @@ from autonomie.export.excel import (
         make_excel_view,
         ExcelExpense,
         )
-from autonomie.utils.forms import merge_session_with_post
+from autonomie.views.forms import (
+        merge_session_with_post,
+        BaseFormView,
+        )
 from autonomie.resources import expense_js
 
 

@@ -28,7 +28,7 @@ from autonomie.models.task.invoice import (
         CancelInvoice,
         CancelInvoiceLine,
         )
-from autonomie.utils.forms import merge_session_with_post
+from autonomie.views.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.exception import Forbidden
 from autonomie.views.taskaction import (

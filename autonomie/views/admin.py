@@ -34,7 +34,6 @@ from autonomie.models.treasury import (
 )
 from autonomie.models.company import Company
 
-from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.admin import (
         MainConfig,
@@ -47,7 +46,10 @@ from autonomie.views.forms.admin import (
         get_config_dbdatas,
         merge_config_datas,
         )
-from autonomie.views.forms import BaseFormView
+from autonomie.views.forms import (
+        BaseFormView,
+        merge_session_with_post,
+        )
 from autonomie.utils.widgets import ViewLink
 from js.tinymce import tinymce
 

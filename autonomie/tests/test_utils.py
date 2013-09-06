@@ -16,7 +16,7 @@ import colander
 from pyramid import testing
 from mock import Mock
 
-from autonomie.utils.forms import merge_session_with_post
+from autonomie.views.forms import merge_session_with_post
 from autonomie.utils.files import (encode_path, decode_path, issubdir,
         filesizeformat)
 from autonomie.compute.math_utils import floor

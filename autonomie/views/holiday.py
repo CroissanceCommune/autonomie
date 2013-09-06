@@ -24,13 +24,13 @@ from sqlalchemy import or_
 
 
 from autonomie.models.holiday import Holiday
-from autonomie.utils.forms import merge_session_with_post
+from autonomie.views.forms import merge_session_with_post
 from autonomie.utils.rest import RestJsonRepr
 from autonomie.utils.rest import RestError
 from autonomie.utils.rest import add_rest_views
 from autonomie.utils.rest import make_redirect_view
 from autonomie.views.base import BaseView
-from autonomie.views.forms.utils import BaseFormView
+from autonomie.views.forms import BaseFormView
 from autonomie.views.forms.holiday import HolidaySchema
 from autonomie.views.forms.holiday import searchSchema
 from autonomie.resources import holiday_js

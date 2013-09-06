@@ -27,14 +27,18 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.client import Client
-from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms import CLIENTSCHEMA
-from autonomie.views.forms import BaseFormView
-from autonomie.views.forms.client import ClientSearchSchema
+from autonomie.views.forms.client import (
+        CLIENTSCHEMA,
+        ClientSearchSchema,
+        )
+from autonomie.views.forms import (
+        BaseFormView,
+        merge_session_with_post,
+        )
 from .base import (
         BaseListView,
         BaseCsvView,

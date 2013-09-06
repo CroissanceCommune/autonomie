@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 07-02-2012
-# * Last Modified : ven. 08 mars 2013 16:08:41 CET
+# * Last Modified : ven. 06 sept. 2013 12:48:33 CEST
 #
 # * Project :
 #
@@ -28,7 +28,7 @@ from deform import Form
 from deform import Button
 from deform import ValidationFailure
 
-from autonomie.views.forms import get_auth_schema
+from autonomie.views.forms.user import get_auth_schema
 
 log = logging.getLogger(__name__)
 

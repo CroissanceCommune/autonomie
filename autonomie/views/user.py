@@ -26,11 +26,14 @@ from deform import Form
 
 from autonomie.models.user import User
 from autonomie.models.company import Company
-from autonomie.utils.forms import merge_session_with_post
-from autonomie.views.forms.utils import BaseFormView
-from autonomie.utils.widgets import ViewLink
-from autonomie.utils.widgets import SearchForm
-from autonomie.utils.widgets import PopUp
+from autonomie.views.forms import (
+        merge_session_with_post,
+        BaseFormView,
+)
+from autonomie.utils.widgets import (
+        ViewLink,
+        SearchForm,
+        PopUp)
 from autonomie.utils.views import submit_btn
 from autonomie.utils.views import cancel_btn
 from autonomie.views.render_api import format_account

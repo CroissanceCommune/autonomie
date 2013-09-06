@@ -13,7 +13,7 @@
 # * Project :
 #
 import colander
-from autonomie.views.forms.utils import BaseFormView
+from autonomie.views.forms import BaseFormView
 
 from autonomie.tests.base import BaseTestCase, BaseViewTest
 

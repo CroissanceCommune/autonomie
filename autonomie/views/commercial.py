@@ -26,7 +26,7 @@ from fanstatic import Resource
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.utils.views import submit_btn
-from autonomie.utils.forms import merge_session_with_post
+from autonomie.views.forms import merge_session_with_post
 from autonomie.compute.math_utils import dec_round
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice

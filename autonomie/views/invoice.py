@@ -28,7 +28,7 @@ from autonomie.views.forms.task import (
         get_invoice_appstruct,
         get_invoice_dbdatas,
         )
-from autonomie.utils.forms import merge_session_with_post
+from autonomie.views.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 
 from autonomie.utils.views import submit_btn

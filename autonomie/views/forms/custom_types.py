@@ -16,7 +16,7 @@
     Custom colander types
 """
 import colander
-from autonomie.utils.math_utils import amount
+from autonomie.compute.math_utils import amount
 
 
 def specialfloat(self, value):

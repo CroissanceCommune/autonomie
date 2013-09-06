@@ -27,7 +27,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.utils.views import submit_btn
 from autonomie.utils.forms import merge_session_with_post
-from autonomie.utils.math_utils import dec_round
+from autonomie.compute.math_utils import dec_round
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
 from autonomie.models.task import CancelInvoice

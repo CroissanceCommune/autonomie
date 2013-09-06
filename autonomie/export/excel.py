@@ -22,7 +22,7 @@ import cStringIO as StringIO
 from string import ascii_uppercase
 
 from autonomie.utils.ascii import force_ascii
-from autonomie.utils.math_utils import integer_to_amount
+from autonomie.compute.math_utils import integer_to_amount
 from autonomie.models.treasury import ExpenseType
 from autonomie.models.treasury import ExpenseKmType
 from autonomie.models.treasury import ExpenseTelType

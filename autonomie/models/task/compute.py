@@ -19,7 +19,7 @@
 import operator
 import math
 from autonomie.models.tva import Tva
-from autonomie.utils.math_utils import floor
+from autonomie.compute.math_utils import floor
 
 
 def get_default_tva():

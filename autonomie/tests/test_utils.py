@@ -19,8 +19,8 @@ from mock import Mock
 from autonomie.utils.forms import merge_session_with_post
 from autonomie.utils.files import (encode_path, decode_path, issubdir,
         filesizeformat)
-from autonomie.utils.math_utils import floor
-from autonomie.utils.math_utils import amount
+from autonomie.compute.math_utils import floor
+from autonomie.compute.math_utils import amount
 
 from autonomie.utils.rest import RestJsonRepr, RestError
 
@@ -28,8 +28,6 @@ from .base import BaseTestCase
 from .base import BaseViewTest
 from autonomie.tests.base import BaseFunctionnalTest
 
-class DummySchema(colander.MappingSchema):
-    lastname = colander.SchemaNode(colander.String(), title='Nom')
 
 class TestFormUtils(BaseTestCase):
     def test_merge_session_with_post(self):

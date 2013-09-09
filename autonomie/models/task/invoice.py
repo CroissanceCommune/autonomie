@@ -60,6 +60,7 @@ from .interfaces import (
         )
 from .task import Task
 from .states import DEFAULT_STATE_MACHINES
+from autonomie.models.tva import Product
 
 log = logging.getLogger(__name__)
 
@@ -410,6 +411,7 @@ class InvoiceLine(DBBASE, LineCompute):
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
+        newone.product_code = self.product_code
         return newone
 
     def gen_cancelinvoice_line(self):
@@ -428,6 +430,9 @@ class InvoiceLine(DBBASE, LineCompute):
     def __repr__(self):
         return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
  quantity:{s.quantity} tva:{s.tva}>".format(s=self)
+
+    def product(self):
+        return Product.query().filter(Product.code==self.product_code).first()
 
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)

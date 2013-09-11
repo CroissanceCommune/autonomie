@@ -60,7 +60,6 @@ from .interfaces import (
         )
 from .task import Task
 from .states import DEFAULT_STATE_MACHINES
-from autonomie.models.tva import Product
 
 log = logging.getLogger(__name__)
 
@@ -394,11 +393,15 @@ class InvoiceLine(DBBASE, LineCompute):
                default=get_current_timestamp,
                onupdate=get_current_timestamp))
     unity = Column("unity", String(100))
-    product_code = Column(String(125), default="")
+    product_id = Column(Integer)
     task = relationship(
         "Invoice",
         backref=backref("lines", order_by='InvoiceLine.rowIndex',
                         cascade="all, delete-orphan"))
+    product = relationship("Product",
+            primaryjoin="Product.id==InvoiceLine.product_id",
+            uselist=False,
+            foreign_keys=product_id)
 
     def duplicate(self):
         """
@@ -411,7 +414,7 @@ class InvoiceLine(DBBASE, LineCompute):
         newone.description = self.description
         newone.quantity = self.quantity
         newone.unity = self.unity
-        newone.product_code = self.product_code
+        newone.product_id = self.product_id
         return newone
 
     def gen_cancelinvoice_line(self):
@@ -430,9 +433,6 @@ class InvoiceLine(DBBASE, LineCompute):
     def __repr__(self):
         return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
  quantity:{s.quantity} tva:{s.tva}>".format(s=self)
-
-    def product(self):
-        return Product.query().filter(Product.code==self.product_code).first()
 
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
@@ -584,7 +584,6 @@ class CancelInvoiceLine(DBBASE, LineCompute):
     tva = Column("tva", Integer, nullable=False, default=196)
     quantity = Column(DOUBLE, default=1)
     unity = Column(String(100), default=None)
-    product_code = Column(String(125), default="")
 
     def duplicate(self):
         """

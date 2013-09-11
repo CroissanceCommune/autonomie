@@ -210,7 +210,7 @@ def get_product_choices():
     """
         Return data structure for product code select widget options
     """
-    return [(p.compte_cg, u"{0} ({1})".format(p.name, p.compte_cg),)\
+    return [(p.id, u"{0} ({1})".format(p.name, p.compte_cg),)\
             for p in Product.query()]
 
 
@@ -378,8 +378,8 @@ class TaskLine(colander.MappingSchema):
         validator=deferred_tva_validator,
         css_class='span1',
         title=u'TVA')
-    product_code = colander.SchemaNode(
-            colander.String(),
+    product_id = colander.SchemaNode(
+            colander.Integer(),
             widget=deferred_product_widget,
             validator=deferred_product_validator,
             missing="",
@@ -558,8 +558,8 @@ class TaskSchema(colander.MappingSchema):
 
 def remove_admin_fiels(schema, kw):
     if kw['request'].user.is_contractor():
-        # Non admin users doesn't edit product codes
-        del schema['lines']['lines']['taskline']['product_code']
+        # Non admin users doesn't edit products
+        del schema['lines']['lines']['taskline']['product_id']
         print schema['lines']
         schema['lines']['lines'].is_admin = False
         schema['lines']['lines']['taskline']['description'].css_class = 'span4'
@@ -951,7 +951,7 @@ class CancelInvoiceMatch(MappingWrapper):
 class TaskLinesMatch(SequenceWrapper):
     mapping_name = 'lines'
     sequence_name = 'lines'
-    fields = ('description', 'cost', 'quantity', 'unity', 'tva', 'product_code')
+    fields = ('description', 'cost', 'quantity', 'unity', 'tva', 'product_id')
     dbtype = 'lines'
 
 

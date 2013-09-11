@@ -1,4 +1,4 @@
-"""1.7 : expensetype_active_tag
+"""1.7 : Add active tags
 
 Revision ID: 2b29f533fdfc
 Revises: 4ce6b915de98
@@ -20,7 +20,13 @@ def upgrade():
             default=True,
             server_default=sa.sql.expression.true())
     op.add_column("expense_type", col)
+    col = sa.Column('active',
+            sa.Boolean(),
+            default=True,
+            server_default=sa.sql.expression.true())
+    op.add_column("tva", col)
 
 
 def downgrade():
     op.drop_column("expense_type", "active")
+    op.drop_column("tva", "active")

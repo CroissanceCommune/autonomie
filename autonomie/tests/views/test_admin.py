@@ -41,15 +41,17 @@ class TestTvaView(BaseFunctionnalTest):
     def test_success(self):
         self.config.add_route('admin_tva', '/')
         appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1,
-            "products":[]},
-            {'name':"7%", "value":700, "default":0, "products":[]}]}
+            "products":[], 'id':None},
+            {'name':"7%", "value":700, "default":0, "products":[], 'id':None}]}
         view = AdminTva(self.get_csrf_request())
         view.submit_success(appstruct)
-        self.assertEqual(self.session.query(tva.Tva).count(), 2)
+        self.assertEqual(self.session.query(tva.Tva)\
+                .filter(tva.Tva.active==True).count(), 2)
         appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1,
-            "products":[]}]}
+            "id":None, "products":[]}]}
         view.submit_success(appstruct)
-        self.assertEqual(self.session.query(tva.Tva).count(), 1)
+        self.assertEqual(self.session.query(tva.Tva)\
+                .filter(tva.Tva.active==True).count(), 1)
 
 
 class TestPaymentModeView(BaseFunctionnalTest):

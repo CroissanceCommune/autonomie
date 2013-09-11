@@ -141,33 +141,74 @@ class AdminTva(BaseFormView):
         """
             Add appstruct to the current form object
         """
-        appstruct = [{'name':tva.name,
-                      'value':tva.value,
-                      "default":tva.default,
-                      "compte_cg":tva.compte_cg,
-                      "products":[{"name":product.name,
-                                   "compte_cg":product.compte_cg}
-                                   for product in tva.products]}
-                                   for tva in Tva.query().all()]
+        appstruct = []
+        for tva in Tva.query().all():
+            struct = tva.appstruct()
+            struct['products'] = [product.appstruct()
+                    for product in tva.products]
+            appstruct.append(struct)
+
         form.set_appstruct({'tvas':appstruct})
         populate_actionmenu(self.request)
+
+    @staticmethod
+    def get_remaining_prod_ids(appstruct):
+        """
+            return id of products remaining in the submitted config
+        """
+        ids = []
+        for tva in appstruct['tvas']:
+            ids.extend([product['id'] for product in tva['products']])
+        return ids
+
+    @staticmethod
+    def get_remaining_tva_ids(appstruct):
+        """
+            Return ids of tva remaining in the submitted config
+        """
+        return [tva['id'] for tva in appstruct['tvas']]
+
+    def disable_elements(self, factory, ids):
+        """
+            Disable elements of type "factory" that are not in the ids list
+        """
+        for element in factory.query(include_inactive=True).all():
+            if element.id not in ids:
+                element.active = False
+                self.dbsession.merge(element)
 
     def submit_success(self, appstruct):
         """
             fired on submit success, set Tvas
         """
-        for tva in Tva.query().all():
-            self.dbsession.delete(tva)
+        # First we disable the elements that are no longer part of the
+        # configuration
+        self.disable_elements(Product, self.get_remaining_prod_ids(appstruct))
+        self.disable_elements(Tva, self.get_remaining_tva_ids(appstruct))
+        self.dbsession.flush()
+
         for data in appstruct['tvas']:
             products = data.pop('products')
-            tva = Tva()
-            merge_session_with_post(tva, data)
-            self.dbsession.add(tva)
-            for product in products:
-                product_obj = Product()
-                merge_session_with_post(product_obj, product)
-                product_obj.tva = tva
-                self.dbsession.add(product_obj)
+            if data['id'] is not None:
+                tva = Tva.get(data['id'])
+                merge_session_with_post(tva, data)
+                tva = self.dbsession.merge(tva)
+            else:
+                tva = Tva()
+                merge_session_with_post(tva, data)
+                self.dbsession.add(tva)
+
+            for prod in products:
+                if prod['id'] is not None:
+                    product = Product.get(prod['id'])
+                    product.tva = tva
+                    merge_session_with_post(product, prod)
+                    self.dbsession.merge(product)
+                else:
+                    product = Product()
+                    merge_session_with_post(product, prod)
+                    product.tva = tva
+                    self.dbsession.add(product)
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_tva"))
 

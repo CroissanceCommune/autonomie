@@ -144,6 +144,10 @@ class Product(colander.MappingSchema):
     """
         Form schema for a single product configuration
     """
+    id = colander.SchemaNode(colander.Integer(),
+            widget=widget.HiddenWidget(),
+            default=None,
+            missing=None)
     name = colander.SchemaNode(colander.String(), title=u"Libellé")
     compte_cg = colander.SchemaNode(colander.String(),
                                     title=u"Compte CG")
@@ -156,6 +160,10 @@ class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
     """
+    id = colander.SchemaNode(colander.Integer(),
+            widget=widget.HiddenWidget(),
+            default=None,
+            missing=None)
     name = colander.SchemaNode(
         colander.String(),
         title=u"Libellé du taux de TVA",

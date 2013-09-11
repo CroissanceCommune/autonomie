@@ -15,12 +15,17 @@
 """
     Model for tva amounts
 """
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import backref
+from sqlalchemy import (
+        Column,
+        Integer,
+        String,
+        ForeignKey,
+        Boolean,
+        )
+from sqlalchemy.orm import (
+        relationship,
+        backref,
+        )
 
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
@@ -39,10 +44,13 @@ class Tva(DBBASE):
     value = Column("value", Integer)
     default = Column("default", Integer)
     compte_cg = Column("compte_cg", String(125), default="")
+    active = Column(Boolean(), default=True)
 
     @classmethod
-    def query(cls):
+    def query(cls, include_inactive=False):
         q = super(Tva, cls).query()
+        if not include_inactive:
+            q = q.filter(Tva.active==True)
         return q.order_by('value')
 
     @classmethod
@@ -64,6 +72,7 @@ class Product(DBBASE):
     id = Column('id', Integer, primary_key=True)
     name = Column("name", String(8), nullable=False)
     compte_cg = Column("compte_cg", String(125))
+    active = Column(Boolean(), default=True)
     tva_id = Column(Integer, ForeignKey("tva.id", ondelete="cascade"))
     tva = relationship("Tva",
             backref=backref("products", cascade="all, delete-orphan"))
@@ -74,3 +83,10 @@ class Product(DBBASE):
                 name=self.name,
                 compte_cg=self.compte_cg
                 )
+
+    @classmethod
+    def query(cls, include_inactive=False):
+        q = super(Product, cls).query()
+        if not include_inactive:
+            q.filter(Product.active==True)
+        return q.order_by('name')

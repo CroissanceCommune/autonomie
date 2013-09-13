@@ -33,7 +33,7 @@
     </div>
     <div class='row'>
         <div class='span2 offset10'>
-            <button class='btn btn-mini btn-info pull-right' type="button" onclick='deform.appendSequenceItem($(this).parent().parent());' id="${field.oid}-seqAdd">
+            <button class='btn btn-mini btn-info pull-right' type="button" onclick='deform.appendSequenceItem($(this).parent().parent());cleanProductSelects();' id="${field.oid}-seqAdd">
                 Ajouter une ligne
             </button>
         </div>

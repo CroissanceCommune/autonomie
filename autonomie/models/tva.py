@@ -70,7 +70,7 @@ class Product(DBBASE):
     __tablename__ = 'product'
     __table_args__ = default_table_args
     id = Column('id', Integer, primary_key=True)
-    name = Column("name", String(8), nullable=False)
+    name = Column("name", String(125), nullable=False)
     compte_cg = Column("compte_cg", String(125))
     active = Column(Boolean(), default=True)
     tva_id = Column(Integer, ForeignKey("tva.id", ondelete="cascade"))

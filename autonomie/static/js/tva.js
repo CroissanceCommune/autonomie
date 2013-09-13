@@ -42,9 +42,9 @@ function update_product_code_select(pcode_select, codes, current_code){
   if (codes){
     for (var i = 0; i < codes.length; i++) {
       var code = codes[i];
-      options += "<option value='" + code.compte_cg + "'";
+      options += "<option value='" + code.id + "'";
       if (! _.isUndefined(current_code)){
-        if (current_code == code.compte_cg){
+        if (current_code == code.id){
           options += " selected='selected'";
         }
       }else{

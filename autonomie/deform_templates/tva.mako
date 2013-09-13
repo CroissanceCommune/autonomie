@@ -15,6 +15,7 @@ selected="selected"
  value="${value}">${description}</option>
 % endfor
 </select>
+% if field.name == 'tva':
 <script>
  deform.addCallback(
     "${field.oid}",
@@ -27,3 +28,4 @@ selected="selected"
       })
     });
 </script>
+% endif

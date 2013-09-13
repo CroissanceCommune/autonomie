@@ -269,7 +269,7 @@ def deferred_tvas_widget(node, kw):
     wid = widget.SelectWidget(
         values=tvas,
         css_class='span1',
-        template=TEMPLATES_URL + 'tva.mako')
+        template=TEMPLATES_URL + 'select.mako')
     return wid
 
 
@@ -282,7 +282,7 @@ def deferred_product_widget(node, kw):
     wid = widget.SelectWidget(
         values=products,
         css_class='span2',
-        template=TEMPLATES_URL + 'tva.mako')
+        template=TEMPLATES_URL + 'select.mako')
     return wid
 
 

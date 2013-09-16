@@ -78,19 +78,25 @@ def expense_options():
         Return options related to the expense configuration
     """
     options = dict()
-    options["expensetypes"] = [{"label":e.label, "value":str(e.id)}
-             for e in ExpenseType.query()\
-                     .filter(ExpenseType.type=='expense')\
-                     .filter(ExpenseType.active==True)]
-
-    options["kmtypes"] =  [{"label":e.label, "value":str(e.id),
-        "amount":e.amount}
-        for e in ExpenseKmType.query().filter(ExpenseKmType.active==True)]
-
-    options["teltypes"] = [{"label":e.label, "value":str(e.id),
-        "percentage":e.percentage}
-        for e in ExpenseTelType.query().filter(ExpenseTelType.active==True)]
-
+    options["expensetypes"] = [
+        {
+        "label":"{0} ({1})".format(e.label, e.code),
+        "value":str(e.id)
+        }for e in ExpenseType.query()\
+                .filter(ExpenseType.active==True)
+                .filter(ExpenseType.type=='expense')]
+    options["kmtypes"] =  [
+        {
+        "label":"{0} ({1})".format(e.label, e.code),
+        "value":str(e.id),
+        "amount":e.amount
+        }for e in ExpenseKmType.query().filter(ExpenseKmType.active==True)]
+    options["teltypes"] = [
+        {
+        "label":"{0} ({1})".format(e.label, e.code),
+        "value":str(e.id),
+        "percentage":e.percentage
+        }for e in ExpenseTelType.query().filter(ExpenseTelType.active==True)]
     options['categories'] = [{'value':'1',
                             'label':u'Frais direct de fonctionnement'},
                             {'value':'2',

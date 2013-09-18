@@ -66,3 +66,10 @@ def integer_to_amount(value, precision=2):
     flat_point = Decimal(str(math.pow(10, -precision)))
     val = Decimal(str(value)) * flat_point
     return float(Decimal(str(val)).quantize(flat_point, ROUND_DOWN))
+
+
+def percentage(value, percent):
+    """
+        Return the value of the "percent" percent of the original "value"
+    """
+    return float(value) * (int(percent)/100.0)

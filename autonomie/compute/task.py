@@ -60,7 +60,7 @@ class TaskCompute(object):
     discounts = []
     expenses = 0
     expenses_ht = 0
-    expenses_tva = 1960
+    expenses_tva = -1
 
     def lines_total_ht(self):
         """

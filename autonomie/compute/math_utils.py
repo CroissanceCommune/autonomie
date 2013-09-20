@@ -72,4 +72,8 @@ def percentage(value, percent):
     """
         Return the value of the "percent" percent of the original "value"
     """
-    return float(value) * (int(percent)/100.0)
+    return int(float(value) * (int(percent)/100.0))
+
+
+def compute_taux(taux, value):
+    return int(taux * value)

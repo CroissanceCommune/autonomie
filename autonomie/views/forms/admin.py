@@ -288,25 +288,37 @@ class CaeConfig(colander.MappingSchema):
 
 def build_cae_config_schema():
     fields =(
+    ('code_journal', u"Code journal", u"Le code du journal dans Sage",),
+    ('numero_analytique', u"Numéro analytique de la CAE", "",),
     ('compte_cg_contribution', u"Compte CG contribution", u"Compte CG \
 correspondant à la contribution des entrepreneurs à la CAE"),
     ('compte_rrr', u"Compte RRR", u"Compte Rabais, Remises et Ristournes",),
     ('compte_frais_annexes', u"Compte de frais annexes", '',),
-    ('compte_cg_assurance', u"Compte CG assurance", '',),
-    ('compte_cg_debiteur', u"Compte CG de débiteur", '',),
-    ('compte_cgscop', u"Compte CGSCOP", "",),
-    ('compte_rg', u"Compte RG", "",),
-#    ('compte_debiteur', u"Compte Débiteur", "",),
-    ('numero_analytique', u"Numéro analytique de la CAE", "",),
-    ('rg_coop', u"RG COOP", "",),
-#    ('rg', u"RG", "",),
-    ("taux_assurance", u"Taux d'assurance", "",),
-    ("taux_cgscop", u"Taux CGSCOP", "",),
-    ("taux_rg_interne", u"Taux RG Interne", "",),
-    ("taux_rg_client", u"Taux RG Client", "",),
+
+    ('compte_cg_assurance', u"Compte CG assurance",
+        u"Requis pour le module d'écritures Assurance",),
+    ('compte_cgscop', u"Compte CGSCOP",
+        u"Requis pour le module d'écritures CGSCOP",),
+    ('compte_cg_debiteur', u"Compte CG de débiteur",
+        u"Requis pour le module d'écritures CGSCOP",),
+    ('compte_rg_interne', u"Compte RG Interne",
+        u"Requis pour les écritures RG Interne",),
+    ('compte_rg_externe', u"Compte RG Externe",
+        u"Requis pour le module d'écriture RG Client",),
+
+
     ("contribution_cae", u"Pourcentage de la contribution",
         u"Valeur par défaut de la contribution (nombre entre 1 et 100). \
-        Elle peut être individualisée sur les pages entreprises",),)
+        Elle peut être individualisée sur les pages entreprises",),
+    ("taux_assurance", u"Taux d'assurance",
+        u"(nombre entre 1 et 100) Requis pour le module d'écritures Assurance",),
+    ("taux_cgscop", u"Taux CGSCOP",
+        u"(nombre entre 1 et 100) Requis pour le module d'écritures CGSCOP",),
+    ("taux_rg_interne", u"Taux RG Interne",
+        u"(nombre entre 1 et 100) Requis pour les écritures RG Interne",),
+    ("taux_rg_client", u"Taux RG Client",
+        u"(nombre entre 1 et 100) Requis pour le module d'écriture RG Client",)
+    ,)
     schema = CaeConfig().clone()
     for key, title, description in fields:
         schema.add(colander.SchemaNode(

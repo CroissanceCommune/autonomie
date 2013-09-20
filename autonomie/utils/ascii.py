@@ -21,3 +21,12 @@ def force_ascii(datas):
         éko=>ko
     """
     return "".join((i for i in datas if ord(i) < 128))
+
+
+def force_utf8(value):
+    """
+        return a utf-8 string
+    """
+    if isinstance(value, unicode):
+        value = value.encode('utf-8')
+    return value

@@ -20,7 +20,10 @@
 import csv
 import cStringIO as StringIO
 from autonomie.utils.sqla import get_columns
-from autonomie.utils.ascii import force_ascii
+from autonomie.utils.ascii import (
+        force_ascii,
+        force_utf8,
+        )
 
 
 CSV_DELIMITER = ','
@@ -62,40 +65,20 @@ def collect_keys(model):
             yield column.name
 
 
-class SqlaToCsvWriter:
-    """
-        buffer for writing csv files
-        fobj: the destination file object
-        fieldnames: The fieldnames we have in our dest file
-    """
-    def __init__(self, model):
-        self.model = model
-        self.keys = list(collect_keys(self.model))
-        self._datas = []
+class BaseCsvWriter(object):
+    keys = []
+    def __init__(self, datas=None):
+        self._datas = datas or []
 
-    def subdict(self, dic):
-        """
-            restrict the dictionnary to the current fieldnames
-        """
-        ret = {}
-        for key, value in dic.items():
-            if key in self.keys:
-                if isinstance(value, unicode):
-                    value = value.encode('utf-8')
-                ret[key] = value
-        return ret
+    @staticmethod
+    def format_row(row):
+        return row
 
     def add_row(self, row):
         """
             Add a row to our buffer
         """
-        self._datas.append(self.subdict(row))
-
-    def has(self, row):
-        """
-            Is the row in our datas ?
-        """
-        return row in self._datas
+        self._datas.append(self.format_row(row))
 
     def render(self):
         """
@@ -110,6 +93,28 @@ class SqlaToCsvWriter:
         outfile.writeheader()
         outfile.writerows(self._datas)
         return f_buf
+
+
+class SqlaToCsvWriter(BaseCsvWriter):
+    """
+        buffer for writing csv files
+        fobj: the destination file object
+        fieldnames: The fieldnames we have in our dest file
+    """
+    def __init__(self, model, datas):
+        super(SqlaToCsvWriter).__init__(self)
+        self.model = model
+        self.keys = list(collect_keys(self.model))
+
+    def format_row(self, row):
+        """
+            restrict the dictionnary to the current fieldnames
+        """
+        ret = {}
+        for key, value in row.items():
+            if key in self.keys:
+                ret[key] = force_utf8(value)
+        return ret
 
 
 def write_csv_headers(request, filename):

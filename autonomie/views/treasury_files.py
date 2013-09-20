@@ -264,7 +264,7 @@ class SalarySheet(DisplayDirectoryView):
     """
         List the salary sheets
     """
-    title = u"Feuille de paye"
+    title = u"Bulletin de salaire"
     _root_directory = "salaire"
 
 def includeme(config):

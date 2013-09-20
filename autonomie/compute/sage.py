@@ -19,7 +19,11 @@ import datetime
 import warnings
 
 from autonomie.models.tva import Tva
-from autonomie.compute.math_utils import floor
+from autonomie.compute.math_utils import (
+        floor,
+        percentage,
+        compute_taux
+        )
 #FIXME : on a pris le compte_cg comme code tva, pas sûr que ce soit ça
 #FIXME : L'ordre des écriture importe-t-il ?
 #TODO : gérer le cas où on ne retrouve pas le produit ou la tva associé à une
@@ -235,8 +239,8 @@ class SageFacturation(BaseSageBookEntryFactory):
             Return the value of the libelle column
         """
         return u"{0} {1}".format(
-                self.invoice.company.name,
                 self.invoice.client.name,
+                self.invoice.company.name,
                 )
 
     @property
@@ -302,35 +306,209 @@ class SageContribution(BaseSageBookEntryFactory):
     """
         The contribution module
     """
-    pass
+    @property
+    def libelle(self):
+        return u"{0} {1}".format(
+                self.invoice.client.name,
+                self.invoice.company.name,
+                )
+
+    def get_contribution(self):
+        contrib = self.invoice.company.contribution
+        if contrib is None:
+            try:
+                contrib = self.config['contribution_cae']
+            except ValueError:
+                raise MissingData(u'Contribution should be an integer, not : \
+"{0}"'.format(self.config['contribution_cae']))
+        return contrib
+
+    def get_amount(self, product):
+        return percentage(product['ht'], self.get_contribution())
+
+    def debit_ht_entreprise(self, product):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_contribution'],
+                num_analytique=self.invoice.company.code_compta,
+                debit=self.get_amount(product)
+                )
+        return entry
+
+    def credit_ht_entreprise(self, product):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.invoice.company.compte_cg_banque,
+                num_analytique=self.invoice.company.code_compta,
+                credit=self.get_amount(product)
+                )
+        return entry
+
+    def debit_ht_cae(self, product):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.invoice.company.compte_cg_banque,
+                num_analytique=self.config['numero_analytique'],
+                debit=self.get_amount(product))
+        return entry
+
+    def credit_ht_cae(self, product):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_contribution'],
+                num_analytique=self.config['numero_analytique'],
+                credit=self.get_amount(product))
+        return entry
+
+    def yield_entries(self):
+        for product in self.wrapped_invoice.products.values():
+            yield self.debit_ht_entreprise(product)
+            yield self.credit_ht_entreprise(product)
+            yield self.debit_ht_cae(product)
+            yield self.credit_ht_cae(product)
 
 
 class SageAssurance(BaseSageBookEntryFactory):
     """
         The assurance module
     """
-    pass
+    @property
+    def libelle(self):
+        return u"{0} {1}".format(
+                self.invoice.client.name,
+                self.invoice.company.name,
+                )
+
+    def get_amount(self):
+        try:
+            taux = float(self.config['taux_assurance'].replace(',', '.'))
+        except ValueError:
+            raise MissingData(u"Taux assurance should be a float")
+        return compute_taux(taux, self.invoice.total_ht())
+
+    def debit_entreprise(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_assurance'],
+                num_analytique=self.invoice.company.code_compta,
+                debit=self.get_amount(),
+                )
+        return entry
+
+    def credit_entreprise(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.invoice.company.compte_cg_banque,
+                num_analytique=self.invoice.company.code_compta,
+                credit=self.get_amount(),)
+        return entry
+
+    def debit_cae(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.invoice.company.compte_cg_banque,
+                num_analytique=self.config['numero_analytique'],
+                debit=self.get_amount(),)
+        return entry
+
+    def credit_cae(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_assurance'],
+                num_analytique=self.config['numero_analytique'],
+                credit=self.get_amount(),)
+        return entry
+
+    def yield_entries(self):
+        yield self.debit_entreprise()
+        yield self.credit_entreprise()
+        yield self.debit_cae()
+        yield self.credit_cae()
+
 
 
 class SageCGScop(BaseSageBookEntryFactory):
     """
         The cgscop module
     """
-    pass
+    @property
+    def libelle(self):
+        return u"{0} {1}".format(
+                self.invoice.client.name,
+                self.invoice.company.name,
+                )
+
+    def get_amount(self):
+        try:
+            taux = float(self.config['taux_cgscop'].replace(',', '.'))
+        except ValueError:
+            raise MissingData(u"Taux CGSCOP should be a float")
+        return compute_taux(taux, self.invoice.total_ht())
+
+    def debit_entreprise(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cgscop'],
+                num_analytique=self.invoice.company.code_compta,
+                debit=self.get_amount(),
+                )
+        return entry
+
+    def credit_entreprise(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.invoice.company.compte_cg_banque,
+                num_analytique=self.invoice.company.code_compta,
+                credit=self.get_amount(),)
+        return entry
+
+    def debit_cae(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.invoice.company.compte_cg_banque,
+                num_analytique=self.config['numero_analytique'],
+                debit=self.get_amount(),)
+        return entry
+
+    def credit_cae(self):
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_debiteur'],
+                num_analytique=self.config['numero_analytique'],
+                credit=self.get_amount(),)
+        return entry
+
+    def yield_entries(self):
+        yield self.debit_entreprise()
+        yield self.credit_entreprise()
+        yield self.debit_cae()
+        yield self.credit_cae()
+
+
 
 
 class SageRGInterne(BaseSageBookEntryFactory):
     """
         The RGINterne module
     """
-    pass
+    @property
+    def libelle(self):
+        return u"RG COOP {0} {1}".format(
+                self.invoice.client.name,
+                self.invoice.company.name,
+                )
 
 
 class SageRGClient(BaseSageBookEntryFactory):
     """
         The Rg client module
     """
-    pass
+    @property
+    def libelle(self):
+        return u"RG {0} {1}".format(
+                self.invoice.client.name,
+                self.invoice.company.name,
+                )
 
 
 class SageExport(object):

@@ -163,6 +163,10 @@ ce document.".format(status)
         else:
             return None
 
+    @property
+    def company(self):
+        return self.get_company()
+
     def get_client(self):
         """
             Return the client of the current task

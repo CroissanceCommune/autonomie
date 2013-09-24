@@ -116,3 +116,16 @@ def merge_session_with_post(session, app_struct):
         setattr(session, key, value)
     return session
 
+
+def flatten_appstruct(appstruct):
+    """
+        return a flattened appstruct, suppose all keys in the dict and subdict
+        are unique
+    """
+    res = {}
+    for key, value in appstruct.items():
+        if not isinstance(value, dict):
+            res[key] = value
+        else:
+            res.update(value)
+    return res

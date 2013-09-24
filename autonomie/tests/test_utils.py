@@ -16,7 +16,10 @@ import colander
 from pyramid import testing
 from mock import Mock
 
-from autonomie.views.forms import merge_session_with_post
+from autonomie.views.forms import (
+        merge_session_with_post,
+        flatten_appstruct,
+        )
 from autonomie.utils.files import (encode_path, decode_path, issubdir,
         filesizeformat)
 from autonomie.compute.math_utils import floor
@@ -37,6 +40,11 @@ class TestFormUtils(BaseTestCase):
         merge_session_with_post(session, post)
         self.assertTrue(session.name == 'Dupont')
         self.assertTrue("admin" in session.accounts)
+
+    def test_flatten_appstruct(self):
+        appstruct = {'key1':'value1', 'key2': {'key3': 'value3'}}
+        self.assertEqual(flatten_appstruct(appstruct),
+                {'key1': 'value1', 'key3': 'value3'})
 
 
 class TestAvatar(BaseViewTest):

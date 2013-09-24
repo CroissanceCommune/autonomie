@@ -23,6 +23,7 @@ from deform import widget
 from deform import FileData
 
 from autonomie.models.config import Config
+from autonomie.views.forms import flatten_appstruct
 from autonomie.views.forms.validators import validate_image_mime
 from autonomie.utils.fileupload import FileTempStore
 
@@ -286,6 +287,12 @@ class CaeConfig(colander.MappingSchema):
     """
     pass
 
+class SageExportConfig(colander.MappingSchema):
+    """
+        Sage export modules selection form schema
+    """
+    pass
+
 def build_cae_config_schema():
     fields =(
     ('code_journal', u"Code journal", u"Le code du journal dans Sage",),
@@ -327,6 +334,45 @@ correspondant à la contribution des entrepreneurs à la CAE"),
                 description=description,
                 missing=u"",
                 name=key))
+
+
+    export_modules = (
+            ("sage_contribution",
+                u"Module contribution",
+                u"",),
+            ('sage_assurance',
+                u"Module assurance",
+                u"",),
+            ('sage_cgscop',
+                u"Module CGSCOP",
+                u"",),
+            ('sage_rginterne',
+                u"Module RG Interne",
+                u"",),
+            ('sage_rgclient',
+                u"Module RG Client",
+                u"",),
+            )
+    export_schema = SageExportConfig(
+            title=u"Activation des modules d'export Sage",
+            name='sage_export').clone()
+    export_schema.add(colander.SchemaNode(
+        colander.String(),
+        widget=widget.CheckboxWidget(
+            template='autonomie:deform_templates/checkbox_readonly.pt',
+            ),
+        title=u"Module facturation",
+        description=u"activé par défaut",
+        name="sage_facturation_not_used",
+        ))
+    for key, title, description in export_modules:
+        export_schema.add(colander.SchemaNode(
+            colander.String(),
+            widget=widget.CheckboxWidget(true_val="1", false_val="0"),
+            title=title,
+            description=description,
+            name=key))
+    schema.add(export_schema)
 
     return schema
 
@@ -421,7 +467,8 @@ def merge_config_datas(dbdatas, appstruct):
     """
         Merge the datas returned by form validation and the original dbdatas
     """
-    for name, value in appstruct.items():
+    flat_appstruct = flatten_appstruct(appstruct)
+    for name, value in flat_appstruct.items():
         dbdata = get_element_by_name(dbdatas, name)
         if not dbdata:
             # The key 'name' doesn't exist in the database, adding new one

@@ -475,6 +475,7 @@ class RestExpenseLine(BaseView):
             import traceback
             traceback.print_exc()
             log.exception("  - Erreur")
+            log.exception(appstruct)
             raise RestError(err.asdict(), 400)
         line = self.factory(**appstruct)
         line.sheet = self.request.context
@@ -504,6 +505,7 @@ class RestExpenseLine(BaseView):
             import traceback
             traceback.print_exc()
             log.exception("  - Erreur")
+            log.exception(appstruct)
             raise RestError(err.asdict(), 400)
         line = merge_session_with_post(line, appstruct)
         self.request.dbsession.merge(line)

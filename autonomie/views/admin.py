@@ -351,7 +351,13 @@ class AdminCae(BaseFormView):
         """
             Add the appstruct to the form
         """
-        appstruct = self.request.config
+        appstruct = {}
+        for key, value in self.request.config.items():
+            if key.startswith('sage'):
+                appstruct.setdefault('sage_export', {})[key] = value
+            else:
+                appstruct[key] = value
+
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 

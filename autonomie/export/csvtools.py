@@ -68,7 +68,10 @@ def collect_keys(model):
 class BaseCsvWriter(object):
     keys = []
     def __init__(self, datas=None):
-        self._datas = datas or []
+        self._datas = []
+        if datas is not None:
+            for data in datas:
+                self.add_row(data)
 
     @staticmethod
     def format_row(row):

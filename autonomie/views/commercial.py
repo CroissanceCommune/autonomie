@@ -28,15 +28,19 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import merge_session_with_post
 from autonomie.compute.math_utils import dec_round
-from autonomie.models.task import Estimation
-from autonomie.models.task import Invoice
-from autonomie.models.task import CancelInvoice
+from autonomie.models.task import (
+        Estimation,
+        Invoice,
+        CancelInvoice,
+        )
 from autonomie.models.client import Client
 from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
 from autonomie.views.base import BaseView
-from autonomie.views.forms.commercial import CommercialFormSchema
-from autonomie.views.forms.commercial import CommercialSetFormSchema
+from autonomie.views.forms.commercial import (
+        CommercialFormSchema,
+        CommercialSetFormSchema,
+        )
 from autonomie.resources import lib_autonomie, backbone
 
 commercial_js = Resource(lib_autonomie, "js/commercial.js", depends=[backbone])

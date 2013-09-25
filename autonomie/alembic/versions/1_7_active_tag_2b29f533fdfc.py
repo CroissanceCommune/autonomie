@@ -1,4 +1,4 @@
-"""1.7 : Add active tags
+"""1.7 : Add active tags to expense types and tva
 
 Revision ID: 2b29f533fdfc
 Revises: 4ce6b915de98

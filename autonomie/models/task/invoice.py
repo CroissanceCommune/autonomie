@@ -23,6 +23,7 @@ from zope.interface import implementer
 from sqlalchemy import (
         Column,
         Integer,
+        Boolean,
         String,
         ForeignKey,
         DateTime,
@@ -132,6 +133,8 @@ class Invoice(Task, InvoiceCompute):
         "Estimation",
         backref="invoices",
         primaryjoin="Invoice.estimation_id==Estimation.id")
+
+    exported = deferred(Column(Boolean(), default=False), group="edit")
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 

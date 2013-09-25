@@ -13,7 +13,9 @@
                 <strong>Aucune information d'historique ou de statut n'a pu être retrouvée.</strong>
             %endif
         </p>
+        <ul>
         %if not task.is_editable():
+            <li>
             <p>
                 % if task.is_waiting():
                     Vous ne pouvez plus modifier ce document car il est en attente de validation.
@@ -24,24 +26,45 @@
                     % endif
                 % endif
             </p>
+            </li>
         %elif task.is_waiting():
+            <li>
             <p>
                 Vous ne pouvez plus modifier ce document car il est en attente de validation.
             </p>
+            </li>
         % endif
         % if task.is_invoice():
             % if hasattr(task, 'estimation') and task.estimation:
+                <li>
                 <p>
                     Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.number}</a>
                 </p>
+                </li>
             % endif
             % if hasattr(task, 'cancelinvoice') and task.cancelinvoice:
+                <li>
                 <p>
                     L'avoir : <a href="${request.route_path('cancelinvoice', id=task.cancelinvoice.id)}">${task.cancelinvoice.number}</a> a été généré depuis cette facture.
                 </p>
+                </li>
+            % endif
+            % if task.exported:
+                <li>
+                <p>
+                    Cette facture a déjà été exportée
+                </p>
+                </li>
+            % else:
+                <li>
+                <p>
+                    Cette facture n'a pas encore été exportée
+                </p>
+                </li>
             % endif
         % elif task.is_estimation():
             % if hasattr(task, 'invoices') and task.invoices:
+                <li>
                 <p>
                     Les factures suivantes ont été générées depuis ce devis :
                     <ul class='unstyled'>
@@ -52,14 +75,18 @@
                         % endfor
                     </ul>
                 </p>
+                </li>
             % endif
         % elif task.is_cancelinvoice():
             % if hasattr(task, 'invoice') and task.invoice:
+                <li>
                 <p>
                     Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">${task.invoice.officialNumber}</a>
                 </p>
+                </li>
             % endif
         %endif
+    </ul>
 
         % if hasattr(task, "statusComment") and task.statusComment:
             <b>Communication CAE-Entrepreneur</b>

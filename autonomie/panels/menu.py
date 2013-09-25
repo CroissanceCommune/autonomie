@@ -177,14 +177,22 @@ def get_admin_menus(request):
         Build the admin menu
     """
     menu = Menu()
+
+
     href = request.route_path("invoices")
     menu.add_item(u"Factures", icon="icon-list-alt", href=href)
+
     href = request.route_path("holidays")
     menu.add_item(u"Congés", icon="icon-plane", href=href)
 
     if has_permission("admin", request.context, request):
         href = request.route_path("admin_index")
         menu.add_item(u"Configuration", icon="icon-cog", href=href)
+        treasury = DropDown(label=u"Comptabilité")
+        href = request.route_path("sage_export")
+        treasury.add_item(u"Export des factures", icon="icon-list-alt",
+                href=href)
+        menu.add(treasury)
     return menu
 
 

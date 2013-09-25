@@ -8,7 +8,7 @@
 </%doc>
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
-% for form in (all_form, period_form, invoice_number_form):
+% for form in (all_form, period_form, from_invoice_number_form, invoice_number_form):
 <div class='row'>
     <div class='span6 offset3'>
         ${form|n}

@@ -37,6 +37,7 @@ from autonomie.views.base import BaseView
 from autonomie.views.forms.sage import (
         periodSchema,
         InvoiceNumberSchema,
+        FromInvoiceNumberSchema,
         AllSchema,
         )
 
@@ -52,6 +53,22 @@ def get_period_form():
     return Form(schema=schema,
             buttons=(submit_btn,),
             formid='period_form')
+
+
+def get_from_invoice_number_form(counter, request):
+    """
+        Return the export criteria form used to export from a given invoice
+    """
+    submit_btn = Button(name="submit", type="submit",
+            title=u"Exporter")
+    schema = FromInvoiceNumberSchema(
+            title=u"Exporter les factures à partir d'un numéro")
+    schema = schema.bind(request=request)
+    return Form(schema=schema,
+            buttons=(submit_btn,),
+            formid='from_invoice_number_form',
+            counter=counter)
+
 
 
 def get_invoice_number_form(counter, request):
@@ -111,6 +128,14 @@ class SageExportPage(BaseView):
             query = query.filter(Invoice.officialNumber == officialNumber)
             financial_year = query_params_dict['financial_year']
             query = query.filter(Invoice.financial_year == financial_year)
+        elif 'start_officialNumber' in query_params_dict:
+            officialNumber = query_params_dict['start_officialNumber']
+            query = query.filter(Invoice.officialNumber >= officialNumber)
+            financial_year = query_params_dict['financial_year']
+            query = query.filter(Invoice.financial_year == financial_year)
+        if not 'exported' in query_params_dict or \
+                not query_params_dict.get('exported'):
+            query.filter(Invoice.exported == False)
         return query
 
     def check_invoice_line(self, line):
@@ -218,6 +243,9 @@ sont manquantes"
         period_form = get_period_form()
         invoice_number_form = get_invoice_number_form(period_form.counter,
                 self.request)
+        from_invoice_number_form = get_from_invoice_number_form(
+                period_form.counter,
+                self.request)
         all_form = get_all_form(period_form.counter)
         log.debug("Here we are")
         log.debug(self.request.params)
@@ -232,6 +260,15 @@ sont manquantes"
                             self.request.POST.items())
                 except ValidationFailure as e:
                     invoice_number_form = e
+
+            elif "from_invoice_number_form" in self.request.POST.values():
+                log.debug(u"It's the from_invoice_number_form")
+                try:
+                    appstruct = from_invoice_number_form.validate(
+                            self.request.POST.items())
+                except ValidationFailure as e:
+                    from_invoice_number_form = e
+
 
             elif "period_form" in self.request.POST.values():
                 log.debug(u"It's the period form")
@@ -256,6 +293,7 @@ sont manquantes"
                 period_form=period_form.render(),
                 invoice_number_form=invoice_number_form.render(),
                 all_form=all_form.render(),
+                from_invoice_number_form=from_invoice_number_form.render(),
                 check_messages=check_messages)
 
 

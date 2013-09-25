@@ -42,6 +42,14 @@ def date_validator(form, value):
         raise exc
 
 
+ExportedField = colander.SchemaNode(colander.Boolean(),
+            title=u"Inclure les documents déjà exportés ?",
+            default=False,
+            missing=False,
+            description=u"Autonomie retient les documents qui ont déjà été \
+exportés, vous pouvez décider ici de les inclure")
+
+
 class PeriodSchema(colander.MappingSchema):
     """
         A form used to select a period
@@ -50,6 +58,7 @@ class PeriodSchema(colander.MappingSchema):
             widget=get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
             widget=get_date_input())
+    exported = ExportedField
 
 
 periodSchema = PeriodSchema(
@@ -69,7 +78,25 @@ class InvoiceNumberSchema(colander.MappingSchema):
     officialNumber = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture')
+    exported = ExportedField
 
+
+class FromInvoiceNumberSchema(colander.MappingSchema):
+    """
+        Form schema for an invoice number selection (year + number)
+    """
+    financial_year = colander.SchemaNode(colander.Integer(),
+            widget=deferred_year_select_widget,
+            default=default_year,
+            missing=default_year,
+            title=u"Année comptable")
+    start_officialNumber = colander.SchemaNode(
+            colander.String(),
+            title=u'Numéro de facture',
+            description=u"Numéro de facture à partir duquel vous voulez \
+exporter (celle-ci sera inclue dans l'export)")
+    exported = ExportedField
 
 class AllSchema(colander.MappingSchema):
     pass
+

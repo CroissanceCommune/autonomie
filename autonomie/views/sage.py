@@ -135,7 +135,7 @@ class SageExportPage(BaseView):
             query = query.filter(Invoice.financial_year == financial_year)
         if not 'exported' in query_params_dict or \
                 not query_params_dict.get('exported'):
-            query.filter(Invoice.exported == False)
+            query = query.filter(Invoice.exported == False)
         return query
 
     def check_invoice_line(self, line):
@@ -178,11 +178,9 @@ class SageExportPage(BaseView):
         res = {'title': title, 'errors':[]}
 
         for invoice in invoices:
-            log.debug("Checking an invoice")
             officialNumber = invoice.officialNumber
             for line in invoice.lines:
                 if not self.check_invoice_line(line):
-                    log.debug("There's an error with this line")
                     invoice_url = self.request.route_path('invoice',
                             id=invoice.id)
                     message = u"La facture {0} n'est pas exportable :"

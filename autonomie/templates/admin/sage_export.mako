@@ -9,7 +9,11 @@
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
 % if check_messages is not None:
-    <h2>${check_messages['title']}</h2>
+    <div class='row'>
+        <div class='span6 offset3'>
+            <h2>${check_messages['title']}</h2>
+        </div>
+    </div>
     <p class='text-error'>
     % for message in check_messages['errors']:
         <b>*</b> ${message|n}<br />

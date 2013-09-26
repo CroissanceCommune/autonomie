@@ -37,7 +37,7 @@ def upgrade():
     # Les factures deja validees sont considerees comme exportees
     logger.warn(u"On tag des factures comme exportees")
     for invoice in Invoice.query():
-        if invoice.has_been_validated():
+        if invoice.CAEStatus in Invoice.valid_states:
             invoice.exported = True
             DBSESSION().merge(invoice)
             logger.warn(u"officialNumber : {0.officialNumber} \

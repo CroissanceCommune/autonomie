@@ -178,6 +178,7 @@ class SageExportPage(BaseView):
             title = u"Il n'y a aucune facture à exporter"
             res = {'title': title,
                     'errors': [""]}
+            return res
         title = u"Vous vous apprêtez à exporter {0} factures".format(
                 count)
         res = {'title': title, 'errors':[]}

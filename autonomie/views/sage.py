@@ -173,8 +173,13 @@ class SageExportPage(BaseView):
         """
             Check that the given invoices are 'exportable'
         """
+        count = invoices.count()
+        if count == 0:
+            title = u"Il n'y a aucune facture à exporter"
+            res = {'title': title,
+                    'errors': [""]}
         title = u"Vous vous apprêtez à exporter {0} factures".format(
-                invoices.count())
+                count)
         res = {'title': title, 'errors':[]}
 
         for invoice in invoices:

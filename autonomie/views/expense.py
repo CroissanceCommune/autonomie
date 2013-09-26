@@ -80,20 +80,20 @@ def expense_options():
     options = dict()
     options["expensetypes"] = [
         {
-        "label":"{0} ({1})".format(e.label, e.code),
+        "label":u"{0} ({1})".format(e.label, e.code),
         "value":str(e.id)
         }for e in ExpenseType.query()\
                 .filter(ExpenseType.active==True)
                 .filter(ExpenseType.type=='expense')]
     options["kmtypes"] =  [
         {
-        "label":"{0} ({1})".format(e.label, e.code),
+        "label":u"{0} ({1})".format(e.label, e.code),
         "value":str(e.id),
         "amount":e.amount
         }for e in ExpenseKmType.query().filter(ExpenseKmType.active==True)]
     options["teltypes"] = [
         {
-        "label":"{0} ({1})".format(e.label, e.code),
+        "label":u"{0} ({1})".format(e.label, e.code),
         "value":str(e.id),
         "percentage":e.percentage
         }for e in ExpenseTelType.query().filter(ExpenseTelType.active==True)]

@@ -8,13 +8,6 @@
 </%doc>
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
-% for form in (all_form, period_form, from_invoice_number_form, invoice_number_form):
-<div class='row'>
-    <div class='span6 offset3'>
-        ${form|n}
-    </div>
-</div>
-% endfor
 % if check_messages is not None:
     <h2>${check_messages['title']}</h2>
     <p class='text-error'>
@@ -23,5 +16,12 @@
     % endfor
     </p>
 % endif
+% for form in (all_form, period_form, from_invoice_number_form, invoice_number_form):
+<div class='row'>
+    <div class='span6 offset3'>
+        ${form|n}
+    </div>
+</div>
+% endfor
 </%block>
 

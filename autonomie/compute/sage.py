@@ -22,7 +22,6 @@ from autonomie.models.tva import Tva
 from autonomie.compute.math_utils import (
         floor,
         percentage,
-        compute_taux
         )
 
 def format_sage_date(date_object):
@@ -62,13 +61,14 @@ class SageInvoice(object):
             créer produit
     """
     expense_tva_compte_cg = None
+    expense_tva_code = None
 
     def __init__(self, invoice, compte_cgs=None):
         self.products = {}
         self.invoice = invoice
         self.compte_cgs = compte_cgs or {}
 
-    def get_product(self, compte_cg_produit, compte_cg_tva):
+    def get_product(self, compte_cg_produit, compte_cg_tva, code_tva):
         """
             Return the product dict belonging to the key "compte_cg_produit"
         """
@@ -76,6 +76,7 @@ class SageInvoice(object):
         if prod == {}:
             prod['compte_cg_produit'] = compte_cg_produit
             prod['compte_cg_tva'] = compte_cg_tva
+            prod['code_tva'] = code_tva
         return prod
 
     def _populate_invoice_lines(self):
@@ -88,7 +89,8 @@ class SageInvoice(object):
                 raise MissingData(u"No product found for this invoice line")
             prod = self.get_product(
                     line.product.compte_cg,
-                    line.product.tva.compte_cg
+                    line.product.tva.compte_cg,
+                    line.product.tva.code,
                     )
             prod['tva'] = prod.get('tva', 0) + line.tva_amount()
             prod['ht'] = prod.get('ht', 0) + line.total_ht()
@@ -103,7 +105,9 @@ class SageInvoice(object):
                 raise MissingData(u"No tva found for this discount line")
             prod = self.get_product(
                     self.compte_cgs['compte_rrr'],
-                    tva.compte_cg)
+                    tva.compte_cg,
+                    tva.code,
+                    )
             prod['tva'] = prod.get('tva', 0) + line.tva_amount()
             prod['ht'] = prod.get('ht', 0) + line.total_ht()
 
@@ -114,9 +118,12 @@ class SageInvoice(object):
         if self.invoice.expenses > 0 or self.invoice.expenses_ht > 0:
             if self.expense_tva_compte_cg is None:
                 self.expense_tva_compte_cg = Tva.get_default().compte_cg
+                self.expense_tva_code = Tva.get_default().code
+
             prod = self.get_product(
                         self.compte_cgs["compte_frais_annexes"],
-                        self.expense_tva_compte_cg
+                        self.expense_tva_compte_cg,
+                        self.expense_tva_code
                         )
             ht_expense = self.invoice.get_expense_ht()
             ttc_expense = self.invoice.expenses_amount()
@@ -277,7 +284,7 @@ class SageFacturation(BaseSageBookEntryFactory):
         entry.update(
                 compte_cg=product['compte_cg_produit'],
                 num_analytique=self.num_analytique,
-                code_tva=product['compte_cg_tva'],
+                code_tva=product['code_tva'],
                 credit=product['ht']
                 )
         return entry
@@ -288,9 +295,9 @@ class SageFacturation(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=product['compte_cg_produit'],
+                compte_cg=product['compte_cg_tva'],
                 num_analytique=self.num_analytique,
-                code_tva=product['compte_cg_tva'],
+                code_tva=product['code_tva'],
                 credit=product['tva']
                 )
         return entry

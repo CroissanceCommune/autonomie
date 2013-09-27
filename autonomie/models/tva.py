@@ -44,6 +44,7 @@ class Tva(DBBASE):
     value = Column("value", Integer)
     default = Column("default", Integer)
     compte_cg = Column("compte_cg", String(125), default="")
+    code = Column("code", String(125), default="")
     active = Column(Boolean(), default=True)
 
     @classmethod

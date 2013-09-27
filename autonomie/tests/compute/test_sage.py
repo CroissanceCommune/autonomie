@@ -76,9 +76,9 @@ def get_config():
 
 def prepare():
     tva1 = MagicMock(name="tva1", value=1960, default=0,
-            compte_cg="TVA0001")
+            compte_cg="TVA0001", code='CTVA0001')
     tva2 = MagicMock(name="tva2", value=700, default=0,
-            compte_cg="TVA0002")
+            compte_cg="TVA0002", code='CTVA0002')
 
     p1 = MagicMock(name="product 1", compte_cg="P0001", tva=tva1)
     p2 = MagicMock(name="product 2", compte_cg="P0002", tva=tva2)
@@ -112,8 +112,10 @@ class TestSageInvoice(BaseTestCase):
     def test_get_products(self):
         obj = SageInvoice(invoice=MagicMock())
         obj.products['1'] = {'test_key':'test'}
-        self.assertTrue(obj.get_product('1', 'dontcare').has_key('test_key'))
-        self.assertEqual(len(obj.get_product('2', 'tva_cg_code').keys()), 2)
+        self.assertTrue(
+                obj.get_product('1', 'dontcare', 'dontcare').has_key('test_key'))
+        self.assertEqual(len(obj.get_product('2', 'tva_compte_cg',
+            'tva_code').keys()), 3)
 
     def test_populate_invoice_lines(self):
         tvas, products, invoice = prepare()
@@ -185,16 +187,16 @@ class TestSageFacturation(BaseBookEntryTest):
         res = {'libelle': 'client company',
             'compte_cg': 'P0001',
             'num_analytique': 'COMP_CG',
-            'code_tva': 'TVA0001',
+            'code_tva': 'CTVA0001',
             'credit': 20000}
         method = "credit_totalht"
         self._test_product_book_entry(method, res)
 
     def test_credit_tva(self):
         res = {'libelle': 'client company',
-            'compte_cg': 'P0001',
+            'compte_cg': 'TVA0001',
             'num_analytique': 'COMP_CG',
-            'code_tva': 'TVA0001',
+            'code_tva': 'CTVA0001',
             'credit': 3920}
         method = "credit_tva"
         self._test_product_book_entry(method, res)

@@ -20,6 +20,7 @@ from autonomie.models.task import Invoice
 def upgrade():
     logger = logging.getLogger("alembic.add_compte_cg")
     op.add_column("tva", sa.Column("compte_cg", sa.String(125), default=""))
+    op.add_column("tva", sa.Column("code", sa.String(125), default=""))
     op.add_column("company", sa.Column("contribution", sa.Integer))
     op.add_column("customer",
             sa.Column("compte_cg", sa.String(125), default=""))
@@ -45,6 +46,7 @@ def upgrade():
 
 def downgrade():
     op.drop_column("tva", "compte_cg")
+    op.drop_column("tva", "code")
     op.drop_column("company", "contribution")
     op.drop_column("customer", "compte_cg")
     op.drop_column("customer", "compte_tiers")

@@ -176,6 +176,9 @@ class TvaItem(colander.MappingSchema):
     compte_cg = colander.SchemaNode(
             colander.String(),
             title=u"Compte CG de Tva")
+    code = colander.SchemaNode(
+            colander.String(),
+            title=u"Code de Tva")
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",

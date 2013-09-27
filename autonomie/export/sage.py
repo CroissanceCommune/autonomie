@@ -24,6 +24,7 @@ class SageCsvWriter(BaseCsvWriter):
     """
         Write Sage csv files
     """
+    delimiter = ";"
     headers = (
             ('code_journal', "Code Journal"),
             ('date', "Date de pièce"),

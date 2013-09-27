@@ -26,7 +26,7 @@ from autonomie.utils.ascii import (
         )
 
 
-CSV_DELIMITER = ','
+CSV_DELIMITER = ';'
 CSV_QUOTECHAR = '"'
 
 
@@ -67,6 +67,9 @@ def collect_keys(model):
 
 class BaseCsvWriter(object):
     keys = []
+    delimiter = CSV_DELIMITER
+    quotechar = CSV_QUOTECHAR
+
     def __init__(self, datas=None):
         self._datas = []
         if datas is not None:
@@ -90,8 +93,8 @@ class BaseCsvWriter(object):
         f_buf = StringIO.StringIO()
         outfile = csv.DictWriter(f_buf,
                                  self.keys,
-                                 delimiter=CSV_DELIMITER,
-                                 quotechar=CSV_QUOTECHAR,
+                                 delimiter=self.delimiter,
+                                 quotechar=self.quotechar,
                                  quoting=csv.QUOTE_ALL)
         outfile.writeheader()
         outfile.writerows(self._datas)

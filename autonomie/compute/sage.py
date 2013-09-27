@@ -323,7 +323,8 @@ class SageFacturation(BaseSageBookEntryFactory):
         """
         for product in self.wrapped_invoice.products.values():
             yield self.credit_totalht(product)
-            yield self.credit_tva(product)
+            if product['tva'] > 0:
+                yield self.credit_tva(product)
             yield self.debit_ttc(product)
 
 

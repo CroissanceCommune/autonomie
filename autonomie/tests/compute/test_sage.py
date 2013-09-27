@@ -204,7 +204,7 @@ class TestSageFacturation(BaseBookEntryTest):
     def test_debit_ttc(self):
         method = "debit_ttc"
         res = {'libelle': 'client company',
-            'compte_cg': 'COMP_CG',
+            'compte_cg': 'CG_CLIENT',
             'num_analytique': 'COMP_CG',
             'compte_tiers': 'CLIENT',
             'debit': 23920,

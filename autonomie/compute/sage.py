@@ -309,7 +309,7 @@ class SageFacturation(BaseSageBookEntryFactory):
         entry = self.get_base_entry()
         echeance = self.invoice.taskDate + datetime.timedelta(days=30)
         entry.update(
-                compte_cg=self.invoice.company.code_compta,
+                compte_cg=self.invoice.client.compte_cg,
                 num_analytique=self.num_analytique,
                 compte_tiers=self.invoice.client.compte_tiers,
                 echeance=format_sage_date(echeance),

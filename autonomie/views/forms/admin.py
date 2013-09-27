@@ -175,9 +175,11 @@ class TvaItem(colander.MappingSchema):
         css_class='span2')
     compte_cg = colander.SchemaNode(
             colander.String(),
+            missing="",
             title=u"Compte CG de Tva")
     code = colander.SchemaNode(
             colander.String(),
+            missing="",
             title=u"Code de Tva")
     default = colander.SchemaNode(
         colander.Integer(),

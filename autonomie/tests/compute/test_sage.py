@@ -64,6 +64,7 @@ def get_config():
             'compte_cgscop': 'CG_SCOP',
             'compte_rg_externe': 'CG_RG_EXT',
             'compte_rg_interne': 'CG_RG_INT',
+            'compte_cg_banque': 'BANK_CG',
             'numero_analytique': 'NUM_ANA',
             'rg_coop': 'CG_RG_COOP',
             'taux_assurance': "5",
@@ -89,10 +90,8 @@ def prepare():
     line3 = DummyLine(cost=10000, quantity=1, tva=tva2.value, product=p2,
             tva_object=tva2)
 
-    company = Dummy(name="company", code_compta='COMP_CG',
-            compte_cg_banque='COMP_BANK_CG', contribution=None)
-    client = Dummy(name="client", compte_tiers="CLIENT",
-            compte_cg='CG_CLIENT')
+    company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
+    client = Dummy(name="client", compte_tiers="CLIENT", compte_cg='CG_CLIENT')
     invoice = TaskCompute()
     invoice.taskDate = datetime.date(2013, 02, 02)
     invoice.client = client
@@ -225,7 +224,7 @@ class TestSageContribution(BaseBookEntryTest):
     def test_credit_entreprise(self):
         method = "credit_entreprise"
         res = {'libelle': 'client company',
-            'compte_cg': 'COMP_BANK_CG',
+            'compte_cg': 'BANK_CG',
             'num_analytique': 'COMP_CG',
             'credit':2000}
         self._test_product_book_entry(method, res)
@@ -233,7 +232,7 @@ class TestSageContribution(BaseBookEntryTest):
     def test_debit_cae(self):
         method = "debit_cae"
         res = {'libelle': 'client company',
-            'compte_cg': 'COMP_BANK_CG',
+            'compte_cg': 'BANK_CG',
             'num_analytique': 'NUM_ANA',
             'debit':2000}
         self._test_product_book_entry(method, res)
@@ -265,7 +264,7 @@ class TestSageAssurance(BaseBookEntryTest):
         method = 'credit_entreprise'
         res = {
                 'libelle': 'client company',
-                'compte_cg': 'COMP_BANK_CG',
+                'compte_cg': 'BANK_CG',
                 'num_analytique': 'COMP_CG',
                 'credit': 2000,
                 }
@@ -275,7 +274,7 @@ class TestSageAssurance(BaseBookEntryTest):
         method = 'debit_cae'
         res = {
                 'libelle': 'client company',
-                'compte_cg': 'COMP_BANK_CG',
+                'compte_cg': 'BANK_CG',
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000,
                 }
@@ -310,7 +309,7 @@ class TestSageCGScop(BaseBookEntryTest):
         res = {
                 'libelle': 'client company',
                 'num_analytique': 'COMP_CG',
-                'compte_cg': 'COMP_BANK_CG',
+                'compte_cg': 'BANK_CG',
                 'credit': 2000,
                 }
         self._test_invoice_book_entry(method, res)
@@ -319,7 +318,7 @@ class TestSageCGScop(BaseBookEntryTest):
         method = 'debit_cae'
         res = {
                 'libelle': 'client company',
-                'compte_cg': 'COMP_BANK_CG',
+                'compte_cg': 'BANK_CG',
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000,
                 }
@@ -350,7 +349,7 @@ class TestSageRGInterne(BaseBookEntryTest):
     def test_credit_entreprise(self):
         method = "credit_entreprise"
         res = {'libelle': 'RG COOP client company',
-            'compte_cg': 'COMP_BANK_CG',
+            'compte_cg': 'BANK_CG',
             'num_analytique': 'COMP_CG',
             'credit':1196}
         self._test_product_book_entry(method, res)
@@ -358,7 +357,7 @@ class TestSageRGInterne(BaseBookEntryTest):
     def test_debit_cae(self):
         method = "debit_cae"
         res = {'libelle': 'RG COOP client company',
-            'compte_cg': 'COMP_BANK_CG',
+            'compte_cg': 'BANK_CG',
             'num_analytique': 'NUM_ANA',
             'debit':1196}
         self._test_product_book_entry(method, res)

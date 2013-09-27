@@ -93,7 +93,6 @@ def remove_admin_fields(schema, kw):
         del schema['RIB']
         del schema['IBAN']
         del schema['code_compta']
-        del schema['compte_cg_banque']
         del schema['contribution']
 
 
@@ -138,11 +137,6 @@ class CompanySchema(colander.MappingSchema):
             title=u"Compte analytique",
             description=u"Compte analytique utilisé dans le logiciel de compta",
             missing="")
-    compte_cg_banque = colander.SchemaNode(
-            colander.String(),
-            title=u"Compte CG Banque",
-            missing=u"",
-            description=u"Compte CG Banque de l'entreprise")
     contribution = colander.SchemaNode(
             colander.Integer(),
             widget=widget.TextInputWidget(

@@ -301,6 +301,7 @@ def build_cae_config_schema():
 correspondant à la contribution des entrepreneurs à la CAE"),
     ('compte_rrr', u"Compte RRR", u"Compte Rabais, Remises et Ristournes",),
     ('compte_frais_annexes', u"Compte de frais annexes", '',),
+    ('compte_cg_banque', u"Compte CG Banque", "",),
 
     ('compte_cg_assurance', u"Compte CG assurance",
         u"Requis pour le module d'écritures Assurance",),

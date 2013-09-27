@@ -150,11 +150,6 @@ class SageExportPage(BaseView):
         """
         if not company.code_compta:
             return False
-        for module in ('sage_contribution', 'sage_assurance', 'sage_cgscop',
-                'sage_rginterne'):
-            if self.request.config.get('module'):
-                if not company.compte_cg_banque:
-                    return False
         return True
 
 

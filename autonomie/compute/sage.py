@@ -367,7 +367,7 @@ class SageContribution(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.invoice.company.code_compta,
                 credit=self.get_amount(product)
                 )
@@ -379,7 +379,7 @@ class SageContribution(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.config['numero_analytique'],
                 debit=self.get_amount(product))
         return entry
@@ -443,7 +443,7 @@ class SageAssurance(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.invoice.company.code_compta,
                 credit=self.get_amount(),)
         return entry
@@ -454,7 +454,7 @@ class SageAssurance(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.config['numero_analytique'],
                 debit=self.get_amount(),)
         return entry
@@ -518,7 +518,7 @@ class SageCGScop(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.invoice.company.code_compta,
                 credit=self.get_amount(),)
         return entry
@@ -529,7 +529,7 @@ class SageCGScop(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.config['numero_analytique'],
                 debit=self.get_amount(),)
         return entry
@@ -595,7 +595,7 @@ class SageRGInterne(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.invoice.company.code_compta,
                 credit=self.get_amount(product),)
         return entry
@@ -606,7 +606,7 @@ class SageRGInterne(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.company.compte_cg_banque,
+                compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.config['numero_analytique'],
                 debit=self.get_amount(product),)
         return entry

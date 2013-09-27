@@ -78,7 +78,6 @@ class Company(DBBASE):
                             order_by="Project.id",
                             backref="company")
     code_compta = deferred(Column(String(30), default=0), group="edit")
-    compte_cg_banque = deferred(Column(String(125), default=""), group='edit')
     contribution = deferred(Column(Integer), group='edit')
 
     def get_path(self):

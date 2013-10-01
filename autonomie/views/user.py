@@ -76,8 +76,7 @@ class UserList(BaseListView):
         """
         return User.query(ordered=False).outerjoin(User.companies)
 
-    @staticmethod
-    def filter_name_search(query, appstruct):
+    def filter_name_search(self, query, appstruct):
         """
             filter the query with the provided search argument
         """

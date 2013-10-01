@@ -194,7 +194,8 @@ class DisplayDirectoryView(BaseView):
             collect all documents restricted to the given prefix
         """
         result_dict = {}
-        if self.root_directory is not None:
+        if self.root_directory is not None and \
+                os.path.isdir(self.root_directory):
             for year, year_path in self.digit_subdirs(self.root_directory):
                 result_dict[year] = {}
                 for month, month_path in self.digit_subdirs(year_path):

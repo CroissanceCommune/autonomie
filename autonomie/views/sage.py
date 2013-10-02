@@ -21,6 +21,7 @@
 """
 import logging
 import datetime
+from sqlalchemy import or_, and_
 
 from deform import (
         Button,
@@ -32,7 +33,10 @@ from autonomie.compute.sage import SageExport as ComputeSageExport
 from autonomie.export.sage import SageCsvWriter
 from autonomie.export.csvtools import write_csv_to_request
 
-from autonomie.models.task import Invoice
+from autonomie.models.task import (
+        Task,
+        Invoice,
+        CancelInvoice,)
 from autonomie.views.base import BaseView
 from autonomie.views.forms.sage import (
         periodSchema,
@@ -111,31 +115,57 @@ class SageExportPage(BaseView):
         today = datetime.date.today()
         return u"export_facture_{:%d%m%Y}.csv".format(today)
 
+    def _filter_valid(self, query):
+        inv_validated = Invoice.valid_states
+        cinv_valid = CancelInvoice.valid_states
+        return query.filter(or_(and_(Task.CAEStatus.in_(inv_validated),
+            Task.type_=='invoice'),
+            and_(Task.CAEStatus.in_(cinv_valid),
+                Task.type_=='cancelinvoice')))
+
+    def _filter_date(self, query, start_date, end_date):
+        return query.filter(Task.taskDate.between(start_date, end_date))
+
+    def _filter_number(self, query, number, year, strict=False):
+        if strict:
+            query = query.filter(
+                or_(Invoice.officialNumber == number,
+                    CancelInvoice.officialNumber  == number))
+        else:
+            query = query.filter(
+                or_(Invoice.officialNumber >= number,
+                    CancelInvoice.officialNumber  >= number))
+
+        return query.filter(
+                or_(Invoice.financial_year == year,
+                    CancelInvoice.financial_year == year))
 
     def query_invoices(self, query_params_dict):
         """
             Retrieve the exports we want to export
         """
-        query = Invoice.query().filter(Invoice.CAEStatus\
-                .in_(Invoice.valid_states))
+        query = Task.query().with_polymorphic([Invoice, CancelInvoice])
+        query = self._filter_valid(query)
+
 
         if 'start_date' in query_params_dict:
             start_date = query_params_dict['start_date']
             end_date = query_params_dict['end_date']
-            query = query.filter(Invoice.taskDate.between(start_date, end_date))
+            query = self._filter_date(query, start_date, end_date)
         elif 'officialNumber' in query_params_dict:
             officialNumber = query_params_dict['officialNumber']
-            query = query.filter(Invoice.officialNumber == officialNumber)
             financial_year = query_params_dict['financial_year']
-            query = query.filter(Invoice.financial_year == financial_year)
+            query = self._filter_number(query, officialNumber, financial_year,
+                    strict=True)
         elif 'start_officialNumber' in query_params_dict:
             officialNumber = query_params_dict['start_officialNumber']
-            query = query.filter(Invoice.officialNumber >= officialNumber)
             financial_year = query_params_dict['financial_year']
-            query = query.filter(Invoice.financial_year == financial_year)
+            query = self._filter_number(query, officialNumber, financial_year,
+                    strict=False)
         if not 'exported' in query_params_dict or \
                 not query_params_dict.get('exported'):
-            query = query.filter(Invoice.exported == False)
+            query = query.filter(or_(Invoice.exported == False,
+                                     CancelInvoice.exported == False))
         return query
 
     def check_invoice_line(self, line):

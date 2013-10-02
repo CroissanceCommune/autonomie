@@ -262,6 +262,14 @@ sont manquantes"
 
         return res
 
+    def record_invoices_exported(self, invoices):
+        for invoice in invoices:
+            log.info("The invoice number {1} (id : {0}) has been exported"\
+                    .format(invoice.id, invoice.officialNumber))
+            invoice.exported = True
+            self.request.dbsession.merge(invoice)
+
+
     def write_csv(self, invoices):
         """
             Write the exported csv file to the request
@@ -269,6 +277,7 @@ sont manquantes"
         exporter = ComputeSageExport(self.request.config)
         writer = SageCsvWriter(exporter.get_book_entries(invoices))
         write_csv_to_request(self.request, self.filename, writer.render())
+        self.record_invoices_exported(invoices)
         return self.request.response
 
     def __call__(self):
@@ -279,14 +288,10 @@ sont manquantes"
                 period_form.counter,
                 self.request)
         all_form = get_all_form(period_form.counter)
-        log.debug("Here we are")
-        log.debug(self.request.params)
         check_messages = None
 
         if 'submit' in self.request.params:
-            log.debug(u"A form has been submitted")
             if "invoice_number_form" in self.request.POST.values():
-                log.debug(u"It's the invoice_number_form")
                 try:
                     appstruct = invoice_number_form.validate(
                             self.request.POST.items())
@@ -294,7 +299,6 @@ sont manquantes"
                     invoice_number_form = e
 
             elif "from_invoice_number_form" in self.request.POST.values():
-                log.debug(u"It's the from_invoice_number_form")
                 try:
                     appstruct = from_invoice_number_form.validate(
                             self.request.POST.items())
@@ -303,24 +307,19 @@ sont manquantes"
 
 
             elif "period_form" in self.request.POST.values():
-                log.debug(u"It's the period form")
                 try:
                     appstruct = period_form.validate(self.request.POST.items())
                 except ValidationFailure as e:
                     period_form = e
             elif "all_form" in self.request.POST.values():
-                log.debug(u"Ask for all non-validate invoices")
                 try:
                     appstruct = all_form.validate(self.request.POST.items())
                 except ValidationFailure as e:
                     all_form = e
             invoices = self.query_invoices(appstruct)
-            log.debug(u"We want to export some invoices : '{0}' invoices"\
-                    .format(len(invoices.all())))
             check_messages = self.check_invoices(invoices)
             if check_messages['errors'] == []:
                 try:
-                    log.debug("Here we are")
                     return self.write_csv(invoices)
                 except (MissingData, KeyError), e:
                     check_messages['errors'] = [u"Des éléments de \

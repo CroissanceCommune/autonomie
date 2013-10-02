@@ -29,7 +29,10 @@ from deform import (
         )
 from deform.exception import ValidationFailure
 
-from autonomie.compute.sage import SageExport as ComputeSageExport
+from autonomie.compute.sage import (
+        SageExport as ComputeSageExport,
+        MissingData,
+        )
 from autonomie.export.sage import SageCsvWriter
 from autonomie.export.csvtools import write_csv_to_request
 
@@ -316,7 +319,14 @@ sont manquantes"
                     .format(len(invoices.all())))
             check_messages = self.check_invoices(invoices)
             if check_messages['errors'] == []:
-                return self.write_csv(invoices)
+                try:
+                    log.debug("Here we are")
+                    return self.write_csv(invoices)
+                except (MissingData, KeyError), e:
+                    check_messages['errors'] = [u"Des éléments de \
+configuration sont manquants, veuillez configurer \
+les informations comptables nécessaires à l'export des documents, \
+dans Configuration->Configuration des informations comptables de la CAE"]
 
         return dict(title=self.title,
                 period_form=period_form.render(),

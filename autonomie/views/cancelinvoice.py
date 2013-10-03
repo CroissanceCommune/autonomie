@@ -17,6 +17,7 @@
 """
 import logging
 
+from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.views.forms.task import (
@@ -37,6 +38,7 @@ from autonomie.views.taskaction import (
     TaskStatusView,
     populate_actionmenu,
     get_set_financial_year_form,
+    get_set_products_form,
     make_pdf_view,
     make_html_view,
     make_task_delete_view,
@@ -176,6 +178,29 @@ class CancelInvoiceEdit(TaskFormView):
 
 class CancelInvoiceStatus(TaskStatusView):
 
+    def redirect(self):
+        project_id = self.request.context.project.id
+        return HTTPFound(self.request.route_path('project', id=project_id))
+
+    def pre_set_products_process(self, task, status, params):
+        """
+            Pre processed method for product configuration
+        """
+        log.debug(u"+ Setting products for an invoice (pre-step)")
+        form = get_set_products_form(self.request)
+        appstruct = form.validate(params.items())
+        log.debug(appstruct)
+        return appstruct
+
+    def post_set_products_process(self, task, status, params):
+        log.debug(u"+ Setting products for an invoice (post-step)")
+        invoice = params
+        invoice = self.request.dbsession.merge(invoice)
+        log.debug(u"Configuring prodicts for invoice :{0}".format(invoice.id))
+        msg = u"Les codes produits ont bien été configurés"
+        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
+        self.request.session.flash(msg)
+
     def pre_set_financial_year_process(self, task, status, params):
         """
             Handle form validation before setting the financial year of
@@ -193,13 +218,37 @@ class CancelInvoiceStatus(TaskStatusView):
         log.debug(u"Set financial year of the cancelinvoice :{0}"\
                 .format(cancelinvoice.id))
         msg = u"L'année comptable de référence a bien été modifiée"
-        msg = msg.format(self.request.route_path("cancelinvoice",
-                                                id=cancelinvoice.id))
         self.request.session.flash(msg)
 
     def post_valid_process(self, task, status, params):
         msg = u"L'avoir porte le numéro <b>{0}</b>"
         self.session.flash(msg.format(task.officialNumber))
+
+
+def set_financial_year(request):
+    """
+        Set the financial year of a document
+    """
+    try:
+        ret_dict = CancelInvoiceStatus(request)()
+    except ValidationFailure, err:
+        log.exception(u"Financial year set error")
+        ret_dict = dict(form=err.render(),
+                title=u"Année comptable de référence")
+    return ret_dict
+
+
+def set_products(request):
+    """
+        Set products in a document
+    """
+    try:
+        ret_dict = CancelInvoiceStatus(request)()
+    except ValidationFailure, err:
+        log.exception(u"Error setting products")
+        ret_dict = dict(form=err.render(),
+                title=u"Année comptable de référence")
+    return ret_dict
 
 
 def includeme(config):
@@ -236,3 +285,14 @@ def includeme(config):
                     route_name='cancelinvoice',
                     request_param='action=delete',
                     permission='edit')
+
+    config.add_view(set_financial_year,
+                    route_name="cancelinvoice",
+                    request_param='action=set_financial_year',
+                    permission="view",
+                    renderer='base/formpage.mako')
+    config.add_view(set_products,
+                    route_name="cancelinvoice",
+                    request_param='action=set_products',
+                    permission="view",
+                    renderer='base/formpage.mako')

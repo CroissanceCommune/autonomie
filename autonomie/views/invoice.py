@@ -211,21 +211,6 @@ class InvoiceStatus(TaskStatusView):
         msg = msg.format(self.request.route_path("invoice", id=invoice.id))
         self.request.session.flash(msg)
 
-    def pre_set_financial_year_process(self, task, status, params):
-        """
-            Handle form validation before setting the financial year of
-            the current task
-        """
-        form = get_set_financial_year_form(self.request)
-        # if an error is raised here, it will be cached a level higher
-        appstruct = form.validate(params.items())
-        log.debug(u" * Form has been validated")
-        return appstruct
-
-    def post_valid_process(self, task, status, params):
-        msg = u"La facture porte le numéro <b>{0}</b>"
-        self.session.flash(msg.format(task.officialNumber))
-
     def pre_gencinv_process(self, task, status, params):
         params = dict(params.items())
         params['user'] = self.request.user
@@ -253,6 +238,17 @@ class InvoiceStatus(TaskStatusView):
         msg = msg.format(self.request.route_path("invoice", id=id_))
         self.request.session.flash(msg)
 
+    def pre_set_financial_year_process(self, task, status, params):
+        """
+            Handle form validation before setting the financial year of
+            the current task
+        """
+        form = get_set_financial_year_form(self.request)
+        # if an error is raised here, it will be cached a level higher
+        appstruct = form.validate(params.items())
+        log.debug(u" * Form has been validated")
+        return appstruct
+
     def post_set_financial_year_process(self, task, status, params):
         invoice = params
         invoice = self.request.dbsession.merge(invoice)
@@ -270,6 +266,10 @@ class InvoiceStatus(TaskStatusView):
         # original wrapping call (see register_payment)
         appstruct = form.validate(params.items())
         return appstruct
+
+    def post_valid_process(self, task, status, params):
+        msg = u"La facture porte le numéro <b>{0}</b>"
+        self.session.flash(msg.format(task.officialNumber))
 
 
 def register_payment(request):
@@ -307,6 +307,19 @@ def set_financial_year(request):
         ret_dict = InvoiceStatus(request)()
     except ValidationFailure, err:
         log.exception(u"Financial year set error")
+        ret_dict = dict(form=err.render(),
+                title=u"Année comptable de référence")
+    return ret_dict
+
+
+def set_products(request):
+    """
+        Set products in a document
+    """
+    try:
+        ret_dict = InvoiceStatus(request)()
+    except ValidationFailure, err:
+        log.exception(u"Error setting products")
         ret_dict = dict(form=err.render(),
                 title=u"Année comptable de référence")
     return ret_dict
@@ -352,6 +365,11 @@ def includeme(config):
     config.add_view(set_financial_year,
                     route_name="invoice",
                     request_param='action=set_financial_year',
+                    permission="view",
+                    renderer='base/formpage.mako')
+    config.add_view(set_products,
+                    route_name="invoice",
+                    request_param='action=set_products',
                     permission="view",
                     renderer='base/formpage.mako')
 

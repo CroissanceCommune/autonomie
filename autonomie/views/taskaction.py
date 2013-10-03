@@ -73,11 +73,11 @@ def get_set_products_form(request, counter=None):
     schema = SetProductsSchema().bind(request=request)
     action = request.route_path(request.context.__name__,
             id=request.context.id,
-            _query=dict(action='status'))
+            _query=dict(action='set_products'))
     valid_btn = Button(name='submit', value="set_products", type='submit',
                         title=u"Valider")
     form = Form(schema=schema, buttons=(valid_btn,), action=action,
-                counter=counter, formid="set_products")
+                counter=counter)
     return form
 
 
@@ -139,7 +139,7 @@ def get_set_financial_year_form(request, counter=None):
     valid_btn = Button(name='submit', value="set_financial_year", type='submit',
                 title=u"Valider")
     form = Form(schema=schema, buttons=(valid_btn,), action=action,
-            formid="set_financial_year_form", counter=counter)
+            counter=counter)
     return form
 
 

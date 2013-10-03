@@ -121,23 +121,3 @@ class SqlaToCsvWriter(BaseCsvWriter):
             if key in self.keys:
                 ret[key] = force_utf8(value)
         return ret
-
-
-def write_csv_headers(request, filename):
-    """
-        write the headers of the csv file 'filename'
-    """
-    request.response.content_type = 'application/csv'
-    request.response.headerlist.append(
-            ('Content-Disposition',
-                'attachment; filename={0}'.format(force_ascii(filename))))
-    return request
-
-
-def write_csv_to_request(request, filename, buf):
-    """
-        write a csv buffer to the current request
-    """
-    request = write_csv_headers(request, filename)
-    request.response.write(buf.getvalue())
-    return request

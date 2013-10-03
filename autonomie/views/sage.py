@@ -34,7 +34,7 @@ from autonomie.compute.sage import (
         MissingData,
         )
 from autonomie.export.sage import SageCsvWriter
-from autonomie.export.csvtools import write_csv_to_request
+from autonomie.export.utils import write_file_to_request
 
 from autonomie.models.task import (
         Task,
@@ -116,7 +116,7 @@ class SageExportPage(BaseView):
     @property
     def filename(self):
         today = datetime.date.today()
-        return u"export_facture_{:%d%m%Y}.csv".format(today)
+        return u"export_facture_{:%d%m%Y}.txt".format(today)
 
     def _filter_valid(self, query):
         inv_validated = Invoice.valid_states
@@ -276,7 +276,11 @@ sont manquantes"
         """
         exporter = ComputeSageExport(self.request.config)
         writer = SageCsvWriter(exporter.get_book_entries(invoices))
-        write_csv_to_request(self.request, self.filename, writer.render())
+        write_file_to_request(
+                self.request,
+                self.filename,
+                writer.render(),
+                headers="application/csv")
         self.record_invoices_exported(invoices)
         return self.request.response
 

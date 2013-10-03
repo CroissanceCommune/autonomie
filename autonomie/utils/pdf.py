@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 06-02-2012
-# * Last Modified : mar. 30 avril 2013 10:45:01 CEST
+# * Last Modified : jeu. 03 oct. 2013 12:54:14 CEST
 #
 # * Project : coopagestv2
 #
@@ -25,7 +25,7 @@ from xhtml2pdf import pisa
 from pyramid.renderers import render
 from pyramid.threadlocal import get_current_request
 
-from autonomie.utils.ascii import force_ascii
+from autonomie.export.utils import write_file_to_request
 
 
 def render_html(request, template, datas):
@@ -39,20 +39,8 @@ def write_pdf(request, filename, html):
     """
         Write a pdf in a pyramid request
     """
-    request = write_pdf_headers(request, filename)
     result = buffer_pdf(html)
-    request.response.write(result.getvalue())
-    return request
-
-
-def write_pdf_headers(request, filename):
-    """
-        write the headers for the pdf file 'filename'
-    """
-    request.response.content_type = 'application/pdf'
-    request.response.headerlist.append(
-                ('Content-Disposition',
-                 'attachment; filename={0}'.format(force_ascii(filename))))
+    write_file_to_request(request, filename, result)
     return request
 
 

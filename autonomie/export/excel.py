@@ -21,7 +21,7 @@ from openpyxl.style import Color, Fill
 import cStringIO as StringIO
 from string import ascii_uppercase
 
-from autonomie.utils.ascii import force_ascii
+from autonomie.export.utils import write_file_to_request
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie.models.treasury import ExpenseType
 from autonomie.models.treasury import ExpenseKmType
@@ -330,7 +330,7 @@ CLIENTS"
         """
         cell = self.get_merged_cells('D', 'J')
         cell.value = u"Accord après vérification"
-        self.index +=1
+        self.index += 1
         self.worksheet.merge_cells(
                 start_row=self.index,
                 end_row=self.index +4,
@@ -396,31 +396,6 @@ CLIENTS"
         return result
 
 
-def write_excel_headers(request, filename):
-    """
-        write the headers of the excel file 'filename'
-    """
-    request.response.content_type = 'application/vnd.ms-excel'
-    request.response.headerlist.append(
-            ('Content-Disposition',
-                'attachment; filename={0}'.format(force_ascii(filename))))
-    return request
-
-
-def write_excel(request, filename, factory):
-    """
-        write an excel stylesheet to the current request
-        :param filename: the filename to output the document to
-        :param factory: the Excel factory that should be used to wrap the
-            request context the factory should provide a render method
-            returning a file like object
-    """
-    request = write_excel_headers(request, filename)
-    result = factory(request.context).render()
-    request.response.write(result.getvalue())
-    return request
-
-
 def make_excel_view(filename_builder, factory):
     """
         Build an excel view of a model
@@ -435,6 +410,7 @@ def make_excel_view(filename_builder, factory):
             the dynamically builded view object
         """
         filename = filename_builder(request)
-        request = write_excel(request, filename, factory)
+        result = factory(request.context).render()
+        request = write_file_to_request(request, filename, result)
         return request.response
     return _view

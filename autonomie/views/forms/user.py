@@ -44,7 +44,7 @@ def unique_login(node, value):
     """
         Test login unicity against database
     """
-    result = User.query().filter_by(login=value).first()
+    result = User.query(only_active=False).filter_by(login=value).first()
     if result:
         message = u"Le login '{0}' n'est pas disponible.".format(
                                                             value)

@@ -6,7 +6,7 @@
 #   License: http://www.gnu.org/licenses/gpl-3.0.txt
 #
 # * Creation Date : 11-01-2012
-# * Last Modified : mar. 24 sept. 2013 15:43:14 CEST
+# * Last Modified : lun. 07 oct. 2013 14:33:37 CEST
 #
 # * Project : autonomie
 #
@@ -133,13 +133,3 @@ def main(global_config, **settings):
     add_resources_to_registry()
 
     return config.make_wsgi_app()
-
-
-def formalchemy(config):
-    """
-        Set formalchemy's configuration
-    """
-    #FIXME : Not used yet, it is still a very buggy module (and maybe it will
-    #           not change)
-    config.include("autonomie.fainit")
-    config.include("autonomie.faroutes")

@@ -1,17 +1,3 @@
-# -*- coding: utf-8 -*-
-# * File Name : subscribers.py
-#
-# * Copyright (C) 2010 Gaston TJEBBES <g.t@majerti.fr>
-# * Company : Majerti ( http://www.majerti.fr )
-#
-#   This software is distributed under GPLV3
-#   License: http://www.gnu.org/licenses/gpl-3.0.txt
-#
-# * Creation Date : 27-03-2012
-# * Last Modified :
-#
-# * Project :
-#
 """
     Subscribers
     Add menus to the returned datas before rendering

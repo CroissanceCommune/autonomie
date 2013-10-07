@@ -1,17 +1,3 @@
-# -*- coding: utf-8 -*-
-# * File Name : sage.py
-#
-# * Copyright (C) 2012 Gaston TJEBBES <g.t@majerti.fr>
-# * Company : Majerti ( http://www.majerti.fr )
-#
-#   This software is distributed under GPLV3
-#   License: http://www.gnu.org/licenses/gpl-3.0.txt
-#
-# * Creation Date : 24-09-2013
-# * Last Modified :
-#
-# * Project :
-#
 """
     Sage export views
     Provide views to manage sage invoice exports

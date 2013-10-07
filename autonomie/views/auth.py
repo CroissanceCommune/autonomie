@@ -1,15 +1,3 @@
-# -*- coding: utf-8 -*-
-# * File Name : auth.py
-#
-# * Copyright (C) 2012 Majerti <tech@majerti.fr>
-#   This software is distributed under GPLV3
-#   License: http://www.gnu.org/licenses/gpl-3.0.txt
-#
-# * Creation Date : 07-02-2012
-# * Last Modified : ven. 06 sept. 2013 12:48:33 CEST
-#
-# * Project :
-#
 """
     All Authentication views
 """

@@ -1,15 +1,3 @@
-# -*- coding: utf-8 -*-
-# * File Name : views.py
-#
-# * Copyright (C) 2012 Majerti <tech@majerti.fr>
-#   This software is distributed under GPLV3
-#   License: http://www.gnu.org/licenses/gpl-3.0.txt
-#
-# * Creation Date : mer. 11 janv. 2012
-# * Last Modified : lun. 12 nov. 2012 11:06:43 CET
-#
-# * Project : autonomie
-#
 """
     Index view
 """

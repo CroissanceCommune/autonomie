@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
-# * File Name : translater.py
+# * Copyright (C) 2012-2013 Croissance Commune
+# * Authors:
+#       * Arezki Feth <f.a@majerti.fr>;
+#       * Miotte Julien <j.m@majerti.fr>;
+#       * Pettier Gabriel;
+#       * TJEBBES Gaston <g.t@majerti.fr>
 #
-# * Copyright (C) 2010 Gaston TJEBBES <tonthon21@gmail.com>
-#   This software is distributed under GPLV3
-#   License: http://www.gnu.org/licenses/gpl-3.0.txt
+# This file is part of Autonomie : Progiciel de gestion de CAE.
 #
-# * Creation Date : 18-02-2012
-# * Last Modified : mar. 17 avril 2012 17:32:21 CEST
+#    Autonomie is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-# * Project : Autonomie
+#    Autonomie is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
+#    You should have received a copy of the GNU General Public License
+#    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 """
     Translation tools
 """

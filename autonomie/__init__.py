@@ -1,14 +1,25 @@
 # -*- coding: utf-8 -*-
-# * File Name : __init__.py
+# * Copyright (C) 2012-2013 Croissance Commune
+# * Authors:
+#       * Arezki Feth <f.a@majerti.fr>;
+#       * Miotte Julien <j.m@majerti.fr>;
+#       * Pettier Gabriel;
+#       * TJEBBES Gaston <g.t@majerti.fr>
 #
-# * Copyright (C) 2012 Majerti <tech@majerti.fr>
-#   This software is distributed under GPLV3
-#   License: http://www.gnu.org/licenses/gpl-3.0.txt
+# This file is part of Autonomie : Progiciel de gestion de CAE.
 #
-# * Creation Date : 11-01-2012
-# * Last Modified : lun. 07 oct. 2013 14:33:37 CEST
+#    Autonomie is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-# * Project : autonomie
+#    Autonomie is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 """
     Main file for our pyramid application
@@ -133,3 +144,8 @@ def main(global_config, **settings):
     add_resources_to_registry()
 
     return config.make_wsgi_app()
+
+__author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"
+__copyright__ = "Copyright 2012-2013, Croissance Commune"
+__license__ = "GPL"
+__version__ = "3.0"

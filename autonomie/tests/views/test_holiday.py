@@ -1,17 +1,27 @@
 # -*- coding: utf-8 -*-
-# * File Name : test_holiday.py
+# * Copyright (C) 2012-2013 Croissance Commune
+# * Authors:
+#       * Arezki Feth <f.a@majerti.fr>;
+#       * Miotte Julien <j.m@majerti.fr>;
+#       * Pettier Gabriel;
+#       * TJEBBES Gaston <g.t@majerti.fr>
 #
-# * Copyright (C) 2012 Gaston TJEBBES <g.t@majerti.fr>
-# * Company : Majerti ( http://www.majerti.fr )
+# This file is part of Autonomie : Progiciel de gestion de CAE.
 #
-#   This software is distributed under GPLV3
-#   License: http://www.gnu.org/licenses/gpl-3.0.txt
+#    Autonomie is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-# * Creation Date : 05-11-2012
-# * Last Modified :
+#    Autonomie is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-# * Project :
+#    You should have received a copy of the GNU General Public License
+#    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
+
 from datetime import date
 from autonomie.models.holiday import Holiday
 from mock import Mock
@@ -62,4 +72,3 @@ class TestHolidayRegister(BaseFunctionnalTest):
 
         holiday = get_holidays(user_id=user.id).all()[0]
         self.assertEqual(holiday.start_date.day, 13)
-

@@ -22,8 +22,6 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
-# -*- coding: utf-8 -*-
     <div class='row taskline' id="taskline_${esc('id')}">
         <div class='span5'>
             <textarea class='span5' name="prestation_${esc('id')}">{{if prestation}}${esc('prestation')}{{/if}}</textarea>

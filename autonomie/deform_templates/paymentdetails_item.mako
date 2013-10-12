@@ -22,8 +22,6 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
-# -*- coding: utf-8 -*-
 %if field.title:
     % if field.widget.__dict__.has_key('before'):
         ${field.renderer(field.widget.before, options=field.widget.before_options)|n}

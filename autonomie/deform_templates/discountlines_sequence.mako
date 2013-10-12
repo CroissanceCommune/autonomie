@@ -22,8 +22,6 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
-# -*- coding: utf-8 -*-
 <div>
     <div class='control-group estimationamounts offset8' id='tasklines_ht'>
         <div class='control-label'>

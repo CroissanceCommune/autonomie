@@ -22,8 +22,6 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
-# -*- coding: utf-8 -*-
 <div>
     <input type="hidden" name="__start__" value="${field.name}:sequence" class="deformProto" prototype="${field.widget.prototype(field)}">
     <div class='row linesblockheader'>

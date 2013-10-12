@@ -26,33 +26,33 @@
 
 var ALREADY_LOADED = new Object();
 
-function fetch_client(client_id){
+function fetch_customer(customer_id){
   return $.ajax({
          type: 'GET',
-         url:"/clients/" + client_id,
+         url:"/customers/" + customer_id,
          dataType: 'json',
          success: function(data) {
-           ALREADY_LOADED[client_id] = data;
+           ALREADY_LOADED[customer_id] = data;
          },
          async: false
   });
 }
 
-function get_client(client_id){
+function get_customer(customer_id){
   /*
-   * Fetch the client object through the json api
+   * Fetch the customer object through the json api
    */
-  if (client_id in ALREADY_LOADED){
-    return ALREADY_LOADED[client_id];
+  if (customer_id in ALREADY_LOADED){
+    return ALREADY_LOADED[customer_id];
   }else{
-    fetch_client(client_id);
-    return ALREADY_LOADED[client_id];
+    fetch_customer(customer_id);
+    return ALREADY_LOADED[customer_id];
   }
 }
 function get_form(){
   return $('#duplicate_form');
 }
-function get_select_client(){
+function get_select_customer(){
   return $(get_form().find('select')[0]);
 }
 function get_select_project(){
@@ -97,16 +97,16 @@ function update_phase_select(phases){
   }
   get_select_phase().html(options);
 }
-function getCurrentClient(){
-  var client_id = get_select_client().children('option:selected').val();
-  return get_client(client_id);
+function getCurrentCustomer(){
+  var customer_id = get_select_customer().children('option:selected').val();
+  return get_customer(customer_id);
 }
 function getCurrentProject(){
   var project_id = get_select_project().children('option:selected').val();
-  var client = getCurrentClient();
+  var customer = getCurrentCustomer();
   var ret_data = {};
-  for (var i=0; i < client.projects.length; i++){
-    var project = client.projects[i];
+  for (var i=0; i < customer.projects.length; i++){
+    var project = customer.projects[i];
     if (project.id == project_id){
       ret_data = project;
       break;
@@ -118,11 +118,11 @@ $(function(){
   /*
    * Add onchange behaviour at page load
    */
-  get_select_client().change(
+  get_select_customer().change(
     function(){
-      var client_obj = getCurrentClient();
-      if (client_obj.projects){
-        update_project_select(client_obj.projects);
+      var customer_obj = getCurrentCustomer();
+      if (customer_obj.projects){
+        update_project_select(customer_obj.projects);
       }else{
         update_project_select([]);
       }
@@ -143,5 +143,5 @@ $(function(){
       }
     }
   );
-  get_select_client().change();
+  get_select_customer().change();
 });

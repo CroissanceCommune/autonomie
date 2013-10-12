@@ -27,7 +27,7 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="searchform"/>
 <%namespace file="/base/utils.mako" import="format_text" />
-<%namespace file="/base/utils.mako" import="format_client" />
+<%namespace file="/base/utils.mako" import="format_customer" />
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
@@ -49,15 +49,15 @@
                         % endif
                     % endfor
                 </select>
-                <select id='client-select' name='client_id' data-placeholder="Sélectionner un client">
+                <select id='customer-select' name='customer_id' data-placeholder="Sélectionner un client">
                     <option value=''></option>
                     %for company in companies:
                         <optgroup label="${company.name}">
-                            %for client in company.clients:
-                                %if client.id == client_id:
-                                    <option selected='1' value='${client.id}'>${client.name} (${client.code})</option>
+                            %for customer in company.customers:
+                                %if customer.id == customer_id:
+                                    <option selected='1' value='${customer.id}'>${customer.name} (${customer.code})</option>
                                 %else:
-                                    <option value='${client.id}'>${client.name} (${client.code})</option>
+                                    <option value='${customer.id}'>${customer.name} (${customer.code})</option>
                                 %endif
                             %endfor
                         </optgroup>
@@ -128,7 +128,7 @@
         <th>${sortable(u"Entrepreneur", 'company')}</th>
         <th>${sortable(u"Émise le", 'taskDate')}</th>
         <th>${sortable(u"Nom de la facture", 'number')}</th>
-        <th>${sortable(u"Client", 'client')}</th>
+        <th>${sortable(u"Client", 'customer')}</th>
         <th>Montant HT</th>
         <th>TVA</th>
         <th>TTC</th>
@@ -200,7 +200,7 @@
                 </blockquote>
             </td>
             <td class='invoice_company_name'>
-                ${format_client(document.get_client())}
+                ${format_customer(document.get_customer())}
             </td>
             <td>
                 <strong>${api.format_amount(document.total_ht())|n}&nbsp;€</strong>
@@ -258,8 +258,8 @@ ${pager(records)}
 <%block name='footerjs'>
 $('#company-select').chosen({allow_single_deselect: true});
 $('#company-select').change(function(){$(this).closest('form').submit()});
-$('#client-select').chosen({allow_single_deselect: true});
-$('#client-select').change(function(){$(this).closest('form').submit()});
+$('#customer-select').chosen({allow_single_deselect: true});
+$('#customer-select').change(function(){$(this).closest('form').submit()});
 $('#year-select').chosen({allow_single_deselect: true});
 $('#year-select').change(function(){$(this).closest('form').submit()});
 $('#paid-select').chosen({allow_single_deselect: true});

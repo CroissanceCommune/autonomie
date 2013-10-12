@@ -25,7 +25,7 @@
 <%def name='esc(datas)'><%text>${</%text>${datas}<%text>}</%text>\
 </%def>
 <%def name='address(datas, _type)'>
-    %if _type == 'client':
+    %if _type == 'customer':
             <address>
                 <b>${datas.name}</b><br />
                 ${datas.address}<br />
@@ -114,14 +114,14 @@ path = request.current_route_path(_query=get_args)
         ${data.replace(u'\n', u'<br />')|n}
     %endif
 </%def>
-<%def name="format_client(client)">
+<%def name="format_customer(customer)">
     <%doc>
-        Render a client
+        Render a customer
     </%doc>
-    %if client is not UNDEFINED and client is not None:
-        <a href="${request.route_path('client', id=client.id)}"
-           title="Voir le client ${client.name}">
-            ${client.name}
+    %if customer is not UNDEFINED and customer is not None:
+        <a href="${request.route_path('customer', id=customer.id)}"
+           title="Voir le client ${customer.name}">
+            ${customer.name}
         </a>
     %endif
 </%def>

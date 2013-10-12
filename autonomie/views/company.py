@@ -79,7 +79,7 @@ def company_view(request):
     populate_actionmenu(request, request.context)
     link_list = []
     link_list.append(ViewLink(u"Voir les clients",
-            "manage", path="company_clients", id=company.id,
+            "manage", path="company_customers", id=company.id,
             icon='icon-arrow-right'
             ))
     link_list.append(ViewLink(u"Voir les projets",

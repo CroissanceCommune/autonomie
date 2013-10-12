@@ -28,7 +28,7 @@ from autonomie.tests.base import BaseTestCase, printstatus
 from autonomie.models.task import (CancelInvoice, ManualInvoice,
                                     Invoice, InvoiceLine, DiscountLine)
 from autonomie.models.user import User
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.models.project import Phase, Project
 
 LINES = [{'description':u'text1',
@@ -64,7 +64,7 @@ class TestCancelInvoice(BaseTestCase):
     def test_get_number(self):
         cinv = CancelInvoice()
         cinv.project = MagicMock(code="PRO1")
-        cinv.client = MagicMock(code="CLI1")
+        cinv.customer = MagicMock(code="CLI1")
         cinv.taskDate = datetime.date(1969, 07, 31)
         cinv.set_sequenceNumber(15)
         cinv.set_number()
@@ -97,7 +97,7 @@ class TestInvoice(BaseTestCase):
 
     def test_set_number(self):
         invoice = Invoice()
-        invoice.client = MagicMock(code="CLI1")
+        invoice.customer = MagicMock(code="CLI1")
         invoice.project = MagicMock(code="PRO1")
         seq_number = 15
         invoice.set_sequenceNumber(15)
@@ -143,7 +143,7 @@ class TestInvoice(BaseTestCase):
 
     def test_duplicate_invoice(self):
         user = self.session.query(User).first()
-        client = self.session.query(Client).first()
+        customer = self.session.query(Customer).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
         inv = self.getOne()
@@ -151,20 +151,20 @@ class TestInvoice(BaseTestCase):
         inv.statusPersonAccount = user
         inv.project = project
         inv.phase = phase
-        inv.client = client
+        inv.customer = customer
 
-        newinv = inv.duplicate(user, project, phase, client)
+        newinv = inv.duplicate(user, project, phase, customer)
         self.assertEqual(len(inv.lines), len(newinv.lines))
         self.assertEqual(len(inv.discounts), len(newinv.discounts))
         self.assertEqual(inv.project, newinv.project)
         self.assertEqual(newinv.statusPersonAccount, user)
         self.assertEqual(newinv.phase, phase)
-        for key in "client", "address", "expenses", "expenses_ht":
+        for key in "customer", "address", "expenses", "expenses_ht":
             self.assertEqual(getattr(newinv, key), getattr(inv, key))
 
     def test_duplicate_invoice_financial_year(self):
         user = self.session.query(User).first()
-        client = self.session.query(Client).first()
+        customer = self.session.query(Customer).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
         inv = self.getOne()
@@ -172,10 +172,10 @@ class TestInvoice(BaseTestCase):
         inv.statusPersonAccount = user
         inv.project = project
         inv.phase = phase
-        inv.client = client
+        inv.customer = customer
         inv.financial_year = 1900
 
-        newinv = inv.duplicate(user, project, phase, client)
+        newinv = inv.duplicate(user, project, phase, customer)
         self.assertEqual(newinv.financial_year, datetime.date.today().year)
 
     def test_duplicate_invoice_integration(self):
@@ -183,17 +183,17 @@ class TestInvoice(BaseTestCase):
         printstatus(user)
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
-        client = self.session.query(Client).first()
+        customer = self.session.query(Customer).first()
 
         inv = self.getOne()
         inv.phase = phase
-        inv.client = client
+        inv.customer = customer
         inv.owner = user
         inv.statusPersonAccount = user
         inv.project = project
         self.session.add(inv)
         self.session.flush()
-        newest = inv.duplicate(user, project, phase, client)
+        newest = inv.duplicate(user, project, phase, customer)
         self.session.add(newest)
         self.session.flush()
         self.assertEqual(newest.phase_id, phase.id)

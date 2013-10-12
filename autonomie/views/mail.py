@@ -42,7 +42,7 @@ EVENTS = {"valid":u"validé",
             "resulted": u"payé"}
 
 
-MAIL_TMPL = u"""{docname} {docnumber} du projet {project} avec le client {client} a été {status_verb}{gender}.
+MAIL_TMPL = u"""{docname} {docnumber} du projet {project} avec le client {customer} a été {status_verb}{gender}.
 
 {addr}
 
@@ -114,7 +114,7 @@ class StatusChanged(object):
         status_verb = get_status_verb(self.new_status)
         addr = self.request.route_url(self.document.type_, id=self.document.id)
         docnumber = self.document.number
-        client = self.document.client.name
+        customer = self.document.customer.name
         project = self.document.project.name
         if self.document.is_invoice():
             docname = u"La facture"
@@ -128,7 +128,7 @@ class StatusChanged(object):
             comment = u"Aucun"
         return MAIL_TMPL.format(docname=docname,
                 docnumber=docnumber,
-                client=client,
+                customer=customer,
                 project=project,
                 status_verb=status_verb,
                 gender=gender,

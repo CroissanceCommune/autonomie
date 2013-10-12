@@ -15,11 +15,14 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    col = sa.Column('active',
-            sa.Boolean(),
-            default=True,
-            server_default=sa.sql.expression.true())
-    op.add_column("expense_type", col)
+    try:
+        col = sa.Column('active',
+                sa.Boolean(),
+                default=True,
+                server_default=sa.sql.expression.true())
+        op.add_column("expense_type", col)
+    except:
+        print "The column already exists"
     col = sa.Column('active',
             sa.Boolean(),
             default=True,

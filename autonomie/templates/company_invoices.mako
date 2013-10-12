@@ -30,7 +30,7 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="searchform"/>
 <%namespace file="/base/utils.mako" import="format_text" />
-<%namespace file="/base/utils.mako" import="format_client" />
+<%namespace file="/base/utils.mako" import="format_customer" />
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
@@ -42,13 +42,13 @@
     <div class='span7'>
         <form class='form-search form-horizontal' id='search_form' method='GET'>
             <div style="padding-bottom:3px">
-                <select id='client-select' name='client_id' data-placeholder="Sélectionner un client">
+                <select id='customer-select' name='customer_id' data-placeholder="Sélectionner un client">
                     <option value='-1'></option>
-                    %for client in clients:
-                        %if client.id == client_id:
-                            <option selected='1' value='${client.id}'>${client.name} (${client.code})</option>
+                    %for customer in customers:
+                        %if customer.id == customer_id:
+                            <option selected='1' value='${customer.id}'>${customer.name} (${customer.code})</option>
                         %else:
-                            <option value='${client.id}'>${client.name} (${client.code})</option>
+                            <option value='${customer.id}'>${customer.name} (${customer.code})</option>
                         %endif
                     %endfor
                 </select>
@@ -116,7 +116,7 @@
         <th>${sortable(u"Identifiant", "officialNumber")}</th>
         <th>${sortable(u"Émise le", 'taskDate')}</th>
         <th>${sortable(u"Nom de la facture", 'number')}</th>
-        <th>${sortable(u"Client", 'client')}</th>
+        <th>${sortable(u"Client", 'customer')}</th>
         <th>Montant HT</th>
         <th>TVA</th>
         <th>TTC</th>
@@ -179,7 +179,7 @@
                 </blockquote>
              </td>
              <td class='invoice_company_name'>
-                 ${format_client(document.get_client())}
+                 ${format_customer(document.get_customer())}
              </td>
              <td>
                  <strong>
@@ -238,8 +238,8 @@
 ${pager(records)}
 </%block>
 <%block name='footerjs'>
-$('#client-select').chosen({allow_single_deselect: true});
-$('#client-select').change(function(){$(this).closest('form').submit()});
+$('#customer-select').chosen({allow_single_deselect: true});
+$('#customer-select').change(function(){$(this).closest('form').submit()});
 $('#year-select').chosen({allow_single_deselect: true});
 $('#year-select').change(function(){$(this).closest('form').submit()});
 $('#paid-select').chosen({allow_single_deselect: true});

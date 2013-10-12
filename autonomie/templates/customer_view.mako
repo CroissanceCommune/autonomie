@@ -30,13 +30,13 @@
 <div class="row">
     <div class='span3'>
         <div class='well'>
-            <h3>Entreprise ${client.name.upper()}</h3>
+            <h3>Entreprise ${customer.name.upper()}</h3>
             <dl>
-                <% datas = ((u"Nom de l'entreprise", client.name),
-                            (u"Code", client.code),
-                            (u"TVA intracommunautaire", client.intraTVA),
-                            (u"Compte CG", client.compte_cg),
-                            (u"Compte Tiers", client.compte_tiers),) %>
+                <% datas = ((u"Nom de l'entreprise", customer.name),
+                            (u"Code", customer.code),
+                            (u"TVA intracommunautaire", customer.intraTVA),
+                            (u"Compte CG", customer.compte_cg),
+                            (u"Compte Tiers", customer.compte_tiers),) %>
                  % for label, value in datas :
                     %if value:
                         <dt>${label}</dt>
@@ -45,14 +45,14 @@
                 % endfor
             </dl>
             <h3>Contact principal</h3>
-            <strong>${api.format_name(client.contactFirstName, client.contactLastName)}</strong>
-            % if client.function:
-                <div>Fonction: ${format_text(client.function)}</div>
+            <strong>${api.format_name(customer.contactFirstName, customer.contactLastName)}</strong>
+            % if customer.function:
+                <div>Fonction: ${format_text(customer.function)}</div>
             % endif
             <br />
-            % if client.address:
+            % if customer.address:
                 <address>
-                    ${format_text(client.full_address)}
+                    ${format_text(customer.full_address)}
                 </address>
             %else:
                 Aucun adresse connue
@@ -61,24 +61,24 @@
             <dl>
                 <dt>E-mail</dt>
                 <dd>
-                    %if client.email:
-                        ${format_mail(client.email)}
+                    %if customer.email:
+                        ${format_mail(customer.email)}
                     % else:
                         Aucune adresse connue
                     % endif
                 </dd>
                 <dt>Téléphone</dt>
                 <dd>
-                    %if client.phone:
-                        ${format_phone(client.phone)}
+                    %if customer.phone:
+                        ${format_phone(customer.phone)}
                     %else:
                         Aucun numéro connu
                     %endif
                 </dd>
                 <dt>Fax</dt>
                 <dd>
-                    %if client.fax:
-                        ${format_phone(client.fax)}
+                    %if customer.fax:
+                        ${format_phone(customer.fax)}
                     % else:
                         Aucun numéro de fax connu
                     % endif
@@ -88,10 +88,10 @@
     </div>
     <div class='span9'>
         <h2>Projets</h2>
-        <a class='btn' href='${request.route_path("company_projects", id=client.company.id, _query=dict(action="add", client=client.id))}'>
+        <a class='btn' href='${request.route_path("company_projects", id=customer.company.id, _query=dict(action="add", customer=customer.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>Nouveau projet
         </a>
-        %if client.projects:
+        %if customer.projects:
             <table class="table table-striped table-condensed">
                 <thead>
                     <tr>
@@ -101,7 +101,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    % for project in client.projects:
+                    % for project in customer.projects:
                         %if project.is_archived():
                             <tr class='tableelement' style='background-color:#999' id="${project.id}">
                             %else:
@@ -157,9 +157,9 @@
 <div class='row'>
     <div class='span12'>
         <div class='well'>
-            % if client.comments:
+            % if customer.comments:
                 <h3>Commentaires</h3>
-                ${format_text(client.comments)|n}
+                ${format_text(customer.comments)|n}
             %else :
                 Aucun commentaire
             % endif

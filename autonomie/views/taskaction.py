@@ -43,7 +43,7 @@ from autonomie.utils.widgets import (
         ViewLink,
         PopUp,
         )
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.models.project import (
         Project,
         Phase,
@@ -204,11 +204,11 @@ class TaskFormActions(object):
         """
         return self.project.company
 
-    def get_clients(self):
+    def get_customers(self):
         """
-            Return the clients of the current company
+            Return the customers of the current company
         """
-        return self.company.clients
+        return self.company.customers
 
     def _valid_btn(self):
         """
@@ -543,8 +543,8 @@ class TaskStatusView(StatusView):
         # if an error is raised here, it will be cached a level higher
         appstruct = form.validate(params.items())
         log.debug(u" * Form has been validated")
-        client_id = appstruct.get('client')
-        client = Client.get(client_id)
+        customer_id = appstruct.get('customer')
+        customer = Customer.get(customer_id)
         project_id = appstruct.get('project')
         project = Project.get(project_id)
         phase_id = appstruct.get('phase')
@@ -553,7 +553,7 @@ class TaskStatusView(StatusView):
         log.debug(u" * Project : %s" % project)
         appstruct['phase'] = phase
         appstruct['project'] = project
-        appstruct['client'] = client
+        appstruct['customer'] = customer
         appstruct['user'] = self.request.user
         return appstruct
 

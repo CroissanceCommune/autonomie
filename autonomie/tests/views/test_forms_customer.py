@@ -24,12 +24,12 @@
 
 import colander
 from mock import MagicMock, Mock
-from autonomie.views.forms.client import deferred_ccode_valid, \
-                        get_client_from_request, get_company_id_from_request
-from autonomie.models.client import Client
+from autonomie.views.forms.customer import deferred_ccode_valid, \
+                        get_customer_from_request, get_company_id_from_request
+from autonomie.models.customer import Customer
 from autonomie.tests.base import BaseTestCase
 
-class TestClient(BaseTestCase):
+class TestCustomer(BaseTestCase):
     def makeOne(self, context):
         request = MagicMock(context=context)
         return deferred_ccode_valid("nutt", {'request':request})
@@ -45,24 +45,24 @@ class TestClient(BaseTestCase):
         validator = self.makeOne(company)
         self.assertNotRaises(validator, 'nutt', u'IMDD')
 
-        # In edit mode, no error is raised for the current_client
-        client = self.session.query(Client).first()
-        client.__name__ = 'client'
-        validator = self.makeOne(client)
+        # In edit mode, no error is raised for the current_customer
+        customer = self.session.query(Customer).first()
+        customer.__name__ = 'customer'
+        validator = self.makeOne(customer)
         self.assertNotRaises(validator, 'nutt', u'IMDD')
 
-    def test_get_client_from_request(self):
-        context = Mock(__name__='client')
+    def test_get_customer_from_request(self):
+        context = Mock(__name__='customer')
         req = MagicMock(context=context)
-        self.assertEqual(get_client_from_request(req), context)
+        self.assertEqual(get_customer_from_request(req), context)
         context = Mock(__name__='other')
         req = MagicMock(context=context)
-        self.assertEqual(get_client_from_request(req), None)
+        self.assertEqual(get_customer_from_request(req), None)
 
     def test_get_company_id_from_request(self):
         company = Mock(id=1, __name__='company')
-        client = MagicMock(__name__='client', company=company)
-        req = MagicMock(context=client)
+        customer = MagicMock(__name__='customer', company=company)
+        req = MagicMock(context=customer)
         self.assertEqual(get_company_id_from_request(req), 1)
         req = MagicMock(context=company)
         self.assertEqual(get_company_id_from_request(req), 1)

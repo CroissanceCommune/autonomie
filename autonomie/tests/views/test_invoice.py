@@ -38,10 +38,10 @@ from autonomie.tests.base import BaseFunctionnalTest
 TODAY = datetime.date.today()
 
 APPSTRUCT = {'common': dict(phase_id=1,
-                        client_id=1,
+                        customer_id=1,
                         address="address",
                         taskDate=TODAY,
-                        description="Facture pour le client test",
+                        description="Facture pour le customer test",
                         course="0",
                         displayedUnits="1",),
         'lines':dict(expenses=2000,
@@ -118,7 +118,7 @@ class TestInvoiceAdd(Base):
         #The invoice status need to be at least wait to be duplicated
         invoice.CAEStatus = 'wait'
         request = self.request(task=invoice, post_args={'submit':'duplicate',
-            'phase':"1", 'project':"1", 'client':"1"})
+            'phase':"1", 'project':"1", 'customer':"1"})
         duplicate(request)
         invoices = Invoice.query().filter(Invoice.phase_id==1).all()
         self.assertEqual(len(invoices), 2)

@@ -24,22 +24,22 @@
 
 import colander
 from mock import MagicMock
-from autonomie.views.forms.project import build_client_value
-from autonomie.views.forms.project import get_clients_from_request
+from autonomie.views.forms.project import build_customer_value
+from autonomie.views.forms.project import get_customers_from_request
 
 from autonomie.tests.base import BaseTestCase
 
 class TestProjectForm(BaseTestCase):
-    def test_build_client_value(self):
-        client = MagicMock(id=12, name=5)
+    def test_build_customer_value(self):
+        customer = MagicMock(id=12, name=5)
         # deform is expecting a string (while it's an integer type
-        self.assertEqual(build_client_value(client)[0], '12')
+        self.assertEqual(build_customer_value(customer)[0], '12')
 
-    def test_get_clients_from_request(self):
-        clients = ['clients']
-        comp = MagicMock(__name__='company', clients=clients)
+    def test_get_customers_from_request(self):
+        customers = ['customers']
+        comp = MagicMock(__name__='company', customers=customers)
         req = MagicMock(context=comp)
-        self.assertEqual(get_clients_from_request(req), clients)
+        self.assertEqual(get_customers_from_request(req), customers)
         proj = MagicMock(__name__='project', company=comp)
         req = MagicMock(context=proj)
-        self.assertEqual(get_clients_from_request(req), clients)
+        self.assertEqual(get_customers_from_request(req), customers)

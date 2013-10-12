@@ -36,7 +36,7 @@ from autonomie.models.task.invoice import CancelInvoice
 from autonomie.models.task.invoice import ManualInvoice
 from autonomie.models.company import Company
 from autonomie.models.project import Project
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.models.types import format_to_taskdate
 from autonomie.views.forms.invoices import InvoicesListSchema
 from autonomie.views.forms.invoices import STATUS_OPTIONS
@@ -49,9 +49,9 @@ log = logging.getLogger(__name__)
 
 p1 = aliased(Project)
 p2 = aliased(Project)
-c1 = aliased(Client)
-c2 = aliased(Client)
-c3 = aliased(Client)
+c1 = aliased(Customer)
+c2 = aliased(Customer)
+c3 = aliased(Customer)
 
 
 #Here we do some multiple function stuff to allow caching to work
@@ -105,7 +105,7 @@ class InvoicesList(BaseListView):
     schema = InvoicesListSchema()
     sort_columns = dict(taskDate=("taskDate",),
                number=("number",),
-               client=("client", "name",),
+               customer=("customer", "name",),
                company=("project", "company", "name",),
                officialNumber=("officialNumber",))
 
@@ -117,9 +117,9 @@ class InvoicesList(BaseListView):
                 .with_polymorphic([Invoice, CancelInvoice, ManualInvoice])\
                      .outerjoin(p1, Invoice.project)\
                      .outerjoin(p2, CancelInvoice.project)\
-                     .outerjoin(c1, Invoice.client)\
-                     .outerjoin(c2, CancelInvoice.client)\
-                     .outerjoin(c3, ManualInvoice.client)
+                     .outerjoin(c1, Invoice.customer)\
+                     .outerjoin(c2, CancelInvoice.customer)\
+                     .outerjoin(c3, ManualInvoice.customer)
         if self.request.context == 'company':
             company_id = self.request.context.id
             query = query.filter(or_(p1.company_id == company_id,
@@ -150,12 +150,12 @@ class InvoicesList(BaseListView):
                                 ManualInvoice.officialNumber == number))
         return query
 
-    def filter_client(self, query, appstruct):
-        client_id = appstruct['client_id']
-        if client_id != -1:
-            query = query.filter(or_(Invoice.client_id == client_id,
-                                     CancelInvoice.client_id == client_id,
-                                     ManualInvoice.client_id == client_id))
+    def filter_customer(self, query, appstruct):
+        customer_id = appstruct['customer_id']
+        if customer_id != -1:
+            query = query.filter(or_(Invoice.customer_id == customer_id,
+                                     CancelInvoice.customer_id == customer_id,
+                                     ManualInvoice.customer_id == customer_id))
         return query
 
     def filter_taskDate(self, query, appstruct):
@@ -244,7 +244,7 @@ class CompanyInvoicesList(InvoicesList):
 
     def default_form_values(self, appstruct):
         values = super(CompanyInvoicesList, self).default_form_values(appstruct)
-        values["clients"] = self.request.context.clients
+        values["customers"] = self.request.context.customers
         return values
 
 class GlobalInvoicesList(InvoicesList):

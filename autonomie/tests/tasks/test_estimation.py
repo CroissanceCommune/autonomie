@@ -29,7 +29,7 @@ from autonomie.tests.base import BaseTestCase
 from autonomie.models.task import (Estimation, DiscountLine, PaymentLine,
                     EstimationLine, Invoice)
 
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.models.project import Project, Phase
 from autonomie.models.user import User
 
@@ -118,7 +118,7 @@ class TestEstimation(BaseTestCase):
     def test_set_number(self):
         est = Estimation()
         est.project = MagicMock(code="PRO1")
-        est.client = MagicMock(code="CLI1")
+        est.customer = MagicMock(code="CLI1")
         est.taskDate = datetime.date(1969, 07, 31)
         est.set_sequenceNumber(15)
         est.set_number()
@@ -132,17 +132,17 @@ class TestEstimation(BaseTestCase):
 
     def test_duplicate_estimation(self):
         user = self.session.query(User).first()
-        client = self.session.query(Client).first()
+        customer = self.session.query(Customer).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
         est = self.getOne()
         est.phase = phase
         est.project = project
         est.owner = user
-        est.client = client
+        est.customer = customer
         est.statusPersonAccount = user
-        newest = est.duplicate(user, project, phase, client)
-        for key in "client", "address", "expenses", "expenses_ht":
+        newest = est.duplicate(user, project, phase, customer)
+        for key in "customer", "address", "expenses", "expenses_ht":
             self.assertEqual(getattr(newest, key), getattr(est, key))
         self.assertEqual(newest.CAEStatus, 'draft')
         self.assertEqual(newest.project, project)
@@ -156,18 +156,18 @@ class TestEstimation(BaseTestCase):
     def test_duplicate_estimation_integration(self):
         """
             Here we test the duplication on a real world case
-            specifically, the client is not loaded in the session
+            specifically, the customer is not loaded in the session
             causing the insert statement to be fired during duplication
         """
         user = self.session.query(User).first()
-        client = self.session.query(Client).first()
+        customer = self.session.query(Customer).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
         est = self.getOne()
         est.phase = phase
         est.project = project
         est.owner = user
-        est.client = client
+        est.customer = customer
         est.statusPersonAccount = user
 
         self.assertEqual(est.statusPersonAccount, user)
@@ -175,7 +175,7 @@ class TestEstimation(BaseTestCase):
         est = self.session.merge(est)
         self.session.flush()
 
-        newest = est.duplicate(user, project, phase, client)
+        newest = est.duplicate(user, project, phase, customer)
         self.session.merge(newest)
         self.session.flush()
         self.assertEqual(newest.phase, phase)
@@ -186,14 +186,14 @@ class TestEstimation(BaseTestCase):
     @unittest.skip(u"Le calcul de TVA inversé conduit irrémediablement à ce pb")
     def test_gen_invoice(self):
         user = self.session.query(User).first()
-        client = self.session.query(Client).first()
+        customer = self.session.query(Customer).first()
         project = self.session.query(Project).first()
         phase = self.session.query(Phase).first()
         est = self.getOne()
         est.phase = phase
         est.project = project
         est.owner = user
-        est.client = client
+        est.customer = customer
         est.statusPersonAccount = user
         invoices = est.gen_invoices(user)
         for inv in invoices:

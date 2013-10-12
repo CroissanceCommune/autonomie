@@ -64,7 +64,7 @@
         %for invoice in invoices:
             <tr>
                 <td>
-                    ${invoice.get_client().name} - ${invoice.number}
+                    ${invoice.get_customer().name} - ${invoice.number}
                 </td>
                 <td>
                     ${print_date(invoice.taskDate)}

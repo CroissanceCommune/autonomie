@@ -40,10 +40,10 @@
         <div class="span8 offset2">
     <div class="well">
                     <h3>Client(s)</h3>
-                    % for client in project.clients:
+                    % for customer in project.customers:
                         <div class='well'>
                             <address>
-                                ${format_text(client.full_address)}
+                                ${format_text(customer.full_address)}
                             </address>
                         </div>
                     % endfor

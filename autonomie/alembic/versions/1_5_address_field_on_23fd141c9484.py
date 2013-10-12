@@ -14,10 +14,10 @@ from alembic import op
 import sqlalchemy as sa
 from autonomie.models import DBSESSION
 from autonomie.models.task import Invoice, CancelInvoice, Estimation
-from autonomie.models.client import Client
 
 
 def upgrade():
+    from autonomie.models.client import Client
     for table in ("estimation", "invoice", "cancelinvoice"):
         op.add_column(table, sa.Column("address", sa.Text, default=""))
         op.add_column(table,

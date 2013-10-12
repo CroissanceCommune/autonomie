@@ -31,7 +31,7 @@ from autonomie.models.user import User, ADMIN_PRIMARY_GROUP, \
 from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.project import Phase
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.tva import Tva
 from autonomie.scripts.utils import command
@@ -98,30 +98,30 @@ def add_company(user, company_name, goal=""):
 
     return company
 
-def add_client(company, client_name, client_code, client_lastname):
-    client = Client()
-    client.name = client_name #u"Institut médical Dupont & Dupond"
-    client.contactLastName = client_lastname # "Dupont"
-    client.code = client_code #"IMDD"
-    client.company = company
+def add_customer(company, customer_name, customer_code, customer_lastname):
+    customer = Customer()
+    customer.name = customer_name #u"Institut médical Dupont & Dupond"
+    customer.contactLastName = customer_lastname # "Dupont"
+    customer.code = customer_code #"IMDD"
+    customer.company = company
 
     session = DBSESSION()
-    session.add(client)
+    session.add(customer)
     session.flush()
 
-    print u"Added client to %s: %s" % (company.name, client_name)
-    return client
+    print u"Added customer to %s: %s" % (company.name, customer_name)
+    return customer
 
-def add_project(client, company, project_name, project_code):
+def add_project(customer, company, project_name, project_code):
     project = Project(name=project_name, code=project_code)
-    project.clients.append(client)
+    project.customers.append(customer)
     project.company = company
 
     session = DBSESSION()
     session.add(project)
     session.flush()
 
-    print u"Added project to %s for %s: %s" % (company.name, client.name,
+    print u"Added project to %s for %s: %s" % (company.name, customer.name,
                                                             project_name)
     return project
 
@@ -204,9 +204,9 @@ def fake_database_fill(arguments):
 
     # Adding companies
     company = add_company(contractor1, u"Laveur de K-ro", u"Nettoyage de vitre")
-    client = add_client(company, u"Institut médical Dupont & Dupond", "IMDD",
+    customer = add_customer(company, u"Institut médical Dupont & Dupond", "IMDD",
                                                                     "Dupont" )
-    project = add_project(client, company, u"Vitrine rue Neuve", "VRND")
+    project = add_project(customer, company, u"Vitrine rue Neuve", "VRND")
     phase = add_phase(project, u"Default")
 
 

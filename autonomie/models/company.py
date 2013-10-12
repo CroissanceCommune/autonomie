@@ -81,7 +81,7 @@ class Company(DBBASE):
             group='edit')
     IBAN = deferred(Column("IBAN", String(255)),
             group='edit')
-    clients = relationship("Customer",
+    customers = relationship("Customer",
                             order_by="Customer.code",
                             backref='company')
     projects = relationship("Project",
@@ -158,7 +158,7 @@ class Company(DBBASE):
         """
             return a dict representation
         """
-        clients = [client.todict() for client in self.clients]
+        customers = [customer.todict() for customer in self.customers]
         projects = [project.todict() for project in self.projects]
         return dict(id=self.id,
                     name=self.name,
@@ -171,5 +171,5 @@ class Company(DBBASE):
                     IBAN=self.IBAN,
                     logo=self.get_logo_filepath(),
                     header=self.get_header_filepath(),
-                    clients=clients,
+                    customers=customers,
                     projects=projects)

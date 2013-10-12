@@ -177,11 +177,11 @@ ce document.".format(status)
     def company(self):
         return self.get_company()
 
-    def get_client(self):
+    def get_customer(self):
         """
-            Return the client of the current task
+            Return the customer of the current task
         """
-        return self.client
+        return self.customer
 
     def get_company_id(self):
         """

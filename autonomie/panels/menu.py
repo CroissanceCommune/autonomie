@@ -25,7 +25,7 @@
 """
     Panels for the top main menus
 
-    A common user has his company menu with clients, projects ...
+    A common user has his company menu with customers, projects ...
     A manager or an admin has an admin menu and eventually a usermenu if he's
     consulting a companyr's account
 
@@ -142,7 +142,7 @@ def get_company_menu(request, cid, css=None):
         Build the usermenu
     """
     menu = Menu(css=css)
-    href = request.route_path("company_clients", id=cid)
+    href = request.route_path("company_customers", id=cid)
     menu.add_item(u"Clients", icon="icon-user", href=href)
 
     href = request.route_path("company_projects", id=cid)

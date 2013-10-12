@@ -63,7 +63,7 @@ class StatisticView(object):
                 current_year = year
             company = self.request.context
             projects = company.projects
-            clients = company.clients
+            customers = company.customers
             invoices = []
             estimations = []
             for proj in projects:
@@ -78,13 +78,13 @@ class StatisticView(object):
                      if est.taskDate.year >= current_year]
                 )
             prospects = [cli
-                         for cli in clients
+                         for cli in customers
                          if True not in [len(proj.invoices) > 0
                                          for proj in cli.projects]]
             #Return the stats
             ret_dict['current_company'] = company
             ret_dict['projects'] = projects
-            ret_dict['clients'] = clients
+            ret_dict['customers'] = customers
             ret_dict['prospects'] = prospects
             ret_dict['invoices'] = invoices
             ret_dict['estimations'] = estimations

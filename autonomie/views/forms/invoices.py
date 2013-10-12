@@ -47,5 +47,5 @@ class InvoicesListSchema(BaseListsSchema):
             validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
             missing='both')
     year = colander.SchemaNode(colander.Integer(), missing=default_year)
-    client_id = colander.SchemaNode(colander.Integer(), missing=-1)
+    customer_id = colander.SchemaNode(colander.Integer(), missing=-1)
     company_id = colander.SchemaNode(colander.Integer(), missing=-1)

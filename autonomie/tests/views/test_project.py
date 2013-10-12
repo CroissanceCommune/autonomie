@@ -29,7 +29,7 @@ from autonomie.views.project import (ProjectAdd, ProjectEdit,
 
 from autonomie.tests.base import BaseFunctionnalTest
 
-APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "clients":[]}
+APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "customers":[]}
 
 class Base(BaseFunctionnalTest):
     def addOne(self, appstruct=APPSTRUCT):
@@ -52,19 +52,19 @@ class TestProjectAdd(Base):
         self.assertEqual(project.code, "ABDC")
         self.assertEqual(project.company_id, 1)
 
-    def test_client_not_exist(self):
-        appstruct = {'name':u'Projéct&$', "code":"ABDC", "clients":["11111"]}
+    def test_customer_not_exist(self):
+        appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["11111"]}
         self.addOne(appstruct)
         project = self.getOne()
-        self.assertEqual(len(project.clients), 0)
+        self.assertEqual(len(project.customers), 0)
 
-    def test_client(self):
-        from autonomie.models.client import Client
-        print Client.get(1)
-        appstruct = {'name':u'Projéct&$', "code":"ABDC", "clients":["1"]}
+    def test_customer(self):
+        from autonomie.models.customer import Customer
+        print Customer.get(1)
+        appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
         self.addOne(appstruct)
         project = self.getOne()
-        self.assertEqual(len(project.clients), 1)
+        self.assertEqual(len(project.customers), 1)
 
 
 class TestProjectEdit(Base):
@@ -81,29 +81,29 @@ class TestProjectEdit(Base):
         project = self.getOne()
         self.assertEqual(project.definition, definition)
 
-    def test_client_remove(self):
-        appstruct = {'name':u'Projéct&$', "code":"ABDC", "clients":["1"]}
+    def test_customer_remove(self):
+        appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
         self.addOne(appstruct)
         project = self.getOne()
         req = self.get_csrf_request()
         req.context = project
-        appstruct["clients"] = []
+        appstruct["customers"] = []
         view = ProjectEdit(req)
         view.submit_success(appstruct)
         project = self.getOne()
-        self.assertEqual(len(project.clients), 0)
+        self.assertEqual(len(project.customers), 0)
 
-    def test_client_add(self):
+    def test_customer_add(self):
         self.addOne()
         project = self.getOne()
         req = self.get_csrf_request()
         req.context = project
         appstruct = APPSTRUCT.copy()
-        appstruct['clients'] = ["1"]
+        appstruct['customers'] = ["1"]
         view = ProjectEdit(req)
         view.submit_success(appstruct)
         project = self.getOne()
-        self.assertEqual(len(project.clients), 1)
+        self.assertEqual(len(project.customers), 1)
 
 class TestActions(Base):
     def test_delete(self):

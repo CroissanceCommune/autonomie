@@ -23,21 +23,21 @@
 #
 
 """
-    Client handling forms schemas
+    Customer handling forms schemas
 """
 import colander
 import logging
 
 from deform import widget
 
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.views.forms.widgets import get_mail_input
 from autonomie.views.forms.lists import BaseListsSchema
 
 log = logging.getLogger(__name__)
 
-def get_client_from_request(request):
-    if request.context.__name__ == 'client':
+def get_customer_from_request(request):
+    if request.context.__name__ == 'customer':
         return request.context
     else:
         return None
@@ -45,7 +45,7 @@ def get_client_from_request(request):
 def get_company_id_from_request(request):
     if request.context.__name__ =='company':
         return request.context.id
-    elif request.context.__name__ == 'client':
+    elif request.context.__name__ == 'customer':
         return request.context.company.id
     else:
         return -1
@@ -54,7 +54,7 @@ def get_company_id_from_request(request):
 def deferred_ccode_valid(node, kw):
     request = kw['request']
     company_id = get_company_id_from_request(request)
-    client = get_client_from_request(request)
+    customer = get_customer_from_request(request)
 
     def unique_ccode(node, value):
         """
@@ -64,11 +64,11 @@ def deferred_ccode_valid(node, kw):
             message = u"Le code client doit contenir 4 caractères."
             raise colander.Invalid(node, message)
         #Test unicity
-        query = Client.query().filter(Client.company_id == company_id)\
-                .filter(Client.code == value)
-        if client:
+        query = Customer.query().filter(Customer.company_id == company_id)\
+                .filter(Customer.code == value)
+        if customer:
             # In edit mode, it will always fail
-            query = query.filter(Client.id != client.id)
+            query = query.filter(Customer.id != customer.id)
         result = query.all()
 
         if len(result):
@@ -87,7 +87,7 @@ def remove_admin_fields(schema, kw):
         del schema['compte_tiers']
 
 
-class ClientSchema(colander.MappingSchema):
+class CustomerSchema(colander.MappingSchema):
     """
         Schema for customer insertion
     """
@@ -160,8 +160,8 @@ de compta",
             missing=u'')
 
 
-CLIENTSCHEMA = ClientSchema(after_bind=remove_admin_fields)
+CUSTOMERSCHEMA = CustomerSchema(after_bind=remove_admin_fields)
 
 
-class ClientSearchSchema(BaseListsSchema):
+class CustomerSearchSchema(BaseListsSchema):
     pass

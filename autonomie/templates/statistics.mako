@@ -77,7 +77,7 @@
                 <br />
                 Nombre de projet(s) : ${len(projects)}
                 <br />
-                Nombre de client(s) : ${len(clients)}
+                Nombre de client(s) : ${len(customers)}
                 <br />
                 Nombre de prospect(s) : ${len(prospects)}
                 <br />

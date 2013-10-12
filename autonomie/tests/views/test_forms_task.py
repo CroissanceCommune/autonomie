@@ -42,10 +42,10 @@ DBDATAS = dict(estimation=dict(course="0",
                                 paymentConditions="Payer à l'heure",
                                 phase_id=485,
                                 taskDate="10-12-2012",
-                                description="Devis pour le client test",
+                                description="Devis pour le customer test",
                                 manualDeliverables=1,
                                 statusComment=u"Aucun commentaire",
-                                client_id=15,
+                                customer_id=15,
                                 address="address"),
                 invoice=dict(course="0",
                                 displayedUnits="1",
@@ -55,9 +55,9 @@ DBDATAS = dict(estimation=dict(course="0",
                                 phase_id=415,
                                 taskDate="15-12-2012",
                                 financial_year=2012,
-                                description="Facture pour le client test",
+                                description="Facture pour le customer test",
                                 statusComment=u"Aucun commentaire",
-                                client_id=15,
+                                customer_id=15,
                                 address="address"
                                 ),
                 lines=[
@@ -88,10 +88,10 @@ DBDATAS = dict(estimation=dict(course="0",
                     ]
                 )
 DATAS = {'common': dict(phase_id=485,
-                        client_id=15,
+                        customer_id=15,
                         address="address",
                         taskDate="10-12-2012",
-                        description="Devis pour le client test",
+                        description="Devis pour le customer test",
                         course="0",
                         displayedUnits="1",),
         'lines':dict(expenses=1500,
@@ -118,11 +118,11 @@ DATAS = {'common': dict(phase_id=485,
         "communication":dict(statusComment=u"Aucun commentaire"),
                         }
 INV_DATAS = {'common': dict(phase_id=415,
-                        client_id=15,
+                        customer_id=15,
                         address="address",
                         taskDate="15-12-2012",
                         financial_year=2012,
-                        description="Facture pour le client test",
+                        description="Facture pour le customer test",
                         course="0",
                         displayedUnits="1",),
         'lines':dict(expenses=2000,
@@ -248,9 +248,9 @@ class TestTaskForms(BaseTestCase):
                 project=self.project())
 
     def project(self):
-        return MagicMock(clients=self.clients(), id=1, __name__='project')
+        return MagicMock(customers=self.customers(), id=1, __name__='project')
 
-    def clients(self):
+    def customers(self):
         return [MagicMock(id=1), MagicMock(id=2)]
 
     def request(self):
@@ -278,9 +278,9 @@ class TestTaskForms(BaseTestCase):
         validator = deferred_payment_mode_validator("nutt", {'request':self.request()})
         self.assertRaises(colander.Invalid, validator, c, u'pièce en chocolat')
 
-    def test_client_validator(self):
-        from autonomie.views.forms.task import deferred_client_validator
-        func = deferred_client_validator("nutt", {'request':self.request()})
+    def test_customer_validator(self):
+        from autonomie.views.forms.task import deferred_customer_validator
+        func = deferred_customer_validator("nutt", {'request':self.request()})
         self.assertRaises(colander.Invalid, func, "nutt", 0)
         self.assertRaises(colander.Invalid, func, "nutt", 15)
         self.assertNotRaises(func, "nutt", 1)

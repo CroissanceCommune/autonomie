@@ -45,7 +45,7 @@ from autonomie.models.project import (
         Project,
         Phase,
         )
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.utils.widgets import (
         ViewLink,
         ToggleLink,
@@ -95,15 +95,15 @@ def get_project_form(request):
     return form
 
 
-def redirect_to_clientslist(request, company):
+def redirect_to_customerslist(request, company):
     """
-        Force project page to be redirected to client page
+        Force project page to be redirected to customer page
     """
     request.session.flash(u"Vous avez été redirigé vers la liste \
 des clients")
     request.session.flash(u"Vous devez créer des clients afin \
 de créer de nouveaux projets")
-    raise HTTPFound(request.route_path("company_clients",
+    raise HTTPFound(request.route_path("company_customers",
                                                 id=company.id))
 
 
@@ -126,22 +126,22 @@ class ProjectsList(BaseListView):
 
     def query(self):
         company = self.request.context
-        # We can't have projects without having clients
-        if not company.clients:
-            redirect_to_clientslist(self.request, company)
-        return Project.query().outerjoin(Project.clients).filter(
+        # We can't have projects without having customers
+        if not company.customers:
+            redirect_to_customerslist(self.request, company)
+        return Project.query().outerjoin(Project.customers).filter(
                             Project.company_id == company.id)
 
     def filter_archived(self, query, appstruct):
         archived = appstruct['archived']
         return query.filter(Project.archived == archived)
 
-    def filter_name_or_client(self, query, appstruct):
+    def filter_name_or_customer(self, query, appstruct):
         search = appstruct['search']
         if search:
             query = query.filter(
                 or_(Project.name.like("%" + search + "%"),
-                    Project.clients.any(Client.name.like("%" + search + "%"))))
+                    Project.customers.any(Customer.name.like("%" + search + "%"))))
         return query
 
     def populate_actionmenu(self, appstruct):
@@ -281,7 +281,7 @@ def project_view(request):
             else:
                 cancelinvoice.color = get_color()
     title = u"Projet : {0} ({1})".format(request.context.name,
-            ", ".join((client.name for client in request.context.clients)))
+            ", ".join((customer.name for customer in request.context.customers)))
     return dict(title=title,
                 project=request.context,
                 company=request.context.company)
@@ -295,9 +295,9 @@ class ProjectAdd(BaseFormView):
 
     def before(self, form):
         populate_actionmenu(self.request)
-        # If there's no client, redirect to client view
-        if len(self.request.context.clients) == 0:
-            redirect_to_clientslist(self.request, self.request.context)
+        # If there's no customer, redirect to customer view
+        if len(self.request.context.customers) == 0:
+            redirect_to_customerslist(self.request, self.request.context)
 
     def submit_success(self, appstruct):
         """
@@ -305,12 +305,12 @@ class ProjectAdd(BaseFormView):
         """
         project = Project()
         project.company_id = self.request.context.id
-        client_ids = appstruct.pop("clients", [])
+        customer_ids = appstruct.pop("customers", [])
         project = merge_session_with_post(project, appstruct)
-        for client_id in client_ids:
-            client = Client.get(client_id)
-            if client:
-                project.clients.append(client)
+        for customer_id in customer_ids:
+            customer = Customer.get(customer_id)
+            if customer:
+                project.customers.append(customer)
         self.dbsession.add(project)
         self.dbsession.flush()
         # Add a default phase to the project
@@ -333,7 +333,7 @@ class ProjectEdit(BaseFormView):
             populate the form with the current datas
         """
         appstruct = self.request.context.appstruct()
-        appstruct['clients'] = [c.id for c in self.request.context.clients]
+        appstruct['customers'] = [c.id for c in self.request.context.customers]
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request, self.request.context)
 
@@ -341,13 +341,13 @@ class ProjectEdit(BaseFormView):
         """
             Flush project edition to the database
         """
-        client_ids = appstruct.pop("clients", [])
+        customer_ids = appstruct.pop("customers", [])
         project = merge_session_with_post(self.request.context, appstruct)
-        project.clients = []
-        for client_id in client_ids:
-            client = Client.get(client_id)
-            if client is not None:
-                project.clients.append(client)
+        project.customers = []
+        for customer_id in customer_ids:
+            customer = Customer.get(customer_id)
+            if customer is not None:
+                project.customers.append(customer)
         self.dbsession.merge(project)
         self.dbsession.flush()
         message = u"Le projet <b>{0}</b> a été édité avec succès".format(

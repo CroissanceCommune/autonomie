@@ -56,7 +56,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.user",
     "autonomie.views.company",
     "autonomie.views.index",
-    "autonomie.views.client",
+    "autonomie.views.customer",
     "autonomie.views.project",
     "autonomie.views.company_invoice",
     "autonomie.views.admin",

@@ -45,9 +45,9 @@
                     <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.name}</td>
                     <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>
                         <ul>
-                            % for client in project.clients:
+                            % for customer in project.customers:
                                 <li>
-                                ${client.name}
+                                ${customer.name}
                                 </li>
                             % endfor
                         </ul>

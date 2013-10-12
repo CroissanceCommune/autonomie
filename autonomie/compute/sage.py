@@ -274,7 +274,7 @@ class SageFacturation(BaseSageBookEntryFactory):
             Return the value of the libelle column
         """
         return u"{0} {1}".format(
-                self.invoice.client.name,
+                self.invoice.customer.name,
                 self.invoice.company.name,
                 )
 
@@ -319,9 +319,9 @@ class SageFacturation(BaseSageBookEntryFactory):
         entry = self.get_base_entry()
         echeance = self.invoice.taskDate + datetime.timedelta(days=30)
         entry.update(
-                compte_cg=self.invoice.client.compte_cg,
+                compte_cg=self.invoice.customer.compte_cg,
                 num_analytique=self.num_analytique,
-                compte_tiers=self.invoice.client.compte_tiers,
+                compte_tiers=self.invoice.customer.compte_tiers,
                 echeance=format_sage_date(echeance),
                 debit=product['ht'] + product['tva']
                 )
@@ -346,7 +346,7 @@ class SageContribution(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"{0} {1}".format(
-                self.invoice.client.name,
+                self.invoice.customer.name,
                 self.invoice.company.name,
                 )
 
@@ -432,7 +432,7 @@ class SageAssurance(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"{0} {1}".format(
-                self.invoice.client.name,
+                self.invoice.customer.name,
                 self.invoice.company.name,
                 )
 
@@ -507,7 +507,7 @@ class SageCGScop(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"{0} {1}".format(
-                self.invoice.client.name,
+                self.invoice.customer.name,
                 self.invoice.company.name,
                 )
 
@@ -583,7 +583,7 @@ class SageRGInterne(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"RG COOP {0} {1}".format(
-                self.invoice.client.name,
+                self.invoice.customer.name,
                 self.invoice.company.name,
                 )
 
@@ -659,7 +659,7 @@ class SageRGClient(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"RG {0} {1}".format(
-                self.invoice.client.name,
+                self.invoice.customer.name,
                 self.invoice.company.name,
                 )
 
@@ -697,10 +697,10 @@ class SageRGClient(BaseSageBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.client.compte_cg,
+                compte_cg=self.invoice.customer.compte_cg,
                 num_analytique=self.invoice.company.code_compta,
                 credit=self.get_amount(product),
-                compte_tiers=self.invoice.client.compte_tiers,
+                compte_tiers=self.invoice.customer.compte_tiers,
                 echeance=self.get_echeance(),
                 )
         return entry

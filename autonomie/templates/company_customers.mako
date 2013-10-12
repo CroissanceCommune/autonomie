@@ -39,13 +39,13 @@
     </thead>
     <tbody>
         % if records:
-            % for client in records:
-                <tr class='tableelement' id="${client.id}">
-                    <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.code}</td>
-                    <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.name}</td>
-                    <td onclick="document.location='${request.route_path("client", id=client.id)}'" class="rowlink" >${client.contactLastName} ${client.contactFirstName}</td>
+            % for customer in records:
+                <tr class='tableelement' id="${customer.id}">
+                    <td onclick="document.location='${request.route_path("customer", id=customer.id)}'" class="rowlink" >${customer.code}</td>
+                    <td onclick="document.location='${request.route_path("customer", id=customer.id)}'" class="rowlink" >${customer.name}</td>
+                    <td onclick="document.location='${request.route_path("customer", id=customer.id)}'" class="rowlink" >${customer.contactLastName} ${customer.contactFirstName}</td>
                     <td style="text-align:right">
-                        ${table_btn(request.route_path("client", id=client.id), u"Voir/Éditer", u"Voir/Éditer ce client", icon=u"icon-pencil")}
+                        ${table_btn(request.route_path("customer", id=customer.id), u"Voir/Éditer", u"Voir/Éditer ce client", icon=u"icon-pencil")}
                     </td>
                 </tr>
             % endfor

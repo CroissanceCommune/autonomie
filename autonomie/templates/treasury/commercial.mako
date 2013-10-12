@@ -29,7 +29,7 @@
 <table class='table table-striped table-bordered' style="margin-top:15px">
 <tr><td><b>Nombre de devis rédigés</b></td><td><b>${estimations}</b></td></tr>
 <tr><td><b>Nombre de devis concrétisés</b></td><td><b>${validated_estimations}</b></td></tr>
-<tr><td><b>Nombre de client</b></td><td><b>${clients}</b></td></tr>
+<tr><td><b>Nombre de client</b></td><td><b>${customers}</b></td></tr>
 </table>
 </div>
 </div>

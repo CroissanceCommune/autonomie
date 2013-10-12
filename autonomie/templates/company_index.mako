@@ -26,7 +26,7 @@
     Company index page shows last activities and elapsed invoices
 </%doc>
 <%namespace file="/base/utils.mako" import="format_text" />
-<%namespace file="/base/utils.mako" import="format_client" />
+<%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%inherit file="base.mako"></%inherit>
@@ -52,7 +52,7 @@
                                     ${invoice.officialNumber}
                                 </td>
                                 <td>
-                                    ${format_client(invoice.client)}
+                                    ${format_customer(invoice.customer)}
                                 </td>
                                 <td>
                                     ${api.format_amount(invoice.total())|n}&nbsp;€
@@ -114,7 +114,7 @@
                                 ${format_project(task.project)}
                             </td>
                             <td>
-                                ${format_client(task.client)}
+                                ${format_customer(task.customer)}
                             </td>
                             <td>${task.name}</td>
                             <td>${api.format_status(task)}</td>

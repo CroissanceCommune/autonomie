@@ -192,9 +192,9 @@ class IInvoice(Interface):
             Return the company this task is related to
         """
 
-    def get_client():
+    def get_customer():
         """
-            Return the client this document is related to
+            Return the customer this document is related to
         """
 
     def is_viewable():

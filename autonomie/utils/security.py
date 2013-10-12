@@ -33,7 +33,7 @@ from sqlalchemy.orm import undefer_group
 
 from autonomie.models.project import Project
 from autonomie.models.company import Company
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import CancelInvoice
@@ -78,7 +78,7 @@ class RootFactory(dict):
         self.request = request
         self['companies'] = CompanyFactory(self, "companies")
         self['projects'] = ProjectFactory(self, 'projects')
-        self['clients'] = ClientFactory(self, 'clients')
+        self['customers'] = CustomerFactory(self, 'customers')
         self['estimations'] = EstimationFactory(self, 'estimations')
         self['invoices'] = InvoiceFactory(self, 'invoices')
         self['cancelinvoices'] = CancelInvoiceFactory(self, 'cancelinvoices')
@@ -135,20 +135,20 @@ class ProjectFactory(BaseDBFactory):
         return self._get_item(Project, key, 'project')
 
 
-class ClientFactory(BaseDBFactory):
+class CustomerFactory(BaseDBFactory):
     """
-        Handle access to a client
+        Handle access to a customer
     """
     def __getitem__(self, key):
         """
             Returns the traversed object
         """
-        return self._get_item(Client, key, 'client')
+        return self._get_item(Customer, key, 'customer')
 
 
 class EstimationFactory(BaseDBFactory):
     """
-        Handle access to a client
+        Handle access to an estimation
     """
     def __getitem__(self, key):
         """
@@ -252,7 +252,7 @@ def get_task_acl(self):
     return acl
 
 
-def get_client_or_project_acls(self):
+def get_customer_or_project_acls(self):
     """
         Compute the project's acls
     """
@@ -285,8 +285,8 @@ def wrap_db_objects():
         Add acls and names to the db objects used as context
     """
     Company.__acl__ = property(get_company_acl)
-    Project.__acl__ = property(get_client_or_project_acls)
-    Client.__acl__ = property(get_client_or_project_acls)
+    Project.__acl__ = property(get_customer_or_project_acls)
+    Customer.__acl__ = property(get_customer_or_project_acls)
     Estimation.__acl__ = property(get_task_acl)
     Invoice.__acl__ = property(get_task_acl)
     CancelInvoice.__acl__ = property(get_task_acl)

@@ -14,7 +14,6 @@ from alembic import op
 import sqlalchemy as sa
 from autonomie.models import DBSESSION
 from autonomie.models.project import Project
-from autonomie.models.client import Client
 from autonomie.models.task import EstimationLine
 from autonomie.models.task import PaymentLine
 from autonomie.models.task import InvoiceLine
@@ -28,6 +27,7 @@ def migrate_projects_to_multiple_clients():
     """
         move project's client to the manytomany relationship
     """
+    from autonomie.models.client import Client
     for proj in DBSESSION().query(Project):
         try:
             client = Client.get(proj.client_id)

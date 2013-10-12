@@ -132,7 +132,7 @@ class Invoice(Task, InvoiceCompute):
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
 
-    client = relationship(
+    customer = relationship(
         "Customer",
         primaryjoin="Customer.id==Invoice.customer_id",
         backref=backref('invoices', order_by='Invoice.taskDate'))
@@ -215,7 +215,7 @@ class Invoice(Task, InvoiceCompute):
 
     @property
     def number(self):
-        tasknumber_tmpl = u"{s.project.code}_{s.client.code}_{s._number}"
+        tasknumber_tmpl = u"{s.project.code}_{s.customer.code}_{s._number}"
         return tasknumber_tmpl.format(s=self)
 
     def set_project(self, project):
@@ -291,7 +291,7 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.project = self.project
         cancelinvoice.owner = user
         cancelinvoice.phase = self.phase
-        cancelinvoice.client = self.client
+        cancelinvoice.customer = self.customer
         for line in self.lines:
             cancelinvoice.lines.append(line.gen_cancelinvoice_line())
         rowindex = self.get_next_row_index()
@@ -338,7 +338,7 @@ class Invoice(Task, InvoiceCompute):
             self.CAEStatus = 'resulted'
         return self
 
-    def duplicate(self, user, project, phase, client):
+    def duplicate(self, user, project, phase, customer):
         """
             Duplicate the current invoice
         """
@@ -349,16 +349,16 @@ class Invoice(Task, InvoiceCompute):
         invoice.statusPersonAccount = user
         invoice.phase = phase
         invoice.owner = user
-        invoice.client = client
+        invoice.customer = customer
         invoice.project = project
         invoice.taskDate = date
         invoice.set_sequenceNumber(seq_number)
         invoice.set_number()
         invoice.set_name()
-        if client.id == self.customer_id:
+        if customer.id == self.customer_id:
             invoice.address = self.address
         else:
-            invoice.address = client.full_address
+            invoice.address = customer.full_address
 
         invoice.CAEStatus = 'draft'
         invoice.description = self.description
@@ -485,7 +485,7 @@ class CancelInvoice(Task, TaskCompute):
         "Invoice",
         backref=backref("cancelinvoice", uselist=False),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id")
-    client = relationship(
+    customer = relationship(
         "Customer",
         primaryjoin="Customer.id==CancelInvoice.customer_id",
         backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
@@ -560,7 +560,7 @@ class CancelInvoice(Task, TaskCompute):
 
     @property
     def number(self):
-        tasknumber_tmpl = u"{s.project.code}_{s.client.code}_{s._number}"
+        tasknumber_tmpl = u"{s.project.code}_{s.customer.code}_{s._number}"
         return tasknumber_tmpl.format(s=self)
 
     def valid_callback(self):
@@ -685,7 +685,7 @@ class ManualInvoice(Task):
     tva = Column("tva", Integer)
     customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
     financial_year = Column(Integer, nullable=False)
-    client = relationship(
+    customer = relationship(
         "Customer",
         primaryjoin="Customer.id==ManualInvoice.customer_id",
         backref='manual_invoices')
@@ -747,8 +747,8 @@ class ManualInvoice(Task):
     def get_company(self):
         return self.company
 
-    def get_client(self):
-        return self.client
+    def get_customer(self):
+        return self.customer
 
     def is_viewable(self):
         return False
@@ -756,10 +756,10 @@ class ManualInvoice(Task):
     @property
     def project(self):
         """
-            Return a fake project used to access client and company
+            Return a fake project used to access customer and company
             on an uniform way
         """
-        return FakeProject(client=self.client, company=self.company)
+        return FakeProject(customer=self.customer, company=self.company)
 
     @classmethod
     def get_officialNumber(cls):

@@ -23,7 +23,7 @@
 #
 
 """
-    Client views
+    Customer views
 """
 import logging
 
@@ -36,14 +36,14 @@ from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.widgets import SearchForm
 from autonomie.utils.widgets import PopUp
 from autonomie.utils.views import submit_btn
-from autonomie.views.forms.client import (
-        CLIENTSCHEMA,
-        ClientSearchSchema,
+from autonomie.views.forms.customer import (
+        CUSTOMERSCHEMA,
+        CustomerSearchSchema,
         )
 from autonomie.views.forms import (
         BaseFormView,
@@ -57,38 +57,38 @@ from .base import (
 log = logging.getLogger(__name__)
 
 
-def get_client_form(request):
+def get_customer_form(request):
     """
-        Returns the client add/edit form
+        Returns the customer add/edit form
     """
-    schema = CLIENTSCHEMA.bind(request=request)
+    schema = CUSTOMERSCHEMA.bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
     return form
 
 
-class ClientsList(BaseListView):
+class CustomersList(BaseListView):
     title = u"Liste des clients"
-    schema = ClientSearchSchema()
-    sort_columns = {'name':Client.name,
-                    "code":Client.code,
-                    "contactLastName":Client.contactLastName}
+    schema = CustomerSearchSchema()
+    sort_columns = {'name':Customer.name,
+                    "code":Customer.code,
+                    "contactLastName":Customer.contactLastName}
 
     def query(self):
         company = self.request.context
-        return Client.query().filter(Client.company_id == company.id)
+        return Customer.query().filter(Customer.company_id == company.id)
 
     def filter_name_or_contact(self, records, appstruct):
         search = appstruct['search']
         if search:
             records = records.filter(
-                or_(Client.name.like("%" + search + "%"),
-                    Client.contactLastName.like("%" + search + "%")))
+                or_(Customer.name.like("%" + search + "%"),
+                    Customer.contactLastName.like("%" + search + "%")))
         return records
 
     def populate_actionmenu(self, appstruct):
         populate_actionmenu(self.request)
         if has_permission('add', self.request.context, self.request):
-            form = get_client_form(self.request)
+            form = get_customer_form(self.request)
             popup = PopUp("addform", u'Ajouter un client', form.render())
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
@@ -97,11 +97,11 @@ class ClientsList(BaseListView):
         self.request.actionmenu.add(searchform)
 
 
-class ClientsCsv(BaseCsvView):
+class CustomersCsv(BaseCsvView):
     """
-        Client csv view
+        Customer csv view
     """
-    model = Client
+    model = Customer
 
     @property
     def filename(self):
@@ -109,41 +109,41 @@ class ClientsCsv(BaseCsvView):
 
     def query(self):
         company = self.request.context
-        return Client.query().options(undefer_group('edit'))\
-                .filter(Client.company_id == company.id)
+        return Customer.query().options(undefer_group('edit'))\
+                .filter(Customer.company_id == company.id)
 
 
-def client_view(request):
+def customer_view(request):
     """
-        Return the view of a client
+        Return the view of a customer
     """
     populate_actionmenu(request, request.context)
     return dict(title=u"Client : {0}".format(request.context.name),
-                client=request.context)
+                customer=request.context)
 
 
-class ClientAdd(BaseFormView):
+class CustomerAdd(BaseFormView):
     title = u"Ajouter un client"
-    schema = CLIENTSCHEMA
+    schema = CUSTOMERSCHEMA
     buttons = (submit_btn,)
 
     def before(self, form):
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
-        client = Client()
-        client.company = self.request.context
-        client = merge_session_with_post(client, appstruct)
-        self.dbsession.add(client)
+        customer = Customer()
+        customer.company = self.request.context
+        customer = merge_session_with_post(customer, appstruct)
+        self.dbsession.add(customer)
         self.dbsession.flush()
         message = u"Le client <b>{0}</b> a été ajouté avec succès".format(
-                                                                client.name)
+                                                                customer.name)
         self.session.flash(message)
-        return HTTPFound(self.request.route_path('client', id=client.id))
+        return HTTPFound(self.request.route_path('customer', id=customer.id))
 
 
-class ClientEdit(BaseFormView):
-    schema = CLIENTSCHEMA
+class CustomerEdit(BaseFormView):
+    schema = CUSTOMERSCHEMA
     buttons = (submit_btn,)
 
     @reify
@@ -160,41 +160,41 @@ class ClientEdit(BaseFormView):
         """
             Edit the database entry
         """
-        client = merge_session_with_post(self.request.context, appstruct)
-        client = self.dbsession.merge(client)
+        customer = merge_session_with_post(self.request.context, appstruct)
+        customer = self.dbsession.merge(customer)
         self.dbsession.flush()
         message = u"Le client <b>{0}</b> a été édité avec succès".format(
-                                                                client.name)
+                                                                customer.name)
         self.session.flash(message)
-        return HTTPFound(self.request.route_path('client', id=client.id))
+        return HTTPFound(self.request.route_path('customer', id=customer.id))
 
     def appstruct(self):
         """
-            Populate the form with the current edited context (client)
+            Populate the form with the current edited context (customer)
         """
         return self.request.context.appstruct()
 
 
-def populate_actionmenu(request, client=None):
+def populate_actionmenu(request, customer=None):
     """
         populate the actionmenu
     """
     company_id = request.context.get_company_id()
     request.actionmenu.add(get_list_view_btn(company_id))
-    if client:
-        request.actionmenu.add(get_view_btn(client.id))
+    if customer:
+        request.actionmenu.add(get_view_btn(customer.id))
         if has_permission('edit', request.context, request):
-            request.actionmenu.add(get_edit_btn(client.id))
+            request.actionmenu.add(get_edit_btn(customer.id))
 
 def get_list_view_btn(id_):
-    return ViewLink(u"Liste des clients", "edit", path="company_clients",
+    return ViewLink(u"Liste des clients", "edit", path="company_customers",
                                                                     id=id_)
 
-def get_view_btn(client_id):
-    return ViewLink(u"Voir", "view", path="client", id=client_id)
+def get_view_btn(customer_id):
+    return ViewLink(u"Voir", "view", path="customer", id=customer_id)
 
-def get_edit_btn(client_id):
-    return ViewLink(u"Éditer", "edit", path="client", id=client_id,
+def get_edit_btn(customer_id):
+    return ViewLink(u"Éditer", "edit", path="customer", id=customer_id,
                                         _query=dict(action="edit"))
 
 
@@ -202,46 +202,46 @@ def includeme(config):
     """
         Add module's views
     """
-    config.add_route('client',
-                     '/clients/{id}',
-                     traverse='/clients/{id}')
+    config.add_route('customer',
+                     '/customers/{id}',
+                     traverse='/customers/{id}')
 
-    config.add_route('company_clients',
-                     '/company/{id:\d+}/clients',
+    config.add_route('company_customers',
+                     '/company/{id:\d+}/customers',
                      traverse='/companies/{id}')
-    config.add_route('company_clients_csv',
-                     '/company/{id:\d+}/clients.csv',
+    config.add_route('company_customers_csv',
+                     '/company/{id:\d+}/customers.csv',
                      traverse='/companies/{id}')
 
-    config.add_view(ClientAdd,
-                    route_name='company_clients',
-                    renderer='client.mako',
+    config.add_view(CustomerAdd,
+                    route_name='company_customers',
+                    renderer='customer.mako',
                     request_method='POST',
                     permission='edit')
-    config.add_view(ClientAdd,
-                    route_name='company_clients',
-                    renderer='client.mako',
+    config.add_view(CustomerAdd,
+                    route_name='company_customers',
+                    renderer='customer.mako',
                     request_param='action=add',
                     permission='edit')
-    config.add_view(ClientEdit,
-                    route_name='client',
-                    renderer='client.mako',
+    config.add_view(CustomerEdit,
+                    route_name='customer',
+                    renderer='customer.mako',
                     request_param='action=edit',
                     permission='edit')
 
-    config.add_view(ClientsList,
-                    route_name='company_clients',
-                    renderer='company_clients.mako',
+    config.add_view(CustomersList,
+                    route_name='company_customers',
+                    renderer='company_customers.mako',
                     request_method='GET',
                     permission='edit')
 
-    config.add_view(ClientsCsv,
-                    route_name='company_clients_csv',
+    config.add_view(CustomersCsv,
+                    route_name='company_customers_csv',
                     request_method='GET',
                     permission='edit')
 
-    config.add_view(client_view,
-                    route_name='client',
-                    renderer='client_view.mako',
+    config.add_view(customer_view,
+                    route_name='customer',
+                    renderer='customer_view.mako',
                     request_method='GET',
                     permission='view')

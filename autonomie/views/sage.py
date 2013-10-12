@@ -196,14 +196,14 @@ class SageExportPage(BaseView):
         return True
 
 
-    def check_client(self, client):
+    def check_customer(self, customer):
         """
-            Check the invoice's client is configured for exports
+            Check the invoice's customer is configured for exports
         """
-        if not client.compte_cg:
+        if not customer.compte_cg:
             return False
-        if self.request.config.get('sage_rgclient'):
-            if not client.compte_tiers:
+        if self.request.config.get('sage_rgcustomer'):
+            if not customer.compte_tiers:
                 return False
         return True
 
@@ -253,10 +253,10 @@ sont manquantes"
 
 
 
-            if not self.check_client(invoice.client):
-                client_url = self.request.route_path(
-                        'client',
-                        id=invoice.client.id,
+            if not self.check_customer(invoice.customer):
+                customer_url = self.request.route_path(
+                        'customer',
+                        id=invoice.customer.id,
                         _query={'action':'edit'})
                 message = u"La facture {0} n'est pas exportable :"
                 message += u" Des informations sur le client {1} \
@@ -264,8 +264,8 @@ sont manquantes"
                 message += u" <a href='{2}'>Voir l'entreprise</a>"
                 message = message.format(
                         officialNumber,
-                        invoice.client.name,
-                        client_url)
+                        invoice.customer.name,
+                        customer_url)
                 res['errors'].append(message)
                 continue
 

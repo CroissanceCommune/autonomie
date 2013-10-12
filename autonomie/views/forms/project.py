@@ -38,41 +38,41 @@ from autonomie.views.forms.lists import BaseListsSchema
 log = logging.getLogger(__name__)
 
 
-def build_client_value(client=None):
+def build_customer_value(customer=None):
     """
-        return the tuple for building client select
+        return the tuple for building customer select
     """
-    if client:
-        return (str(client.id), client.name)
+    if customer:
+        return (str(customer.id), customer.name)
     else:
         return ("0", u"Sélectionnez")
 
 
-def build_client_values(clients):
+def build_customer_values(customers):
     """
-        Build human understandable client labels
+        Build human understandable customer labels
         allowing efficient discrimination
     """
-    options = [build_client_value()]
-    options.extend([build_client_value(client)
-                            for client in clients])
+    options = [build_customer_value()]
+    options.extend([build_customer_value(customer)
+                            for customer in customers])
     return options
 
-def get_clients_from_request(request):
+def get_customers_from_request(request):
     if request.context.__name__ == 'project':
-        clients = request.context.company.clients
+        customers = request.context.company.customers
     elif request.context.__name__ == 'company':
-        clients = request.context.clients
+        customers = request.context.customers
     else:
-        clients = []
-    return clients
+        customers = []
+    return customers
 
 @colander.deferred
-def deferred_client_list(node, kw):
+def deferred_customer_list(node, kw):
     request = kw['request']
-    clients = get_clients_from_request(request)
+    customers = get_customers_from_request(request)
     return deferred_autocomplete_widget(node,
-                        {'choices':build_client_values(clients)})
+                        {'choices':build_customer_values(customers)})
 
 @colander.deferred
 def deferred_code_widget(node, kw):
@@ -84,38 +84,38 @@ def deferred_code_widget(node, kw):
 
 
 @colander.deferred
-def deferred_default_client(node, kw):
+def deferred_default_customer(node, kw):
     """
-        Return the client provided as request arg if there is one
+        Return the customer provided as request arg if there is one
     """
     request = kw['request']
-    clients = get_clients_from_request(request)
-    client = request.params.get('client')
-    if client in [str(c.id) for c in clients]:
-        return [int(client)]
+    customers = get_customers_from_request(request)
+    customer = request.params.get('customer')
+    if customer in [str(c.id) for c in customers]:
+        return [int(customer)]
     else:
         return colander.null
 
 
 @colander.deferred
-def deferred_client_validator(node, kw):
+def deferred_customer_validator(node, kw):
     request = kw['request']
-    clients = get_clients_from_request(request)
-    client_ids = [client.id for client in clients]
-    def client_oneof(value):
+    customers = get_customers_from_request(request)
+    customer_ids = [customer.id for customer in customers]
+    def customer_oneof(value):
         if value in ("0", 0):
             return u"Veuillez choisir un client"
-        elif value not in client_ids:
+        elif value not in customer_ids:
             return u"Entrée invalide"
         return True
-    return colander.Function(client_oneof)
+    return colander.Function(customer_oneof)
 
 
-class ClientSchema(colander.SequenceSchema):
-    client_id = colander.SchemaNode(colander.Integer(),
+class CustomerSchema(colander.SequenceSchema):
+    customer_id = colander.SchemaNode(colander.Integer(),
             title=u"Client",
-            widget=deferred_client_list,
-            validator=deferred_client_validator)
+            widget=deferred_customer_list,
+            validator=deferred_customer_validator)
 
 
 class ProjectSchema(colander.MappingSchema):
@@ -145,12 +145,12 @@ class ProjectSchema(colander.MappingSchema):
             title=u"Date de fin",
             missing=u"",
             widget=get_date_input())
-    clients = ClientSchema(
+    customers = CustomerSchema(
             title=u"Clients",
             widget=widget.SequenceWidget(
                 min_len=1,
                 add_subitem_text_template=u"Ajouter un client"),
-            default=deferred_default_client)
+            default=deferred_default_customer)
 
 
 class PhaseSchema(colander.MappingSchema):

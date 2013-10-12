@@ -43,10 +43,10 @@
             <div class='row'>
                 <div class='span3'>
                     <h3>Client(s)</h3>
-                    % for client in project.clients:
+                    % for customer in project.customers:
                         <div class='well'>
                             <address>
-                                ${format_text(client.full_address)}
+                                ${format_text(customer.full_address)}
                             </address>
                         </div>
                     % endfor

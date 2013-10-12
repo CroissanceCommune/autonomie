@@ -118,7 +118,7 @@ class Estimation(Task, EstimationCompute):
         "Project",
         backref=backref('estimations', order_by='Estimation.taskDate')
     )
-    client = relationship(
+    customer = relationship(
             "Customer",
             primaryjoin="Customer.id==Estimation.customer_id",
             backref=backref('estimations', order_by='Estimation.taskDate'))
@@ -148,7 +148,7 @@ class Estimation(Task, EstimationCompute):
     def is_estimation(self):
         return True
 
-    def duplicate(self, user, project, phase, client):
+    def duplicate(self, user, project, phase, customer):
         """
             returns a duplicate estimation object
         """
@@ -159,16 +159,16 @@ class Estimation(Task, EstimationCompute):
         estimation.statusPersonAccount = user
         estimation.phase = phase
         estimation.owner = user
-        estimation.client = client
+        estimation.customer = customer
         estimation.project = project
         estimation.taskDate = date
         estimation.set_sequenceNumber(seq_number)
         estimation.set_number()
         estimation.set_name()
-        if client.id == self.customer_id:
+        if customer.id == self.customer_id:
             estimation.address = self.address
         else:
-            estimation.address = client.full_address
+            estimation.address = customer.full_address
 
         estimation.description = self.description
         estimation.CAEStatus = "draft"
@@ -268,7 +268,7 @@ class Estimation(Task, EstimationCompute):
         """
         inv = Invoice()
         # Relationship
-        inv.client = self.client
+        inv.customer = self.customer
         inv.project = self.project
         inv.phase = self.phase
         inv.owner = user
@@ -339,7 +339,7 @@ class Estimation(Task, EstimationCompute):
 
     @property
     def number(self):
-        tasknumber_tmpl = u"{s.project.code}_{s.client.code}_{s._number}"
+        tasknumber_tmpl = u"{s.project.code}_{s.customer.code}_{s._number}"
         return tasknumber_tmpl.format(s=self)
 
     def is_cancelled(self):

@@ -43,7 +43,7 @@ from autonomie.models.task import (
         Invoice,
         CancelInvoice,
         )
-from autonomie.models.client import Client
+from autonomie.models.customer import Customer
 from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
 from autonomie.views.base import BaseView
@@ -140,15 +140,15 @@ class DisplayCommercialHandling(BaseView):
         return self.estimations()\
                 .filter(Estimation.CAEStatus=='geninv')
 
-    def clients(self):
+    def customers(self):
         """
-            Return the number of real clients (with invoices)
+            Return the number of real customers (with invoices)
             for the current year
         """
         company_id = self.request.context.id
         result = 0
-        for client in Client.query().filter(Client.company_id==company_id):
-            for invoice in client.invoices:
+        for customer in Customer.query().filter(Customer.company_id==company_id):
+            for invoice in customer.invoices:
                 if invoice.financial_year == self.year:
                     if invoice.CAEStatus in Invoice.valid_states:
                         result += 1
@@ -217,7 +217,7 @@ class DisplayCommercialHandling(BaseView):
         return dict(title=self.title,
                     estimations=self.estimations().count(),
                     validated_estimations=self.validated_estimations().count(),
-                    clients=self.clients(),
+                    customers=self.customers(),
                     turnovers=self.turnovers(),
                     turnover_projections=turnover_projections,
                     year_form=year_form,

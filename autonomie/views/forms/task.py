@@ -128,57 +128,57 @@ def deferred_default_year(node, kw):
     return datetime.date.today().year
 
 
-def build_client_value(client=None):
+def build_customer_value(customer=None):
     """
-        return the tuple for building client select
+        return the tuple for building customer select
     """
-    if client:
-        return (str(client.id), client.name)
+    if customer:
+        return (str(customer.id), customer.name)
     else:
         return ("0", u"Sélectionnez")
 
 
-def build_client_values(clients):
+def build_customer_values(customers):
     """
-        Build human understandable client labels
+        Build human understandable customer labels
         allowing efficient discrimination
     """
-    options = [build_client_value()]
-    options.extend([build_client_value(client)
-                            for client in clients])
+    options = [build_customer_value()]
+    options.extend([build_customer_value(customer)
+                            for customer in customers])
     return options
 
 
-def get_clients_from_request(request):
-    clients = []
+def get_customers_from_request(request):
+    customers = []
     if request.context.__name__ == 'project':
-        clients = request.context.clients
+        customers = request.context.customers
     elif request.context.__name__ in ('invoice', 'estimation', 'cancelinvoice'):
         if request.context.project is not None:
-            clients = request.context.project.clients
-    return clients
+            customers = request.context.project.customers
+    return customers
 
 
 @colander.deferred
-def deferred_client_list(node, kw):
+def deferred_customer_list(node, kw):
     request = kw['request']
-    clients = get_clients_from_request(request)
+    customers = get_customers_from_request(request)
     return deferred_autocomplete_widget(node,
-            {'choices':build_client_values(clients)})
+            {'choices':build_customer_values(customers)})
 
 
 @colander.deferred
-def deferred_client_validator(node, kw):
+def deferred_customer_validator(node, kw):
     request = kw['request']
-    clients = get_clients_from_request(request)
-    client_ids = [client.id for client in clients]
-    def client_oneof(value):
+    customers = get_customers_from_request(request)
+    customer_ids = [customer.id for customer in customers]
+    def customer_oneof(value):
         if value in ("0", 0):
             return u"Veuillez choisir un client"
-        elif value not in client_ids:
+        elif value not in customer_ids:
             return u"Entrée invalide"
         return True
-    return colander.Function(client_oneof)
+    return colander.Function(customer_oneof)
 
 
 def get_tasktype_from_request(request):
@@ -490,11 +490,11 @@ class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
-    client_id = colander.SchemaNode(
+    customer_id = colander.SchemaNode(
                 colander.Integer(),
                 title=u"Choix du client",
-                widget=deferred_client_list,
-                validator=deferred_client_validator)
+                widget=deferred_customer_list,
+                validator=deferred_customer_validator)
     address = colander.SchemaNode(
             colander.String(),
             title=u"Nom et adresse du client",
@@ -964,7 +964,7 @@ class InvoiceMatch(MappingWrapper):
         ('financial_year', 'common'),
         ('description', 'common'),
         #both estimation and invoice attrs
-        ('client_id', 'common'),
+        ('customer_id', 'common'),
         ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
@@ -981,7 +981,7 @@ class EstimationMatch(MappingWrapper):
         ('phase_id', 'common'),
         ('taskDate', 'common'),
         ('description', 'common'),
-        ('client_id', 'common'),
+        ('customer_id', 'common'),
         ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
@@ -1005,7 +1005,7 @@ class CancelInvoiceMatch(MappingWrapper):
         ('taskDate', 'common'),
         ('financial_year', 'common'),
         ('description', 'common'),
-        ('client_id', 'common'),
+        ('customer_id', 'common'),
         ('address', 'common'),
         ('displayedUnits', 'common'),
         ('expenses', 'lines'),

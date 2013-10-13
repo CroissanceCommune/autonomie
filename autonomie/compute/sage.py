@@ -49,6 +49,22 @@ class MissingData(Exception):
     """
     pass
 
+def double_lines(method):
+    """
+        Wrap a book entry generator by duplicating the analytic book entry as a
+        general one
+    """
+    def wrapped_method(self, *args):
+        analytic_entry = method(self, *args)
+        general_entry = analytic_entry.copy()
+        general_entry['type_'] = 'G'
+        general_entry.pop('num_analytique')
+        yield general_entry
+        yield analytic_entry
+    return wrapped_method
+
+
+
 
 class SageInvoice(object):
     """
@@ -168,7 +184,8 @@ class BaseSageBookEntryFactory(object):
                       'code_journal',
                       'date',
                       'num_facture',
-                      'libelle'
+                      'libelle',
+                      'type_',
                         )
     variable_columns = ('compte_cg', 'num_analytique', 'compte_tiers',
         'code_tva', 'echeance', 'debit', 'credit')
@@ -215,6 +232,13 @@ class BaseSageBookEntryFactory(object):
             Should be overriden by subclasses
         """
         return ""
+
+    @property
+    def type_(self):
+        """
+            Return A for 'Analytic' book entry
+        """
+        return "A"
 
     def get_base_entry(self):
         """
@@ -286,6 +310,7 @@ class SageFacturation(BaseSageBookEntryFactory):
         """
         return self.invoice.company.code_compta
 
+    @double_lines
     def credit_totalht(self, product):
         """
             Return a Credit Total HT entry
@@ -299,6 +324,7 @@ class SageFacturation(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def credit_tva(self, product):
         """
             Return a Credit TVA entry
@@ -312,6 +338,7 @@ class SageFacturation(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def debit_ttc(self, product):
         """
             Return a debit TTC entry
@@ -367,6 +394,7 @@ class SageContribution(BaseSageBookEntryFactory):
         """
         return percentage(product['ht'], self.get_contribution())
 
+    @double_lines
     def debit_entreprise(self, product):
         """
             Debit entreprise book entry
@@ -379,6 +407,7 @@ class SageContribution(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def credit_entreprise(self, product):
         """
             Credit Entreprise book entry
@@ -391,6 +420,7 @@ class SageContribution(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def debit_cae(self, product):
         """
             Debit CAE book entry
@@ -402,6 +432,7 @@ class SageContribution(BaseSageBookEntryFactory):
                 debit=self.get_amount(product))
         return entry
 
+    @double_lines
     def credit_cae(self, product):
         """
             Credit CAE book entry
@@ -413,6 +444,7 @@ class SageContribution(BaseSageBookEntryFactory):
                 credit=self.get_amount(product))
         return entry
 
+    @double_lines
     def yield_entries(self):
         """
             yield book entries
@@ -443,6 +475,7 @@ class SageAssurance(BaseSageBookEntryFactory):
         """
         return self._amount_method(self.invoice.total_ht(), self.get_part())
 
+    @double_lines
     def debit_entreprise(self):
         """
             Debit entreprise book entry
@@ -455,6 +488,7 @@ class SageAssurance(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def credit_entreprise(self):
         """
             Credit entreprise book entry
@@ -466,6 +500,7 @@ class SageAssurance(BaseSageBookEntryFactory):
                 credit=self.get_amount(),)
         return entry
 
+    @double_lines
     def debit_cae(self):
         """
             Debit cae book entry
@@ -477,6 +512,7 @@ class SageAssurance(BaseSageBookEntryFactory):
                 debit=self.get_amount(),)
         return entry
 
+    @double_lines
     def credit_cae(self):
         """
             Credit CAE book entry
@@ -518,6 +554,7 @@ class SageCGScop(BaseSageBookEntryFactory):
         """
         return self._amount_method(self.invoice.total_ht(), self.get_part())
 
+    @double_lines
     def debit_entreprise(self):
         """
             Debit entreprise book entry
@@ -530,6 +567,7 @@ class SageCGScop(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def credit_entreprise(self):
         """
             Credit entreprise book entry
@@ -541,6 +579,7 @@ class SageCGScop(BaseSageBookEntryFactory):
                 credit=self.get_amount(),)
         return entry
 
+    @double_lines
     def debit_cae(self):
         """
             Debit cae book entry
@@ -552,6 +591,7 @@ class SageCGScop(BaseSageBookEntryFactory):
                 debit=self.get_amount(),)
         return entry
 
+    @double_lines
     def credit_cae(self):
         """
             Credit CAE book entry
@@ -595,6 +635,7 @@ class SageRGInterne(BaseSageBookEntryFactory):
         ttc = product['ht'] + product['tva']
         return self._amount_method(ttc, self.get_part())
 
+    @double_lines
     def debit_entreprise(self, product):
         """
             Debit entreprise book entry
@@ -607,6 +648,7 @@ class SageRGInterne(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def credit_entreprise(self, product):
         """
             Credit entreprise book entry
@@ -618,6 +660,7 @@ class SageRGInterne(BaseSageBookEntryFactory):
                 credit=self.get_amount(product),)
         return entry
 
+    @double_lines
     def debit_cae(self, product):
         """
             Debit cae book entry
@@ -629,6 +672,7 @@ class SageRGInterne(BaseSageBookEntryFactory):
                 debit=self.get_amount(product),)
         return entry
 
+    @double_lines
     def credit_cae(self, product):
         """
             Credit CAE book entry
@@ -678,6 +722,7 @@ class SageRGClient(BaseSageBookEntryFactory):
         echeance = self.invoice.taskDate + datetime.timedelta(days=365)
         return format_sage_date(echeance)
 
+    @double_lines
     def debit_entreprise(self, product):
         """
             Debit entreprise book entry
@@ -691,6 +736,7 @@ class SageRGClient(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @double_lines
     def credit_entreprise(self, product):
         """
             Credit entreprise book entry

@@ -46,6 +46,7 @@ class SageCsvWriter(BaseCsvWriter):
             ('echeance', "Date d’échéance"),
             ('debit', "Montant débit"),
             ('credit', "Montant crédit"),
+            ('type_', "Type de ligne"),
             ('num_analytique', "Numéro analytique"),)
 
     @property

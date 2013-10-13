@@ -32,13 +32,14 @@ from autonomie.compute.task import (
         InvoiceCompute,
         )
 from autonomie.compute.sage import (
+        double_lines,
         SageInvoice,
         SageFacturation,
         SageContribution,
         SageAssurance,
         SageCGScop,
         SageRGInterne,
-        SageRGCustomer,
+        SageRGClient,
         SageExport,
         )
 
@@ -80,7 +81,7 @@ def get_config():
             'taux_assurance': "5",
             'taux_cgscop': "5",
             'taux_rg_interne': "5",
-            'taux_rg_customer': "5",
+            'taux_rg_client': "5",
             'contribution_cae': "10"
             }
 
@@ -155,7 +156,11 @@ class TestSageInvoice(BaseTestCase):
 class BaseBookEntryTest(BaseTestCase):
     factory = None
 
-    def _test_product_book_entry(self, method, exp_res, prod_cg='P0001'):
+    def _test_product_book_entry(
+            self,
+            method,
+            exp_analytic_line,
+            prod_cg='P0001'):
         """
         test a book_entry output (one of a product)
         """
@@ -166,13 +171,23 @@ class BaseBookEntryTest(BaseTestCase):
         book_entry_factory = self.factory(config)
         book_entry_factory.set_invoice(wrapped_invoice)
         product = wrapped_invoice.products[prod_cg]
-        line = getattr(book_entry_factory, method)(product)
-        exp_res['date'] = '020213'
-        exp_res['num_facture'] = 'INV_001'
-        exp_res['code_journal'] = 'CODE_JOURNAL'
-        self.assertEqual(line, exp_res)
 
-    def _test_invoice_book_entry(self, method, exp_res):
+        lines_generator = getattr(book_entry_factory, method)(product)
+
+        exp_analytic_line['date'] = '020213'
+        exp_analytic_line['num_facture'] = 'INV_001'
+        exp_analytic_line['code_journal'] = 'CODE_JOURNAL'
+        exp_general_line = exp_analytic_line.copy()
+        exp_analytic_line['type_'] = 'A'
+        exp_general_line['type_'] = 'G'
+        exp_general_line.pop('num_analytique', '')
+
+        general_line = lines_generator.next()
+        self.assertEqual(general_line, exp_general_line)
+        analytic_line = lines_generator.next()
+        self.assertEqual(analytic_line, exp_analytic_line)
+
+    def _test_invoice_book_entry(self, method, exp_analytic_line):
         """
         test a book_entry output (one of a product)
         """
@@ -182,12 +197,33 @@ class BaseBookEntryTest(BaseTestCase):
         wrapped_invoice.populate()
         book_entry_factory = self.factory(config)
         book_entry_factory.set_invoice(wrapped_invoice)
-        line = getattr(book_entry_factory, method)()
-        exp_res['date'] = '020213'
-        exp_res['num_facture'] = 'INV_001'
-        exp_res['code_journal'] = 'CODE_JOURNAL'
-        print exp_res
-        self.assertEqual(line, exp_res)
+        lines_generator = getattr(book_entry_factory, method)()
+
+        exp_analytic_line['date'] = '020213'
+        exp_analytic_line['num_facture'] = 'INV_001'
+        exp_analytic_line['code_journal'] = 'CODE_JOURNAL'
+        exp_general_line = exp_analytic_line.copy()
+        exp_analytic_line['type_'] = 'A'
+        exp_general_line['type_'] = 'G'
+        exp_general_line.pop('num_analytique', '')
+
+        general_line = lines_generator.next()
+        self.assertEqual(general_line, exp_general_line)
+        analytic_line = lines_generator.next()
+        self.assertEqual(analytic_line, exp_analytic_line)
+
+
+def decoratorfunc(a, b):
+    return {'type_': 'A', 'key': 'value', 'num_analytique':'NUM'}
+
+
+class Testmain(BaseTestCase):
+    def test_double_lines(self):
+        res = list(double_lines(decoratorfunc)(None, None))
+        self.assertEqual(res, [
+            {'type_': 'G', 'key': 'value'},
+            {'type_': 'A', 'key': 'value', 'num_analytique':'NUM'}
+            ])
 
 
 class TestSageFacturation(BaseBookEntryTest):
@@ -383,8 +419,8 @@ class TestSageRGInterne(BaseBookEntryTest):
         self._test_product_book_entry(method, res)
 
 
-class TestSageRGCustomer(BaseBookEntryTest):
-    factory = SageRGCustomer
+class TestSageRGClient(BaseBookEntryTest):
+    factory = SageRGClient
 
     def test_debit_entreprise(self):
         method = 'debit_entreprise'

@@ -22,7 +22,6 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import unittest
 import datetime
 from mock import MagicMock
 
@@ -76,6 +75,8 @@ def get_config():
             'compte_rg_externe': 'CG_RG_EXT',
             'compte_rg_interne': 'CG_RG_INT',
             'compte_cg_banque': 'BANK_CG',
+            'compte_cg_tva_rrr': "CG_TVA_RRR",
+            "code_tva_rrr": "CODE_TVA_RRR",
             'numero_analytique': 'NUM_ANA',
             'rg_coop': 'CG_RG_COOP',
             'taux_assurance': "5",
@@ -85,7 +86,7 @@ def get_config():
             'contribution_cae': "10"
             }
 
-def prepare():
+def prepare(discount=False):
     tva1 = MagicMock(name="tva1", value=1960, default=0,
             compte_cg="TVA0001", code='CTVA0001')
     tva2 = MagicMock(name="tva2", value=700, default=0,
@@ -109,6 +110,14 @@ def prepare():
     invoice.company = company
     invoice.officialNumber = "INV_001"
     invoice.lines = [line1, line2, line3]
+
+    if discount:
+        discount1 = DummyLine(cost=10000, quantity=1, tva=tva1.value,
+                tva_object=tva1)
+        discount2 = DummyLine(cost=10000, quantity=1, tva=tva2.value,
+                tva_object=tva2)
+        invoice.discounts = [discount1, discount2]
+
     invoice.expenses_ht = 10000
     invoice.expenses = 10000
 
@@ -139,9 +148,36 @@ class TestSageInvoice(BaseTestCase):
         self.assertEqual(wrapper.products['P0002']['ht'], 10000)
         self.assertEqual(wrapper.products['P0002']['tva'], 700)
 
-    @unittest.skip("This functionnality is not implemented yet, missing specs")
     def test_populate_discount_lines(self):
-        pass
+        tvas, products, invoice = prepare(discount=True)
+        wrapper = SageInvoice(invoice=invoice, compte_cgs=get_config())
+        wrapper._populate_discounts()
+        wrapper._round_products()
+        self.assertEqual(wrapper.products.keys(), ['CG_RRR'])
+        self.assertEqual(
+                wrapper.products['CG_RRR']['code_tva'],
+                "CODE_TVA_RRR")
+        self.assertEqual(
+                wrapper.products['CG_RRR']['compte_cg_tva'],
+                "CG_TVA_RRR")
+        self.assertEqual(wrapper.products['CG_RRR']['ht'], 20000)
+        self.assertEqual(wrapper.products['CG_RRR']['tva'], 2660)
+
+        # If one of compte_cg_tva_rrr or code_tva_rrr is not def
+        # No entry should be returned
+        config = get_config()
+        config.pop("compte_cg_tva_rrr")
+        wrapper = SageInvoice(invoice=invoice, compte_cgs=config)
+        wrapper._populate_discounts()
+        self.assertEqual(wrapper.products.keys(), [])
+
+        config = get_config()
+        config.pop("code_tva_rrr")
+        wrapper = SageInvoice(invoice=invoice, compte_cgs=config)
+        wrapper._populate_discounts()
+        self.assertEqual(wrapper.products.keys(), [])
+
+
 
     def test_populate_expenses(self):
         tvas, products, invoice = prepare()

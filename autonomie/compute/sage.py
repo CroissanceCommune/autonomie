@@ -64,8 +64,6 @@ def double_lines(method):
     return wrapped_method
 
 
-
-
 class SageInvoice(object):
     """
         Sage wrapper for invoices
@@ -124,18 +122,21 @@ class SageInvoice(object):
     def _populate_discounts(self):
         """
             populate our object with the content of discount lines
+            discount lines are grouped in a unique book entry, the TVA used is
+            specific to the RRR, no book entry is returned if the code and
+            compte cg for this specific book entry type is defined
         """
-        for line in self.invoice.discounts:
-            tva = line.get_tva()
-            if tva is None:
-                raise MissingData(u"No tva found for this discount line")
-            prod = self.get_product(
-                    self.compte_cgs['compte_rrr'],
-                    tva.compte_cg,
-                    tva.code,
-                    )
-            prod['tva'] = prod.get('tva', 0) + line.tva_amount()
-            prod['ht'] = prod.get('ht', 0) + line.total_ht()
+        compte_cg_tva = self.compte_cgs.get('compte_cg_tva_rrr')
+        code_tva = self.compte_cgs.get('code_tva_rrr')
+        if compte_cg_tva and code_tva:
+            for line in self.invoice.discounts:
+                prod = self.get_product(
+                        self.compte_cgs['compte_rrr'],
+                        compte_cg_tva,
+                        code_tva,
+                        )
+                prod['tva'] = prod.get('tva', 0) + line.tva_amount()
+                prod['ht'] = prod.get('ht', 0) + line.total_ht()
 
     def _populate_expenses(self):
         """

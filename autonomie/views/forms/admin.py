@@ -310,38 +310,104 @@ class SageExportConfig(colander.MappingSchema):
 
 def build_cae_config_schema():
     fields =(
-    ('code_journal', u"Code journal", u"Le code du journal dans Sage",),
-    ('numero_analytique', u"Numéro analytique de la CAE", "",),
-    ('compte_cg_contribution', u"Compte CG contribution", u"Compte CG \
-correspondant à la contribution des entrepreneurs à la CAE"),
-    ('compte_rrr', u"Compte RRR", u"Compte Rabais, Remises et Ristournes",),
-    ('compte_frais_annexes', u"Compte de frais annexes", '',),
-    ('compte_cg_banque', u"Compte CG Banque", "",),
+    (
+        'code_journal',
+        u"Code journal",
+        u"Le code du journal dans Sage",
+    ),
+    (
+        'numero_analytique',
+        u"Numéro analytique de la CAE",
+        "",
+    ),
 
-    ('compte_cg_assurance', u"Compte CG assurance",
-        u"Requis pour le module d'écritures Assurance",),
-    ('compte_cgscop', u"Compte CGSCOP",
-        u"Requis pour le module d'écritures CGSCOP",),
-    ('compte_cg_debiteur', u"Compte CG de débiteur",
-        u"Requis pour le module d'écritures CGSCOP",),
-    ('compte_rg_interne', u"Compte RG Interne",
-        u"Requis pour les écritures RG Interne",),
-    ('compte_rg_externe', u"Compte RG Externe",
-        u"Requis pour le module d'écriture RG Client",),
+    (
+        'compte_cg_contribution',
+        u"Compte CG contribution",
+        u"Compte CG correspondant à la contribution des entrepreneurs à la CAE"
+    ),
+    (
+        'compte_rrr',
+        u"Compte RRR",
+        u"Compte Rabais, Remises et Ristournes",
+    ),
+    (
+        'compte_frais_annexes',
+        u"Compte de frais annexes",
+        '',
+    ),
+    (
+        'compte_cg_banque',
+        u"Compte CG Banque",
+        "",
+    ),
+
+    (
+        'compte_cg_assurance',
+        u"Compte CG assurance",
+        u"Requis pour le module d'écritures Assurance",
+    ),
+    (
+        'compte_cgscop',
+        u"Compte CGSCOP",
+        u"Requis pour le module d'écritures CGSCOP",
+    ),
+    (
+        'compte_cg_debiteur',
+        u"Compte CG de débiteur",
+        u"Requis pour le module d'écritures CGSCOP",
+    ),
+    (
+        'compte_rg_interne',
+        u"Compte RG Interne",
+        u"Requis pour les écritures RG Interne",
+    ),
+    (
+        'compte_rg_externe',
+        u"Compte RG Externe",
+        u"Requis pour le module d'écriture RG Client",
+    ),
+    (
+        'compte_cg_tva_rrr',
+        u"Compte CG de TVA spécifique aux RRR",
+        u"Facultatif, les remises apparaitront dans les écritures si cette \
+valeur et le code tva sont renseignés.",
+    ),
+    (
+        'code_tva_rrr',
+        u"Code de TVA spécifique aux RRR",
+        u"Facultatif, les remises apparaitront dans les écritures si cette \
+valeur et le compte CG sont renseignés.",
+    ),
 
 
-    ("contribution_cae", u"Pourcentage de la contribution",
+    (
+        "contribution_cae",
+        u"Pourcentage de la contribution",
         u"Valeur par défaut de la contribution (nombre entre 1 et 100). \
-        Elle peut être individualisée sur les pages entreprises",),
-    ("taux_assurance", u"Taux d'assurance",
-        u"(nombre entre 1 et 100) Requis pour le module d'écritures Assurance",),
-    ("taux_cgscop", u"Taux CGSCOP",
-        u"(nombre entre 1 et 100) Requis pour le module d'écritures CGSCOP",),
-    ("taux_rg_interne", u"Taux RG Interne",
-        u"(nombre entre 1 et 100) Requis pour les écritures RG Interne",),
-    ("taux_rg_client", u"Taux RG Client",
-        u"(nombre entre 1 et 100) Requis pour le module d'écriture RG Client",)
-    ,)
+        Elle peut être individualisée sur les pages entreprises",
+    ),
+    (
+        "taux_assurance",
+        u"Taux d'assurance",
+        u"(nombre entre 1 et 100) Requis pour le module d'écritures Assurance",
+    ),
+    (
+        "taux_cgscop",
+        u"Taux CGSCOP",
+        u"(nombre entre 1 et 100) Requis pour le module d'écritures CGSCOP",
+    ),
+    (
+        "taux_rg_interne",
+        u"Taux RG Interne",
+        u"(nombre entre 1 et 100) Requis pour les écritures RG Interne",
+    ),
+    (
+        "taux_rg_client",
+        u"Taux RG Client",
+        u"(nombre entre 1 et 100) Requis pour le module d'écriture RG Client",
+    ),
+    )
     schema = CaeConfig().clone()
     for key, title, description in fields:
         schema.add(colander.SchemaNode(
@@ -353,19 +419,24 @@ correspondant à la contribution des entrepreneurs à la CAE"),
 
 
     export_modules = (
-            ("sage_contribution",
+            (
+                "sage_contribution",
                 u"Module contribution",
                 u"",),
-            ('sage_assurance',
+            (
+                'sage_assurance',
                 u"Module assurance",
                 u"",),
-            ('sage_cgscop',
+            (
+                'sage_cgscop',
                 u"Module CGSCOP",
                 u"",),
-            ('sage_rginterne',
+            (
+                'sage_rginterne',
                 u"Module RG Interne",
                 u"",),
-            ('sage_rgclient',
+            (
+                'sage_rgclient',
                 u"Module RG Client",
                 u"",),
             )

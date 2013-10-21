@@ -36,6 +36,7 @@ class SageCsvWriter(BaseCsvWriter):
     """
     delimiter = ";"
     headers = (
+            ('num_facture', "Numéro de pièce",),
             ('code_journal', "Code Journal"),
             ('date', "Date de pièce"),
             ('compte_cg', "N° compte général"),

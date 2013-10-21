@@ -59,8 +59,7 @@ def double_lines(method):
         general_entry = analytic_entry.copy()
         general_entry['type_'] = 'G'
         general_entry.pop('num_analytique')
-        yield general_entry
-        yield analytic_entry
+        return general_entry, analytic_entry
     return wrapped_method
 
 
@@ -445,7 +444,6 @@ class SageContribution(BaseSageBookEntryFactory):
                 credit=self.get_amount(product))
         return entry
 
-    @double_lines
     def yield_entries(self):
         """
             yield book entries
@@ -795,7 +793,9 @@ class SageExport(object):
         for module in self.modules:
             module.set_invoice(wrapped_invoice)
             for entry in module.yield_entries():
-                yield entry
+                gen_line, analytic_line = entry
+                yield gen_line
+                yield analytic_line
 
     def get_book_entries(self, invoicelist):
         """

@@ -208,7 +208,7 @@ class BaseBookEntryTest(BaseTestCase):
         book_entry_factory.set_invoice(wrapped_invoice)
         product = wrapped_invoice.products[prod_cg]
 
-        lines_generator = getattr(book_entry_factory, method)(product)
+        general_line, analytic_line = getattr(book_entry_factory, method)(product)
 
         exp_analytic_line['date'] = '020213'
         exp_analytic_line['num_facture'] = 'INV_001'
@@ -218,9 +218,7 @@ class BaseBookEntryTest(BaseTestCase):
         exp_general_line['type_'] = 'G'
         exp_general_line.pop('num_analytique', '')
 
-        general_line = lines_generator.next()
         self.assertEqual(general_line, exp_general_line)
-        analytic_line = lines_generator.next()
         self.assertEqual(analytic_line, exp_analytic_line)
 
     def _test_invoice_book_entry(self, method, exp_analytic_line):
@@ -233,7 +231,8 @@ class BaseBookEntryTest(BaseTestCase):
         wrapped_invoice.populate()
         book_entry_factory = self.factory(config)
         book_entry_factory.set_invoice(wrapped_invoice)
-        lines_generator = getattr(book_entry_factory, method)()
+
+        general_line, analytic_line = getattr(book_entry_factory, method)()
 
         exp_analytic_line['date'] = '020213'
         exp_analytic_line['num_facture'] = 'INV_001'
@@ -243,9 +242,7 @@ class BaseBookEntryTest(BaseTestCase):
         exp_general_line['type_'] = 'G'
         exp_general_line.pop('num_analytique', '')
 
-        general_line = lines_generator.next()
         self.assertEqual(general_line, exp_general_line)
-        analytic_line = lines_generator.next()
         self.assertEqual(analytic_line, exp_analytic_line)
 
 

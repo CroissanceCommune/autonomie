@@ -125,6 +125,8 @@
                     % endfor
                 </tbody>
             </table>
+            <a id="index_activities_previous">previous</a> 
+            <a id="index_activities_next>next</a> 
         </div>
     </div>
 </div>

@@ -30,6 +30,7 @@ from autonomie.views.render_api import format_amount
 from autonomie.utils.ascii import force_utf8
 from autonomie.export.csvtools import BaseCsvWriter
 
+
 class SageCsvWriter(BaseCsvWriter):
     """
         Write Sage csv files
@@ -75,7 +76,7 @@ class SageCsvWriter(BaseCsvWriter):
         if debit == '':
             return 0
         else:
-            return format_amount(debit)
+            return format_amount(debit, grouping=False)
 
     def format_credit(self, credit):
         """

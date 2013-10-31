@@ -107,7 +107,7 @@ def format_name(firstname, lastname, reverse=False):
         return u"{0} {1}".format(firstname, lastname)
 
 
-def format_amount(amount, trim=True):
+def format_amount(amount, trim=True, grouping=True):
     """
         return a pretty printable amount
     """
@@ -119,10 +119,11 @@ def format_amount(amount, trim=True):
                 trim = True
         if trim:
             amount = int(amount) / 100.0
-            resp = locale.format("%.2f", amount, grouping=True)
+            resp = locale.format("%.2f", amount, grouping=grouping)
         else:
-            resp = locale.format("%g", amount / 100.0, grouping=True)
-    resp = resp.replace(' ', '&nbsp;')
+            resp = locale.format("%g", amount / 100.0, grouping=grouping)
+    if grouping:
+        resp = resp.replace(' ', '&nbsp;')
     return resp
 
 

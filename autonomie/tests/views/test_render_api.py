@@ -42,6 +42,9 @@ class TestIt(BaseTestCase):
         self.assertEqual(render_api.format_amount(a, False), "15,25")
         self.assertEqual(render_api.format_amount(b), "15,25")
         self.assertEqual(render_api.format_amount(b, False), "15,253")
+        c = 210000
+        self.assertEqual(render_api.format_amount(c, grouping=False), "2100,00")
+        self.assertEqual(render_api.format_amount(c, grouping=True), "2&nbsp;100,00")
 
     def test_format_name(self):
         self.assertEqual(render_api.format_name(None, u"LastName"),

@@ -162,7 +162,7 @@
      %endif
              </td>
              <td>
-                 ${document.officialNumber}
+                 ${request.config.get('invoiceprefix')}${document.officialNumber}
              </td>
              <td>
                  ${api.format_date(document.taskDate)}

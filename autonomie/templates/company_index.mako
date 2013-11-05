@@ -49,7 +49,7 @@
                         % for invoice in elapsed_invoices[:5]:
                             <tr>
                                 <td>
-                                    ${invoice.officialNumber}
+                                    ${request.config.get('invoiceprefix')}${invoice.officialNumber}
                                 </td>
                                 <td>
                                     ${format_customer(invoice.customer)}

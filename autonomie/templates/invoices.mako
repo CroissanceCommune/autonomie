@@ -174,7 +174,7 @@
         %endif
             </td>
             <td>
-                ${document.officialNumber}
+                ${request.config.get('invoiceprefix')}${document.officialNumber}
             </td>
             <td>
                 <% company = document.get_company() %>

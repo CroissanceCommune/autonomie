@@ -46,7 +46,7 @@
                 % else:
                     Vous ne pouvez plus modifier ce document car il a déjà été validé.
                     % if hasattr(task, 'officialNumber'):
-                        Il porte le numéro <b>${task.officialNumber}</b>.
+                        Il porte le numéro <b>${request.config.get('invoiceprefix')}${task.officialNumber}</b>.
                     % endif
                 % endif
             </p>
@@ -105,7 +105,9 @@
             % if hasattr(task, 'invoice') and task.invoice:
                 <li>
                 <p>
-                    Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">${task.invoice.officialNumber}</a>
+                    Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">
+                        ${request.config.get('invoiceprefix')}${task.invoice.officialNumber}
+                    </a>
                 </p>
                 </li>
             % endif

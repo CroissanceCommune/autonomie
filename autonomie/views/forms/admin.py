@@ -79,6 +79,9 @@ class InvoiceConfig(colander.MappingSchema):
     """
         Schema for invoice configuration
     """
+    prefix = colander.SchemaNode(colander.String(),
+            title=u"Préfixer les numéros de facture",
+            missing=u"")
     header = colander.SchemaNode(
             colander.String(),
             title=u"Cadre d'information spécifique (en entête des factures)",
@@ -474,17 +477,18 @@ def get_config_appstruct(config_dict):
     appstruct = {
         'site':     {'welcome': None},
         'document': {'estimation':  {
-                                    'header':None,
+                                    'header': None,
                                     'footer': None,
                                     },
                      'invoice':     {
-                                    'header':None,
+                                    'prefix': None,
+                                    'header': None,
                                     'payment': None,
                                      'late': None},
                      'footertitle': None,
                      'footercourse': None,
                      'footercontent': None,
-                     'cgv':None},
+                     'cgv': None},
     }
     appstruct['site']['welcome'] = config_dict.get('welcome')
     appstruct['document']['footertitle'] = config_dict.get(
@@ -500,6 +504,8 @@ def get_config_appstruct(config_dict):
     appstruct['document']['estimation']['footer'] = config_dict.get(
                                                        'coop_estimationfooter')
 
+    appstruct['document']['invoice']['prefix'] = config_dict.get(
+                                                    'invoiceprefix')
     appstruct['document']['invoice']['header'] = config_dict.get(
                                                         'coop_invoiceheader')
 
@@ -529,6 +535,9 @@ def get_config_dbdatas(appstruct):
     dbdatas['coop_estimationfooter'] = appstruct.get('document', {}).get(
                                                 'estimation', {}).get('footer')
 
+    dbdatas['invoiceprefix'] = appstruct.get('document', {})\
+            .get('invoice', {})\
+            .get('prefix')
     dbdatas['coop_invoiceheader'] = appstruct.get('document', {}).get(
                                            'invoice', {}).get('header')
     dbdatas['coop_invoicepayment'] = appstruct.get('document', {}).get(

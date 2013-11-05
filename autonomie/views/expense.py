@@ -359,6 +359,12 @@ perdues) ?")
         """
         return Submit(u"Invalider", "invalid", request=self.request)
 
+    def _resulted_btn(self):
+        """
+            Return a button to set the expense as resulted
+        """
+        return Submit(u"Notifier le paiement", "resulted", request=self.request)
+
     @property
     def edit(self):
         """

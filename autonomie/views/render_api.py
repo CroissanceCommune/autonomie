@@ -42,7 +42,13 @@ STATUS = dict((
             ("paid", u"Paiement partiel reçu",),
             ("resulted", u"Paiement reçu",),
             ))
-
+EXPENSE_STATUS = dict((
+    ("draft", u"Brouillon modifié",),
+    ("wait", u"Validation demandée",),
+    ("valid", u"Validé{genre}"),
+    ('invalid', u"Invalidé{genre}",),
+    ("resulted", u"Paiement notifié",),
+    ))
 
 def format_status(task):
     """
@@ -68,7 +74,8 @@ def format_expense_status(expense):
     """
         Return a formatted status string for the expense
     """
-    status_str = STATUS.get(expense.status, DEF_STATUS).format(genre=u"e")
+    status_str = EXPENSE_STATUS.get(expense.status, DEF_STATUS)\
+            .format(genre=u"e")
     if expense.status_user:
         account = format_account(expense.status_user)
     else:

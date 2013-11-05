@@ -120,10 +120,12 @@ def build_state_machine():
     reset = ('reset', None, None, False,)
     valid = ('valid', MANAGER_PERMS, )
     invalid = ('invalid', MANAGER_PERMS,)
+    resulted = ('resulted', MANAGER_PERMS, )
     states = {}
     states['draft'] = ('draft', 'wait', reset, valid,)
     states['invalid'] = ('draft', 'wait',)
     states['wait'] = (valid, invalid,)
+    states['valid'] = (resulted,)
     return states
 
 

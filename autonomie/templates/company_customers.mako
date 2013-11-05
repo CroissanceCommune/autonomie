@@ -28,6 +28,7 @@
 <%namespace file="/base/utils.mako" import="searchform"/>
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
+<a class='btn pull-right' href='${request.route_path("customers.csv", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>

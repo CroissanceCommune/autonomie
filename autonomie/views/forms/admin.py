@@ -176,8 +176,8 @@ class TvaItem(colander.MappingSchema):
     """
     id = colander.SchemaNode(colander.Integer(),
             widget=widget.HiddenWidget(),
-            default=None,
-            missing=None)
+            default=0,
+            missing=0)
     name = colander.SchemaNode(
         colander.String(),
         title=u"Libellé du taux de TVA",

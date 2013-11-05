@@ -25,6 +25,11 @@
 """
     Form view tool to easily build form views
 """
+
+
+import colander
+import logging
+
 from pyramid_deform import FormView
 from autonomie.utils.views import submit_btn
 
@@ -99,9 +104,17 @@ class BaseFormView(FormView):
         super(BaseFormView, self).__init__(request)
         self.dbsession = self.request.dbsession
         self.session = self.request.session
+        self.logger = logging.getLogger("form_admin")
 
     def __call__(self):
-        result = super(BaseFormView, self).__call__()
+        try:
+            result = super(BaseFormView, self).__call__()
+        except colander.Invalid, exc:
+            self.logger.exception(
+                "Exception while rendering form "
+                "'%s': %s - struct received: %s", 
+                self.title, exc, self.appstruct())
+            raise
         if isinstance(result, dict):
             result.update(self._more_template_vars())
         return result

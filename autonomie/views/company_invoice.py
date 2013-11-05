@@ -31,15 +31,18 @@ import datetime
 from beaker.cache import cache_region
 
 from autonomie.models.task.task import Task
-from autonomie.models.task.invoice import Invoice
-from autonomie.models.task.invoice import CancelInvoice
-from autonomie.models.task.invoice import ManualInvoice
+from autonomie.models.task.invoice import (
+        Invoice,
+        CancelInvoice,
+        ManualInvoice,
+        )
 from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
-from autonomie.models.types import format_to_taskdate
-from autonomie.views.forms.invoices import InvoicesListSchema
-from autonomie.views.forms.invoices import STATUS_OPTIONS
+from autonomie.views.forms.invoices import (
+        InvoicesListSchema,
+        STATUS_OPTIONS,
+        )
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import aliased
 
@@ -144,7 +147,9 @@ class InvoicesList(BaseListView):
 
     def filter_officialNumber(self, query, appstruct):
         number = appstruct['search']
-        if number != -1:
+        if number and number != -1:
+            prefix = self.request.config.get('invoiceprefix', '')
+            number = number.strip(prefix)
             query = query.filter(or_(Invoice.officialNumber == number,
                                 CancelInvoice.officialNumber == number,
                                 ManualInvoice.officialNumber == number))

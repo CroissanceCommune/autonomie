@@ -42,7 +42,7 @@ def default_year(node, kw):
 class InvoicesListSchema(BaseListsSchema):
     # We override the search param, it needs to be an integer in our case
     # (officialNumber)
-    search = colander.SchemaNode(colander.Integer(), missing=None)
+#    search = colander.SchemaNode(colander.Integer(), missing=None)
     status = colander.SchemaNode(colander.String(),
             validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
             missing='both')

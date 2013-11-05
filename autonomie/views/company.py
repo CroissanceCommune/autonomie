@@ -71,22 +71,16 @@ def company_index(request):
     ret_val['elapsed_invoices'] = elapsed_invoices
     return ret_val
 
-def recent_tasks(company, page_nb, nb_per_page):
-    """
-    helper for providing a pageable task list
-    """
-    all_tasks = []
-    all_invoices = []
-    for project in company.projects:
-        all_tasks.extend(project.estimations)
-        all_tasks.extend(project.invoices)
-        all_invoices.extend(project.invoices)
 
-    all_tasks = sorted(all_tasks,
-                        key=lambda a: a.statusDate,
-                        reverse=True)
+def recent_tasks(request):
+    company = request.context
+    page_nb = request.POST.get('tasks.page_nb', 0)
+    nb_per_page = request.POST.get('tasks.page_nb', 5)
+    return {'tasks': company.get_recent_tasks(page_nb, nb_per_page)}
 
-    return all_tasks[:5]
+def recent_tasks_panel(context, request):
+    return recent_tasks(request)
+
 
 def company_view(request):
     """
@@ -267,3 +261,12 @@ def includeme(config):
                     renderer='company_edit.mako',
                     request_param='action=enable',
                     permission="edit")
+    config.add_view(recent_tasks,
+                   route_name='company',
+                   renderer='company_tasks.mako',
+                   request_param='action=tasks',
+                   permission='edit')
+    # same as above, but as a panel
+    config.add_panel(recent_tasks_panel, 
+                    'company_tasks', 
+                    renderer='company_tasks.mako')

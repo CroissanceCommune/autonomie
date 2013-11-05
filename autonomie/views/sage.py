@@ -140,6 +140,8 @@ class SageExportPage(BaseView):
         return query.filter(Task.taskDate.between(start_date, end_date))
 
     def _filter_number(self, query, number, year, strict=False):
+        prefix = self.request.config.get('invoiceprefix', '')
+        number = number.strip(prefix)
         if strict:
             query = query.filter(
                 or_(Invoice.officialNumber == number,
@@ -221,8 +223,9 @@ class SageExportPage(BaseView):
                 count)
         res = {'title': title, 'errors':[]}
 
+        prefix = self.request.config.get('invoiceprefix', '')
         for invoice in invoices:
-            officialNumber = invoice.officialNumber
+            officialNumber = "%s%s" % (prefix, invoice.officialNumber)
             for line in invoice.lines:
                 if not self.check_invoice_line(line):
                     invoice_url = self.request.route_path('invoice',

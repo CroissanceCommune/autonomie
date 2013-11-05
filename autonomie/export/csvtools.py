@@ -113,12 +113,11 @@ class BaseCsvWriter(object):
 
 class SqlaToCsvWriter(BaseCsvWriter):
     """
-        buffer for writing csv files
-        fobj: the destination file object
-        fieldnames: The fieldnames we have in our dest file
+        Render a sqla model as a csv file buffer
+        :param model: our model class
     """
-    def __init__(self, model, datas):
-        super(SqlaToCsvWriter).__init__(self)
+    def __init__(self, model):
+        super(SqlaToCsvWriter, self).__init__()
         self.model = model
         self.keys = list(collect_keys(self.model))
 

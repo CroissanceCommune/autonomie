@@ -54,7 +54,7 @@ def unique_login(node, value):
     """
         Test login unicity against database
     """
-    result = User.query().filter_by(login=value).first()
+    result = User.query(only_active=False).filter_by(login=value).first()
     if result:
         message = u"Le login '{0}' n'est pas disponible.".format(
                                                             value)
@@ -308,4 +308,6 @@ def get_auth_schema():
     return AuthSchema(title=u"Authentification", validator=auth)
 
 class UserListSchema(BaseListsSchema):
-    pass
+    disabled = colander.SchemaNode(colander.String(),
+                                    missing="0",
+                                    validator=colander.OneOf(('0', '1')))

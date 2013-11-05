@@ -46,7 +46,12 @@
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >
                         <ul>
                             % for company in user.companies:
-                                <li>${company.name}</li>
+                                <li>
+                                    ${company.name}
+                                    % if not company.enabled():
+                                        <span class='label label-warning'>Cette entreprise a été désactivée</span>
+                                    % endif
+                                </li>
                             % endfor
                         </ul>
                     </td>

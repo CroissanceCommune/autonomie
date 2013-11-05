@@ -54,7 +54,10 @@
             <br />
             % for company in user.companies:
                 ${format_company(company)}
-                % endfor
+                % if not company.enabled():
+                    <span class='label label-warning'>Cette entreprise a été désactivée</span>
+                % endif
+            % endfor
         </div>
     </div>
 </div>

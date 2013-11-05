@@ -37,9 +37,11 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.customer import Customer
-from autonomie.utils.widgets import ViewLink
-from autonomie.utils.widgets import SearchForm
-from autonomie.utils.widgets import PopUp
+from autonomie.utils.widgets import (
+        ViewLink,
+        SearchForm,
+        PopUp,
+        )
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.customer import (
         CUSTOMERSCHEMA,
@@ -209,7 +211,7 @@ def includeme(config):
     config.add_route('company_customers',
                      '/company/{id:\d+}/customers',
                      traverse='/companies/{id}')
-    config.add_route('company_customers_csv',
+    config.add_route('customers.csv',
                      '/company/{id:\d+}/customers.csv',
                      traverse='/companies/{id}')
 
@@ -236,7 +238,7 @@ def includeme(config):
                     permission='edit')
 
     config.add_view(CustomersCsv,
-                    route_name='company_customers_csv',
+                    route_name='customers.csv',
                     request_method='GET',
                     permission='edit')
 

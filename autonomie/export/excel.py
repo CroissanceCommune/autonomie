@@ -81,48 +81,77 @@ class ExcelExpense(object):
     def __init__(self, expensesheet):
         self.book = openpyxl.workbook.Workbook()
         self.model = expensesheet
-        self.internal_columns = []
-        self.activity_columns = []
-        self.build_columns(self.internal_columns)
-        self.build_columns(self.activity_columns, internal=False)
+        self.internal_columns = self.get_columns()
+        self.activity_columns = self.get_columns(internal=False)
         self.index = 2
 
-    def build_columns(self, columns, internal=True):
+    def get_tel_column(self):
         """
-            Retrieve all columns and define a global column attribute
         """
-        columns.append({'label':'Date', 'key':'date'})
-        columns.append({'label':'Description', 'key':'description',
-                                                                'width':3})
-        # Telephonic fees are only available as internal expenses
-        if internal:
-            teltype = ExpenseTelType.query().first()
-            if teltype:
-                columns.append({'label':"Téléphonie", 'code':teltype.code})
+        teltype = ExpenseTelType.query().first()
+        if teltype:
+            return [{'label':"Téléphonie", 'code':teltype.code}]
+        else:
+            return []
+
+    def get_km_column(self):
+        """
+        """
         kmtype = ExpenseKmType.query().first()
         if kmtype:
-            columns.append({'label':"Frais de déplacement",
-                'code':kmtype.code})
-        commontypes = ExpenseType.query()\
-                .filter(ExpenseType.type=="expense")\
-                .filter(ExpenseType.active==True)
-        for type_ in commontypes:
-            # Here's a hack to allow to group km fee types and displacement fees
-            if type_.code != kmtype.code:
-                columns.append({'label':type_.label, 'code':type_.code})
+            return [{'label':"Frais de déplacement", 'code':kmtype.code}]
+        else:
+            return []
 
+    def get_disabled_types_columns(self):
+        """
+        """
         types = []
         for line in self.model.lines:
             type_ = line.type_object
             if not type_.active and type_.type != 'expensetel':
                 if type_.id not in types:
                     types.append(type_.id)
-                    columns.append({
+                    yield {
                          'label':"%s (ce type de frais n'existe plus)"\
                                  % (type_.label),
                          'code':type_.code
-                     })
+                     }
 
+    def get_columns(self, internal=True):
+        """
+            Retrieve all columns and define a global column attribute
+            :param internal: are we asking columns for internal expenses
+        """
+        columns = []
+        # Add the two first columns
+        columns.append({'label':'Date', 'key':'date'})
+        columns.append({
+            'label':'Description',
+            'key':'description',
+            'additional_cell_nb':3})
+        # Telephonic fees are only available as internal expenses
+        if internal:
+            columns.extend(self.get_tel_column())
+        km_columns = self.get_km_column()
+        columns.extend(km_columns)
+
+        if len(km_columns) > 0:
+            kmtype_code = km_columns[0]['code']
+        else:
+            kmtype_code = None
+
+        commontypes = ExpenseType.query()\
+                .filter(ExpenseType.type=="expense")\
+                .filter(ExpenseType.active==True)
+        for type_ in commontypes:
+            # Here's a hack to allow to group km fee types and displacement fees
+            if kmtype_code is not None and type_.code != kmtype_code:
+                columns.append({'label':type_.label, 'code':type_.code})
+
+        columns.extend(self.get_disabled_types_columns())
+
+        # Add the last columns
         columns.append({'label':'Tva', 'key':'tva',
             'formatter':integer_to_amount})
         columns.append({'label':'Total', 'key':'total',
@@ -132,15 +161,16 @@ class ExcelExpense(object):
         index = 0
         for col in columns:
             letter = ASCII_UPPERCASE[index]
-            width = col.get('width')
-            if width:
-                last_letter = ASCII_UPPERCASE[index+width]
-                index += width + 1
+            additional_cell_nb = col.get('additional_cell_nb')
+            if additional_cell_nb:
+                last_letter = ASCII_UPPERCASE[index + additional_cell_nb]
+                index += additional_cell_nb + 1
             else:
                 last_letter = letter
                 index += 1
             col['letter'] = letter
             col['last_letter'] = last_letter
+        return columns
 
     def get_merged_cells(self, start, end):
         """
@@ -237,6 +267,18 @@ class ExcelExpense(object):
             val = ""
         return val
 
+    def set_col_width(self, col_letter, width, force=False):
+        """
+            Set the width of a given column
+        """
+        col_dim = self.worksheet.column_dimensions.get(col_letter)
+        if col_dim:
+            if col_dim.width == -1 or force:
+                if width == 0:
+                    col_dim.visible=False
+                else:
+                    col_dim.width = width
+
     def write_table(self, columns, lines):
         """
             write a table with headers and content
@@ -263,6 +305,10 @@ class ExcelExpense(object):
                                      if line.type_object \
                                      and line.type_object.code==column['code']])
                 cell.value = integer_to_amount(val)
+                if val == 0:
+                    self.set_col_width(column['letter'], 0)
+                else:
+                    self.set_col_width(column['letter'], 13)
             elif column.get('key') == 'description':
                 cell.value = "Totaux"
             elif column.get('key') == 'tva':
@@ -321,12 +367,12 @@ CLIENTS"
         """
             write the final total
         """
-        cell = self.get_merged_cells('D', 'I')
+        cell = self.get_merged_cells('A', 'D')
         cell.value = u"Total des frais professionnel à payer"
         cell.style.font.bold = True
         cell.style.font.size = 16
         self.set_color(cell, Color.footer)
-        cell = self.get_merged_cells('J', 'J')
+        cell = self.get_merged_cells('E', 'E')
         cell.style.font.bold = True
         cell.style.font.size = 16
         cell.value = integer_to_amount(self.model.total)
@@ -338,14 +384,14 @@ CLIENTS"
         """
             Write the endline
         """
-        cell = self.get_merged_cells('D', 'J')
+        cell = self.get_merged_cells('B', 'E')
         cell.value = u"Accord après vérification"
         self.index += 1
         self.worksheet.merge_cells(
                 start_row=self.index,
                 end_row=self.index +4,
-                start_column=4,
-                end_column=6)
+                start_column=1,
+                end_column=4)
 
     def write_km_book(self):
         """
@@ -387,10 +433,9 @@ CLIENTS"
         self.write_total()
         self.write_accord()
 
+        # We set a width to all columns that have no width set (-1)
         for let in ASCII_UPPERCASE:
-            col_dim = self.worksheet.column_dimensions.get(let)
-            if col_dim:
-                col_dim.width = 13
+            self.set_col_width(let, 13)
 
         self.worksheet = self.book.create_sheet()
         self.worksheet.title = u"Journal de bord"

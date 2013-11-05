@@ -160,6 +160,7 @@ class AdminTva(BaseFormView):
 
         form.set_appstruct({'tvas':appstruct})
         populate_actionmenu(self.request)
+        log.debug("AdminTva struct: %s", appstruct)
 
     @staticmethod
     def get_remaining_prod_ids(appstruct):
@@ -199,7 +200,7 @@ class AdminTva(BaseFormView):
 
         for data in appstruct['tvas']:
             products = data.pop('products')
-            if data['id'] is not None:
+            if data['id'] != 0:
                 tva = Tva.get(data['id'])
                 merge_session_with_post(tva, data)
                 tva = self.dbsession.merge(tva)

@@ -25,6 +25,7 @@
 """
     Sage exports tools
 """
+from pyramid.threadlocal import get_current_request
 
 from autonomie.views.render_api import format_amount
 from autonomie.utils.ascii import force_utf8
@@ -50,6 +51,11 @@ class SageCsvWriter(BaseCsvWriter):
             ('credit', "Montant crédit"),
             ('type_', "Type de ligne"),
             ('num_analytique', "Numéro analytique"),)
+
+    def __init__(self, datas=None):
+        super(SageCsvWriter, self).__init__(datas)
+        request = get_current_request()
+        self.prefix = request.config.get('invoiceprefix', '')
 
     @property
     def keys(self):
@@ -83,3 +89,9 @@ class SageCsvWriter(BaseCsvWriter):
             format the credit entry to get a clean float
         """
         return self.format_debit(credit)
+
+    def format_num_facture(self, number):
+        """
+            format the invoice official Number to add a prefix
+        """
+        return "%s%s" % (self.prefix, number)

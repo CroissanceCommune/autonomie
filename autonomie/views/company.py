@@ -71,6 +71,23 @@ def company_index(request):
     ret_val['elapsed_invoices'] = elapsed_invoices
     return ret_val
 
+def recent_tasks(company, page_nb, nb_per_page):
+    """
+    helper for providing a pageable task list
+    """
+    all_tasks = []
+    all_invoices = []
+    for project in company.projects:
+        all_tasks.extend(project.estimations)
+        all_tasks.extend(project.invoices)
+        all_invoices.extend(project.invoices)
+
+    all_tasks = sorted(all_tasks,
+                        key=lambda a: a.statusDate,
+                        reverse=True)
+
+    return all_tasks[:5]
+
 def company_view(request):
     """
         Company main view

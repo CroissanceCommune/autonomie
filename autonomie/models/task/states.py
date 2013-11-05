@@ -211,7 +211,7 @@ def get_inv_state():
     result['invalid'] = ('draft', 'wait', delete, )
     result['wait'] = (valid, invalid, duplicate, delete, financial_year,
             phasechange,)
-    result['valid'] = (paid, resulted, aboinv, gencinv, duplicate, mdelete,
+    result['valid'] = (paid, resulted, gencinv, duplicate, mdelete,
             phasechange, financial_year, products,)
     result['paid'] = (paid, resulted, gencinv, duplicate, financial_year,
             phasechange, products, )

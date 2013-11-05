@@ -221,7 +221,7 @@ class TestTaskModels(BaseTestCase):
         task.CAEStatus = "valid"
         for st in ("draft", "invalid"):
             self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("aboinv", "paid"):
+        for st in ("paid",):
             self.assertEqual(task.validate_status("nutt", st), st)
         task.CAEStatus = "paid"
         for st in ("draft", "invalid", "valid", "aboinv", ):

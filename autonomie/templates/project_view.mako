@@ -177,7 +177,7 @@
                         </td>
                         <% task.url = request.route_path("invoice", id=task.id) %>
                         <td onclick="document.location='${task.url}'" class='rowlink'>
-                            ${task.officialNumber}</td>
+                            ${request.config.get('invoiceprefix')}${task.officialNumber}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink visible-desktop'>${task.name}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>
@@ -212,9 +212,9 @@
                         </td>
                         <% task.url = request.route_path("cancelinvoice", id=task.id) %>
                         <td onclick="document.location='${task.url}'" class='rowlink'>
-                            ${task.officialNumber}
+                            ${request.config.get('invoiceprefix')}${task.officialNumber}
                             % if task.invoice:
-                                (lié à la facture ${task.invoice.officialNumber})
+                                (lié à la facture ${request.config.get('invoiceprefix')}${task.invoice.officialNumber})
                             % endif
                         </td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>

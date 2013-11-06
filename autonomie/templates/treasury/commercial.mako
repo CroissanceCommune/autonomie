@@ -45,6 +45,7 @@
             % for i in range(1, 13):
                 <th>${api.month_name(i)}</th>
             % endfor
+            <th>Total annuel</th>
         </thead>
         <tbody>
             <tr><td>CA prévisionnel</td>
@@ -66,25 +67,37 @@
                         </a>
                     </td>
                 % endfor
+                <td>
+                    ${api.format_amount(turnover_projections['year_total'])|n}
+                </td>
             </tr>
             <tr><td>CA réalisé</td>
                 % for i in range(1, 13):
                     <td>${api.format_amount(turnovers[i])|n}</td>
                 % endfor
+                <td>
+                    ${api.format_amount(turnovers['year_total'])|n}
+                </td>
             </tr>
             <tr><td>Écart</td>
                 % for i in range(1, 13):
                     <td id='gap_${i}'>
-                        ${api.format_amount(compute_difference(i, turnover_projections, turnovers))|n}
+                        ${api.format_amount(compute_turnover_difference(i, turnover_projections, turnovers))|n}
                     </td>
                 % endfor
+                <td>
+                    ${api.format_amount(turnovers['year_total'] - turnover_projections['year_total'])|n}
+                </td>
             </tr>
             <tr><td>Pourcentage</td>
                 % for i in range(1, 13):
                     <td id='gap_percent_${i}'>
-                        ${compute_percent(i, turnover_projections, turnovers)}&nbsp;%
+                        ${compute_turnover_percent(i, turnover_projections, turnovers)}&nbsp;%
                     </td>
                 % endfor
+                <td>
+                    ${compute_percent(turnovers['year_total'], turnover_projections['year_total'])}&nbsp;%
+                </td>
             </tr>
         </tbody>
     </table>

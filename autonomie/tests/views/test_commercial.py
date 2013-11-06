@@ -27,8 +27,7 @@
 """
 from datetime import date
 from mock import Mock
-from autonomie.views.commercial import compute_percent
-from autonomie.views.commercial import compute_difference
+from autonomie.views.commercial import compute_turnover_difference
 from autonomie.views.commercial import DisplayCommercialHandling
 from autonomie.models.treasury import TurnoverProjection
 
@@ -56,20 +55,18 @@ class TestCommercial(BaseFunctionnalTest):
         req.context = Mock(id=1)
         return req
 
-    def test_compute_difference(self):
+    def test_compute_turnover_difference(self):
         index = 0
         projections = {}
         turnovers = {}
-        self.assertEqual(None, compute_difference(index,
+        self.assertEqual(None, compute_turnover_difference(index,
                                                   projections, turnovers))
         p = Mock(value=10)
         projections = {0:p}
         turnovers = {0:10}
-        self.assertEqual(None, compute_difference(1, projections, turnovers))
-        self.assertEqual(0, compute_difference(0, projections, turnovers))
+        self.assertEqual(None, compute_turnover_difference(1, projections, turnovers))
+        self.assertEqual(0, compute_turnover_difference(0, projections, turnovers))
 
-    def test_compute_percent(self):
-        pass
 
     def test_submit_year(self):
         req = self.get_csrf_request()

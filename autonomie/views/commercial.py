@@ -27,7 +27,6 @@
 """
 import datetime
 import colander
-from decimal import Decimal
 
 from sqlalchemy import extract
 from deform import Form
@@ -37,20 +36,20 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import merge_session_with_post
-from autonomie.compute.math_utils import dec_round
+from autonomie.compute.math_utils import percent
 from autonomie.models.task import (
-        Estimation,
-        Invoice,
-        CancelInvoice,
-        )
+    Estimation,
+    Invoice,
+    CancelInvoice,
+    )
 from autonomie.models.customer import Customer
 from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
 from autonomie.views.base import BaseView
 from autonomie.views.forms.commercial import (
-        CommercialFormSchema,
-        CommercialSetFormSchema,
-        )
+    CommercialFormSchema,
+    CommercialSetFormSchema,
+    )
 from autonomie.resources import lib_autonomie, backbone
 
 commercial_js = Resource(lib_autonomie, "js/commercial.js", depends=[backbone])
@@ -147,7 +146,8 @@ class DisplayCommercialHandling(BaseView):
         """
         company_id = self.request.context.id
         result = 0
-        for customer in Customer.query().filter(Customer.company_id==company_id):
+        customers = Customer.query().filter(Customer.company_id==company_id)
+        for customer in customers:
             for invoice in customer.invoices:
                 if invoice.financial_year == self.year:
                     if invoice.CAEStatus in Invoice.valid_states:
@@ -159,30 +159,54 @@ class DisplayCommercialHandling(BaseView):
         """
             Return the realised turnovers
         """
-        result = dict()
+        result = dict(year_total=0)
         for month in range(1, 13):
-            invoices = Invoice.query().join(Project)\
-               .filter(Project.company_id==self.request.context.id)\
-               .filter(extract('year', Invoice.taskDate)==self.year)\
-               .filter(extract('month', Invoice.taskDate)==month)\
-               .filter(Invoice.CAEStatus.in_(Invoice.valid_states))
+
+            invoices = Invoice.query().join(Project)
+            invoices = invoices.filter(
+                Project.company_id==self.request.context.id
+                )
+            invoices = invoices.filter(
+                extract('year', Invoice.taskDate)==self.year
+                )
+            invoices = invoices.filter(
+                extract('month', Invoice.taskDate)==month
+                )
+            invoices = invoices.filter(
+                Invoice.CAEStatus.in_(Invoice.valid_states)
+                )
             invoice_sum = sum([invoice.total_ht() for invoice in invoices])
-            cinvoices = CancelInvoice.query().join(Project)\
-               .filter(Project.company_id==self.request.context.id)\
-               .filter(extract('year', CancelInvoice.taskDate)==self.year)\
-               .filter(extract('month', CancelInvoice.taskDate)==month)\
-               .filter(CancelInvoice.CAEStatus.in_(CancelInvoice.valid_states))
+
+            cinvoices = CancelInvoice.query().join(Project)
+            cinvoices = cinvoices.filter(
+                    Project.company_id==self.request.context.id
+                    )
+            cinvoices = cinvoices.filter(
+                    extract('year', CancelInvoice.taskDate)==self.year
+                    )
+            cinvoices = cinvoices.filter(
+                    extract('month', CancelInvoice.taskDate)==month
+                    )
+            cinvoices = cinvoices.filter(
+                    CancelInvoice.CAEStatus.in_(CancelInvoice.valid_states)
+                    )
             cinvoice_sum = sum([cinvoice.total_ht() for cinvoice in cinvoices])
+
             result[month] = invoice_sum + cinvoice_sum
+            result['year_total'] += result[month]
         return result
 
     def turnover_projections(self):
         """
             Return a query for turnover projections
         """
-        return TurnoverProjection.query()\
-                .filter(TurnoverProjection.company_id==self.request.context.id)\
-                .filter(TurnoverProjection.year==self.year)
+        query = TurnoverProjection.query()
+        query = query.filter(
+            TurnoverProjection.company_id==self.request.context.id
+            )
+        result = query.filter(TurnoverProjection.year==self.year)
+
+        return result
 
     def submit_success(self, appstruct):
         """
@@ -190,10 +214,13 @@ class DisplayCommercialHandling(BaseView):
         """
         appstruct['year'] = self.year
         appstruct['company_id'] = self.request.context.id
-        projection = self.turnover_projections()\
-                .filter(TurnoverProjection.month==appstruct['month'])\
-                .first() \
-                or TurnoverProjection()
+
+        query = self.turnover_projections()
+        query = query.filter(TurnoverProjection.month==appstruct['month'])
+        result = query.first()
+
+        projection = result or TurnoverProjection()
+
         projection = merge_session_with_post(projection, appstruct)
         if projection.id is not None:
             projection = self.request.dbsession.merge(projection)
@@ -212,9 +239,14 @@ class DisplayCommercialHandling(BaseView):
                 self.submit_success(appstruct)
             except ValidationFailure as e:
                 form = e
-        turnover_projections = dict((t.month, t)
-                        for t in self.turnover_projections())
-        return dict(title=self.title,
+
+        turnover_projections = dict(year_total=0)
+        for projection in self.turnover_projections():
+            turnover_projections[projection.month] = projection
+            turnover_projections['year_total'] += projection.value
+
+        return dict(
+                    title=self.title,
                     estimations=self.estimations().count(),
                     validated_estimations=self.validated_estimations().count(),
                     customers=self.customers(),
@@ -222,11 +254,13 @@ class DisplayCommercialHandling(BaseView):
                     turnover_projections=turnover_projections,
                     year_form=year_form,
                     form=form,
-                    compute_difference=compute_difference,
-                    compute_percent=compute_percent)
+                    compute_turnover_difference=compute_turnover_difference,
+                    compute_percent=percent,
+                    compute_turnover_percent=compute_turnover_percent,
+                    )
 
 
-def compute_difference(index, projections, turnovers):
+def compute_turnover_difference(index, projections, turnovers):
     """
         Compute the difference beetween the projection and the real value
     """
@@ -238,7 +272,7 @@ def compute_difference(index, projections, turnovers):
         return None
 
 
-def compute_percent(index, projections, turnovers):
+def compute_turnover_percent(index, projections, turnovers):
     """
         Compute the percent the difference represents
     """
@@ -247,8 +281,7 @@ def compute_percent(index, projections, turnovers):
         projection = projections.get(index)
         if projection:
             if projection.value:
-                value = turnover * 100.0 / projection.value
-                return float(dec_round(Decimal(str(value)), 2))
+                return percent(turnover, projection.value)
     return None
 
 

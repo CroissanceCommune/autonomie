@@ -78,12 +78,16 @@ def integer_to_amount(value, precision=2):
     return float(Decimal(str(val)).quantize(flat_point, ROUND_DOWN))
 
 
-def percentage(value, percent):
+def percentage(value, _percent):
     """
         Return the value of the "percent" percent of the original "value"
     """
-    return int(float(value) * (int(percent)/100.0))
+    return int(float(value) * (int(_percent)/100.0))
 
 
-def compute_taux(taux, value):
-    return int(taux * value)
+def percent(part, total):
+    """
+        Return the percentage of total represented by part
+    """
+    value = part * 100.0 / total
+    return float(dec_round(Decimal(str(value)), 2))

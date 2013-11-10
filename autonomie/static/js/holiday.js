@@ -278,6 +278,7 @@ $(function(){
       async: false,
       mimeType: "textPlain",
       data: {},
+      cache: false,
       success: function(data) {
         MyApp.start(data);
       },

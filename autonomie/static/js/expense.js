@@ -814,6 +814,7 @@ $(function(){
       async: false,
       mimeType: "textPlain",
       data: {},
+      cache: false,
       success: function(data) {
         _.extend(AppOptions, data['options']);
         MyApp.start({'expense':data['expense']});

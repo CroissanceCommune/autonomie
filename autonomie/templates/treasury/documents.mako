@@ -46,7 +46,7 @@
                     <th>Mois</th>
                     <th>Nom du fichier</th>
                     <th>Taille</th>
-                    <th>Dernière modification</th>
+                    <th>Dernière consultation</th>
                     <th>Télécharger</th>
                 </thead>
                 <tbody>

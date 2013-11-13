@@ -3,11 +3,15 @@
 <%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='company_tasks_panel'>
+% if not only_table:
 <div class='row'>
     <div class='span12'>
-        <div class='well' style="margin-top:10px">
+        <div class='well tasklist' style="margin-top:10px"
+            active_page="${active_page}"
+            total_pages_nb="${total_pages_nb}">
             <div class='section-header'>Dernières activités</div>
-            <table class='table table-stripped'>
+% endif
+            <table class='table table-stripped tasklist'>
                 <thead>
                     <th>
                         Projet
@@ -40,9 +44,18 @@
                     % endfor
                 </tbody>
             </table>
-            <a id="index_activities_previous">previous</a> 
-            <a id="index_activities_next">next</a> 
+% if not only_table:
+            <div class="pagination">
+            <ul>
+            <li><a class="previous_btn_state">Previous</a></li>
+            % for index in xrange(total_pages_nb):
+            <li><a id="companytaskpage_${loop.index}">${loop.index + 1}</a></li>
+            % endfor
+            <li><a class="next_btn_state">Next</a></li>
+            </ul>
+            </div>
         </div>
     </div>
 </div>
+% endif
 </%block>

@@ -27,16 +27,19 @@
     Entry point for the main users
 """
 import logging
+from math import ceil
+
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.company import Company
-from autonomie.views.forms import merge_session_with_post
-from autonomie.views.forms import BaseFormView
-from autonomie.views.forms.company import COMPANYSCHEMA
-from autonomie.utils.widgets import ViewLink
+from autonomie.resources import task_list_js
 from autonomie.utils.views import submit_btn
+from autonomie.utils.widgets import ViewLink
+from autonomie.views.forms import BaseFormView
+from autonomie.views.forms import merge_session_with_post
+from autonomie.views.forms.company import COMPANYSCHEMA
 
 log = logging.getLogger(__name__)
 
@@ -73,10 +76,30 @@ def company_index(request):
 
 
 def recent_tasks(request):
+    if not request.is_xhr:
+        task_list_js.need()
     company = request.context
-    page_nb = request.POST.get('tasks.page_nb', 0)
-    nb_per_page = request.POST.get('tasks.page_nb', 5)
-    return {'tasks': company.get_recent_tasks(page_nb, nb_per_page)}
+    page_nb = int(request.POST.get('tasks_page_nb', 0))
+    nb_per_page = request.POST.get('tasks.nb_per_page', 5)
+    tasks, tasks_nb = company.get_recent_tasks(page_nb, nb_per_page)
+    if page_nb == 0:
+        previous_btn_state = 'disabled'
+    else:
+        previous_btn_state = 'active'
+    if nb_per_page * page_nb < tasks_nb - 1:
+        next_btn_state = 'active'
+    else:
+        next_btn_state = 'disabled'
+    result_data = {
+        'next_btn_state': next_btn_state,
+        'previous_btn_state': previous_btn_state, 
+        'tasks': tasks, 
+        'active_page': page_nb,
+        'total_pages_nb': int(ceil((tasks_nb + 0.0) / nb_per_page)),
+        'only_table': request.is_xhr,
+        }
+    return result_data
+
 
 def recent_tasks_panel(context, request):
     return recent_tasks(request)
@@ -270,3 +293,9 @@ def includeme(config):
     config.add_panel(recent_tasks_panel, 
                     'company_tasks', 
                     renderer='company_tasks.mako')
+    # same panel as html view
+    config.add_view(recent_tasks,
+                   route_name='company',
+                   renderer='company_tasks.mako',
+                   request_param='action=tasks_html',
+                   permission='edit')

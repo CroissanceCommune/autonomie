@@ -199,9 +199,11 @@ class Company(DBBASE):
         :param int page_nb: pagination index
 
         .. todo:: this is naive, use sqlalchemy pagination
+
+        :return: pagination for wanted tasks, total nb of tasks
         """
         all_tasks = sorted(self.get_tasks(),
                         key=lambda t: t.statusDate,
                         reverse=True)
         offset = page_nb * nb_per_page
-        return all_tasks[offset:offset + nb_per_page]
+        return all_tasks[offset:offset + nb_per_page], len(all_tasks)

@@ -75,8 +75,10 @@ def log_request(event):
     http_version = request.http_version
     referer = request.referer
     user_agent = request.user_agent
-    log.info(u"method:'%s' - uri:'%s', http_version:'%s' -  referer:'%s' - \
-agent:'%s'" % (method, req_uri, http_version, referer, user_agent))
+    log.info(u"## The current incoming request ##")
+    log.info(event.request)
+    log.info(u"The current session")
+    log.info(event.request.session)
 
 
 def add_request_attributes(event):

@@ -267,6 +267,11 @@ class ExpenseTelConfig(ExpenseConfig):
     percentage = colander.SchemaNode(colander.Integer(),
                                 title=u"Pourcentage remboursé",
                                 validator=colander.Range(1, 100))
+    initialize = colander.SchemaNode(colander.Boolean(),
+            title=u"Créer une entrée par défaut ?",
+            description=u"Une ligne sera automatiquement ajoutée à la feuille \
+de notes de frais",
+            default=True)
 
 
 class ExpensesConfig(colander.SequenceSchema):

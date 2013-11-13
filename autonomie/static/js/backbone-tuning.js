@@ -107,7 +107,11 @@ Autonomie.addFormInitialize = function(options){
    */
   this.destCollection = options['destCollection'];
   this.modelObject = options['modelObject'];
-  this.model = new this.modelObject({});
+  var model_options = options['modelOptions'];
+  if (model_options === undefined){
+    model_options = {};
+  }
+  this.model = new this.modelObject(model_options);
   Backbone.Validation.bind(this);
 };
 
@@ -125,7 +129,14 @@ Autonomie.addsubmit = function(e){
    */
   e.preventDefault();
   var this_ = this;
-  var data = this.ui.form.serializeObject();
+  // We get a clone of the attributes passed to our current model
+  // In order not to affect the model when extending the "data" object
+  var data = _.clone(this.model.attributes);
+
+  var form_datas = this.ui.form.serializeObject();
+
+  _.extend(data, form_datas);
+
   // Here we need to use the model to which Backbone.Validation was bound in
   // the initialize method to launch validation, if not, the model dynamically
   // created below with destCollection.create has no validate method (that is

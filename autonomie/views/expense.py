@@ -182,7 +182,10 @@ def get_new_expense_sheet(year, month, cid, uid):
     expense.month = month
     expense.company_id = cid
     expense.user_id = uid
-    for type_ in ExpenseTelType.query().filter(ExpenseTelType.active==True):
+    query = ExpenseTelType.query()
+    query = query.filter(ExpenseTelType.active==True)
+    teltypes = query.filter(ExpenseTelType.initialize==True)
+    for type_ in teltypes:
         line = ExpenseLine(type_id=type_.id, ht=0, tva=0,
                 description=type_.label)
         expense.lines.append(line)

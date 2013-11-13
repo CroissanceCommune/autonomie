@@ -75,6 +75,7 @@ class User(DBBASE):
                              backref="employees")
     code_compta = Column("code_compta", String(30),
                          default=0)
+    session_id = Column("session_id", String(256), default=None)
 
     @staticmethod
     def _encode_pass(password):

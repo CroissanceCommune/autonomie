@@ -30,40 +30,50 @@ var TaskList = {
             $(button).attr("style", "color: #ccc");
             }
     },
+    get_table: function(element) {
+        return $(element.find("table.tasklist"));
+    },
     buttons_states: function(element) {
-        page_num = element.attr("active_page");
-        page_max = element.attr("total_pages_nb");
-        console.log("current page: " + page_num);
-        prev_btn = element.find(".previous_btn_state");
-        next_btn = element.find(".next_btn_state");
-        TaskList.switch_btn(prev_btn, (page_num != 0));
-        TaskList.switch_btn(next_btn, (page_num != page_max));
+        table = TaskList.get_table(element);
+        page_num = parseInt(table.attr("active_page"));
+        page_max = parseInt(table.attr("total_pages_nb"));
+        console.log("current page: " + page_num + " - max page=" + page_max);
+        TaskList.button_makeup(element.prev_btn, page_num != 0, page_num - 1, element)
+        TaskList.button_makeup(element.next_btn, page_num != page_max - 1, page_num + 1, element)
         $.each(
-            element.find("[id^=companytaskpage_]"), 
+            element.find("[class^=companytaskpage_]"), 
             function(index, button) {
-                if (button.id == "companytaskpage_" + page_num) {
-                    TaskList.switch_btn($(button), false);
-                } else {
-                    TaskList.switch_btn($(button), true);
-                    console.log("setting up link for " + button.id);
-                    $(button).bind("click", function(){
-                        console.log("clicked on " + button.id);
-                        TaskList.refresh_list(table, index);
-                        });
-                } 
+                button = $(button);
+                TaskList.button_makeup(button, button.attr('class') != "companytaskpage_" + page_num, index, element)
             });
     },
-    refresh_list: function(table, page_num) {
-        $(table).html("Recuperation en cours: page " + page_num);
+    button_makeup: function(button, state, target_page, element) {
+    button.unbind();
+    if (state) {
+        button_class = button.attr("class");
+        console.log(button_class + " has target " + target_page);
+        TaskList.switch_btn(button, true);
+        button.bind("click", function(){
+            console.log("clicked on " + button_class);
+            TaskList.refresh_list(element, target_page);
+            });
+    }
+    else {
+        TaskList.switch_btn(button, false);
+    }
+    },
+    refresh_list: function(element, page_num) {
         console.log("Recuperation en cours: page " + page_num);
         url = '?action=tasks_html';
-        data = {'tasks_page_nb': page_num};
+        postdata = {'tasks_page_nb': page_num};
         $.post(
             url,
-            data,
+            postdata,
             function(data, httpstatus, xhr){
-                console.log('success: ');
-                $(table).html(data);
+                /* TODO: handle failure. 
+                 * I got in trouble with callbacks */
+                TaskList.get_table(element).replaceWith(data);
+                TaskList.buttons_states(element);
             });
     },
     setup: function(element) {
@@ -72,10 +82,10 @@ var TaskList = {
          * * tasklist_elt: a jquery elt 
          */
         console.log("Task list: setup for element " + element);
-        TaskList.buttons_states(element);
-        console.log('prev btn: ' + prev_btn);
         console.log("Task list: setup done");
-        table = element.find("table.tasklist");
+        element.prev_btn = element.find(".previous_btn_state");
+        element.next_btn = element.find(".next_btn_state");
+        TaskList.buttons_states(element);
     },
 };
 

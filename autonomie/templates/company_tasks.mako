@@ -6,12 +6,12 @@
 % if not only_table:
 <div class='row'>
     <div class='span12'>
-        <div class='well tasklist' style="margin-top:10px"
-            active_page="${active_page}"
-            total_pages_nb="${total_pages_nb}">
+        <div class='well tasklist' style="margin-top:10px">
             <div class='section-header'>Dernières activités</div>
 % endif
-            <table class='table table-stripped tasklist'>
+            <table class='table table-stripped tasklist'
+                active_page="${active_page}"
+                total_pages_nb="${total_pages_nb}">
                 <thead>
                     <th>
                         Projet
@@ -49,7 +49,7 @@
             <ul>
             <li><a class="previous_btn_state">Previous</a></li>
             % for index in xrange(total_pages_nb):
-            <li><a id="companytaskpage_${loop.index}">${loop.index + 1}</a></li>
+            <li><a class="companytaskpage_${loop.index}">${loop.index + 1}</a></li>
             % endfor
             <li><a class="next_btn_state">Next</a></li>
             </ul>

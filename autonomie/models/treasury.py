@@ -111,6 +111,7 @@ class ExpenseTelType(ExpenseType):
     __mapper_args__ = dict(polymorphic_identity='expensetel')
     id = Column(Integer, ForeignKey('expense_type.id'), primary_key=True)
     percentage = Column(Integer)
+    initialize = Column(Boolean, default=True)
 
 
 def build_state_machine():

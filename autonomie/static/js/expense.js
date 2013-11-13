@@ -44,7 +44,7 @@ var BaseExpenseModel = Backbone.Model.extend({
   /*
    * BaseModel for expenses, provides tools to access main options
    */
-  getType:function(arr){
+  getTypeOption:function(arr){
     /*
      * Retrieve the element from arr where its type_id is the same as the model's
      * current one
@@ -58,12 +58,19 @@ var BaseExpenseModel = Backbone.Model.extend({
      */
     return [];
   },
+  getType: function(){
+    /*
+     * return the type object associated to the current model
+     */
+    var options = this.getTypeOptions();
+    return this.getTypeOption(options);
+  },
   getTypeLabel: function(){
     /*
      * Return the Label of the current type
      */
+    var current_type = this.getType();
     var options = this.getTypeOptions();
-    var current_type = this.getType(options);
     if (current_type === undefined){
       return "";
     }else{
@@ -126,7 +133,7 @@ var ExpenseLine = BaseExpenseModel.extend({
   total: function(){
     var total = this.getHT() + this.getTva();
     if (this.isSpecial()){
-      var percentage = this.getType(AppOptions['teltypes']).percentage;
+      var percentage = this.getTypeOption(AppOptions['teltypes']).percentage;
       total = getPercent(total, percentage);
     }
     return total;
@@ -141,11 +148,11 @@ var ExpenseLine = BaseExpenseModel.extend({
     /*
      * return True if this expense is a special one (related to phone)
      */
-    return this.getType(AppOptions['teltypes']) !== undefined;
+    return this.getTypeOption(AppOptions['teltypes']) !== undefined;
   },
   hasNoType: function(){
-  var isnottel = _.isUndefined(this.getType(AppOptions['teltypes']));
-  var isnotexp = _.isUndefined(this.getType(AppOptions['expensetypes']));
+    var isnottel = _.isUndefined(this.getTypeOption(AppOptions['teltypes']));
+    var isnotexp = _.isUndefined(this.getTypeOption(AppOptions['expensetypes']));
     if (isnottel && isnotexp){
       return true;
     }else{
@@ -338,12 +345,14 @@ var ExpenseLineView = BaseExpenseLineView.extend({
      * Add custom var for rendering
      */
     var typelabel = this.model.getTypeLabel();
+
     var edit_url = "#lines/" + this.model.cid + "/edit";
     var total = this.model.total();
     return {typelabel:typelabel,
             edit_url:edit_url,
             total:formatAmount(total),
-            edit:AppOptions['edit']};
+            edit:AppOptions['edit']
+            };
   },
   initialize: function(){
     /*
@@ -551,7 +560,10 @@ var ExpenseAdd = BaseExpenseFormView.extend({
     /*
      * Return the options for expense categories
      */
-    return AppOptions['categories'];
+    //return AppOptions['categories'];
+    var category_options = AppOptions['categories'];
+    var category = this.model.get('category');
+    return this.updateSelectOptions(category_options, category);
   },
   getTypeOptions: function(){
     /*
@@ -618,6 +630,21 @@ var ExpenseEdit = ExpenseAdd.extend({
   }
 });
 
+var ExpenseTelAdd = BaseFormView.extend({
+  submit: Autonomie.addsubmit,
+  template: templates.expenseTelForm,
+  formname: "expenseTelForm",
+  ui:{
+    form:"#expenseTelForm"
+  },
+  initialize: function(options){
+    Autonomie.addFormInitialize.call(this, options);
+  },
+  templateHelpers: function(){
+    return {type_options: AppOptions['teltypes']};
+  }
+});
+
 
 var ExpenseKmEdit = ExpenseKmAdd.extend({
   /*
@@ -655,8 +682,11 @@ MyApp.Router = Backbone.Marionette.AppRouter.extend({
     "": "index",
     "index":"index",
     "lines/:id/edit": "edit",
+    "lines/add/:category": "add",
     "lines/add": "add",
+    "tel/add": "addtel",
     "kmlines/:id/edit": "editkm",
+    "kmlines/add/:category": "addkm",
     "kmlines/add": "addkm"
   }
 });
@@ -670,6 +700,7 @@ MyApp.Controller = {
   _popup:null,
   expense_form:null,
   expensekm_form:null,
+  expensetel_form: null,
   lines:null,
   kmlines:null,
   index: function() {
@@ -706,7 +737,7 @@ MyApp.Controller = {
     var model = MyApp.expense.kmlines.get(id);
     return model;
   },
-  add: function(){
+  add: function(category){
     /*
      * expenseline add route
      */
@@ -716,7 +747,8 @@ MyApp.Controller = {
     }
     this.expense_form = new ExpenseAdd({title:"Ajouter",
         modelObject:ExpenseLine,
-        destCollection:MyApp.expense.lines});
+        destCollection:MyApp.expense.lines,
+        modelOptions:{"category": category}});
     MyApp.formContainer.show(this.expense_form);
   },
   edit: function(id) {
@@ -732,7 +764,20 @@ MyApp.Controller = {
                                          title:"Éditer"});
     MyApp.formContainer.show(this.expense_form);
   },
-  addkm: function(){
+  addtel: function(){
+    this.initialize();
+    if (this.expensetel_form !== null){
+      this.expensetel_form.reset();
+    }
+    this.expensetel_form = new ExpenseTelAdd({
+      title:'Ajouter des frais téléphoniques',
+      modelObject:ExpenseLine,
+      destCollection:MyApp.expense.lines,
+      modelOptions:{"category": 1}
+    });
+    MyApp.formContainer.show(this.expensetel_form);
+  },
+  addkm: function(category){
     /*
      * expensekmline add route
      */
@@ -741,8 +786,8 @@ MyApp.Controller = {
       this.expensekm_form.reset();
     }
     this.expensekm_form = new ExpenseKmAdd({title:"Ajouter",
-    modelObject:ExpenseKmLine,
-    destCollection:MyApp.expense.kmlines});
+      modelObject:ExpenseKmLine,
+      destCollection:MyApp.expense.kmlines});
     MyApp.formContainer.show(this.expensekm_form);
   },
   editkm: function(id) {

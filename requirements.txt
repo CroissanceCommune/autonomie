@@ -53,3 +53,4 @@ zope.deprecation==4.0.2
 zope.event==4.0.1
 zope.interface==4.0.3
 zope.sqlalchemy==0.7.1
+pyramid-deform==0.2a5

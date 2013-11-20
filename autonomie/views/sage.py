@@ -126,7 +126,7 @@ class SageExportPage(BaseView):
     @property
     def filename(self):
         today = datetime.date.today()
-        return u"export_facture_{:%d%m%Y}.txt".format(today)
+        return u"export_facture_{0}.txt".format(today.strftime("%d%m%Y"))
 
     def _filter_valid(self, query):
         inv_validated = Invoice.valid_states

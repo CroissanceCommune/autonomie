@@ -29,6 +29,7 @@
     from date to date
     from number to number (in a given year)
 """
+import itertools
 import logging
 import datetime
 from sqlalchemy import or_, and_
@@ -113,6 +114,11 @@ def get_all_form(counter):
             buttons=(submit_btn,),
             formid='all_form',
             counter=counter)
+
+
+_HELPMSG_CONFIG = u"""Des éléments de configuration sont manquants, veuillez
+configurer les informations comptables nécessaires à l'export des documents,
+dans Configuration->Configuration des informations comptables de la CAE"""
 
 
 class SageExportPage(BaseView):
@@ -294,59 +300,75 @@ sont manquantes"
         self.record_invoices_exported(invoices)
         return self.request.response
 
+    def _forms_dict(self):
+        _period_form = get_period_form()
+        return {
+            'all_form': get_all_form(_period_form.counter),
+            'from_invoice_number_form': get_from_invoice_number_form(
+                _period_form.counter, self.request),
+            'invoice_number_form': get_invoice_number_form(_period_form.counter,
+                self.request),
+            'period_form': _period_form,
+            }
+
     def __call__(self):
-        period_form = get_period_form()
-        invoice_number_form = get_invoice_number_form(period_form.counter,
-                self.request)
-        from_invoice_number_form = get_from_invoice_number_form(
-                period_form.counter,
-                self.request)
-        all_form = get_all_form(period_form.counter)
-        check_messages = None
+        """
+        Render data into 1) initial forms or 2) annotated forms or 3) form result
+
+        :rtype: rendered data
+        """
+        # FIXME: what about check_messages = {}
+        check_messages = appstruct = None
+        forms = self._forms_dict()
 
         if 'submit' in self.request.params:
-            if "invoice_number_form" in self.request.POST.values():
-                try:
-                    appstruct = invoice_number_form.validate(
-                            self.request.POST.items())
-                except ValidationFailure as e:
-                    invoice_number_form = e
+            post_values = self.request.POST.values()
+            post_items = self.request.POST.items()
 
-            elif "from_invoice_number_form" in self.request.POST.values():
-                try:
-                    appstruct = from_invoice_number_form.validate(
-                            self.request.POST.items())
-                except ValidationFailure as e:
-                    from_invoice_number_form = e
+            for form_name, form in forms.iteritems():
+                if form_name in post_values:
+                    log.debug("Form %s was submitted", form_name)
+                    try:
+                        appstruct = form.validate(post_items)
+                    except ValidationFailure as validation_error:
+                        # Replace the form - will be displayed again
+                        forms[form_name] = validation_error
+                        log.debug("Form %s contains errors", form_name)
+                    break
 
+            # FIXME: if form not found, let's raise or return something:
+            #
+            # if appstruct is None:
+            #     raise / return ...
 
-            elif "period_form" in self.request.POST.values():
-                try:
-                    appstruct = period_form.validate(self.request.POST.items())
-                except ValidationFailure as e:
-                    period_form = e
-            elif "all_form" in self.request.POST.values():
-                try:
-                    appstruct = all_form.validate(self.request.POST.items())
-                except ValidationFailure as e:
-                    all_form = e
             invoices = self.query_invoices(appstruct)
             check_messages = self.check_invoices(invoices)
+
+            # FIXME: What about "if not check_messages.get('errors')"?
             if check_messages['errors'] == []:
                 try:
+                    # Let's process and return successfully -> next page
                     return self.write_csv(invoices)
-                except (MissingData, KeyError), e:
-                    check_messages['errors'] = [u"Des éléments de \
-configuration sont manquants, veuillez configurer \
-les informations comptables nécessaires à l'export des documents, \
-dans Configuration->Configuration des informations comptables de la CAE"]
+                except (MissingData, KeyError), validation_error:
+                    # oops, we'll redisplay the forms with errors highlighted:
+                    log.exception("Exception occured while writing CSV file")
+                    check_messages['errors'] = [_HELPMSG_CONFIG]
 
-        return dict(title=self.title,
-                period_form=period_form.render(),
-                invoice_number_form=invoice_number_form.render(),
-                all_form=all_form.render(),
-                from_invoice_number_form=from_invoice_number_form.render(),
-                check_messages=check_messages)
+        # We are either
+        # * reporting an error
+        # * or doing the initial display of forms.
+
+        # check messages for the form
+        raw_values = ('title', self.title), ('check_messages', check_messages)
+        # rendered forms
+        rendered_forms_generator = (
+            (name, form.render())
+            for name, form in forms.iteritems()
+            )
+
+        # add the above duples in a single dict with itertools.chain
+        rdata = dict((itertools.chain(rendered_forms_generator, raw_values)))
+        return rdata
 
 
 def includeme(config):

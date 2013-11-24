@@ -291,7 +291,7 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.project = self.project
         cancelinvoice.owner = user
         cancelinvoice.phase = self.phase
-        cancelinvoice.customer = self.customer
+        cancelinvoice.customer_id = self.customer_id
         for line in self.lines:
             cancelinvoice.lines.append(line.gen_cancelinvoice_line())
         rowindex = self.get_next_row_index()

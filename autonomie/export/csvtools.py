@@ -29,11 +29,21 @@
 """
 import csv
 import cStringIO as StringIO
+import sys
+
 from autonomie.utils.sqla import get_columns
 from autonomie.utils.ascii import (
         force_ascii,
         force_utf8,
         )
+
+
+if sys.version_info[:2] == (2, 6):
+    # backport a function from current Python versions into Python 2.6
+    def writeheader(self):
+        header = dict(zip(self.fieldnames, self.fieldnames))
+        self.writerow(header)
+    csv.DictWriter.writeheader = writeheader
 
 
 CSV_DELIMITER = ';'

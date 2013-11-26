@@ -45,7 +45,7 @@ def date_validator(form, value):
     """
         Validate the period
     """
-    if value['start_date'] >= value['end_date']:
+    if value['start_date'] > value['end_date']:
         exc = colander.Invalid(form,
                     u"La date de début doit précéder la date de fin")
         exc['start_date'] = u"Doit précéder la date de fin"

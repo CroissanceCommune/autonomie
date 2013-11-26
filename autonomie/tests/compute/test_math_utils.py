@@ -27,7 +27,9 @@ from autonomie.compute.math_utils import (
         floor,
         amount,
         percent,
+        percentage,
         )
+
 
 class TestMathUtils(unittest.TestCase):
     def test_floor(self):
@@ -49,3 +51,8 @@ class TestMathUtils(unittest.TestCase):
         self.assertEqual(percent(30, 10), 300.0)
         self.assertEqual(percent(1, 3), 33.33)
 
+    def test_percentage(self):
+        # Ref #32
+        a = 0.25
+        b = 10000
+        self.assertEqual(percentage(a, b), 25)

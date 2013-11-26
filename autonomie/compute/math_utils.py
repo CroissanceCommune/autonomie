@@ -82,7 +82,7 @@ def percentage(value, _percent):
     """
         Return the value of the "percent" percent of the original "value"
     """
-    return int(float(value) * (int(_percent)/100.0))
+    return int(float(value) * (float(percent)/100.0))
 
 
 def percent(part, total):

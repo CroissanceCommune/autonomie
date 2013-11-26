@@ -37,6 +37,7 @@ from autonomie.compute.sage import (
         SageContribution,
         SageAssurance,
         SageCGScop,
+        SageContributionOrganic,
         SageRGInterne,
         SageRGClient,
         SageExport,
@@ -72,6 +73,8 @@ def get_config():
             'compte_cg_assurance': 'CG_ASSUR',
             'compte_cg_debiteur': 'CG_DEB',
             'compte_cgscop': 'CG_SCOP',
+            'compte_cg_organic': "CG_ORGA",
+            'compte_cg_debiteur_organic': "CG_DEB_ORGA",
             'compte_rg_externe': 'CG_RG_EXT',
             'compte_rg_interne': 'CG_RG_INT',
             'compte_cg_banque': 'BANK_CG',
@@ -83,6 +86,7 @@ def get_config():
             'taux_cgscop': "5",
             'taux_rg_interne': "5",
             'taux_rg_client': "5",
+            'taux_contribution_organic': "5",
             'contribution_cae': "10"
             }
 
@@ -422,6 +426,52 @@ class TestSageCGScop(BaseBookEntryTest):
         res = {
                 'libelle': 'customer company',
                 'compte_cg': 'CG_DEB',
+                'num_analytique': 'NUM_ANA',
+                'credit': 2000,
+                }
+        self._test_invoice_book_entry(method, res)
+
+
+class TestSageContributionOrganic(BaseBookEntryTest):
+    factory = SageContributionOrganic
+
+    libelle = 'Contribution Organic customer company'
+
+    def test_debit_entreprise(self):
+        method = 'debit_entreprise'
+        res = {
+                'libelle': self.libelle,
+                'compte_cg': 'CG_ORGA',
+                'num_analytique': 'COMP_CG',
+                'debit': 2000,
+                }
+        self._test_invoice_book_entry(method, res)
+
+    def test_credit_entreprise(self):
+        method = 'credit_entreprise'
+        res = {
+                'libelle': self.libelle,
+                'num_analytique': 'COMP_CG',
+                'compte_cg': 'BANK_CG',
+                'credit': 2000,
+                }
+        self._test_invoice_book_entry(method, res)
+
+    def test_debit_cae(self):
+        method = 'debit_cae'
+        res = {
+                'libelle': self.libelle,
+                'compte_cg': 'BANK_CG',
+                'num_analytique': 'NUM_ANA',
+                'debit': 2000,
+                }
+        self._test_invoice_book_entry(method, res)
+
+    def test_credit_cae(self):
+        method = 'credit_cae'
+        res = {
+                'libelle': self.libelle,
+                'compte_cg': 'CG_DEB_ORGA',
                 'num_analytique': 'NUM_ANA',
                 'credit': 2000,
                 }

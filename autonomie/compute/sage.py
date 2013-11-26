@@ -621,6 +621,85 @@ class SageCGScop(BaseSageBookEntryFactory):
         yield self.credit_cae()
 
 
+class SageContributionOrganic(BaseSageBookEntryFactory):
+    """
+        The Organic contribution is due for CAE with a large CA
+    """
+    _part_key = "taux_contribution_organic"
+    @property
+    def libelle(self):
+        return u"Contribution Organic {0} {1}".format(
+                self.invoice.customer.name,
+                self.invoice.company.name,
+                )
+
+    def get_contribution(self):
+        return self.get_part()
+
+    def get_amount(self):
+        """
+            Return the amount for the current module
+            (the same for credit or debit)
+        """
+        return self._amount_method(self.invoice.total_ht(), self.get_part())
+
+    @double_lines
+    def debit_entreprise(self):
+        """
+            Debit entreprise book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_organic'],
+                num_analytique=self.invoice.company.code_compta,
+                debit=self.get_amount(),
+                )
+        return entry
+
+    @double_lines
+    def credit_entreprise(self):
+        """
+            Credit entreprise book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_banque'],
+                num_analytique=self.invoice.company.code_compta,
+                credit=self.get_amount(),)
+        return entry
+
+    @double_lines
+    def debit_cae(self):
+        """
+            Debit cae book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_banque'],
+                num_analytique=self.config['numero_analytique'],
+                debit=self.get_amount(),)
+        return entry
+
+    @double_lines
+    def credit_cae(self):
+        """
+            Credit CAE book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+                compte_cg=self.config['compte_cg_debiteur_organic'],
+                num_analytique=self.config['numero_analytique'],
+                credit=self.get_amount(),)
+        return entry
+
+    def yield_entries(self):
+        """
+            yield book entries
+        """
+        yield self.debit_entreprise()
+        yield self.credit_entreprise()
+        yield self.debit_cae()
+        yield self.credit_cae()
 
 
 class SageRGInterne(BaseSageBookEntryFactory):
@@ -768,6 +847,9 @@ class SageRGClient(BaseSageBookEntryFactory):
             yield self.credit_entreprise(product)
 
 
+
+
+
 class SageExport(object):
     """
         base module for treasury export
@@ -779,6 +861,7 @@ class SageExport(object):
         "sage_contribution": SageContribution,
         "sage_assurance": SageAssurance,
         "sage_cgscop": SageCGScop,
+        "sage_organic": SageContributionOrganic,
         "sage_rginterne": SageRGInterne,
         "sage_rgclient": SageRGClient,
         }

@@ -358,6 +358,18 @@ def build_cae_config_schema():
         u"Requis pour le module d'écritures CGSCOP",
     ),
     (
+        'compte_cg_organic',
+        u"Compte CG Organic",
+        u"Compte CG pour la contribution à l'Organic (requis pour le module \
+d'écritures Contribution Organic)",
+    ),
+    (
+        'compte_cg_debiteur_organic',
+        u"Compte CG de débiteur Organic",
+        u"Compte CG de débiteur pour la contribution à l'Organic (requis pour \
+le module d'écritures Contribution Organic)",
+    ),
+    (
         'compte_rg_interne',
         u"Compte RG Interne",
         u"Requis pour les écritures RG Interne",
@@ -384,28 +396,34 @@ valeur et le compte CG sont renseignés.",
     (
         "contribution_cae",
         u"Pourcentage de la contribution",
-        u"Valeur par défaut de la contribution (nombre entre 1 et 100). \
+        u"Valeur par défaut de la contribution (nombre entre 0 et 100). \
         Elle peut être individualisée sur les pages entreprises",
     ),
     (
         "taux_assurance",
         u"Taux d'assurance",
-        u"(nombre entre 1 et 100) Requis pour le module d'écritures Assurance",
+        u"(nombre entre 0 et 100) Requis pour le module d'écritures Assurance",
     ),
     (
         "taux_cgscop",
         u"Taux CGSCOP",
-        u"(nombre entre 1 et 100) Requis pour le module d'écritures CGSCOP",
+        u"(nombre entre 0 et 100) Requis pour le module d'écritures CGSCOP",
+    ),
+    (
+        "taux_contribution_organic",
+        u"Taux de Contribution à l'Organic",
+        u"(nombre entre 0 et 100) Requis pour le module d'écritures \
+Contribution Organic",
     ),
     (
         "taux_rg_interne",
         u"Taux RG Interne",
-        u"(nombre entre 1 et 100) Requis pour les écritures RG Interne",
+        u"(nombre entre 0 et 100) Requis pour les écritures RG Interne",
     ),
     (
         "taux_rg_client",
         u"Taux RG Client",
-        u"(nombre entre 1 et 100) Requis pour le module d'écriture RG Client",
+        u"(nombre entre 0 et 100) Requis pour le module d'écriture RG Client",
     ),
     )
     schema = CaeConfig().clone()
@@ -430,6 +448,10 @@ valeur et le compte CG sont renseignés.",
             (
                 'sage_cgscop',
                 u"Module CGSCOP",
+                u"",),
+            (
+                'sage_organic',
+                u"Module Contribution organic",
                 u"",),
             (
                 'sage_rginterne',

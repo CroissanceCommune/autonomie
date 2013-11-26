@@ -72,7 +72,7 @@
           <div class='span6 offset3'>
             <div class="alert alert-success">
               <button class="close" data-dismiss="alert" type="button">×</button>
-              ${message|n}
+              ${api.clean_html(message)|n}
             </div>
           </div>
         </div>
@@ -82,7 +82,7 @@
           <div class='span6 offset3'>
             <div class="alert alert-error">
               <button class="close" data-dismiss="alert" type="button">×</button>
-              ${message|n}
+              ${api.clean_html(message)|n}
             </div>
           </div>
         </div>

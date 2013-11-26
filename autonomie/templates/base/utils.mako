@@ -111,7 +111,7 @@ path = request.current_route_path(_query=get_args)
         Replace \n with br for html output
     </%doc>
     %if data is not UNDEFINED and data is not None:
-        ${data.replace(u'\n', u'<br />')|n}
+        ${api.clean_html(data.replace(u'\n', u'<br />'))|n}
     %endif
 </%def>
 <%def name="format_customer(customer)">
@@ -160,7 +160,7 @@ path = request.current_route_path(_query=get_args)
         % endif
         >
         %if icotext:
-            <span>${icotext|n}</span>
+            <span>${api.clean_html(icotext)|n}</span>
         % endif
         %if icon:
             <i class='icon ${icon}'></i>

@@ -159,7 +159,7 @@
         <div class='well'>
             % if customer.comments:
                 <h3>Commentaires</h3>
-                ${format_text(customer.comments)|n}
+                ${format_text(customer.comments)}
             %else :
                 Aucun commentaire
             % endif

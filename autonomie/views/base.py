@@ -103,7 +103,6 @@ class BaseListView(BaseView):
             filter the query with the configured filters
         """
         for method in self._get_filters():
-            print method
             query = method(query, appstruct)
         return query
 

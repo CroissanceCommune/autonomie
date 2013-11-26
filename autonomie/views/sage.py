@@ -301,6 +301,9 @@ sont manquantes"
         return self.request.response
 
     def _forms_dict(self):
+        """
+            Return the different invoice search forms
+        """
         _period_form = get_period_form()
         return {
             'all_form': get_all_form(_period_form.counter),
@@ -313,11 +316,11 @@ sont manquantes"
 
     def __call__(self):
         """
-        Render data into 1) initial forms or 2) annotated forms or 3) form result
+        Render data into 1) initial forms or 2) annotated forms or 3) form
+        result
 
-        :rtype: rendered data
+        :rtype: rendering datas (dict) or response object (csv file)
         """
-        # FIXME: what about check_messages = {}
         check_messages = appstruct = None
         forms = self._forms_dict()
 
@@ -331,28 +334,26 @@ sont manquantes"
                     try:
                         appstruct = form.validate(post_items)
                     except ValidationFailure as validation_error:
-                        # Replace the form - will be displayed again
+                        log.exception(u"There was an error on form validation")
+                        log.exception(post_items)
+                        # Replace the form, it now contains errors
+                        # - will be displayed again
                         forms[form_name] = validation_error
-                        log.debug("Form %s contains errors", form_name)
                     break
 
-            # FIXME: if form not found, let's raise or return something:
-            #
-            # if appstruct is None:
-            #     raise / return ...
 
-            invoices = self.query_invoices(appstruct)
-            check_messages = self.check_invoices(invoices)
+            if appstruct is not None:
+                invoices = self.query_invoices(appstruct)
+                check_messages = self.check_invoices(invoices)
 
-            # FIXME: What about "if not check_messages.get('errors')"?
-            if check_messages['errors'] == []:
-                try:
-                    # Let's process and return successfully -> next page
-                    return self.write_csv(invoices)
-                except (MissingData, KeyError), validation_error:
-                    # oops, we'll redisplay the forms with errors highlighted:
-                    log.exception("Exception occured while writing CSV file")
-                    check_messages['errors'] = [_HELPMSG_CONFIG]
+                if not check_messages.get('errors'):
+                    try:
+                        # Let's process and return successfully the csvfile
+                        return self.write_csv(invoices)
+                    except (MissingData, KeyError), validation_error:
+                        log.exception("Exception occured while writing CSV \
+file")
+                        check_messages['errors'] = [_HELPMSG_CONFIG]
 
         # We are either
         # * reporting an error

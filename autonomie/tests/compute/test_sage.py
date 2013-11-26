@@ -189,6 +189,7 @@ class TestSageInvoice(BaseTestCase):
         self.assertEqual(wrapper.products['CG_FA']['ht'], 20000)
         self.assertEqual(wrapper.products['CG_FA']['tva'], 1960)
 
+
 class BaseBookEntryTest(BaseTestCase):
     factory = None
 
@@ -262,6 +263,14 @@ class Testmain(BaseTestCase):
 class TestSageFacturation(BaseBookEntryTest):
     factory = SageFacturation
 
+    def test__has_tva_value(self):
+        product = {'tva': 0.5}
+        self.assertTrue(SageFacturation._has_tva_value(product))
+        product = {'tva': 0.0}
+        self.assertFalse(SageFacturation._has_tva_value(product))
+        product = {'tva': -0.5}
+        self.assertTrue(SageFacturation._has_tva_value(product))
+
     def test_credit_totalht(self):
         res = {'libelle': 'customer company',
             'compte_cg': 'P0001',
@@ -279,6 +288,9 @@ class TestSageFacturation(BaseBookEntryTest):
             'credit': 3920}
         method = "credit_tva"
         self._test_product_book_entry(method, res)
+
+        # Ref bug #30
+
 
     def test_debit_ttc(self):
         method = "debit_ttc"

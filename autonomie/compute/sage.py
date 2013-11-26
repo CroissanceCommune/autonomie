@@ -252,9 +252,10 @@ class BaseSageBookEntryFactory(object):
             of a book entry
         """
         try:
-            part = int(self.config[self._part_key])
+            part = float(self.config[self._part_key])
         except ValueError:
-            raise MissingData(u"The Taux %s should be an int" % self._part_key)
+            raise MissingData(u"The Taux {0} should be a float"\
+                    .format(self._part_key))
         return part
 
 

@@ -354,13 +354,21 @@ class SageFacturation(BaseSageBookEntryFactory):
                 )
         return entry
 
+    @staticmethod
+    def _has_tva_value(product):
+        """
+            Test whether the tva of the given product has a positive value
+        """
+        return product['tva'] != 0
+
+
     def yield_entries(self):
         """
             Produce all the entries for the current task
         """
         for product in self.wrapped_invoice.products.values():
             yield self.credit_totalht(product)
-            if product['tva'] != 0:
+            if self._has_tva_value(product):
                 yield self.credit_tva(product)
             yield self.debit_ttc(product)
 

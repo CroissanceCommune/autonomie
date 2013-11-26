@@ -28,6 +28,14 @@
 import datetime
 import locale
 import calendar
+import bleach
+from copy import deepcopy
+
+ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p']
+ALLOWED_HTML_ATTRS = deepcopy(bleach.ALLOWED_ATTRIBUTES)
+ALLOWED_HTML_ATTRS['font'] = ['color']
+ALLOWED_HTML_ATTRS['*'] = ['class', 'style']
+ALLOWED_CSS_STYLES = ['color', 'text-align', 'font-weight']
 
 DEF_STATUS = u"Statut inconnu"
 STATUS = dict((
@@ -224,6 +232,18 @@ def month_name(index):
         return u""
 
 
+def clean_html(text):
+    """
+        Return a sanitized version of an html code keeping essential html tags
+        and allowing only a few attributes
+    """
+    return bleach.clean(
+            text,
+            tags=ALLOWED_HTML_TAGS,
+            attributes=ALLOWED_HTML_ATTRS,
+            )
+
+
 class Api(object):
     """
         Api object passed to the templates hosting all commands we will use
@@ -243,4 +263,6 @@ api = Api(format_amount=format_amount,
           format_long_date=format_long_date,
           format_quantity=format_quantity,
           urlupdate=urlupdate,
-          month_name=month_name)
+          month_name=month_name,
+          clean_html=clean_html,
+          )

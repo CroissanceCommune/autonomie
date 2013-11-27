@@ -242,6 +242,7 @@ def clean_html(text):
             text,
             tags=ALLOWED_HTML_TAGS,
             attributes=ALLOWED_HTML_ATTRS,
+            styles=ALLOWED_CSS_STYLES,
             )
 
 

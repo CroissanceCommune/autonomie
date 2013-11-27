@@ -31,11 +31,12 @@ import calendar
 import bleach
 from copy import deepcopy
 
-ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p']
+ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p', 'span', 'h1',
+                                            'h2', 'h3', 'h4', 'h5', 'hr']
 ALLOWED_HTML_ATTRS = deepcopy(bleach.ALLOWED_ATTRIBUTES)
 ALLOWED_HTML_ATTRS['font'] = ['color']
 ALLOWED_HTML_ATTRS['*'] = ['class', 'style']
-ALLOWED_CSS_STYLES = ['color', 'text-align', 'font-weight']
+ALLOWED_CSS_STYLES = ['color', 'text-align', 'font-weight', 'font-family']
 
 DEF_STATUS = u"Statut inconnu"
 STATUS = dict((

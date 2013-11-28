@@ -30,17 +30,26 @@ from deform import ValidationFailure
 
 from pyramid.httpexceptions import HTTPFound
 
+from sqlalchemy import extract
+from beaker.cache import cache_region
+
 from autonomie.models.task.estimation import (
         Estimation,
         EstimationLine,
         PaymentLine,
 )
 from autonomie.models.task.task import DiscountLine
+from autonomie.models.project import Project
+from autonomie.models.customer import Customer
 from autonomie.views.forms.task import (
         get_estimation_schema,
         get_estimation_appstruct,
         get_estimation_dbdatas,
 )
+from autonomie.views.forms.estimations import (
+        EstimationListSchema,
+        STATUS_OPTIONS,
+        )
 from autonomie.views.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.utils.views import submit_btn
@@ -53,6 +62,7 @@ from autonomie.views.taskaction import (
         make_html_view,
         make_task_delete_view,
 )
+from .base import BaseListView
 
 log = logging.getLogger(__name__)
 
@@ -252,6 +262,93 @@ def duplicate(request):
     return ret_dict
 
 
+def get_taskdates(dbsession):
+    """
+        Return all taskdates
+    """
+    @cache_region("long_term", "taskdates")
+    def taskdates():
+        """
+            Cached version
+        """
+        return dbsession.query(Estimation.taskDate)
+    return taskdates()
+
+
+def get_years(dbsession):
+    """
+        We consider that all documents should be dated after 2000
+    """
+    estimations = get_taskdates(dbsession)
+
+    @cache_region("long_term", "taskyears")
+    def years():
+        """
+            cached version
+        """
+        return sorted(set([est.taskDate.year for est in estimations.all()]))
+    return years()
+
+
+class EstimationList(BaseListView):
+    title = u""
+    schema = EstimationListSchema()
+    sort_columns = dict(
+            taskDate=Estimation.taskDate,
+            customer=Customer.name,
+            )
+    default_sort = 'taskDate'
+    default_direction = 'desc'
+
+    def default_form_values(self, appstruct):
+        values = super(EstimationList, self).default_form_values(appstruct)
+        appstruct['years'] = get_years(self.request.dbsession)
+        values["customers"] = self.request.context.customers
+        appstruct['status_options'] = STATUS_OPTIONS
+        return values
+
+    def query(self):
+        log.debug(u"Querying Estimations")
+        query = Estimation.query().join(Project).join(Customer)
+        company_id = self.request.context.id
+        query = query.filter(Project.company_id==company_id)
+        log.debug(u"Querying %s elements" % (len(query.all())))
+        return query
+
+    def filter_year(self, query, appstruct):
+        """
+            filter estimations by year
+        """
+        year = appstruct['year']
+        log.debug(u"Filtering by year : %s" % year)
+        query = query.filter(extract('year', Estimation.taskDate)==year)
+        return query
+
+    def filter_customer(self, query, appstruct):
+        """
+            filter estimations by customer
+        """
+        customer_id = appstruct['customer_id']
+        if customer_id != -1:
+            log.debug(u"Filtering by customer id : %s" % customer_id)
+            query = query.filter(Estimation.customer_id==customer_id)
+        return query
+
+    def filter_status(self, query, appstruct):
+        """
+            Filter estimations by status
+        """
+        status = appstruct['status']
+        if status == 'all':
+            log.debug(u"Filtering by status")
+            query = query.filter(Estimation.CAEStatus.in_(
+                ['valid', 'aboest', 'geninv']))
+        else:
+            log.debug(u"Filtering by status : %s" % status)
+            query = query.filter(Estimation.CAEStatus == status)
+        return query
+
+
 def includeme(config):
     config.add_route('project_estimations',
                     '/projects/{id:\d+}/estimations',
@@ -259,6 +356,9 @@ def includeme(config):
     config.add_route('estimation',
                      '/estimations/{id:\d+}',
                       traverse='/estimations/{id}')
+    config.add_route("estimations",
+                    "/company/{id:\d+}/estimations",
+                    traverse="/companies/{id}")
 
     config.add_view(make_pdf_view("tasks/estimation.mako"),
                     route_name='estimation',
@@ -292,3 +392,8 @@ def includeme(config):
                     route_name="estimation",
                     request_param='action=status',
                     permission="edit")
+
+    config.add_view(EstimationList,
+            route_name="estimations",
+            renderer="estimations.mako",
+            permission="edit")

@@ -9,7 +9,7 @@
  *
  */
 html{
-  font-size:13px;
+  font-size:11px;
 }
 .addressblock{
   position:relative;
@@ -23,14 +23,15 @@ html{
 }
 .lines{
   border:1px solid #ddd;
-  margin-bottom:26px;
+  margin-bottom:33px;
 }
 .lines thead tr{
   background-color:#f6f6f6;
-  padding-top:6px;
+  padding-top:3px;
+  font-size:12px;
 }
 .lines td, .lines th{
-  padding-top:6px;
+  padding-top:3px;
   padding:3px;
 }
 .lines .price{
@@ -53,23 +54,26 @@ html{
 }
 .title{
   padding:3px;
-  padding-top:6px;
+  padding-top:3px;
   background-color:#f6f6f6;
   font-weight:bold;
+  font-size:11px;
   border:1px solid #ddd;
   -pdf-keep-with-next:true;
 }
 .content{
+  font-size:10px;
   padding:3px;
   border:1px solid #ddd;
   padding-bottom:4px;
-  margin-bottom:26px;
+  margin-bottom:12px;
 }
 #footer{
   background-color:#efefef;
   color:#000;
   text-align:center;
   padding:5px;
+  font-size: 9px;
 }
 #cgv p{
   font-size:8px;

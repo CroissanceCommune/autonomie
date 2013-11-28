@@ -47,22 +47,22 @@
 ${period_form.render()|n}
 <hr />
 % if request.context.status == 'resulted':
-    <div class="well">
+    <div class="well hidden-print">
         <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais a été payée.
     </div>
 % elif request.context.status == 'valid':
-    <div class="well">
+    <div class="well hidden-print">
         <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais a été validée, elle est en attente de paiement.
     </div>
 % elif request.context.status == 'wait':
-    <div class="well">
+    <div class="well hidden-print">
         <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais est en attente de validation
     </div>
 % endif
-<div class="row">
+<div class="row hidden-print">
 % for com in communication_history:
     % if loop.first:
         <div class="well">
@@ -79,9 +79,11 @@ ${period_form.render()|n}
 % endfor
 </div>
 % if edit:
+    <div class="hidden-print">
     <a href="#lines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais</a>
     <a href="#kmlines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>
     <a href="#tel/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
+</div>
 % endif
 <div class='row'>
     <div class='span12' id="expenses"></div>
@@ -96,11 +98,6 @@ ${period_form.render()|n}
 % else:
 <div class='well'>
     ${api.format_expense_status(request.context)}<br />
-    % if request.context.comments :
-        <blockquote>
-            ${request.context.comments|n}
-        </blockquote>
-    % endif
 </div>
 % endif
 <div id='messageboxes'>

@@ -34,6 +34,7 @@
     <meta name="description" comment="">
     <meta name="KEYWORDS" CONTENT="">
     <meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW,ALL">
+    <link  rel="stylesheet" type="text/css" href="${request.static_url('autonomie:static/css/print.css')}" media="print" />
     </%block>
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -45,19 +46,19 @@
     <%block name="css" />
   </head>
   <body>
-    <header>
+      <header class="hidden-print">
             ${request.layout_manager.render_panel('menu')}
             ${request.layout_manager.render_panel('submenu')}
     </header>
     <%block name="headtitle">
-    <div class='pagetitle visible-desktop hidden-tablet'>
+    <div class='pagetitle visible-desktop hidden-tablet hidden-print'>
       <h2 >
         ${title}
       </h2>
     </div>
     </%block>
     <div class='container'>
-      <div class='subnav'>
+        <div class='subnav hidden-print'>
         <%block name="actionmenu">
         % if action_menu is not UNDEFINED and not action_menu.void():
             ${action_menu.render(request)|n}
@@ -68,7 +69,7 @@
       </div>
       <%block name='pop_message'>
       % for message in request.session.pop_flash(queue=""):
-        <div class='row'>
+          <div class='row hidden-print'>
           <div class='span6 offset3'>
             <div class="alert alert-success">
               <button class="close" data-dismiss="alert" type="button">×</button>
@@ -78,7 +79,7 @@
         </div>
       % endfor
       % for message in request.session.pop_flash(queue="error"):
-        <div class='row'>
+          <div class='row hidden-print'>
           <div class='span6 offset3'>
             <div class="alert alert-error">
               <button class="close" data-dismiss="alert" type="button">×</button>
@@ -91,7 +92,7 @@
       <%block name='content' />
       % if request.popups is not UNDEFINED:
           % for name, popup in request.popups.items():
-              <div id="${name}" style="display:none;">
+              <div id="${name}" style="display:none;" class="hidden-print">
                 ${popup.html|n}
               </div>
         % endfor

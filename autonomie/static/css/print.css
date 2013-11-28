@@ -1,0 +1,6 @@
+form, .hidden-print, a.btn, button{
+  display:none;
+}
+body, table caption, .lead{
+  font-size: 9pt;
+}

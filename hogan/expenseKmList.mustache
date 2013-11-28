@@ -4,7 +4,7 @@
         <caption>
         Frais kilométriques liés au fonctionnement de l'entreprise
             {{#edit}}
-            <div style="display:inline-block">
+            <div class="inline-element">
 <a href="#kmlines/add/1" class='btn visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
             </div>
             {{/edit}}
@@ -18,7 +18,7 @@
             <th>Kms</th>
             <th>Indemnités</th>
             {{#edit}}
-            <th>Actions</th>
+            <th class="hidden-print">Actions</th>
             {{/edit}}
         </thead>
         <tbody class='internal'>
@@ -28,7 +28,7 @@
                 <td colspan='6'>Total</td>
                 <td id='km_internal_total'></td>
                 {{#edit}}
-                <td></td>
+                <td class="hidden-print"></td>
                 {{/edit}}
             </tr>
         </tfoot>
@@ -38,7 +38,7 @@
         <caption>
             Frais kilométriques liés à l'activité
             {{#edit}}
-            <div style="display:inline-block">
+            <div class="inline-element">
 <a href="#kmlines/add/2" class='btn visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
             </div>
             {{/edit}}
@@ -52,7 +52,7 @@
             <th>Kms</th>
             <th>Indemnités</th>
             {{#edit}}
-            <th>Actions</th>
+            <th class="hidden-print">Actions</th>
             {{/edit}}
         </thead>
         <tbody class='activity'>
@@ -62,7 +62,7 @@
                 <td colspan='6'>Total</td>
                 <td id='km_activity_total'></td>
                 {{#edit}}
-                <td></td>
+                <td class="hidden-print"></td>
                 {{/edit}}
             </tr>
         </tfoot>

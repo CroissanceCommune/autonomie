@@ -3,7 +3,7 @@
     <caption>
     Frais liés au fonctionnement de l'entreprise
     {{#edit}}
-    <div style="display:inline-block">
+    <div class="inline-element">
     <a href="#lines/add/1" class='btn visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
     <a href="#tel/add" class='btn visible-desktop hidden-tablet' title="Ajouter une lignei de frais téléphonique"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
     </div>
@@ -17,7 +17,7 @@
         <th>Tva</th>
         <th>Total</th>
         {{#edit}}
-        <th>Actions</th>
+        <th class="hidden-print">Actions</th>
             {{/edit}}
     </thead>
     <tbody class='internal'>
@@ -27,7 +27,7 @@
             <td colspan='5'>Total</td>
             <td id='internal_total'></td>
         {{#edit}}
-            <td></td>
+            <td class="hidden-print"></td>
             {{/edit}}
         </tr>
     </tfoot>
@@ -37,7 +37,7 @@
     <caption>
     Frais liés à l'activité
     {{#edit}}
-    <div style="display:inline-block">
+    <div class="inline-element">
     <a href="#lines/add/2" class='btn visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
     </div>
     {{/edit}}
@@ -50,7 +50,7 @@
         <th>Tva</th>
         <th>Total</th>
         {{#edit}}
-        <th>Actions</th>
+        <th class="hidden-print">Actions</th>
         {{/edit}}
     </thead>
     <tbody class='activity'>
@@ -60,7 +60,7 @@
             <td colspan='5'>Total</td>
             <td id='activity_total'></td>
         {{#edit}}
-            <td></td>
+            <td class="hidden-print"></td>
             {{/edit}}
         </tr>
     </tfoot>

@@ -242,3 +242,6 @@ table.opa thead th{
 table.opa tfoot td{
   background-color:#FCF8E3;
 }
+.inline-element{
+  display:inline-block;
+}

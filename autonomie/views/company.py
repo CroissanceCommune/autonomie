@@ -53,6 +53,26 @@ def company_index(request):
     ret_val = dict(title=company.name.title(),
                 company=company)
     # recovering last activities
+#    from autonomie.models.task import Task, Invoice, CancelInvoice, Estimation
+#    from autonomie.models.project import Project
+#    from sqlalchemy.orm import aliased
+#    from sqlalchemy import (
+#            or_,
+#            desc,
+#            )
+#    company_id = company.id
+#    p1 = aliased(Project)
+#    p3 = aliased(Project)
+#    p2 = aliased(Project)
+#    query = Task.query()\
+#                .with_polymorphic([Invoice, CancelInvoice, Estimation])\
+#                .outerjoin(p1, Invoice.project)\
+#                .outerjoin(p2, CancelInvoice.project)\
+#                .outerjoin(p3, Estimation.project)\
+#                .filter(or_(p1.company_id == company_id,
+#                            p2.company_id == company_id,
+#                            p3.company_id == company_id))\
+#                .order_by(desc(Task.taskDate))
     all_tasks = []
     all_invoices = []
     for project in company.projects:
@@ -92,8 +112,8 @@ def recent_tasks(request):
         next_btn_state = 'disabled'
     result_data = {
         'next_btn_state': next_btn_state,
-        'previous_btn_state': previous_btn_state, 
-        'tasks': tasks, 
+        'previous_btn_state': previous_btn_state,
+        'tasks': tasks,
         'active_page': page_nb,
         'total_pages_nb': int(ceil((tasks_nb + 0.0) / nb_per_page)),
         'only_table': request.is_xhr,
@@ -290,8 +310,8 @@ def includeme(config):
                    request_param='action=tasks',
                    permission='edit')
     # same as above, but as a panel
-    config.add_panel(recent_tasks_panel, 
-                    'company_tasks', 
+    config.add_panel(recent_tasks_panel,
+                    'company_tasks',
                     renderer='company_tasks.mako')
     # same panel as html view
     config.add_view(recent_tasks,

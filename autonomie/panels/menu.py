@@ -153,16 +153,8 @@ def get_company_menu(request, cid, css=None):
     href = request.route_path("company_invoices", id=cid)
     gestion.add_item(u"Factures", icon="icon-list-alt", href=href)
 
-    href = request.route_path("treasury", id=cid)
-    gestion.add_item(u"Trésorerie", icon="icon-info-sign", href=href)
-
-    href = request.route_path("incomestatement", id=cid)
-    gestion.add_item(u"Compte de résultat", icon="icon-info-sign",
-            href=href)
-
-    href = request.route_path("salarysheet", id=cid)
-    gestion.add_item(u"Bulletin de salaire", icon="icon-info-sign",
-            href=href)
+    href = request.route_path("estimations", id=cid)
+    gestion.add_item(u"Devis", icon="icon-list-alt", href=href)
 
     href = request.route_path("commercial_handling", id=cid)
     gestion.add_item(u"Gestion commerciale", icon="icon-list-alt",
@@ -172,6 +164,20 @@ def get_company_menu(request, cid, css=None):
     gestion.add_item(u"Notes de frais", icon="icon-cog", href=href)
 
     menu.add(gestion)
+
+    docs = DropDown(label=u"Documents")
+    href = request.route_path("treasury", id=cid)
+    docs.add_item(u"Trésorerie", icon="icon-info-sign", href=href)
+
+    href = request.route_path("incomestatement", id=cid)
+    docs.add_item(u"Compte de résultat", icon="icon-info-sign",
+         href=href)
+
+    href = request.route_path("salarysheet", id=cid)
+    docs.add_item(u"Bulletin de salaire", icon="icon-info-sign",
+         href=href)
+
+    menu.add(docs)
 
     params = DropDown(label=u"Paramètres")
 

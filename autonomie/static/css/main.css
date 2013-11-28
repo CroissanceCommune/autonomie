@@ -137,7 +137,7 @@ textarea{
   background-color:#eee;
 }
 /* Invoice list */
-.invoice_resulted{
+.invoice_resulted, .estimation_geninv{
   background-color:#fff866;
   width:36px;
 }
@@ -145,11 +145,11 @@ textarea{
   background-color:#ffb266;
   width:36px;
 }
-.invoice_notpaid{
+.invoice_notpaid, .estimation_valid{
   background-color:#ffffff;
   width:36px;
 }
-.invoice_tolate{
+.invoice_tolate, .estimation_aboest{
   background-color:#C43C35;
   width:36px;
 }
@@ -158,16 +158,16 @@ textarea{
   text-transform:uppercase;
   text-decoration:underline;
 }
-.invoice_resulted_tr{
+.invoice_resulted_tr, .estimation_geninv_tr{
   background-color:#fffbaa;
 }
 .invoice_paid_tr{
   background-color:#ffb266;
 }
-.invoice_tolate_tr{
+.invoice_tolate_tr, .estimation_aboest_tr{
   background-color:#f9aaaa;
 }
-.invoice_cancelled_tr{
+.invoice_cancelled_tr, {
   background-color:#eeeeee;
 }
 .navbar-form button, .navbar-form input, .navbar-form select{

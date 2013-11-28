@@ -282,9 +282,9 @@ des informations concernant son activité.""")
         default=deferred_company_disable_default)
 
 
-class AuthSchema(colander.MappingSchema):
+class BaseAuthSchema(colander.MappingSchema):
     """
-        Schema for authentication form
+        Base auth schema (sufficient for json auth)
     """
     login = colander.SchemaNode(
         colander.String(),
@@ -293,6 +293,12 @@ class AuthSchema(colander.MappingSchema):
         colander.String(),
         widget=widget.PasswordWidget(),
         title="Mot de passe")
+
+
+class AuthSchema(BaseAuthSchema):
+    """
+        Schema for authentication form
+    """
     nextpage = colander.SchemaNode(
         colander.String(),
         widget=widget.HiddenWidget())
@@ -306,6 +312,13 @@ def get_auth_schema():
         return the authentication form schema
     """
     return AuthSchema(title=u"Authentification", validator=auth)
+
+
+def get_json_auth_schema():
+    """
+        return the auth form schema in case of json auth
+    """
+    return BaseAuthSchema(validator=auth)
 
 class UserListSchema(BaseListsSchema):
     disabled = colander.SchemaNode(colander.String(),

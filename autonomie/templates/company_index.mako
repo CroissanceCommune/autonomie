@@ -26,6 +26,9 @@
     Company index page shows last activities and elapsed invoices
 </%doc>
 <%inherit file="base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="format_text" />
+<%namespace file="/base/utils.mako" import="format_customer" />
+<%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
 <div class='row-fluid'>
     <div class='span5'>

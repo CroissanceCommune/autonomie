@@ -21,76 +21,85 @@
  *    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var TaskList = {
-    switch_btn: function(button, value) {
-        if (value) {
-            $(button).attr("style", "");
-            }
-        else {
-            $(button).attr("style", "color: #ccc");
-            }
-    },
-    get_table: function(element) {
-        return $(element.find("table.tasklist"));
-    },
-    buttons_states: function(element) {
-        table = TaskList.get_table(element);
-        page_num = parseInt(table.attr("active_page"));
-        page_max = parseInt(table.attr("total_pages_nb"));
-        console.log("current page: " + page_num + " - max page=" + page_max);
-        TaskList.button_makeup(element.prev_btn, page_num != 0, page_num - 1, element)
-        TaskList.button_makeup(element.next_btn, page_num != page_max - 1, page_num + 1, element)
-        $.each(
-            element.find("[class^=companytaskpage_]"), 
-            function(index, button) {
-                button = $(button);
-                TaskList.button_makeup(button, button.attr('class') != "companytaskpage_" + page_num, index, element)
-            });
-    },
-    button_makeup: function(button, state, target_page, element) {
-    button.unbind();
-    if (state) {
-        button_class = button.attr("class");
-        console.log(button_class + " has target " + target_page);
-        TaskList.switch_btn(button, true);
-        button.bind("click", function(){
-            console.log("clicked on " + button_class);
-            TaskList.refresh_list(element, target_page);
-            });
+var MyApp = new Backbone.Marionette.Application();
+
+MyApp.on("initialize:after", function(){
+  /*
+   *""" Launche the history (controller and router stuff)
+   */
+  console.log("Launching backbone's history'");
+  if ((Backbone.history)&&(! Backbone.History.started)){
+    Backbone.history.start();
+  }
+});
+
+MyApp.Router = Backbone.Marionette.AppRouter.extend({
+  appRoutes: {
+    "": "index",
+    "index": "index",
+    "tasklist/:id": "get_tasks"
+  }
+});
+
+MyApp.Controller = {
+  initialized: false,
+  element: '#tasklist_container',
+
+  initialize: function(){
+    console.log("Initialize");
+    if (!this.initialized){
+      this.$element = $(this.element);
+      this.initialized = true;
     }
-    else {
-        TaskList.switch_btn(button, false);
-    }
-    },
-    refresh_list: function(element, page_num) {
-        console.log("Recuperation en cours: page " + page_num);
-        url = '?action=tasks_html';
-        postdata = {'tasks_page_nb': page_num};
-        $.post(
-            url,
-            postdata,
-            function(data, httpstatus, xhr){
-                /* TODO: handle failure. 
-                 * I got in trouble with callbacks */
-                TaskList.get_table(element).replaceWith(data);
-                TaskList.buttons_states(element);
-            });
-    },
-    setup: function(element) {
-        /* 
-         * Arguments:
-         * * tasklist_elt: a jquery elt 
-         */
-        console.log("Task list: setup for element " + element);
-        console.log("Task list: setup done");
-        element.prev_btn = element.find(".previous_btn_state");
-        element.next_btn = element.find(".next_btn_state");
-        TaskList.buttons_states(element);
-    },
-};
+  },
+  setNbItemsSelectBehaviour: function(){
+    $('#number_of_tasks').unbind('change.tasks');
+    _.bindAll(this, 'get_tasks');
+    var this_ = this;
+    $('#number_of_tasks').bind("change.tasks",
+      function(){
+        this_.get_tasks(1);
+      }
+    );
+  },
+  index: function(){
+    console.log("Coming on the index page");
+    this.initialize();
+    this.setNbItemsSelectBehaviour();
+  },
+  get_tasks: function(id){
+    console.log("Getting tasks");
+    this.initialize();
+    this.refresh_list(id);
+  },
+  refresh_list: function(page_num) {
+    console.log("Recuperation en cours: page " + page_num);
+    url = '?action=tasks_html';
+    var items_per_page = $('#number_of_tasks').val();
+    postdata = {'tasks_page_nb': page_num,
+                'tasks_per_page': items_per_page};
+    var this_ = this;
+    $.post(
+        url,
+        postdata,
+        function(data, httpstatus, xhr){
+            /* TODO: handle failure.
+             * I got in trouble with callbacks */
+            this_.$element.html(data);
+            this_.setNbItemsSelectBehaviour();
+        },
+        'text');
+  },
+}
+
+MyApp.addInitializer(function(options){
+  /*
+   *  Application initialization
+   */
+  MyApp.router = new MyApp.Router({controller:MyApp.Controller});
+});
 
 $(function(){
-    $.each($("div.tasklist"), function(index, element) {
-        TaskList.setup($(element));
-    });
+  console.log("Starting my application");
+  MyApp.start();
 });

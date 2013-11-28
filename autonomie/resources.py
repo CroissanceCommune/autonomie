@@ -128,7 +128,7 @@ task = Resource(
 task_list_js = Resource(
         lib_autonomie,
         "js/task_list.js",
-        depends=[tools, jquery])
+        depends=[tools, jquery, backbone])
 message_js = Resource(
         lib_autonomie,
         "js/message.js",

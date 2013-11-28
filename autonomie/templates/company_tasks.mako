@@ -1,17 +1,28 @@
 <%namespace file="/base/utils.mako" import="format_text" />
+<%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='company_tasks_panel'>
-% if not only_table:
+% if not request.is_xhr:
 <div class='row'>
     <div class='span12'>
-        <div class='well tasklist' style="margin-top:10px">
-            <div class='section-header'>Dernières activités</div>
+        <div class='well tasklist' style="margin-top:10px" id='tasklist_container'>
 % endif
-            <table class='table table-stripped tasklist'
-                active_page="${active_page}"
-                total_pages_nb="${total_pages_nb}">
+            <div class='section-header'>Dernières activités</div>
+            Afficher <select id='number_of_tasks'>
+              % for i in (5, 10, 15, 50):
+              <option value='${i}'
+              % if tasks.items_per_page == i:
+                selected=true
+              % endif
+              >
+              ${i}
+              </option>
+              % endfor
+            </select>
+            éléments à la fois
+            <table class='table table-stripped tasklist'>
                 <thead>
                     <th>
                         Projet
@@ -44,18 +55,10 @@
                     % endfor
                 </tbody>
             </table>
-% if not only_table:
-            <div class="pagination">
-            <ul>
-            <li><a class="previous_btn_state">Previous</a></li>
-            % for index in xrange(total_pages_nb):
-            <li><a class="companytaskpage_${loop.index}">${loop.index + 1}</a></li>
-            % endfor
-            <li><a class="next_btn_state">Next</a></li>
-            </ul>
-            </div>
-        </div>
-    </div>
+            ${pager(tasks)}
+% if not request.is_xhr:
+</div>
+</div>
 </div>
 % endif
 </%block>

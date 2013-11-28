@@ -26,20 +26,31 @@
     Views for the company handling
     Entry point for the main users
 """
+
 import logging
-from math import ceil
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
+from sqlalchemy import desc, or_
+from sqlalchemy.orm import aliased
+from webhelpers import paginate
 
+from autonomie import resources
 from autonomie.models.company import Company
-from autonomie.resources import task_list_js
+from autonomie.models.project import Project
+from autonomie.models.task import CancelInvoice, Estimation, Invoice, Task
 from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import ViewLink
 from autonomie.views.forms import BaseFormView
 from autonomie.views.forms import merge_session_with_post
 from autonomie.views.forms.company import COMPANYSCHEMA
+
+
+_p1 = aliased(Project)
+_p2 = aliased(Project)
+_p3 = aliased(Project)
+
 
 log = logging.getLogger(__name__)
 
@@ -52,38 +63,10 @@ def company_index(request):
     company = request.context
     ret_val = dict(title=company.name.title(),
                 company=company)
-    # recovering last activities
-#    from autonomie.models.task import Task, Invoice, CancelInvoice, Estimation
-#    from autonomie.models.project import Project
-#    from sqlalchemy.orm import aliased
-#    from sqlalchemy import (
-#            or_,
-#            desc,
-#            )
-#    company_id = company.id
-#    p1 = aliased(Project)
-#    p3 = aliased(Project)
-#    p2 = aliased(Project)
-#    query = Task.query()\
-#                .with_polymorphic([Invoice, CancelInvoice, Estimation])\
-#                .outerjoin(p1, Invoice.project)\
-#                .outerjoin(p2, CancelInvoice.project)\
-#                .outerjoin(p3, Estimation.project)\
-#                .filter(or_(p1.company_id == company_id,
-#                            p2.company_id == company_id,
-#                            p3.company_id == company_id))\
-#                .order_by(desc(Task.taskDate))
-    all_tasks = []
     all_invoices = []
     for project in company.projects:
-        all_tasks.extend(project.estimations)
-        all_tasks.extend(project.invoices)
         all_invoices.extend(project.invoices)
 
-    all_tasks = sorted(all_tasks,
-                        key=lambda a: a.statusDate,
-                        reverse=True)
-    ret_val['tasks'] = all_tasks[:5]
 
     # recovering elapsed invoices for warning
     elapsed_invoices = [invoice
@@ -95,29 +78,61 @@ def company_index(request):
     return ret_val
 
 
+def _get_page_url(page):
+    return "#tasklist/{0}".format(page)
+
+
 def recent_tasks(request):
+    """
+    Return a page of the list of recent tasks.
+    Parameters to be supplied as a cookie or in request.POST
+
+    pseudo params : tasks_per_page,
+    """
     if not request.is_xhr:
-        task_list_js.need()
-    company = request.context
+        resources.task_list_js.need()
+
+    # TODO : Need a colander schema for validation
     page_nb = int(request.POST.get('tasks_page_nb', 0))
-    nb_per_page = request.POST.get('tasks.nb_per_page', 5)
-    tasks, tasks_nb = company.get_recent_tasks(page_nb, nb_per_page)
-    if page_nb == 0:
-        previous_btn_state = 'disabled'
+
+
+    if 'tasks_per_page' in request.POST:
+        raw_nb_per_page = request.POST['tasks_per_page']
+        nb_per_page = int(raw_nb_per_page)
+        request.response.set_cookie('tasks_per_page', raw_nb_per_page)
+    elif 'tasks_per_page' in request.cookies:
+        log.info("tasks_per_page in cookies")
+        raw_nb_per_page = request.cookies['tasks_per_page']
+        nb_per_page = int(raw_nb_per_page)
     else:
-        previous_btn_state = 'active'
-    if nb_per_page * page_nb < tasks_nb - 1:
-        next_btn_state = 'active'
-    else:
-        next_btn_state = 'disabled'
-    result_data = {
-        'next_btn_state': next_btn_state,
-        'previous_btn_state': previous_btn_state,
-        'tasks': tasks,
-        'active_page': page_nb,
-        'total_pages_nb': int(ceil((tasks_nb + 0.0) / nb_per_page)),
-        'only_table': request.is_xhr,
-        }
+        # fall back to base value
+        nb_per_page = 5
+
+    company_id = request.context.id
+
+    query = Task.query()
+    query = query.with_polymorphic([Invoice, Estimation, CancelInvoice])
+    query = query.order_by(desc(Task.statusDate))
+
+    query = query.outerjoin(_p1, Invoice.project)
+    query = query.outerjoin(_p2, Estimation.project)
+    query = query.outerjoin(_p3, CancelInvoice.project)
+
+    query = query.filter(or_(
+                _p1.company_id==company_id,
+                _p2.company_id==company_id,
+                _p3.company_id==company_id
+                ))
+
+    paginated_tasks = paginate.Page(
+            query,
+            page_nb,
+            items_per_page=nb_per_page,
+            url=_get_page_url,
+            )
+
+    result_data = {'tasks': paginated_tasks}
+
     return result_data
 
 

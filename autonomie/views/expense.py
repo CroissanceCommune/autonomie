@@ -53,6 +53,7 @@ from autonomie.models.treasury import (
         ExpenseSheet,
         ExpenseLine,
         ExpenseKmLine,
+        Communication,
 )
 from autonomie.views.base import BaseView
 from autonomie.views.render_api import (
@@ -229,7 +230,7 @@ def expense_configured():
     return length > 0
 
 
-def company_expenses(request):
+def company_expenses_view(request):
     """
         View that lists the expenseSheets related to the current company
     """
@@ -272,7 +273,7 @@ def get_expense_sheet(request, year, month, cid, uid):
     return expense
 
 
-def expenses_access(request):
+def expenses_access_view(request):
     """
         get/initialize the expense corresponding to the 4-uple:
             (year, month, user_id, company_id)
@@ -288,12 +289,20 @@ def expenses_access(request):
     return HTTPTemporaryRedirect(request.route_path("expense", id=expense.id))
 
 
+def get_expense_history(expensesheet):
+    """
+        Return the communication history for a given expensesheet
+    """
+    return expensesheet.communications
+
+
 class ExpenseSheetView(BaseFormView):
     """
         ExpenseSheet view
     """
     schema = ExpenseStatusSchema()
-    add_template_vars = ('title', 'loadurl', 'period_form', "edit")
+    add_template_vars = ('title', 'loadurl', 'period_form', "edit",
+                         "communication_history")
 
     def __init__(self, request):
         super(ExpenseSheetView, self).__init__(request)
@@ -310,6 +319,13 @@ class ExpenseSheetView(BaseFormView):
         uid = self.request.context.user_id
         url = self.request.route_url("user_expenses", id=cid, uid=uid)
         return get_period_form(self.request, url)
+
+    @property
+    def communication_history(self):
+        """
+            Communication history data, will be carried to the template
+        """
+        return get_expense_history(self.request.context)
 
     @property
     def title(self):
@@ -403,16 +419,42 @@ perdues) ?")
 
     def submit_success(self, appstruct):
         """
-            Handle submission of the expense page
+            Handle submission of the expense page, only on state change
+            validation
         """
         log.debug("Submitting expense sheet status form")
+
+        # Comment is now stored in a specific table
+        comment = None
+        if appstruct.has_key("comment"):
+            comment = appstruct.pop('comment')
+
+        # here we merge all our parameters with the current expensesheet
         merge_session_with_post(self.request.context, appstruct)
+
+        # We modifiy the expense status
         try:
             expense = self.set_expense_status(self.request.context)
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
+
+        self._store_communication(comment)
+
         return HTTPFound(self.request.route_url("expense",
                                                 id=self.request.context.id))
+
+    def _store_communication(self, comment):
+        """
+            Stores a comment that would have been provided on expense state
+            change
+        """
+        # If there was a comment, we add it in the database
+        if comment is not None:
+            comment = Communication(user_id=self.request.user.id,
+                                    content=comment,
+                                    expense_sheet_id=self.request.context.id)
+            self.dbsession.add(comment)
+
 
     def set_expense_status(self, expense):
         """
@@ -442,7 +484,7 @@ cette feuille de notes de frais")
         return HTTPFound(url)
 
 
-def expensesheet(request):
+def expensesheet_json_view(request):
     """
         Return an json encoded expensesheet
     """
@@ -499,6 +541,7 @@ class RestExpenseLine(BaseView):
             log.exception(appstruct)
             raise RestError(err.asdict(), 400)
         line = self.factory(**appstruct)
+
         line.sheet = self.request.context
         self.request.dbsession.add(line)
         self.request.dbsession.flush()
@@ -715,15 +758,15 @@ def includeme(config):
             "/expenses/{id:\d+}/kmlines/{lid}",
             traverse=traverse)
     #views
-    config.add_view(company_expenses,
+    config.add_view(company_expenses_view,
             route_name="company_expenses",
             renderer="treasury/expenses.mako")
-    config.add_view(expenses_access,
+    config.add_view(expenses_access_view,
             route_name="user_expenses")
     config.add_view(ExpenseSheetView,
             route_name="expense",
             renderer="treasury/expense.mako")
-    config.add_view(expensesheet,
+    config.add_view(expensesheet_json_view,
             route_name="expensejson",
             xhr=True,
             renderer="json")

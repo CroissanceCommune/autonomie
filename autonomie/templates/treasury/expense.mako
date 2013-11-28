@@ -23,6 +23,7 @@
 </%doc>
 
 <%inherit file="/base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="format_text" />
 <%block name="content">
 <style>
     #period_form label{
@@ -61,6 +62,22 @@ ${period_form.render()|n}
         Cette note de frais est en attente de validation
     </div>
 % endif
+<div class="row">
+% for com in communication_history:
+    % if loop.first:
+        <div class="well">
+            <b>Historique des Communications Entrepreneurs-CAE</b>
+    % endif
+        <hr />
+        <p class="font-size:10px;">
+            ${format_text(com.content)}
+        </p>
+        <small>${api.format_account(com.user)} le ${api.format_date(com.date)}</small>
+    % if loop.last:
+        </div>
+    % endif
+% endfor
+</div>
 % if edit:
     <a href="#lines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais</a>
     <a href="#kmlines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>

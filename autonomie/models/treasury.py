@@ -160,7 +160,6 @@ class ExpenseSheet(DBBASE):
     company_id = Column(Integer, ForeignKey("company.id", ondelete="cascade"))
     user_id = Column(Integer, ForeignKey("accounts.id", ondelete="cascade"))
     status = Column(String(10), default='draft')
-    comments = Column(Text)
     status_user_id = Column(Integer, ForeignKey("accounts.id"))
     status_date = Column(Date(), default=date.today(), onupdate=date.today())
     company = relationship("Company",
@@ -326,3 +325,27 @@ class ExpenseKmLine(BaseExpenseLine):
     @property
     def ht(self):
         return self.total
+
+
+class Communication(DBBASE):
+    """
+        Communication Class, logs communications between the contractor and its
+        CAE
+    """
+    __tablename__ = "communication"
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("accounts.id"))
+    content = Column(Text)
+    date = Column(Date(), default=date.today(), onupdate=date.today())
+    expense_sheet_id = Column(Integer, ForeignKey("expense_sheet.id"))
+
+    expense_sheet = relationship("ExpenseSheet",
+            backref=backref("communications",
+                order_by="Communication.date",
+                cascade="all, delete-orphan"))
+
+    user = relationship("User",primaryjoin="Communication.user_id==User.id",
+            backref=backref("expense_communications",
+                order_by="Communication.date",
+                cascade="all, delete-orphan"))

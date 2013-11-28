@@ -26,6 +26,7 @@
     All Authentication views
 """
 import logging
+import colander
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPForbidden
@@ -40,7 +41,11 @@ from deform import Form
 from deform import Button
 from deform import ValidationFailure
 
-from autonomie.views.forms.user import get_auth_schema
+from autonomie.views.forms.user import (
+        get_auth_schema,
+        get_json_auth_schema,
+        )
+from autonomie.utils.rest import RestError
 
 log = logging.getLogger(__name__)
 
@@ -66,6 +71,9 @@ def forbidden_view(request):
 
 
 def get_longtimeout():
+    """
+        Return the configured session timeout for people keeping connected
+    """
     settings = get_current_registry().settings
     default = 3600
     longtimeout = settings.get("session.longtimeout", default)
@@ -74,6 +82,29 @@ def get_longtimeout():
     except:
         longtimeout = default
     return longtimeout
+
+
+def login_json(request):
+    """
+        A Json login view
+        expect a login and a password element
+        returns a json dict :
+            success : {'result':'success'}
+            error : {'status':'error', 'errors':{'field':'error message'}}
+    """
+    schema = get_json_auth_schema()
+    appstruct = request.json_body
+    log.info(u"Authenticating : '{0}'".format(appstruct.get('login')))
+    try:
+        appstruct = schema.deserialize(appstruct)
+    except colander.Invalid, err:
+        log.exception("  - Erreur")
+        raise RestError(err.asdict(), 400)
+    else:
+        login = appstruct['login']
+        log.info(u" + '{0}' has been authenticated".format(login))
+        remember(request, login)
+    return dict(result=u"Success", status='success')
 
 
 def login_view(request):
@@ -155,3 +186,12 @@ def includeme(config):
                     route_name='login',
                     permission=NO_PERMISSION_REQUIRED,
                     renderer='login.mako')
+
+    # API v1
+    config.add_route('apiloginv1', '/api/v1/login')
+    config.add_view(login_json,
+                    route_name='apiloginv1',
+                    permission=NO_PERMISSION_REQUIRED,
+                    xhr=True,
+                    renderer='json',
+                    request_method='POST')

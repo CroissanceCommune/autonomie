@@ -59,6 +59,11 @@ class RestError(HTTPError):
         self.content_type = 'application/json'
 
 
+class Apiv1Resp(dict):
+    def __init__(self, body, status='success'):
+        dict.__init__(self, status=status, result=body)
+
+
 class RestJsonRepr(object):
     """
         BaseJson model wrapper
@@ -141,6 +146,9 @@ def add_rest_views(config, route_name, factory):
         get - > route_name, GET
         post - > route_name+"s", POST
     """
+    # FIXME : l'api rest est placée à la racine, on a pas de traversal qui nous
+    # permet de donner des droits autres que 'view' à nos users, donc tout est
+    # autorisé pour les gens qui ont les droits 'view'
     config.add_view(factory,
             attr='get',
             route_name=route_name,
@@ -154,7 +162,7 @@ def add_rest_views(config, route_name, factory):
             route_name=route_name + "s",
             renderer="json",
             request_method='POST',
-            permission='add',
+            permission='view',
             xhr=True)
     config.add_view(factory,
             attr='put',
@@ -178,7 +186,7 @@ def make_redirect_view(route_name):
         It supposes the route route_name is expecting a id key
     """
     def view(request):
-        id = request.context.id
-        url = request.route_path(route_name, id=id)
+        id_ = request.context.id
+        url = request.route_path(route_name, id=id_)
         return HTTPTemporaryRedirect(url)
     return view

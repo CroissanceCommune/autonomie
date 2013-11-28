@@ -28,6 +28,7 @@
 import logging
 import colander
 import datetime
+import traceback
 
 from deform import Form
 from pyramid.security import has_permission
@@ -45,6 +46,7 @@ from autonomie.views.forms.expense import (
         ExpenseSheetSchema,
 )
 from autonomie.models.treasury import (
+        BaseExpenseLine,
         ExpenseType,
         ExpenseTelType,
         ExpenseKmType,
@@ -58,6 +60,7 @@ from autonomie.views.render_api import (
         format_account,
         )
 from autonomie.utils.rest import (
+        Apiv1Resp,
         RestError,
         RestJsonRepr,
         add_rest_views,
@@ -217,10 +220,10 @@ def expense_configured():
     """
         Return True if the expenses were already configured
     """
-    l = 0
+    length = 0
     for factory in (ExpenseType, ExpenseKmType, ExpenseTelType):
-        l += factory.query().count()
-    return l > 0
+        length += factory.query().count()
+    return length > 0
 
 
 def company_expenses(request):
@@ -482,7 +485,6 @@ class RestExpenseLine(BaseView):
         try:
             appstruct = self.schema.deserialize(appstruct)
         except colander.Invalid, err:
-            import traceback
             traceback.print_exc()
             log.exception("  - Erreur")
             log.exception(appstruct)
@@ -512,7 +514,6 @@ class RestExpenseLine(BaseView):
         try:
             appstruct = self.schema.deserialize(appstruct)
         except colander.Invalid, err:
-            import traceback
             traceback.print_exc()
             log.exception("  - Erreur")
             log.exception(appstruct)
@@ -537,6 +538,127 @@ class RestExpenseKmLine(RestExpenseLine):
     factory = ExpenseKmLine
     key = "kmlines"
     model_wrapper = ExpenseKmLineJson
+
+
+
+class Expensev1(BaseView):
+    """
+        Rest api for expense line add
+        Here we manage dynamically the targetted expense sheet regarding the
+        date of the given expense.
+        An expense is included in the month it has been edited
+    """
+    _schema = ExpenseLineSchema()
+    _schema_km = ExpenseKmLineSchema()
+    factory = ExpenseLine
+    factory_km = ExpenseKmLine
+    model_wrapper = ExpenseLineJson
+    model_wrapper_km = ExpenseKmLineJson
+
+    def schema(self, appstruct):
+        """
+            Returns the appropriate schema used to validate input datas
+        """
+        if self.is_kmline(appstruct):
+            return self._schema_km.bind()
+        else:
+            return self._schema.bind()
+
+    def makeOne(self, appstruct):
+        """
+            Make a model using the appropriate factory
+        """
+        if self.is_kmline(appstruct):
+            return self.factory_km(**appstruct)
+        else:
+            return self.factory(**appstruct)
+
+    def wrap(self, model):
+        """
+            Wrap the model with appropriate json formatter
+        """
+        if hasattr(model, 'start'):
+            return self.model_wrapper_km(model)
+        else:
+            return self.model_wrapper(model)
+
+    def get_sheet(self, appstruct):
+        """
+            Return the sheet related to the given appstruct
+        """
+        uid = self.request.user.id
+        # TODO : les utilisateurs avec plusieurs entreprises
+        if len(self.request.user.companies) != 1:
+            traceback.print_exc()
+            log.exception("  - Erreur")
+            raise RestError({}, 403)
+        cid = self.request.user.companies[0].id
+        date = appstruct['date']
+        sheet = get_expense_sheet(self.request, date.year, date.month, cid, uid)
+        if sheet.status not in ('draft', 'invalid',):
+            traceback.print_exc()
+            log.exception("  - Erreur")
+            raise RestError({}, 403)
+        return sheet
+
+    def is_kmline(self, appstruct):
+        """
+            return True if the current edited line is a km line
+        """
+        return 'start' in appstruct.keys()
+
+    def getOne(self):
+        id_ = self.request.matchdict.get('id')
+        line = BaseExpenseLine.get(id_)
+        if line is not None:
+            return line
+        traceback.print_exc()
+        log.exception("  - Erreur")
+        raise RestError({}, 404)
+
+    def get(self):
+        return Apiv1Resp(self.wrap(self.getOne()))
+
+    def addOne(self, edit=False):
+        appstruct = self.request.json_body
+        schema = self.schema(appstruct)
+        try:
+            appstruct = schema.deserialize(appstruct)
+        except colander.Invalid, err:
+            traceback.print_exc()
+            log.exception("  - Erreur")
+            raise RestError(err.asdict(), 400)
+        # Here an error is raised if the next steps are forbidden
+        sheet = self.get_sheet(appstruct)
+        if edit:
+            line = self.getOne()
+            line = merge_session_with_post(line, appstruct)
+            self.request.dbsession.merge(line)
+        else:
+            line = self.makeOne(appstruct)
+            line.sheet = sheet
+            self.request.dbsession.add(line)
+        self.request.dbsession.flush()
+        return Apiv1Resp(self.wrap(line))
+
+    def post(self):
+        return self.addOne()
+
+    def put(self):
+        return self.addOne(edit=True)
+
+    def delete(self):
+        line = self.getOne()
+        self.request.dbsession.delete(line)
+        return Apiv1Resp({'message':u"Successfully deleted"})
+
+
+def expense_optionsv1(request):
+    """
+        Return the options for expense edition (type of expenses, associated
+        datas)
+    """
+    return dict(status='success', result=expense_options())
 
 
 def excel_filename(request):
@@ -609,3 +731,14 @@ def includeme(config):
     add_rest_views(config, "expensekmline", RestExpenseKmLine)
     config.add_view(redirect_to_expense, route_name="expensekmline")
     config.add_view(redirect_to_expense, route_name="expensekmlines")
+
+    # V1 Rest Api
+    config.add_route("expenselinev1s", "/api/v1/expenses")
+    config.add_route("expenselinev1", "/api/v1/expenses/{id}",
+            traverse='expenselines/{id}')
+    config.add_route("expenseoptionsv1", "/api/v1/expenseoptions")
+
+    add_rest_views(config, "expenselinev1", Expensev1)
+    config.add_view(expense_optionsv1,
+            route_name="expenseoptionsv1",
+            renderer="json")

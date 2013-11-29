@@ -38,7 +38,10 @@ from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import CancelInvoice
 from autonomie.models.user import User
-from autonomie.models.treasury import ExpenseSheet
+from autonomie.models.treasury import (
+        ExpenseSheet,
+        BaseExpenseLine,
+        )
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +87,7 @@ class RootFactory(dict):
         self['cancelinvoices'] = CancelInvoiceFactory(self, 'cancelinvoices')
         self['users'] = UserFactory(self, 'users')
         self['expenses'] = ExpenseSheetFactory(self, "expenses")
+        self['expenselines'] = ExpenseFactory(self, 'expenselines')
 
 
 class BaseDBFactory(object):
@@ -201,6 +205,17 @@ class ExpenseSheetFactory(BaseDBFactory):
         return self._get_item(ExpenseSheet, key, "expensesheet")
 
 
+class ExpenseFactory(BaseDBFactory):
+    """
+        Handle access to expense sheets
+    """
+    def __getitem__(self, key):
+        """
+            Returns the traversed object
+        """
+        return self._get_item(BaseExpenseLine, key, "expense")
+
+
 def get_base_acl(self):
     """
         return the base acls
@@ -280,6 +295,20 @@ def get_expensesheet_acl(self):
     return acl
 
 
+def get_expense_acl(self):
+    """
+        Compute the acls for an expenseline
+    """
+    if self.sheet.status in ('draft', 'invalid'):
+        user_rights = ("view", "edit", "add")
+    else:
+        user_rights = ("view",)
+    acl = DEFAULT_PERM[:]
+    acl.extend([(Allow, u"%s" % user.login, user_rights)
+        for user in self.sheet.company.employees])
+    return acl
+
+
 def wrap_db_objects():
     """
         Add acls and names to the db objects used as context
@@ -292,3 +321,4 @@ def wrap_db_objects():
     CancelInvoice.__acl__ = property(get_task_acl)
     User.__acl__ = property(get_user_acl)
     ExpenseSheet.__acl__ = property(get_expensesheet_acl)
+    BaseExpenseLine.__acl__ = property(get_expense_acl)

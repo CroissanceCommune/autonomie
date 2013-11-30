@@ -45,6 +45,7 @@ if HERE:
     OPTIONS['sampledb'] = join(HERE, OPTIONS['sampledb'])
     OPTIONS['sampledatas'] = join(HERE, OPTIONS['sampledatas'])
     OPTIONS['updatedir'] = join(HERE, OPTIONS['updatedir'])
+    OPTIONS.setdefault('mysql_cmd', 'mysql_cmd')
 
 
 def launch_cmd(cmd):

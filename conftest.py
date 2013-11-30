@@ -15,6 +15,7 @@
 import sys
 from os import system
 from os.path import dirname, join
+import os.path
 
 from paste.deploy.loadwsgi import appconfig
 from pyramid.config import Configurator
@@ -25,7 +26,16 @@ from autonomie.tests.base import TMPDIR
 
 
 HERE = dirname(__file__)
-SETTINGS = appconfig('config:' + join(HERE, 'test.ini'), "autonomie")
+
+
+def __current_test_ini_file():
+    local_test_ini = os.path.join(HERE, 'test.ini')
+    if os.path.exists(local_test_ini):
+        return local_test_ini
+    return os.path.join(HERE, 'travis.ini')
+
+
+SETTINGS = appconfig('config:%s' % __current_test_ini_file(), "autonomie")
 PREFIX = "testdb."
 
 OPTIONS = dict((key[len(PREFIX):], SETTINGS[key])

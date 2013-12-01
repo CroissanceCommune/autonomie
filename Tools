@@ -2,7 +2,7 @@
 # Useful function used to manage databases installation
 having_root_pwd() {
     log "Have you got the root password"
-    if [ "$BDD_ROOT_PWD" == "" ]
+    if [ "x$BDD_ROOT_PWD" == "x" ]
     then
         echo "Missing the sql password for ${BDD_ROOT_USER}, please provide one and press [ENTER]:"
         read BDD_ROOT_PWD
@@ -12,7 +12,7 @@ having_root_pwd() {
 mysql_set_db() {
     DB=$1
     FILENAME=$2
-    if [ "$NOPASSWORD" == "1" ]
+    if [ "x$NOPASSWORD" == "x1" ]
     then
         mysql -u${BDD_ROOT_USER} $DB < $FILENAME
     else
@@ -21,7 +21,7 @@ mysql_set_db() {
 }
 
 mysql_cmd() {
-    if [ "$NOPASSWORD" == "1" ]
+    if [ "x$NOPASSWORD" == "x1" ]
     then
         echo "$@" | mysql -u${BDD_ROOT_USER}
     else

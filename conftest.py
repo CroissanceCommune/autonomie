@@ -16,6 +16,8 @@ import sys
 from os import system
 from os.path import dirname, join
 import os.path
+import shlex
+import subprocess
 
 from paste.deploy.loadwsgi import appconfig
 from pyramid.config import Configurator
@@ -46,6 +48,8 @@ if HERE:
     OPTIONS['sampledatas'] = join(HERE, OPTIONS['sampledatas'])
     OPTIONS['updatedir'] = join(HERE, OPTIONS['updatedir'])
     OPTIONS.setdefault('mysql_cmd', 'mysql_cmd')
+    OPTIONS.setdefault('Tools',  join(HERE, 'Tools'))
+    os.putenv('SHELL', '/bin/bash')
 
 
 def launch_cmd(cmd):
@@ -54,14 +58,16 @@ def launch_cmd(cmd):
     """
     command_line = cmd.format(**OPTIONS)
     print "Launching : %s" % command_line
-    return system(command_line)
+    process = subprocess.Popen(shlex.split(command_line), shell=True)
+    process.wait()
+    return process.returncode
 
 
 def launch_sql_cmd(cmd):
     """
         Main entry to launch sql commands
     """
-    return launch_cmd("echo \"%s\"|{mysql_cmd}" % cmd)
+    return launch_cmd(". {Tools} && echo \"%s\"|{mysql_cmd}" % cmd)
 
 
 def create_sql_user():
@@ -116,7 +122,7 @@ def test_connect():
     """
         test the db connection
     """
-    cmd = "echo 'quit' | {mysql_cmd}"
+    cmd = ". {Tools} && echo 'quit' | {mysql_cmd}"
     ret_code = launch_cmd(cmd)
 
     if ret_code != 0:

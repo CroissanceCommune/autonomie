@@ -36,7 +36,7 @@ from pyramid.httpexceptions import HTTPFound
 from deform import Button
 from deform import Form
 
-from autonomie.views.mail import StatusChanged
+from autonomie.events.tasks import StatusChanged
 from autonomie.exception import Forbidden
 from autonomie.utils.widgets import (
         Submit,
@@ -506,7 +506,12 @@ class StatusView(BaseView):
         """
             Notify the change to the registry
         """
-        self.request.registry.notify(StatusChanged(self.request, item, status))
+        html_string = html(self.request, [item])
+        self.request.registry.notify(StatusChanged(self.request,
+            item,
+            status,
+            html_string,
+            ))
 
     def __call__(self):
         """
@@ -596,8 +601,13 @@ class TaskFormView(BaseFormView):
         params = dict(self.request.POST)
         status = params['submit']
         task.set_status(status, self.request, self.request.user.id, **params)
-        self.request.registry.notify(StatusChanged(self.request, task,
-            status))
+        html_string = html(self.request, [task])
+        self.request.registry.notify(StatusChanged(
+            self.request,
+            task,
+            status,
+            html_string,
+            ))
         return task
 
     @property

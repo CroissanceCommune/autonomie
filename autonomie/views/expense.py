@@ -55,6 +55,7 @@ from autonomie.models.treasury import (
         ExpenseKmLine,
         Communication,
 )
+from autonomie.events.expense import StatusChanged
 from autonomie.views.base import BaseView
 from autonomie.views.render_api import (
         month_name,
@@ -434,11 +435,17 @@ perdues) ?")
 
         # We modifiy the expense status
         try:
-            expense = self.set_expense_status(self.request.context)
+            expense, status = self.set_expense_status(self.request.context)
+            self._store_communication(comment)
+            self.request.registry.notify(StatusChanged(
+                self.request,
+                expense,
+                status,
+                comment,
+                ))
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
 
-        self._store_communication(comment)
 
         return HTTPFound(self.request.route_url("expense",
                                                 id=self.request.context.id))
@@ -463,7 +470,8 @@ perdues) ?")
         params = dict(self.request.POST)
         status = params['submit']
         expense.set_status(status, self.request, self.request.user.id, **params)
-        return expense
+        self.request.registry.notify(StatusChanged(request, expense, status))
+        return expense, status
 
     def reset_success(self, appstruct):
         """

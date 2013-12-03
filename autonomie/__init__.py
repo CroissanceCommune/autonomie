@@ -51,7 +51,7 @@ from autonomie.utils.deform_bootstrap_fix import add_resources_to_registry
 
 AUTONOMIE_MODULES = (
     "autonomie.views.static",
-    "autonomie.views.mail",
+    "autonomie.events.tasks",
     "autonomie.views.auth",
     "autonomie.views.user",
     "autonomie.views.company",

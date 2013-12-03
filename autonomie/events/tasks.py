@@ -35,7 +35,10 @@ from autonomie.views.render_api import format_status
 from autonomie.export.utils import detect_file_headers
 from autonomie.utils.pdf import write_pdf
 
-from autonomie.events.utils import send_mail
+from autonomie.events.utils import (
+    send_mail,
+    format_mail,
+    )
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +48,7 @@ EVENTS = {"valid":u"validé",
             "paid": u"partiellement payé",
             "resulted": u"payé"}
 
+SUBJECT_TMPL = u"{docname} ({customer}) : {statusstr}"
 
 MAIL_TMPL = u"""{docname} {docnumber} du projet {project} avec le client {customer} a été {status_verb}{gender}.
 
@@ -74,19 +78,13 @@ class StatusChanged(object):
             self.new_status = 'resulted'
 
 
-    def format_mail(self, mail):
-        """
-            Format the mail address to fit gmail's rfc interpretation
-        """
-        return u"<{0}>".format(mail)
-
     @property
     def recipients(self):
         """
             return the recipients' emails
         """
         if self.document.owner.email:
-            email = [self.format_mail(self.document.owner.email)]
+            email = [format_mail(self.document.owner.email)]
         else:
             email = []
         return email
@@ -103,15 +101,18 @@ class StatusChanged(object):
             log.info(u"'{0}' has not set his email".format(
                                                     self.request.user.login))
             mail = "Unknown"
-        return self.format_mail(mail)
+        return format_mail(mail)
 
     @property
     def subject(self):
         """
             return the subject of the email
         """
-        return u"{0} : {1}".format(self.document.name,
-                                    format_status(self.document))
+        return SUBJECT_TMPL.format(
+                docname=self.document.name,
+                customer=self.document.customer.name,
+                statusstr=format_status(self.document),
+                )
 
     @property
     def body(self):
@@ -176,4 +177,7 @@ def get_status_verb(status):
 
 
 def includeme(config):
+    """
+    Pyramid's incusion mechanism
+    """
     config.add_subscriber(send_mail, StatusChanged)

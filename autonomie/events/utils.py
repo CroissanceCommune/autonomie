@@ -30,6 +30,14 @@ from pyramid_mailer.message import Message
 
 log = logging.getLogger(__file__)
 
+
+def format_mail(mail):
+    """
+        Format the mail address to fit gmail's rfc interpretation
+    """
+    return u"<{0}>".format(mail)
+
+
 def send_mail(event):
     """
         send a mail to dests with subject and body beeing set

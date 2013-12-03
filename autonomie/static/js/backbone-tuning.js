@@ -34,11 +34,14 @@ var Autonomie = {};
 
 // Provide a default table item view
 var BaseTableLineView = Backbone.Marionette.ItemView.extend({
-  highlight: function( callback ){
+  highlight: function( options ){
     /*
      * Ok highlight
      */
-    this._highlight("#ceff99", callback);
+    if (options['scroll']){
+      this._scroll();
+    }
+    this._highlight("#ceff99", options['callback']);
   },
   error: function(callback){
     /*
@@ -46,13 +49,15 @@ var BaseTableLineView = Backbone.Marionette.ItemView.extend({
      */
     this._highlight("#F9AAAA", callback);
   },
+  _scroll: function(){
+    var top = this.$el.offset().top - 50;
+    $('html, body').animate({scrollTop: top});
+  },
   _highlight: function(color, callback){
     /*
      * scroll to the view, highlight with the given color and launch the
      * callback
      */
-    var top = this.$el.offset().top - 50;
-    $('html, body').animate({scrollTop: top});
     // Silly hack to provide highlights on webkit browsers
     this.$el.css("backgroundColor", "#fff");
     this.$el.effect('highlight', {color:color}, 1500,

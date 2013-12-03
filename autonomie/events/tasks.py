@@ -27,11 +27,15 @@
 """
 import logging
 
-from pyramid_mailer import get_mailer
-from pyramid_mailer.message import Message
+from pyramid_mailer.message import Attachment
 from pyramid.threadlocal import get_current_registry
 
 from autonomie.views.render_api import format_status
+
+from autonomie.export.utils import detect_file_headers
+from autonomie.utils.pdf import write_pdf
+
+from autonomie.events.utils import send_mail
 
 log = logging.getLogger(__name__)
 
@@ -54,10 +58,12 @@ class StatusChanged(object):
     """
         Event raised when a document status changes
     """
-    def __init__(self, request, document, status):
+    def __init__(self, request, document, status, html_string):
         self.request = request
         self.document = document
         self.new_status = status
+        # Html string output of the given document
+        self.html_string = html_string
         # Silly hack :
         # When a payment is registered, the new status is "paid",
         # if the resulted box has been checked, it's set to resulted later on.
@@ -66,6 +72,7 @@ class StatusChanged(object):
         # wrong message
         if status == 'paid' and self.document.CAEStatus == 'resulted':
             self.new_status = 'resulted'
+
 
     def format_mail(self, mail):
         """
@@ -135,6 +142,20 @@ class StatusChanged(object):
                 addr=addr,
                 comment=comment)
 
+    def get_attachment(self):
+        """
+            Return the file data to be sent with the email
+        """
+        attachment = None
+        if self.new_status == 'valid':
+            filename = u"{0}.pdf".format(self.document.number)
+            pdf_io = write_pdf(self.request, filename, self.html_string)
+            pdf_datas = pdf_io.read()
+
+            mimetype = detect_file_headers(filename)
+            attachment = Attachment(filename, mimetype, pdf_datas)
+        return attachment
+
 
     def is_key_event(self):
         """
@@ -153,25 +174,6 @@ def get_status_verb(status):
     """
     return EVENTS.get(status, u"")
 
-
-def send_mail(event):
-    """
-        send a mail to dests with subject and body beeing set
-    """
-    if event.is_key_event():
-        recipients = event.recipients
-        if recipients:
-            log.info(u"Sending an email to '{0}'".format(recipients))
-            try:
-                mailer = get_mailer(event.request)
-                message = Message(subject=event.subject,
-                      sender=event.sendermail,
-                      recipients=recipients,
-                      body=event.body)
-                mailer.send_immediately(message)
-            except:
-                log.exception(u" - An error has occured while sending the \
-email(s)")
 
 def includeme(config):
     config.add_subscriber(send_mail, StatusChanged)

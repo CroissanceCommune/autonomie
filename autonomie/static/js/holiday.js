@@ -95,11 +95,12 @@ var HolidayView = BaseTableLineView.extend({
     var confirmed = confirm("Êtes vous certain de vouloir supprimer cet élément ?");
     if (confirmed){
       var _model = this.model;
-      this.highlight(function(){_model.destroy(
+      this.highlight(
+      {callback: function(){_model.destroy(
         {success: function(model, response) {
           displayServerSuccess("L'élément a bien été supprimé");
         }}
-      );});
+      );}});
     }
   },
   _edit: function(){

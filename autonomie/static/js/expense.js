@@ -315,11 +315,15 @@ var BaseExpenseLineView = BaseTableLineView.extend({
     var confirmed = confirm("Êtes vous certain de vouloir supprimer cet élément ?");
     if (confirmed){
       var _model = this.model;
-      this.highlight(function(){_model.destroy(
-        {success: function(model, response) {
-          displayServerSuccess("L'élément a bien été supprimé");
-        }}
-      );});
+      this.highlight({
+        callback: function(){
+          _model.destroy({
+              success: function(model, response) {
+                displayServerSuccess("L'élément a bien été supprimé");
+              }
+           });
+         }
+        });
     }
   }
 });
@@ -378,7 +382,6 @@ var ExpenseLineView = BaseExpenseLineView.extend({
     this.model.save(attrs, {
           success:function(){
             displayServerSuccess("Les informations ont bien été enregistrées");
-            this_.highlight();
             this_.setTotal();
           },
           error:function(){
@@ -446,8 +449,15 @@ var BaseExpenseCollectionView = Backbone.Marionette.CompositeView.extend({
     }
     this.appendChild(index, itemView, childrenContainer);
     if (_.isFunction(itemView.highlight)){
-      itemView.highlight();
-    }
+      // The new_element attribute is used to check if we should highlight(on
+      // add only)
+      var options = {};
+      if (itemView.model.has('new_element')){
+        options['scroll'] = true;
+        itemView.model.unset('new_element', {silent:true});
+      }
+      itemView.highlight(options);
+      }
   },
   appendChild: function(index, itemView, childrenContainer){
     childrenContainer.append(itemView.el);
@@ -745,10 +755,13 @@ MyApp.Controller = {
     if (this.expense_form !== null){
       this.expense_form.reset();
     }
+    // Passing the new_element tags a creation used to highlight (or not) the
+    // line
     this.expense_form = new ExpenseAdd({title:"Ajouter",
         modelObject:ExpenseLine,
         destCollection:MyApp.expense.lines,
-        modelOptions:{"category": category}});
+        modelOptions:{"category": category, new_element: true}
+        });
     MyApp.formContainer.show(this.expense_form);
   },
   edit: function(id) {
@@ -769,11 +782,13 @@ MyApp.Controller = {
     if (this.expensetel_form !== null){
       this.expensetel_form.reset();
     }
+    // Passing the new_element tags a creation used to highlight (or not) the
+    // line
     this.expensetel_form = new ExpenseTelAdd({
       title:'Ajouter des frais téléphoniques',
       modelObject:ExpenseLine,
       destCollection:MyApp.expense.lines,
-      modelOptions:{"category": 1}
+      modelOptions: {category: 1, new_element: true}
     });
     MyApp.formContainer.show(this.expensetel_form);
   },
@@ -785,9 +800,13 @@ MyApp.Controller = {
     if (this.expensekm_form !== null){
       this.expensekm_form.reset();
     }
+    // Passing the new_element tags a creation used to highlight (or not) the
+    // line
     this.expensekm_form = new ExpenseKmAdd({title:"Ajouter",
       modelObject:ExpenseKmLine,
-      destCollection:MyApp.expense.kmlines});
+      destCollection:MyApp.expense.kmlines,
+      modelOptions: {new_element: true}
+    });
     MyApp.formContainer.show(this.expensekm_form);
   },
   editkm: function(id) {

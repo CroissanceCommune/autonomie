@@ -120,7 +120,20 @@ class StatusChanged(object):
             return the body of the email
         """
         status_verb = get_status_verb(self.new_status)
-        addr = self.request.route_url(self.document.type_, id=self.document.id)
+
+        # If the document is validated, we directly send the link to the pdf
+        # file
+        if self.new_status == 'valid':
+            query_args = dict(view="pdf")
+        else:
+            query_args = {}
+
+        addr = self.request.route_url(
+                    self.document.type_,
+                    id=self.document.id,
+                    _query=query_args,
+                    )
+
         docnumber = self.document.number
         customer = self.document.customer.name
         project = self.document.project.name
@@ -148,13 +161,13 @@ class StatusChanged(object):
             Return the file data to be sent with the email
         """
         attachment = None
-        if self.new_status == 'valid':
-            filename = u"{0}.pdf".format(self.document.number)
-            pdf_io = write_pdf(self.request, filename, self.html_string)
-            pdf_datas = pdf_io.read()
+        #if self.new_status == 'valid':
+        #    filename = u"{0}.pdf".format(self.document.number)
+        #    pdf_io = write_pdf(self.request, filename, self.html_string)
+        #    pdf_datas = pdf_io.read()
 
-            mimetype = detect_file_headers(filename)
-            attachment = Attachment(filename, mimetype, pdf_datas)
+        #    mimetype = detect_file_headers(filename)
+        #    attachment = Attachment(filename, mimetype, pdf_datas)
         return attachment
 
 

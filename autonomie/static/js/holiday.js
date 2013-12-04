@@ -44,10 +44,14 @@ var HolidayModel = Backbone.Model.extend({
     // Here we provide default values for the alt fields (alt fields are used
     // by the datepicker widget to provide a display field and a stored one
     // that will be sent to the server)
-    if ((options['alt_start_date'] === undefined)&&(options['start_date']!==undefined)){
+    options = options || {};
+
+    if ( _.isUndefined( options['alt_start_date'] ) &&
+         ! _.isUndefined( options['start_date'] ) ){
       this.set('alt_start_date', formatPaymentDate(options['start_date']));
     }
-    if ((options['alt_end_date'] === undefined)&&(options['end_date']!==undefined)){
+    if ( _.isUndefined( options['alt_end_date'] ) &&
+       ! _.isUndefined( options['end_date'] ) ){
       this.set('alt_end_date', formatPaymentDate(options['end_date']));
     }
   },
@@ -145,7 +149,7 @@ var HolidayList = Backbone.Marionette.CompositeView.extend({
 });
 
 
-var HolidayAdd = BaseFormView.extend({
+var HolidayForm = BaseFormView.extend({
   /*
    *  Holiday add form view
    */
@@ -155,28 +159,17 @@ var HolidayAdd = BaseFormView.extend({
     end_date: "#holidayForm input[name=alt_end_date]",
     form: "#holidayForm"
   },
-  submit: Autonomie.addsubmit,
-  initialize: function(options){
-    Autonomie.addFormInitialize.call(this, options);
-  },
   onShow: function(){
     /*
      * Launched when the form is added to the dom
      * Make some js calls
      */
+    console.log(this.ui.start_date);
+    console.log(this.ui.end_date);
+
     this.setDatePicker("holidayForm", this.ui.start_date, "start_date");
     this.setDatePicker("holidayForm", this.ui.end_date, "end_date");
-  }
-});
-
-
-var HolidayEdit = HolidayAdd.extend({
-  /*
-   * Holiday edition form
-   */
-  submit: Autonomie.editsubmit,
-  initialize: function(options){
-    Autonomie.editFormInitialize.call(this, options);
+    this.ui.start_date.focus();
   }
 });
 
@@ -209,22 +202,22 @@ MyApp.Controller = {
   },
   add: function(){
     this.initialize();
-    if (this.addform !== null){
-      this.addform.reset();
-    }
-    this.addform = new HolidayAdd({'title': "Ajouter",
-      modelObject: HolidayModel,
-      destCollection:MyApp.holidays});
-    MyApp.formContainer.show(this.addform);
+    var model = new HolidayModel();
+    holidayForm = new HolidayForm({
+      title: "Ajouter",
+      destCollection: MyApp.holidays,
+      model:model
+      });
+    MyApp.formContainer.show(holidayForm);
   },
   edit: function(id){
     this.initialize();
-    if (this.editform !== null){
-      this.editform.reset();
-    }
-    model = MyApp.holidays.get(id);
-    this.editform = new HolidayEdit({model:model, title:"Éditer"});
-    MyApp.formContainer.show(this.editform);
+    var model = MyApp.holidays.get(id);
+    holidayForm = new HolidayForm({
+      title:"Éditer",
+      model:model
+      });
+    MyApp.formContainer.show(holidayForm);
   }
 };
 

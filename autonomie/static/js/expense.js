@@ -93,8 +93,8 @@ var ExpenseLine = BaseExpenseModel.extend({
   defaults:{
     category: null,
     description:"",
-    ht:0,
-    tva:0
+    ht:null,
+    tva:null
   },
   // Constructor dynamically add a altdate if missing
   // (altdate is used in views for jquery datepicker)
@@ -262,6 +262,15 @@ var ExpenseLineCollection = Backbone.Collection.extend({
       }else if ( acat > bcat ){
         res = 1;
       }
+      if (res === 0){
+        var adate = a.get('altdate');
+        var bdate = a.get('altdate');
+        if (adate < bdate){
+          res = -1;
+        } else if ( acat > bcat ){
+          res = 1;
+        }
+      }
     }
     return res;
   },
@@ -302,8 +311,10 @@ var ExpenseKmCollection = Backbone.Collection.extend({
   }
 });
 
-
+////////////////////////////////////////////////////////////////
 /********************  Views  *********************************/
+////////////////////////////////////////////////////////////////
+
 var BaseExpenseLineView = BaseTableLineView.extend({
   /*
    * Base item view for expense lines
@@ -332,7 +343,6 @@ var ExpenseLineView = BaseExpenseLineView.extend({
   /*
    *  Expense Line view (for classic and tel expenses)
    */
-  template: templates.expense,
   tagName:"tr",
   events: {
     'click a.remove':'_remove',
@@ -358,18 +368,27 @@ var ExpenseLineView = BaseExpenseLineView.extend({
             edit:AppOptions['edit']
             };
   },
+  getTemplate: function(){
+    /*
+     * Return the template used
+     */
+    if (this.model.hasNoType()){
+      return templates.expenseorphan;
+    }
+    if (this.model.isSpecial()){
+      return templates.expensetel;
+    }
+
+    return templates.expense;
+  },
   initialize: function(){
     /*
      * View constructor
      */
     // bind the model change to the view rendering
-    if (this.model.hasNoType()){
-      this.template = templates.expenseorphan;
-    }
-    if (this.model.isSpecial()){
-      this.template = templates.expensetel;
-    }else{
+    if (! this.model.isSpecial()){
       this.listenTo(this.model, 'change', this.render, this);
+      this.listenTo(this.model, 'change', this.highlight, this);
     }
   },
   changeVal: function(){
@@ -415,10 +434,12 @@ var ExpenseKmLineView = BaseExpenseLineView.extend({
     var typelabel = this.model.getTypeLabel();
     var total = this.model.total();
     var edit_url = "#kmlines/" + this.model.cid + "/edit";
-    return {typelabel:typelabel,
+    return {
+            typelabel:typelabel,
             edit_url:edit_url,
             edit:AppOptions['edit'],
-            total:formatAmount(total)};
+            total:formatAmount(total)
+            };
   },
   initialize: function(){
     this.listenTo(this.model, 'change', this.render, this);
@@ -427,6 +448,12 @@ var ExpenseKmLineView = BaseExpenseLineView.extend({
 
 
 var BaseExpenseCollectionView = Backbone.Marionette.CompositeView.extend({
+  /*
+   * A base expense collection View
+   *
+   * It provides two tables : one for internal and another for activity related
+   * expenses
+   */
   tagName: "div",
   internalContainer: "tbody.internal",
   activityContainer: "tbody.activity",
@@ -437,9 +464,12 @@ var BaseExpenseCollectionView = Backbone.Marionette.CompositeView.extend({
     /*
      * Choose the container for child appending regarding the category
      */
+
+    // Subscribe to the change behaviour of our model
     this.listenTo(itemView.model, 'change', this.setTotal, this);
 
     var childrenContainer;
+    // Retrieve the container our expense should be rendered in
     if (itemView.model.get('category') == '1'){
       // It's an expense related to internal needs
       childrenContainer = collectionView.$(collectionView.internalContainer);
@@ -448,6 +478,8 @@ var BaseExpenseCollectionView = Backbone.Marionette.CompositeView.extend({
       childrenContainer = collectionView.$(collectionView.activityContainer);
     }
     this.appendChild(index, itemView, childrenContainer);
+
+    // Highight a newly added element
     if (_.isFunction(itemView.highlight)){
       // The new_element attribute is used to check if we should highlight(on
       // add only)
@@ -517,19 +549,20 @@ var ExpensesKmView = BaseExpenseCollectionView.extend({
   }
 });
 
+////////////////////////////////////////
+// FormViews
+////////////////////////////////////////
 
 var BaseExpenseFormView = BaseFormView.extend({
-  /*
-   * Base form view
-   */
-  submit: Autonomie.addsubmit,
   formname: null,
   templateHelpers: function(){
     /*
      * Add datas to the template context
      */
-    return {type_options:this.getTypeOptions(),
-            category_options:this.getCategoryOptions()};
+    return {
+      type_options: this.getTypeOptions(),
+      category_options: this.getCategoryOptions()
+      };
   },
   updateSelectOptions: function(options, val){
     /*
@@ -553,12 +586,8 @@ var BaseExpenseFormView = BaseFormView.extend({
 
 
 var ExpenseAdd = BaseExpenseFormView.extend({
-  /*
-   *  Expense add form
-   */
   template: templates.expenseForm,
   formname: "expenseForm",
-  // The most used UI elements
   ui:{
     form:"#expenseForm",
     date:"#expenseForm input[name=altdate]"
@@ -567,88 +596,51 @@ var ExpenseAdd = BaseExpenseFormView.extend({
     Autonomie.addFormInitialize.call(this, options);
   },
   getCategoryOptions:function(){
-    /*
-     * Return the options for expense categories
-     */
-    //return AppOptions['categories'];
     var category_options = AppOptions['categories'];
     var category = this.model.get('category');
     return this.updateSelectOptions(category_options, category);
   },
   getTypeOptions: function(){
-    /*
-     *  Return the options for tva selection
-     */
     return AppOptions['expensetypes'];
   }
 });
 
 
 var ExpenseKmAdd = BaseExpenseFormView.extend({
-  /*
-   * Form to add km fees expenses
-   */
   template:templates.expenseKmForm,
   formname: "expenseKmForm",
-  // The most used UI elements (are cached)
   ui:{
     form:"#expenseKmForm",
     date:"#expenseKmForm input[name=altdate]"
   },
-  initialize: function(options){
-    Autonomie.addFormInitialize.call(this, options);
-  },
   getTypeOptions: function(){
-    /*
-     *  Return the options for tva selection
-     */
     return AppOptions['kmtypes'];
   },
   getCategoryOptions:function(){
-    /*
-     * Return the options for expense categories
-     */
     return AppOptions['categories'];
   }
 });
 
 
 var ExpenseEdit = ExpenseAdd.extend({
-  /*
-   *  Expense edit form
-   */
-  submit: Autonomie.editsubmit,
-  initialize: function(options){
-    Autonomie.editFormInitialize.call(this, options);
-  },
   getCategoryOptions:function(){
-    /*
-     * Return the options for expense categories
-     */
     var category_options = AppOptions['categories'];
     var category = this.model.get('category');
     return this.updateSelectOptions(category_options, category);
 
   },
   getTypeOptions: function(){
-    /*
-     *  Return the options for the expense types
-     */
     var type_options = AppOptions['expensetypes'];
     var type_id = this.model.get('type_id');
     return this.updateSelectOptions(type_options, type_id);
   }
 });
 
+
 var ExpenseTelAdd = BaseFormView.extend({
-  submit: Autonomie.addsubmit,
   template: templates.expenseTelForm,
-  formname: "expenseTelForm",
   ui:{
     form:"#expenseTelForm"
-  },
-  initialize: function(options){
-    Autonomie.addFormInitialize.call(this, options);
   },
   templateHelpers: function(){
     return {type_options: AppOptions['teltypes']};
@@ -657,17 +649,7 @@ var ExpenseTelAdd = BaseFormView.extend({
 
 
 var ExpenseKmEdit = ExpenseKmAdd.extend({
-  /*
-   * Km expense edition
-   */
-  submit: Autonomie.editsubmit,
-  initialize: function(options){
-    Autonomie.editFormInitialize.call(this, options);
-  },
   getCategoryOptions:function(){
-    /*
-     * Return the options for expense categories
-     */
     var category_options = AppOptions['categories'];
     var category = this.model.get('category');
     return this.updateSelectOptions(category_options, category);
@@ -708,9 +690,6 @@ MyApp.Controller = {
    */
   initialized:false,
   _popup:null,
-  expense_form:null,
-  expensekm_form:null,
-  expensetel_form: null,
   lines:null,
   kmlines:null,
   index: function() {
@@ -752,75 +731,64 @@ MyApp.Controller = {
      * expenseline add route
      */
     this.initialize();
-    if (this.expense_form !== null){
-      this.expense_form.reset();
-    }
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
-    this.expense_form = new ExpenseAdd({title:"Ajouter",
-        modelObject:ExpenseLine,
-        destCollection:MyApp.expense.lines,
-        modelOptions:{"category": category, new_element: true}
-        });
-    MyApp.formContainer.show(this.expense_form);
+    model = new ExpenseLine({"category": category, new_element: true});
+    expense_form = new ExpenseAdd({
+      title: "Ajouter",
+      destCollection: MyApp.expense.lines,
+      model: model
+      });
+    MyApp.formContainer.show(expense_form);
   },
   edit: function(id) {
     /*
      * expenseline edit route
      */
     this.initialize();
-    if (this.expense_form !== null){
-      this.expense_form.reset();
-    }
     var model = this._getExpenseLine(id);
-    this.expense_form = new ExpenseEdit({model:model,
-                                         title:"Éditer"});
-    MyApp.formContainer.show(this.expense_form);
+    expense_form = new ExpenseEdit({
+      title:"Éditer",
+      destCollection: MyApp.expense.lines,
+      model:model
+      });
+    MyApp.formContainer.show(expense_form);
   },
   addtel: function(){
     this.initialize();
-    if (this.expensetel_form !== null){
-      this.expensetel_form.reset();
-    }
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
-    this.expensetel_form = new ExpenseTelAdd({
+    expensetel_form = new ExpenseTelAdd({
       title:'Ajouter des frais téléphoniques',
       modelObject:ExpenseLine,
       destCollection:MyApp.expense.lines,
       modelOptions: {category: 1, new_element: true}
     });
-    MyApp.formContainer.show(this.expensetel_form);
+    MyApp.formContainer.show(expensetel_form);
   },
   addkm: function(category){
     /*
      * expensekmline add route
      */
     this.initialize();
-    if (this.expensekm_form !== null){
-      this.expensekm_form.reset();
-    }
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
-    this.expensekm_form = new ExpenseKmAdd({title:"Ajouter",
+    expensekm_form = new ExpenseKmAdd({title:"Ajouter",
       modelObject:ExpenseKmLine,
       destCollection:MyApp.expense.kmlines,
       modelOptions: {new_element: true}
     });
-    MyApp.formContainer.show(this.expensekm_form);
+    MyApp.formContainer.show(expensekm_form);
   },
   editkm: function(id) {
     /*
      * expensekmline edit route
      */
     this.initialize();
-    if (this.expensekm_form !== null){
-      this.expensekm_form.reset();
-    }
     var model = this._getExpenseKmLine(id);
-    this.expensekm_form = new ExpenseKmEdit({model:model,
+    expensekm_form = new ExpenseKmEdit({model:model,
                                          title:"Éditer"});
-    MyApp.formContainer.show(this.expensekm_form);
+    MyApp.formContainer.show(expensekm_form);
   }
 };
 

@@ -32,7 +32,7 @@ var Popup = Backbone.Marionette.Region.extend({
    */
   el: "#popup",
   constructor:function(){
-    _.bindAll(this);
+    _.bindAll(this, "closeModal", "reset", "onShow", "getEl");
     Backbone.Marionette.Region.prototype.constructor.apply(this, arguments);
   },
   getEl: function(selector){

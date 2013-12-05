@@ -24,8 +24,9 @@
 
 
 // Override backbone marionette's render method to fit hogan templating
-Backbone.Marionette.Renderer.render = function(template_obj, data){
-  return template_obj.render(data);
+Backbone.Marionette.Renderer.render = function(template_name, data){
+  var template_obj = Handlebars.templates[template_name + '.mustache'];
+  return template_obj(data);
 };
 
 

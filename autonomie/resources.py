@@ -50,9 +50,9 @@ jquery_tmpl = Resource(
         lib_autonomie,
         "js/vendors/jquery.tmpl.min.js",
         depends=[jquery])
-_hogan = Resource(
+_handlebar = Resource(
         lib_autonomie,
-        "js/vendors/hogan-2.0.0.js")
+        "js/vendors/handlebars.runtime-v1.1.2.js")
 _underscore = Resource(
         lib_autonomie,
         "js/vendors/underscore.js",
@@ -85,14 +85,14 @@ _backbone_popup = Resource(
 _backbone_tuning = Resource(
         lib_autonomie,
         "js/backbone-tuning.js",
-        depends=[_backbone_marionnette, _hogan, main])
+        depends=[_backbone_marionnette, _handlebar, main])
 
 backbone = Group([_backbone_validation_bootstrap,
                   _backbone_tuning, _backbone_popup])
 
 
 templates = Resource(lib_autonomie,
-        "js/template.js", depends=[_hogan])
+        "js/template.js", depends=[_handlebar])
 
 _date = Resource(
         lib_autonomie,

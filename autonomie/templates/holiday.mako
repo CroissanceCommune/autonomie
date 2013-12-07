@@ -27,7 +27,7 @@ Template for holiday declarations
 </%doc>
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
-<div class='row' style="padding-top:10px;">
+<div class='row-fluid' style="padding-top:10px;">
     <div class='span6 offset3'>
         ${form|n}
     </div>

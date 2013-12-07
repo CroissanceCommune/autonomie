@@ -24,7 +24,7 @@
 
 <%inherit file="/base.mako"></%inherit>
 <%block name='content'>
-<div class='row'>
+<div class='row-fluid'>
     <% keys = documents.keys() %>
     <% keys.sort() %>
     % for year in keys:

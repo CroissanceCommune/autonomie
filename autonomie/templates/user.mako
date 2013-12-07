@@ -27,8 +27,8 @@
 <%namespace file="/base/utils.mako" import="format_phone" />
 <%namespace file="/base/utils.mako" import="format_company" />
 <%block name='content'>
-<div class='row'>
-    <div class='span4 offset1'>
+<div class='row-fluid'>
+    <div class='span5'>
         <div class='well'>
             <dl class="dl-horizontal">
                 % for label, value in ((u'Identifiant', user.login), (u"Nom", user.lastname), (u"Prénom", user.firstname)):
@@ -44,7 +44,7 @@
 % endif
         </div>
     </div>
-    <div class='span6'>
+    <div class='span6 offset1'>
         <div class='well'>
             % if len(user.companies) == 1:
                 <h3>Entreprise</h3>

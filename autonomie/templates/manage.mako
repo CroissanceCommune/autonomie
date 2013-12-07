@@ -28,6 +28,8 @@
 <%inherit file="/base.mako"></%inherit >
 <%block name="content">
 <br />
+<div class='row-fluid'>
+    <div class='span10 offset1'>
 <table class="table table-striped table-condensed table-hover table-bordered">
     <caption>Devis, Factures et Avoirs</caption>
     <thead>
@@ -57,6 +59,9 @@
     </tbody>
 </table>
 <br />
+</div>
+<div class='row-fluid'>
+    <div class='span10 offset1'>
 <table class="table table-striped table-condensed table-hover table-bordered">
 <caption>Feuilles de notes de frais</caption>
     <thead>
@@ -81,4 +86,6 @@
 % endif
     </tbody>
 </table>
+</div>
+</div>
 </%block>

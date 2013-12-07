@@ -31,8 +31,8 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
-<div class='row'>
-    <div class='span4'>
+<div class='row-fluid'>
+    <div class='span5'>
         %if elapsed_invoices:
             <div class='well' style="margin-top:10px">
                 <div class='section-header'>
@@ -88,7 +88,7 @@
     </div>
 </div>
 
-<div class='row'>
+<div class='row-fluid'>
     <div class='span12'>
         <div class='well' style="margin-top:10px">
             <div class='section-header'>Dernières activités</div>

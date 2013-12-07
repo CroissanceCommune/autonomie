@@ -24,7 +24,7 @@
 
 <%inherit file="/base.mako"></%inherit>
 <%block name='content'>
-<div class='row'>
+<div class='row-fluid'>
 <div class='span8 offset2'>
 <table class='table table-striped table-bordered' style="margin-top:15px">
 <tr><td><b>Nombre de devis rédigés</b></td><td><b>${estimations}</b></td></tr>
@@ -33,12 +33,12 @@
 </table>
 </div>
 </div>
-<div class='row'>
+<div class='row-fluid'>
     <div class='span2 offset8'>
         ${year_form.render()|n}
     </div>
 </div>
-<div class='row'>
+<div class='row-fluid'>
     <table class='table table-striped table-bordered' style="margin-top:15px">
         <thead>
             <th>Description</th>
@@ -102,7 +102,7 @@
         </tbody>
     </table>
 </div>
-<div class='row'>
+<div class='row-fluid'>
     <div class='span6 offset2 well' id="form_container">
         <a class="close" onclick="$('#form_container').fadeOut('slow');" title="Enlever">×</a>
         ${form.render()|n}

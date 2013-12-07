@@ -25,7 +25,7 @@
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
 % if check_messages is not None:
-    <div class='row'>
+    <div class='row-fluid'>
         <div class='span6 offset3'>
             <h2>${check_messages['title']}</h2>
         </div>
@@ -37,7 +37,7 @@
     </p>
 % endif
 % for form in (all_form, period_form, from_invoice_number_form, invoice_number_form):
-<div class='row'>
+    <div class='row-fluid'>
     <div class='span6 offset3'>
         ${form|n}
     </div>

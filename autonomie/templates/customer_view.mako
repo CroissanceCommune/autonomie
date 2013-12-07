@@ -26,9 +26,10 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />
 <%namespace file="/base/utils.mako" import="format_text" />
+<%namespace file="/base/utils.mako" import="table_btn" />
 <%block name='content'>
-<div class="row">
-    <div class='span3'>
+<div class="row-fluid">
+    <div class='span4'>
         <div class='well'>
             <h3>Entreprise ${customer.name.upper()}</h3>
             <dl>
@@ -86,7 +87,7 @@
             </dl>
         </div>
     </div>
-    <div class='span9'>
+    <div class='span8'>
         <h2>Projets</h2>
         <a class='btn' href='${request.route_path("company_projects", id=customer.company.id, _query=dict(action="add", customer=customer.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>Nouveau projet
@@ -115,32 +116,13 @@
                                 </td>
                                 <td>
                                     <div class='btn-group'>
-                                        <a class='btn' href='${request.route_path("project", id=project.id)}'>
-                                            <span class='ui-icon ui-icon-pencil'></span>
-                                            Voir
-                                        </a>
+                                        ${table_btn(request.route_path("project", id=project.id), u"Voir", "Voir ce projet", icon=u"icon-pencil")}
                                         %if not project.is_archived():
-                                            <a class='btn' href='${request.route_path("project_estimations", id=project.id)}'>
-                                                <span class='ui-icon ui-icon-plusthick'></span>
-                                                Devis
-                                            </a>
-                                            <a class='btn' href='${request.route_path("project_invoices", id=project.id)}'>
-                                                <span class='ui-icon ui-icon-plusthick'></span>
-                                                Facture
-                                            </a>
-                                            <a class='btn'
-                                                href='${request.route_path("project", id=project.id, _query=dict(action="archive"))}'
-                                                onclick="return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');">
-                                                <span class='ui-icon ui-icon-folder-collapsed'></span>
-                                                Archiver
-                                            </a>
+                                            ${table_btn(request.route_path("project_estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"ui-icon-plusthick")}
+                                            ${table_btn(request.route_path("project_invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"ui-icon-plusthick")}
+                                            ${table_btn(request.route_path("project", id=project.id, _query=dict(action="archive")), u"Archiver", u"Archiver ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');", icon=u"ui-icon-folder-collapsed")}
                                         %elif project.is_deletable():
-                                            <a class='btn'
-                                                href='${request.route_path("project", id=project.id, _query=dict(action="delete"))}'
-                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');">
-                                                <span class='ui-icon ui-icon-trash'></span>
-                                                Supprimer
-                                            </a>
+                                            ${table_btn(request.route_path("project", id=project.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');", icon=u"ui-icon-trash")}
                                         %endif
                                     </div>
                                 </td>
@@ -154,7 +136,7 @@
         %endif
     </div>
 </div>
-<div class='row'>
+<div class='row-fluid'>
     <div class='span12'>
         <div class='well'>
             % if customer.comments:

@@ -43,7 +43,7 @@
     }
 </style>
 <br />
-<div class="row">
+<div class="row-fluid">
     <div id="header-container">
     </div>
 </div>
@@ -66,7 +66,7 @@ ${period_form.render()|n}
         Cette note de frais est en attente de validation
     </div>
 % endif
-<div class="row hidden-print">
+<div class="row-fluid hidden-print">
 % for com in communication_history:
     % if loop.first:
         <div class="well">
@@ -89,8 +89,10 @@ ${period_form.render()|n}
     <a href="#tel/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
 </div>
 % endif
-<div class='row'>
+<div class='row-fluid'>
     <div class='span12' id="expenses"></div>
+</div>
+<div class='row-fluid'>
     <div class='span12' id="expenseskm"></div>
     <div id="form-container" class='span4'></div>
 </div>

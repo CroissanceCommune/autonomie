@@ -154,7 +154,7 @@ path = request.current_route_path(_query=get_args)
     % endif
 </%def>
 <%def name="table_btn(href, label, title, icon=None, onclick=None, icotext=None)">
-    <a class='btn' href='${href}' title="${title}"
+    <a class='btn btn-small' href='${href}' title="${title}"
         % if onclick:
             onclick="${onclick}"
         % endif

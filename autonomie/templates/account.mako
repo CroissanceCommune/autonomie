@@ -26,8 +26,8 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%block name='content'>
 <% account = request.user %>
-<div class="row" style="margin-top:10px">
-    <div class='span4 offset1'>
+<div class="row-fluid" style="margin-top:10px">
+    <div class='span5'>
         <div class="well">
             <dl class="dl-horizontal">
                 %for label, value in ((u'Identifiant', account.login), (u'Nom', account.lastname), (u'Prénom', account.firstname)):
@@ -63,7 +63,7 @@
             % endfor
         </div>
     </div>
-    <div class='span5 offset1'>
+    <div class='span5 offset2'>
         ${form|n}
     </div>
 </div>

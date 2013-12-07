@@ -24,6 +24,7 @@
 
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
+<div class='row-fluid'>
 % if companies:
     <ul class="thumbnails">
         % for company in companies:
@@ -46,4 +47,5 @@
 %else:
     <strong>Aucune entreprise n'a été configurée pour ce compte</strong>
 % endif
+</div>
 </%block>

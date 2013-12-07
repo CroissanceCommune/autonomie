@@ -57,7 +57,7 @@
       </h2>
     </div>
     </%block>
-    <div class='container'>
+    <div style='margin:10px'>
         <div class='subnav hidden-print'>
         <%block name="actionmenu">
         % if action_menu is not UNDEFINED and not action_menu.void():

@@ -22,6 +22,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 
+<%namespace file="/base/utils.mako" import="table_btn"/>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
 % if conf_msg is not UNDEFINED:
@@ -63,8 +64,8 @@
                 <tr><td>${api.month_name(expense.month)} ${expense.year}</td>
                     <td>${api.format_expense_status(expense)}</td>
                     <td style='text-align:right'>
-                        <a class='btn' href="${request.route_path('expense', id=expense.id)}"><i class='icon icon-search'></i>Voir</a>
-                        <a class='btn' href="${request.route_path('expensexlsx', id=expense.id)}"><i class='icon icon-file'></i>Export</a>
+                        ${table_btn(request.route_path('expense', id=expense.id), u"Voir", u"Voir cette note de frais", 'icon-search')}
+                        ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de frais au format xslx", "icon-file")}
                     </td>
                 </tr>
             % endfor

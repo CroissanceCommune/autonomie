@@ -35,7 +35,7 @@
     <li>
     </li>
 </ul>
-<div class='row'>
+<div class='row-fluid'>
     <div class='span7'>
         <form class='form-search form-horizontal' id='search_form' method='GET'>
             <div style="padding-bottom:3px">

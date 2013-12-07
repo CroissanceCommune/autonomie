@@ -27,7 +27,7 @@
 <%namespace file="base/utils.mako" import="table_btn" />
 <%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
-<div class='row collapse' id='project-addphase'>
+<div class='row-fluid collapse' id='project-addphase'>
     <div class='span4 offset4'>
         <h3>Ajouter une phase</h3>
         <form class='navbar-form' method='POST' action="${request.route_path('project', id=project.id, _query=dict(action='addphase'))}">
@@ -37,11 +37,11 @@
         <br />
     </div>
 </div>
-<div class='row collapse' id='project-description'>
+<div class='row-fluid collapse' id='project-description'>
     <div class="span8 offset2">
         <div class="well">
-            <div class='row'>
-                <div class='span3'>
+            <div class='row-fluid'>
+                <div class='span6'>
                     <h3>Client(s)</h3>
                     % for customer in project.customers:
                         <div class='well'>
@@ -51,7 +51,7 @@
                         </div>
                     % endfor
                 </div>
-                <div class="span3">
+                <div class="span6">
                     <dl>
                         %if project.type:
                             <dt>Type de projet :</dt> <dd>${project.type}</dd>
@@ -77,7 +77,7 @@
         </div>
     </div>
 </div>
-<div class='container'>
+<div class='row-fluid'>
     %if len(project.phases)>1:
         <% section_css = 'collapse' %>
     %else:
@@ -105,7 +105,7 @@
                 <thead>
                     <th></th>
                     <th>Document</th>
-                    <th class='visible-desktop'>Nom</th>
+                    <th class="hidden-phone">Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>
@@ -120,7 +120,7 @@
                         </td>
                         <% task.url = request.route_path("estimation", id=task.id) %>
                         <td class='rowlink' onclick="document.location='${task.url}'">${task.number}</td>
-                        <td class='rowlink visible-desktop' onclick="document.location='${task.url}'">${task.name}</td>
+                        <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">${task.name}</td>
                         <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">
                             %if task.is_cancelled():
                                 <span class="label label-important">
@@ -162,7 +162,7 @@
                     <th></th>
                     <th>Numéro</th>
                     <th>Document</th>
-                    <th class='visible-desktop'>Nom</th>
+                    <th class="hidden-phone">Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>
@@ -179,7 +179,7 @@
                         <td onclick="document.location='${task.url}'" class='rowlink'>
                             ${request.config.get('invoiceprefix')}${task.officialNumber}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink visible-desktop'>${task.name}</td>
+                        <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>${task.name}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>
                             %if task.is_cancelled():
                                 <span class="label label-important">

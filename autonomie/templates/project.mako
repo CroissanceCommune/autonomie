@@ -26,7 +26,7 @@
 <%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
 % if hasattr(project, "id") and project.id:
-    <div class='row collapse' id='project-addphase'>
+    <div class='row-fluid collapse' id='project-addphase'>
         <div class='span4 offset4'>
             <h3>Ajouter une phase</h3>
             <form class='navbar-form' method='POST' action="${request.route_path('project', id=project.id, _query=dict(action='addphase'))}">
@@ -36,7 +36,7 @@
             <br />
         </div>
     </div>
-<div class='row collapse' id='project-description'>
+    <div class='row-fluid collapse' id='project-description'>
         <div class="span8 offset2">
     <div class="well">
                     <h3>Client(s)</h3>
@@ -59,7 +59,7 @@
 </div>
 </div>
 % endif
-<div class='row'>
+<div class='row-fluid'>
     <div class='span6 offset3'>
         ${form|n}
     </div>

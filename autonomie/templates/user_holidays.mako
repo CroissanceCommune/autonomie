@@ -24,7 +24,7 @@
 
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-<div class='row'>
+<div class='row-fluid'>
     <div class="span8 offset2" id="holidays"></div>
 </div>
 <div id="form-container" class='span4'>

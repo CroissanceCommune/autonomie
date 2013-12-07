@@ -28,7 +28,7 @@ Template for holidays search
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="print_date" />
 <%block name='content'>
-<div class='row' style="padding-top:10px;">
+<div class='row-fluid' style="padding-top:10px;">
     <div class='span6 offset3'>
         ${form|n}
         %if start_date and end_date:
@@ -36,7 +36,7 @@ Template for holidays search
         % endif
     </div>
 </div>
-<div class='row'>
+<div class='row-fluid'>
     <div class='span6 offset3'>
         % if holidays:
         % for holiday in holidays:

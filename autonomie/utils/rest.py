@@ -135,7 +135,7 @@ class RestJsonRepr(object):
         return result
 
 
-def add_rest_views(config, route_name, factory):
+def add_rest_views(config, route_name, factory, edit_rights='edit'):
     """
         Add a rest iface associating the factory's methods to the different
         request methods of the routes based on route_name :
@@ -169,24 +169,27 @@ def add_rest_views(config, route_name, factory):
             route_name=route_name,
             renderer="json",
             request_method='PUT',
-            permission="edit",
+            permission=edit_rights,
             xhr=True)
     config.add_view(factory,
             attr='delete',
             route_name=route_name,
             renderer="json",
             request_method='DELETE',
-            permission="edit",
+            permission=edit_rights,
             xhr=True)
 
 
-def make_redirect_view(route_name):
+def make_redirect_view(route_name, with_id=True):
     """
         Returns a redirect function that redirects to route_name
-        It supposes the route route_name is expecting a id key
+        :@param with_id: the route expects and id
     """
     def view(request):
-        id_ = request.context.id
-        url = request.route_path(route_name, id=id_)
+        if with_id:
+            id_ = request.context.id
+            url = request.route_path(route_name, id=id_)
+        else:
+            url = request.route_path(route_name)
         return HTTPTemporaryRedirect(url)
     return view

@@ -43,6 +43,10 @@
     }
 </style>
 <br />
+<div class="row">
+    <div id="header-container">
+    </div>
+</div>
 <a class='btn pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
 ${period_form.render()|n}
 <hr />

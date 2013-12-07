@@ -1,4 +1,29 @@
-<form id='expenseForm' class='form' action='#' onsubmit='return false;'>
+<form id='expenseForm' class='form form-horizontal' action='#' onsubmit='return false;'>
+
+{{#unless id }}
+<button class='btn btn-block btn-primary' onclick="$('#bookmarks').toggle();" type='button'>Mes Favoris     >>></button>
+<div id='bookmarks' class='well' style='display:none'>
+<table class="table table-condensed table-stripped table-bordered">
+{{#bookmark_options}}
+<tr>
+<td>
+{{#attributes}}{{description}} - HT:{{ht}} € - TVA:{{tva}} € ({{type.label}}) {{/attributes}}
+</td>
+<td>
+<a class="btn btn-mini edit" data-cid='{{cid}}'>
+    <i class="icon-ok"></i>
+</a>
+<a class="btn btn-mini delete"  data-cid='{{cid}}'>
+    <i class="icon-remove-sign"></i>
+</a>
+</td>
+</tr>
+{{/bookmark_options}}
+</table>
+</div>
+<hr />
+<br />
+{{/unless}}
 
 <div class="control-group">
 <label class="control-label" for='category'>Catégorie de frais</label>
@@ -11,10 +36,11 @@
 </div>
 </div>
 
+
 <div class="control-group">
 <label class="control-label" for='type_id'>Type de frais</label>
 <div class='controls'>
-<select class='input-xlarge' name='type_id'>
+<select class='input-xxlarge' name='type_id'>
 {{#type_options }}
 <option value='{{value}}' {{#selected}}selected='true'{{/selected}}>{{label}}</option>
 {{/type_options }}
@@ -33,7 +59,7 @@
 <div class="control-group">
 <label class="control-label" for='description'>Description</label>
 <div class='controls'>
-<input type='text' class='input-xlarge' name='description' value='{{description}}'/>
+<input type='text' class='input-xxlarge' name='description' value='{{description}}'/>
 </div>
 </div>
 

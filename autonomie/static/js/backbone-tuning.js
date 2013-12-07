@@ -91,14 +91,18 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     if (! _.isUndefined(options['destCollection'])){
       this.destCollection = options['destCollection'];
     }
-    Backbone.Validation.bind(this);
+    if (! _.isUndefined(options['model'])){
+      // A model was passed on view creation
+      this.listenTo(this.model, 'change', this.render, this);
+    }
   },
   setDatePicker: function(formName, tag, altFieldName){
     /*
      * Set datefields as a jquery datepicker
      */
+    var altField = "#" + formName + " input[name=" + altFieldName + "]";
     tag.datepicker({
-      altField: "#" + formName + " input[name=" + altFieldName + "]",
+      altField: altField,
       altFormat:"yy-mm-dd",
       dateFormat:"dd/mm/yy"
     });
@@ -139,6 +143,11 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     // our model before'
     this.model.set(this.formDatas(), {validate:true});
 
+    if (! this.model.isValid() ){
+      Backbone.Validation.unbind(this);
+      return false;
+    }
+
     // We now add the item to the dest collection
     var this_ = this;
     this.destCollection.create(
@@ -157,6 +166,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
         sort:true
       }
     );
+    return true;
   },
   editSubmit: function(){
     /*
@@ -195,6 +205,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
 
   },
   onFormSubmit: function(e){
+    Backbone.Validation.bind(this);
     e.preventDefault();
     var this_ = this;
 

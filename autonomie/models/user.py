@@ -29,16 +29,19 @@ import logging
 
 from hashlib import md5
 
-from sqlalchemy import Table
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
+from sqlalchemy import (
+    Table,
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    )
 
 from sqlalchemy.orm import relationship
 
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
+from autonomie.models.types import JsonEncodedDict
 
 ADMIN_PRIMARY_GROUP = 1
 MANAGER_PRIMARY_GROUP = 2
@@ -75,7 +78,7 @@ class User(DBBASE):
                              backref="employees")
     code_compta = Column("code_compta", String(30),
                          default=0)
-    session_id = Column("session_id", String(256), default=None)
+    session_datas = Column("session_datas", JsonEncodedDict, default=None)
 
     @staticmethod
     def _encode_pass(password):

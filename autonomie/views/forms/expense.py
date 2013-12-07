@@ -97,6 +97,7 @@ class BaseLineSchema(colander.MappingSchema):
     type_id = colander.SchemaNode(colander.Integer(),
             validator=deferred_type_id_validator)
 
+
 class ExpenseKmLineSchema(BaseLineSchema):
     """
         Expense line schema for kilometric fees
@@ -117,15 +118,30 @@ class ExpenseLineSchema(BaseLineSchema):
 class ExpenseLineSchemaAddon(ExpenseLineSchema):
     id = colander.SchemaNode(colander.Integer())
 
+
 class ExpenseLinesSchema(colander.SequenceSchema):
     line = ExpenseLineSchemaAddon()
+
 
 class ExpenseKmLineSchemaAddon(ExpenseKmLineSchema):
     id = colander.SchemaNode(colander.Integer())
 
+
 class ExpenseKmLinesSchema(colander.SequenceSchema):
     line = ExpenseKmLineSchemaAddon()
+
 
 class ExpenseSheetSchema(ExpenseStatusSchema):
     lines = ExpenseLinesSchema()
     kmlines = ExpenseKmLinesSchema()
+
+
+class BookMarkSchema(colander.MappingSchema):
+    """
+        Schema for bookmarks
+    """
+    type_id = colander.SchemaNode(colander.Integer(),
+            validator=deferred_type_id_validator)
+    description = colander.SchemaNode(colander.String())
+    ht = colander.SchemaNode(colander.Float())
+    tva = colander.SchemaNode(colander.Float())

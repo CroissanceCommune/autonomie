@@ -27,7 +27,7 @@ function _displayServerMessage(options){
   /*
    * """ Display a message from the server
    */
-  var msgdiv = templates.serverMessage.render(options);
+  var msgdiv = Handlebars.templates['serverMessage.mustache'](options);
   $(msgdiv).prependTo("#messageboxes").fadeIn('slow').delay(8000).fadeOut(
   'fast', function() { $(this).remove(); });
 }

@@ -31,14 +31,21 @@ from autonomie.models.company import Company
 from autonomie.models.treasury import (ExpenseType, ExpenseKmType,
                 ExpenseSheet, ExpenseLine, ExpenseKmLine)
 from autonomie.utils.rest import RestError
-from autonomie.views.expense import (RestExpenseLine, get_expense_sheet,
-        RestExpenseKmLine, ExpenseKmLineJson, ExpenseLineJson,
-        ExpenseSheetView)
+from autonomie.views.expense import (
+        RestExpenseLine,
+        get_expense_sheet,
+        RestExpenseKmLine,
+        ExpenseKmLineJson,
+        ExpenseLineJson,
+        ExpenseSheetView,
+        get_bookmarks,
+        BookMarkHandler,
+        )
 from autonomie.views.forms.expense import ExpenseKmLineSchema, ExpenseLineSchema
-from autonomie.tests.base import BaseFunctionnalTest
-
-
-
+from autonomie.tests.base import (
+        BaseFunctionnalTest,
+        BaseViewTest,
+        )
 
 
 class BaseExpense(BaseFunctionnalTest):
@@ -176,3 +183,60 @@ class TestRestExpenseKmLine(BaseExpense):
         self.assertEqual(line.start, u"point a2")
         self.assertEqual(line.end, u"point b2")
         self.assertEqual(line.type_id, 1)
+
+
+class TestBookMarkHandler(BaseViewTest):
+    def get_handler(self, user):
+        req = self.get_csrf_request()
+        req.user = user
+        return BookMarkHandler(req)
+
+    def get_user(self):
+        return User.query().first()
+
+    def test_init(self):
+        user = self.get_user()
+        handler = self.get_handler(user)
+        self.assertEqual(handler.bookmarks, {})
+
+        user.session_datas = {'expense':
+            {'bookmarks':
+                {1:
+                    {'description':u'test', 'ht': 2.25, 'tva': 1.2}
+                }
+            }}
+        handler = self.get_handler(user)
+        self.assertEqual(handler.bookmarks,
+                        {1: {'description':u'test', 'ht': 2.25, 'tva': 1.2}})
+
+    def test_next_id(self):
+        user = self.get_user()
+        user.session_datas = {'expense':
+            {'bookmarks':
+                {"1":
+                    {'description':u'test 1', 'ht': 2.25, 'tva': 1.2},
+                 2:
+                    {'description':u'test 2', 'ht': 2.5, 'tva': 1.25},
+
+                }
+            }}
+        handler = self.get_handler(user)
+        self.assertEqual(handler._next_id(), 3)
+
+    def test_store(self):
+        user = self.get_user()
+        handler = self.get_handler(user)
+        a = {'description':u'test 1', 'ht': 2.25, 'tva': 1.2}
+        handler.store(a)
+        self.session.flush()
+        b = {'description':u'test 2', 'ht': 2.5, 'tva': 1.25}
+        handler.store(b)
+        self.session.flush()
+        c = {'description':u'test 3', 'ht': 2.5, 'tva': 1.25}
+        handler.store(c)
+        self.session.flush()
+        user = self.get_user()
+        self.assertEqual(user.session_datas.keys(), ['expense'])
+        self.assertEqual(len(user.session_datas['expense']['bookmarks']), 3)
+
+        self.assertEqual(user.session_datas['expense']['bookmarks'][3], c)

@@ -1,8 +1,8 @@
 JS_TEMPLATE_FILE=autonomie/static/js/template.js
-JS_TEMPLATE_SOURCES=$(wildcard hogan/*.mustache)
+JS_TEMPLATE_SOURCES=$(wildcard handlebars/*.mustache)
 
 js:
-	hulk $(JS_TEMPLATE_SOURCES) > $(JS_TEMPLATE_FILE)
+	handlebars $(JS_TEMPLATE_SOURCES) -f $(JS_TEMPLATE_FILE)
 
 dev_serve:
 	pserve --reload development.ini

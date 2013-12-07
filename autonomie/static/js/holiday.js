@@ -86,7 +86,7 @@ var HolidayView = BaseTableLineView.extend({
   /*
    * A single line in the table
    */
-  template: templates.holiday,
+  template: "holiday",
   tagName: "tr",
   events: {
     'click a.remove':'_remove',
@@ -120,7 +120,7 @@ var HolidayList = Backbone.Marionette.CompositeView.extend({
   /*
    * Holidays table
    */
-  template: templates.holidayList,
+  template: "holidayList",
   itemViewContainer: "tbody",
   itemView: HolidayView,
   events: {
@@ -153,7 +153,7 @@ var HolidayForm = BaseFormView.extend({
   /*
    *  Holiday add form view
    */
-  template: templates.holidayForm,
+  template: "holidayForm",
   ui:{
     start_date: "#holidayForm input[name=alt_start_date]",
     end_date: "#holidayForm input[name=alt_end_date]",

@@ -44,6 +44,7 @@ from autonomie.views.forms.expense import (
         ExpenseLineSchema,
         ExpenseKmLineSchema,
         ExpenseSheetSchema,
+        BookMarkSchema,
 )
 from autonomie.models.treasury import (
         BaseExpenseLine,
@@ -88,11 +89,78 @@ from autonomie.resources import expense_js
 log = logging.getLogger(__name__)
 
 
-def expense_options():
+class BookMarkHandler(object):
+    """
+        Wrapper for expense bookmarks
+    """
+    def __init__(self, request):
+        self.request = request
+        session_datas = request.user.session_datas or {}
+        expense_datas = session_datas.get('expense', {})
+        self.bookmarks = expense_datas.get('bookmarks', {})
+
+    def store(self, item):
+        """
+            Store a bookmark (add/edit)
+            :@param item: a dictionnary with the bookmark informations
+        """
+        id_ = item.get('id')
+        if not id_:
+            id_ = self._next_id()
+            item['id'] = id_
+
+        self.bookmarks[id_] = item
+        self._save()
+        return item
+
+    def delete(self, id_):
+        """
+            Removes a bookmark
+        """
+        item = self.bookmarks.pop(id_, None)
+        if item is not None:
+            self._save()
+        return item
+
+    def _next_id(self):
+        """
+            Return the next available bookmark id
+        """
+        id_ = 1
+        if self.bookmarks.keys():
+            all_keys = [int(key) for key in self.bookmarks.keys()]
+            id_ = max(all_keys) + 1
+        return id_
+
+    def _save(self):
+        """
+            Persist the bookmarks in the database
+        """
+        session_datas = self.request.user.session_datas or {}
+        session_datas.setdefault('expense', {})['bookmarks'] = self.bookmarks
+        if self.request.user.session_datas is None:
+            self.request.user.session_datas = {}
+
+        # NOte : Here we ensure passing through the __setitem__ method of our
+        # MutableDict (see models.types for more informations)
+        self.request.user.session_datas['expense'] = session_datas['expense']
+        self.request.dbsession.merge(self.request.user)
+        self.request.dbsession.flush()
+
+
+def get_bookmarks(request):
+    """
+        Return the user's bookmarks
+    """
+    return BookMarkHandler(request).bookmarks.values()
+
+
+def expense_options(request):
     """
         Return options related to the expense configuration
     """
     options = dict()
+
     options["expensetypes"] = [
         {
         "label":u"{0} ({1})".format(e.label, e.code),
@@ -100,23 +168,29 @@ def expense_options():
         }for e in ExpenseType.query()\
                 .filter(ExpenseType.active==True)
                 .filter(ExpenseType.type=='expense')]
+
     options["kmtypes"] =  [
         {
         "label":u"{0} ({1})".format(e.label, e.code),
         "value":str(e.id),
         "amount":e.amount
         }for e in ExpenseKmType.query().filter(ExpenseKmType.active==True)]
+
     options["teltypes"] = [
         {
         "label":u"{0} ({1})".format(e.label, e.code),
         "value":str(e.id),
         "percentage":e.percentage
         }for e in ExpenseTelType.query().filter(ExpenseTelType.active==True)]
+
     options['categories'] = [{'value':'1',
                             'label':u'Frais direct de fonctionnement'},
                             {'value':'2',
                             'label':u"Frais concernant directement votre \
 activité auprès de vos clients"}]
+
+    options['bookmarks'] = get_bookmarks(request)
+
     return options
 
 
@@ -470,7 +544,8 @@ perdues) ?")
         params = dict(self.request.POST)
         status = params['submit']
         expense.set_status(status, self.request, self.request.user.id, **params)
-        self.request.registry.notify(StatusChanged(request, expense, status))
+        self.request.registry.notify(StatusChanged(self.request, expense,
+            status))
         return expense, status
 
     def reset_success(self, appstruct):
@@ -497,7 +572,7 @@ def expensesheet_json_view(request):
         Return an json encoded expensesheet
     """
     return dict(expense=ExpenseSheetJson(request.context),
-                options=expense_options())
+                options=expense_options(request))
 
 
 class RestExpenseLine(BaseView):
@@ -718,7 +793,7 @@ def expense_optionsv1(request):
         Return the options for expense edition (type of expenses, associated
         datas)
     """
-    return dict(status='success', result=expense_options())
+    return dict(status='success', result=expense_options(request))
 
 
 def excel_filename(request):
@@ -728,6 +803,67 @@ def excel_filename(request):
     exp = request.context
     return u"ndf_{0}_{1}_{2}_{3}.xlsx".format(exp.year, exp.month,
             exp.user.lastname, exp.user.firstname)
+
+
+class RestBookMarks(BaseView):
+    """
+        Json rest-api for expense bookmarks handling
+    """
+    _schema = BookMarkSchema()
+
+    @property
+    def schema(self):
+        return self._schema.bind(request=self.request)
+
+    def get(self):
+        """
+            Rest GET Method : get
+        """
+        return get_bookmarks(self.request)
+
+    def post(self):
+        """
+            Rest POST method : add
+        """
+        log.debug(u"In the bookmark edition")
+
+        appstruct = self.request.json_body
+        try:
+            bookmark = self.schema.deserialize(appstruct)
+        except colander.Invalid, err:
+            traceback.print_exc()
+            log.exception("  - Error in posting bookmark")
+            log.exception(appstruct)
+            raise RestError(err.asdict(), 400)
+
+        handler = BookMarkHandler(self.request)
+        bookmark = handler.store(bookmark)
+        return bookmark
+
+    def put(self):
+        """
+            Rest PUT method : edit
+        """
+        self.post()
+
+    def delete(self):
+        """
+            Removes a bookmark
+        """
+        log.debug(u"In the bookmark deletion view")
+
+        handler = BookMarkHandler(self.request)
+
+        # Retrieving the id from the request
+        id_ = self.request.matchdict.get('id')
+
+        bookmark = handler.delete(id_)
+
+        # if None is returned => there was no bookmark with this id
+        if bookmark is None:
+            raise RestError({}, 404)
+        else:
+            return dict(status="success")
 
 
 def includeme(config):
@@ -765,6 +901,10 @@ def includeme(config):
     config.add_route("expensekmline",
             "/expenses/{id:\d+}/kmlines/{lid}",
             traverse=traverse)
+
+    config.add_route("bookmark", "/bookmarks/{id:\d+}")
+    config.add_route("bookmarks", "/bookmarks")
+
     #views
     config.add_view(company_expenses_view,
             route_name="company_expenses",
@@ -791,6 +931,11 @@ def includeme(config):
     add_rest_views(config, "expensekmline", RestExpenseKmLine)
     config.add_view(redirect_to_expense, route_name="expensekmline")
     config.add_view(redirect_to_expense, route_name="expensekmlines")
+
+    # Since the edition of bookmarks is done directly on the current user model
+    # View rights are sufficient to access those views
+    add_rest_views(config, "bookmark", RestBookMarks, edit_rights='view')
+
 
     # V1 Rest Api
     config.add_route("expenselinev1s", "/api/v1/expenses")

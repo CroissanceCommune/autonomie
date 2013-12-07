@@ -40,6 +40,25 @@ MyApp.on("initialize:after", function(){
 
 
 /******************************** Models ********************************/
+var BookMarkModel = Backbone.Model.extend({
+  initialize: function(options){
+    var type_id = options['type_id'];
+    if (! _.isUndefined(type_id)){
+      this.set('type', this.getType(type_id));
+    }
+  },
+  getType: function(type_id){
+    return _.find(AppOptions['expensetypes'], function(type){return type['value'] == type_id;});
+  }
+  });
+
+
+var BookMarksCollection = Backbone.Collection.extend({
+  url: "/bookmarks",
+  model: BookMarkModel
+  });
+
+
 var BaseExpenseModel = Backbone.Model.extend({
   /*
    * BaseModel for expenses, provides tools to access main options
@@ -50,7 +69,7 @@ var BaseExpenseModel = Backbone.Model.extend({
      * current one
      */
     var type_id = this.get('type_id');
-    return _.find(arr, function(type){return type['value'] === type_id;});
+    return _.find(arr, function(type){return type['value'] == type_id;});
   },
   getTypeOptions: function(){
     /*
@@ -77,8 +96,9 @@ var BaseExpenseModel = Backbone.Model.extend({
       return current_type.label;
     }
   }
-
 });
+
+
 var ExpenseLine = BaseExpenseModel.extend({
   /*
    *  Expenseline model
@@ -311,6 +331,7 @@ var ExpenseKmCollection = Backbone.Collection.extend({
   }
 });
 
+
 ////////////////////////////////////////////////////////////////
 /********************  Views  *********************************/
 ////////////////////////////////////////////////////////////////
@@ -339,6 +360,7 @@ var BaseExpenseLineView = BaseTableLineView.extend({
   }
 });
 
+
 var ExpenseLineView = BaseExpenseLineView.extend({
   /*
    *  Expense Line view (for classic and tel expenses)
@@ -358,12 +380,17 @@ var ExpenseLineView = BaseExpenseLineView.extend({
     /*
      * Add custom var for rendering
      */
-    var typelabel = this.model.getTypeLabel();
+    var this_ = this;
+    var typelabel = function(){
+      return this_.model.getTypeLabel();
+    };
 
     var edit_url = "#lines/" + this.model.cid + "/edit";
+    var bookmark_url = "#lines/" + this.model.cid + "/bookmark";
     var total = this.model.total();
     return {typelabel:typelabel,
             edit_url:edit_url,
+            bookmark_url: bookmark_url,
             total:formatAmount(total),
             edit:AppOptions['edit']
             };
@@ -373,13 +400,13 @@ var ExpenseLineView = BaseExpenseLineView.extend({
      * Return the template used
      */
     if (this.model.hasNoType()){
-      return templates.expenseorphan;
+      return "expenseorphan"; //templates.expenseorphan;
     }
     if (this.model.isSpecial()){
-      return templates.expensetel;
+      return "expensetel";
     }
 
-    return templates.expense;
+    return "expense";
   },
   initialize: function(){
     /*
@@ -422,7 +449,7 @@ var ExpenseKmLineView = BaseExpenseLineView.extend({
   /*
    *  View for expenses related to km fees
    */
-  template: templates.expenseKm,
+  template: "expenseKm",
   tagName:"tr",
   events: {
     'click a.remove':'_remove'
@@ -518,7 +545,7 @@ var ExpensesView = BaseExpenseCollectionView.extend({
   /*
    *  CompositeView that presents the expenses collection in a table
    */
-  template: templates.expenseList,
+  template: "expenseList",
   itemView: ExpenseLineView,
   id: "expenselines",
   ui:{
@@ -540,7 +567,7 @@ var ExpensesKmView = BaseExpenseCollectionView.extend({
   /*
    *  CompositeView that presents the expenses related to km fees in a table
    */
-  template: templates.expenseKmList,
+  template: "expenseKmList",
   itemView: ExpenseKmLineView,
   id:'expensekmlines',
   ui:{
@@ -559,9 +586,17 @@ var BaseExpenseFormView = BaseFormView.extend({
     /*
      * Add datas to the template context
      */
+    var this_ = this;
     return {
-      type_options: this.getTypeOptions(),
-      category_options: this.getCategoryOptions()
+      bookmark_options: function(){
+        return MyApp.bookmarks.toArray();
+      },
+      type_options: function(){
+        return this_.getTypeOptions();
+      },
+      category_options: function(){
+        return this_.getCategoryOptions();
+        }
       };
   },
   updateSelectOptions: function(options, val){
@@ -577,57 +612,83 @@ var BaseExpenseFormView = BaseFormView.extend({
     return options;
   },
   onShow: function(){
-    /*
-     * Set the datepicker and its date (that need to be passed through setDate)
-     */
+     //Called when added to the DOM by the région
     this.setDatePicker(this.formname, this.ui.date, "date");
+  },
+  onRender: function(){
+    // Called when rendered (the first time the setDatePicker doesn't work
+    // because the datas is rendered but not added to the DOM, that's why the
+    // call is also made in onShow)
+    this.setDatePicker(this.formname, this.ui.date, "date");
+    if (!_.isUndefined(this.ui.bookmarks)){
+      this.setBookMarkBehaviour();
+    }
+  },
+  setBookMarkBehaviour: function(){
+    /*
+     * Add the bookmark select's behaviour
+     */
+    _.bindAll(this, "updateFormWithBookMark", "deleteBookmark");
+    var this_ = this;
+    this.ui.bookmarks.find('a.edit').unbind('click.usebookmark');
+    this.ui.bookmarks.find('a.edit').bind('click.usebookmark', function(){
+      var cid = $(this).attr('data-cid');
+      this_.updateFormWithBookMark(cid);
+    });
+    this.ui.bookmarks.find('a.delete').unbind('click.deletebookmark');
+    this.ui.bookmarks.find('a.delete').bind(
+      'click.deletebookmark',
+      function(){
+        var cid = $(this).attr('data-cid');
+        this_.deleteBookmark(cid);
+      }
+    );
+  },
+  updateFormWithBookMark: function(cid){
+    /*
+     * Update the form models regarding the selected bookmark
+     */
+    if (_.isUndefined(cid)){
+      return false;
+    }
+    var bookmark = MyApp.bookmarks.get(cid);
+    var model = this.model;
+
+    _.each(['type_id', 'description', 'ht', 'tva'], function(key){
+      model.set(key, bookmark.get(key));
+    });
+    return true;
+  },
+  deleteBookmark: function(cid){
+    console.log("Ask for deleting the bookmark %s", cid);
+    if (_.isUndefined(cid)){
+      return false;
+    }
+    var bookmark = MyApp.bookmarks.get(cid);
+    var this_ = this;
+    bookmark.destroy({
+      success: function(model, response) {
+        displayServerSuccess("Le favori a bien été supprimé");
+        this_.render();
+      }
+    });
+    return true;
   }
 });
 
 
-var ExpenseAdd = BaseExpenseFormView.extend({
-  template: templates.expenseForm,
+var ExpenseFormView = BaseExpenseFormView.extend({
+  template: "expenseForm",
   formname: "expenseForm",
   ui:{
     form:"#expenseForm",
-    date:"#expenseForm input[name=altdate]"
-  },
-  initialize: function(options){
-    Autonomie.addFormInitialize.call(this, options);
+    date:"#expenseForm input[name=altdate]",
+    bookmarks: "#expenseForm #bookmarks"
   },
   getCategoryOptions:function(){
     var category_options = AppOptions['categories'];
     var category = this.model.get('category');
     return this.updateSelectOptions(category_options, category);
-  },
-  getTypeOptions: function(){
-    return AppOptions['expensetypes'];
-  }
-});
-
-
-var ExpenseKmAdd = BaseExpenseFormView.extend({
-  template:templates.expenseKmForm,
-  formname: "expenseKmForm",
-  ui:{
-    form:"#expenseKmForm",
-    date:"#expenseKmForm input[name=altdate]"
-  },
-  getTypeOptions: function(){
-    return AppOptions['kmtypes'];
-  },
-  getCategoryOptions:function(){
-    return AppOptions['categories'];
-  }
-});
-
-
-var ExpenseEdit = ExpenseAdd.extend({
-  getCategoryOptions:function(){
-    var category_options = AppOptions['categories'];
-    var category = this.model.get('category');
-    return this.updateSelectOptions(category_options, category);
-
   },
   getTypeOptions: function(){
     var type_options = AppOptions['expensetypes'];
@@ -637,18 +698,13 @@ var ExpenseEdit = ExpenseAdd.extend({
 });
 
 
-var ExpenseTelAdd = BaseFormView.extend({
-  template: templates.expenseTelForm,
+var ExpenseKmFormView = BaseExpenseFormView.extend({
+  template: "expenseKmForm",
+  formname: "expenseKmForm",
   ui:{
-    form:"#expenseTelForm"
+    form:"#expenseKmForm",
+    date:"#expenseKmForm input[name=altdate]"
   },
-  templateHelpers: function(){
-    return {type_options: AppOptions['teltypes']};
-  }
-});
-
-
-var ExpenseKmEdit = ExpenseKmAdd.extend({
   getCategoryOptions:function(){
     var category_options = AppOptions['categories'];
     var category = this.model.get('category');
@@ -659,6 +715,17 @@ var ExpenseKmEdit = ExpenseKmAdd.extend({
     var type_options = AppOptions['kmtypes'];
     var type_id = this.model.get('type_id');
     return this.updateSelectOptions(type_options, type_id);
+  }
+});
+
+
+var ExpenseTelFormView = BaseFormView.extend({
+  template: "expenseTelForm",
+  ui:{
+    form:"#expenseTelForm"
+  },
+  templateHelpers: function(){
+    return {type_options: AppOptions['teltypes']};
   }
 });
 
@@ -674,6 +741,7 @@ MyApp.Router = Backbone.Marionette.AppRouter.extend({
     "": "index",
     "index":"index",
     "lines/:id/edit": "edit",
+    "lines/:id/bookmark": "bookmark",
     "lines/add/:category": "add",
     "lines/add": "add",
     "tel/add": "addtel",
@@ -733,8 +801,8 @@ MyApp.Controller = {
     this.initialize();
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
-    model = new ExpenseLine({"category": category, new_element: true});
-    expense_form = new ExpenseAdd({
+    var model = new ExpenseLine({"category": category, new_element: true});
+    expense_form = new ExpenseFormView({
       title: "Ajouter",
       destCollection: MyApp.expense.lines,
       model: model
@@ -747,47 +815,64 @@ MyApp.Controller = {
      */
     this.initialize();
     var model = this._getExpenseLine(id);
-    expense_form = new ExpenseEdit({
+    expense_form = new ExpenseFormView({
       title:"Éditer",
       destCollection: MyApp.expense.lines,
       model:model
       });
     MyApp.formContainer.show(expense_form);
   },
+  bookmark: function(id){
+    this.initialize();
+    var model = this._getExpenseLine(id);
+    // Get only the attributes necessary for our bookmark
+    var attributes = _.pick(model.attributes,
+                        "type_id", "description", "ht", "tva" );
+
+    var bookmark = new BookMarkModel(attributes);
+    MyApp.bookmarks.create(bookmark, {
+        'success':function(){
+          displayServerSuccess("L'élément a bien été ajouté à vos favoris");
+          MyApp.router.navigate("index", {trigger: true});
+        },
+        'error': function(){
+          displayServerError("Erreur à l'ajout de favoris");
+          MyApp.router.navigate("index", {trigger: true});
+        }
+      }
+    );
+  },
   addtel: function(){
     this.initialize();
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
-    expensetel_form = new ExpenseTelAdd({
+    var model = new ExpenseLine({category: 1, new_element: true});
+    expensetel_form = new ExpenseTelFormView({
       title:'Ajouter des frais téléphoniques',
-      modelObject:ExpenseLine,
       destCollection:MyApp.expense.lines,
-      modelOptions: {category: 1, new_element: true}
+      model: model
     });
     MyApp.formContainer.show(expensetel_form);
   },
   addkm: function(category){
-    /*
-     * expensekmline add route
-     */
     this.initialize();
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
-    expensekm_form = new ExpenseKmAdd({title:"Ajouter",
-      modelObject:ExpenseKmLine,
+    var model = new ExpenseKmLine({new_element: true, category: category});
+    expensekm_form = new ExpenseKmFormView({
+      title:"Ajouter",
       destCollection:MyApp.expense.kmlines,
-      modelOptions: {new_element: true}
+      model: model
     });
     MyApp.formContainer.show(expensekm_form);
   },
   editkm: function(id) {
-    /*
-     * expensekmline edit route
-     */
     this.initialize();
     var model = this._getExpenseKmLine(id);
-    expensekm_form = new ExpenseKmEdit({model:model,
-                                         title:"Éditer"});
+    expensekm_form = new ExpenseKmFormView({
+      title:"Éditer",
+      model:model
+    });
     MyApp.formContainer.show(expensekm_form);
   }
 };
@@ -799,6 +884,7 @@ MyApp.addInitializer(function(options){
    */
   MyApp.expense = new ExpenseSheet(options['expense']);
   MyApp.router = new MyApp.Router({controller:MyApp.Controller});
+  MyApp.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
 });
 
 MyApp.vent.on("totalchanged", function(){
@@ -820,7 +906,8 @@ MyApp.addRegions({
    */
   linesRegion:'#expenses',
   linesKmRegion:'#expenseskm',
-  formContainer:pp
+  formContainer:pp,
+  headerContainer: '#header-container'
 });
 
 

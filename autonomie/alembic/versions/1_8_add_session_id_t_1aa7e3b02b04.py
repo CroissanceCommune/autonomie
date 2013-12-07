@@ -15,8 +15,8 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    col = sa.Column('session_id',
-            sa.String(256),
+    col = sa.Column('session_datas',
+            sa.Text,
             default=None)
     op.add_column("accounts", col)
 
@@ -25,7 +25,7 @@ def upgrade():
     op.drop_column("expense_sheet", "comments")
 
 def downgrade():
-    op.drop_column("accounts", "session_id")
+    op.drop_column("accounts", "session_datas")
     op.drop_column("expensetel_type", "initialize")
     col = sa.Column("comments", sa.Text)
     op.add_column("expense_sheet", col)

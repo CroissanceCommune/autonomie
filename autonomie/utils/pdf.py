@@ -25,7 +25,7 @@
 """
     Tools for handling pdf files
 
-    write_pdf(request, filename, template, datas)
+    write_pdf(request, filename, html)
 
 """
 import pkg_resources

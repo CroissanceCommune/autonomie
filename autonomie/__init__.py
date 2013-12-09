@@ -74,6 +74,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.expense",
     "autonomie.views.sage",
     "autonomie.panels.menu",
+    "autonomie.panels.task",
     )
 
 

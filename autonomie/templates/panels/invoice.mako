@@ -23,9 +23,9 @@
 </%doc>
 
 <%doc>
-    invoice template
+    invoice panel template
 </%doc>
-<%inherit file="/tasks/task.mako" />
+<%inherit file="/panels/task.mako" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%def name="table(title, datas)">
     <div class="title">
@@ -35,29 +35,6 @@
         ${format_text(datas)}
     </div>
 </%def>
-<%block name='header'>
-        <style>
-            @page {
-                size: a4 portrait;
-                margin:1cm;
-                margin-bottom:3.5cm;
-                % if not task.has_been_validated() and not task.is_cancelled():
-                    background-image: url("${request.static_url('autonomie:static/watermark_invoice.jpg', _app_url='')}");
-                % endif
-                @frame footer {
-                    -pdf-frame-content: footer;
-                    bottom: 0cm;
-                    margin-left: 1cm;
-                    margin-right: 1cm;
-                    % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
-                        height:4cm;
-                    % else:
-                        height:3cm;
-                    % endif
-                }
-            }
-        </style>
-</%block>
 <%block name='information'>
 <strong>Facture N°</strong>${request.config.get('invoiceprefix')}${task.officialNumber}<br />
 <strong>Libellé : </strong>${task.number}<br />

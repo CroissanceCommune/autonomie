@@ -26,6 +26,9 @@
     Base template for task readonly display
 </%doc>
 <%inherit file="/base.mako"></%inherit>
+<%block name='css'>
+    <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
+</%block>
 <%block name='content'>
 <div class='container' style='overflow:hidden'>
     <div class='well'>
@@ -149,8 +152,8 @@
             % endfor
         </form>
     </div>
-    <div style='border:1px solid #888'>
-        ${html_datas|n}
+    <div style='border:1px solid #ddd; margin:3px;'>
+            ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}
     </div>
 </div>
 </%block>

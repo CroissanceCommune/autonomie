@@ -49,8 +49,8 @@ from autonomie.views.taskaction import (
     populate_actionmenu,
     get_set_financial_year_form,
     get_set_products_form,
-    make_pdf_view,
-    make_html_view,
+    task_pdf_view,
+    task_html_view,
     make_task_delete_view,
     )
 
@@ -270,15 +270,22 @@ def includeme(config):
                     '/cancelinvoice/{id:\d+}',
                     traverse='/cancelinvoices/{id}')
     delete_msg = u"L'avoir {task.number} a bien été supprimé."
-    config.add_view(make_pdf_view("tasks/cancelinvoice.mako"),
-                    route_name='cancelinvoice',
-                    request_param='view=pdf',
-                    permission='view')
-    config.add_view(make_html_view(CancelInvoice, "tasks/cancelinvoice.mako"),
-                route_name='cancelinvoice',
-                renderer='tasks/view_only.mako',
-                permission='view',
-                request_param='view=html')
+
+    config.add_view(
+        task_pdf_view,
+        route_name='cancelinvoice',
+        request_param='view=pdf',
+        permission='view',
+        )
+
+    config.add_view(
+        task_html_view,
+        route_name='cancelinvoice',
+        renderer='tasks/view_only.mako',
+        permission='view',
+        request_param='view=html',
+        )
+
     config.add_view(CancelInvoiceStatus,
                     route_name='cancelinvoice',
                     request_param='action=status',

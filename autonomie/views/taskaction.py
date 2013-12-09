@@ -609,22 +609,20 @@ class TaskFormView(BaseFormView):
         return Tva.query().all()
 
 
-def html(request, template):
+def html(request, tasks=None):
     """
         return the html output of a given task
     """
-    task = request.context
-    tvas = task.get_tvas()
-    if len([value for value in tvas.keys() if value >=0]) > 1:
-        multiple_tvas = True
-    else:
-        multiple_tvas = False
-    datas = dict(company=task.project.company,
-                 project=task.project,
-                 task=task,
+    template = "tasks/task.mako"
+
+    if tasks == None:
+        tasks = [ request.context ]
+
+    datas = dict(
+                 tasks=tasks,
                  config=request.config,
-                 multiple_tvas=multiple_tvas,
-                 tvas=tvas)
+                 )
+
     return render_html(request, template, datas)
 
 
@@ -646,49 +644,50 @@ def populate_actionmenu(request):
     request.actionmenu.add(get_project_redirect_btn(request, project.id))
 
 
-def make_html_view(model, template):
+def task_html_view(request):
     """
-        Return an html view function
-        :model: model class
-        :template: model rendering template
+        Returns a page displaying an html rendering of a task
     """
-    def html_view(request):
-        """
-            Returns a page displaying an html rendering of the given task
-        """
-        if context_is_editable(request, request.context):
-            return HTTPFound(request.route_path(request.context.__name__,
-                                                id=request.context.id))
-        if request.context.__name__ == 'invoice':
-            label = u"Facture"
-        elif request.context.__name__ == 'estimation':
-            label = u"Estimation"
-        elif request.context.__name__ == 'cancelinvoice':
-            label = u"Avoir"
-        else:
-            label = u"Objet"
-        title = u"{0} numéro : {1}".format(label, request.context.number)
-        populate_actionmenu(request)
-        html_datas = html(request, template)
-        button_handler = TaskFormActions(request, model)
-        submit_buttons = button_handler.get_buttons()
-        return dict(title=title,
-                task=request.context,
-                html_datas=html_datas,
-                submit_buttons=submit_buttons,)
-    return html_view
+    # If the task is editable, we go the edit page
+    if context_is_editable(request, request.context):
+        return HTTPFound(request.route_path(request.context.__name__,
+                                            id=request.context.id))
+
+    # Get the label for the given task
+    if request.context.__name__ == 'invoice':
+        label = u"Facture"
+    elif request.context.__name__ == 'estimation':
+        label = u"Estimation"
+    elif request.context.__name__ == 'cancelinvoice':
+        label = u"Avoir"
+    else:
+        label = u"Objet"
+
+    title = u"{0} numéro : {1}".format(label, request.context.number)
+    populate_actionmenu(request)
+
+    # We use the task's class to retrieve the available actions
+    model = request.context.__class__
+    button_handler = TaskFormActions(request, model)
+    submit_buttons = button_handler.get_buttons()
+
+    return dict(
+        title=title,
+        task=request.context,
+        submit_buttons=submit_buttons,
+        )
 
 
-def make_pdf_view(template):
-    def pdf(request):
-        """
-            Returns a page displaying an html rendering of the given task
-        """
-        log.debug(u"# Generating the pdf file #")
-        filename = u"{0}.pdf".format(request.context.number)
-        write_pdf(request, filename, html(request, template))
-        return request.response
-    return pdf
+def task_pdf_view(request):
+    """
+        Returns a pdf rendering of the current task
+    """
+    filename = u"{0}.pdf".format(request.context.number)
+
+    html_string = html(request)
+    write_pdf(request, filename, html_string)
+
+    return request.response
 
 
 def make_task_delete_view(valid_msg):
@@ -722,7 +721,7 @@ def make_task_delete_view(valid_msg):
     return delete
 
 
-def task_options(request):
+def task_options_json(request):
     """
         Returns the task form options as a dict
     """
@@ -733,8 +732,11 @@ def task_options(request):
 
 
 def includeme(config):
+    """
+        Pyramid's inclusion mechanism
+    """
     config.add_route("taskoptions.json", "/task/options.json")
-    config.add_view(task_options,
+    config.add_view(task_options_json,
             route_name="taskoptions.json",
             xhr=True,
             renderer="json")

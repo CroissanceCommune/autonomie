@@ -50,10 +50,9 @@ from autonomie.views.taskaction import (
         context_is_editable,
         TaskStatusView,
         populate_actionmenu,
-        make_pdf_view,
-        make_html_view,
+        task_pdf_view,
+        task_html_view,
         make_task_delete_view,
-        task_options,
         )
 
 log = logging.getLogger(__name__)
@@ -344,15 +343,19 @@ def includeme(config):
                      traverse='/invoices/{id}')
 
     delete_msg = u"La facture {task.number} a bien été supprimée."
-    config.add_view(make_pdf_view("tasks/invoice.mako"),
-                    route_name='invoice',
-                    request_param='view=pdf',
-                    permission='view')
-    config.add_view(make_html_view(Invoice, "tasks/invoice.mako"),
-                route_name='invoice',
-                renderer='tasks/view_only.mako',
-                permission='view',
-                request_param='view=html')
+    config.add_view(
+        task_pdf_view,
+        route_name='invoice',
+        request_param='view=pdf',
+        permission='view',
+        )
+    config.add_view(
+        task_html_view,
+        route_name='invoice',
+        renderer='tasks/view_only.mako',
+        permission='view',
+        request_param='view=html',
+        )
 
     config.add_view(make_task_delete_view(delete_msg),
                     route_name='invoice',

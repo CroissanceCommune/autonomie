@@ -58,8 +58,8 @@ from autonomie.views.taskaction import (
         TaskFormView,
         context_is_editable,
         populate_actionmenu,
-        make_pdf_view,
-        make_html_view,
+        task_pdf_view,
+        task_html_view,
         make_task_delete_view,
 )
 from .base import BaseListView
@@ -360,15 +360,17 @@ def includeme(config):
                     "/company/{id:\d+}/estimations",
                     traverse="/companies/{id}")
 
-    config.add_view(make_pdf_view("tasks/estimation.mako"),
+    config.add_view(task_pdf_view,
                     route_name='estimation',
                     request_param='view=pdf',
                     permission='view')
-    config.add_view(make_html_view(Estimation, "tasks/estimation.mako"),
+
+    config.add_view(task_html_view,
                     route_name='estimation',
                     renderer='tasks/view_only.mako',
                     request_param='view=html',
                     permission='view')
+
     delete_msg = u"Le devis {task.number} a bien été supprimé."
     config.add_view(make_task_delete_view(delete_msg),
                     route_name='estimation',

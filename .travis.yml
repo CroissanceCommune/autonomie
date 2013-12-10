@@ -7,7 +7,7 @@ services:
 install: pip install -r requirements.txt -r test_requirements.txt .
 script:  py.test
 before_install:
-  - sudo apt-get --reinstall install -qq language-pack-en language-pack-fr
+  - ./.travis_before_install.sh
 notifications:
     irc:
         channels:

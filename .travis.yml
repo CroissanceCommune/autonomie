@@ -11,5 +11,5 @@ before_install:
 notifications:
     irc:
         channels:
-            - "irc.freenode.org#majerteam"
+            - "irc.freenode.org#majerteam-travis"
         on_success: change

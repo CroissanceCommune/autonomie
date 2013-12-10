@@ -82,34 +82,38 @@ def _get_page_url(page):
     return "#tasklist/{0}".format(page)
 
 
-def recent_tasks(request):
+def _get_post_int(request, key, default):
+    if key in request.POST:
+        return int(request.POST[key])
+    return default
+
+
+def _get_tasks_per_page(request):
     """
-    Return a page of the list of recent tasks.
-    Parameters to be supplied as a cookie or in request.POST
+    Infers the nb of tasks per page from a request.
+    If value supplied in POST, we redefine it in a cookie.
 
-    pseudo params : tasks_per_page,
+    tasks_per_page is a string representation of a base 10 int
+        expected to be 5, 15 or 50.
+
     """
-    if not request.is_xhr:
-        resources.task_list_js.need()
+    post_value = _get_post_int(request, 'tasks_per_page', None)
+    if post_value is not None:
+        request.response.set_cookie('tasks_per_page', '%d' % post_value)
+        return post_value
 
-    # TODO : Need a colander schema for validation
-    page_nb = int(request.POST.get('tasks_page_nb', 0))
-
-
-    if 'tasks_per_page' in request.POST:
-        raw_nb_per_page = request.POST['tasks_per_page']
-        nb_per_page = int(raw_nb_per_page)
-        request.response.set_cookie('tasks_per_page', raw_nb_per_page)
-    elif 'tasks_per_page' in request.cookies:
-        log.info("tasks_per_page in cookies")
+    if 'tasks_per_page' in request.cookies:
         raw_nb_per_page = request.cookies['tasks_per_page']
-        nb_per_page = int(raw_nb_per_page)
-    else:
-        # fall back to base value
-        nb_per_page = 5
+        return int(raw_nb_per_page)
 
-    company_id = request.context.id
+    # fall back to base value
+    return 5
 
+
+def _company_tasks_query(company_id):
+    """
+    Build sqlalchemy query to all tasks of a company, in reverse date order.
+    """
     query = Task.query()
     query = query.with_polymorphic([Invoice, Estimation, CancelInvoice])
     query = query.order_by(desc(Task.statusDate))
@@ -118,16 +122,38 @@ def recent_tasks(request):
     query = query.outerjoin(_p2, Estimation.project)
     query = query.outerjoin(_p3, CancelInvoice.project)
 
-    query = query.filter(or_(
+    return query.filter(or_(
                 _p1.company_id==company_id,
                 _p2.company_id==company_id,
                 _p3.company_id==company_id
                 ))
 
+
+def _get_taskpage_number(request):
+    # TODO : Need a colander schema for validation
+    return _get_post_int(request, 'tasks_page_nb', 0)
+
+
+def recent_tasks(request):
+    """
+    Return a page of the list of recent tasks.
+    Parameters to be supplied as a cookie or in request.POST
+
+    pseudo params: tasks_per_page, see _get_tasks_per_page()
+    tasks_page_nb: -only in POST- the page we display
+    """
+    if not request.is_xhr:
+        # javascript engine for the panel
+        resources.task_list_js.need()
+
+    query = _company_tasks_query(request.context.id)
+    page_nb = _get_taskpage_number(request)
+    items_per_page = _get_tasks_per_page(request)
+
     paginated_tasks = paginate.Page(
             query,
             page_nb,
-            items_per_page=nb_per_page,
+            items_per_page=items_per_page,
             url=_get_page_url,
             )
 

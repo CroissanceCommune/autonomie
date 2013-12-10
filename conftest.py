@@ -13,7 +13,6 @@
 # * Project :
 #
 import sys
-from os import system
 from os.path import dirname, join
 import os.path
 import shlex
@@ -148,6 +147,8 @@ def initialize_test_database():
     """
         dump sample datas as a test database
     """
+    if __current_test_ini_file().endswith('travis.ini'):
+        return
     print "Initializing test database"
     test_connect()
     create_sql_user()

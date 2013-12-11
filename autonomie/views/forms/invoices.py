@@ -29,6 +29,9 @@ from datetime import date
 import colander
 
 from autonomie.views.forms.lists import BaseListsSchema
+from autonomie.views.forms.widgets import (
+        deferred_year_select_widget,
+        )
 
 
 STATUS_OPTIONS = ((u"Toutes les factures", "both"),
@@ -49,3 +52,43 @@ class InvoicesListSchema(BaseListsSchema):
     year = colander.SchemaNode(colander.Integer(), missing=default_year)
     customer_id = colander.SchemaNode(colander.Integer(), missing=-1)
     company_id = colander.SchemaNode(colander.Integer(), missing=-1)
+
+
+def range_validator(form, value):
+    """
+        Validate that end is higher or equal than start
+    """
+    if value['end'] > 0 and value['start'] > value['end']:
+        exc = colander.Invalid(form,
+             u"Le numéro de début doit être plus petit ou égal à celui de fin")
+        exc['start'] = u"Doit être inférieur au numéro de fin"
+        raise exc
+
+
+class InvoicesPdfExport(colander.MappingSchema):
+    """
+        Schema for invoice bulk export
+    """
+    year = colander.SchemaNode(
+            colander.Integer(),
+            title=u"Année comptable",
+            widget=deferred_year_select_widget,
+            missing=default_year,
+            default=default_year,
+            )
+    start = colander.SchemaNode(
+            colander.Integer(),
+            title=u"Numéro de début",
+            description=u"Numéro à partir duquel exporter",
+            )
+    end = colander.SchemaNode(
+            colander.Integer(),
+            title=u"Numéro de fin",
+            description=u"Numéro jusqu'auquel exporter \
+(dernier document si vide)",
+            missing=-1,
+            )
+
+pdfexportSchema = InvoicesPdfExport(
+        title=u"Exporter un ensemble de factures dans un fichier pdf",
+        validator=range_validator)

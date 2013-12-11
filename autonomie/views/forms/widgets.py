@@ -272,8 +272,13 @@ def get_years(dbsession):
         """
             return the distinct financial years available in the database
         """
-        return dbsession.query(distinct(Invoice.financial_year))\
+        years = dbsession.query(distinct(Invoice.financial_year))\
                 .order_by(Invoice.financial_year).all()
+        years = [year[0] for year in years]
+        now = date.today().year
+        if now not in years:
+            years.append(now)
+        return years
     return taskyears()
 
 
@@ -283,7 +288,7 @@ def deferred_year_select_widget(node, kw):
         Return a deferred year select widget
     """
     years = get_years(kw['request'].dbsession)
-    return widget.SelectWidget(values=[(year[0], year[0])for year in years],
+    return widget.SelectWidget(values=zip(years, years),
                 css_class='input-small')
 
 

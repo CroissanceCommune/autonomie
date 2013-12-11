@@ -27,11 +27,21 @@
 """
 import logging
 import datetime
+from deform import (
+        Form,
+        ValidationFailure,
+        )
+
+from sqlalchemy import (
+            or_,
+            and_,
+            )
+from sqlalchemy.orm import aliased
 
 from beaker.cache import cache_region
 
-from autonomie.models.task.task import Task
-from autonomie.models.task.invoice import (
+from autonomie.models.task import (
+        Task,
         Invoice,
         CancelInvoice,
         ManualInvoice,
@@ -39,17 +49,26 @@ from autonomie.models.task.invoice import (
 from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
+
+from autonomie.utils.views import submit_btn
+from autonomie.utils.widgets import (
+        PopUp,
+        ViewLink,
+        )
+from autonomie.utils.pdf import write_pdf
+
+from autonomie.views.taskaction import html
+
 from autonomie.views.forms.invoices import (
         InvoicesListSchema,
+        pdfexportSchema,
         STATUS_OPTIONS,
         )
-from sqlalchemy import or_, and_
-from sqlalchemy.orm import aliased
-
-from .base import BaseListView
+from autonomie.views.base import BaseListView
 
 log = logging.getLogger(__name__)
 
+# Aliases needed to outerjoin tables properly
 p1 = aliased(Project)
 p2 = aliased(Project)
 c1 = aliased(Customer)
@@ -105,6 +124,7 @@ class InvoicesList(BaseListView):
         Used as base for company invoices listing
     """
     title = u""
+    add_template_vars = (u'title', u'pdf_export_btn',)
     schema = InvoicesListSchema()
     sort_columns = dict(taskDate=("taskDate",),
                number=("number",),
@@ -114,6 +134,16 @@ class InvoicesList(BaseListView):
 
     default_sort = "officialNumber"
     default_direction = 'desc'
+
+    @property
+    def pdf_export_btn(self):
+        """
+            return a popup object for the pdf export form
+        """
+        form = get_invoice_pdf_export_form(self.request)
+        popup = PopUp("pdfexportform", u'Export massif', form.render())
+        self.request.popups = {popup.name: popup}
+        return popup.open_btn()
 
     def query(self):
         query = Task.query()\
@@ -262,6 +292,100 @@ class GlobalInvoicesList(InvoicesList):
         return values
 
 
+def get_invoice_pdf_export_form(request):
+    """
+        Return the form used to search for invoices that will be exported
+    """
+    schema = pdfexportSchema.bind(request=request)
+    action = request.route_path(
+                "invoices",
+                _query=dict(action="export_pdf"),
+                )
+    query_form = Form(schema, buttons=(submit_btn,), action=action)
+    return query_form
+
+
+def query_documents_for_export(from_number, to_number, year):
+    """
+        Query the database to retrieve the documents for the pdf export
+    """
+    # querying the database
+    query = Task.query().with_polymorphic([Invoice, CancelInvoice])
+    query = query.filter(or_(
+        Invoice.officialNumber >= from_number,
+        CancelInvoice.officialNumber >= from_number,
+        ))
+
+    # Default provided in the form schema is -1
+    if to_number > 0:
+        query = query.filter(or_(
+            Invoice.officialNumber <= to_number,
+            CancelInvoice.officialNumber <= to_number,
+            ))
+    query = query.filter(
+        or_(
+            Invoice.financial_year == year,
+            CancelInvoice.financial_year == year,
+            ))
+    return query.all()
+
+
+def invoices_pdf_view(request):
+    """
+        Bulk pdf output : output a large amount of invoices/cancelinvoices
+
+    """
+    # We retrieve the form
+    query_form = get_invoice_pdf_export_form(request)
+
+    try:
+        appstruct = query_form.validate(request.params.items())
+    except ValidationFailure as e:
+        # Form validation failed, the error contains the form with the error
+        # messages
+        query_form = e
+        appstruct = None
+
+    if appstruct is not None:
+        # The form has been validated, we can query for documents
+        start_number = appstruct["start"]
+        end_number = appstruct["end"]
+        year = appstruct['year']
+
+        documents = query_documents_for_export(start_number, end_number, year)
+
+        # We've got some documents to export
+        if documents:
+            # Getting the html output
+            html_string = html(request, documents)
+
+            filename = u"factures_{0}_{1}_{2}.pdf".format(year,
+                        start_number,
+                        end_number)
+
+            try:
+                # Placing the pdf datas in the request
+                write_pdf(request, filename, html_string)
+                return request.response
+            except BaseException as e:
+                import traceback
+                traceback.print_exc()
+                request.session.flash(u"Erreur à l'export des factures, \
+essayez de limiter le nombre de factures à exporter. Prévenez \
+votre administrateur si le problème persiste.", queue="error")
+        else:
+            # There were no documents to export, we send a message to the end
+            # user
+            request.session.flash(u"Aucune facture n'a pu être retrouvée",
+                    queue="error")
+    gotolist_btn = ViewLink(u"Liste des factures", "edit", path="invoices")
+    request.actionmenu.add(gotolist_btn)
+    return dict(
+                title=u"Export massif de factures au format PDF",
+                form=query_form.render(),
+                )
+
+
 def includeme(config):
     # Company invoices view
     config.add_route('company_invoices',
@@ -279,3 +403,10 @@ def includeme(config):
                     route_name="invoices",
                     renderer="invoices.mako",
                     permission="manage")
+    config.add_view(
+            invoices_pdf_view,
+            route_name="invoices",
+            request_param='action=export_pdf',
+            renderer="/base/formpage.mako",
+            permission="manage",
+            )

@@ -31,6 +31,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
+        ${pdf_export_btn.render(request)|n}
     </li>
     <li>
     </li>

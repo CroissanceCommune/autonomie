@@ -91,8 +91,11 @@ def deferred_default_contribution(node, kw):
         Return the default contribution
     """
     request = kw['request']
-    request.config.get('contribution_cae')
-    return request.config.get('contribution_cae')
+    cae_contribution = request.config.get('contribution_cae')
+    if cae_contribution.isdigit():
+        return cae_contribution
+    else:
+        return None
 
 
 def remove_admin_fields(schema, kw):

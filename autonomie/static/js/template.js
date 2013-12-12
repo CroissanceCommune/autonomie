@@ -282,7 +282,7 @@ function program7(depth0,data) {
   return "\n            <div class=\"inline-element\">\n<a href=\"#kmlines/add/2\" class='btn visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n            ";
   }
 
-  buffer += "<div class='row-fluid'>\n\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <caption>\n        Frais kilométriques liés au fonctionnement de l'entreprise\n            ";
+  buffer += "<div>\n\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <caption>\n        Frais kilométriques liés au fonctionnement de l'entreprise\n            ";
   options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
@@ -300,7 +300,7 @@ function program7(depth0,data) {
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n            </tr>\n        </tfoot>\n    </table>\n    <br/>\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <caption>\n            Frais kilométriques liés à l'activité\n            ";
+  buffer += "\n            </tr>\n        </tfoot>\n    </table>\n    <br/>\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <caption>\n            Frais concernant directement votre activité auprès de vos clients\n            ";
   options = {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
@@ -647,7 +647,7 @@ function program9(depth0,data) {
   return "\n        <th class=\"hidden-print\">Actions</th>\n        ";
   }
 
-  buffer += "<div class='row-fluid'>\n<table class=\"opa table table-bordered table-condensed\">\n    <caption>\n    Frais liés au fonctionnement de l'entreprise\n    ";
+  buffer += "<div>\n<table class=\"opa table table-bordered table-condensed\">\n    <caption>\n    Frais liés au fonctionnement de l'entreprise\n    ";
   options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
@@ -665,7 +665,7 @@ function program9(depth0,data) {
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n        </tr>\n    </tfoot>\n</table>\n<br />\n<table class=\"opa table table-bordered table-condensed\">\n    <caption>\n    Frais liés à l'activité\n    ";
+  buffer += "\n        </tr>\n    </tfoot>\n</table>\n<br />\n<table class=\"opa table table-bordered table-condensed\">\n    <caption>\n    Frais concernant directement votre activité auprès de vos clients\n    ";
   options = {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }

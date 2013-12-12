@@ -183,11 +183,15 @@ def expense_options(request):
         "percentage":e.percentage
         }for e in ExpenseTelType.query().filter(ExpenseTelType.active==True)]
 
-    options['categories'] = [{'value':'1',
-                            'label':u'Frais direct de fonctionnement'},
-                            {'value':'2',
-                            'label':u"Frais concernant directement votre \
-activité auprès de vos clients"}]
+    options['categories'] = [{
+        'value':'1',
+        'label':u"Frais liés au fonctionnement de l'entreprise"
+        },
+        {
+        'value':'2',
+        'label':u"Frais concernant directement votre activité auprès de vos \
+clients"
+        }]
 
     options['bookmarks'] = get_bookmarks(request)
 

@@ -86,6 +86,11 @@
         % endif
     </div>
 </div>
-
-${request.layout_manager.render_panel('company_tasks')}
+<div class='row-fluid'>
+    <div class='span12'>
+        <div class='well tasklist' style="margin-top:10px" id='tasklist_container'>
+            ${request.layout_manager.render_panel('company_tasks')}
+        </div>
+    </div>
+</div>
 </%block>

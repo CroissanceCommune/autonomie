@@ -25,10 +25,4 @@
     Page fragment displaying the page list
     Should be returned from an ajax call
 </%doc>
-<div class='row'>
-    <div class='span12'>
-        <div class='well tasklist' style="margin-top:10px" id='tasklist_container'>
-            ${request.layout_manager.render_panel('company_tasks')}
-        </div>
-    </div>
-</div>
+${request.layout_manager.render_panel('company_tasks')}

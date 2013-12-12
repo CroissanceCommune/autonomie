@@ -99,7 +99,10 @@ class UserList(BaseListView):
             query = query.filter(
             or_(User.lastname.like("%" + search + "%"),
                 User.firstname.like("%" + search + "%"),
-                User.companies.any(Company.name.like("%" + search + "%"))))
+                User.companies.any(Company.name.like("%" + search + "%")),
+                User.companies.any(Company.goal.like("%" + search + "%"))
+                ))
+
         return query
 
     def filter_disabled(self, query, appstruct):
@@ -122,7 +125,7 @@ class UserList(BaseListView):
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
             self.request.actionmenu.add(self._get_disabled_btn(appstruct))
-        searchform = SearchForm(u"Nom ou entreprise")
+        searchform = SearchForm(u"Nom, entreprise, activité")
         searchform.set_defaults(appstruct)
         self.request.actionmenu.add(searchform)
 

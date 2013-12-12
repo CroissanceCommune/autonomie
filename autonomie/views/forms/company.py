@@ -116,7 +116,7 @@ class CompanySchema(colander.MappingSchema):
             title=u'Nom')
     goal = colander.SchemaNode(
             colander.String(),
-            title=u'Objet')
+            title=u'Activité')
     email = get_mail_input(missing=u'')
     phone = colander.SchemaNode(
             colander.String(),

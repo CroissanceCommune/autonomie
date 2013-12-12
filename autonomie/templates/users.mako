@@ -44,16 +44,17 @@
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user, reverse=True)}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.email}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >
-                        <ul>
                             % for company in user.companies:
-                                <li>
-                                    ${company.name}
+                                    <blockquote>
+                                        ${company.name}
                                     % if not company.enabled():
                                         <span class='label label-warning'>Cette entreprise a été désactivée</span>
                                     % endif
-                                </li>
+                                        <small>
+                                            ${company.goal}
+                                        </small>
+                                    </blockquote>
                             % endfor
-                        </ul>
                     </td>
                 </tr>
             % endfor

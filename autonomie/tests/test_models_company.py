@@ -21,9 +21,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
+import datetime
 
 from mock import MagicMock
 from autonomie.models.company import Company
+from autonomie.models.customer import Customer
+from autonomie.models.project import Phase
+from autonomie.models.project import Project
+from autonomie.models.task import Estimation
 from .base import BaseTestCase
 
 TEST = dict(name=u"Test",
@@ -46,3 +51,36 @@ class TestCompanyModel(BaseTestCase):
 
     def test_get_company_id(self):
         self.assertEqual(self.company.get_company_id(), 1)
+
+    def test_get_tasks(self):
+        # specific setup
+        for project_name, project_code in (
+            ('project_%d' % num, 'PC%2d' % num)
+            for num in xrange(12)):
+
+            project = Project(name=project_name, code=project_code)
+            
+            for customer, time in (
+                (Customer(), time) 
+                for time in xrange(3)): 
+
+                customer.name = 'cust_%d_%s' % (time, project_name)
+                project.customers.append(customer)
+                project.company = self
+
+            for phase in (Phase('phase_%d' % time) for time in xrange(3)):
+                project.append(phase)
+
+        # setup the part that is to be tested
+            for estimation in (Estimation() for time in xrange(4)):
+                estimation.project = project
+                # FIXME: something that is to be tested
+                # tasks will be ordered according to dates.
+                estimation_date = datetime.date(2013, 01, 01)
+                estimation.taskDate = estimation_date
+            self.company.projects.append(project)
+
+        # FIXME: actually test
+
+    def test_get_recent_tasks(self):
+        pass

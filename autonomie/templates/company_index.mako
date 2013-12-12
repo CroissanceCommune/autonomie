@@ -25,11 +25,10 @@
 <%doc>
     Company index page shows last activities and elapsed invoices
 </%doc>
+<%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_customer" />
-<%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<%inherit file="base.mako"></%inherit>
 <%block name='content'>
 <div class='row-fluid'>
     <div class='span5'>
@@ -87,44 +86,10 @@
         % endif
     </div>
 </div>
-
 <div class='row-fluid'>
     <div class='span12'>
-        <div class='well' style="margin-top:10px">
-            <div class='section-header'>Dernières activités</div>
-            <table class='table table-stripped'>
-                <thead>
-                    <th>
-                        Projet
-                    </th>
-                    <th>
-                        Client
-                    </th>
-                    <th>
-                        Nom du document
-                    </th>
-                    <th>
-                        Dernière modification
-                    </th>
-                </thead>
-                <tbody>
-                    % for task in tasks:
-                        <tr>
-                            <td>
-                                ${format_project(task.project)}
-                            </td>
-                            <td>
-                                ${format_customer(task.customer)}
-                            </td>
-                            <td>${task.name}</td>
-                            <td>${api.format_status(task)}</td>
-                            <td>
-                                ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"icon-search")}
-                            </td>
-                        </tr>
-                    % endfor
-                </tbody>
-            </table>
+        <div class='well tasklist' style="margin-top:10px" id='tasklist_container'>
+            ${request.layout_manager.render_panel('company_tasks')}
         </div>
     </div>
 </div>

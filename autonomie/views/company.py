@@ -26,17 +26,21 @@
     Views for the company handling
     Entry point for the main users
 """
+
 import logging
+
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
+from autonomie import resources
 from autonomie.models.company import Company
-from autonomie.views.forms import merge_session_with_post
-from autonomie.views.forms import BaseFormView
-from autonomie.views.forms.company import COMPANYSCHEMA
-from autonomie.utils.widgets import ViewLink
 from autonomie.utils.views import submit_btn
+from autonomie.utils.widgets import ViewLink
+from autonomie.views.forms import BaseFormView
+from autonomie.views.forms import merge_session_with_post
+from autonomie.views.forms.company import COMPANYSCHEMA
+
 
 log = logging.getLogger(__name__)
 
@@ -49,18 +53,10 @@ def company_index(request):
     company = request.context
     ret_val = dict(title=company.name.title(),
                 company=company)
-    # recovering last activities
-    all_tasks = []
     all_invoices = []
     for project in company.projects:
-        all_tasks.extend(project.estimations)
-        all_tasks.extend(project.invoices)
         all_invoices.extend(project.invoices)
 
-    all_tasks = sorted(all_tasks,
-                        key=lambda a: a.statusDate,
-                        reverse=True)
-    ret_val['tasks'] = all_tasks[:5]
 
     # recovering elapsed invoices for warning
     elapsed_invoices = [invoice
@@ -70,6 +66,7 @@ def company_index(request):
                               reverse=True)
     ret_val['elapsed_invoices'] = elapsed_invoices
     return ret_val
+
 
 def company_view(request):
     """
@@ -226,6 +223,14 @@ def get_enable_btn(company_id):
                                             _query=dict(action="enable"))
 
 
+def recent_tasks_view(request):
+    """
+    Return a page of the list of recent tasks.
+    View wrapper around the company_tasks panel
+    """
+    return {}
+
+
 def includeme(config):
     """
         Add all company related views
@@ -250,3 +255,9 @@ def includeme(config):
                     renderer='company_edit.mako',
                     request_param='action=enable',
                     permission="edit")
+    # same panel as html view
+    config.add_view(recent_tasks_view,
+                   route_name='company',
+                   renderer='company_tasks.mako',
+                   request_param='action=tasks_html',
+                   permission='edit')

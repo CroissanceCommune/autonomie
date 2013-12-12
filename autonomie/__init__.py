@@ -75,6 +75,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.sage",
     "autonomie.panels.menu",
     "autonomie.panels.task",
+    "autonomie.panels.company",
     )
 
 

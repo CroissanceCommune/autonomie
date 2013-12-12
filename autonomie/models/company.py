@@ -182,3 +182,28 @@ class Company(DBBASE):
                     header=self.get_header_filepath(),
                     customers=customers,
                     projects=projects)
+
+    def get_tasks(self):
+        """
+        Get all tasks for this company, as a list
+        """
+        tasks = []
+        for project in self.projects:
+            tasks.extend(project.estimations)
+            tasks.extend(project.invoices)
+        return tasks
+
+    def get_recent_tasks(self, page_nb, nb_per_page):
+        """
+        :param int nb_per_page: how many to return
+        :param int page_nb: pagination index
+
+        .. todo:: this is naive, use sqlalchemy pagination
+
+        :return: pagination for wanted tasks, total nb of tasks
+        """
+        all_tasks = sorted(self.get_tasks(),
+                        key=lambda t: t.statusDate,
+                        reverse=True)
+        offset = page_nb * nb_per_page
+        return all_tasks[offset:offset + nb_per_page], len(all_tasks)

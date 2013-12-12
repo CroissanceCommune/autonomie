@@ -43,6 +43,7 @@ def task_panel(context, request, task):
             config=request.config,
             )
 
+
 def includeme(config):
     """
         Pyramid's inclusion mechanism

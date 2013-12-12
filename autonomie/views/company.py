@@ -32,24 +32,14 @@ import logging
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
-from sqlalchemy import desc, or_
-from sqlalchemy.orm import aliased
-from webhelpers import paginate
 
 from autonomie import resources
 from autonomie.models.company import Company
-from autonomie.models.project import Project
-from autonomie.models.task import CancelInvoice, Estimation, Invoice, Task
 from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import ViewLink
 from autonomie.views.forms import BaseFormView
 from autonomie.views.forms import merge_session_with_post
 from autonomie.views.forms.company import COMPANYSCHEMA
-
-
-_p1 = aliased(Project)
-_p2 = aliased(Project)
-_p3 = aliased(Project)
 
 
 log = logging.getLogger(__name__)
@@ -76,94 +66,6 @@ def company_index(request):
                               reverse=True)
     ret_val['elapsed_invoices'] = elapsed_invoices
     return ret_val
-
-
-def _get_page_url(page):
-    return "#tasklist/{0}".format(page)
-
-
-def _get_post_int(request, key, default):
-    if key in request.POST:
-        return int(request.POST[key])
-    return default
-
-
-def _get_tasks_per_page(request):
-    """
-    Infers the nb of tasks per page from a request.
-    If value supplied in POST, we redefine it in a cookie.
-
-    tasks_per_page is a string representation of a base 10 int
-        expected to be 5, 15 or 50.
-
-    """
-    post_value = _get_post_int(request, 'tasks_per_page', None)
-    if post_value is not None:
-        request.response.set_cookie('tasks_per_page', '%d' % post_value)
-        return post_value
-
-    if 'tasks_per_page' in request.cookies:
-        raw_nb_per_page = request.cookies['tasks_per_page']
-        return int(raw_nb_per_page)
-
-    # fall back to base value
-    return 5
-
-
-def _company_tasks_query(company_id):
-    """
-    Build sqlalchemy query to all tasks of a company, in reverse date order.
-    """
-    query = Task.query()
-    query = query.with_polymorphic([Invoice, Estimation, CancelInvoice])
-    query = query.order_by(desc(Task.statusDate))
-
-    query = query.outerjoin(_p1, Invoice.project)
-    query = query.outerjoin(_p2, Estimation.project)
-    query = query.outerjoin(_p3, CancelInvoice.project)
-
-    return query.filter(or_(
-                _p1.company_id==company_id,
-                _p2.company_id==company_id,
-                _p3.company_id==company_id
-                ))
-
-
-def _get_taskpage_number(request):
-    # TODO : Need a colander schema for validation
-    return _get_post_int(request, 'tasks_page_nb', 0)
-
-
-def recent_tasks(request):
-    """
-    Return a page of the list of recent tasks.
-    Parameters to be supplied as a cookie or in request.POST
-
-    pseudo params: tasks_per_page, see _get_tasks_per_page()
-    tasks_page_nb: -only in POST- the page we display
-    """
-    if not request.is_xhr:
-        # javascript engine for the panel
-        resources.task_list_js.need()
-
-    query = _company_tasks_query(request.context.id)
-    page_nb = _get_taskpage_number(request)
-    items_per_page = _get_tasks_per_page(request)
-
-    paginated_tasks = paginate.Page(
-            query,
-            page_nb,
-            items_per_page=items_per_page,
-            url=_get_page_url,
-            )
-
-    result_data = {'tasks': paginated_tasks}
-
-    return result_data
-
-
-def recent_tasks_panel(context, request):
-    return recent_tasks(request)
 
 
 def company_view(request):
@@ -321,6 +223,14 @@ def get_enable_btn(company_id):
                                             _query=dict(action="enable"))
 
 
+def recent_tasks_view(request):
+    """
+    Return a page of the list of recent tasks.
+    View wrapper around the company_tasks panel
+    """
+    return {}
+
+
 def includeme(config):
     """
         Add all company related views
@@ -345,17 +255,8 @@ def includeme(config):
                     renderer='company_edit.mako',
                     request_param='action=enable',
                     permission="edit")
-    config.add_view(recent_tasks,
-                   route_name='company',
-                   renderer='company_tasks.mako',
-                   request_param='action=tasks',
-                   permission='edit')
-    # same as above, but as a panel
-    config.add_panel(recent_tasks_panel,
-                    'company_tasks',
-                    renderer='company_tasks.mako')
     # same panel as html view
-    config.add_view(recent_tasks,
+    config.add_view(recent_tasks_view,
                    route_name='company',
                    renderer='company_tasks.mako',
                    request_param='action=tasks_html',

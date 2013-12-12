@@ -27,7 +27,6 @@ MyApp.on("initialize:after", function(){
   /*
    *""" Launche the history (controller and router stuff)
    */
-  console.log("Launching backbone's history'");
   if ((Backbone.history)&&(! Backbone.History.started)){
     Backbone.history.start();
   }
@@ -46,10 +45,10 @@ MyApp.Controller = {
   element: '#tasklist_container',
 
   initialize: function(){
-    console.log("Initialize");
     if (!this.initialized){
       this.$element = $(this.element);
       this.initialized = true;
+      _.bindAll(this, 'displayList');
     }
   },
   setNbItemsSelectBehaviour: function(){
@@ -63,34 +62,40 @@ MyApp.Controller = {
     );
   },
   index: function(){
-    console.log("Coming on the index page");
     this.initialize();
     this.setNbItemsSelectBehaviour();
   },
   get_tasks: function(id){
-    console.log("Getting tasks");
     this.initialize();
     this.refresh_list(id);
   },
   refresh_list: function(page_num) {
-    console.log("Recuperation en cours: page " + page_num);
     url = '?action=tasks_html';
     var items_per_page = $('#number_of_tasks').val();
     postdata = {'tasks_page_nb': page_num,
                 'tasks_per_page': items_per_page};
     var this_ = this;
-    $.post(
+    $.ajax(
         url,
-        postdata,
-        function(data, httpstatus, xhr){
-            /* TODO: handle failure.
-             * I got in trouble with callbacks */
-            this_.$element.html(data);
-            this_.setNbItemsSelectBehaviour();
-        },
-        'text');
+        {
+          type: 'POST',
+          data: postdata,
+          dataType: 'html',
+          success: function(data){
+            this_.displayList(data);
+          },
+          error: function(){
+            displayServerError("Une erreur a été rencontrée lors de " +
+            "la récupération des dernières activités");
+          }
+        }
+        );
   },
-}
+  displayList: function(data){
+    this.$element.html(data);
+    this.setNbItemsSelectBehaviour();
+  }
+};
 
 MyApp.addInitializer(function(options){
   /*
@@ -100,6 +105,5 @@ MyApp.addInitializer(function(options){
 });
 
 $(function(){
-  console.log("Starting my application");
   MyApp.start();
 });

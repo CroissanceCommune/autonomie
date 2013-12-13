@@ -92,7 +92,7 @@ def deferred_default_contribution(node, kw):
     """
     request = kw['request']
     cae_contribution = request.config.get('contribution_cae')
-    if cae_contribution.isdigit():
+    if cae_contribution is not None and cae_contribution.isdigit():
         return cae_contribution
     else:
         return None

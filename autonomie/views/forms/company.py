@@ -161,6 +161,7 @@ class CompanySchema(colander.MappingSchema):
                 max_err=u"Veuillez fournir un nombre inférieur à 100"),
             title=u"Contribution à la CAE",
             default=deferred_default_contribution,
+            missing=deferred_default_contribution,
             description=u"Pourcentage que cette entreprise contribue à la CAE")
     RIB = colander.SchemaNode(
             colander.String(),

@@ -288,7 +288,7 @@ function program7(depth0,data) {
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n        </caption>\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th class='span3'>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n            ";
+  buffer += "\n        </caption>\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n            ";
   options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
@@ -306,7 +306,7 @@ function program7(depth0,data) {
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n        </caption>\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th class='span3'>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n            ";
+  buffer += "\n        </caption>\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n            ";
   options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
@@ -653,7 +653,7 @@ function program9(depth0,data) {
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n    </caption>\n    <thead>\n        <th>Date</th>\n        <th class='span3'>Type de frais</th>\n        <th class='span3'>Description</th>\n        <th>Montant HT</th>\n        <th>Tva</th>\n        <th>Total</th>\n        ";
+  buffer += "\n    </caption>\n    <thead>\n        <th>Date</th>\n        <th>Type de frais</th>\n        <th>Description</th>\n        <th>Montant HT</th>\n        <th>Tva</th>\n        <th>Total</th>\n        ";
   options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
@@ -671,7 +671,7 @@ function program9(depth0,data) {
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n    </caption>\n    <thead>\n        <th>Date</th>\n        <th class='span3'>Type de frais</th>\n        <th class='span3'>Description</th>\n        <th>Montant HT</th>\n        <th>Tva</th>\n        <th>Total</th>\n        ";
+  buffer += "\n    </caption>\n    <thead>\n        <th>Date</th>\n        <th>Type de frais</th>\n        <th>Description</th>\n        <th>Montant HT</th>\n        <th>Tva</th>\n        <th>Total</th>\n        ";
   options = {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data};
   if (stack1 = helpers.edit) { stack1 = stack1.call(depth0, options); }
   else { stack1 = (depth0 && depth0.edit); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }

@@ -747,7 +747,8 @@ MyApp.Router = Backbone.Marionette.AppRouter.extend({
     "tel/add": "addtel",
     "kmlines/:id/edit": "editkm",
     "kmlines/add/:category": "addkm",
-    "kmlines/add": "addkm"
+    "kmlines/add": "addkm",
+    "print": "print"
   }
 });
 
@@ -874,6 +875,9 @@ MyApp.Controller = {
       model:model
     });
     MyApp.formContainer.show(expensekm_form);
+  },
+  print: function(){
+    window.print();
   }
 };
 

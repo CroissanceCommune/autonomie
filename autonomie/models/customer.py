@@ -74,34 +74,142 @@ class Customer(DBBASE):
     """
     __tablename__ = 'customer'
     __table_args__ = default_table_args
-    id = Column('id', Integer, primary_key=True)
+    id = Column(
+            'id',
+            Integer,
+            primary_key=True,
+            info={'options':{'csv_exclude':True}}
+            )
     code = Column('code', String(4))
-    comments = deferred(Column("comments", Text), group='edit')
-    creationDate = Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp)
-    updateDate = Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp)
-    company_id = Column("company_id", Integer,
-                                    ForeignKey('company.id'))
-    intraTVA = deferred(Column("intraTVA", String(50)), group='edit')
-    address = deferred(Column("address", String(255)), group='edit')
-    zipCode = deferred(Column("zipCode", String(20)), group='edit')
-    city = deferred(Column("city", String(255)), group='edit')
-    country = deferred(Column("country", String(150), default=u'France'),
-                                                            group='edit')
-    phone = deferred(Column("phone", String(50)), group='edit')
-    fax = deferred(Column("fax", String(50)), group="edit")
-    function = deferred(Column("function", String(255)), group="edit")
-    email = deferred(Column("email", String(255)), group='edit')
-    contactLastName = deferred(Column("contactLastName",
-                    String(255), default=None), group='edit')
-    name = Column("name", String(255), default=None)
-    contactFirstName = deferred(Column("contactFirstName",
-                    String(255), default=None), group='edit')
+    comments = deferred(
+            Column(
+                "comments",
+                Text,
+                info={'label':u"Commentaires"},
+                ),
+            group='edit',
+            )
+    creationDate = Column(
+            "creationDate",
+            CustomDateType,
+            default=get_current_timestamp,
+            info={'options':{'csv_exclude':True}},
+            )
+    updateDate = Column(
+            "updateDate",
+            CustomDateType,
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp,
+            info={'options':{'csv_exclude':True}},
+            )
+    company_id = Column(
+            "company_id",
+            Integer,
+            ForeignKey('company.id'),
+            info={'options':{'csv_exclude':True}}
+            )
+    intraTVA = deferred(
+            Column(
+                "intraTVA",
+                String(50),
+                info={'label':u"TVA intracommunautaire"},
+                ),
+            group='edit',
+            )
+    address = deferred(
+            Column(
+                "address",
+                String(255),
+                info={'label':u"Adresse"},
+                ),
+            group='edit')
+    zipCode = deferred(
+            Column(
+                "zipCode",
+                String(20),
+                info={'label':u"Code postal"},
+                ),
+            group='edit')
+    city = deferred(
+            Column(
+                "city",
+                String(255),
+                info={'label':u"Ville"},
+                ),
+            group='edit')
+    country = deferred(
+            Column(
+                "country",
+                String(150),
+                default=u'France',
+                info={'label':u"Pays"}
+                ),
+            group='edit')
+    phone = deferred(
+            Column(
+                "phone",
+                String(50),
+                info={'label':u"Téléphone"}
+                ),
+            group='edit')
+    fax = deferred(
+            Column(
+                "fax",
+                String(50),
+                info={'label':u"Fax"}
+                ),
+            group="edit")
+    function = deferred(
+            Column(
+                "function",
+                String(255),
+                info={'label':u"Fonction du contact principal"}
+                ),
+            group="edit")
+    email = deferred(
+            Column(
+                "email",
+                String(255),
+                info={'label':u"E-mail"}
+                ),
+            group='edit')
+    contactLastName = deferred(
+            Column(
+                "contactLastName",
+                String(255),
+                default=None,
+                info={'label':u"Prénom du contact principal"}
+                ),
+            group='edit')
+    name = Column(
+            "name",
+            String(255),
+            default=None,
+            info={'label':u"Nom"}
+            )
+    contactFirstName = deferred(
+            Column(
+                "contactFirstName",
+                String(255),
+                default=None,
+                info={'label':u"Nom du contact principal"}
+                ),
+            group='edit')
 
-    compte_cg = deferred(Column(String(125), default=""), group="edit")
-    compte_tiers = deferred(Column(String(125), default=""), group="edit")
+    compte_cg = deferred(
+            Column(
+                String(125),
+                default="",
+                info={'options':{'csv_exclude':True}}
+                ),
+            group="edit")
+    compte_tiers = deferred(
+            Column(
+                String(125),
+                default="",
+                info={'options':{'csv_exclude':True}}
+                ),
+            group="edit")
 
     def get_company_id(self):
         """

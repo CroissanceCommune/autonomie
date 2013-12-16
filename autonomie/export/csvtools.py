@@ -54,7 +54,7 @@ def get_column_label(column):
     """
         Return the label of a column
     """
-    return column.info.get('label', column.name)
+    return force_utf8(column.info.get('label', column.name))
 
 
 def should_be_exported(column):
@@ -67,22 +67,13 @@ def should_be_exported(column):
     return not column.info.get('options', {}).has_key('csv_exclude')
 
 
-def collect_labels(model):
-    """
-        collect the column labels our dest file is supposed to provide
-    """
-    for column in get_columns(model):
-        if should_be_exported(column):
-            yield get_column_label(column)
-
-
-def collect_keys(model):
+def collect_headers(model):
     """
         Return the different column keys
     """
     for column in get_columns(model):
         if should_be_exported(column):
-            yield column.name
+            yield column.name, get_column_label(column)
 
 
 class BaseCsvWriter(object):
@@ -129,14 +120,15 @@ class SqlaToCsvWriter(BaseCsvWriter):
     def __init__(self, model):
         super(SqlaToCsvWriter, self).__init__()
         self.model = model
-        self.keys = list(collect_keys(self.model))
+        self.headers = list(collect_headers(self.model))
+        self.keys = [name for key, name in self.headers]
 
     def format_row(self, row):
         """
             restrict the dictionnary to the current fieldnames
         """
         ret = {}
-        for key, value in row.items():
-            if key in self.keys:
-                ret[key] = force_utf8(value)
+        for key, name in self.headers:
+            value = row.get(key, '')
+            ret[name] = force_utf8(value)
         return ret

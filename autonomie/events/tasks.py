@@ -62,12 +62,10 @@ class StatusChanged(object):
     """
         Event raised when a document status changes
     """
-    def __init__(self, request, document, status, html_string):
+    def __init__(self, request, document, status):
         self.request = request
         self.document = document
         self.new_status = status
-        # Html string output of the given document
-        self.html_string = html_string
         # Silly hack :
         # When a payment is registered, the new status is "paid",
         # if the resulted box has been checked, it's set to resulted later on.
@@ -160,16 +158,7 @@ class StatusChanged(object):
         """
             Return the file data to be sent with the email
         """
-        attachment = None
-        #if self.new_status == 'valid':
-        #    filename = u"{0}.pdf".format(self.document.number)
-        #    pdf_io = write_pdf(self.request, filename, self.html_string)
-        #    pdf_datas = pdf_io.read()
-
-        #    mimetype = detect_file_headers(filename)
-        #    attachment = Attachment(filename, mimetype, pdf_datas)
-        return attachment
-
+        return None
 
     def is_key_event(self):
         """

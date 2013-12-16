@@ -506,11 +506,9 @@ class StatusView(BaseView):
         """
             Notify the change to the registry
         """
-        html_string = html(self.request, [item])
         self.request.registry.notify(StatusChanged(self.request,
             item,
             status,
-            html_string,
             ))
 
     def __call__(self):
@@ -601,12 +599,10 @@ class TaskFormView(BaseFormView):
         params = dict(self.request.POST)
         status = params['submit']
         task.set_status(status, self.request, self.request.user.id, **params)
-        html_string = html(self.request, [task])
         self.request.registry.notify(StatusChanged(
             self.request,
             task,
             status,
-            html_string,
             ))
         return task
 
@@ -623,7 +619,7 @@ def html(request, tasks=None):
     """
         return the html output of a given task
     """
-    template = "tasks/task.mako"
+    template = "autonomie:templates/tasks/task.mako"
 
     if tasks == None:
         tasks = [ request.context ]

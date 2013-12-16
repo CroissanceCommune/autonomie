@@ -55,16 +55,31 @@ ${period_form.render()|n}
     <div class="well hidden-print">
         <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais a été payée.
+        <p>
+            <small>
+                ${api.format_expense_status(request.context)}<br />
+            </small>
+        </p>
     </div>
 % elif request.context.status == 'valid':
     <div class="well hidden-print">
         <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais a été validée, elle est en attente de paiement.
+        <p>
+            <small>
+                ${api.format_expense_status(request.context)}<br />
+            </small>
+        </p>
     </div>
 % elif request.context.status == 'wait':
     <div class="well hidden-print">
         <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais est en attente de validation
+        <p>
+            <small>
+                ${api.format_expense_status(request.context)}<br />
+            </small>
+        </p>
     </div>
 % endif
 <div class="row-fluid hidden-print">
@@ -74,7 +89,7 @@ ${period_form.render()|n}
             <b>Historique des Communications Entrepreneurs-CAE</b>
     % endif
         <hr />
-        <p class="font-size:10px;">
+        <p>
             ${format_text(com.content)}
         </p>
         <small>${api.format_account(com.user)} le ${api.format_date(com.date)}</small>
@@ -102,10 +117,6 @@ ${period_form.render()|n}
 % if edit:
 <hr />
     ${form|n}
-% else:
-<div class='well'>
-    ${api.format_expense_status(request.context)}<br />
-</div>
 % endif
 <div id='messageboxes'>
 </div>

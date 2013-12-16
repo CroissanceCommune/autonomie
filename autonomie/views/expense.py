@@ -548,8 +548,6 @@ perdues) ?")
         params = dict(self.request.POST)
         status = params['submit']
         expense.set_status(status, self.request, self.request.user.id, **params)
-        self.request.registry.notify(StatusChanged(self.request, expense,
-            status))
         return expense, status
 
     def reset_success(self, appstruct):

@@ -54,3 +54,4 @@ zope.sqlalchemy==0.7.1
 pyramid-deform==0.2a5
 pyramid-layout==0.7
 bleach==1.2.2
+simplejson==2.5.2

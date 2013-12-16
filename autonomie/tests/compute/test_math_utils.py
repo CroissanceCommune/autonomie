@@ -50,6 +50,8 @@ class TestMathUtils(unittest.TestCase):
     def test_percent(self):
         self.assertEqual(percent(30, 10), 300.0)
         self.assertEqual(percent(1, 3), 33.33)
+        self.assertRaises(ZeroDivisionError, percent, 1,0)
+        self.assertEqual(percent(1, 0, 5), 5)
 
     def test_percentage(self):
         # Ref #32

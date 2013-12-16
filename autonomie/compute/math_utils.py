@@ -85,9 +85,12 @@ def percentage(value, _percent):
     return int(float(value) * (float(_percent)/100.0))
 
 
-def percent(part, total):
+def percent(part, total, default=None):
     """
         Return the percentage of total represented by part
+        if default is provided, the ZeroDivisionError is handled
     """
+    if default is not None and total == 0:
+        return default
     value = part * 100.0 / total
     return float(dec_round(Decimal(str(value)), 2))

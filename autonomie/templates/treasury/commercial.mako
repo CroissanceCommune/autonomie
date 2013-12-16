@@ -96,7 +96,7 @@
                     </td>
                 % endfor
                 <td>
-                    ${compute_percent(turnovers['year_total'], turnover_projections['year_total'])}&nbsp;%
+                    ${compute_percent(turnovers['year_total'], turnover_projections['year_total'], 0)}&nbsp;%
                 </td>
             </tr>
         </tbody>

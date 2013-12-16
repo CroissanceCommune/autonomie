@@ -57,10 +57,12 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
-          <a class="btn btn-navbar" data-target=".menu" data-toggle="collapse">
-            >>>
-          </a>
-          <div class="nav-collapse menu">
+          <button class="btn btn-navbar" data-target=".menu" data-toggle="collapse" type="button">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+          </button>
+          <div class="nav-collapse menu collapse">
             <ul
                 % if hasattr(elem, "css"):
                     class="nav ${menu.css}"
@@ -85,10 +87,12 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
-          <a class="btn btn-navbar" data-target=".menu" data-toggle="collapse">
-            >>>
-          </a>
-          <div class="nav-collapse menu">
+          <button class="btn btn-navbar" data-target=".menu" data-toggle="collapse" type="button">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+          </button>
+          <div class="nav-collapse menu collapse">
 % endif
 % if usermenu is not UNDEFINED:
     <ul class="nav pull-right">
@@ -116,10 +120,12 @@
         <div class="navbar navbar-inverse">
         <div class="navbar-inner">
           <div class="container">
-            <a class="btn btn-navbar" data-target=".submenu" data-toggle="collapse">
-              >>>
-            </a>
-            <div class='nav-collapse submenu'>
+              <button class="btn btn-navbar" data-target=".submenu" data-toggle="collapse" type="button">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <div class='nav-collapse submenu collapse'>
     <ul
         % if hasattr(elem, "css"):
             class="nav ${submenu.css}"

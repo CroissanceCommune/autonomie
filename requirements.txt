@@ -16,7 +16,7 @@ deform==0.9.7
 deform-bootstrap==0.2.6
 fanstatic==0.16
 ipython==0.13.1
-js.bootstrap==2.3.1
+js.bootstrap==2.3.2
 js.chosen==0.9.11
 js.deform==0.9.5-6
 js.deform-bootstrap==0.2.4-1

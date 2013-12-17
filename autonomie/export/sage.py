@@ -53,9 +53,9 @@ class SageCsvWriter(BaseCsvWriter):
             ('num_analytique', "Numéro analytique"),)
 
     def __init__(self, datas=None):
-        super(SageCsvWriter, self).__init__(datas)
         request = get_current_request()
         self.prefix = request.config.get('invoiceprefix', '')
+        super(SageCsvWriter, self).__init__(datas)
 
     @property
     def keys(self):

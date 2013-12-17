@@ -615,7 +615,7 @@ class TaskFormView(BaseFormView):
         return Tva.query().all()
 
 
-def html(request, tasks=None):
+def html(request, tasks=None, bulk=False):
     """
         return the html output of a given task
     """
@@ -627,6 +627,7 @@ def html(request, tasks=None):
     datas = dict(
                  tasks=tasks,
                  config=request.config,
+                 bulk=bulk,
                  )
 
     return render_html(request, template, datas)

@@ -27,7 +27,7 @@
 
 """
 
-def task_panel(context, request, task):
+def task_panel(context, request, task, bulk=False):
     """
         Task panel
     """
@@ -41,6 +41,7 @@ def task_panel(context, request, task):
             multiple_tvas=multiple_tvas,
             tvas=tvas,
             config=request.config,
+            bulk=bulk,
             )
 
 

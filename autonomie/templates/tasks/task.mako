@@ -64,7 +64,7 @@
     </head>
     <body>
         % for task in tasks:
-            ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}
+            ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task, bulk=bulk)}
             % if not loop.last:
                 <pdf:nextpage />
             % endif

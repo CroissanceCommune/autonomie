@@ -357,7 +357,7 @@ def invoices_pdf_view(request):
         # We've got some documents to export
         if documents:
             # Getting the html output
-            html_string = html(request, documents)
+            html_string = html(request, documents, bulk=True)
 
             filename = u"factures_{0}_{1}_{2}.pdf".format(year,
                         start_number,

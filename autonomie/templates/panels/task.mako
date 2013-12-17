@@ -189,6 +189,7 @@
             ${format_text(config.get('coop_pdffootertext'))}
         % endif
 </div>
+% if bulk is UNDEFINED or not bulk:
 <pdf:nextpage />
 <div id="cgv">
     % if config.has_key('coop_cgv'):
@@ -196,3 +197,4 @@
         ${format_text(data)}
     % endif
 </div>
+% endif

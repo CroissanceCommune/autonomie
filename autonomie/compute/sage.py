@@ -86,10 +86,10 @@ class SageInvoice(object):
     expense_tva_compte_cg = None
     expense_tva_code = None
 
-    def __init__(self, invoice, compte_cgs=None):
+    def __init__(self, invoice, config=None):
         self.products = {}
         self.invoice = invoice
-        self.compte_cgs = compte_cgs or {}
+        self.config = config or {}
 
     def get_product(self, compte_cg_produit, compte_cg_tva, code_tva):
         """
@@ -125,12 +125,12 @@ class SageInvoice(object):
             specific to the RRR, no book entry is returned if the code and
             compte cg for this specific book entry type is defined
         """
-        compte_cg_tva = self.compte_cgs.get('compte_cg_tva_rrr')
-        code_tva = self.compte_cgs.get('code_tva_rrr')
+        compte_cg_tva = self.config.get('compte_cg_tva_rrr')
+        code_tva = self.config.get('code_tva_rrr')
         if compte_cg_tva and code_tva:
             for line in self.invoice.discounts:
                 prod = self.get_product(
-                        self.compte_cgs['compte_rrr'],
+                        self.config.get('compte_rrr'),
                         compte_cg_tva,
                         code_tva,
                         )
@@ -147,7 +147,7 @@ class SageInvoice(object):
                 self.expense_tva_code = Tva.get_default().code
 
             prod = self.get_product(
-                        self.compte_cgs["compte_frais_annexes"],
+                        self.config.get("compte_frais_annexes"),
                         self.expense_tva_compte_cg,
                         self.expense_tva_code
                         )
@@ -880,7 +880,7 @@ class SageExport(object):
             Yield the book entries for a given invoice
         """
         # We wrap the invoice with some common computing tools
-        wrapped_invoice = SageInvoice(invoice)
+        wrapped_invoice = SageInvoice(invoice, self.config)
         wrapped_invoice.populate()
         for module in self.modules:
             module.set_invoice(wrapped_invoice)

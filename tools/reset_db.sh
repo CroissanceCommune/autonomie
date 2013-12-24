@@ -4,9 +4,9 @@ if [ "$1" == '-f' ]
 then
     echo "Forcing"
     MYSQLCMD='mysql -u root'
-    DBNAME='egw'
-    DBUSER='egw'
-    DBPASS='egw'
+    DBNAME='autonomie'
+    DBUSER='autonomie'
+    DBPASS='autonomie'
 else
     echo "Enter the mysql command line needed to have root access (default: 'mysql -u root')"
     read MYSQLCMD
@@ -14,23 +14,23 @@ else
     then
         MYSQLCMD='mysql -u root'
     fi
-    echo "Enter the database name (default : 'egw')"
+    echo "Enter the database name (default : 'autonomie')"
     read DBNAME
     if [ "$DBNAME" == '' ]
     then
-        DBNAME='egw'
+        DBNAME='autonomie'
     fi
-    echo "Enter the database user (default : 'egw')"
+    echo "Enter the database user (default : 'autonomie')"
     read DBUSER
     if [ "$DBUSER" == '' ]
     then
-        DBUSER='egw'
+        DBUSER='autonomie'
     fi
-    echo "Enter the database user password (default : 'egw')"
+    echo "Enter the database user password (default : 'autonomie')"
     read DBPASS
     if [ "$DBPASS" == '' ]
     then
-        DBPASS='egw'
+        DBPASS='autonomie'
     fi
 
 fi

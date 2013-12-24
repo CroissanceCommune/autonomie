@@ -11,11 +11,11 @@ else
     then
         MYSQLCMD='mysql -u root'
     fi
-    echo "Enter the database name (default : 'egw')"
+    echo "Enter the database name (default : 'autonomie')"
     read DBNAME
     if [ "$DBNAME" == '' ]
     then
-        DBNAME='egw'
+        DBNAME='autonomie'
     fi
 fi
 

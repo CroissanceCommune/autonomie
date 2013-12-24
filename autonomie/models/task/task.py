@@ -57,12 +57,13 @@ from autonomie.exception import Forbidden
 from .interfaces import ITask
 from .states import DEFAULT_STATE_MACHINES
 from autonomie.compute.task import LineCompute
+from autonomie.models.node import Node
 
 log = logging.getLogger(__name__)
 
 
 @implementer(ITask)
-class Task(DBBASE):
+class Task(Node):
     """
         Metadata pour une tâche (estimation, invoice)
     """
@@ -70,7 +71,7 @@ class Task(DBBASE):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'task'}
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     phase_id = Column("phase_id", ForeignKey('phase.id'))
     name = Column("name", String(255))
     CAEStatus = Column('CAEStatus', String(10))
@@ -107,10 +108,6 @@ class Task(DBBASE):
         primaryjoin="Task.phase_id==Phase.id",
         backref=backref("tasks", order_by='Task.taskDate'),
         lazy="joined")
-
-    type_ = Column('type_', String(30), nullable=False)
-    __mapper_args__ = {'polymorphic_on': type_,
-                       'polymorphic_identity': 'task'}
 
     state_machine = DEFAULT_STATE_MACHINES['base']
 

@@ -28,9 +28,9 @@ File related views, views related to the file model
 
 from autonomie.export.utils import write_file_to_request
 
-def file_view(context, request):
+def file_dl_view(context, request):
     """
-    simple view for a given file
+    download view for a given file
     """
     write_file_to_request(
             request,
@@ -41,10 +41,30 @@ def file_view(context, request):
     return request.response
 
 
+def file_view(context, request):
+    """
+    simple view for a given file
+    """
+    return dict(
+            title=u"Fichier {0}".format(context.name),
+            file=context,
+            )
+
+
 def includeme(config):
     """
     Configure views
     """
     config.add_route("file", "/files/{id:\d+}", traverse="/files/{id}")
-    config.add_view(file_view, route_name='file', permission='view')
-
+    config.add_view(
+            file_dl_view,
+            route_name='file',
+            permission='view',
+            request_param='action=download',
+            )
+    config.add_view(
+            file_view,
+            route_name="file",
+            permission='view',
+            renderer="file.mako",
+            )

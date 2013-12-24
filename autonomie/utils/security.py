@@ -37,6 +37,7 @@ from autonomie.models.customer import Customer
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.task.invoice import CancelInvoice
+from autonomie.models.files import File
 from autonomie.models.user import User
 from autonomie.models.treasury import (
         ExpenseSheet,
@@ -88,6 +89,7 @@ class RootFactory(dict):
         self['users'] = UserFactory(self, 'users')
         self['expenses'] = ExpenseSheetFactory(self, "expenses")
         self['expenselines'] = ExpenseFactory(self, 'expenselines')
+        self['files'] = FileFactory(self, 'files')
 
 
 class BaseDBFactory(object):
@@ -216,6 +218,17 @@ class ExpenseFactory(BaseDBFactory):
         return self._get_item(BaseExpenseLine, key, "expense")
 
 
+class FileFactory(BaseDBFactory):
+    """
+    Handle access to files
+    """
+    def __getitem__(self, key):
+        """
+        Return the traversed file object
+        """
+        return self._get_item(File, key, 'file')
+
+
 def get_base_acl(self):
     """
         return the base acls
@@ -309,6 +322,14 @@ def get_expense_acl(self):
     return acl
 
 
+def get_file_acl(self):
+    """
+    Compute the acls for a file object
+    a file object's acls are simply the parent's
+    """
+    return self.parent.__acl__
+
+
 def wrap_db_objects():
     """
         Add acls and names to the db objects used as context
@@ -322,3 +343,4 @@ def wrap_db_objects():
     User.__acl__ = property(get_user_acl)
     ExpenseSheet.__acl__ = property(get_expensesheet_acl)
     BaseExpenseLine.__acl__ = property(get_expense_acl)
+    File.__acl__ = property(get_file_acl)

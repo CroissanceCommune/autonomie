@@ -52,6 +52,7 @@ ASCII_UPPERCASE = list(ascii_uppercase) + list(
     ''.join(duple)
     for duple in itertools.combinations_with_replacement(ascii_uppercase, 2)
     )
+EXCEL_NUMBER_FORMAT = '0.00'
 EXPENSEKM_COLUMNS = [
     {
         'key': 'date',
@@ -93,7 +94,7 @@ EXPENSEKM_COLUMNS = [
         'key': 'total',
         'label': u'Indemnités',
         'letter': 'L',
-        'number_format': '0.00',
+        'number_format': EXCEL_NUMBER_FORMAT,
     }
 ]
 
@@ -180,7 +181,7 @@ class ExcelExpense(object):
         columns.append({'label':'Tva', 'key':'tva',
             'formatter':integer_to_amount})
         columns.append({'label':'Total', 'key':'total',
-            'formatter':integer_to_amount, 'number_format':'0.00'})
+            'formatter':integer_to_amount, 'number_format':EXCEL_NUMBER_FORMAT})
 
         # We set the appropriate letter to each column
         index = 0
@@ -324,26 +325,37 @@ class ExcelExpense(object):
             cell = self.get_column_cell(column)
             cell.style.font.bold = True
             self.set_color(cell, Color.footer)
-            cell.style.number_format.format_code = '0.00'
+            cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
+
             if column.has_key('code'):
-                val = sum([line.ht for line in lines \
-                                     if line.type_object \
-                                     and line.type_object.code==column['code']])
+                val = sum([line.ht
+                        for line in lines
+                        if line.type_object and
+                        line.type_object.code == column['code']]
+                        )
                 cell.value = integer_to_amount(val)
+
                 if val == 0:
-                    self.set_col_width(column['letter'], 0)
+                    col_width = 0
                 else:
-                    self.set_col_width(column['letter'], 13)
+                    col_width = 13
+                self.set_col_width(column['letter'], col_width)
+
             elif column.get('key') == 'description':
                 cell.value = "Totaux"
+
             elif column.get('key') == 'tva':
                 cell.value = integer_to_amount(
                         sum([getattr(line, 'tva', 0) for line in lines]))
-                cell.style.number_format.format_code = '0.00'
+                # FIXME: already done above, outside of if?
+                cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
+
             elif column.get('key') == 'total':
                 cell.value = integer_to_amount(
                         sum([line.total for line in lines]))
-                cell.style.number_format.format_code = '0.00'
+                # FIXME: already done above, outside of if?
+                cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
+
         self.index += 4
 
     def write_expense_table(self, category, columns):
@@ -401,7 +413,7 @@ CLIENTS"
         cell.style.font.bold = True
         cell.style.font.size = 16
         cell.value = integer_to_amount(self.model.total)
-        cell.style.number_format.format_code = '0.00'
+        cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
         self.set_color(cell, Color.footer)
         self.index += 2
 
@@ -414,7 +426,7 @@ CLIENTS"
         self.index += 1
         self.worksheet.merge_cells(
                 start_row=self.index,
-                end_row=self.index +4,
+                end_row=self.index + 4,
                 start_column=1,
                 end_column=4)
 

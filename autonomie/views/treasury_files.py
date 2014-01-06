@@ -290,7 +290,7 @@ def includeme(config):
                      ("salarysheet", SalarySheet):
         config.add_route(key, "/company/{id:\d+}/%s" % key, traverse=traverse)
         config.add_view(view, route_name=key,
-                renderer="treasury/documents.mako", permission="view")
+                renderer="treasury/documents.mako", permission="edit")
     config.add_route("treasury_files", "/company/{id:\d+}/files/",
                         traverse=traverse)
     config.add_view(file_display, route_name="treasury_files",

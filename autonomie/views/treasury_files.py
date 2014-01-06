@@ -53,15 +53,13 @@ def get_root_directory(request):
     return absdir
 
 
+_NULLCODES = ["0", 0, "", None]
+
 def code_is_not_null(code):
     """
         Return True if the given code is not null
     """
-    if code in ["0", 0, "", None]:
-        return False
-    else:
-        return True
-
+    return code not in _NULLCODES
 
 def isprefixed(filename, prefix='___'):
     """
@@ -236,24 +234,30 @@ def file_display(request):
     filepath = os.path.join(root_path, rel_filepath)
     filename = os.path.basename(filepath)
     company_code = request.context.code_compta
-    if code_is_not_null(company_code) and isprefixed(filename, company_code):
-        if issubdir(root_path, filepath):
-            if os.path.isfile(filepath):
-                file_obj = File(filename, filepath)
-                file_obj.as_response(request)
-                return request.response
-            else:
-                log.warn("File not found")
-                log.warn(filepath)
-                return HTTPNotFound()
-        else:
-            log.warn("Given filepath is not a subdirectory")
-            log.warn(filepath)
-            log.warn(root_path)
-            return HTTPForbidden()
-    else:
+
+    if not code_is_not_null(company_code):
         log.warn("Current context has no code")
         return HTTPForbidden()
+
+    if not isprefixed(filename, company_code):
+        log.warn("Current context has no code")
+        return HTTPForbidden()
+
+    if not issubdir(root_path, filepath):
+        log.warn("Given filepath is not a subdirectory")
+        log.warn(filepath)
+        log.warn(root_path)
+        return HTTPForbidden()
+
+    if os.path.isfile(filepath):
+        file_obj = File(filename, filepath)
+        file_obj.as_response(request)
+        return request.response
+
+    log.warn("File not found")
+    log.warn(filepath)
+    return HTTPNotFound()
+
 
 
 class Treasury(DisplayDirectoryView):

@@ -1,47 +1,22 @@
-Autonomie README
-================
+==========
+Autonomie
+==========
 
-Getting Started
----------------
+Un progiciel de gestion pour CAE -Coopérative d'activité et d'emploi.
 
-The fr_FR.UTF8 locale must be installed::
+Licence
+-------
 
-    dpkg-reconfigure locales
+Ceci est un logiciel libre, pour les conditions d'accès, d'utilisation, de copie et d'exploitation, voir LICENSE.txt
 
-Create the mysql tables::
+Nouvelles fonctionnalités/Anomalies
+-----------------------------------
 
-    create database egw;
-    grant all privileges on egw.* to egw@localhost identified by "egw";
-    flush privileges;
+L'essentiel du développement est réalisé sur financement de Croissance Commune.
 
-Install autonomie::
-
-    mkvirtualenv autonomie
-    python setup.py develop
-
-Configure autonomie::
-    cp development.ini.sample app.ini
-    edit app.ini
-
-Serve autonomie::
-    pserve app.ini
+Si vous rencontrez un bogue, ou avez une idée de fonctionnalité, il est possible
+de signaler cela aux développeurs directement ou en utilisant le système de
+tickets de github.
+Exception : pour les bogues de sécurité, merci d'écrire un courriel à autonomie@majerti.fr.
 
 
-Alembic migration
------------------
-
-Alembic is used every time we changed the database schema.
-
-Add a new revision::
-
-    tools/new_alembic_revision.sh
-
-Then, migrate::
-
-    autonomie-migrate app.ini upgrade
-
-Debian dependencies
--------------------
-
-Install::
-    apt-get install python-dev libmysqlclient-dev build-essential

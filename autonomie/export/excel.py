@@ -26,6 +26,7 @@
     Data export module
 """
 
+import itertools
 import openpyxl
 from openpyxl.style import Color, Fill
 import cStringIO as StringIO
@@ -38,8 +39,6 @@ from autonomie.models.treasury import ExpenseKmType
 from autonomie.models.treasury import ExpenseTelType
 
 
-LETTERS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',)
-
 Color.LightCyan = "FFE0FFFF"
 Color.LightCoral = "FFF08080"
 Color.LightGreen = "FF90EE90"
@@ -47,36 +46,62 @@ Color.Crimson = "FFDC143C"
 Color.header = "FFD9EDF7"
 Color.footer = "FFFCF8E3"
 
-def get_xls_column_keys():
-    res = []
-    for let in ascii_uppercase:
-        res.append(let)
 
-    for leta in ascii_uppercase:
-        for letb in ascii_uppercase:
-            res.append('%s%s'% (leta, letb))
-    return res
+# A, B, C, ..., AA, AB, AC, ..., ZZ
+ASCII_UPPERCASE = list(ascii_uppercase) + list(
+    ''.join(duple)
+    for duple in itertools.combinations_with_replacement(ascii_uppercase, 2)
+    )
+EXPENSEKM_COLUMNS = [
+    {
+        'key': 'date',
+        'label': u'Date',
+        'letter': 'A',
+    },
+    {
+        'key': 'vehicle',
+        'label': u'Type de véhicule',
+        'letter': 'B',
+        'last_letter': 'C',
+    },
+    {
+        'key': 'start',
+        'label': u'Lieu de départ',
+        'letter': 'D',
+        'last_letter': 'E',
+    },
+    {
+        'key': 'end',
+        'label': u"Lieu d'arrivée",
+        'letter': 'F',
+        'last_letter': 'G',
+    },
+    {
+        'key': 'description',
+        'label': u'Description/Mission',
+        'letter': 'H',
+        'last_letter': 'J',
+    },
+    {
+        'formatter': integer_to_amount,
+        'key': 'km',
+        'label': 'Nombre de kms',
+        'letter': 'K',
+    },
+    {
+        'formatter': integer_to_amount,
+        'key': 'total',
+        'label': u'Indemnités',
+        'letter': 'L',
+        'number_format': '0.00',
+    }
+]
 
-ASCII_UPPERCASE = get_xls_column_keys()
 
 class ExcelExpense(object):
     """
         Wrapper for excel export of an expense object
     """
-    expensekm_columns = [
-    {'label':u'Date', 'key':'date', 'letter': 'A'},
-    {'label':u'Type de véhicule', 'key':'vehicle', 'letter':'B',
-        'last_letter':'C'},
-    {'label':u'Lieu de départ', 'key':'start', 'letter':'D',
-        'last_letter':'E'},
-    {'label':u"Lieu d'arrivée", 'key':'end', 'letter':'F',
-        'last_letter':'G'},
-    {'label':u'Description/Mission', 'key':'description', 'letter':'H',
-        'last_letter':'J'},
-    {'label':'Nombre de kms', 'key':'km', 'formatter':integer_to_amount,
-        'letter':'K'},
-    {'label':'Indemnités', 'key':'total', 'formatter':integer_to_amount,
-        'letter':'L', 'number_format':'0.00'}]
 
     def __init__(self, expensesheet):
         self.book = openpyxl.workbook.Workbook()
@@ -409,7 +434,7 @@ CLIENTS"
         row_dim.height = 30
         self.index += 2
 
-        self.write_table(self.expensekm_columns, self.model.kmlines)
+        self.write_table(EXPENSEKM_COLUMNS, self.model.kmlines)
 
     def render(self):
         """

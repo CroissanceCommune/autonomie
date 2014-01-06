@@ -218,13 +218,15 @@ def includeme(config):
     config.add_view(user_holidays_index,
                     route_name="user_holidays",
                     renderer="user_holidays.mako",
-                    permission="view")
+                    permission="edit")
 
     config.add_view(holidays_json,
                     route_name='user_holidays',
                     xhr=True,
                     renderer="json")
-    add_rest_views(config, "user_holiday", RestHoliday)
+    add_rest_views(config, "user_holiday", RestHoliday,
+            view_rights='add',
+            add_rights='add')
     config.add_view(
             make_redirect_view("user_holidays"),
             route_name="user_holiday")

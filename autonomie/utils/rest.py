@@ -135,7 +135,8 @@ class RestJsonRepr(object):
         return result
 
 
-def add_rest_views(config, route_name, factory, edit_rights='edit'):
+def add_rest_views(config, route_name, factory,
+        edit_rights='edit', add_rights='view', view_rights='view'):
     """
         Add a rest iface associating the factory's methods to the different
         request methods of the routes based on route_name :
@@ -154,7 +155,7 @@ def add_rest_views(config, route_name, factory, edit_rights='edit'):
             route_name=route_name,
             renderer="json",
             request_method='GET',
-            permission='view',
+            permission=view_rights,
             xhr=True)
     config.add_view(factory,
             attr='post',
@@ -162,7 +163,7 @@ def add_rest_views(config, route_name, factory, edit_rights='edit'):
             route_name=route_name + "s",
             renderer="json",
             request_method='POST',
-            permission='view',
+            permission=add_rights,
             xhr=True)
     config.add_view(factory,
             attr='put',

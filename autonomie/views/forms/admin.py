@@ -28,6 +28,7 @@
 import os
 import colander
 import logging
+import simplejson as json
 
 from deform import widget
 from deform import FileData
@@ -130,6 +131,22 @@ page des documents (devis/factures/avoirs)",
     invoice = InvoiceConfig(title=u"Factures")
 
 
+class FileTypeConfig(colander.SequenceSchema):
+    name = colander.SchemaNode(
+            colander.String(),
+            title=u"Libellé du type de document",
+            description=u"Le libellé permet d'identifier plus facilement les \
+documents attachés aux factures",
+            )
+
+
+class FileTypesConfig(colander.MappingSchema):
+    """
+        Configure file types that may be attached
+    """
+    types = FileTypeConfig(title=u"")
+
+
 class SiteConfig(colander.MappingSchema):
     """
         Site configuration
@@ -146,12 +163,14 @@ class SiteConfig(colander.MappingSchema):
         widget=widget.RichTextWidget(cols=80, rows=2, theme="advanced"),
         missing=u'')
 
+
 class MainConfig(colander.MappingSchema):
     """
         Schema for main site configuration
     """
     site = SiteConfig()
     document = DocumentConfig(title=u'Document (devis et factures)')
+    attached_filetypes = FileTypesConfig(title=u"Type des documents attachés")
 
 
 class Product(colander.MappingSchema):
@@ -310,11 +329,13 @@ class CaeConfig(colander.MappingSchema):
     """
     pass
 
+
 class SageExportConfig(colander.MappingSchema):
     """
         Sage export modules selection form schema
     """
     pass
+
 
 def build_cae_config_schema():
     fields =(
@@ -516,6 +537,7 @@ def get_config_appstruct(config_dict):
                      'footercourse': None,
                      'footercontent': None,
                      'cgv': None},
+        "filetypes": []
     }
     appstruct['site']['welcome'] = config_dict.get('welcome')
     appstruct['document']['footertitle'] = config_dict.get(
@@ -540,6 +562,10 @@ def get_config_appstruct(config_dict):
                                                         'coop_invoicepayment')
     appstruct['document']['invoice']['late'] = config_dict.get(
                                                         'coop_invoicelate')
+
+    appstruct["attached_filetypes"] = json.loads(
+            config_dict.get('attached_filetypes', "[]")
+            )
     return appstruct
 
 
@@ -572,6 +598,8 @@ def get_config_dbdatas(appstruct):
     dbdatas['coop_invoicelate'] = appstruct.get('document', {}).get(
                                                 'invoice', {}).get('late')
     dbdatas['welcome'] = appstruct.get('site', {}).get('welcome')
+
+    dbdatas['attached_filetypes'] = json.dumps(appstruct.get('attached_filetypes', []))
     return dbdatas
 
 

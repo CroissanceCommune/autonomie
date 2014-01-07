@@ -77,6 +77,7 @@ AUTONOMIE_MODULES = (
     "autonomie.panels.menu",
     "autonomie.panels.task",
     "autonomie.panels.company",
+    "autonomie.panels.invoicetable",
     )
 
 

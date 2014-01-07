@@ -31,6 +31,7 @@
 <%namespace file="/base/utils.mako" import="searchform"/>
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_customer" />
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
@@ -110,131 +111,7 @@
 </div>
 </%block>
 <%block name='content'>
-<table class="table table-condensed table-bordered">
-    <thead>
-        <th><span class="ui-icon ui-icon-comment"></span></th>
-        <th>${sortable(u"Identifiant", "officialNumber")}</th>
-        <th>${sortable(u"Émise le", 'taskDate')}</th>
-        <th>${sortable(u"Nom de la facture", 'number')}</th>
-        <th>${sortable(u"Client", 'customer')}</th>
-        <th>Montant HT</th>
-        <th>TVA</th>
-        <th>TTC</th>
-        <th>Information de paiement</th>
-        <th>PDF</th>
-    </thead>
-    <tbody>
-        <% totalht = sum([document.total_ht() for document in records]) %>
-        <% totaltva = sum([document.tva_amount() for document in records]) %>
-        <% totalttc = sum([document.total() for document in records]) %>
-        <tr>
-            <td colspan='5'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-            <td colspan='3'></td>
-        </tr>
-        ## records are : Invoices, ManualInvoices or CancelInvoices
-     % if records:
-     % for document in records:
-     % if document.is_cancelled():
-        <tr class='invoice_cancelled_tr'>
-            <td class='invoice_cancelled'>
-                <span class="label label-important">
-                    <i class="icon-white icon-remove"></i>
-                </span>
-     % elif document.is_tolate():
-        <tr class='invoice_tolate_tr'>
-            <td class='invoice_tolate'>
-                <br />
-     % elif document.is_paid():
-        <tr class='invoice_paid_tr'>
-            <td class='invoice_paid'>
-     % elif document.is_resulted():
-        <tr class='invoice_resulted_tr'>
-            <td class='invoice_resulted'>
-     % else:
-         <tr>
-             <td class='invoice_notpaid'>
-                 <br />
-     % endif
-     %if document.statusComment:
-         <span class="ui-icon ui-icon-comment" title="${document.statusComment}"></span>
-     %endif
-             </td>
-             <td>
-                 ${request.config.get('invoiceprefix')}${document.officialNumber}
-             </td>
-             <td>
-                 ${api.format_date(document.taskDate)}
-             </td>
-             <td>
-                <blockquote>
-                    %if document.is_viewable():
-                        <a href="${request.route_path(document.type_, id=document.id)}"
-                            title='Voir le document'>${document.number}</a>
-                    %else:
-                        ${document.number}
-                    %endif
-                    <small>${format_text(document.description)}
-                </blockquote>
-             </td>
-             <td class='invoice_company_name'>
-                 ${format_customer(document.get_customer())}
-             </td>
-             <td>
-                 <strong>
-                    ${api.format_amount(document.total_ht())|n}&nbsp;€
-                 </strong>
-             </td>
-             <td>
-                 ${api.format_amount(document.tva_amount())|n}&nbsp;€
-             </td>
-             <td>
-                 ${api.format_amount(document.total())|n}&nbsp;€
-             </td>
-             <td>
-                 % if len(document.payments) == 1 and document.is_resulted():
-                     Le ${api.format_date(document.payments[0].date)} (${api.format_paymentmode(document.payments[0].mode)})
-                 % elif len(document.payments) > 0:
-                     <ul>
-                         % for payment in document.payments:
-                             <li>
-                                 ${api.format_amount(payment.amount)|n}&nbsp;€ le ${api.format_date(payment.date)} (${api.format_paymentmode(payment.mode)})
-                             </li>
-                         % endfor
-                     </ul>
-                 % endif
-
-              </td>
-              <td>
-                  % if document.is_viewable():
-                      <a class='btn'
-                          href='${request.route_path(document.type_, id=document.id, _query=dict(view="pdf"))}'
-                          title="Télécharger la version PDF">
-                          <i class='icon icon-file'></i>
-                      </a>
-                  % endif
-              </td>
-          </tr>
-      % endfor
-  % else:
-      <tr>
-          <td colspan='10'>
-              Aucune facture n'a pu être retrouvée
-          </td>
-      </tr>
-  % endif
-  </tbody>
-  <tfoot>
-      <tr>
-          <td colspan='5'><strong>Total</strong></td>
-          <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
-          <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-          <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
-          <td colspan='2'></td>
-      </tr>
-  </tfoot>
-</table>
+${request.layout_manager.render_panel('invoicetable', records, is_admin_view=True)}
 ${pager(records)}
 </%block>
 <%block name='footerjs'>

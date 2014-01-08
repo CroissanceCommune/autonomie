@@ -537,7 +537,7 @@ def get_config_appstruct(config_dict):
                      'footercourse': None,
                      'footercontent': None,
                      'cgv': None},
-        "filetypes": []
+        "attached_filetypes": {}
     }
     appstruct['site']['welcome'] = config_dict.get('welcome')
     appstruct['document']['footertitle'] = config_dict.get(
@@ -563,11 +563,20 @@ def get_config_appstruct(config_dict):
     appstruct['document']['invoice']['late'] = config_dict.get(
                                                         'coop_invoicelate')
 
-    appstruct["attached_filetypes"] = json.loads(
+    appstruct["attached_filetypes"]['types'] = json.loads(
             config_dict.get('attached_filetypes', "[]")
             )
     return appstruct
 
+
+def load_filetypes_from_config(config):
+    """
+        Return filetypes configured in databas
+    """
+    attached_filetypes = json.loads(config.get('attached_filetypes', '[]'))
+    if not isinstance(attached_filetypes, list):
+        attached_filetypes = []
+    return attached_filetypes
 
 
 def get_config_dbdatas(appstruct):
@@ -599,7 +608,8 @@ def get_config_dbdatas(appstruct):
                                                 'invoice', {}).get('late')
     dbdatas['welcome'] = appstruct.get('site', {}).get('welcome')
 
-    dbdatas['attached_filetypes'] = json.dumps(appstruct.get('attached_filetypes', []))
+    dbdatas['attached_filetypes'] = json.dumps(
+            appstruct.get('attached_filetypes', {}).get('types',  []))
     return dbdatas
 
 

@@ -26,6 +26,7 @@
     Base template for task readonly display
 </%doc>
 <%inherit file="/base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='css'>
     <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
 </%block>
@@ -151,6 +152,16 @@
                 ${button.render(request)|n}
             % endfor
         </form>
+    </div>
+        <div class='well'>
+        <strong>Fichiers attachés à ce document</strong>
+          ${format_filelist(task)}
+          % if hasattr(task, 'estimation'):
+            ${format_filelist(task.estimation)}
+        % elif hasattr(task, 'invoice'):
+            ${format_filelist(task.invoice)}
+          % endif
+
     </div>
     <div style='border:1px solid #ddd; margin:3px;'>
             ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}

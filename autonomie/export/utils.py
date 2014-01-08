@@ -50,10 +50,12 @@ def write_headers(request, filename, header):
     """
         Write the given headers to the current request
     """
-    request.response.content_type = header
+    # Here enforce ascii chars and string object as content type
+    header = force_ascii(header)
+    request.response.content_type = str(header)
     request.response.headerlist.append(
             ('Content-Disposition',
-             'attachment; filename={0}'.format(force_ascii(filename))))
+             'attachment; filename="{0}"'.format(force_ascii(filename))))
     return request
 
 

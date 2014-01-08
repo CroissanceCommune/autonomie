@@ -227,7 +227,7 @@ def month_name(index):
     """
         Return the name of the month number "index"
     """
-    if index in range(1,13):
+    if index in range(1, 13):
         return calendar.month_name[index].decode('utf-8')
     else:
         return u""
@@ -244,6 +244,23 @@ def clean_html(text):
             attributes=ALLOWED_HTML_ATTRS,
             styles=ALLOWED_CSS_STYLES,
             )
+
+
+def human_readable_filesize(size):
+    """
+        Return a human readable file size
+    """
+    result = u"Inconnu"
+    try:
+        size = float(size)
+        for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+            if size < 1024.0:
+                result = u"%3.1f %s" % (size, x)
+                break
+            size /= 1024.0
+    except ValueError:
+        pass
+    return result
 
 
 class Api(object):
@@ -264,6 +281,7 @@ api = Api(format_amount=format_amount,
           format_short_date=format_short_date,
           format_long_date=format_long_date,
           format_quantity=format_quantity,
+          human_readable_filesize=human_readable_filesize,
           urlupdate=urlupdate,
           month_name=month_name,
           clean_html=clean_html,

@@ -36,8 +36,11 @@ from sqlalchemy.orm import relationship
 
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+        default_table_args,
+        DBBASE,
+        )
+from autonomie.models.node import Node
 
 ProjectCustomer = Table('project_customer', DBBASE.metadata,
         Column("project_id", Integer, ForeignKey('project.id')),
@@ -45,24 +48,20 @@ ProjectCustomer = Table('project_customer', DBBASE.metadata,
         mysql_charset=default_table_args['mysql_charset'],
         mysql_engine=default_table_args['mysql_engine'])
 
-class Project(DBBASE):
+class Project(Node):
     """
         The project model
     """
     __tablename__ = 'project'
     __table_args__ = default_table_args
-    id = Column('id', Integer, primary_key=True)
-    name = Column("name", String(255))
+    __mapper_args__ = {'polymorphic_identity': 'project'}
+    id = Column('id', ForeignKey('node.id'), primary_key=True)
     code = Column("code", String(4), nullable=False)
     definition = deferred(Column("definition", Text), group='edit')
 
     company_id = Column("company_id", Integer,
                                     ForeignKey('company.id'))
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
+
     startingDate = deferred(Column("startingDate", CustomDateType,
                                 default=get_current_timestamp), group='edit')
     endingDate = deferred(Column("endingDate", CustomDateType,

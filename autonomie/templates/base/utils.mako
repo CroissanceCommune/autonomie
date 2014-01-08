@@ -197,3 +197,20 @@ path = request.current_route_path(_query=get_args)
             % endif
         </dl>
 </%def>
+<%def name="format_filelist(document)">
+ % if document is not None:
+      % for child in document.children:
+          % if loop.first:
+              <ul>
+          % endif
+              % if child.type_ == 'file':
+                  <li>
+                  <a href="${request.route_path('file', id=child.id)}">${child.label}</a>
+                  </li>
+              % endif
+          % if loop.last:
+              </ul>
+          % endif
+      % endfor
+  % endif
+</%def>

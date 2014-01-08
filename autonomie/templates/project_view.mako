@@ -26,6 +26,7 @@
 <%namespace file="base/utils.mako" import="print_date" />
 <%namespace file="base/utils.mako" import="table_btn" />
 <%namespace file="base/utils.mako" import="format_text" />
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='content'>
 <div class='row-fluid collapse' id='project-addphase'>
     <div class='span4 offset4'>
@@ -63,6 +64,11 @@
                             <dt>Livraison prévue le :</dt><dd>${api.format_date(project.endingDate)}</dd>
                         % endif
                     </dl>
+                    <div class='well'>
+                        <strong>Fichiers attachés à ce projet</strong>
+                        ${format_filelist(project)}
+                    </div>
+
                 </div>
             </div>
             <h3>Définition du projet</h3>

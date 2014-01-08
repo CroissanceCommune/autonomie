@@ -184,3 +184,9 @@ test_js = Group([main,
                  deform_bootstrap_js,
                  task,
                  jquery_qunit])
+
+# File upload page js requirements
+fileupload_js = Resource(
+        lib_autonomie,
+        "js/fileupload.js",
+        depends=[main_js])

@@ -38,6 +38,7 @@ from autonomie.models.task.estimation import (
         EstimationLine,
         PaymentLine,
 )
+from autonomie.views.files import FileUploadView
 from autonomie.models.task.task import DiscountLine
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
@@ -399,3 +400,11 @@ def includeme(config):
             route_name="estimations",
             renderer="estimations.mako",
             permission="edit")
+
+    config.add_view(
+            FileUploadView,
+            route_name="estimation",
+            renderer='base/formpage.mako',
+            permission='edit',
+            request_param='action=attach_file',
+            )

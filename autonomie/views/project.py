@@ -46,6 +46,7 @@ from autonomie.models.project import (
         Phase,
         )
 from autonomie.models.customer import Customer
+from autonomie.views.files import FileUploadView
 from autonomie.utils.widgets import (
         ViewLink,
         ToggleLink,
@@ -59,6 +60,7 @@ from autonomie.views.forms import (
         merge_session_with_post,
         BaseFormView,
         )
+from autonomie.views.files import get_add_file_link
 from autonomie.views.forms.project import (
         ProjectsListSchema,
         ProjectSchema,
@@ -376,6 +378,7 @@ def populate_actionmenu(request, project=None):
             request.actionmenu.add(get_edit_btn(project.id))
             request.actionmenu.add(get_detail_btn())
             request.actionmenu.add(get_phase_btn())
+            request.actionmenu.add(get_add_file_link(request))
 
 def get_list_view_btn(cid):
     return ViewLink(u"Liste des projets", "edit",
@@ -439,3 +442,11 @@ def includeme(config):
                     renderer='company_projects.mako',
                     request_method='GET',
                     permission='edit')
+
+    config.add_view(
+            FileUploadView,
+            route_name="project",
+            renderer='base/formpage.mako',
+            permission='edit',
+            request_param='action=attach_file',
+            )

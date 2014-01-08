@@ -28,6 +28,7 @@ from autonomie.compute.math_utils import (
         amount,
         percent,
         percentage,
+        convert_to_int,
         )
 
 
@@ -58,3 +59,8 @@ class TestMathUtils(unittest.TestCase):
         a = 0.25
         b = 10000
         self.assertEqual(percentage(a, b), 25)
+
+    def test_convert_to_int(self):
+        self.assertEqual(convert_to_int('25'), 25)
+        self.assertEqual(convert_to_int('NOOK', 25), 25)
+        self.assertRaises(ValueError, convert_to_int, 'NOOK')

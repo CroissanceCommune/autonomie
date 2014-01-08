@@ -26,14 +26,13 @@
 <div class='row-fluid'>
     <div class='span6 offset3 well'>
         <dl class='dl-horizontal'>
+            <dt>Description du fichier</dt><dd>${file.description}</dd>
             <dt>Nom du fichier</dt><dd> ${file.name}</dd>
-            <dt>Taille du fichier</dt><dd>${file.size} TODO : format size</dd>
+            <dt>Taille du fichier</dt><dd>${api.human_readable_filesize(file.size)}</dd>
             <dt>Date de dépôt</dt><dd>${api.format_date(file.created_at)}</dd>
             <dt>Dernière modification</dt><dd>${api.format_date(file.updated_at)}</dd>
             <dt></dt>
             <dd><a class='' href="${request.route_path('file', id=file.id, _query=dict(action='download'))}">Télécharger le fichier</a></dd>
-            <dt></dt>
-            <dd><a class='' href="${request.route_path(file.parent.type_, id=file.parent.id)}">Voir le document lié</a></dd>
         </dl>
     </div>
 </div>

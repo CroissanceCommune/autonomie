@@ -121,8 +121,10 @@ class FileUploadView(BaseFormView):
             datas structure expected for File add/edit
         """
         file_infos = appstruct.pop('upload')
-        # Ensure the provided file object isn't consumed yet
+        # In edit if a new file has not be uploaded, the upload key doesn't
+        # contain any file data ('fp' key).
         if file_infos.has_key('fp'):
+            # Ensure the provided file object isn't consumed yet
             file_infos['fp'].seek(0)
 
             # Retrieving file datas from the datas provided by the FileUploadWidget
@@ -185,7 +187,10 @@ class FileEditView(FileUploadView):
                 'filename': filedict['name'],
                 'uid': str(self.request.context.id),
                 }
-        filedict.pop('data')
+        # Since data is a deferred column it should not be present in the output
+        # If in the request lifecycle, this column was already accessed, it will
+        # be present and should be poped out (no need for it in this form)
+        filedict.pop('data', None)
         filedict.pop('mimetype')
         filedict.pop('size')
         return filedict

@@ -38,26 +38,10 @@ class SessionDBFileUploadTempStore(SessionFileUploadTempStore):
         else:
             return None
 
-def get_file_datas(request, file_obj):
-    from cStringIO import StringIO
-    buf = StringIO()
-    buf.write(file_obj.data)
-    datas = {
-            'uid': str(file_obj.id),
-            'fp': buf,
-            'mimetype': file_obj.mimetype,
-            'filename': file_obj.name,
-            'size': file_obj.size,
-            'preview_url': request.route_path('file', id=file_obj.id)
-            }
-    return datas
-
 @colander.deferred
 def deferred_upload_widget(node, kw):
     request = kw['request']
     tmpstore = SessionDBFileUploadTempStore(request)
-    if request.context.type_ == 'file':
-        tmpstore[str(request.context.id)] = get_file_datas(request, request.context)
     return deform.widget.FileUploadWidget(tmpstore)
 
 

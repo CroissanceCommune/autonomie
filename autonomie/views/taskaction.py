@@ -60,6 +60,7 @@ from autonomie.views.forms.task import (
         SetProductsSchema,
         )
 from autonomie.views.forms import BaseFormView
+from autonomie.views.files import get_add_file_link
 from autonomie.utils.pdf import (
         write_pdf,
         render_html,
@@ -652,6 +653,9 @@ def populate_actionmenu(request):
     else:
         project = request.context
     request.actionmenu.add(get_project_redirect_btn(request, project.id))
+    request.actionmenu.add(
+            get_add_file_link(request)
+            )
 
 
 def task_html_view(request):

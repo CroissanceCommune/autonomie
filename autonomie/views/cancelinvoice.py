@@ -39,6 +39,7 @@ from autonomie.models.task.invoice import (
         CancelInvoice,
         CancelInvoiceLine,
         )
+from autonomie.views.files import FileUploadView
 from autonomie.views.forms import merge_session_with_post
 from autonomie.utils.views import submit_btn
 from autonomie.exception import Forbidden
@@ -314,3 +315,11 @@ def includeme(config):
                     request_param='action=set_products',
                     permission="view",
                     renderer='base/formpage.mako')
+
+    config.add_view(
+            FileUploadView,
+            route_name="cancelinvoice",
+            renderer='base/formpage.mako',
+            permission='edit',
+            request_param='action=attach_file',
+            )

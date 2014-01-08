@@ -650,7 +650,8 @@ def populate_actionmenu(request):
     else:
         project = request.context
     request.actionmenu.add(get_project_redirect_btn(request, project.id))
-    request.actionmenu.add(
+    if context_is_task(request.context):
+        request.actionmenu.add(
             get_add_file_link(request)
             )
 

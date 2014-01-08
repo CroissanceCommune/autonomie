@@ -91,3 +91,18 @@ def percent(part, total):
     """
     value = part * 100.0 / total
     return float(dec_round(Decimal(str(value)), 2))
+
+
+def convert_to_int(value, default=None):
+    """
+    try to convert the given value to an int
+    """
+    try:
+        val = int(value)
+    except ValueError as err:
+        if default:
+            val = default
+        else:
+            raise err
+    return val
+

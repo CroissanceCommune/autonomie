@@ -155,6 +155,11 @@ else:
                 % elif hasattr(document, 'invoice'):
                     ${format_filelist(document.invoice)}
                   % endif
+                  <a class='btn'
+                      href='${request.route_path(document.type_, id=document.id, _query=dict(action="attach_file"))}'
+                      title="Attacher un fichier">
+                      <i class='icon icon-plus'></i>
+                  </a>
               </td>
         </tr>
         % endfor

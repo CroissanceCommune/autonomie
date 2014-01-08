@@ -209,7 +209,7 @@ path = request.current_route_path(_query=get_args)
                   </li>
               % endif
           % if loop.last:
-              <ul>
+              </ul>
           % endif
       % endfor
   % endif

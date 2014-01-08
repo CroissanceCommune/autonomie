@@ -55,7 +55,7 @@ def write_headers(request, filename, header):
     request.response.content_type = str(header)
     request.response.headerlist.append(
             ('Content-Disposition',
-             'attachment; filename={0}'.format(force_ascii(filename))))
+             'attachment; filename="{0}"'.format(force_ascii(filename))))
     return request
 
 

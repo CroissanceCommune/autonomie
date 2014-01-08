@@ -28,7 +28,11 @@ import colander
 import deform
 import simplejson as json
 
+from pyramid.threadlocal import get_current_registry
 from pyramid_deform import SessionFileUploadTempStore
+
+from autonomie.compute.math_utils import convert_to_int
+from autonomie.views.render_api import human_readable_filesize
 
 
 class SessionDBFileUploadTempStore(SessionFileUploadTempStore):
@@ -52,6 +56,38 @@ def deferred_filetype_select(node, kw):
     filetypes.insert(0, "")
     values = zip(filetypes, filetypes)
     return deform.widget.SelectWidget(values=values)
+
+
+def get_max_allowedfilesize():
+    """
+    Return the max allowed filesize configured in autonomie
+    """
+    default = 1048576 # 1MB
+    settings = get_current_registry().settings
+    size = settings.get("autonomie.maxfilesize", default)
+    return convert_to_int(size, default)
+
+
+def file_description():
+    """
+        Return the file upload field description
+    """
+    size = get_max_allowedfilesize()
+    return u"Taille maximale : {0}".format(human_readable_filesize(size))
+
+
+def filesize_validator(node, value):
+    """
+    Validates the file's size
+    """
+    file_obj = value.get('fp')
+    if file_obj:
+        file_obj.seek(0)
+        max_filesize = get_max_allowedfilesize()
+        size = len(file_obj.read())
+        if size > max_filesize:
+            message = u"Ce fichier est trop volumineux"
+            raise colander.Invalid(node, message)
 
 
 class FileUploadSchema(colander.Schema):
@@ -79,4 +115,6 @@ class FileUploadSchema(colander.Schema):
             deform.FileData(),
             widget=deferred_upload_widget,
             title=u"Choix du fichier",
+            description=file_description(),
+            validator=filesize_validator,
             )

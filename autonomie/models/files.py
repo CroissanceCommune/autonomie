@@ -37,6 +37,8 @@ from sqlalchemy.orm import (
         deferred,
         )
 
+from sqlalchemy.dialects.mysql.base import LONGBLOB
+
 from autonomie.models.base import default_table_args
 from autonomie.models.node import Node
 
@@ -49,7 +51,8 @@ class File(Node):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'file'}
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
-    data = deferred(Column(LargeBinary()))
+    description = Column(String(100), default="")
+    data = deferred(Column(LONGBLOB()))
     mimetype = Column(String(100))
     size = Column(Integer)
 
@@ -74,3 +77,7 @@ class File(Node):
 
     def getvalue(self):
         return self.data
+
+    @property
+    def label(self):
+        return self.description or self.name

@@ -32,7 +32,18 @@ from autonomie.models.activity import (
         ActivityType,
         ACTIVITY_MODES,
         )
-from autonomie.views.forms import main
+from autonomie.views.forms import (
+        main,
+        lists,
+        )
+
+
+STATUS_OPTIONS = (
+    (u"Toutes les activités", "all"),
+    (u"Les activités planifiées", "planned"),
+    (u"Les activités terminées", "closed"),
+    )
+
 
 
 def get_activity_types():
@@ -96,3 +107,20 @@ class RecordActivitySchema(colander.Schema):
     objectifs = main.textarea_node(title=u"Définition des objectifs")
     action = main.textarea_node(title=u"Plan d'action et préconisations")
     documents = main.textarea_node(title=u"Documents produits")
+
+
+class ActivityListSchema(lists.BaseListsSchema):
+    """
+    Schema for activity listing
+    """
+    status = colander.SchemaNode(
+            colander.String(),
+            validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
+            default='all',
+            missing='all')
+    conseiller_id = main.user_node(
+            roles=['manager', 'admin'],
+            missing=-1,
+            default=main.deferred_current_user_id,
+            )
+    participant_id = main.user_node(missing=-1)

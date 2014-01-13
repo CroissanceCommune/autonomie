@@ -30,9 +30,11 @@ import logging
 import deform
 
 from pyramid.httpexceptions import HTTPFound
+from sqlalchemy.orm import aliased
 
+from autonomie.views.base import BaseListView
 from autonomie.models.activity import Activity
-from autonomie.models.user import User
+from autonomie.models import user
 from autonomie.views.forms import (
         BaseFormView,
         merge_session_with_post,
@@ -41,6 +43,8 @@ from autonomie.views.forms.activity import (
         CreateActivitySchema,
         NewActivitySchema,
         RecordActivitySchema,
+        ActivityListSchema,
+        STATUS_OPTIONS,
         )
 from autonomie.views import render_api
 
@@ -75,11 +79,12 @@ class NewActivityView(BaseFormView):
         """
         log.debug("A new activity will be created")
         log.debug(appstruct)
-        activity = Activity()
+        activity = Activity(status="planned")
         come_from = appstruct.pop('come_from')
         now = appstruct.pop('now', False)
         participants_ids = appstruct.pop('participants')
-        appstruct['participants'] = [User.get(id_) for id_ in participants_ids]
+        appstruct['participants'] = [user.User.get(id_) \
+                for id_ in participants_ids]
         merge_session_with_post(activity, appstruct)
         self.dbsession.add(activity)
         self.dbsession.flush()
@@ -170,14 +175,59 @@ class ActivityEdit(BaseFormView):
         appstruct = self.get_appstruct()
         form.set_appstruct(appstruct)
 
+CONSEILLER = aliased(user.User)
+PARTICIPANTS = aliased(user.User)
 
-def activity_list(request):
-    """
-    Activity list view
-    """
-    query = Activity.query()
-    query = Activity.filter(Activity.conseiller_id==request.user.id)
-    return dict(activities=query)
+class ActivityList(BaseListView):
+    title = u"Accompagnement"
+    schema = ActivityListSchema()
+    sort_columns = dict(
+            date=Activity.date,
+            conseiller=CONSEILLER.lastname,
+            )
+    default_sort = 'date'
+    default_direction = 'desc'
+
+    def default_form_values(self, values):
+        """
+        Provide default form values for the manually rendered form
+        """
+        values = super(ActivityList, self).default_form_values(values)
+        values['status_options'] = STATUS_OPTIONS
+        values['conseiller_options'] = user.get_user_by_roles(
+                ['admin',  'manager'])
+        values['participants_options'] = user.User.query()
+        return values
+
+    def query(self):
+        log.debug(u"Querying activities")
+        query = Activity.query()
+        query = query.outerjoin(CONSEILLER, Activity.conseiller)
+        query = query.outerjoin(PARTICIPANTS, Activity.participants)
+        return query
+
+    def filter_conseiller(self, query, appstruct):
+        """
+        Add a filter on the conseiller to the current query
+        """
+        conseiller_id = appstruct['conseiller_id']
+        if conseiller_id != -1:
+            query = query.filter(Activity.conseiller_id==conseiller_id)
+        return query
+
+    def filter_participant(self, query, appstruct):
+        participant_id = appstruct['participant_id']
+        if participant_id != -1:
+            query = query.filter(
+                    Activity.participants.any(PARTICIPANTS.id==participant_id)
+                    )
+        return query
+
+    def filter_status(self, query, appstruct):
+        status = appstruct['status']
+        if status != 'all':
+            query = query.filter(Activity.status==status)
+        return query
 
 
 def activity_view_only_view(request):
@@ -192,7 +242,7 @@ def includeme(config):
     """
     config.add_route(
             'activity',
-            "/activity/{id:\d+}",
+            "/activities/{id:\d+}",
             traverse='/activities/{id}',
             )
     config.add_route('activities', "/activities")
@@ -213,7 +263,7 @@ def includeme(config):
             renderer="/base/formajax.mako",
             )
     config.add_view(
-            activity_list,
+            ActivityList,
             route_name='activities',
             permission='view',
             renderer="/activities.mako",

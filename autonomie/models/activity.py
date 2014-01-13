@@ -80,7 +80,7 @@ class Event(Node):
     __mapper_args__ = {'polymorphic_identity': 'event'}
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     date = Column(Date, default=datetime.date.today)
-    status = Column(String(15))
+    status = Column(String(15), default='planned')
 
 
 class Activity(Event):

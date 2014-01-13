@@ -42,11 +42,13 @@
         % if records:
             % for customer in records:
                 <tr class='tableelement' id="${customer.id}">
-                    <td onclick="document.location='${request.route_path("customer", id=customer.id)}'" class="rowlink" >${customer.code}</td>
-                    <td onclick="document.location='${request.route_path("customer", id=customer.id)}'" class="rowlink" >${customer.name}</td>
-                    <td onclick="document.location='${request.route_path("customer", id=customer.id)}'" class="rowlink" >${customer.contactLastName} ${customer.contactFirstName}</td>
+                    <% url = request.route_path("customer", id=customer.id) %>
+                    <% onclick = "document.location='${url}'".format(url=url) %>
+                    <td onclick="${onclick}" class="rowlink" >${customer.code}</td>
+                    <td onclick="${onclick}" class="rowlink" >${customer.name}</td>
+                    <td onclick="${onclick}" class="rowlink" >${customer.contactLastName} ${customer.contactFirstName}</td>
                     <td style="text-align:right">
-                        ${table_btn(request.route_path("customer", id=customer.id), u"Voir/Éditer", u"Voir/Éditer ce client", icon=u"icon-pencil")}
+                        ${table_btn(url, u"Voir/Éditer", u"Voir/Éditer ce client", icon=u"icon-pencil")}
                     </td>
                 </tr>
             % endfor

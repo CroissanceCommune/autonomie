@@ -503,7 +503,7 @@ class TaskConfiguration(colander.MappingSchema):
         title=u"Phase où insérer le devis",
         widget=deferred_phases_widget,
         default=deferred_default_phase)
-    taskDate = main.date_node(title=u"Date du devis")
+    taskDate = main.today_node(title=u"Date du devis")
     description = colander.SchemaNode(
         colander.String(),
         title=u"Objet du devis",

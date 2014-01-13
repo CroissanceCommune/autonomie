@@ -301,11 +301,11 @@ class EstimationList(BaseListView):
     default_sort = 'taskDate'
     default_direction = 'desc'
 
-    def default_form_values(self, appstruct):
-        values = super(EstimationList, self).default_form_values(appstruct)
-        appstruct['years'] = get_years(self.request.dbsession)
+    def default_form_values(self, values):
+        values = super(EstimationList, self).default_form_values(values)
+        values['years'] = get_years(self.request.dbsession)
         values["customers"] = self.request.context.customers
-        appstruct['status_options'] = STATUS_OPTIONS
+        values['status_options'] = STATUS_OPTIONS
         return values
 
     def query(self):

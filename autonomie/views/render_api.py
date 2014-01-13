@@ -60,6 +60,11 @@ EXPENSE_STATUS = dict((
     ('invalid', u"Invalidé{genre}",),
     ("resulted", u"Paiement notifié",),
     ))
+ACTIVITY_STATUS = dict(
+    ("closed", u"Terminée",),
+    ("planned", u"Planifiée",),
+    )
+
 
 def format_status(task):
     """
@@ -94,6 +99,14 @@ def format_expense_status(expense):
     date = format_date(expense.status_date)
     suffix = u" par {0} le {1}".format(account, date)
     return status_str + suffix
+
+
+def format_activity_status(activity):
+    """
+        Return a formatted status string for the given activity
+    """
+    status_str = ACTIVITY_STATUS.get(activity.status, DEF_STATUS)
+    return status_str
 
 
 def format_account(account, reverse=False, upper=True):
@@ -280,6 +293,7 @@ api = Api(format_amount=format_amount,
           format_date=format_date,
           format_status=format_status,
           format_expense_status=format_expense_status,
+          format_activity_status=format_activity_status,
           format_account=format_account,
           format_name=format_name,
           format_paymentmode=format_paymentmode,

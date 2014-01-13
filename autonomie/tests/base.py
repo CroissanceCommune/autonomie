@@ -38,8 +38,14 @@ from autonomie.models.base import DBBASE  # base declarative object
 from sqlalchemy.orm import scoped_session
 
 here = os.path.dirname(__file__)
-settings = appconfig('config:' + os.path.join(here, '../../', 'test.ini'),
-                                                          "autonomie")
+base_dir = os.path.join(here, '../..')
+
+def __current_test_ini_file():
+    local_test_ini = os.path.join(base_dir, 'test.ini')
+    if os.path.exists(local_test_ini):
+        return local_test_ini
+    return os.path.join(base_dir, 'travis.ini')
+settings = appconfig('config:%s' % __current_test_ini_file(), "autonomie")
 TMPDIR = os.path.join(here, 'tmp')
 DATASDIR = os.path.join(here, 'datas')
 

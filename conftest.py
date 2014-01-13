@@ -13,8 +13,10 @@
 # * Project :
 #
 import sys
-from os import system
 from os.path import dirname, join
+import os.path
+import shlex
+import subprocess
 
 from paste.deploy.loadwsgi import appconfig
 from pyramid.config import Configurator
@@ -25,7 +27,16 @@ from autonomie.tests.base import TMPDIR
 
 
 HERE = dirname(__file__)
-SETTINGS = appconfig('config:' + join(HERE, 'test.ini'), "autonomie")
+
+
+def __current_test_ini_file():
+    local_test_ini = os.path.join(HERE, 'test.ini')
+    if os.path.exists(local_test_ini):
+        return local_test_ini
+    return os.path.join(HERE, 'travis.ini')
+
+
+SETTINGS = appconfig('config:%s' % __current_test_ini_file(), "autonomie")
 PREFIX = "testdb."
 
 OPTIONS = dict((key[len(PREFIX):], SETTINGS[key])
@@ -35,6 +46,9 @@ if HERE:
     OPTIONS['sampledb'] = join(HERE, OPTIONS['sampledb'])
     OPTIONS['sampledatas'] = join(HERE, OPTIONS['sampledatas'])
     OPTIONS['updatedir'] = join(HERE, OPTIONS['updatedir'])
+    OPTIONS.setdefault('mysql_cmd', 'mysql_cmd')
+    OPTIONS.setdefault('Tools',  join(HERE, 'Tools'))
+    os.putenv('SHELL', '/bin/bash')
 
 
 def launch_cmd(cmd):
@@ -43,14 +57,16 @@ def launch_cmd(cmd):
     """
     command_line = cmd.format(**OPTIONS)
     print "Launching : %s" % command_line
-    return system(command_line)
+    process = subprocess.Popen(shlex.split(command_line), shell=True)
+    process.wait()
+    return process.returncode
 
 
 def launch_sql_cmd(cmd):
     """
         Main entry to launch sql commands
     """
-    return launch_cmd("echo \"%s\"|{mysql_cmd}" % cmd)
+    return launch_cmd(". {Tools} && echo \"%s\"|{mysql_cmd}" % cmd)
 
 
 def create_sql_user():
@@ -105,7 +121,7 @@ def test_connect():
     """
         test the db connection
     """
-    cmd = "echo 'quit' | {mysql_cmd}"
+    cmd = ". {Tools} && echo 'quit' | {mysql_cmd}"
     ret_code = launch_cmd(cmd)
 
     if ret_code != 0:
@@ -131,6 +147,8 @@ def initialize_test_database():
     """
         dump sample datas as a test database
     """
+    if __current_test_ini_file().endswith('travis.ini'):
+        return
     print "Initializing test database"
     test_connect()
     create_sql_user()

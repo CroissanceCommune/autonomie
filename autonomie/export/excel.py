@@ -507,7 +507,7 @@ def make_excel_view(filename_builder, factory):
     """
     def _view(request):
         """
-            the dynamically builded view object
+            the dynamically built view object
         """
         filename = filename_builder(request)
         result = factory(request.context).render()

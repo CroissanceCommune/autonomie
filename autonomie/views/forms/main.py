@@ -57,7 +57,7 @@ def get_users_options(roles=None):
     return [(unicode(u.id), render_api.format_account(u)) for u in query]
 
 
-def get_deferred_user_choice(roles=None):
+def get_deferred_user_choice(roles=None, widget_options={}):
     """
         Return a colander deferred for users selection options
     """
@@ -67,7 +67,7 @@ def get_deferred_user_choice(roles=None):
             Return a user select widget
         """
         choices = get_users_options(roles)
-        return ChosenSingleWidget(values=choices)
+        return ChosenSingleWidget(values=choices, **widget_options)
     return user_select
 
 
@@ -117,9 +117,10 @@ def user_node(roles=None, **kw):
     roles: allow to restrict the selection to the given roles
         (to select between admin, contractor and manager)
     """
+    widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
             colander.Integer(),
-            widget=get_deferred_user_choice(roles),
+            widget=get_deferred_user_choice(roles, widget_options),
             **kw
             )
 

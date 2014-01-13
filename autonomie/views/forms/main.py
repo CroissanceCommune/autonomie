@@ -92,6 +92,14 @@ def deferred_today(node, kw):
     return date.today()
 
 
+@colander.deferred
+def deferred_current_user_id(node, kw):
+    """
+        Return a deferred for the current user
+    """
+    return kw['request'].user.id
+
+
 def get_date_input(**kw):
     """
     Return a date input displaying a french user friendly format
@@ -101,6 +109,7 @@ def get_date_input(**kw):
     date_input = custom_widgets.CustomDateInputWidget(**kw)
     date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
+
 
 def user_node(roles=None, **kw):
     """

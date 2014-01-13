@@ -154,9 +154,11 @@ class BaseListView(BaseView):
         schema = self.schema.bind(**self._get_bind_params())
         try:
             appstruct = schema.deserialize(self.request.GET)
-        except colander.Invalid:
+        except colander.Invalid as e:
             # If values are not valid, we want the default ones to be provided
             # see the schema definition
+            log.error("CURRENT SEARCH VALUES ARE NOT VALID")
+            log.error(e)
             appstruct = schema.deserialize({})
 
         query = self._filter(query, appstruct)

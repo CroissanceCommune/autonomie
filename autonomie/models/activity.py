@@ -68,6 +68,9 @@ ACTIVITY_PARTICIPANT = Table(
 ACTIVITY_MODES = (u"en direct", u"par mail", u"par courrier", u"par téléphone")
 
 
+ACTIVITY_STATUS = (u"planned", u"closed",)
+
+
 class Event(Node):
     """
         An event model
@@ -77,7 +80,7 @@ class Event(Node):
     __mapper_args__ = {'polymorphic_identity': 'event'}
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     date = Column(Date, default=datetime.date.today)
-    state = Column(String(15))
+    status = Column(String(15))
 
 
 class Activity(Event):

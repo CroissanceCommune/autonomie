@@ -60,10 +60,10 @@ EXPENSE_STATUS = dict((
     ('invalid', u"Invalidé{genre}",),
     ("resulted", u"Paiement notifié",),
     ))
-ACTIVITY_STATUS = dict(
+ACTIVITY_STATUS = dict((
     ("closed", u"Terminée",),
     ("planned", u"Planifiée",),
-    )
+    ))
 
 
 def format_status(task):

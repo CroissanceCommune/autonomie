@@ -30,6 +30,7 @@ import logging
 import deform
 
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import has_permission
 from sqlalchemy.orm import aliased
 
 from autonomie.views.base import BaseListView
@@ -45,6 +46,7 @@ from autonomie.views.forms.activity import (
         RecordActivitySchema,
         ActivityListSchema,
         STATUS_OPTIONS,
+        get_activity_types,
         )
 from autonomie.views import render_api
 
@@ -197,6 +199,7 @@ class ActivityList(BaseListView):
         values['conseiller_options'] = user.get_user_by_roles(
                 ['admin',  'manager'])
         values['participants_options'] = user.User.query()
+        values['type_options'] = get_activity_types()
         return values
 
     def query(self):
@@ -223,6 +226,12 @@ class ActivityList(BaseListView):
                     )
         return query
 
+    def filter_type(self, query, appstruct):
+        type_id = appstruct['type_id']
+        if type_id != -1:
+            query = query.filter(Activity.type_id == type_id)
+        return query
+
     def filter_status(self, query, appstruct):
         status = appstruct['status']
         if status != 'all':
@@ -230,11 +239,31 @@ class ActivityList(BaseListView):
         return query
 
 
-def activity_view_only_view(request):
+def activity_view_only_view(context, request):
     """
     Single Activity view-only view
     """
+    if has_permission('manage', context, request):
+        url = request.route_path(
+                'activity',
+                id=context.id,
+                _query=dict(action='edit'),
+                )
+        return HTTPFound(url)
     return dict(activity=request.context)
+
+
+def activity_delete_view(context, request):
+    """
+    Deletion activity view
+    """
+    url = request.referer
+    request.dbsession.delete(context)
+    request.session.flash(u"L'activité a bien été supprimée")
+    if not url:
+        url = request.route_path('activities')
+    return HTTPFound(url)
+
 
 def includeme(config):
     """
@@ -274,6 +303,13 @@ def includeme(config):
             route_name='activity',
             permission='view',
             renderer="/activity.mako",
+            )
+
+    config.add_view(
+            activity_delete_view,
+            route_name='activity',
+            permission='manage',
+            request_param='action=delete',
             )
 
     config.add_view(

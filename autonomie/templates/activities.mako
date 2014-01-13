@@ -50,7 +50,7 @@
                             </option>
                     %endfor
                 </select>
-                <select name='status' id='status-select'>
+                <select name='status' id='status-select' class='span2'>
                     %for label, value in status_options:
                         <option
                             %if value == status:
@@ -61,7 +61,19 @@
                             </option>
                     %endfor
                 </select>
-                <select id='participant-select' name='participant_id' data-placeholder="Rechercher un participant">
+                <select name='type_id' id='type-select' class='span2' data-placeholder="Filtrer par type d'activité">
+                    <option value=-1></option>
+                    %for activity_type in type_options:
+                        <option
+                            %if type_id == activity_type.id:
+                                selected='1'
+                            %endif
+                            value='${activity_type.id}'>
+                                ${activity_type.label}
+                            </option>
+                    %endfor
+                </select>
+                <select id='participant-select' name='participant_id' data-placeholder="Rechercher un participant" class='span3'>
                     <option value='-1'></option>
                     %for participant in participants_options:
                             <option
@@ -73,7 +85,7 @@
                             </option>
                     %endfor
                 </select>
-                <select class='span1' name='items_per_page'>
+                <select class='span2' name='items_per_page' id='items-select'>
                     % for label, value in items_per_page_options:
                         % if int(value) == int(items_per_page):
                             <option value="${value}" selected='true'>${label}</option>
@@ -83,10 +95,6 @@
                     % endfor
                 </select>
             </div>
-            <div class='pull-left' style="padding-right:3px">
-                <input type='text' name='search' class='input-medium search-query' value="${search}" />
-            </div>
-            <button type="submit" class="btn btn-primary">Filtrer</button>
         </form>
     </div>
     <div class='span4'>
@@ -117,7 +125,7 @@
     <tbody>
         % for activity in records:
             <% url = request.route_path('activity', id=activity.id) %>
-            <% onclick = "document.location='${url}'".format(url=url) %>
+            <% onclick = "document.location='{url}'".format(url=url) %>
             <%
 if activity.status == 'planned':
     css = "invoice_notpaid"
@@ -149,6 +157,8 @@ else:
                     % else:
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'activité", icon='icon-pencil')}
+                        <% del_url = request.route_path('activity', id=activity.id, _query=dict(action="delete")) %>
+                        ${table_btn(del_url, u"Supprimer",  u"Supprimer cette activité", icon='icon-delete', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cette activité ?')")}
                     %endif
                 </td>
             </tr>
@@ -163,4 +173,7 @@ $('#participant-select').chosen({allow_single_deselect: true});
 $('#participant-select').change(function(){$(this).closest('form').submit()});
 $('#status-select').chosen({allow_single_deselect: true});
 $('#status-select').change(function(){$(this).closest('form').submit()});
+$('#type-select').chosen({allow_single_deselect: true});
+$('#type-select').change(function(){$(this).closest('form').submit()});
+$('#items-select').chosen({allow_single_deselect: true});
 </%block>

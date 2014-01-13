@@ -26,7 +26,7 @@
     Activity search schema (#TODO)
 """
 import colander
-from deform import widget
+from deform import widget as deform_widget
 
 from autonomie.models.activity import (
         ActivityType,
@@ -53,7 +53,14 @@ def get_activity_types():
 @colander.deferred
 def deferred_select_type(node, kw):
     options = [(unicode(a.id), a.label) for a in get_activity_types()]
-    return widget.SelectWidget(values=options)
+    return deform_widget.SelectWidget(values=options)
+
+
+@colander.deferred
+def deferred_type_validator(node, kw):
+    values = [a.id for a in get_activity_types()]
+    values.append(-1)
+    return colander.OneOf(values)
 
 
 class ParticipantsSequence(colander.SequenceSchema):
@@ -80,11 +87,14 @@ class CreateActivitySchema(colander.MappingSchema):
             )
     mode = colander.SchemaNode(
             colander.String(),
-            widget=widget.SelectWidget(values=zip(ACTIVITY_MODES, ACTIVITY_MODES)),
+            widget=deform_widget.SelectWidget(
+                values=zip(ACTIVITY_MODES, ACTIVITY_MODES)
+                ),
             title=u"Mode d'entretien",
             )
-    participants = ParticipantsSequence(title=u"Participants",
-            widget=widget.SequenceWidget(min_len=1))
+    participants = ParticipantsSequence(
+            title=u"Participants",
+            widget=deform_widget.SequenceWidget(min_len=1))
 
 
 class NewActivitySchema(CreateActivitySchema):
@@ -113,14 +123,18 @@ class ActivityListSchema(lists.BaseListsSchema):
     """
     Schema for activity listing
     """
-    status = colander.SchemaNode(
-            colander.String(),
-            validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
-            default='all',
-            missing='all')
     conseiller_id = main.user_node(
             roles=['manager', 'admin'],
             missing=-1,
             default=main.deferred_current_user_id,
             )
     participant_id = main.user_node(missing=-1)
+    status = colander.SchemaNode(
+            colander.String(),
+            validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
+            default='all',
+            missing='all')
+    type_id = colander.SchemaNode(
+            colander.Integer(),
+            validator=deferred_type_validator,
+            missing=-1)

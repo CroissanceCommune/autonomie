@@ -154,7 +154,7 @@ class TestSageInvoice(BaseTestCase):
 
     def test_populate_discount_lines(self):
         tvas, products, invoice = prepare(discount=True)
-        wrapper = SageInvoice(invoice=invoice, compte_cgs=get_config())
+        wrapper = SageInvoice(invoice=invoice, config=get_config())
         wrapper._populate_discounts()
         wrapper._round_products()
         self.assertEqual(wrapper.products.keys(), ['CG_RRR'])
@@ -171,13 +171,13 @@ class TestSageInvoice(BaseTestCase):
         # No entry should be returned
         config = get_config()
         config.pop("compte_cg_tva_rrr")
-        wrapper = SageInvoice(invoice=invoice, compte_cgs=config)
+        wrapper = SageInvoice(invoice=invoice, config=config)
         wrapper._populate_discounts()
         self.assertEqual(wrapper.products.keys(), [])
 
         config = get_config()
         config.pop("code_tva_rrr")
-        wrapper = SageInvoice(invoice=invoice, compte_cgs=config)
+        wrapper = SageInvoice(invoice=invoice, config=config)
         wrapper._populate_discounts()
         self.assertEqual(wrapper.products.keys(), [])
 
@@ -185,7 +185,7 @@ class TestSageInvoice(BaseTestCase):
 
     def test_populate_expenses(self):
         tvas, products, invoice = prepare()
-        wrapper = SageInvoice(invoice=invoice, compte_cgs=get_config())
+        wrapper = SageInvoice(invoice=invoice, config=get_config())
         wrapper.expense_tva_compte_cg = "TVA0001"
         wrapper._populate_expenses()
         wrapper._round_products()
@@ -207,7 +207,7 @@ class BaseBookEntryTest(BaseTestCase):
         """
         tvas, products, invoice = prepare()
         config = get_config()
-        wrapped_invoice = SageInvoice(invoice=invoice, compte_cgs=config)
+        wrapped_invoice = SageInvoice(invoice=invoice, config=config)
         wrapped_invoice.populate()
         book_entry_factory = self.factory(config)
         book_entry_factory.set_invoice(wrapped_invoice)
@@ -232,7 +232,7 @@ class BaseBookEntryTest(BaseTestCase):
         """
         tvas, products, invoice = prepare()
         config = get_config()
-        wrapped_invoice = SageInvoice(invoice=invoice, compte_cgs=config)
+        wrapped_invoice = SageInvoice(invoice=invoice, config=config)
         wrapped_invoice.populate()
         book_entry_factory = self.factory(config)
         book_entry_factory.set_invoice(wrapped_invoice)

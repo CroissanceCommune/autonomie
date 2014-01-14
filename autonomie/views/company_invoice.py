@@ -330,7 +330,7 @@ def query_documents_for_export(from_number, to_number, year):
     records = query.all()
     # We need to sort by officialNumber manually (there are two different
     # columns, one for invoices, the other for cancelinvoices)
-    sorted(records, key=lambda a: a.officialNumber)
+    records = sorted(records, key=lambda a: a.officialNumber)
     return records
 
 

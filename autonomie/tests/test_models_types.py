@@ -22,6 +22,7 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import os
 import datetime
 import time
 from .base import BaseTestCase
@@ -45,6 +46,7 @@ class TestCustomFileType(BaseTestCase):
 
 class TestCustomDateType(BaseTestCase):
     def test_bind(self):
+        os.environ['TZ'] = "Europe/Paris"
         a = CustomDateType()
         date = datetime.datetime(2012,1,1,1,1)
         self.assertEqual(a.process_bind_param(date, "nutt"),
@@ -58,6 +60,7 @@ class TestCustomDateType(BaseTestCase):
         self.assertTrue(a.process_bind_param("", "nutt") <= t + 6000)
 
     def test_result(self):
+        os.environ['TZ'] = "Europe/Paris"
         a = CustomDateType()
         date = datetime.datetime(2012,1,1,1,1)
         timestamp = 1325376060

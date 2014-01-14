@@ -1,14 +1,11 @@
 language: python
 python:
   - 2.7
-  - 3.3
 services:
     - mysql
-install: pip install -r requirements.txt -r test_requirements.txt .
+install: pip install -r base_requirements.txt -r test_requirements.txt .
 script:  py.test
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq build-essential libjpeg-dev libfreetype6 libfreetype6-dev zlib1g-dev
   - ./.travis_before_install.sh
 notifications:
     irc:

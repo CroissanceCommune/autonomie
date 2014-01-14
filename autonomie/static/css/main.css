@@ -138,7 +138,7 @@ textarea{
 }
 /* Invoice list */
 .invoice_resulted, .estimation_geninv{
-  background-color:#fff866;
+  background-color:#baff87;
   width:36px;
 }
 .invoice_paid{
@@ -159,7 +159,7 @@ textarea{
   text-decoration:underline;
 }
 .invoice_resulted_tr, .estimation_geninv_tr{
-  background-color:#fffbaa;
+  background-color:#c4ffaa;
 }
 .invoice_paid_tr{
   background-color:#ffb266;

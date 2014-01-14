@@ -327,8 +327,11 @@ def query_documents_for_export(from_number, to_number, year):
             Invoice.financial_year == year,
             CancelInvoice.financial_year == year,
             ))
-    query = query.order_by(Task.taskDate)
-    return query.all()
+    records = query.all()
+    # We need to sort by officialNumber manually (there are two different
+    # columns, one for invoices, the other for cancelinvoices)
+    sorted(records, key=lambda a: a.officialNumber)
+    return records
 
 
 def invoices_pdf_view(request):

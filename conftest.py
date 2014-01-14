@@ -14,7 +14,7 @@
 #
 import sys
 from os.path import dirname, join
-import os.path
+import os
 import shlex
 import subprocess
 
@@ -166,6 +166,8 @@ def pytest_sessionstart():
         Py.test setup
     """
     from py.test import config
+
+    os.environ['TZ'] = "Europe/Paris"
 
     # Only run database setup on master (in case of xdist/multiproc mode)
     if not hasattr(config, 'slaveinput'):

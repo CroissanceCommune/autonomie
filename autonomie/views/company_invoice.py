@@ -327,6 +327,7 @@ def query_documents_for_export(from_number, to_number, year):
             Invoice.financial_year == year,
             CancelInvoice.financial_year == year,
             ))
+    query = query.order_by(Task.taskDate)
     return query.all()
 
 

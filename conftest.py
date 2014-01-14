@@ -187,6 +187,8 @@ def pytest_sessionfinish():
         py.test teardown
     """
     from py.test import config
+    if __current_test_ini_file().endswith('travis.ini'):
+        return
 
     if not hasattr(config, 'slaveinput'):
         drop_sql_datas()

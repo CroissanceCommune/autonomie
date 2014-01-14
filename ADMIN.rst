@@ -10,8 +10,8 @@ The fr_FR.UTF8 locale must be installed::
 
 Create the mysql tables::
 
-    create database egw;
-    grant all privileges on egw.* to egw@localhost identified by "egw";
+    create database autonomie;
+    grant all privileges on autonomie.* to autonomie@localhost identified by "autonomie";
     flush privileges;
 
 Install autonomie::

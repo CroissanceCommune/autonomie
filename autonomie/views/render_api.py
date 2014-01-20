@@ -32,10 +32,12 @@ import bleach
 from copy import deepcopy
 
 ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p', 'span', 'h1',
-                                            'h2', 'h3', 'h4', 'h5', 'hr']
+                                            'h2', 'h3', 'h4', 'h5', 'hr',
+                                            'img']
 ALLOWED_HTML_ATTRS = deepcopy(bleach.ALLOWED_ATTRIBUTES)
 ALLOWED_HTML_ATTRS['font'] = ['color']
 ALLOWED_HTML_ATTRS['*'] = ['class', 'style']
+ALLOWED_HTML_ATTRS['img'] = ['src', 'width', 'height', 'alt']
 ALLOWED_CSS_STYLES = ['color', 'text-align', 'font-weight', 'font-family']
 
 DEF_STATUS = u"Statut inconnu"

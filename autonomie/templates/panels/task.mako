@@ -154,7 +154,7 @@
                 %if task.expenses:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
-                            Frais de port
+                            Frais réels
                         </td>
                         <td class='price'>
                             ${api.format_amount(task.expenses_amount())|n}&nbsp;€

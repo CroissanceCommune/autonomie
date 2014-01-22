@@ -27,9 +27,11 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
+    % if api.has_permission('manage', request.context, request):
         <a href="${request.route_path('activities', _query=dict(action='new'))}">
             Nouvelle activité
         </a>
+    %endif
     </li>
     <li>
     </li>
@@ -38,6 +40,7 @@
     <div class='span7'>
         <form class='form-search form-horizontal' id='search_form' method='GET'>
             <div style="padding-bottom:3px">
+                % if api.has_permission('manage', request.context, request):
                 <select id='conseiller-select' name='conseiller_id' data-placeholder="Rechercher un conseiller">
                     <option value='-1'></option>
                     %for conseiller in conseiller_options:
@@ -50,6 +53,7 @@
                             </option>
                     %endfor
                 </select>
+                % endif
                 <select name='status' id='status-select' class='span2'>
                     %for label, value in status_options:
                         <option
@@ -73,6 +77,7 @@
                             </option>
                     %endfor
                 </select>
+                % if api.has_permission('manage', request.context, request):
                 <select id='participant-select' name='participant_id' data-placeholder="Rechercher un participant" class='span3'>
                     <option value='-1'></option>
                     %for participant in participants_options:
@@ -85,6 +90,7 @@
                             </option>
                     %endfor
                 </select>
+                % endif
                 <select class='span2' name='items_per_page' id='items-select'>
                     % for label, value in items_per_page_options:
                         % if int(value) == int(items_per_page):

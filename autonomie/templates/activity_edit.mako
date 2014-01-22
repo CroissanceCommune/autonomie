@@ -21,23 +21,84 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="/base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="definition_list" />
+<%namespace file="/base/utils.mako" import="format_mail" />
 <%block name="content">
+<% activity = request.context %>
+<div class='row-fluid'>
+            <div class='section-header'>
+                <a href="#" data-toggle='collapse' data-target='#edition_form'>
+                    Éditer les informations générales <i class="icon-arrow-down"></i>
+                </a>
+            </div>
+            <div class='section-content collapse' id='edition_form'>
+                        ${form|n}
+            </div>
+            </div>
 <div class='row-fluid'>
     <div class='span4'>
-        ${form|n}
+            <% companies = set() %>
+            <div class='well'>
+                <h3>Participants</h3>
+                <ul>
+                % for participant in activity.participants:
+                    <li>
+                    ${api.format_account(participant)} : ${ format_mail(participant.email) }
+                    </li>
+                    % for company in participant.companies:
+                        <% companies.add(company) %>
+                    % endfor
+                %endfor
+                </ul>
+                <h3>Activités</h3>
+                % for company in companies:
+                    <div>
+                        <b>${company.name}</b>
+                        <ul>
+                        % for label, route in ( \
+                            (u'Liste des factures', 'invoices'), \
+                            (u'Liste des devis', 'estimations'), \
+                            (u'Gestion commerciale', 'commercial_handling'), \
+                            ):
+                            <li>
+                                <% url = request.route_path(route, id=company.id) %>
+                                <a href='#' onclick='window.open("${url}", "${label}");'>${label}</a>
+                            </li>
+                        % endfor
+                        </ul>
+                    </div>
+                % endfor
+            </div>
     </div>
     <div class='span8'>
+            <div class='well'>
+                <% items = (\
+                    (u'Conseiller', api.format_account(activity.conseiller)), \
+                    (u'Date', api.format_date(activity.date)), \
+                    (u"Type d'activité", activity.type_object.label), \
+                    (u"Mode d'entretien", activity.mode), \
+                    )\
+                %>
+                ${definition_list(items)}
+                <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
+                    Editer
+                </button>
+            </div>
         ${record_form|n}
+        <hr>
+        <div class='section-header'>
+            <a href="#" data-toggle='collapse' data-target='#next_activity_form_container'>
+                Programmer une nouvelle activité <i class="icon-arrow-down"></i>
+            </a>
+        </div>
+        <div class='section-content collapse' id='next_activity_form_container'>
+            <div id="next_activity_message" />
+            ${next_activity_form|n}
+        </div>
     </div>
 </div>
-    <button class='btn'
-        data-target="#next_activity_form_container"
-        data-toggle="collapse">
-        Programmer une nouvelle activité
-    </button>
-<div class='row-fluid collapse' id='next_activity_form_container'>
-    <div class="span8 offset2 well">
-        ${next_activity_form|n}
+<div class='row-fluid'>
+    <div class="span4">
     </div>
 </div>
 </%block>

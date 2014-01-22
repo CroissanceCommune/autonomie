@@ -24,7 +24,6 @@
 
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_mail" />
-<%namespace file="/base/utils.mako" import="format_phone" />
 <%namespace file="/base/utils.mako" import="format_company" />
 <%block name='content'>
 <div class='row-fluid'>

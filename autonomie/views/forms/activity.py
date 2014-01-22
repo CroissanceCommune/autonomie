@@ -113,10 +113,12 @@ class RecordActivitySchema(colander.Schema):
     """
     Schema for activity recording
     """
-    point = main.textarea_node(title=u"Point de suivi")
-    objectifs = main.textarea_node(title=u"Définition des objectifs")
-    action = main.textarea_node(title=u"Plan d'action et préconisations")
-    documents = main.textarea_node(title=u"Documents produits")
+    point = main.textarea_node(title=u"Point de suivi", missing='')
+    objectifs = main.textarea_node(title=u"Définition des objectifs",
+            missing='')
+    action = main.textarea_node(title=u"Plan d'action et préconisations",
+            missing='')
+    documents = main.textarea_node(title=u"Documents produits", missing='')
 
 
 class ActivityListSchema(lists.BaseListsSchema):

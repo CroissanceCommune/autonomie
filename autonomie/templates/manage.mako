@@ -29,9 +29,9 @@
 <%block name="content">
 <br />
 <div class='row-fluid'>
-    <div class='span10 offset1'>
+    <div class='span6'>
 <table class="table table-striped table-condensed table-hover table-bordered">
-    <caption>Devis, Factures et Avoirs</caption>
+    <caption>Les devis, factures et avoirs en attent</caption>
     <thead>
         <tr>
             <th>Entreprise</th>
@@ -54,16 +54,56 @@
     </tr>
 % endfor
 % if not tasks:
-    <tr><td colspan='3'>Aucun document en attente</td></tr>
+    <tr><td colspan='3'>aucun document en attente</td></tr>
 % endif
     </tbody>
 </table>
-<br />
-</div>
-<div class='row-fluid'>
-    <div class='span10 offset1'>
 <table class="table table-striped table-condensed table-hover table-bordered">
-<caption>Feuilles de notes de frais</caption>
+    <caption>Mes Activités / Rendez-vous à venir</caption>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Participant</th>
+            <th>Mode</th>
+            <th>Nature du rendez-vous</th>
+        </tr>
+    </thead>
+    <tbody>
+        % for activity in activities:
+            <tr>
+                <td onclick="document.location='${activity.url}'" class='rowlink'>
+                    ${api.format_date(activity.date)}
+                </td>
+                <td onclick="document.location='${activity.url}'" class='rowlink'>
+                    <ul>
+                    % for participant in activity.participants:
+                        <li>${api.format_account(participant)}</li>
+                    % endfor
+                    </ul>
+                </td>
+                <td onclick="document.location='${activity.url}'" class='rowlink'>
+                    ${activity.mode}
+                </td>
+                <td onclick="document.location='${activity.url}'" class='rowlink'>
+                    ${activity.type_object.label}
+                </td>
+            </tr>
+        % endfor
+        % if not activities:
+            <tr><td colspan='4'>aucune activité n'est prévue</td></tr>
+    % endif
+    </tbody>
+</table>
+<a
+    class='btn btn-primary'
+    href="${request.route_path('activities', _query=dict(conseiller_id=request.user.id))}"
+    >
+    Voir plus
+</a>
+</div>
+<div class='span6'>
+<table class="table table-striped table-condensed table-hover table-bordered">
+    <caption>Les feuilles de notes de frais en attente</caption>
     <thead>
         <tr>
             <th>Période</th>
@@ -86,6 +126,5 @@
 % endif
     </tbody>
 </table>
-</div>
 </div>
 </%block>

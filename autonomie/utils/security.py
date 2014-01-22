@@ -247,6 +247,18 @@ def get_base_acl(self):
         return the base acls
     """
     acl = DEFAULT_PERM[:]
+    acl.append((Allow, Authenticated, 'view',))
+    return acl
+
+
+def get_activity_acl(self):
+    """
+    Return acls for activities
+    """
+    acl = DEFAULT_PERM[:]
+    acl.extend(
+        [(Allow, u"%s" % user.login, "view") for user in self.participants]
+            )
     return acl
 
 
@@ -356,5 +368,5 @@ def wrap_db_objects():
     User.__acl__ = property(get_user_acl)
     ExpenseSheet.__acl__ = property(get_expensesheet_acl)
     BaseExpenseLine.__acl__ = property(get_expense_acl)
-    Activity.__acl__ = property(get_base_acl)
+    Activity.__acl__ = property(get_activity_acl)
     File.__acl__ = property(get_file_acl)

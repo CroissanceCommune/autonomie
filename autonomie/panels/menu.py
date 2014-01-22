@@ -163,6 +163,9 @@ def get_company_menu(request, cid, css=None):
     href = request.route_path("company_expenses", id=cid)
     gestion.add_item(u"Notes de frais", icon="icon-cog", href=href)
 
+    href = request.route_path("company_activities", id=cid)
+    gestion.add_item(u"Accompagnement", icon="icon-list-alt", href=href)
+
     menu.add(gestion)
 
     docs = DropDown(label=u"Documents")
@@ -195,20 +198,26 @@ def get_admin_menus(request):
     menu = Menu()
 
 
+    treasury = DropDown(label=u"Comptabilité")
     href = request.route_path("invoices")
     menu.add_item(u"Factures", icon="icon-list-alt", href=href)
-
-    href = request.route_path("holidays")
-    menu.add_item(u"Congés", icon="icon-plane", href=href)
+    if has_permission("admin", request.context, request):
+        href = request.route_path("sage_export")
+        treasury.add_item(u"Export des factures", icon="icon-list-alt",
+                href=href)
+    menu.add(treasury)
 
     if has_permission("admin", request.context, request):
         href = request.route_path("admin_index")
         menu.add_item(u"Configuration", icon="icon-cog", href=href)
-        treasury = DropDown(label=u"Comptabilité")
-        href = request.route_path("sage_export")
-        treasury.add_item(u"Export des factures", icon="icon-list-alt",
-                href=href)
-        menu.add(treasury)
+
+    accompagnement = DropDown(label=u"Accompagnement")
+    href = request.route_path('activities')
+    accompagnement.add_item(u"Rendez-vous", href=href)
+    menu.add(accompagnement)
+
+    href = request.route_path("holidays")
+    menu.add_item(u"Congés", icon="icon-plane", href=href)
     return menu
 
 

@@ -30,6 +30,7 @@ import locale
 import calendar
 import bleach
 from copy import deepcopy
+from pyramid.security import has_permission
 
 ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p', 'span', 'h1',
                                             'h2', 'h3', 'h4', 'h5', 'hr',
@@ -304,4 +305,5 @@ api = Api(format_amount=format_amount,
           urlupdate=urlupdate,
           month_name=month_name,
           clean_html=clean_html,
+          has_permission=has_permission,
           )

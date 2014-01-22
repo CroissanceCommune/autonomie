@@ -95,10 +95,10 @@ class Activity(Event):
     type_id = Column(ForeignKey('activity_type.id'))
     mode = Column(Enum(*ACTIVITY_MODES))
     # Champ text multiligne pour les activités
-    point = deferred(Column(Text()))
-    objectifs = deferred(Column(Text()))
-    action = deferred(Column(Text()))
-    documents = deferred(Column(Text()))
+    point = deferred(Column(Text()), group='edit')
+    objectifs = deferred(Column(Text()), group='edit')
+    action = deferred(Column(Text()), group='edit')
+    documents = deferred(Column(Text()), group='edit')
 
     type_object = relationship(
             "ActivityType",

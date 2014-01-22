@@ -141,7 +141,7 @@ path = request.current_route_path(_query=get_args)
         Render an email address
     </%doc>
     % if mail is not UNDEFINED and mail is not None:
-        <a href="mailto:${mail}"><span class="ui-icon ui-icon-mail-closed"></span>${mail}</a>
+        <a href="mailto:${mail}">${mail}&nbsp;<i class="icon-envelope"></i></a>
     % endif
 </%def>
 <%def name="format_phone(phone)">
@@ -214,3 +214,16 @@ path = request.current_route_path(_query=get_args)
       % endfor
   % endif
 </%def>
+<%def name="definition_list(items)">
+    <%doc>
+        render a list of elements as a definition_list
+        items should be an iterator of (label, values) 2-uple
+    </%doc>
+    <dl class="dl-horizontal">
+        % for label, value in items:
+            <dt>${label}</dt>
+            <dd>${value}</dd>
+        % endfor
+    </dl>
+</%def>
+

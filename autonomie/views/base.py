@@ -45,8 +45,9 @@ log = logging.getLogger(__name__)
 
 
 class BaseView(object):
-    def __init__(self, request):
+    def __init__(self, context, request):
         self.request = request
+        self.context = context
         self.session = self.request.session
 
 class BaseListView(BaseView):

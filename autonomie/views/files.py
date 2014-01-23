@@ -65,7 +65,6 @@ def file_dl_view(context, request):
             request,
             context.name,
             context,
-            context.mimetype,
             )
     return request.response
 

@@ -17,6 +17,7 @@ Autonomie uses a Mysql database.
 To access it, we use the following libraries:
 * SQLAlchemy : ORM for database object representation
 * Alembic : Database migration (downgrade/upgrade)
+* Python MysqlDB
 
 Forms handling
 --------------
@@ -35,7 +36,7 @@ The following js libraries are used:
 * Bootstrap : Fancy effects (accordion, scrolling menu)
 * Underscore/backbone/backbone-marionette : MVP datas handling (Model View
   Presentation)
-* Hogan.js : Javascript templating
+* Handlebars.js : Javascript templating
 
 Css Stylesheet
 --------------

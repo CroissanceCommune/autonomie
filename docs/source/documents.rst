@@ -4,7 +4,7 @@ Les documents
 Modèles
 -------
 
-Le modèle Task est le modèle de document de base.
+Le modèle Task est le modèle de document de base (il hérite lui-même de Node).
 Les autres modèles dérivent de celui-ci excepté les ManualInvoice
 qui sont un héritage du hack symfony (gestion.).
 
@@ -32,6 +32,11 @@ des factures grâce à la méthode with_polymorphic
 Les statuts
 -----------
 
+#TODO : refactor, certains statuts sont induits par différents éléments
+(geninv d'un devis par exemple est induit par le fait qu'une facture est liée à
+ce devis, mais il est aussi stocké dans la base, si la facture est supprimée, le
+statut geninv n'est pas mis à jour, pourtant il devrait l'être)
+
 Les statuts des documents sont stockés dans la colonne CAEStatus du modèle Task.
 Un validateur Sqlalchemy permet de prévenir les modifications non autorisées
 de statut.
@@ -50,7 +55,7 @@ Le workflow est composé d'état qui sont :
 * une permission (optionnelle)
 * une fonction de callback (optionnelle)
 
-un booléen indique si c'est état doivent être inscrit dans la base de données
+un booléen indique si cet état doivent être inscrit dans la base de données
 comme statut de document.
 
 La fonction de callback prend le document et le user_id comme argument et

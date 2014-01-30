@@ -28,10 +28,22 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="esc"/>
 <%namespace file="/base/utils.mako" import="address"/>
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='css'>
 <link href="${request.static_url('autonomie:static/css/task.css')}" rel="stylesheet"  type="text/css" />
 </%block>
 <%block name='content'>
+% if request.context.type_ in ('cancelinvoice', 'estimation', 'invoice'):
+     <div class='well'>
+     <strong>Fichiers attachés à ce document</strong>
+        ${format_filelist(task)}
+        % if hasattr(task, 'estimation'):
+            ${format_filelist(task.estimation)}
+        % elif hasattr(task, 'invoice'):
+            ${format_filelist(task.invoice)}
+        % endif
+    </div>
+% endif
     <dl class="dl-horizontal">
         <dt>Prestataire</dt>
         <dd>${address(company, 'company')}</dd>

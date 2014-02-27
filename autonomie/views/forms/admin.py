@@ -343,6 +343,7 @@ class ActivityTypeConfig(colander.MappingSchema):
         validator=colander.Length(max=100)
         )
 
+
 class ActivityTypesSeqConfig(colander.SequenceSchema):
     """
         The sequence Schema associated with the ActivityTypeConfig
@@ -350,11 +351,28 @@ class ActivityTypesSeqConfig(colander.SequenceSchema):
     activity_type = ActivityTypeConfig(title=u"Type d'activité")
 
 
+class ActivityModeConfig(colander.MappingSchema):
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Mode d'entretien",
+        validator=colander.Length(max=100)
+        )
+
+
+class ActivityModesSeqConfig(colander.SequenceSchema):
+    """
+    Sequence schema for activity modes configuration
+    """
+    activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
+
+
 class ActivityTypesConfig(colander.Schema):
     """
         The schema for activity types configuration
     """
     types = ActivityTypesSeqConfig(title=u"")
+    modes = ActivityModesSeqConfig(title=u"")
+
 
 class CaeConfig(colander.MappingSchema):
     """

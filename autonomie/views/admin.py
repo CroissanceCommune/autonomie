@@ -42,7 +42,10 @@ from autonomie.models.treasury import (
         ExpenseKmType,
         ExpenseTelType,
 )
-from autonomie.models.activity import ActivityType
+from autonomie.models.activity import (
+        ActivityType,
+        ActivityMode,
+        )
 from autonomie.models.company import Company
 
 from autonomie.utils.views import submit_btn
@@ -360,7 +363,7 @@ class AdminActivities(BaseFormView):
         Activity types config
     """
     title = u"Configuration des activités"
-    validation_msg = u"Les types d'activité ont bien été configurés"
+    validation_msg = u"Les activités ont bien été configurées"
     schema = ActivityTypesConfig(title=u"Configuration des types d'activité")
     buttons = (submit_btn,)
 
@@ -369,29 +372,45 @@ class AdminActivities(BaseFormView):
             Add appstruct to the current form object
         """
         query = ActivityType.query()
-        query = query.filter(ActivityType.active==True)
+        types = query.filter(ActivityType.active==True)
 
-        appstruct = {'types': [type_.appstruct() for type_ in query]}
+        modes = ActivityMode.query()
+
+        appstruct = {
+                'types': [type_.appstruct() for type_ in types],
+                'modes': [mode.appstruct() for mode in modes],
+                }
+
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
-    def get_all_ids(self, appstruct):
+    def get_submitted_type_ids(self, appstruct):
         """
             Return the ids of the options still present in the submitted form
         """
         return [data['id'] for data in appstruct["types"]]
 
+    def get_submitted_modes(self, appstruct):
+        return [data['label'] for data in appstruct['modes']]
+
     def submit_success(self, appstruct):
         """
             Handle successfull expense configuration
         """
-        all_ids = self.get_all_ids(appstruct)
+        all_type_ids = self.get_submitted_type_ids(appstruct)
+        all_modes = self.get_submitted_modes(appstruct)
 
         # We delete the elements that are no longer in the appstruct
         for element in ActivityType.query():
-            if element.id not in all_ids:
+            if element.id not in all_type_ids:
                 element.active = False
                 self.dbsession.merge(element)
+        for element in ActivityMode.query():
+            if element.label not in all_modes:
+                self.dbsession.delete(element)
+            else:
+                # Remove it from the submitted list so we don't insert it again
+                all_modes.remove(element.label)
         self.dbsession.flush()
 
         for data in appstruct["types"]:
@@ -403,6 +422,10 @@ class AdminActivities(BaseFormView):
                 type_ = ActivityType()
                 merge_session_with_post(type_, data)
                 self.dbsession.add(type_)
+        for mode in all_modes:
+            new_mode = ActivityMode(label=mode)
+            self.dbsession.add(new_mode)
+
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_activity"))
 

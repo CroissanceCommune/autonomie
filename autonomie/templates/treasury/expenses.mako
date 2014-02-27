@@ -57,12 +57,14 @@
         <thead>
             <th>Période</th>
             <th>Statut</th>
+            <th>Total</th>
             <th>Actions</th>
         </thead>
         <tbody>
             % for expense in expenses:
                 <tr><td>${api.month_name(expense.month)} ${expense.year}</td>
                     <td>${api.format_expense_status(expense)}</td>
+                    <td>${api.format_amount(expense.total, trim=True)|n}</td>
                     <td style='text-align:right'>
                         ${table_btn(request.route_path('expense', id=expense.id), u"Voir", u"Voir cette note de frais", 'icon-search')}
                         ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de frais au format xslx", "icon-file")}
@@ -70,7 +72,7 @@
                 </tr>
             % endfor
             % if not expenses:
-                <tr><td colspan='3'>Il n'y a aucun document</td></tr>
+                <tr><td colspan='4'>Il n'y a aucun document</td></tr>
             % endif
         </tbody>
     </table>

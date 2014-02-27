@@ -65,10 +65,7 @@ ACTIVITY_PARTICIPANT = Table(
     mysql_engine=default_table_args['mysql_engine'])
 
 
-ACTIVITY_MODES = (u"en direct", u"par mail", u"par courrier", u"par téléphone")
-
-
-ACTIVITY_STATUS = (u"planned", u"closed",)
+ACTIVITY_STATUS = (u"planned", u"closed", u"cancelled")
 
 
 class Event(Node):
@@ -93,12 +90,13 @@ class Activity(Event):
     id = Column(Integer, ForeignKey('event.id'), primary_key=True)
     conseiller_id = Column(ForeignKey('accounts.id'))
     type_id = Column(ForeignKey('activity_type.id'))
-    mode = Column(Enum(*ACTIVITY_MODES))
+    mode = Column(String(100))
     # Champ text multiligne pour les activités
     point = deferred(Column(Text()), group='edit')
     objectifs = deferred(Column(Text()), group='edit')
     action = deferred(Column(Text()), group='edit')
     documents = deferred(Column(Text()), group='edit')
+    notes = deferred(Column(Text()), group='edit')
 
     type_object = relationship(
             "ActivityType",
@@ -123,3 +121,10 @@ class ActivityType(DBBASE):
     id = Column(Integer, primary_key=True)
     label = Column(String(100))
     active = Column(Boolean(), default=True)
+
+
+class ActivityMode(DBBASE):
+    __tablename__ = 'activity_modes'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(String(100))

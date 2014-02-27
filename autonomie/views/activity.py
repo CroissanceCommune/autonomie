@@ -56,13 +56,19 @@ from autonomie.views import render_api
 log = logging.getLogger(__name__)
 
 
-ACTIVITY_SUCCESS_MSG = u"L'activité a bien été programmée \
+ACTIVITY_SUCCESS_MSG = u"Le rendez-vous a bien été programmé \
 <a href='{0}'>Voir</a>"
 
 NEW_ACTIVITY_BUTTON = deform.Button(
     name='submit',
     type='submit',
     title=u"Programmer")
+
+
+ACTIVITY_RECORD_BUTTON = deform.Button(
+    name="submit",
+    type="submit",
+    title=u"Enregistrer et Terminer le rendez-vous")
 
 
 def new_activity(request, appstruct):
@@ -109,8 +115,7 @@ class NewActivityView(BaseFormView):
         View for new activity creation
         Only accessible with manage rights
     """
-    add_template_vars = ('title', 'message',)
-    title = u"Créer une nouvelle activité"
+    title = u"Créer un nouveau rendez-vous"
     schema = NewActivitySchema()
 
     def before(self, form):
@@ -242,7 +247,7 @@ class ActivityEditView(BaseFormView):
             )
         form = deform.Form(
             schema=RecordActivitySchema().bind(request=self.request),
-            buttons=(submit_btn,),
+            buttons=(ACTIVITY_RECORD_BUTTON,),
             counter=self.counter,
             formid="record_form",
             action=submit_url,
@@ -282,7 +287,7 @@ class ActivityRecordView(BaseFormView):
     add_template_vars = ()
 
     schema = RecordActivitySchema()
-    buttons = (submit_btn,)
+    buttons = (ACTIVITY_RECORD_BUTTON,)
 
     def submit_success(self, appstruct):
         """
@@ -401,7 +406,7 @@ def activity_delete_view(context, request):
     """
     url = request.referer
     request.dbsession.delete(context)
-    request.session.flash(u"L'activité a bien été supprimée")
+    request.session.flash(u"Le rendez-vous a bien été supprimé")
     if not url:
         url = request.route_path('activities')
     return HTTPFound(url)

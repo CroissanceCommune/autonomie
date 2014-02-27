@@ -30,7 +30,7 @@ from deform import widget as deform_widget
 
 from autonomie.models.activity import (
         ActivityType,
-        ACTIVITY_MODES,
+        ActivityMode,
         )
 from autonomie.views.forms import (
         main,
@@ -39,15 +39,18 @@ from autonomie.views.forms import (
 
 
 STATUS_OPTIONS = (
-    (u"Toutes les activités", "all"),
-    (u"Les activités planifiées", "planned"),
-    (u"Les activités terminées", "closed"),
+    (u"Tous les rendez-vous", "all"),
+    (u"Les rendez-vous planifiés", "planned"),
+    (u"Les rendez-vous terminés", "closed"),
     )
-
 
 
 def get_activity_types():
     return ActivityType.query().filter(ActivityType.active==True)
+
+
+def get_activity_modes():
+    return [mode.label for mode in ActivityMode.query()]
 
 
 @colander.deferred
@@ -57,8 +60,22 @@ def deferred_select_type(node, kw):
 
 
 @colander.deferred
+def deferred_select_mode(node, kw):
+    modes = get_activity_modes()
+    options = zip(modes, modes)
+    return deform_widget.SelectWidget(values=options)
+
+
+@colander.deferred
 def deferred_type_validator(node, kw):
     values = [a.id for a in get_activity_types()]
+    values.append(-1)
+    return colander.OneOf(values)
+
+
+@colander.deferred
+def deferred_mode_validator(node, kw):
+    values = [a.label for a in get_activity_modes()]
     values.append(-1)
     return colander.OneOf(values)
 
@@ -76,20 +93,19 @@ class CreateActivitySchema(colander.MappingSchema):
     """
     come_from = main.come_from_node()
     conseiller_id = main.user_node(
-            title=u"Conseiller menant l'activité",
+            title=u"Conseiller menant le rendez-vous",
             roles=['manager', 'admin'],
             )
-    date = main.today_node(title=u"Date de l'activité")
+    date = main.today_node(title=u"Date de rendez-vous")
     type_id = colander.SchemaNode(
             colander.Integer(),
             widget=deferred_select_type,
-            title=u"Type d'activité",
+            title=u"Nature du rendez-vous",
             )
     mode = colander.SchemaNode(
             colander.String(),
-            widget=deform_widget.SelectWidget(
-                values=zip(ACTIVITY_MODES, ACTIVITY_MODES)
-                ),
+            widget=deferred_select_mode,
+
             title=u"Mode d'entretien",
             )
     participants = ParticipantsSequence(
@@ -104,7 +120,7 @@ class NewActivitySchema(CreateActivitySchema):
     """
     now = colander.SchemaNode(
             colander.Boolean(),
-            title=u"Démarrer l'activité immédiatement",
+            title=u"Démarrer le rendez-vous immédiatement",
             default=False,
             )
 
@@ -119,6 +135,7 @@ class RecordActivitySchema(colander.Schema):
     action = main.textarea_node(title=u"Plan d'action et préconisations",
             missing='')
     documents = main.textarea_node(title=u"Documents produits", missing='')
+    notes = main.textarea_node(title=u"Notes", missing="")
 
 
 class ActivityListSchema(lists.BaseListsSchema):

@@ -29,7 +29,7 @@
     <li>
     % if api.has_permission('manage', request.context, request):
         <a href="${request.route_path('activities', _query=dict(action='new'))}">
-            Nouvelle activité
+            Nouveau rendez-vous
         </a>
     %endif
     </li>
@@ -65,7 +65,7 @@
                             </option>
                     %endfor
                 </select>
-                <select name='type_id' id='type-select' class='span2' data-placeholder="Filtrer par type d'activité">
+                <select name='type_id' id='type-select' class='span2' data-placeholder="Nature des Rdv">
                     <option value=-1></option>
                     %for activity_type in type_options:
                         <option
@@ -107,11 +107,11 @@
         <table class='table table-bordered'>
             <tr>
                 <td class='invoice_resulted'><br /></td>
-                <td>Activités terminées</td>
+                <td>Rendez-vous terminés</td>
             </tr>
             <tr>
                 <td class='invoice_notpaid'><br /></td>
-                <td>Activités programmées</td>
+                <td>Rendez-vous programmés</td>
             </tr>
         </table>
     </div>
@@ -121,10 +121,11 @@
 <table class="table table-condensed table-hover">
     <thead>
         <tr>
-            <th>Type d'activité</th>
-            <th>${sortable("Conseiller", "conseiller")}</th>
             <th>${sortable("Date", "date")}</th>
+            <th>${sortable("Conseiller", "conseiller")}</th>
             <th>Participant(s)</th>
+            <th>Nature du Rdv</th>
+            <th>Mode de Rdv</th>
             <th style="text-align:center">Actions</th>
         </tr>
     </thead>
@@ -140,15 +141,10 @@ else:
 %>
             <tr class='${css}_tr'>
                 <td onclick="${onclick}" class="rowlink ${css}">
-                    % if activity.type_object is not None:
-                        ${activity.type_object.label}
-                    % endif
+                    ${api.format_date(activity.date)}
                 </td>
                 <td onclick="${onclick}" class="rowlink ${css}">
                     ${api.format_account(activity.conseiller)}
-                </td>
-                <td onclick="${onclick}" class="rowlink ${css}">
-                    ${api.format_date(activity.date)}
                 </td>
                 <td onclick="${onclick}" class="rowlink ${css}">
                     <ul>
@@ -157,14 +153,22 @@ else:
                     % endfor
                     </ul>
                 </td>
+                <td onclick="${onclick}" class="rowlink ${css}">
+                    % if activity.type_object is not None:
+                        ${activity.type_object.label}
+                    % endif
+                </td>
+                <td onclick="${onclick}" class="rowlink ${css}">
+                    ${activity.mode}
+                </td>
                 <td class="${css}">
                     % if request.user.is_contractor():
-                        ${table_btn(url, u"Voir", u"Voir l'activité", icon='icon-search')}
+                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
                     % else:
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
-                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'activité", icon='icon-pencil')}
+                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='icon-pencil')}
                         <% del_url = request.route_path('activity', id=activity.id, _query=dict(action="delete")) %>
-                        ${table_btn(del_url, u"Supprimer",  u"Supprimer cette activité", icon='icon-delete', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cette activité ?')")}
+                        ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='icon-delete', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
                     %endif
                 </td>
             </tr>

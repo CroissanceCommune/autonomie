@@ -28,7 +28,7 @@
 <div class='row-fluid'>
             <div class='section-header'>
                 <a href="#" data-toggle='collapse' data-target='#edition_form'>
-                    Éditer les informations générales <i class="icon-arrow-down"></i>
+                    <i class="icon-arrow-down"></i>
                 </a>
             </div>
             <div class='section-content collapse' id='edition_form'>
@@ -75,7 +75,7 @@
                 <% items = (\
                     (u'Conseiller', api.format_account(activity.conseiller)), \
                     (u'Date', api.format_date(activity.date)), \
-                    (u"Type d'activité", activity.type_object.label), \
+                    (u"Nature du rendez-vous", activity.type_object.label), \
                     (u"Mode d'entretien", activity.mode), \
                     )\
                 %>
@@ -88,7 +88,7 @@
         <hr>
         <div class='section-header'>
             <a href="#" data-toggle='collapse' data-target='#next_activity_form_container'>
-                Programmer une nouvelle activité <i class="icon-arrow-down"></i>
+                Programmer un nouveau rendez-vous <i class="icon-arrow-down"></i>
             </a>
         </div>
         <div class='section-content collapse' id='next_activity_form_container'>

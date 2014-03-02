@@ -142,7 +142,7 @@ class RecordActivitySchema(colander.Schema):
         validator=colander.OneOf([x[0] for x in STATUSCHOICES]),
         widget=deform_widget.RadioChoiceWidget(values=STATUSCHOICES),
         title=u"Statut des participants",
-        default="closed")
+        missing=u"closed")
     point = main.textarea_node(title=u"Point de suivi", missing='')
     objectifs = main.textarea_node(title=u"Définition des objectifs",
             missing='')

@@ -27,7 +27,6 @@
 <%block name="content">
 <a class='btn pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='icon-file'></i>PDF</a>
 <div class='row-fluid'>
-    <div class='span8 offset2'>
                 <% items = (\
                     (u'Conseiller', api.format_account(activity.conseiller)), \
                     (u'Date', api.format_date(activity.date)), \
@@ -57,7 +56,5 @@
             </blockquote>
         % endfor
 
-    </div>
 </div>
-
 </%block>

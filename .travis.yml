@@ -5,7 +5,8 @@ services:
     - mysql
 install:
     - pip install cython
-    - pip install PIL --allow-external PIL --allow-unverified PIL
+    - pip install PIL==1.1.7 --allow-external PIL --allow-unverified PIL
+    - pip install pypdf --allow-external pypdf --allow-unverified pypdf
     - pip install -r requirements.txt -r test_requirements.txt .
 script:  py.test
 before_install:

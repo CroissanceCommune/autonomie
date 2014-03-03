@@ -28,7 +28,11 @@
 import datetime
 import colander
 
-from sqlalchemy import extract
+from sqlalchemy import (
+        extract,
+        and_,
+        or_,
+        )
 from deform import Form
 from deform.exception import ValidationFailure
 from fanstatic import Resource
@@ -166,12 +170,23 @@ class DisplayCommercialHandling(BaseView):
             invoices = invoices.filter(
                 Project.company_id==self.request.context.id
                 )
-            invoices = invoices.filter(
-                extract('year', Invoice.taskDate)==self.year
-                )
-            invoices = invoices.filter(
-                extract('month', Invoice.taskDate)==month
-                )
+            date_condition = and_(
+                    extract('year', Invoice.taskDate)==self.year,
+                    extract('month', Invoice.taskDate)==month
+                    )
+            if month != 12:
+                invoices = invoices.filter(date_condition)
+            else:
+                # for december, we also like to have invoices edited in january
+                # and reported to the previous comptability year
+                reported_condition = and_(
+                        Invoice.financial_year==self.year,
+                        extract('year', Invoice.taskDate)!=self.year,
+                    )
+                invoices = invoices.filter(
+                        or_(date_condition, reported_condition)
+                    )
+
             invoices = invoices.filter(
                 Invoice.CAEStatus.in_(Invoice.valid_states)
                 )
@@ -181,12 +196,21 @@ class DisplayCommercialHandling(BaseView):
             cinvoices = cinvoices.filter(
                     Project.company_id==self.request.context.id
                     )
-            cinvoices = cinvoices.filter(
-                    extract('year', CancelInvoice.taskDate)==self.year
-                    )
-            cinvoices = cinvoices.filter(
+            date_condition = and_(
+                    extract('year', CancelInvoice.taskDate)==self.year,
                     extract('month', CancelInvoice.taskDate)==month
                     )
+            if month != 12:
+                cinvoices = cinvoices.filter(date_condition)
+            else:
+                reported_condition = and_(
+                    CancelInvoice.financial_year==self.year,
+                    extract('year', CancelInvoice.taskDate)!=self.year,
+                    )
+                cinvoices = cinvoices.filter(
+                        or_(date_condition, reported_condition)
+                        )
+
             cinvoices = cinvoices.filter(
                     CancelInvoice.CAEStatus.in_(CancelInvoice.valid_states)
                     )

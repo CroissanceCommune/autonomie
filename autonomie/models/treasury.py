@@ -274,10 +274,15 @@ class ExpenseLine(BaseExpenseLine):
         """
             return the total
         """
-        result = self.ht + self.tva
-        if self.type_object.type == 'expensetel':
-            percentage = self.type_object.percentage
-            result = result * percentage / 100.0
+        # Previously, it was possible to delete expense types and consequently
+        # break this relationship
+        if self.type_object is not None:
+            result = self.ht + self.tva
+            if self.type_object.type == 'expensetel':
+                percentage = self.type_object.percentage
+                result = result * percentage / 100.0
+        else:
+            result = 0
         return result
 
 

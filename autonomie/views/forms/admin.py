@@ -34,10 +34,13 @@ from deform import widget
 from deform import FileData
 
 from autonomie.models.config import Config
-from autonomie.views.forms import main
-from autonomie.views.forms import flatten_appstruct
+from autonomie.views.forms import (
+    main,
+    flatten_appstruct,
+    )
 from autonomie.views.forms.validators import validate_image_mime
-from autonomie.utils.fileupload import FileTempStore
+from autonomie.utils.image import ImageResizer
+from autonomie.views.forms.widgets import get_fileupload_widget
 
 
 from .custom_types import AmountType
@@ -45,20 +48,31 @@ from .custom_types import AmountType
 log = logging.getLogger(__name__)
 
 
-@colander.deferred
-def deferred_upload_widget(node, kw):
-    """
-        Returns a fileupload widget to allow logo upload
-    """
-    request = kw['request']
-    session = request.session
-    root_path = request.registry.settings.get('autonomie.assets')
-    root_url = "/assets/"
-    store_url = os.path.join(root_url, "main")
-    store_directory = os.path.join(root_path, "main")
-    tmpstore = FileTempStore(session, store_directory, store_url, 'logo.png')
-    return widget.FileUploadWidget(tmpstore,
-            template="autonomie:deform_templates/fileupload.mako")
+HEADER_RESIZER = ImageResizer(4, 1)
+
+
+def get_deferred_upload_widget(filename, filters=None):
+    @colander.deferred
+    def deferred_upload_widget(node, kw):
+        """
+            Returns a fileupload widget to allow logo upload
+        """
+        request = kw['request']
+
+        root_url = "/assets/"
+        store_url = os.path.join(root_url, "main")
+
+        root_path = request.registry.settings.get('autonomie.assets')
+        store_path = os.path.join(root_path, "main")
+
+        return get_fileupload_widget(
+                store_url,
+                store_path,
+                request.session,
+                default_filename=filename,
+                filters=filters)
+
+    return deferred_upload_widget
 
 
 class EstimationConfig(colander.MappingSchema):
@@ -139,7 +153,7 @@ class SiteConfig(colander.MappingSchema):
     """
     logo = colander.SchemaNode(
         FileData(),
-        widget=deferred_upload_widget,
+        widget=get_deferred_upload_widget('logo.png'),
         title=u'Logo du site',
         validator=validate_image_mime,
         default={"filename": "logo.png", "uid": "MAINLOGO"},
@@ -365,13 +379,33 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
     """
     activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
 
+class MainActivityConfig(colander.MappingSchema):
+    """
+    Mapping schema for main configuration
+    """
+    header = colander.SchemaNode(
+        FileData(),
+        widget=get_deferred_upload_widget('accompagnement_header.png'),
+        title=u'En-tête des sortie PDF',
+        validator=validate_image_mime,
+        default={
+            "filename": "accompagnement_header.png",
+            "uid": "ACCOMPAGNEMENT_HEADER",
+            },
+        )
+
 
 class ActivityTypesConfig(colander.Schema):
     """
         The schema for activity types configuration
     """
-    types = ActivityTypesSeqConfig(title=u"")
-    modes = ActivityModesSeqConfig(title=u"")
+    main = MainActivityConfig(title=u"")
+    types = ActivityTypesSeqConfig(
+            title=u"Configuration des types de rendez-vous"
+            )
+    modes = ActivityModesSeqConfig(
+            title=u"Configuration des modes d'entretien"
+            )
 
 
 class CaeConfig(colander.MappingSchema):

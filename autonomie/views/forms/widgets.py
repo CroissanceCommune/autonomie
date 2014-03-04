@@ -196,11 +196,18 @@ class CustomSequenceWidget(widget.SequenceWidget):
                               add_subitem_text=add_subitem_text)
 
 
-def get_fileupload_widget(store_url, store_path, session, filters=None):
+def get_fileupload_widget(store_url, store_path, session, \
+        default_filename=None, filters=None):
     """
         return a file upload widget
     """
-    tmpstore = FileTempStore(session, store_path, store_url, filters=filters)
+    tmpstore = FileTempStore(
+            session,
+            store_path,
+            store_url,
+            default_filename=default_filename,
+            filters=filters,
+            )
     return widget.FileUploadWidget(tmpstore,
                 template="autonomie:deform_templates/fileupload.mako")
 

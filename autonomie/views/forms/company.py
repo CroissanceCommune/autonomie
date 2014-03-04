@@ -82,7 +82,7 @@ def deferred_header_widget(node, kw):
     request = kw['request']
     path, url = get_upload_options_from_request(request, HEADER_PATH)
     return get_fileupload_widget(url, path, request.session,
-                                    [HEADER_RESIZER.complete])
+                                    filters=[HEADER_RESIZER.complete])
 
 
 @colander.deferred

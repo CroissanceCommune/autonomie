@@ -364,7 +364,7 @@ class AdminActivities(BaseFormView):
     """
     title = u"Configuration des activités"
     validation_msg = u"Les activités ont bien été configurées"
-    schema = ActivityTypesConfig(title=u"Configuration des types d'activité")
+    schema = ActivityTypesConfig(title=u"")
     buttons = (submit_btn,)
 
     def before(self, form):

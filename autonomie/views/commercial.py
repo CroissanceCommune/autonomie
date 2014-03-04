@@ -172,7 +172,8 @@ class DisplayCommercialHandling(BaseView):
                 )
             date_condition = and_(
                     extract('year', Invoice.taskDate)==self.year,
-                    extract('month', Invoice.taskDate)==month
+                    extract('month', Invoice.taskDate)==month,
+                    Invoice.financial_year==self.year,
                     )
             if month != 12:
                 invoices = invoices.filter(date_condition)
@@ -198,7 +199,8 @@ class DisplayCommercialHandling(BaseView):
                     )
             date_condition = and_(
                     extract('year', CancelInvoice.taskDate)==self.year,
-                    extract('month', CancelInvoice.taskDate)==month
+                    extract('month', CancelInvoice.taskDate)==month,
+                    CancelInvoice.financial_year==self.year,
                     )
             if month != 12:
                 cinvoices = cinvoices.filter(date_condition)

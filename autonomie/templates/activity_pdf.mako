@@ -32,6 +32,7 @@
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
     </head>
     <body>
+        <img src="/assets/main/accompagnement_header.png" />
 <h1>Fiche rendez-vous</h1>
 <div>Nature du rendez-vous : ${activity.type_object.label}</div>
 <div>Mode d'entretien : ${activity.mode}</div>

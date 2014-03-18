@@ -23,6 +23,7 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="definition_list" />
 <%namespace file="/base/utils.mako" import="format_mail" />
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
 <a class='btn pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='icon-file'></i>PDF</a>
 <% activity = request.context %>
@@ -59,6 +60,8 @@
                         </ul>
                     </div>
                 % endfor
+                <strong>Fichiers attachés</strong>
+                ${format_filelist(activity)}
             </div>
     </div>
     <div class='span8'>

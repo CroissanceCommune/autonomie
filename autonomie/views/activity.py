@@ -39,6 +39,7 @@ from autonomie.utils.pdf import (
         write_pdf,
         )
 from autonomie.views.base import BaseListView
+from autonomie.views.files import FileUploadView
 from autonomie.models.activity import Activity
 from autonomie.models import user
 from autonomie.views.forms import (
@@ -110,6 +111,15 @@ def next_activity_url(request):
 def populate_actionmenu(request):
     if has_permission('manage', request.context, request):
         link = ViewLink(u"Liste des rendez-vous", "manage", path="activities")
+        request.actionmenu.add(link)
+        link = ViewLink(
+                u"Attacher un fichier",
+                "manage",
+                path="activity",
+                id=request.context.id,
+                _query=dict(action="attach_file")
+                )
+        request.actionmenu.add(link)
     else:
         # On doit rediriger l'utilisateur vers la liste des activités de son
         # entreprise, le problème c'est qu'on a pas l'id de celle-ci, on prend
@@ -121,7 +131,7 @@ def populate_actionmenu(request):
                 path="company_activities",
                 id=request.user.companies[0].id
                 )
-    request.actionmenu.add(link)
+        request.actionmenu.add(link)
 
 
 class NewActivityView(BaseFormView):
@@ -520,4 +530,11 @@ def includeme(config):
             permission='manage',
             request_param='action=record',
             renderer="/base/formajax.mako",
+            )
+    config.add_view(
+            FileUploadView,
+            route_name="activity",
+            renderer='base/formpage.mako',
+            permission='manage',
+            request_param='action=attach_file',
             )

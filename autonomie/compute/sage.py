@@ -169,8 +169,8 @@ class SageInvoice(object):
             populate the products entries with the current invoice
         """
         self._populate_invoice_lines()
-        warnings.warn("Missing specs", DeprecationWarning)
-        #self._populate_discounts()
+        #warnings.warn("Missing specs", DeprecationWarning)
+        self._populate_discounts()
         self._populate_expenses()
         self._round_products()
 

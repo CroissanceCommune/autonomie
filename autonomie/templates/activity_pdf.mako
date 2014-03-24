@@ -33,18 +33,25 @@
     </head>
     <body>
         <img src="/assets/main/accompagnement_header.png" />
-<h1>Fiche rendez-vous</h1>
-<div>Nature du rendez-vous : ${activity.type_object.label}</div>
-<div>Mode d'entretien : ${activity.mode}</div>
-<div>Conseiller : ${api.format_account(activity.conseiller)}</div>
-<div>Participants :
-% for user in activity.participants:
-${api.format_account(user)}
-    % if not loop.last:
-    ,
-    % endif
-% endfor
-</div>
+
+        <div><b>Date : </b> le ${api.format_date(activity.date)}</div>
+        <div><b>Durée : </b> </div>
+
+
+        <center>
+            <h1>Fiche de suivi rendez-vous</h1>
+            <div>${activity.type_object.label}</div>
+        </center>
+        <div>Conseiller : ${api.format_account(activity.conseiller)}</div>
+        <% companies = set() %>
+        <div>Participants :
+            % for user in activity.participants:
+                ${api.format_account(user)} ( ${"'".join([c.name for c in user.companies])} )
+                % if not loop.last:
+                    ,
+                % endif
+            % endfor
+        </div>
         <% options = (\
                 (u"Point de suivi", "point"),\
                 (u"Définition des objectifs", "objectifs"), \
@@ -54,6 +61,7 @@ ${api.format_account(user)}
         %>
         % for label, attr in options:
             <h3>${label}</h3>
+            <hr />
             <blockquote>
                 ${format_text(getattr(activity, attr))}
             </blockquote>

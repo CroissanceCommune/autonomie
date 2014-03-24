@@ -41,7 +41,7 @@ class TestCommercial(BaseFunctionnalTest):
         req = self.get_csrf_request()
         if year:
             req.GET = {'year':year}
-        view = DisplayCommercialHandling(req)
+        view = DisplayCommercialHandling(None, req)
         view.submit_success(APPSTRUCT)
 
     def getOne(self):
@@ -71,7 +71,7 @@ class TestCommercial(BaseFunctionnalTest):
     def test_submit_year(self):
         req = self.get_csrf_request()
         req.GET = {'year':'2010'}
-        view = DisplayCommercialHandling(req)
+        view = DisplayCommercialHandling(None, req)
         self.assertEqual(view.submit_year(), {'year':2010})
         req.GET = {}
         self.assertEqual(view.submit_year(), {'year':date.today().year})
@@ -98,7 +98,7 @@ class TestCommercial(BaseFunctionnalTest):
         appstruct = APPSTRUCT.copy()
         appstruct['value'] = 10
         req = self.get_csrf_request()
-        view = DisplayCommercialHandling(req)
+        view = DisplayCommercialHandling(None, req)
         view.submit_success(appstruct)
         proj = self.getOne()
         self.assertEqual(proj.value, 10)

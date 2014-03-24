@@ -103,8 +103,8 @@ class DisplayCommercialHandling(BaseView):
     year_form_schema = CommercialFormSchema()
     form_schema = CommercialSetFormSchema()
 
-    def __init__(self, request):
-        super(DisplayCommercialHandling, self).__init__(request)
+    def __init__(self, context, request):
+        super(DisplayCommercialHandling, self).__init__(context, request)
         commercial_js.need()
         self.year = self.submit_year()['year']
 

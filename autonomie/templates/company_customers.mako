@@ -42,7 +42,7 @@
             % for customer in records:
                 <tr class='tableelement' id="${customer.id}">
                     <% url = request.route_path("customer", id=customer.id) %>
-                    <% onclick = "document.location='${url}'".format(url=url) %>
+                    <% onclick = "document.location='{url}'".format(url=url) %>
                     <td onclick="${onclick}" class="rowlink" >${customer.code}</td>
                     <td onclick="${onclick}" class="rowlink" >${customer.name}</td>
                     <td onclick="${onclick}" class="rowlink" >${customer.contactLastName} ${customer.contactFirstName}</td>

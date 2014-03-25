@@ -434,6 +434,9 @@ th.visible-desktop, td.visible-desktop, th.hidden-phone, td.hidden-phone{
   /*
    * All medias smaller than 979px (tablet portrait and layout + mobile + some desktops)
    */
+.dropdown-backdrop{
+      position: static;
+    }
 .deform fieldset{
   padding:0px;
 }

@@ -169,12 +169,12 @@ class NewActivityView(BaseFormView):
                         _query=dict(action="edit")
                         )
 
-        msg = ACTIVITY_SUCCESS_MSG.format(activity_url)
-
-        self.session.flash(msg)
         if now or not come_from:
             redirect = activity_url
         else:
+            msg = ACTIVITY_SUCCESS_MSG.format(activity_url)
+            self.session.flash(msg)
+
             redirect = come_from
         return HTTPFound(redirect)
 

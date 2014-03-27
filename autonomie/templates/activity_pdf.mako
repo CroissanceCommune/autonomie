@@ -32,6 +32,8 @@
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
     </head>
     <body>
+        <% config = request.config %>
+
         <img src="/assets/main/accompagnement_header.png" />
 
         <div><b>Date : </b> le ${api.format_date(activity.date)}</div>
@@ -39,8 +41,11 @@
 
 
         <center>
-            <h1>Fiche de suivi rendez-vous</h1>
+            <h1>${activity.action_label}</h1>
+            <h3>${activity.subaction_label}</h3>
+            <br />
             <div>${activity.type_object.label}</div>
+
         </center>
         <div>Conseiller : ${api.format_account(activity.conseiller)}</div>
         <% companies = set() %>
@@ -66,12 +71,27 @@
                 ${format_text(getattr(activity, attr))}
             </blockquote>
         % endfor
-<hr>
-<div style="padding-bottom:50px">
-<b>Signature Conseiller</b>
-</div>
-<div>
-<b>Signature Participant</b>
+        <br />
+        <br />
+        <br />
+        <br />
+        <table>
+        <tr>
+            <td style="padding-bottom:50px; width:50%">
+                <b>Signature Conseiller</b>
+            </td>
+            <td style="padding-bottom:50px; width:50%">
+                <b>Signature Participant</b>
+            </td>
+            </tr>
+            </table>
+    <div class='row' id='footer'>
+        % if config.has_key('coop_pdffootertitle'):
+            <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
+        %endif
+        % if config.has_key('coop_pdffootertext'):
+            ${format_text(config.get('coop_pdffootertext'))}
+        % endif
 </div>
 </body>
 </html>

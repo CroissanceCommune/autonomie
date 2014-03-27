@@ -91,6 +91,9 @@ class Activity(Event):
     conseiller_id = Column(ForeignKey('accounts.id'))
     type_id = Column(ForeignKey('activity_type.id'))
     mode = Column(String(100))
+    # Libellé pour la sortie pdf
+    action_label = Column(String(125), default="")
+    subaction_label = Column(String(125), default="")
     # Champ text multiligne pour les activités
     point = deferred(Column(Text()), group='edit')
     objectifs = deferred(Column(Text()), group='edit')

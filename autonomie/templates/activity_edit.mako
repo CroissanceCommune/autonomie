@@ -87,10 +87,19 @@
                         </button>
                     </div>
                 </div>
-                <div class='section-content collapse' id='edition_form'>
+
+                <div
+                    % if formerror is not UNDEFINED:
+                        class='section-content'
+                    % else:
+                        class='section-content collapse'
+                    % endif
+                    id='edition_form'>
+                    <button class="close" data-toggle="collapse" data-target='#edition_form' type="button">×</button>
                     ${form|n}
                 </div>
                 <div class='section-content collapse' id='next_activity_form_container'>
+                    <button class="close" data-toggle="collapse" data-target='#next_activity_form_container' type="button">×</button>
                     <div id="next_activity_message"></div>
                     ${next_activity_form|n}
                 </div>

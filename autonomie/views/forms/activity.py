@@ -110,6 +110,17 @@ class CreateActivitySchema(colander.MappingSchema):
             widget=deferred_select_type,
             title=u"Nature du rendez-vous",
             )
+    action_label = colander.SchemaNode(
+            colander.String(),
+            title=u"Intitulé de l'action (financée)",
+            validator=colander.Length(0, 125),
+            )
+    subaction_label = colander.SchemaNode(
+            colander.String(),
+            title=u"Intitulé sous-action",
+            missing="",
+            validator=colander.Length(0, 125),
+            )
     mode = colander.SchemaNode(
             colander.String(),
             widget=deferred_select_mode,

@@ -61,6 +61,12 @@ from autonomie.views import render_api
 log = logging.getLogger(__name__)
 
 
+# Sqlalchemy aliases used to outerjoin two times on the same table (but through
+# two different relationships
+CONSEILLER = aliased(user.User)
+PARTICIPANTS = aliased(user.User)
+
+
 ACTIVITY_SUCCESS_MSG = u"Le rendez-vous a bien été programmé \
 <a href='{0}'>Voir</a>"
 
@@ -99,6 +105,23 @@ def new_activity(request, appstruct):
     request.dbsession.add(activity)
     request.dbsession.flush()
     return activity
+
+
+def record_changes(request, appstruct, message):
+    """
+    Record changes on the current activity, changes could be :
+        edition
+        record
+    """
+    activity = merge_session_with_post(request.context, appstruct)
+    request.dbsession.merge(activity)
+    request.session.flash(message)
+    url = request.route_path(
+            'activity',
+            id=request.context.id,
+            _query=dict(action='edit'),
+            )
+    return HTTPFound(url)
 
 
 def next_activity_url(request):
@@ -195,23 +218,6 @@ class NewActivityAjaxView(BaseFormView):
                         _query=dict(action="edit")
                         )
         return dict(message=ACTIVITY_SUCCESS_MSG.format(activity_url))
-
-
-def record_changes(request, appstruct, message):
-    """
-    Record changes on the current activity, changes could be :
-        edition
-        record
-    """
-    activity = merge_session_with_post(request.context, appstruct)
-    request.dbsession.merge(activity)
-    request.session.flash(message)
-    url = request.route_path(
-            'activity',
-            id=request.context.id,
-            _query=dict(action='edit'),
-            )
-    return HTTPFound(url)
 
 
 def get_next_activity_form(request, counter):
@@ -328,12 +334,6 @@ class ActivityRecordView(BaseFormView):
         return record_changes(self.request, appstruct, message)
 
 
-# Sqlalchemy aliases used to outerjoin two times on the same table (but through
-# two different relationships
-CONSEILLER = aliased(user.User)
-PARTICIPANTS = aliased(user.User)
-
-
 class ActivityList(BaseListView):
     title = u"Rendez-vous"
     schema = ActivityListSchema()
@@ -442,15 +442,15 @@ def activity_delete_view(context, request):
     return HTTPFound(url)
 
 
-def activity_pdf_view(request):
+def activity_pdf_view(context, request):
     """
     Return a pdf output of the current activity
     """
-    date = request.context.date.strftime("%e_%M_%Y")
+    date = context.date.strftime("%e_%M_%Y")
     filename = u"rdv_{0}.pdf".format(date)
 
     template = u"autonomie:templates/activity_pdf.mako"
-    datas = dict(activity=request.context)
+    datas = dict(activity=context)
     html_str = render_html(request, template, datas)
 
     write_pdf(request, filename, html_str)

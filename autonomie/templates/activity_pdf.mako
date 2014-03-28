@@ -20,7 +20,7 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<%namespace file="/base/utils.mako" import="format_text" />
+<%namespace file="autonomie:templates/base/utils.mako" import="format_text" />
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>

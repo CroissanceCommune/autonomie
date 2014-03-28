@@ -26,15 +26,21 @@ from autonomie.models import (
         )
 from autonomie.views.activity import (
         NewActivityView,
+        activity_view_only_view,
+        activity_delete_view,
+        activity_pdf_view,
+        NewActivityAjaxView,
+        ACTIVITY_SUCCESS_MSG,
         ActivityRecordView,
         ActivityEditView,
         )
+from pyramid.events import BeforeRender
+from autonomie.views.subscribers import add_api
 from autonomie.tests.base import BaseFunctionnalTest
 
 
 class BaseTest(BaseFunctionnalTest):
     def addType(self, label='First type'):
-        print "Adding a type"
         activity_type = activity.ActivityType(label=label)
         self.session.add(activity_type)
         self.session.flush()
@@ -76,6 +82,25 @@ class TestNewActivityView(BaseTest):
             self.assertTrue(getattr(a, key) == value)
 
 
+class TestNewActivityAjaxView(BaseTest):
+    def test_success(self):
+        self.config.add_route('activity', '/activity/{id}')
+        typeid = self.addType()
+        appstruct = {
+                'conseiller_id': 1,
+                'date': date.today(),
+                'type_id': typeid,
+                'mode': 'par mail',
+                }
+        view = NewActivityAjaxView(self.get_csrf_request())
+        result = view.submit_success(appstruct)
+        self.assertTrue(result['message'].startswith(ACTIVITY_SUCCESS_MSG[:25]))
+        a = self.getOne()
+        for key, value in appstruct.items():
+            self.assertTrue(getattr(a, key) == value)
+
+
+
 class TestActivityRecordView(BaseTest):
     def test_success(self):
         req = self.get_csrf_request()
@@ -109,3 +134,50 @@ class TestActivityEditView(BaseTest):
         a = self.getOne()
         self.assertEqual(a.mode, appstruct['mode'])
         self.assertEqual(a.type_object.label, "Second type")
+
+
+class TestActivityFuncViews(BaseTest):
+
+    def test_activity_view_only_view(self):
+        self.config.add_route('activity', '/activity/{id}')
+        context = self.addOne()
+        request = self.get_csrf_request()
+        result = activity_view_only_view(context, request)
+        assert result.status == '302 Found'
+        assert result.location == '/activity/{id}?action=edit'.format(
+                id=context.id)
+
+
+    def test_activity_delete_view(self):
+        self.config.add_route('activities', '/activities')
+        request = self.get_csrf_request()
+        request.referer = None
+        context = self.addOne()
+        result = activity_delete_view(context, request)
+        assert result.status == '302 Found'
+        assert result.location == '/activities'
+        assert self.getOne() == None
+
+    def test_activity_delete_view_redirect(self):
+        self.config.add_route('activities', '/activities')
+        request = self.get_csrf_request()
+        request.referer = "/titi"
+        context = self.addOne()
+        result = activity_delete_view(context, request)
+        assert result.status == '302 Found'
+        assert result.location == '/titi'
+        assert self.getOne() == None
+
+
+    def test_activity_pdf_view(self):
+        self.config.add_subscriber(add_api, BeforeRender)
+        self.config.add_static_view("static", "autonomie:static")
+        context = self.addOne()
+        request = self.get_csrf_request()
+        result = activity_pdf_view(context, request)
+        datestr = date.today().strftime("%e_%M_%Y")
+        assert ('Content-Disposition',
+                'attachment; filename="rdv_%s.pdf"' % datestr) in \
+                        result.headerlist
+
+

@@ -181,6 +181,8 @@ else:
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='icon-pencil')}
                         <% del_url = request.route_path('activity', id=activity.id, _query=dict(action="delete")) %>
                         ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='icon-delete', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
+                        <% pdf_url = request.route_path("activity.pdf", id=request.context.id) %>
+                        ${table_btn(pdf_url, u"PDF", u"Télécharger la sortie PDF pour impression", icon='icon-file')}
                     %endif
                 </td>
             </tr>

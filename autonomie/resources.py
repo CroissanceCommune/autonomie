@@ -28,7 +28,7 @@ from fanstatic import Group
 from fanstatic import Library
 from fanstatic import Resource
 from js.bootstrap import bootstrap
-from js.bootstrap import bootstrap_responsive_css
+#from js.bootstrap import bootstrap_responsive_css
 from js.jquery import jquery
 from js.jqueryui import effects_highlight
 from js.jqueryui import effects_shake
@@ -106,6 +106,9 @@ _math = Resource(
         "js/math.js")
 tools = Group([_dom, _math, _date])
 
+bootstrap_responsive_css = Resource(lib_autonomie,
+        "css/bootstrap-responsive.css", depends=[bootstrap])
+
 
 duplicate = Resource(
         lib_autonomie,
@@ -128,6 +131,10 @@ task = Resource(
 task_list_js = Resource(
         lib_autonomie,
         "js/task_list.js",
+        depends=[tools, jquery, backbone])
+activity_list_js = Resource(
+        lib_autonomie,
+        "js/activity_list.js",
         depends=[tools, jquery, backbone])
 message_js = Resource(
         lib_autonomie,

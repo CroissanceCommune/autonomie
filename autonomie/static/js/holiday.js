@@ -24,15 +24,6 @@
 
 
 var AppOptions = {};
-var MyApp = new Backbone.Marionette.Application();
-MyApp.on("initialize:after", function(){
-  /*
-   *""" Launche the history (controller and router stuff)
-   */
-  if ((Backbone.history)&&(! Backbone.History.started)){
-    Backbone.history.start();
-  }
-});
 
 
 var HolidayModel = Backbone.Model.extend({
@@ -119,7 +110,7 @@ var HolidayView = BaseTableLineView.extend({
      * Redirect to the edit page
      */
     var route = "edit/" + this.model.cid;
-    MyApp.router.navigate(route, {trigger: true});
+    AutonomieApp.router.navigate(route, {trigger: true});
   }
 });
 
@@ -151,7 +142,7 @@ var HolidayList = Backbone.Marionette.CompositeView.extend({
     /*
      *  Redirect our one page app to the holiday add page
      */
-    MyApp.router.navigate("add", {trigger: true});
+    AutonomieApp.router.navigate("add", {trigger: true});
   }
 });
 
@@ -178,7 +169,7 @@ var HolidayForm = BaseFormView.extend({
 });
 
 
-MyApp.Controller = {
+AutonomieApp.Controller = {
   /*
    * Application controller
    * Provides methods that are called regarding the router's configuration
@@ -195,12 +186,12 @@ MyApp.Controller = {
     /*
      *  ensure the popup is closed (is necessary when we come from other views)
      */
-    MyApp.formContainer.close();
+    AutonomieApp.formContainer.close();
   },
   initialize: function(){
     if (!this.initialized){
-      this.holidays = new HolidayList({collection: MyApp.holidays});
-      MyApp.holidayRegion.show(this.holidays);
+      this.holidays = new HolidayList({collection: AutonomieApp.holidays});
+      AutonomieApp.holidayRegion.show(this.holidays);
       this.initialized = true;
     }
   },
@@ -209,24 +200,24 @@ MyApp.Controller = {
     var model = new HolidayModel();
     holidayForm = new HolidayForm({
       title: "Ajouter",
-      destCollection: MyApp.holidays,
+      destCollection: AutonomieApp.holidays,
       model:model
       });
-    MyApp.formContainer.show(holidayForm);
+    AutonomieApp.formContainer.show(holidayForm);
   },
   edit: function(id){
     this.initialize();
-    var model = MyApp.holidays.get(id);
+    var model = AutonomieApp.holidays.get(id);
     holidayForm = new HolidayForm({
       title:"Éditer",
       model:model
       });
-    MyApp.formContainer.show(holidayForm);
+    AutonomieApp.formContainer.show(holidayForm);
   }
 };
 
 
-MyApp.Router = Backbone.Marionette.AppRouter.extend({
+AutonomieApp.Router = Backbone.Marionette.AppRouter.extend({
   /*
    * Application's routes configuration
    */
@@ -246,7 +237,7 @@ var popup = Popup.extend({
   el:'#form-container'
 });
 
-MyApp.addRegions({
+AutonomieApp.addRegions({
   /*
    * Application regions are used to display views
    */
@@ -255,16 +246,16 @@ MyApp.addRegions({
 });
 
 
-MyApp.addInitializer(function(options){
+AutonomieApp.addInitializer(function(options){
   /*
    *  Application initialization
    *  options : data provided by the server on setup ajax call
    *
    *  options should provide : a holidays objects list and a user_id param
    */
-  MyApp.holidays = new HolidaysCollection(options['holidays']);
-  MyApp.holidays.url = "/user/" + options['user_id'] + "/holidays";
-  MyApp.router = new MyApp.Router({controller: MyApp.Controller});
+  AutonomieApp.holidays = new HolidaysCollection(options['holidays']);
+  AutonomieApp.holidays.url = "/user/" + options['user_id'] + "/holidays";
+  AutonomieApp.router = new AutonomieApp.Router({controller: AutonomieApp.Controller});
 });
 
 
@@ -278,7 +269,7 @@ $(function(){
       data: {},
       cache: false,
       success: function(data) {
-        MyApp.start(data);
+        AutonomieApp.start(data);
       },
       error: function(){
         alert("Une erreur a été rencontrée, contactez votre administrateur.");

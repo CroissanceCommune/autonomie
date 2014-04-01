@@ -25,10 +25,10 @@
 
 """
 import logging
-from pyramid.threadlocal import get_current_registry
 
 from autonomie.events.utils import (
     format_mail,
+    format_link,
     send_mail,
     )
 from autonomie.views.render_api import (
@@ -63,6 +63,7 @@ class StatusChanged(object):
         self.expense = expense
         self.new_status = status
         self.comment = comment
+        self.settings = self.request.registry.settings
 
     @property
     def recipients(self):
@@ -80,9 +81,8 @@ class StatusChanged(object):
         """
             Return the sender's email
         """
-        settings = get_current_registry().settings
-        if 'mail.default_sender' in settings:
-            mail = settings['mail.default_sender']
+        if 'mail.default_sender' in self.settings:
+            mail = self.settings['mail.default_sender']
         else:
             log.info(u"'{0}' has not set his email".format(
                                                     self.request.user.login))
@@ -109,6 +109,7 @@ class StatusChanged(object):
         date = u"{0}/{1}".format(self.expense.month, self.expense.year)
         status_verb = get_status_verb(self.new_status)
         addr = self.request.route_url("expense", id=self.expense.id)
+        addr = format_link(self.settings, addr)
 
         return MAIL_TMPL.format(
                 owner=owner,

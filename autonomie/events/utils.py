@@ -38,6 +38,19 @@ def format_mail(mail):
     return u"<{0}>".format(mail)
 
 
+def format_link(settings, link):
+    """
+    Format a link to fit the sender's domain name if a bounce url has been
+    configured
+    """
+    bounce_url = settings.get("mail.bounce_url")
+    if bounce_url:
+        url = u"http://{0}/?url={1}".format(bounce_url, link)
+    else:
+        url = link
+    return url
+
+
 def send_mail(event):
     """
         send a mail to dests with subject and body beeing set

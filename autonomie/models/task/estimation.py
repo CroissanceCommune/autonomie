@@ -473,7 +473,7 @@ class PaymentLine(DBBASE):
             CustomDateType,
             default=get_current_timestamp,
             onupdate=get_current_timestamp))
-    paymentDate = Column("paymentDate", CustomDateType2(11))
+    paymentDate = Column("paymentDate", CustomDateType2)
     task = relationship(
         "Estimation",
         backref=backref('payment_lines', order_by='PaymentLine.rowIndex',

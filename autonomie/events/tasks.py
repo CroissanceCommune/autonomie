@@ -27,17 +27,12 @@
 """
 import logging
 
-from pyramid_mailer.message import Attachment
-from pyramid.threadlocal import get_current_registry
-
 from autonomie.views.render_api import format_status
-
-from autonomie.export.utils import detect_file_headers
-from autonomie.utils.pdf import write_pdf
 
 from autonomie.events.utils import (
     send_mail,
     format_mail,
+    format_link,
     )
 
 log = logging.getLogger(__name__)
@@ -75,6 +70,8 @@ class StatusChanged(object):
         if status == 'paid' and self.document.CAEStatus == 'resulted':
             self.new_status = 'resulted'
 
+        self.settings = self.request.registry.settings
+
 
     @property
     def recipients(self):
@@ -92,9 +89,8 @@ class StatusChanged(object):
         """
             Return the sender's email
         """
-        settings = get_current_registry().settings
-        if 'mail.default_sender' in settings:
-            mail = settings['mail.default_sender']
+        if 'mail.default_sender' in self.settings:
+            mail = self.settings['mail.default_sender']
         else:
             log.info(u"'{0}' has not set his email".format(
                                                     self.request.user.login))
@@ -131,6 +127,7 @@ class StatusChanged(object):
                     id=self.document.id,
                     _query=query_args,
                     )
+        addr = format_link(self.settings, addr)
 
         docnumber = self.document.number
         customer = self.document.customer.name

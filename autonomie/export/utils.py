@@ -25,25 +25,18 @@
 """
     Export utilities
 """
-import os
 from autonomie.utils.ascii import (
         force_ascii,
         )
-
-
-MIMETYPES = {'.csv': 'application/csv',
-        '.xls': 'application/vnd.ms-excel',
-        '.xlsx': 'application/vnd.ms-excel',
-        '.pdf': 'application/pdf',
-        '.txt': 'text/plain'}
+import mimetypes
 
 
 def detect_file_headers(filename):
     """
         Return the headers adapted to the given filename
     """
-    ext = os.path.splitext(filename)[1]
-    return MIMETYPES.get(ext, "text/plain")
+    mimetype = mimetypes.guess_type(filename)[0] or "text/plain"
+    return mimetype
 
 
 def write_headers(request, filename, header):

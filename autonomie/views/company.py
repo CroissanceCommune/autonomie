@@ -223,12 +223,16 @@ def get_enable_btn(company_id):
                                             _query=dict(action="enable"))
 
 
-def recent_tasks_view(request):
+def make_panel_wrapper_view(panel_name):
     """
-    Return a page of the list of recent tasks.
-    View wrapper around the company_tasks panel
+        Return a view wrapping the given panel
     """
-    return {}
+    def myview(request):
+        """
+            Return a panel name for our panel wrapper
+        """
+        return {'panel_name': panel_name }
+    return myview
 
 
 def includeme(config):
@@ -256,8 +260,12 @@ def includeme(config):
                     request_param='action=enable',
                     permission="edit")
     # same panel as html view
-    config.add_view(recent_tasks_view,
-                   route_name='company',
-                   renderer='company_tasks.mako',
-                   request_param='action=tasks_html',
-                   permission='edit')
+    for panel, request_param in (
+            ('company_tasks', 'action=tasks_html',),
+            ('company_activities', 'action=activities_html',),
+            ):
+        config.add_view(make_panel_wrapper_view(panel),
+                route_name='company',
+                renderer="panel_wrapper.mako",
+                request_param=request_param,
+                permission="edit")

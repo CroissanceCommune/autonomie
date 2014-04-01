@@ -78,20 +78,22 @@ th.visible-desktop, td.visible-desktop, th.hidden-phone, td.hidden-phone{
   .visible-phone {
     display: block;
   }
-  .hidden-phone {
+  .hidden-phone , th.hidden-phone, td.hidden-phone{
     display: none;
   }
   .hidden-desktop {
     display: block;
   }
-  .visible-desktop {
+  .visible-desktop, th.visible-desktop, td.visible-desktop{
     display: none;
   }
   .form-horizontal .control-group{
     margin-bottom:2px;
     padding:2px;
   }
-
+  .navbar button.btn-navbar{
+    display: block;
+  }
   .deform fieldset{
   padding:0px;
   }
@@ -156,7 +158,7 @@ th.visible-desktop, td.visible-desktop, th.hidden-phone, td.hidden-phone{
   .hidden-desktop {
     display: block;
   }
-  .visible-desktop {
+  .visible-desktop, th.visible-desktop, td.visible-desktop{
     display: none;
   }
   .form-horizontal .control-group{
@@ -538,7 +540,7 @@ th.visible-desktop, td.visible-desktop, th.hidden-phone, td.hidden-phone{
   .btn-navbar {
     display: block;
   }
-  .nav-collapse {
+  .nav-collapse.collapse {
     overflow: hidden;
     height: 0;
   }
@@ -547,6 +549,13 @@ th.visible-desktop, td.visible-desktop, th.hidden-phone, td.hidden-phone{
   .nav-collapse.collapse {
     height: auto !important;
     overflow: visible !important;
+  }
+  tr.visible-desktop {
+     display:table-row !important;
+  }
+  td.visible-desktop,
+  th.visible-desktop {
+     display:table-cell !important;
   }
 }
 @media (min-width: 1200px) {

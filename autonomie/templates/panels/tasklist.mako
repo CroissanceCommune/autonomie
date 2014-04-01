@@ -28,7 +28,7 @@
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<div class='section-header'>Dernières activités</div>
+<div class='section-header'>Dernières activités sur vos documents</div>
 Afficher <select id='number_of_tasks'>
   % for i in (5, 10, 15, 50):
   <option value='${i}'
@@ -43,31 +43,37 @@ Afficher <select id='number_of_tasks'>
 éléments à la fois
 <table class='table table-stripped tasklist'>
     <thead>
+        <th class="visible-desktop">
+            Nom du document
+        </th>
         <th>
             Projet
         </th>
         <th>
             Client
         </th>
-        <th>
-            Nom du document
-        </th>
-        <th>
+        <th class="visible-desktop">
             Dernière modification
+        </th>
+        <th class="visible-desktop">
         </th>
     </thead>
     <tbody>
         % for task in tasks:
             <tr>
-                <td>
-                    ${format_project(task.project)}
+                <% url = request.route_path(task.type_, id=task.id) %>
+                <% onclick = "document.location='{url}'".format(url=url) %>
+                <td class="visible-desktop rowlink" onclick="${onclick}">
+                    ${task.name}
                 </td>
-                <td>
-                    ${format_customer(task.customer)}
+                <td  onclick="${onclick}" class="rowlink" >
+                    ${format_project(task.project, False)}
                 </td>
-                <td>${task.name}</td>
-                <td>${api.format_status(task)}</td>
-                <td>
+                <td onclick="${onclick}" class="rowlink">
+                    ${format_customer(task.customer, False)}
+                </td>
+                <td class="visible-desktop rowlink">${api.format_status(task)}</td>
+                <td class="visible-desktop" style="text-align:right">
                     ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"icon-search")}
                 </td>
             </tr>

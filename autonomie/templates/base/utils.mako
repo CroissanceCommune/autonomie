@@ -114,26 +114,35 @@ path = request.current_route_path(_query=get_args)
         ${api.clean_html(data.replace(u'\n', u'<br />'))|n}
     %endif
 </%def>
-<%def name="format_customer(customer)">
+<%def name="format_customer(customer, link=True)">
     <%doc>
         Render a customer
     </%doc>
     %if customer is not UNDEFINED and customer is not None:
+        % if link:
         <a href="${request.route_path('customer', id=customer.id)}"
-           title="Voir le client ${customer.name}">
-            ${customer.name}
+            title="Voir le client ${customer.name}">
+        % endif
+        ${customer.name}
+        % if link:
         </a>
     %endif
+    %endif
 </%def>
-<%def name="format_project(project)">
+<%def name="format_project(project, link=True)">
     <%doc>
         Render a project
+        link : should we generate an html link
     </%doc>
     %if project is not UNDEFINED and project is not None:
+        % if link:
         <a href="${request.route_path('project', id=project.id)}"
             title="Voir le projet ${project.name}">
-            ${project.name}
-        </a>
+        % endif
+        ${project.name}
+        % if link:
+            </a>
+        % endif
     %endif
 </%def>
 <%def name="format_mail(mail)">

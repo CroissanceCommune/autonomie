@@ -27,7 +27,7 @@
 """
 import logging
 
-from autonomie.views.render_api import format_status
+from autonomie.views import render_api
 
 from autonomie.events.utils import (
     send_mail,
@@ -45,8 +45,12 @@ EVENTS = {"valid":u"validé",
 
 SUBJECT_TMPL = u"{docname} ({customer}) : {statusstr}"
 
-MAIL_TMPL = u"""{docname} {docnumber} du projet {project} avec le client {customer} a été {status_verb}{gender}.
+MAIL_TMPL = u"""
+Bonjour {username},
 
+{docname} {docnumber} du projet {project} avec le client {customer} a été {status_verb}{gender}.
+
+Vous pouvez {determinant} consulter ici :
 {addr}
 
 Commentaires associés au document :
@@ -105,7 +109,7 @@ class StatusChanged(object):
         return SUBJECT_TMPL.format(
                 docname=self.document.name,
                 customer=self.document.customer.name,
-                statusstr=format_status(self.document),
+                statusstr=render_api.format_status(self.document),
                 )
 
     @property
@@ -129,20 +133,31 @@ class StatusChanged(object):
                     )
         addr = format_link(self.settings, addr)
 
-        docnumber = self.document.number
-        customer = self.document.customer.name
-        project = self.document.project.name
+        docnumber = self.document.number.lower()
+        customer = self.document.customer.name.capitalize()
+        project = self.document.project.name.capitalize()
         if self.document.is_invoice():
             docname = u"La facture"
             gender = u"e"
+            determinant = u"la"
+        elif self.document.is_cancelinvoice():
+            docname = u"L'avoir"
+            gender = u""
+            determinant = u"le"
         else:
             docname = u"Le devis"
             gender = u""
+            determinant = u"le"
         if self.document.statusComment:
             comment = self.document.statusComment
         else:
             comment = u"Aucun"
-        return MAIL_TMPL.format(docname=docname,
+
+        username = render_api.format_account(self.document.owner)
+        return MAIL_TMPL.format(
+                determinant=determinant,
+                username=username,
+                docname=docname,
                 docnumber=docnumber,
                 customer=customer,
                 project=project,

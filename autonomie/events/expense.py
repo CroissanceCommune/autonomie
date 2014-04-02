@@ -45,9 +45,12 @@ EVENTS = {
           "resulted": u"payée",
           }
 
-MAIL_TMPL = u"""La note de frais de {owner} pour la période {date} a été \
-{status_verb}.
+MAIL_TMPL = u"""
+Bonjour {owner},
 
+La note de frais de {owner} pour la période {date} a été {status_verb}.
+
+Vous pouvez la consulter ici :
 {addr}
 
 Commentaires associés au document :

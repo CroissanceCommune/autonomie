@@ -96,7 +96,7 @@ def format_expense_status(expense):
     return status_str + suffix
 
 
-def format_account(account, reverse=False):
+def format_account(account, reverse=False, upper=True):
     """
         return {firstname} {lastname}
     """
@@ -106,10 +106,10 @@ def format_account(account, reverse=False):
     else:
         firstname = "Inconnu"
         lastname = ""
-    return format_name(firstname, lastname, reverse)
+    return format_name(firstname, lastname, reverse, upper)
 
 
-def format_name(firstname, lastname, reverse=False):
+def format_name(firstname, lastname, reverse=False, upper=True):
     """
         format firstname and lastname in a common format
     """
@@ -118,7 +118,10 @@ def format_name(firstname, lastname, reverse=False):
     if lastname is None:
         lastname = ""
     firstname = firstname.capitalize()
-    lastname = lastname.upper()
+    if upper:
+        lastname = lastname.upper()
+    else:
+        lastname = lastname.capitalize()
     if reverse:
         return u"{0} {1}".format(lastname, firstname)
     else:

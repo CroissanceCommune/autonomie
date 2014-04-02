@@ -165,6 +165,16 @@ def _get_next_activity_form(request, counter):
     return form
 
 
+def _get_appstruct_from_activity(activity):
+    """
+    Return an activity as a form appstruct
+    """
+    appstruct = activity.appstruct()
+    participants = activity.participants
+    appstruct['participants'] = [p.id for p in participants]
+    return appstruct
+
+
 def populate_actionmenu(request):
     if has_permission('manage', request.context, request):
         link = ViewLink(u"Liste des rendez-vous", "manage", path="activities")
@@ -258,7 +268,12 @@ class NewActivityAjaxView(BaseFormView):
                         id=activity.id,
                         _query=dict(action="edit")
                         )
-        return dict(message=ACTIVITY_SUCCESS_MSG.format(activity_url))
+        form = self._get_form()
+        form.set_appstruct(_get_appstruct_from_activity(activity))
+        return dict(
+                message=ACTIVITY_SUCCESS_MSG.format(activity_url),
+                form=form.render()
+                )
 
 
 class ActivityEditView(BaseFormView):
@@ -311,11 +326,7 @@ class ActivityEditView(BaseFormView):
         return form.render()
 
     def get_appstruct(self):
-        appstruct = self.request.context.appstruct()
-        participants = self.request.context.participants
-        appstruct['participants'] = [p.id for p in participants]
-        return appstruct
-
+        return _get_appstruct_from_activity(self.request.context)
 
     def before(self, form):
         """

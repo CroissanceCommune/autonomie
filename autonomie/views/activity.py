@@ -107,7 +107,7 @@ def new_activity(request, appstruct):
     return activity
 
 
-def record_changes(request, appstruct, message):
+def record_changes(request, appstruct, message, gotolist=False):
     """
     Record changes on the current activity, changes could be :
         edition
@@ -116,11 +116,17 @@ def record_changes(request, appstruct, message):
     activity = merge_session_with_post(request.context, appstruct)
     request.dbsession.merge(activity)
     request.session.flash(message)
-    url = request.route_path(
+    if gotolist:
+        url = request.route_path(
+            'activities',
+            )
+    else:
+        url = request.route_path(
             'activity',
             id=request.context.id,
             _query=dict(action='edit'),
             )
+
     return HTTPFound(url)
 
 
@@ -331,7 +337,7 @@ class ActivityRecordView(BaseFormView):
         Called when the record submit button is clicked
         """
         message = u"Les informations ont bien été enregistrées"
-        return record_changes(self.request, appstruct, message)
+        return record_changes(self.request, appstruct, message, gotolist=True)
 
 
 class ActivityList(BaseListView):

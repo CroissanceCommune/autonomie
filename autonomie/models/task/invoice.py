@@ -29,6 +29,7 @@ import datetime
 import logging
 
 from zope.interface import implementer
+from beaker.cache import cache_region
 
 from sqlalchemy import (
         Column,
@@ -39,6 +40,7 @@ from sqlalchemy import (
         DateTime,
         Text,
         func,
+        distinct,
         )
 from sqlalchemy.orm import (
         relationship,
@@ -775,3 +777,23 @@ class FakeProject(object):
     def __init__(self, **kw):
         for key, value in kw.items():
             setattr(self, key, value)
+
+
+# Usefull queries
+def get_invoice_years():
+    """
+        Return a cached query for the years we have invoices configured
+    """
+    @cache_region("long_term", "taskyears")
+    def taskyears():
+        """
+            return the distinct financial years available in the database
+        """
+        query = DBSESSION().query(distinct(Invoice.financial_year))
+        query = query.order_by(Invoice.financial_year)
+        years = [year[0] for year in query]
+        current = datetime.date.today().year
+        if current not in years:
+            years.append(current)
+        return years
+    return taskyears()

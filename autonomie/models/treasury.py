@@ -26,6 +26,7 @@
     Models related to the treasury module
 """
 from datetime import date
+from beaker.cache import cache_region
 from sqlalchemy import (
         Column,
         Date,
@@ -36,6 +37,7 @@ from sqlalchemy import (
         Text,
         Boolean,
         ForeignKey,
+        distinct,
         )
 from sqlalchemy.orm import (
     relationship,
@@ -44,6 +46,7 @@ from sqlalchemy.orm import (
 
 from autonomie.models.base import (
         DBBASE,
+        DBSESSION,
         default_table_args,
         )
 
@@ -222,9 +225,9 @@ class ExpenseSheet(DBBASE):
         """
         ret_dict = {}
         for line in self.lines:
-            ret_dict.setdefault(line.type_id, []).append(line)
+            ret_dict.setdefault(line.type_object.code, []).append(line)
         for line in self.kmlines:
-            ret_dict.setdefault(line.type_id, []).append(line)
+            ret_dict.setdefault(line.type_object.code, []).append(line)
         return ret_dict.values()
 
 
@@ -388,3 +391,23 @@ class Communication(DBBASE):
             backref=backref("expense_communications",
                 order_by="Communication.date",
                 cascade="all, delete-orphan"))
+
+
+def get_expense_years():
+    """
+    Return the list of years that there were some expense configured
+    """
+    @cache_region("long_term", "expenseyears")
+    def expenseyears():
+        """
+        return distinct expense years available in the database
+        """
+        query = DBSESSION().query(distinct(ExpenseSheet.year))\
+                .order_by(ExpenseSheet.year)
+        years = [year[0] for year in query]
+        current = date.today().year
+        if current not in years:
+            years.append(current)
+        return years
+    return expenseyears()
+

@@ -24,7 +24,6 @@
 
 import colander
 
-
 ITEMS_PER_PAGE_OPTIONS = (('10 par page', u'10'),
                           ('20 par page', u'20'),
                           ('30 par page', u'30'),
@@ -74,21 +73,32 @@ def deferred_items_per_page_validator(node, kw):
     return set_cookie
 
 
-class BaseListsSchema(colander.MappingSchema):
+class BaseListsSchema(colander.Schema):
     """
         Base List schema used to validate the common list view options
         raw search
         pagination arguments
         sort parameters
     """
+    page = colander.SchemaNode(
+            colander.Integer(),
+            missing=0,
+            )
+    sort = colander.SchemaNode(
+            colander.String(),
+            missing=deferred_default_sort,
+            validator=deferred_sort_validator,
+            )
+
+    direction = colander.SchemaNode(
+            colander.String(),
+            missing=deferred_default_direction,
+            validator=colander.OneOf(['asc', 'desc']),
+            )
+    items_per_page = colander.SchemaNode(
+            colander.Integer(),
+            missing=deferred_items_per_page,
+            validator=deferred_items_per_page_validator,
+            css='span2',
+            )
     search = colander.SchemaNode(colander.String(), missing=u'')
-    items_per_page = colander.SchemaNode(colander.Integer(),
-                               missing=deferred_items_per_page,
-                               validator=deferred_items_per_page_validator)
-    page = colander.SchemaNode(colander.Integer(), missing=0)
-    sort = colander.SchemaNode(colander.String(),
-                               missing=deferred_default_sort,
-                               validator=deferred_sort_validator)
-    direction = colander.SchemaNode(colander.String(),
-                            missing=deferred_default_direction,
-                            validator=colander.OneOf(['asc', 'desc']))

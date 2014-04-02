@@ -25,18 +25,6 @@
 
 
 var AppOptions = {};
-var MyApp = new Backbone.Marionette.Application();
-
-
-MyApp.on("initialize:after", function(){
-  /*
-   *""" Launche the history (controller and router stuff)
-   */
-  if ((Backbone.history)&&(! Backbone.History.started)){
-    Backbone.history.start();
-  }
-});
-
 
 
 /******************************** Models ********************************/
@@ -534,7 +522,7 @@ var BaseExpenseCollectionView = Backbone.Marionette.CompositeView.extend({
     /*
      * Set the total value for the current collection
      */
-    MyApp.vent.trigger("totalchanged");
+    AutonomieApp.vent.trigger("totalchanged");
     this.ui.internalTotal.html(formatAmount(this.collection.total('1')));
     this.ui.activityTotal.html(formatAmount(this.collection.total('2')));
   }
@@ -589,7 +577,7 @@ var BaseExpenseFormView = BaseFormView.extend({
     var this_ = this;
     return {
       bookmark_options: function(){
-        return MyApp.bookmarks.toArray();
+        return AutonomieApp.bookmarks.toArray();
       },
       type_options: function(){
         return this_.getTypeOptions();
@@ -651,7 +639,7 @@ var BaseExpenseFormView = BaseFormView.extend({
     if (_.isUndefined(cid)){
       return false;
     }
-    var bookmark = MyApp.bookmarks.get(cid);
+    var bookmark = AutonomieApp.bookmarks.get(cid);
     var model = this.model;
 
     _.each(['type_id', 'description', 'ht', 'tva'], function(key){
@@ -663,7 +651,7 @@ var BaseExpenseFormView = BaseFormView.extend({
     if (_.isUndefined(cid)){
       return false;
     }
-    var bookmark = MyApp.bookmarks.get(cid);
+    var bookmark = AutonomieApp.bookmarks.get(cid);
     var this_ = this;
     bookmark.destroy({
       success: function(model, response) {
@@ -729,7 +717,7 @@ var ExpenseTelFormView = BaseFormView.extend({
 });
 
 
-MyApp.Router = Backbone.Marionette.AppRouter.extend({
+AutonomieApp.Router = Backbone.Marionette.AppRouter.extend({
   /*
    *  Local route configuration
    *
@@ -752,7 +740,7 @@ MyApp.Router = Backbone.Marionette.AppRouter.extend({
 });
 
 
-MyApp.Controller = {
+AutonomieApp.Controller = {
   /*
    * App controller
    */
@@ -768,15 +756,15 @@ MyApp.Controller = {
     /*
      *  ensure the popup is closed (is necessary when we come from other views)
      */
-    MyApp.formContainer.close();
+    AutonomieApp.formContainer.close();
   },
   initialize:function(){
     if (!this.initialized){
-      this.lines = new ExpensesView({collection:MyApp.expense.lines});
-      this.kmlines = new ExpensesKmView( {collection:MyApp.expense.kmlines});
+      this.lines = new ExpensesView({collection:AutonomieApp.expense.lines});
+      this.kmlines = new ExpensesKmView( {collection:AutonomieApp.expense.kmlines});
 
-      MyApp.linesRegion.show(this.lines);
-      MyApp.linesKmRegion.show(this.kmlines);
+      AutonomieApp.linesRegion.show(this.lines);
+      AutonomieApp.linesKmRegion.show(this.kmlines);
       this.initialized = true;
     }
   },
@@ -784,14 +772,14 @@ MyApp.Controller = {
     /*
      * Return the expenseline by id or cid
      */
-    var model = MyApp.expense.lines.get(id);
+    var model = AutonomieApp.expense.lines.get(id);
     return model;
   },
   _getExpenseKmLine:function(id){
     /*
      * Return the expenseKmline by id or cid
      */
-    var model = MyApp.expense.kmlines.get(id);
+    var model = AutonomieApp.expense.kmlines.get(id);
     return model;
   },
   add: function(category){
@@ -804,10 +792,10 @@ MyApp.Controller = {
     var model = new ExpenseLine({"category": category, new_element: true});
     var expense_form = new ExpenseFormView({
       title: "Ajouter",
-      destCollection: MyApp.expense.lines,
+      destCollection: AutonomieApp.expense.lines,
       model: model
       });
-    MyApp.formContainer.show(expense_form);
+    AutonomieApp.formContainer.show(expense_form);
   },
   edit: function(id) {
     /*
@@ -817,10 +805,10 @@ MyApp.Controller = {
     var model = this._getExpenseLine(id);
     var expense_form = new ExpenseFormView({
       title:"Éditer",
-      destCollection: MyApp.expense.lines,
+      destCollection: AutonomieApp.expense.lines,
       model:model
       });
-    MyApp.formContainer.show(expense_form);
+    AutonomieApp.formContainer.show(expense_form);
   },
   bookmark: function(id){
     this.initialize();
@@ -830,14 +818,14 @@ MyApp.Controller = {
                         "type_id", "description", "ht", "tva" );
 
     var bookmark = new BookMarkModel(attributes);
-    MyApp.bookmarks.create(bookmark, {
+    AutonomieApp.bookmarks.create(bookmark, {
         'success':function(){
           displayServerSuccess("L'élément a bien été ajouté à vos favoris");
-          MyApp.router.navigate("index", {trigger: true});
+          AutonomieApp.router.navigate("index", {trigger: true});
         },
         'error': function(){
           displayServerError("Erreur à l'ajout de favoris");
-          MyApp.router.navigate("index", {trigger: true});
+          AutonomieApp.router.navigate("index", {trigger: true});
         }
       }
     );
@@ -853,10 +841,10 @@ MyApp.Controller = {
       });
     var expensetel_form = new ExpenseTelFormView({
       title:'Ajouter des frais téléphoniques',
-      destCollection:MyApp.expense.lines,
+      destCollection:AutonomieApp.expense.lines,
       model: model
     });
-    MyApp.formContainer.show(expensetel_form);
+    AutonomieApp.formContainer.show(expensetel_form);
   },
   addkm: function(category){
     this.initialize();
@@ -865,10 +853,10 @@ MyApp.Controller = {
     var model = new ExpenseKmLine({new_element: true, category: category});
     var expensekm_form = new ExpenseKmFormView({
       title:"Ajouter",
-      destCollection:MyApp.expense.kmlines,
+      destCollection:AutonomieApp.expense.kmlines,
       model: model
     });
-    MyApp.formContainer.show(expensekm_form);
+    AutonomieApp.formContainer.show(expensekm_form);
   },
   editkm: function(id) {
     this.initialize();
@@ -877,7 +865,7 @@ MyApp.Controller = {
       title:"Éditer",
       model:model
     });
-    MyApp.formContainer.show(expensekm_form);
+    AutonomieApp.formContainer.show(expensekm_form);
   },
   print: function(){
     window.print();
@@ -885,18 +873,18 @@ MyApp.Controller = {
 };
 
 
-MyApp.addInitializer(function(options){
+AutonomieApp.addInitializer(function(options){
   /*
    *  Application initialization
    */
-  MyApp.expense = new ExpenseSheet(options['expense']);
-  MyApp.router = new MyApp.Router({controller:MyApp.Controller});
-  MyApp.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
+  AutonomieApp.expense = new ExpenseSheet(options['expense']);
+  AutonomieApp.router = new AutonomieApp.Router({controller:AutonomieApp.Controller});
+  AutonomieApp.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
 });
 
-MyApp.vent.on("totalchanged", function(){
+AutonomieApp.vent.on("totalchanged", function(){
   var text = "Total des frais professionnels à payer : ";
-  var total = MyApp.expense.lines.total() +  MyApp.expense.kmlines.total();
+  var total = AutonomieApp.expense.lines.total() +  AutonomieApp.expense.kmlines.total();
   text += formatAmount(total);
   $('#total').html(text);
 });
@@ -907,7 +895,7 @@ var pp = Popup.extend({
 });
 
 
-MyApp.addRegions({
+AutonomieApp.addRegions({
   /*
    * Application regions
    */
@@ -943,7 +931,7 @@ $(function(){
       cache: false,
       success: function(data) {
         _.extend(AppOptions, data['options']);
-        MyApp.start({'expense':data['expense']});
+        AutonomieApp.start({'expense':data['expense']});
       },
       error: function(){
         alert("Une erreur a été rencontrée, contactez votre administrateur.");

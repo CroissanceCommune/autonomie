@@ -20,18 +20,17 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-var TaskModule = AutonomieApp.module('TaskModule' ,
-  function (TaskModule, AutonomieApp, Backbone, Marionette, $, _){
-    TaskModule.startWithParent = false;
-    TaskModule.Router = Marionette.AppRouter.extend({
+var ActivityModule = AutonomieApp.module('ActivityModule' ,
+  function (ActivityModule, AutonomieApp, Backbone, Marionette, $, _){
+    ActivityModule.startWithParent = false;
+    ActivityModule.Router = Marionette.AppRouter.extend({
       appRoutes: {
-        "tasklist/:id": "get_tasks"
+        "activities/:id": "get_activities"
         }
     });
-    TaskModule.Controller = {
+    ActivityModule.Controller = {
       initialized: false,
-      element: '#tasklist_container',
+      element: '#activitylist_container',
 
       initialize: function(){
         if (!this.initialized){
@@ -41,12 +40,12 @@ var TaskModule = AutonomieApp.module('TaskModule' ,
         }
       },
       setNbItemsSelectBehaviour: function(){
-        $('#number_of_tasks').unbind('change.tasks');
-        _.bindAll(this, 'get_tasks');
+        $('#number_of_activities').unbind('change.activities');
+        _.bindAll(this, 'get_activities');
         var this_ = this;
-        $('#number_of_tasks').bind("change.tasks",
+        $('#number_of_activities').bind("change.activities",
           function(){
-            this_.get_tasks(1);
+            this_.get_activities(1);
           }
         );
       },
@@ -54,15 +53,15 @@ var TaskModule = AutonomieApp.module('TaskModule' ,
         this.initialize();
         this.setNbItemsSelectBehaviour();
       },
-      get_tasks: function(id){
+      get_activities: function(id){
         this.initialize();
         this.refresh_list(id);
       },
       refresh_list: function(page_num) {
-        url = '?action=tasks_html';
-        var items_per_page = $('#number_of_tasks').val();
-        postdata = {'tasks_page_nb': page_num,
-                    'tasks_per_page': items_per_page};
+        url = '?action=activities_html';
+        var items_per_page = $('#number_of_activities').val();
+        postdata = {'activities_page_nb': page_num,
+                    'activities_per_page': items_per_page};
         var this_ = this;
         $.ajax(
             url,
@@ -88,10 +87,10 @@ var TaskModule = AutonomieApp.module('TaskModule' ,
     AutonomieApp.addInitializer(function(){
       // Here we have code launched before backbone history starts (we need to
       // create all routers before))
-      // We manually launch the index since it's not the role of our task
+      // We manually launch the index since it's not the role of our activity
       // module to do that
-      TaskModule.router = new TaskModule.Router( {controller: TaskModule.Controller});
-      TaskModule.Controller.index();
+      ActivityModule.router = new ActivityModule.Router( {controller: ActivityModule.Controller});
+      ActivityModule.Controller.index();
     });
     }
 );
@@ -99,5 +98,6 @@ var TaskModule = AutonomieApp.module('TaskModule' ,
 
 $(function(){
   AutonomieApp.start();
-  AutonomieApp.module('TaskModule').start();
+  AutonomieApp.module('ActivityModule').start();
 });
+

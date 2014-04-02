@@ -24,10 +24,10 @@
 """
     forms schemas for estimation list related views
 """
-from datetime import date
 import colander
 
 from autonomie.views.forms.lists import BaseListsSchema
+from autonomie.views.forms import main
 
 
 STATUS_OPTIONS = ((u"Tous les devis", "all",),
@@ -37,11 +37,6 @@ STATUS_OPTIONS = ((u"Tous les devis", "all",),
                 )
 
 
-@colander.deferred
-def default_year(node, kw):
-    return date.today().year
-
-
 class EstimationListSchema(BaseListsSchema):
     """
         Estimation list search schema
@@ -49,5 +44,5 @@ class EstimationListSchema(BaseListsSchema):
     status = colander.SchemaNode(colander.String(),
             validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
             missing='all')
-    year = colander.SchemaNode(colander.Integer(), missing=default_year)
+    year = colander.SchemaNode(colander.Integer(), missing=main.default_year)
     customer_id = colander.SchemaNode(colander.Integer(), missing=-1)

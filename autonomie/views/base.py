@@ -45,8 +45,14 @@ log = logging.getLogger(__name__)
 
 
 class BaseView(object):
-    def __init__(self, request):
-        self.request = request
+    def __init__(self, context, request=None):
+        if request is None:
+            # Needed for manually called views
+            self.request = context
+            self.context = self.request.context
+        else:
+            self.request = request
+            self.context = context
         self.session = self.request.session
 
 class BaseListView(BaseView):
@@ -154,9 +160,11 @@ class BaseListView(BaseView):
         schema = self.schema.bind(**self._get_bind_params())
         try:
             appstruct = schema.deserialize(self.request.GET)
-        except colander.Invalid:
+        except colander.Invalid as e:
             # If values are not valid, we want the default ones to be provided
             # see the schema definition
+            log.error("CURRENT SEARCH VALUES ARE NOT VALID")
+            log.error(e)
             appstruct = schema.deserialize({})
 
         query = self._filter(query, appstruct)

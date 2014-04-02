@@ -29,6 +29,22 @@ Backbone.Marionette.Renderer.render = function(template_name, data){
   return template_obj(data);
 };
 
+var AutonomieApp = null;
+AutonomieApp = new Backbone.Marionette.Application();
+AutonomieApp.navigate = function(route,  options){
+  options || (options = {});
+  Backbone.history.navigate(route, options);
+};
+AutonomieApp.on("initialize:after", function(){
+  /*
+   *""" Launche the history (controller and router stuff)
+   */
+  if ((Backbone.history)&&(! Backbone.History.started)){
+    console.log("Here we start the history");
+    Backbone.history.start();
+  }
+});
+
 
 var Autonomie = {};
 
@@ -127,7 +143,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     /*
      * """ Launched when the form view is closed : redirects to index
      */
-    MyApp.router.navigate("index", {trigger: true});
+    AutonomieApp.router.navigate("index", {trigger: true});
   },
   reset: function(){
     /*

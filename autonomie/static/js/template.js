@@ -124,7 +124,7 @@ function program9(depth0,data) {
   else { stack1 = (depth0 && depth0.type_options); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.type_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n</select>\n</div>\n</div>\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='altdate'>Date</label>\n<div class='controls'>\n<input name=\"altdate\" class=\"input-small\" type=\"text\">\n<input name=\"date\" class=\"input-small\" type=\"hidden\">\n</div>\n</div>\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='description'>Description</label>\n<div class='controls'>\n<input type='text' class='input-xxlarge' name='description' value='";
+  buffer += "\n</select>\n</div>\n</div>\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='altdate'>Date</label>\n<div class='controls'>\n<input name=\"altdate\" class=\"input-small\" type=\"text\" autocomplete=\"off\">\n<input name=\"date\" class=\"input-small\" type=\"hidden\">\n</div>\n</div>\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='description'>Description</label>\n<div class='controls'>\n<input type='text' class='input-xxlarge' name='description' value='";
   if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = (depth0 && depth0.description); stack1 = typeof stack1 === functionType ? stack1.call(depth0, {hash:{},data:data}) : stack1; }
   buffer += escapeExpression(stack1)
@@ -433,7 +433,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<form id='holidayForm' class='form' action='#' onsubmit='return false;'>\n<div class=\"control-group\">\n<label class=\"control-label\" for='alt_start_date'>Début</label>\n<div class='controls'>\n    <input name=\"alt_start_date\" class=\"input-small\" type=\"text\">\n    <input name=\"start_date\" type=\"hidden\">\n</div>\n</div>\n<div class=\"control-group\">\n<label class=\"control-label\" for='alt_end_date'>Fin</label>\n<div class='controls'>\n    <input name=\"alt_end_date\" class=\"input-small\" type=\"text\">\n    <input name=\"end_date\" type=\"hidden\">\n</div>\n</div>\n\n<div class=\"form-actions\">\n<button type=\"submit\" class=\"btn btn-primary\" name='submit'>Valider</button>\n<button type=\"reset\" class=\"btn\" name=\"cancel\">Annuler</button>\n</div>\n</form>\n";
+  return "<form id='holidayForm' class='form' action='#' onsubmit='return false;'>\n<div class=\"control-group\">\n<label class=\"control-label\" for='alt_start_date'>Début</label>\n<div class='controls'>\n    <input name=\"alt_start_date\" class=\"input-small\" type=\"text\" autocomplete=\"off\">\n    <input name=\"start_date\" type=\"hidden\">\n</div>\n</div>\n<div class=\"control-group\">\n<label class=\"control-label\" for='alt_end_date'>Fin</label>\n<div class='controls'>\n    <input name=\"alt_end_date\" class=\"input-small\" type=\"text\" autocomplete=\"off\">\n    <input name=\"end_date\" type=\"hidden\">\n</div>\n</div>\n\n<div class=\"form-actions\">\n<button type=\"submit\" class=\"btn btn-primary\" name='submit'>Valider</button>\n<button type=\"reset\" class=\"btn\" name=\"cancel\">Annuler</button>\n</div>\n</form>\n";
   });
 templates['holidayList.mustache'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
@@ -593,7 +593,7 @@ function program4(depth0,data) {
   else { stack1 = (depth0 && depth0.type_options); stack1 = typeof stack1 === functionType ? stack1.call(depth0, options) : stack1; }
   if (!helpers.type_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n</div>\n</div>\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='altdate'>Date</label>\n<div class='controls'>\n<input name=\"altdate\" class=\"input-small\" type=\"text\">\n<input name=\"date\" class=\"input-small\" type=\"hidden\">\n</div>\n</div>\n\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='start'>Point de départ</label>\n<div class='controls'>\n<input type='text' class='input-medium' name='start' value='";
+  buffer += "\n</div>\n</div>\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='altdate'>Date</label>\n<div class='controls'>\n<input name=\"altdate\" class=\"input-small\" type=\"text\" autocomplete=\"off\">\n<input name=\"date\" class=\"input-small\" type=\"hidden\">\n</div>\n</div>\n\n\n<div class=\"control-group\">\n<label class=\"control-label\" for='start'>Point de départ</label>\n<div class='controls'>\n<input type='text' class='input-medium' name='start' value='";
   if (stack1 = helpers.start) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = (depth0 && depth0.start); stack1 = typeof stack1 === functionType ? stack1.call(depth0, {hash:{},data:data}) : stack1; }
   buffer += escapeExpression(stack1)

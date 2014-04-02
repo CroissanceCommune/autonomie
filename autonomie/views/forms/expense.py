@@ -34,14 +34,8 @@ from deform import widget
 
 from autonomie.models.treasury import ExpenseType
 from autonomie.views.render_api import month_name
-from autonomie.views.forms.widgets import deferred_year_select_widget
-from autonomie.views.forms.widgets import deferred_today
+from autonomie.views.forms import main
 from .custom_types import AmountType
-
-
-@colander.deferred
-def default_year(node, kw):
-    return date.today().year
 
 
 @colander.deferred
@@ -59,11 +53,7 @@ def deferred_type_id_validator(node, kw):
 
 
 class PeriodSelectSchema(colander.MappingSchema):
-    year = colander.SchemaNode(colander.Integer(),
-            widget=deferred_year_select_widget,
-            default=default_year,
-            missing=default_year,
-            title=u"")
+    year = main.year_select_node()
     month = colander.SchemaNode(colander.Integer(),
             widget=widget.SelectWidget(values=[(month, month_name(month))
                                                 for month in range(1,13)],
@@ -88,14 +78,17 @@ class BaseLineSchema(colander.MappingSchema):
     """
         Base Expenseline schema
     """
-    date = colander.SchemaNode(colander.Date(), missing=deferred_today,
-            default=deferred_today)
-    category = colander.SchemaNode(colander.String(),
-            validator=colander.OneOf(('1', '2')))
+    date = main.today_node(missing=main.deferred_today)
+    category = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf(('1', '2'))
+        )
     description = colander.SchemaNode(colander.String(), missing=u'')
     valid = colander.SchemaNode(colander.Boolean(), missing=False)
-    type_id = colander.SchemaNode(colander.Integer(),
-            validator=deferred_type_id_validator)
+    type_id = colander.SchemaNode(
+        colander.Integer(),
+        validator=deferred_type_id_validator,
+        )
 
 
 class ExpenseKmLineSchema(BaseLineSchema):
@@ -140,8 +133,10 @@ class BookMarkSchema(colander.MappingSchema):
     """
         Schema for bookmarks
     """
-    type_id = colander.SchemaNode(colander.Integer(),
-            validator=deferred_type_id_validator)
+    type_id = colander.SchemaNode(
+            colander.Integer(),
+            validator=deferred_type_id_validator
+            )
     description = colander.SchemaNode(colander.String())
     ht = colander.SchemaNode(colander.Float())
     tva = colander.SchemaNode(colander.Float())

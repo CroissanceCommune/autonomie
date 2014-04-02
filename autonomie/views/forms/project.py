@@ -31,7 +31,7 @@ import logging
 from deform import widget
 
 from autonomie.views.forms.widgets import deferred_autocomplete_widget
-from autonomie.views.forms.widgets import get_date_input
+from autonomie.views.forms import main
 from autonomie.views.forms.widgets import DisabledInput
 from autonomie.views.forms.lists import BaseListsSchema
 
@@ -140,11 +140,11 @@ class ProjectSchema(colander.MappingSchema):
     startingDate = colander.SchemaNode(colander.Date(),
             title=u"Date de début",
             missing=u"",
-            widget=get_date_input())
+            widget=main.get_date_input())
     endingDate = colander.SchemaNode(colander.Date(),
             title=u"Date de fin",
             missing=u"",
-            widget=get_date_input())
+            widget=main.get_date_input())
     customers = CustomerSchema(
             title=u"Clients",
             widget=widget.SequenceWidget(

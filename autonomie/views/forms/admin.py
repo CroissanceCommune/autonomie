@@ -34,9 +34,13 @@ from deform import widget
 from deform import FileData
 
 from autonomie.models.config import Config
-from autonomie.views.forms import flatten_appstruct
+from autonomie.views.forms import (
+    main,
+    flatten_appstruct,
+    )
 from autonomie.views.forms.validators import validate_image_mime
-from autonomie.utils.fileupload import FileTempStore
+from autonomie.utils.image import ImageResizer
+from autonomie.views.forms.widgets import get_fileupload_widget
 
 
 from .custom_types import AmountType
@@ -44,35 +48,42 @@ from .custom_types import AmountType
 log = logging.getLogger(__name__)
 
 
-@colander.deferred
-def deferred_upload_widget(node, kw):
-    """
-        Returns a fileupload widget to allow logo upload
-    """
-    request = kw['request']
-    session = request.session
-    root_path = request.registry.settings.get('autonomie.assets')
-    root_url = "/assets/"
-    store_url = os.path.join(root_url, "main")
-    store_directory = os.path.join(root_path, "main")
-    tmpstore = FileTempStore(session, store_directory, store_url, 'logo.png')
-    return widget.FileUploadWidget(tmpstore,
-            template="autonomie:deform_templates/fileupload.mako")
+HEADER_RESIZER = ImageResizer(4, 1)
+
+
+def get_deferred_upload_widget(filename, filters=None):
+    @colander.deferred
+    def deferred_upload_widget(node, kw):
+        """
+            Returns a fileupload widget to allow logo upload
+        """
+        request = kw['request']
+
+        root_url = "/assets/"
+        store_url = os.path.join(root_url, "main")
+
+        root_path = request.registry.settings.get('autonomie.assets')
+        store_path = os.path.join(root_path, "main")
+
+        return get_fileupload_widget(
+                store_url,
+                store_path,
+                request.session,
+                default_filename=filename,
+                filters=filters)
+
+    return deferred_upload_widget
 
 
 class EstimationConfig(colander.MappingSchema):
     """
         Schema for estimation configuration
     """
-    header = colander.SchemaNode(
-            colander.String(),
-            title=u"Cadre d'information spécifique (en entête des devis)",
-            widget=widget.TextAreaWidget(cols=80, rows=2),
-            missing=u'')
-    footer = colander.SchemaNode(
-        colander.String(),
+    header = main.textarea_node(
+        title=u"Cadre d'information spécifique (en entête des devis)",
+        missing=u"")
+    footer = main.textarea_node(
         title=u"Informations sur l'acceptation des devis",
-        widget=widget.TextAreaWidget(cols=80, rows=2),
         missing=u"")
 
 
@@ -80,23 +91,18 @@ class InvoiceConfig(colander.MappingSchema):
     """
         Schema for invoice configuration
     """
-    prefix = colander.SchemaNode(colander.String(),
-            title=u"Préfixer les numéros de facture",
-            missing=u"")
-    header = colander.SchemaNode(
-            colander.String(),
-            title=u"Cadre d'information spécifique (en entête des factures)",
-            widget=widget.TextAreaWidget(cols=80, rows=2),
-            missing=u'')
-    payment = colander.SchemaNode(
+    prefix = colander.SchemaNode(
         colander.String(),
-        title=u"Information de paiement pour les factures",
-        widget=widget.TextAreaWidget(cols=80, rows=2),
+        title=u"Préfixer les numéros de facture",
         missing=u"")
-    late = colander.SchemaNode(
-        colander.String(),
+    header = main.textarea_node(
+        title=u"Cadre d'information spécifique (en entête des factures)",
+        missing=u"")
+    payment = main.textarea_node(
+        title=u"Information de paiement pour les factures",
+        missing=u"")
+    late = main.textarea_node(
         title=u"Informations sur les délais de paiement",
-        widget=widget.TextAreaWidget(cols=80, rows=2),
         missing=u"")
 
 
@@ -104,28 +110,21 @@ class DocumentConfig(colander.MappingSchema):
     """
         Schema for document (estimation/invoice ...) configuration
     """
-    cgv = colander.SchemaNode(
-            colander.String(),
-            title=u"Conditions générales de vente",
-            widget=widget.RichTextWidget(cols=80, rows=2, theme="advanced"),
-            description=u"Les conditions générales sont placées en dernière \
+    cgv = main.textarea_node(
+        title=u"Conditions générales de vente",
+        description=u"Les conditions générales sont placées en dernière \
 page des documents (devis/factures/avoirs)",
-            missing=u'')
-    footertitle = colander.SchemaNode(
-        colander.String(),
+        missing=u'',
+        richwidget=True)
+    footertitle = main.textarea_node(
         title=u"Titre du pied de page",
-        widget=widget.TextAreaWidget(cols=80, rows=2),
         missing=u"")
-    footercourse = colander.SchemaNode(
-        colander.String(),
+    footercourse = main.textarea_node(
         title=u"Pied de page des documents liées aux formations",
-        widget=widget.TextAreaWidget(cols=80, rows=2),
-        missing=u'')
-    footercontent = colander.SchemaNode(
-        colander.String(),
+        missing=u"")
+    footercontent = main.textarea_node(
         title=u"Contenu du pied de page",
-        widget=widget.TextAreaWidget(cols=80, rows=2),
-        missing=u'')
+        missing=u"")
 
     estimation = EstimationConfig(title=u'Devis')
     invoice = InvoiceConfig(title=u"Factures")
@@ -133,9 +132,9 @@ page des documents (devis/factures/avoirs)",
 
 class FileTypeConfig(colander.SequenceSchema):
     name = colander.SchemaNode(
-            colander.String(),
-            title=u"Libellé du type de document",
-            description=u"Le libellé permet d'identifier plus facilement les \
+        colander.String(),
+        title=u"Type de document",
+        description=u"Le libellé permet d'identifier plus facilement les \
 documents attachés aux factures",
             )
 
@@ -152,15 +151,16 @@ class SiteConfig(colander.MappingSchema):
         Site configuration
         logos ...
     """
-    logo = colander.SchemaNode(FileData(),
-                widget=deferred_upload_widget,
-                title=u'Logo du site',
-                validator=validate_image_mime,
-                default={"filename": "logo.png", "uid": "MAINLOGO"})
-    welcome = colander.SchemaNode(
-        colander.String(),
+    logo = colander.SchemaNode(
+        FileData(),
+        widget=get_deferred_upload_widget('logo.png'),
+        title=u'Logo du site',
+        validator=validate_image_mime,
+        default={"filename": "logo.png", "uid": "MAINLOGO"},
+        )
+    welcome = main.textarea_node(
         title=u"Texte d'accueil",
-        widget=widget.RichTextWidget(cols=80, rows=2, theme="advanced"),
+        richwidget=True,
         missing=u'')
 
 
@@ -177,13 +177,13 @@ class Product(colander.MappingSchema):
     """
         Form schema for a single product configuration
     """
-    id = colander.SchemaNode(colander.Integer(),
-            widget=widget.HiddenWidget(),
-            default=None,
-            missing=None)
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None)
     name = colander.SchemaNode(colander.String(), title=u"Libellé")
-    compte_cg = colander.SchemaNode(colander.String(),
-                                    title=u"Compte CG")
+    compte_cg = colander.SchemaNode(colander.String(), title=u"Compte CG")
 
 
 class ProductSequence(colander.SequenceSchema):
@@ -193,10 +193,11 @@ class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
     """
-    id = colander.SchemaNode(colander.Integer(),
-            widget=widget.HiddenWidget(),
-            default=0,
-            missing=0)
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=0,
+        missing=0)
     name = colander.SchemaNode(
         colander.String(),
         title=u"Libellé du taux de TVA",
@@ -206,19 +207,20 @@ class TvaItem(colander.MappingSchema):
         title=u"Montant",
         css_class='span2')
     compte_cg = colander.SchemaNode(
-            colander.String(),
-            missing="",
-            title=u"Compte CG de Tva")
+        colander.String(),
+        missing="",
+        title=u"Compte CG de Tva")
     code = colander.SchemaNode(
-            colander.String(),
-            missing="",
-            title=u"Code de Tva")
+        colander.String(),
+        missing="",
+        title=u"Code de Tva")
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",
         widget=widget.CheckboxWidget(true_val="1", false_val="0"))
-    products = ProductSequence(title=u"",
-            widget=widget.SequenceWidget(orderable=False))
+    products = ProductSequence(
+        title=u"",
+        widget=widget.SequenceWidget(orderable=False))
 
 
 class TvaSequence(colander.SequenceSchema):
@@ -226,8 +228,10 @@ class TvaSequence(colander.SequenceSchema):
 
 
 class TvaConfig(colander.MappingSchema):
-    tvas = TvaSequence(title=u"", missing=u'',
-            widget=widget.SequenceWidget(orderable=True))
+    tvas = TvaSequence(
+        title=u"",
+        missing=u'',
+        widget=widget.SequenceWidget(orderable=True))
 
 
 class PaymentModeSequence(colander.SequenceSchema):
@@ -240,8 +244,10 @@ class PaymentModeConfig(colander.MappingSchema):
     """
         Main configuration form model
     """
-    paymentmodes = PaymentModeSequence(title=u"", missing=u"",
-            widget=widget.SequenceWidget(orderable=True))
+    paymentmodes = PaymentModeSequence(
+        title=u"",
+        missing=u"",
+        widget=widget.SequenceWidget(orderable=True))
 
 
 class WorkUnitSequence(colander.SequenceSchema):
@@ -254,43 +260,55 @@ class WorkUnitConfig(colander.MappingSchema):
     """
         Main configuration form model
     """
-    workunits = WorkUnitSequence(title=u"", missing=u"",
-            widget=widget.SequenceWidget(orderable=True))
+    workunits = WorkUnitSequence(
+        title=u"",
+        missing=u"",
+        widget=widget.SequenceWidget(orderable=True))
 
 
 class ExpenseConfig(colander.MappingSchema):
     """
         Schema for the configuration of different expense types
     """
-    id = colander.SchemaNode(colander.Integer(),
-            widget=widget.HiddenWidget(),
-            default=None,
-            missing=None)
-    label = colander.SchemaNode(colander.String(), title=u"Libellé",
-            validator=colander.Length(max=50))
-    code = colander.SchemaNode(colander.String(), title=u"Code analytique",
-            validator=colander.Length(max=15))
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None)
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé",
+        validator=colander.Length(max=50))
+    code = colander.SchemaNode(
+        colander.String(),
+        title=u"Code analytique",
+        validator=colander.Length(max=15))
+
 
 class ExpenseKmConfig(ExpenseConfig):
     """
         Schema for the configuration of vehicle related expenses
     """
-    amount = colander.SchemaNode(colander.Float(),
-            title=u"Tarif", description=u"Tarif au km")
+    amount = colander.SchemaNode(
+        colander.Float(),
+        title=u"Tarif",
+        description=u"Tarif au km")
 
 
 class ExpenseTelConfig(ExpenseConfig):
     """
         Schema for telefonic expenses
     """
-    percentage = colander.SchemaNode(colander.Integer(),
-                                title=u"Pourcentage remboursé",
-                                validator=colander.Range(1, 100))
-    initialize = colander.SchemaNode(colander.Boolean(),
-            title=u"Créer une entrée par défaut ?",
-            description=u"Une ligne sera automatiquement ajoutée à la feuille \
+    percentage = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Pourcentage remboursé",
+        validator=colander.Range(1, 100))
+    initialize = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Créer une entrée par défaut ?",
+        description=u"Une ligne sera automatiquement ajoutée à la feuille \
 de notes de frais",
-            default=True)
+        default=True)
 
 
 class ExpensesConfig(colander.SequenceSchema):
@@ -321,6 +339,73 @@ class ExpenseTypesConfig(colander.MappingSchema):
     expenses = ExpensesConfig(title=u'Frais généraux')
     expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
     expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
+
+
+class ActivityTypeConfig(colander.MappingSchema):
+    """
+        Schema for the configuration of different activity types
+    """
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None
+        )
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé",
+        validator=colander.Length(max=100)
+        )
+
+
+class ActivityTypesSeqConfig(colander.SequenceSchema):
+    """
+        The sequence Schema associated with the ActivityTypeConfig
+    """
+    activity_type = ActivityTypeConfig(title=u"Type d'activité")
+
+
+class ActivityModeConfig(colander.MappingSchema):
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Mode d'entretien",
+        validator=colander.Length(max=100)
+        )
+
+
+class ActivityModesSeqConfig(colander.SequenceSchema):
+    """
+    Sequence schema for activity modes configuration
+    """
+    activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
+
+class MainActivityConfig(colander.MappingSchema):
+    """
+    Mapping schema for main configuration
+    """
+    header = colander.SchemaNode(
+        FileData(),
+        widget=get_deferred_upload_widget('accompagnement_header.png'),
+        title=u'En-tête des sortie PDF',
+        validator=validate_image_mime,
+        default={
+            "filename": "accompagnement_header.png",
+            "uid": "ACCOMPAGNEMENT_HEADER",
+            },
+        )
+
+
+class ActivityTypesConfig(colander.Schema):
+    """
+        The schema for activity types configuration
+    """
+    main = MainActivityConfig(title=u"")
+    types = ActivityTypesSeqConfig(
+            title=u"Configuration des types de rendez-vous"
+            )
+    modes = ActivityModesSeqConfig(
+            title=u"Configuration des modes d'entretien"
+            )
 
 
 class CaeConfig(colander.MappingSchema):
@@ -457,12 +542,13 @@ Contribution Organic",
     )
     schema = CaeConfig().clone()
     for key, title, description in fields:
-        schema.add(colander.SchemaNode(
-                colander.String(),
-                title=title,
-                description=description,
-                missing=u"",
-                name=key))
+        schema.add(
+            colander.SchemaNode(
+            colander.String(),
+            title=title,
+            description=description,
+            missing=u"",
+            name=key))
 
 
     export_modules = (
@@ -492,24 +578,28 @@ Contribution Organic",
                 u"",),
             )
     export_schema = SageExportConfig(
-            title=u"Activation des modules d'export Sage",
-            name='sage_export').clone()
-    export_schema.add(colander.SchemaNode(
-        colander.String(),
-        widget=widget.CheckboxWidget(
-            template='autonomie:deform_templates/checkbox_readonly.pt',
-            ),
-        title=u"Module facturation",
-        description=u"activé par défaut",
-        name="sage_facturation_not_used",
-        ))
-    for key, title, description in export_modules:
-        export_schema.add(colander.SchemaNode(
+        title=u"Activation des modules d'export Sage",
+        name='sage_export').clone()
+    export_schema.add(
+        colander.SchemaNode(
             colander.String(),
-            widget=widget.CheckboxWidget(true_val="1", false_val="0"),
-            title=title,
-            description=description,
-            name=key))
+            widget=widget.CheckboxWidget(
+                template='autonomie:deform_templates/checkbox_readonly.pt',
+                ),
+            title=u"Module facturation",
+            description=u"activé par défaut",
+            name="sage_facturation_not_used",
+            )
+        )
+    for key, title, description in export_modules:
+        export_schema.add(
+            colander.SchemaNode(
+                colander.String(),
+                widget=widget.CheckboxWidget(true_val="1", false_val="0"),
+                title=title,
+                description=description,
+                name=key)
+        )
     schema.add(export_schema)
 
     return schema

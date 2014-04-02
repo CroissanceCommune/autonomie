@@ -57,6 +57,16 @@ EDIT_OK_MSG = u"Le fichier a bien été adjoint au document"
 log = logging.getLogger(__name__)
 
 
+NODE_TYPE_LABEL = {
+    'project': u'projet',
+    'estimation': u'document',
+    'invoice': u'document',
+    'cancelinvoice': u'document',
+    'activity': u'rendez-vous',
+    }
+
+
+
 def file_dl_view(context, request):
     """
     download view for a given file
@@ -232,10 +242,8 @@ def populate_actionmenu(context, request):
     """
         Add menu items
     """
-    if context.parent.type_ == 'project':
-        label = u"Revenir au projet"
-    else:
-        label = u"Revenir au document"
+    type_label = NODE_TYPE_LABEL.get(context.parent.type_, u'précédent')
+    label = u"Revenir au {0}".format(type_label)
     request.actionmenu.add(
         ViewLink(
             label,

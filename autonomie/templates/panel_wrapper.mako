@@ -1,9 +1,8 @@
 <%doc>
- * Copyright (C) 2012-2013 Croissance Commune
+ * Copyright (C) 2012-2014 Croissance Commune
  * Authors:
        * Arezki Feth <f.a@majerti.fr>;
        * Miotte Julien <j.m@majerti.fr>;
-       * Pettier Gabriel;
        * TJEBBES Gaston <g.t@majerti.fr>
 
  This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -22,7 +21,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%doc>
-    Page fragment displaying the page list
+    Wrap a given panel
     Should be returned from an ajax call
 </%doc>
-${request.layout_manager.render_panel('company_tasks')}
+${request.layout_manager.render_panel(panel_name)}

@@ -7,6 +7,7 @@
 
     <input type="text"
            name="displayDate"
+           autocomplete="off"
            value="${cstruct}"
            tal:attributes="size field.widget.size;
                            class field.widget.css_class"

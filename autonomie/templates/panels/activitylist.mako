@@ -28,11 +28,11 @@
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<div class='section-header'>Dernières activités sur vos documents</div>
-Afficher <select id='number_of_tasks'>
+<div class='section-header'>Rendez-vous</div>
+Afficher <select id='number_of_activities'>
   % for i in (5, 10, 15, 50):
   <option value='${i}'
-  % if tasks.items_per_page == i:
+  % if activities.items_per_page == i:
     selected=true
   % endif
   >
@@ -41,43 +41,45 @@ Afficher <select id='number_of_tasks'>
   % endfor
 </select>
 éléments à la fois
-<table class='table table-stripped tasklist'>
+<table class='table table-stripped activitylist'>
     <thead>
-        <th class="visible-desktop">
-            Nom du document
+        <th>
+            Date
         </th>
         <th>
-            Projet
-        </th>
-        <th>
-            Client
+            Conseiller
         </th>
         <th class="visible-desktop">
-            Dernière modification
+            Nature du rendez-vous
+        </th>
+        <th class="visible-desktop">
+            Mode de rendez-vous
         </th>
         <th class="visible-desktop">
         </th>
     </thead>
     <tbody>
-        % for task in tasks:
+        % for activity in activities:
             <tr>
-                <% url = request.route_path(task.type_, id=task.id) %>
+                <% url = request.route_path("activity", id=activity.id) %>
                 <% onclick = "document.location='{url}'".format(url=url) %>
-                <td class="visible-desktop rowlink" onclick="${onclick}">
-                    ${task.name}
-                </td>
                 <td  onclick="${onclick}" class="rowlink" >
-                    ${format_project(task.project, False)}
+                    ${api.format_date(activity.date)}
                 </td>
                 <td onclick="${onclick}" class="rowlink">
-                    ${format_customer(task.customer, False)}
+                    ${api.format_account(activity.conseiller)}
                 </td>
-                <td class="visible-desktop rowlink">${api.format_status(task)}</td>
+                <td class="visible-desktop rowlink" onclick="${onclick}">
+                    % if activity.type_object is not None:
+                        ${activity.type_object.label}
+                    % endif
+                </td>
+                <td class="visible-desktop rowlink">${activity.mode}</td>
                 <td class="visible-desktop" style="text-align:right">
-                    ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"icon-search")}
+                    ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
                 </td>
             </tr>
         % endfor
     </tbody>
 </table>
-${pager(tasks)}
+${pager(activities)}

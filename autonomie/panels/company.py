@@ -31,24 +31,40 @@ from sqlalchemy import desc, or_
 from sqlalchemy.orm import aliased
 from autonomie.models.task import CancelInvoice, Estimation, Invoice, Task
 from autonomie.models.project import Project
+from autonomie.models.activity import Activity
+from autonomie.models.user import User
 
 from autonomie import resources
-
 
 _p1 = aliased(Project)
 _p2 = aliased(Project)
 _p3 = aliased(Project)
 
+PARTICIPANTS = aliased(User)
 
 log = logging.getLogger(__name__)
 
 
-def _get_tasklist_url(page):
+def _get_page_number(request, post_arg):
     """
-        Return a js url for tasklist pagination
-        :param page: page number
+        Return the page number the user is asking
     """
-    return "#tasklist/{0}".format(page)
+    return _get_post_int(request, post_arg, 0)
+
+
+def _make_get_list_url(listname):
+    """
+    Return a url builder for the pagination
+        :param listname: the name of the list
+    """
+    tmpl = "#{listname}/{option}".format(listname=listname, option="{0}")
+    def _get_list_url(page):
+        """
+            Return a js url for a list pagination
+            :param page: page number
+        """
+        return tmpl.format(page)
+    return _get_list_url
 
 
 def _get_post_int(request, key, default):
@@ -66,26 +82,32 @@ def _get_post_int(request, key, default):
     return val
 
 
-def _get_tasks_per_page(request):
+def _get_items_per_page(request, cookie_name):
     """
-    Infers the nb of tasks per page from a request.
+    Infers the nb of items per page from a request.
     If value supplied in POST, we redefine it in a cookie.
 
-    tasks_per_page is a string representation of a base 10 int
+    cookie_name is a string representation of a base 10 int
         expected to be 5, 15 or 50.
 
     """
-    post_value = _get_post_int(request, 'tasks_per_page', None)
+    default = 5
+
+    post_value = _get_post_int(request, cookie_name, None)
     if post_value is not None:
-        request.response.set_cookie('tasks_per_page', '%d' % post_value)
+        request.response.set_cookie(cookie_name, '%d' % post_value)
         return post_value
 
-    if 'tasks_per_page' in request.cookies:
-        raw_nb_per_page = request.cookies['tasks_per_page']
-        return int(raw_nb_per_page)
+    if cookie_name in request.cookies:
+        raw_nb_per_page = request.cookies[cookie_name]
+        try:
+            return int(raw_nb_per_page)
+        except ValueError:
+            # Not an int, setting it again and going on
+            request.response.set_cookie(cookie_name, '%d' % default)
 
     # fall back to base value
-    return 5
+    return default
 
 
 def _company_tasks_query(company_id):
@@ -108,13 +130,6 @@ def _company_tasks_query(company_id):
                 ))
 
 
-def _get_taskpage_number(request):
-    """
-        Return the page number the user is asking
-    """
-    return _get_post_int(request, 'tasks_page_nb', 0)
-
-
 def recent_tasks_panel(context, request):
     """
     Panel returning the company's tasklist
@@ -128,18 +143,50 @@ def recent_tasks_panel(context, request):
         resources.task_list_js.need()
 
     query = _company_tasks_query(context.id)
-    page_nb = _get_taskpage_number(request)
-    items_per_page = _get_tasks_per_page(request)
+    page_nb = _get_page_number(request, "tasks_page_nb")
+    items_per_page = _get_items_per_page(request, 'tasks_per_page')
 
     paginated_tasks = paginate.Page(
             query,
             page_nb,
             items_per_page=items_per_page,
-            url=_get_tasklist_url,
+            url=_make_get_list_url('tasklist'),
             )
 
     result_data = {'tasks': paginated_tasks}
 
+    return result_data
+
+
+def _user_activities_query(user_id):
+    """
+    Return a sqla query for the user's activities
+    """
+    query = Activity.query()
+    query = query.outerjoin(PARTICIPANTS, Activity.participants)
+    query = query.filter(Activity.participants.any(PARTICIPANTS.id==user_id))
+    return query
+
+
+def next_activities_panel(context, request):
+    """
+        Return the list of the upcoming activities
+    """
+    if not request.is_xhr:
+        resources.activity_list_js.need()
+
+    query = _user_activities_query(request.user.id)
+    page_nb = _get_page_number(request, 'activities_page_nb')
+    items_per_page = _get_items_per_page(request, 'activities_per_page')
+
+    paginated_activities = paginate.Page(
+            query,
+            page_nb,
+            items_per_page=items_per_page,
+            url=_make_get_list_url('activities'),
+            )
+
+    result_data = {'activities': paginated_activities}
     return result_data
 
 
@@ -150,3 +197,6 @@ def includeme(config):
     config.add_panel(recent_tasks_panel,
                     'company_tasks',
                     renderer='panels/tasklist.mako')
+    config.add_panel(next_activities_panel,
+                    'company_activities',
+                    renderer='panels/activitylist.mako')

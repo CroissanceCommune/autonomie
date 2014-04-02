@@ -114,26 +114,35 @@ path = request.current_route_path(_query=get_args)
         ${api.clean_html(data.replace(u'\n', u'<br />'))|n}
     %endif
 </%def>
-<%def name="format_customer(customer)">
+<%def name="format_customer(customer, link=True)">
     <%doc>
         Render a customer
     </%doc>
     %if customer is not UNDEFINED and customer is not None:
+        % if link:
         <a href="${request.route_path('customer', id=customer.id)}"
-           title="Voir le client ${customer.name}">
-            ${customer.name}
+            title="Voir le client ${customer.name}">
+        % endif
+        ${customer.name}
+        % if link:
         </a>
     %endif
+    %endif
 </%def>
-<%def name="format_project(project)">
+<%def name="format_project(project, link=True)">
     <%doc>
         Render a project
+        link : should we generate an html link
     </%doc>
     %if project is not UNDEFINED and project is not None:
+        % if link:
         <a href="${request.route_path('project', id=project.id)}"
             title="Voir le projet ${project.name}">
-            ${project.name}
-        </a>
+        % endif
+        ${project.name}
+        % if link:
+            </a>
+        % endif
     %endif
 </%def>
 <%def name="format_mail(mail)">
@@ -141,7 +150,7 @@ path = request.current_route_path(_query=get_args)
         Render an email address
     </%doc>
     % if mail is not UNDEFINED and mail is not None:
-        <a href="mailto:${mail}"><span class="ui-icon ui-icon-mail-closed"></span>${mail}</a>
+        <a href="mailto:${mail}">${mail}&nbsp;<i class="icon-envelope"></i></a>
     % endif
 </%def>
 <%def name="format_phone(phone)">
@@ -214,3 +223,16 @@ path = request.current_route_path(_query=get_args)
       % endfor
   % endif
 </%def>
+<%def name="definition_list(items)">
+    <%doc>
+        render a list of elements as a definition_list
+        items should be an iterator of (label, values) 2-uple
+    </%doc>
+    <dl class="dl-horizontal">
+        % for label, value in items:
+            <dt>${label}</dt>
+            <dd>${value}</dd>
+        % endfor
+    </dl>
+</%def>
+

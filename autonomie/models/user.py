@@ -47,6 +47,13 @@ ADMIN_PRIMARY_GROUP = 1
 MANAGER_PRIMARY_GROUP = 2
 CONTRACTOR_PRIMARY_GROUP = 3
 
+
+ROLES = {
+    'admin': 1,
+    'manager': 2,
+    'contractor': 3,
+    }
+
 COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
         Column("company_id", Integer, ForeignKey('company.id')),
         Column("account_id", Integer, ForeignKey('accounts.id')),
@@ -167,3 +174,11 @@ class User(DBBASE):
 
     def __repr__(self):
         return u"<User {s.id} '{s.lastname} {s.firstname}'>".format(s=self)
+
+
+def get_user_by_roles(roles):
+    """
+        Return user by roles
+    """
+    roles_ids = [ROLES[role] for role in roles if role in ROLES.keys()]
+    return User.query().filter(User.primary_group.in_(roles_ids))

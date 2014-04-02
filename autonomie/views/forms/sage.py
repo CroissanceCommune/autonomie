@@ -28,9 +28,9 @@
 from datetime import date
 import colander
 from autonomie.views.forms.widgets import (
-        get_date_input,
         deferred_year_select_widget,
         )
+from autonomie.views.forms import main
 
 
 @colander.deferred
@@ -65,9 +65,9 @@ class PeriodSchema(colander.MappingSchema):
         A form used to select a period
     """
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
-            widget=get_date_input())
+            widget=main.get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
-            widget=get_date_input())
+            widget=main.get_date_input())
     exported = ExportedField
 
 
@@ -80,11 +80,7 @@ class InvoiceNumberSchema(colander.MappingSchema):
     """
         Form schema for an invoice number selection (year + number)
     """
-    financial_year = colander.SchemaNode(colander.Integer(),
-            widget=deferred_year_select_widget,
-            default=default_year,
-            missing=default_year,
-            title=u"Année comptable")
+    financial_year = main.year_select_node(title=u"Année comptable")
     officialNumber = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture')
@@ -95,11 +91,7 @@ class FromInvoiceNumberSchema(colander.MappingSchema):
     """
         Form schema for an invoice number selection (year + number)
     """
-    financial_year = colander.SchemaNode(colander.Integer(),
-            widget=deferred_year_select_widget,
-            default=default_year,
-            missing=default_year,
-            title=u"Année comptable")
+    financial_year = main.year_select_node(title=u"Année comptable")
     start_officialNumber = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture',

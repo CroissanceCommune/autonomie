@@ -32,10 +32,13 @@ from sqlalchemy import and_
 
 from autonomie.models.task.task import Task
 from autonomie.models.treasury import ExpenseSheet
-from autonomie.models.task.invoice import Invoice
-from autonomie.models.task.invoice import CancelInvoice
+from autonomie.models.task.invoice import (
+        Invoice,
+        CancelInvoice,
+        )
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.project import Phase
+from autonomie.models.activity import Activity
 
 log = logging.getLogger(__name__)
 
@@ -49,17 +52,31 @@ def manage(request):
             .join(Task.phase)\
             .filter(and_(Task.CAEStatus == 'wait', Phase.name is not None))\
             .order_by(Task.statusDate).all()
+
     for document in documents:
         document.url = request.route_path(document.type_, id=document.id)
+
 
     expenses = ExpenseSheet.query()\
             .filter(ExpenseSheet.status == 'wait')\
             .order_by(ExpenseSheet.month).all()
     for expense in expenses:
         expense.url = request.route_path("expense", id=expense.id)
+
+
+    user_id = request.user.id
+    query = Activity.query().filter(Activity.conseiller_id==user_id)
+    query = query.filter(Activity.status=='planned')
+    query = query.order_by(Activity.date).limit(10)
+    activities = query.all()
+
+    for activity in activities:
+        activity.url = request.route_path("activity", id=activity.id)
+
     return dict(title=u"Documents en attente de validation",
                 tasks=documents,
-                expenses = expenses)
+                expenses = expenses,
+                activities=activities)
 
 def includeme(config):
     config.add_route("manage",

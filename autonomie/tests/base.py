@@ -87,14 +87,14 @@ class BaseViewTest(BaseTestCase):
         from pyramid_beaker import BeakerSessionFactoryConfig
         return BeakerSessionFactoryConfig(**options)(request)
 
-    def get_csrf_request(self, post={}):
+    def get_csrf_request(self, params={}, cookies=None, post={}):
         """
             Insert a dummy csrf token in the posted datas
         """
         def_csrf = 'default_csrf'
         if not  u'csrf_token' in post.keys():
             post.update({'csrf_token': def_csrf})
-        request = testing.DummyRequest(post)
+        request = testing.DummyRequest(params=params, post=post, cookies=cookies)
         request.session = self.make_session(request)
         request.dbsession = self.session
         request.config = {}

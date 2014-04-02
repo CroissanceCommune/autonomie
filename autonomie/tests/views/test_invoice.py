@@ -67,7 +67,8 @@ class Base(BaseFunctionnalTest):
         return User.query().first()
 
     def request(self, task=None, post_args=APPSTRUCT):
-        request = self.get_csrf_request(post=post_args)
+        # Since the testing request separates post args from the webob params
+        request = self.get_csrf_request(params=post_args, post=post_args)
         if task is None:
             request.context = self.project()
             request.context.__name__ = 'project'

@@ -28,6 +28,7 @@
 """
 import logging
 import deform
+import itertools
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
@@ -130,11 +131,38 @@ def record_changes(request, appstruct, message, gotolist=False):
     return HTTPFound(url)
 
 
-def next_activity_url(request):
+def _next_activity_url(request):
     """
     Return the url for the next activity form
     """
     return request.route_path('activities', _query=dict(action='new'))
+
+
+def _get_next_activity_form_options(request, counter=None):
+    """
+    Return options needed to build the next activity form
+    """
+    submit_url = _next_activity_url(request)
+    if counter is None:
+        # To be sure we haven't id problems
+        counter=itertools.count(start=100)
+    return dict(
+            buttons=(NEW_ACTIVITY_BUTTON,),
+            counter=counter,
+            formid="next_activity_form",
+            action=submit_url,
+            )
+
+def _get_next_activity_form(request, counter):
+    """
+    Return the form used to configure the next activity
+    """
+    form = deform.Form(
+            schema=CreateActivitySchema().bind(request=request),
+            use_ajax=True,
+            **_get_next_activity_form_options(request, counter)
+            )
+    return form
 
 
 def populate_actionmenu(request):
@@ -215,6 +243,12 @@ class NewActivityAjaxView(BaseFormView):
     """
     add_template_vars = ()
     schema = NewActivitySchema()
+    use_ajax = True
+
+    @property
+    def form_options(self):
+        form_options = _get_next_activity_form_options(self.request)
+        return form_options
 
     def submit_success(self, appstruct):
         activity = new_activity(self.request, appstruct)
@@ -224,22 +258,6 @@ class NewActivityAjaxView(BaseFormView):
                         _query=dict(action="edit")
                         )
         return dict(message=ACTIVITY_SUCCESS_MSG.format(activity_url))
-
-
-def get_next_activity_form(request, counter):
-    """
-    Return the form used to configure the next activity
-    """
-    submit_url = next_activity_url(request)
-    form = deform.Form(
-            schema=CreateActivitySchema().bind(request=request),
-            buttons=(NEW_ACTIVITY_BUTTON,),
-            use_ajax=True,
-            counter=counter,
-            formid="next_activity_form",
-            action=submit_url,
-            )
-    return form
 
 
 class ActivityEditView(BaseFormView):
@@ -266,7 +284,7 @@ class ActivityEditView(BaseFormView):
 
     @property
     def next_activity_form(self):
-        form = get_next_activity_form(self.request, self.counter)
+        form = _get_next_activity_form(self.request, self.counter)
         form.set_appstruct(self.get_appstruct())
         return form.render()
 

@@ -873,15 +873,6 @@ AutonomieApp.Controller = {
 };
 
 
-AutonomieApp.addInitializer(function(options){
-  /*
-   *  Application initialization
-   */
-  AutonomieApp.expense = new ExpenseSheet(options['expense']);
-  AutonomieApp.router = new AutonomieApp.Router({controller:AutonomieApp.Controller});
-  AutonomieApp.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
-});
-
 AutonomieApp.vent.on("totalchanged", function(){
   var text = "Total des frais professionnels à payer : ";
   var total = AutonomieApp.expense.lines.total() +  AutonomieApp.expense.kmlines.total();
@@ -892,17 +883,6 @@ AutonomieApp.vent.on("totalchanged", function(){
 
 var pp = Popup.extend({
   el:'#form-container'
-});
-
-
-AutonomieApp.addRegions({
-  /*
-   * Application regions
-   */
-  linesRegion:'#expenses',
-  linesKmRegion:'#expenseskm',
-  formContainer:pp,
-  headerContainer: '#header-container'
 });
 
 
@@ -920,7 +900,21 @@ var ExpenseSheet = Backbone.Model.extend({
 });
 
 
-$(function(){
+AutonomieApp.addRegions({
+  /*
+   * Application regions
+   */
+  linesRegion:'#expenses',
+  linesKmRegion:'#expenseskm',
+  formContainer:pp,
+  headerContainer: '#header-container'
+});
+
+
+AutonomieApp.addInitializer(function(options){
+  /*
+   *  Application initialization
+   */
   if (AppOptions['loadurl'] !== undefined){
     $.ajax({
       url: AppOptions['loadurl'],
@@ -931,7 +925,9 @@ $(function(){
       cache: false,
       success: function(data) {
         _.extend(AppOptions, data['options']);
-        AutonomieApp.start({'expense':data['expense']});
+        AutonomieApp.expense = new ExpenseSheet(data['expense']);
+        AutonomieApp.router = new AutonomieApp.Router({controller:AutonomieApp.Controller});
+        AutonomieApp.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
       },
       error: function(){
         alert("Une erreur a été rencontrée, contactez votre administrateur.");

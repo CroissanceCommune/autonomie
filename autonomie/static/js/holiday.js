@@ -25,7 +25,6 @@
 
 var AppOptions = {};
 
-
 var HolidayModel = Backbone.Model.extend({
   /*
    *
@@ -253,13 +252,6 @@ AutonomieApp.addInitializer(function(options){
    *
    *  options should provide : a holidays objects list and a user_id param
    */
-  AutonomieApp.holidays = new HolidaysCollection(options['holidays']);
-  AutonomieApp.holidays.url = "/user/" + options['user_id'] + "/holidays";
-  AutonomieApp.router = new AutonomieApp.Router({controller: AutonomieApp.Controller});
-});
-
-
-$(function(){
   if (AppOptions['loadurl'] !== undefined){
     $.ajax({
       url: AppOptions['loadurl'],
@@ -268,8 +260,10 @@ $(function(){
       mimeType: "textPlain",
       data: {},
       cache: false,
-      success: function(data) {
-        AutonomieApp.start(data);
+      success: function(options) {
+        AutonomieApp.holidays = new HolidaysCollection(options['holidays']);
+        AutonomieApp.holidays.url = "/user/" + options['user_id'] + "/holidays";
+        AutonomieApp.router = new AutonomieApp.Router({controller: AutonomieApp.Controller});
       },
       error: function(){
         alert("Une erreur a été rencontrée, contactez votre administrateur.");

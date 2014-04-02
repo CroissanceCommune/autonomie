@@ -863,7 +863,7 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
             yield self.credit_entreprise(product)
 
 
-class SageExport(object):
+class InvoiceExport(object):
     """
         base module for treasury export
         @param config: application configuration dict, contains all the CAE wide
@@ -977,29 +977,29 @@ class SageExpenseMain(SageExpenseBase):
         return entry
 
     @double_lines
-    def _debit_ht(self, type_obj, ht):
+    def _debit_ht(self, type_object, ht):
         """
         Débit HT du total de la charge
         """
         entry = self.get_base_entry()
         entry.update(
-            compte_cg=type_obj.code,
+            compte_cg=type_object.code,
             num_analytique=self.company.code_compta,
-            code_tva=type_obj.code_tva,
+            code_tva=type_object.code_tva,
             debit=ht,
             )
         return entry
 
     @double_lines
-    def _debit_tva(self, type_obj, tva):
+    def _debit_tva(self, type_object, tva):
         """
         Débit TVA de la charge
         """
         entry = self.get_base_entry()
         entry.update(
-            compte_cg=type_obj.compte_tva,
+            compte_cg=type_object.compte_tva,
             num_analytique=self.company.code_compta,
-            code_tva=type_obj.code_tva,
+            code_tva=type_object.code_tva,
             debit=tva,
             )
         return entry
@@ -1066,15 +1066,16 @@ class SageExpenseMain(SageExpenseBase):
 
             for charge in self.expense.get_lines_by_type():
 
-                type_obj = charge[0].type_obj
+                type_object = charge[0].type_object
                 ht = sum([line.total_ht for line in charge])
                 tva = sum([line.total_tva for line in charge])
 
-                yield self._debit_ht(type_obj, ht)
+                if ht > 0:
+                    yield self._debit_ht(type_object, ht)
                 if tva > 0:
-                    yield self._debit_tva(type_obj, tva)
+                    yield self._debit_tva(type_object, tva)
 
-                if charge.contribution:
+                if type_object.contribution:
 
                     contribution = self._get_contribution_amount(ht)
 

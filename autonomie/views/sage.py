@@ -41,10 +41,14 @@ from deform import (
 from deform.exception import ValidationFailure
 
 from autonomie.compute.sage import (
-        SageExport as ComputeSageExport,
+        InvoiceExport,
         MissingData,
+        ExpenseExport,
         )
-from autonomie.export.sage import SageCsvWriter
+from autonomie.export.sage import (
+        SageInvoiceCsvWriter,
+        SageExpenseCsvWriter,
+        )
 from autonomie.export.utils import write_file_to_request
 
 from autonomie.models.task import (
@@ -57,19 +61,32 @@ from autonomie.views.forms.sage import (
         InvoiceNumberSchema,
         FromInvoiceNumberSchema,
         AllSchema,
+        ExpenseSchema,
+        ExpenseIdSchema,
+        )
+from autonomie.views.render_api import format_account
+from autonomie.models.treasury import (
+        ExpenseSheet,
+        ExpenseType,
         )
 
 log = logging.getLogger(__name__)
+
+
+EXPENSE_CONFIG_ERROR_MSG = u"Veuillez vous assurer que tous les éléments de \
+configuration nécessaire à l'export des notes de frais ont \
+bien été fournis : <br /><a href='{0}'>Configuration des notes de frais</a> \
+<br/><a href='{1}'>Configuration des informations comptables de la CAE</a>"
+
+EXPORT_BTN = Button(name="submit", type="submit", title=u"Exporter")
 
 def get_period_form():
     """
         Return the period search form
     """
-    submit_btn = Button(name="submit", type="submit",
-            title=u"Exporter")
     schema = periodSchema
     return Form(schema=schema,
-            buttons=(submit_btn,),
+            buttons=(EXPORT_BTN,),
             formid='period_form')
 
 
@@ -77,13 +94,11 @@ def get_from_invoice_number_form(counter, request):
     """
         Return the export criteria form used to export from a given invoice
     """
-    submit_btn = Button(name="submit", type="submit",
-            title=u"Exporter")
     schema = FromInvoiceNumberSchema(
             title=u"Exporter les factures à partir d'un numéro")
     schema = schema.bind(request=request)
     return Form(schema=schema,
-            buttons=(submit_btn,),
+            buttons=(EXPORT_BTN,),
             formid='from_invoice_number_form',
             counter=counter)
 
@@ -93,26 +108,44 @@ def get_invoice_number_form(counter, request):
     """
         Return the search form used to search invoices by number+year
     """
-    submit_btn = Button(name="submit", type="submit",
-            title=u"Exporter")
     schema = InvoiceNumberSchema(title=u"Exporter une facture")
     schema = schema.bind(request=request)
     return Form(schema=schema,
-            buttons=(submit_btn,),
+            buttons=(EXPORT_BTN,),
             formid='invoice_number_form',
             counter=counter)
 
 
 def get_all_form(counter):
     """
-        Return a void form used to export all non-exported invoices
+    Return a void form used to export all non-exported documents
     """
-    submit_btn = Button(name="submit", type="submit",
-            title=u"Exporter")
-    schema = AllSchema(title=u"Exporter les factures non exportées")
+    schema = AllSchema(title=u"Exporter les documents non exportées")
     return Form(schema=schema,
-            buttons=(submit_btn,),
+            buttons=(EXPORT_BTN,),
             formid='all_form',
+            counter=counter)
+
+def get_expense_form(request):
+    """
+    Return a form for expense export
+    """
+    schema = ExpenseSchema(title=u"Exporter les notes de frais")
+    schema = schema.bind(request=request)
+    return Form(schema=schema,
+            buttons=(EXPORT_BTN,),
+            formid="expense_form")
+
+def get_expense_id_form(counter):
+    """
+    Return a form for expense export by id
+    :param counter: the iterator used to insert various forms in the same page
+    """
+    schema = ExpenseIdSchema(title=u"Exporter une notes de frais depuis \
+un identifiant")
+    return Form(schema=schema,
+            buttons=(EXPORT_BTN,),
+            formid="expense_id_form",
             counter=counter)
 
 
@@ -121,13 +154,13 @@ configurer les informations comptables nécessaires à l'export des documents,
 dans Configuration->Configuration des informations comptables de la CAE"""
 
 
-class SageExportPage(BaseView):
+class SageInvoiceExportPage(BaseView):
     """
         Provide a sage export view compound of :
             * a form for date to date invoice exports
             * a form for number to number invoice export
     """
-    title = "Export des factures au format CSV pour Sage"
+    title = u"Export des factures au format CSV pour Sage"
 
     @property
     def filename(self):
@@ -161,7 +194,7 @@ class SageExportPage(BaseView):
                 or_(Invoice.financial_year == year,
                     CancelInvoice.financial_year == year))
 
-    def query_invoices(self, query_params_dict):
+    def query(self, query_params_dict):
         """
             Retrieve the exports we want to export
         """
@@ -215,7 +248,7 @@ class SageExportPage(BaseView):
                 return False
         return True
 
-    def check_invoices(self, invoices):
+    def check(self, invoices):
         """
             Check that the given invoices are 'exportable'
         """
@@ -281,7 +314,7 @@ sont manquantes"
 
         return res
 
-    def record_invoices_exported(self, invoices):
+    def record_exported(self, invoices):
         for invoice in invoices:
             log.info("The invoice number {1} (id : {0}) has been exported"\
                     .format(invoice.id, invoice.officialNumber))
@@ -293,14 +326,16 @@ sont manquantes"
         """
             Write the exported csv file to the request
         """
-        exporter = ComputeSageExport(self.request.config)
-        writer = SageCsvWriter(exporter.get_book_entries(invoices))
+        exporter = InvoiceExport(self.request.config)
+        writer = SageInvoiceCsvWriter()
+        writer.set_prefix(self.request.config.get('invoice_prefix', ''))
+        writer.set_datas(exporter.get_book_entries(invoices))
         write_file_to_request(
                 self.request,
                 self.filename,
                 writer.render(),
                 headers="application/csv")
-        self.record_invoices_exported(invoices)
+        self.record_exported(invoices)
         return self.request.response
 
     def _forms_dict(self):
@@ -346,8 +381,8 @@ sont manquantes"
 
 
             if appstruct is not None:
-                invoices = self.query_invoices(appstruct)
-                check_messages = self.check_invoices(invoices)
+                invoices = self.query(appstruct)
+                check_messages = self.check(invoices)
 
                 if not check_messages.get('errors'):
                     try:
@@ -362,22 +397,234 @@ file")
         # * reporting an error
         # * or doing the initial display of forms.
 
-        # check messages for the form
-        raw_values = ('title', self.title), ('check_messages', check_messages)
         # rendered forms
-        rendered_forms_generator = (
-            (name, form.render())
-            for name, form in forms.iteritems()
-            )
+        rendered_forms = [form.render() for form in forms.values()]
 
-        # add the above duples in a single dict with itertools.chain
-        rdata = dict((itertools.chain(rendered_forms_generator, raw_values)))
-        return rdata
+        return {
+                'title': self.title,
+                'check_messages': check_messages,
+                'forms': rendered_forms,
+                }
 
+
+class SageExpenseExportPage(BaseView):
+    """
+    Sage Expense export views
+    """
+    title = u"Export des notes de frais au format CSV pour Sage"
+    config_keys = ('compte_cg_ndf', 'code_journal_ndf',)
+    contribution_config_keys = ('compte_cg_contribution',
+            'contribution_cae', 'numero_analytique')
+
+    @property
+    def filename(self):
+        today = datetime.date.today()
+        return u"export_ndf_{0}.txt".format(today.strftime("%d%m%Y"))
+
+    def query(self, query_params_dict):
+        """
+        Base Query for expenses
+        :param query_params_dict: params passed in the query for expense export
+        """
+        query = ExpenseSheet.query()
+        query = query.filter(ExpenseSheet.status.in_(['valid', 'resulted']))
+
+        if query_params_dict.get("sheet_id", 0) != 0:
+            sheet_id = query_params_dict['sheet_id']
+            query = query.filter(ExpenseSheet.id==sheet_id)
+
+        else:
+            if "year" in query_params_dict:
+                year = query_params_dict['year']
+                query = query.filter(ExpenseSheet.year==year)
+
+                month = query_params_dict['month']
+                query = query.filter(ExpenseSheet.month==month)
+            if query_params_dict.get('user_id', 0) != 0:
+                user_id = query_params_dict['user_id']
+                query = query.filter(ExpenseSheet.user_id==user_id)
+
+        if not 'exported' in query_params_dict or \
+                not query_params_dict.get('exported'):
+            query = query.filter(ExpenseSheet.exported == False)
+
+        return query
+
+    def check_config(self, config):
+        """
+        Check all configuration values are set for export
+
+        :param config: The application configuration dict
+        """
+        contribution_is_active = False
+        for type_ in ExpenseType.query().filter(ExpenseType.active==True):
+            if not type_.code or not type_.compte_tva or not type_.code_tva:
+                return False
+            if type_.contribution:
+                contribution_is_active = True
+
+        for key in self.config_keys:
+            if not config.get(key):
+                return False
+            if contribution_is_active:
+                for key in self.contribution_config_keys:
+                    if not config.get(key):
+                        return False
+        return True
+
+    def check_company(self, company):
+        """
+        Check if the company is fully configured
+
+        :param company: The company we are exporting expenses from
+        """
+        if not company.code_compta or not company.compte_tiers:
+            company_url = self.request.route_path(
+                    'company',
+                    id=company.id,
+                    _query={'action':'edit'},
+                    )
+            message = u" Des informations sur l'entreprise {0} \
+sont manquantes"
+            message += u" <a href='{1}'>Voir l'entreprise</a>"
+            message = message.format(
+                    company.name,
+                    company_url)
+            return message
+        return None
+
+    def check(self, expenses) :
+        """
+        Check if we can export the expenses
+
+        :param expenses: the expenses to export
+        """
+        count = expenses.count()
+        if count == 0:
+            title = u"Il n'y a aucune note de frais à exporter"
+            res = {'title': title,
+                    'errors': [""]}
+            return res
+
+        title = u"Vous vous apprêtez à exporter {0} notes de frais".format(
+                count)
+
+        errors = []
+
+        if not self.check_config(self.request.config):
+            url1 = self.request.route_path('admin_expense')
+            url2 = self.request.route_path('admin_cae')
+            errors.append(EXPENSE_CONFIG_ERROR_MSG.format(url1, url2))
+
+        for expense in expenses:
+            company = expense.company
+            error = self.check_company(company)
+            if error is not None:
+                errors.append(u"La note de frais de {0} n'est pas exportable\
+<br />{1}".format(format_account(expense.user), error))
+
+        res = {'title': title, 'errors':errors}
+        return res
+
+    def record_exported(self, expenses):
+        """
+        Tag the exported expenses
+
+        :param expenses: The expenses we are exporting
+        """
+        for expense in expenses:
+            log.info(u"The expense with id {0} has been exported".format(
+                expense.id))
+            expense.exported = True
+            self.request.dbsession.merge(expense)
+
+    def write_csv(self, expenses):
+        """
+        Write the exported csv file to the request
+        """
+        exporter = ExpenseExport(self.request.config)
+        writer = SageExpenseCsvWriter()
+        writer.set_datas(exporter.get_book_entries(expenses))
+        write_file_to_request(
+                self.request,
+                self.filename,
+                writer.render(),
+                headers="application/csv")
+        self.record_exported(expenses)
+        return self.request.response
+
+    def _forms_dict(self):
+        """
+        Return a dict with all form used in the export page
+        """
+        expense_form = get_expense_form(self.request)
+        return {
+                'expense_form': expense_form,
+                'expense_id_form': get_expense_id_form(expense_form.counter),
+                'all_form': get_all_form(expense_form.counter)
+                }
+
+
+    def __call__(self):
+        """
+        Render data into 1) initial forms or 2) annotated forms or 3) form
+        result
+
+        :rtype: rendering datas (dict) or response object (csv file)
+        """
+        check_messages = appstruct = None
+        forms = self._forms_dict()
+
+        if 'submit' in self.request.params:
+            post_values = self.request.POST.values()
+            post_items = self.request.POST.items()
+
+            for form_name, form in forms.iteritems():
+                if form_name in post_values:
+                    log.debug("Form %s was submitted", form_name)
+                    try:
+                        appstruct = form.validate(post_items)
+                    except ValidationFailure as validation_error:
+                        log.exception(u"There was an error on form validation")
+                        log.exception(post_items)
+                        # Replace the form, it now contains errors
+                        # - will be displayed again
+                        forms[form_name] = validation_error
+                    break
+
+            if appstruct is not None:
+                expenses = self.query(appstruct)
+                check_messages = self.check(expenses)
+
+                if not check_messages.get('errors'):
+                    try:
+                        # Let's process and return successfully the csvfile
+                        return self.write_csv(expenses)
+                    except (MissingData, KeyError), validation_error:
+                        log.exception("Exception occured while writing CSV \
+file")
+                        check_messages['errors'] = [_HELPMSG_CONFIG]
+
+        # We are either
+        # * reporting an error
+        # * or doing the initial display of forms.
+
+        # rendered forms
+        rendered_forms = [form.render() for form in forms.values()]
+
+        return {
+                'title': self.title,
+                'check_messages': check_messages,
+                'forms': rendered_forms,
+                }
 
 def includeme(config):
-    config.add_route("sage_export", "/sage_export")
-    config.add_view(SageExportPage,
-            route_name="sage_export",
+    for name, page_obj in (('invoice', SageInvoiceExportPage),
+            ('expense', SageExpenseExportPage)):
+        route = "sage_{0}_export".format(name)
+        config.add_route(route, "/" + route)
+
+        config.add_view(page_obj,
+            route_name=route,
             renderer="admin/sage_export.mako",
             permission="admin")

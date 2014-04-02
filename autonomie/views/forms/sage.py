@@ -25,20 +25,11 @@
 """
     Form schemas for invoice exports
 """
-from datetime import date
 import colander
-from autonomie.views.forms.widgets import (
-        deferred_year_select_widget,
-        )
+
+from autonomie.models.treasury import get_expense_years
+
 from autonomie.views.forms import main
-
-
-@colander.deferred
-def default_year(node, kw):
-    """
-        Return the current year
-    """
-    return date.today().year
 
 
 def date_validator(form, value):
@@ -52,7 +43,7 @@ def date_validator(form, value):
         raise exc
 
 
-ExportedField = colander.SchemaNode(colander.Boolean(),
+EXPORTEDFIELD = colander.SchemaNode(colander.Boolean(),
             title=u"Inclure les documents déjà exportés ?",
             default=False,
             missing=False,
@@ -68,7 +59,7 @@ class PeriodSchema(colander.MappingSchema):
             widget=main.get_date_input())
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
             widget=main.get_date_input())
-    exported = ExportedField
+    exported = EXPORTEDFIELD
 
 
 periodSchema = PeriodSchema(
@@ -84,7 +75,7 @@ class InvoiceNumberSchema(colander.MappingSchema):
     officialNumber = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture')
-    exported = ExportedField
+    exported = EXPORTEDFIELD
 
 
 class FromInvoiceNumberSchema(colander.MappingSchema):
@@ -97,7 +88,29 @@ class FromInvoiceNumberSchema(colander.MappingSchema):
             title=u'Numéro de facture',
             description=u"Numéro de facture à partir duquel vous voulez \
 exporter (celle-ci sera inclue dans l'export)")
-    exported = ExportedField
+    exported = EXPORTEDFIELD
+
 
 class AllSchema(colander.MappingSchema):
     pass
+
+
+class ExpenseIdSchema(colander.MappingSchema):
+    sheet_id = colander.SchemaNode(
+            colander.Integer(),
+            missing=0,
+            title=u"Identifiant",
+            description=u"Identifiant de la feuille de notes de frais \
+(voir sur la page associée)")
+    exported = EXPORTEDFIELD
+
+
+class ExpenseSchema(colander.MappingSchema):
+    """
+    Schema for sage expense export
+    """
+    user_id = main.user_node(title=u"Nom de l'entrepreneur",
+        widget_options={'default_option':(u'0', u'Tous les entrepreneurs',)})
+    year = main.year_select_node(title=u"Année", query_func=get_expense_years)
+    month = main.month_select_node(title=u"Mois")
+    exported = EXPORTEDFIELD

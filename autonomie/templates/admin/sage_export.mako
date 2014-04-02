@@ -36,7 +36,7 @@
     % endfor
     </p>
 % endif
-% for form in (all_form, period_form, from_invoice_number_form, invoice_number_form):
+% for form in forms:
     <div class='row-fluid'>
     <div class='span6 offset3'>
         ${form|n}

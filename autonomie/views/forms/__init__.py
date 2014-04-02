@@ -139,7 +139,7 @@ class BaseFormView(FormView):
                         use_ajax=use_ajax, ajax_options=ajax_options,
                         **dict(self.form_options))
         self.before(form)
-
+        return form
 
 
 def merge_session_with_post(session, app_struct):

@@ -112,7 +112,7 @@ class BaseFormView(FormView):
         except colander.Invalid, exc:
             self.logger.exception(
                 "Exception while rendering form "
-                "'%s': %s - struct received: %s", 
+                "'%s': %s - struct received: %s",
                 self.title, exc, self.appstruct())
             raise
         if isinstance(result, dict):
@@ -127,6 +127,19 @@ class BaseFormView(FormView):
         for name in self.add_template_vars:
             result[name] = getattr(self, name)
         return result
+
+    def _get_form(self):
+        """
+            A simple hack to be able to retrieve the form once again
+        """
+        use_ajax = getattr(self, 'use_ajax', False)
+        ajax_options = getattr(self, 'ajax_options', '{}')
+        self.schema = self.schema.bind(**self.get_bind_data())
+        form = self.form_class(self.schema, buttons=self.buttons,
+                        use_ajax=use_ajax, ajax_options=ajax_options,
+                        **dict(self.form_options))
+        self.before(form)
+
 
 
 def merge_session_with_post(session, app_struct):

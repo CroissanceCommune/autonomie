@@ -87,8 +87,18 @@ class BaseCsvWriter(object):
             for data in datas:
                 self.add_row(data)
 
+    def set_datas(self, datas):
+        """
+        Set the rows of our current csv output
+        """
+        for data in datas:
+            self.add_row(data)
+
     @staticmethod
     def format_row(row):
+        """
+        Row formatter, should be implemented in subclasses
+        """
         return row
 
     def add_row(self, row):

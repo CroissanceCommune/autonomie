@@ -147,7 +147,6 @@ def _get_next_activity_form_options(request, counter=None):
         # To be sure we haven't id problems
         counter=itertools.count(start=100)
     return dict(
-            buttons=(NEW_ACTIVITY_BUTTON,),
             counter=counter,
             formid="next_activity_form",
             action=submit_url,
@@ -160,6 +159,7 @@ def _get_next_activity_form(request, counter):
     form = deform.Form(
             schema=CreateActivitySchema().bind(request=request),
             use_ajax=True,
+            buttons=(NEW_ACTIVITY_BUTTON,),
             **_get_next_activity_form_options(request, counter)
             )
     return form
@@ -244,6 +244,7 @@ class NewActivityAjaxView(BaseFormView):
     add_template_vars = ()
     schema = NewActivitySchema()
     use_ajax = True
+    buttons = (NEW_ACTIVITY_BUTTON,)
 
     @property
     def form_options(self):

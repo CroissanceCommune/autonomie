@@ -25,8 +25,12 @@ def upgrade():
     col = sa.Column("contribution", sa.Boolean(), default=False)
     op.add_column("expense_type", col)
 
+    col = sa.Column("exported", sa.Boolean(), default=False)
+    op.add_column("expense_sheet", col)
+
 
 def downgrade():
     op.drop_column('company', "compte_tiers")
     for col in ('code_tva', 'compte_tva', 'contribution'):
         op.drop_column('expense_type', col)
+    op.drop_column("expense_sheet", "exported")

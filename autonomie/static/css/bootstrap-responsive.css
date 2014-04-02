@@ -1110,3 +1110,48 @@
     overflow: visible !important;
   }
 }
+@media (min-width: 980px) {
+    tr.visible-desktop {
+        display:table-row !important;
+    }
+    td.visible-desktop,
+    th.visible-desktop {
+        display:table-cell !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 979px) {
+    tr.hidden-desktop,
+    tr.visible-tablet {
+        display:table-row !important;
+    }
+    td.hidden-desktop,
+    th.hidden-desktop,
+    td.visible-tablet,
+    th.visible-tablet {
+        display:table-cell !important;
+    }
+}
+
+@media (max-width: 767px) {
+    tr.hidden-desktop,
+    tr.visible-phone {
+        display:table-row !important;
+    }
+    td.hidden-desktop,
+    th.hidden-desktop,
+    td.visible-phone,
+    th.visible-phone {
+        display:table-cell !important;
+    }
+}
+
+@media print {
+    tr.visible-print {
+        display:table-row !important;
+    }
+    td.visible-print,
+    th.visible-print {
+        display:table-cell !important;
+    }
+}

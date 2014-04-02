@@ -49,7 +49,7 @@
                         <ul>
                         % for label, route in ( \
                         (u'Liste des factures', 'company_invoices'), \
-                        (u'Liste des devis', 'company_estimations'), \
+                        (u'Liste des devis', 'estimations'), \
                             (u'Gestion commerciale', 'commercial_handling'), \
                             ):
                             <li>

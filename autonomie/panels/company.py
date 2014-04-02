@@ -165,6 +165,7 @@ def _user_activities_query(user_id):
     query = Activity.query()
     query = query.outerjoin(PARTICIPANTS, Activity.participants)
     query = query.filter(Activity.participants.any(PARTICIPANTS.id==user_id))
+    query = query.order_by(desc(Activity.date))
     return query
 
 

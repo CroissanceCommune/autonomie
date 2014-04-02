@@ -45,11 +45,11 @@ PARTICIPANTS = aliased(User)
 log = logging.getLogger(__name__)
 
 
-def _get_page_number(request, cookie_name):
+def _get_page_number(request, post_arg):
     """
         Return the page number the user is asking
     """
-    return _get_post_int(request, cookie_name, 0)
+    return _get_post_int(request, post_arg, 0)
 
 
 def _make_get_list_url(listname):
@@ -91,6 +91,8 @@ def _get_items_per_page(request, cookie_name):
         expected to be 5, 15 or 50.
 
     """
+    default = 5
+
     post_value = _get_post_int(request, cookie_name, None)
     if post_value is not None:
         request.response.set_cookie(cookie_name, '%d' % post_value)
@@ -98,10 +100,14 @@ def _get_items_per_page(request, cookie_name):
 
     if cookie_name in request.cookies:
         raw_nb_per_page = request.cookies[cookie_name]
-        return int(raw_nb_per_page)
+        try:
+            return int(raw_nb_per_page)
+        except ValueError:
+            # Not an int, setting it again and going on
+            request.response.set_cookie(cookie_name, '%d' % default)
 
     # fall back to base value
-    return 5
+    return default
 
 
 def _company_tasks_query(company_id):

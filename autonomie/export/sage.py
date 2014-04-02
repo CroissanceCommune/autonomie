@@ -25,8 +25,6 @@
 """
     Sage exports tools
 """
-from pyramid.threadlocal import get_current_request
-
 from autonomie.views.render_api import format_amount
 from autonomie.utils.ascii import force_utf8
 from autonomie.export.csvtools import BaseCsvWriter
@@ -35,30 +33,22 @@ from autonomie.export.csvtools import BaseCsvWriter
 class SageCsvWriter(BaseCsvWriter):
     """
         Write Sage csv files
+        :param datas: The datas to export list of dict
+        :param headers: The translation tuple between input and output column
+        names
     """
     delimiter = ";"
-    headers = (
-            ('num_facture', "Numéro de pièce",),
-            ('code_journal', "Code Journal"),
-            ('date', "Date de pièce"),
-            ('compte_cg', "N° compte général"),
-            ('num_facture', "Numéro de facture"),
-            ('compte_tiers', "Numéro de compte tiers"),
-            ('code_tva', "Code taxe"),
-            ('libelle', "Libellé d’écriture"),
-            ('echeance', "Date d’échéance"),
-            ('debit', "Montant débit"),
-            ('credit', "Montant crédit"),
-            ('type_', "Type de ligne"),
-            ('num_analytique', "Numéro analytique"),)
+    headers = ()
 
-    def __init__(self, datas=None):
-        request = get_current_request()
-        self.prefix = request.config.get('invoiceprefix', '')
-        super(SageCsvWriter, self).__init__(datas)
+    def __init__(self):
+        super(SageCsvWriter, self).__init__()
 
     @property
     def keys(self):
+        """
+        Return the keys configured in our headers
+        Those keys corresponds to the datas keys we ha
+        """
         return [val for key, val in self.headers]
 
     def format_row(self, row):
@@ -90,8 +80,53 @@ class SageCsvWriter(BaseCsvWriter):
         """
         return self.format_debit(credit)
 
+
+class SageInvoiceCsvWriter(SageCsvWriter):
+    """
+    Sage invoice csv writer
+    Add the handling of the invoice prefix in invoice number formatting
+    """
+    headers = (
+            ('num_facture', "Numéro de pièce",),
+            ('code_journal', "Code Journal"),
+            ('date', "Date de pièce"),
+            ('compte_cg', "N° compte général"),
+            ('num_facture', "Numéro de facture"),
+            ('compte_tiers', "Numéro de compte tiers"),
+            ('code_tva', "Code taxe"),
+            ('libelle', "Libellé d’écriture"),
+            ('echeance', "Date d’échéance"),
+            ('debit', "Montant débit"),
+            ('credit', "Montant crédit"),
+            ('type_', "Type de ligne"),
+            ('num_analytique', "Numéro analytique"),)
+
+    def set_prefix(self, prefix):
+        """
+        Set the prefix of the current CAE
+        """
+        self.prefix = prefix
+
     def format_num_facture(self, number):
         """
             format the invoice official Number to add a prefix
         """
         return "%s%s" % (self.prefix, number)
+
+
+class SageExpenseCsvWriter(SageCsvWriter):
+    """
+    Expense CsvWriter
+    """
+    headers = (
+            ('num_feuille', "Numéro de pièce",),
+            ('code_journal', "Code Journal"),
+            ('date', "Date de pièce"),
+            ('compte_cg', "N° compte général"),
+            ('compte_tiers', "Numéro de compte tiers"),
+            ('code_tva', "Code taxe"),
+            ('libelle', "Libellé d’écriture"),
+            ('debit', "Montant débit"),
+            ('credit', "Montant crédit"),
+            ('type_', "Type de ligne"),
+            ('num_analytique', "Numéro analytique"),)

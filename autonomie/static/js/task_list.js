@@ -23,7 +23,6 @@
 
 var TaskModule = AutonomieApp.module('TaskModule' ,
   function (TaskModule, AutonomieApp, Backbone, Marionette, $, _){
-    TaskModule.startWithParent = false;
     TaskModule.Router = Marionette.AppRouter.extend({
       appRoutes: {
         "tasklist/:id": "get_tasks"
@@ -95,9 +94,3 @@ var TaskModule = AutonomieApp.module('TaskModule' ,
     });
     }
 );
-
-
-$(function(){
-  AutonomieApp.start();
-  AutonomieApp.module('TaskModule').start();
-});

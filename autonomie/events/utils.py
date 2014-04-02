@@ -30,6 +30,16 @@ from pyramid_mailer.message import Message
 
 log = logging.getLogger(__file__)
 
+UNSUBSCRIBE_MSG = u"<mailto:{0}?subject=Unsubscribe-{1}>"
+
+UNSUBSCRIBE_LINK = u"""
+
+
+Vous avez reçu ce mail car vous êtes utilisateurs de l'application Autonomie. \
+Si vous avez reçu ce mail par erreur, nous vous prions de nous \
+en excuser. Vous pouvez vous désincrire en écrivant à \
+{0}?subject=Unsubscribe-{1}."""
+
 
 def format_mail(mail):
     """
@@ -51,6 +61,24 @@ def format_link(settings, link):
     return url
 
 
+def _handle_optout(settings, mail_body):
+    """
+    Add additionnal datas for optout declaration
+    Allows to fit a bit more the mailing conformity
+    """
+    headers = {}
+    optout_addr = settings.get("mail.optout_address")
+    instance_name = settings.get('autonomie.instance_name')
+    if optout_addr and instance_name:
+        headers['Precedence'] = 'bulk'
+        headers['List-Unsubscribe'] = UNSUBSCRIBE_MSG.format(
+                optout_addr,
+                instance_name,
+                )
+        mail_body += UNSUBSCRIBE_LINK.format(optout_addr, instance_name)
+    return headers, mail_body
+
+
 def send_mail(event):
     """
         send a mail to dests with subject and body beeing set
@@ -66,18 +94,21 @@ def send_mail(event):
                 recipients : list of recipients (a string)
                 subject : the mail's subject
                 body : the body of the mail
+                settings : the app settings
 
     """
     if event.is_key_event():
         recipients = event.recipients
         if recipients:
             log.info(u"Sending an email to '{0}'".format(recipients))
+            headers, mail_body = _handle_optout(event.settings, event.body)
             try:
                 mailer = get_mailer(event.request)
                 message = Message(subject=event.subject,
                       sender=event.sendermail,
                       recipients=recipients,
-                      body=event.body)
+                      body=mail_body,
+                      extra_headers=headers)
                 attachment = event.get_attachment()
                 if attachment:
                     message.attach(attachment)

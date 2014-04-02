@@ -22,7 +22,6 @@
  */
 var ActivityModule = AutonomieApp.module('ActivityModule' ,
   function (ActivityModule, AutonomieApp, Backbone, Marionette, $, _){
-    ActivityModule.startWithParent = false;
     ActivityModule.Router = Marionette.AppRouter.extend({
       appRoutes: {
         "activities/:id": "get_activities"
@@ -30,7 +29,7 @@ var ActivityModule = AutonomieApp.module('ActivityModule' ,
     });
     ActivityModule.Controller = {
       initialized: false,
-      element: '#activitylist_container',
+      element: '#activity_container',
 
       initialize: function(){
         if (!this.initialized){
@@ -89,15 +88,10 @@ var ActivityModule = AutonomieApp.module('ActivityModule' ,
       // create all routers before))
       // We manually launch the index since it's not the role of our activity
       // module to do that
+      console.log("Start The Activity Module");
       ActivityModule.router = new ActivityModule.Router( {controller: ActivityModule.Controller});
       ActivityModule.Controller.index();
     });
     }
 );
-
-
-$(function(){
-  AutonomieApp.start();
-  AutonomieApp.module('ActivityModule').start();
-});
 

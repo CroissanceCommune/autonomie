@@ -40,11 +40,12 @@ AutonomieApp.on("initialize:after", function(){
    *""" Launche the history (controller and router stuff)
    */
   if ((Backbone.history)&&(! Backbone.History.started)){
-    console.log("Here we start the history");
     Backbone.history.start();
   }
 });
-
+$(function(){
+  AutonomieApp.start();
+});
 
 var Autonomie = {};
 

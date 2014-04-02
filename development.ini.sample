@@ -25,6 +25,10 @@ pyramid.includes =   pyramid_tm
 #mail.password=mygmailpasswd
 #mail.tls=True
 #mail.default_sender=default_sender@sender.com
+### Optout address for unsubscription (for local smtp purpose)
+#mail.optout_address=unsubcribe@mail.com
+## Bounce_url address (should indicate a server redirecting a query to the url passed in the url GET param)
+#mail.bounce_url=bounce_server.com
 
 #### DATABASE ACCESS CONFIGURATION ####
 sqlalchemy.url = mysql://autonomie:autonomie@localhost/autonomie?charset=utf8
@@ -60,6 +64,15 @@ cache.long_term.expire = 20
 autonomie.static=static
 # Assets (logo ...) storage path
 autonomie.assets=/tmp/
+# treasury related docs upload
+autonomie.ftpdir=/home/gas/Developpement/git/autonomie/autonomie/filesystem
+# Max filesize for file attachment (in Bytes)
+autonomie.maxfilesize=2000000
+# The instance name
+autonomie.instance_name=intranet.local.fr
+
+# Tempdir for file upload (should exist)
+pyramid_deform.tempdir=/tmp/tempdir
 
 [filter:fanstatic]
 use = egg:fanstatic#fanstatic

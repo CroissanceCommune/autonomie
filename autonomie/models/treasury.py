@@ -90,6 +90,10 @@ class ExpenseType(DBBASE):
     code = Column(String(15))
     active = Column(Boolean(), default=True)
 
+    code_tva = Column(String(15), default="")
+    compte_tva = Column(String(15), default="")
+    contribution = Column(Boolean(), default=False)
+
 
 class ExpenseKmType(ExpenseType):
     """

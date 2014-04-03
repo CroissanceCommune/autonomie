@@ -105,30 +105,39 @@ class TestExpenseView(BaseFunctionnalTest):
     def test_success(self):
         self.config.add_route('admin_expense', '/')
         appstruct = {
+                "code_journal": "JOURNAL01",
                 'compte_cg': "DOE548",
                 'expenses':[
-            {'label':u"Restauration", "code":u"0001", "id":None},
-            {'label':u"Déplacement", "code":u"0002", "id":None}],
+    {'label':u"Restauration", "code":u"0001", "id":None, 'compte_tva':"CTVA" },
+
+    {'label':u"Déplacement", "code":u"0002", "id":None, 'code_tva':"TVA"}
+            ],
                     'expenseskm':[
-            {'label':u"Scooter", "code":u"0003", "amount":"0.852", "id":None}],
-                    'expensestel':[
-            {'label':u"Adsl-Téléphone", "code":u"0004", "percentage":"80",
-                "id":None}]}
+    {'label':u"Scooter", "code":u"0003", "amount":"0.852", "id":None,
+        'code_tva':"TVA1"}],
+                 'expensestel':[
+    {'label':u"Adsl-Téléphone", "code":u"0004", "percentage":"80",
+        "id":None, "code_tva": "TVA2", 'contribution': True}]}
         view = AdminExpense(self.get_csrf_request())
         view.submit_success(appstruct)
 
-        self.assertEqual(
-                "DOE548",
-                Config.get('compte_cg_ndf').value)
+        self.assertEqual("DOE548", Config.get('compte_cg_ndf').value)
+        self.assertEqual("JOURNAL01", Config.get('code_journal_ndf').value)
 
         form = DummyForm()
         view.before(form)
         self.assertEqual(len(form.appstruct['expenses']), 2)
         self.assertEqual(form.appstruct['expenses'][0]['label'], u"Restauration")
         self.assertEqual(form.appstruct['expenses'][0]['code'], u"0001")
+        self.assertEqual(form.appstruct['expenses'][0]['compte_tva'], "CTVA")
+        self.assertEqual(form.appstruct['expenses'][1]['code_tva'], "TVA")
+
         self.assertEqual(form.appstruct['expenseskm'][0]['label'], u"Scooter")
         self.assertEqual(form.appstruct['expenseskm'][0]['amount'], 0.852)
+        self.assertEqual(form.appstruct['expenseskm'][0]['code_tva'], 'TVA1')
         self.assertEqual(form.appstruct['expensestel'][0]['percentage'], 80)
+        self.assertEqual(form.appstruct['expensestel'][0]['code_tva'], 'TVA2')
+        self.assertEqual(form.appstruct['expensestel'][0]['contribution'], True)
 
     def test_success_id_preservation(self):
         self.config.add_route('admin_expense', '/')

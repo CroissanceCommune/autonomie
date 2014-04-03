@@ -275,14 +275,36 @@ class ExpenseConfig(colander.MappingSchema):
         widget=widget.HiddenWidget(),
         default=None,
         missing=None)
+
     label = colander.SchemaNode(
         colander.String(),
         title=u"Libellé",
         validator=colander.Length(max=50))
+
     code = colander.SchemaNode(
         colander.String(),
         title=u"Code analytique",
         validator=colander.Length(max=15))
+
+    code_tva = colander.SchemaNode(
+        colander.String(),
+        title=u"Code TVA",
+        missing="",
+        validator=colander.Length(max=15))
+
+    compte_tva = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte de TVA",
+        missing="",
+        description=u"Compte de TVA déductible",
+        validator=colander.Length(max=15))
+
+    contribution = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Contribution",
+        description=u"Ce type de frais est-il intégré dans la contribution \
+à la CAE?",
+        )
 
 
 class ExpenseKmConfig(ExpenseConfig):
@@ -336,12 +358,18 @@ class ExpenseTypesConfig(colander.MappingSchema):
     """
         Expense Configuration form schema
     """
+    code_journal = colander.SchemaNode(
+        colander.String(),
+        title=u"Code journal",
+        description=u"Le code journal pour les notes de frais",
+        missing="",
+        )
     compte_cg = colander.SchemaNode(
-            colander.String(),
-            title=u"Compte CG",
-            description=u"Le compte général pour les notes de frais",
-            missing="",
-            )
+        colander.String(),
+        title=u"Compte CG",
+        description=u"Le compte général pour les notes de frais",
+        missing="",
+        )
     expenses = ExpensesConfig(title=u'Frais généraux')
     expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
     expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")

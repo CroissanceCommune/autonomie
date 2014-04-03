@@ -308,18 +308,23 @@ ont été configurés"
                  'expenseskm':(ExpenseKmType, 'expensekm'),
                  'expensestel':(ExpenseTelType, 'expensetel')}
 
+    def _get_config_key(self, rel_keyname):
+        return rel_keyname + "_ndf"
+
     def before(self, form):
         """
         Add appstruct to the current form object
         """
         appstruct = {}
-        compte_cg = self.request.config.get('compte_cg_ndf', '')
+
+        for key in ('code_journal', 'compte_cg'):
+            cfg_key = self._get_config_key(key)
+            appstruct[key] = self.request.config.get(cfg_key, '')
 
         for key, (factory, polytype) in self.factories.items():
             appstruct[key] = [e.appstruct() for e in factory.query()\
                                             .filter(factory.type==polytype)\
                                             .filter(factory.active==True)]
-        appstruct['compte_cg'] = compte_cg
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
@@ -332,30 +337,32 @@ ont été configurés"
             ids.extend([data['id'] for data in appstruct[key]])
         return ids
 
-    def _get_actual_compte_cg(self):
+    def _get_actual_config_obj(self, config_key):
         """
         Return the actual configured compte_cg object
         """
-        return Config.get("compte_cg_ndf")
+        return Config.get(config_key)
 
-    def _set_compte_cg(self, appstruct):
+    def _set_config_value(self, appstruct, config_key, appstruct_key):
         """
-        Set the compte cg
+        Set a config value
         :param appstruct: the form submitted values
+        :param config_key: The name of the configuration key
+        :param appstruct_key: The name of the key in the appstruct
         """
-        cg_obj = self._get_actual_compte_cg()
-        value = appstruct.pop('compte_cg', None)
+        cfg_obj = self._get_actual_config_obj(config_key)
+        value = appstruct.pop(appstruct_key, None)
 
         if value:
-            if cg_obj is None:
-                cg_obj = Config(name="compte_cg_ndf", value=value)
-                self.dbsession.add(cg_obj)
+            if cfg_obj is None:
+                cfg_obj = Config(name=config_key, value=value)
+                self.dbsession.add(cfg_obj)
 
             else:
-                cg_obj.value = value
-                self.dbsession.merge(cg_obj)
+                cfg_obj.value = value
+                self.dbsession.merge(cfg_obj)
 
-        log.debug(u"Setting the new compte CG : {0}".format(value))
+        log.debug(u"Setting the new {0} : {1}".format(config_key, value))
 
     def submit_success(self, appstruct):
         """
@@ -372,7 +379,9 @@ ont été configurés"
                     self.dbsession.merge(element)
         self.dbsession.flush()
 
-        self._set_compte_cg(appstruct)
+        for key in ('code_journal', 'compte_cg'):
+            cfg_key = self._get_config_key(key)
+            self._set_config_value(appstruct, cfg_key, key)
 
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:

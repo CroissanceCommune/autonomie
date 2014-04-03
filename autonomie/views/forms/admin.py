@@ -353,7 +353,7 @@ class ActivityTypeConfig(colander.MappingSchema):
         )
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Libellé",
+        title=u"Nature de renz-vous",
         validator=colander.Length(max=100)
         )
 
@@ -362,7 +362,7 @@ class ActivityTypesSeqConfig(colander.SequenceSchema):
     """
         The sequence Schema associated with the ActivityTypeConfig
     """
-    activity_type = ActivityTypeConfig(title=u"Type d'activité")
+    activity_type = ActivityTypeConfig(title=u"Nature du rendez-vous")
 
 
 class ActivityModeConfig(colander.MappingSchema):
@@ -378,6 +378,7 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
     Sequence schema for activity modes configuration
     """
     activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
+
 
 class MainActivityConfig(colander.MappingSchema):
     """
@@ -401,7 +402,7 @@ class ActivityTypesConfig(colander.Schema):
     """
     main = MainActivityConfig(title=u"")
     types = ActivityTypesSeqConfig(
-            title=u"Configuration des types de rendez-vous"
+            title=u"Configuration des natures de rendez-vous"
             )
     modes = ActivityModesSeqConfig(
             title=u"Configuration des modes d'entretien"

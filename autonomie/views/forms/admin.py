@@ -336,6 +336,12 @@ class ExpenseTypesConfig(colander.MappingSchema):
     """
         Expense Configuration form schema
     """
+    compte_cg = colander.SchemaNode(
+            colander.String(),
+            title=u"Compte CG",
+            description=u"Le compte général pour les notes de frais",
+            missing="",
+            )
     expenses = ExpensesConfig(title=u'Frais généraux')
     expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
     expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
@@ -724,7 +730,7 @@ def merge_config_datas(dbdatas, appstruct):
         dbdata = get_element_by_name(dbdatas, name)
         if not dbdata:
             # The key 'name' doesn't exist in the database, adding new one
-            dbdata = Config(app=u"autonomie", name=name, value=value)
+            dbdata = Config(name=name, value=value)
             dbdatas.append(dbdata)
         else:
             dbdata.value = value

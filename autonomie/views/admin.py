@@ -310,28 +310,57 @@ ont été configurés"
 
     def before(self, form):
         """
-            Add appstruct to the current form object
+        Add appstruct to the current form object
         """
         appstruct = {}
+        compte_cg = self.request.config.get('compte_cg_ndf', '')
+
         for key, (factory, polytype) in self.factories.items():
             appstruct[key] = [e.appstruct() for e in factory.query()\
                                             .filter(factory.type==polytype)\
                                             .filter(factory.active==True)]
+        appstruct['compte_cg'] = compte_cg
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
     def get_all_ids(self, appstruct):
         """
-            Return the ids of the options still present in the submitted form
+        Return the ids of the options still present in the submitted form
         """
         ids = []
         for key in self.factories:
             ids.extend([data['id'] for data in appstruct[key]])
         return ids
 
+    def _get_actual_compte_cg(self):
+        """
+        Return the actual configured compte_cg object
+        """
+        return Config.get("compte_cg_ndf")
+
+    def _set_compte_cg(self, appstruct):
+        """
+        Set the compte cg
+        :param appstruct: the form submitted values
+        """
+        cg_obj = self._get_actual_compte_cg()
+        value = appstruct.pop('compte_cg', None)
+
+        if value:
+            if cg_obj is None:
+                cg_obj = Config(name="compte_cg_ndf", value=value)
+                self.dbsession.add(cg_obj)
+
+            else:
+                cg_obj.value = value
+                self.dbsession.merge(cg_obj)
+
+        log.debug(u"Setting the new compte CG : {0}".format(value))
+
     def submit_success(self, appstruct):
         """
-            Handle successfull expense configuration
+        Handle successfull expense configuration
+        :param appstruct: submitted datas
         """
         all_ids = self.get_all_ids(appstruct)
 
@@ -343,6 +372,8 @@ ont été configurés"
                     self.dbsession.merge(element)
         self.dbsession.flush()
 
+        self._set_compte_cg(appstruct)
+
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
                 if data['id'] is not None:
@@ -353,9 +384,9 @@ ont été configurés"
                     type_ = factory()
                     merge_session_with_post(type_, data)
                     self.dbsession.add(type_)
+
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_expense"))
-
 
 
 class AdminActivities(BaseFormView):
@@ -459,11 +490,12 @@ class AdminCae(BaseFormView):
         """
         # la table config étant un stockage clé valeur
         # le merge_session_with_post ne peut être utilisé
-        dbdatas = self.dbsession.query(Config).all()
-        log.debug("appstruct")
+        dbdatas = Config.query().all()
+
+        log.debug(u"Cae configuration submission")
         log.debug(appstruct)
+
         new_dbdatas = merge_config_datas(dbdatas, appstruct)
-        log.debug("New config")
         for dbdata in new_dbdatas:
             log.debug(dbdata.name)
             if dbdata in dbdatas:

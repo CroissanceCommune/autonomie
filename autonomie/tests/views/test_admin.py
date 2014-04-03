@@ -25,14 +25,20 @@
 from autonomie.models import tva
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
-from autonomie.models.config import get_config
 from autonomie.models.treasury import ExpenseType
-from autonomie.views.admin import AdminTva
-from autonomie.views.admin import AdminMain
-from autonomie.views.admin import AdminPaymentMode
-from autonomie.views.admin import AdminWorkUnit
-from autonomie.views.admin import AdminExpense
-from autonomie.views.admin import AdminCae
+from autonomie.models.config import (
+        get_config,
+        Config,
+        )
+
+from autonomie.views.admin import (
+        AdminTva,
+        AdminMain,
+        AdminPaymentMode,
+        AdminWorkUnit,
+        AdminExpense,
+        AdminCae,
+        )
 from autonomie.tests.base import BaseFunctionnalTest
 
 
@@ -98,7 +104,9 @@ class DummyForm(object):
 class TestExpenseView(BaseFunctionnalTest):
     def test_success(self):
         self.config.add_route('admin_expense', '/')
-        appstruct = {'expenses':[
+        appstruct = {
+                'compte_cg': "DOE548",
+                'expenses':[
             {'label':u"Restauration", "code":u"0001", "id":None},
             {'label':u"Déplacement", "code":u"0002", "id":None}],
                     'expenseskm':[
@@ -108,6 +116,10 @@ class TestExpenseView(BaseFunctionnalTest):
                 "id":None}]}
         view = AdminExpense(self.get_csrf_request())
         view.submit_success(appstruct)
+
+        self.assertEqual(
+                "DOE548",
+                Config.get('compte_cg_ndf').value)
 
         form = DummyForm()
         view.before(form)
@@ -134,6 +146,7 @@ class TestExpenseView(BaseFunctionnalTest):
         view.submit_success(appstruct)
         expense = ExpenseType.query().filter(ExpenseType.id==expense.id).first()
         self.assertEqual(expense.code, u"00002")
+
 
 class TestCaeView(BaseFunctionnalTest):
     def test_success(self):

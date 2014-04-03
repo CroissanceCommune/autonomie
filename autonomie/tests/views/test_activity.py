@@ -84,6 +84,7 @@ class TestNewActivityView(BaseTest):
 
 class TestNewActivityAjaxView(BaseTest):
     def test_success(self):
+        self.config.add_route('activities', '/activities')
         self.config.add_route('activity', '/activity/{id}')
         typeid = self.addType()
         appstruct = {
@@ -105,7 +106,7 @@ class TestActivityRecordView(BaseTest):
     def test_success(self):
         req = self.get_csrf_request()
         req.context = self.addOne()
-        self.config.add_route('activity', '/activity/{id}')
+        self.config.add_route('activities', '/activities')
         appstruct = {
                 'point': u"Point de suivi",
                 'objectifs': u"Objectifs",

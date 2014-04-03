@@ -74,7 +74,7 @@ class TestAvatar(BaseViewTest):
 class TestConfig(BaseTestCase):
     def test_load_value(self):
         from autonomie.models.config import get_config, Config
-        self.session.add(Config(app="test", name="name", value="value"))
+        self.session.add(Config(name="name", value="value"))
         self.session.flush()
         all_ = get_config()
         self.assertTrue("name" in all_.keys() and all_["name"] == "value")

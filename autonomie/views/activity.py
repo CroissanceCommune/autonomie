@@ -521,6 +521,7 @@ def includeme(config):
             request_param='action=new',
             renderer="/base/formpage.mako",
             )
+
     config.add_view(
             NewActivityAjaxView,
             route_name='activities',
@@ -529,24 +530,28 @@ def includeme(config):
             xhr=True,
             renderer="/base/formajax.mako",
             )
+
     config.add_view(
             ActivityList,
             route_name='activities',
             permission='manage',
             renderer="/activities.mako",
             )
+
     config.add_view(
             ActivityListContractor,
             route_name='company_activities',
-            permission='view',
+            permission='edit',
             renderer="/activities.mako",
             )
+
     config.add_view(
             activity_view_only_view,
             route_name='activity',
             permission='view',
             renderer="/activity.mako",
             )
+
     config.add_view(
             activity_pdf_view,
             route_name='activity.pdf',
@@ -567,6 +572,7 @@ def includeme(config):
             request_param='action=edit',
             renderer="/activity_edit.mako",
             )
+
     config.add_view(
             ActivityRecordView,
             route_name='activity',
@@ -574,6 +580,7 @@ def includeme(config):
             request_param='action=record',
             renderer="/base/formajax.mako",
             )
+
     config.add_view(
             FileUploadView,
             route_name="activity",

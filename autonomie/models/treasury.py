@@ -215,6 +215,17 @@ class ExpenseSheet(DBBASE):
         return sum([line.total for line in self.lines]) \
                 + sum([line.total for line in self.kmlines])
 
+    def get_lines_by_type(self):
+        """
+        Return lines grouped by type
+        """
+        ret_dict = {}
+        for line in self.lines:
+            ret_dict.setdefault(line.type_id, []).append(line)
+        for line in self.kmlines:
+            ret_dict.setdefault(line.type_id, []).append(line)
+        return ret_dict.values()
+
 
 class BaseExpenseLine(DBBASE):
     """
@@ -272,6 +283,11 @@ class ExpenseLine(BaseExpenseLine):
                     tva=self.tva,
                     type_id=self.type_id)
 
+    def _compute_value(self, val):
+        if self.type_object.type == 'expensetel':
+            percentage = self.type_object.percentage
+            val = val * percentage / 100.0
+        return val
 
     @property
     def total(self):
@@ -279,15 +295,24 @@ class ExpenseLine(BaseExpenseLine):
             return the total
         """
         # Previously, it was possible to delete expense types and consequently
-        # break this relationship
+        # break this relationship we still have such behaviours in our users
+        # databases
         if self.type_object is not None:
             result = self.ht + self.tva
-            if self.type_object.type == 'expensetel':
-                percentage = self.type_object.percentage
-                result = result * percentage / 100.0
         else:
             result = 0
-        return result
+        return self._compute_value(result)
+
+    @property
+    def total_ht(self):
+        """
+        Return the HT total of the line
+        """
+        return self._compute_value(self.ht)
+
+    @property
+    def total_tva(self):
+        return self._compute_value(self.tva)
 
 
 class ExpenseKmLine(BaseExpenseLine):
@@ -332,8 +357,12 @@ class ExpenseKmLine(BaseExpenseLine):
         return self.type_object.label
 
     @property
-    def ht(self):
+    def total_ht(self):
         return self.total
+
+    @property
+    def total_tva(self):
+        return 0
 
 
 class Communication(DBBASE):

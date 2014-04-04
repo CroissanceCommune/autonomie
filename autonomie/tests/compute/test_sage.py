@@ -21,7 +21,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+import py.test
 import datetime
 from mock import MagicMock
 
@@ -41,6 +41,7 @@ from autonomie.compute.sage import (
         SageRGInterne,
         SageRGClient,
         SageExport,
+        SageExpenseMain,
         )
 
 from autonomie.tests.base import BaseTestCase
@@ -87,7 +88,9 @@ def get_config():
             'taux_rg_interne': "5",
             'taux_rg_client': "5",
             'taux_contribution_organic': "5",
-            'contribution_cae': "10"
+            'contribution_cae': "10",
+            'compte_cg_ndf': "CGNDF",
+            'code_journal_ndf':"JOURNALNDF",
             }
 
 def prepare(discount=False):
@@ -126,7 +129,6 @@ def prepare(discount=False):
     invoice.expenses = 10000
 
     return ((tva1, tva2), (p1, p2), invoice)
-
 
 
 class TestSageInvoice(BaseTestCase):
@@ -552,3 +554,140 @@ class TestSageExport(BaseTestCase):
         for fact in sage_factories:
             self.assertTrue(True in [isinstance(module, fact)
                 for module in exporter.modules])
+
+
+@py.test.mark.expense
+class TestSageExpenseMain(BaseTestCase):
+    """
+    Main Expense export module testing
+    """
+    def get_factory(self):
+        """
+        Return an instance of the book entry factory we are testing
+        """
+        factory = SageExpenseMain(get_config())
+        factory.set_expense(self.get_base_expense())
+        return factory
+
+    def get_base_expense(self):
+        company = MagicMock(code_compta="COMP_ANA",
+                            compte_tiers="COMP_TIERS")
+
+        return MagicMock(
+                company=company,
+                user=MagicMock(firstname="firstname", lastname="lastname"),
+                month=5,
+                year=2014,
+                date=datetime.date.today(),
+                )
+
+    def get_type_obj(self, contrib=True):
+        return MagicMock(
+                code='ETYPE1',
+                code_tva='CODETVA',
+                compte_tva='COMPTETVA',
+                contribution=contrib,
+                )
+
+    def test_base_entry(self):
+        factory = self.get_factory()
+        assert factory.libelle == "Firstname LASTNAME/frais 5 2014"
+        assert factory.num_feuille == "ndf52014"
+        assert factory.code_journal == "JOURNALNDF"
+
+        base_entry = factory.get_base_entry()
+        for i in ('code_journal', 'date', 'libelle', 'num_feuille', 'type_'):
+            assert i in base_entry
+
+    def test_credit(self):
+        factory = self.get_factory()
+        general, analytic = factory._credit(2500)
+        assert analytic['type_'] == 'A'
+        assert analytic['credit'] == 2500
+        assert analytic['compte_cg'] == "CGNDF"
+        assert analytic['num_analytique'] == "COMP_ANA"
+        assert analytic['compte_tiers'] == "COMP_TIERS"
+
+        assert general['type_'] == 'G'
+        assert 'num_analytique' not in general.keys()
+
+
+    def test_debit_ht(self):
+        tobj = self.get_type_obj()
+        factory = self.get_factory()
+        general, analytic = factory._debit_ht(tobj, 150)
+
+        assert analytic['type_'] == 'A'
+        assert analytic['compte_cg'] == "ETYPE1"
+        assert analytic['num_analytique'] == 'COMP_ANA'
+        assert analytic['code_tva'] == 'CODETVA'
+        assert analytic['debit'] == 150
+
+        assert general['type_'] == 'G'
+        assert 'num_analytique' not in general.keys()
+
+    def test_debit_tva(self):
+        tobj = self.get_type_obj()
+        factory = self.get_factory()
+        general, analytic = factory._debit_tva(tobj, 120)
+
+        assert analytic['type_'] == 'A'
+        assert analytic['compte_cg'] == "COMPTETVA"
+        assert analytic['num_analytique'] == 'COMP_ANA'
+        assert analytic['code_tva'] == 'CODETVA'
+        assert analytic['debit'] == 120
+
+        assert general['type_'] == 'G'
+        assert 'num_analytique' not in general.keys()
+
+    def test_credit_entreprise(self):
+        tobj = self.get_type_obj()
+        factory = self.get_factory()
+        general, analytic = factory._credit_entreprise(120)
+
+        assert analytic['type_'] == 'A'
+        assert analytic['compte_cg'] == "CG_CONTRIB"
+        assert analytic['num_analytique'] == 'COMP_ANA'
+        assert analytic['debit'] == 120
+
+        assert general['type_'] == 'G'
+        assert 'num_analytique' not in general.keys()
+
+    def test_debit_entreprise(self):
+        tobj = self.get_type_obj()
+        factory = self.get_factory()
+        general, analytic = factory._debit_entreprise(120)
+
+        assert analytic['type_'] == 'A'
+        assert analytic['compte_cg'] == "BANK_CG"
+        assert analytic['num_analytique'] == 'COMP_ANA'
+        assert analytic['credit'] == 120
+
+        assert general['type_'] == 'G'
+        assert 'num_analytique' not in general.keys()
+
+    def test_credit_cae(self):
+        tobj = self.get_type_obj()
+        factory = self.get_factory()
+        general, analytic = factory._credit_cae(120)
+
+        assert analytic['type_'] == 'A'
+        assert analytic['compte_cg'] == "BANK_CG"
+        assert analytic['num_analytique'] == 'NUM_ANA'
+        assert analytic['debit'] == 120
+
+        assert general['type_'] == 'G'
+        assert 'num_analytique' not in general.keys()
+
+    def test_debit_cae(self):
+        tobj = self.get_type_obj()
+        factory = self.get_factory()
+        general, analytic = factory._debit_cae(120)
+
+        assert analytic['type_'] == 'A'
+        assert analytic['compte_cg'] == "CG_CONTRIB"
+        assert analytic['num_analytique'] == 'NUM_ANA'
+        assert analytic['credit'] == 120
+
+        assert general['type_'] == 'G'
+        assert 'num_analytique' not in general.keys()

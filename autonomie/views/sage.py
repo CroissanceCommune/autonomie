@@ -458,7 +458,7 @@ class SageExpenseExportPage(BaseView):
         """
         contribution_is_active = False
         for type_ in ExpenseType.query().filter(ExpenseType.active==True):
-            if not type_.code or not type_.compte_tva or not type_.code_tva:
+            if not type_.code: # or not type_.compte_tva or not type_.code_tva:
                 return False
             if type_.contribution:
                 contribution_is_active = True

@@ -123,6 +123,7 @@ class SageExpenseCsvWriter(SageCsvWriter):
             ('code_journal', "Code Journal"),
             ('date', "Date de pièce"),
             ('compte_cg', "N° compte général"),
+            ('num_feuille', "Numéro de note de frais",),
             ('compte_tiers', "Numéro de compte tiers"),
             ('code_tva', "Code taxe"),
             ('libelle', "Libellé d’écriture"),

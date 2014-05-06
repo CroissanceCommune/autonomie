@@ -40,7 +40,7 @@ from autonomie.compute.sage import (
         SageContributionOrganic,
         SageRGInterne,
         SageRGClient,
-        SageExport,
+        InvoiceExport,
         SageExpenseMain,
         )
 
@@ -548,7 +548,7 @@ class TestSageExport(BaseTestCase):
         config = {'sage_contribution':'1',
                 'sage_assurance':'1',
                 'sage_cgscop':'0'}
-        exporter = SageExport(config)
+        exporter = InvoiceExport(config)
         self.assertEqual(len(exporter.modules), 3)
         sage_factories = [SageFacturation, SageContribution, SageAssurance]
         for fact in sage_factories:

@@ -64,7 +64,9 @@ def get_max_allowedfilesize():
     """
     default = 1048576 # 1MB
     settings = get_current_registry().settings
+    print settings
     size = settings.get("autonomie.maxfilesize", default)
+    print size
     return convert_to_int(size, default)
 
 

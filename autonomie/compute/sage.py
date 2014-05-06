@@ -995,7 +995,7 @@ class SageExpenseMain(SageExpenseBase):
         """
         Débit TVA de la charge
         """
-        if not type_object.code_tva or type_object.compte_tva:
+        if type_object.code_tva is None or type_object.compte_tva is None:
             raise MissingData(u"Sage Expense : Missing code_tva or compte_tva \
 in type_object")
         entry = self.get_base_entry()

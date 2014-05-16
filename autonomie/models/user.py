@@ -85,6 +85,7 @@ class User(DBBASE):
                              backref="employees")
     code_compta = Column("code_compta", String(30),
                          default=0)
+    compte_tiers = Column(String(30), default="")
     session_datas = Column("session_datas", JsonEncodedDict, default=None)
 
     @staticmethod

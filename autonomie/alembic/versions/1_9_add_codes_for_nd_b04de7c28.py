@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     col = sa.Column("compte_tiers", sa.String(30), default="")
-    op.add_column("company", col)
+    op.add_column("accounts", col)
 
     for name in ('code_tva', 'compte_tva'):
         col = sa.Column(name, sa.String(15), default="")
@@ -30,7 +30,7 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_column('company', "compte_tiers")
+    op.drop_column('accounts', "compte_tiers")
     for col in ('code_tva', 'compte_tva', 'contribution'):
         op.drop_column('expense_type', col)
     op.drop_column("expense_sheet", "exported")

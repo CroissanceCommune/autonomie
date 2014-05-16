@@ -971,7 +971,7 @@ class SageExpenseMain(SageExpenseBase):
         entry.update(
                 compte_cg=self.config['compte_cg_ndf'],
                 num_analytique=self.company.code_compta,
-                compte_tiers=self.company.compte_tiers,
+                compte_tiers=self.expense.user.compte_tiers,
                 credit=total,
                 )
         return entry
@@ -995,8 +995,8 @@ class SageExpenseMain(SageExpenseBase):
         """
         Débit TVA de la charge
         """
-        if type_object.code_tva is None or type_object.compte_tva is None:
-            raise MissingData(u"Sage Expense : Missing code_tva or compte_tva \
+        if type_object.compte_tva is None:
+            raise MissingData(u"Sage Expense : Missing compte_tva \
 in type_object")
         entry = self.get_base_entry()
         entry.update(

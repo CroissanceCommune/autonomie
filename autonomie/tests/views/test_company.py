@@ -34,7 +34,6 @@ APPSTRUCT = {
     'name':u"Compané $& test",
     "goal":u"Be the best",
     "contribution": 80,
-    "compte_tiers": "DC548748",
         }
 
 class Base(BaseFunctionnalTest):

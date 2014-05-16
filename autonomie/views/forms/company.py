@@ -107,7 +107,6 @@ def remove_admin_fields(schema, kw):
         del schema['IBAN']
         del schema['code_compta']
         del schema['contribution']
-        del schema['compte_tiers']
 
 
 class CompanySchema(colander.MappingSchema):
@@ -173,13 +172,6 @@ comptabilité",
             default=deferred_default_contribution,
             missing=deferred_default_contribution,
             description=u"Pourcentage que cette entreprise contribue à la CAE")
-
-    compte_tiers = colander.SchemaNode(
-            colander.String(),
-            title=u"Compte tiers",
-            description=u"Compte tiers utilisé dans le logiciel de \
-comptabilité (utilisé pour l'export des notes de frais",
-            missing="")
 
     RIB = colander.SchemaNode(
             colander.String(),

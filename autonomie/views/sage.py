@@ -478,7 +478,7 @@ class SageExpenseExportPage(BaseView):
 
         :param company: The company we are exporting expenses from
         """
-        if not company.code_compta or not company.compte_tiers:
+        if not company.code_compta:
             company_url = self.request.route_path(
                     'company',
                     id=company.id,

@@ -183,6 +183,7 @@ def remove_fields(schema, kw):
         del schema['user']['primary_group']
         del schema['companies']
         del schema['password']
+        del schema['compte_tiers']
 
 
 class AccountSchema(colander.MappingSchema):
@@ -194,13 +195,24 @@ class AccountSchema(colander.MappingSchema):
         title=u"Identifiant",
         validator=deferred_login_validator,
         widget=deferred_edit_widget)
+
     firstname = colander.SchemaNode(
         colander.String(),
         title=u"Prénom")
+
     lastname = colander.SchemaNode(
         colander.String(),
         title=u"Nom")
+
     email = main.mail_node(missing=u"")
+
+    compte_tiers = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte tiers",
+        description=u"Compte tiers utilisé dans le logiciel de \
+comptabilité (utilisé pour l'export des notes de frais",
+        missing="")
+
     primary_group = colander.SchemaNode(
         colander.String(),
         title=u"Rôle de l'utilisateur",

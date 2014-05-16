@@ -570,12 +570,16 @@ class TestSageExpenseMain(BaseTestCase):
         return factory
 
     def get_base_expense(self):
-        company = MagicMock(code_compta="COMP_ANA",
-                            compte_tiers="COMP_TIERS")
+        company = MagicMock(code_compta="COMP_ANA")
+        user = MagicMock(
+            firstname="firstname",
+            lastname="lastname",
+            compte_tiers="COMP_TIERS",
+            )
 
         return MagicMock(
                 company=company,
-                user=MagicMock(firstname="firstname", lastname="lastname"),
+                user=user,
                 month=5,
                 year=2014,
                 date=datetime.date.today(),

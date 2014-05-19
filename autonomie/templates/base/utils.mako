@@ -202,7 +202,6 @@ path = request.current_route_path(_query=get_args)
             % endfor
             % if request.user.is_manager() or request.user.is_admin():
                 % for label, key in ((u'Code comptable', 'code_compta'),\
-                                     (u'Compte Tiers', 'compte_tiers'), \
                                      (u'Contribution à la CAE (en %)', 'contribution'),\
                                      ):
                     <dt>${label}</dt>

@@ -35,7 +35,6 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Date,
-    Enum,
     Text,
     Boolean,
     )
@@ -90,6 +89,8 @@ class Activity(Event):
     id = Column(Integer, ForeignKey('event.id'), primary_key=True)
     conseiller_id = Column(ForeignKey('accounts.id'))
     type_id = Column(ForeignKey('activity_type.id'))
+    action_id = Column(ForeignKey('activity_action.id'))
+    subaction_id = Column(ForeignKey('activity_action.id'))
     mode = Column(String(100))
     # Libellé pour la sortie pdf
     action_label = Column(String(125), default="")
@@ -116,6 +117,14 @@ class Activity(Event):
             secondary=ACTIVITY_PARTICIPANT,
             backref="activities",
             )
+    action = relationship(
+            "ActivityAction",
+            primaryjoin="Activity.action_id==ActivityAction.id",
+            )
+    subaction = relationship(
+            "ActivityAction",
+            primaryjoin="Activity.subaction_id==ActivityAction.id",
+            )
 
 
 class ActivityType(DBBASE):
@@ -131,3 +140,18 @@ class ActivityMode(DBBASE):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     label = Column(String(100))
+
+
+class ActivityAction(DBBASE):
+    __tablename__ = 'activity_action'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(String(100))
+    active = Column(Boolean(), default=True)
+    parent_id = Column(ForeignKey("activity_action.id"))
+    children = relationship(
+        "ActivityAction",
+        primaryjoin="ActivityAction.id==ActivityAction.parent_id",
+        backref=backref("parent", remote_side=[id]),
+        cascade="all",
+        )

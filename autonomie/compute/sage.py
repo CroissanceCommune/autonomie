@@ -1016,7 +1016,7 @@ in type_object")
         entry.update(
             compte_cg=self.config['compte_cg_contribution'],
             num_analytique=self.company.code_compta,
-            debit=value,
+            credit=value,
             )
         return entry
 
@@ -1029,7 +1029,7 @@ in type_object")
         entry.update(
             compte_cg=self.config['compte_cg_banque'],
             num_analytique=self.company.code_compta,
-            credit=value,
+            debit=value,
             )
         return entry
 
@@ -1042,7 +1042,7 @@ in type_object")
         entry.update(
                 compte_cg=self.config['compte_cg_banque'],
                 num_analytique=self.config['numero_analytique'],
-                debit=value,
+                credit=value,
                 )
         return entry
 
@@ -1055,7 +1055,7 @@ in type_object")
         entry.update(
                 compte_cg=self.config['compte_cg_contribution'],
                 num_analytique=self.config['numero_analytique'],
-                credit=value,
+                debit=value,
                 )
         return entry
 

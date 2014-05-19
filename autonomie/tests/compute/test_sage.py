@@ -652,7 +652,7 @@ class TestSageExpenseMain(BaseTestCase):
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "CG_CONTRIB"
         assert analytic['num_analytique'] == 'COMP_ANA'
-        assert analytic['debit'] == 120
+        assert analytic['credit'] == 120
 
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
@@ -665,7 +665,7 @@ class TestSageExpenseMain(BaseTestCase):
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "BANK_CG"
         assert analytic['num_analytique'] == 'COMP_ANA'
-        assert analytic['credit'] == 120
+        assert analytic['debit'] == 120
 
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
@@ -678,7 +678,7 @@ class TestSageExpenseMain(BaseTestCase):
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "BANK_CG"
         assert analytic['num_analytique'] == 'NUM_ANA'
-        assert analytic['debit'] == 120
+        assert analytic['credit'] == 120
 
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
@@ -691,7 +691,7 @@ class TestSageExpenseMain(BaseTestCase):
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "CG_CONTRIB"
         assert analytic['num_analytique'] == 'NUM_ANA'
-        assert analytic['credit'] == 120
+        assert analytic['debit'] == 120
 
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()

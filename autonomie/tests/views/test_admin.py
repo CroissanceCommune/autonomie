@@ -27,12 +27,15 @@ from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.config import get_config
 from autonomie.models.treasury import ExpenseType
-from autonomie.views.admin import AdminTva
-from autonomie.views.admin import AdminMain
-from autonomie.views.admin import AdminPaymentMode
-from autonomie.views.admin import AdminWorkUnit
-from autonomie.views.admin import AdminExpense
-from autonomie.views.admin import AdminCae
+from autonomie.views.admin import (
+    AdminTva,
+    AdminMain,
+    AdminPaymentMode,
+    AdminWorkUnit,
+    AdminExpense,
+    AdminCae,
+    AdminActivities,
+    )
 from autonomie.tests.base import BaseFunctionnalTest
 
 
@@ -145,3 +148,18 @@ class TestCaeView(BaseFunctionnalTest):
         config = get_config()
         for key, value in appstruct.items():
             self.assertEqual(config[key], value)
+
+class TestAdminActivities(BaseFunctionnalTest):
+    def test_get_edited_elements(self):
+        obj = AdminActivities(self.get_csrf_request())
+        datas = {'tests':
+            [
+                {'id':5},
+                {'id':4},
+                {},
+            ]
+            }
+        self.assertItemsEqual(obj.get_edited_elements(datas, 'tests')\
+                .keys(), [5,4])
+
+

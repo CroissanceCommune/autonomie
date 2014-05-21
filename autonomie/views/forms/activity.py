@@ -31,6 +31,7 @@ from deform import widget as deform_widget
 from autonomie.models.activity import (
         ActivityType,
         ActivityMode,
+        ActivityAction,
         )
 from autonomie.views.forms import (
         main,
@@ -61,6 +62,21 @@ def get_activity_modes():
     return [mode.label for mode in ActivityMode.query()]
 
 
+def get_actions():
+    query = ActivityAction.query()
+    query = query.filter(ActivityAction.active==True)
+    return query.filter(ActivityAction.parent_id==None)
+
+
+def get_subaction_options():
+    options = [("", "Sélectionner une sous-action"),]
+    for action in get_actions():
+        gr_options = [(unicode(a.id), a.label) for a in action.children]
+        group = deform_widget.OptGroup(action.label, *gr_options)
+        options.append(group)
+    return options
+
+
 @colander.deferred
 def deferred_select_type(node, kw):
     options = [(unicode(a.id), a.label) for a in get_activity_types()]
@@ -71,6 +87,19 @@ def deferred_select_type(node, kw):
 def deferred_select_mode(node, kw):
     modes = get_activity_modes()
     options = zip(modes, modes)
+    return deform_widget.SelectWidget(values=options)
+
+
+@colander.deferred
+def deferred_select_action(node, kw):
+    options = [("", u"Sélectionner une action"),]
+    options.extend([(unicode(a.id), a.label) for a in get_actions()])
+    return deform_widget.SelectWidget(values=options)
+
+
+@colander.deferred
+def deferred_select_subaction(node, kw):
+    options = get_subaction_options()
     return deform_widget.SelectWidget(values=options)
 
 
@@ -110,21 +139,20 @@ class CreateActivitySchema(colander.MappingSchema):
             widget=deferred_select_type,
             title=u"Nature du rendez-vous",
             )
-    action_label = colander.SchemaNode(
-            colander.String(),
+    action_id = colander.SchemaNode(
+            colander.Integer(),
+            widget=deferred_select_action,
             title=u"Intitulé de l'action (financée)",
-            validator=colander.Length(0, 125),
             )
-    subaction_label = colander.SchemaNode(
-            colander.String(),
+    subaction_id = colander.SchemaNode(
+            colander.Integer(),
+            widget=deferred_select_subaction,
             title=u"Intitulé sous-action",
-            missing="",
-            validator=colander.Length(0, 125),
+            missing=None,
             )
     mode = colander.SchemaNode(
             colander.String(),
             widget=deferred_select_mode,
-
             title=u"Mode d'entretien",
             )
     participants = ParticipantsSequence(

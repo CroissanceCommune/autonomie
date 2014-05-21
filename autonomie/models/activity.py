@@ -117,14 +117,28 @@ class Activity(Event):
             secondary=ACTIVITY_PARTICIPANT,
             backref="activities",
             )
-    action = relationship(
+    action_label_obj = relationship(
             "ActivityAction",
             primaryjoin="Activity.action_id==ActivityAction.id",
             )
-    subaction = relationship(
+    subaction_label_obj = relationship(
             "ActivityAction",
             primaryjoin="Activity.subaction_id==ActivityAction.id",
             )
+
+    @property
+    def action_label(self):
+        if self.action_label_obj is not None:
+            return self.action_label_obj.label
+        else:
+            return ""
+
+    @property
+    def subaction_label(self):
+        if self.subaction_label_obj is not None:
+            return self.subaction_label_obj.label
+        else:
+            return ""
 
 
 class ActivityType(DBBASE):

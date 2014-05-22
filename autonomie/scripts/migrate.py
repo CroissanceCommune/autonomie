@@ -187,10 +187,11 @@ def list_all():
         """
             print the current revision
         """
-        print(u"  - current revision: {0}".format(rev))
+        print(u"  - The Current Revision: {0}".format(rev))
         return []
     pkg_env.run_env(current_revision)
     print
+    print migrate.__doc__
 
 
 def fetch(revision=None):
@@ -232,13 +233,13 @@ def revision(message):
 def migrate():
     """Migrate autonomie's database
     Usage:
-        migrate <config_uri> list_all
+        migrate <config_uri> list
         migrate <config_uri> upgrade
         migrate <config_uri> fetch [--rev=<rev>]
         migrate <config_uri> revision [--m=<message>]
         migrate <config_uri> downgrade [--rev=<rev>]
 
-    o list_all : all the revisions
+    o list : all the revisions
     o upgrade : upgrade the app to the latest revision
     o revision : auto-generate a migration file with the given message
     o fetch : set the revision
@@ -249,7 +250,7 @@ def migrate():
     """
     def callback(arguments):
         args = ()
-        if arguments['list_all']:
+        if arguments['list']:
             func = list_all
         elif arguments['upgrade']:
             func = upgrade

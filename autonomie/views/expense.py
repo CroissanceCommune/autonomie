@@ -881,9 +881,11 @@ def includeme(config):
     """
     # Routes
     traverse = '/companies/{id}'
+
     config.add_route("company_expenses",
             "/company/{id}/expenses",
             traverse=traverse)
+
     config.add_route("user_expenses",
             "/company/{id}/{uid}/expenses",
             traverse=traverse)
@@ -917,12 +919,17 @@ def includeme(config):
     #views
     config.add_view(company_expenses_view,
             route_name="company_expenses",
-            renderer="treasury/expenses.mako")
+            renderer="treasury/expenses.mako",
+            permission="edit")
+
     config.add_view(expenses_access_view,
-            route_name="user_expenses")
+            route_name="user_expenses",
+            permission="edit")
+
     config.add_view(ExpenseSheetView,
             route_name="expense",
             renderer="treasury/expense.mako")
+
     config.add_view(expensesheet_json_view,
             route_name="expensejson",
             xhr=True,

@@ -84,6 +84,7 @@ class TestNewActivityView(BaseTest):
 
 class TestNewActivityAjaxView(BaseTest):
     def test_success(self):
+        self.config.add_route('activities', '/activities')
         self.config.add_route('activity', '/activity/{id}')
         self.config.add_route('activities', '/activities')
         typeid = self.addType()

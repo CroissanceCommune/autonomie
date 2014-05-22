@@ -45,6 +45,7 @@ from autonomie.models.treasury import (
 from autonomie.models.activity import (
         ActivityType,
         ActivityMode,
+        ActivityAction,
         )
 from autonomie.models.company import Company
 
@@ -416,55 +417,140 @@ class AdminActivities(BaseFormView):
 
         modes = ActivityMode.query()
 
+        query = ActivityAction.query()
+        query = query.filter(ActivityAction.parent_id==None)
+        actions = query.filter(ActivityAction.active==True)
+
         appstruct = {
-                'types': [type_.appstruct() for type_ in types],
-                'modes': [mode.appstruct() for mode in modes],
+            'types': [type_.appstruct() for type_ in types],
+            'modes': [mode.appstruct() for mode in modes],
+            'actions': [
+                {
+                'id': act.id,
+                'label': act.label,
+                'children': [child.appstruct() for child in act.children],
                 }
+                for act in actions]
+            }
 
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
-    def get_submitted_type_ids(self, appstruct):
+    def get_edited_elements(self, appstruct, key):
         """
-            Return the ids of the options still present in the submitted form
+        Return a dict id:data for the elements that are edited (with an id)
         """
-        return [data['id'] for data in appstruct["types"]]
+        return dict((data['id'], data) for data in appstruct.get(key, {}) \
+            if data.get('id') is not None)
 
     def get_submitted_modes(self, appstruct):
+        """
+        Return the modes that have been submitted
+        """
         return [data['label'] for data in appstruct['modes']]
 
-    def submit_success(self, appstruct):
+    def disable_types(self, appstruct):
         """
-            Handle successfull expense configuration
+        Disable types that are no longer used
         """
-        all_type_ids = self.get_submitted_type_ids(appstruct)
-        all_modes = self.get_submitted_modes(appstruct)
+        edited_types = self.get_edited_elements(appstruct, "types")
 
-        # We delete the elements that are no longer in the appstruct
         for element in ActivityType.query():
-            if element.id not in all_type_ids:
+            if element.id not in edited_types.keys():
                 element.active = False
                 self.dbsession.merge(element)
+
+    def disable_actions(self, appstruct):
+        """
+        Disable actions that are not active anymore
+        """
+        edited_actions = self.get_edited_elements(appstruct, 'actions')
+
+        for element in ActivityAction.query()\
+                .filter(ActivityAction.parent_id==None):
+            if element.id not in edited_actions.keys():
+                element.active = False
+                self.dbsession.merge(element)
+            # On désactive ensuite les enfants
+            datas = edited_actions.get(element.id, {})
+            edited_children = self.get_edited_elements(
+                datas, "children")
+            for child in element.children:
+                if child.id in edited_children.keys():
+                    child.active = False
+                    self.dbsession.merge(element)
+
+    def delete_modes(self, appstruct):
+        """
+        Delete modes that are no longer used
+
+        Return modes that have to be added
+        """
+        all_modes = self.get_submitted_modes(appstruct)
         for element in ActivityMode.query():
             if element.label not in all_modes:
                 self.dbsession.delete(element)
             else:
                 # Remove it from the submitted list so we don't insert it again
                 all_modes.remove(element.label)
+        return all_modes
+
+    def _add_or_edit(self, datas, factory):
+        """
+        Add or edit an element of the given factory
+        """
+        if datas['id'] is not None:
+            element = factory.get(datas['id'])
+            merge_session_with_post(element, datas)
+            element = self.dbsession.merge(element)
+        else:
+            element = factory()
+            merge_session_with_post(element, datas)
+            self.dbsession.add(element)
+        return element
+
+    def add_types(self, appstruct):
+        """
+        Add/edit the types
+        """
+        for data in appstruct["types"]:
+            self._add_or_edit(data, ActivityType)
+
+    def add_modes(self, new_modes):
+        """
+        Add new modes
+        """
+        for mode in new_modes:
+            new_mode_obj = ActivityMode(label=mode)
+            self.dbsession.add(new_mode_obj)
+
+    def add_actions(self, appstruct):
+        """
+        Add new actions
+        """
+        for data in appstruct["actions"]:
+            # First replace children datas by children objects
+            children_datas = data.pop('children')
+            data['children'] = []
+            for child_datas in children_datas:
+                child = self._add_or_edit(child_datas, ActivityAction)
+                data['children'].append(child)
+
+            self._add_or_edit(data, ActivityAction)
+
+    def submit_success(self, appstruct):
+        """
+            Handle successfull expense configuration
+        """
+        # We delete the elements that are no longer in the appstruct
+        self.disable_types(appstruct)
+        self.disable_actions(appstruct)
+        new_modes = self.delete_modes(appstruct)
         self.dbsession.flush()
 
-        for data in appstruct["types"]:
-            if data['id'] is not None:
-                type_ = ActivityType.get(data['id'])
-                merge_session_with_post(type_, data)
-                self.dbsession.merge(type_)
-            else:
-                type_ = ActivityType()
-                merge_session_with_post(type_, data)
-                self.dbsession.add(type_)
-        for mode in all_modes:
-            new_mode = ActivityMode(label=mode)
-            self.dbsession.add(new_mode)
+        self.add_types(appstruct)
+        self.add_actions(appstruct)
+        self.add_modes(new_modes)
 
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_activity"))

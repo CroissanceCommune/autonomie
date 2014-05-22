@@ -1,4 +1,4 @@
-"""1.9 : add_codes_for_ndf_export
+"""2.0 : Add codes for ndf export
 
 Revision ID: b04de7c28
 Revises: 1ca3a6ef9c9d
@@ -8,7 +8,7 @@ Create Date: 2014-04-03 16:25:24.109529
 
 # revision identifiers, used by Alembic.
 revision = 'b04de7c28'
-down_revision = '1ca3a6ef9c9d'
+down_revision = '1b3d5402f3e4'
 
 from alembic import op
 import sqlalchemy as sa

@@ -414,6 +414,43 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
     activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
 
 
+class ActivitySubActionConfig(colander.MappingSchema):
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None
+        )
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Intitulé",
+        validator=colander.Length(max=100)
+        )
+
+
+class ActivitySubActionSeq(colander.SequenceSchema):
+    subaction = ActivitySubActionConfig(title=u"Sous-action")
+
+
+class ActivityActionConfig(colander.Schema):
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None
+        )
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Intitulé de l'action",
+        validator=colander.Length(max=100)
+        )
+    children = ActivitySubActionSeq( title=u"Sous actions")
+
+
+class ActivityActionSeq(colander.SequenceSchema):
+    action = ActivityActionConfig(title=u"Action")
+
+
 class MainActivityConfig(colander.MappingSchema):
     """
     Mapping schema for main configuration
@@ -436,11 +473,14 @@ class ActivityTypesConfig(colander.Schema):
     """
     main = MainActivityConfig(title=u"")
     types = ActivityTypesSeqConfig(
-            title=u"Configuration des natures de rendez-vous"
+        title=u"Configuration des natures de rendez-vous"
             )
     modes = ActivityModesSeqConfig(
-            title=u"Configuration des modes d'entretien"
+        title=u"Configuration des modes d'entretien"
             )
+    actions = ActivityActionSeq(
+        title=u"Configuration des intitulés d'action"
+        )
 
 
 class CaeConfig(colander.MappingSchema):

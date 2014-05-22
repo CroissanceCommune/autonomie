@@ -26,6 +26,7 @@
     Models related to the treasury module
 """
 from datetime import date
+from beaker.cache import cache_region
 from sqlalchemy import (
         Column,
         Date,
@@ -36,6 +37,7 @@ from sqlalchemy import (
         Text,
         Boolean,
         ForeignKey,
+        distinct,
         )
 from sqlalchemy.orm import (
     relationship,
@@ -44,6 +46,7 @@ from sqlalchemy.orm import (
 
 from autonomie.models.base import (
         DBBASE,
+        DBSESSION,
         default_table_args,
         )
 
@@ -89,6 +92,10 @@ class ExpenseType(DBBASE):
     label = Column(String(50))
     code = Column(String(15))
     active = Column(Boolean(), default=True)
+
+    code_tva = Column(String(15), default="")
+    compte_tva = Column(String(15), default="")
+    contribution = Column(Boolean(), default=False)
 
 
 class ExpenseKmType(ExpenseType):
@@ -162,6 +169,7 @@ class ExpenseSheet(DBBASE):
     status = Column(String(10), default='draft')
     status_user_id = Column(Integer, ForeignKey("accounts.id"))
     status_date = Column(Date(), default=date.today(), onupdate=date.today())
+    exported = Column(Boolean(), default=False)
     company = relationship("Company",
             backref=backref("expenses",
                 order_by="ExpenseSheet.month",
@@ -210,6 +218,17 @@ class ExpenseSheet(DBBASE):
         """
         return sum([line.total for line in self.lines]) \
                 + sum([line.total for line in self.kmlines])
+
+    def get_lines_by_type(self):
+        """
+        Return lines grouped by type
+        """
+        ret_dict = {}
+        for line in self.lines:
+            ret_dict.setdefault(line.type_object.code, []).append(line)
+        for line in self.kmlines:
+            ret_dict.setdefault(line.type_object.code, []).append(line)
+        return ret_dict.values()
 
 
 class BaseExpenseLine(DBBASE):
@@ -268,6 +287,11 @@ class ExpenseLine(BaseExpenseLine):
                     tva=self.tva,
                     type_id=self.type_id)
 
+    def _compute_value(self, val):
+        if self.type_object.type == 'expensetel':
+            percentage = self.type_object.percentage
+            val = val * percentage / 100.0
+        return val
 
     @property
     def total(self):
@@ -275,15 +299,24 @@ class ExpenseLine(BaseExpenseLine):
             return the total
         """
         # Previously, it was possible to delete expense types and consequently
-        # break this relationship
+        # break this relationship we still have such behaviours in our users
+        # databases
         if self.type_object is not None:
             result = self.ht + self.tva
-            if self.type_object.type == 'expensetel':
-                percentage = self.type_object.percentage
-                result = result * percentage / 100.0
         else:
             result = 0
-        return result
+        return self._compute_value(result)
+
+    @property
+    def total_ht(self):
+        """
+        Return the HT total of the line
+        """
+        return self._compute_value(self.ht)
+
+    @property
+    def total_tva(self):
+        return self._compute_value(self.tva)
 
 
 class ExpenseKmLine(BaseExpenseLine):
@@ -328,8 +361,12 @@ class ExpenseKmLine(BaseExpenseLine):
         return self.type_object.label
 
     @property
-    def ht(self):
+    def total_ht(self):
         return self.total
+
+    @property
+    def total_tva(self):
+        return 0
 
 
 class Communication(DBBASE):
@@ -354,3 +391,23 @@ class Communication(DBBASE):
             backref=backref("expense_communications",
                 order_by="Communication.date",
                 cascade="all, delete-orphan"))
+
+
+def get_expense_years():
+    """
+    Return the list of years that there were some expense configured
+    """
+    @cache_region("long_term", "expenseyears")
+    def expenseyears():
+        """
+        return distinct expense years available in the database
+        """
+        query = DBSESSION().query(distinct(ExpenseSheet.year))\
+                .order_by(ExpenseSheet.year)
+        years = [year[0] for year in query]
+        current = date.today().year
+        if current not in years:
+            years.append(current)
+        return years
+    return expenseyears()
+

@@ -33,7 +33,7 @@ from autonomie.tests.base import BaseFunctionnalTest
 APPSTRUCT = {
     'name':u"Compané $& test",
     "goal":u"Be the best",
-    "contribution": 80
+    "contribution": 80,
         }
 
 class Base(BaseFunctionnalTest):
@@ -62,9 +62,8 @@ class TestCompanyAdd(Base):
     def test_success(self):
         self.addOne()
         company = self.getOne()
-        self.assertEqual(company.goal, APPSTRUCT['goal'])
-        self.assertEqual(company.name, APPSTRUCT['name'])
-        self.assertEqual(company.contribution, APPSTRUCT['contribution'])
+        for key, val in APPSTRUCT.items():
+            self.assertEqual(getattr(company, key), val)
 
 class TestCompanyEdit(Base):
     def test_success(self):

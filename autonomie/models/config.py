@@ -45,9 +45,24 @@ class Config(DBBASE):
     """
     __tablename__ = 'config'
     __table_args__ = default_table_args
-    app = Column("config_app", String(50), primary_key=True)
+    app = Column("config_app",
+            String(50),
+            primary_key=True,
+            default='autonomie')
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
+
+    @classmethod
+    def get(cls, keyname):
+        query = super(Config, cls).query()
+        query = query.filter(Config.app=='autonomie')
+        query = query.filter(Config.name==keyname)
+        return query.first()
+
+    @classmethod
+    def query(cls):
+        query = super(Config, cls).query()
+        return query.filter(Config.app=='autonomie')
 
 
 def get_config():

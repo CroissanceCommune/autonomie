@@ -23,14 +23,13 @@
 Main deferreds functions used in autonomie
 """
 import colander
-from beaker.cache import cache_region
+import calendar
 from datetime import date
 from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
-from sqlalchemy import distinct
 
 from autonomie.models import user
-from autonomie.models.task import Invoice
+from autonomie.models.task.invoice import get_invoice_years
 from autonomie.views import render_api
 
 from autonomie.views.forms import widgets as custom_widgets
@@ -57,16 +56,20 @@ def get_users_options(roles=None):
     return [(unicode(u.id), render_api.format_account(u)) for u in query]
 
 
-def get_deferred_user_choice(roles=None, widget_options={}):
+def get_deferred_user_choice(roles=None, widget_options=None):
     """
         Return a colander deferred for users selection options
     """
+    widget_options = widget_options or {}
+    default_option = widget_options.pop("default_option", None)
     @colander.deferred
     def user_select(node, kw):
         """
             Return a user select widget
         """
         choices = get_users_options(roles)
+        if default_option:
+            choices.insert(0, default_option)
         return ChosenSingleWidget(values=choices, **widget_options)
     return user_select
 
@@ -170,47 +173,61 @@ def default_year(node, kw):
     return date.today().year
 
 
-def get_years(dbsession):
+def get_year_select_deferred(query_func):
     """
-        Return a cached query for the available years
+    return a deferred widget for year selection
+    :param query_func: the query function returning a list of years
     """
-    @cache_region("long_term", "taskdates")
-    def taskyears():
-        """
-            return the distinct financial years available in the database
-        """
-        years = dbsession.query(distinct(Invoice.financial_year))\
-                .order_by(Invoice.financial_year).all()
-        years = [year[0] for year in years]
-        now = date.today().year
-        if now not in years:
-            years.append(now)
-        return years
-    return taskyears()
-
-
-@colander.deferred
-def deferred_year_select_widget(node, kw):
-    """
-        Return a deferred year select widget
-    """
-    years = get_years(kw['request'].dbsession)
-    return widget.SelectWidget(values=zip(years, years),
-                css_class='input-small')
+    @colander.deferred
+    def deferred_widget(node, kw):
+        years = query_func()
+        return widget.SelectWidget(values=zip(years, years),
+                    css_class='input-small')
+    return deferred_widget
 
 
 def year_select_node(**kw):
     """
     Return a year select node with defaults and missing values
     """
-    title = kw.pop('title', None) or u''
+    title = kw.pop('title', u"")
+    query_func = kw.pop('query_func', get_invoice_years)
     return colander.SchemaNode(
         colander.Integer(),
-        widget=deferred_year_select_widget,
+        widget=get_year_select_deferred(query_func),
         default=default_year,
         missing=default_year,
         title=title
         )
+
+
+@colander.deferred
+def default_month(node, kw):
+    return date.today().month
+
+
+def get_month_select_widget():
+    """
+    Return a select widget for month selection
+    """
+    options = [(index, calendar.month_name[index].decode('utf8')) \
+            for index in range(1, 13)]
+    return widget.SelectWidget(values=options,
+                    css_class='input-small')
+
+
+def month_select_node(**kw):
+    """
+    Return a select widget for month selection
+    """
+    title = kw.pop('title', u"")
+    return colander.SchemaNode(
+            colander.Integer(),
+            widget=get_month_select_widget(),
+            default=default_month,
+            missing=default_month,
+            title=title,
+            )
 
 
 def mail_node(**kw):

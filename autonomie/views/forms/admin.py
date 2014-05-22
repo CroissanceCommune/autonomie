@@ -275,14 +275,36 @@ class ExpenseConfig(colander.MappingSchema):
         widget=widget.HiddenWidget(),
         default=None,
         missing=None)
+
     label = colander.SchemaNode(
         colander.String(),
         title=u"Libellé",
         validator=colander.Length(max=50))
+
     code = colander.SchemaNode(
         colander.String(),
         title=u"Code analytique",
         validator=colander.Length(max=15))
+
+    code_tva = colander.SchemaNode(
+        colander.String(),
+        title=u"Code TVA",
+        missing="",
+        validator=colander.Length(max=15))
+
+    compte_tva = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte de TVA",
+        missing="",
+        description=u"Compte de TVA déductible",
+        validator=colander.Length(max=15))
+
+    contribution = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Contribution",
+        description=u"Ce type de frais est-il intégré dans la contribution \
+à la CAE?",
+        )
 
 
 class ExpenseKmConfig(ExpenseConfig):
@@ -336,6 +358,18 @@ class ExpenseTypesConfig(colander.MappingSchema):
     """
         Expense Configuration form schema
     """
+    code_journal = colander.SchemaNode(
+        colander.String(),
+        title=u"Code journal",
+        description=u"Le code journal pour les notes de frais",
+        missing="",
+        )
+    compte_cg = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte CG",
+        description=u"Le compte général pour les notes de frais",
+        missing="",
+        )
     expenses = ExpensesConfig(title=u'Frais généraux')
     expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
     expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
@@ -380,6 +414,43 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
     activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
 
 
+class ActivitySubActionConfig(colander.MappingSchema):
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None
+        )
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Intitulé",
+        validator=colander.Length(max=100)
+        )
+
+
+class ActivitySubActionSeq(colander.SequenceSchema):
+    subaction = ActivitySubActionConfig(title=u"Sous-action")
+
+
+class ActivityActionConfig(colander.Schema):
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None
+        )
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Intitulé de l'action",
+        validator=colander.Length(max=100)
+        )
+    children = ActivitySubActionSeq( title=u"Sous actions")
+
+
+class ActivityActionSeq(colander.SequenceSchema):
+    action = ActivityActionConfig(title=u"Action")
+
+
 class MainActivityConfig(colander.MappingSchema):
     """
     Mapping schema for main configuration
@@ -402,11 +473,14 @@ class ActivityTypesConfig(colander.Schema):
     """
     main = MainActivityConfig(title=u"")
     types = ActivityTypesSeqConfig(
-            title=u"Configuration des natures de rendez-vous"
+        title=u"Configuration des natures de rendez-vous"
             )
     modes = ActivityModesSeqConfig(
-            title=u"Configuration des modes d'entretien"
+        title=u"Configuration des modes d'entretien"
             )
+    actions = ActivityActionSeq(
+        title=u"Configuration des intitulés d'action"
+        )
 
 
 class CaeConfig(colander.MappingSchema):
@@ -724,7 +798,7 @@ def merge_config_datas(dbdatas, appstruct):
         dbdata = get_element_by_name(dbdatas, name)
         if not dbdata:
             # The key 'name' doesn't exist in the database, adding new one
-            dbdata = Config(app=u"autonomie", name=name, value=value)
+            dbdata = Config(name=name, value=value)
             dbdatas.append(dbdata)
         else:
             dbdata.value = value

@@ -51,37 +51,37 @@
 <a class='btn pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
 ${period_form.render()|n}
 <hr />
+    <div class="well hidden-print">
+        <span class="label label-important"><i class='icon-white icon-play'></i></span>
 % if request.context.status == 'resulted':
-    <div class="well hidden-print">
-        <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais a été payée.
-        <p>
-            <small>
-                ${api.format_expense_status(request.context)}<br />
-            </small>
-        </p>
-    </div>
 % elif request.context.status == 'valid':
-    <div class="well hidden-print">
-        <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais a été validée, elle est en attente de paiement.
-        <p>
-            <small>
-                ${api.format_expense_status(request.context)}<br />
-            </small>
-        </p>
-    </div>
 % elif request.context.status == 'wait':
-    <div class="well hidden-print">
-        <span class="label label-important"><i class='icon-white icon-play'></i></span>
         Cette note de frais est en attente de validation
+% endif
         <p>
             <small>
                 ${api.format_expense_status(request.context)}<br />
             </small>
         </p>
-    </div>
+% if request.user.is_admin():
+    <p>
+    <small>
+        L'identifiant de cette notes de frais est : ${ request.context.id }
+    </small>
+</p>
+<p>
+    <small>
+        % if request.context.exported:
+            Ce document a déjà été exporté vers le logiciel de comptabilité
+        %else:
+            Ce document n'a pas encore été exporté vers le logiciel de comptabilité
+        % endif
+    </small>
+</p>
 % endif
+    </div>
 <div class="row-fluid hidden-print">
 % for com in communication_history:
     % if loop.first:

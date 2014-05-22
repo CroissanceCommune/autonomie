@@ -25,14 +25,21 @@
 from autonomie.models import tva
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
-from autonomie.models.config import get_config
 from autonomie.models.treasury import ExpenseType
-from autonomie.views.admin import AdminTva
-from autonomie.views.admin import AdminMain
-from autonomie.views.admin import AdminPaymentMode
-from autonomie.views.admin import AdminWorkUnit
-from autonomie.views.admin import AdminExpense
-from autonomie.views.admin import AdminCae
+from autonomie.models.config import (
+        get_config,
+        Config,
+        )
+
+from autonomie.views.admin import (
+    AdminTva,
+    AdminMain,
+    AdminPaymentMode,
+    AdminWorkUnit,
+    AdminExpense,
+    AdminCae,
+    AdminActivities,
+    )
 from autonomie.tests.base import BaseFunctionnalTest
 
 
@@ -98,25 +105,40 @@ class DummyForm(object):
 class TestExpenseView(BaseFunctionnalTest):
     def test_success(self):
         self.config.add_route('admin_expense', '/')
-        appstruct = {'expenses':[
-            {'label':u"Restauration", "code":u"0001", "id":None},
-            {'label':u"Déplacement", "code":u"0002", "id":None}],
+        appstruct = {
+                "code_journal": "JOURNAL01",
+                'compte_cg': "DOE548",
+                'expenses':[
+    {'label':u"Restauration", "code":u"0001", "id":None, 'compte_tva':"CTVA" },
+
+    {'label':u"Déplacement", "code":u"0002", "id":None, 'code_tva':"TVA"}
+            ],
                     'expenseskm':[
-            {'label':u"Scooter", "code":u"0003", "amount":"0.852", "id":None}],
-                    'expensestel':[
-            {'label':u"Adsl-Téléphone", "code":u"0004", "percentage":"80",
-                "id":None}]}
+    {'label':u"Scooter", "code":u"0003", "amount":"0.852", "id":None,
+        'code_tva':"TVA1"}],
+                 'expensestel':[
+    {'label':u"Adsl-Téléphone", "code":u"0004", "percentage":"80",
+        "id":None, "code_tva": "TVA2", 'contribution': True}]}
         view = AdminExpense(self.get_csrf_request())
         view.submit_success(appstruct)
+
+        self.assertEqual("DOE548", Config.get('compte_cg_ndf').value)
+        self.assertEqual("JOURNAL01", Config.get('code_journal_ndf').value)
 
         form = DummyForm()
         view.before(form)
         self.assertEqual(len(form.appstruct['expenses']), 2)
         self.assertEqual(form.appstruct['expenses'][0]['label'], u"Restauration")
         self.assertEqual(form.appstruct['expenses'][0]['code'], u"0001")
+        self.assertEqual(form.appstruct['expenses'][0]['compte_tva'], "CTVA")
+        self.assertEqual(form.appstruct['expenses'][1]['code_tva'], "TVA")
+
         self.assertEqual(form.appstruct['expenseskm'][0]['label'], u"Scooter")
         self.assertEqual(form.appstruct['expenseskm'][0]['amount'], 0.852)
+        self.assertEqual(form.appstruct['expenseskm'][0]['code_tva'], 'TVA1')
         self.assertEqual(form.appstruct['expensestel'][0]['percentage'], 80)
+        self.assertEqual(form.appstruct['expensestel'][0]['code_tva'], 'TVA2')
+        self.assertEqual(form.appstruct['expensestel'][0]['contribution'], True)
 
     def test_success_id_preservation(self):
         self.config.add_route('admin_expense', '/')
@@ -135,6 +157,7 @@ class TestExpenseView(BaseFunctionnalTest):
         expense = ExpenseType.query().filter(ExpenseType.id==expense.id).first()
         self.assertEqual(expense.code, u"00002")
 
+
 class TestCaeView(BaseFunctionnalTest):
     def test_success(self):
         self.config.add_route("admin_cae", "/")
@@ -145,3 +168,18 @@ class TestCaeView(BaseFunctionnalTest):
         config = get_config()
         for key, value in appstruct.items():
             self.assertEqual(config[key], value)
+
+class TestAdminActivities(BaseFunctionnalTest):
+    def test_get_edited_elements(self):
+        obj = AdminActivities(self.get_csrf_request())
+        datas = {'tests':
+            [
+                {'id':5},
+                {'id':4},
+                {},
+            ]
+            }
+        self.assertItemsEqual(obj.get_edited_elements(datas, 'tests')\
+                .keys(), [5,4])
+
+

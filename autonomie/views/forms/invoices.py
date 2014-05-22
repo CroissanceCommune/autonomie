@@ -29,9 +29,7 @@ from datetime import date
 import colander
 
 from autonomie.views.forms.lists import BaseListsSchema
-from autonomie.views.forms.widgets import (
-        deferred_year_select_widget,
-        )
+from autonomie.views.forms import main
 
 
 STATUS_OPTIONS = ((u"Toutes les factures", "both"),
@@ -69,13 +67,7 @@ class InvoicesPdfExport(colander.MappingSchema):
     """
         Schema for invoice bulk export
     """
-    year = colander.SchemaNode(
-            colander.Integer(),
-            title=u"Année comptable",
-            widget=deferred_year_select_widget,
-            missing=default_year,
-            default=default_year,
-            )
+    year = main.year_select_node(title=u"Année comptable")
     start = colander.SchemaNode(
             colander.Integer(),
             title=u"Numéro de début",

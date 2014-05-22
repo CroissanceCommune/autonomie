@@ -30,7 +30,7 @@
                 <% items = (\
                     (u'Conseiller', api.format_account(activity.conseiller)), \
                     (u'Date', api.format_date(activity.date)), \
-                    (u'Action', u"%s %s" % (activity.action_label, activity.subaction_label)), \
+                    (u"Action financée", u"%s %s" % (activity.action_label, activity.subaction_label)), \
                     (u"Nature du rendez-vous", activity.type_object.label), \
                     (u"Mode d'entretien", activity.mode), \
                     )

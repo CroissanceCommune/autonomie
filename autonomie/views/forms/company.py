@@ -117,18 +117,23 @@ class CompanySchema(colander.MappingSchema):
             colander.String(),
             widget=deferred_edit_adminonly_widget,
             title=u'Nom')
+
     goal = colander.SchemaNode(
             colander.String(),
             title=u'Activité')
+
     email = main.mail_node(missing=u'')
+
     phone = colander.SchemaNode(
             colander.String(),
             title=u'Téléphone',
             missing=u'')
+
     mobile = colander.SchemaNode(
             colander.String(),
             title=u'Téléphone portable',
             missing=u'')
+
     logo = colander.SchemaNode(
             FileData(),
             widget=deferred_logo_widget,
@@ -136,6 +141,7 @@ class CompanySchema(colander.MappingSchema):
             validator=validate_image_mime,
             description=u"Charger un fichier de type image *.png *.jpeg \
 *.jpg ...")
+
     header = colander.SchemaNode(
             FileData(),
             widget=deferred_header_widget,
@@ -144,12 +150,15 @@ class CompanySchema(colander.MappingSchema):
 *.jpg ... Le fichier est idéalement au format 20/4 (par exemple 1000px x \
 200 px)",
             validator=validate_image_mime)
+
     # Fields specific to the treasury
     code_compta = colander.SchemaNode(
             colander.String(),
             title=u"Compte analytique",
-            description=u"Compte analytique utilisé dans le logiciel de compta",
+            description=u"Compte analytique utilisé dans le logiciel de \
+comptabilité",
             missing="")
+
     contribution = colander.SchemaNode(
             colander.Integer(),
             widget=widget.TextInputWidget(
@@ -163,10 +172,12 @@ class CompanySchema(colander.MappingSchema):
             default=deferred_default_contribution,
             missing=deferred_default_contribution,
             description=u"Pourcentage que cette entreprise contribue à la CAE")
+
     RIB = colander.SchemaNode(
             colander.String(),
             title=u'RIB',
             missing=u'')
+
     IBAN = colander.SchemaNode(
             colander.String(),
             title=u'IBAN',

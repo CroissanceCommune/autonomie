@@ -29,11 +29,19 @@ from autonomie.tests.base import BaseFunctionnalTest
 from autonomie.models.user import User
 from autonomie.models.company import Company
 
-USER = dict(login=u'test_user', lastname=u'lastname__\xe9\xe9',
-                 firstname=u'firstname__éé')
+USER = {
+    "login": u'test_user',
+    "lastname": u'lastname__\xe9\xe9',
+    "firstname": u'firstname__éé',
+    "compte_tiers": "DC548748",
+    }
 PWD = "Tést$!Pass"
 COMPANIES = ['company 1', 'company 2']
-APPSTRUCT = {'user':USER, 'password':{'pwd':PWD}, 'companies':COMPANIES}
+APPSTRUCT = {
+    'user':USER,
+    'password':{'pwd':PWD},
+    'companies':COMPANIES,
+        }
 
 class Base(BaseFunctionnalTest):
     def addone(self):
@@ -53,6 +61,7 @@ class TestUserAccount(Base):
         view = UserAccount(req)
         view.submit_success({'pwd':u"Né^PAs$$ù"})
         self.assertEqual(req.user.auth(u"Né^PAs$$ù"), True)
+
 
 class TestUserDelete(Base):
     def test_func(self):
@@ -81,10 +90,9 @@ class TestUserDisable(Base):
 
 class TestUserAdd(Base):
     def test_success(self):
-        appstruct = {'user':APPSTRUCT, 'password':{'pwd':PWD},
-                'companies':['company1', 'company2']}
         self.addone()
         user = self.getone()
+        self.assertEqual(user.compte_tiers, USER['compte_tiers'])
         self.assertTrue(user.auth(PWD))
         self.assertEqual(len(user.companies), 2)
 

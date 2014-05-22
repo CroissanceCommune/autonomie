@@ -45,6 +45,7 @@ from autonomie.models.treasury import (
 from autonomie.models.activity import (
         ActivityType,
         ActivityMode,
+        ActivityAction,
         )
 from autonomie.models.company import Company
 
@@ -308,11 +309,19 @@ ont été configurés"
                  'expenseskm':(ExpenseKmType, 'expensekm'),
                  'expensestel':(ExpenseTelType, 'expensetel')}
 
+    def _get_config_key(self, rel_keyname):
+        return rel_keyname + "_ndf"
+
     def before(self, form):
         """
-            Add appstruct to the current form object
+        Add appstruct to the current form object
         """
         appstruct = {}
+
+        for key in ('code_journal', 'compte_cg'):
+            cfg_key = self._get_config_key(key)
+            appstruct[key] = self.request.config.get(cfg_key, '')
+
         for key, (factory, polytype) in self.factories.items():
             appstruct[key] = [e.appstruct() for e in factory.query()\
                                             .filter(factory.type==polytype)\
@@ -322,16 +331,44 @@ ont été configurés"
 
     def get_all_ids(self, appstruct):
         """
-            Return the ids of the options still present in the submitted form
+        Return the ids of the options still present in the submitted form
         """
         ids = []
         for key in self.factories:
             ids.extend([data['id'] for data in appstruct[key]])
         return ids
 
+    def _get_actual_config_obj(self, config_key):
+        """
+        Return the actual configured compte_cg object
+        """
+        return Config.get(config_key)
+
+    def _set_config_value(self, appstruct, config_key, appstruct_key):
+        """
+        Set a config value
+        :param appstruct: the form submitted values
+        :param config_key: The name of the configuration key
+        :param appstruct_key: The name of the key in the appstruct
+        """
+        cfg_obj = self._get_actual_config_obj(config_key)
+        value = appstruct.pop(appstruct_key, None)
+
+        if value:
+            if cfg_obj is None:
+                cfg_obj = Config(name=config_key, value=value)
+                self.dbsession.add(cfg_obj)
+
+            else:
+                cfg_obj.value = value
+                self.dbsession.merge(cfg_obj)
+
+        log.debug(u"Setting the new {0} : {1}".format(config_key, value))
+
     def submit_success(self, appstruct):
         """
-            Handle successfull expense configuration
+        Handle successfull expense configuration
+        :param appstruct: submitted datas
         """
         all_ids = self.get_all_ids(appstruct)
 
@@ -343,6 +380,10 @@ ont été configurés"
                     self.dbsession.merge(element)
         self.dbsession.flush()
 
+        for key in ('code_journal', 'compte_cg'):
+            cfg_key = self._get_config_key(key)
+            self._set_config_value(appstruct, cfg_key, key)
+
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
                 if data['id'] is not None:
@@ -353,9 +394,9 @@ ont été configurés"
                     type_ = factory()
                     merge_session_with_post(type_, data)
                     self.dbsession.add(type_)
+
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_expense"))
-
 
 
 class AdminActivities(BaseFormView):
@@ -376,55 +417,140 @@ class AdminActivities(BaseFormView):
 
         modes = ActivityMode.query()
 
+        query = ActivityAction.query()
+        query = query.filter(ActivityAction.parent_id==None)
+        actions = query.filter(ActivityAction.active==True)
+
         appstruct = {
-                'types': [type_.appstruct() for type_ in types],
-                'modes': [mode.appstruct() for mode in modes],
+            'types': [type_.appstruct() for type_ in types],
+            'modes': [mode.appstruct() for mode in modes],
+            'actions': [
+                {
+                'id': act.id,
+                'label': act.label,
+                'children': [child.appstruct() for child in act.children],
                 }
+                for act in actions]
+            }
 
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
-    def get_submitted_type_ids(self, appstruct):
+    def get_edited_elements(self, appstruct, key):
         """
-            Return the ids of the options still present in the submitted form
+        Return a dict id:data for the elements that are edited (with an id)
         """
-        return [data['id'] for data in appstruct["types"]]
+        return dict((data['id'], data) for data in appstruct.get(key, {}) \
+            if data.get('id') is not None)
 
     def get_submitted_modes(self, appstruct):
+        """
+        Return the modes that have been submitted
+        """
         return [data['label'] for data in appstruct['modes']]
 
-    def submit_success(self, appstruct):
+    def disable_types(self, appstruct):
         """
-            Handle successfull expense configuration
+        Disable types that are no longer used
         """
-        all_type_ids = self.get_submitted_type_ids(appstruct)
-        all_modes = self.get_submitted_modes(appstruct)
+        edited_types = self.get_edited_elements(appstruct, "types")
 
-        # We delete the elements that are no longer in the appstruct
         for element in ActivityType.query():
-            if element.id not in all_type_ids:
+            if element.id not in edited_types.keys():
                 element.active = False
                 self.dbsession.merge(element)
+
+    def disable_actions(self, appstruct):
+        """
+        Disable actions that are not active anymore
+        """
+        edited_actions = self.get_edited_elements(appstruct, 'actions')
+
+        for element in ActivityAction.query()\
+                .filter(ActivityAction.parent_id==None):
+            if element.id not in edited_actions.keys():
+                element.active = False
+                self.dbsession.merge(element)
+            # On désactive ensuite les enfants
+            datas = edited_actions.get(element.id, {})
+            edited_children = self.get_edited_elements(
+                datas, "children")
+            for child in element.children:
+                if child.id in edited_children.keys():
+                    child.active = False
+                    self.dbsession.merge(element)
+
+    def delete_modes(self, appstruct):
+        """
+        Delete modes that are no longer used
+
+        Return modes that have to be added
+        """
+        all_modes = self.get_submitted_modes(appstruct)
         for element in ActivityMode.query():
             if element.label not in all_modes:
                 self.dbsession.delete(element)
             else:
                 # Remove it from the submitted list so we don't insert it again
                 all_modes.remove(element.label)
+        return all_modes
+
+    def _add_or_edit(self, datas, factory):
+        """
+        Add or edit an element of the given factory
+        """
+        if datas['id'] is not None:
+            element = factory.get(datas['id'])
+            merge_session_with_post(element, datas)
+            element = self.dbsession.merge(element)
+        else:
+            element = factory()
+            merge_session_with_post(element, datas)
+            self.dbsession.add(element)
+        return element
+
+    def add_types(self, appstruct):
+        """
+        Add/edit the types
+        """
+        for data in appstruct["types"]:
+            self._add_or_edit(data, ActivityType)
+
+    def add_modes(self, new_modes):
+        """
+        Add new modes
+        """
+        for mode in new_modes:
+            new_mode_obj = ActivityMode(label=mode)
+            self.dbsession.add(new_mode_obj)
+
+    def add_actions(self, appstruct):
+        """
+        Add new actions
+        """
+        for data in appstruct["actions"]:
+            # First replace children datas by children objects
+            children_datas = data.pop('children')
+            data['children'] = []
+            for child_datas in children_datas:
+                child = self._add_or_edit(child_datas, ActivityAction)
+                data['children'].append(child)
+
+            self._add_or_edit(data, ActivityAction)
+
+    def submit_success(self, appstruct):
+        """
+            Handle successfull expense configuration
+        """
+        # We delete the elements that are no longer in the appstruct
+        self.disable_types(appstruct)
+        self.disable_actions(appstruct)
+        new_modes = self.delete_modes(appstruct)
         self.dbsession.flush()
 
-        for data in appstruct["types"]:
-            if data['id'] is not None:
-                type_ = ActivityType.get(data['id'])
-                merge_session_with_post(type_, data)
-                self.dbsession.merge(type_)
-            else:
-                type_ = ActivityType()
-                merge_session_with_post(type_, data)
-                self.dbsession.add(type_)
-        for mode in all_modes:
-            new_mode = ActivityMode(label=mode)
-            self.dbsession.add(new_mode)
+        self.add_types(appstruct)
+        self.add_actions(appstruct)
+        self.add_modes(new_modes)
 
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_activity"))
@@ -459,11 +585,12 @@ class AdminCae(BaseFormView):
         """
         # la table config étant un stockage clé valeur
         # le merge_session_with_post ne peut être utilisé
-        dbdatas = self.dbsession.query(Config).all()
-        log.debug("appstruct")
+        dbdatas = Config.query().all()
+
+        log.debug(u"Cae configuration submission")
         log.debug(appstruct)
+
         new_dbdatas = merge_config_datas(dbdatas, appstruct)
-        log.debug("New config")
         for dbdata in new_dbdatas:
             log.debug(dbdata.name)
             if dbdata in dbdatas:

@@ -203,9 +203,9 @@
                         <td style="text-align:right">
                             ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cette facture", u"icon-pencil")}
                             ${table_btn(request.route_path("invoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
-                            %if task.is_deletable(request):
-                                ${table_btn(request.route_path("invoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer le devis", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
-                            %endif
+                            % if task.is_deletable(request):
+                                ${table_btn(request.route_path("invoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer la facture", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
+                            % endif
                         </td>
                     </tr>
                 %endfor
@@ -235,6 +235,9 @@
                         <td style="text-align:right">
                             ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cet avoir", u"icon-pencil")}
                             ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
+                            %if task.is_deletable(request):
+                                ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer l'avoir", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
+                            % endif
                         </td>
                     </tr>
                 % endfor

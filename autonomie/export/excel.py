@@ -339,7 +339,7 @@ class ExcelExpense(object):
             cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
 
             if column.has_key('code'):
-                val = sum([line.ht
+                val = sum([line.total_ht
                         for line in lines
                         if line.type_object and
                         line.type_object.code == column['code']]

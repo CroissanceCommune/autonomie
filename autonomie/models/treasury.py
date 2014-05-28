@@ -49,6 +49,7 @@ from autonomie.models.base import (
         DBSESSION,
         default_table_args,
         )
+from autonomie.compute import math_utils
 
 from autonomie.models.statemachine import StateMachine
 
@@ -288,24 +289,22 @@ class ExpenseLine(BaseExpenseLine):
                     type_id=self.type_id)
 
     def _compute_value(self, val):
-        if self.type_object.type == 'expensetel':
-            percentage = self.type_object.percentage
-            val = val * percentage / 100.0
-        return val
+        result = 0
+        # In the first versions it was possible to delete expensetypes (now they
+        # are disabled instead)
+        if self.type_object is not None:
+            if self.type_object.type == 'expensetel':
+                percentage = self.type_object.percentage
+                val = val * percentage / 100.0
+            result = math_utils.floor(val)
+        return result
 
     @property
     def total(self):
         """
             return the total
         """
-        # Previously, it was possible to delete expense types and consequently
-        # break this relationship we still have such behaviours in our users
-        # databases
-        if self.type_object is not None:
-            result = self.ht + self.tva
-        else:
-            result = 0
-        return self._compute_value(result)
+        return self.total_ht + self.total_tva
 
     @property
     def total_ht(self):
@@ -354,7 +353,7 @@ class ExpenseKmLine(BaseExpenseLine):
     @property
     def total(self):
         indemnity = self.type_object.amount
-        return indemnity * self.km
+        return math_utils.floor(indemnity * self.km)
 
     @property
     def vehicle(self):

@@ -361,6 +361,11 @@ class ExpenseKmLine(BaseExpenseLine):
         return self.type_object.label
 
     @property
+    def ht(self):
+        # Deprecated function kept for compatibility
+        return self.total
+
+    @property
     def total_ht(self):
         return self.total
 

@@ -91,6 +91,11 @@ DAYS = (
         ('FEUIL', u'Feuillet(s)'),
         ('PACK', u'Forfait'),
         )
+TASKTYPES_LABELS = {
+    'invoice': u'Facture',
+    u'estimation': u'Devis',
+    'cancelinvoice': u'Avoir',
+    }
 PAYMENTDISPLAYCHOICES = (
         ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
         ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
@@ -340,6 +345,25 @@ def get_phases_from_request(request):
         phases = request.context.project.phases
     return phases
 
+@colander.deferred
+def deferred_default_name(node, kw):
+    """
+    Return a default name for the new document
+    """
+    request = kw['request']
+    tasktype = get_tasktype_from_request(request)
+    method = "get_next_{0}_number".format(tasktype)
+
+    if request.context.__name__ == 'project':
+        # e.g : project.get_next_invoice_number()
+        number = getattr(request.context, method)()
+
+        name = TASKTYPES_LABELS[tasktype] + ' %s' % number
+    else:
+        # Unusefull
+        name = request.context.name
+    return name
+
 
 @colander.deferred
 def deferred_phases_widget(node, kw):
@@ -489,20 +513,30 @@ class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
+    name = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé du document",
+        validator=colander.Length(max=255),
+        default=deferred_default_name,
+        missing="",
+        )
     customer_id = colander.SchemaNode(
-                colander.Integer(),
-                title=u"Choix du client",
-                widget=deferred_customer_list,
-                validator=deferred_customer_validator)
+        colander.Integer(),
+        title=u"Choix du client",
+        widget=deferred_customer_list,
+        validator=deferred_customer_validator
+        )
     address = colander.SchemaNode(
-            colander.String(),
-            title=u"Nom et adresse du client",
-            widget=widget.TextAreaWidget(rows=4, cols=60))
+        colander.String(),
+        title=u"Nom et adresse du client",
+        widget=widget.TextAreaWidget(rows=4, cols=60)
+        )
     phase_id = colander.SchemaNode(
         colander.String(),
         title=u"Phase où insérer le devis",
         widget=deferred_phases_widget,
-        default=deferred_default_phase)
+        default=deferred_default_phase
+        )
     taskDate = main.today_node(title=u"Date du devis")
     description = colander.SchemaNode(
         colander.String(),
@@ -953,6 +987,7 @@ class SequenceWrapper:
 class InvoiceMatch(MappingWrapper):
     matching_map = (
         #task attrs
+        ('name', 'common'),
         ('phase_id', 'common'),
         ('taskDate', 'common'),
         ('financial_year', 'common'),
@@ -972,6 +1007,7 @@ class InvoiceMatch(MappingWrapper):
 
 class EstimationMatch(MappingWrapper):
     matching_map = (
+        ('name', 'common'),
         ('phase_id', 'common'),
         ('taskDate', 'common'),
         ('description', 'common'),
@@ -995,6 +1031,7 @@ class EstimationMatch(MappingWrapper):
 class CancelInvoiceMatch(MappingWrapper):
     matching_map = (
         #task attrs
+        ('name', 'common'),
         ('phase_id', 'common'),
         ('taskDate', 'common'),
         ('financial_year', 'common'),

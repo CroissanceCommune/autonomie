@@ -110,7 +110,6 @@
             <table class='table table-striped table-condensed'>
                 <thead>
                     <th></th>
-                    <th>Document</th>
                     <th class="hidden-phone">Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
@@ -125,7 +124,6 @@
                             % endif
                         </td>
                         <% task.url = request.route_path("estimation", id=task.id) %>
-                        <td class='rowlink' onclick="document.location='${task.url}'">${task.number}</td>
                         <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">${task.name}</td>
                         <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">
                             %if task.is_cancelled():
@@ -167,7 +165,6 @@
                 <thead>
                     <th></th>
                     <th>Numéro</th>
-                    <th>Document</th>
                     <th class="hidden-phone">Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
@@ -184,7 +181,6 @@
                         <% task.url = request.route_path("invoice", id=task.id) %>
                         <td onclick="document.location='${task.url}'" class='rowlink'>
                             ${request.config.get('invoiceprefix')}${task.officialNumber}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>${task.name}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>
                             %if task.is_cancelled():
@@ -223,7 +219,6 @@
                                 (lié à la facture ${request.config.get('invoiceprefix')}${task.invoice.officialNumber})
                             % endif
                         </td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>${task.name}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>
                             %if task.is_valid():

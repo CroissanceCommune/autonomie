@@ -25,6 +25,7 @@
 
 import colander
 from deform import widget
+from autonomie.views.forms import main
 
 def get_customers_from_request(request):
     project = request.context.project
@@ -153,13 +154,34 @@ class DuplicateSchema(colander.MappingSchema):
         validator=deferred_phase_validator)
 
 
-class PhaseChangeSchema(colander.MappingSchema):
+class EditMetadataSchema(colander.MappingSchema):
     """
         Colander schema for moving a task from a phase to another
     """
-    phase = colander.SchemaNode(
+    name = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé du document",
+        validator=colander.Length(max=255),
+        missing="",
+        )
+    taskDate = main.today_node(title=u"Date")
+    phase_id = colander.SchemaNode(
         colander.Integer(),
         title=u"Phase",
         widget=deferred_phase_choice,
-        default=deferred_default_phase,
         validator=deferred_phase_validator)
+
+
+def remove_some_fields(schema, kw):
+    request = kw['request']
+
+    if len(request.context.project.phases) == 1:
+        del(schema['phase_id'])
+
+    if request.user.is_contractor():
+        del(schema['taskDate'])
+
+    return schema
+
+
+EDIT_METADATASCHEMA = EditMetadataSchema(after_bind=remove_some_fields)

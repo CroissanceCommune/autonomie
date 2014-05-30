@@ -91,6 +91,7 @@ else:
             <td>
                 ${request.config.get('invoiceprefix')}${document.officialNumber}
             </td>
+            % if is_admin_view:
             <td>
                 <% company = document.get_company() %>
                 % if company:
@@ -98,6 +99,7 @@ else:
                         title="Voir l'entreprise">${company.name}</a>
                 % endif
             </td>
+            % endif
             <td>
                 ${api.format_date(document.taskDate)}
             </td>
@@ -109,9 +111,11 @@ else:
                     %else:
                         ${document.number}
                     %endif
+                    % if not is_admin_view:
                     <small>
                         ${format_text(document.description)}
                     </small>
+                    % endif
                 </blockquote>
             </td>
             <td class='invoice_company_name'>

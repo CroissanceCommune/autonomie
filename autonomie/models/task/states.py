@@ -80,16 +80,14 @@ def duplicate_task(task, **kw):
         raise Forbidden()
 
 
-def phasechange_task(task, **kw):
+def edit_metadata_task(task, **kw):
     """
         Change a task's phase
     """
-    phase = kw.get("phase")
-    if phase is not None:
-        task.phase = phase
-        return task
-    else:
-        raise Forbidden()
+    for key, value in kw.items():
+        if value not in (None, ''):
+            setattr(task, key, value)
+    return task
 
 
 def gen_cancelinvoice(task, **kw):
@@ -166,18 +164,18 @@ def get_est_state():
         aboest
     """
     duplicate = ('duplicate', 'view', duplicate_task, False,)
-    phasechange = ("phasechange", "view", phasechange_task, False,)
+    edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', MANAGER_PERMS, set_date,)
     invalid = ('invalid', MANAGER_PERMS,)
     geninv = ('geninv', None, gen_invoices,)
     delete = ('delete', None, None, False,)
     result = {}
-    result['draft'] = ('draft', 'wait', 'delete', valid)
-    result['invalid'] = ('draft', 'wait', 'delete',)
-    result['wait'] = (valid, invalid, duplicate, 'delete', phasechange)
-    result['valid'] = ('aboest', geninv, duplicate, 'delete', phasechange)
-    result['aboest'] = (delete, phasechange)
-    result['geninv'] = (duplicate, phasechange)
+    result['draft'] = ('draft', 'wait', 'delete', valid, edit_metadata)
+    result['invalid'] = ('draft', 'wait', 'delete', edit_metadata)
+    result['wait'] = (valid, invalid, duplicate, 'delete', edit_metadata)
+    result['valid'] = ('aboest', geninv, duplicate, 'delete', edit_metadata)
+    result['aboest'] = (delete, edit_metadata)
+    result['geninv'] = (duplicate, edit_metadata)
     return result
 
 
@@ -193,7 +191,7 @@ def get_inv_state():
         aboinv
     """
     duplicate = ('duplicate', 'view', duplicate_task, False,)
-    phasechange = ("phasechange", "view", phasechange_task, False,)
+    edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     aboinv = ('aboinv', MANAGER_PERMS,)
@@ -210,14 +208,14 @@ def get_inv_state():
     result['draft'] = ('draft', 'wait', delete, valid,)
     result['invalid'] = ('draft', 'wait', delete, )
     result['wait'] = (valid, invalid, duplicate, delete, financial_year,
-            phasechange,)
+            edit_metadata,)
     result['valid'] = (paid, resulted, gencinv, duplicate, mdelete,
-            phasechange, financial_year, products,)
+            edit_metadata, financial_year, products,)
     result['paid'] = (paid, resulted, gencinv, duplicate, financial_year,
-            phasechange, products, )
-    result['resulted'] = (gencinv, duplicate, financial_year, phasechange,
+            edit_metadata, products, )
+    result['resulted'] = (gencinv, duplicate, financial_year, edit_metadata,
             products,)
-    result['aboinv'] = (delete, phasechange)
+    result['aboinv'] = (delete, edit_metadata)
     return result
 
 
@@ -229,7 +227,7 @@ def get_cinv_state():
         valid
         invalid
     """
-    phasechange = ("phasechange", "view", phasechange_task, False,)
+    edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
@@ -238,10 +236,10 @@ def get_cinv_state():
             False,)
     result = {}
     result['draft'] = ('wait', 'delete', valid )
-    result['wait'] = (valid, invalid, 'delete', financial_year, phasechange,
+    result['wait'] = (valid, invalid, 'delete', financial_year, edit_metadata,
         products, )
-    result['invalid'] = ('draft', 'wait', phasechange, products, )
-    result['valid'] = (financial_year, phasechange, products, )
+    result['invalid'] = ('draft', 'wait', edit_metadata, products, )
+    result['valid'] = (financial_year, edit_metadata, products, )
     return result
 
 def get_maninv_state():

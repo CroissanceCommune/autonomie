@@ -239,13 +239,14 @@ class Invoice(Task, InvoiceCompute):
         self.sequenceNumber = snumber
 
     def set_name(self, deposit=False, sold=False):
-        if deposit:
-            taskname_tmpl = u"Facture d'acompte {0}"
-        elif sold:
-            taskname_tmpl = u"Facture de solde"
-        else:
-            taskname_tmpl = u"Facture {0}"
-        self.name = taskname_tmpl.format(self.sequenceNumber)
+        if self.name in [None, ""]:
+            if deposit:
+                taskname_tmpl = u"Facture d'acompte {0}"
+            elif sold:
+                taskname_tmpl = u"Facture de solde"
+            else:
+                taskname_tmpl = u"Facture {0}"
+            self.name = taskname_tmpl.format(self.sequenceNumber)
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):
@@ -529,8 +530,9 @@ class CancelInvoice(Task, TaskCompute):
         return True
 
     def set_name(self):
-        taskname_tmpl = u"Avoir {0}"
-        self.name = taskname_tmpl.format(self.sequenceNumber)
+        if self.name in [None, ""]:
+            taskname_tmpl = u"Avoir {0}"
+            self.name = taskname_tmpl.format(self.sequenceNumber)
 
     @classmethod
     def get_officialNumber(cls):

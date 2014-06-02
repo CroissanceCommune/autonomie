@@ -189,6 +189,7 @@ else:
         % endfor
     </tbody>
 </table>
+${pager(records)}
 </%block>
 <%block name='footerjs'>
 $('#conseiller-select').chosen({allow_single_deselect: true});

@@ -198,8 +198,13 @@ def get_admin_menus(request):
     menu = Menu()
 
 
+    documents = DropDown(label=u"Documents")
     href = request.route_path("invoices")
-    menu.add_item(u"Factures", icon="icon-list-alt", href=href)
+    documents.add_item(u"Factures", icon="icon-list-alt", href=href)
+    href = request.route_path('expenses')
+    documents.add_item(u'Notes de frais', icon='icon-list-alt', href=href)
+
+    menu.add(documents)
 
     if has_permission("admin", request.context, request):
         treasury = DropDown(label=u"Comptabilité")

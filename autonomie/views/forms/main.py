@@ -206,12 +206,16 @@ def default_month(node, kw):
     return date.today().month
 
 
+def get_month_options():
+    return [(index, calendar.month_name[index].decode('utf8')) \
+            for index in range(1, 13)]
+
+
 def get_month_select_widget():
     """
     Return a select widget for month selection
     """
-    options = [(index, calendar.month_name[index].decode('utf8')) \
-            for index in range(1, 13)]
+    options = get_month_options()
     return widget.SelectWidget(values=options,
                     css_class='input-small')
 
@@ -221,11 +225,13 @@ def month_select_node(**kw):
     Return a select widget for month selection
     """
     title = kw.pop('title', u"")
+    default = kw.pop('default', default_month)
+    missing = kw.pop('missing', default_month)
     return colander.SchemaNode(
             colander.Integer(),
             widget=get_month_select_widget(),
-            default=default_month,
-            missing=default_month,
+            default=default,
+            missing=missing,
             title=title,
             )
 

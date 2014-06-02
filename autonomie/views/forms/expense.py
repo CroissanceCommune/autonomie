@@ -32,10 +32,25 @@ import colander
 from datetime import date
 from deform import widget
 
-from autonomie.models.treasury import ExpenseType
+from autonomie.models.treasury import (
+    ExpenseType,
+    get_expense_years,
+    )
+
 from autonomie.views.render_api import month_name
 from autonomie.views.forms import main
+from autonomie.views.forms.lists import BaseListsSchema
 from .custom_types import AmountType
+
+
+STATUS_OPTIONS = (
+    (u"Toutes les notes de frais", "all"),
+    (u'Validées', 'valid'),
+    (u'Payées', 'resulted'),
+    (u'En attente de validation', 'wait'),
+#    (u'Brouillon', 'draft'),
+#    (u'Invalidées', 'invalid'),
+    )
 
 
 @colander.deferred
@@ -140,3 +155,12 @@ class BookMarkSchema(colander.MappingSchema):
     description = colander.SchemaNode(colander.String())
     ht = colander.SchemaNode(colander.Float())
     tva = colander.SchemaNode(colander.Float())
+
+
+class ExpenseListSchema(BaseListsSchema):
+    status = colander.SchemaNode(colander.String(),
+        validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
+        missing='all')
+    year = main.year_select_node(title=u"Année", query_func=get_expense_years)
+    month = main.month_select_node(title=u"Mois", default=None, missing=None)
+    owner_id = main.user_node(title=u"Utilisateur", missing=None)

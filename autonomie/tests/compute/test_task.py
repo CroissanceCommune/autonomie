@@ -83,6 +83,7 @@ class DummyTask(Dummy, TaskCompute):
 
 
 class DummyInvoice(Dummy, InvoiceCompute):
+    cancelinvoice = None
     pass
 
 

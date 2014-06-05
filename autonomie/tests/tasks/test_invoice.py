@@ -90,8 +90,10 @@ class TestInvoice(BaseTestCase):
         invoice.set_sequenceNumber(5)
         invoice.set_name()
         self.assertEqual(invoice.name, u"Facture 5")
+        invoice.name = ""
         invoice.set_name(sold=True)
         self.assertEqual(invoice.name, u"Facture de solde")
+        invoice.name = ""
         invoice.set_name(deposit=True)
         self.assertEqual(invoice.name, u"Facture d'acompte 5")
 

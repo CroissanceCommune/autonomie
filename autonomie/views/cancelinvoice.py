@@ -106,6 +106,8 @@ class CancelInvoiceAdd(TaskFormView):
         cinvoice.set_name()
         try:
             cinvoice = self.set_task_status(cinvoice)
+            cinvoice.invoice.check_resulted()
+            self.dbsession.merge(cinvoice.invoice)
             # Line handling
             cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
             self.dbsession.add(cinvoice)
@@ -176,6 +178,8 @@ class CancelInvoiceEdit(TaskFormView):
         cinvoice = merge_session_with_post(cinvoice, appstruct["cancelinvoice"])
         try:
             cinvoice = self.set_task_status(cinvoice)
+            cinvoice.invoice.check_resulted()
+            self.dbsession.merge(cinvoice.invoice)
             # Line handling
             cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
             cinvoice = self.dbsession.merge(cinvoice)
@@ -200,17 +204,23 @@ class CancelInvoiceStatus(TaskStatusView):
         log.debug(u"+ Setting products for an invoice (pre-step)")
         form = get_set_products_form(self.request)
         appstruct = form.validate(params.items())
-        log.debug(appstruct)
         return appstruct
 
-    def post_set_products_process(self, task, status, params):
-        log.debug(u"+ Setting products for an invoice (post-step)")
-        invoice = params
-        invoice = self.request.dbsession.merge(invoice)
-        log.debug(u"Configuring prodicts for invoice :{0}".format(invoice.id))
+    def post_set_products_process(self, task, status, cancelinvoice):
+        self.request.dbsession.merge(cancelinvoice)
+        log.debug(u"Configuring products for cancelinvoice post-step :{0}"\
+.format(cancelinvoice.id))
         msg = u"Les codes produits ont bien été configurés"
-        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
         self.request.session.flash(msg)
+
+    def post_valid_process(self, task, status, cancelinvoice):
+        """
+        Launched after a cancelinvoice has been validated
+        """
+        log.debug(u"+ checking if the associated invoice is resulted")
+        invoice = task.invoice
+        invoice = invoice.check_resulted()
+        self.request.dbsession.merge(invoice)
 
     def pre_set_financial_year_process(self, task, status, params):
         """

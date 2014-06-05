@@ -357,7 +357,7 @@ class ExcelExpense(object):
 
             elif column.get('key') == 'tva':
                 cell.value = integer_to_amount(
-                        sum([getattr(line, 'tva', 0) for line in lines]))
+                        sum([getattr(line, 'total_tva', 0) for line in lines]))
 
             elif column.get('key') == 'total':
                 cell.value = integer_to_amount(

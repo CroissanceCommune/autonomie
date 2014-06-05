@@ -331,14 +331,24 @@ class Invoice(Task, InvoiceCompute):
 
     def record_payment(self, mode, amount, resulted=False):
         """
-            Validate a record payment
+        Record a payment for the current invoice
         """
         log.info(u"Amount : {0}".format(amount))
         payment = Payment(mode=mode, amount=amount)
         self.payments.append(payment)
+        return self.check_resulted(force_resulted=resulted)
+
+    def check_resulted(self, force_resulted=False):
+        """
+        Check if the invoice is resulted or not and set the appropriate status
+        """
         log.debug(u"-> There still to pay : %s" % self.topay())
-        if self.topay() == 0 or resulted:
+        if self.topay() == 0 or force_resulted:
             self.CAEStatus = 'resulted'
+        elif len(self.payments) > 0:
+            self.CAEStatus = 'paid'
+        else:
+            self.CAEStatus = 'valid'
         return self
 
     def duplicate(self, user, project, phase, customer):

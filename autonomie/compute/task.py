@@ -180,9 +180,16 @@ class InvoiceCompute(TaskCompute):
 
     def topay(self):
         """
-            return the amount to pay
+        Return the amount that still need to be paid
+
+        Compute the sum of the payments and what's part of a valid cancelinvoice
         """
-        return self.total() - self.paid()
+        result = self.total()
+        result -= sum([payment.amount for payment in self.payments])
+        if self.cancelinvoice is not None and self.cancelinvoice.is_valid():
+            result += self.cancelinvoice.total()
+        return result
+
 
 class EstimationCompute(TaskCompute):
     """

@@ -787,13 +787,24 @@ def get_cancel_invoice_schema():
     return schema
 
 
+def get_amount_topay(kw):
+    context = kw['request'].context
+    if context.__name__ == 'invoice':
+        task = context
+        topay = task.topay()
+    else:
+        task = context.task
+        topay = task.topay()
+        topay += context.amount
+    return topay
+
+
 @colander.deferred
 def deferred_amount_default(node, kw):
     """
         default value for the payment amount
     """
-    task = kw['request'].context
-    return task.topay()
+    return get_amount_topay(kw)
 
 
 @colander.deferred
@@ -801,11 +812,11 @@ def deferred_total_validator(node, kw):
     """
         validate the amount to keep the sum under the total
     """
-    task = kw['request'].context
+    topay = get_amount_topay(kw)
     max_msg = u"Le montant ne doit pas dépasser %s\
-(total ttc - somme des paiements enregistrés)" % (task.topay() / 100.0)
+(total ttc - somme des paiements enregistrés)" % (topay / 100.0)
     min_msg = u"Le montant doit être positif"
-    return colander.Range(min=0, max=task.topay(), min_err=min_msg,
+    return colander.Range(min=0, max=topay, min_err=min_msg,
                                                    max_err=max_msg)
 
 
@@ -827,21 +838,22 @@ class PaymentSchema(colander.MappingSchema):
     """
         colander schema for payment recording
     """
+    come_from = main.come_from_node()
     amount = colander.SchemaNode(AmountType(),
-            title=u"Montant",
-            validator=deferred_total_validator,
-            default=deferred_amount_default)
+        title=u"Montant",
+        validator=deferred_total_validator,
+        default=deferred_amount_default)
     mode = colander.SchemaNode(colander.String(),
-            title=u"Mode de paiement",
-            widget=deferred_payment_mode_widget,
-            validator=deferred_payment_mode_validator)
+        title=u"Mode de paiement",
+        widget=deferred_payment_mode_widget,
+        validator=deferred_payment_mode_validator)
     resulted = colander.SchemaNode(
-            colander.Boolean(),
-            title=u"Soldé",
-            description="""Indique que le document est soldé (
+        colander.Boolean(),
+        title=u"Soldé",
+        description="""Indique que le document est soldé (
 ne recevra plus de paiement), si le montant indiqué correspond au
 montant de la facture celle-ci est soldée automatiquement""",
-            default=False)
+        default=False)
 
 
 class FinancialYearSchema(colander.MappingSchema):

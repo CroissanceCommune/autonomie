@@ -76,6 +76,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.expense",
     "autonomie.views.sage",
     "autonomie.views.files",
+    "autonomie.views.payment",
     "autonomie.panels.menu",
     "autonomie.panels.task",
     "autonomie.panels.company",

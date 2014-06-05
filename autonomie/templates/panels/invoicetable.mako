@@ -132,12 +132,22 @@ else:
             </td>
             <td>
                 % if len(document.payments) == 1 and document.is_resulted():
-                    Le ${api.format_date(document.payments[0].date)} (${api.format_paymentmode(document.payments[0].mode)})
+                    <% payment = document.payments[0] %>
+                    <% url = request.route_path('payment', id=payment.id) %>
+                    <a href="${url}">
+                    Le ${api.format_date(payment.date)}
+                    (${api.format_paymentmode(payment.mode)})
+                    </a>
                 % elif len(document.payments) > 0:
                     <ul>
                         % for payment in document.payments:
+                    <% url = request.route_path('payment', id=payment.id) %>
                             <li>
-                            ${api.format_amount(payment.amount)|n}&nbsp;€ le ${api.format_date(payment.date)} (${api.format_paymentmode(payment.mode)})
+                                <a href="${url}">
+                            ${api.format_amount(payment.amount)|n}&nbsp;€
+                            le ${api.format_date(payment.date)}
+                            (${api.format_paymentmode(payment.mode)})
+                                </a>
                             </li>
                         % endfor
                     </ul>

@@ -788,6 +788,9 @@ def get_cancel_invoice_schema():
 
 
 def get_amount_topay(kw):
+    """
+    Retrieve the amount to be paid regarding the context
+    """
     context = kw['request'].context
     if context.__name__ == 'invoice':
         task = context
@@ -813,8 +816,8 @@ def deferred_total_validator(node, kw):
         validate the amount to keep the sum under the total
     """
     topay = get_amount_topay(kw)
-    max_msg = u"Le montant ne doit pas dépasser %s\
-(total ttc - somme des paiements enregistrés)" % (topay / 100.0)
+    max_msg = u"Le montant ne doit pas dépasser %s (total ttc - somme \
+des paiements + montant d'un éventuel avoir)" % (topay / 100.0)
     min_msg = u"Le montant doit être positif"
     return colander.Range(min=0, max=topay, min_err=min_msg,
                                                    max_err=max_msg)

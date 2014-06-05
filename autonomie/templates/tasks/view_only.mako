@@ -141,6 +141,9 @@
                 </ul>
             % endif
         % endif
+        % if hasattr(task, 'topay') and not task.is_resulted():
+            Il reste ${api.format_amount(task.topay())|n}&nbsp;€ à régler.
+        % endif
     </div>
             % if task.is_estimation():
                 <% route = request.route_path('estimation', id=task.id, _query=dict(action='status')) %>

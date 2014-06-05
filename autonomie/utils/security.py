@@ -37,8 +37,11 @@ from autonomie.models.customer import Customer
 from autonomie.models.files import File
 from autonomie.models.project import Project
 from autonomie.models.task.estimation import Estimation
-from autonomie.models.task.invoice import Invoice
-from autonomie.models.task.invoice import CancelInvoice
+from autonomie.models.task.invoice import (
+    Invoice,
+    CancelInvoice,
+    Payment,
+)
 from autonomie.models.treasury import (
         ExpenseSheet,
         BaseExpenseLine,
@@ -92,6 +95,7 @@ class RootFactory(dict):
         self['invoices'] = InvoiceFactory(self, 'invoices')
         self['projects'] = ProjectFactory(self, 'projects')
         self['users'] = UserFactory(self, 'users')
+        self['payments'] = PaymentFactory(self, 'payments')
 
 
 class BaseDBFactory(object):
@@ -242,6 +246,17 @@ class ActivityFactory(BaseDBFactory):
         return self._get_item(Activity, key, 'file')
 
 
+class PaymentFactory(BaseDBFactory):
+    """
+    Handle access to payments
+    """
+    def __getitem__(self, key):
+        """
+        Return the traversed file object
+        """
+        return self._get_item(Payment, key, 'payment')
+
+
 def get_base_acl(self):
     """
         return the base acls
@@ -370,3 +385,4 @@ def wrap_db_objects():
     BaseExpenseLine.__acl__ = property(get_expense_acl)
     Activity.__acl__ = property(get_activity_acl)
     File.__acl__ = property(get_file_acl)
+    Payment.__acl__ = property(get_base_acl)

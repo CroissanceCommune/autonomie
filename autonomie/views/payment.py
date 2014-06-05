@@ -55,38 +55,24 @@ class PaymentEdit(BaseFormView):
         """
         handle successfull submission of the form
         """
-        context = self.request.context
-        was_resulted = context.task.is_resulted()
-        prec_amount = context.amount
+        payment_obj = self.request.context
+
+        # update the payment
+        merge_session_with_post(payment_obj, appstruct)
+        self.dbsession.merge(payment_obj)
+
+        # Check the invoice status
         force_resulted = appstruct.pop('resulted', False)
-
-        total = context.task.total()
-
-        # Edit the payment and flush to be able to update the invoice payment
-        # status afterwards
-        merge_session_with_post(context, appstruct)
-        self.dbsession.merge(context)
-        self.dbsession.flush(context)
+        invoice = payment_obj.task
+        invoice = invoice.check_resulted(force_resulted=force_resulted)
+        self.dbsession.merge(invoice)
 
         come_from = appstruct.pop('come_from', None)
-
-        user_id = self.request.user.id
-        if force_resulted or context.amount == total:
-            context.task.CAEStatus = 'resulted'
-            self.dbsession.merge(context.task)
-        elif was_resulted and not prec_amount > context.amount:
-            # On a baissé le montant => plus soldée
-            context.task.CAEStatus = 'paid'
-            self.dbsession.merge(context.task)
-        elif context.amount == context.task.total:
-            # le montant est égal au total
-            context.task.CAEStatus = 'resulted'
-            self.dbsession.merge(context.task)
 
         if come_from is not None:
             redirect = come_from
         else:
-            redirect = self.request.route_path("payment", id=context.id)
+            redirect = self.request.route_path("payment", id=payment_obj.id)
         return HTTPFound(redirect)
 
 
@@ -127,14 +113,11 @@ def payment_delete(context, request):
     """
     invoice = context.task
     user_id = request.user.id
-    if len(invoice.payments) == 1:
-        invoice.CAEStatus = "valid"
-        request.dbsession.merge(invoice)
-    elif invoice.is_resulted():
-        invoice.CAEStatus = "paid"
-        request.dbsession.merge(invoice)
 
     request.dbsession.delete(context)
+
+    invoice = invoice.check_resulted()
+    request.dbsession.merge(invoice)
 
     redirect = request.route_path("invoice", id=invoice.id)
     return HTTPFound(redirect)

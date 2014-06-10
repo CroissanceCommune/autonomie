@@ -412,14 +412,8 @@ class ActivityList(BaseListView):
             query = query.filter(Activity.conseiller_id==conseiller_id)
         return query
 
-    def _get_participant_id(self, appstruct):
-        """
-        Return the id of one of the activity's participant
-        """
-        return appstruct['participant_id']
-
     def filter_participant(self, query, appstruct):
-        participant_id = self._get_participant_id(appstruct)
+        participant_id = appstruct['participant_id']
         if participant_id != -1:
             query = query.outerjoin(PARTICIPANTS, Activity.participants)
             query = query.filter(
@@ -444,8 +438,14 @@ class ActivityListContractor(ActivityList):
     def _get_conseiller_id(self, appstruct):
         return -1
 
-    def _get_participant_id(self, appstruct):
-        return self.request.user.id
+    def filter_participant(self, query, appstruct):
+        company = self.context
+        participants_ids = [user.id for user in company.employees]
+        query = query.outerjoin(PARTICIPANTS, Activity.participants)
+        query = query.filter(
+            Activity.participants.any(PARTICIPANTS.id.in_(participants_ids))
+            )
+        return query
 
 
 def activity_view_only_view(context, request):

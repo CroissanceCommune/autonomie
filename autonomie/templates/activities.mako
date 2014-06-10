@@ -27,7 +27,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    % if api.has_permission('manage', request.context, request):
+    % if api.has_permission('manage'):
         <a href="${request.route_path('activities', _query=dict(action='new'))}">
             Nouveau rendez-vous
         </a>
@@ -40,7 +40,7 @@
     <div class='span7'>
         <form class='form-search form-horizontal' id='search_form' method='GET'>
             <div style="padding-bottom:3px">
-                % if api.has_permission('manage', request.context, request):
+                % if api.has_permission('manage'):
                 <select id='conseiller-select' name='conseiller_id' data-placeholder="Rechercher un conseiller">
                     <option value='-1'></option>
                     %for conseiller in conseiller_options:
@@ -77,7 +77,7 @@
                             </option>
                     %endfor
                 </select>
-                % if api.has_permission('manage', request.context, request):
+                % if api.has_permission('manage'):
                 <select id='participant-select' name='participant_id' data-placeholder="Rechercher un participant" class='span3'>
                     <option value='-1'></option>
                     %for participant in participants_options:
@@ -141,7 +141,11 @@
     <tbody>
         % for activity in records:
             <% url = request.route_path('activity', id=activity.id) %>
-            <% onclick = "document.location='{url}'".format(url=url) %>
+            % if api.has_permission('view', activity):
+                <% onclick = "document.location='{url}'".format(url=url) %>
+            % else :
+                <% onclick = u"alert(\"Vous n'avez pas accès aux données de ce rendez-vous\");" %>
+            % endif
             <%
 if activity.status == 'planned':
     css = "white_"
@@ -175,16 +179,17 @@ else:
                     ${activity.mode}
                 </td>
                 <td>
-                    % if request.user.is_contractor():
+                    % if api.has_permission("view", activity):
                         ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
-                    % else:
+                    % endif
+                    % if api.has_permission('edit', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='icon-pencil')}
                         <% del_url = request.route_path('activity', id=activity.id, _query=dict(action="delete")) %>
                         ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='icon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
                         <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
                         ${table_btn(pdf_url, u"PDF", u"Télécharger la sortie PDF pour impression", icon='icon-file')}
-                    %endif
+                    % endif
                 </td>
             </tr>
         % endfor

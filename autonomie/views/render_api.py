@@ -30,7 +30,7 @@ import locale
 import calendar
 import bleach
 from copy import deepcopy
-from pyramid.security import has_permission
+from pyramid.security import has_permission as base_has_permission
 
 ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p', 'span', 'h1',
                                             'h2', 'h3', 'h4', 'h5', 'hr',
@@ -223,25 +223,6 @@ def format_paymentmode(paymentmode):
     return paymentmode
 
 
-def urlupdate(request, args_dict):
-    """
-        Return the current url with updated GET params
-        It allows to keep url params when :
-        * sorting
-        * searching
-        * moving from one page to another
-
-        if current url ends with :
-            <url>?foo=1&bar=2
-        when passing {'foo':5}, we get :
-            <url>?foo=5&bar=2
-    """
-    get_args = request.GET.copy()
-    get_args.update(args_dict)
-    path = request.current_route_path(_query=get_args)
-    return path
-
-
 def month_name(index):
     """
         Return the name of the month number "index"
@@ -286,24 +267,46 @@ class Api(object):
     """
         Api object passed to the templates hosting all commands we will use
     """
-    def __init__(self, **kw):
-        for key, value in kw.items():
-            setattr(self, key, value)
+    format_amount  = staticmethod(format_amount)
+    format_date  = staticmethod(format_date)
+    format_status  = staticmethod(format_status)
+    format_expense_status  = staticmethod(format_expense_status)
+    format_activity_status  = staticmethod(format_activity_status)
+    format_account  = staticmethod(format_account)
+    format_name  = staticmethod(format_name)
+    format_paymentmode  = staticmethod(format_paymentmode)
+    format_short_date  = staticmethod(format_short_date)
+    format_long_date  = staticmethod(format_long_date)
+    format_quantity  = staticmethod(format_quantity)
+    human_readable_filesize  = staticmethod(human_readable_filesize)
+    month_name  = staticmethod(month_name)
+    clean_html  = staticmethod(clean_html)
 
-api = Api(format_amount=format_amount,
-          format_date=format_date,
-          format_status=format_status,
-          format_expense_status=format_expense_status,
-          format_activity_status=format_activity_status,
-          format_account=format_account,
-          format_name=format_name,
-          format_paymentmode=format_paymentmode,
-          format_short_date=format_short_date,
-          format_long_date=format_long_date,
-          format_quantity=format_quantity,
-          human_readable_filesize=human_readable_filesize,
-          urlupdate=urlupdate,
-          month_name=month_name,
-          clean_html=clean_html,
-          has_permission=has_permission,
-          )
+    def __init__(self, request, context):
+        self.request = request
+        self.context = context
+
+    def has_permission(self, perm_name, context=None):
+        context = context or self.context
+        return base_has_permission(perm_name, context, self.request)
+
+    def urlupdate(self, args_dict):
+        """
+            Return the current url with updated GET params
+            It allows to keep url params when :
+            * sorting
+            * searching
+            * moving from one page to another
+
+            if current url ends with :
+                <url>?foo=1&bar=2
+            when passing {'foo':5}, we get :
+                <url>?foo=5&bar=2
+        """
+        get_args = self.request.GET.copy()
+        get_args.update(args_dict)
+        path = self.request.current_route_path(_query=get_args)
+        return path
+
+
+

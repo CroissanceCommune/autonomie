@@ -101,6 +101,7 @@
                     % endfor
                 </select>
             </div>
+            <button type="submit" class="btn btn-primary">Filtrer</button>
         </form>
     </div>
     <div class='span4'>

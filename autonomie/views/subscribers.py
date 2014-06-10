@@ -36,7 +36,7 @@ from pyramid.threadlocal import get_current_request
 from autonomie.i18n import translate
 from autonomie.utils.widgets import ActionMenu
 from autonomie.resources import main_js
-from autonomie.views.render_api import api
+from autonomie.views.render_api import Api
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +55,9 @@ def add_api(event):
     """
         Add an api to the templating context
     """
-    event['api'] = api
+    request = event['request']
+    context = request.context
+    event['api'] = Api(request, context)
 
 
 def get_req_uri(request):

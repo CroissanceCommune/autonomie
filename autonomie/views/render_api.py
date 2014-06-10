@@ -282,9 +282,11 @@ class Api(object):
     month_name  = staticmethod(month_name)
     clean_html  = staticmethod(clean_html)
 
-    def __init__(self, request, context):
+    def __init__(self, context, request):
         self.request = request
         self.context = context
+        if getattr(request, 'template_api', None) is None:
+            request.template_api = self
 
     def has_permission(self, perm_name, context=None):
         context = context or self.context

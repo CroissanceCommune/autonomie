@@ -55,9 +55,12 @@ def add_api(event):
     """
         Add an api to the templating context
     """
-    request = event['request']
-    context = request.context
-    event['api'] = Api(request, context)
+    if event.get('renderer_name', 'json') != 'json':
+        request = event['request']
+        api = getattr(request, 'template_api', None)
+        if api is None and request is not None:
+            api = Api(event['context'], event['request'])
+        event['api'] = api
 
 
 def get_req_uri(request):

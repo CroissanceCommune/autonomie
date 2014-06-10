@@ -26,6 +26,6 @@
 <dl class="dl-horizontal">
     <dt>Date</dt><dd>${api.format_date(request.context.date)}</dd>
     <dt>Mode de paiement</dt><dd>${request.context.mode}</dd>
-    <dt>Montant</dt><dd>${api.format_amount(request.context.amount)}&nbsp;&euro;</dd>
+    <dt>Montant</dt><dd>${api.format_amount(request.context.amount)|n}&nbsp;&euro;</dd>
 </dl>
 </%block>

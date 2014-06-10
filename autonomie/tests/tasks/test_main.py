@@ -32,7 +32,7 @@
 
 import datetime
 from zope.interface.verify import verifyObject
-from autonomie.tests.base import BaseTestCase
+from autonomie.tests.base import BaseViewTest
 
 from autonomie.models.task import Task
 from autonomie.models.task import Estimation
@@ -126,7 +126,7 @@ def get_task(factory):
     task.owner = user
     return task
 
-class TestTaskModels(BaseTestCase):
+class TestTaskModels(BaseViewTest):
     def test_interfaces(self):
         self.assertTrue(verifyObject(ITask, Task()))
         self.assertTrue(verifyObject(IValidatedTask, Estimation()))
@@ -188,48 +188,100 @@ class TestTaskModels(BaseTestCase):
         self.assertTrue(task.is_valid())
         self.assertFalse(task.is_editable())
 
+    def _forbidden_state_change(self, task, from_state, to_states):
+        request = self.get_csrf_request()
+        self.config.testing_securitypolicy(userid='test', permissive=True)
+
+        for st in to_states:
+            task.CAEStatus = from_state
+            self.assertRaises(Forbidden, task.set_status, st, request, 'test')
+
+    def _allowed_state_change(self, task, from_state, to_states):
+        request = self.get_csrf_request()
+        self.config.testing_securitypolicy(userid='test', permissive=True)
+        for st in to_states:
+            task.CAEStatus = from_state
+            task.set_status(st, request, 'test')
+            self.assertEqual(task.CAEStatus, st)
+
+
     def test_status_change(self):
         # Estimation
         task = get_task(factory=Estimation)
-        for st in ("geninv", "aboest", "invalid"):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        self.assertEqual(task.validate_status("nutt", "wait"), "wait")
-        task.CAEStatus = "wait"
-        for st in ("draft", "geninv", ):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        self.assertEqual(task.validate_status("nutt", "invalid"), "invalid")
-        self.assertEqual(task.validate_status("nutt", "valid"), "valid")
-        task.CAEStatus = "valid"
-        for st in ("draft", "invalid", ):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("geninv", "aboest"):
-            self.assertEqual(task.validate_status("nutt", st), st)
-        task.CAEStatus = "geninv"
-        for st in ("draft", "invalid", "valid", "aboest"):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
 
-        # Invoice
+        request = self.get_csrf_request()
+        self.config.testing_securitypolicy(userid='test', permissive=True)
+
+        status = 'draft'
+        self._forbidden_state_change(
+            task, status,
+            ("geninv", "aboest", "invalid"))
+        self._allowed_state_change(
+            task, status,
+            ('wait',))
+
+        status = 'wait'
+        self._forbidden_state_change(
+            task, status,
+            ("draft", "geninv", ))
+        self._allowed_state_change(
+            task, status,
+            ('invalid', 'valid',))
+
+        status = 'valid'
+        self._forbidden_state_change(
+            task, status,
+            ("draft", "invalid", )
+            )
+        self._allowed_state_change(
+            task, status,
+            ("aboest", ))
+
+        status = 'geninv'
+        self._forbidden_state_change(
+            task, status,
+            ("draft", "invalid", "valid", "aboest")
+            )
+
+#        # Invoice
         task = get_task(factory=Invoice)
-        for st in ("aboinv", "invalid"):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        self.assertEqual(task.validate_status("nutt", "wait"), "wait")
-        task.CAEStatus = "wait"
-        for st in ("draft", ):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        self.assertEqual(task.validate_status("nutt", "invalid"), "invalid")
-        self.assertEqual(task.validate_status("nutt", "valid"), "valid")
-        task.CAEStatus = "valid"
-        for st in ("draft", "invalid"):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
-        for st in ("paid",):
-            self.assertEqual(task.validate_status("nutt", st), st)
-        task.CAEStatus = "paid"
-        for st in ("draft", "invalid", "valid", "aboinv", ):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
+        status = 'draft'
+        self._forbidden_state_change(
+            task, status,
+            ("aboinv", "invalid"))
+        self._allowed_state_change(
+            task, status,
+            ('wait',))
 
-        # CancelInvoice
+        status = 'wait'
+        self._forbidden_state_change(
+            task, status,
+            ("draft", ))
+        self._allowed_state_change(
+            task, status,
+            ('invalid', 'valid',))
+
+        status = 'valid'
+        self._forbidden_state_change(
+            task, status,
+            ("draft", "invalid", )
+            )
+
+        status = "paid"
+        self._forbidden_state_change(
+            task, status,
+            ("draft", "invalid", "valid", "aboinv", )
+            )
+
         task = get_task(factory=CancelInvoice)
-        # Removing Direct validation of the cancelinvoice
-        task.CAEStatus = "valid"
-        for st in ("draft",):
-            self.assertRaises(Forbidden, task.validate_status, "nutt", st)
+        status = "draft"
+        self._allowed_state_change(
+                task, status, ('delete',))
+
+        status = "valid"
+        self._forbidden_state_change(
+            task, status,
+            ("draft", ))
+
+
+

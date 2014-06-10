@@ -182,13 +182,31 @@ class RecordActivitySchema(colander.Schema):
         widget=deform_widget.RadioChoiceWidget(values=STATUSCHOICES),
         title=u"Statut des participants",
         missing=u"closed")
-    point = main.textarea_node(title=u"Point de suivi", missing='')
-    objectifs = main.textarea_node(title=u"Définition des objectifs",
-            missing='')
-    action = main.textarea_node(title=u"Plan d'action et préconisations",
-            missing='')
-    documents = main.textarea_node(title=u"Documents produits", missing='')
-    notes = main.textarea_node(title=u"Notes", missing="")
+    point = main.textarea_node(
+        title=u"Point de suivi",
+        richwidget=True,
+        missing='',
+        )
+    objectifs = main.textarea_node(
+        title=u"Définition des objectifs",
+        richwidget=True,
+        missing='',
+        )
+    action = main.textarea_node(
+        title=u"Plan d'action et préconisations",
+        richwidget=True,
+        missing='',
+        )
+    documents = main.textarea_node(
+        title=u"Documents produits",
+        richwidget=True,
+        missing='',
+        )
+    notes = main.textarea_node(
+        title=u"Notes",
+        richwidget=True,
+        missing="",
+        )
 
 
 class ActivityListSchema(lists.BaseListsSchema):

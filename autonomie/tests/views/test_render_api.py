@@ -29,11 +29,6 @@ from autonomie.tests.base import BaseTestCase
 from autonomie.views import render_api
 
 class TestIt(BaseTestCase):
-    def test_its_in(self):
-        for i in dir(render_api):
-            if i.startswith('format_'):
-                self.assertTrue(hasattr(render_api.api, i))
-
     def test_format_amount(self):
         a = 1525
         b = 1525.3

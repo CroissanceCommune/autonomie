@@ -239,13 +239,14 @@ class Invoice(Task, InvoiceCompute):
         self.sequenceNumber = snumber
 
     def set_name(self, deposit=False, sold=False):
-        if deposit:
-            taskname_tmpl = u"Facture d'acompte {0}"
-        elif sold:
-            taskname_tmpl = u"Facture de solde"
-        else:
-            taskname_tmpl = u"Facture {0}"
-        self.name = taskname_tmpl.format(self.sequenceNumber)
+        if self.name in [None, ""]:
+            if deposit:
+                taskname_tmpl = u"Facture d'acompte {0}"
+            elif sold:
+                taskname_tmpl = u"Facture de solde"
+            else:
+                taskname_tmpl = u"Facture {0}"
+            self.name = taskname_tmpl.format(self.sequenceNumber)
 
     @validates("paymentMode")
     def validate_paymentMode(self, key, paymentMode):
@@ -330,14 +331,24 @@ class Invoice(Task, InvoiceCompute):
 
     def record_payment(self, mode, amount, resulted=False):
         """
-            Validate a record payment
+        Record a payment for the current invoice
         """
         log.info(u"Amount : {0}".format(amount))
         payment = Payment(mode=mode, amount=amount)
         self.payments.append(payment)
+        return self.check_resulted(force_resulted=resulted)
+
+    def check_resulted(self, force_resulted=False):
+        """
+        Check if the invoice is resulted or not and set the appropriate status
+        """
         log.debug(u"-> There still to pay : %s" % self.topay())
-        if self.topay() == 0 or resulted:
+        if self.topay() == 0 or force_resulted:
             self.CAEStatus = 'resulted'
+        elif len(self.payments) > 0:
+            self.CAEStatus = 'paid'
+        else:
+            self.CAEStatus = 'valid'
         return self
 
     def duplicate(self, user, project, phase, customer):
@@ -529,8 +540,9 @@ class CancelInvoice(Task, TaskCompute):
         return True
 
     def set_name(self):
-        taskname_tmpl = u"Avoir {0}"
-        self.name = taskname_tmpl.format(self.sequenceNumber)
+        if self.name in [None, ""]:
+            taskname_tmpl = u"Avoir {0}"
+            self.name = taskname_tmpl.format(self.sequenceNumber)
 
     @classmethod
     def get_officialNumber(cls):

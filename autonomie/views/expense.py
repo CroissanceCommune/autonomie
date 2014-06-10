@@ -39,22 +39,26 @@ from pyramid.httpexceptions import (
 
 from autonomie.exception import Forbidden
 from autonomie.views.forms.expense import (
-        ExpenseStatusSchema,
-        PeriodSelectSchema,
-        ExpenseLineSchema,
-        ExpenseKmLineSchema,
-        ExpenseSheetSchema,
-        BookMarkSchema,
+    ExpenseStatusSchema,
+    PeriodSelectSchema,
+    ExpenseLineSchema,
+    ExpenseKmLineSchema,
+    ExpenseSheetSchema,
+    BookMarkSchema,
+    ExpenseListSchema,
+    STATUS_OPTIONS
 )
+from autonomie.views.forms import main as form_main
 from autonomie.models.treasury import (
-        BaseExpenseLine,
-        ExpenseType,
-        ExpenseTelType,
-        ExpenseKmType,
-        ExpenseSheet,
-        ExpenseLine,
-        ExpenseKmLine,
-        Communication,
+    BaseExpenseLine,
+    ExpenseType,
+    ExpenseTelType,
+    ExpenseKmType,
+    ExpenseSheet,
+    ExpenseLine,
+    ExpenseKmLine,
+    Communication,
+    get_expense_years,
 )
 from autonomie.events.expense import StatusChanged
 from autonomie.views.base import BaseView
@@ -874,6 +878,63 @@ class RestBookMarks(BaseView):
         else:
             return dict(status="success")
 
+from autonomie.views.base import BaseListView
+
+class ExpenseList(BaseListView):
+    title = u"Notes de frais"
+    schema = ExpenseListSchema()
+    sort_columns = dict(month=ExpenseSheet.month)
+    default_sort = 'month'
+    default_direction = 'desc'
+
+    def default_form_values(self, values):
+        """
+        Provide default form values for the manually rendered form
+        """
+        values = super(ExpenseList, self).default_form_values(values)
+        values['month_options'] = form_main.get_month_options()
+        values['years'] = get_expense_years()
+        values['status_options'] = STATUS_OPTIONS
+        values['owner_options'] = form_main.get_users_options()
+        return values
+
+
+    def query(self):
+        return ExpenseSheet.query()
+
+    def filter_search(self, query, appstruct):
+        search = appstruct['search']
+        if search:
+            query = query.filter(ExpenseSheet.id==search)
+        return query
+
+    def filter_year(self, query, appstruct):
+        year = appstruct['year']
+        if year:
+            query = query.filter(ExpenseSheet.year==year)
+        return query
+
+    def filter_month(self, query, appstruct):
+        month = appstruct['month']
+        if month and month != -1:
+            query = query.filter(ExpenseSheet.month==month)
+        return query
+
+    def filter_owner(self, query, appstruct):
+        user_id = appstruct['owner_id']
+        if user_id and user_id != -1:
+            query = query.filter(ExpenseSheet.user_id==user_id)
+        return query
+
+    def filter_status(self, query, appstruct):
+        status = appstruct['status']
+        if status != 'all':
+            query = query.filter(ExpenseSheet.status==status)
+        else:
+            interesting_status = [i[1] for i in STATUS_OPTIONS]
+            query = query.filter(ExpenseSheet.status.in_(interesting_status))
+        return query
+
 
 def includeme(config):
     """
@@ -882,6 +943,8 @@ def includeme(config):
     # Routes
     traverse = '/companies/{id}'
 
+    config.add_route("expenses", "/expenses")
+
     config.add_route("company_expenses",
             "/company/{id}/expenses",
             traverse=traverse)
@@ -889,6 +952,7 @@ def includeme(config):
     config.add_route("user_expenses",
             "/company/{id}/{uid}/expenses",
             traverse=traverse)
+
     traverse = "/expenses/{id}"
 
     config.add_route("expense",
@@ -917,23 +981,28 @@ def includeme(config):
     config.add_route("bookmarks", "/bookmarks")
 
     #views
+    config.add_view(ExpenseList,
+        route_name="expenses",
+        permission="admin",
+        renderer="treasury/admin_expenses.mako")
+
     config.add_view(company_expenses_view,
-            route_name="company_expenses",
-            renderer="treasury/expenses.mako",
-            permission="edit")
+        route_name="company_expenses",
+        renderer="treasury/expenses.mako",
+        permission="edit")
 
     config.add_view(expenses_access_view,
-            route_name="user_expenses",
-            permission="edit")
+        route_name="user_expenses",
+        permission="edit")
 
     config.add_view(ExpenseSheetView,
-            route_name="expense",
-            renderer="treasury/expense.mako")
+        route_name="expense",
+        renderer="treasury/expense.mako")
 
     config.add_view(expensesheet_json_view,
-            route_name="expensejson",
-            xhr=True,
-            renderer="json")
+        route_name="expensejson",
+        xhr=True,
+        renderer="json")
 
     # Excel export
     config.add_view(make_excel_view(excel_filename, ExcelExpense),

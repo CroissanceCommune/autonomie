@@ -31,6 +31,9 @@ import colander
 import logging
 
 from pyramid_deform import FormView
+from pyramid.security import has_permission
+from js.tinymce import tinymce
+
 from autonomie.utils.views import submit_btn
 
 class BaseFormView(FormView):
@@ -105,6 +108,8 @@ class BaseFormView(FormView):
         self.dbsession = self.request.dbsession
         self.session = self.request.session
         self.logger = logging.getLogger("form_admin")
+        if has_permission('manage', request.context, request):
+            tinymce.need()
 
     def __call__(self):
         try:

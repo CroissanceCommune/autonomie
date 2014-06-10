@@ -52,7 +52,7 @@ from autonomie.models.tva import Tva
 from autonomie.views.base import BaseView
 from autonomie.views.forms.duplicate import (
         DuplicateSchema,
-        PhaseChangeSchema,
+        EDIT_METADATASCHEMA,
         )
 from autonomie.views.forms.task import (
         FinancialYearSchema,
@@ -123,18 +123,18 @@ def get_duplicate_form(request, counter=None):
     return form
 
 
-def get_phasechange_form(request, counter=None):
+def get_edit_metadata_form(request, counter=None):
     """
         Return the used to move a task from one phase to another
     """
-    schema = PhaseChangeSchema().bind(request=request)
+    schema = EDIT_METADATASCHEMA.bind(request=request)
     action = request.route_path(request.context.__name__,
             id=request.context.id,
             _query=dict(action='status'))
-    valid_btn = Button(name='submit', value="phasechange", type='submit',
+    valid_btn = Button(name='submit', value="edit_metadata", type='submit',
             title=u"Valider")
     form = Form(schema=schema, buttons=(valid_btn,), action=action,
-            formid="phasechange", counter=counter)
+            formid="edit_metadata", counter=counter)
     return form
 
 
@@ -290,23 +290,28 @@ class TaskFormActions(object):
             self.request.popups[popup.name] = popup
             yield popup.open_btn(css='btn btn-primary')
 
-    def _phasechange_form(self):
+    def _edit_metadata_form(self):
         """
             return the form used to change a task's phase
         """
-        form = get_phasechange_form(self.request, self.formcounter)
+        form = get_edit_metadata_form(self.request, self.formcounter)
+        form.set_appstruct(self.context.appstruct())
         self.formcounter = form.counter
         return form
 
-    def _phasechange_btn(self):
+    def _edit_metadata_btn(self):
         """
             Return the button for moving the current task to another phase
         """
-        if context_is_task(self.context) and \
-                len(self.context.project.phases)> 1:
-            title = u"Déplacer vers une autre phase"
-            form = self._phasechange_form()
-            popup = PopUp("phasechange_form_container", title, form.render())
+        if self.request.user.is_contractor():
+            manage = False
+        else:
+            manage = True
+        if context_is_task(self.context) and not self.context.is_editable(manage):
+            title = u"Éditer ce document"
+            form = self._edit_metadata_form()
+            form.appstruct = self.context.appstruct()
+            popup = PopUp("edit_metadata_form_container", title, form.render())
             self.request.popups[popup.name] = popup
             yield popup.open_btn(css='btn btn-primary')
 
@@ -520,6 +525,7 @@ class StatusView(BaseView):
         if "submit" in self.request.params:
             try:
                 status = self._get_status()
+                log.debug(u"New status : %s "%status)
                 item, status = self.set_status(item, status)
                 item = self.request.dbsession.merge(item)
                 self.notify(item, status)
@@ -561,23 +567,18 @@ class TaskStatusView(StatusView):
         appstruct['user'] = self.request.user
         return appstruct
 
-    def pre_phasechange_process(self, task, status, params):
+    def pre_edit_metadata_process(self, task, status, params):
         """
             pre process method for phase changing
         """
-        form = get_phasechange_form(self.request)
+        form = get_edit_metadata_form(self.request)
         appstruct = form.validate(params.items())
         log.debug(u" * Form has been validated")
-        phase_id = appstruct.get('phase')
-        phase = Phase.get(phase_id)
-        appstruct['phase'] = phase
         return appstruct
 
-    def post_phasechange_process(self, task, status, params):
-        log.debug(u"CHANGING THE PHASE OF THE CURRENT TASK")
+    def post_edit_metadata_process(self, task, status, params):
         task = self.request.dbsession.merge(task)
-        log.debug(u"Moved document to another phase")
-        msg = u"Le document a bien été déplacé"
+        msg = u"Le document a bien été édité"
         self.request.session.flash(msg)
 
 

@@ -111,7 +111,7 @@
 </div>
 </%block>
 <%block name='content'>
-${request.layout_manager.render_panel('invoicetable', records, is_admin_view=True)}
+${request.layout_manager.render_panel('invoicetable', records, is_admin_view=False)}
 ${pager(records)}
 </%block>
 <%block name='footerjs'>

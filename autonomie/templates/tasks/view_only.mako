@@ -129,10 +129,20 @@
                 Paiement reçu :
                 <ul>
                 % for payment in task.payments:
-                    <li>${api.format_amount(payment.amount)|n} € le ${api.format_date(payment.date)} (${api.format_paymentmode(payment.mode)}) </li>
+                    <% url = request.route_path('payment', id=payment.id) %>
+                    <li>
+                        <a href="${url}">
+                            ${api.format_amount(payment.amount)|n}&nbsp;€
+                            le ${api.format_date(payment.date)}
+                            (${api.format_paymentmode(payment.mode)})
+                        </a>
+                    </li>
                 % endfor
                 </ul>
             % endif
+        % endif
+        % if hasattr(task, 'topay') and not task.is_resulted():
+            Il reste ${api.format_amount(task.topay())|n}&nbsp;€ à régler.
         % endif
     </div>
             % if task.is_estimation():

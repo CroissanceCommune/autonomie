@@ -110,7 +110,6 @@
             <table class='table table-striped table-condensed'>
                 <thead>
                     <th></th>
-                    <th>Document</th>
                     <th class="hidden-phone">Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
@@ -125,7 +124,6 @@
                             % endif
                         </td>
                         <% task.url = request.route_path("estimation", id=task.id) %>
-                        <td class='rowlink' onclick="document.location='${task.url}'">${task.number}</td>
                         <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">${task.name}</td>
                         <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">
                             %if task.is_cancelled():
@@ -167,7 +165,6 @@
                 <thead>
                     <th></th>
                     <th>Numéro</th>
-                    <th>Document</th>
                     <th class="hidden-phone">Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
@@ -184,7 +181,6 @@
                         <% task.url = request.route_path("invoice", id=task.id) %>
                         <td onclick="document.location='${task.url}'" class='rowlink'>
                             ${request.config.get('invoiceprefix')}${task.officialNumber}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>${task.name}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>
                             %if task.is_cancelled():
@@ -203,9 +199,9 @@
                         <td style="text-align:right">
                             ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cette facture", u"icon-pencil")}
                             ${table_btn(request.route_path("invoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
-                            %if task.is_deletable(request):
-                                ${table_btn(request.route_path("invoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer le devis", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
-                            %endif
+                            % if task.is_deletable(request):
+                                ${table_btn(request.route_path("invoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer la facture", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
+                            % endif
                         </td>
                     </tr>
                 %endfor
@@ -223,7 +219,6 @@
                                 (lié à la facture ${request.config.get('invoiceprefix')}${task.invoice.officialNumber})
                             % endif
                         </td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>${task.number}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>${task.name}</td>
                         <td onclick="document.location='${task.url}'" class='rowlink'>
                             %if task.is_valid():
@@ -235,6 +230,9 @@
                         <td style="text-align:right">
                             ${table_btn(task.url, u"Voir/Éditer", u"Voir/éditer cet avoir", u"icon-pencil")}
                             ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
+                            %if task.is_deletable(request):
+                                ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer l'avoir", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
+                            % endif
                         </td>
                     </tr>
                 % endfor

@@ -134,25 +134,23 @@ class Task(Node):
         return False
 
     @validates('CAEStatus')
-    def validate_status(self, key, status):
+    def change_status(self, key, status):
         """
-            validate the caestatus change
+        fired on status change, stores a new taskstatus for each status change
         """
         log.debug(u"# CAEStatus change #")
 
         actual_status = self.CAEStatus
         if actual_status is None and status == self.state_machine.default_state:
             return status
+
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
+        status_record = TaskStatus(
+            statusCode=status,
+            statusPerson=self.statusPerson,
+            )
+        self.statuses.append(status_record)
 
-        allowed_status = self.state_machine.get_next_status(actual_status)
-
-        if status != actual_status and status not in allowed_status:
-            message = u"Vous n'êtes pas autorisé à assigner ce statut {0} à \
-ce document.".format(status)
-            raise Forbidden(message)
-        self.statuses.append(TaskStatus(statusCode=status,
-                                        statusPerson=self.statusPerson))
         return status
 
     def get_next_actions(self):

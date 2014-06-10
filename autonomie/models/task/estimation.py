@@ -327,8 +327,9 @@ class Estimation(Task, EstimationCompute):
         return invoices
 
     def set_name(self):
-        taskname_tmpl = u"Devis {0}"
-        self.name = taskname_tmpl.format(self.sequenceNumber)
+        if self.name in [None, ""]:
+            taskname_tmpl = u"Devis {0}"
+            self.name = taskname_tmpl.format(self.sequenceNumber)
 
     def set_number(self):
         tasknumber_tmpl = u"D{s.sequenceNumber}_{s.taskDate:%m%y}"

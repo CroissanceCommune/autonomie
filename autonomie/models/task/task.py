@@ -82,7 +82,7 @@ class Task(Node):
         "statusDate",
         CustomDateType,
         default=get_current_timestamp,
-        onupdate=get_current_timestamp)
+        )
     taskDate = Column("taskDate", CustomDateType2)
     owner_id = Column("owner_id", ForeignKey('accounts.id'))
     creationDate = deferred(
@@ -143,6 +143,8 @@ class Task(Node):
         actual_status = self.CAEStatus
         if actual_status is None and status == self.state_machine.default_state:
             return status
+
+        self.statusDate = get_current_timestamp()
 
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
         status_record = TaskStatus(

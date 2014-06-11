@@ -308,7 +308,7 @@ class TaskFormActions(object):
         else:
             manage = True
         if context_is_task(self.context) and not self.context.is_editable(manage):
-            title = u"Éditer ce document"
+            title = u"Modifier ce document"
             form = self._edit_metadata_form()
             form.appstruct = self.context.appstruct()
             popup = PopUp("edit_metadata_form_container", title, form.render())

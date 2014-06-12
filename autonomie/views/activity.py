@@ -494,6 +494,10 @@ def activity_pdf_view(context, request):
     return request.response
 
 
+def activity_html_view(context, request):
+    return dict(title=u"Vue html", activity=context)
+
+
 def includeme(config):
     """
     Add view to the pyramid registry
@@ -506,6 +510,11 @@ def includeme(config):
     config.add_route(
             'activity.pdf',
             "/activities/{id:\d+}.pdf",
+            traverse='/activities/{id}',
+            )
+    config.add_route(
+            'activity.html',
+            "/activities/{id:\d+}.html",
             traverse='/activities/{id}',
             )
     config.add_route('activities', "/activities")
@@ -556,6 +565,13 @@ def includeme(config):
             activity_pdf_view,
             route_name='activity.pdf',
             permission='view',
+            )
+
+    config.add_view(
+            activity_html_view,
+            route_name='activity.html',
+            permission='view',
+            renderer="/activity_pdf.mako"
             )
 
     config.add_view(

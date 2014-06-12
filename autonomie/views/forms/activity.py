@@ -182,13 +182,13 @@ class RecordActivitySchema(colander.Schema):
         widget=deform_widget.RadioChoiceWidget(values=STATUSCHOICES),
         title=u"Statut des participants",
         missing=u"closed")
-    point = main.textarea_node(
-        title=u"Point de suivi",
+    objectifs = main.textarea_node(
+        title=u"Objectifs du rendez-vous",
         richwidget=True,
         missing='',
         )
-    objectifs = main.textarea_node(
-        title=u"Définition des objectifs",
+    point = main.textarea_node(
+        title=u"Points abordés",
         richwidget=True,
         missing='',
         )

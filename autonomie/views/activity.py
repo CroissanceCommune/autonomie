@@ -55,8 +55,6 @@ from autonomie.views.forms.activity import (
         STATUS_OPTIONS,
         get_activity_types,
         )
-from autonomie.utils.views import submit_btn
-
 from autonomie.views import render_api
 
 log = logging.getLogger(__name__)
@@ -286,7 +284,6 @@ class ActivityEditView(BaseFormView):
         )
 
     schema = CreateActivitySchema()
-    buttons = (submit_btn,)
 
     @property
     def title(self):
@@ -440,7 +437,7 @@ class ActivityListContractor(ActivityList):
 
     def filter_participant(self, query, appstruct):
         company = self.context
-        participants_ids = [user.id for user in company.employees]
+        participants_ids = [u.id for u in company.employees]
         query = query.outerjoin(PARTICIPANTS, Activity.participants)
         query = query.filter(
             Activity.participants.any(PARTICIPANTS.id.in_(participants_ids))

@@ -24,7 +24,7 @@ Main deferreds functions used in autonomie
 """
 import colander
 import calendar
-from datetime import date
+import datetime
 from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
 
@@ -92,7 +92,15 @@ def deferred_today(node, kw):
     """
         return a deferred value for "today"
     """
-    return date.today()
+    return datetime.date.today()
+
+
+@colander.deferred
+def deferred_now(node, kw):
+    """
+    Return a deferred datetime value for now
+    """
+    return datetime.datetime.now()
 
 
 @colander.deferred
@@ -106,12 +114,17 @@ def deferred_current_user_id(node, kw):
 def get_date_input(**kw):
     """
     Return a date input displaying a french user friendly format
-    #FIXME : check the current deform we use to see if it's fun to use the
-    browser's date widget
     """
     date_input = custom_widgets.CustomDateInputWidget(**kw)
-    date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
+
+
+def get_datetime_input(**kw):
+    """
+    Return a datetime input displaying a french user friendly format
+    """
+    datetime_input = custom_widgets.CustomDateTimeInputWidget(**kw)
+    return datetime_input
 
 
 def user_node(roles=None, **kw):
@@ -138,6 +151,19 @@ def today_node(**kw):
             colander.Date(),
             widget=get_date_input(),
             **kw)
+
+
+def now_node(**kw):
+    """
+    Return a schema node for time selection, defaulted to "now"
+    """
+    if not "default" in kw:
+        kw['default'] = deferred_now
+    return colander.SchemaNode(
+        colander.DateTime(),
+        widget=get_datetime_input(),
+        **kw)
+
 
 def come_from_node(**kw):
     """
@@ -170,7 +196,7 @@ def textarea_node(**kw):
 
 @colander.deferred
 def default_year(node, kw):
-    return date.today().year
+    return datetime.date.today().year
 
 
 def get_year_select_deferred(query_func):
@@ -203,7 +229,7 @@ def year_select_node(**kw):
 
 @colander.deferred
 def default_month(node, kw):
-    return date.today().month
+    return datetime.date.today().month
 
 
 def get_month_options():

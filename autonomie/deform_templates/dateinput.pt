@@ -13,18 +13,6 @@
                            class field.widget.css_class"
            id="${field.oid}"/>
            <script type="text/javascript">
-             function getDateFromIso(isoDateStr, dateFormat){
-               var strdate = "";
-               if (isoDateStr !== ''){
-                var splitted = isoDateStr.split('-');
-                var year = parseInt(splitted[0], 10);
-                var month = parseInt(splitted[1], 10) - 1;
-                var day = parseInt(splitted[2], 10);
-                var date = new Date(year, month, day);
-                var strdate = $.datepicker.formatDate(dateFormat, date);
-               }
-               return strdate;
-             }
              deform.addCallback(
                 '${field.oid}',
                 function(oid) {

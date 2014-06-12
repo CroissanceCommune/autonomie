@@ -55,3 +55,7 @@ test("Date To Iso", function(){
   equal(pdate.month, edate.month);
   equal(pdate.day, edate.day);
 });
+test("DateTime from Iso", function(){
+  var datetime = "2014-06-12 12:15:12.56";
+  equal(getDateTimeFromIso(datetime, 'dd/mm/yy', 'hh:mm'), '12/06/2014 12:15');
+});

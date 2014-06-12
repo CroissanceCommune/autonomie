@@ -27,6 +27,7 @@
 """
 import cgi
 import logging
+import json
 import colander
 from datetime import date
 
@@ -95,7 +96,7 @@ class CustomDateInputWidget(widget.Widget):
     readonly_template = 'readonly/textinput'
     size = None
     requirements = (('jqueryui', None), )
-    default_options = (('dateFormat', 'yy-mm-dd'),)
+    default_options = (('dateFormat', 'dd/mm/yy'),)
 
     def __init__(self, *args, **kwargs):
         self.options = dict(self.default_options)
@@ -118,6 +119,78 @@ class CustomDateInputWidget(widget.Widget):
         if date in ('', colander.null):
             return colander.null
         return date
+
+
+class CustomDateTimeInputWidget(CustomDateInputWidget):
+    """
+    Renders a datetime picker widget.
+
+    The default rendering is as a native HTML5 datetime  input widget,
+    falling back to jQuery UI date picker with a JQuery Timepicker add-on
+    (http://trentrichardson.com/examples/timepicker/).
+
+    Used for ``colander.DateTime`` schema nodes.
+
+    **Attributes/Arguments**
+
+    options
+        A dictionary of options that's passed to the datetimepicker.
+
+    size
+        The size, in columns, of the text input field.  Defaults to
+        ``None``, meaning that the ``size`` is not included in the
+        widget output (uses browser default size).
+
+    style
+        A string that will be placed literally in a ``style`` attribute on
+        the text input tag.  For example, 'width:150px;'.  Default: ``None``,
+        meaning no style attribute will be added to the input tag.
+
+    template
+        The template name used to render the widget.  Default:
+        ``dateinput``.
+
+    readonly_template
+        The template name used to render the widget in read-only mode.
+        Default: ``readonly/textinput``.
+    """
+    template = 'autonomie:deform_templates/datetimeinput.pt'
+    readonly_template = 'readonly/textinput'
+    type_name = 'datetime'
+    size = None
+    style = None
+    requirements = ( ('modernizr', None), ('jqueryui', None),
+                     ('datetimepicker', None), )
+    default_options = (('dateFormat', 'dd/mm/yy'),
+                       ('timeFormat', 'hh:mm:ss'),
+                       ('separator', ' '))
+
+    def serialize(self, field, cstruct, readonly=False):
+        if cstruct in (colander.null, None):
+            cstruct = ''
+        if cstruct:
+            parsed = colander.iso8601.ISO8601_REGEX.match(cstruct)
+            if parsed: # strip timezone if it's there
+                timezone = parsed.groupdict()['timezone']
+                if timezone and cstruct.endswith(timezone):
+                    cstruct = cstruct[:-len(timezone)]
+        options = self.options
+        options['altFormat'] = 'yy-mm-dd'
+        separator = options.get('separator', ' ')
+        options = json.dumps(options)
+        cstruct = separator.join(cstruct.split('T'))
+        template = readonly and self.readonly_template or self.template
+        return field.renderer(
+            template,
+            field=field,
+            cstruct=cstruct,
+            options=options)
+
+    def deserialize(self, field, pstruct):
+        datetime_data = pstruct.get('datetime', colander.null)
+        if datetime_data in ('', colander.null):
+            return colander.null
+        return datetime_data.replace(self.options['separator'], 'T')
 
 
 class CustomSequenceWidget(widget.SequenceWidget):

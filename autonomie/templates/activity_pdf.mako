@@ -58,18 +58,16 @@
             % endfor
         </div>
         <% options = (\
-                (u"Point de suivi", "point"),\
-                (u"Définition des objectifs", "objectifs"), \
-                (u"Plan d'action et préconisations", "action" ),\
-                (u"Documents produits", "documents" ),\
-                )
+            (u"Objectifs du rendez-vous", "objectifs"), \
+            (u"Points abordés", "point"),\
+            (u"Plan d'action et préconisations", "action" ),\
+            (u"Documents produits", "documents" ),\
+            )
         %>
         % for label, attr in options:
             <h3>${label}</h3>
             <hr />
-            <blockquote>
-                ${format_text(getattr(activity, attr))}
-            </blockquote>
+            ${api.clean_html(getattr(activity, attr))|n}
         % endfor
         <br />
         <br />

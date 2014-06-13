@@ -370,7 +370,7 @@ class UserEdit(BaseUserForm):
         """
             form title
         """
-        return u"Édition de {0}".format(
+        return u"Modification de {0}".format(
                                         format_account(self.request.context))
 
     def before(self, form):
@@ -435,7 +435,7 @@ def get_edit_btn(user_id):
     """
         Return a link for user edition
     """
-    return ViewLink(u"Éditer", "edit", path="user", id=user_id,
+    return ViewLink(u"Modifier", "edit", path="user", id=user_id,
                                         _query=dict(action="edit"))
 
 

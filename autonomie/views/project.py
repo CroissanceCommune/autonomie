@@ -359,7 +359,7 @@ class ProjectEdit(BaseFormView):
 
     @reify
     def title(self):
-        return u"Édition du projet : {0}".format(self.request.context.name)
+        return u"Modification du projet : {0}".format(self.request.context.name)
 
     @reify
     def project(self):
@@ -389,7 +389,7 @@ def get_view_btn(id_):
     return ViewLink(u"Voir", path="project", id=id_)
 
 def get_edit_btn(id_):
-    return ViewLink(u"Éditer",  path="project", id=id_,
+    return ViewLink(u"Modifier",  path="project", id=id_,
                                     _query=dict(action="edit"))
 
 def get_detail_btn():

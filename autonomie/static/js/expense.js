@@ -804,7 +804,7 @@ AutonomieApp.Controller = {
     this.initialize();
     var model = this._getExpenseLine(id);
     var expense_form = new ExpenseFormView({
-      title:"Éditer",
+      title:"Modifier",
       destCollection: AutonomieApp.expense.lines,
       model:model
       });
@@ -862,7 +862,7 @@ AutonomieApp.Controller = {
     this.initialize();
     var model = this._getExpenseKmLine(id);
     var expensekm_form = new ExpenseKmFormView({
-      title:"Éditer",
+      title:"Modifier",
       model:model
     });
     AutonomieApp.formContainer.show(expensekm_form);

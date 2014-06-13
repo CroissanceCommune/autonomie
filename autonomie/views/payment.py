@@ -43,7 +43,7 @@ class PaymentEdit(BaseFormView):
     """
     Edit payment view
     """
-    title = u"Édition d'un paiement"
+    title = u"Modification d'un paiement"
     schema = PaymentSchema()
 
     def before(self, form):
@@ -89,7 +89,7 @@ def populate_actionmenu(request):
     request.actionmenu.add(link)
     if has_permission('manage', request.context, request):
         link = ViewLink(
-                u"Éditer",
+                u"Modifier",
                 "manage",
                 path="payment",
                 id=request.context.id,

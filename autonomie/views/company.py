@@ -158,7 +158,7 @@ class CompanyEdit(BaseFormView):
         """
             title property
         """
-        return u"Édition de {0}".format(self.request.context.name.title())
+        return u"Modification de {0}".format(self.request.context.name.title())
 
     def before(self, form):
         """
@@ -211,7 +211,7 @@ def get_edit_btn(company_id):
     """
         Return a link to the edition form
     """
-    return ViewLink(u"Éditer", "edit", path="company", id=company_id,
+    return ViewLink(u"Modifier", "edit", path="company", id=company_id,
                                             _query=dict(action="edit"))
 
 

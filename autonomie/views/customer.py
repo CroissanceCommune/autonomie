@@ -150,7 +150,7 @@ class CustomerEdit(BaseFormView):
 
     @reify
     def title(self):
-        return u"Éditer le client '{0}'".format(self.request.context.name)
+        return u"Modifier le client '{0}'".format(self.request.context.name)
 
     def before(self, form):
         """
@@ -196,7 +196,7 @@ def get_view_btn(customer_id):
     return ViewLink(u"Voir", "view", path="customer", id=customer_id)
 
 def get_edit_btn(customer_id):
-    return ViewLink(u"Éditer", "edit", path="customer", id=customer_id,
+    return ViewLink(u"Modifier", "edit", path="customer", id=customer_id,
                                         _query=dict(action="edit"))
 
 

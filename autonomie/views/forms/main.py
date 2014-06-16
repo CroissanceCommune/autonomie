@@ -70,7 +70,10 @@ def get_deferred_user_choice(roles=None, widget_options=None):
         choices = get_users_options(roles)
         if default_option:
             choices.insert(0, default_option)
-        return ChosenSingleWidget(values=choices, **widget_options)
+        return ChosenSingleWidget(
+            values=choices,
+            **widget_options
+            )
     return user_select
 
 
@@ -147,9 +150,10 @@ def today_node(**kw):
     """
     if not "default" in kw:
         kw['default'] = deferred_today
+    widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
             colander.Date(),
-            widget=get_date_input(),
+            widget=get_date_input(**widget_options),
             **kw)
 
 

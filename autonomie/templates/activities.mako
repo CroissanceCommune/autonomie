@@ -33,78 +33,14 @@
         </a>
     %endif
     </li>
-    <li>
-    </li>
 </ul>
 <div class='row-fluid'>
-    <div class='span7'>
-        <form class='form-search form-horizontal' id='search_form' method='GET'>
-            <div style="padding-bottom:3px">
-                % if api.has_permission('manage'):
-                <select id='conseiller-select' name='conseiller_id' data-placeholder="Rechercher un conseiller">
-                    <option value='-1'></option>
-                    %for conseiller in conseiller_options:
-                            <option
-                                %if conseiller.id == conseiller_id:
-                                    selected='1'
-                                %endif
-                                value='${conseiller.id}'>
-                                    ${api.format_account(conseiller)}
-                            </option>
-                    %endfor
-                </select>
-                % endif
-                <select name='status' id='status-select' class='span2'>
-                    %for label, value in status_options:
-                        <option
-                            %if value == status:
-                                selected='1'
-                            %endif
-                            value='${value}'>
-                                ${label}
-                            </option>
-                    %endfor
-                </select>
-                <select name='type_id' id='type-select' class='span2' data-placeholder="Nature des Rdv">
-                    <option value=-1></option>
-                    %for activity_type in type_options:
-                        <option
-                            %if type_id == activity_type.id:
-                                selected='1'
-                            %endif
-                            value='${activity_type.id}'>
-                                ${activity_type.label}
-                            </option>
-                    %endfor
-                </select>
-                % if api.has_permission('manage'):
-                <select id='participant-select' name='participant_id' data-placeholder="Rechercher un participant" class='span3'>
-                    <option value='-1'></option>
-                    %for participant in participants_options:
-                            <option
-                            %if participant.id == participant_id:
-                                    selected='1'
-                                %endif
-                                value='${participant.id}'>
-                                    ${api.format_account(participant)}
-                            </option>
-                    %endfor
-                </select>
-                % endif
-                <select class='span2' name='items_per_page' id='items-select'>
-                    % for label, value in items_per_page_options:
-                        % if int(value) == int(items_per_page):
-                            <option value="${value}" selected='true'>${label}</option>
-                        %else:
-                            <option value="${value}">${label}</option>
-                        %endif
-                    % endfor
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-        </form>
+<div class='span8'>
+    <div class='row'>
+        ${form|n}
     </div>
-    <div class='span4'>
+</div>
+        <div class='span4'>
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>
@@ -125,6 +61,7 @@
         </table>
     </div>
 </div>
+
 </%block>
 <%block name="content">
 <table class="table table-condensed table-hover">
@@ -196,15 +133,4 @@ else:
     </tbody>
 </table>
 ${pager(records)}
-</%block>
-<%block name='footerjs'>
-$('#conseiller-select').chosen({allow_single_deselect: true});
-$('#conseiller-select').change(function(){$(this).closest('form').submit()});
-$('#participant-select').chosen({allow_single_deselect: true});
-$('#participant-select').change(function(){$(this).closest('form').submit()});
-$('#status-select').chosen({allow_single_deselect: true});
-$('#status-select').change(function(){$(this).closest('form').submit()});
-$('#type-select').chosen({allow_single_deselect: true});
-$('#type-select').change(function(){$(this).closest('form').submit()});
-$('#items-select').chosen({allow_single_deselect: true});
 </%block>

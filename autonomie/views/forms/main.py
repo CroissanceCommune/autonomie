@@ -29,6 +29,7 @@ from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
 
 from autonomie.models import user
+from autonomie.models import company
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie.views import render_api
 
@@ -144,6 +145,37 @@ def user_node(roles=None, **kw):
             )
 
 
+def get_deferred_company_choices(widget_options):
+    default_entry = widget_options.pop('default', None)
+    @colander.deferred
+    def deferred_company_choices(node, kw):
+        """
+        return a deferred company selection widget
+        """
+        values = [(comp.id, comp.name) for comp in company.Company.query()]
+        if default_entry is not None:
+            values.insert(0, default_entry)
+        return ChosenSingleWidget(
+            values=values,
+            placeholder=u"Sélectionner une entreprise",
+            **widget_options
+            )
+    return deferred_company_choices
+
+
+def company_node(**kw):
+    """
+    Return a schema node for company selection
+
+    """
+    widget_options = kw.pop('widget_options', {})
+    return colander.SchemaNode(
+        colander.Integer(),
+        widget=get_deferred_company_choices(widget_options),
+        **kw
+        )
+
+
 def today_node(**kw):
     """
     Return a schema node for date selection, defaulted to today
@@ -227,7 +259,8 @@ def year_select_node(**kw):
         widget=get_year_select_deferred(query_func),
         default=default_year,
         missing=default_year,
-        title=title
+        title=title,
+        **kw
         )
 
 

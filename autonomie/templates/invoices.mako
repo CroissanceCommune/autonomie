@@ -22,79 +22,24 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 
+<%doc>
+    Invoice List for a given company
+</%doc>
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/pager.mako" import="pager"/>
-<%namespace file="/base/utils.mako" import="searchform"/>
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
+    % if is_admin:
         ${pdf_export_btn.render(request)|n}
+    % endif
     </li>
     <li>
     </li>
 </ul>
 <div class='row-fluid'>
     <div class='span7'>
-        <form class='form-search form-horizontal' id='search_form' method='GET'>
-            <div style="padding-bottom:3px">
-                <select id='company-select' name='company_id' data-placeholder="Sélectionner une entreprise">
-                    <option value=''></option>
-                    % for company in companies:
-                        % if company.id == company_id:
-                            <option selected='1' value='${company.id}'>${company.name}</option>
-                        % else:
-                            <option value='${company.id}'>${company.name}</option>
-                        % endif
-                    % endfor
-                </select>
-                <select id='customer-select' name='customer_id' data-placeholder="Sélectionner un client">
-                    <option value=''></option>
-                    %for company in companies:
-                        <optgroup label="${company.name}">
-                            %for customer in company.customers:
-                                %if customer.id == customer_id:
-                                    <option selected='1' value='${customer.id}'>${customer.name} (${customer.code})</option>
-                                %else:
-                                    <option value='${customer.id}'>${customer.name} (${customer.code})</option>
-                                %endif
-                            %endfor
-                        </optgroup>
-                    % endfor
-                </select>
-                <select name='year' id='year-select' class='span2' data-placeholder="Sélectionner une année">
-                    %for year_option in years:
-                        %if unicode(year_option) == unicode(year):
-                            <option selected="1" value='${year_option}'>${year_option}</option>
-                        %else:
-                            <option value='${year_option}'>${year_option}</option>
-                        %endif
-                    %endfor
-                </select>
-                <select name='status' id='paid-select'>
-                    %for label, value in status_options:
-                        %if value == status:
-                            <option selected="1" value='${value}'>${label}</option>
-                        %else:
-                            <option value='${value}'>${label}</option>
-                        %endif
-                    %endfor
-                </select>
-                <select class='span1' name='items_per_page'>
-                    % for label, value in items_per_page_options:
-                        % if int(value) == int(items_per_page):
-                            <option value="${value}" selected='true'>${label}</option>
-                        %else:
-                            <option value="${value}">${label}</option>
-                        %endif
-                    % endfor
-                </select>
-            </div>
-            <div class='pull-left' style="padding-right:3px">
-                <input type='text' name='search' class='input-medium search-query' value="${search}" />
-                <span class="help-block">Identifiant du document</span>
-            </div>
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-        </form>
+        ${form|n}
     </div>
     <div class='span4'>
         <table class='table table-bordered'>
@@ -119,16 +64,16 @@
 </div>
 </%block>
 <%block name='content'>
-${request.layout_manager.render_panel('invoicetable', records, is_admin_view=True)}
+${request.layout_manager.render_panel('invoicetable', records, is_admin_view=is_admin)}
 ${pager(records)}
 </%block>
 <%block name='footerjs'>
-$('#company-select').chosen({allow_single_deselect: true});
-$('#company-select').change(function(){$(this).closest('form').submit()});
-$('#customer-select').chosen({allow_single_deselect: true});
-$('#customer-select').change(function(){$(this).closest('form').submit()});
-$('#year-select').chosen({allow_single_deselect: true});
-$('#year-select').change(function(){$(this).closest('form').submit()});
-$('#paid-select').chosen({allow_single_deselect: true});
-$('#paid-select').change(function(){$(this).closest('form').submit()});
+## #deformField2_chzn (company_id) and #deformField3_chzn (customer_id) are the
+## tag names
+% if is_admin:
+    $('#deformField2_chzn').change(function(){$(this).closest('form').submit()});
+% endif
+$('#deformField3_chzn').change(function(){$(this).closest('form').submit()});
+$('select[name=year]').change(function(){$(this).closest('form').submit()});
+$('select[name=status]').change(function(){$(this).closest('form').submit()});
 </%block>

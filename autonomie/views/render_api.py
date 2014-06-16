@@ -178,6 +178,8 @@ def format_short_date(date):
     """
     if isinstance(date, datetime.date):
         resp = date.strftime("%e/%m/%Y")
+    elif isinstance(date, datetime.datetime):
+        resp = date.strftime("%d/%m/%Y %H:%M")
     elif not date:
         resp = u""
     else:

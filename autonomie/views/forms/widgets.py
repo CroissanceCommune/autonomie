@@ -269,6 +269,14 @@ class CustomSequenceWidget(widget.SequenceWidget):
                               add_subitem_text=add_subitem_text)
 
 
+class CustomChosenOptGroupWidget(widget.SelectWidget):
+    """
+    Customize the chosenselectwidget to be able to provide a default value for
+    unselection
+    """
+    template = 'autonomie:deform_templates/chosen_optgroup.pt'
+
+
 def get_fileupload_widget(store_url, store_path, session, \
         default_filename=None, filters=None):
     """

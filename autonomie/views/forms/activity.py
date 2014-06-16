@@ -40,11 +40,11 @@ from autonomie.views.forms import (
 
 
 STATUS_OPTIONS = (
-    (u"Tous les rendez-vous", "all"),
-    (u"Planifiés", "planned"),
-    (u"Participants absents", "absent"),
-    (u"Participants excusés", "excused"),
-    (u"Participants présents", "closed"),
+    ("all", u"Tous les rendez-vous", ),
+    ("planned", u"Planifiés", ),
+    ("absent", u"Participants absents", ),
+    ("excused", u"Participants excusés", ),
+    ("closed", u"Participants présents", ),
     )
 
 STATUSCHOICES = (
@@ -77,10 +77,14 @@ def get_subaction_options():
     return options
 
 
-@colander.deferred
-def deferred_select_type(node, kw):
-    options = [(unicode(a.id), a.label) for a in get_activity_types()]
-    return deform_widget.SelectWidget(values=options)
+def get_deferred_select_type(default=False):
+    @colander.deferred
+    def deferred_select_type(node, kw):
+        values = [(unicode(a.id), a.label) for a in get_activity_types()]
+        if default:
+            values.insert(0, (-1, 'Tous'))
+        return deform_widget.SelectWidget(values=values)
+    return deferred_select_type
 
 
 @colander.deferred
@@ -121,7 +125,7 @@ class ParticipantsSequence(colander.SequenceSchema):
     """
     Schema for the list of participants
     """
-    participant_id = main.user_node(title=u"")
+    participant_id = main.user_node(title=u"", )
 
 
 class CreateActivitySchema(colander.MappingSchema):
@@ -130,13 +134,13 @@ class CreateActivitySchema(colander.MappingSchema):
     """
     come_from = main.come_from_node()
     conseiller_id = main.user_node(
-            title=u"Conseiller menant le rendez-vous",
-            roles=['manager', 'admin'],
-            )
+        title=u"Conseiller menant le rendez-vous",
+        roles=['manager', 'admin'],
+        )
     date = main.today_node(title=u"Date de rendez-vous")
     type_id = colander.SchemaNode(
             colander.Integer(),
-            widget=deferred_select_type,
+            widget=get_deferred_select_type(),
             title=u"Nature du rendez-vous",
             )
     action_id = colander.SchemaNode(
@@ -209,22 +213,39 @@ class RecordActivitySchema(colander.Schema):
         )
 
 
-class ActivityListSchema(lists.BaseListsSchema):
-    """
-    Schema for activity listing
-    """
-    conseiller_id = main.user_node(
+def get_list_schema():
+    schema = lists.BaseListsSchema().clone()
+    schema.insert(0, colander.SchemaNode(
+        colander.Integer(),
+        name='type_id',
+        widget=get_deferred_select_type(True),
+        validator=deferred_type_validator,
+        missing=-1))
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name='status',
+        widget=deform_widget.SelectWidget(values=STATUS_OPTIONS),
+        validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+        default='all',
+        missing='all'))
+
+    schema.insert(0, main.user_node(
+        missing=-1,
+        name='participant_id',
+        widget_options={
+            'default_option': (-1, ''),
+            'placeholder': u"Sélectionner un participant"},
+        ))
+
+    schema.insert(0, main.user_node(
             roles=['manager', 'admin'],
             missing=-1,
             default=main.deferred_current_user_id,
-            )
-    participant_id = main.user_node(missing=-1)
-    status = colander.SchemaNode(
-            colander.String(),
-            validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
-            default='all',
-            missing='all')
-    type_id = colander.SchemaNode(
-            colander.Integer(),
-            validator=deferred_type_validator,
-            missing=-1)
+            name='conseiller_id',
+            widget_options={
+                'default_option': (-1, ''),
+                'placeholder': u"Sélectionner un conseiller"},
+            ))
+
+    del schema['search']
+    return schema

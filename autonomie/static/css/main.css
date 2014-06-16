@@ -245,3 +245,12 @@ table.opa tfoot td{
 .inline-element{
   display:inline-block;
 }
+.chzn-container {
+  vertical-align: middle;
+  margin-top: 5px;
+  margin-right: 3px;
+}
+#search_form .chzn-container{
+  float: left;
+  display: inline-block;
+}

@@ -12,6 +12,7 @@
            tal:attributes="size field.widget.size;
                            class field.widget.css_class"
            id="${field.oid}"/>
+
            <script type="text/javascript">
              deform.addCallback(
                 '${field.oid}',
@@ -21,6 +22,11 @@
                     var date = getDateFromIso("${cstruct}", js_options['dateFormat']);
                     $('#' + oid).val(date);
                     $('#' + oid).datepicker(js_options);
+                    $('#' + oid).change(function(){
+                      if (!$(this).val()) {
+                      $("#" + oid + "_altField").val('');
+                      }
+                    });
                 }
              );
     </script>

@@ -39,7 +39,7 @@ from autonomie.utils.pdf import (
         render_html,
         write_pdf,
         )
-from autonomie.views.base import BaseListView
+from autonomie.views import BaseListView
 from autonomie.views.files import FileUploadView
 from autonomie.models.activity import Activity
 from autonomie.models import user
@@ -51,7 +51,7 @@ from autonomie.views.forms.activity import (
         CreateActivitySchema,
         NewActivitySchema,
         RecordActivitySchema,
-        ActivityListSchema,
+        get_list_schema,
         STATUS_OPTIONS,
         get_activity_types,
         )
@@ -369,25 +369,13 @@ class ActivityRecordView(BaseFormView):
 
 class ActivityList(BaseListView):
     title = u"Rendez-vous"
-    schema = ActivityListSchema()
+    schema = get_list_schema()
     sort_columns = dict(
             date=Activity.date,
             conseiller=CONSEILLER.lastname,
             )
     default_sort = 'date'
     default_direction = 'desc'
-
-    def default_form_values(self, values):
-        """
-        Provide default form values for the manually rendered form
-        """
-        values = super(ActivityList, self).default_form_values(values)
-        values['status_options'] = STATUS_OPTIONS
-        values['conseiller_options'] = user.get_user_by_roles(
-                ['admin',  'manager'])
-        values['participants_options'] = user.User.query()
-        values['type_options'] = get_activity_types()
-        return values
 
     def query(self):
         query = Activity.query()

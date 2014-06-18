@@ -177,11 +177,7 @@ class Product(colander.MappingSchema):
     """
         Form schema for a single product configuration
     """
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=widget.HiddenWidget(),
-        default=None,
-        missing=None)
+    id = main.id_node()
     name = colander.SchemaNode(colander.String(), title=u"Libellé")
     compte_cg = colander.SchemaNode(colander.String(), title=u"Compte CG")
 
@@ -193,11 +189,7 @@ class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
     """
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=widget.HiddenWidget(),
-        default=0,
-        missing=0)
+    id = main.id_node()
     name = colander.SchemaNode(
         colander.String(),
         title=u"Libellé du taux de TVA",
@@ -270,11 +262,7 @@ class ExpenseConfig(colander.MappingSchema):
     """
         Schema for the configuration of different expense types
     """
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=widget.HiddenWidget(),
-        default=None,
-        missing=None)
+    id = main.id_node()
 
     label = colander.SchemaNode(
         colander.String(),
@@ -379,12 +367,8 @@ class ActivityTypeConfig(colander.MappingSchema):
     """
         Schema for the configuration of different activity types
     """
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=widget.HiddenWidget(),
-        default=None,
-        missing=None
-        )
+    id = main.id_node()
+
     label = colander.SchemaNode(
         colander.String(),
         title=u"Nature de renz-vous",
@@ -415,12 +399,8 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
 
 
 class ActivitySubActionConfig(colander.MappingSchema):
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=widget.HiddenWidget(),
-        default=None,
-        missing=None
-        )
+    id = main.id_node()
+
     label = colander.SchemaNode(
         colander.String(),
         title=u"Intitulé",
@@ -433,12 +413,7 @@ class ActivitySubActionSeq(colander.SequenceSchema):
 
 
 class ActivityActionConfig(colander.Schema):
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=widget.HiddenWidget(),
-        default=None,
-        missing=None
-        )
+    id = main.id_node()
     label = colander.SchemaNode(
         colander.String(),
         title=u"Intitulé de l'action",

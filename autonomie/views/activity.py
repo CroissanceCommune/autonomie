@@ -52,7 +52,6 @@ from autonomie.views.forms.activity import (
         NewActivitySchema,
         RecordActivitySchema,
         get_list_schema,
-        STATUS_OPTIONS,
         get_activity_types,
         )
 from autonomie.views import render_api
@@ -346,12 +345,6 @@ class ActivityEditView(BaseFormView):
         message = u"Les informations ont bien été mises à jour"
         return record_changes(self.request, appstruct, message)
 
-    def submit_failure(self, e):
-        """
-        Called when we failed to submit the values
-        We add a token to know if we should display the form or not
-        """
-        return dict(form=e.render(), formerror=True)
 
 class ActivityRecordView(BaseFormView):
     add_template_vars = ()

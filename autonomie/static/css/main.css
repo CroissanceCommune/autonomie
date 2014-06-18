@@ -47,7 +47,7 @@ header .navbar .nav > li > a{
   background-image:url('theme/images/ui-icons_f6cf3b_256x240.png');
 }
 .btn{
-  font-size:11px;
+  font-size:1em;
 }
 .deform label{
   font-size:1em;

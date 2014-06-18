@@ -196,7 +196,7 @@ def now_node(**kw):
     if not "default" in kw:
         kw['default'] = deferred_now
     return colander.SchemaNode(
-        colander.DateTime(),
+        colander.DateTime(default_tzinfo=None),
         widget=get_datetime_input(),
         **kw)
 
@@ -310,4 +310,15 @@ def mail_node(**kw):
         validator=colander.Email(MAIL_ERROR_MESSAGE),
         **kw)
 
+def id_node():
+    """
+    Return a node for id recording (usefull in edition forms for retrieving
+    original objects)
+    """
+    return colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None
+        )
 

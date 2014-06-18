@@ -39,6 +39,7 @@ import treasury
 import tva
 import user
 import task
+import workshop
 __author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"
 __copyright__ = "Copyright 2012-2013, Croissance Commune"
 __license__ = "GPL"

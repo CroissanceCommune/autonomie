@@ -52,7 +52,7 @@
     </thead>
     <tbody>
         % for workshop in records:
-            <% url = request.route_path('workshop', id=workshop.id) %>
+            <% url = request.route_path('workshop', id=workshop.id, _query=dict(action='edit')) %>
             % if api.has_permission('view', workshop):
                 <% onclick = "document.location='{url}'".format(url=url) %>
             % else :
@@ -81,7 +81,9 @@
                             <li>
                                 <% pdf_url = request.route_path("timeslot.pdf", id=timeslot.id) %>
                                 <a href="${pdf_url}" title="Télécharger la sortie PDF pour impression" icon='icon-file'>
-                                    Du ${api.format_date(timeslot.start_time)} au ${api.format_date(timeslot.end_time)}
+                                    Du ${api.format_datetime(timeslot.start_time)} au \
+${api.format_datetime(timeslot.end_time)} \
+(${timeslot.duration[0]}h${timeslot.duration[1]})
                                 </a>
                             </li>
                         % endfor

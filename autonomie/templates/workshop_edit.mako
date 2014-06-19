@@ -68,6 +68,11 @@
                         % endif
                             ' id='tab_${timeslot.id}'>
                             <h4>Émargement de la tranche horaire ${timeslot.name}</h4>
+                            <b>Horaires : </b>  de ${api.format_datetime(timeslot.start_time, timeonly=True)} \
+à ${api.format_datetime(timeslot.end_time, timeonly=True)} \
+(${timeslot.duration[0]}h${timeslot.duration[1]})
+<a class='btn pull-right' href='${request.route_path("timeslot.pdf", id=timeslot.id)}' ><i class='icon-file'></i>PDF</a>
+
                             % for attendance in timeslot.attendances:
                                 <input type="hidden" name="__start__" value="attendance:mapping" />
                                 <% participant = attendance.user %>

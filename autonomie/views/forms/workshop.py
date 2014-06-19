@@ -63,7 +63,7 @@ def range_validator(form, values):
         raise exc
 
 
-class TimeSlotSchema(colander.MappingSchema):
+class TimeslotSchema(colander.MappingSchema):
     id = main.id_node()
     name = colander.SchemaNode(
         colander.String(),
@@ -76,8 +76,8 @@ correspondante (ex: Matinée 1)",
     end_time = main.now_node(title=u"Fin de la tranche horaire")
 
 
-class TimeSlotsSequence(colander.SequenceSchema):
-    timeslot = TimeSlotSchema(
+class TimeslotsSequence(colander.SequenceSchema):
+    timeslot = TimeslotSchema(
         title=u"Tranche horaire",
         validator=range_validator,
         )
@@ -105,7 +105,7 @@ class Workshop(colander.MappingSchema):
         title=u"Participants",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
-    timeslots = TimeSlotsSequence(
+    timeslots = TimeslotsSequence(
         title=u"Tranches horaires",
         description=u"Les différentes tranches horaires de l'atelier \
 donnant lieu à un émargement",
@@ -157,7 +157,7 @@ class AttendanceEntry(colander.MappingSchema):
         )
 
 
-class TimeSlotAttendanceEntries(colander.SequenceSchema):
+class TimeslotAttendanceEntries(colander.SequenceSchema):
     """
     """
     attendance = AttendanceEntry()
@@ -167,4 +167,4 @@ class Attendances(colander.MappingSchema):
     """
     Attendance registration schema
     """
-    attendances = TimeSlotAttendanceEntries()
+    attendances = TimeslotAttendanceEntries()

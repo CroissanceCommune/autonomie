@@ -91,7 +91,7 @@ class Workshop(Event):
         )
 
 
-class TimeSlot(Event):
+class Timeslot(Event):
     """
     A given time slot for a workshop
     """
@@ -105,15 +105,23 @@ class TimeSlot(Event):
 
     workshop = relationship(
         'Workshop',
-        primaryjoin="TimeSlot.workshop_id==Workshop.id",
+        primaryjoin="Timeslot.workshop_id==Workshop.id",
         backref=backref(
             'timeslots',
-            order_by='TimeSlot.start_time',
+            order_by='Timeslot.start_time',
             cascade='all, delete-orphan'
             ),
         )
 
     participants = association_proxy('attendances', 'user')
+
+    @property
+    def duration(self):
+        time_delta = self.end_time - self.start_time
+        hours, rest = divmod(time_delta.seconds, 3600)
+        minutes, seconds = divmod(rest, 60)
+        hours = 24 * time_delta.days + hours
+        return hours, minutes
 
 
 class Attendance(DBBASE):
@@ -127,7 +135,7 @@ class Attendance(DBBASE):
     status = Column(String(15), default="registered")
 
     timeslot = relationship(
-        'TimeSlot',
+        'Timeslot',
         backref=backref(
             'attendances',
             cascade='all, delete-orphan',

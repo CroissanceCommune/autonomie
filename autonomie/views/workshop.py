@@ -38,6 +38,10 @@ from js.jquery_timepicker_addon import timepicker_fr
 from autonomie.models import workshop
 from autonomie.models import user
 
+from autonomie.utils.pdf import (
+        render_html,
+        write_pdf,
+        )
 from autonomie.views.forms import (
     BaseFormView,
     merge_session_with_post,
@@ -77,7 +81,7 @@ class WorkshopAddView(BaseFormView):
         come_from = appstruct.pop('come_from')
 
         timeslots_datas = appstruct.pop('timeslots')
-        appstruct['timeslots'] = [workshop.TimeSlot(**data) \
+        appstruct['timeslots'] = [workshop.Timeslot(**data) \
             for data in timeslots_datas]
 
         participants_ids = set(appstruct.pop('participants', []))
@@ -106,15 +110,11 @@ class WorkshopAddView(BaseFormView):
         return HTTPFound(redirect)
 
 
-def get_attendance_form(timeslot, participants):
-    """
-    Return a form for editing the given timeslot's participants
-    """
-    pass
-
 class WorkshopEditView(BaseFormView):
     """
     Workshop edition view
+
+    Provide edition functionnality and display a form for attendance recording
     """
     schema = WorkshopSchema()
     add_template_vars = ('title', 'available_status', )
@@ -124,18 +124,6 @@ class WorkshopEditView(BaseFormView):
         workshop_title = self.context.name
         leaders = u", ".join(self.context.leaders)
         return u"Atelier {0} animé par {1}".format(workshop_title, leaders)
-
-    @property
-    def attendance_forms(self):
-        forms = []
-        participants = self.context.participants
-        for timeslot in self.context.timeslots:
-
-            form_label = timeslot.name
-            form = get_attendance_form(timeslot.id, participants)
-            forms.append((form_label, form.render()))
-
-        return forms
 
     @property
     def available_status(self):
@@ -181,7 +169,7 @@ qui n'appartient pas au contexte courant !!!!")
         for data in datas:
             if data['id'] is None:
                 # New timeslots
-                objects.append(workshop.TimeSlot(**data))
+                objects.append(workshop.Timeslot(**data))
             else:
                 # existing timeslots
                 obj = self._retrieve_workshop_timeslot(data['id'])
@@ -261,8 +249,10 @@ def record_attendances_view(context, request):
     return HTTPFound(url)
 
 
-
 class WorkshopList(BaseListView):
+    """
+    View for listing workshops
+    """
     title = u"Ateliers"
     schema = get_list_schema()
     sort_columns = dict(date=workshop.Workshop.date)
@@ -299,6 +289,31 @@ class WorkshopList(BaseListView):
         if date is not None:
             query = query.filter(workshop.Workshop.date == date)
         return query
+
+
+def timeslot_pdf_view(timeslot, request):
+    """
+    Return a pdf attendance sheet for the given workshop
+
+        timeslot
+
+            A timeslot object returned as a current context by traversal
+    """
+    date = timeslot.start_time.strftime("%e_%M_%Y")
+    filename = u"atelier_{0}_{1}.pdf".format(date, timeslot.id)
+
+    template = u"autonomie:templates/workshop_pdf.mako"
+    rendering_datas = dict(
+        timeslot=timeslot,
+        workshop=timeslot.workshop,
+        config=request.config,
+        participants=timeslot.participants,
+        )
+    html_str = render_html(request, template, rendering_datas)
+
+    write_pdf(request, filename, html_str)
+
+    return request.response
 
 
 def includeme(config):
@@ -352,4 +367,8 @@ def includeme(config):
         route_name='workshop',
         permission='manage',
         request_param='action=record',
+        )
+    config.add_view(
+        timeslot_pdf_view,
+        route_name='timeslot.pdf',
         )

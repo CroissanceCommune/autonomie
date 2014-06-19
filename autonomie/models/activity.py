@@ -64,7 +64,19 @@ ACTIVITY_PARTICIPANT = Table(
     mysql_engine=default_table_args['mysql_engine'])
 
 
-ACTIVITY_STATUS = (u"planned", u"closed", u"excused", "absent")
+STATUS_SEARCH = (
+    ("all", u"Tous les rendez-vous", ),
+    ("planned", u"Planifiés", ),
+    ("absent", u"Participants absents", ),
+    ("excused", u"Participants excusés", ),
+    ("closed", u"Participants présents", ),
+    )
+
+STATUS = (
+    ("closed", u"Participant(s) présents"),
+    ("excused", u"Participant(s) excusés"),
+    ("absent", u"Participant(s) absents"),
+    )
 
 
 class Event(Node):

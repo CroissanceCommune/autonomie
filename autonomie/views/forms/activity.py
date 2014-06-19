@@ -32,26 +32,13 @@ from autonomie.models.activity import (
         ActivityType,
         ActivityMode,
         ActivityAction,
+        STATUS,
+        STATUS_SEARCH,
         )
 from autonomie.views.forms import (
         main,
         lists,
         )
-
-
-STATUS_OPTIONS = (
-    ("all", u"Tous les rendez-vous", ),
-    ("planned", u"Planifiés", ),
-    ("absent", u"Participants absents", ),
-    ("excused", u"Participants excusés", ),
-    ("closed", u"Participants présents", ),
-    )
-
-STATUSCHOICES = (
-    ("closed", u"Participant(s) présents"),
-    ("excused", u"Participant(s) excusés"),
-    ("absent", u"Participant(s) absents"),
-    )
 
 
 def get_activity_types():
@@ -182,8 +169,8 @@ class RecordActivitySchema(colander.Schema):
     """
     status = colander.SchemaNode(
         colander.String(),
-        validator=colander.OneOf([x[0] for x in STATUSCHOICES]),
-        widget=deform_widget.RadioChoiceWidget(values=STATUSCHOICES),
+        validator=colander.OneOf([x[0] for x in STATUS]),
+        widget=deform_widget.RadioChoiceWidget(values=STATUS),
         title=u"Statut des participants",
         missing=u"closed")
     point = main.textarea_node(
@@ -224,8 +211,8 @@ def get_list_schema():
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name='status',
-        widget=deform_widget.SelectWidget(values=STATUS_OPTIONS),
-        validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+        widget=deform_widget.SelectWidget(values=STATUS_SEARCH),
+        validator=colander.OneOf([s[0] for s in STATUS_SEARCH]),
         default='all',
         missing='all'))
 

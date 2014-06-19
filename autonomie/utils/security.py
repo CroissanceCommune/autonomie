@@ -42,11 +42,14 @@ from autonomie.models.task.invoice import (
     CancelInvoice,
     Payment,
 )
-from autonomie.models.workshop import Workshop
+from autonomie.models.workshop import (
+    Workshop,
+    Timeslot,
+)
 from autonomie.models.treasury import (
-        ExpenseSheet,
-        BaseExpenseLine,
-        )
+    ExpenseSheet,
+    BaseExpenseLine,
+)
 from autonomie.models.user import User
 
 log = logging.getLogger(__name__)
@@ -99,7 +102,9 @@ class RootFactory(dict):
             ('projects', 'project', Project, ),
             ('users', 'user', User, ),
             ('payments', 'payment', Payment, ),
-            ('workshops', 'workshop', Workshop, ), ):
+            ('workshops', 'workshop', Workshop, ),
+            ('timeslots', 'timeslot', Timeslot, ),
+            ):
 
             self[traversal_name] = TraversalDbAccess(
                 self,
@@ -273,3 +278,4 @@ def set_models_acls():
     File.__acl__ = property(get_file_acl)
     Payment.__acl__ = property(get_base_acl)
     Workshop.__acl__ = property(get_activity_acl)
+    Timeslot.__acl__ = property(get_base_acl)

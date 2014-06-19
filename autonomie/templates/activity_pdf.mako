@@ -36,20 +36,20 @@
 
         <img src="/assets/main/accompagnement_header.png" />
 
-        <div><b>Date : </b> le ${api.format_date(activity.date)}</div>
-        <div><b>Durée : </b> </div>
+        <div class='text12'><b>Date : </b> le ${api.format_date(activity.date)}</div>
+        <div class='text12'><b>Durée : </b> </div>
 
 
         <center>
-            <h1>${activity.action_label}</h1>
-            <h3>${activity.subaction_label}</h3>
+            <div class='text12 upper'><b>${activity.action_label}</b></div>
+            <div class='text9'>${activity.subaction_label}</div>
             <br />
-            <div>${activity.type_object.label}</div>
+            <div class='text14'><b>${activity.type_object.label}</b></div>
 
         </center>
-        <div>Conseiller : ${api.format_account(activity.conseiller)}</div>
+        <div class='text12'>Conseiller : ${api.format_account(activity.conseiller)}</div>
         <% companies = set() %>
-        <div>Participants :
+        <div class='text12'>Participants :
             % for user in activity.participants:
                 ${api.format_account(user)} ( ${"'".join([c.name for c in user.companies])} )
                 % if not loop.last:
@@ -65,7 +65,8 @@
             )
         %>
         % for label, attr in options:
-            <h3>${label}</h3>
+            <br />
+            <div class='text12' ><b>${label}</b></div>
             <hr />
             ${api.clean_html(getattr(activity, attr))|n}
         % endfor

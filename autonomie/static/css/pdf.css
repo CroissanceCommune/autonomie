@@ -83,3 +83,15 @@ html{
 #cgv h1, #cgv h2, #cgv h3, #cgv h4, #cgv h5{
   margin: 2px;
 }
+.text12{
+font-size: 12px;
+}
+.text9{
+font-size: 9px;
+}
+.text14{
+font-size: 14px;
+}
+.upper{
+text-transform: uppercase;
+}

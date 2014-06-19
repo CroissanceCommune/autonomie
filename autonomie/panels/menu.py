@@ -226,6 +226,10 @@ def get_admin_menus(request):
 
     href = request.route_path('activities')
     accompagnement.add_item(u"Rendez-vous", href=href)
+
+    href = request.route_path('workshops')
+    accompagnement.add_item(u"Ateliers", href=href)
+
     menu.add(accompagnement)
 
     href = request.route_path("holidays")

@@ -41,18 +41,21 @@ from autonomie.utils.pdf import (
         )
 from autonomie.views import BaseListView
 from autonomie.views.files import FileUploadView
-from autonomie.models.activity import Activity
+from autonomie.models.activity import (
+    Activity,
+    Attendance,
+    )
 from autonomie.models import user
 from autonomie.views.forms import (
-        BaseFormView,
-        merge_session_with_post,
-        )
+    BaseFormView,
+    merge_session_with_post,
+    )
 from autonomie.views.forms.activity import (
-        CreateActivitySchema,
-        NewActivitySchema,
-        RecordActivitySchema,
-        get_list_schema,
-        )
+    CreateActivitySchema,
+    NewActivitySchema,
+    RecordActivitySchema,
+    get_list_schema,
+    )
 from autonomie.views import render_api
 
 log = logging.getLogger(__name__)
@@ -61,8 +64,6 @@ log = logging.getLogger(__name__)
 # Sqlalchemy aliases used to outerjoin two times on the same table (but through
 # two different relationships
 CONSEILLER = aliased(user.User)
-PARTICIPANTS = aliased(user.User)
-
 
 ACTIVITY_SUCCESS_MSG = u"Le rendez-vous a bien été programmé \
 <a href='{0}'>Voir</a>"
@@ -72,21 +73,15 @@ NEW_ACTIVITY_BUTTON = deform.Button(
     type='submit',
     title=u"Programmer")
 
-
 ACTIVITY_RECORD_BUTTON = deform.Button(
-    name="submit",
+    name="closed",
     type="submit",
     title=u"Enregistrer et Terminer le rendez-vous")
 
-ACTIVITY_USER_EXCUSED = deform.Button(
-    name="excused",
+ACTIVITY_CANCEL_BUTTON = deform.Button(
+    name="cancelled",
     type="submit",
-    title=u"Participant excusé")
-
-ACTIVITY_USER_ABSENT = deform.Button(
-    name="absent",
-    type="submit",
-    title=u"Participant excusé")
+    title=u"Enregistrer et Annuler le rendez-vous")
 
 
 def new_activity(request, appstruct):
@@ -168,6 +163,13 @@ def _get_appstruct_from_activity(activity):
     appstruct = activity.appstruct()
     participants = activity.participants
     appstruct['participants'] = [p.id for p in participants]
+    appstruct['attendances'] = [
+        {
+        'event_id': att.event_id,
+        'account_id': att.account_id,
+        'username': render_api.format_account(att.user),
+        'status': att.status,
+        } for att in activity.attendances]
     return appstruct
 
 
@@ -312,7 +314,7 @@ class ActivityEditView(BaseFormView):
             )
         form = deform.Form(
             schema=RecordActivitySchema().bind(request=self.request),
-            buttons=(ACTIVITY_RECORD_BUTTON,),
+            buttons=(ACTIVITY_RECORD_BUTTON, ACTIVITY_CANCEL_BUTTON,),
             counter=self.counter,
             formid="record_form",
             action=submit_url,
@@ -332,6 +334,8 @@ class ActivityEditView(BaseFormView):
         appstruct = self.get_appstruct()
         form.set_appstruct(appstruct)
 
+        form.schema
+
     def submit_success(self, appstruct):
         """
         called when the edition form is submitted
@@ -349,13 +353,37 @@ class ActivityRecordView(BaseFormView):
     add_template_vars = ()
 
     schema = RecordActivitySchema()
-    buttons = (ACTIVITY_RECORD_BUTTON,)
+    buttons = (ACTIVITY_RECORD_BUTTON, ACTIVITY_CANCEL_BUTTON, )
 
-    def submit_success(self, appstruct):
+    def record_attendance(self, appstruct):
+        """
+        Record the attendances status in both cancelled and closed activity
+        """
+        for datas in appstruct.pop('attendances', []):
+            account_id = datas['account_id']
+            event_id = datas['event_id']
+
+            obj = Attendance.get((account_id, event_id))
+            if obj is not None:
+                obj.status = datas['status']
+                self.dbsession.merge(obj)
+
+    def closed_success(self, appstruct):
         """
         Called when the record submit button is clicked
         """
         message = u"Les informations ont bien été enregistrées"
+        self.record_attendance(appstruct)
+        self.context.status = 'closed'
+        return record_changes(self.request, appstruct, message, gotolist=True)
+
+    def cancelled_success(self, appstruct):
+        """
+        Called when the cancelled button is clicked
+        """
+        message = u"Le rendez-vous a bien été annulé"
+        self.record_attendance(appstruct)
+        self.context.status = 'cancelled'
         return record_changes(self.request, appstruct, message, gotolist=True)
 
 
@@ -364,14 +392,14 @@ class ActivityList(BaseListView):
     schema = get_list_schema()
     sort_columns = dict(
             date=Activity.date,
-            conseiller=CONSEILLER.lastname,
+            conseiller=user.User.lastname,
             )
     default_sort = 'date'
     default_direction = 'desc'
 
     def query(self):
         query = Activity.query()
-        query = query.outerjoin(CONSEILLER, Activity.conseiller)
+        query = query.join(Activity.conseiller)
         return query
 
     def _get_conseiller_id(self, appstruct):
@@ -389,13 +417,20 @@ class ActivityList(BaseListView):
             query = query.filter(Activity.conseiller_id==conseiller_id)
         return query
 
-    def filter_participant(self, query, appstruct):
+    def filter_participant_and_or_user_status(self, query, appstruct):
         participant_id = appstruct['participant_id']
-        if participant_id != -1:
-            query = query.outerjoin(PARTICIPANTS, Activity.participants)
-            query = query.filter(
-                    Activity.participants.any(PARTICIPANTS.id==participant_id)
+        status = appstruct['user_status']
+
+        if participant_id != -1 or status != 'all':
+            query = query.join(Activity.attendances)
+            if participant_id != -1:
+                query = query.filter(
+                    Activity.attendances.any(Attendance.account_id==participant_id)
                     )
+            if status != 'all':
+                query = query.filter(
+                    Activity.attendances.any(Attendance.status==status)
+                )
         return query
 
     def filter_type(self, query, appstruct):
@@ -406,8 +441,10 @@ class ActivityList(BaseListView):
 
     def filter_status(self, query, appstruct):
         status = appstruct['status']
+
         if status != 'all':
-            query = query.filter(Activity.status==status)
+            query = query.filter(Activity.status == status)
+
         return query
 
 
@@ -418,9 +455,9 @@ class ActivityListContractor(ActivityList):
     def filter_participant(self, query, appstruct):
         company = self.context
         participants_ids = [u.id for u in company.employees]
-        query = query.outerjoin(PARTICIPANTS, Activity.participants)
+        query = query.join(Activity.attendances)
         query = query.filter(
-            Activity.participants.any(PARTICIPANTS.id.in_(participants_ids))
+            Activity.attendances.any(Attendance.account_id==participant_id)
             )
         return query
 
@@ -459,8 +496,8 @@ def activity_pdf_view(context, request):
     """
     Return a pdf output of the current activity
     """
-    date = context.date.strftime("%e_%M_%Y")
-    filename = u"rdv_{0}.pdf".format(date)
+    date = context.date.strftime("%e_%m_%Y")
+    filename = u"rdv_{0}_{1}.pdf".format(date, context.id)
 
     template = u"autonomie:templates/activity_pdf.mako"
     datas = dict(activity=context)

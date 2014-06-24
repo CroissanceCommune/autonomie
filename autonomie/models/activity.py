@@ -44,6 +44,7 @@ from sqlalchemy.orm import (
     backref,
     )
 
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from autonomie.models.base import (
     DBBASE,
@@ -55,28 +56,62 @@ from autonomie.models.node import Node
 log = logging.getLogger(__name__)
 
 
-ACTIVITY_PARTICIPANT = Table(
-    "activity_participant",
-    DBBASE.metadata,
-    Column("activity_id", ForeignKey('activity.id')),
-    Column("account_id", ForeignKey('accounts.id')),
-    mysql_charset=default_table_args['mysql_charset'],
-    mysql_engine=default_table_args['mysql_engine'])
+# Statut des participants à un évènement
+ATTENDANCE_STATUS = (
+    ('registered', u'Attendu', ),
+    ('attended', u'Présent', ),
+    ('absent', u'Absent', ),
+    ('excused', u'Excusé', ),
+    )
 
+ATTENDANCE_STATUS_SEARCH = (
+    ('all', u'Tous les rendez-vous',),
+    ('absent', u'Un des participants étaient absent',),
+    ('excused', u'Un des participants était excusé',),
+    ('attended', u'Les participants étaient présents',),
+    )
+
+# Statut d'une activité
+STATUS = (
+    ('planned', u'Planifié', ),
+    ('closed', u'Terminé', ),
+    ('cancelled', u'Annulé', ),
+    )
 
 STATUS_SEARCH = (
     ("all", u"Tous les rendez-vous", ),
     ("planned", u"Planifiés", ),
-    ("absent", u"Participants absents", ),
-    ("excused", u"Participants excusés", ),
-    ("closed", u"Participants présents", ),
+    ("closed", u"Terminés", ),
+    ("cancelled", u"Annulés", ),
     )
 
-STATUS = (
-    ("closed", u"Participant(s) présents"),
-    ("excused", u"Participant(s) excusés"),
-    ("absent", u"Participant(s) absents"),
+
+class Attendance(DBBASE):
+    """
+    Relationship table used to store the attendance of a user for a given
+    event
+    """
+    __tablename__ = 'attendance'
+    account_id = Column(ForeignKey('accounts.id'), primary_key=True)
+    event_id = Column(ForeignKey('event.id'), primary_key=True)
+    status = Column(String(15), default="registered")
+
+    event = relationship(
+        'Event',
+        backref=backref(
+            'attendances',
+            cascade='all, delete-orphan',
+        )
     )
+    user = relationship(
+        "User",
+        backref=backref('event_attendances', cascade='all, delete-orphan')
+    )
+
+    # Used as default creator function by the association_proxy
+    def __init__(self, user=None):
+        if user is not None:
+            self.user = user
 
 
 class Event(Node):
@@ -89,6 +124,24 @@ class Event(Node):
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     date = Column(Date, default=datetime.date.today)
     status = Column(String(15), default='planned')
+
+    participants = association_proxy('attendances', 'user')
+
+    def user_status(self, user_id):
+        """
+        Return a user's status for this given timeslot
+
+            user_id
+
+                Id of the user we're asking the attendance status for
+        """
+        res = ""
+        for attendance in self.attendances:
+            if attendance.account_id == user_id:
+                res = attendance.status
+                break
+
+        return dict(STATUS).get(res, 'Statut inconnu')
 
 
 class Activity(Event):
@@ -123,11 +176,6 @@ class Activity(Event):
             "User",
             primaryjoin="User.id==Activity.conseiller_id",
             backref=backref("managed_activities", order_by="Activity.date")
-            )
-    participants = relationship(
-            "User",
-            secondary=ACTIVITY_PARTICIPANT,
-            backref="activities",
             )
     action_label_obj = relationship(
             "ActivityAction",

@@ -34,10 +34,14 @@ from autonomie.models.activity import (
         ActivityAction,
         STATUS,
         STATUS_SEARCH,
+        ATTENDANCE_STATUS,
+        ATTENDANCE_STATUS_SEARCH,
         )
+
 from autonomie.views.forms import (
         main,
         lists,
+        widgets as custom_widget,
         )
 
 
@@ -163,36 +167,66 @@ class NewActivitySchema(CreateActivitySchema):
             )
 
 
+class Attendance(colander.MappingSchema):
+    account_id = main.id_node()
+    event_id = main.id_node()
+
+    username = colander.SchemaNode(
+        colander.String(),
+        title=u'',
+        widget=custom_widget.DisabledInput(),
+        missing='',
+        )
+
+    status = colander.SchemaNode(
+        colander.String(),
+        widget=deform_widget.RadioChoiceWidget(values=ATTENDANCE_STATUS),
+        validator=colander.OneOf([x[0] for x in ATTENDANCE_STATUS]),
+        title=u'',
+        missing=u'excused',
+        )
+
+
+class Attendances(colander.SequenceSchema):
+    attendance = Attendance(
+        title=u'',
+        widget=custom_widget.InlineMappingWidget()
+        )
+
+
 class RecordActivitySchema(colander.Schema):
     """
     Schema for activity recording
     """
-    status = colander.SchemaNode(
-        colander.String(),
-        validator=colander.OneOf([x[0] for x in STATUS]),
-        widget=deform_widget.RadioChoiceWidget(values=STATUS),
-        title=u"Statut des participants",
-        missing=u"closed")
+    attendances = Attendances(
+        title=u'Présence',
+        widget=deform_widget.SequenceWidget(
+            template='autonomie:deform_templates/fixed_len_sequence.pt',
+            item_template='autonomie:deform_templates/fixed_len_sequence_item.pt'))
     point = main.textarea_node(
         title=u"Point de suivi",
         richwidget=True,
         missing='',
         )
+
     objectifs = main.textarea_node(
         title=u"Définition des objectifs",
         richwidget=True,
         missing='',
         )
+
     action = main.textarea_node(
         title=u"Plan d'action et préconisations",
         richwidget=True,
         missing='',
         )
+
     documents = main.textarea_node(
         title=u"Documents produits",
         richwidget=True,
         missing='',
         )
+
     notes = main.textarea_node(
         title=u"Notes",
         richwidget=True,
@@ -202,12 +236,14 @@ class RecordActivitySchema(colander.Schema):
 
 def get_list_schema():
     schema = lists.BaseListsSchema().clone()
+
     schema.insert(0, colander.SchemaNode(
         colander.Integer(),
         name='type_id',
         widget=get_deferred_select_type(True),
         validator=deferred_type_validator,
         missing=-1))
+
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name='status',
@@ -215,6 +251,15 @@ def get_list_schema():
         validator=colander.OneOf([s[0] for s in STATUS_SEARCH]),
         default='all',
         missing='all'))
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name='user_status',
+        widget=deform_widget.SelectWidget(values=ATTENDANCE_STATUS_SEARCH),
+        validator=colander.OneOf([s[0] for s in ATTENDANCE_STATUS_SEARCH]),
+        default='all',
+        missing='all'))
+
 
     schema.insert(0, main.user_node(
         missing=-1,

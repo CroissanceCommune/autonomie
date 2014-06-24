@@ -48,15 +48,11 @@
             </tr>
             <tr>
                 <td class='green_tr'><br /></td>
-                <td>Participants présents</td>
+                <td>Rendez-vous terminés</td>
             </tr>
             <tr>
                 <td class='orange_tr'><br /></td>
-                <td>Participants excusés</td>
-            </tr>
-            <tr>
-                <td class='red_tr'><br /></td>
-                <td>Participants absents</td>
+                <td>Rendez-vous annulés</td>
             </tr>
         </table>
     </div>
@@ -86,11 +82,9 @@
             <%
 if activity.status == 'planned':
     css = "white_"
-elif activity.status == 'excused':
+elif activity.status == 'cancelled':
     css = "orange_"
-elif activity.status == "absent":
-    css = "red_"
-else:
+elif activity.status == 'closed':
     css = "green_"
 %>
             <tr class='${css}tr'>

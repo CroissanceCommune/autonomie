@@ -115,7 +115,7 @@ class TestActivityRecordView(BaseTest):
                 }
 
         view = ActivityRecordView(req)
-        view.submit_success(appstruct)
+        view.closed_success(appstruct)
         a = self.getOne()
         self.assertEqual(a.point, appstruct['point'])
         self.assertEqual(a.objectifs, appstruct['objectifs'])
@@ -178,9 +178,9 @@ class TestActivityFuncViews(BaseTest):
         context = self.addOne()
         request = self.get_csrf_request()
         result = activity_pdf_view(context, request)
-        datestr = date.today().strftime("%e_%M_%Y")
+        datestr = date.today().strftime("%e_%m_%Y")
         assert ('Content-Disposition',
-                'attachment; filename="rdv_%s.pdf"' % datestr) in \
-                        result.headerlist
+                'attachment; filename="rdv_%s_%s.pdf"' % \
+                    (datestr, context.id)) in  result.headerlist
 
 

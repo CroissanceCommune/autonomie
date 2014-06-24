@@ -29,7 +29,11 @@ import cgi
 import logging
 import json
 import colander
+import warnings
 from datetime import date
+from itertools import izip_longest
+
+import deform
 
 from beaker.cache import cache_region
 from sqlalchemy import distinct
@@ -48,12 +52,14 @@ from autonomie.models.task import Invoice
 
 log = logging.getLogger(__name__)
 
+TEMPLATES_PATH = "autonomie:deform_templates/"
+
 
 class DisabledInput(widget.Widget):
     """
         A non editable input
     """
-    template = "autonomie:deform_templates/disabledinput.mako"
+    template = TEMPLATES_PATH + "disabledinput.mako"
 
     def serialize(self, field, cstruct=None, readonly=True):
         if cstruct is colander.null:
@@ -92,7 +98,7 @@ class CustomDateInputWidget(widget.Widget):
         The template name used to render the widget in read-only mode.
         Default: ``readonly/textinput``.
     """
-    template = 'autonomie:deform_templates/dateinput.pt'
+    template = TEMPLATES_PATH + 'dateinput.pt'
     readonly_template = 'readonly/textinput'
     size = None
     requirements = (('jqueryui', None), )
@@ -154,7 +160,7 @@ class CustomDateTimeInputWidget(CustomDateInputWidget):
         The template name used to render the widget in read-only mode.
         Default: ``readonly/textinput``.
     """
-    template = 'autonomie:deform_templates/datetimeinput.pt'
+    template = TEMPLATES_PATH + 'datetimeinput.pt'
     readonly_template = 'readonly/textinput'
     type_name = 'datetime'
     size = None
@@ -274,7 +280,7 @@ class CustomChosenOptGroupWidget(widget.SelectWidget):
     Customize the chosenselectwidget to be able to provide a default value for
     unselection
     """
-    template = 'autonomie:deform_templates/chosen_optgroup.pt'
+    template = TEMPLATES_PATH + 'chosen_optgroup.pt'
 
 
 def get_fileupload_widget(store_url, store_path, session, \
@@ -290,7 +296,7 @@ def get_fileupload_widget(store_url, store_path, session, \
             filters=filters,
             )
     return widget.FileUploadWidget(tmpstore,
-                template="autonomie:deform_templates/fileupload.mako")
+                template=TEMPLATES_PATH + "fileupload.mako")
 
 @colander.deferred
 def deferred_edit_widget(node, kw):
@@ -367,3 +373,192 @@ def deferred_today(node, kw):
         return a deferred value for "today"
     """
     return date.today()
+
+
+def grouper(iterable, items, fillvalue=None):
+    """
+    Collect data into fixed-length chunks or blocks
+
+    e.g:
+
+        grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+
+    Got it from https://docs.python.org/2/library/itertools.html#recipes
+    """
+    args = [iter(iterable)] * items
+    return izip_longest(fillvalue=fillvalue, *args)
+
+
+class Inline(colander.Mapping):
+    """
+    Inline schema type, necessary to avoid our mapping to be render as tabs
+    (see deform_bootstrap.utils.tabify function )
+    """
+    pass
+
+
+class InlineMappingWidget(deform.widget.MappingWidget):
+    """
+    The custom widget we use to render our mapping
+    """
+    template = TEMPLATES_PATH + "inline_mapping"
+    item_template = TEMPLATES_PATH + "inline_mapping_item"
+    readonly_template = TEMPLATES_PATH + "inline_mapping"
+    readonly_item_template = TEMPLATES_PATH + "inline_mapping_item"
+
+
+class InlineMappingSchema(colander.MappingSchema):
+    """
+    Schema providing inline rendering of form elements
+    """
+    schema_type = Inline
+    widget = InlineMappingWidget()
+
+
+class VoidWidget(object):
+    """
+    Void widget used to fill our grid
+    """
+    def __init__(self, width=1):
+        self.width = width
+
+    def render_template(self, template):
+        """
+        Return a div of class span<width>
+        """
+        return u"<div class='span{0}'><br /></div>".format(self.width)
+
+
+class TableMappingWidget(deform.widget.MappingWidget):
+    """
+    A custom widget rendering a mapping as a table
+
+    :param cols: number of columns we want
+    """
+    default_cols = 3
+    template = TEMPLATES_PATH + "grid_mapping"
+    item_template = TEMPLATES_PATH + "grid_mapping_item"
+    readonly_template = TEMPLATES_PATH + "grid_mapping"
+    readonly_item_template = TEMPLATES_PATH + "grid_mapping_item"
+
+    def childgroup(self, field):
+        """
+        Return children grouped regarding the grid description
+        """
+        cols = getattr(self, "cols", self.default_cols)
+        return list(grouper(field.children, cols, fillvalue=None))
+
+
+class GridMappingWidget(TableMappingWidget):
+    """
+    A custom mapping widget rendering it as a grid
+
+    :param grid: A matrix describing the grid we want. The matrix should be
+    composed of two dimensionnal vectors (width, filled) where filled is a
+    boolean.
+    e.g:
+
+   class CompanyMainInformations(colander.MappingSchema):
+       title = colander.SchemaNode(
+           colander.String(),
+           title=u'Nom entreprise',
+       )
+       address = colander.SchemaNode(
+           colander.String(),
+           title=u'Adresse',
+           width="5",
+       )
+       lon_coord = colander.SchemaNode(
+           colander.Float(),
+           title=u"Longitude",
+       )
+       lat_coord = colander.SchemaNode(
+           colander.Float(),
+           title=u"Latitude",
+       )
+
+    LAYOUT = (
+           ((3, True), ),
+           ((6, True), (2, False), (2, True), (2, True)),
+           )
+
+    class CompanySchema(colander.Schema):
+        tab = CompanyMainInformations(widget=GridMappingWidget(grid=LAYOUT))
+
+    Here we've got a two lines grid with 1 element on the first line and 3 on
+    the second one. The second element of the second line will be a void cell
+    of 2 units width
+    """
+
+    # The default bootstrap layout contains 12 columns
+    num_cols = 12
+
+    def childgroup(self, field):
+        """
+        Return a list of fields stored by row regarding the configured grid
+
+        :param field: The original field this widget is attached to
+        """
+        grid = getattr(self, "grid")
+
+        if grid is None:
+            raise AttributeError(u"Missing the grid argument")
+
+        result = []
+        index = 0
+        for row in grid:
+            child_row = []
+            width_sum = 0
+            for width, filled in row:
+                width_sum += width
+                if width_sum > self.num_cols:
+                    warnings.warn(u"It seems your grid configuration overlaps \
+the bootstrap layout columns number. One of your lines is larger than {0}. \
+You can increase this column number by compiling bootstrap css with \
+lessc.".format(self.num_cols))
+
+                if filled:
+                    try:
+                        child = field.children[index]
+                    except IndexError:
+                        raise AttributeError(u"The grid items number doesn't \
+match the number of children of our mapping widget")
+                    index += 1
+                    child.width = width
+                else:
+                    child = VoidWidget(width)
+                child_row.append(child)
+            result.append(child_row)
+        return result
+
+
+class GridFormWidget(GridMappingWidget):
+    """
+    Render a form as a grid
+
+    .. code-block:: python
+
+        class CompanyMainInformations(colander.MappingSchema):
+            title = colander.SchemaNode(
+                colander.String(),
+                title=u'Nom entreprise',
+            )
+            address = colander.SchemaNode(
+                colander.String(),
+                title=u'Adresse',
+                width="5",
+            )
+
+        LAYOUT = (((2, True), (2, False), (2, True),),)
+
+        schema = CompanyMainInformations()
+        form = Form(schema)
+        form.widget = GridFormWidget(grid=LAYOUT)
+
+    .. warning::
+
+        Here you need to set the widget after you initialize the form object
+
+    """
+    template = TEMPLATES_PATH + "grid_form"
+    readonly_template = TEMPLATES_PATH + "grid_form"

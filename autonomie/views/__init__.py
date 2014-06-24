@@ -28,6 +28,7 @@
 import inspect
 import logging
 import colander
+import itertools
 from deform import Form
 
 from functools import partial
@@ -178,7 +179,8 @@ class BaseListView(BaseView):
         return result
 
     def get_form(self, schema, appstruct):
-        form = Form(schema)
+        # counter is used to avoid field name conflicts
+        form = Form(schema, counter=itertools.count(15000))
         form.widget.template = "autonomie:deform_templates/searchform.pt"
         return form.render(appstruct)
 

@@ -39,19 +39,18 @@ from pyramid.security import has_permission
 from autonomie.models.customer import Customer
 from autonomie.utils.widgets import (
         ViewLink,
-        SearchForm,
         PopUp,
         )
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.customer import (
         CUSTOMERSCHEMA,
-        CustomerSearchSchema,
+        get_list_schema,
         )
 from autonomie.views.forms import (
         BaseFormView,
         merge_session_with_post,
         )
-from .base import (
+from autonomie.views import (
         BaseListView,
         BaseCsvView,
         )
@@ -70,7 +69,7 @@ def get_customer_form(request):
 
 class CustomersList(BaseListView):
     title = u"Liste des clients"
-    schema = CustomerSearchSchema()
+    schema = get_list_schema()
     sort_columns = {'name':Customer.name,
                     "code":Customer.code,
                     "contactLastName":Customer.contactLastName}
@@ -94,9 +93,6 @@ class CustomersList(BaseListView):
             popup = PopUp("addform", u'Ajouter un client', form.render())
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
-        searchform = SearchForm(u"Entreprise ou contact principal")
-        searchform.set_defaults(appstruct)
-        self.request.actionmenu.add(searchform)
 
 
 class CustomersCsv(BaseCsvView):

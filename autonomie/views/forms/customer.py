@@ -187,6 +187,8 @@ de compta",
 
 CUSTOMERSCHEMA = CustomerSchema(after_bind=remove_admin_fields)
 
+def get_list_schema():
+    schema = BaseListsSchema().clone()
+    schema['search'].description = u"Entreprise ou contact principal"
 
-class CustomerSearchSchema(BaseListsSchema):
-    pass
+    return schema

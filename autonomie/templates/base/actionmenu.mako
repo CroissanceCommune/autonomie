@@ -33,7 +33,11 @@ Render an action menu
         % else:
             <li>
         % endif
-        ${item.render(request)|n}
+        % if hasattr(item, 'render'):
+            ${item.render(request)|n}
+        % else:
+            ${item|n}
+        % endif
         </li>
     % endfor
     </ul>

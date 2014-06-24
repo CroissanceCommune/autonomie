@@ -164,7 +164,16 @@ class PhaseSchema(colander.MappingSchema):
 phaseSchema = PhaseSchema()
 
 
-class ProjectsListSchema(BaseListsSchema):
-    archived = colander.SchemaNode(colander.String(),
-                                    missing="0",
-                                    validator=colander.OneOf(('0', '1')))
+def get_list_schema():
+    schema = BaseListsSchema().clone()
+
+    schema['search'].description = u"Projet ou nom du client"
+
+    schema.add(colander.SchemaNode(
+        colander.String(),
+        name='archived',
+        missing="0",
+        validator=colander.OneOf(('0', '1')),
+        widget=widget.HiddenWidget()))
+
+    return schema

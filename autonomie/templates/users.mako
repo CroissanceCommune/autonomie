@@ -28,6 +28,11 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
+<%block name='actionmenu'>
+## We place the search form in the actionmenu since there are a few fields
+    <% request.actionmenu.add(form) %>
+    ${request.actionmenu.render(request)|n}
+</%block>
 <%block name='content'>
 <table class="table table-striped table-condensed">
     <thead>

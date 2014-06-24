@@ -13,7 +13,7 @@ WebOb==1.2.3
 alembic==0.4.1
 bleach==1.2.2
 colander==1.0a2
-deform-bootstrap==0.2.9
+deform-bootstrap==0.2.8
 deform==0.9.9
 docopt==0.5.0
 fanstatic==0.16

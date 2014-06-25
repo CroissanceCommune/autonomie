@@ -20,15 +20,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-import datetime
 
 from sqlalchemy import (
-    Table,
     Integer,
     Column,
     ForeignKey,
     String,
-    Date,
     DateTime,
     )
 from sqlalchemy.orm import (
@@ -36,12 +33,7 @@ from sqlalchemy.orm import (
     backref,
     )
 
-from sqlalchemy.ext.associationproxy import association_proxy
-
-from autonomie.models.base import (
-    DBBASE,
-    default_table_args,
-    )
+from autonomie.models.base import default_table_args
 from autonomie.models.types import JsonEncodedList
 from autonomie.models.activity import Event
 
@@ -49,26 +41,12 @@ from autonomie.models.activity import Event
 log = logging.getLogger(__name__)
 
 
-STATUS = (
-    ('registered', u'Attendu', ),
-    ('attended', u'Présent', ),
-    ('absent', u'Absent', ),
-    ('cancelled', u'Excusé', ),
-    )
-
-WORKSHOP_PARTICIPANT = Table(
-    "workshop_participant",
-    DBBASE.metadata,
-    Column("workshop_id", ForeignKey("workshop.id"), primary_key=True),
-    Column("account_id", ForeignKey('accounts.id'), primary_key=True),
-    mysql_charset=default_table_args['mysql_charset'],
-    mysql_engine=default_table_args['mysql_engine'],
-)
-
-
 class Workshop(Event):
     """
     A workshop model
+
+    It's a meta event grouping a bunch of timeslots with each their own
+    attendance sheet
     """
     __tablename__ = 'workshop'
     __table_args__ = default_table_args
@@ -79,21 +57,19 @@ class Workshop(Event):
     info2 = Column(String(125), default="")
     info3 = Column(String(125), default="")
     leaders = Column(JsonEncodedList)
-    date = Column(Date(), default=datetime.date.today())
 
-    participants = relationship(
-            "User",
-            secondary=WORKSHOP_PARTICIPANT,
-            backref=backref(
-                "workshops",
-                order_by='Workshop.date',
-            )
-        )
+    @property
+    def title(self):
+        """
+        Return a title for this given workshop
+        """
+        return u"Atelier '{0}' animé par {1}".format(
+            self.name, ', '.join(self.leaders))
 
 
 class Timeslot(Event):
     """
-    A given time slot for a workshop
+    A time slot for a given workshop
     """
     __tablename__ = 'timeslot'
     __table_args__ = default_table_args
@@ -113,8 +89,6 @@ class Timeslot(Event):
             ),
         )
 
-    participants = association_proxy('attendances', 'user')
-
     @property
     def duration(self):
         time_delta = self.end_time - self.start_time
@@ -122,30 +96,3 @@ class Timeslot(Event):
         minutes, seconds = divmod(rest, 60)
         hours = 24 * time_delta.days + hours
         return hours, minutes
-
-
-class Attendance(DBBASE):
-    """
-    Relationship table used to store the attendance of the user's for a given
-    timeslot
-    """
-    __tablename__ = 'attendance'
-    account_id = Column(ForeignKey('accounts.id'), primary_key=True)
-    timeslot_id = Column(ForeignKey('timeslot.id'), primary_key=True)
-    status = Column(String(15), default="registered")
-
-    timeslot = relationship(
-        'Timeslot',
-        backref=backref(
-            'attendances',
-            cascade='all, delete-orphan',
-        )
-    )
-    user = relationship(
-        "User",
-        backref=backref('workshop_attendances', cascade='all, delete-orphan')
-    )
-
-    # Used as default creator function by the association_proxy
-    def __init__(self, user):
-        self.user = user

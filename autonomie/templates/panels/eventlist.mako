@@ -28,11 +28,53 @@
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="format_project" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<div class='section-header'>Rendez-vous</div>
-Afficher <select id='number_of_activities'>
+<%def name='timeslot_row(event)'>
+    <% workshop = event.workshop %>
+    <% url = request.route_path('workshop', id=workshop.id) %>
+    <% onclick = "document.location='{url}'".format(url=url) %>
+    <td onclick="${onclick}" class="rowlink visible-desktop" >
+            Atelier
+        </td>
+        <td  onclick="${onclick}" class="rowlink" >
+            ${api.format_datetime(event.start_time)}
+        </td>
+        <td onclick="${onclick}" class="rowlink">
+            ${', '.join(workshop.leaders)}
+        </td>
+        <td class="visible-desktop rowlink" onclick="${onclick}">
+            ${workshop.name} (${event.name})
+        </td>
+        <td class="visible-desktop" style="text-align:right">
+            ${table_btn(url, u"Voir", u"Voir l'atelier", icon='icon-search')}
+        </td>
+</%def>
+<%def name='activity_row(event)'>
+    <% url = request.route_path('activity', id=event.id) %>
+    <% onclick = "document.location='{url}'".format(url=url) %>
+    <td onclick="${onclick}" class="rowlink visible-desktop" >
+            Rendez-vous
+        </td>
+        <td  onclick="${onclick}" class="rowlink" >
+            ${api.format_datetime(event.datetime)}
+        </td>
+        <td onclick="${onclick}" class="rowlink">
+            ${', '.join([api.format_account(conseiller) for conseiller in event.conseillers])}
+        </td>
+        <td class="visible-desktop rowlink" onclick="${onclick}">
+            % if event.type_object is not None:
+                ${event.type_object.label}
+            % endif
+             (${event.mode})
+        </td>
+        <td class="visible-desktop" style="text-align:right">
+            ${table_btn(url, u"Voir", u"Voir l'évènement", icon='icon-search')}
+        </td>
+</%def>
+<div class='section-header'>Vos rendez-vous</div>
+Afficher <select id='number_of_events'>
   % for i in (5, 10, 15, 50):
   <option value='${i}'
-  % if activities.items_per_page == i:
+  % if events.items_per_page == i:
     selected=true
   % endif
   >
@@ -41,45 +83,35 @@ Afficher <select id='number_of_activities'>
   % endfor
 </select>
 éléments à la fois
-<table class='table table-stripped activitylist'>
+<table class='table table-stripped'>
     <thead>
-        <th>
-            Date
+        <th class="visible-desktop">
+            Type
         </th>
         <th>
-            Conseiller
+            Date de début
+        </th>
+        <th>
+            Conseiller / Animateur
         </th>
         <th class="visible-desktop">
-            Nature du rendez-vous
-        </th>
-        <th class="visible-desktop">
-            Mode de rendez-vous
+            Intitulé
         </th>
         <th class="visible-desktop">
         </th>
     </thead>
     <tbody>
-        % for activity in activities:
+        % for event in events:
             <tr>
-                <% url = request.route_path("activity", id=activity.id) %>
-                <% onclick = "document.location='{url}'".format(url=url) %>
-                <td  onclick="${onclick}" class="rowlink" >
-                    ${api.format_date(activity.date)}
-                </td>
-                <td onclick="${onclick}" class="rowlink">
-                    ${api.format_account(activity.conseiller)}
-                </td>
-                <td class="visible-desktop rowlink" onclick="${onclick}">
-                    % if activity.type_object is not None:
-                        ${activity.type_object.label}
-                    % endif
-                </td>
-                <td class="visible-desktop rowlink">${activity.mode}</td>
-                <td class="visible-desktop" style="text-align:right">
-                    ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
-                </td>
+                % if event.type_ == 'activity':
+                    ${activity_row(event)}
+                % elif event.type_ == 'timeslot':
+                    ${timeslot_row(event)}
+                % else:
+                    ${event.type_}
+                % endif
             </tr>
         % endfor
     </tbody>
 </table>
-${pager(activities)}
+${pager(events)}

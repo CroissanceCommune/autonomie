@@ -132,9 +132,9 @@ task_list_js = Resource(
         lib_autonomie,
         "js/task_list.js",
         depends=[tools, jquery, backbone])
-activity_list_js = Resource(
+event_list_js = Resource(
         lib_autonomie,
-        "js/activity_list.js",
+        "js/event_list.js",
         depends=[tools, jquery, backbone])
 message_js = Resource(
         lib_autonomie,

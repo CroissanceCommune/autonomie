@@ -121,9 +121,13 @@ class Attendance(DBBASE):
     )
 
     # Used as default creator function by the association_proxy
-    def __init__(self, user=None):
+    def __init__(self, user=None, account_id=None, status=None):
         if user is not None:
             self.user = user
+        if account_id is not None:
+            self.account_id = account_id
+        if status is not None:
+            self.status = status
 
 
 class Event(Node):
@@ -154,8 +158,24 @@ class Event(Node):
                 res = attendance.status
                 break
 
-
         return dict(ATTENDANCE_STATUS).get(res, 'Statut inconnu')
+
+    def is_participant(self, user_id):
+        """
+        Return True if the user_id is one of a participant
+
+            user_id
+
+                Id of the user we're asking the information for
+        """
+        res = False
+
+        for attendance in self.attendances:
+            if attendance.account_id == user_id:
+                res = True
+                break
+
+        return res
 
 
 class Activity(Event):

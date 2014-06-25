@@ -33,7 +33,6 @@ from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie import resources
 from autonomie.models.company import Company
 from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import ViewLink
@@ -75,18 +74,56 @@ def company_view(request):
     company = request.context
     populate_actionmenu(request, request.context)
     link_list = []
-    link_list.append(ViewLink(u"Voir les clients",
-            "manage", path="company_customers", id=company.id,
+    link_list.append(
+        ViewLink(
+            u"Voir les clients",
+            "manage",
+            path="company_customers",
+            id=company.id,
             icon='icon-arrow-right'
-            ))
-    link_list.append(ViewLink(u"Voir les projets",
-            "manage", path="company_projects", id=company.id,
+        )
+    )
+
+    link_list.append(
+        ViewLink(
+            u"Voir les projets",
+            "manage",
+            path="company_projects",
+            id=company.id,
             icon='icon-arrow-right'
-            ))
-    link_list.append(ViewLink(u"Voir les factures",
-            "manage", path="company_invoices", id=company.id,
+        )
+    )
+
+    link_list.append(
+        ViewLink(
+            u"Voir les factures",
+            "manage",
+            path="company_invoices",
+            id=company.id,
             icon='icon-arrow-right'
-            ))
+        )
+    )
+
+    link_list.append(
+        ViewLink(
+            u"Liste des rendez-vous",
+            "manage",
+            path="company_activities",
+            id=company.id,
+            icon='icon-arrow-right'
+        )
+    )
+
+    link_list.append(
+        ViewLink(
+            u"Liste des ateliers",
+            "manage",
+            path="company_workshops",
+            id=company.id,
+            icon='icon-arrow-right'
+        )
+    )
+
     return dict(title=company.name.title(),
                 company=company,
                 link_list=link_list)

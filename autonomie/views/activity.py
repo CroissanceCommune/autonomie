@@ -476,7 +476,7 @@ class ActivityListContractor(ActivityList):
         company = self.context
         participants_ids = [u.id for u in company.employees]
         query = query.filter(
-            Activity.attendances.any(Attendance.account_id==participant_id)
+            Activity.attendances.any(Attendance.account_id.in_(participants_ids))
             )
         return query
 

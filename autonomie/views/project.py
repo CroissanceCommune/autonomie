@@ -53,7 +53,6 @@ from autonomie.utils.widgets import (
         ItemActionLink,
         StaticWidget,
         PopUp,
-        SearchForm,
         )
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms import (
@@ -62,10 +61,10 @@ from autonomie.views.forms import (
         )
 from autonomie.views.files import get_add_file_link
 from autonomie.views.forms.project import (
-        ProjectsListSchema,
+        get_list_schema,
         ProjectSchema,
         )
-from .base import BaseListView
+from autonomie.views import BaseListView
 
 log = logging.getLogger(__name__)
 
@@ -120,7 +119,7 @@ class ProjectsList(BaseListView):
     """
     add_template_vars = ('title', 'item_actions',)
     title = u"Liste des projets"
-    schema = ProjectsListSchema()
+    schema = get_list_schema()
     default_sort = "name"
     sort_columns = {'name':Project.name,
                     "code":Project.code,
@@ -154,9 +153,6 @@ class ProjectsList(BaseListView):
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
         self.request.actionmenu.add(self._get_archived_btn(appstruct))
-        searchform = SearchForm(u"Projet ou nom du client")
-        searchform.set_defaults(appstruct)
-        self.request.actionmenu.add(searchform)
 
     def _get_archived_btn(self, appstruct):
         """

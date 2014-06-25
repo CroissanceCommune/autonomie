@@ -27,6 +27,11 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="searchform"/>
 <%namespace file="/base/utils.mako" import="urlbuild" />
+<%block name='actionmenu'>
+## We place the search form in the actionmenu since there are a few fields
+    <% request.actionmenu.add(form) %>
+    ${request.actionmenu.render(request)|n}
+</%block>
 <%block name='content'>
 <table class="table table-striped table-condensed table-hover">
     <thead>

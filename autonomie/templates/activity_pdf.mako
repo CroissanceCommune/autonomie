@@ -37,8 +37,9 @@
         <img src="/assets/main/accompagnement_header.png" />
 
         <div class='text12'><b>Date : </b> le ${api.format_date(activity.date)}</div>
-        <div class='text12'><b>Durée : </b> </div>
-
+        <div class='text12'><b>Durée : </b> ${activity.duration}</div>
+        <div><b>Date : </b> le ${api.format_date(activity.datetime)}</div>
+        <div><b>Durée : </b> ${activity.duration}</div>
 
         <center>
             <div class='text12 upper'><b>${activity.action_label}</b></div>
@@ -47,7 +48,7 @@
             <div class='text14'><b>${activity.type_object.label}</b></div>
 
         </center>
-        <div class='text12'>Conseiller : ${api.format_account(activity.conseiller)}</div>
+        <div class='text12'>Conseiller : ${', '.join([api.format_account(conseiller) for conseiller in activity.conseillers])}</div>
         <% companies = set() %>
         <div class='text12'>Participants :
             % for user in activity.participants:

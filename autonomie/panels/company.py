@@ -29,9 +29,21 @@ import logging
 from webhelpers import paginate
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import aliased
-from autonomie.models.task import CancelInvoice, Estimation, Invoice, Task
+from autonomie.models.task import (
+    CancelInvoice,
+    Estimation,
+    Invoice,
+    Task,
+)
 from autonomie.models.project import Project
-from autonomie.models.activity import Activity
+from autonomie.models.activity import (
+    Event,
+    Attendance,
+    Activity,
+)
+from autonomie.models.workshop import (
+    Timeslot,
+)
 from autonomie.models.user import User
 
 from autonomie import resources
@@ -158,36 +170,38 @@ def recent_tasks_panel(context, request):
     return result_data
 
 
-def _user_activities_query(user_id):
+def _user_events_query(user_id):
     """
-    Return a sqla query for the user's activities
+    Return a sqla query for the user's events
     """
-    query = Activity.query()
-    query = query.outerjoin(PARTICIPANTS, Activity.participants)
-    query = query.filter(Activity.participants.any(PARTICIPANTS.id==user_id))
-    query = query.order_by(desc(Activity.date))
+    query = Event.query().with_polymorphic([Timeslot, Activity])
+    query = query.filter(Event.type_.in_(['timeslot', 'activity']))
+    query = query.filter(
+        Event.attendances.any(Attendance.account_id==user_id)
+    )
+    query = query.order_by(desc(Event.datetime))
     return query
 
 
-def next_activities_panel(context, request):
+def next_events_panel(context, request):
     """
-        Return the list of the upcoming activities
+        Return the list of the upcoming events
     """
     if not request.is_xhr:
-        resources.activity_list_js.need()
+        resources.event_list_js.need()
 
-    query = _user_activities_query(request.user.id)
-    page_nb = _get_page_number(request, 'activities_page_nb')
-    items_per_page = _get_items_per_page(request, 'activities_per_page')
+    query = _user_events_query(request.user.id)
+    page_nb = _get_page_number(request, 'events_page_nb')
+    items_per_page = _get_items_per_page(request, 'events_per_page')
 
-    paginated_activities = paginate.Page(
+    paginated_events = paginate.Page(
             query,
             page_nb,
             items_per_page=items_per_page,
-            url=_make_get_list_url('activities'),
+            url=_make_get_list_url('events'),
             )
 
-    result_data = {'activities': paginated_activities}
+    result_data = {'events': paginated_events}
     return result_data
 
 
@@ -198,6 +212,6 @@ def includeme(config):
     config.add_panel(recent_tasks_panel,
                     'company_tasks',
                     renderer='panels/tasklist.mako')
-    config.add_panel(next_activities_panel,
-                    'company_activities',
-                    renderer='panels/activitylist.mako')
+    config.add_panel(next_events_panel,
+                    'company_events',
+                    renderer='panels/eventlist.mako')

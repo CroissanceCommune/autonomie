@@ -28,8 +28,8 @@
 <a class='btn pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='icon-file'></i>PDF</a>
 <div class='row-fluid'>
                 <% items = (\
-                    (u'Conseiller', api.format_account(activity.conseiller)), \
-                    (u'Date', api.format_date(activity.date)), \
+                (u'Conseiller(s)', ','.join([api.format_account(conseiller) for conseiller in activity.conseillers])), \
+                    (u'Horaire', api.format_datetime(activity.datetime)), \
                     (u"Action financée", u"%s %s" % (activity.action_label, activity.subaction_label)), \
                     (u"Nature du rendez-vous", activity.type_object.label), \
                     (u"Mode d'entretien", activity.mode), \

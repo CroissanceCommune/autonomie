@@ -23,13 +23,14 @@
 #
 
 import colander
+import deform
 
-ITEMS_PER_PAGE_OPTIONS = (('10 par page', u'10'),
-                          ('20 par page', u'20'),
-                          ('30 par page', u'30'),
-                          ("40 par page", u'40'),
-                          ('50 par page', u'50'),
-                          ('Tous', u'10000'))
+ITEMS_PER_PAGE_OPTIONS = ((u'10', u'10 par page',),
+                          (u'20', u'20 par page',),
+                          (u'30', u'30 par page', ),
+                          (u'40', u"40 par page", ),
+                          (u'50', u'50 par page', ),
+                          (u"1000", u'Tous',))
 
 
 @colander.deferred
@@ -80,25 +81,34 @@ class BaseListsSchema(colander.Schema):
         pagination arguments
         sort parameters
     """
-    page = colander.SchemaNode(
-            colander.Integer(),
-            missing=0,
-            )
-    sort = colander.SchemaNode(
-            colander.String(),
-            missing=deferred_default_sort,
-            validator=deferred_sort_validator,
-            )
-
-    direction = colander.SchemaNode(
-            colander.String(),
-            missing=deferred_default_direction,
-            validator=colander.OneOf(['asc', 'desc']),
-            )
+    search = colander.SchemaNode(
+        colander.String(),
+        missing=u'',
+        widget=deform.widget.TextInputWidget(
+        css_class='input-medium search-query')
+        )
     items_per_page = colander.SchemaNode(
-            colander.Integer(),
-            missing=deferred_items_per_page,
-            validator=deferred_items_per_page_validator,
-            css='span2',
-            )
-    search = colander.SchemaNode(colander.String(), missing=u'')
+        colander.Integer(),
+        missing=deferred_items_per_page,
+        widget=deform.widget.SelectWidget(
+            values=ITEMS_PER_PAGE_OPTIONS,
+        ),
+        validator=deferred_items_per_page_validator,
+        )
+    page = colander.SchemaNode(
+        colander.Integer(),
+        widget=deform.widget.HiddenWidget(),
+        missing=0,
+        )
+    sort = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.HiddenWidget(),
+        missing=deferred_default_sort,
+        validator=deferred_sort_validator,
+        )
+    direction = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.HiddenWidget(),
+        missing=deferred_default_direction,
+        validator=colander.OneOf(['asc', 'desc']),
+        )

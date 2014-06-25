@@ -33,78 +33,14 @@
         </a>
     %endif
     </li>
-    <li>
-    </li>
 </ul>
 <div class='row-fluid'>
-    <div class='span7'>
-        <form class='form-search form-horizontal' id='search_form' method='GET'>
-            <div style="padding-bottom:3px">
-                % if api.has_permission('manage'):
-                <select id='conseiller-select' name='conseiller_id' data-placeholder="Rechercher un conseiller">
-                    <option value='-1'></option>
-                    %for conseiller in conseiller_options:
-                            <option
-                                %if conseiller.id == conseiller_id:
-                                    selected='1'
-                                %endif
-                                value='${conseiller.id}'>
-                                    ${api.format_account(conseiller)}
-                            </option>
-                    %endfor
-                </select>
-                % endif
-                <select name='status' id='status-select' class='span2'>
-                    %for label, value in status_options:
-                        <option
-                            %if value == status:
-                                selected='1'
-                            %endif
-                            value='${value}'>
-                                ${label}
-                            </option>
-                    %endfor
-                </select>
-                <select name='type_id' id='type-select' class='span2' data-placeholder="Nature des Rdv">
-                    <option value=-1></option>
-                    %for activity_type in type_options:
-                        <option
-                            %if type_id == activity_type.id:
-                                selected='1'
-                            %endif
-                            value='${activity_type.id}'>
-                                ${activity_type.label}
-                            </option>
-                    %endfor
-                </select>
-                % if api.has_permission('manage'):
-                <select id='participant-select' name='participant_id' data-placeholder="Rechercher un participant" class='span3'>
-                    <option value='-1'></option>
-                    %for participant in participants_options:
-                            <option
-                            %if participant.id == participant_id:
-                                    selected='1'
-                                %endif
-                                value='${participant.id}'>
-                                    ${api.format_account(participant)}
-                            </option>
-                    %endfor
-                </select>
-                % endif
-                <select class='span2' name='items_per_page' id='items-select'>
-                    % for label, value in items_per_page_options:
-                        % if int(value) == int(items_per_page):
-                            <option value="${value}" selected='true'>${label}</option>
-                        %else:
-                            <option value="${value}">${label}</option>
-                        %endif
-                    % endfor
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-        </form>
+<div class='span8'>
+    <div class='row'>
+        ${form|n}
     </div>
-    <div class='span4'>
+</div>
+        <div class='span4'>
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>
@@ -112,26 +48,23 @@
             </tr>
             <tr>
                 <td class='green_tr'><br /></td>
-                <td>Participants présents</td>
+                <td>Rendez-vous terminés</td>
             </tr>
             <tr>
                 <td class='orange_tr'><br /></td>
-                <td>Participants excusés</td>
-            </tr>
-            <tr>
-                <td class='red_tr'><br /></td>
-                <td>Participants absents</td>
+                <td>Rendez-vous annulés</td>
             </tr>
         </table>
     </div>
 </div>
+
 </%block>
 <%block name="content">
 <table class="table table-condensed table-hover">
     <thead>
         <tr>
-            <th>${sortable("Date", "date")}</th>
-            <th>${sortable("Conseiller", "conseiller")}</th>
+            <th>${sortable("Horaire", "datetime")}</th>
+            <th>${sortable("Conseiller", "conseillers")}</th>
             <th>Participant(s)</th>
             <th>Nature du Rdv</th>
             <th>Mode de Rdv</th>
@@ -149,19 +82,19 @@
             <%
 if activity.status == 'planned':
     css = "white_"
-elif activity.status == 'excused':
+elif activity.status == 'cancelled':
     css = "orange_"
-elif activity.status == "absent":
-    css = "red_"
-else:
+elif activity.status == 'closed':
     css = "green_"
 %>
             <tr class='${css}tr'>
                 <td onclick="${onclick}" class="rowlink">
-                    ${api.format_date(activity.date)}
+                    ${api.format_datetime(activity.datetime)}
                 </td>
                 <td onclick="${onclick}" class="rowlink">
-                    ${api.format_account(activity.conseiller)}
+                    % for conseiller in activity.conseillers:
+                        ${api.format_account(conseiller)}
+                    % endfor
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     <ul>
@@ -179,9 +112,6 @@ else:
                     ${activity.mode}
                 </td>
                 <td>
-                    % if api.has_permission("view", activity):
-                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
-                    % endif
                     % if api.has_permission('edit', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='icon-pencil')}
@@ -189,6 +119,8 @@ else:
                         ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='icon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
                         <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
                         ${table_btn(pdf_url, u"PDF", u"Télécharger la sortie PDF pour impression", icon='icon-file')}
+                    % else:
+                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
                     % endif
                 </td>
             </tr>
@@ -196,15 +128,4 @@ else:
     </tbody>
 </table>
 ${pager(records)}
-</%block>
-<%block name='footerjs'>
-$('#conseiller-select').chosen({allow_single_deselect: true});
-$('#conseiller-select').change(function(){$(this).closest('form').submit()});
-$('#participant-select').chosen({allow_single_deselect: true});
-$('#participant-select').change(function(){$(this).closest('form').submit()});
-$('#status-select').chosen({allow_single_deselect: true});
-$('#status-select').change(function(){$(this).closest('form').submit()});
-$('#type-select').chosen({allow_single_deselect: true});
-$('#type-select').change(function(){$(this).closest('form').submit()});
-$('#items-select').chosen({allow_single_deselect: true});
 </%block>

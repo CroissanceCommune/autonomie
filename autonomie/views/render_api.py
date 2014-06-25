@@ -186,6 +186,17 @@ def format_short_date(date):
     return resp
 
 
+def format_datetime(datetime_object, timeonly=False):
+    """
+    format a datetime object
+    """
+    res = datetime_object.strftime("%H:%M")
+    if not timeonly:
+        day = datetime_object.strftime("%d/%m/%Y")
+        res = u"%s à %s" % (day, res)
+    return res
+
+
 def format_long_date(date):
     """
         return a long printable version of the date obj
@@ -278,6 +289,7 @@ class Api(object):
     format_short_date  = staticmethod(format_short_date)
     format_long_date  = staticmethod(format_long_date)
     format_quantity  = staticmethod(format_quantity)
+    format_datetime = staticmethod(format_datetime)
     human_readable_filesize  = staticmethod(human_readable_filesize)
     month_name  = staticmethod(month_name)
     clean_html  = staticmethod(clean_html)

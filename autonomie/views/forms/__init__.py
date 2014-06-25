@@ -105,6 +105,7 @@ class BaseFormView(FormView):
 
     def __init__(self, request):
         super(BaseFormView, self).__init__(request)
+        self.context = request.context
         self.dbsession = self.request.dbsession
         self.session = self.request.session
         self.logger = logging.getLogger("form_admin")
@@ -146,16 +147,32 @@ class BaseFormView(FormView):
         self.before(form)
         return form
 
+    def submit_failure(self, e):
+        """
+        Called by default when we failed to submit the values
+        We add a token here for forms that are collapsed by default to keep them
+        open if there is an error
+        """
+        return dict(form=e.render(), formerror=True)
 
-def merge_session_with_post(session, app_struct):
+
+def merge_session_with_post(model, app_struct):
     """
         Merge Deform validated datas with SQLAlchemy's objects
         Allow to spare some lines of assigning datas to the object
         before writing to database
+
+        model
+
+            The sqlalchemy model
+
+        app_struct
+
+            The datas retrieved for example from a form
     """
     for key, value in app_struct.items():
-        setattr(session, key, value)
-    return session
+        setattr(model, key, value)
+    return model
 
 
 def flatten_appstruct(appstruct):

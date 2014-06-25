@@ -23,7 +23,7 @@
 </%doc>
 
 <%doc>
-    Company index page shows last activities and elapsed invoices
+    Company index page shows last events and elapsed invoices
 </%doc>
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_text" />
@@ -95,8 +95,8 @@
         </div>
     </div>
     <div class='span6'>
-        <div class='well tasklist' style="margin-top:10px" id='activity_container'>
-            ${request.layout_manager.render_panel('company_activities')}
+        <div class='well tasklist' style="margin-top:10px" id='event_container'>
+            ${request.layout_manager.render_panel('company_events')}
         </div>
     </div>
 </div>

@@ -39,6 +39,7 @@ from autonomie.models.task.invoice import (
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.project import Phase
 from autonomie.models.activity import Activity
+from autonomie.models.user import User
 
 log = logging.getLogger(__name__)
 
@@ -65,9 +66,13 @@ def manage(request):
 
 
     user_id = request.user.id
-    query = Activity.query().filter(Activity.conseiller_id==user_id)
+    query = Activity.query()
+    query = query.join(Activity.conseillers)
+    query = query.filter(
+        Activity.conseillers.any(User.id==user_id)
+    )
     query = query.filter(Activity.status=='planned')
-    query = query.order_by(Activity.date).limit(10)
+    query = query.order_by(Activity.datetime).limit(10)
     activities = query.all()
 
     for activity in activities:

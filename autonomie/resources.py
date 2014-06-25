@@ -36,6 +36,7 @@ from js.jqueryui import ui_dialog
 from js.jqueryui import ui_sortable
 from js.jqueryui import ui_autocomplete
 from js.jqueryui import ui_datepicker_fr
+from js.jquery_timepicker_addon import timepicker_js
 from js.jquery_maskedinput import jquery_maskedinput
 from js.jquery_form import jquery_form
 from js.deform_bootstrap import deform_bootstrap_js
@@ -96,7 +97,7 @@ templates = Resource(lib_autonomie,
 
 _date = Resource(
         lib_autonomie,
-        "js/date.js")
+        "js/date.js", depends=[timepicker_js])
 _dom = Resource(
         lib_autonomie,
         "js/dom.js",
@@ -108,7 +109,6 @@ tools = Group([_dom, _math, _date])
 
 bootstrap_responsive_css = Resource(lib_autonomie,
         "css/bootstrap-responsive.css", depends=[bootstrap])
-
 
 duplicate = Resource(
         lib_autonomie,
@@ -132,9 +132,9 @@ task_list_js = Resource(
         lib_autonomie,
         "js/task_list.js",
         depends=[tools, jquery, backbone])
-activity_list_js = Resource(
+event_list_js = Resource(
         lib_autonomie,
-        "js/activity_list.js",
+        "js/event_list.js",
         depends=[tools, jquery, backbone])
 message_js = Resource(
         lib_autonomie,
@@ -172,7 +172,9 @@ main_js = Group([main,
                  ui_datepicker_fr,
                  jquery_maskedinput,
                  deform_bootstrap_js,
-                 chosen_jquery])
+                 chosen_jquery,
+                 tools,
+                 ])
 # Javascript requirements for task pages/forms
 task_js = Group([main,
                  bootstrap,

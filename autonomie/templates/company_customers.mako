@@ -26,6 +26,11 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="table_btn"/>
+<%block name='actionmenu'>
+## We place the search form in the actionmenu since there are a few fields
+    <% request.actionmenu.add(form) %>
+    ${request.actionmenu.render(request)|n}
+</%block>
 <%block name='content'>
 <a class='btn pull-right' href='${request.route_path("customers.csv", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
 <table class="table table-striped table-condensed table-hover">

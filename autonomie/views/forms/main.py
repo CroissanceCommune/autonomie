@@ -24,11 +24,12 @@ Main deferreds functions used in autonomie
 """
 import colander
 import calendar
-from datetime import date
+import datetime
 from deform import widget
 from deform_bootstrap.widget import ChosenSingleWidget
 
 from autonomie.models import user
+from autonomie.models import company
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie.views import render_api
 
@@ -70,7 +71,10 @@ def get_deferred_user_choice(roles=None, widget_options=None):
         choices = get_users_options(roles)
         if default_option:
             choices.insert(0, default_option)
-        return ChosenSingleWidget(values=choices, **widget_options)
+        return ChosenSingleWidget(
+            values=choices,
+            **widget_options
+            )
     return user_select
 
 
@@ -92,7 +96,15 @@ def deferred_today(node, kw):
     """
         return a deferred value for "today"
     """
-    return date.today()
+    return datetime.date.today()
+
+
+@colander.deferred
+def deferred_now(node, kw):
+    """
+    Return a deferred datetime value for now
+    """
+    return datetime.datetime.now()
 
 
 @colander.deferred
@@ -106,12 +118,17 @@ def deferred_current_user_id(node, kw):
 def get_date_input(**kw):
     """
     Return a date input displaying a french user friendly format
-    #FIXME : check the current deform we use to see if it's fun to use the
-    browser's date widget
     """
     date_input = custom_widgets.CustomDateInputWidget(**kw)
-    date_input.options['dateFormat'] = 'dd/mm/yy'
     return date_input
+
+
+def get_datetime_input(**kw):
+    """
+    Return a datetime input displaying a french user friendly format
+    """
+    datetime_input = custom_widgets.CustomDateTimeInputWidget(**kw)
+    return datetime_input
 
 
 def user_node(roles=None, **kw):
@@ -128,16 +145,61 @@ def user_node(roles=None, **kw):
             )
 
 
+def get_deferred_company_choices(widget_options):
+    default_entry = widget_options.pop('default', None)
+    @colander.deferred
+    def deferred_company_choices(node, kw):
+        """
+        return a deferred company selection widget
+        """
+        values = [(comp.id, comp.name) for comp in company.Company.query()]
+        if default_entry is not None:
+            values.insert(0, default_entry)
+        return ChosenSingleWidget(
+            values=values,
+            placeholder=u"Sélectionner une entreprise",
+            **widget_options
+            )
+    return deferred_company_choices
+
+
+def company_node(**kw):
+    """
+    Return a schema node for company selection
+
+    """
+    widget_options = kw.pop('widget_options', {})
+    return colander.SchemaNode(
+        colander.Integer(),
+        widget=get_deferred_company_choices(widget_options),
+        **kw
+        )
+
+
 def today_node(**kw):
     """
     Return a schema node for date selection, defaulted to today
     """
     if not "default" in kw:
         kw['default'] = deferred_today
+    widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
             colander.Date(),
-            widget=get_date_input(),
+            widget=get_date_input(**widget_options),
             **kw)
+
+
+def now_node(**kw):
+    """
+    Return a schema node for time selection, defaulted to "now"
+    """
+    if not "default" in kw:
+        kw['default'] = deferred_now
+    return colander.SchemaNode(
+        colander.DateTime(default_tzinfo=None),
+        widget=get_datetime_input(),
+        **kw)
+
 
 def come_from_node(**kw):
     """
@@ -170,7 +232,7 @@ def textarea_node(**kw):
 
 @colander.deferred
 def default_year(node, kw):
-    return date.today().year
+    return datetime.date.today().year
 
 
 def get_year_select_deferred(query_func):
@@ -197,13 +259,14 @@ def year_select_node(**kw):
         widget=get_year_select_deferred(query_func),
         default=default_year,
         missing=default_year,
-        title=title
+        title=title,
+        **kw
         )
 
 
 @colander.deferred
 def default_month(node, kw):
-    return date.today().month
+    return datetime.date.today().month
 
 
 def get_month_options():
@@ -247,4 +310,15 @@ def mail_node(**kw):
         validator=colander.Email(MAIL_ERROR_MESSAGE),
         **kw)
 
+def id_node():
+    """
+    Return a node for id recording (usefull in edition forms for retrieving
+    original objects)
+    """
+    return colander.SchemaNode(
+        colander.Integer(),
+        widget=widget.HiddenWidget(),
+        default=None,
+        missing=None
+        )
 

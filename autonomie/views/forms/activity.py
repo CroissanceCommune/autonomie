@@ -32,7 +32,6 @@ from autonomie.models.activity import (
         ActivityType,
         ActivityMode,
         ActivityAction,
-        STATUS,
         STATUS_SEARCH,
         ATTENDANCE_STATUS,
         ATTENDANCE_STATUS_SEARCH,
@@ -119,40 +118,52 @@ class ParticipantsSequence(colander.SequenceSchema):
     participant_id = main.user_node(title=u"", )
 
 
+class ConseillerSequence(colander.SequenceSchema):
+    """
+    Schema for the list of conseiller
+    """
+    conseiller_id = main.user_node(
+        title=u"Conseillers menant le rendez-vous",
+        roles=['manager', 'admin'],
+    )
+
+
 class CreateActivitySchema(colander.MappingSchema):
     """
         Activity creation schema
     """
     come_from = main.come_from_node()
-    conseiller_id = main.user_node(
-        title=u"Conseiller menant le rendez-vous",
-        roles=['manager', 'admin'],
-        )
-    date = main.today_node(title=u"Date de rendez-vous")
+
+    conseillers = ConseillerSequence(
+        title=u"Conseillers",
+        widget=deform_widget.SequenceWidget(min_len=1)
+    )
+    datetime = main.now_node(title=u"Date de rendez-vous")
     type_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=get_deferred_select_type(),
-            title=u"Nature du rendez-vous",
-            )
+        colander.Integer(),
+        widget=get_deferred_select_type(),
+        title=u"Nature du rendez-vous",
+    )
     action_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deferred_select_action,
-            title=u"Intitulé de l'action (financée)",
-            )
+        colander.Integer(),
+        widget=deferred_select_action,
+        title=u"Intitulé de l'action (financée)",
+    )
     subaction_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deferred_select_subaction,
-            title=u"Intitulé sous-action",
-            missing=None,
-            )
+        colander.Integer(),
+        widget=deferred_select_subaction,
+        title=u"Intitulé sous-action",
+        missing=None,
+    )
     mode = colander.SchemaNode(
-            colander.String(),
-            widget=deferred_select_mode,
-            title=u"Mode d'entretien",
-            )
+        colander.String(),
+        widget=deferred_select_mode,
+        title=u"Mode d'entretien",
+    )
     participants = ParticipantsSequence(
-            title=u"Participants",
-            widget=deform_widget.SequenceWidget(min_len=1))
+        title=u"Participants",
+        widget=deform_widget.SequenceWidget(min_len=1)
+    )
 
 
 class NewActivitySchema(CreateActivitySchema):
@@ -202,7 +213,8 @@ class RecordActivitySchema(colander.Schema):
         title=u'Présence',
         widget=deform_widget.SequenceWidget(
             template='autonomie:deform_templates/fixed_len_sequence.pt',
-            item_template='autonomie:deform_templates/fixed_len_sequence_item.pt'))
+            item_template='autonomie:deform_templates/fixed_len_sequence_item.pt')
+    )
     point = main.textarea_node(
         title=u"Point de suivi",
         richwidget=True,
@@ -232,6 +244,12 @@ class RecordActivitySchema(colander.Schema):
         richwidget=True,
         missing="",
         )
+
+    duration = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(max=6),
+        title=u'Durée',
+        description=u"La durée du rendez-vous (ex : 1h30)")
 
 
 def get_list_schema():
@@ -267,17 +285,19 @@ def get_list_schema():
         widget_options={
             'default_option': (-1, ''),
             'placeholder': u"Sélectionner un participant"},
-        ))
+        )
+    )
 
     schema.insert(0, main.user_node(
-            roles=['manager', 'admin'],
-            missing=-1,
-            default=main.deferred_current_user_id,
-            name='conseiller_id',
-            widget_options={
-                'default_option': (-1, ''),
-                'placeholder': u"Sélectionner un conseiller"},
-            ))
+        roles=['manager', 'admin'],
+        missing=-1,
+        default=main.deferred_current_user_id,
+        name='conseiller_id',
+        widget_options={
+            'default_option': (-1, ''),
+            'placeholder': u"Sélectionner un conseiller"},
+        )
+    )
 
     del schema['search']
     return schema

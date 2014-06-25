@@ -19,6 +19,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
+from datetime import datetime
 from datetime import date
 from autonomie.models import (
         activity,
@@ -49,11 +50,10 @@ class BaseTest(BaseFunctionnalTest):
     def addOne(self):
         type_id = self.addType()
         appstruct = {
-                'conseiller_id': 1,
-                'date': date.today(),
-                'type_id': type_id,
-                'mode': 'par mail',
-                }
+            'datetime': datetime.now(),
+            'type_id': type_id,
+            'mode': 'par mail',
+        }
         a = activity.Activity(**appstruct)
         self.session.add(a)
         self.session.flush()
@@ -68,13 +68,13 @@ class TestNewActivityView(BaseTest):
         self.config.add_route('toto', '/toto')
         self.config.add_route('activity', '/activity/{id}')
         self.addType()
+        now = datetime.now().replace(microsecond=0)
         appstruct = {
-                'come_from': "/toto",
-                'conseiller_id': 1,
-                'date': date.today(),
-                'type_id': 1,
-                'mode': 'par mail',
-                }
+            'come_from': "/toto",
+            'datetime': now,
+            'type_id': 1,
+            'mode': 'par mail',
+        }
         view = NewActivityView(self.get_csrf_request())
         view.submit_success(appstruct)
         a = self.getOne()
@@ -88,12 +88,12 @@ class TestNewActivityAjaxView(BaseTest):
         self.config.add_route('activity', '/activity/{id}')
         self.config.add_route('activities', '/activities')
         typeid = self.addType()
+        now = datetime.now().replace(microsecond=0)
         appstruct = {
-                'conseiller_id': 1,
-                'date': date.today(),
-                'type_id': typeid,
-                'mode': 'par mail',
-                }
+            'datetime': now,
+            'type_id': typeid,
+            'mode': 'par mail',
+        }
         view = NewActivityAjaxView(self.get_csrf_request())
         result = view.submit_success(appstruct)
         self.assertTrue(result['message'].startswith(ACTIVITY_SUCCESS_MSG[:25]))

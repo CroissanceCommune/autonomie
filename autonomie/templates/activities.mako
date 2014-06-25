@@ -63,8 +63,8 @@
 <table class="table table-condensed table-hover">
     <thead>
         <tr>
-            <th>${sortable("Date", "date")}</th>
-            <th>${sortable("Conseiller", "conseiller")}</th>
+            <th>${sortable("Horaire", "datetime")}</th>
+            <th>${sortable("Conseiller", "conseillers")}</th>
             <th>Participant(s)</th>
             <th>Nature du Rdv</th>
             <th>Mode de Rdv</th>
@@ -89,10 +89,12 @@ elif activity.status == 'closed':
 %>
             <tr class='${css}tr'>
                 <td onclick="${onclick}" class="rowlink">
-                    ${api.format_date(activity.date)}
+                    ${api.format_datetime(activity.datetime)}
                 </td>
                 <td onclick="${onclick}" class="rowlink">
-                    ${api.format_account(activity.conseiller)}
+                    % for conseiller in activity.conseillers:
+                        ${api.format_account(conseiller)}
+                    % endfor
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     <ul>
@@ -110,9 +112,6 @@ elif activity.status == 'closed':
                     ${activity.mode}
                 </td>
                 <td>
-                    % if api.has_permission("view", activity):
-                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
-                    % endif
                     % if api.has_permission('edit', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='icon-pencil')}
@@ -120,6 +119,8 @@ elif activity.status == 'closed':
                         ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='icon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
                         <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
                         ${table_btn(pdf_url, u"PDF", u"Télécharger la sortie PDF pour impression", icon='icon-file')}
+                    % else:
+                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
                     % endif
                 </td>
             </tr>

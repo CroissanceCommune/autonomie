@@ -30,6 +30,9 @@ import logging
 import deform
 import itertools
 
+from js.deform import auto_need
+from js.jquery_timepicker_addon import timepicker_fr
+
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from sqlalchemy.orm import aliased
@@ -61,8 +64,6 @@ from autonomie.views import render_api
 log = logging.getLogger(__name__)
 
 
-# Sqlalchemy aliases used to outerjoin two times on the same table (but through
-# two different relationships
 CONSEILLER = aliased(user.User)
 
 ACTIVITY_SUCCESS_MSG = u"Le rendez-vous a bien été programmé \
@@ -89,10 +90,17 @@ def new_activity(request, appstruct):
     Add a new activity in the database
     """
     activity = Activity(status="planned")
-    participants_ids = appstruct.pop('participants', [])
+
+    participants_ids = set(appstruct.pop('participants', []))
     if participants_ids:
         appstruct['participants'] = [user.User.get(id_) \
             for id_ in participants_ids]
+
+    conseillers_ids = set(appstruct.pop('conseillers', []))
+    if conseillers_ids:
+        appstruct['conseillers'] = [user.User.get(id_) \
+            for id_ in conseillers_ids]
+
     merge_session_with_post(activity, appstruct)
     request.dbsession.add(activity)
     request.dbsession.flush()
@@ -162,7 +170,10 @@ def _get_appstruct_from_activity(activity):
     """
     appstruct = activity.appstruct()
     participants = activity.participants
+    conseillers = activity.conseillers
+
     appstruct['participants'] = [p.id for p in participants]
+    appstruct['conseillers'] = [c.id for c in conseillers]
     appstruct['attendances'] = [
         {
         'event_id': att.event_id,
@@ -211,12 +222,14 @@ class NewActivityView(BaseFormView):
         """
         By default the activity is filled with the current user as conseiller
         """
+        auto_need(form)
+        timepicker_fr.need()
         come_from = self.request.referrer
         current_user = self.request.user
         appstruct = {
-                'conseiller_id': current_user.id,
-                'come_from': come_from,
-                }
+            'conseillers': [current_user.id],
+            'come_from': come_from,
+        }
         form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
@@ -311,15 +324,16 @@ class ActivityEditView(BaseFormView):
             "activity",
             id=self.request.context.id,
             _query=dict(action="record"),
-            )
+        )
         form = deform.Form(
             schema=RecordActivitySchema().bind(request=self.request),
             buttons=(ACTIVITY_RECORD_BUTTON, ACTIVITY_CANCEL_BUTTON,),
             counter=self.counter,
             formid="record_form",
             action=submit_url,
-            )
+        )
         form.set_appstruct(self.get_appstruct())
+        auto_need(form)
         return form.render()
 
     def get_appstruct(self):
@@ -334,16 +348,20 @@ class ActivityEditView(BaseFormView):
         appstruct = self.get_appstruct()
         form.set_appstruct(appstruct)
 
-        form.schema
+        auto_need(form)
+        timepicker_fr.need()
 
     def submit_success(self, appstruct):
         """
         called when the edition form is submitted
         """
         # Retrieving participants
-        participants_ids = appstruct.pop('participants', [])
+        participants_ids = set(appstruct.pop('participants', []))
         appstruct['participants'] = [user.User.get(id_) \
                 for id_ in participants_ids]
+        conseillers_ids = set(appstruct.pop('conseillers', []))
+        appstruct['conseillers'] = [user.User.get(id_) \
+                                    for id_ in conseillers_ids]
 
         message = u"Les informations ont bien été mises à jour"
         return record_changes(self.request, appstruct, message)
@@ -391,15 +409,14 @@ class ActivityList(BaseListView):
     title = u"Rendez-vous"
     schema = get_list_schema()
     sort_columns = dict(
-            date=Activity.date,
+            datetime=Activity.datetime,
             conseiller=user.User.lastname,
             )
-    default_sort = 'date'
+    default_sort = 'datetime'
     default_direction = 'desc'
 
     def query(self):
         query = Activity.query()
-        query = query.join(Activity.conseiller)
         return query
 
     def _get_conseiller_id(self, appstruct):
@@ -414,23 +431,26 @@ class ActivityList(BaseListView):
         """
         conseiller_id = self._get_conseiller_id(appstruct)
         if conseiller_id != -1:
-            query = query.filter(Activity.conseiller_id==conseiller_id)
+            query = query.filter(
+                Activity.conseillers.any(user.User.id==conseiller_id)
+            )
         return query
 
-    def filter_participant_and_or_user_status(self, query, appstruct):
+    def filter_participant(self, query, appstruct):
         participant_id = appstruct['participant_id']
-        status = appstruct['user_status']
 
-        if participant_id != -1 or status != 'all':
-            query = query.join(Activity.attendances)
-            if participant_id != -1:
-                query = query.filter(
-                    Activity.attendances.any(Attendance.account_id==participant_id)
-                    )
-            if status != 'all':
-                query = query.filter(
-                    Activity.attendances.any(Attendance.status==status)
+        if participant_id != -1:
+            query = query.filter(
+                Activity.attendances.any(Attendance.account_id==participant_id)
                 )
+        return query
+
+    def filter_user_status(self, query, appstruct):
+        status = appstruct['user_status']
+        if status != 'all':
+            query = query.filter(
+                Activity.attendances.any(Attendance.status==status)
+            )
         return query
 
     def filter_type(self, query, appstruct):
@@ -455,7 +475,6 @@ class ActivityListContractor(ActivityList):
     def filter_participant(self, query, appstruct):
         company = self.context
         participants_ids = [u.id for u in company.employees]
-        query = query.join(Activity.attendances)
         query = query.filter(
             Activity.attendances.any(Attendance.account_id==participant_id)
             )
@@ -474,7 +493,7 @@ def activity_view_only_view(context, request):
                 )
         return HTTPFound(url)
     title = u"Rendez-vous du %s" % (
-            render_api.format_date(request.context.date),
+            render_api.format_datetime(request.context.datetime),
             )
     populate_actionmenu(request)
     return dict(title=title, activity=request.context)
@@ -496,7 +515,7 @@ def activity_pdf_view(context, request):
     """
     Return a pdf output of the current activity
     """
-    date = context.date.strftime("%e_%m_%Y")
+    date = context.datetime.strftime("%e_%m_%Y")
     filename = u"rdv_{0}_{1}.pdf".format(date, context.id)
 
     template = u"autonomie:templates/activity_pdf.mako"

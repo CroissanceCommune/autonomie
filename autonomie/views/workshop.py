@@ -30,18 +30,24 @@ from pyramid.httpexceptions import (
     HTTPFound,
     HTTPForbidden,
     )
-from sqlalchemy import or_
+from sqlalchemy import (
+    or_,
+    func,
+)
+from pyramid.security import has_permission
 
 from js.deform import auto_need
 from js.jquery_timepicker_addon import timepicker_fr
 
-from autonomie.models import workshop
+from autonomie.models import workshop as models
+from autonomie.models.activity import Attendance
 from autonomie.models import user
 
 from autonomie.utils.pdf import (
         render_html,
         write_pdf,
         )
+from autonomie.utils.widgets import ViewLink
 from autonomie.views.forms import (
     BaseFormView,
     merge_session_with_post,
@@ -49,11 +55,11 @@ from autonomie.views.forms import (
 from autonomie.views import BaseListView
 from autonomie.views.forms.workshop import (
     Workshop as WorkshopSchema,
-    STATUS,
     get_list_schema,
+    ATTENDANCE_STATUS,
     Attendances as AttendanceSchema,
     )
-
+from autonomie.views.render_api import format_datetime, format_date
 
 log = logging.getLogger(__name__)
 
@@ -81,7 +87,7 @@ class WorkshopAddView(BaseFormView):
         come_from = appstruct.pop('come_from')
 
         timeslots_datas = appstruct.pop('timeslots')
-        appstruct['timeslots'] = [workshop.Timeslot(**data) \
+        appstruct['timeslots'] = [models.Timeslot(**data) \
             for data in timeslots_datas]
 
         participants_ids = set(appstruct.pop('participants', []))
@@ -91,7 +97,7 @@ class WorkshopAddView(BaseFormView):
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
 
-        workshop_obj = workshop.Workshop(**appstruct)
+        workshop_obj = models.Workshop(**appstruct)
         self.dbsession.add(workshop_obj)
         self.dbsession.flush()
 
@@ -121,13 +127,11 @@ class WorkshopEditView(BaseFormView):
 
     @property
     def title(self):
-        workshop_title = self.context.name
-        leaders = u", ".join(self.context.leaders)
-        return u"Atelier {0} animé par {1}".format(workshop_title, leaders)
+        return self.context.title
 
     @property
     def available_status(self):
-        return STATUS
+        return ATTENDANCE_STATUS
 
     def before(self, form):
         """
@@ -138,6 +142,7 @@ class WorkshopEditView(BaseFormView):
                 The deform form object used in this form view (see parent class
                 in pyramid_deform)
         """
+        populate_actionmenu(self.request)
         auto_need(form)
         timepicker_fr.need()
 
@@ -169,7 +174,7 @@ qui n'appartient pas au contexte courant !!!!")
         for data in datas:
             if data['id'] is None:
                 # New timeslots
-                objects.append(workshop.Timeslot(**data))
+                objects.append(models.Timeslot(**data))
             else:
                 # existing timeslots
                 obj = self._retrieve_workshop_timeslot(data['id'])
@@ -235,7 +240,7 @@ def record_attendances_view(context, request):
             for datas in appstruct['attendances']:
                 account_id = datas['account_id']
                 timeslot_id = datas['timeslot_id']
-                obj = workshop.Attendance.get((account_id, timeslot_id))
+                obj = Attendance.get((account_id, timeslot_id))
                 obj.status = datas['status']
                 request.dbsession.merge(obj)
             request.session.flash(u"L'émargement a bien été enregistré")
@@ -255,39 +260,56 @@ class WorkshopList(BaseListView):
     """
     title = u"Ateliers"
     schema = get_list_schema()
-    sort_columns = dict(date=workshop.Workshop.date)
-    default_sort = 'date'
+    sort_columns = dict(datetime=models.Workshop.datetime)
+    default_sort = 'datetime'
     default_direction = 'desc'
 
     def query(self):
-        query = workshop.Workshop.query()
+        query = models.Workshop.query()
         return query
 
     def filter_participant(self, query, appstruct):
         participant_id = appstruct['participant_id']
         if participant_id not in (None, -1):
-            query = query.outerjoin(user.User, workshop.Workshop.participants)
-
             query = query.filter(
-                workshop.Workshop.participants.any(
-                    user.User.id==participant_id
-                    )
+                models.Workshop.attendances.any(
+                    Attendance.account_id==participant_id
                 )
+            )
         return query
 
     def filter_search(self, query, appstruct):
         search = appstruct['search']
         if search:
             query = query.filter(
-                or_(workshop.Workshop.name.like('%{0}%'.format(search)),
-                    workshop.Workshop.leaders.like('%{0}%'.format(search))
+                or_(models.Workshop.name.like('%{0}%'.format(search)),
+                    models.Workshop.leaders.like('%{0}%'.format(search))
                     ))
         return query
 
     def filter_date(self, query, appstruct):
         date = appstruct['date']
         if date is not None:
-            query = query.filter(workshop.Workshop.date == date)
+            query = query.filter(
+                models.Workshop.timeslots.any(
+                    func.date(models.Timeslot.start_time)==date
+                )
+            )
+        return query
+
+
+class CompanyWorkshopList(WorkshopList):
+    """
+    View for listing company's workshops
+    """
+    schema = get_list_schema(company=True)
+    def filter_participant(self, query, appstruct):
+        company = self.context
+        employees_id = [u.id for u in company.employees]
+        query = query.filter(
+            models.Workshop.participants.any(
+                user.User.id.in_(employees_id)
+                ))
         return query
 
 
@@ -299,7 +321,7 @@ def timeslot_pdf_view(timeslot, request):
 
             A timeslot object returned as a current context by traversal
     """
-    date = timeslot.start_time.strftime("%e_%M_%Y")
+    date = timeslot.start_time.strftime("%e_%m_%Y")
     filename = u"atelier_{0}_{1}.pdf".format(date, timeslot.id)
 
     template = u"autonomie:templates/workshop_pdf.mako"
@@ -316,32 +338,107 @@ def timeslot_pdf_view(timeslot, request):
     return request.response
 
 
+def workshop_view(workshop, request):
+    """
+    Workshop view_only view
+
+        workshop
+
+            the context returned by the traversal tree
+    """
+    if has_permission('manage', workshop, request):
+        url = request.route_path(
+                'workshop',
+                id=workshop.id,
+                _query=dict(action='edit'),
+                )
+        return HTTPFound(url)
+    populate_actionmenu(request)
+
+    timeslots_datas = []
+
+    for timeslot in workshop.timeslots:
+        if timeslot.start_time.day == timeslot.end_time.day:
+            time_str = u"le {0} de {1} à {2}".format(
+                format_date(timeslot.start_time),
+                format_datetime(timeslot.start_time, timeonly=True),
+                format_datetime(timeslot.end_time, timeonly=True)
+                )
+        else:
+            time_str = u"du {0} au {1}".format(
+                format_datetime(timeslot.start_time),
+                format_datetime(timeslot.end_time)
+                )
+
+        status = timeslot.user_status(request.user.id)
+        timeslots_datas.append((timeslot.name, time_str, status))
+
+    return dict(title=workshop.title, timeslots_datas=timeslots_datas)
+
+
+def workshop_delete_view(workshop, request):
+    """
+    Workshop deletion view
+    """
+    url = request.referer
+    request.dbsession.delete(workshop)
+    request.session.flash(u"L'atelier a bien été supprimé")
+    if not url:
+        url = request.route_path('workshops')
+    return HTTPFound(url)
+
+
+def populate_actionmenu(request):
+    """
+    Add elements in the actionmenu regarding the current context
+    """
+    company_id = request.GET.get('company_id')
+
+    if company_id is not None:
+        link = ViewLink(
+            u"Liste des ateliers",
+            "view",
+            path='company_workshops',
+            id=company_id
+        )
+    else:
+        link = ViewLink(u"Liste des ateliers", "manage", path='workshops')
+
+    request.actionmenu.add(link)
+
+
 def includeme(config):
     """
     Add view to the pyramid registry
     """
+    # Routes declaration
     config.add_route(
         'workshop',
         "/workshops/{id:\d+}",
         traverse='/workshops/{id}',
         )
+
     config.add_route(
         'workshop.pdf',
         "/workshops/{id:\d+}.pdf",
         traverse='/workshops/{id}',
         )
+
     config.add_route(
         'timeslot.pdf',
         "/timeslots/{id:\d+}.pdf",
         traverse='/timeslots/{id}',
         )
+
     config.add_route('workshops', "/workshops")
+
     config.add_route(
         'company_workshops',
         "/company/{id}/workshops",
         traverse="/companies/{id}",
         )
 
+    # Views declaration
     config.add_view(
         WorkshopAddView,
         route_name='workshops',
@@ -349,12 +446,21 @@ def includeme(config):
         request_param='action=new',
         renderer="/base/formpage.mako",
         )
+
     config.add_view(
         WorkshopList,
         route_name='workshops',
         permission='manage',
         renderer="/workshops.mako",
         )
+
+    config.add_view(
+        CompanyWorkshopList,
+        route_name='company_workshops',
+        permission='view',
+        renderer="/workshops.mako",
+        )
+
     config.add_view(
         WorkshopEditView,
         route_name='workshop',
@@ -362,13 +468,29 @@ def includeme(config):
         request_param='action=edit',
         renderer="/workshop_edit.mako",
         )
+
     config.add_view(
         record_attendances_view,
         route_name='workshop',
         permission='manage',
         request_param='action=record',
         )
+
     config.add_view(
         timeslot_pdf_view,
         route_name='timeslot.pdf',
+        )
+
+    config.add_view(
+            workshop_delete_view,
+            route_name='workshop',
+            permission='manage',
+            request_param='action=delete',
+            )
+
+    config.add_view(
+        workshop_view,
+        route_name='workshop',
+        permission='view',
+        renderer='/workshop_view.mako',
         )

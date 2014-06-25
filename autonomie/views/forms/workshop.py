@@ -22,7 +22,7 @@
 import colander
 from deform import widget as deform_widget
 
-from autonomie.models.workshop import STATUS
+from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.views.forms import (
     main,
     lists,
@@ -97,7 +97,7 @@ class Workshop(colander.MappingSchema):
         title=u"Animateur(s)/Animatrice(s)",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
-    date = main.today_node(title=u"Date de l'atelier")
+    datetime = main.today_node(title=u"Date de l'atelier")
     info1 = get_info_field(u"Sous-titre 1 (facultatif)")
     info2 = get_info_field(u"Sous-titre 2 (facultatif)")
     info3 = get_info_field(u"Sous-titre 3 (facultatif)")
@@ -113,7 +113,7 @@ donnant lieu à un émargement",
         )
 
 
-def get_list_schema():
+def get_list_schema(company=False):
     """
     Return a schema for filtering workshop list
     """
@@ -127,14 +127,14 @@ def get_list_schema():
             description=u"Date de l'atelier",
             widget_options={'css_class': 'input-medium search-query'},
             ))
-
-    schema.insert(0, main.user_node(
-        missing=None,
-        name='participant_id',
-        widget_options={
-            'placeholder': u"Sélectionner un participant",
-            'default_option': (None, ''),
-            }
+    if not company:
+        schema.insert(0, main.user_node(
+            missing=-1,
+            name='participant_id',
+            widget_options={
+                'placeholder': u"Sélectionner un participant",
+                'default_option': (-1, ''),
+                }
         ))
 
     schema['search'].description = u"Intitulé de l'atelier"
@@ -150,8 +150,8 @@ class AttendanceEntry(colander.MappingSchema):
     timeslot_id = main.id_node()
     status = colander.SchemaNode(
         colander.String(),
-        widget=deform_widget.SelectWidget(values=STATUS),
-        validator=colander.OneOf(dict(STATUS).keys()),
+        widget=deform_widget.SelectWidget(values=ATTENDANCE_STATUS),
+        validator=colander.OneOf(dict(ATTENDANCE_STATUS).keys()),
         default='registered',
         missing='registered',
         )

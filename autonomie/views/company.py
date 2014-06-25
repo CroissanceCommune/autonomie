@@ -262,7 +262,7 @@ def includeme(config):
     # same panel as html view
     for panel, request_param in (
             ('company_tasks', 'action=tasks_html',),
-            ('company_activities', 'action=activities_html',),
+            ('company_events', 'action=events_html',),
             ):
         config.add_view(make_panel_wrapper_view(panel),
                 route_name='company',

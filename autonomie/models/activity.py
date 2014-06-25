@@ -34,7 +34,7 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     String,
-    Date,
+    DateTime,
     Text,
     Boolean,
     )
@@ -44,6 +44,7 @@ from sqlalchemy.orm import (
     backref,
     )
 
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from autonomie.models.base import (
     DBBASE,
@@ -55,16 +56,74 @@ from autonomie.models.node import Node
 log = logging.getLogger(__name__)
 
 
-ACTIVITY_PARTICIPANT = Table(
-    "activity_participant",
+# Statut des participants à un évènement
+ATTENDANCE_STATUS = (
+    ('registered', u'Attendu', ),
+    ('attended', u'Présent', ),
+    ('absent', u'Absent', ),
+    ('excused', u'Excusé', ),
+    )
+
+ATTENDANCE_STATUS_SEARCH = (
+    ('all', u'Tous les rendez-vous',),
+    ('absent', u'Un des participants était absent',),
+    ('excused', u'Un des participants était excusé',),
+    ('attended', u'Les participants étaient présents',),
+    )
+
+# Statut d'une activité
+STATUS = (
+    ('planned', u'Planifié', ),
+    ('closed', u'Terminé', ),
+    ('cancelled', u'Annulé', ),
+    )
+
+STATUS_SEARCH = (
+    ("all", u"Tous les rendez-vous", ),
+    ("planned", u"Planifiés", ),
+    ("closed", u"Terminés", ),
+    ("cancelled", u"Annulés", ),
+    )
+
+
+
+ACTIVITY_CONSEILLER = Table(
+    'activity_conseiller',
     DBBASE.metadata,
-    Column("activity_id", ForeignKey('activity.id')),
-    Column("account_id", ForeignKey('accounts.id')),
+    Column("activity_id", Integer, ForeignKey('activity.id')),
+    Column("account_id", Integer, ForeignKey('accounts.id')),
     mysql_charset=default_table_args['mysql_charset'],
-    mysql_engine=default_table_args['mysql_engine'])
+    mysql_engine=default_table_args['mysql_engine']
+)
 
 
-ACTIVITY_STATUS = (u"planned", u"closed", u"excused", "absent")
+class Attendance(DBBASE):
+    """
+    Relationship table used to store the attendance of a user for a given
+    event
+    """
+    __tablename__ = 'attendance'
+    __table_args__ = default_table_args
+    account_id = Column(ForeignKey('accounts.id'), primary_key=True)
+    event_id = Column(ForeignKey('event.id'), primary_key=True)
+    status = Column(String(15), default="registered")
+
+    event = relationship(
+        'Event',
+        backref=backref(
+            'attendances',
+            cascade='all, delete-orphan',
+        )
+    )
+    user = relationship(
+        "User",
+        backref=backref('event_attendances', cascade='all, delete-orphan')
+    )
+
+    # Used as default creator function by the association_proxy
+    def __init__(self, user=None):
+        if user is not None:
+            self.user = user
 
 
 class Event(Node):
@@ -75,8 +134,28 @@ class Event(Node):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'event'}
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
-    date = Column(Date, default=datetime.date.today)
+    datetime = Column(DateTime, default=datetime.datetime.now)
     status = Column(String(15), default='planned')
+
+    participants = association_proxy('attendances', 'user')
+
+    def user_status(self, user_id):
+        """
+        Return a user's status for this given timeslot
+
+            user_id
+
+                Id of the user we're asking the attendance status for
+        """
+        res = ""
+
+        for attendance in self.attendances:
+            if attendance.account_id == user_id:
+                res = attendance.status
+                break
+
+
+        return dict(ATTENDANCE_STATUS).get(res, 'Statut inconnu')
 
 
 class Activity(Event):
@@ -87,7 +166,6 @@ class Activity(Event):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'activity'}
     id = Column(Integer, ForeignKey('event.id'), primary_key=True)
-    conseiller_id = Column(ForeignKey('accounts.id'))
     type_id = Column(ForeignKey('activity_type.id'))
     action_id = Column(ForeignKey('activity_action.id'))
     subaction_id = Column(ForeignKey('activity_action.id'))
@@ -101,22 +179,18 @@ class Activity(Event):
     action = deferred(Column(Text()), group='edit')
     documents = deferred(Column(Text()), group='edit')
     notes = deferred(Column(Text()), group='edit')
+    duration = deferred(Column(String(6), default='0h'), group='edit')
 
     type_object = relationship(
             "ActivityType",
             primaryjoin="Activity.type_id==ActivityType.id",
             uselist=False,
             foreign_keys=type_id)
-    conseiller = relationship(
-            "User",
-            primaryjoin="User.id==Activity.conseiller_id",
-            backref=backref("managed_activities", order_by="Activity.date")
-            )
-    participants = relationship(
-            "User",
-            secondary=ACTIVITY_PARTICIPANT,
-            backref="activities",
-            )
+    conseillers = relationship(
+        'User',
+        secondary=ACTIVITY_CONSEILLER,
+        backref=backref('activities', order_by='Activity.datetime')
+    )
     action_label_obj = relationship(
             "ActivityAction",
             primaryjoin="Activity.action_id==ActivityAction.id",

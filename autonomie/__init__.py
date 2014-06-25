@@ -36,8 +36,8 @@ from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from autonomie.utils.security import RootFactory
-from autonomie.utils.security import BaseDBFactory
-from autonomie.utils.security import wrap_db_objects
+from autonomie.utils.security import TraversalDbAccess
+from autonomie.utils.security import set_models_acls
 
 from autonomie.models.initialize import initialize_sql
 from autonomie.models.config import get_config
@@ -77,6 +77,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.sage",
     "autonomie.views.files",
     "autonomie.views.payment",
+    "autonomie.views.workshop",
     "autonomie.panels.menu",
     "autonomie.panels.task",
     "autonomie.panels.company",
@@ -125,8 +126,8 @@ def main(global_config, **settings):
     config.commit()
 
     dbsession = initialize_sql(engine)
-    wrap_db_objects()
-    BaseDBFactory.dbsession = dbsession
+    set_models_acls()
+    TraversalDbAccess.dbsession = dbsession
 
     # Application main configuration
     config._set_root_factory(RootFactory)

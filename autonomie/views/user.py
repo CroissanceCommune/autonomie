@@ -42,7 +42,6 @@ from autonomie.views.forms import (
 )
 from autonomie.utils.widgets import (
         ViewLink,
-        SearchForm,
         PopUp,
         StaticWidget,
         )
@@ -51,13 +50,13 @@ from autonomie.utils.views import cancel_btn
 from autonomie.views.render_api import format_account
 from autonomie.views.forms.user import (
         USERSCHEMA,
-        UserListSchema,
+        get_list_schema,
         PASSWORDSCHEMA,
         UserDisableSchema,
         )
 from autonomie.views.company import company_enable
 
-from .base import BaseListView
+from autonomie.views import BaseListView
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ class UserList(BaseListView):
     """
     title = u"Annuaire des utilisateurs"
     # The schema used to validate our search/filter form
-    schema = UserListSchema()
+    schema = get_list_schema()
     # The columns that allow sorting
     sort_columns = dict(name=User.lastname,
                         email=User.email)
@@ -125,9 +124,6 @@ class UserList(BaseListView):
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
             self.request.actionmenu.add(self._get_disabled_btn(appstruct))
-        searchform = SearchForm(u"Nom, entreprise, activité")
-        searchform.set_defaults(appstruct)
-        self.request.actionmenu.add(searchform)
 
     def _get_disabled_btn(self, appstruct):
         """

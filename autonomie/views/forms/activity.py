@@ -32,26 +32,16 @@ from autonomie.models.activity import (
         ActivityType,
         ActivityMode,
         ActivityAction,
+        STATUS_SEARCH,
+        ATTENDANCE_STATUS,
+        ATTENDANCE_STATUS_SEARCH,
         )
+
 from autonomie.views.forms import (
         main,
         lists,
+        widgets as custom_widget,
         )
-
-
-STATUS_OPTIONS = (
-    (u"Tous les rendez-vous", "all"),
-    (u"Planifiés", "planned"),
-    (u"Participants absents", "absent"),
-    (u"Participants excusés", "excused"),
-    (u"Participants présents", "closed"),
-    )
-
-STATUSCHOICES = (
-    ("closed", u"Participant(s) présents"),
-    ("excused", u"Participant(s) excusés"),
-    ("absent", u"Participant(s) absents"),
-    )
 
 
 def get_activity_types():
@@ -77,10 +67,14 @@ def get_subaction_options():
     return options
 
 
-@colander.deferred
-def deferred_select_type(node, kw):
-    options = [(unicode(a.id), a.label) for a in get_activity_types()]
-    return deform_widget.SelectWidget(values=options)
+def get_deferred_select_type(default=False):
+    @colander.deferred
+    def deferred_select_type(node, kw):
+        values = [(unicode(a.id), a.label) for a in get_activity_types()]
+        if default:
+            values.insert(0, (-1, 'Tous'))
+        return deform_widget.SelectWidget(values=values)
+    return deferred_select_type
 
 
 @colander.deferred
@@ -121,7 +115,17 @@ class ParticipantsSequence(colander.SequenceSchema):
     """
     Schema for the list of participants
     """
-    participant_id = main.user_node(title=u"")
+    participant_id = main.user_node(title=u"", )
+
+
+class ConseillerSequence(colander.SequenceSchema):
+    """
+    Schema for the list of conseiller
+    """
+    conseiller_id = main.user_node(
+        title=u"Conseillers menant le rendez-vous",
+        roles=['manager', 'admin'],
+    )
 
 
 class CreateActivitySchema(colander.MappingSchema):
@@ -129,35 +133,37 @@ class CreateActivitySchema(colander.MappingSchema):
         Activity creation schema
     """
     come_from = main.come_from_node()
-    conseiller_id = main.user_node(
-            title=u"Conseiller menant le rendez-vous",
-            roles=['manager', 'admin'],
-            )
-    date = main.today_node(title=u"Date de rendez-vous")
+
+    conseillers = ConseillerSequence(
+        title=u"Conseillers",
+        widget=deform_widget.SequenceWidget(min_len=1)
+    )
+    datetime = main.now_node(title=u"Date de rendez-vous")
     type_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deferred_select_type,
-            title=u"Nature du rendez-vous",
-            )
+        colander.Integer(),
+        widget=get_deferred_select_type(),
+        title=u"Nature du rendez-vous",
+    )
     action_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deferred_select_action,
-            title=u"Intitulé de l'action (financée)",
-            )
+        colander.Integer(),
+        widget=deferred_select_action,
+        title=u"Intitulé de l'action (financée)",
+    )
     subaction_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deferred_select_subaction,
-            title=u"Intitulé sous-action",
-            missing=None,
-            )
+        colander.Integer(),
+        widget=deferred_select_subaction,
+        title=u"Intitulé sous-action",
+        missing=None,
+    )
     mode = colander.SchemaNode(
-            colander.String(),
-            widget=deferred_select_mode,
-            title=u"Mode d'entretien",
-            )
+        colander.String(),
+        widget=deferred_select_mode,
+        title=u"Mode d'entretien",
+    )
     participants = ParticipantsSequence(
-            title=u"Participants",
-            widget=deform_widget.SequenceWidget(min_len=1))
+        title=u"Participants",
+        widget=deform_widget.SequenceWidget(min_len=1)
+    )
 
 
 class NewActivitySchema(CreateActivitySchema):
@@ -172,59 +178,126 @@ class NewActivitySchema(CreateActivitySchema):
             )
 
 
+class Attendance(colander.MappingSchema):
+    account_id = main.id_node()
+    event_id = main.id_node()
+
+    username = colander.SchemaNode(
+        colander.String(),
+        title=u'',
+        widget=custom_widget.DisabledInput(),
+        missing='',
+        )
+
+    status = colander.SchemaNode(
+        colander.String(),
+        widget=deform_widget.RadioChoiceWidget(values=ATTENDANCE_STATUS),
+        validator=colander.OneOf([x[0] for x in ATTENDANCE_STATUS]),
+        title=u'',
+        missing=u'excused',
+        )
+
+
+class Attendances(colander.SequenceSchema):
+    attendance = Attendance(
+        title=u'',
+        widget=custom_widget.InlineMappingWidget()
+        )
+
+
 class RecordActivitySchema(colander.Schema):
     """
     Schema for activity recording
     """
-    status = colander.SchemaNode(
-        colander.String(),
-        validator=colander.OneOf([x[0] for x in STATUSCHOICES]),
-        widget=deform_widget.RadioChoiceWidget(values=STATUSCHOICES),
-        title=u"Statut des participants",
-        missing=u"closed")
-    objectifs = main.textarea_node(
-        title=u"Objectifs du rendez-vous",
-        richwidget=True,
-        missing='',
-        )
+    attendances = Attendances(
+        title=u'Présence',
+        widget=deform_widget.SequenceWidget(
+            template='autonomie:deform_templates/fixed_len_sequence.pt',
+            item_template='autonomie:deform_templates/fixed_len_sequence_item.pt')
+    )
     point = main.textarea_node(
-        title=u"Points abordés",
+        title=u"Point de suivi",
         richwidget=True,
         missing='',
         )
+
+    objectifs = main.textarea_node(
+        title=u"Définition des objectifs",
+        richwidget=True,
+        missing='',
+        )
+
     action = main.textarea_node(
         title=u"Plan d'action et préconisations",
         richwidget=True,
         missing='',
         )
+
     documents = main.textarea_node(
         title=u"Documents produits",
         richwidget=True,
         missing='',
         )
+
     notes = main.textarea_node(
         title=u"Notes",
         richwidget=True,
         missing="",
         )
 
+    duration = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(max=6),
+        title=u'Durée',
+        description=u"La durée du rendez-vous (ex : 1h30)")
 
-class ActivityListSchema(lists.BaseListsSchema):
-    """
-    Schema for activity listing
-    """
-    conseiller_id = main.user_node(
-            roles=['manager', 'admin'],
-            missing=-1,
-            default=main.deferred_current_user_id,
-            )
-    participant_id = main.user_node(missing=-1)
-    status = colander.SchemaNode(
-            colander.String(),
-            validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
-            default='all',
-            missing='all')
-    type_id = colander.SchemaNode(
-            colander.Integer(),
-            validator=deferred_type_validator,
-            missing=-1)
+
+def get_list_schema():
+    schema = lists.BaseListsSchema().clone()
+
+    schema.insert(0, colander.SchemaNode(
+        colander.Integer(),
+        name='type_id',
+        widget=get_deferred_select_type(True),
+        validator=deferred_type_validator,
+        missing=-1))
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name='status',
+        widget=deform_widget.SelectWidget(values=STATUS_SEARCH),
+        validator=colander.OneOf([s[0] for s in STATUS_SEARCH]),
+        default='all',
+        missing='all'))
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name='user_status',
+        widget=deform_widget.SelectWidget(values=ATTENDANCE_STATUS_SEARCH),
+        validator=colander.OneOf([s[0] for s in ATTENDANCE_STATUS_SEARCH]),
+        default='all',
+        missing='all'))
+
+
+    schema.insert(0, main.user_node(
+        missing=-1,
+        name='participant_id',
+        widget_options={
+            'default_option': (-1, ''),
+            'placeholder': u"Sélectionner un participant"},
+        )
+    )
+
+    schema.insert(0, main.user_node(
+        roles=['manager', 'admin'],
+        missing=-1,
+        default=main.deferred_current_user_id,
+        name='conseiller_id',
+        widget_options={
+            'default_option': (-1, ''),
+            'placeholder': u"Sélectionner un conseiller"},
+        )
+    )
+
+    del schema['search']
+    return schema

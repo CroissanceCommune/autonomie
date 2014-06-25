@@ -332,7 +332,21 @@ def get_json_auth_schema():
     """
     return BaseAuthSchema(validator=auth)
 
-class UserListSchema(BaseListsSchema):
-    disabled = colander.SchemaNode(colander.String(),
-                                    missing="0",
-                                    validator=colander.OneOf(('0', '1')))
+
+def get_list_schema():
+    """
+    Return a schema for filtering the user list
+    """
+    schema = BaseListsSchema().clone()
+
+    schema['search'].description = u"Nom, entreprise, activité"
+
+    schema.add(colander.SchemaNode(
+        colander.String(),
+        name='disabled',
+        missing="0",
+        widget=widget.HiddenWidget(),
+        validator=colander.OneOf(('0', '1'))
+        )
+    )
+    return schema

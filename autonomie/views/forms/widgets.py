@@ -27,8 +27,13 @@
 """
 import cgi
 import logging
+import json
 import colander
+import warnings
 from datetime import date
+from itertools import izip_longest
+
+import deform
 
 from beaker.cache import cache_region
 from sqlalchemy import distinct
@@ -47,12 +52,14 @@ from autonomie.models.task import Invoice
 
 log = logging.getLogger(__name__)
 
+TEMPLATES_PATH = "autonomie:deform_templates/"
+
 
 class DisabledInput(widget.Widget):
     """
         A non editable input
     """
-    template = "autonomie:deform_templates/disabledinput.mako"
+    template = TEMPLATES_PATH + "disabledinput.mako"
 
     def serialize(self, field, cstruct=None, readonly=True):
         if cstruct is colander.null:
@@ -91,11 +98,11 @@ class CustomDateInputWidget(widget.Widget):
         The template name used to render the widget in read-only mode.
         Default: ``readonly/textinput``.
     """
-    template = 'autonomie:deform_templates/dateinput.pt'
+    template = TEMPLATES_PATH + 'dateinput.pt'
     readonly_template = 'readonly/textinput'
     size = None
     requirements = (('jqueryui', None), )
-    default_options = (('dateFormat', 'yy-mm-dd'),)
+    default_options = (('dateFormat', 'dd/mm/yy'),)
 
     def __init__(self, *args, **kwargs):
         self.options = dict(self.default_options)
@@ -118,6 +125,78 @@ class CustomDateInputWidget(widget.Widget):
         if date in ('', colander.null):
             return colander.null
         return date
+
+
+class CustomDateTimeInputWidget(CustomDateInputWidget):
+    """
+    Renders a datetime picker widget.
+
+    The default rendering is as a native HTML5 datetime  input widget,
+    falling back to jQuery UI date picker with a JQuery Timepicker add-on
+    (http://trentrichardson.com/examples/timepicker/).
+
+    Used for ``colander.DateTime`` schema nodes.
+
+    **Attributes/Arguments**
+
+    options
+        A dictionary of options that's passed to the datetimepicker.
+
+    size
+        The size, in columns, of the text input field.  Defaults to
+        ``None``, meaning that the ``size`` is not included in the
+        widget output (uses browser default size).
+
+    style
+        A string that will be placed literally in a ``style`` attribute on
+        the text input tag.  For example, 'width:150px;'.  Default: ``None``,
+        meaning no style attribute will be added to the input tag.
+
+    template
+        The template name used to render the widget.  Default:
+        ``dateinput``.
+
+    readonly_template
+        The template name used to render the widget in read-only mode.
+        Default: ``readonly/textinput``.
+    """
+    template = TEMPLATES_PATH + 'datetimeinput.pt'
+    readonly_template = 'readonly/textinput'
+    type_name = 'datetime'
+    size = None
+    style = None
+    requirements = ( ('modernizr', None), ('jqueryui', None),
+                     ('datetimepicker', None), )
+    default_options = (('dateFormat', 'dd/mm/yy'),
+                       ('timeFormat', 'hh:mm:ss'),
+                       ('separator', ' '))
+
+    def serialize(self, field, cstruct, readonly=False):
+        if cstruct in (colander.null, None):
+            cstruct = ''
+        if cstruct:
+            parsed = colander.iso8601.ISO8601_REGEX.match(cstruct)
+            if parsed: # strip timezone if it's there
+                timezone = parsed.groupdict()['timezone']
+                if timezone and cstruct.endswith(timezone):
+                    cstruct = cstruct[:-len(timezone)]
+        options = self.options
+        options['altFormat'] = 'yy-mm-dd'
+        separator = options.get('separator', ' ')
+        options = json.dumps(options)
+        cstruct = separator.join(cstruct.split('T'))
+        template = readonly and self.readonly_template or self.template
+        return field.renderer(
+            template,
+            field=field,
+            cstruct=cstruct,
+            options=options)
+
+    def deserialize(self, field, pstruct):
+        datetime_data = pstruct.get('datetime', colander.null)
+        if datetime_data in ('', colander.null):
+            return colander.null
+        return datetime_data.replace(self.options['separator'], 'T')
 
 
 class CustomSequenceWidget(widget.SequenceWidget):
@@ -196,6 +275,14 @@ class CustomSequenceWidget(widget.SequenceWidget):
                               add_subitem_text=add_subitem_text)
 
 
+class CustomChosenOptGroupWidget(widget.SelectWidget):
+    """
+    Customize the chosenselectwidget to be able to provide a default value for
+    unselection
+    """
+    template = TEMPLATES_PATH + 'chosen_optgroup.pt'
+
+
 def get_fileupload_widget(store_url, store_path, session, \
         default_filename=None, filters=None):
     """
@@ -209,7 +296,7 @@ def get_fileupload_widget(store_url, store_path, session, \
             filters=filters,
             )
     return widget.FileUploadWidget(tmpstore,
-                template="autonomie:deform_templates/fileupload.mako")
+                template=TEMPLATES_PATH + "fileupload.mako")
 
 @colander.deferred
 def deferred_edit_widget(node, kw):
@@ -286,3 +373,192 @@ def deferred_today(node, kw):
         return a deferred value for "today"
     """
     return date.today()
+
+
+def grouper(iterable, items, fillvalue=None):
+    """
+    Collect data into fixed-length chunks or blocks
+
+    e.g:
+
+        grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+
+    Got it from https://docs.python.org/2/library/itertools.html#recipes
+    """
+    args = [iter(iterable)] * items
+    return izip_longest(fillvalue=fillvalue, *args)
+
+
+class Inline(colander.Mapping):
+    """
+    Inline schema type, necessary to avoid our mapping to be render as tabs
+    (see deform_bootstrap.utils.tabify function )
+    """
+    pass
+
+
+class InlineMappingWidget(deform.widget.MappingWidget):
+    """
+    The custom widget we use to render our mapping
+    """
+    template = TEMPLATES_PATH + "inline_mapping"
+    item_template = TEMPLATES_PATH + "inline_mapping_item"
+    readonly_template = TEMPLATES_PATH + "inline_mapping"
+    readonly_item_template = TEMPLATES_PATH + "inline_mapping_item"
+
+
+class InlineMappingSchema(colander.MappingSchema):
+    """
+    Schema providing inline rendering of form elements
+    """
+    schema_type = Inline
+    widget = InlineMappingWidget()
+
+
+class VoidWidget(object):
+    """
+    Void widget used to fill our grid
+    """
+    def __init__(self, width=1):
+        self.width = width
+
+    def render_template(self, template):
+        """
+        Return a div of class span<width>
+        """
+        return u"<div class='span{0}'><br /></div>".format(self.width)
+
+
+class TableMappingWidget(deform.widget.MappingWidget):
+    """
+    A custom widget rendering a mapping as a table
+
+    :param cols: number of columns we want
+    """
+    default_cols = 3
+    template = TEMPLATES_PATH + "grid_mapping"
+    item_template = TEMPLATES_PATH + "grid_mapping_item"
+    readonly_template = TEMPLATES_PATH + "grid_mapping"
+    readonly_item_template = TEMPLATES_PATH + "grid_mapping_item"
+
+    def childgroup(self, field):
+        """
+        Return children grouped regarding the grid description
+        """
+        cols = getattr(self, "cols", self.default_cols)
+        return list(grouper(field.children, cols, fillvalue=None))
+
+
+class GridMappingWidget(TableMappingWidget):
+    """
+    A custom mapping widget rendering it as a grid
+
+    :param grid: A matrix describing the grid we want. The matrix should be
+    composed of two dimensionnal vectors (width, filled) where filled is a
+    boolean.
+    e.g:
+
+   class CompanyMainInformations(colander.MappingSchema):
+       title = colander.SchemaNode(
+           colander.String(),
+           title=u'Nom entreprise',
+       )
+       address = colander.SchemaNode(
+           colander.String(),
+           title=u'Adresse',
+           width="5",
+       )
+       lon_coord = colander.SchemaNode(
+           colander.Float(),
+           title=u"Longitude",
+       )
+       lat_coord = colander.SchemaNode(
+           colander.Float(),
+           title=u"Latitude",
+       )
+
+    LAYOUT = (
+           ((3, True), ),
+           ((6, True), (2, False), (2, True), (2, True)),
+           )
+
+    class CompanySchema(colander.Schema):
+        tab = CompanyMainInformations(widget=GridMappingWidget(grid=LAYOUT))
+
+    Here we've got a two lines grid with 1 element on the first line and 3 on
+    the second one. The second element of the second line will be a void cell
+    of 2 units width
+    """
+
+    # The default bootstrap layout contains 12 columns
+    num_cols = 12
+
+    def childgroup(self, field):
+        """
+        Return a list of fields stored by row regarding the configured grid
+
+        :param field: The original field this widget is attached to
+        """
+        grid = getattr(self, "grid")
+
+        if grid is None:
+            raise AttributeError(u"Missing the grid argument")
+
+        result = []
+        index = 0
+        for row in grid:
+            child_row = []
+            width_sum = 0
+            for width, filled in row:
+                width_sum += width
+                if width_sum > self.num_cols:
+                    warnings.warn(u"It seems your grid configuration overlaps \
+the bootstrap layout columns number. One of your lines is larger than {0}. \
+You can increase this column number by compiling bootstrap css with \
+lessc.".format(self.num_cols))
+
+                if filled:
+                    try:
+                        child = field.children[index]
+                    except IndexError:
+                        raise AttributeError(u"The grid items number doesn't \
+match the number of children of our mapping widget")
+                    index += 1
+                    child.width = width
+                else:
+                    child = VoidWidget(width)
+                child_row.append(child)
+            result.append(child_row)
+        return result
+
+
+class GridFormWidget(GridMappingWidget):
+    """
+    Render a form as a grid
+
+    .. code-block:: python
+
+        class CompanyMainInformations(colander.MappingSchema):
+            title = colander.SchemaNode(
+                colander.String(),
+                title=u'Nom entreprise',
+            )
+            address = colander.SchemaNode(
+                colander.String(),
+                title=u'Adresse',
+                width="5",
+            )
+
+        LAYOUT = (((2, True), (2, False), (2, True),),)
+
+        schema = CompanyMainInformations()
+        form = Form(schema)
+        form.widget = GridFormWidget(grid=LAYOUT)
+
+    .. warning::
+
+        Here you need to set the widget after you initialize the form object
+
+    """
+    template = TEMPLATES_PATH + "grid_form"
+    readonly_template = TEMPLATES_PATH + "grid_form"

@@ -51,3 +51,30 @@ function formatPaymentDate(isoDate){
     return "";
   }
 }
+function getDateFromIso(isoDateStr, dateFormat){
+ var strdate = "";
+ if (isoDateStr !== ''){
+  var date = parseDate(isoDateStr);
+  strdate = $.datepicker.formatDate(dateFormat, date);
+ }
+ return strdate;
+}
+
+function getTimeFromIso(isoTimeStr, timeFormat){
+  var splitted = isoTimeStr.split(':');
+  var hour = parseInt(splitted[0], 10);
+  var min = parseInt(splitted[1], 10);
+  return $.datepicker.formatTime(timeFormat, {hour: hour, minute: min});
+}
+
+function getDateTimeFromIso(isoStr, dateFormat, timeFormat){
+  var strdatetime = "";
+  if (isoStr !== ''){
+    var isoDateStr = isoStr.split(' ')[0];
+    var isoTimeStr = isoStr.split(' ')[1];
+    var strdate = getDateFromIso(isoDateStr, dateFormat);
+    var strTime = getTimeFromIso(isoTimeStr, timeFormat);
+    strdatetime = strdate + " " + strTime;
+  }
+  return strdatetime;
+}

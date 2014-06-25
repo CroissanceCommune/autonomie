@@ -24,12 +24,12 @@ var ActivityModule = AutonomieApp.module('ActivityModule' ,
   function (ActivityModule, AutonomieApp, Backbone, Marionette, $, _){
     ActivityModule.Router = Marionette.AppRouter.extend({
       appRoutes: {
-        "activities/:id": "get_activities"
+        "events/:id": "get_events"
         }
     });
     ActivityModule.Controller = {
       initialized: false,
-      element: '#activity_container',
+      element: '#event_container',
 
       initialize: function(){
         if (!this.initialized){
@@ -39,12 +39,12 @@ var ActivityModule = AutonomieApp.module('ActivityModule' ,
         }
       },
       setNbItemsSelectBehaviour: function(){
-        $('#number_of_activities').unbind('change.activities');
-        _.bindAll(this, 'get_activities');
+        $('#number_of_events').unbind('change.events');
+        _.bindAll(this, 'get_events');
         var this_ = this;
-        $('#number_of_activities').bind("change.activities",
+        $('#number_of_events').bind("change.events",
           function(){
-            this_.get_activities(1);
+            this_.get_events(1);
           }
         );
       },
@@ -52,15 +52,15 @@ var ActivityModule = AutonomieApp.module('ActivityModule' ,
         this.initialize();
         this.setNbItemsSelectBehaviour();
       },
-      get_activities: function(id){
+      get_events: function(id){
         this.initialize();
         this.refresh_list(id);
       },
       refresh_list: function(page_num) {
-        url = '?action=activities_html';
-        var items_per_page = $('#number_of_activities').val();
-        postdata = {'activities_page_nb': page_num,
-                    'activities_per_page': items_per_page};
+        url = '?action=events_html';
+        var items_per_page = $('#number_of_events').val();
+        postdata = {'events_page_nb': page_num,
+                    'events_per_page': items_per_page};
         var this_ = this;
         $.ajax(
             url,
@@ -86,7 +86,7 @@ var ActivityModule = AutonomieApp.module('ActivityModule' ,
     AutonomieApp.addInitializer(function(){
       // Here we have code launched before backbone history starts (we need to
       // create all routers before))
-      // We manually launch the index since it's not the role of our activity
+      // We manually launch the index since it's not the role of our event
       // module to do that
       console.log("Start The Activity Module");
       ActivityModule.router = new ActivityModule.Router( {controller: ActivityModule.Controller});

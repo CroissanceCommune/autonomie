@@ -158,6 +158,29 @@ class JsonEncodedDict(TypeDecorator):
         return value
 
 
+class JsonEncodedList(TypeDecorator):
+    """
+    Stores a list as a json string
+    """
+    impl = Text_type
+
+    def process_bind_param(self, value, dialect):
+        """
+            Process params when setting the value
+        """
+        if value is not None:
+            value = json.dumps(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        """
+            Processing the value when getting the value
+        """
+        if value is not None:
+            value = json.loads(value)
+        return value
+
+
 class MutableDict(Mutable, dict):
     """
         Allows sqlalchemy to check if a data has changed in our dict
@@ -191,7 +214,52 @@ class MutableDict(Mutable, dict):
         dict.__delitem__(self, key)
         self.changed()
 
+
+class MutableList(Mutable, list):
+    """
+        Allows sqlalchemy to check if a data has changed in our list
+        If not used, the dbsession will never detect modifications
+    """
+    @classmethod
+    def coerce(cls, key, value):
+        """
+        Convert list to mutablelist
+        """
+        if not isinstance(value, MutableList):
+            print type(value)
+            if isinstance(value, list):
+                return MutableList(value)
+
+            # this call will raise ValueError
+            return Mutable.coerce(key, value)
+        else:
+            return value
+
+    def append(self, value):
+        """
+        Detect list append changes
+        """
+        list.append(self, value)
+        self.changed()
+
+    def extend(self, value):
+        """
+        Detect list append changes
+        """
+        list.extend(self, value)
+        self.changed()
+
+    def remove(self, value):
+        """
+        Detect list remove change
+        """
+        list.remove(self, value)
+        self.changed()
+
+
 # Here we always associate our MutableDict to our JsonEncodedDict column type
 # If a column is of type JsonEncodedDict, its value will be casted as a
 # mutabledict that will signify modifications on setitem and delitem
 MutableDict.associate_with(JsonEncodedDict)
+# The same for lists
+MutableList.associate_with(JsonEncodedList)

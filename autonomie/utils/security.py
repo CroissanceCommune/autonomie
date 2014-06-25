@@ -42,10 +42,14 @@ from autonomie.models.task.invoice import (
     CancelInvoice,
     Payment,
 )
+from autonomie.models.workshop import (
+    Workshop,
+    Timeslot,
+)
 from autonomie.models.treasury import (
-        ExpenseSheet,
-        BaseExpenseLine,
-        )
+    ExpenseSheet,
+    BaseExpenseLine,
+)
 from autonomie.models.user import User
 
 log = logging.getLogger(__name__)
@@ -84,30 +88,46 @@ class RootFactory(dict):
 
     def __init__(self, request):
         self.request = request
-        self['activities'] = ActivityFactory(self, "activities")
-        self['cancelinvoices'] = CancelInvoiceFactory(self, 'cancelinvoices')
-        self['companies'] = CompanyFactory(self, "companies")
-        self['customers'] = CustomerFactory(self, 'customers')
-        self['estimations'] = EstimationFactory(self, 'estimations')
-        self['expenses'] = ExpenseSheetFactory(self, "expenses")
-        self['expenselines'] = ExpenseFactory(self, 'expenselines')
-        self['files'] = FileFactory(self, 'files')
-        self['invoices'] = InvoiceFactory(self, 'invoices')
-        self['projects'] = ProjectFactory(self, 'projects')
-        self['users'] = UserFactory(self, 'users')
-        self['payments'] = PaymentFactory(self, 'payments')
+
+        for traversal_name, object_name, factory in (
+            ("activities", "activity", Activity, ),
+            ('cancelinvoices', 'cancelinvoice', CancelInvoice, ),
+            ('companies', 'company', Company, ),
+            ('customers', 'customer', Customer, ),
+            ('estimations', 'estimation', Estimation, ),
+            ('expenses', 'expense', ExpenseSheet, ),
+            ('expenselines', 'expenseline', BaseExpenseLine, ),
+            ('files', 'file', File, ),
+            ('invoices', 'invoice', Invoice, ),
+            ('projects', 'project', Project, ),
+            ('users', 'user', User, ),
+            ('payments', 'payment', Payment, ),
+            ('workshops', 'workshop', Workshop, ),
+            ('timeslots', 'timeslot', Timeslot, ),
+            ):
+
+            self[traversal_name] = TraversalDbAccess(
+                self,
+                traversal_name,
+                object_name,
+                factory)
 
 
-class BaseDBFactory(object):
+class TraversalDbAccess(object):
     """
-        Base class for dbrelated objects
+        Class handling access to dbrelated objects
     """
     __acl__ = DEFAULT_PERM[:]
     dbsession = None
-    def __init__(self, parent, name):
-        self.__parent__ = parent
-        self.__name__ = name
 
+    def __init__(self, parent, traversal_name, object_name, factory):
+        self.__parent__ = parent
+        self.factory = factory
+        self.object_name = object_name
+        self.__name__ = traversal_name
+
+    def __getitem__(self, key):
+        return self._get_item(self.factory, key, self.object_name)
 
     def _get_item(self, klass, key, object_name):
         assert self.dbsession is not None, "Missing dbsession"
@@ -123,138 +143,6 @@ class BaseDBFactory(object):
 
         obj.__name__ = object_name
         return obj
-
-
-class CompanyFactory(BaseDBFactory):
-    """
-        Handle access to a project
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(Company, key, "company")
-
-
-class ProjectFactory(BaseDBFactory):
-    """
-        Handle access to a project
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(Project, key, 'project')
-
-
-class CustomerFactory(BaseDBFactory):
-    """
-        Handle access to a customer
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(Customer, key, 'customer')
-
-
-class EstimationFactory(BaseDBFactory):
-    """
-        Handle access to an estimation
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(Estimation, key, 'estimation')
-
-
-class InvoiceFactory(BaseDBFactory):
-    """
-        Handle access to an invoice
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(Invoice, key, 'invoice')
-
-
-class CancelInvoiceFactory(BaseDBFactory):
-    """
-        Handle access to a cancelinvoice
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(CancelInvoice, key, 'cancelinvoice')
-
-
-class UserFactory(BaseDBFactory):
-    """
-        Handle access to a user account
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(User, key, 'user')
-
-
-class ExpenseSheetFactory(BaseDBFactory):
-    """
-        Handle access to expense sheets
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(ExpenseSheet, key, "expensesheet")
-
-
-class ExpenseFactory(BaseDBFactory):
-    """
-        Handle access to expense sheets
-    """
-    def __getitem__(self, key):
-        """
-            Returns the traversed object
-        """
-        return self._get_item(BaseExpenseLine, key, "expense")
-
-
-class FileFactory(BaseDBFactory):
-    """
-    Handle access to files
-    """
-    def __getitem__(self, key):
-        """
-        Return the traversed file object
-        """
-        return self._get_item(File, key, 'file')
-
-
-class ActivityFactory(BaseDBFactory):
-    """
-    Handle access to activities
-    """
-    def __getitem__(self, key):
-        """
-        Return the traversed file object
-        """
-        return self._get_item(Activity, key, 'file')
-
-
-class PaymentFactory(BaseDBFactory):
-    """
-    Handle access to payments
-    """
-    def __getitem__(self, key):
-        """
-        Return the traversed file object
-        """
-        return self._get_item(Payment, key, 'payment')
 
 
 def get_base_acl(self):
@@ -370,9 +258,12 @@ def get_file_acl(self):
     return self.parent.__acl__
 
 
-def wrap_db_objects():
+def set_models_acls():
     """
-        Add acls and names to the db objects used as context
+    Add acls to the db objects used as context
+
+    Here acls are set globally, but we'd like to set things more dynamically
+    when different roles will be implemented
     """
     Company.__acl__ = property(get_company_acl)
     Project.__acl__ = property(get_customer_or_project_acls)
@@ -386,3 +277,5 @@ def wrap_db_objects():
     Activity.__acl__ = property(get_activity_acl)
     File.__acl__ = property(get_file_acl)
     Payment.__acl__ = property(get_base_acl)
+    Workshop.__acl__ = property(get_activity_acl)
+    Timeslot.__acl__ = property(get_base_acl)

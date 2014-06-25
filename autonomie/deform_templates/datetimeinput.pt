@@ -1,0 +1,38 @@
+<span tal:define="oid oid|field.oid;
+                  style style|field.widget.style|None;
+                  type_name type_name|field.widget.type_name;"
+    tal:omit-tag="">
+    <input type='hidden' name="__start__" value="${field.name}:mapping"/>
+    <input type="hidden"
+           name="datetime"
+           value="${cstruct}"
+           id="${field.oid}_altField" />
+
+    <input type="text"
+           name="displayDate"
+           autocomplete="off"
+           value="${cstruct}"
+           tal:attributes="size field.widget.size;
+                           class field.widget.css_class"
+           id="${field.oid}"/>
+    <script type="text/javascript">
+
+      deform.addCallback(
+        '${oid}',
+        function(oid) {
+              if (!Modernizr.inputtypes['datetime'] ||
+                   "${type_name}" != "datetime"){
+                var js_options = ${options};
+                js_options['altField'] = "#" + oid + "_altField";
+                js_options['altFieldTimeOnly'] = false;
+                var datetime = getDateTimeFromIso("${cstruct}",
+                  js_options['dateFormat'],
+                  js_options['timeFormat']);
+                $('#' + oid).val(datetime);
+                $('#' + oid).datetimepicker(js_options);
+              }
+        }
+      );
+    </script>
+    <input type="hidden" name="__end__" value="${field.name}:mapping"/>
+</span>

@@ -1,0 +1,19 @@
+<div class="row form-row"
+          tal:define="title title|field.title;
+                      description description|field.description;
+                      errormsg errormsg|field.errormsg;
+                      item_template item_template|field.widget.item_template"
+          i18n:domain="deform">
+  <!-- mapping -->
+  <div tal:condition="errormsg">
+    <h3 class="errorMsgLbl" i18n:translate=""
+        >There was a problem with this section</h3>
+    <p class="errorMsg">${errormsg}</p>
+  </div>
+  ${field.start_mapping()}
+    <div tal:repeat="child field"
+         tal:replace="structure child.render_template(item_template)"/>
+  ${field.end_mapping()}
+  <!-- /mapping -->
+</div>
+

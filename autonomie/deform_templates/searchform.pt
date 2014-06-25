@@ -1,0 +1,24 @@
+<form class='navbar-form offset1 pull-right form-search form-inline'
+  id='search_form'
+  method='GET'
+  accept-charset="utf-8"
+  enctype="multipart/form-data"
+  i18n:domain="deform"
+  >
+
+    <input type="hidden" name="_charset_" />
+    <input type="hidden" name="__formid__" value="${field.formid}"/>
+
+    <tal:for tal:repeat="item field.children" tal:define="rndr field.renderer; tmpl field.widget.item_template">
+
+        <tal:code tal:define="not_wrapped item.widget.template not in ('textinput', 'autonomie:deform_templates/datetimeinput.pt', 'autonomie:deform_templates/dateinput.pt')" >
+        <div class='pull-left inline-element' tal:omit-tag="not_wrapped">
+          <div tal:replace="structure item.render(cstruct=cstruct.get(item.name, null))" />
+          <span class='help-block' tal:condition="item.description" tal:content="item.description" />
+        </div>
+        </tal:code>
+    </tal:for>
+
+
+    <button type="submit" class="btn btn-primary">Filtrer</button>
+</form>

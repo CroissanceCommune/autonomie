@@ -46,7 +46,6 @@ from autonomie.models.task import (
         CancelInvoice,
         ManualInvoice,
         )
-from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
 
@@ -60,11 +59,10 @@ from autonomie.utils.pdf import write_pdf
 from autonomie.views.taskaction import html
 
 from autonomie.views.forms.invoices import (
-        InvoicesListSchema,
+        get_list_schema,
         pdfexportSchema,
-        STATUS_OPTIONS,
         )
-from autonomie.views.base import BaseListView
+from autonomie.views import BaseListView
 
 log = logging.getLogger(__name__)
 
@@ -119,13 +117,13 @@ def get_year_range(year):
     return fday, lday
 
 
-class InvoicesList(BaseListView):
+class GlobalInvoicesList(BaseListView):
     """
         Used as base for company invoices listing
     """
     title = u""
-    add_template_vars = (u'title', u'pdf_export_btn',)
-    schema = InvoicesListSchema()
+    add_template_vars = (u'title', u'pdf_export_btn', 'is_admin',)
+    schema = get_list_schema(is_admin=True)
     sort_columns = dict(taskDate=("taskDate",),
                number=("number",),
                customer=("customer", "name",),
@@ -134,11 +132,13 @@ class InvoicesList(BaseListView):
 
     default_sort = "officialNumber"
     default_direction = 'desc'
+    is_admin = True
 
     @property
     def pdf_export_btn(self):
         """
-            return a popup object for the pdf export form
+        return a popup open button for the pdf export form and place the popup
+        in the request attribute
         """
         form = get_invoice_pdf_export_form(self.request)
         popup = PopUp("pdfexportform", u'Export massif', form.render())
@@ -169,11 +169,7 @@ class InvoicesList(BaseListView):
         return query
 
     def _get_company_id(self, appstruct):
-        """
-            Return the company id : should be overriden
-        """
-        return -1
-
+        return appstruct['company_id']
 
     def filter_officialNumber(self, query, appstruct):
         number = appstruct['search']
@@ -238,12 +234,6 @@ class InvoicesList(BaseListView):
                                     Task.type_=='cancelinvoice'),
                                 Task.type_=='manualinvoice'))
 
-    def default_form_values(self, appstruct):
-        super(InvoicesList, self).default_form_values(appstruct)
-        appstruct['years'] = get_years(self.request.dbsession)
-        appstruct['status_options'] = STATUS_OPTIONS
-        return appstruct
-
     def _sort(self, query, appstruct):
         """
             Custom sort function
@@ -273,23 +263,16 @@ class InvoicesList(BaseListView):
         invoices = sorted(invoices, key=sort_func, reverse=reverse)
         return invoices
 
-class CompanyInvoicesList(InvoicesList):
+
+class CompanyInvoicesList(GlobalInvoicesList):
+    """
+    Invoice list for one given company
+    """
+    schema = get_list_schema(is_admin=False)
+    is_admin = False
+
     def _get_company_id(self, appstruct):
         return self.request.context.id
-
-    def default_form_values(self, appstruct):
-        values = super(CompanyInvoicesList, self).default_form_values(appstruct)
-        values["customers"] = self.request.context.customers
-        return values
-
-class GlobalInvoicesList(InvoicesList):
-    def _get_company_id(self, appstruct):
-        return appstruct['company_id']
-
-    def default_form_values(self, appstruct):
-        values = super(GlobalInvoicesList, self).default_form_values(appstruct)
-        values['companies'] = Company.query().all()
-        return values
 
 
 def get_invoice_pdf_export_form(request):
@@ -401,7 +384,7 @@ def includeme(config):
 
     config.add_view(CompanyInvoicesList,
                     route_name='company_invoices',
-                    renderer='company_invoices.mako',
+                    renderer='invoices.mako',
                     permission='edit')
     config.add_view(GlobalInvoicesList,
                     route_name="invoices",

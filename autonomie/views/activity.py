@@ -30,6 +30,9 @@ import logging
 import deform
 import itertools
 
+from js.deform import auto_need
+from js.jquery_timepicker_addon import timepicker_fr
+
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from sqlalchemy.orm import aliased
@@ -39,34 +42,29 @@ from autonomie.utils.pdf import (
         render_html,
         write_pdf,
         )
-from autonomie.views.base import BaseListView
+from autonomie.views import BaseListView
 from autonomie.views.files import FileUploadView
-from autonomie.models.activity import Activity
+from autonomie.models.activity import (
+    Activity,
+    Attendance,
+    )
 from autonomie.models import user
 from autonomie.views.forms import (
-        BaseFormView,
-        merge_session_with_post,
-        )
+    BaseFormView,
+    merge_session_with_post,
+    )
 from autonomie.views.forms.activity import (
-        CreateActivitySchema,
-        NewActivitySchema,
-        RecordActivitySchema,
-        ActivityListSchema,
-        STATUS_OPTIONS,
-        get_activity_types,
-        )
-from autonomie.utils.views import submit_btn
-
+    CreateActivitySchema,
+    NewActivitySchema,
+    RecordActivitySchema,
+    get_list_schema,
+    )
 from autonomie.views import render_api
 
 log = logging.getLogger(__name__)
 
 
-# Sqlalchemy aliases used to outerjoin two times on the same table (but through
-# two different relationships
 CONSEILLER = aliased(user.User)
-PARTICIPANTS = aliased(user.User)
-
 
 ACTIVITY_SUCCESS_MSG = u"Le rendez-vous a bien été programmé \
 <a href='{0}'>Voir</a>"
@@ -76,21 +74,15 @@ NEW_ACTIVITY_BUTTON = deform.Button(
     type='submit',
     title=u"Programmer")
 
-
 ACTIVITY_RECORD_BUTTON = deform.Button(
-    name="submit",
+    name="closed",
     type="submit",
     title=u"Enregistrer et Terminer le rendez-vous")
 
-ACTIVITY_USER_EXCUSED = deform.Button(
-    name="excused",
+ACTIVITY_CANCEL_BUTTON = deform.Button(
+    name="cancelled",
     type="submit",
-    title=u"Participant excusé")
-
-ACTIVITY_USER_ABSENT = deform.Button(
-    name="absent",
-    type="submit",
-    title=u"Participant excusé")
+    title=u"Enregistrer et Annuler le rendez-vous")
 
 
 def new_activity(request, appstruct):
@@ -98,10 +90,17 @@ def new_activity(request, appstruct):
     Add a new activity in the database
     """
     activity = Activity(status="planned")
-    participants_ids = appstruct.pop('participants', [])
+
+    participants_ids = set(appstruct.pop('participants', []))
     if participants_ids:
         appstruct['participants'] = [user.User.get(id_) \
             for id_ in participants_ids]
+
+    conseillers_ids = set(appstruct.pop('conseillers', []))
+    if conseillers_ids:
+        appstruct['conseillers'] = [user.User.get(id_) \
+            for id_ in conseillers_ids]
+
     merge_session_with_post(activity, appstruct)
     request.dbsession.add(activity)
     request.dbsession.flush()
@@ -171,7 +170,17 @@ def _get_appstruct_from_activity(activity):
     """
     appstruct = activity.appstruct()
     participants = activity.participants
+    conseillers = activity.conseillers
+
     appstruct['participants'] = [p.id for p in participants]
+    appstruct['conseillers'] = [c.id for c in conseillers]
+    appstruct['attendances'] = [
+        {
+        'event_id': att.event_id,
+        'account_id': att.account_id,
+        'username': render_api.format_account(att.user),
+        'status': att.status,
+        } for att in activity.attendances]
     return appstruct
 
 
@@ -213,12 +222,14 @@ class NewActivityView(BaseFormView):
         """
         By default the activity is filled with the current user as conseiller
         """
+        auto_need(form)
+        timepicker_fr.need()
         come_from = self.request.referrer
         current_user = self.request.user
         appstruct = {
-                'conseiller_id': current_user.id,
-                'come_from': come_from,
-                }
+            'conseillers': [current_user.id],
+            'come_from': come_from,
+        }
         form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
@@ -286,7 +297,6 @@ class ActivityEditView(BaseFormView):
         )
 
     schema = CreateActivitySchema()
-    buttons = (submit_btn,)
 
     @property
     def title(self):
@@ -314,15 +324,16 @@ class ActivityEditView(BaseFormView):
             "activity",
             id=self.request.context.id,
             _query=dict(action="record"),
-            )
+        )
         form = deform.Form(
             schema=RecordActivitySchema().bind(request=self.request),
-            buttons=(ACTIVITY_RECORD_BUTTON,),
+            buttons=(ACTIVITY_RECORD_BUTTON, ACTIVITY_CANCEL_BUTTON,),
             counter=self.counter,
             formid="record_form",
             action=submit_url,
-            )
+        )
         form.set_appstruct(self.get_appstruct())
+        auto_need(form)
         return form.render()
 
     def get_appstruct(self):
@@ -337,64 +348,75 @@ class ActivityEditView(BaseFormView):
         appstruct = self.get_appstruct()
         form.set_appstruct(appstruct)
 
+        auto_need(form)
+        timepicker_fr.need()
+
     def submit_success(self, appstruct):
         """
         called when the edition form is submitted
         """
         # Retrieving participants
-        participants_ids = appstruct.pop('participants', [])
+        participants_ids = set(appstruct.pop('participants', []))
         appstruct['participants'] = [user.User.get(id_) \
                 for id_ in participants_ids]
+        conseillers_ids = set(appstruct.pop('conseillers', []))
+        appstruct['conseillers'] = [user.User.get(id_) \
+                                    for id_ in conseillers_ids]
 
         message = u"Les informations ont bien été mises à jour"
         return record_changes(self.request, appstruct, message)
 
-    def submit_failure(self, e):
-        """
-        Called when we failed to submit the values
-        We add a token to know if we should display the form or not
-        """
-        return dict(form=e.render(), formerror=True)
 
 class ActivityRecordView(BaseFormView):
     add_template_vars = ()
 
     schema = RecordActivitySchema()
-    buttons = (ACTIVITY_RECORD_BUTTON,)
+    buttons = (ACTIVITY_RECORD_BUTTON, ACTIVITY_CANCEL_BUTTON, )
 
-    def submit_success(self, appstruct):
+    def record_attendance(self, appstruct):
+        """
+        Record the attendances status in both cancelled and closed activity
+        """
+        for datas in appstruct.pop('attendances', []):
+            account_id = datas['account_id']
+            event_id = datas['event_id']
+
+            obj = Attendance.get((account_id, event_id))
+            if obj is not None:
+                obj.status = datas['status']
+                self.dbsession.merge(obj)
+
+    def closed_success(self, appstruct):
         """
         Called when the record submit button is clicked
         """
         message = u"Les informations ont bien été enregistrées"
+        self.record_attendance(appstruct)
+        self.context.status = 'closed'
+        return record_changes(self.request, appstruct, message, gotolist=True)
+
+    def cancelled_success(self, appstruct):
+        """
+        Called when the cancelled button is clicked
+        """
+        message = u"Le rendez-vous a bien été annulé"
+        self.record_attendance(appstruct)
+        self.context.status = 'cancelled'
         return record_changes(self.request, appstruct, message, gotolist=True)
 
 
 class ActivityList(BaseListView):
     title = u"Rendez-vous"
-    schema = ActivityListSchema()
+    schema = get_list_schema()
     sort_columns = dict(
-            date=Activity.date,
-            conseiller=CONSEILLER.lastname,
+            datetime=Activity.datetime,
+            conseiller=user.User.lastname,
             )
-    default_sort = 'date'
+    default_sort = 'datetime'
     default_direction = 'desc'
-
-    def default_form_values(self, values):
-        """
-        Provide default form values for the manually rendered form
-        """
-        values = super(ActivityList, self).default_form_values(values)
-        values['status_options'] = STATUS_OPTIONS
-        values['conseiller_options'] = user.get_user_by_roles(
-                ['admin',  'manager'])
-        values['participants_options'] = user.User.query()
-        values['type_options'] = get_activity_types()
-        return values
 
     def query(self):
         query = Activity.query()
-        query = query.outerjoin(CONSEILLER, Activity.conseiller)
         return query
 
     def _get_conseiller_id(self, appstruct):
@@ -409,16 +431,26 @@ class ActivityList(BaseListView):
         """
         conseiller_id = self._get_conseiller_id(appstruct)
         if conseiller_id != -1:
-            query = query.filter(Activity.conseiller_id==conseiller_id)
+            query = query.filter(
+                Activity.conseillers.any(user.User.id==conseiller_id)
+            )
         return query
 
     def filter_participant(self, query, appstruct):
         participant_id = appstruct['participant_id']
+
         if participant_id != -1:
-            query = query.outerjoin(PARTICIPANTS, Activity.participants)
             query = query.filter(
-                    Activity.participants.any(PARTICIPANTS.id==participant_id)
-                    )
+                Activity.attendances.any(Attendance.account_id==participant_id)
+                )
+        return query
+
+    def filter_user_status(self, query, appstruct):
+        status = appstruct['user_status']
+        if status != 'all':
+            query = query.filter(
+                Activity.attendances.any(Attendance.status==status)
+            )
         return query
 
     def filter_type(self, query, appstruct):
@@ -429,8 +461,10 @@ class ActivityList(BaseListView):
 
     def filter_status(self, query, appstruct):
         status = appstruct['status']
+
         if status != 'all':
-            query = query.filter(Activity.status==status)
+            query = query.filter(Activity.status == status)
+
         return query
 
 
@@ -440,10 +474,9 @@ class ActivityListContractor(ActivityList):
 
     def filter_participant(self, query, appstruct):
         company = self.context
-        participants_ids = [user.id for user in company.employees]
-        query = query.outerjoin(PARTICIPANTS, Activity.participants)
+        participants_ids = [u.id for u in company.employees]
         query = query.filter(
-            Activity.participants.any(PARTICIPANTS.id.in_(participants_ids))
+            Activity.attendances.any(Attendance.account_id==participant_id)
             )
         return query
 
@@ -460,7 +493,7 @@ def activity_view_only_view(context, request):
                 )
         return HTTPFound(url)
     title = u"Rendez-vous du %s" % (
-            render_api.format_date(request.context.date),
+            render_api.format_datetime(request.context.datetime),
             )
     populate_actionmenu(request)
     return dict(title=title, activity=request.context)
@@ -482,8 +515,8 @@ def activity_pdf_view(context, request):
     """
     Return a pdf output of the current activity
     """
-    date = context.date.strftime("%e_%M_%Y")
-    filename = u"rdv_{0}.pdf".format(date)
+    date = context.datetime.strftime("%e_%m_%Y")
+    filename = u"rdv_{0}_{1}.pdf".format(date, context.id)
 
     template = u"autonomie:templates/activity_pdf.mako"
     datas = dict(activity=context)
@@ -494,8 +527,15 @@ def activity_pdf_view(context, request):
     return request.response
 
 
-def activity_html_view(context, request):
-    return dict(title=u"Vue html", activity=context)
+def activity_html_view(activity, request):
+    """
+    Return an html view of the current activity
+
+        activity
+
+            context retrieved through traversal
+    """
+    return dict(activity=activity)
 
 
 def includeme(config):
@@ -571,7 +611,7 @@ def includeme(config):
             activity_html_view,
             route_name='activity.html',
             permission='view',
-            renderer="/activity_pdf.mako"
+            renderer='/activity_pdf.mako',
             )
 
     config.add_view(

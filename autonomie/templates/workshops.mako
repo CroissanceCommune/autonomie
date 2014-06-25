@@ -42,7 +42,7 @@
 <table class="table table-condensed table-hover">
     <thead>
         <tr>
-            <th>${sortable("Date", "date")}</th>
+            <th>${sortable("Date", "datetime")}</th>
             <th>Intitulé de l'Atelier</th>
             <th>Animateur(s)/Animatrice(s)</th>
             <th>Nombre de participant(s)</th>
@@ -52,7 +52,13 @@
     </thead>
     <tbody>
         % for workshop in records:
-            <% url = request.route_path('workshop', id=workshop.id, _query=dict(action='edit')) %>
+            % if api.has_permission('manage', workshop):
+                <% _query=dict(action='edit') %>
+            % else:
+                ## Route is company_workshops, the context is the company
+                <% _query=dict(company_id=request.context.id) %>
+            % endif
+            <% url = request.route_path('workshop', id=workshop.id, _query=_query) %>
             % if api.has_permission('view', workshop):
                 <% onclick = "document.location='{url}'".format(url=url) %>
             % else :
@@ -60,7 +66,7 @@
             % endif
             <tr>
                 <td onclick="${onclick}" class="rowlink">
-                    ${api.format_date(workshop.date)}
+                    ${api.format_date(workshop.datetime)}
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     ${workshop.name}
@@ -90,16 +96,14 @@ ${api.format_datetime(timeslot.end_time)} \
                     </ul>
                 </td>
                 <td>
-                    % if api.has_permission("view", workshop):
-                        ${table_btn(url, u"Voir", u"Voir l'atelier", icon='icon-search')}
-                    % endif
-                    % if api.has_permission('edit', workshop):
+                    % if api.has_permission('manage', workshop):
                         <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='icon-pencil')}
 
                         <% del_url = request.route_path('workshop', id=workshop.id, _query=dict(action="delete")) %>
                         ${table_btn(del_url, u"Supprimer",  u"Supprimer cet atelier", icon='icon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')")}
-
+                    % elif api.has_permission("view", workshop):
+                        ${table_btn(url, u"Voir", u"Voir l'atelier", icon='icon-search')}
                     % endif
                 </td>
             </tr>

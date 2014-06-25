@@ -164,7 +164,10 @@ def get_company_menu(request, cid, css=None):
     gestion.add_item(u"Notes de frais", icon="icon-cog", href=href)
 
     href = request.route_path("company_activities", id=cid)
-    gestion.add_item(u"Accompagnement", icon="icon-list-alt", href=href)
+    gestion.add_item(u"Rendez-vous", icon="icon-list-alt", href=href)
+
+    href = request.route_path("company_workshops", id=cid)
+    gestion.add_item(u"Ateliers", icon="icon-list-alt", href=href)
 
     menu.add(gestion)
 

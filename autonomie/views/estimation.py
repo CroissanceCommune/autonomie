@@ -34,36 +34,36 @@ from sqlalchemy import extract
 from beaker.cache import cache_region
 
 from autonomie.models.task.estimation import (
-        Estimation,
-        EstimationLine,
-        PaymentLine,
+    Estimation,
+    EstimationLine,
+    PaymentLine,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.models.task.task import DiscountLine
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
 from autonomie.views.forms.task import (
-        get_estimation_schema,
-        get_estimation_appstruct,
-        get_estimation_dbdatas,
+    get_estimation_schema,
+    get_estimation_appstruct,
+    get_estimation_dbdatas,
 )
 from autonomie.views.forms.estimations import (
-        EstimationListSchema,
-        STATUS_OPTIONS,
-        )
+    get_list_schema,
+    STATUS_OPTIONS,
+)
 from autonomie.views.forms import merge_session_with_post
 from autonomie.exception import Forbidden
 from autonomie.utils.views import submit_btn
 from autonomie.views.taskaction import (
-        TaskStatusView,
-        TaskFormView,
-        context_is_editable,
-        populate_actionmenu,
-        task_pdf_view,
-        task_html_view,
-        make_task_delete_view,
+    TaskStatusView,
+    TaskFormView,
+    context_is_editable,
+    populate_actionmenu,
+    task_pdf_view,
+    task_html_view,
+    make_task_delete_view,
 )
-from .base import BaseListView
+from autonomie.views import BaseListView
 
 log = logging.getLogger(__name__)
 
@@ -293,7 +293,7 @@ def get_years(dbsession):
 
 class EstimationList(BaseListView):
     title = u""
-    schema = EstimationListSchema()
+    schema = get_list_schema()
     sort_columns = dict(
             taskDate=Estimation.taskDate,
             customer=Customer.name,
@@ -301,19 +301,10 @@ class EstimationList(BaseListView):
     default_sort = 'taskDate'
     default_direction = 'desc'
 
-    def default_form_values(self, values):
-        values = super(EstimationList, self).default_form_values(values)
-        values['years'] = get_years(self.request.dbsession)
-        values["customers"] = self.request.context.customers
-        values['status_options'] = STATUS_OPTIONS
-        return values
-
     def query(self):
-        log.debug(u"Querying Estimations")
         query = Estimation.query().join(Project).join(Customer)
         company_id = self.request.context.id
         query = query.filter(Project.company_id==company_id)
-        log.debug(u"Querying %s elements" % (len(query.all())))
         return query
 
     def filter_year(self, query, appstruct):
@@ -321,7 +312,6 @@ class EstimationList(BaseListView):
             filter estimations by year
         """
         year = appstruct['year']
-        log.debug(u"Filtering by year : %s" % year)
         query = query.filter(extract('year', Estimation.taskDate)==year)
         return query
 
@@ -331,7 +321,6 @@ class EstimationList(BaseListView):
         """
         customer_id = appstruct['customer_id']
         if customer_id != -1:
-            log.debug(u"Filtering by customer id : %s" % customer_id)
             query = query.filter(Estimation.customer_id==customer_id)
         return query
 
@@ -341,11 +330,9 @@ class EstimationList(BaseListView):
         """
         status = appstruct['status']
         if status == 'all':
-            log.debug(u"Filtering by status")
             query = query.filter(Estimation.CAEStatus.in_(
                 ['valid', 'aboest', 'geninv']))
         else:
-            log.debug(u"Filtering by status : %s" % status)
             query = query.filter(Estimation.CAEStatus == status)
         return query
 

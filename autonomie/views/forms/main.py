@@ -25,8 +25,8 @@ Main deferreds functions used in autonomie
 import colander
 import calendar
 import datetime
-from deform import widget
-from deform_bootstrap.widget import ChosenSingleWidget
+from deform import widget as deform_widget
+from deform_bootstrap import widget as bootstrap_widget
 
 from autonomie.models import user
 from autonomie.models import company
@@ -71,7 +71,7 @@ def get_deferred_user_choice(roles=None, widget_options=None):
         choices = get_users_options(roles)
         if default_option:
             choices.insert(0, default_option)
-        return ChosenSingleWidget(
+        return bootstrap_widget.ChosenSingleWidget(
             values=choices,
             **widget_options
             )
@@ -85,9 +85,9 @@ def deferred_autocomplete_widget(node, kw):
     """
     choices = kw.get('choices')
     if choices:
-        wid = ChosenSingleWidget(values=choices)
+        wid = bootstrap_widget.ChosenSingleWidget(values=choices)
     else:
-        wid = widget.TextInputWidget()
+        wid = deform_widget.TextInputWidget()
     return wid
 
 
@@ -155,7 +155,7 @@ def get_deferred_company_choices(widget_options):
         values = [(comp.id, comp.name) for comp in company.Company.query()]
         if default_entry is not None:
             values.insert(0, default_entry)
-        return ChosenSingleWidget(
+        return bootstrap_widget.ChosenSingleWidget(
             values=values,
             placeholder=u"Sélectionner une entreprise",
             **widget_options
@@ -209,7 +209,7 @@ def come_from_node(**kw):
         kw["missing"] = ""
     return colander.SchemaNode(
             colander.String(),
-            widget=widget.HiddenWidget(),
+            widget=deform_widget.HiddenWidget(),
             **kw
             )
 
@@ -220,9 +220,9 @@ def textarea_node(**kw):
     """
     css_class = kw.pop('css_class', None) or 'span10'
     if kw.pop('richwidget', None):
-        wid = widget.RichTextWidget(css_class=css_class, theme="advanced")
+        wid = deform_widget.RichTextWidget(css_class=css_class, theme="advanced")
     else:
-        wid = widget.TextAreaWidget(css_class=css_class)
+        wid = deform_widget.TextAreaWidget(css_class=css_class)
     return colander.SchemaNode(
             colander.String(),
             widget=wid,
@@ -243,7 +243,7 @@ def get_year_select_deferred(query_func):
     @colander.deferred
     def deferred_widget(node, kw):
         years = query_func()
-        return widget.SelectWidget(values=zip(years, years),
+        return deform_widget.SelectWidget(values=zip(years, years),
                     css_class='input-small')
     return deferred_widget
 
@@ -279,7 +279,7 @@ def get_month_select_widget():
     Return a select widget for month selection
     """
     options = get_month_options()
-    return widget.SelectWidget(values=options,
+    return deform_widget.SelectWidget(values=options,
                     css_class='input-small')
 
 
@@ -317,8 +317,67 @@ def id_node():
     """
     return colander.SchemaNode(
         colander.Integer(),
-        widget=widget.HiddenWidget(),
+        widget=deform_widget.HiddenWidget(),
         default=None,
         missing=None
         )
 
+
+@colander.deferred
+def deferred_fullcustomer_list_widget(node, kw):
+    values = [('', '')]
+    for comp in company.Company.query():
+        values.append(
+            deform_widget.OptGroup(
+                comp.name,
+                *[(cust.id, cust.name) for cust in comp.customers]
+            )
+        )
+    return custom_widgets.CustomChosenOptGroupWidget(
+        values=values,
+        placeholder=u"Sélectionner un client"
+        )
+
+
+@colander.deferred
+def deferred_customer_list_widget(node, kw):
+    values = [(-1, u''), ]
+    company = kw['request'].context
+    values.extend(((cust.id, cust.name) for cust in company.customers))
+    return bootstrap_widget.ChosenSingleWidget(
+        values=values,
+        placeholder=u'Sélectionner un client',
+        )
+
+
+@colander.deferred
+def deferred_company_customer_validator(node, kw):
+    """
+    Ensure we don't query customers from other companies
+    """
+    company = kw['request'].context
+    return colander.OneOf([customer.id for customer in company.customers])
+
+
+def customer_node(is_admin=False):
+    """
+    return a customer selection node
+
+        is_admin
+
+            is the associated view restricted to company's invoices
+    """
+    if is_admin:
+        deferred_customer_widget = deferred_fullcustomer_list_widget
+        deferred_customer_validator = None
+    else:
+        deferred_customer_widget = deferred_customer_list_widget
+        deferred_customer_validator = deferred_company_customer_validator
+
+    return colander.SchemaNode(
+            colander.Integer(),
+            name='customer_id',
+            widget=deferred_customer_widget,
+            validator=deferred_customer_validator,
+            missing=-1,
+        )

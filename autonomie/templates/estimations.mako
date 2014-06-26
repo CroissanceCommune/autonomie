@@ -29,56 +29,9 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-    </li>
-    <li>
-    </li>
-</ul>
 <div class='row-fluid'>
     <div class='span7'>
-        <form class='form-search form-horizontal' id='search_form' method='GET'>
-            <div style="padding-bottom:3px">
-                <select id='customer-select' name='customer_id' data-placeholder="Sélectionner un client">
-                    <option value='-1'></option>
-                    %for customer in customers:
-                        %if customer.id == customer_id:
-                            <option selected='1' value='${customer.id}'>${customer.name} (${customer.code})</option>
-                        %else:
-                            <option value='${customer.id}'>${customer.name} (${customer.code})</option>
-                        %endif
-                    %endfor
-                </select>
-                <select name='year' id='year-select' class='span2' data-placeholder="Sélectionner une année">
-                    %for year_option in years:
-                        %if unicode(year) == unicode(year_option):
-                            <option selected="1" value='${year_option}'>${year_option}</option>
-                        %else:
-                            <option value='${year_option}'>${year_option}</option>
-                        %endif
-                    %endfor
-                </select>
-                <select name='status' id='status-select'>
-                    %for label, value in status_options:
-                        %if value == status:
-                            <option selected="1" value='${value}'>${label}</option>
-                        %else:
-                            <option value='${value}'>${label}</option>
-                        %endif
-                    %endfor
-                </select>
-                <select class='span1' name='items_per_page'>
-                    % for label, value in items_per_page_options:
-                        % if int(value) == int(items_per_page):
-                            <option value="${value}" selected='true'>${label}</option>
-                        %else:
-                            <option value="${value}">${label}</option>
-                        %endif
-                    % endfor
-                </select>
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            </div>
-        </form>
+        ${form|n}
     </div>
     <div class='span4'>
         <table class='table table-bordered'>

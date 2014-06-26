@@ -25,81 +25,17 @@
 """
     form schemas for invoices related views
 """
-from datetime import date
 import colander
 
 from deform import widget as deform_widget
-from deform_bootstrap import widget as bootstrap_widget
 
 from autonomie.views.forms.lists import BaseListsSchema
 from autonomie.views.forms import main
-from autonomie.views.forms.widgets import CustomChosenOptGroupWidget
-from autonomie.models import company
 
 
 STATUS_OPTIONS = (("both", u"Toutes les factures", ),
                   ("paid", u"Les factures payées", ),
                   ("notpaid", u"Seulement les impayés", ))
-
-
-@colander.deferred
-def deferred_fullcustomer_list_widget(node, kw):
-    values = [('', '')]
-    for comp in company.Company.query():
-        values.append(
-            deform_widget.OptGroup(
-                comp.name,
-                *[(cust.id, cust.name) for cust in comp.customers]
-            )
-        )
-    return CustomChosenOptGroupWidget(
-        values=values,
-        placeholder=u"Sélectionner un client"
-        )
-
-
-@colander.deferred
-def deferred_customer_list_widget(node, kw):
-    values = [('', u'Sélectionner un client'), ]
-    company = kw['request'].context
-    values.extend(((cust.id, cust.name) for cust in company.customers))
-    return bootstrap_widget.ChosenSingleWidget(
-        values=values,
-        placeholder=u'Sélectionner un client',
-        )
-
-
-@colander.deferred
-def deferred_company_customer_validator(node, kw):
-    """
-    Ensure we don't query customers from other companies
-    """
-    company = kw['request'].context
-    return colander.OneOf([customer.id for customer in company.customers])
-
-
-def customer_node(is_admin=False):
-    """
-    return a customer selection node
-
-        is_admin
-
-            is the associated view restricted to company's invoices
-    """
-    if is_admin:
-        deferred_customer_widget = deferred_fullcustomer_list_widget
-        deferred_customer_validator = None
-    else:
-        deferred_customer_widget = deferred_customer_list_widget
-        deferred_customer_validator = deferred_company_customer_validator
-
-    return colander.SchemaNode(
-            colander.Integer(),
-            name='customer_id',
-            widget=deferred_customer_widget,
-            validator=deferred_customer_validator,
-            missing=-1
-        )
 
 
 def get_list_schema(is_admin=False):
@@ -122,7 +58,7 @@ def get_list_schema(is_admin=False):
             missing='both',
             ))
 
-    schema.insert(0, customer_node(is_admin))
+    schema.insert(0, main.customer_node(is_admin))
 
     if is_admin:
         schema.insert(0,

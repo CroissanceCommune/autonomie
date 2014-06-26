@@ -25,24 +25,34 @@
     forms schemas for estimation list related views
 """
 import colander
+from deform import widget as deform_widget
 
 from autonomie.views.forms.lists import BaseListsSchema
 from autonomie.views.forms import main
 
 
-STATUS_OPTIONS = ((u"Tous les devis", "all",),
-                (u"Devis concrétisés (avec facture)", "geninv",),
-                (u"Devis annulés", "aboest",),
-                (u"Devis en cours", "valid",),
+STATUS_OPTIONS = (('all', u"Tous les devis", ),
+                ('geninv', u"Devis concrétisés (avec facture)", ),
+                ('aboest', u"Devis annulés", ),
+                ('valid', u"Devis en cours", ),
                 )
 
 
-class EstimationListSchema(BaseListsSchema):
-    """
-        Estimation list search schema
-    """
-    status = colander.SchemaNode(colander.String(),
-            validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
-            missing='all')
-    year = colander.SchemaNode(colander.Integer(), missing=main.default_year)
-    customer_id = colander.SchemaNode(colander.Integer(), missing=-1)
+def get_list_schema():
+    schema = BaseListsSchema().clone()
+
+    del schema['search']
+
+    schema.insert(0, main.customer_node())
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name='status',
+        widget=deform_widget.SelectWidget(values=STATUS_OPTIONS),
+        validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+        missing='all'
+    ))
+
+    schema.insert(0, main.year_select_node(name='year'))
+
+    return schema

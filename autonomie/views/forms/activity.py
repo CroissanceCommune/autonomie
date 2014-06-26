@@ -72,7 +72,7 @@ def get_deferred_select_type(default=False):
     def deferred_select_type(node, kw):
         values = [(unicode(a.id), a.label) for a in get_activity_types()]
         if default:
-            values.insert(0, (-1, 'Tous'))
+            values.insert(0, (-1, 'Tous les rendez-vous'))
         return deform_widget.SelectWidget(values=values)
     return deferred_select_type
 
@@ -252,7 +252,7 @@ class RecordActivitySchema(colander.Schema):
         description=u"La durée du rendez-vous (ex : 1h30)")
 
 
-def get_list_schema():
+def get_list_schema(is_admin=False):
     schema = lists.BaseListsSchema().clone()
 
     schema.insert(0, colander.SchemaNode(
@@ -279,25 +279,26 @@ def get_list_schema():
         missing='all'))
 
 
-    schema.insert(0, main.user_node(
-        missing=-1,
-        name='participant_id',
-        widget_options={
-            'default_option': (-1, ''),
-            'placeholder': u"Sélectionner un participant"},
+    if is_admin:
+        schema.insert(0, main.user_node(
+            missing=-1,
+            name='participant_id',
+            widget_options={
+                'default_option': (-1, ''),
+                'placeholder': u"Sélectionner un participant"},
+            )
         )
-    )
 
-    schema.insert(0, main.user_node(
-        roles=['manager', 'admin'],
-        missing=-1,
-        default=main.deferred_current_user_id,
-        name='conseiller_id',
-        widget_options={
-            'default_option': (-1, ''),
-            'placeholder': u"Sélectionner un conseiller"},
+        schema.insert(0, main.user_node(
+            roles=['manager', 'admin'],
+            missing=-1,
+            default=main.deferred_current_user_id,
+            name='conseiller_id',
+            widget_options={
+                'default_option': (-1, ''),
+                'placeholder': u"Sélectionner un conseiller"},
+            )
         )
-    )
 
     del schema['search']
     return schema

@@ -127,6 +127,7 @@ def get_list_schema(company=False):
             description=u"Date de l'atelier",
             widget_options={'css_class': 'input-medium search-query'},
             ))
+
     if not company:
         schema.insert(0, main.user_node(
             missing=-1,

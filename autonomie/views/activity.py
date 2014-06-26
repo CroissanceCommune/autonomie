@@ -407,7 +407,7 @@ class ActivityRecordView(BaseFormView):
 
 class ActivityList(BaseListView):
     title = u"Rendez-vous"
-    schema = get_list_schema()
+    schema = get_list_schema(is_admin=True)
     sort_columns = dict(
             datetime=Activity.datetime,
             conseiller=user.User.lastname,
@@ -469,6 +469,7 @@ class ActivityList(BaseListView):
 
 
 class ActivityListContractor(ActivityList):
+    schema = get_list_schema(is_admin=False)
     def _get_conseiller_id(self, appstruct):
         return -1
 

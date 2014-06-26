@@ -249,6 +249,7 @@ table.opa tfoot td{
   vertical-align: middle;
   margin-top: 5px;
   margin-right: 3px;
+  margin-bottom: 5px;
 }
 #search_form .chzn-container{
   float: left;

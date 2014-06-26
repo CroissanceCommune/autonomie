@@ -517,18 +517,22 @@ the bootstrap layout columns number. One of your lines is larger than {0}. \
 You can increase this column number by compiling bootstrap css with \
 lessc.".format(self.num_cols))
 
+                child = None
                 if filled:
                     try:
                         child = field.children[index]
                     except IndexError:
-                        raise AttributeError(u"The grid items number doesn't \
+                        warnings.warn(u"The grid items number doesn't \
 match the number of children of our mapping widget")
+                    else:
+                        child.width = width
                     index += 1
-                    child.width = width
                 else:
                     child = VoidWidget(width)
-                child_row.append(child)
-            result.append(child_row)
+                if child is not None:
+                    child_row.append(child)
+            if child_row != []:
+                result.append(child_row)
         return result
 
 

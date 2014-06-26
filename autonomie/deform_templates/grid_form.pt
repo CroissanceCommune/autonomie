@@ -3,7 +3,7 @@
 -->
 <form
   id="${field.formid}"
-  class="deform ${field.bootstrap_form_style | 'form-horizontal'}
+  class="deform ${field.bootstrap_form_style | 'form-grid'}
          ${field.css_class}"
   action="${field.action}"
   method="${field.method}"

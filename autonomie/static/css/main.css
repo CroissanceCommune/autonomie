@@ -265,7 +265,7 @@ form.deform div.input label {
   margin-right: 5px;
 }
 
-form.deform input, form.deform textarea, ul.tagit {
+form.deform input[type=text], form.deform textarea, ul.tagit, form.deform input[type=password] {
   width: 90%;
 }
 

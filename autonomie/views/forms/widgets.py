@@ -30,6 +30,8 @@ import logging
 import json
 import colander
 import warnings
+from string import lowercase
+import random
 from datetime import date
 from itertools import izip_longest
 
@@ -532,6 +534,35 @@ match the number of children of our mapping widget")
             if child_row != []:
                 result.append(child_row)
         return result
+
+
+class AccordionMappingWidget(GridMappingWidget):
+    """
+    Render a mapping as an accordion and places inner fields in a grid
+
+    .. code-block:: python
+
+        class Mapping(colander.MappingSchema):
+            field = colander.SchemaNode(...)
+
+        class Schema(colander.Schema):
+            mymapping = Mapping(title=u'The accordion header',
+                widget = AccordionMappingWidget(grid=GRID)
+                )
+
+    you'll need to set the bootstrap_form_style to 'form-grid'
+
+    Form(schema=Schema(), bootstrap_form_style='form-grid')
+    """
+    template = TEMPLATES_PATH + "accordion_mapping"
+    readonly_template = TEMPLATES_PATH + "accordion_mapping"
+
+    @property
+    def tag_id(self):
+        if not hasattr(self, '_tag_id'):
+            size = 15
+            self._tag_id = ''.join(random.choice(lowercase) for _ in range(size))
+        return self._tag_id
 
 
 class GridFormWidget(GridMappingWidget):

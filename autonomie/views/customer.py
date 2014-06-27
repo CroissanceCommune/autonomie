@@ -46,6 +46,7 @@ from autonomie.views.forms.customer import (
         CUSTOMERSCHEMA,
         get_list_schema,
         )
+from autonomie.views.forms.widgets import GridFormWidget
 from autonomie.views.forms import (
         BaseFormView,
         merge_session_with_post,
@@ -57,6 +58,15 @@ from autonomie.views import (
 
 log = logging.getLogger(__name__)
 
+FORM_GRID = (
+    ((4, True,), (2, True), ),
+    ((4, True,), (4, True),  (4, True), ),
+    ((4, True,), (4, True),  (4, True), ),
+    ((4, True,), (2, True), (3, True), (3, True), ),
+    ((3, True,), ),
+    ((3, True,), (3, True),  (3, True), ),
+    )
+
 
 def get_customer_form(request):
     """
@@ -64,6 +74,7 @@ def get_customer_form(request):
     """
     schema = CUSTOMERSCHEMA.bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
+    form.widget = GridFormWidget(grid=FORM_GRID)
     return form
 
 
@@ -127,6 +138,7 @@ class CustomerAdd(BaseFormView):
 
     def before(self, form):
         populate_actionmenu(self.request)
+        form.widget = GridFormWidget(grid=FORM_GRID)
 
     def submit_success(self, appstruct):
         customer = Customer()
@@ -153,6 +165,7 @@ class CustomerEdit(BaseFormView):
             prepopulate the form and the actionmenu
         """
         populate_actionmenu(self.request, self.request.context)
+        form.widget = GridFormWidget(grid=FORM_GRID)
 
     def submit_success(self, appstruct):
         """

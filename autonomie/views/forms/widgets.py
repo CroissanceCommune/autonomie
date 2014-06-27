@@ -521,14 +521,16 @@ lessc.".format(self.num_cols))
                     try:
                         child = field.children[index]
                     except IndexError:
-                        raise AttributeError(u"The grid items number doesn't \
+                        warnings.warn(u"The grid items number doesn't \
 match the number of children of our mapping widget")
-                    index += 1
+                        break
                     child.width = width
+                    index += 1
                 else:
                     child = VoidWidget(width)
                 child_row.append(child)
-            result.append(child_row)
+            if child_row != []:
+                result.append(child_row)
         return result
 
 

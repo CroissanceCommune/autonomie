@@ -45,10 +45,10 @@ from autonomie.views.forms.expense import (
     ExpenseKmLineSchema,
     ExpenseSheetSchema,
     BookMarkSchema,
-    ExpenseListSchema,
+    get_list_schema,
     STATUS_OPTIONS
 )
-from autonomie.views.forms import main as form_main
+from autonomie.views import BaseListView
 from autonomie.models.treasury import (
     BaseExpenseLine,
     ExpenseType,
@@ -58,7 +58,6 @@ from autonomie.models.treasury import (
     ExpenseLine,
     ExpenseKmLine,
     Communication,
-    get_expense_years,
 )
 from autonomie.events.expense import StatusChanged
 from autonomie.views.base import BaseView
@@ -878,26 +877,13 @@ class RestBookMarks(BaseView):
         else:
             return dict(status="success")
 
-from autonomie.views.base import BaseListView
 
 class ExpenseList(BaseListView):
     title = u"Notes de frais"
-    schema = ExpenseListSchema()
+    schema = get_list_schema()
     sort_columns = dict(month=ExpenseSheet.month)
     default_sort = 'month'
     default_direction = 'desc'
-
-    def default_form_values(self, values):
-        """
-        Provide default form values for the manually rendered form
-        """
-        values = super(ExpenseList, self).default_form_values(values)
-        values['month_options'] = form_main.get_month_options()
-        values['years'] = get_expense_years()
-        values['status_options'] = STATUS_OPTIONS
-        values['owner_options'] = form_main.get_users_options()
-        return values
-
 
     def query(self):
         return ExpenseSheet.query()

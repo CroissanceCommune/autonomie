@@ -254,11 +254,12 @@ def year_select_node(**kw):
     """
     title = kw.pop('title', u"")
     query_func = kw.pop('query_func', get_invoice_years)
+    missing = kw.pop('missing', default_year)
     return colander.SchemaNode(
         colander.Integer(),
         widget=get_year_select_deferred(query_func),
         default=default_year,
-        missing=default_year,
+        missing=missing,
         title=title,
         **kw
         )
@@ -296,6 +297,7 @@ def month_select_node(**kw):
             default=default,
             missing=missing,
             title=title,
+            **kw
             )
 
 

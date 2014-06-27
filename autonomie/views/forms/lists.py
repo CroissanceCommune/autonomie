@@ -92,6 +92,7 @@ class BaseListsSchema(colander.Schema):
         missing=deferred_items_per_page,
         widget=deform.widget.SelectWidget(
             values=ITEMS_PER_PAGE_OPTIONS,
+            css_class="input-small",
         ),
         validator=deferred_items_per_page_validator,
         )

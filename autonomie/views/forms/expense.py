@@ -30,7 +30,7 @@
 """
 import colander
 from datetime import date
-from deform import widget
+from deform import widget as deform_widget
 
 from autonomie.models.treasury import (
     ExpenseType,
@@ -44,18 +44,13 @@ from .custom_types import AmountType
 
 
 STATUS_OPTIONS = (
-    (u"Toutes les notes de frais", "all"),
-    (u'Validées', 'valid'),
-    (u'Payées', 'resulted'),
-    (u'En attente de validation', 'wait'),
+    ("all", u"Toutes les notes de frais", ),
+    ("valid", u'Validées', ),
+    ("resulted", u'Payées', ),
+    ("wait", u'En attente de validation', ),
 #    (u'Brouillon', 'draft'),
 #    (u'Invalidées', 'invalid'),
     )
-
-
-@colander.deferred
-def default_month(node, kw):
-    return date.today().month
 
 
 @colander.deferred
@@ -69,19 +64,12 @@ def deferred_type_id_validator(node, kw):
 
 class PeriodSelectSchema(colander.MappingSchema):
     year = main.year_select_node()
-    month = colander.SchemaNode(colander.Integer(),
-            widget=widget.SelectWidget(values=[(month, month_name(month))
-                                                for month in range(1,13)],
-                                                css_class='input-small'),
-            default=default_month,
-            missing=default_month,
-            title=u"")
-
+    month = main.month_select_node(title=u'')
 
 
 class ExpenseStatusSchema(colander.MappingSchema):
     comment = colander.SchemaNode(colander.String(),
-            widget=widget.TextAreaWidget(cols=80, rows=2),
+            widget=deform_widget.TextAreaWidget(cols=80, rows=2),
                                     title=u"Communication avec la CAE",
             description=u"Message à destination des membres de la CAE qui \
 valideront votre feuille de notes de frais",
@@ -157,10 +145,40 @@ class BookMarkSchema(colander.MappingSchema):
     tva = colander.SchemaNode(colander.Float())
 
 
-class ExpenseListSchema(BaseListsSchema):
-    status = colander.SchemaNode(colander.String(),
-        validator=colander.OneOf([s[1] for s in STATUS_OPTIONS]),
-        missing='all')
-    year = main.year_select_node(title=u"Année", query_func=get_expense_years)
-    month = main.month_select_node(title=u"Mois", default=None, missing=None)
-    owner_id = main.user_node(title=u"Utilisateur", missing=None)
+def get_list_schema():
+    schema = BaseListsSchema().clone()
+
+    schema['search'].description = u"Identifiant du document"
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name=u'status',
+        widget=deform_widget.SelectWidget(values=STATUS_OPTIONS),
+        validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+        missing='all',
+    ))
+
+    schema.insert(0, main.year_select_node(
+        name='year',
+        title=u"Année",
+        query_func=get_expense_years,
+        missing=-1,
+    ))
+
+    schema.insert(0, main.month_select_node(
+        title=u"Mois",
+        default=None,
+        missing=-1,
+        name='month',
+    ))
+
+    schema.insert(0, main.user_node(
+        title=u"Utilisateur",
+        missing=-1,
+        name=u'owner_id',
+        widget_options={
+            'default_option': (-1, ''),
+            'placeholder': u"Sélectionner un entrepreneur"},
+    ))
+
+    return schema

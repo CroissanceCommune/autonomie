@@ -14,7 +14,7 @@ i18n:domain="deform"
 </div>
 ${field.start_mapping()}
   <!-- mapping -->
-<div class="row-fluide form-row"
+<div class="row-fluid form-row"
      tal:repeat="childgroup childgroups"
      i18n:domain="deform">
      <div tal:omit-tag="" tal:repeat="child childgroup">

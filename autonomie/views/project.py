@@ -278,11 +278,20 @@ def project_view(request):
                 cancelinvoice.color = cancelinvoice.invoice.color
             else:
                 cancelinvoice.color = get_color()
+
+    # We get the latest used task and so we get the latest used phase
+    all_tasks = []
+    for phase in phases:
+        all_tasks.extend(phase.tasks)
+    all_tasks.sort(key=lambda task:task.statusDate, reverse=True)
+    latest_phase = all_tasks[0].phase
+
     title = u"Projet : {0} ({1})".format(request.context.name,
             ", ".join((customer.name for customer in request.context.customers)))
     return dict(title=title,
                 project=request.context,
-                company=request.context.company)
+                company=request.context.company,
+                latest_phase=latest_phase)
 
 
 class ProjectAdd(BaseFormView):

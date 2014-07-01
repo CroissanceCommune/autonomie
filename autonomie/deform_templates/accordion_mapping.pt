@@ -2,7 +2,7 @@
 <div class='accordion-group'>
 
   <div class='accordion-heading'>
-<a href='#' data-toggle='collapse' data-target='#${field.widget.tag_id}' class='accordion-toggle'>
+    <a href='#${field.widget.tag_id}' data-toggle='collapse' data-target='#${field.widget.tag_id}' class='accordion-toggle'>
     ${field.title}
   </a>
     </div>

@@ -73,7 +73,6 @@ class Task(Node):
 
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     phase_id = Column("phase_id", ForeignKey('phase.id'))
-    name = Column("name", String(255))
     CAEStatus = Column('CAEStatus', String(10))
     statusComment = Column("statusComment", Text)
     statusPerson = Column("statusPerson",

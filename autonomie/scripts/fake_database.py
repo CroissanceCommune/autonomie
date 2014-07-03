@@ -25,6 +25,8 @@
 """
     Script for populating a fake database
 """
+import sys
+
 from autonomie.models import DBSESSION
 from autonomie.models.user import User, ADMIN_PRIMARY_GROUP, \
         MANAGER_PRIMARY_GROUP, CONTRACTOR_PRIMARY_GROUP
@@ -36,9 +38,16 @@ from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.tva import Tva
 from autonomie.scripts.utils import command
 from autonomie.models.task.unity import WorkUnit
-from autonomie.models.treasury import ExpenseKmType
-from autonomie.models.treasury import ExpenseTelType
-from autonomie.models.treasury import ExpenseType
+from autonomie.models.treasury import (
+    ExpenseKmType,
+    ExpenseTelType,
+    ExpenseType,
+)
+from autonomie.models.activity import (
+    ActivityType,
+    ActivityMode,
+    ActivityAction,
+)
 
 GROUPS = {
     ADMIN_PRIMARY_GROUP: "admin",
@@ -169,7 +178,25 @@ def add_expense_type(type_, **kwargs):
     session.add(e)
     session.flush()
 
+def add_activity_type(label):
+    session = DBSESSION()
+    session.add(ActivityType(label=label))
+    session.flush()
+
+def add_activity_mode(label):
+    session = DBSESSION()
+    session.add(ActivityMode(label=label))
+    session.flush()
+
+def add_activity_action(label, **kw):
+    session = DBSESSION()
+    a = ActivityAction(label=label, **kw)
+    session.add(a)
+    session.flush()
+    return a
+
 def set_configuration():
+    print("Adding configuration elements")
     add_payment_mode(u"par chèque")
     add_payment_mode(u"par virement")
 
@@ -190,9 +217,22 @@ def set_configuration():
     add_expense_type("tel", label=u"Adsl-Tel fix", code="0006", percentage="80")
     add_expense_type("tel", label=u"Mobile", code="0007", percentage="80")
 
+    for i in (u'Rendez-vous mensuel', u'Entretien individuel'):
+        add_activity_type(i)
 
-def fake_database_fill(arguments):
-    set_configuration()
+    for i in (u'par skype', u'en direct', u'par mail', u'par téléphone', ):
+        add_activity_mode(i)
+
+    a = add_activity_action(
+        u"Projet FSE 2014 - Passerelle pour l'entreprenariat collectif",)
+    add_activity_action(
+        u"Module 3 : Accompagnement renforcé - Etape : Business model \
+commercial, économique et social", parent=a)
+
+
+
+def fake_database_fill():
+
     # Adding admins
     add_simple_admin("admin1")
 
@@ -203,9 +243,17 @@ def fake_database_fill(arguments):
     contractor1 = add_simple_contractor("contractor1")
 
     # Adding companies
-    company = add_company(contractor1, u"Laveur de K-ro", u"Nettoyage de vitre")
-    customer = add_customer(company, u"Institut médical Dupont & Dupond", "IMDD",
-                                                                    "Dupont" )
+    company = add_company(
+        contractor1,
+        u"Laveur de K-ro",
+        u"Nettoyage de vitre",
+    )
+    customer = add_customer(
+        company,
+        u"Institut médical Dupont & Dupond",
+        "IMDD",
+        "Dupont",
+    )
     project = add_project(customer, company, u"Vitrine rue Neuve", "VRND")
     phase = add_phase(project, u"Default")
 
@@ -214,11 +262,21 @@ def populate_fake():
     """Populate the database with fake datas
     Usage:
         autonomie-fake <config_uri> populate
+        autonomie-fake <config_uri> populate_conf
 
     Options:
         -h --help     Show this screen.
     """
+    def callback(arguments):
+        if arguments['populate']:
+            func = fake_database_fill
+        elif arguments['populate_conf']:
+            func = set_configuration
+        else:
+            print populate_fake.__doc__
+            sys.exit(1)
+        return func()
     try:
-        return command(fake_database_fill, populate_fake.__doc__)
+        return command(callback, populate_fake.__doc__)
     finally:
         pass

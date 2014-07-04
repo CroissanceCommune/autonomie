@@ -896,7 +896,7 @@ class ExpenseList(BaseListView):
 
     def filter_year(self, query, appstruct):
         year = appstruct['year']
-        if year:
+        if year and year != -1:
             query = query.filter(ExpenseSheet.year==year)
         return query
 
@@ -917,7 +917,7 @@ class ExpenseList(BaseListView):
         if status != 'all':
             query = query.filter(ExpenseSheet.status==status)
         else:
-            interesting_status = [i[1] for i in STATUS_OPTIONS]
+            interesting_status = [i[0] for i in STATUS_OPTIONS]
             query = query.filter(ExpenseSheet.status.in_(interesting_status))
         return query
 

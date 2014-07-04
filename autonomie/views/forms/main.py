@@ -275,11 +275,14 @@ def get_month_options():
             for index in range(1, 13)]
 
 
-def get_month_select_widget():
+def get_month_select_widget(widget_options):
     """
     Return a select widget for month selection
     """
     options = get_month_options()
+    default_val = widget_options.get('default_val')
+    if default_val is not None:
+        options.insert(0, default_val)
     return deform_widget.SelectWidget(values=options,
                     css_class='input-small')
 
@@ -291,9 +294,10 @@ def month_select_node(**kw):
     title = kw.pop('title', u"")
     default = kw.pop('default', default_month)
     missing = kw.pop('missing', default_month)
+    widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
             colander.Integer(),
-            widget=get_month_select_widget(),
+            widget=get_month_select_widget(widget_options),
             default=default,
             missing=missing,
             title=title,

@@ -167,9 +167,9 @@ def get_list_schema():
 
     schema.insert(0, main.month_select_node(
         title=u"Mois",
-        default=None,
         missing=-1,
         name='month',
+        widget_options={'default_val': (-1, '')},
     ))
 
     schema.insert(0, main.user_node(

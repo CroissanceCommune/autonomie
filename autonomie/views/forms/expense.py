@@ -162,7 +162,6 @@ def get_list_schema():
         name='year',
         title=u"Année",
         query_func=get_expense_years,
-        missing=-1,
     ))
 
     schema.insert(0, main.month_select_node(

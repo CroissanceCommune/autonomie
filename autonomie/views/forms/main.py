@@ -235,7 +235,7 @@ def default_year(node, kw):
     return datetime.date.today().year
 
 
-def get_year_select_deferred(query_func):
+def get_year_select_deferred(query_func, default_val=None):
     """
     return a deferred widget for year selection
     :param query_func: the query function returning a list of years
@@ -243,7 +243,10 @@ def get_year_select_deferred(query_func):
     @colander.deferred
     def deferred_widget(node, kw):
         years = query_func()
-        return deform_widget.SelectWidget(values=zip(years, years),
+        values = zip(years, years)
+        if default_val is not None:
+            values.insert(0, default_val)
+        return deform_widget.SelectWidget(values=values,
                     css_class='input-small')
     return deferred_widget
 
@@ -255,9 +258,11 @@ def year_select_node(**kw):
     title = kw.pop('title', u"")
     query_func = kw.pop('query_func', get_invoice_years)
     missing = kw.pop('missing', default_year)
+    widget_options = kw.pop('widget_options', {})
+    default_val = widget_options.get('default_val')
     return colander.SchemaNode(
         colander.Integer(),
-        widget=get_year_select_deferred(query_func),
+        widget=get_year_select_deferred(query_func, default_val),
         default=default_year,
         missing=missing,
         title=title,

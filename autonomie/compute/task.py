@@ -171,12 +171,29 @@ class InvoiceCompute(TaskCompute):
     """
     # Should have an amount attribute
     payments = []
+    cancelinvoice = None
+
+    def payments_sum(self):
+        """
+        Return the amount covered by the recorded payments
+        """
+        return sum([payment.amount for payment in self.payments])
+
+    def cancelinvoice_amount(self):
+        """
+        Return the amount covered by th associated cancelinvoice
+        """
+        result = 0
+        if self.cancelinvoice is not None and self.cancelinvoice.is_valid():
+            # cancelinvoice total is negative
+            result = -1 * self.cancelinvoice.total()
+        return result
 
     def paid(self):
         """
             return the amount that has already been paid
         """
-        return sum([payment.amount for payment in self.payments])
+        return self.payments_sum() + self.cancelinvoice_amount()
 
     def topay(self):
         """
@@ -184,10 +201,7 @@ class InvoiceCompute(TaskCompute):
 
         Compute the sum of the payments and what's part of a valid cancelinvoice
         """
-        result = self.total()
-        result -= sum([payment.amount for payment in self.payments])
-        if self.cancelinvoice is not None and self.cancelinvoice.is_valid():
-            result += self.cancelinvoice.total()
+        result = self.total() - self.paid()
         return result
 
 

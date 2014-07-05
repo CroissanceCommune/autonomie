@@ -431,18 +431,23 @@ class TaskFormActions(object):
         """
             Return a button to abort an invoice
         """
-        yield Submit(u"Annuler cette facture",
-                 value="aboinv",
-                 request=self.request,
-                 confirm=u"Êtes-vous sûr de vouloir annuler cette facture ?")
+        yield Submit(
+            u"Annuler cette facture",
+            value="aboinv",
+            request=self.request,
+            confirm=u"Êtes-vous sûr de vouloir annuler cette facture ?"
+        )
 
     def _gencinv_btn(self):
         """
             Return a button for generating a cancelinvoice
         """
-        yield Submit(u"Générer un avoir",
-                     value="gencinv",
-                     request=self.request)
+        if self.request.context.topay() != 0:
+            yield Submit(
+                u"Générer un avoir",
+                value="gencinv",
+                request=self.request,
+            )
 
 
 class StatusView(BaseView):

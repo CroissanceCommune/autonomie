@@ -371,7 +371,7 @@ class ActivityTypeConfig(colander.MappingSchema):
 
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Nature de renz-vous",
+        title=u"Libellé",
         validator=colander.Length(max=100)
         )
 
@@ -386,7 +386,7 @@ class ActivityTypesSeqConfig(colander.SequenceSchema):
 class ActivityModeConfig(colander.MappingSchema):
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Mode d'entretien",
+        title=u"libellé",
         validator=colander.Length(max=100)
         )
 

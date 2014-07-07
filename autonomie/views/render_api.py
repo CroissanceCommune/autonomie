@@ -67,7 +67,14 @@ ACTIVITY_STATUS = dict((
     ))
 
 
-def format_status(task):
+TASKTYPES_LABEL = dict(
+    invoice=u"Facture",
+    estimation=u"Devis",
+    cancelinvoice=u"Avoir",
+)
+
+
+def format_status(task, full=True):
     """
         return a formatted status string
     """
@@ -84,10 +91,13 @@ def format_status(task):
     suffix = u" par {0} le {1}"\
             .format(format_account(task.statusPersonAccount),
                                         format_date(task.statusDate))
-    return status_str + suffix
+    if full:
+        status_str += suffix
+
+    return status_str
 
 
-def format_expense_status(expense):
+def format_expense_status(expense, full=True):
     """
         Return a formatted status string for the expense
     """
@@ -99,7 +109,11 @@ def format_expense_status(expense):
         account = format_account(expense.user)
     date = format_date(expense.status_date)
     suffix = u" par {0} le {1}".format(account, date)
-    return status_str + suffix
+
+    if full:
+        status_str += suffix
+
+    return status_str
 
 
 def format_activity_status(activity):
@@ -114,9 +128,12 @@ def format_account(account, reverse=False, upper=True):
     """
         return {firstname} {lastname}
     """
-    if account:
+    if hasattr(account, 'firstname'):
         firstname = account.firstname
         lastname = account.lastname
+    elif hasattr(account, 'coordonnees_firstname'):
+        firstname = account.coordonnees_firstname
+        lastname = account.coordonnees_lastname
     else:
         firstname = "Inconnu"
         lastname = ""
@@ -274,6 +291,10 @@ def human_readable_filesize(size):
     return result
 
 
+def format_task_type(task):
+    return TASKTYPES_LABEL.get(task.type_)
+
+
 class Api(object):
     """
         Api object passed to the templates hosting all commands we will use
@@ -290,6 +311,7 @@ class Api(object):
     format_long_date  = staticmethod(format_long_date)
     format_quantity  = staticmethod(format_quantity)
     format_datetime = staticmethod(format_datetime)
+    format_task_type = staticmethod(format_task_type)
     human_readable_filesize  = staticmethod(human_readable_filesize)
     month_name  = staticmethod(month_name)
     clean_html  = staticmethod(clean_html)

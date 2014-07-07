@@ -27,10 +27,10 @@
     DBSESSION : database session factory
     DBBASE : base object for models
 """
-
 from sqlalchemy.ext import declarative
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
+from sqlalchemy.ext.declarative import declared_attr
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
@@ -54,6 +54,11 @@ class ORMClass(object):
             Return a query
         """
         return DBSESSION().query(cls).get(id_)
+
+    @declared_attr
+    def __tablename__(cls):
+        from autonomie.utils.ascii import camel_case_to_name
+        return camel_case_to_name(cls.__name__)
 
 
 DBBASE = declarative.declarative_base(cls=ORMClass)

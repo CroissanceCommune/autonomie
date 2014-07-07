@@ -30,8 +30,10 @@ import colander
 import logging
 import simplejson as json
 
-from deform import widget
+from deform import widget as deform_widget
 from deform import FileData
+
+from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.config import Config
 from autonomie.views.forms import (
@@ -209,10 +211,10 @@ class TvaItem(colander.MappingSchema):
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",
-        widget=widget.CheckboxWidget(true_val="1", false_val="0"))
+        widget=deform_widget.CheckboxWidget(true_val="1", false_val="0"))
     products = ProductSequence(
         title=u"",
-        widget=widget.SequenceWidget(orderable=False))
+        widget=deform_widget.SequenceWidget(orderable=False))
 
 
 class TvaSequence(colander.SequenceSchema):
@@ -223,7 +225,7 @@ class TvaConfig(colander.MappingSchema):
     tvas = TvaSequence(
         title=u"",
         missing=u'',
-        widget=widget.SequenceWidget(orderable=True))
+        widget=deform_widget.SequenceWidget(orderable=True))
 
 
 class PaymentModeSequence(colander.SequenceSchema):
@@ -239,7 +241,7 @@ class PaymentModeConfig(colander.MappingSchema):
     paymentmodes = PaymentModeSequence(
         title=u"",
         missing=u"",
-        widget=widget.SequenceWidget(orderable=True))
+        widget=deform_widget.SequenceWidget(orderable=True))
 
 
 class WorkUnitSequence(colander.SequenceSchema):
@@ -255,7 +257,7 @@ class WorkUnitConfig(colander.MappingSchema):
     workunits = WorkUnitSequence(
         title=u"",
         missing=u"",
-        widget=widget.SequenceWidget(orderable=True))
+        widget=deform_widget.SequenceWidget(orderable=True))
 
 
 class ExpenseConfig(colander.MappingSchema):
@@ -633,7 +635,7 @@ Contribution Organic",
     export_schema.add(
         colander.SchemaNode(
             colander.String(),
-            widget=widget.CheckboxWidget(
+            widget=deform_widget.CheckboxWidget(
                 template='autonomie:deform_templates/checkbox_readonly.pt',
                 ),
             title=u"Module facturation",
@@ -645,7 +647,7 @@ Contribution Organic",
         export_schema.add(
             colander.SchemaNode(
                 colander.String(),
-                widget=widget.CheckboxWidget(true_val="1", false_val="0"),
+                widget=deform_widget.CheckboxWidget(true_val="1", false_val="0"),
                 title=title,
                 description=description,
                 name=key)
@@ -778,3 +780,27 @@ def merge_config_datas(dbdatas, appstruct):
         else:
             dbdata.value = value
     return dbdatas
+
+
+def get_sequence_model_admin(model, title=u""):
+    """
+    Return a schema for configuring sequence of models
+
+        model
+
+            The SQLAlchemy model to configure
+    """
+    node_schema = SQLAlchemySchemaNode(model)
+    node_schema.name = 'data'
+
+    schema = colander.SchemaNode(colander.Mapping())
+    schema.add(
+        colander.SchemaNode(
+            colander.Sequence(),
+            node_schema,
+            widget=deform_widget.SequenceWidget(min_len=1),
+            title=title,
+            name='datas')
+    )
+    return schema
+

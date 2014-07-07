@@ -43,25 +43,42 @@ from autonomie.models.treasury import (
         ExpenseTelType,
 )
 from autonomie.models.activity import (
-        ActivityType,
-        ActivityMode,
-        ActivityAction,
-        )
+    ActivityType,
+    ActivityMode,
+    ActivityAction,
+)
+from autonomie.utils.ascii import (
+    camel_case_to_name,
+)
 from autonomie.models.company import Company
+from autonomie.models.user import (
+    ZoneOption,
+    ZoneQualificationOption,
+    StudyLevelOption,
+    SocialStatusOption,
+    ActivityTypeOption,
+    PcsOption,
+    PrescripteurOption,
+    NonAdmissionOption,
+    ParcoursStatusOption,
+    MotifSortieOption,
+    SocialDocTypeOption,
+)
 
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.admin import (
-        MainConfig,
-        TvaConfig,
-        PaymentModeConfig,
-        WorkUnitConfig,
-        ExpenseTypesConfig,
-        ActivityTypesConfig,
-        CAECONFIG,
-        get_config_appstruct,
-        get_config_dbdatas,
-        merge_config_datas,
-        )
+    MainConfig,
+    TvaConfig,
+    PaymentModeConfig,
+    WorkUnitConfig,
+    ExpenseTypesConfig,
+    ActivityTypesConfig,
+    CAECONFIG,
+    get_config_appstruct,
+    get_config_dbdatas,
+    merge_config_datas,
+    get_sequence_model_admin,
+)
 from autonomie.views.forms import (
         BaseFormView,
         merge_session_with_post,
@@ -99,7 +116,48 @@ dans les formulaires"))
     request.actionmenu.add(ViewLink(u"Configuration du module accompagnement",
         path="admin_activity",
         title=u"Configuration des types d'activité du module accompagnement"))
+    request.actionmenu.add(
+        ViewLink(
+            u"Administration de la gestion sociale",
+            path='admin_userdatas',
+            title=u"Configuration des types pour la gestion sociale",
+        )
+    )
     return dict(title=u"Administration du site")
+
+
+def make_enter_point_view(parent_route, views_to_link_to, title=u""):
+    """
+    Builds a view with links to the views passed as argument
+
+        views_to_link_to
+
+            list of 2-uples (view_obj, route_name) we'd like to link to
+
+        parent_route
+
+            route of the parent page
+    """
+    def myview(request):
+        """
+        The dinamycally built view
+        """
+        request.actionmenu.add(
+            ViewLink(
+                u"Retour",
+                path=parent_route
+            )
+        )
+        for view, route_name in views_to_link_to:
+            request.actionmenu.add(
+                ViewLink(
+                    view.title,
+                    path=route_name,
+                    title=view.title,
+                )
+            )
+        return dict(title=title)
+    return myview
 
 
 def populate_actionmenu(request):
@@ -219,7 +277,7 @@ class AdminTva(BaseFormView):
                 self.dbsession.add(tva)
 
             for prod in products:
-                if prod['id'] is not None:
+                if prod['id'] != 0:
                     product = Product.get(prod['id'])
                     product.tva = tva
                     merge_session_with_post(product, prod)
@@ -386,7 +444,7 @@ ont été configurés"
 
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
-                if data['id'] is not None:
+                if data['id'] != 0:
                     type_ = factory.get(data['id'])
                     merge_session_with_post(type_, data)
                     self.dbsession.merge(type_)
@@ -433,6 +491,8 @@ class AdminActivities(BaseFormView):
                 for act in actions]
             }
 
+        print appstruct
+
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
@@ -441,7 +501,7 @@ class AdminActivities(BaseFormView):
         Return a dict id:data for the elements that are edited (with an id)
         """
         return dict((data['id'], data) for data in appstruct.get(key, {}) \
-            if data.get('id') is not None)
+            if data.get('id') !=0)
 
     def get_submitted_modes(self, appstruct):
         """
@@ -499,7 +559,7 @@ class AdminActivities(BaseFormView):
         """
         Add or edit an element of the given factory
         """
-        if datas['id'] is not None:
+        if datas['id'] != 0:
             element = factory.get(datas['id'])
             merge_session_with_post(element, datas)
             element = self.dbsession.merge(element)
@@ -609,6 +669,145 @@ class AdminCae(BaseFormView):
         return HTTPFound(self.request.route_path("admin_cae"))
 
 
+class AdminOption(BaseFormView):
+    """
+    Main view for option configuration
+    It allows to configure a set of models
+
+        factory
+
+            The model we are manipulating.
+
+        disable
+
+            If the model has an "active" column, it can be used to
+            enable/disable elements
+
+        validation_msg
+
+            The message shown to the end user on successfull validation
+
+        redirect_path
+
+            The route we're redirecting to after successfull validation
+    """
+    title = u""
+    validation_msg = u""
+    factory = None
+    redirect_path = 'admin_index'
+    disable = True
+    _schema = None
+
+    @property
+    def schema(self):
+        if self._schema is None:
+            self._schema = get_sequence_model_admin(
+                self.factory,
+                self.title,
+            )
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        self._schema = value
+
+    def before(self, form):
+        """
+        Populate the form with existing elements
+        """
+        appstruct = {'datas': [elem.appstruct() \
+                               for elem in self.factory.query()]}
+        form.set_appstruct(appstruct)
+        self.populate_actionmenu()
+
+    def populate_actionmenu(self):
+        self.request.actionmenu.add(
+            ViewLink(u"Retour", path=self.redirect_path)
+        )
+
+    def _get_edited_elements(self, appstruct):
+        """
+        Return the elements that are edited (already have an id)
+        """
+        return dict((data['id'], data) \
+                    for data in appstruct.get('datas', {}) \
+                    if data.get('id') != 0
+                   )
+
+    def _disable_or_remove_elements(self, appstruct):
+        """
+        Disable existing elements that are no more in the results
+        """
+        edited = self._get_edited_elements(appstruct)
+
+        for element in self.factory.query():
+            if element.id not in edited.keys():
+                if self.disable:
+                    element.active = False
+                    self.dbsession.merge(element)
+                else:
+                    self.dbsession.delete(element)
+
+    def _add_or_edit(self, datas):
+        """
+        Add or edit an element of the given factory
+        """
+        node_schema = self.schema.children[0].children[0]
+        element = node_schema.objectify(datas)
+        if element.id != 0:
+            element = self.dbsession.merge(element)
+        else:
+            self.dbsession.add(element)
+        return element
+
+    def submit_success(self, appstruct):
+        """
+        Handle successfull submission
+        """
+        self._disable_or_remove_elements(appstruct)
+
+        for datas in appstruct.get('datas', []):
+            self._add_or_edit(datas)
+
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path(self.redirect_path))
+
+
+def get_model_view(model):
+    infos = model.__colanderalchemy_config__
+    view_title = infos.get('title', u'Titre inconnu')
+    class MyView(AdminOption):
+        title = view_title
+        validation_msg = infos.get('validation_msg', u'')
+        factory = model
+        schema = get_sequence_model_admin(model, u"")
+        redirect_path = 'admin_userdatas'
+    return (
+        MyView,
+        camel_case_to_name(model.__name__),
+    )
+
+
+def get_all_option_views():
+    """
+    Return view_class, route_name for all option configuration views
+    """
+    for model in (
+        ZoneOption,
+        ZoneQualificationOption,
+        StudyLevelOption,
+        SocialStatusOption,
+        ActivityTypeOption,
+        PcsOption,
+        PrescripteurOption,
+        NonAdmissionOption,
+        ParcoursStatusOption,
+        MotifSortieOption,
+        SocialDocTypeOption,
+    ):
+        yield get_model_view(model)
+
+
 def includeme(config):
     """
         Add module's views
@@ -622,27 +821,62 @@ def includeme(config):
     config.add_route("admin_expense", "admin/expense")
     config.add_route("admin_activity", "admin/activity")
     config.add_route("admin_cae", "admin/cae")
+
     config.add_view(index, route_name='admin_index',
                  renderer='admin/index.mako',
                  permission='admin')
+
     config.add_view(AdminMain, route_name="admin_main",
                  renderer="admin/main.mako",
                  permission='admin')
+
     config.add_view(AdminTva, route_name='admin_tva',
                  renderer="admin/main.mako",
                  permission='admin')
+
     config.add_view(AdminPaymentMode, route_name='admin_paymentmode',
                 renderer="admin/main.mako",
                 permission='admin')
+
     config.add_view(AdminWorkUnit, route_name='admin_workunit',
                 renderer="admin/main.mako",
                 permission='admin')
+
     config.add_view(AdminExpense, route_name='admin_expense',
                 renderer="admin/main.mako",
                 permission='admin')
+
     config.add_view(AdminActivities, route_name='admin_activity',
                 renderer="admin/main.mako",
                 permission='admin')
+
     config.add_view(AdminCae, route_name='admin_cae',
             renderer="admin/main.mako",
             permission="admin")
+
+
+    # User Datas view configuration
+    config.add_route("admin_userdatas", "admin/userdatas")
+
+    all_option_views = list(get_all_option_views())
+    for view, route_name in all_option_views:
+        config.add_route(route_name, "admin/" + route_name)
+        config.add_view(
+            view,
+            route_name=route_name,
+            renderer="admin/main.mako",
+            permission="admin",
+        )
+
+    config.add_view(
+        make_enter_point_view(
+            'admin_index',
+            all_option_views,
+            u"Administration de la gestion sociale"
+        ),
+        route_name="admin_userdatas",
+        renderer='admin/index.mako',
+        permission="admin",
+    )
+
+

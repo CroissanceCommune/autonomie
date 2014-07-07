@@ -37,6 +37,12 @@
                     % endif
                 % endfor
                 <dt>E-mail</dt><dd>${format_mail(user.email)}</dd>
+                % if api.has_permission('manage') and request.context.userdatas is not None:
+                    <dt>Informations sociales</dt>
+                    <dd>
+                        <a href="${request.route_path('userdata', id=request.context.userdatas.id)}">Voir</a>
+                    </dd>
+                % endif
             </dl>
 % if not user.enabled():
     <span class='label label-warning'>Ce compte a été désactivé</span>
@@ -45,7 +51,7 @@
     </div>
     <div class='span6 offset1'>
         <div class='well'>
-            % if len(user.companies) == 1:
+            % if len(user.companies) <= 1:
                 <h3>Entreprise</h3>
             %else:
                 <h3>Entreprises</h3>

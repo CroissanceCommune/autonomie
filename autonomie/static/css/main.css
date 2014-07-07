@@ -280,4 +280,7 @@ ul.form-tabs li.error a {
 .form-row{
   padding-bottom: 4px;
 }
-
+.accordion-heading a{
+  color: #555;
+}
+.accordion-body.in:hover { overflow:visible; }

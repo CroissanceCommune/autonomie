@@ -28,9 +28,12 @@
 import colander
 import logging
 
-from deform import widget
+from deform import widget as deform_widget
 
-from autonomie.models.user import User
+from autonomie.models.user import (
+    User,
+    SITUATION_OPTIONS,
+)
 from autonomie.models.company import Company
 from autonomie.views.forms import main
 from autonomie.views.forms.widgets import deferred_edit_widget
@@ -101,7 +104,7 @@ def deferred_company_input(node, kw):
         Deferred company autocomplete input widget
     """
     companies = get_companies_choices()
-    wid = widget.AutocompleteInputWidget(values=companies,
+    wid = deform_widget.AutocompleteInputWidget(values=companies,
             template="autonomie:deform_templates/autocomple_input.pt")
     return wid
 
@@ -129,7 +132,7 @@ def deferred_primary_group_widget(node, kw):
         roles = MANAGER_ROLES
     else:
         roles = []
-    return widget.RadioChoiceWidget(values=roles)
+    return deform_widget.RadioChoiceWidget(values=roles)
 
 
 @colander.deferred
@@ -217,7 +220,7 @@ comptabilité (utilisé pour l'export des notes de frais",
         colander.String(),
         title=u"Rôle de l'utilisateur",
         validator=colander.OneOf([x[0] for x in ADMIN_ROLES]),
-        widget=widget.RadioChoiceWidget(values=ADMIN_ROLES),
+        widget=deform_widget.RadioChoiceWidget(values=ADMIN_ROLES),
         default=u"3")
 
 
@@ -227,16 +230,16 @@ class PasswordChangeSchema(colander.MappingSchema):
     """
     login = colander.SchemaNode(
         colander.String(),
-        widget=widget.HiddenWidget()
+        widget=deform_widget.HiddenWidget()
     )
     password = colander.SchemaNode(
         colander.String(),
-        widget=widget.PasswordWidget(),
+        widget=deform_widget.PasswordWidget(),
         title="Mot de passe actuel",
         default=u'')
     pwd = colander.SchemaNode(
         colander.String(),
-        widget=widget.CheckedPasswordWidget(),
+        widget=deform_widget.CheckedPasswordWidget(),
         title="Nouveau mot de passe")
 
 
@@ -258,7 +261,7 @@ class Password(colander.MappingSchema):
     pwd = colander.SchemaNode(
         colander.String(),
         validator=colander.Length(min=4),
-        widget=widget.CheckedPasswordWidget(size=20),
+        widget=deform_widget.CheckedPasswordWidget(size=20),
         title=u"",
         missing=deferred_missing_password)
 
@@ -270,13 +273,17 @@ class UserFormSchema(colander.MappingSchema):
     user = AccountSchema(title=u"Utilisateur")
     companies = CompanySchema(
         title=u"Entreprise(s)",
-        widget=widget.SequenceWidget(
+        widget=deform_widget.SequenceWidget(
             add_subitem_text_template=u"Ajouter une entreprise")
     )
     password = Password(title=u"Mot de passe")
 
 
 USERSCHEMA = UserFormSchema(after_bind=remove_fields)
+
+SITUATION_SEARCH_OPTIONS = (
+    ('', u"Sélectionner un statut",),
+) + SITUATION_OPTIONS
 
 
 class UserDisableSchema(colander.MappingSchema):
@@ -303,7 +310,7 @@ class BaseAuthSchema(colander.MappingSchema):
         title="Identifiant")
     password = colander.SchemaNode(
         colander.String(),
-        widget=widget.PasswordWidget(),
+        widget=deform_widget.PasswordWidget(),
         title="Mot de passe")
 
 
@@ -313,9 +320,9 @@ class AuthSchema(BaseAuthSchema):
     """
     nextpage = colander.SchemaNode(
         colander.String(),
-        widget=widget.HiddenWidget())
+        widget=deform_widget.HiddenWidget())
     remember_me = colander.SchemaNode(colander.Boolean(),
-                                      widget=widget.CheckboxWidget(),
+                                      widget=deform_widget.CheckboxWidget(),
                                       title="Rester connecté")
 
 
@@ -345,8 +352,41 @@ def get_list_schema():
         colander.String(),
         name='disabled',
         missing="0",
-        widget=widget.HiddenWidget(),
+        widget=deform_widget.HiddenWidget(),
         validator=colander.OneOf(('0', '1'))
+        )
+    )
+    return schema
+
+
+def get_userdatas_list_schema():
+    """
+    Return a list schema for user datas
+    """
+    schema = BaseListsSchema().clone()
+
+    schema['search'].description = u"Nom, prénom, entreprise"
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name='situation_situation',
+        widget=deform_widget.SelectWidget(values=SITUATION_SEARCH_OPTIONS),
+        validator=colander.OneOf([s[0] for s in SITUATION_SEARCH_OPTIONS]),
+        default='',
+        missing='',
+        )
+    )
+
+    schema.insert(
+        0,
+        main.user_node(
+            roles=['manager', 'admin'],
+            missing=-1,
+            default=main.deferred_current_user_id,
+            name='situation_follower_id',
+            widget_options={
+                'default_option': (-1, ''),
+                'placeholder': u"Sélectionner un conseiller"},
         )
     )
     return schema

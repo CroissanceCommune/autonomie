@@ -26,6 +26,8 @@
     User related views
 """
 import logging
+import colander
+import deform
 
 from sqlalchemy import or_
 from pyramid.httpexceptions import HTTPFound
@@ -33,8 +35,17 @@ from pyramid.security import has_permission
 from pyramid.decorator import reify
 from webhelpers.html.builder import HTML
 from deform import Form
+from js.deform import auto_need
 
-from autonomie.models.user import User
+from colanderalchemy import SQLAlchemySchemaNode
+
+from autonomie.models.user import (
+    User,
+    UserDatas,
+    UserDatasSocialDocTypes,
+    SocialDocTypeOption,
+    CompanyDatas,
+)
 from autonomie.models.company import Company
 from autonomie.views.forms import (
         merge_session_with_post,
@@ -48,17 +59,26 @@ from autonomie.utils.widgets import (
 from autonomie.utils.views import submit_btn
 from autonomie.utils.views import cancel_btn
 from autonomie.views.render_api import format_account
+from autonomie.views.forms.widgets import AccordionFormWidget
 from autonomie.views.forms.user import (
-        USERSCHEMA,
-        get_list_schema,
-        PASSWORDSCHEMA,
-        UserDisableSchema,
-        )
+    USERSCHEMA,
+    get_list_schema,
+    get_userdatas_list_schema,
+    PASSWORDSCHEMA,
+    UserDisableSchema,
+)
 from autonomie.views.company import company_enable
 
 from autonomie.views import BaseListView
 
 log = logging.getLogger(__name__)
+
+
+DOCTYPE_VALIDATION_BTN = deform.Button(
+    name='submit',
+    type='submit',
+    title=u'Enregistrer les statuts de documents',
+)
 
 
 def get_user_form(request):
@@ -69,216 +89,26 @@ def get_user_form(request):
     return Form(schema, buttons=(submit_btn,))
 
 
-class UserList(BaseListView):
+def get_doctypes_form_schema(userdatas_model):
     """
-        List the users
-        Allows to search for companies or user name
-        Sorting is allowed on names and emails
+    Returns a dynamically built form for doctypes registration
     """
-    title = u"Annuaire des utilisateurs"
-    # The schema used to validate our search/filter form
-    schema = get_list_schema()
-    # The columns that allow sorting
-    sort_columns = dict(name=User.lastname,
-                        email=User.email)
+    registrations = userdatas_model.doctypes_registrations
+    node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)
 
-    def query(self):
-        """
-            Return the main query for our list view
-        """
-        return User.query(ordered=False, only_active=False)\
-                .outerjoin(User.companies)
+    appstruct = {}
+    form_schema = colander.Schema()
 
-    def filter_name_search(self, query, appstruct):
-        """
-            filter the query with the provided search argument
-        """
-        search = appstruct['search']
-        if search:
-            query = query.filter(
-            or_(User.lastname.like("%" + search + "%"),
-                User.firstname.like("%" + search + "%"),
-                User.companies.any(Company.name.like("%" + search + "%")),
-                User.companies.any(Company.goal.like("%" + search + "%"))
-                ))
+    for index, registration in enumerate(registrations):
+        node = node_schema.clone()
+        name = 'node_%s' % index
+        node.name = name
+        node.title = u''
+        node['status'].title = registration.doctype.label
+        form_schema.add(node)
+        appstruct[name] = node_schema.dictify(registration)
 
-        return query
-
-    def filter_disabled(self, query, appstruct):
-        disabled = appstruct['disabled']
-        if disabled == '0':
-            val = 'Y'
-        else:
-            val = 'N'
-        return query.filter(User.active == val)
-
-    def populate_actionmenu(self, appstruct):
-        """
-            Add items to the action menu (directory link,
-            add user link and popup for user with add permission ...)
-        """
-        populate_actionmenu(self.request)
-        if has_permission('add', self.request.context, self.request):
-            form = get_user_form(self.request)
-            popup = PopUp("add", u'Ajouter un compte', form.render())
-            self.request.popups = {popup.name: popup}
-            self.request.actionmenu.add(popup.open_btn())
-            self.request.actionmenu.add(self._get_disabled_btn(appstruct))
-
-    def _get_disabled_btn(self, appstruct):
-        """
-            return the button to show disabled users
-        """
-        disabled = appstruct['disabled']
-        if disabled == '0':
-            url = self.request.current_route_path(_query=dict(disabled="1"))
-            link = HTML.a(u"Afficher les comptes désactivés",  href=url)
-        else:
-            url = self.request.current_route_path(_query=dict(archived="0"))
-            link = HTML.a(u"Afficher uniquement les comptes actifs", href=url)
-        return StaticWidget(link)
-
-
-class UserAccount(BaseFormView):
-    """
-        User account page providing password change
-    """
-    schema = PASSWORDSCHEMA
-    title = u"Mon compte"
-
-    def before(self, form):
-        """
-            Called before view execution
-        """
-        appstruct = {'login': self.request.user.login}
-        form.set_appstruct(appstruct)
-
-    def submit_success(self, appstruct):
-        """
-            Called on submission success
-        """
-        log.info(u"# User {0} has changed his password #".format(
-                        self.request.user.login))
-        new_pass = appstruct['pwd']
-        self.request.user.set_password(new_pass)
-        self.dbsession.merge(self.request.user)
-        self.request.session.flash(u"Votre mot de passe a bien été modifié")
-
-
-def user_view(request):
-    """
-        Return user view only datas
-    """
-    title = u"{0}".format(format_account(request.context))
-    populate_actionmenu(request, request.context)
-    return dict(title=title,
-                user=request.context)
-
-
-def user_delete(request):
-    """
-        disable a user and its enteprises
-    """
-    account = request.context
-    try:
-        log.debug(u"Deleting account : {0}".format(format_account(account)))
-        request.dbsession.delete(account)
-        request.dbsession.flush()
-        message = u"Le compte '{0}' a bien été supprimé".format(
-                                        format_account(account))
-        request.session.flash(message)
-    except:
-        log.exception(u"Erreur à la suppression du compte")
-        err_msg = u"Erreur à la suppression du compte de '{0}'".format(
-                                            format_account(account))
-        request.session.flash(err_msg, 'error')
-    return HTTPFound(request.route_path("users"))
-
-
-def user_enable(request):
-    """
-        enable a user and its enterprise (if he has only one)
-    """
-    account = request.context
-    if not account.enabled():
-        try:
-            account.enable()
-            request.dbsession.merge(account)
-            log.info(u"The user {0} has been enabled".\
-                    format(format_account(account)))
-            message = u"L'utilisateur {0} a été (ré)activé.".\
-                    format(format_account(account))
-            request.session.flash(message)
-            if len(account.companies) == 1:
-                company = account.companies[0]
-                company_enable(request, company=company)
-        except:
-            log.exception(u"Erreur à l'activation du compte")
-            err_msg = u"Erreur à l'activation du compte de '{0}'".\
-                    format(format_account(account))
-            request.session.flash(err_msg, 'error')
-    return HTTPFound(request.route_path("users"))
-
-
-class UserDisable(BaseFormView):
-    """
-        Allows to disable user's and optionnaly its companies
-    """
-    schema = UserDisableSchema()
-    buttons = (submit_btn, cancel_btn,)
-
-    @reify
-    def title(self):
-        """
-            title of the form
-        """
-        return u"Désactivation du compte {0}".format(
-                                         format_account(self.request.context))
-
-    def before(self, form):
-        """
-            Redirect if the cancel button was clicked
-        """
-        if "cancel" in self.request.POST:
-            user_id = self.request.context.id
-            raise HTTPFound(self.request.route_path("user", id=user_id))
-
-    def submit_success(self, appstruct):
-        """
-            Disable users and companies
-        """
-        if appstruct.get('companies', False):
-            self._disable_companies()
-        if appstruct.get('disable', False):
-            self._disable_user(self.request.context)
-        return HTTPFound(self.request.route_path("users"))
-
-    def _disable_user(self, user):
-        """
-            disable the current user
-        """
-        if user.enabled():
-            user.disable()
-            self.dbsession.merge(user)
-            log.info(u"The user {0} has been disabled".format(
-                                                        format_account(user)))
-            message = u"L'utilisateur {0} a été désactivé.".format(
-                                                        format_account(user))
-            self.session.flash(message)
-
-    def _disable_companies(self):
-        """
-            disable all companies related to the current user
-        """
-        for company in self.request.context.companies:
-            company.disable()
-            self.dbsession.merge(company)
-            log.info(u"The company {0} has been disabled".format(company.name))
-            message = u"L'entreprise '{0}' a bien été désactivée.".format(
-                                                company.name)
-            self.session.flash(message)
-            for employee in company.employees:
-                self._disable_user(employee)
+    return form_schema, appstruct
 
 
 class BaseUserForm(BaseFormView):
@@ -397,6 +227,402 @@ class UserEdit(BaseUserForm):
         return HTTPFound(self.request.route_path("user", id=user.id))
 
 
+class UserList(BaseListView):
+    """
+        List the users
+        Allows to search for companies or user name
+        Sorting is allowed on names and emails
+    """
+    title = u"Annuaire des utilisateurs"
+    # The schema used to validate our search/filter form
+    schema = get_list_schema()
+    # The columns that allow sorting
+    sort_columns = dict(name=User.lastname,
+                        email=User.email)
+
+    def query(self):
+        """
+            Return the main query for our list view
+        """
+        return User.query(ordered=False, only_active=False)\
+                .outerjoin(User.companies)
+
+    def filter_name_search(self, query, appstruct):
+        """
+            filter the query with the provided search argument
+        """
+        search = appstruct['search']
+        if search:
+            query = query.filter(
+            or_(User.lastname.like("%" + search + "%"),
+                User.firstname.like("%" + search + "%"),
+                User.companies.any(Company.name.like("%" + search + "%")),
+                User.companies.any(Company.goal.like("%" + search + "%"))
+                ))
+
+        return query
+
+    def filter_disabled(self, query, appstruct):
+        disabled = appstruct['disabled']
+        if disabled == '0':
+            val = 'Y'
+        else:
+            val = 'N'
+        return query.filter(User.active == val)
+
+    def populate_actionmenu(self, appstruct):
+        """
+            Add items to the action menu (directory link,
+            add user link and popup for user with add permission ...)
+        """
+        populate_actionmenu(self.request)
+        if has_permission('add', self.request.context, self.request):
+            form = get_user_form(self.request)
+            popup = PopUp("add", u'Ajouter un compte', form.render())
+            self.request.popups = {popup.name: popup}
+            self.request.actionmenu.add(popup.open_btn())
+            self.request.actionmenu.add(self._get_disabled_btn(appstruct))
+
+    def _get_disabled_btn(self, appstruct):
+        """
+            return the button to show disabled users
+        """
+        disabled = appstruct['disabled']
+        if disabled == '0':
+            url = self.request.current_route_path(_query=dict(disabled="1"))
+            link = HTML.a(u"Afficher les comptes désactivés",  href=url)
+        else:
+            url = self.request.current_route_path(_query=dict(archived="0"))
+            link = HTML.a(u"Afficher uniquement les comptes actifs", href=url)
+        return StaticWidget(link)
+
+
+class UserAccount(BaseFormView):
+    """
+        User account page providing password change
+    """
+    schema = PASSWORDSCHEMA
+    title = u"Mon compte"
+
+    def before(self, form):
+        """
+            Called before view execution
+        """
+        appstruct = {'login': self.request.user.login}
+        form.set_appstruct(appstruct)
+
+    def submit_success(self, appstruct):
+        """
+            Called on submission success
+        """
+        log.info(u"# User {0} has changed his password #".format(
+                        self.request.user.login))
+        new_pass = appstruct['pwd']
+        self.request.user.set_password(new_pass)
+        self.dbsession.merge(self.request.user)
+        self.request.session.flash(u"Votre mot de passe a bien été modifié")
+
+
+class UserDatasAdd(BaseFormView):
+    title = u"Gestion sociale"
+    schema = SQLAlchemySchemaNode(UserDatas)
+    validation_msg = u"Les informations sociales ont bien été enregistrées"
+
+    def before(self, form):
+        auto_need(form)
+        form.widget = AccordionFormWidget()
+        self.populate_actionmenu()
+
+    def populate_actionmenu(self):
+        self.request.actionmenu.add(get_userdatas_list_btn())
+
+    def submit_success(self, appstruct):
+        model = self.schema.objectify(appstruct)
+
+        user, login, password = model.gen_user_account()
+
+        companies = model.gen_companies()
+        if companies:
+            msg = u"Les activités associées ont été ajoutées"
+            self.request.session.flash(msg)
+            user.companies = companies
+
+        model = self.dbsession.merge(model)
+        self.dbsession.flush()
+
+        if user is not None:
+            url = self.request.route_path('user', id=user.id)
+
+            msg = u"Un compte a été créé : \
+login : {0}, \
+mot de passe : {1}".format(login, password, url)
+
+            self.request.session.flash(msg)
+
+        self.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path('userdata', id=model.id))
+
+
+class UserDatasEdit(UserDatasAdd):
+    add_template_vars = ('doctypes_form',)
+
+    @property
+    def title(self):
+        return "Gestion sociale : {0}".format(
+            format_account(self.request.context)
+        )
+
+    def before(self, form):
+        super(UserDatasEdit, self).before(form)
+        form.set_appstruct(self.schema.dictify(self.request.context))
+        self.counter = form.counter
+        self.ensure_doctypes_rel()
+        self.populate_actionmenu()
+
+    def ensure_doctypes_rel(self):
+        """
+        Ensure the current userdata context is related to all doctypes through a
+        UserDatasSocialDocTypes object
+        """
+        userdatas_id = self.context.id
+
+        for doctype in SocialDocTypeOption.query():
+            doctype_id = doctype.id
+            rel = UserDatasSocialDocTypes.get((userdatas_id, doctype_id,))
+            if rel is None:
+                rel = UserDatasSocialDocTypes(
+                    userdatas_id=userdatas_id,
+                    doctype_id=doctype_id,
+                )
+                self.dbsession.add(rel)
+
+    @property
+    def doctypes_form(self):
+        """
+        Add a doctype registration form to the resulting dict
+        """
+        form_schema, appstruct = get_doctypes_form_schema(self.context)
+        action = self.request.route_path(
+            'userdata',
+            id=self.context.id,
+            _query=dict(action="doctype"),
+        )
+        form = Form(
+            form_schema,
+            buttons=(submit_btn,),
+            action=action,
+            counter=self.counter
+        )
+        form.set_appstruct(appstruct)
+        return form
+
+
+def userdata_doctype_view(userdata_model, request):
+    """
+    View used to register doctypes status
+
+        userdata_model
+
+            The UserDatas model retrieved through traversal
+    """
+    if 'submit' in request.params:
+        schema = get_doctypes_form_schema(userdata_model)[0]
+        appstruct = request.POST.items()
+        try:
+            appstruct = schema.deserialize(appstruct)
+        except colander.Invalid, exc:
+            log.exception(
+                "Error while validating doctype registration"
+            )
+        else:
+            node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)
+            for data in appstruct.values():
+                model = schema.objectify(data)
+                request.dbsession.merge(model)
+            request.session.flash(
+                u"Les informations saisies ont bien été enregistrées"
+            )
+
+    return HTTPFound(
+        request.route_path('userdata', id=userdata_model.id)
+    )
+
+
+class UserDatasList(BaseListView):
+    """
+    User datas list view
+    """
+    title = u"Liste des informations sociales"
+    schema = get_userdatas_list_schema()
+    sort_columns = dict(
+        lastname=UserDatas.coordonnees_lastname,
+    )
+    default_sort = 'lastname'
+
+    def query(self):
+        return UserDatas.query()
+
+    def filter_situation_situation(self, query, appstruct):
+        """
+        Filter the general situation of the project
+        """
+        log.debug("APPSTRUCT : %s" % appstruct)
+        situation = appstruct.get('situation_situation')
+        if situation not in (None, ''):
+            query = query.filter(
+                UserDatas.situation_situation==situation
+            )
+        return query
+
+    def filter_search(self, query, appstruct):
+        """
+        Filter the current query for firstname, lastname or activity
+        """
+        search = appstruct.get('search')
+
+        if search not in (None, ''):
+            filter_ = "%" + search + "%"
+            query = query.filter(
+                or_(
+                    UserDatas.coordonnees_firstname.like(filter_),
+                    UserDatas.coordonnees_lastname.like(filter_),
+                    UserDatas.activity_companydatas.any(
+                        CompanyDatas.name.like(filter_)),
+                    UserDatas.activity_companydatas.any(
+                        CompanyDatas.title.like(filter_)),
+                )
+            )
+        return query
+
+    def filter_situation_follower_id(self, query, appstruct):
+        """
+        Filter the current query through followers
+        """
+        follower_id = appstruct.get('situation_follower_id')
+
+        if follower_id not in (None, -1):
+            query = query.filter(
+                UserDatas.situation_follower_id==follower_id
+            )
+        return query
+
+
+def user_view(request):
+    """
+        Return user view only datas
+    """
+    title = u"{0}".format(format_account(request.context))
+    populate_actionmenu(request, request.context)
+    return dict(title=title,
+                user=request.context)
+
+
+def user_delete(request):
+    """
+        disable a user and its enteprises
+    """
+    account = request.context
+    try:
+        log.debug(u"Deleting account : {0}".format(format_account(account)))
+        request.dbsession.delete(account)
+        request.dbsession.flush()
+        message = u"Le compte '{0}' a bien été supprimé".format(
+                                        format_account(account))
+        request.session.flash(message)
+    except:
+        log.exception(u"Erreur à la suppression du compte")
+        err_msg = u"Erreur à la suppression du compte de '{0}'".format(
+                                            format_account(account))
+        request.session.flash(err_msg, 'error')
+    return HTTPFound(request.route_path("users"))
+
+
+def user_enable(request):
+    """
+        enable a user and its enterprise (if he has only one)
+    """
+    account = request.context
+    if not account.enabled():
+        try:
+            account.enable()
+            request.dbsession.merge(account)
+            log.info(u"The user {0} has been enabled".\
+                    format(format_account(account)))
+            message = u"L'utilisateur {0} a été (ré)activé.".\
+                    format(format_account(account))
+            request.session.flash(message)
+            if len(account.companies) == 1:
+                company = account.companies[0]
+                company_enable(request, company=company)
+        except:
+            log.exception(u"Erreur à l'activation du compte")
+            err_msg = u"Erreur à l'activation du compte de '{0}'".\
+                    format(format_account(account))
+            request.session.flash(err_msg, 'error')
+    return HTTPFound(request.route_path("users"))
+
+
+class UserDisable(BaseFormView):
+    """
+        Allows to disable user's and optionnaly its companies
+    """
+    schema = UserDisableSchema()
+    buttons = (submit_btn, cancel_btn,)
+
+    @reify
+    def title(self):
+        """
+            title of the form
+        """
+        return u"Désactivation du compte {0}".format(
+                                         format_account(self.request.context))
+
+    def before(self, form):
+        """
+            Redirect if the cancel button was clicked
+        """
+        if "cancel" in self.request.POST:
+            user_id = self.request.context.id
+            raise HTTPFound(self.request.route_path("user", id=user_id))
+
+    def submit_success(self, appstruct):
+        """
+            Disable users and companies
+        """
+        if appstruct.get('companies', False):
+            self._disable_companies()
+        if appstruct.get('disable', False):
+            self._disable_user(self.request.context)
+        return HTTPFound(self.request.route_path("users"))
+
+    def _disable_user(self, user):
+        """
+            disable the current user
+        """
+        if user.enabled():
+            user.disable()
+            self.dbsession.merge(user)
+            log.info(u"The user {0} has been disabled".format(
+                                                        format_account(user)))
+            message = u"L'utilisateur {0} a été désactivé.".format(
+                                                        format_account(user))
+            self.session.flash(message)
+
+    def _disable_companies(self):
+        """
+            disable all companies related to the current user
+        """
+        for company in self.request.context.companies:
+            company.disable()
+            self.dbsession.merge(company)
+            log.info(u"The company {0} has been disabled".format(company.name))
+            message = u"L'entreprise '{0}' a bien été désactivée.".format(
+                                                company.name)
+            self.session.flash(message)
+            for employee in company.employees:
+                self._disable_user(employee)
+
+
 def populate_actionmenu(request, user=None):
     """
         populate the actionmenu
@@ -418,6 +644,13 @@ def get_list_view_btn():
         Return a link to the user list
     """
     return ViewLink(u"Annuaire", "view", path="users")
+
+
+def get_userdatas_list_btn():
+    """
+    Return a link to the user datas list
+    """
+    return ViewLink(u"Annuaire 'Gestion sociale'", "manage", path="userdatas")
 
 
 def get_view_btn(user_id):
@@ -462,47 +695,112 @@ def includeme(config):
     """
         Declare all the routes and views related to this model
     """
-    config.add_route("users",
-                    "/users")
-    config.add_route("user",
-                     "/users/{id:\d+}",
-                     traverse="/users/{id}")
-    config.add_route('account',
-                    '/account')
+    config.add_route("users", "/users")
 
-    config.add_view(UserList,
-                    route_name='users',
-                    renderer='users.mako',
-                    permission='view')
-    config.add_view(user_view,
-                    route_name='user',
-                    renderer='user.mako',
-                    permission='view')
-    config.add_view(UserAdd,
-                    route_name='users',
-                    renderer='user_edit.mako',
-                    request_method='POST',
-                    permission='add')
-    config.add_view(UserEdit,
-                    route_name='user',
-                    renderer='user_edit.mako',
-                    request_param='action=edit',
-                    permission='edit')
-    config.add_view(UserDisable,
-                    route_name='user',
-                    renderer='user_edit.mako',
-                    request_param='action=disable',
-                    permission='edit')
-    config.add_view(user_enable,
-                    route_name='user',
-                    renderer='user_edit.mako',
-                    request_param='action=enable',
-                    permission='edit')
-    config.add_view(user_delete,
-                    route_name='user',
-                    request_param='action=delete',
-                    permission='manage')
-    config.add_view(UserAccount,
-                    route_name='account',
-                    renderer='account.mako',
-                    permission='view')
+    config.add_route(
+        "user",
+        "/users/{id:\d+}",
+        traverse="/users/{id}",
+    )
+
+    config.add_route(
+        "userdata",
+        "/userdatas/{id:\d+}",
+        traverse="/userdatas/{id}",
+    )
+
+    config.add_route(
+        "userdatas",
+        "/userdatas",
+    )
+
+    config.add_route('account', '/account')
+
+    config.add_view(
+        UserList,
+        route_name='users',
+        renderer='users.mako',
+        permission='view'
+    )
+
+    config.add_view(
+        user_view,
+        route_name='user',
+        renderer='user.mako',
+        permission='view',
+    )
+
+    config.add_view(
+        UserAdd,
+        route_name='users',
+        renderer='user_edit.mako',
+        request_method='POST',
+        permission='add',
+    )
+
+    config.add_view(
+        UserEdit,
+        route_name='user',
+        renderer='user_edit.mako',
+        request_param='action=edit',
+        permission='edit',
+    )
+
+    config.add_view(
+        UserDatasAdd,
+        route_name='userdatas',
+        request_param='action=new',
+        renderer='/userdata.mako',
+        permission='admin',
+    )
+
+    config.add_view(
+        UserDatasEdit,
+        route_name='userdata',
+        renderer='/userdata.mako',
+        permission='admin'
+    )
+
+    config.add_view(
+        userdata_doctype_view,
+        route_name='userdata',
+        request_param='action=doctype',
+        permission='admin',
+    )
+
+    config.add_view(
+        UserDisable,
+        route_name='user',
+        renderer='user_edit.mako',
+        request_param='action=disable',
+        permission='edit',
+    )
+
+    config.add_view(
+        user_enable,
+        route_name='user',
+        renderer='user_edit.mako',
+        request_param='action=enable',
+        permission='edit'
+    )
+
+    config.add_view(
+        user_delete,
+        route_name='user',
+        request_param='action=delete',
+        permission='manage'
+    )
+
+    config.add_view(
+        UserAccount,
+        route_name='account',
+        renderer='account.mako',
+        permission='view'
+    )
+
+    config.add_view(
+        UserDatasList,
+        route_name="userdatas",
+        renderer="userdatas.mako",
+        permission="manage",
+    )

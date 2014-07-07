@@ -50,7 +50,10 @@ from autonomie.models.treasury import (
     ExpenseSheet,
     BaseExpenseLine,
 )
-from autonomie.models.user import User
+from autonomie.models.user import (
+    User,
+    UserDatas,
+)
 
 log = logging.getLogger(__name__)
 
@@ -101,6 +104,7 @@ class RootFactory(dict):
             ('invoices', 'invoice', Invoice, ),
             ('projects', 'project', Project, ),
             ('users', 'user', User, ),
+            ('userdatas', 'userdatas', UserDatas, ),
             ('payments', 'payment', Payment, ),
             ('workshops', 'workshop', Workshop, ),
             ('timeslots', 'timeslot', Timeslot, ),
@@ -272,6 +276,7 @@ def set_models_acls():
     Invoice.__acl__ = property(get_task_acl)
     CancelInvoice.__acl__ = property(get_task_acl)
     User.__acl__ = property(get_user_acl)
+    UserDatas.__acl__ = property(get_base_acl)
     ExpenseSheet.__acl__ = property(get_expensesheet_acl)
     BaseExpenseLine.__acl__ = property(get_expense_acl)
     Activity.__acl__ = property(get_activity_acl)

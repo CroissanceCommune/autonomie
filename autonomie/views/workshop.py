@@ -87,6 +87,8 @@ class WorkshopAddView(BaseFormView):
         come_from = appstruct.pop('come_from')
 
         timeslots_datas = appstruct.pop('timeslots')
+        for i in timeslots_datas:
+            i.pop('id')
         appstruct['timeslots'] = [models.Timeslot(**data) \
             for data in timeslots_datas]
 
@@ -172,7 +174,7 @@ qui n'appartient pas au contexte courant !!!!")
         objects = []
 
         for data in datas:
-            if data['id'] is None:
+            if data['id'] == 0:
                 # New timeslots
                 objects.append(models.Timeslot(**data))
             else:

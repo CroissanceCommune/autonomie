@@ -143,6 +143,13 @@ class Event(Node):
 
     participants = association_proxy('attendances', 'user')
 
+    # Waiting for a way to declare order_by clause in an association_proxy
+    @property
+    def sorted_participants(self):
+        p = self.participants
+        p = sorted(p, key=lambda u:u.lastname)
+        return p
+
     def user_status(self, user_id):
         """
         Return a user's status for this given timeslot

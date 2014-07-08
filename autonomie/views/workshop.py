@@ -356,29 +356,62 @@ class CompanyWorkshopList(WorkshopList):
         return query
 
 
-def timeslot_pdf_view(timeslot, request):
+def timeslots_pdf_output(timeslots, workshop, request):
     """
-    Return a pdf attendance sheet for the given workshop
+    write the pdf output of an attendance sheet to the current request response
 
-        timeslot
+        timeslots
 
-            A timeslot object returned as a current context by traversal
+            The timeslots to render in the attendance sheet (one timeslot = one
+            column)
+
+        workshop
+
+            The workshop object
+
+        request
+
+            The current request object
     """
-    date = timeslot.start_time.strftime("%e_%m_%Y")
-    filename = u"atelier_{0}_{1}.pdf".format(date, timeslot.id)
+    if not hasattr(timeslots, '__iter__'):
+        timeslots = [timeslots]
+
+    date = workshop.datetime.strftime("%e_%m_%Y")
+    filename = u"atelier_{0}_{1}.pdf".format(date, workshop.id)
 
     template = u"autonomie:templates/workshop_pdf.mako"
     rendering_datas = dict(
-        timeslot=timeslot,
-        workshop=timeslot.workshop,
+        timeslots=timeslots,
+        workshop=workshop,
         config=request.config,
-        participants=timeslot.participants,
+        participants=workshop.sorted_participants,
         )
     html_str = render_html(request, template, rendering_datas)
 
     write_pdf(request, filename, html_str)
 
     return request.response
+
+def timeslot_pdf_view(timeslot, request):
+    """
+    Return a pdf attendance sheet for the given timeslot
+
+        timeslot
+
+            A timeslot object returned as a current context by traversal
+    """
+    return timeslots_pdf_output(timeslot, timeslot.workshop, request)
+
+
+def workshop_pdf_view(workshop, request):
+    """
+    Return a pdf attendance sheet for all the timeslots of the given workshop
+
+        workshop
+
+            A workshop object returned as a current context by traversal
+    """
+    return timeslots_pdf_output(workshop.timeslots, workshop, request)
 
 
 def workshop_view(workshop, request):
@@ -523,6 +556,11 @@ def includeme(config):
         timeslot_pdf_view,
         route_name='timeslot.pdf',
         )
+
+    config.add_view(
+        workshop_pdf_view,
+        route_name='workshop.pdf',
+    )
 
     config.add_view(
             workshop_delete_view,

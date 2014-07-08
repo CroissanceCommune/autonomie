@@ -25,6 +25,7 @@ Workshop related views
 import logging
 import peppercorn
 import colander
+import datetime
 
 from pyramid.httpexceptions import (
     HTTPFound,
@@ -68,6 +69,39 @@ WORKSHOP_SUCCESS_MSG = u"L'atelier a bien été programmée : \
 <a href='{0}'>Voir</a>"
 
 
+def get_new_datetime(now, hour, minute=0):
+    """
+    Return a new datetime object based on the 'now' element
+
+        hour
+
+            The hour we'd like to set
+
+        minute
+
+            The minute value we want to set (default 0)
+    """
+    return now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
+
+def get_default_timeslots():
+    """
+    Return default timeslots for workshop creation
+    """
+    now = datetime.datetime.now()
+    morning = {
+        'name': u'Matinée',
+        'start_time': get_new_datetime(now, 9),
+        'end_time': get_new_datetime(now, 12, 30),
+    }
+    afternoon = {
+        'name': u'Après-midi',
+        'start_time': get_new_datetime(now, 14),
+        'end_time': get_new_datetime(now, 18),
+    }
+    return [morning, afternoon]
+
+
 class WorkshopAddView(BaseFormView):
     """
     View for adding workshop
@@ -78,12 +112,14 @@ class WorkshopAddView(BaseFormView):
     def before(self, form):
         auto_need(form)
         timepicker_fr.need()
+        default_timeslots = get_default_timeslots()
+        print default_timeslots
+        form.set_appstruct({'timeslots': default_timeslots})
 
     def submit_success(self, appstruct):
         """
         Create a new workshop
         """
-        log.info(appstruct)
         come_from = appstruct.pop('come_from')
 
         timeslots_datas = appstruct.pop('timeslots')
@@ -174,12 +210,13 @@ qui n'appartient pas au contexte courant !!!!")
         objects = []
 
         for data in datas:
-            if data['id'] == 0:
+            id_ = data.pop('id')
+            if id_ is None:
                 # New timeslots
                 objects.append(models.Timeslot(**data))
             else:
                 # existing timeslots
-                obj = self._retrieve_workshop_timeslot(data['id'])
+                obj = self._retrieve_workshop_timeslot(id_)
                 merge_session_with_post(obj, data)
                 objects.append(obj)
 
@@ -189,8 +226,6 @@ qui n'appartient pas au contexte courant !!!!")
         """
         Handle successfull submission of our edition form
         """
-        log.info(" -> Editing a workshop")
-        log.info(appstruct)
         come_from = appstruct.pop('come_from')
         appstruct['timeslots'] = self._get_timeslots(appstruct)
 
@@ -238,7 +273,6 @@ def record_attendances_view(context, request):
             log.error(u"Error while validating workshop attendance")
             log.error(e)
         else:
-            log.info(appstruct)
             for datas in appstruct['attendances']:
                 account_id = datas['account_id']
                 timeslot_id = datas['timeslot_id']

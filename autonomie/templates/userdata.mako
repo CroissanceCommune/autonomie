@@ -27,7 +27,7 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-% if getattr(request.context, "user_id", None) is not None and request.context.__name__ == 'userdata':
+% if getattr(request.context, "user_id", None) is not None and request.context.__name__ == 'userdatas':
     <div class='well'>
         Ces données sont associées à un compte utilisateur : <a href='${request.route_path("user", id=request.context.user_id)}'>Voir</a>
     </div>

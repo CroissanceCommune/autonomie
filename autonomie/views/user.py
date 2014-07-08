@@ -377,7 +377,6 @@ class UserDatasEdit(UserDatasAdd):
         form.set_appstruct(self.schema.dictify(self.request.context))
         self.counter = form.counter
         self.ensure_doctypes_rel()
-        self.populate_actionmenu()
 
     def ensure_doctypes_rel(self):
         """

@@ -55,7 +55,7 @@ def upgrade():
         op.execute(query)
 
     # Migrating activity to add duration and use datetimes
-    op.add_column('activity', sa.Column('duration', sa.String(6), default='0h'))
+    op.add_column('activity', sa.Column('duration', sa.Integer, default=0))
     op.alter_column(
         'event',
         'date',

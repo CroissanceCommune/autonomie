@@ -246,10 +246,13 @@ class RecordActivitySchema(colander.Schema):
         )
 
     duration = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(max=6),
+        colander.Integer(),
         title=u'Durée',
-        description=u"La durée du rendez-vous (ex : 1h30)")
+        description=u"La durée du rendez-vous, en minute (ex : 90)",
+        widget=deform_widget.TextInputWidget(
+            input_append='minutes',
+        ),
+    )
 
 
 def get_list_schema(is_admin=False):

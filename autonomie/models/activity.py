@@ -206,7 +206,7 @@ class Activity(Event):
     action = deferred(Column(Text()), group='edit')
     documents = deferred(Column(Text()), group='edit')
     notes = deferred(Column(Text()), group='edit')
-    duration = deferred(Column(String(6), default='0h'), group='edit')
+    duration = deferred(Column(Integer, default=0), group='edit')
 
     type_object = relationship(
             "ActivityType",

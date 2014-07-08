@@ -125,6 +125,10 @@ class WorkshopAddView(BaseFormView):
         timeslots_datas = appstruct.pop('timeslots')
         for i in timeslots_datas:
             i.pop('id')
+
+        timeslots_datas.sort(key=lambda val: val['start_time'])
+
+        appstruct['datetime'] = timeslots_datas[0]['start_time']
         appstruct['timeslots'] = [models.Timeslot(**data) \
             for data in timeslots_datas]
 
@@ -208,6 +212,7 @@ qui n'appartient pas au contexte courant !!!!")
     def _get_timeslots(self, appstruct):
         datas = appstruct.pop('timeslots')
         objects = []
+        datas.sort(key=lambda val: val['start_time'])
 
         for data in datas:
             id_ = data.pop('id')
@@ -228,6 +233,8 @@ qui n'appartient pas au contexte courant !!!!")
         """
         come_from = appstruct.pop('come_from')
         appstruct['timeslots'] = self._get_timeslots(appstruct)
+        appstruct['datetime'] = appstruct['timeslots'][0].start_time
+
 
         participants_ids = set(appstruct.pop('participants', []))
         appstruct['participants'] = [user.User.get(id_) \

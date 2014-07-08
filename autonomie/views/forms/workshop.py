@@ -97,7 +97,6 @@ class Workshop(colander.MappingSchema):
         title=u"Animateur(s)/Animatrice(s)",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
-    datetime = main.today_node(title=u"Date de l'atelier")
     info1 = get_info_field(u"Sous-titre 1 (facultatif)")
     info2 = get_info_field(u"Sous-titre 2 (facultatif)")
     info3 = get_info_field(u"Sous-titre 3 (facultatif)")

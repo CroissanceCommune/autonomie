@@ -315,22 +315,44 @@ class Phase(DBBASE):
     """
     __tablename__ = 'phase'
     __table_args__ = default_table_args
-    id = Column('id', Integer, primary_key=True)
-    project_id = Column('project_id', Integer,
-                        ForeignKey('project.id'))
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': widgets.EXCLUDED},
+    )
+
+    project_id = Column(
+        ForeignKey('project.id'),
+        info={'colanderalchemy': widgets.EXCLUDED},
+    )
+
     name = Column("name", String(150), default=u'Phase par défaut')
+
     project = relationship(
         "Project",
         backref=backref(
             "phases",
             info={'colanderalchemy': widgets.EXCLUDED},
+        ),
+        info={'colanderalchemy': widgets.EXCLUDED},
+    )
+
+    creationDate = deferred(
+        Column(
+            CustomDateType,
+            info={'colanderalchemy': widgets.EXCLUDED},
+            default=get_current_timestamp,
         )
     )
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
+
+    updateDate = deferred(
+        Column(
+            CustomDateType,
+            info={'colanderalchemy': widgets.EXCLUDED},
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp,
+        )
+    )
 
     def is_default(self):
         """

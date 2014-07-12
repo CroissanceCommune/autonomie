@@ -22,9 +22,11 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 """
-    Nodes model is a base model for both projects and documents
+    Nodes model is a base model for many other models (projects, documents,
+    files, events)
+    This way we can easily use the parent/children relationship on an agnostic
+    way as in a CMS
 """
-import logging
 from datetime import datetime
 from sqlalchemy import (
     Column,
@@ -32,13 +34,14 @@ from sqlalchemy import (
     String,
     DateTime,
     ForeignKey,
-    )
+)
 from sqlalchemy.orm import relationship, backref
 
+from autonomie.models import widgets
 from autonomie.models.base import (
-        DBBASE,
-        default_table_args,
-        )
+    DBBASE,
+    default_table_args,
+)
 
 
 class Node(DBBASE):
@@ -48,22 +51,47 @@ class Node(DBBASE):
             'polymorphic_on': 'type_',
             'polymorphic_identity':'nodes'}
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), default='')
+    name = Column(
+        String(255),
+        info={
+            'colanderalchemy': {'title': u"Nom"},
+        },
+        nullable=False,
+    )
+
     created_at = Column(
-            DateTime(),
-            default=datetime.now()
-            )
+        DateTime(),
+        info={'colanderalchemy': widgets.EXCLUDED,},
+        default=datetime.now(),
+    )
+
     updated_at = Column(
-            DateTime(),
-            default=datetime.now(),
-            onupdate=datetime.now()
-            )
-    parent_id = Column(ForeignKey('node.id'))
+        DateTime(),
+        info={'colanderalchemy': widgets.EXCLUDED,},
+        default=datetime.now(),
+        onupdate=datetime.now()
+    )
+
+    parent_id = Column(
+        ForeignKey('node.id'),
+        info={'colanderalchemy': widgets.EXCLUDED,},
+    )
+
     children = relationship(
-           'Node',
-           primaryjoin='Node.id==Node.parent_id',
-           backref=backref('parent', remote_side=[id]),
-           cascade='all',
-           )
-    #TODO :     parent_id = Column(ForeignKey("Node.id", ...
-    type_ = Column('type_', String(30), nullable=False)
+        'Node',
+        primaryjoin='Node.id==Node.parent_id',
+        backref=backref(
+            'parent',
+            remote_side=[id],
+            info={'colanderalchemy': widgets.EXCLUDED,},
+        ),
+        cascade='all',
+        info={'colanderalchemy': widgets.EXCLUDED,},
+    )
+
+    type_ = Column(
+        'type_',
+        String(30),
+        info={'colanderalchemy': widgets.EXCLUDED,},
+        nullable=False,
+    )

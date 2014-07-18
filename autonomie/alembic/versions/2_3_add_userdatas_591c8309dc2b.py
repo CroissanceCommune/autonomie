@@ -20,7 +20,9 @@ def upgrade():
 
     db = DBSESSION()
 
-    for u in db.query(user.User):
+    for u in db.query(user.User)\
+             .filter(user.User.active=='Y')\
+             .filter(user.User.primary_group==3):
         situation = "integre"
         userdata = user.UserDatas(
             situation_situation=situation,

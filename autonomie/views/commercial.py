@@ -38,10 +38,6 @@ from deform.exception import ValidationFailure
 from fanstatic import Resource
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.views.forms import (
-    merge_session_with_post,
-    submit_btn,
-)
 from autonomie.compute.math_utils import percent
 from autonomie.models.task import (
     Estimation,
@@ -51,12 +47,20 @@ from autonomie.models.task import (
 from autonomie.models.customer import Customer
 from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
-from autonomie.views.base import BaseView
+from autonomie.views import BaseView
+from autonomie.views.forms import (
+    merge_session_with_post,
+    submit_btn,
+)
 from autonomie.views.forms.commercial import (
     CommercialFormSchema,
     CommercialSetFormSchema,
     )
-from autonomie.resources import lib_autonomie, backbone
+
+from autonomie.resources import (
+    lib_autonomie,
+    backbone,
+)
 
 commercial_js = Resource(lib_autonomie, "js/commercial.js", depends=[backbone])
 

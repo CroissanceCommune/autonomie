@@ -57,16 +57,6 @@ from autonomie.models.user import (
 
 log = logging.getLogger(__name__)
 
-MANAGER_ROLES = (
-    (u"3", u'Entrepreneur'),
-    (u"2", u'Membre de la coopérative'),
-)
-ADMIN_ROLES = (
-    (u"3", u'Entrepreneur'),
-    (u"1", u'Administrateur'),
-    (u"2", u'Membre de la coopérative'),
-)
-
 DEFAULT_PERM = [
     (Allow, "group:admin", ALL_PERMISSIONS,),
     (Allow, "group:manager", ("manage", "add", "edit", "view")),

@@ -49,6 +49,7 @@ from autonomie.models.base import (
         DBSESSION,
         default_table_args,
         )
+from autonomie.models.widgets import EXCLUDED
 from autonomie.compute import math_utils
 
 from autonomie.models.statemachine import StateMachine
@@ -179,9 +180,13 @@ class ExpenseSheet(DBBASE):
             primaryjoin="ExpenseSheet.user_id==User.id",
             backref=backref("expenses",
                 order_by="ExpenseSheet.month",
-                cascade="all, delete-orphan"))
-    status_user = relationship("User",
-            primaryjoin="ExpenseSheet.status_user_id==User.id")
+                info={'colanderalchemy': EXCLUDED},
+                cascade="all, delete-orphan"),
+            )
+    status_user = relationship(
+        "User",
+        primaryjoin="ExpenseSheet.status_user_id==User.id",
+    )
 
     state_machine = ExpenseStates('draft', build_state_machine())
 
@@ -394,6 +399,7 @@ class Communication(DBBASE):
     user = relationship("User",primaryjoin="Communication.user_id==User.id",
             backref=backref("expense_communications",
                 order_by="Communication.date",
+                info={'colanderalchemy': EXCLUDED},
                 cascade="all, delete-orphan"))
 
 

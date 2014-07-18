@@ -32,8 +32,11 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    DBBASE,
+    default_table_args,
+)
+from autonomie.models.widgets import EXCLUDED
 
 class Holiday(DBBASE):
     """
@@ -49,11 +52,16 @@ class Holiday(DBBASE):
     user_id = Column("user_id", Integer, ForeignKey('accounts.id'))
     start_date = Column(Date)
     end_date = Column(Date)
-    user = relationship("User",
-                        backref=backref("holidays",
-                                        order_by="Holiday.start_date"),
-                        primaryjoin="Holiday.user_id==User.id"
-                        )
+    user = relationship(
+        "User",
+        backref=backref(
+            "holidays",
+            info={'colanderalchemy': EXCLUDED},
+            order_by="Holiday.start_date",
+        ),
+        primaryjoin="Holiday.user_id==User.id"
+    )
+
     def __json__(self, request):
         return dict(
                 id=self.id,

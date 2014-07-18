@@ -56,8 +56,8 @@ from autonomie.utils.widgets import (
 from autonomie.views import BaseListView
 from autonomie.views.forms import (
     submit_btn,
-    BaseFormView,
     cancel_btn,
+    BaseFormView,
 )
 
 from autonomie.views.render_api import format_account
@@ -155,6 +155,12 @@ class PermanentUserAddView(BaseFormView):
         """
         populate_actionmenu(self.request)
 
+    def redirect_url(self, user_model):
+        """
+        Return the url we should redirect to
+        """
+        return self.request.route_path("user", id=user_model.id)
+
     def submit_success(self, appstruct):
         """
             Add a user to the database
@@ -182,10 +188,9 @@ class PermanentUserAddView(BaseFormView):
 
         # Here we flush to get an id for the redirect
         self.dbsession.flush()
-        url = self.request.route_path("user", id=user_model.id)
 
         self.session.flash(self.validate_msg)
-        return HTTPFound(url)
+        return HTTPFound(self.redirect_url(user_model))
 
 
 class PermanentUserEditView(PermanentUserAddView):
@@ -221,6 +226,17 @@ class UserEditView(PermanentUserEditView):
     Contractor's account edition view
     """
     schema = get_user_schema(edit=True, permanent=False)
+
+    def redirect_url(self, user_model):
+        """
+        Redirect to the userdatas view associated to the given model
+        pass also the form3 tab name
+        """
+        return self.request.route_path(
+            "userdata",
+            id=user_model.userdatas.id,
+            _anchor='form3'
+        )
 
 
 class UserList(BaseListView):

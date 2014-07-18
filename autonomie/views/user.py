@@ -29,15 +29,13 @@ import logging
 import colander
 import deform
 
+from colanderalchemy import SQLAlchemySchemaNode
+from js.deform import auto_need
+from webhelpers.html.builder import HTML
 from sqlalchemy import or_
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.decorator import reify
-from webhelpers.html.builder import HTML
-from deform import Form
-from js.deform import auto_need
-
-from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.user import (
     User,
@@ -45,31 +43,35 @@ from autonomie.models.user import (
     UserDatasSocialDocTypes,
     SocialDocTypeOption,
     CompanyDatas,
+    USERDATAS_FORM_GRIDS,
 )
+
 from autonomie.models.company import Company
-from autonomie.views.forms import (
-        merge_session_with_post,
-        BaseFormView,
-)
 from autonomie.utils.widgets import (
-        ViewLink,
-        PopUp,
-        StaticWidget,
-        )
-from autonomie.utils.views import submit_btn
-from autonomie.utils.views import cancel_btn
+    ViewLink,
+    PopUp,
+    StaticWidget,
+)
+
+from autonomie.views import BaseListView
+from autonomie.views.forms import (
+    submit_btn,
+    BaseFormView,
+    cancel_btn,
+)
+
 from autonomie.views.render_api import format_account
 from autonomie.views.forms.widgets import AccordionFormWidget
 from autonomie.views.forms.user import (
-    USERSCHEMA,
     get_list_schema,
+    get_account_schema,
+    get_password_schema,
+    get_user_schema,
     get_userdatas_list_schema,
-    PASSWORDSCHEMA,
     UserDisableSchema,
 )
-from autonomie.views.company import company_enable
 
-from autonomie.views import BaseListView
+from autonomie.views.company import company_enable
 
 log = logging.getLogger(__name__)
 
@@ -85,8 +87,8 @@ def get_user_form(request):
     """
         Return the user add form
     """
-    schema = USERSCHEMA.bind(request=request)
-    return Form(schema, buttons=(submit_btn,))
+    schema = get_user_schema().bind(request=request)
+    return deform.Form(schema, buttons=(submit_btn,))
 
 
 def get_doctypes_form_schema(userdatas_model):
@@ -111,33 +113,29 @@ def get_doctypes_form_schema(userdatas_model):
     return form_schema, appstruct
 
 
-class BaseUserForm(BaseFormView):
+class PermanentUserAddView(BaseFormView):
     """
-        Base form view for user handling, provide common functions
-    """
-    schema = USERSCHEMA
-    @staticmethod
-    def get_user(user, appstruct):
-        """
-            Return the user object configured in the appstruct
-        """
-        user = merge_session_with_post(user, appstruct['user'])
-        if 'password' in appstruct:
-            if appstruct['password']['pwd']:
-                user.set_password(appstruct['password']['pwd'])
-        return user
+    User add form, allows to add :
 
-    def get_company(self, name, user):
+        * managers
+        * admins
+    """
+    title = u"Ajout d'un nouveau compte"
+    validate_msg = u"Le compte a bien été ajouté"
+    schema = get_user_schema()
+
+    def _get_company(self, name, user):
         """
             Return a company object, create a new one if needed
         """
-        company = Company.query().filter(Company.name==name).first()
+        query = Company.query()
+        company = query.filter(Company.name==name).first()
         #avoid creating duplicate companies
         if company is None:
-            company = self.add_company(name, user)
+            company = self._add_company(name, user)
         return company
 
-    def add_company(self, name, user):
+    def _add_company(self, name, user):
         """
             Add a company 'name' in the database
             ( set its goal by default )
@@ -151,14 +149,6 @@ class BaseUserForm(BaseFormView):
         self.dbsession.flush()
         return company
 
-
-class UserAdd(BaseUserForm):
-    """
-        User add form, automatically add companies if new one are specified
-    """
-    title = u"Ajout d'un nouveau compte"
-    validate_msg = u"Le compte a bien été ajouté"
-
     def before(self, form):
         """
             populate the actionmenu before entering the view
@@ -171,25 +161,39 @@ class UserAdd(BaseUserForm):
             Add its companies
             Add a relationship between companies and the new account
         """
-        user = self.get_user(User(), appstruct)
-        if 'companies' in appstruct:
-            companies = set(appstruct.get('companies'))
-            user.companies = []
-            for company_name in companies:
-                company = self.get_company(company_name, user)
-                user.companies.append(company)
-        log.info(u"Add user : {0}" .format(format_account(user)))
-        user = self.dbsession.merge(user)
+        companies = set(appstruct.pop('companies', []))
+        password = appstruct.pop('pwd', None)
+
+        if self.context.__name__ == 'user':
+            user_model = self.schema.objectify(appstruct, self.context)
+            log.info(u"Edit user : {0}" .format(format_account(user_model)))
+        else:
+            user_model = self.schema.objectify(appstruct)
+            log.info(u"Add user : {0}" .format(format_account(user_model)))
+
+        if password is not None:
+            user_model.set_password(password)
+
+        for company_name in companies:
+            company = self._get_company(company_name, user_model)
+            user_model.companies.append(company)
+
+        self.dbsession.merge(user_model)
+
+        # Here we flush to get an id for the redirect
         self.dbsession.flush()
+        url = self.request.route_path("user", id=user_model.id)
+
         self.session.flash(self.validate_msg)
-        return HTTPFound(self.request.route_path("user", id=user.id))
+        return HTTPFound(url)
 
 
-class UserEdit(BaseUserForm):
+class PermanentUserEditView(PermanentUserAddView):
     """
         User edition view
     """
     validate_msg = u"Le compte a bien été édité"
+    schema = get_user_schema(edit=True)
 
     @reify
     def title(self):
@@ -197,34 +201,26 @@ class UserEdit(BaseUserForm):
             form title
         """
         return u"Modification de {0}".format(
-                                        format_account(self.request.context))
+            format_account(self.context)
+        )
 
     def before(self, form):
         """
             Set the context datas in the view attributes before view execution
         """
-        user = self.request.context
-        appstruct = {'user': user.appstruct(),
-                     'companies': [comp.name for comp in  user.companies]}
-        form.set_appstruct(appstruct)
-        populate_actionmenu(self.request, self.request.context)
+        appstruct = self.schema.dictify(self.context)
+        appstruct.pop('pwd')
 
-    def submit_success(self, appstruct):
-        """
-            Edit the database entry for the current user
-        """
-        user = self.get_user(self.request.context, appstruct)
-        if 'companies' in appstruct:
-            companies = set(appstruct.get('companies'))
-            user.companies = []
-            for company_name in companies:
-                company = self.get_company(company_name, user)
-                user.companies.append(company)
-        log.info(u"Edit user : {0}" .format(format_account(user)))
-        user = self.dbsession.merge(user)
-        self.dbsession.flush()
-        self.session.flash(self.validate_msg)
-        return HTTPFound(self.request.route_path("user", id=user.id))
+        appstruct['companies'] = [c.name for c in self.context.companies]
+        form.set_appstruct(appstruct)
+        populate_actionmenu(self.request, self.context)
+
+
+class UserEditView(PermanentUserEditView):
+    """
+    Contractor's account edition view
+    """
+    schema = get_user_schema(edit=True, permanent=False)
 
 
 class UserList(BaseListView):
@@ -276,12 +272,13 @@ class UserList(BaseListView):
             add user link and popup for user with add permission ...)
         """
         populate_actionmenu(self.request)
-        if has_permission('add', self.request.context, self.request):
-            form = get_user_form(self.request)
-            popup = PopUp("add", u'Ajouter un compte', form.render())
-            self.request.popups = {popup.name: popup}
-            self.request.actionmenu.add(popup.open_btn())
-            self.request.actionmenu.add(self._get_disabled_btn(appstruct))
+        form = get_user_form(self.request)
+        popup = PopUp("add", u'Ajouter un permanent', form.render())
+        self.request.popups = {popup.name: popup}
+        self.request.actionmenu.add(popup.open_btn())
+
+        self.request.actionmenu.add(get_add_contractor_btn())
+        self.request.actionmenu.add(self._get_disabled_btn(appstruct))
 
     def _get_disabled_btn(self, appstruct):
         """
@@ -297,11 +294,11 @@ class UserList(BaseListView):
         return StaticWidget(link)
 
 
-class UserAccount(BaseFormView):
+class UserAccountView(BaseFormView):
     """
-        User account page providing password change
+        User account view with password edition
     """
-    schema = PASSWORDSCHEMA
+    schema = get_password_schema()
     title = u"Mon compte"
 
     def before(self, form):
@@ -313,7 +310,7 @@ class UserAccount(BaseFormView):
 
     def submit_success(self, appstruct):
         """
-            Called on submission success
+            Called on submission success -> changing password
         """
         log.info(u"# User {0} has changed his password #".format(
                         self.request.user.login))
@@ -321,6 +318,26 @@ class UserAccount(BaseFormView):
         self.request.user.set_password(new_pass)
         self.dbsession.merge(self.request.user)
         self.request.session.flash(u"Votre mot de passe a bien été modifié")
+        return HTTPFound(self.request.route_path('account'))
+
+
+class UserAccountEditView(BaseFormView):
+    """
+    View allowing a end user to modify some of his account informations
+    """
+    schema = get_account_schema()
+    msg = u"Vos modifications ont bien été enregistrées"
+
+    def before(self, form):
+        form.set_appstruct(self.schema.dictify(self.context))
+
+    def submit_success(self, appstruct):
+        model = self.schema.objectify(appstruct, self.context)
+        self.dbsession.merge(model)
+        self.request.session.flash(self.msg)
+        return HTTPFound(
+            self.request.route_path('account')
+        )
 
 
 class UserDatasAdd(BaseFormView):
@@ -330,7 +347,7 @@ class UserDatasAdd(BaseFormView):
 
     def before(self, form):
         auto_need(form)
-        form.widget = AccordionFormWidget()
+        form.widget = AccordionFormWidget(grids=USERDATAS_FORM_GRIDS)
         self.populate_actionmenu()
 
     def populate_actionmenu(self):
@@ -364,7 +381,7 @@ mot de passe : {1}".format(login, password, url)
 
 
 class UserDatasEdit(UserDatasAdd):
-    add_template_vars = ('doctypes_form',)
+    add_template_vars = ('doctypes_form', 'account_form',)
 
     @property
     def title(self):
@@ -396,6 +413,36 @@ class UserDatasEdit(UserDatasAdd):
                 self.dbsession.add(rel)
 
     @property
+    def account_form(self):
+        """
+        Return a user account edition form
+        """
+        form = None
+        if self.context.user_id is not None:
+            # There is an associated user account
+            schema = get_user_schema(edit=True, permanent=False)
+            schema = schema.bind(request=self.request)
+            action = self.request.route_path(
+                'user',
+                id=self.context.user_id,
+                _query=dict(action="edit"),
+            )
+            form = deform.Form(
+                schema,
+                buttons = (submit_btn,),
+                action=action,
+                counter=self.counter,
+            )
+
+            user_obj = self.context.user
+
+            appstruct = schema.dictify(user_obj)
+            appstruct.pop('pwd')
+            appstruct['companies'] = [c.name for c in user_obj.companies]
+            form.set_appstruct(appstruct)
+        return form
+
+    @property
     def doctypes_form(self):
         """
         Add a doctype registration form to the resulting dict
@@ -406,7 +453,7 @@ class UserDatasEdit(UserDatasAdd):
             id=self.context.id,
             _query=dict(action="doctype"),
         )
-        form = Form(
+        form = deform.Form(
             form_schema,
             buttons=(submit_btn,),
             action=action,
@@ -630,7 +677,7 @@ def populate_actionmenu(request, user=None):
     if user:
         request.actionmenu.add(get_view_btn(user.id))
         if has_permission('edit', request.context, request):
-            request.actionmenu.add(get_edit_btn(user.id))
+            request.actionmenu.add(get_edit_btn(user))
             if user.enabled():
                 request.actionmenu.add(get_disable_btn(user.id))
             else:
@@ -659,12 +706,26 @@ def get_view_btn(user_id):
     return ViewLink(u"Voir", "view", path="user", id=user_id)
 
 
-def get_edit_btn(user_id):
+def get_edit_btn(user):
     """
         Return a link for user edition
     """
-    return ViewLink(u"Modifier", "edit", path="user", id=user_id,
-                                        _query=dict(action="edit"))
+    if user.is_contractor():
+        return ViewLink(
+            u"Modifier",
+            "manage",
+            path="userdata",
+            id=user.userdatas.id,
+            _anchor='form3',
+        )
+    else:
+        return ViewLink(
+            u"Modifier",
+            "manage",
+            path="user",
+            id=user.id,
+            _query=dict(action="edit"),
+        )
 
 
 def get_enable_btn(user_id):
@@ -678,6 +739,19 @@ def get_disable_btn(user_id):
     """
     return ViewLink(u"Désactiver", "manage", path="user", id=user_id,
                                         _query=dict(action="disable"))
+
+
+def get_add_contractor_btn():
+    """
+    Return a button returning the end user to the userdatas page to add a new
+    account
+    """
+    return ViewLink(
+        u"Ajouter un entrepreneur",
+        "add",
+        path="userdatas",
+        _query=dict(action='new'),
+    )
 
 
 def get_del_btn(user_id):
@@ -730,18 +804,34 @@ def includeme(config):
     )
 
     config.add_view(
-        UserAdd,
+        PermanentUserAddView,
         route_name='users',
-        renderer='user_edit.mako',
+        renderer='base/formpage.mako',
         request_method='POST',
         permission='add',
     )
 
     config.add_view(
-        UserEdit,
+        PermanentUserEditView,
         route_name='user',
-        renderer='user_edit.mako',
+        renderer='base/formpage.mako',
+        request_param='action=edit_permanent',
+        permission='manage',
+    )
+
+    config.add_view(
+        UserEditView,
+        route_name='user',
+        renderer='base/formpage.mako',
         request_param='action=edit',
+        permission='manage',
+    )
+
+    config.add_view(
+        UserAccountEditView,
+        route_name='user',
+        renderer='base/formpage.mako',
+        request_param='action=accountedit',
         permission='edit',
     )
 
@@ -770,7 +860,7 @@ def includeme(config):
     config.add_view(
         UserDisable,
         route_name='user',
-        renderer='user_edit.mako',
+        renderer='base/formpage.mako',
         request_param='action=disable',
         permission='edit',
     )
@@ -778,7 +868,7 @@ def includeme(config):
     config.add_view(
         user_enable,
         route_name='user',
-        renderer='user_edit.mako',
+        renderer='base/formpage.mako',
         request_param='action=enable',
         permission='edit'
     )
@@ -791,7 +881,7 @@ def includeme(config):
     )
 
     config.add_view(
-        UserAccount,
+        UserAccountView,
         route_name='account',
         renderer='account.mako',
         permission='view'

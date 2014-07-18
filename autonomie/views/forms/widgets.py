@@ -461,17 +461,13 @@ class GridMappingWidget(TableMappingWidget):
     # The default bootstrap layout contains 12 columns
     num_cols = 12
 
-    def childgroup(self, field):
+    def _childgroup(self, children, grid):
         """
-        Return a list of fields stored by row regarding the configured grid
-
-        :param field: The original field this widget is attached to
+        Stores the children in a list following the grid's structure
+        :param children: list of fields
+        :param grid: a list of list corresponding of the layout to apply to the
+        given children
         """
-        grid = getattr(self, "grid")
-
-        if grid is None:
-            raise AttributeError(u"Missing the grid argument")
-
         result = []
         index = 0
         hidden_fields = []
@@ -489,7 +485,7 @@ lessc.".format(self.num_cols))
 
                 if filled:
                     try:
-                        child = field.children[index]
+                        child = children[index]
                     except IndexError:
                         warnings.warn(u"The grid items number doesn't \
 match the number of children of our mapping widget")
@@ -498,7 +494,7 @@ match the number of children of our mapping widget")
                         hidden_fields.append(child)
                         index += 1
                         try:
-                            child = field.children[index]
+                            child = children[index]
                         except IndexError:
                             warnings.warn(u"The grid items number doesn't \
 match the number of children of our mapping widget")
@@ -513,6 +509,20 @@ match the number of children of our mapping widget")
         if hidden_fields != []:
             result.append(hidden_fields)
         return result
+
+
+    def childgroup(self, field):
+        """
+        Return a list of fields stored by row regarding the configured grid
+
+        :param field: The original field this widget is attached to
+        """
+        grid = getattr(self, "grid", None)
+
+        if grid is None:
+            raise AttributeError(u"Missing the grid argument")
+
+        return self._childgroup(field.children, grid)
 
 
 class AccordionMappingWidget(GridMappingWidget):
@@ -538,6 +548,9 @@ class AccordionMappingWidget(GridMappingWidget):
 
     @property
     def tag_id(self):
+        """
+        Return a unique tag id for this mapping
+        """
         if not hasattr(self, '_tag_id'):
             self._tag_id = random_tag_id()
         return self._tag_id
@@ -575,7 +588,7 @@ class GridFormWidget(GridMappingWidget):
     readonly_template = TEMPLATES_PATH + "grid_form"
 
 
-class AccordionFormWidget(deform.widget.MappingWidget):
+class AccordionFormWidget(GridFormWidget):
     """
     AccordionFormWidget is supposed to be combined with colanderalchemy
 
@@ -624,20 +637,21 @@ class AccordionFormWidget(deform.widget.MappingWidget):
         form = Form(schema)
         form.widget = AccordionMappingWidget()
     """
+    num_cols = 12
     template = TEMPLATES_PATH + "accordion_form"
     readonly_template = TEMPLATES_PATH + "accordion_form"
+    default_item_template = deform.widget.MappingWidget.item_template
 
-
-    def accordions(self, field):
+    def accordions(self, form):
         """
-        return the children of the given field sorted
-
-
+        return the chlidren of the given form in a dict allowing to render them
+        in accordions with a grid layout
+        :param form: the form object
         """
         fixed = []
         accordions = OrderedDict()
 
-        for child in field.children:
+        for child in form.children:
             section = getattr(child.schema, 'section', '')
             if not section:
                 fixed.append(child)
@@ -652,5 +666,17 @@ class AccordionFormWidget(deform.widget.MappingWidget):
                 if child.error:
                     accordions[section]['error'] = True
                 accordions[section]['children'].append(child)
+
+        grids = getattr(self, "grids", {})
+
+        if grids is {}:
+            warnings.warn(u"Missing the grids argument")
+
+        for accordion in accordions.values():
+            name = accordion['name']
+            grid = grids.get(name)
+            if grid is not None:
+                children = accordion.pop('children')
+                accordion['rows'] = self._childgroup(children, grid)
 
         return fixed, accordions

@@ -14,7 +14,8 @@
               fields python: field.widget.accordions(field);
               top_level_fields fields[0];
               accordions fields[1];
-              item_template item_template|field.widget.item_template;
+              grid_item_template item_template|field.widget.item_template;
+              default_item_template default_item_template|field.widget.default_item_template;
               title title|field.title;
               ">
     <fieldset class="deformFormFieldset">
@@ -37,7 +38,7 @@
 
       <div tal:omit-tag="" tal:repeat="field top_level_fields">
         <tal:block tal:omit-tag="" tal:condition="field">
-          <div tal:replace="structure field.render_template(item_template)" />
+          <div tal:replace="structure field.render_template(default_item_template)" />
         </tal:block>
       </div>
 
@@ -56,18 +57,40 @@
           ${accordion['name']}
         </a>
       </div>
-      <div class="accordion-body collapse ${repeat.accordion.start and 'in' or ''}" id="${accordion['tag_id']}">
-      <div class='accordion-inner' tal:define="
-        fields accordion.children
-        "
-        i18n:domain="deform"
+      <div class="accordion-body collapse ${repeat.accordion.start and 'in' or ''}"
+        id="${accordion['tag_id']}"
         >
-            <div tal:omit-tag="" tal:repeat="field fields">
-              <tal:block tal:omit-tag="" tal:condition="field">
-                <div tal:replace="structure field.render_template(item_template)" />
-              </tal:block>
+        <tal:if tal:condition="accordion.has_key('rows')">
+          <div class='accordion-inner' tal:define="
+            childgroups accordion.rows
+            "
+            i18n:domain="deform"
+            >
+            <div class="row-fluid form-row"
+              tal:repeat="childgroup childgroups"
+              i18n:domain="deform"
+              >
+              <div tal:omit-tag="" tal:repeat="child childgroup">
+                <tal:block tal:omit-tag="" tal:condition="child">
+                  <div tal:replace="structure child.render_template(grid_item_template)" />
+                </tal:block>
+              </div>
             </div>
-      </div>
+          </div>
+        </tal:if>
+        <tal:if tal:condition="not accordion.has_key('rows')">
+          <div class='accordion-inner' tal:define="
+            childgroup accordion.children
+            "
+            i18n:domain="deform"
+            >
+              <div tal:omit-tag="" tal:repeat="child childgroup">
+                <tal:block tal:omit-tag="" tal:condition="child">
+                  <div tal:replace="structure child.render_template(default_item_template)" />
+                </tal:block>
+              </div>
+          </div>
+        </tal:if>
       </div>
     </div>
   </div>

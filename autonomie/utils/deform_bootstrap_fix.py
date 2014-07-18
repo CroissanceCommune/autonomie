@@ -47,3 +47,13 @@ def add_resources_to_registry():
         for version, resources in versions.items():
             registry.set_js_resources(rqrt, version, resources.get('js'))
             registry.set_css_resources(rqrt, version, resources.get('css'))
+
+
+def set_form_template():
+    """
+    Set a custom form template :
+
+        * to avoid mappings being converted to tabs
+        * to allow the use of custom buttons
+    """
+    Form.template = "autonomie:deform_templates/form.pt"

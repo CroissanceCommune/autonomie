@@ -28,6 +28,7 @@
 import logging
 import datetime
 import colander
+from deform import widget as deform_widget
 
 from hashlib import md5
 
@@ -40,6 +41,7 @@ from sqlalchemy import (
     Date,
     Boolean,
     Text,
+    not_,
 )
 
 from sqlalchemy.orm import (
@@ -47,6 +49,7 @@ from sqlalchemy.orm import (
     backref,
 )
 from sqlalchemy.util import classproperty
+from sqlalchemy.event import listen
 
 from autonomie.views import render_api
 
@@ -55,7 +58,6 @@ from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
 from autonomie.models.widgets import (
     get_hidden_field_conf,
-    get_id_foreignkey_col,
     EXCLUDED,
     get_select,
     get_select_validator,
@@ -125,32 +127,114 @@ CONTRACT_OPTIONS = (
 log = logging.getLogger(__name__)
 
 
+def get_id_foreignkey_col(foreignkey_str):
+    """
+    Return an id column as a foreignkey with correct colander configuration
+
+        foreignkey_str
+
+            The foreignkey our id is pointing to
+    """
+    column = Column(
+        "id",
+        Integer,
+        ForeignKey(foreignkey_str),
+        primary_key=True,
+        info=get_hidden_field_conf(),
+    )
+    return column
+
+
 class User(DBBASE):
     """
         User model
     """
     __tablename__ = 'accounts'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': EXCLUDED},
+    )
+
     login = Column(
         String(64, collation="utf8_bin"),
         unique=True,
         nullable=False,
+        info={'colanderalchemy': {'title': u'Identifiant'}}
     )
-    pwd = Column("password", String(100))
-    firstname = Column(String(50))
-    lastname = Column(String(50))
-    primary_group = Column(Integer, default=3)
-    active = Column(String(1), default='Y')
-    email = Column(String(100))
+
+    lastname = Column(
+        String(50),
+        info={'colanderalchemy': {'title': u'Nom'}},
+        nullable=False,
+    )
+
+    firstname = Column(
+        String(50),
+        info={'colanderalchemy': {'title': u'Prénom'}},
+        nullable=False,
+    )
+
+    primary_group = Column(
+        Integer,
+        info={'colanderalchemy':EXCLUDED},
+        default=3,
+    )
+
+    active = Column(
+        String(1),
+        info={'colanderalchemy':EXCLUDED},
+        default='Y'
+    )
+
+    email = Column(
+        String(100),
+        info={
+            'colanderalchemy': {
+                'title': u"Adresse e-mail",
+                'section': u'Coordonnées',
+                'validator': mail_validator(),
+            }
+        },
+        nullable=False,
+    )
+
+    pwd = Column(
+        "password",
+        String(100),
+        info={'colanderalchemy':
+              {
+                  'title': u'Mot de passe',
+                  'widget': deform_widget.CheckedPasswordWidget(),
+              }
+        },
+        nullable=False,
+    )
+
     companies = relationship(
         "Company",
         secondary=COMPANY_EMPLOYEE,
         backref="employees",
+        info={'colanderalchemy':EXCLUDED},
     )
-    code_compta = Column(String(30), default=0)
-    compte_tiers = Column(String(30), default="")
-    session_datas = Column(JsonEncodedDict, default=None)
+
+    compte_tiers = Column(
+        String(30),
+        info={
+            'colanderalchemy':
+            {
+                'title': u'Compte tiers',
+            }
+        },
+        default="",
+    )
+
+    session_datas = Column(
+        JsonEncodedDict,
+        info={'colanderalchemy':EXCLUDED},
+        default=None,
+    )
 
     @staticmethod
     def _encode_pass(password):
@@ -218,6 +302,30 @@ class User(DBBASE):
             query = query.order_by(User.lastname)
 
         return query
+
+    @classmethod
+    def unique_login(cls, login, user_id=None):
+        """
+        check that the given login is not yet in the database
+
+            login
+
+                A string for a login candidate
+
+            user_id
+
+                Optionnal user_id, if given, we will check all logins except
+                this user's
+        """
+        query = cls.query(only_active=False)
+        if user_id:
+            query = query.filter(not_(cls.id==user_id))
+
+        result = query.filter(cls.login==login).first()
+        if result is not None:
+            return False
+        else:
+            return True
 
     def disable(self):
         """
@@ -517,6 +625,7 @@ class UserDatas(DBBASE):
             "userdatas",
             uselist=False,
             cascade='all, delete-orphan',
+            info={'colanderalchemy': EXCLUDED},
         ),
         info={'colanderalchemy': EXCLUDED}
     )
@@ -533,18 +642,6 @@ class UserDatas(DBBASE):
                 'default': SITUATION_OPTIONS[0][0],
             }
         },
-    )
-
-    situation_societariat_entrance = Column(
-        Date(),
-        info={
-            'colanderalchemy': {
-                'title': u"Date d'entrée au sociétariat",
-                'section': u'Synthèse',
-                'widget': get_date(),
-            },
-        },
-        default=None,
     )
 
     situation_follower_id = Column(
@@ -565,8 +662,21 @@ class UserDatas(DBBASE):
         primaryjoin='User.id==UserDatas.situation_follower_id',
         backref=backref(
             "followed_contractors",
+            info={'colanderalchemy': EXCLUDED},
         ),
         info={'colanderalchemy': EXCLUDED}
+    )
+
+    situation_societariat_entrance = Column(
+        Date(),
+        info={
+            'colanderalchemy': {
+                'title': u"Date d'entrée au sociétariat",
+                'section': u'Synthèse',
+                'widget': get_date(),
+            },
+        },
+        default=None,
     )
 
     # COORDONNÉES : CF CAHIER DES CHARGES #
@@ -577,6 +687,17 @@ class UserDatas(DBBASE):
                 'title': u'Civilité',
                 'section': u"Coordonnées",
                 'widget': get_select(CIVILITE_OPTIONS),
+            }
+        },
+        nullable=False,
+    )
+
+    coordonnees_lastname = Column(
+        String(50),
+        info={
+            'colanderalchemy': {
+                'title': u"Nom",
+                'section': u'Coordonnées',
             }
         },
         nullable=False,
@@ -593,17 +714,6 @@ class UserDatas(DBBASE):
         nullable=False,
     )
 
-    coordonnees_lastname = Column(
-        String(50),
-        info={
-            'colanderalchemy': {
-                'title': u"Nom",
-                'section': u'Coordonnées',
-            }
-        },
-        nullable=False,
-    )
-
     coordonnees_ladies_lastname = Column(
         String(50),
         info={
@@ -614,12 +724,56 @@ class UserDatas(DBBASE):
         },
     )
 
+    coordonnees_email1 = Column(
+        String(100),
+        info={
+            'colanderalchemy': {
+                'title': u"E-mail 1",
+                'section': u'Coordonnées',
+                'validator': mail_validator(),
+            }
+        },
+        nullable=False,
+    )
+
+    coordonnees_email2 = Column(
+        String(100),
+        info={
+            'colanderalchemy': {
+                'title': u"E-mail 2",
+                'section': u'Coordonnées',
+                'validator': mail_validator(),
+            }
+        }
+    )
+
+    coordonnees_tel = Column(
+        String(14),
+        info={
+            'colanderalchemy': {
+                'title': u"Tél. fixe",
+                'section': u'Coordonnées',
+            }
+        }
+    )
+
+    coordonnees_mobile = Column(
+        String(14),
+        info={
+            'colanderalchemy': {
+                'title': u"Tél. mobile",
+                'section': u'Coordonnées',
+            }
+        }
+    )
+
     coordonnees_address = Column(
         String(255),
         info={
             'colanderalchemy': {
                 'title': u'Adresse',
                 'section': u'Coordonnées',
+                'widget': deform_widget.TextAreaWidget(),
             }
         }
     )
@@ -680,45 +834,14 @@ class UserDatas(DBBASE):
         info={'colanderalchemy': EXCLUDED},
     )
 
-    coordonnees_tel = Column(
-        String(14),
+    coordonnees_sex = Column(
+        String(1),
         info={
             'colanderalchemy': {
-                'title': u"Tél. fixe",
+                'title': u'Sexe',
                 'section': u'Coordonnées',
-            }
-        }
-    )
-
-    coordonnees_mobile = Column(
-        String(14),
-        info={
-            'colanderalchemy': {
-                'title': u"Tél. mobile",
-                'section': u'Coordonnées',
-            }
-        }
-    )
-
-    coordonnees_email1 = Column(
-        String(100),
-        info={
-            'colanderalchemy': {
-                'title': u"Mail 1",
-                'section': u'Coordonnées',
-                'validator': mail_validator(),
-            }
-        },
-        nullable=False,
-    )
-
-    coordonnees_email2 = Column(
-        String(100),
-        info={
-            'colanderalchemy': {
-                'title': u"Mail 2",
-                'section': u'Coordonnées',
-                'validator': mail_validator(),
+                'widget': get_select(SEX_OPTIONS),
+                'validator': get_select_validator(SEX_OPTIONS),
             }
         }
     )
@@ -734,24 +857,13 @@ class UserDatas(DBBASE):
         }
     )
 
-    coordonnees_sex = Column(
-        String(1),
-        info={
-            'colanderalchemy': {
-                'title': u'Sexe',
-                'section': u'Coordonnées',
-                'widget': get_select(SEX_OPTIONS),
-                'validator': get_select_validator(SEX_OPTIONS),
-            }
-        }
-    )
-
     coordonnees_birthplace = Column(
         String(255),
         info={
             'colanderalchemy': {
                 'title': u'Lieu de naissance',
                 'section': u'Coordonnées',
+                'widget': deform_widget.TextAreaWidget(),
             }
         }
     )
@@ -776,16 +888,6 @@ class UserDatas(DBBASE):
         }
     )
 
-    coordonnees_secu = Column(
-        String(50),
-        info={
-            'colanderalchemy': {
-                'title': u'Numéro de sécurité sociale',
-                'section': u'Coordonnées',
-            }
-        }
-    )
-
     coordonnees_resident = Column(
         Date(),
         info={
@@ -793,6 +895,16 @@ class UserDatas(DBBASE):
                 'title': u'Carte de séjour (fin de validité)',
                 'section': u'Coordonnées',
                 'widget': get_date(),
+            }
+        }
+    )
+
+    coordonnees_secu = Column(
+        String(50),
+        info={
+            'colanderalchemy': {
+                'title': u'Numéro de sécurité sociale',
+                'section': u'Coordonnées',
             }
         }
     )
@@ -1142,17 +1254,6 @@ class UserDatas(DBBASE):
         }
     )
 
-    parcours_goals = Column(
-        Text(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Objectifs",
-                "section": u"Parcours",
-            }
-        }
-    )
-
     parcours_salary = Column(
         Integer(),
         info={
@@ -1172,6 +1273,18 @@ class UserDatas(DBBASE):
             {
                 'title': u"Salaire en lettres",
                 'section': u'Parcours',
+            }
+        }
+    )
+
+    parcours_goals = Column(
+        Text(),
+        info={
+            'colanderalchemy':
+            {
+                'title': u"Objectifs",
+                "section": u"Parcours",
+                "widget": deform_widget.TextAreaWidget(),
             }
         }
     )
@@ -1437,3 +1550,48 @@ class DateDPAEDatas(DBBASE):
         ForeignKey("user_datas.id"),
         info={'colanderalchemy': EXCLUDED}
     )
+
+
+USERDATAS_FORM_GRIDS = {
+    u"Synthèse": (
+        ((2, True), (2, True)),
+        ((2, True),)
+    ),
+    u"Coordonnées": (
+        ((2, True), (2, True), (2, True), (2, True)),
+        ((2, True), (2, True)),
+        ((2, True), (2, True)),
+        ((2, True), (2, True), (3, True)),
+        ((2, True), (2, True)),
+        ((2, True), (2, True), (2, True), (2, True)),
+        ((2, True), (2, True)),
+        ((3, True), ),
+        ((2, True), (2, True), (2, True)),
+        ((2, True), (2, True)),
+    ),
+    u"Parcours": (
+        ((2, True), (2, True)),
+        ((2, True), ),
+        ((2, True), ),
+        ((2, True), ),
+        ((2, True), ),
+        ((2, True), ),
+        ((2, True), (2, True), (2, True), (2, True)),
+        ((2, True), (2, True), (2, True)),
+        ((2, True), (2, True), ),
+        ((4, True), ),
+        ((2, True), (2, True), (2, True)),
+    )
+}
+
+
+# Registering event handlers to keep datas synchronized
+def sync(key):
+    def handler(target, value, oldvalue, initiator):
+        if target.userdatas is not None:
+            log.debug(u"Updating the {0} with {1}".format(key, value))
+            setattr(target.userdatas, key, value)
+    return handler
+
+listen(User.firstname, 'set', sync('coordonnees_firstname'))
+listen(User.lastname, 'set', sync('coordonnees_lastname'))

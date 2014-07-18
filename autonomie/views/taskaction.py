@@ -49,7 +49,7 @@ from autonomie.models.project import (
         Phase,
         )
 from autonomie.models.tva import Tva
-from autonomie.views.base import BaseView
+from autonomie.views import BaseView
 from autonomie.views.forms.duplicate import (
         DuplicateSchema,
         EDIT_METADATASCHEMA,

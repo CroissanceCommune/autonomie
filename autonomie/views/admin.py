@@ -65,7 +65,7 @@ from autonomie.models.user import (
     SocialDocTypeOption,
 )
 
-from autonomie.utils.views import submit_btn
+from autonomie.views.forms import submit_btn
 from autonomie.views.forms.admin import (
     MainConfig,
     TvaConfig,

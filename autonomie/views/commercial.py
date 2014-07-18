@@ -38,8 +38,10 @@ from deform.exception import ValidationFailure
 from fanstatic import Resource
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.utils.views import submit_btn
-from autonomie.views.forms import merge_session_with_post
+from autonomie.views.forms import (
+    merge_session_with_post,
+    submit_btn,
+)
 from autonomie.compute.math_utils import percent
 from autonomie.models.task import (
     Estimation,

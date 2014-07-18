@@ -25,16 +25,18 @@
 """
     Form view tool to easily build form views
 """
-
-
 import colander
 import logging
 
+from deform import Button
 from pyramid_deform import FormView
 from pyramid.security import has_permission
 from js.tinymce import tinymce
 
-from autonomie.utils.views import submit_btn
+
+submit_btn = Button(name="submit", type="submit", title=u"Valider")
+cancel_btn = Button(name="cancel", type="submit", title=u"Annuler")
+
 
 class BaseFormView(FormView):
     """

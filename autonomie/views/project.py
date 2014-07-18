@@ -45,7 +45,6 @@ from autonomie.models.project import (
 )
 from autonomie.models.customer import Customer
 from autonomie.utils.colors import COLORS_SET
-from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import (
     ViewLink,
     ToggleLink,
@@ -56,6 +55,7 @@ from autonomie.utils.widgets import (
 from autonomie.views.forms.widgets import GridFormWidget
 from autonomie.views.forms import (
     BaseFormView,
+    submit_btn,
 )
 from autonomie.views.forms.project import (
     get_list_schema,

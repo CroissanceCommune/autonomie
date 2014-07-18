@@ -29,21 +29,28 @@ import inspect
 import logging
 import colander
 import itertools
+
 from deform import Form
-
 from functools import partial
-
 from sqlalchemy import desc, asc
-
 from webhelpers import paginate
+from pyramid.url import current_route_url
 
-from autonomie.utils.views import get_page_url
 from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
 from autonomie.export.csvtools import SqlaToCsvWriter
 from autonomie.export.utils import write_file_to_request
 
 
 log = logging.getLogger(__name__)
+
+
+def get_page_url(request, page):
+    """
+        Return a url generator for pagination
+    """
+    args = request.GET
+    args['page'] = str(page)
+    return current_route_url(request, page=page, _query=args)
 
 
 class BaseView(object):
@@ -56,6 +63,7 @@ class BaseView(object):
             self.request = request
             self.context = context
         self.session = self.request.session
+
 
 class BaseListView(BaseView):
     """

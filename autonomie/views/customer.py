@@ -44,7 +44,6 @@ from autonomie.utils.widgets import (
     ViewLink,
     PopUp,
 )
-from autonomie.utils.views import submit_btn
 from autonomie.views.forms.customer import (
     get_list_schema,
     get_customer_schema,
@@ -52,6 +51,7 @@ from autonomie.views.forms.customer import (
 from autonomie.views.forms.widgets import GridFormWidget
 from autonomie.views.forms import (
     BaseFormView,
+    submit_btn,
 )
 from autonomie.views import (
     BaseListView,

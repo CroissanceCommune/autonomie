@@ -32,12 +32,15 @@ import mimetypes
 import datetime
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPNotFound
-from autonomie.views.base import BaseView
+from autonomie.views import BaseView
 from autonomie.utils.ascii import force_ascii
-from autonomie.utils.files import encode_path
-from autonomie.utils.files import decode_path
-from autonomie.utils.files import issubdir
-from autonomie.utils.files import filesizeformat
+from autonomie.utils.files import (
+    encode_path,
+    decode_path,
+    issubdir,
+    filesizeformat,
+)
+
 
 log = logging.getLogger(__name__)
 

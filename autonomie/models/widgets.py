@@ -28,11 +28,6 @@ models, here we provide some usefull declarations
 """
 import colander
 from deform import widget as deform_widget
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Integer,
-)
 from autonomie.views.forms import widgets as custom_widget
 
 
@@ -52,25 +47,24 @@ def get_hidden_field_conf():
     }
 
 
-def get_id_foreignkey_col(foreignkey_str):
+def get_deferred_select_validator(model):
     """
-    Return an id column as a foreignkey with correct colander configuration
+    Return a deferred validator based on the given model
 
-        foreignkey_str
+        model
 
-            The foreignkey our id is pointing to
+            Option model having at least two attributes id and label
     """
-    column = Column(
-        "id",
-        Integer,
-        ForeignKey(foreignkey_str),
-        primary_key=True,
-        info=get_hidden_field_conf(),
-    )
-    return column
+    @colander.deferred
+    def deferred_validator(binding_datas, request):
+        """
+        The deferred function that will be fired on schema binding
+        """
+        return colander.OneOf([m.id for m in model.query()])
+    return deferred_validator
 
 
-def get_deferred_select(model):
+def get_deferred_select(model, multi=False):
     """
     Return a deferred select widget based on the given model
 
@@ -84,11 +78,11 @@ def get_deferred_select(model):
         The deferred function that will be fired on schema binding
         """
         values = [(m.id, m.label) for m in model.query()]
-        return deform_widget.SelectWidget(values=values)
+        return deform_widget.SelectWidget(values=values, multi=multi)
     return deferred_widget
 
 
-def get_select(options):
+def get_select(options, multi=False):
     """
     Return a select widget with the provided options
 
@@ -97,7 +91,7 @@ def get_select(options):
             options as expected by the deform select widget (a sequence of
             2-uples: (id, label))
     """
-    return deform_widget.SelectWidget(values=options)
+    return deform_widget.SelectWidget(values=options, multi=False)
 
 
 def get_select_validator(options):

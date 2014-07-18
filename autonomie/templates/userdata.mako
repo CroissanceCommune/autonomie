@@ -35,13 +35,20 @@
 <ul class='nav nav-tabs'>
     <li class='active'>
     <a href="#form1" data-toggle='tab'>
-        Formulaire de saisie
+        Informations sociales
     </a>
     </li>
     % if doctypes_form is not UNDEFINED:
         <li>
         <a href="#form2" data-toggle='tab'>
             Documents sociaux
+        </a>
+        </li>
+    % endif
+    % if account_form is not UNDEFINED and account_form is not None:
+        <li>
+        <a href="#form3" data-toggle='tab'>
+            Compte utilisateur
         </a>
         </li>
     % endif
@@ -53,6 +60,11 @@
     % if doctypes_form is not UNDEFINED:
     <div class='tab-pane' id='form2'>
         ${doctypes_form.render()|n}
+    </div>
+    % endif
+    % if account_form is not UNDEFINED and account_form is not None:
+        <div class='tab-pane' id='form3'>
+            ${account_form.render()|n}
     </div>
     % endif
 </div>

@@ -40,6 +40,7 @@
             <tr>
                 <th>Type de document</th>
                 <th>Entreprise</th>
+                <th>Demandé le</th>
             </tr>
         </thead>
         <tbody>
@@ -50,6 +51,9 @@
                 </td>
                 <td onclick="document.location='${task.url}'" class='rowlink'>
                     ${task.get_company().name}
+                </td>
+                <td onclick="document.location='${task.url}'" class='rowlink'>
+                    ${api.format_date(task.statusDate)}
                 </td>
             </tr>
         % endfor
@@ -109,6 +113,7 @@
         <tr>
             <th>Période</th>
             <th>Entrepreneur</th>
+            <th>Demandé le</th>
         </tr>
     </thead>
     <tbody>
@@ -119,6 +124,9 @@
         </td>
         <td>
             ${api.format_account(expense.user)}
+        </td>
+        <td onclick="document.location='${task.url}'" class='rowlink'>
+            ${api.format_date(expense.status_date)}
         </td>
     </tr>
 % endfor

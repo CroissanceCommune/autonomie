@@ -48,7 +48,6 @@ from autonomie.utils.renderer import set_json_renderer
 from autonomie.utils.session import get_session_factory
 from autonomie.utils.deform_bootstrap_fix import (
     add_resources_to_registry,
-    set_form_template,
 )
 
 
@@ -153,7 +152,6 @@ def main(global_config, **settings):
     set_json_renderer(config)
     config.add_translation_dirs("colander:locale/", "deform:locale")
     add_resources_to_registry()
-    set_form_template()
 
     return config.make_wsgi_app()
 

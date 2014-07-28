@@ -44,7 +44,7 @@ from autonomie.views.forms import (
 )
 from autonomie.exception import Forbidden
 from autonomie.views.files import FileUploadView
-from autonomie.utils.views import submit_btn
+from autonomie.views.forms import submit_btn
 from autonomie.views.taskaction import (
         TaskFormView,
         get_paid_form,
@@ -91,7 +91,6 @@ class InvoiceAdd(TaskFormView):
     def before(self, form):
         super(InvoiceAdd, self).before(form)
         populate_actionmenu(self.request)
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def submit_success(self, appstruct):
         log.debug("Submitting invoice add")
@@ -158,7 +157,6 @@ class InvoiceEdit(TaskFormView):
 
         super(InvoiceEdit, self).before(form)
         populate_actionmenu(self.request)
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def appstruct(self):
         """

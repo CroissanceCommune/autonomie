@@ -27,6 +27,7 @@
     Copy of : https://github.com/Kotti/deform_bootstrap/pull/44
 """
 from deform import Form
+from deform.widget import FormWidget
 
 default_resources = {
         "chosen":{None:{'js':("jquery_chosen/chosen.jquery.js",),
@@ -47,13 +48,3 @@ def add_resources_to_registry():
         for version, resources in versions.items():
             registry.set_js_resources(rqrt, version, resources.get('js'))
             registry.set_css_resources(rqrt, version, resources.get('css'))
-
-
-def set_form_template():
-    """
-    Set a custom form template :
-
-        * to avoid mappings being converted to tabs
-        * to allow the use of custom buttons
-    """
-    Form.template = "autonomie:deform_templates/form.pt"

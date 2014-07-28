@@ -592,9 +592,6 @@ class TaskFormView(BaseFormView):
 
     def before(self, form):
         form.buttons = self.buttonmaker.get_buttons(counter=form.counter)
-        # Ici on spécifie un template qui permet de rendre nos boutons de
-        # formulaires
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def set_task_status(self, task):
         # self.request.POST is a locked dict, we need a non locked one

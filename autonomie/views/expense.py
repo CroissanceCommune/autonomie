@@ -499,9 +499,6 @@ perdues) ?")
         # Here we override the form counter to avoid field ids conflict
         form.counter = self.period_form.counter
         form.set_appstruct(self.request.context.appstruct())
-        # Ici on spécifie un template qui permet de rendre nos boutons de
-        # formulaires
-        form.widget.template = "autonomie:deform_templates/form.pt"
         btn = ViewLink(u"Revenir à la liste", "view", path="company_expenses",
                 id=self.request.context.company.id)
         self.request.actionmenu.add(btn)

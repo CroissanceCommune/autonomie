@@ -105,7 +105,6 @@ class EstimationAdd(TaskFormView):
     def before(self, form):
         super(EstimationAdd, self).before(form)
         populate_actionmenu(self.request)
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def submit_success(self, appstruct):
         log.debug("Submitting estimation add")
@@ -172,7 +171,6 @@ class EstimationEdit(TaskFormView):
 
         super(EstimationEdit, self).before(form)
         populate_actionmenu(self.request)
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def appstruct(self):
         """

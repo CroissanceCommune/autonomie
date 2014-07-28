@@ -326,7 +326,7 @@ class Api(object):
         context = context or self.context
         return base_has_permission(perm_name, context, self.request)
 
-    def urlupdate(self, args_dict):
+    def urlupdate(self, args_dict={}):
         """
             Return the current url with updated GET params
             It allows to keep url params when :
@@ -343,6 +343,3 @@ class Api(object):
         get_args.update(args_dict)
         path = self.request.current_route_path(_query=get_args)
         return path
-
-
-

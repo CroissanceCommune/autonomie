@@ -77,7 +77,7 @@
         % for activity in activities:
             <tr>
                 <td onclick="document.location='${activity.url}'" class='rowlink'>
-                    ${api.format_date(activity.date)}
+                    ${api.format_date(activity.datetime)}
                 </td>
                 <td onclick="document.location='${activity.url}'" class='rowlink'>
                     <ul>

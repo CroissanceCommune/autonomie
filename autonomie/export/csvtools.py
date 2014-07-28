@@ -133,6 +133,12 @@ class SqlaToCsvWriter(BaseCsvWriter):
         self.headers = list(collect_headers(self.model))
         self.keys = [name for key, name in self.headers]
 
+    def add_row(self, row):
+        """
+            Add a row to our buffer
+        """
+        self._datas.append(self.format_row(row.appstruct()))
+
     def format_row(self, row):
         """
             restrict the dictionnary to the current fieldnames

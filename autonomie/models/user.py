@@ -610,13 +610,19 @@ class UserDatas(DBBASE):
     id = Column(
         Integer,
         primary_key=True,
-        info={'colanderalchemy': get_hidden_field_conf(),}
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        }
     )
 
     # User account associated with this dataset
     user_id = Column(
         ForeignKey('accounts.id'),
-        info={'colanderalchemy': EXCLUDED}
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'exclude': True},
+             }
     )
     user = relationship(
         "User",
@@ -625,9 +631,15 @@ class UserDatas(DBBASE):
             "userdatas",
             uselist=False,
             cascade='all, delete-orphan',
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': {'exclude': True},
+            },
         ),
-        info={'colanderalchemy': EXCLUDED}
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'exclude': True},
+        }
     )
 
     # INFORMATIONS GÉNÉRALES : CF CAHIER DES CHARGES #
@@ -640,6 +652,9 @@ class UserDatas(DBBASE):
                 'widget': get_select(SITUATION_OPTIONS),
                 'validator': get_select_validator(SITUATION_OPTIONS),
                 'default': SITUATION_OPTIONS[0][0],
+            },
+            'export': {
+                'formatter': lambda val: dict(SITUATION_OPTIONS).get(val),
             }
         },
     )
@@ -653,7 +668,8 @@ class UserDatas(DBBASE):
                   'widget': get_deferred_user_choice(
                       roles=['admin', 'manager']
                   ),
-              }
+              },
+              'export': {'exclude': True},
              },
     )
 
@@ -662,9 +678,18 @@ class UserDatas(DBBASE):
         primaryjoin='User.id==UserDatas.situation_follower_id',
         backref=backref(
             "followed_contractors",
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': {'exclude': True},
+            },
         ),
-        info={'colanderalchemy': EXCLUDED}
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {
+                'related_key': 'lastname',
+                'label': u"Conseiller",
+            },
+        }
     )
 
     situation_societariat_entrance = Column(
@@ -687,7 +712,7 @@ class UserDatas(DBBASE):
                 'title': u'Civilité',
                 'section': u"Coordonnées",
                 'widget': get_select(CIVILITE_OPTIONS),
-            }
+            },
         },
         nullable=False,
     )
@@ -698,7 +723,7 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u"Nom",
                 'section': u'Coordonnées',
-            }
+            },
         },
         nullable=False,
     )

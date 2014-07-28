@@ -726,7 +726,11 @@ class ManualInvoice(Task):
     customer = relationship(
         "Customer",
         primaryjoin="Customer.id==ManualInvoice.customer_id",
-        backref='manual_invoices')
+        backref=backref(
+            'manual_invoices',
+            info={'colanderalchemy': widgets.EXCLUDED,},
+        ),
+    )
     company_id = Column(
         'compagnie_id',
         Integer,
@@ -734,7 +738,11 @@ class ManualInvoice(Task):
     company = relationship(
         "Company",
         primaryjoin="Company.id==ManualInvoice.company_id",
-        backref='manual_invoices')
+        backref=backref(
+            'manual_invoices',
+            info={'colanderalchemy': widgets.EXCLUDED,},
+        ),
+    )
     # State machine handling
     state_machine = DEFAULT_STATE_MACHINES['manualinvoice']
     paid_states = ('resulted',)

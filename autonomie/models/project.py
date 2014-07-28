@@ -41,7 +41,7 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie.views.forms.widgets import deferred_autocomplete_widget
+from autonomie.utils.form_widget import deferred_autocomplete_widget
 from autonomie.models import widgets
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType

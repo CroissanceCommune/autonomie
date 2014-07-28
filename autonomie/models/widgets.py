@@ -28,7 +28,7 @@ models, here we provide some usefull declarations
 """
 import colander
 from deform import widget as deform_widget
-from autonomie.views.forms import widgets as custom_widget
+from autonomie.utils import form_widget as custom_widget
 
 
 EXCLUDED = {'exclude': True}

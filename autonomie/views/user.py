@@ -46,6 +46,7 @@ from autonomie.models.user import (
     USERDATAS_FORM_GRIDS,
 )
 
+
 from autonomie.models.company import Company
 from autonomie.utils.widgets import (
     ViewLink,
@@ -53,7 +54,11 @@ from autonomie.utils.widgets import (
     StaticWidget,
 )
 
-from autonomie.views import BaseListView
+from autonomie.views import (
+    BaseListView,
+    BaseXlsView,
+)
+
 from autonomie.views.forms import (
     submit_btn,
     cancel_btn,
@@ -288,13 +293,19 @@ class UserList(BaseListView):
             add user link and popup for user with add permission ...)
         """
         populate_actionmenu(self.request)
-        form = get_user_form(self.request)
-        popup = PopUp("add", u'Ajouter un permanent', form.render())
-        self.request.popups = {popup.name: popup}
-        self.request.actionmenu.add(popup.open_btn())
+
+        if has_permission("add", self.context, self.request):
+            form = get_user_form(self.request)
+            popup = PopUp("add", u'Ajouter un permanent', form.render())
+            self.request.popups = {popup.name: popup}
+            self.request.actionmenu.add(popup.open_btn())
 
         self.request.actionmenu.add(get_add_contractor_btn())
-        self.request.actionmenu.add(self._get_disabled_btn(appstruct))
+
+        if has_permission("manage", self.context, self.request):
+            self.request.actionmenu.add(self._get_disabled_btn(appstruct))
+
+        self.request.actionmenu.add(get_userdatas_link_btn())
 
     def _get_disabled_btn(self, appstruct):
         """
@@ -370,7 +381,10 @@ class UserDatasAdd(BaseFormView):
         self.request.actionmenu.add(get_userdatas_list_btn())
 
     def submit_success(self, appstruct):
-        model = self.schema.objectify(appstruct)
+        if self.context.__name__ == 'userdatas':
+            model = self.schema.objectify(appstruct, self.context)
+        else:
+            model = self.schema.objectify(appstruct)
 
         user, login, password = model.gen_user_account()
 
@@ -510,7 +524,7 @@ def userdata_doctype_view(userdata_model, request):
     )
 
 
-class UserDatasList(BaseListView):
+class UserDatasListClass(object):
     """
     User datas list view
     """
@@ -567,6 +581,24 @@ class UserDatasList(BaseListView):
                 UserDatas.situation_follower_id==follower_id
             )
         return query
+
+
+class UserDatasListView(UserDatasListClass, BaseListView):
+    """
+    The userdatas listing view
+    """
+    pass
+
+
+class UserDatasExcelView(UserDatasListClass, BaseXlsView):
+    """
+        Userdatas excel view
+    """
+    model = UserDatas
+
+    @property
+    def filename(self):
+        return "gestion_social.xls"
 
 
 def user_view(request):
@@ -770,6 +802,17 @@ def get_add_contractor_btn():
     )
 
 
+def get_userdatas_link_btn():
+    """
+    Return a button leading to the userdatas list view
+    """
+    return ViewLink(
+        u"Annuaire gestion sociale",
+        "manage",
+        path="userdatas",
+    )
+
+
 def get_del_btn(user_id):
     """
         Return the button used to delete an account
@@ -801,6 +844,11 @@ def includeme(config):
     config.add_route(
         "userdatas",
         "/userdatas",
+    )
+
+    config.add_route(
+        "userdatas.xls",
+        "/userdatas.xls",
     )
 
     config.add_route('account', '/account')
@@ -904,8 +952,15 @@ def includeme(config):
     )
 
     config.add_view(
-        UserDatasList,
+        UserDatasListView,
         route_name="userdatas",
         renderer="userdatas.mako",
         permission="manage",
     )
+
+    config.add_view(
+        UserDatasExcelView,
+        route_name="userdatas.xls",
+        permission="manage",
+    )
+

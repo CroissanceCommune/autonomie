@@ -71,9 +71,9 @@ def get_customer_form(request):
     return form
 
 
-class CustomersList(BaseListView):
+class CustomersListTools(object):
     """
-    Customer list view
+    Customer list tools
     """
     title = u"Liste des clients"
     schema = get_list_schema()
@@ -98,6 +98,11 @@ class CustomersList(BaseListView):
                     Customer.contactLastName.like("%" + search + "%")))
         return records
 
+
+class CustomersListView(CustomersListTools, BaseListView):
+    """
+    Customer listing view
+    """
     def populate_actionmenu(self, appstruct):
         """
         Populate the actionmenu regarding the user's rights
@@ -110,7 +115,7 @@ class CustomersList(BaseListView):
             self.request.actionmenu.add(popup.open_btn())
 
 
-class CustomersCsv(BaseCsvView):
+class CustomersCsv(CustomersListTools, BaseCsvView):
     """
         Customer csv view
     """
@@ -264,7 +269,7 @@ def includeme(config):
                     request_param='action=edit',
                     permission='edit')
 
-    config.add_view(CustomersList,
+    config.add_view(CustomersListView,
                     route_name='company_customers',
                     renderer='company_customers.mako',
                     request_method='GET',

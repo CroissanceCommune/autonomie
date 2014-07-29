@@ -56,8 +56,11 @@ GROUPS = {
 }
 
 
-def add_user(login, password, group, firstname="", lastname=""):
-    user = User(login=login, firstname=firstname, lastname=lastname)
+def add_user(login, password, group, firstname="", lastname="", email=""):
+    user = User(login=login,
+                firstname=firstname,
+                lastname=lastname,
+                email=email)
     user.set_password(password)
 
     user.primary_group = group
@@ -76,7 +79,8 @@ def add_user(login, password, group, firstname="", lastname=""):
 def add_simple(login, group):
     return add_user(login, login, group,
                     firstname=u"FIRSTNAME_%s" % login,
-                    lastname=u"LASTNAME_%s" % login)
+                    lastname=u"LASTNAME_%s" % login,
+                   email="%s@example.com" % login)
 
 
 def add_simple_admin(login):

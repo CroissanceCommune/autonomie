@@ -53,6 +53,7 @@ class BaseTest(BaseFunctionnalTest):
             'datetime': datetime.now(),
             'type_id': type_id,
             'mode': 'par mail',
+            'name': 'test',
         }
         a = activity.Activity(**appstruct)
         self.session.add(a)
@@ -70,6 +71,7 @@ class TestNewActivityView(BaseTest):
         self.addType()
         now = datetime.now().replace(microsecond=0)
         appstruct = {
+            'name': 'test',
             'come_from': "/toto",
             'datetime': now,
             'type_id': 1,
@@ -92,6 +94,7 @@ class TestNewActivityAjaxView(BaseTest):
         appstruct = {
             'datetime': now,
             'type_id': typeid,
+            'name': 'test',
             'mode': 'par mail',
         }
         view = NewActivityAjaxView(self.get_csrf_request())

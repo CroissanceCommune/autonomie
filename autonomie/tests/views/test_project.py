@@ -24,10 +24,14 @@
 
 from mock import MagicMock
 from autonomie.models.project import Project
+from autonomie.models.company import Company
 from autonomie.views.project import (ProjectAdd, ProjectEdit,
         project_addphase, project_archive, project_delete)
 
-from autonomie.tests.base import BaseFunctionnalTest
+from autonomie.tests.base import (
+    BaseFunctionnalTest,
+    Dummy,
+)
 
 APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "customers":[]}
 
@@ -35,15 +39,20 @@ class Base(BaseFunctionnalTest):
     def addOne(self, appstruct=APPSTRUCT):
         self.config.add_route('project', '/')
         req = self.get_csrf_request()
-        req.context = MagicMock(id=1)
+        company = Company.query().first()
+        company.__name__ = 'company'
+        req.context = company
         view = ProjectAdd(req)
         view.submit_success(appstruct)
 
     def getOne(self):
         try:
-            return Project.query().filter(Project.name=="Projéct&$").one()
+            val = Project.query().filter(Project.name=="Projéct&$").one()
+            val.__name__ = 'project'
         except:
-            return None
+            val = None
+        return val
+
 
 class TestProjectAdd(Base):
     def test_success(self):
@@ -52,15 +61,7 @@ class TestProjectAdd(Base):
         self.assertEqual(project.code, "ABDC")
         self.assertEqual(project.company_id, 1)
 
-    def test_customer_not_exist(self):
-        appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["11111"]}
-        self.addOne(appstruct)
-        project = self.getOne()
-        self.assertEqual(len(project.customers), 0)
-
     def test_customer(self):
-        from autonomie.models.customer import Customer
-        print Customer.get(1)
         appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
         self.addOne(appstruct)
         project = self.getOne()

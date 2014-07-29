@@ -76,6 +76,7 @@ class TestWorkshopAddView(BaseTest):
 
         appstruct = {
             'come_from': "/toto",
+            'name': 'test',
             'info1': 'header',
             'timeslots': [{
                 'name': 'timeslot',

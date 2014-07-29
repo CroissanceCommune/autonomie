@@ -36,6 +36,14 @@
     <li>
     ${form|n}
     </li>
+    <li class='pull-right'>
+    <%
+## We build the link with the current search arguments
+args = request.GET
+url = request.route_path('workshops.xls', _query=args)
+%>
+<a class='btn pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='icon-file'></i>Exporter</a>
+    </li>
 </ul>
 </%block>
 <%block name="content">

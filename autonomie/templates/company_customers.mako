@@ -32,7 +32,12 @@
     ${request.actionmenu.render(request)|n}
 </%block>
 <%block name='content'>
-<a class='btn pull-right' href='${request.route_path("customers.csv", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
+<%
+## We build the link with the current search arguments
+args = request.GET
+url = request.route_path('customers.csv', id=request.context.id, _query=args)
+%>
+<a class='btn pull-right' href='${url}' ><i class='icon-file'></i>Export</a>
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>

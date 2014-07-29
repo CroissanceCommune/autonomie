@@ -428,7 +428,7 @@ class WorkshopXlsView(WorkshopListTools, BaseXlsView):
 
     @property
     def filename(self):
-        return "ateliers.csv"
+        return "ateliers.xls"
 
     def _init_writer(self):
         return self.writer()

@@ -36,7 +36,7 @@
 
         <img src="/assets/main/accompagnement_header.png" />
 
-        <div class='text12'><b>Date : </b> le ${api.format_date(activity.date)}</div>
+        <div class='text12'><b>Date : </b> le ${api.format_date(activity.datetime)}</div>
         <div class='text12'><b>Durée : </b> ${activity.duration}</div>
         <div><b>Date : </b> le ${api.format_date(activity.datetime)}</div>
         <div><b>Durée : </b> ${activity.duration}</div>

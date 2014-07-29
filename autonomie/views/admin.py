@@ -444,7 +444,7 @@ ont été configurés"
 
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
-                if data['id'] != 0:
+                if data.get('id', 0) not in (0, None):
                     type_ = factory.get(data['id'])
                     merge_session_with_post(type_, data)
                     self.dbsession.merge(type_)
@@ -501,7 +501,7 @@ class AdminActivities(BaseFormView):
         Return a dict id:data for the elements that are edited (with an id)
         """
         return dict((data['id'], data) for data in appstruct.get(key, {}) \
-            if data.get('id') !=0)
+            if data.get('id', 0) !=0)
 
     def get_submitted_modes(self, appstruct):
         """

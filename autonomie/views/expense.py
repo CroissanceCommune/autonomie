@@ -79,7 +79,7 @@ from autonomie.utils.widgets import (
 )
 from autonomie.export.excel import (
     make_excel_view,
-    ExcelExpense,
+    XlsExpense,
 )
 from autonomie.views.forms import (
     merge_session_with_post,
@@ -987,8 +987,8 @@ def includeme(config):
         xhr=True,
         renderer="json")
 
-    # Excel export
-    config.add_view(make_excel_view(excel_filename, ExcelExpense),
+    # Xls export
+    config.add_view(make_excel_view(excel_filename, XlsExpense),
             route_name="expensexlsx")
 
     # Rest interface

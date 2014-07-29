@@ -42,7 +42,9 @@
 args = request.GET
 url = request.route_path('workshops.xls', _query=args)
 %>
-<a class='btn pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='icon-file'></i>Exporter</a>
+<a class='btn pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='icon-file'></i>Excel</a>
+<% url = request.route_path('workshops.csv', _query=args) %>
+<a class='btn pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='icon-file'></i>Csv</a>
     </li>
 </ul>
 </%block>

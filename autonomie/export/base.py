@@ -97,10 +97,15 @@ def format_boolean(value):
     return "Y" and value or "N"
 
 
-def get_formatter_from_column(column_type):
+def get_formatter_from_column(column):
     """
     Return a formatter regarding the given SQLAlchemy column type
     """
+    print("Getting a formatter")
+    column = column.columns[0]
+    column_type = getattr(column.type, 'impl', column.type)
+    print column_type
+
     formatter = None
 
     if isinstance(column_type, Boolean):
@@ -110,6 +115,7 @@ def get_formatter_from_column(column_type):
         formatter = format_date
 
     elif isinstance(column_type, DateTime):
+        print("Its a datetime")
         formatter = format_datetime
 
     return formatter
@@ -151,7 +157,7 @@ class SqlaExporter(BaseExporter):
         for prop in columns:
 
             info_dict = get_info_field(prop)
-            main_infos = info_dict.get('export', {})
+            main_infos = info_dict.get('export', {}).copy()
 
             infos = main_infos.get(self.config_key, {})
 

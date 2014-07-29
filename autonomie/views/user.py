@@ -590,7 +590,7 @@ class UserDatasListView(UserDatasListClass, BaseListView):
     pass
 
 
-class UserDatasExcelView(UserDatasListClass, BaseXlsView):
+class UserDatasXlsView(UserDatasListClass, BaseXlsView):
     """
         Userdatas excel view
     """
@@ -959,7 +959,7 @@ def includeme(config):
     )
 
     config.add_view(
-        UserDatasExcelView,
+        UserDatasXlsView,
         route_name="userdatas.xls",
         permission="manage",
     )

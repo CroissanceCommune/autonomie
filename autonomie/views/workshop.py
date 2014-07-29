@@ -48,19 +48,30 @@ from autonomie.utils.pdf import (
         render_html,
         write_pdf,
         )
+from autonomie.export.csvtools import CsvExporter
+from autonomie.export.excel import XlsExporter
 from autonomie.utils.widgets import ViewLink
 from autonomie.views.forms import (
     BaseFormView,
     merge_session_with_post,
     )
-from autonomie.views import BaseListView
+from autonomie.views import (
+    BaseListView,
+    BaseCsvView,
+    BaseXlsView,
+)
 from autonomie.views.forms.workshop import (
     Workshop as WorkshopSchema,
     get_list_schema,
     ATTENDANCE_STATUS,
     Attendances as AttendanceSchema,
     )
-from autonomie.views.render_api import format_datetime, format_date
+
+from autonomie.views.render_api import (
+    format_datetime,
+    format_date,
+    format_account,
+)
 
 log = logging.getLogger(__name__)
 
@@ -297,9 +308,9 @@ def record_attendances_view(context, request):
     return HTTPFound(url)
 
 
-class WorkshopList(BaseListView):
+class WorkshopListTools(object):
     """
-    View for listing workshops
+    Tools for listing workshops
     """
     title = u"Ateliers"
     schema = get_list_schema()
@@ -340,8 +351,93 @@ class WorkshopList(BaseListView):
             )
         return query
 
+class WorkshopListView(WorkshopListTools, BaseListView):
+    """
+    Workshop listing view
+    """
+    pass
 
-class CompanyWorkshopList(WorkshopList):
+
+class WorkshopCsvWriter(CsvExporter):
+    headers = (
+        {'name': 'label', 'label': "Intitulé"},
+        {'name': 'participant', 'label': "Participant"},
+        {'name': 'leaders', 'label': "Formateur(s)"},
+        {'name': 'duration', 'label': "Durée"},
+    )
+
+
+class WorkshopXlsWriter(XlsExporter):
+    headers = (
+        {'name': 'label', 'label': "Intitulé"},
+        {'name': 'participant', 'label': "Participant"},
+        {'name': 'leaders', 'label': "Formateur(s)"},
+        {'name': 'duration', 'label': "Durée"},
+    )
+
+
+def stream_workshop_entries_for_export(query):
+    for workshop in query.all():
+
+        hours = sum(t.duration[0] for t in workshop.timeslots)
+        minutes = sum(t.duration[1] for t in workshop.timeslots)
+
+        duration = hours * 60 + minutes
+
+        for user in workshop.participants:
+
+            attended = False
+            for timeslot in workshop.timeslots:
+                # On exporte une ligne que si le user était là au moins une
+                # fois
+                if timeslot.user_status(user.id) == u'Présent':
+                    attended = True
+                    break
+
+            if attended:
+                yield {
+                    "label" : workshop.name,
+                    "participant": format_account(user),
+                    "leaders": '\n'.join(workshop.leaders),
+                    "duration": duration,
+                }
+
+
+class WorkshopCsvView(WorkshopListTools, BaseCsvView):
+    """
+    Workshop csv export view
+    """
+    writer = WorkshopCsvWriter
+
+    @property
+    def filename(self):
+        return "ateliers.csv"
+
+    def _init_writer(self):
+        return self.writer()
+
+    def _stream_rows(self, query):
+        return stream_workshop_entries_for_export(query)
+
+
+class WorkshopXlsView(WorkshopListTools, BaseXlsView):
+    """
+    Workshop excel export view
+    """
+    writer = WorkshopXlsWriter
+
+    @property
+    def filename(self):
+        return "ateliers.csv"
+
+    def _init_writer(self):
+        return self.writer()
+
+    def _stream_rows(self, query):
+        return stream_workshop_entries_for_export(query)
+
+
+class CompanyWorkshopListView(WorkshopListView):
     """
     View for listing company's workshops
     """
@@ -507,6 +603,8 @@ def includeme(config):
         )
 
     config.add_route('workshops', "/workshops")
+    config.add_route('workshops.csv', "/workshops.csv")
+    config.add_route('workshops.xls', "/workshops.xls")
 
     config.add_route(
         'company_workshops',
@@ -524,18 +622,18 @@ def includeme(config):
         )
 
     config.add_view(
-        WorkshopList,
+        WorkshopListView,
         route_name='workshops',
         permission='manage',
         renderer="/workshops.mako",
         )
 
     config.add_view(
-        CompanyWorkshopList,
+        CompanyWorkshopListView,
         route_name='company_workshops',
         permission='view',
         renderer="/workshops.mako",
-        )
+    )
 
     config.add_view(
         WorkshopEditView,
@@ -543,19 +641,19 @@ def includeme(config):
         permission='manage',
         request_param='action=edit',
         renderer="/workshop_edit.mako",
-        )
+    )
 
     config.add_view(
         record_attendances_view,
         route_name='workshop',
         permission='manage',
         request_param='action=record',
-        )
+    )
 
     config.add_view(
         timeslot_pdf_view,
         route_name='timeslot.pdf',
-        )
+    )
 
     config.add_view(
         workshop_pdf_view,
@@ -563,15 +661,27 @@ def includeme(config):
     )
 
     config.add_view(
-            workshop_delete_view,
-            route_name='workshop',
-            permission='manage',
-            request_param='action=delete',
-            )
+        workshop_delete_view,
+        route_name='workshop',
+        permission='manage',
+        request_param='action=delete',
+    )
 
     config.add_view(
         workshop_view,
         route_name='workshop',
         permission='view',
         renderer='/workshop_view.mako',
-        )
+    )
+
+    config.add_view(
+        WorkshopCsvView,
+        route_name='workshops.csv',
+        permission='manage',
+    )
+
+    config.add_view(
+        WorkshopXlsView,
+        route_name='workshops.xls',
+        permission='manage',
+    )

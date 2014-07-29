@@ -37,8 +37,8 @@ from webhelpers import paginate
 from pyramid.url import current_route_url
 
 from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
-from autonomie.export.csvtools import SqlaToCsvWriter
-from autonomie.export.excel import SqlaXlsWriter
+from autonomie.export.csvtools import SqlaCsvExporter
+from autonomie.export.excel import SqlaXlsExporter
 from autonomie.export.utils import write_file_to_request
 
 
@@ -266,7 +266,7 @@ class BaseCsvView(BaseListClass):
             * filter_ methods
     """
     model = None
-    writer = SqlaToCsvWriter
+    writer = SqlaCsvExporter
 
     @property
     def filename(self):
@@ -283,11 +283,15 @@ class BaseCsvView(BaseListClass):
         for item in query.all():
             yield item
 
+
+    def _init_writer(self):
+        return self.writer(self.model)
+
     def _build_return_value(self, schema, appstruct, query):
         """
         Return the streamed file object
         """
-        writer = self.writer(self.model)
+        writer = self._init_writer()
         for item in self._stream_rows(query):
             writer.add_row(item)
 
@@ -296,4 +300,4 @@ class BaseCsvView(BaseListClass):
 
 
 class BaseXlsView(BaseCsvView):
-    writer = SqlaXlsWriter
+    writer = SqlaXlsExporter

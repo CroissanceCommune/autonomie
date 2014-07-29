@@ -125,7 +125,7 @@ class Customer(DBBASE):
         Integer,
         primary_key=True,
         info={
-            'options':{'csv_exclude':True},
+            'export':{'exclude':True},
             'colanderalchemy': widgets.EXCLUDED,
         },
     )
@@ -136,7 +136,7 @@ class Customer(DBBASE):
             CustomDateType,
             default=get_current_timestamp,
             info={
-                'options':{'csv_exclude':True},
+                'export':{'exclude':True},
                 'colanderalchemy': widgets.EXCLUDED,
             },
         ),
@@ -150,7 +150,7 @@ class Customer(DBBASE):
             default=get_current_timestamp,
             onupdate=get_current_timestamp,
             info={
-                'options':{'csv_exclude':True},
+                'export':{'exclude':True},
                 'colanderalchemy': widgets.EXCLUDED,
             },
         ),
@@ -162,7 +162,7 @@ class Customer(DBBASE):
         Integer,
         ForeignKey('company.id'),
         info={
-            'options':{'csv_exclude':True},
+            'export':{'exclude':True},
             'colanderalchemy': widgets.EXCLUDED,
         }
     )
@@ -171,7 +171,6 @@ class Customer(DBBASE):
         "name",
         String(255),
         info={
-            'label': u"Nom",
             "colanderalchemy": {
                 'title': u'Nom',
             },
@@ -196,7 +195,6 @@ class Customer(DBBASE):
             "contactLastName",
             String(255),
             info={
-                'label':u"Nom du contact principal",
                 "colanderalchemy": {
                     'title':u"Nom du contact principal",
                 }
@@ -211,7 +209,6 @@ class Customer(DBBASE):
             "contactFirstName",
             String(255),
             info={
-                'label': u"Prénom du contact principal",
                 'colanderalchemy': {
                     'title': u"Prénom du contact principal",
                 }
@@ -226,7 +223,6 @@ class Customer(DBBASE):
             "function",
             String(255),
             info={
-                'label': u"Fonction du contact principal",
                 'colanderalchemy': {
                     'title': u"Fonction du contact principal",
                 }
@@ -241,7 +237,6 @@ class Customer(DBBASE):
             "address",
             String(255),
             info={
-                'label':u"Adresse",
                 'colanderalchemy': {
                     'title': u'Adresse',
                     'widget': deform_widget.TextAreaWidget(
@@ -260,7 +255,6 @@ class Customer(DBBASE):
             "zipCode",
             String(20),
             info={
-                'label':u"Code postal",
                 'colanderalchemy':{
                     'title': u'Code postal',
                 }
@@ -275,7 +269,6 @@ class Customer(DBBASE):
             "city",
             String(255),
             info={
-                'label':u"Ville",
                 'colanderalchemy': {
                     'title': u'Ville',
                 }
@@ -290,7 +283,6 @@ class Customer(DBBASE):
             "country",
             String(150),
             info={
-                'label':u"Pays",
                 'colanderalchemy': {'title': u'Pays'},
             },
             default=u'France',
@@ -303,7 +295,6 @@ class Customer(DBBASE):
             "email",
             String(255),
             info={
-                'label':u"E-mail",
                 'colanderalchemy':{
                     'title': u"E-mail",
                     'validator': widgets.mail_validator(),
@@ -319,7 +310,6 @@ class Customer(DBBASE):
             "phone",
             String(50),
             info={
-                'label':u"Téléphone",
                 'colanderalchemy': {
                     'title': u'Téléphone',
                 },
@@ -334,7 +324,6 @@ class Customer(DBBASE):
             "fax",
             String(50),
             info={
-                'label':u"Fax",
                 'colanderalchemy': {
                     'title': u'Fax',
                 }
@@ -349,7 +338,6 @@ class Customer(DBBASE):
             "intraTVA",
             String(50),
             info={
-                'label':u"TVA intracommunautaire",
                 'colanderalchemy': {'title': u"TVA intracommunautaire"},
             },
         ),
@@ -361,7 +349,6 @@ class Customer(DBBASE):
             "comments",
             Text,
             info={
-                'label':u"Commentaires",
                   'colanderalchemy':{
                       'title': u"Commentaires",
                       'widget': deform_widget.TextAreaWidget(
@@ -377,7 +364,7 @@ class Customer(DBBASE):
         Column(
             String(125),
             info={
-                'options':{'csv_exclude':True},
+                'export': {'exclude': True},
                 'colanderalchemy': {
                     'title': u"Compte CG",
                 },
@@ -391,7 +378,7 @@ class Customer(DBBASE):
         Column(
             String(125),
             info={
-                'options':{'csv_exclude':True},
+                'export': {'exclude': True},
                 'colanderalchemy': {
                     'title': u"Compte tiers",
                 }

@@ -29,32 +29,28 @@
 import itertools
 import logging
 import openpyxl
-from openpyxl.styles import Color, fills
+from openpyxl.styles import (
+    Color,
+    fills,
+    Style,
+    NumberFormat,
+    PatternFill,
+    Font,
+)
+
 import cStringIO as StringIO
 from string import ascii_uppercase
 
 
-
-from sqlalchemy import (
-    inspect,
-    Boolean,
-    Date,
-    DateTime,
-)
-from sqlalchemy.orm import (
-    ColumnProperty,
-    RelationshipProperty,
-)
-from colanderalchemy.schema import _creation_order
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie.models.treasury import ExpenseType
 from autonomie.models.treasury import ExpenseKmType
 from autonomie.models.treasury import ExpenseTelType
-from autonomie.views.render_api import (
-    format_date,
-    format_datetime,
-)
 from autonomie.export.utils import write_file_to_request
+from autonomie.export.base import (
+    SqlaExporter,
+    BaseExporter,
+)
 
 
 log = logging.getLogger(__name__)
@@ -66,13 +62,45 @@ Color.Crimson = "FFDC143C"
 Color.header = "FFD9EDF7"
 Color.footer = "FFFCF8E3"
 
+EXCEL_NUMBER_FORMAT = '0.00'
+
+TITLE_STYLE = Style(font=Font(size=24, bold=True))
+HEADER_STYLE = Style(
+    font=Font(bold=True),
+    fill=PatternFill(
+        fill_type=fills.FILL_SOLID,
+        start_color=Color(rgb=Color.header)
+    )
+)
+BOLD_CELL = Style(
+    font=Font(bold=True)
+)
+NUMBER_CELL = Style(
+    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
+)
+FOOTER_CELL = Style(
+    font=Font(bold=True),
+    fill=PatternFill(
+        fill_type=fills.FILL_SOLID,
+        start_color=Color(rgb=Color.footer)
+    ),
+    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
+)
+LARGE_FOOTER_CELL = Style(
+    font=Font(bold=True, size=16),
+    fill=PatternFill(
+        fill_type=fills.FILL_SOLID,
+        start_color=Color(rgb=Color.footer)
+    ),
+    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
+)
+
 
 # A, B, C, ..., AA, AB, AC, ..., ZZ
 ASCII_UPPERCASE = list(ascii_uppercase) + list(
     ''.join(duple)
     for duple in itertools.combinations_with_replacement(ascii_uppercase, 2)
     )
-EXCEL_NUMBER_FORMAT = '0.00'
 EXPENSEKM_COLUMNS = [
     {
         'key': 'date',
@@ -114,32 +142,163 @@ EXPENSEKM_COLUMNS = [
         'key': 'total',
         'label': u'Indemnités',
         'letter': 'L',
-        'number_format': EXCEL_NUMBER_FORMAT,
+        'style': NUMBER_CELL,
     }
 ]
 
-class ExcelExporter(object):
-    def __init__(self, model):
+class XlsWriter(object):
+    """
+    Class providing common tools to write excel files from tabular datas
+
+    Has to be subclassed, the subclass should provide a _datas and a headers
+    attribute that contains the datas to render and the headers
+
+        _datas
+
+            list of tuples (each tuple is a row)
+
+        headers
+
+            list of dict containing the label of each column:
+                {'label': <a label>}
+
+    """
+    title = u"Export"
+    def __init__(self):
         self.book = openpyxl.workbook.Workbook()
-        self.model = model
+        self.worksheet = self.book.active
+        self.worksheet.title = self.title
 
     def save_book(self):
+        """
+        Return a file buffer containing the resulting xls
+        """
         buf = StringIO.StringIO()
         buf.write(openpyxl.writer.excel.save_virtual_workbook(self.book))
         return buf
 
     def set_color(self, cell, color):
-        cell.style.fill.fill_type = fills.FILL_SOLID
-        cell.style.fill.start_color.index = color
+        """
+        Set the given color to the provided cell
+
+            cell
+
+                A xls cell object
+
+            color
+
+                A openpyxl color var
+        """
+        cell.style = cell.style.copy(font=Font(color=Color(rgb=color)))
+
+    def format_row(self, row):
+        """
+        The render method expects rows as lists, here we switch our row format
+        from dict to list respecting the order of the headers
+        """
+        res = []
+        headers = getattr(self, 'headers', [])
+        for column in headers:
+            column_name = column['name']
+            value = row.get(column_name, '')
+            res.append(value)
+        return res
+
+    def render(self):
+        """
+        Definitely render the workbook
+        """
+        self._render_headers()
+        self._render_rows()
+
+        return self.save_book()
 
 
-class ExcelExpense(ExcelExporter):
+    def _render_rows(self):
+        """
+        Render the rows in the current stylesheet
+        """
+        _datas = getattr(self, '_datas', ())
+        for index, row in enumerate(_datas):
+            row_number = index + 2
+            for col_num, value in enumerate(row):
+                cell = self.worksheet.cell(row=row_number, column=col_num + 1)
+                cell.value = value
+
+    def _render_headers(self):
+        """
+        Write the headers row
+        """
+        headers = getattr(self, 'headers', ())
+        for index, col in enumerate(headers):
+            # We write the headers
+            cell = self.worksheet.cell(row=1, column=index + 1)
+            cell.value = col['label']
+
+
+class SqlaXlsExporter(XlsWriter, SqlaExporter):
     """
-        Wrapper for excel export of an expense object
+    Main class used for exporting datas to the xls format
+
+    Models attributes output can be customized through the info param :
+
+        Column(Integer, infos={'export':
+            {'excel':<excel_specific_options>,
+             <main_export_options>
+            }
+        }
+
+    main_export_options and excel_specific_options can be :
+
+        label
+
+            label of the column header
+
+        format
+
+            a function that will be fired on each row to format the output
+
+        related_key
+
+            If the attribute is a relationship, the value of the given attribute
+            of the related object will be used to fill the cells
+
+        exclude
+
+            This data will not be inserted in the export if True
+
+    Usage:
+
+        a = SqlaXlsExporter(MyModel)
+        for i in MyModel.query().filter(<myfilter>):
+            a.add_row(i)
+        a.render()
     """
+    config_key = 'excel'
+    def __init__(self, model):
+        XlsWriter.__init__(self)
+        SqlaExporter.__init__(self, model)
+
+
+class XlsExporter(XlsWriter, BaseExporter):
+    headers = ()
+
+    def __init__(self):
+        XlsWriter.__init__(self)
+        BaseExporter.__init__(self)
+
+
+class XlsExpense(XlsWriter):
+    """
+        Xls exporter of an expensesheet object
+
+        Provide two sheets : the expenses and the kilometric datas
+    """
+    title = "NDF"
 
     def __init__(self, expensesheet):
-        super(ExcelExpense, self).__init__(expensesheet)
+        XlsWriter.__init__(self)
+        self.model = expensesheet
         self.columns = self.get_columns()
         self.index = 2
 
@@ -229,8 +388,12 @@ class ExcelExpense(ExcelExporter):
         # Add the last columns
         columns.append({'label':'Tva', 'key':'tva',
             'formatter':integer_to_amount})
-        columns.append({'label':'Total', 'key':'total',
-            'formatter':integer_to_amount, 'number_format':EXCEL_NUMBER_FORMAT})
+        columns.append({
+            'label':'Total',
+            'key':'total',
+            'formatter':integer_to_amount,
+            'style': NUMBER_CELL
+        })
 
         # We set the appropriate letter to each column
         index = 0
@@ -298,14 +461,12 @@ class ExcelExpense(ExcelExporter):
         """
         for column in columns:
             cell = self.get_column_cell(column)
-            cell.style.fill.fill_type = fills.FILL_SOLID
-            cell.style.fill.start_color.index = Color.header
-            cell.style.font.bold = True
+            cell.style = HEADER_STYLE
             cell.value = column['label']
         self.index += 1
         for column in columns:
             cell = self.get_column_cell(column)
-            cell.style.font.bold = True
+            cell.style = BOLD_CELL
             cell.value = column.get('code', '')
         self.index += 1
 
@@ -335,12 +496,12 @@ class ExcelExpense(ExcelExporter):
         """
         col_dim = self.worksheet.column_dimensions.get(col_letter)
         if col_dim:
-            if col_dim.width == -1 or force:
+            if col_dim.width in (-1, None,) or force:
                 if width == 0:
-                    col_dim.visible = False
+                    col_dim.hidden = True
                 else:
                     col_dim.width = width
-                    col_dim.visible = True
+                    col_dim.hidden = False
 
     def write_table(self, columns, lines):
         """
@@ -353,16 +514,13 @@ class ExcelExpense(ExcelExporter):
             for column in columns:
                 cell = self.get_column_cell(column)
                 cell.value = self.get_cell_val(line, column)
-                if column.has_key('number_format'):
-                    cell.style.number_format.format_code = \
-                            column['number_format']
+                if column.has_key('style'):
+                    cell.style = column['style']
             self.index += 1
 
         for column in columns:
             cell = self.get_column_cell(column)
-            cell.style.font.bold = True
-            self.set_color(cell, Color.footer)
-            cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
+            cell.style = FOOTER_CELL
 
             if column.has_key('code'):
                 val = sum([line.total_ht
@@ -419,7 +577,7 @@ class ExcelExpense(ExcelExporter):
         txt = u"FRAIS DIRECT DE FONCTIONNEMENT (< à 30% DU SALAIRE BRUT \
 PAR MOIS)"
         cell = self.write_full_line(txt)
-        cell.style.font.color.index = Color.Crimson
+        self.set_color(cell, Color.Crimson)
         self.write_expense_table('1')
 
     def write_activity_expenses(self):
@@ -430,7 +588,7 @@ PAR MOIS)"
         txt = u"FRAIS CONCERNANT DIRECTEMENT VOTRE L'ACTIVITE AUPRES DE VOS \
 CLIENTS"
         cell = self.write_full_line(txt)
-        cell.style.font.color.index = Color.Crimson
+        self.set_color(cell, Color.Crimson)
         self.write_expense_table('2')
 
     def write_total(self):
@@ -439,15 +597,10 @@ CLIENTS"
         """
         cell = self.get_merged_cells('A', 'D')
         cell.value = u"Total des frais professionnel à payer"
-        cell.style.font.bold = True
-        cell.style.font.size = 16
-        self.set_color(cell, Color.footer)
+        cell.style = LARGE_FOOTER_CELL
         cell = self.get_merged_cells('E', 'E')
-        cell.style.font.bold = True
-        cell.style.font.size = 16
         cell.value = integer_to_amount(self.model.total)
-        cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
-        self.set_color(cell, Color.footer)
+        cell.style = LARGE_FOOTER_CELL
         self.index += 2
 
     def write_accord(self):
@@ -472,8 +625,7 @@ CLIENTS"
         title = u"Tableau de bord kilométrique de {0} {1}".\
                 format(user.lastname, user.firstname)
         cell = self.write_full_line(title)
-        cell.style.font.bold = True
-        cell.style.font.size = 24
+        cell.style = TITLE_STYLE
         # index has already been increased
         row_dim = self.worksheet.row_dimensions.get(self.index -1 )
         row_dim.height = 30
@@ -485,11 +637,9 @@ CLIENTS"
         """
             Return the current excel export as a String buffer (StringIO)
         """
-        self.worksheet = self.book.worksheets[0]
-        self.worksheet.title = "NDF"
         cell = self.write_full_line(u"Feuille de notes de frais")
-        cell.style.font.bold = True
-        cell.style.font.size = 24
+
+        cell.style = TITLE_STYLE
         # index has already been increased
         row_dim = self.worksheet.row_dimensions.get(self.index -1 )
         row_dim.height = 30
@@ -519,228 +669,13 @@ CLIENTS"
 
         return self.save_book()
 
-def format_boolean(value):
-    return "Y" and value or "N"
-
-
-def get_formatter_from_column(column_type):
-    """
-    Return a formatter regarding the given SQLAlchemy column type
-    """
-    formatter = None
-
-    if isinstance(column_type, Boolean):
-        formatter = format_boolean
-
-    elif isinstance(column_type, Date):
-        formatter = format_date
-
-    elif isinstance(column_type, DateTime):
-        formatter = format_datetime
-
-    return formatter
-
-
-def get_info_field(prop):
-    """
-    Return the info attribute of the given property
-    """
-    if isinstance(prop, ColumnProperty):
-        column = prop.columns[0]
-
-    elif isinstance(prop, RelationshipProperty):
-        column = prop
-
-    return column.info
-
-
-class SqlaXlsWriter(ExcelExporter):
-    """
-    Main class used for exporting datas to the xls format
-
-    Models attributes output can be customized through the info param :
-
-        Column(Integer, infos={'export':
-            {'excel':<excel_specific_options>,
-             <main_export_options>
-            }
-        }
-
-    main_export_options and excel_specific_options can be :
-
-        label
-
-            label of the column header
-
-        format
-
-            a function that will be fired on each row to format the output
-
-        related_key
-
-            If the attribute is a relationship, the value of the given attribute
-            of the related object will be used to fill the cells
-
-        exclude
-
-            This data will not be inserted in the export if True
-
-    Usage:
-
-        a = SqlaXlsWriter(MyModel)
-        for i in MyModel.query().filter(<myfilter>):
-            a.add_row(i)
-        a.render()
-    """
-    def __init__(self, model):
-        self.book = openpyxl.workbook.Workbook()
-        self.worksheet = self.book.active
-        self.worksheet.title = u"Export"
-
-        # Sqla inspector to iterate through the models columns
-        self.inspector = inspect(model)
-        self.headers = self._collect_headers()
-
-        self.keys = [h['name'] for h in self.headers]
-
-        self.rows = []
-
-    def _collect_headers(self):
-        """
-        Collect headers from the models attribute info col
-        """
-        res = []
-
-        columns = sorted(self.inspector.attrs, key=_creation_order)
-
-        for prop in columns:
-
-            info_dict = get_info_field(prop)
-            main_infos = info_dict.get('export', {})
-
-            infos = main_infos.get('excel', {})
-
-            if infos.get('exclude', False) or main_infos.get('exclude', False):
-                continue
-
-            title = info_dict.get('colanderalchemy', {}).get('title')
-
-            if title is not None and not main_infos.has_key('label'):
-                main_infos['label'] = title
-            main_infos.setdefault('label', prop.key)
-
-            main_infos['name'] = prop.key
-
-            main_infos.update(infos)
-
-            # We keep the original prop in case it's usefull
-            main_infos['__col__'] = prop
-
-            if isinstance(prop, RelationshipProperty) \
-               and not main_infos.has_key('related_key'):
-                print("Maybe there's missing some informations about a \
-relationship")
-                continue
-
-            res.append(main_infos)
-        return res
-
-    def add_row(self, obj):
-        """
-        fill a new row with the given obj
-
-            obj
-
-               instance of the exporter's model
-        """
-        row = []
-        for column in self.headers:
-
-            if isinstance(column['__col__'], ColumnProperty):
-                value = self._get_column_cell_val(obj, column)
-
-            elif isinstance(column['__col__'], RelationshipProperty):
-                value = self._get_relationship_cell_val(obj, column)
-
-            row.append(value)
-        self.rows.append(row)
-
-    def _get_formatted_val(self, obj, name, column):
-        val = getattr(obj, name)
-
-        formatter = column.get('formatter')
-        if formatter is None:
-            formatter = get_formatter_from_column(column['__col__'])
-
-        if formatter is not None:
-            val = formatter(val)
-        return val
-
-    def _get_relationship_cell_val(self, obj, column):
-        """
-        Return the value to insert in a relationship cell
-        """
-        name = column['name']
-        related_key = column.get('related_key', 'label')
-
-        related_obj = getattr(obj, name, None)
-
-        if related_obj is None:
-            return ""
-        if column['__col__'].uselist: # OneToMany
-            _vals = []
-            for rel_obj in related_obj:
-                _vals.append(
-                    self._get_formatted_val(rel_obj, related_key, column)
-                )
-            val = '\n'.join(_vals)
-        else:
-            val = self._get_formatted_val(related_obj, related_key, column)
-
-        return val
-
-    def _get_column_cell_val(self, obj, column):
-        """
-        Return a value of a "column" cell
-        """
-        name = column['name']
-        return self._get_formatted_val(obj, name, column)
-
-    def render(self):
-        """
-        Definitely render the workbook
-        """
-        self._render_headers()
-        self._render_rows()
-
-        return self.save_book()
-
-    def _render_rows(self):
-        """
-        Render the rows in the current stylesheet
-        """
-        for index, row in enumerate(self.rows):
-            row_number = index + 2
-            for col_num, value in enumerate(row):
-                cell = self.worksheet.cell(row=row_number, column=col_num + 1)
-                cell.value = value
-
-    def _render_headers(self):
-        """
-        Write the headers row
-        """
-        for index, col in enumerate(self.headers):
-            # We write the headers
-            cell = self.worksheet.cell(row=1, column=index + 1)
-            cell.value = col['label']
-
 
 def make_excel_view(filename_builder, factory):
     """
         Build an excel view of a model
         :param filename_builder: a callable that take the request as arg and
             return a filename
-        :param factory: the Excel factory that should be used to wrap the
+        :param factory: the Xls factory that should be used to wrap the
             request context the factory should provide a render method
             returning a file like object
     """

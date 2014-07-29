@@ -26,11 +26,10 @@
     Sage exports tools
 """
 from autonomie.views.render_api import format_amount
-from autonomie.utils.ascii import force_utf8
-from autonomie.export.csvtools import BaseCsvWriter
+from autonomie.export.csvtools import CsvExporter
 
 
-class SageCsvWriter(BaseCsvWriter):
+class SageCsvWriter(CsvExporter):
     """
         Write Sage csv files
         :param datas: The datas to export list of dict
@@ -42,26 +41,6 @@ class SageCsvWriter(BaseCsvWriter):
 
     def __init__(self):
         super(SageCsvWriter, self).__init__()
-
-    @property
-    def keys(self):
-        """
-        Return the keys configured in our headers
-        Those keys corresponds to the datas keys we ha
-        """
-        return [val for key, val in self.headers]
-
-    def format_row(self, row):
-        """
-            Format the row to fit our export
-        """
-        res_dict = {}
-        for key, name in self.headers:
-            val = row.get(key, '')
-            if hasattr(self, "format_%s" % key):
-                val = getattr(self, "format_%s" % key)(val)
-            res_dict[name] = force_utf8(val)
-        return res_dict
 
     @staticmethod
     def format_debit(debit):
@@ -87,19 +66,20 @@ class SageInvoiceCsvWriter(SageCsvWriter):
     Add the handling of the invoice prefix in invoice number formatting
     """
     headers = (
-            ('num_facture', "Numéro de pièce",),
-            ('code_journal', "Code Journal"),
-            ('date', "Date de pièce"),
-            ('compte_cg', "N° compte général"),
-            ('num_facture', "Numéro de facture"),
-            ('compte_tiers', "Numéro de compte tiers"),
-            ('code_tva', "Code taxe"),
-            ('libelle', "Libellé d’écriture"),
-            ('echeance', "Date d’échéance"),
-            ('debit', "Montant débit"),
-            ('credit', "Montant crédit"),
-            ('type_', "Type de ligne"),
-            ('num_analytique', "Numéro analytique"),)
+        {'name': 'num_facture', 'label': "Numéro de pièce",},
+        {'name': 'code_journal', 'label': "Code Journal"},
+        {'name': 'date', 'label': "Date de pièce"},
+        {'name': 'compte_cg', 'label': "N° compte général"},
+        {'name': 'num_facture', 'label': "Numéro de facture"},
+        {'name': 'compte_tiers', 'label': "Numéro de compte tiers"},
+        {'name': 'code_tva', 'label': "Code taxe"},
+        {'name': 'libelle', 'label': "Libellé d’écriture"},
+        {'name': 'echeance', 'label': "Date d’échéance"},
+        {'name': 'debit', 'label': "Montant débit"},
+        {'name': 'credit', 'label': "Montant crédit"},
+        {'name': 'type_', 'label': "Type de ligne"},
+        {'name': 'num_analytique', 'label': "Numéro analytique"},
+    )
 
     def set_prefix(self, prefix):
         """
@@ -119,15 +99,16 @@ class SageExpenseCsvWriter(SageCsvWriter):
     Expense CsvWriter
     """
     headers = (
-            ('num_feuille', "Numéro de pièce",),
-            ('code_journal', "Code Journal"),
-            ('date', "Date de pièce"),
-            ('compte_cg', "N° compte général"),
-            ('num_feuille', "Numéro de note de frais",),
-            ('compte_tiers', "Numéro de compte tiers"),
-            ('code_tva', "Code taxe"),
-            ('libelle', "Libellé d’écriture"),
-            ('debit', "Montant débit"),
-            ('credit', "Montant crédit"),
-            ('type_', "Type de ligne"),
-            ('num_analytique', "Numéro analytique"),)
+        {'name':'num_feuille', 'label': "Numéro de pièce",},
+        {'name':'code_journal', 'label': "Code Journal"},
+        {'name':'date', 'label': "Date de pièce"},
+        {'name':'compte_cg', 'label': "N° compte général"},
+        {'name':'num_feuille', 'label': "Numéro de note de frais",},
+        {'name':'compte_tiers', 'label': "Numéro de compte tiers"},
+        {'name':'code_tva', 'label': "Code taxe"},
+        {'name':'libelle', 'label': "Libellé d’écriture"},
+        {'name':'debit', 'label': "Montant débit"},
+        {'name':'credit', 'label': "Montant crédit"},
+        {'name':'type_', 'label': "Type de ligne"},
+        {'name':'num_analytique', 'label': "Numéro analytique"},
+    )

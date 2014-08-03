@@ -28,130 +28,75 @@
 import colander
 import logging
 
-from deform import widget
+from deform import widget as deform_widget
 
-from autonomie.views.forms.widgets import deferred_autocomplete_widget
-from autonomie.views.forms import main
-from autonomie.views.forms.widgets import DisabledInput
+from colanderalchemy import SQLAlchemySchemaNode
+
+from autonomie.models.customer import Customer
+from autonomie.models.project import (
+    Project,
+    deferred_customer_select,
+    deferred_customer_validator,
+    deferred_default_customer,
+)
 from autonomie.views.forms.lists import BaseListsSchema
 
 log = logging.getLogger(__name__)
 
 
-def build_customer_value(customer=None):
+def customer_objectify(id_):
     """
-        return the tuple for building customer select
+    Objectify the associated form node schema (an id schemanode)
+
+    Return the customer object with the given id_
+
+    Note :
+        colanderalchemy schemanode is to a model and provides a objectify method
+        used to convert an appstruct to the appropriate model.  For the
+        project->customer relationship, we need to be able to configure only
+        existing elements. Since we didn't found a clear way to do it with
+        colanderalchemy, we add the node manually and fit the colanderalchemy
+        way of working by implementing usefull methods (namely objectify and
+        dictify)
     """
-    if customer:
-        return (str(customer.id), customer.name)
-    else:
-        return ("0", u"Sélectionnez")
+    obj = Customer.get(id_)
+    return obj
 
 
-def build_customer_values(customers):
+def customer_dictify(obj):
     """
-        Build human understandable customer labels
-        allowing efficient discrimination
+    Return a representation of the current model, used to fill the associated
+    form node
     """
-    options = [build_customer_value()]
-    options.extend([build_customer_value(customer)
-                            for customer in customers])
-    return options
-
-def get_customers_from_request(request):
-    if request.context.__name__ == 'project':
-        customers = request.context.company.customers
-    elif request.context.__name__ == 'company':
-        customers = request.context.customers
-    else:
-        customers = []
-    return customers
-
-@colander.deferred
-def deferred_customer_list(node, kw):
-    request = kw['request']
-    customers = get_customers_from_request(request)
-    return deferred_autocomplete_widget(node,
-                        {'choices':build_customer_values(customers)})
-
-@colander.deferred
-def deferred_code_widget(node, kw):
-    if kw['request'].context.__name__ == 'project':
-        wid = DisabledInput()
-    else:
-        wid = widget.TextInputWidget(mask='****')
-    return wid
+    return obj.id
 
 
-@colander.deferred
-def deferred_default_customer(node, kw):
+def get_project_schema():
     """
-        Return the customer provided as request arg if there is one
+    Return the project Edition/add form schema
     """
-    request = kw['request']
-    customers = get_customers_from_request(request)
-    customer = request.params.get('customer')
-    if customer in [str(c.id) for c in customers]:
-        return [int(customer)]
-    else:
-        return colander.null
+    schema = SQLAlchemySchemaNode(Project)
 
+    # Add a custom node to be able to associate existing customers
+    customer_id_node = colander.SchemaNode(
+        colander.Integer(),
+        widget=deferred_customer_select,
+        validator=deferred_customer_validator,
+        default=deferred_default_customer,
+        name='un client'
+    )
+    customer_id_node.objectify = customer_objectify
+    customer_id_node.dictify = customer_dictify
 
-@colander.deferred
-def deferred_customer_validator(node, kw):
-    request = kw['request']
-    customers = get_customers_from_request(request)
-    customer_ids = [customer.id for customer in customers]
-    def customer_oneof(value):
-        if value in ("0", 0):
-            return u"Veuillez choisir un client"
-        elif value not in customer_ids:
-            return u"Entrée invalide"
-        return True
-    return colander.Function(customer_oneof)
-
-
-class CustomerSchema(colander.SequenceSchema):
-    customer_id = colander.SchemaNode(colander.Integer(),
-            title=u"Client",
-            widget=deferred_customer_list,
-            validator=deferred_customer_validator)
-
-
-class ProjectSchema(colander.MappingSchema):
-    """
-        Schema for project
-    """
-    name = colander.SchemaNode(colander.String(),
-            title=u"Nom du projet",
-            validator=colander.Length(max=150), css_class='pull-left')
-    code = colander.SchemaNode(colander.String(),
-            title=u"Code du projet",
-            widget=deferred_code_widget,
-            validator=colander.Length(4))
-    type = colander.SchemaNode(colander.String(),
-            title="Type de projet",
-            validator=colander.Length(max=150),
-            missing=u'')
-    definition = colander.SchemaNode(colander.String(),
-            widget=widget.TextAreaWidget(cols=80, rows=4),
-            title=u'Définition',
-            missing=u'')
-    startingDate = colander.SchemaNode(colander.Date(),
-            title=u"Date de début",
-            missing=u"",
-            widget=main.get_date_input())
-    endingDate = colander.SchemaNode(colander.Date(),
-            title=u"Date de fin",
-            missing=u"",
-            widget=main.get_date_input())
-    customers = CustomerSchema(
-            title=u"Clients",
-            widget=widget.SequenceWidget(
-                min_len=1,
-                add_subitem_text_template=u"Ajouter un client"),
-            default=deferred_default_customer)
-
+    schema.insert(3,
+        colander.SchemaNode(
+        colander.Sequence(),
+        customer_id_node,
+        widget=deform_widget.SequenceWidget(min_len=1),
+        title=u"Clients",
+        name='customers')
+    )
+    return schema
 
 class PhaseSchema(colander.MappingSchema):
     """
@@ -174,6 +119,6 @@ def get_list_schema():
         name='archived',
         missing="0",
         validator=colander.OneOf(('0', '1')),
-        widget=widget.HiddenWidget()))
+        widget=deform_widget.HiddenWidget()))
 
     return schema

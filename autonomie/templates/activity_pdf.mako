@@ -49,7 +49,7 @@
         <div class='text12'>Conseiller : ${', '.join([api.format_account(conseiller) for conseiller in activity.conseillers])}</div>
         <% companies = set() %>
         <div class='text12'>Participants :
-            % for user in activity.participants:
+            % for user in activity.sorted_participants:
                 ${api.format_account(user)} ( ${"'".join([c.name for c in user.companies])} )
                 % if not loop.last:
                     ,

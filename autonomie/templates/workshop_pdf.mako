@@ -35,9 +35,6 @@ Attendance sheet for a given timeslot (the current context)
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
     </head>
     <body>
-        <% config = request.config %>
-        <% timeslot = request.context %>
-        <% workshop = timeslot.workshop %>
         <img src="/assets/main/accompagnement_header.png" />
 
         % for index, i in enumerate(('info1', 'info2', 'info3')):
@@ -46,10 +43,17 @@ Attendance sheet for a given timeslot (the current context)
             % endif
         % endfor
 
-        % if timeslot.start_time.day == timeslot.end_time.day:
-            <h3>Émargement du ${api.format_date(timeslot.start_time)} de ${api.format_datetime(timeslot.start_time, timeonly=True)} à ${api.format_datetime(timeslot.end_time, timeonly=True)}</h3>
+        % if timeslots[0].start_time.day == timeslots[-1].end_time.day:
+            <h3>
+                Émargement du ${api.format_date(timeslots[0].start_time)}
+                de ${api.format_datetime(timeslots[0].start_time, timeonly=True)}
+                à ${api.format_datetime(timeslots[-1].end_time, timeonly=True)}
+            </h3>
         % else:
-            <h3>Émargement du ${api.format_datetime(timeslot.start_time)} au ${api.format_datetime(timeslot.end_time)}</h3>
+            <h3>
+                Émargement du ${api.format_datetime(timeslots[0].start_time)}
+                au ${api.format_datetime(timeslots[-1].end_time)}
+            </h3>
         % endif
         <div>
             <b>Nom du (des) formateur(s)</b> : ${' '.join(workshop.leaders)}&nbsp;&nbsp;&nbsp; <b>Signature(s)</b> :
@@ -72,14 +76,20 @@ Attendance sheet for a given timeslot (the current context)
                 <thead>
                     <tr>
                         <th class="description">Participants</th>
-                        <th class='price'>${timeslot.name}</th>
+                        % for timeslot in timeslots:
+                            <th class='price'>${timeslot.name}</th>
+                        % endfor
                     </tr>
                 </thead>
                 <tbody>
-                    % for participant in participants:
+                    % for user in participants:
                         <tr>
-                            <td>${api.format_account(participant)}</td>
-                            <td><br /></td>
+                            <td>
+                                ${api.format_account(user)} ( ${"'".join([c.name for c in user.companies])} )
+                            </td>
+                            % for timeslot in timeslots:
+                                <td><br /></td>
+                            % endfor
                         </tr>
                     % endfor
                 </tbody>

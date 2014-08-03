@@ -46,7 +46,9 @@ from autonomie.utils.avatar import get_avatar
 from autonomie.utils.renderer import set_deform_renderer
 from autonomie.utils.renderer import set_json_renderer
 from autonomie.utils.session import get_session_factory
-from autonomie.utils.deform_bootstrap_fix import add_resources_to_registry
+from autonomie.utils.deform_bootstrap_fix import (
+    add_resources_to_registry,
+)
 
 
 AUTONOMIE_MODULES = (

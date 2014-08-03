@@ -27,7 +27,6 @@
 """
 import logging
 import datetime
-
 from sqlalchemy import (
     Table,
     Integer,
@@ -51,6 +50,7 @@ from autonomie.models.base import (
     default_table_args,
     )
 from autonomie.models.node import Node
+from autonomie.models.widgets import EXCLUDED
 
 
 log = logging.getLogger(__name__)
@@ -117,7 +117,12 @@ class Attendance(DBBASE):
     )
     user = relationship(
         "User",
-        backref=backref('event_attendances', cascade='all, delete-orphan')
+        backref=backref(
+            'event_attendances',
+            cascade='all, delete-orphan',
+            info={'colanderalchemy':EXCLUDED},
+        ),
+        info={'colanderalchemy':EXCLUDED},
     )
 
     # Used as default creator function by the association_proxy
@@ -142,6 +147,13 @@ class Event(Node):
     status = Column(String(15), default='planned')
 
     participants = association_proxy('attendances', 'user')
+
+    # Waiting for a way to declare order_by clause in an association_proxy
+    @property
+    def sorted_participants(self):
+        p = self.participants
+        p = sorted(p, key=lambda u:u.lastname)
+        return p
 
     def user_status(self, user_id):
         """
@@ -191,15 +203,15 @@ class Activity(Event):
     subaction_id = Column(ForeignKey('activity_action.id'))
     mode = Column(String(100))
     # Libellé pour la sortie pdf
-    action_label = Column(String(125), default="")
-    subaction_label = Column(String(125), default="")
+    #action_label = Column(String(125), default="")
+    #subaction_label = Column(String(125), default="")
     # Champ text multiligne pour les activités
     point = deferred(Column(Text()), group='edit')
     objectifs = deferred(Column(Text()), group='edit')
     action = deferred(Column(Text()), group='edit')
     documents = deferred(Column(Text()), group='edit')
     notes = deferred(Column(Text()), group='edit')
-    duration = deferred(Column(String(6), default='0h'), group='edit')
+    duration = deferred(Column(Integer, default=0), group='edit')
 
     type_object = relationship(
             "ActivityType",
@@ -209,7 +221,12 @@ class Activity(Event):
     conseillers = relationship(
         'User',
         secondary=ACTIVITY_CONSEILLER,
-        backref=backref('activities', order_by='Activity.datetime')
+        backref=backref(
+            'activities',
+            order_by='Activity.datetime',
+            info={'colanderalchemy':EXCLUDED},
+        ),
+        info={'colanderalchemy':EXCLUDED},
     )
     action_label_obj = relationship(
             "ActivityAction",

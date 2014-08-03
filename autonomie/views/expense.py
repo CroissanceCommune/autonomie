@@ -33,9 +33,9 @@ import traceback
 from deform import Form
 from pyramid.security import has_permission
 from pyramid.httpexceptions import (
-        HTTPFound,
-        HTTPTemporaryRedirect,
-        )
+    HTTPFound,
+    HTTPTemporaryRedirect,
+)
 
 from autonomie.exception import Forbidden
 from autonomie.views.forms.expense import (
@@ -60,32 +60,32 @@ from autonomie.models.treasury import (
     Communication,
 )
 from autonomie.events.expense import StatusChanged
-from autonomie.views.base import BaseView
+from autonomie.views import BaseView
 from autonomie.views.render_api import (
-        month_name,
-        format_account,
-        )
-from autonomie.utils.rest import (
-        Apiv1Resp,
-        RestError,
-        RestJsonRepr,
-        add_rest_views,
-        make_redirect_view,
+    month_name,
+    format_account,
 )
-from autonomie.utils.views import submit_btn
+from autonomie.utils.rest import (
+    Apiv1Resp,
+    RestError,
+    RestJsonRepr,
+    add_rest_views,
+    make_redirect_view,
+)
 from autonomie.utils.widgets import (
-        Submit,
-        PopUp,
-        ViewLink,
-        )
+    Submit,
+    PopUp,
+    ViewLink,
+)
 from autonomie.export.excel import (
-        make_excel_view,
-        ExcelExpense,
-        )
+    make_excel_view,
+    XlsExpense,
+)
 from autonomie.views.forms import (
-        merge_session_with_post,
-        BaseFormView,
-        )
+    merge_session_with_post,
+    BaseFormView,
+    submit_btn,
+)
 from autonomie.resources import expense_js
 
 
@@ -499,9 +499,6 @@ perdues) ?")
         # Here we override the form counter to avoid field ids conflict
         form.counter = self.period_form.counter
         form.set_appstruct(self.request.context.appstruct())
-        # Ici on spécifie un template qui permet de rendre nos boutons de
-        # formulaires
-        form.widget.template = "autonomie:deform_templates/form.pt"
         btn = ViewLink(u"Revenir à la liste", "view", path="company_expenses",
                 id=self.request.context.company.id)
         self.request.actionmenu.add(btn)
@@ -990,8 +987,8 @@ def includeme(config):
         xhr=True,
         renderer="json")
 
-    # Excel export
-    config.add_view(make_excel_view(excel_filename, ExcelExpense),
+    # Xls export
+    config.add_view(make_excel_view(excel_filename, XlsExpense),
             route_name="expensexlsx")
 
     # Rest interface

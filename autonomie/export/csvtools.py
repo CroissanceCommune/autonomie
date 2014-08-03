@@ -29,116 +29,126 @@
 """
 import csv
 import cStringIO as StringIO
-import sys
 
-from autonomie.utils.sqla import get_columns
-from autonomie.utils.ascii import (
-        force_ascii,
-        force_utf8,
-        )
-
-
-if sys.version_info[:2] == (2, 6):
-    # backport a function from current Python versions into Python 2.6
-    def writeheader(self):
-        header = dict(zip(self.fieldnames, self.fieldnames))
-        self.writerow(header)
-    csv.DictWriter.writeheader = writeheader
+from autonomie.utils.ascii import force_utf8
+from autonomie.export.base import (
+    BaseExporter,
+    SqlaExporter,
+)
 
 
 CSV_DELIMITER = ';'
 CSV_QUOTECHAR = '"'
 
 
-def get_column_label(column):
+class CsvWriter(object):
     """
-        Return the label of a column
+    A base csv writer
     """
-    return force_utf8(column.info.get('label', column.name))
-
-
-def should_be_exported(column):
-    """
-        Check if the column should be part of the export
-        Default True
-        Add info['options']['csv_exclude'] to avoid the export of the given
-        field
-    """
-    return not column.info.get('options', {}).has_key('csv_exclude')
-
-
-def collect_headers(model):
-    """
-        Return the different column keys
-    """
-    for column in get_columns(model):
-        if should_be_exported(column):
-            yield column.name, get_column_label(column)
-
-
-class BaseCsvWriter(object):
-    keys = []
     delimiter = CSV_DELIMITER
     quotechar = CSV_QUOTECHAR
-
-    def __init__(self, datas=None):
-        self._datas = []
-        if datas is not None:
-            for data in datas:
-                self.add_row(data)
-
-    def set_datas(self, datas):
-        """
-        Set the rows of our current csv output
-        """
-        for data in datas:
-            self.add_row(data)
-
-    @staticmethod
-    def format_row(row):
-        """
-        Row formatter, should be implemented in subclasses
-        """
-        return row
-
-    def add_row(self, row):
-        """
-            Add a row to our buffer
-        """
-        self._datas.append(self.format_row(row))
 
     def render(self):
         """
             Write to the dest buffer
         """
+        headers = getattr(self, 'headers', ())
+
+        keys = [force_utf8(header['label']) for header in headers]
         f_buf = StringIO.StringIO()
-        outfile = csv.DictWriter(f_buf,
-                                 self.keys,
-                                 delimiter=self.delimiter,
-                                 quotechar=self.quotechar,
-                                 quoting=csv.QUOTE_ALL)
+        outfile = csv.DictWriter(
+            f_buf,
+            keys,
+            extrasaction='ignore',
+            delimiter=self.delimiter,
+            quotechar=self.quotechar,
+            quoting=csv.QUOTE_ALL,
+        )
         outfile.writeheader()
-        outfile.writerows(self._datas)
+        _datas = getattr(self, '_datas', ())
+        outfile.writerows(_datas)
         return f_buf
-
-
-class SqlaToCsvWriter(BaseCsvWriter):
-    """
-        Render a sqla model as a csv file buffer
-        :param model: our model class
-    """
-    def __init__(self, model):
-        super(SqlaToCsvWriter, self).__init__()
-        self.model = model
-        self.headers = list(collect_headers(self.model))
-        self.keys = [name for key, name in self.headers]
 
     def format_row(self, row):
         """
-            restrict the dictionnary to the current fieldnames
+        Format the row to fit our export switch the key used to store it in the
+        dict
+
+        since csv writer is expecting dict with keys matching the headers' names
+        we switch the name the attributes fo the row are stored using labels
+        instead of names
         """
-        ret = {}
-        for key, name in self.headers:
-            value = row.get(key, '')
-            ret[name] = force_utf8(value)
-        return ret
+        res_dict = {}
+        headers = getattr(self, 'headers', [])
+        for header in headers:
+            name, label = header['name'], header['label']
+            val = row.get(name, '')
+            if hasattr(self, "format_%s" % name):
+                val = getattr(self, "format_%s" % name)(val)
+            res_dict[label] = force_utf8(val)
+        return res_dict
+
+
+class SqlaCsvExporter(CsvWriter, SqlaExporter):
+    """
+    Main class used for exporting a SQLAlchemy model to a csv format
+
+    Models attributes output can be customized through the info param :
+
+        Column(Integer, infos={'export':
+            {'csv': <csv specific options>,
+            <main_export_options>
+            }
+        })
+
+    main_export_options and csv_specific_options can be :
+
+        label
+
+            label of the column header
+
+        format
+
+            a function that will be fired on each row to format the output
+
+        related_key
+
+            If the attribute is a relationship, the value of the given attribute
+            of the related object will be used to fill the cells
+
+        exclude
+
+            This data will not be inserted in the export if True
+
+    Usage:
+
+        a = SqlaCsvWriter(MyModel)
+        for i in MyModel.query().filter(<myfilter>):
+            a.add_row(i)
+        a.render()
+
+    """
+    config_key = 'csv'
+
+    def __init__(self, model):
+        CsvWriter.__init__(self)
+        SqlaExporter.__init__(self, model)
+
+
+class CsvExporter(CsvWriter, BaseExporter):
+    """
+    A common csv writer to be subclassed
+    Set a header attribute and use it
+
+    class MyCsvExporter(CsvExporter):
+        headers = ({'name': 'key', 'label': u'Ma colonne 1'}, ...)
+
+    writer = MyCsvExporter()
+    writer.add_row({'key': u'La valeur de la cellule de la colonne 1'})
+    writer.render().read()
+    """
+    headers = ()
+
+    def __init__(self):
+        CsvWriter.__init__(self)
+        BaseExporter.__init__(self)

@@ -30,9 +30,6 @@
         simple view, add_phase, edit, ...
 """
 import logging
-from colorsys import hsv_to_rgb
-from random import uniform
-
 from sqlalchemy import or_
 from webhelpers.html.builder import HTML
 from deform import Form
@@ -42,57 +39,44 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.project import (
-        Project,
-        Phase,
-        )
+    Project,
+    Phase,
+    FORM_GRID,
+)
 from autonomie.models.customer import Customer
-from autonomie.views.files import FileUploadView
+from autonomie.utils.colors import COLORS_SET
 from autonomie.utils.widgets import (
-        ViewLink,
-        ToggleLink,
-        ItemActionLink,
-        StaticWidget,
-        PopUp,
-        )
-from autonomie.utils.views import submit_btn
+    ViewLink,
+    ToggleLink,
+    ItemActionLink,
+    StaticWidget,
+    PopUp,
+)
+from autonomie.views.forms.widgets import GridFormWidget
 from autonomie.views.forms import (
-        merge_session_with_post,
-        BaseFormView,
-        )
-from autonomie.views.files import get_add_file_link
+    BaseFormView,
+    submit_btn,
+)
 from autonomie.views.forms.project import (
-        get_list_schema,
-        ProjectSchema,
-        )
+    get_list_schema,
+    get_project_schema,
+)
 from autonomie.views import BaseListView
+from autonomie.views.files import (
+    FileUploadView,
+    get_add_file_link,
+)
 
 log = logging.getLogger(__name__)
-
-
-def rgb_to_hex(rgb):
-    """
-        return an hexadecimal version of the rgb tuple
-        for css rendering
-    """
-    return '#%02x%02x%02x' % rgb
-
-
-def get_color():
-    """
-        return a random color
-    """
-    h = uniform(0.1, 0.8)
-    s = uniform(0.8, 1)
-    v = uniform(0.8, 1)
-    return rgb_to_hex(tuple(255 * c for c in hsv_to_rgb(h, s, v)))
 
 
 def get_project_form(request):
     """
         Returns the project add/edit form
     """
-    schema = ProjectSchema().bind(request=request)
+    schema = get_project_schema().bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
+    form.widget = GridFormWidget(grid=FORM_GRID)
     return form
 
 
@@ -142,7 +126,11 @@ class ProjectsList(BaseListView):
         if search:
             query = query.filter(
                 or_(Project.name.like("%" + search + "%"),
-                    Project.customers.any(Customer.name.like("%" + search + "%"))))
+                    Project.customers.any(
+                        Customer.name.like("%" + search + "%")
+                    )
+                   )
+            )
         return query
 
     def populate_actionmenu(self, appstruct):
@@ -263,36 +251,59 @@ def project_view(request):
     """
     populate_actionmenu(request, request.context)
     phases = request.context.phases
+    index = 0
+
     for phase in phases:
         for estimation in phase.estimations:
-            estimation.color = get_color()
-    for phase in phases:
+            estimation.color = COLORS_SET[index]
+            index += 1
+
         for invoice in phase.invoices:
             if invoice.estimation:
                 invoice.color = invoice.estimation.color
             else:
-                invoice.color = get_color()
-    for phase in phases:
+                invoice.color = COLORS_SET[index]
+                index += 1
+
         for cancelinvoice in phase.cancelinvoices:
             if cancelinvoice.invoice:
                 cancelinvoice.color = cancelinvoice.invoice.color
             else:
-                cancelinvoice.color = get_color()
-    title = u"Projet : {0} ({1})".format(request.context.name,
-            ", ".join((customer.name for customer in request.context.customers)))
+                cancelinvoice.color = COLORS_SET[index]
+                index += 1
+
+    # We get the latest used task and so we get the latest used phase
+    all_tasks = []
+    for phase in phases:
+        all_tasks.extend(phase.tasks)
+    all_tasks.sort(key=lambda task:task.statusDate, reverse=True)
+
+    if all_tasks:
+        latest_phase = all_tasks[0].phase
+    else:
+        latest_phase = 0
+
+    customer_names = (customer.name for customer in request.context.customers)
+    title = u"Projet : {0} ({1})".format(
+        request.context.name,
+        ", ".join(customer_names)
+    )
     return dict(title=title,
                 project=request.context,
-                company=request.context.company)
+                company=request.context.company,
+                latest_phase=latest_phase)
 
 
 class ProjectAdd(BaseFormView):
     add_template_vars = ('title',)
     title = u"Ajout d'un nouveau projet"
-    schema = ProjectSchema()
+    schema = get_project_schema()
     buttons = (submit_btn,)
+    validation_msg = u"Le projet a été ajouté avec succès"
 
     def before(self, form):
         populate_actionmenu(self.request)
+        form.widget = GridFormWidget(grid=FORM_GRID)
         # If there's no customer, redirect to customer view
         if len(self.request.context.customers) == 0:
             redirect_to_customerslist(self.request, self.request.context)
@@ -301,57 +312,40 @@ class ProjectAdd(BaseFormView):
         """
             Add a project with a default phase in the database
         """
-        project = Project()
-        project.company_id = self.request.context.id
-        customer_ids = appstruct.pop("customers", [])
-        project = merge_session_with_post(project, appstruct)
-        for customer_id in customer_ids:
-            customer = Customer.get(customer_id)
-            if customer:
-                project.customers.append(customer)
-        self.dbsession.add(project)
+        if self.context.__name__ == 'company':
+            # It's an add form
+            model = self.schema.objectify(appstruct)
+            model.company = self.context
+
+            # Add a default phase to the project
+            default_phase = Phase()
+            model.phases.append(default_phase)
+
+            self.dbsession.add(model)
+        else:
+            # It's an edition one
+            model = self.schema.objectify(appstruct, self.context)
+            model = self.dbsession.merge(model)
+
         self.dbsession.flush()
-        # Add a default phase to the project
-        default_phase = Phase()
-        default_phase.project = project
-        self.dbsession.add(default_phase)
-        message = u"Le projet <b>{0}</b> a été ajouté avec succès".format(
-                                                                project.name)
-        self.request.session.flash(message)
-        return HTTPFound(self.request.route_path('project', id=project.id))
+
+        self.session.flash(self.validation_msg)
+        return HTTPFound(
+            self.request.route_path(
+                'project',
+                id=model.id
+            )
+        )
 
 
-class ProjectEdit(BaseFormView):
+class ProjectEdit(ProjectAdd):
     add_template_vars = ('title', 'project',)
-    schema = ProjectSchema()
-    buttons = (submit_btn,)
 
-    def before(self, form):
+    def appstruct(self):
         """
-            populate the form with the current datas
+        Populate the form with the current edited context (customer)
         """
-        appstruct = self.request.context.appstruct()
-        appstruct['customers'] = [c.id for c in self.request.context.customers]
-        form.set_appstruct(appstruct)
-        populate_actionmenu(self.request, self.request.context)
-
-    def submit_success(self, appstruct):
-        """
-            Flush project edition to the database
-        """
-        customer_ids = appstruct.pop("customers", [])
-        project = merge_session_with_post(self.request.context, appstruct)
-        project.customers = []
-        for customer_id in customer_ids:
-            customer = Customer.get(customer_id)
-            if customer is not None:
-                project.customers.append(customer)
-        self.dbsession.merge(project)
-        self.dbsession.flush()
-        message = u"Le projet <b>{0}</b> a été édité avec succès".format(
-                                                                  project.name)
-        self.request.session.flash(message)
-        return HTTPFound(self.request.route_path('project', id=project.id))
+        return self.schema.dictify(self.request.context)
 
     @reify
     def title(self):

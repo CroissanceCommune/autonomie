@@ -34,6 +34,7 @@ from pkg_resources import resource_filename
 
 from pyramid.renderers import render
 from pyramid.renderers import JSON
+from pyramid.threadlocal import get_current_request
 
 from deform.form import Form
 from deform.template import ZPTRendererFactory
@@ -72,6 +73,8 @@ class MultiRendererFactory(object):
             chameleon by default mako if not
         """
         if os.path.splitext(template_name)[1] == "":
+            if "request" not in kw:
+                kw['request'] = get_current_request()
             return self.default_renderer(template_name, **kw)
         else:
             return render(template_name, kw)
@@ -82,6 +85,7 @@ def set_deform_renderer():
         Returns a deform renderer allowing translation and multi-rendering
     """
     deform_template_dirs = (
+        resource_filename('autonomie', 'templates/deform'),
         resource_filename('deform_bootstrap', 'templates/'),
         resource_filename('deform', 'templates/'),
         )

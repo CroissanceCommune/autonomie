@@ -28,20 +28,30 @@
 import os
 import logging
 
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import deferred
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import (
+    relationship,
+    deferred,
+    backref,
+)
 
+from autonomie.models import widgets
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.types import CustomDateType
-from autonomie.models.types import CustomFileType
+from autonomie.models.types import (
+    CustomDateType,
+    CustomFileType,
+)
 
-from autonomie.models.base import DBBASE
-from autonomie.models.base import DBSESSION
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    DBBASE,
+    DBSESSION,
+    default_table_args,
+)
 
 log = logging.getLogger(__name__)
 
@@ -55,40 +65,127 @@ class Company(DBBASE):
     __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(150))
-    goal = deferred(Column("object", String(255)),
-            group='edit')
-    email = deferred(Column("email", String(255)),
-            group='edit')
-    phone = deferred(Column("phone", String(20), default=""),
-            group='edit')
-    mobile = deferred(Column("mobile", String(20)),
-            group='edit')
-    comments = deferred(Column("comments", Text),
-            group='edit')
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
-    active = deferred(Column("active", String(1), default="Y"))
-    logo = deferred(Column("logo", CustomFileType("logo_", 255)),
-            group='edit')
-    header = deferred(Column("header", CustomFileType("header_", 255)),
-            group='edit')
-    logoType = deferred(Column("logoType", String(255)))
-    headerType = deferred(Column("headerType", String(255)))
-    RIB = deferred(Column("RIB", String(255)),
-            group='edit')
-    IBAN = deferred(Column("IBAN", String(255)),
-            group='edit')
-    customers = relationship("Customer",
-                            order_by="Customer.code",
-                            backref='company')
-    projects = relationship("Project",
-                            order_by="Project.id",
-                            backref="company")
-    code_compta = deferred(Column(String(30), default=0), group="edit")
-    contribution = deferred(Column(Integer), group='edit')
+    goal = deferred(
+        Column(
+            "object",
+            String(255)
+        ),
+        group='edit'
+    )
+    email = deferred(
+        Column(
+            "email",
+            String(255)
+        ),
+        group='edit'
+    )
+    phone = deferred(
+        Column(
+            "phone",
+            String(20),
+            default=""
+        ),
+        group='edit'
+    )
+    mobile = deferred(
+        Column(
+            "mobile",
+            String(20)
+        ),
+        group='edit'
+    )
+    comments = deferred(
+        Column(
+            "comments",
+            Text
+        ),
+        group='edit'
+    )
+    creationDate = deferred(
+        Column(
+            "creationDate",
+            CustomDateType,
+            default=get_current_timestamp
+        )
+    )
+    updateDate = deferred(
+        Column(
+            "updateDate",
+            CustomDateType,
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp
+        )
+    )
+    active = deferred(
+        Column(
+            "active",
+            String(1),
+            default="Y")
+    )
+    logo = deferred(
+        Column(
+            "logo",
+            CustomFileType("logo_", 255)
+        ),
+        group='edit'
+    )
+    header = deferred(
+        Column(
+            "header",
+            CustomFileType("header_", 255)
+        ),
+        group='edit'
+    )
+    logoType = deferred(
+        Column(
+            "logoType",
+            String(255)
+        )
+    )
+    headerType = deferred(
+        Column(
+            "headerType",
+            String(255)
+        )
+    )
+    RIB = deferred(
+        Column(
+            "RIB",
+            String(255)
+        ),
+        group='edit'
+    )
+    IBAN = deferred(
+        Column(
+            "IBAN",
+            String(255)
+        ),
+        group='edit'
+    )
+    customers = relationship(
+        "Customer",
+        order_by="Customer.code",
+        backref=backref(
+            'company',
+            info={'colanderalchemy': widgets.EXCLUDED},
+        )
+    )
+    projects = relationship(
+        "Project",
+        order_by="Project.id",
+        backref=backref("company", info={'colanderalchemy': widgets.EXCLUDED}),
+    )
+    code_compta = deferred(
+        Column(
+            String(30),
+            default=0
+        ),
+        group="edit",
+    )
+    contribution = deferred(
+        Column(Integer),
+        group='edit'
+    )
 
     def get_path(self):
         """

@@ -28,6 +28,153 @@
 <%namespace file="base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='content'>
+<%def name="action_cell(task, view_url)">
+    <% pdf_url = request.route_path(\
+        task.type_,
+        id=task.id, \
+        _query=dict(view="pdf")) %>
+    <% del_url = request.route_path(\
+        task.type_,
+        id=task.id,
+        _query=dict(action="delete")) %>
+    <td style="text-align:right">
+        ${table_btn(view_url, \
+        u"Voir/Modifier", \
+        u"Voir/éditer ce devis", \
+        u"icon-pencil")}
+
+        ${table_btn( \
+        pdf_url,
+        u"PDF", \
+        u"Télécharger la version PDF", \
+        u"icon-file")}
+        %if task.is_deletable(request):
+            ${table_btn(request.route_path(\
+            "estimation", \
+            id=task.id, \
+            _query=dict(action="delete")), \
+            u"Supprimer", \
+            u"Supprimer le devis", \
+            icon="icon-trash", \
+            onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
+        %endif
+    </td>
+</%def>
+
+<%def name="estimation_row(task)">
+<tr>
+    <td>
+        % if task.invoices:
+            <div
+                style="background-color:${task.color};\
+                width:10px;">
+                <br />
+            </div>
+        % endif
+    </td>
+    <% view_url = request.route_path(task.type_, id=task.id) %>
+
+        <td
+            class='rowlink hidden-phone'
+            onclick="document.location='${view_url}'">
+            ${task.name}
+        </td>
+        <td
+            class='rowlink hidden-phone'
+            onclick="document.location='${view_url}'">
+        %if task.is_cancelled():
+            <span class="label label-important">
+                <i class="icon-white icon-remove"></i>
+            </span>
+        %elif task.is_draft():
+            <i class='icon icon-bold'></i>
+        %elif task.CAEStatus == 'geninv':
+            <i class='icon icon-tasks'></i>
+        %elif task.is_waiting():
+            <i class='icon icon-time'></i>
+        %endif
+        ${api.format_status(task)}
+    </td>
+    ${action_cell(task, view_url)}
+</tr>
+</%def>
+<%def name='invoice_row(task)'>
+    <% view_url = request.route_path(task.type_, id=task.id) %>
+<tr>
+    <td>
+        % if task.cancelinvoice or task.estimation:
+            <div
+                style="background-color:${task.color};\
+                width:10px;">
+                <br />
+            </div>
+        % endif
+    </td>
+    <td
+        onclick="document.location='${view_url}'"
+        class='rowlink'>
+        ${request.config.get('invoiceprefix')}${task.officialNumber}
+    </td>
+    <td
+        onclick="document.location='${view_url}'"
+        class='rowlink hidden-phone'>
+        ${task.name}
+    </td>
+    <td
+        onclick="document.location='${view_url}'"
+        class='rowlink hidden-phone'>
+        %if task.is_cancelled():
+            <span class="label label-important">
+                <i class="icon-white icon-remove"></i>
+            </span>
+        %elif task.is_resulted():
+            <i class='icon icon-ok'></i>
+        %elif task.is_draft():
+            <i class='icon icon-bold'></i>
+        %elif task.is_waiting():
+            <i class='icon icon-time'></i>
+        %endif
+        ${api.format_status(task)}
+    </td>
+    ${action_cell(task, view_url)}
+</tr>
+</%def>
+<%def name='cancelinvoice_row(task)'>
+    <% view_url = request.route_path(task.type_, id=task.id) %>
+<tr>
+    <td>
+        <div
+            style="background-color:${task.color};\
+            width:10px;">
+            <br />
+        </div>
+    </td>
+    <td
+        onclick="document.location='${view_url}'"
+        class='rowlink'>
+    ${request.config.get('invoiceprefix')}${task.officialNumber}
+    % if task.invoice:
+        (lié à la facture ${request.config.get('invoiceprefix')}${task.invoice.officialNumber})
+    % endif
+    </td>
+    <td
+        onclick="document.location='${view_url}'"
+        class='rowlink'>
+        ${task.name}
+    </td>
+    <td
+        onclick="document.location='${view_url}'"
+        class='rowlink'>
+        %if task.is_valid():
+            <i class='icon icon-ok'></i>
+        %elif task.is_draft():
+            <i class='icon icon-bold'></i>
+        %endif
+        ${api.format_status(task)}</td>
+        ${action_cell(task, view_url)}
+</tr>
+</%def>
+
 <div class='row-fluid collapse' id='project-addphase'>
     <div class='span4 offset4'>
         <h3>Ajouter une phase</h3>
@@ -84,28 +231,48 @@
     </div>
 </div>
 <div class='row-fluid'>
-    %if len(project.phases)>1:
-        <% section_css = 'collapse' %>
-    %else:
-        <% section_css = 'in collapse' %>
-    %endif
+    <div class='accordion' id='phase_accordion'>
     %for phase in project.phases:
-        % if not phase.is_default():
-            <div class='section-header'>
-                <a href="#" data-toggle='collapse' data-target='#phase_${phase.id}'>
-                    <div>
-                        <i style="vertical-align:middle" class="icon-folder-open"></i>&nbsp;${phase.name}
-                    </div>
-                </a>
-            </div>
-             <div class="section-content ${section_css}" id='phase_${phase.id}'>
+        % if len(project.phases) > 1:
+            %if phase == latest_phase:
+                <% section_css = 'in collapse' %>
+            %else:
+                <% section_css = 'collapse' %>
+            %endif
+                <div class='accordion-group'>
+                    <div class='accordion-heading section-header'>
+                    <a href="#phase_${phase.id}"
+                        data-toggle='collapse'
+                        data-parent='#phase_accordion'
+                        class='accordion-toggle'>
+                        <div>
+                            <%
+if phase.is_default():
+    label = u"Phase par défaut"
+else:
+    label = phase.name
+%>
+                            <i style="vertical-align:middle"
+                                class="icon-folder-open">
+                            </i>&nbsp;${label}
+                        </div>
+                    </a>
+                </div>
+                <div class="accordion-body ${section_css}"
+                    id='phase_${phase.id}'>
+                    <div class='accordion-inner'>
         % else:
-             <div class="section-content" id='phase_${phase.id}'>
+            <div class='accordion'>
+                <div class='accordion-group'>
+                <div class="accordion-body" id='phase_${phase.id}'>
+                    <div class=''>
         % endif
+
         <h3 class='pull-left' style="padding-right:10px;">Devis</h3>
         <a class='btn' href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>Nouveau devis
         </a>
+
         % if  phase.estimations:
             <table class='table table-striped table-condensed'>
                 <thead>
@@ -115,50 +282,28 @@
                     <th style="text-align:center">Action</th>
                 </thead>
                 %for task in phase.estimations:
-                    <tr>
-                        <td>
-                            % if task.invoices:
-                                <div style="background-color:${task.color};width:10px;">
-                                    <br />
-                                </div>
-                            % endif
-                        </td>
-                        <% task.url = request.route_path("estimation", id=task.id) %>
-                        <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">${task.name}</td>
-                        <td class='rowlink hidden-phone' onclick="document.location='${task.url}'">
-                            %if task.is_cancelled():
-                                <span class="label label-important">
-                                    <i class="icon-white icon-remove"></i>
-                                </span>
-                            %elif task.is_draft():
-                                <i class='icon icon-bold'></i>
-                            %elif task.CAEStatus == 'geninv':
-                                <i class='icon icon-tasks'></i>
-                            %elif task.is_waiting():
-                                <i class='icon icon-time'></i>
-                            %endif
-                            ${api.format_status(task)}
-                        </td>
-                        <td style="text-align:right">
-                            ${table_btn(task.url, u"Voir/Modifier", u"Voir/éditer ce devis", u"icon-pencil")}
-                            ${table_btn(request.route_path("estimation", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
-                            %if task.is_deletable(request):
-                                ${table_btn(request.route_path("estimation", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer le devis", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
-                            %endif
-                        </td>
-                    </tr>
+                    ${estimation_row(task)}
                 %endfor
             </table>
         % else:
             <div style='clear:both'>Aucun devis n'a été créé
-            % if not phase.is_default():
+                % if len(project.phases) > 1:
                 dans cette phase
             % endif
             </div>
         %endif
-        <h3 class='pull-left' style='padding-right:10px;font-weight:100;'>Facture(s)</h3>
-        <a class='btn' href='${request.route_path("project_invoices", id=project.id, _query=dict(phase=phase.id))}'>
-            <span class='ui-icon ui-icon-plusthick'></span>Nouvelle facture
+
+        <h3 class='pull-left'
+            style='padding-right:10px;font-weight:100;'>
+            Facture(s)
+        </h3>
+        <a class='btn'
+            href='${request.route_path(\
+            "project_invoices", \
+            id=project.id, \
+            _query=dict(phase=phase.id))}'>
+            <span class='ui-icon ui-icon-plusthick'></span>
+            Nouvelle facture
         </a>
         %if phase.invoices:
             <table class='table table-striped table-condensed'>
@@ -170,82 +315,24 @@
                     <th style="text-align:center">Action</th>
                 </thead>
                 %for task in phase.invoices:
-                    <tr>
-                        <td>
-                            % if task.cancelinvoice or task.estimation:
-                                <div style="background-color:${task.color};width:10px;">
-                                    <br />
-                                </div>
-                            % endif
-                        </td>
-                        <% task.url = request.route_path("invoice", id=task.id) %>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>
-                            ${request.config.get('invoiceprefix')}${task.officialNumber}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>${task.name}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink hidden-phone'>
-                            %if task.is_cancelled():
-                                <span class="label label-important">
-                                    <i class="icon-white icon-remove"></i>
-                                </span>
-                            %elif task.is_resulted():
-                                <i class='icon icon-ok'></i>
-                            %elif task.is_draft():
-                                <i class='icon icon-bold'></i>
-                            %elif task.is_waiting():
-                                <i class='icon icon-time'></i>
-                            %endif
-                            ${api.format_status(task)}
-                        </td>
-                        <td style="text-align:right">
-                            ${table_btn(task.url, u"Voir/Modifier", u"Voir/éditer cette facture", u"icon-pencil")}
-                            ${table_btn(request.route_path("invoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
-                            % if task.is_deletable(request):
-                                ${table_btn(request.route_path("invoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer la facture", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
-                            % endif
-                        </td>
-                    </tr>
+                    ${invoice_row(task)}
                 %endfor
                 % for task in phase.cancelinvoices:
-                    <tr>
-                        <td>
-                            <div style="background-color:${task.color};width:10px;">
-                                <br />
-                            </div>
-                        </td>
-                        <% task.url = request.route_path("cancelinvoice", id=task.id) %>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>
-                            ${request.config.get('invoiceprefix')}${task.officialNumber}
-                            % if task.invoice:
-                                (lié à la facture ${request.config.get('invoiceprefix')}${task.invoice.officialNumber})
-                            % endif
-                        </td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>${task.name}</td>
-                        <td onclick="document.location='${task.url}'" class='rowlink'>
-                            %if task.is_valid():
-                                <i class='icon icon-ok'></i>
-                            %elif task.is_draft():
-                                <i class='icon icon-bold'></i>
-                            %endif
-                            ${api.format_status(task)}</td>
-                        <td style="text-align:right">
-                            ${table_btn(task.url, u"Voir/Modifier", u"Voir/éditer cet avoir", u"icon-pencil")}
-                            ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(view="pdf")), u"PDF", u"Télécharger la version PDF", u"icon-file")}
-                            %if task.is_deletable(request):
-                                ${table_btn(request.route_path("cancelinvoice", id=task.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer l'avoir", icon="icon-trash", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
-                            % endif
-                        </td>
-                    </tr>
+                    ${cancelinvoice_row(task)}
                 % endfor
             </table>
         % else:
             <div style='clear:both'>Aucune facture n'a été créée
-                %if not phase.is_default():
+                %if len(project.phases) > 1:
                     dans cette phase
                 %endif
             </div>
         % endif
         </div>
+        </div>
+        </div>
     %endfor
+    </div>
     %if not project.phases:
         <strong>Aucune phase n'a été créée dans ce projet</strong>
     %endif

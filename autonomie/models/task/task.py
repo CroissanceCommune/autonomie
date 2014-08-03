@@ -48,9 +48,10 @@ from autonomie.models.types import (
         CustomDateType2)
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
-        DBBASE,
-        default_table_args,
-        )
+    DBBASE,
+    default_table_args,
+)
+from autonomie.models.widgets import EXCLUDED
 from autonomie.models.tva import Tva
 from autonomie.exception import Forbidden
 
@@ -73,7 +74,6 @@ class Task(Node):
 
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     phase_id = Column("phase_id", ForeignKey('phase.id'))
-    name = Column("name", String(255))
     CAEStatus = Column('CAEStatus', String(10))
     statusComment = Column("statusComment", Text)
     statusPerson = Column("statusPerson",
@@ -97,11 +97,19 @@ class Task(Node):
     statusPersonAccount = relationship(
         "User",
         primaryjoin="Task.statusPerson==User.id",
-        backref="taskStatuses")
+        backref=backref(
+            "taskStatuses",
+            info={'colanderalchemy': EXCLUDED},
+        ),
+    )
     owner = relationship(
         "User",
         primaryjoin="Task.owner_id==User.id",
-        backref="ownedTasks")
+        backref=backref(
+            "ownedTasks",
+            info={'colanderalchemy': EXCLUDED},
+        ),
+    )
 
     phase = relationship(
         "Phase",
@@ -270,4 +278,10 @@ class TaskStatus(DBBASE):
     task = relationship("Task",
         backref=backref("statuses",
             cascade="all, delete-orphan"))
-    statusPersonAccount = relationship("User", backref="task_statuses")
+    statusPersonAccount = relationship(
+        "User",
+        backref=backref(
+            "task_statuses",
+            info={'colanderalchemy': EXCLUDED},
+        )
+    )

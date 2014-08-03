@@ -49,6 +49,13 @@ settings = appconfig('config:%s' % __current_test_ini_file(), "autonomie")
 TMPDIR = os.path.join(here, 'tmp')
 DATASDIR = os.path.join(here, 'datas')
 
+
+class Dummy(object):
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -26,47 +26,222 @@
     User related views
 """
 import logging
+import colander
+import deform
 
+from colanderalchemy import SQLAlchemySchemaNode
+from js.deform import auto_need
+from webhelpers.html.builder import HTML
 from sqlalchemy import or_
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.decorator import reify
-from webhelpers.html.builder import HTML
-from deform import Form
 
-from autonomie.models.user import User
-from autonomie.models.company import Company
-from autonomie.views.forms import (
-        merge_session_with_post,
-        BaseFormView,
+from autonomie.models.user import (
+    User,
+    UserDatas,
+    UserDatasSocialDocTypes,
+    SocialDocTypeOption,
+    CompanyDatas,
+    USERDATAS_FORM_GRIDS,
 )
+
+
+from autonomie.models.company import Company
 from autonomie.utils.widgets import (
-        ViewLink,
-        PopUp,
-        StaticWidget,
-        )
-from autonomie.utils.views import submit_btn
-from autonomie.utils.views import cancel_btn
+    ViewLink,
+    PopUp,
+    StaticWidget,
+)
+
+from autonomie.views import (
+    BaseListView,
+    BaseXlsView,
+)
+
+from autonomie.views.forms import (
+    submit_btn,
+    cancel_btn,
+    BaseFormView,
+)
+
 from autonomie.views.render_api import format_account
+from autonomie.views.forms.widgets import AccordionFormWidget
 from autonomie.views.forms.user import (
-        USERSCHEMA,
-        get_list_schema,
-        PASSWORDSCHEMA,
-        UserDisableSchema,
-        )
+    get_list_schema,
+    get_account_schema,
+    get_password_schema,
+    get_user_schema,
+    get_userdatas_list_schema,
+    UserDisableSchema,
+)
+
 from autonomie.views.company import company_enable
 
-from autonomie.views import BaseListView
-
 log = logging.getLogger(__name__)
+
+
+DOCTYPE_VALIDATION_BTN = deform.Button(
+    name='submit',
+    type='submit',
+    title=u'Enregistrer les statuts de documents',
+)
 
 
 def get_user_form(request):
     """
         Return the user add form
     """
-    schema = USERSCHEMA.bind(request=request)
-    return Form(schema, buttons=(submit_btn,))
+    schema = get_user_schema().bind(request=request)
+    return deform.Form(schema, buttons=(submit_btn,))
+
+
+def get_doctypes_form_schema(userdatas_model):
+    """
+    Returns a dynamically built form for doctypes registration
+    """
+    registrations = userdatas_model.doctypes_registrations
+    node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)
+
+    appstruct = {}
+    form_schema = colander.Schema()
+
+    for index, registration in enumerate(registrations):
+        node = node_schema.clone()
+        name = 'node_%s' % index
+        node.name = name
+        node.title = u''
+        node['status'].title = registration.doctype.label
+        form_schema.add(node)
+        appstruct[name] = node_schema.dictify(registration)
+
+    return form_schema, appstruct
+
+
+class PermanentUserAddView(BaseFormView):
+    """
+    User add form, allows to add :
+
+        * managers
+        * admins
+    """
+    title = u"Ajout d'un nouveau compte"
+    validate_msg = u"Le compte a bien été ajouté"
+    schema = get_user_schema()
+
+    def _get_company(self, name, user):
+        """
+            Return a company object, create a new one if needed
+        """
+        query = Company.query()
+        company = query.filter(Company.name==name).first()
+        #avoid creating duplicate companies
+        if company is None:
+            company = self._add_company(name, user)
+        return company
+
+    def _add_company(self, name, user):
+        """
+            Add a company 'name' in the database
+            ( set its goal by default )
+        """
+        log.info(u"Adding company : %s" % name)
+        company = Company()
+        company.name = name
+        company.goal = u"Entreprise de {0}".format(format_account(user))
+        company.contribution = self.request.config.get('contribution_cae')
+        company = self.dbsession.merge(company)
+        self.dbsession.flush()
+        return company
+
+    def before(self, form):
+        """
+            populate the actionmenu before entering the view
+        """
+        populate_actionmenu(self.request)
+
+    def redirect_url(self, user_model):
+        """
+        Return the url we should redirect to
+        """
+        return self.request.route_path("user", id=user_model.id)
+
+    def submit_success(self, appstruct):
+        """
+            Add a user to the database
+            Add its companies
+            Add a relationship between companies and the new account
+        """
+        companies = set(appstruct.pop('companies', []))
+        password = appstruct.pop('pwd', None)
+
+        if self.context.__name__ == 'user':
+            user_model = self.schema.objectify(appstruct, self.context)
+            log.info(u"Edit user : {0}" .format(format_account(user_model)))
+        else:
+            user_model = self.schema.objectify(appstruct)
+            log.info(u"Add user : {0}" .format(format_account(user_model)))
+
+        if password is not None:
+            user_model.set_password(password)
+
+        for company_name in companies:
+            company = self._get_company(company_name, user_model)
+            user_model.companies.append(company)
+
+        self.dbsession.merge(user_model)
+
+        # Here we flush to get an id for the redirect
+        self.dbsession.flush()
+
+        self.session.flash(self.validate_msg)
+        return HTTPFound(self.redirect_url(user_model))
+
+
+class PermanentUserEditView(PermanentUserAddView):
+    """
+        User edition view
+    """
+    validate_msg = u"Le compte a bien été édité"
+    schema = get_user_schema(edit=True)
+
+    @reify
+    def title(self):
+        """
+            form title
+        """
+        return u"Modification de {0}".format(
+            format_account(self.context)
+        )
+
+    def before(self, form):
+        """
+            Set the context datas in the view attributes before view execution
+        """
+        appstruct = self.schema.dictify(self.context)
+        appstruct.pop('pwd')
+
+        appstruct['companies'] = [c.name for c in self.context.companies]
+        form.set_appstruct(appstruct)
+        populate_actionmenu(self.request, self.context)
+
+
+class UserEditView(PermanentUserEditView):
+    """
+    Contractor's account edition view
+    """
+    schema = get_user_schema(edit=True, permanent=False)
+
+    def redirect_url(self, user_model):
+        """
+        Redirect to the userdatas view associated to the given model
+        pass also the form3 tab name
+        """
+        return self.request.route_path(
+            "userdata",
+            id=user_model.userdatas.id,
+            _anchor='form3'
+        )
 
 
 class UserList(BaseListView):
@@ -118,12 +293,19 @@ class UserList(BaseListView):
             add user link and popup for user with add permission ...)
         """
         populate_actionmenu(self.request)
-        if has_permission('add', self.request.context, self.request):
+
+        if has_permission("add", self.context, self.request):
             form = get_user_form(self.request)
-            popup = PopUp("add", u'Ajouter un compte', form.render())
+            popup = PopUp("add", u'Ajouter un permanent', form.render())
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
+
+        self.request.actionmenu.add(get_add_contractor_btn())
+
+        if has_permission("manage", self.context, self.request):
             self.request.actionmenu.add(self._get_disabled_btn(appstruct))
+
+        self.request.actionmenu.add(get_userdatas_link_btn())
 
     def _get_disabled_btn(self, appstruct):
         """
@@ -139,11 +321,11 @@ class UserList(BaseListView):
         return StaticWidget(link)
 
 
-class UserAccount(BaseFormView):
+class UserAccountView(BaseFormView):
     """
-        User account page providing password change
+        User account view with password edition
     """
-    schema = PASSWORDSCHEMA
+    schema = get_password_schema()
     title = u"Mon compte"
 
     def before(self, form):
@@ -155,7 +337,7 @@ class UserAccount(BaseFormView):
 
     def submit_success(self, appstruct):
         """
-            Called on submission success
+            Called on submission success -> changing password
         """
         log.info(u"# User {0} has changed his password #".format(
                         self.request.user.login))
@@ -163,6 +345,260 @@ class UserAccount(BaseFormView):
         self.request.user.set_password(new_pass)
         self.dbsession.merge(self.request.user)
         self.request.session.flash(u"Votre mot de passe a bien été modifié")
+        return HTTPFound(self.request.route_path('account'))
+
+
+class UserAccountEditView(BaseFormView):
+    """
+    View allowing a end user to modify some of his account informations
+    """
+    schema = get_account_schema()
+    msg = u"Vos modifications ont bien été enregistrées"
+
+    def before(self, form):
+        form.set_appstruct(self.schema.dictify(self.context))
+
+    def submit_success(self, appstruct):
+        model = self.schema.objectify(appstruct, self.context)
+        self.dbsession.merge(model)
+        self.request.session.flash(self.msg)
+        return HTTPFound(
+            self.request.route_path('account')
+        )
+
+
+class UserDatasAdd(BaseFormView):
+    title = u"Gestion sociale"
+    schema = SQLAlchemySchemaNode(UserDatas)
+    validation_msg = u"Les informations sociales ont bien été enregistrées"
+
+    def before(self, form):
+        auto_need(form)
+        form.widget = AccordionFormWidget(grids=USERDATAS_FORM_GRIDS)
+        self.populate_actionmenu()
+
+    def populate_actionmenu(self):
+        self.request.actionmenu.add(get_userdatas_list_btn())
+
+    def submit_success(self, appstruct):
+        if self.context.__name__ == 'userdatas':
+            model = self.schema.objectify(appstruct, self.context)
+        else:
+            model = self.schema.objectify(appstruct)
+
+        user, login, password = model.gen_user_account()
+
+        companies = model.gen_companies()
+        if companies:
+            msg = u"Les activités associées ont été ajoutées"
+            self.request.session.flash(msg)
+            user.companies = companies
+
+        model = self.dbsession.merge(model)
+        self.dbsession.flush()
+
+        if user is not None:
+            url = self.request.route_path('user', id=user.id)
+
+            msg = u"Un compte a été créé : \
+login : {0}, \
+mot de passe : {1}".format(login, password, url)
+
+            self.request.session.flash(msg)
+
+        self.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path('userdata', id=model.id))
+
+
+class UserDatasEdit(UserDatasAdd):
+    add_template_vars = ('doctypes_form', 'account_form',)
+
+    @property
+    def title(self):
+        return "Gestion sociale : {0}".format(
+            format_account(self.request.context)
+        )
+
+    def before(self, form):
+        super(UserDatasEdit, self).before(form)
+        form.set_appstruct(self.schema.dictify(self.request.context))
+        self.counter = form.counter
+        self.ensure_doctypes_rel()
+
+    def ensure_doctypes_rel(self):
+        """
+        Ensure the current userdata context is related to all doctypes through a
+        UserDatasSocialDocTypes object
+        """
+        userdatas_id = self.context.id
+
+        for doctype in SocialDocTypeOption.query():
+            doctype_id = doctype.id
+            rel = UserDatasSocialDocTypes.get((userdatas_id, doctype_id,))
+            if rel is None:
+                rel = UserDatasSocialDocTypes(
+                    userdatas_id=userdatas_id,
+                    doctype_id=doctype_id,
+                )
+                self.dbsession.add(rel)
+
+    @property
+    def account_form(self):
+        """
+        Return a user account edition form
+        """
+        form = None
+        if self.context.user_id is not None:
+            # There is an associated user account
+            schema = get_user_schema(edit=True, permanent=False)
+            schema = schema.bind(request=self.request)
+            action = self.request.route_path(
+                'user',
+                id=self.context.user_id,
+                _query=dict(action="edit"),
+            )
+            form = deform.Form(
+                schema,
+                buttons = (submit_btn,),
+                action=action,
+                counter=self.counter,
+            )
+
+            user_obj = self.context.user
+
+            appstruct = schema.dictify(user_obj)
+            appstruct.pop('pwd')
+            appstruct['companies'] = [c.name for c in user_obj.companies]
+            form.set_appstruct(appstruct)
+        return form
+
+    @property
+    def doctypes_form(self):
+        """
+        Add a doctype registration form to the resulting dict
+        """
+        form_schema, appstruct = get_doctypes_form_schema(self.context)
+        action = self.request.route_path(
+            'userdata',
+            id=self.context.id,
+            _query=dict(action="doctype"),
+        )
+        form = deform.Form(
+            form_schema,
+            buttons=(submit_btn,),
+            action=action,
+            counter=self.counter
+        )
+        form.set_appstruct(appstruct)
+        return form
+
+
+def userdata_doctype_view(userdata_model, request):
+    """
+    View used to register doctypes status
+
+        userdata_model
+
+            The UserDatas model retrieved through traversal
+    """
+    if 'submit' in request.params:
+        schema = get_doctypes_form_schema(userdata_model)[0]
+        appstruct = request.POST.items()
+        try:
+            appstruct = schema.deserialize(appstruct)
+        except colander.Invalid, exc:
+            log.exception(
+                "Error while validating doctype registration"
+            )
+        else:
+            node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)
+            for data in appstruct.values():
+                model = schema.objectify(data)
+                request.dbsession.merge(model)
+            request.session.flash(
+                u"Les informations saisies ont bien été enregistrées"
+            )
+
+    return HTTPFound(
+        request.route_path('userdata', id=userdata_model.id)
+    )
+
+
+class UserDatasListClass(object):
+    """
+    User datas list view
+    """
+    title = u"Liste des informations sociales"
+    schema = get_userdatas_list_schema()
+    sort_columns = dict(
+        lastname=UserDatas.coordonnees_lastname,
+    )
+    default_sort = 'lastname'
+
+    def query(self):
+        return UserDatas.query()
+
+    def filter_situation_situation(self, query, appstruct):
+        """
+        Filter the general situation of the project
+        """
+        log.debug("APPSTRUCT : %s" % appstruct)
+        situation = appstruct.get('situation_situation')
+        if situation not in (None, ''):
+            query = query.filter(
+                UserDatas.situation_situation==situation
+            )
+        return query
+
+    def filter_search(self, query, appstruct):
+        """
+        Filter the current query for firstname, lastname or activity
+        """
+        search = appstruct.get('search')
+
+        if search not in (None, ''):
+            filter_ = "%" + search + "%"
+            query = query.filter(
+                or_(
+                    UserDatas.coordonnees_firstname.like(filter_),
+                    UserDatas.coordonnees_lastname.like(filter_),
+                    UserDatas.activity_companydatas.any(
+                        CompanyDatas.name.like(filter_)),
+                    UserDatas.activity_companydatas.any(
+                        CompanyDatas.title.like(filter_)),
+                )
+            )
+        return query
+
+    def filter_situation_follower_id(self, query, appstruct):
+        """
+        Filter the current query through followers
+        """
+        follower_id = appstruct.get('situation_follower_id')
+
+        if follower_id not in (None, -1):
+            query = query.filter(
+                UserDatas.situation_follower_id==follower_id
+            )
+        return query
+
+
+class UserDatasListView(UserDatasListClass, BaseListView):
+    """
+    The userdatas listing view
+    """
+    pass
+
+
+class UserDatasXlsView(UserDatasListClass, BaseXlsView):
+    """
+        Userdatas excel view
+    """
+    model = UserDatas
+
+    @property
+    def filename(self):
+        return "gestion_social.xls"
 
 
 def user_view(request):
@@ -281,122 +717,6 @@ class UserDisable(BaseFormView):
                 self._disable_user(employee)
 
 
-class BaseUserForm(BaseFormView):
-    """
-        Base form view for user handling, provide common functions
-    """
-    schema = USERSCHEMA
-    @staticmethod
-    def get_user(user, appstruct):
-        """
-            Return the user object configured in the appstruct
-        """
-        user = merge_session_with_post(user, appstruct['user'])
-        if 'password' in appstruct:
-            if appstruct['password']['pwd']:
-                user.set_password(appstruct['password']['pwd'])
-        return user
-
-    def get_company(self, name, user):
-        """
-            Return a company object, create a new one if needed
-        """
-        company = Company.query().filter(Company.name==name).first()
-        #avoid creating duplicate companies
-        if company is None:
-            company = self.add_company(name, user)
-        return company
-
-    def add_company(self, name, user):
-        """
-            Add a company 'name' in the database
-            ( set its goal by default )
-        """
-        log.info(u"Adding company : %s" % name)
-        company = Company()
-        company.name = name
-        company.goal = u"Entreprise de {0}".format(format_account(user))
-        company.contribution = self.request.config.get('contribution_cae')
-        company = self.dbsession.merge(company)
-        self.dbsession.flush()
-        return company
-
-
-class UserAdd(BaseUserForm):
-    """
-        User add form, automatically add companies if new one are specified
-    """
-    title = u"Ajout d'un nouveau compte"
-    validate_msg = u"Le compte a bien été ajouté"
-
-    def before(self, form):
-        """
-            populate the actionmenu before entering the view
-        """
-        populate_actionmenu(self.request)
-
-    def submit_success(self, appstruct):
-        """
-            Add a user to the database
-            Add its companies
-            Add a relationship between companies and the new account
-        """
-        user = self.get_user(User(), appstruct)
-        if 'companies' in appstruct:
-            companies = set(appstruct.get('companies'))
-            user.companies = []
-            for company_name in companies:
-                company = self.get_company(company_name, user)
-                user.companies.append(company)
-        log.info(u"Add user : {0}" .format(format_account(user)))
-        user = self.dbsession.merge(user)
-        self.dbsession.flush()
-        self.session.flash(self.validate_msg)
-        return HTTPFound(self.request.route_path("user", id=user.id))
-
-
-class UserEdit(BaseUserForm):
-    """
-        User edition view
-    """
-    validate_msg = u"Le compte a bien été édité"
-
-    @reify
-    def title(self):
-        """
-            form title
-        """
-        return u"Modification de {0}".format(
-                                        format_account(self.request.context))
-
-    def before(self, form):
-        """
-            Set the context datas in the view attributes before view execution
-        """
-        user = self.request.context
-        appstruct = {'user': user.appstruct(),
-                     'companies': [comp.name for comp in  user.companies]}
-        form.set_appstruct(appstruct)
-        populate_actionmenu(self.request, self.request.context)
-
-    def submit_success(self, appstruct):
-        """
-            Edit the database entry for the current user
-        """
-        user = self.get_user(self.request.context, appstruct)
-        if 'companies' in appstruct:
-            companies = set(appstruct.get('companies'))
-            user.companies = []
-            for company_name in companies:
-                company = self.get_company(company_name, user)
-                user.companies.append(company)
-        log.info(u"Edit user : {0}" .format(format_account(user)))
-        user = self.dbsession.merge(user)
-        self.dbsession.flush()
-        self.session.flash(self.validate_msg)
-        return HTTPFound(self.request.route_path("user", id=user.id))
-
-
 def populate_actionmenu(request, user=None):
     """
         populate the actionmenu
@@ -405,7 +725,7 @@ def populate_actionmenu(request, user=None):
     if user:
         request.actionmenu.add(get_view_btn(user.id))
         if has_permission('edit', request.context, request):
-            request.actionmenu.add(get_edit_btn(user.id))
+            request.actionmenu.add(get_edit_btn(user))
             if user.enabled():
                 request.actionmenu.add(get_disable_btn(user.id))
             else:
@@ -420,6 +740,13 @@ def get_list_view_btn():
     return ViewLink(u"Annuaire", "view", path="users")
 
 
+def get_userdatas_list_btn():
+    """
+    Return a link to the user datas list
+    """
+    return ViewLink(u"Annuaire 'Gestion sociale'", "manage", path="userdatas")
+
+
 def get_view_btn(user_id):
     """
         Return a link for user view
@@ -427,12 +754,26 @@ def get_view_btn(user_id):
     return ViewLink(u"Voir", "view", path="user", id=user_id)
 
 
-def get_edit_btn(user_id):
+def get_edit_btn(user):
     """
         Return a link for user edition
     """
-    return ViewLink(u"Modifier", "edit", path="user", id=user_id,
-                                        _query=dict(action="edit"))
+    if user.is_contractor():
+        return ViewLink(
+            u"Modifier",
+            "manage",
+            path="userdata",
+            id=user.userdatas.id,
+            _anchor='form3',
+        )
+    else:
+        return ViewLink(
+            u"Modifier",
+            "manage",
+            path="user",
+            id=user.id,
+            _query=dict(action="edit"),
+        )
 
 
 def get_enable_btn(user_id):
@@ -446,6 +787,30 @@ def get_disable_btn(user_id):
     """
     return ViewLink(u"Désactiver", "manage", path="user", id=user_id,
                                         _query=dict(action="disable"))
+
+
+def get_add_contractor_btn():
+    """
+    Return a button returning the end user to the userdatas page to add a new
+    account
+    """
+    return ViewLink(
+        u"Ajouter un entrepreneur",
+        "add",
+        path="userdatas",
+        _query=dict(action='new'),
+    )
+
+
+def get_userdatas_link_btn():
+    """
+    Return a button leading to the userdatas list view
+    """
+    return ViewLink(
+        u"Annuaire gestion sociale",
+        "manage",
+        path="userdatas",
+    )
 
 
 def get_del_btn(user_id):
@@ -462,47 +827,140 @@ def includeme(config):
     """
         Declare all the routes and views related to this model
     """
-    config.add_route("users",
-                    "/users")
-    config.add_route("user",
-                     "/users/{id:\d+}",
-                     traverse="/users/{id}")
-    config.add_route('account',
-                    '/account')
+    config.add_route("users", "/users")
 
-    config.add_view(UserList,
-                    route_name='users',
-                    renderer='users.mako',
-                    permission='view')
-    config.add_view(user_view,
-                    route_name='user',
-                    renderer='user.mako',
-                    permission='view')
-    config.add_view(UserAdd,
-                    route_name='users',
-                    renderer='user_edit.mako',
-                    request_method='POST',
-                    permission='add')
-    config.add_view(UserEdit,
-                    route_name='user',
-                    renderer='user_edit.mako',
-                    request_param='action=edit',
-                    permission='edit')
-    config.add_view(UserDisable,
-                    route_name='user',
-                    renderer='user_edit.mako',
-                    request_param='action=disable',
-                    permission='edit')
-    config.add_view(user_enable,
-                    route_name='user',
-                    renderer='user_edit.mako',
-                    request_param='action=enable',
-                    permission='edit')
-    config.add_view(user_delete,
-                    route_name='user',
-                    request_param='action=delete',
-                    permission='manage')
-    config.add_view(UserAccount,
-                    route_name='account',
-                    renderer='account.mako',
-                    permission='view')
+    config.add_route(
+        "user",
+        "/users/{id:\d+}",
+        traverse="/users/{id}",
+    )
+
+    config.add_route(
+        "userdata",
+        "/userdatas/{id:\d+}",
+        traverse="/userdatas/{id}",
+    )
+
+    config.add_route(
+        "userdatas",
+        "/userdatas",
+    )
+
+    config.add_route(
+        "userdatas.xls",
+        "/userdatas.xls",
+    )
+
+    config.add_route('account', '/account')
+
+    config.add_view(
+        UserList,
+        route_name='users',
+        renderer='users.mako',
+        permission='view'
+    )
+
+    config.add_view(
+        user_view,
+        route_name='user',
+        renderer='user.mako',
+        permission='view',
+    )
+
+    config.add_view(
+        PermanentUserAddView,
+        route_name='users',
+        renderer='base/formpage.mako',
+        request_method='POST',
+        permission='add',
+    )
+
+    config.add_view(
+        PermanentUserEditView,
+        route_name='user',
+        renderer='base/formpage.mako',
+        request_param='action=edit_permanent',
+        permission='manage',
+    )
+
+    config.add_view(
+        UserEditView,
+        route_name='user',
+        renderer='base/formpage.mako',
+        request_param='action=edit',
+        permission='manage',
+    )
+
+    config.add_view(
+        UserAccountEditView,
+        route_name='user',
+        renderer='base/formpage.mako',
+        request_param='action=accountedit',
+        permission='edit',
+    )
+
+    config.add_view(
+        UserDatasAdd,
+        route_name='userdatas',
+        request_param='action=new',
+        renderer='/userdata.mako',
+        permission='admin',
+    )
+
+    config.add_view(
+        UserDatasEdit,
+        route_name='userdata',
+        renderer='/userdata.mako',
+        permission='admin'
+    )
+
+    config.add_view(
+        userdata_doctype_view,
+        route_name='userdata',
+        request_param='action=doctype',
+        permission='admin',
+    )
+
+    config.add_view(
+        UserDisable,
+        route_name='user',
+        renderer='base/formpage.mako',
+        request_param='action=disable',
+        permission='edit',
+    )
+
+    config.add_view(
+        user_enable,
+        route_name='user',
+        renderer='base/formpage.mako',
+        request_param='action=enable',
+        permission='edit'
+    )
+
+    config.add_view(
+        user_delete,
+        route_name='user',
+        request_param='action=delete',
+        permission='manage'
+    )
+
+    config.add_view(
+        UserAccountView,
+        route_name='account',
+        renderer='account.mako',
+        permission='view'
+    )
+
+    config.add_view(
+        UserDatasListView,
+        route_name="userdatas",
+        renderer="userdatas.mako",
+        permission="manage",
+    )
+
+    config.add_view(
+        UserDatasXlsView,
+        route_name="userdatas.xls",
+        permission="manage",
+    )
+

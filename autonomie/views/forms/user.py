@@ -28,37 +28,50 @@
 import colander
 import logging
 
-from deform import widget
+from deform import widget as deform_widget
+from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.models.user import User
+from autonomie.models.user import (
+    User,
+    SITUATION_OPTIONS,
+)
 from autonomie.models.company import Company
 from autonomie.views.forms import main
 from autonomie.views.forms.widgets import deferred_edit_widget
-from autonomie.utils.security import MANAGER_ROLES
-from autonomie.utils.security import ADMIN_ROLES
 from autonomie.views.forms.lists import BaseListsSchema
 
 log = logging.getLogger(__name__)
 
 
-def is_useredit_form(request):
-    """
-        return True if the current request concerns user edition
-    """
-    if request.context.__name__ == 'user':
-        return True
-    else:
-        return False
+MANAGER_ROLES = (
+    (2, u'Membre de la coopérative'),
+)
 
-def unique_login(node, value):
+
+ADMIN_ROLES = (
+    (1, u'Administrateur'),
+    (2, u'Membre de la coopérative'),
+)
+
+
+def get_unique_login_validator(user_id=None):
     """
+    Return a unique login validator
+
+        user_id
+
+            The id of the current user in case we edit an account (the unicity
+            should be checked on all the other accounts)
+    """
+    def unique_login(node, value):
+        """
         Test login unicity against database
-    """
-    result = User.query(only_active=False).filter_by(login=value).first()
-    if result:
-        message = u"Le login '{0}' n'est pas disponible.".format(
+        """
+        if not User.unique_login(value, user_id):
+            message = u"Le login '{0}' n'est pas disponible.".format(
                                                             value)
-        raise colander.Invalid(node, message)
+            raise colander.Invalid(node, message)
+    return unique_login
 
 
 def auth(form, value):
@@ -83,9 +96,9 @@ def deferred_login_validator(node, kw):
     """
         Dynamically choose the validator user for validating the login
     """
-    if not is_useredit_form(kw['request']):
-        return unique_login
-    return None
+    user_id = kw['request'].context.id
+
+    return get_unique_login_validator(user_id)
 
 
 def get_companies_choices():
@@ -101,20 +114,9 @@ def deferred_company_input(node, kw):
         Deferred company autocomplete input widget
     """
     companies = get_companies_choices()
-    wid = widget.AutocompleteInputWidget(values=companies,
+    wid = deform_widget.AutocompleteInputWidget(values=companies,
             template="autonomie:deform_templates/autocomple_input.pt")
     return wid
-
-
-@colander.deferred
-def deferred_missing_password(node, kw):
-    """
-        set the password to required in case of add form
-    """
-    if is_useredit_form(kw['request']):
-        return ""
-    else:
-        return colander.required
 
 
 @colander.deferred
@@ -129,7 +131,7 @@ def deferred_primary_group_widget(node, kw):
         roles = MANAGER_ROLES
     else:
         roles = []
-    return widget.RadioChoiceWidget(values=roles)
+    return deform_widget.RadioChoiceWidget(values=roles)
 
 
 @colander.deferred
@@ -173,77 +175,6 @@ def deferred_company_disable_default(node, kw):
     return True
 
 
-def remove_fields(schema, kw):
-    """
-        remove fields after user form schema binding when the authenticated
-        user is a contractor
-    """
-    if kw['request'].user.is_contractor():
-        # Non admin users are limited
-        del schema['user']['primary_group']
-        del schema['companies']
-        del schema['password']
-        del schema['compte_tiers']
-
-
-class AccountSchema(colander.MappingSchema):
-    """
-        Form Schema for an account creation
-    """
-    login = colander.SchemaNode(
-        colander.String(),
-        title=u"Identifiant",
-        validator=deferred_login_validator,
-        widget=deferred_edit_widget)
-
-    firstname = colander.SchemaNode(
-        colander.String(),
-        title=u"Prénom")
-
-    lastname = colander.SchemaNode(
-        colander.String(),
-        title=u"Nom")
-
-    email = main.mail_node(missing=u"")
-
-    compte_tiers = colander.SchemaNode(
-        colander.String(),
-        title=u"Compte tiers",
-        description=u"Compte tiers utilisé dans le logiciel de \
-comptabilité (utilisé pour l'export des notes de frais",
-        missing="")
-
-    primary_group = colander.SchemaNode(
-        colander.String(),
-        title=u"Rôle de l'utilisateur",
-        validator=colander.OneOf([x[0] for x in ADMIN_ROLES]),
-        widget=widget.RadioChoiceWidget(values=ADMIN_ROLES),
-        default=u"3")
-
-
-class PasswordChangeSchema(colander.MappingSchema):
-    """
-        Password modification form
-    """
-    login = colander.SchemaNode(
-        colander.String(),
-        widget=widget.HiddenWidget()
-    )
-    password = colander.SchemaNode(
-        colander.String(),
-        widget=widget.PasswordWidget(),
-        title="Mot de passe actuel",
-        default=u'')
-    pwd = colander.SchemaNode(
-        colander.String(),
-        widget=widget.CheckedPasswordWidget(),
-        title="Nouveau mot de passe")
-
-
-PASSWORDSCHEMA = PasswordChangeSchema(validator=auth,
-                                      title=u'Modification de mot de passe')
-
-
 class CompanySchema(colander.SequenceSchema):
     company = colander.SchemaNode(
         colander.String(),
@@ -251,32 +182,9 @@ class CompanySchema(colander.SequenceSchema):
         widget=deferred_company_input)
 
 
-class Password(colander.MappingSchema):
-    """
-        Schema for password set
-    """
-    pwd = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(min=4),
-        widget=widget.CheckedPasswordWidget(size=20),
-        title=u"",
-        missing=deferred_missing_password)
-
-
-class UserFormSchema(colander.MappingSchema):
-    """
-        Schema for user add
-    """
-    user = AccountSchema(title=u"Utilisateur")
-    companies = CompanySchema(
-        title=u"Entreprise(s)",
-        widget=widget.SequenceWidget(
-            add_subitem_text_template=u"Ajouter une entreprise")
-    )
-    password = Password(title=u"Mot de passe")
-
-
-USERSCHEMA = UserFormSchema(after_bind=remove_fields)
+SITUATION_SEARCH_OPTIONS = (
+    ('', u"Sélectionner un statut",),
+) + SITUATION_OPTIONS
 
 
 class UserDisableSchema(colander.MappingSchema):
@@ -300,11 +208,13 @@ class BaseAuthSchema(colander.MappingSchema):
     """
     login = colander.SchemaNode(
         colander.String(),
-        title="Identifiant")
+        title="Identifiant",
+    )
     password = colander.SchemaNode(
         colander.String(),
-        widget=widget.PasswordWidget(),
-        title="Mot de passe")
+        widget=deform_widget.PasswordWidget(),
+        title="Mot de passe",
+    )
 
 
 class AuthSchema(BaseAuthSchema):
@@ -313,10 +223,12 @@ class AuthSchema(BaseAuthSchema):
     """
     nextpage = colander.SchemaNode(
         colander.String(),
-        widget=widget.HiddenWidget())
-    remember_me = colander.SchemaNode(colander.Boolean(),
-                                      widget=widget.CheckboxWidget(),
-                                      title="Rester connecté")
+        widget=deform_widget.HiddenWidget())
+    remember_me = colander.SchemaNode(
+        colander.Boolean(),
+        widget=deform_widget.CheckboxWidget(),
+        title="Rester connecté",
+    )
 
 
 def get_auth_schema():
@@ -345,8 +257,128 @@ def get_list_schema():
         colander.String(),
         name='disabled',
         missing="0",
-        widget=widget.HiddenWidget(),
+        widget=deform_widget.HiddenWidget(),
         validator=colander.OneOf(('0', '1'))
         )
     )
+    return schema
+
+
+def get_userdatas_list_schema():
+    """
+    Return a list schema for user datas
+    """
+    schema = BaseListsSchema().clone()
+
+    schema['search'].description = u"Nom, prénom, entreprise"
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name='situation_situation',
+        widget=deform_widget.SelectWidget(values=SITUATION_SEARCH_OPTIONS),
+        validator=colander.OneOf([s[0] for s in SITUATION_SEARCH_OPTIONS]),
+        default='',
+        missing='',
+        )
+    )
+
+    schema.insert(
+        0,
+        main.user_node(
+            roles=['manager', 'admin'],
+            missing=-1,
+            default=main.deferred_current_user_id,
+            name='situation_follower_id',
+            widget_options={
+                'default_option': (-1, ''),
+                'placeholder': u"Sélectionner un conseiller"},
+        )
+    )
+    return schema
+
+
+def get_account_schema():
+    """
+    Return the user account edition schema
+    """
+    return SQLAlchemySchemaNode(
+        User,
+        includes=('firstname', 'lastname', 'email',),
+    )
+
+
+def get_password_schema():
+    """
+    Return the schema for user password change
+    """
+    schema = SQLAlchemySchemaNode(
+        User,
+        includes=('login', 'pwd',),
+        title=u'Modification de mot de passe',
+        validator=auth,
+    )
+
+    schema.insert(
+        1,
+        colander.SchemaNode(
+            colander.String(),
+            widget=deform_widget.PasswordWidget(),
+            name='password',
+            title=u'Mot de passe actuel',
+            default=u'',
+        )
+    )
+
+    schema['login'].widget = deform_widget.HiddenWidget()
+    # Remove login validation
+    schema['login'].validator = None
+
+    return schema
+
+
+def get_user_schema(edit=False, permanent=True):
+    """
+    Return the schema for adding/editing users
+
+        edit
+
+            Is this an edit form
+
+        permanent
+
+            Is this form related to permanent edition (managers or admins)
+    """
+    if permanent:
+        schema = SQLAlchemySchemaNode(User, excludes=('compte_tiers',))
+    else:
+        schema = SQLAlchemySchemaNode(User)
+
+    if permanent:
+        schema.insert(
+            0,
+            colander.SchemaNode(
+                colander.Integer(),
+                name='primary_group',
+                validator=deferred_primary_group_validator,
+                widget=deferred_primary_group_widget,
+                title=u"Rôle de l'utilisateur",
+            )
+        )
+
+    schema.add(
+        CompanySchema(
+            name='companies',
+            title=u"Entreprise(s)",
+            widget=deform_widget.SequenceWidget(
+                add_subitem_text_template=u"Ajouter une entreprise"
+            )
+        )
+    )
+
+    if edit:
+        schema['login'].validator = deferred_login_validator
+        schema['pwd'].missing = colander.drop
+    else:
+        schema['login'].validator = get_unique_login_validator()
+
     return schema

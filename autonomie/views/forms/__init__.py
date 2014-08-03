@@ -25,16 +25,18 @@
 """
     Form view tool to easily build form views
 """
-
-
 import colander
 import logging
 
+from deform import Button
 from pyramid_deform import FormView
 from pyramid.security import has_permission
 from js.tinymce import tinymce
 
-from autonomie.utils.views import submit_btn
+
+submit_btn = Button(name="submit", type="submit", title=u"Valider")
+cancel_btn = Button(name="cancel", type="submit", title=u"Annuler")
+
 
 class BaseFormView(FormView):
     """
@@ -100,7 +102,8 @@ class BaseFormView(FormView):
                 def submit_success(self, appstruct):
                     # Handle the filtered appstruct
     """
-    add_template_vars = ('title',)
+    title = None
+    add_template_vars = ()
     buttons = (submit_btn,)
 
     def __init__(self, request):
@@ -130,6 +133,9 @@ class BaseFormView(FormView):
             Add template vars to the response dict
         """
         result = {}
+        # Force title in template vars
+        result['title'] = self.title
+
         for name in self.add_template_vars:
             result[name] = getattr(self, name)
         return result
@@ -171,7 +177,8 @@ def merge_session_with_post(model, app_struct):
             The datas retrieved for example from a form
     """
     for key, value in app_struct.items():
-        setattr(model, key, value)
+        if value not in (None, colander.null,):
+            setattr(model, key, value)
     return model
 
 

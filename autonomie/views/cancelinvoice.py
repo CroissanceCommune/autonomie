@@ -40,8 +40,10 @@ from autonomie.models.task.invoice import (
         CancelInvoiceLine,
         )
 from autonomie.views.files import FileUploadView
-from autonomie.views.forms import merge_session_with_post
-from autonomie.utils.views import submit_btn
+from autonomie.views.forms import (
+    merge_session_with_post,
+    submit_btn,
+)
 from autonomie.exception import Forbidden
 from autonomie.views.taskaction import (
     TaskFormView,
@@ -86,7 +88,6 @@ class CancelInvoiceAdd(TaskFormView):
     def before(self, form):
         super(CancelInvoiceAdd, self).before(form)
         populate_actionmenu(self.request)
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def submit_success(self, appstruct):
         log.debug("Submitting cancelinvoice add")
@@ -156,7 +157,6 @@ class CancelInvoiceEdit(TaskFormView):
 
         super(CancelInvoiceEdit, self).before(form)
         populate_actionmenu(self.request)
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def appstruct(self):
         """

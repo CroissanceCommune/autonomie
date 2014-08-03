@@ -255,3 +255,32 @@ table.opa tfoot td{
   float: left;
   display: inline-block;
 }
+form.deform ul {
+  list-style: none;
+  margin-left: 0;
+}
+
+form.deform div.input label {
+  padding-top: 0;
+  margin-right: 5px;
+}
+
+form.deform input[type=text], form.deform textarea, ul.tagit, form.deform input[type=password] {
+  width: 90%;
+}
+
+textarea.tinymce {
+  height: 400px;
+}
+
+ul.form-tabs li.error a {
+  color: #b94a48;
+}
+
+.form-row{
+  padding-bottom: 4px;
+}
+.accordion-heading a{
+  color: #555;
+}
+.accordion-body.in:hover { overflow:visible; }

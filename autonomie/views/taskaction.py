@@ -49,7 +49,7 @@ from autonomie.models.project import (
         Phase,
         )
 from autonomie.models.tva import Tva
-from autonomie.views.base import BaseView
+from autonomie.views import BaseView
 from autonomie.views.forms.duplicate import (
         DuplicateSchema,
         EDIT_METADATASCHEMA,
@@ -597,9 +597,6 @@ class TaskFormView(BaseFormView):
 
     def before(self, form):
         form.buttons = self.buttonmaker.get_buttons(counter=form.counter)
-        # Ici on spécifie un template qui permet de rendre nos boutons de
-        # formulaires
-        form.widget.template = "autonomie:deform_templates/form.pt"
 
     def set_task_status(self, task):
         # self.request.POST is a locked dict, we need a non locked one

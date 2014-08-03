@@ -25,28 +25,104 @@
 """
     Project model
 """
-from sqlalchemy import Table
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy import Text
-from sqlalchemy.orm import deferred
-from sqlalchemy.orm import relationship
+import colander
+from deform import widget as deform_widget
+from sqlalchemy import (
+    Table,
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Text,
+)
+from sqlalchemy.orm import (
+    deferred,
+    relationship,
+    backref,
+)
 
+from autonomie.utils.form_widget import deferred_autocomplete_widget
+from autonomie.models import widgets
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
 from autonomie.models.base import (
-        default_table_args,
-        DBBASE,
-        )
+    default_table_args,
+    DBBASE,
+)
 from autonomie.models.node import Node
+
 
 ProjectCustomer = Table('project_customer', DBBASE.metadata,
         Column("project_id", Integer, ForeignKey('project.id')),
         Column("customer_id", Integer, ForeignKey('customer.id')),
         mysql_charset=default_table_args['mysql_charset'],
         mysql_engine=default_table_args['mysql_engine'])
+
+
+def build_customer_value(customer=None):
+    """
+        return the tuple for building customer select
+    """
+    if customer:
+        return (str(customer.id), customer.name)
+    else:
+        return ("0", u"Sélectionnez")
+
+
+def build_customer_values(customers):
+    """
+        Build human understandable customer labels
+        allowing efficient discrimination
+    """
+    options = [build_customer_value()]
+    options.extend([build_customer_value(customer)
+                            for customer in customers])
+    return options
+
+def get_customers_from_request(request):
+    if request.context.__name__ == 'project':
+        customers = request.context.company.customers
+    elif request.context.__name__ == 'company':
+        customers = request.context.customers
+    else:
+        customers = []
+    return customers
+
+@colander.deferred
+def deferred_customer_select(node, kw):
+    request = kw['request']
+    customers = get_customers_from_request(request)
+    return deferred_autocomplete_widget(node,
+                        {'choices':build_customer_values(customers)})
+
+
+@colander.deferred
+def deferred_default_customer(node, kw):
+    """
+        Return the customer provided as request arg if there is one
+    """
+    request = kw['request']
+    customers = get_customers_from_request(request)
+    customer = request.params.get('customer')
+    if customer in [str(c.id) for c in customers]:
+        return int(customer)
+    else:
+        return colander.null
+
+
+@colander.deferred
+def deferred_customer_validator(node, kw):
+    request = kw['request']
+    customers = get_customers_from_request(request)
+    customer_ids = [customer.id for customer in customers]
+    def customer_oneof(value):
+        if value in ("0", 0):
+            return u"Veuillez choisir un client"
+        elif value not in customer_ids:
+            return u"Entrée invalide"
+        return True
+    return colander.Function(customer_oneof)
+
 
 class Project(Node):
     """
@@ -55,24 +131,108 @@ class Project(Node):
     __tablename__ = 'project'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'project'}
-    id = Column('id', ForeignKey('node.id'), primary_key=True)
-    code = Column("code", String(4), nullable=False)
-    definition = deferred(Column("definition", Text), group='edit')
 
-    company_id = Column("company_id", Integer,
-                                    ForeignKey('company.id'))
+    id = Column(
+        ForeignKey('node.id'),
+        primary_key=True,
+        info={'colanderalchemy': widgets.EXCLUDED}
+    )
 
-    startingDate = deferred(Column("startingDate", CustomDateType,
-                                default=get_current_timestamp), group='edit')
-    endingDate = deferred(Column("endingDate", CustomDateType,
-                                default=get_current_timestamp), group='edit')
+    code = Column(
+        String(4),
+        info={
+            'colanderalchemy': {
+                'title': u"Code",
+                'widget': deform_widget.TextInputWidget(mask='****')
+            },
+        },
+        nullable=False,
+    )
 
-    type = deferred(Column('type', String(150)), group='edit')
-    archived = Column("archived", String(255), default=0)
+    type = deferred(
+        Column(
+            String(150),
+            info={'colanderalchemy': {'title': u"Type de projet"}},
+        ),
+        group='edit'
+    )
 
-    customers = relationship("Customer",
-                            secondary=ProjectCustomer,
-                            backref='projects')
+    company_id = Column(
+        Integer,
+        ForeignKey('company.id'),
+        info={
+            'options':{'csv_exclude':True},
+            'colanderalchemy': widgets.EXCLUDED,
+        }
+    )
+
+    startingDate = deferred(
+        Column(
+            CustomDateType,
+            info={
+                "colanderalchemy":{
+                    "title": "Date de début",
+                    "widget": widgets.get_date(),
+                    "typ": colander.Date(),
+                }
+            },
+            default=get_current_timestamp,
+        ),
+        group='edit',
+    )
+
+    endingDate = deferred(
+        Column(
+            CustomDateType,
+            info={
+                "colanderalchemy":{
+                    "title": "Date de fin",
+                    "widget": widgets.get_date(),
+                    "typ": colander.Date(),
+                }
+            },
+            default=get_current_timestamp,
+        ),
+        group='edit',
+    )
+
+    definition = deferred(
+        Column(
+            Text,
+            info={
+                'label':u"Définition",
+                  'colanderalchemy':{
+                      'title': u"Définition",
+                      'widget': deform_widget.TextAreaWidget(
+                          css_class="span10"
+                      ),
+                  }
+            },
+
+        ),
+        group='edit',
+    )
+
+    archived = Column(
+        String(255),
+        default=0,
+        info={'colanderalchemy': widgets.EXCLUDED},
+    )
+
+    customers = relationship(
+        "Customer",
+        secondary=ProjectCustomer,
+        backref=backref(
+            'projects',
+            info={'colanderalchemy': widgets.EXCLUDED},
+        ),
+        info={
+            'colanderalchemy': {
+                "title": u"Client",
+                "exclude": True,
+            },
+        }
+    )
 
     def get_estimation(self, taskid):
         """
@@ -155,16 +315,44 @@ class Phase(DBBASE):
     """
     __tablename__ = 'phase'
     __table_args__ = default_table_args
-    id = Column('id', Integer, primary_key=True)
-    project_id = Column('project_id', Integer,
-                        ForeignKey('project.id'))
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': widgets.EXCLUDED},
+    )
+
+    project_id = Column(
+        ForeignKey('project.id'),
+        info={'colanderalchemy': widgets.EXCLUDED},
+    )
+
     name = Column("name", String(150), default=u'Phase par défaut')
-    project = relationship("Project", backref="phases")
-    creationDate = deferred(Column("creationDate", CustomDateType,
-                                            default=get_current_timestamp))
-    updateDate = deferred(Column("updateDate", CustomDateType,
-                                        default=get_current_timestamp,
-                                        onupdate=get_current_timestamp))
+
+    project = relationship(
+        "Project",
+        backref=backref(
+            "phases",
+            info={'colanderalchemy': widgets.EXCLUDED},
+        ),
+        info={'colanderalchemy': widgets.EXCLUDED},
+    )
+
+    creationDate = deferred(
+        Column(
+            CustomDateType,
+            info={'colanderalchemy': widgets.EXCLUDED},
+            default=get_current_timestamp,
+        )
+    )
+
+    updateDate = deferred(
+        Column(
+            CustomDateType,
+            info={'colanderalchemy': widgets.EXCLUDED},
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp,
+        )
+    )
 
     def is_default(self):
         """
@@ -197,3 +385,10 @@ class Phase(DBBASE):
         return dict(id=self.id,
                     name=self.name)
 
+
+FORM_GRID = (
+    ((4, True, ), (2, True, ), (4, True, ), ),
+    ((6, True, ), ),
+    ((3, True, ), (3, True, ), ),
+    ((10, True, ), ),
+)

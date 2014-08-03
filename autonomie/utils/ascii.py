@@ -25,6 +25,11 @@
 """
     Provide common tools for string handling
 """
+import re
+import random
+from string import lowercase
+
+
 def force_ascii(datas):
     """
         Return enforced ascii string
@@ -40,3 +45,22 @@ def force_utf8(value):
     if isinstance(value, unicode):
         value = value.encode('utf-8')
     return value
+
+
+def camel_case_to_name(name):
+    """
+    Used to convert a classname to a lowercase name
+    """
+    convert_func = lambda m:"_" + m.group(0).lower()
+    return name[0].lower() + re.sub(r'([A-Z])', convert_func, name[1:])
+
+
+def gen_random_string(size=15):
+    """
+    Generate random string
+
+        size
+
+            size of the resulting string
+    """
+    return ''.join(random.choice(lowercase) for _ in range(size))

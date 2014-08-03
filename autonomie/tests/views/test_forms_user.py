@@ -24,38 +24,35 @@
 
 from colander import Invalid
 from mock import MagicMock
-from autonomie.views.forms.user import (is_useredit_form, unique_login, auth,
-        PasswordChangeSchema, deferred_company_disable_default)
+from autonomie.views.forms.user import (
+    auth,
+    get_password_schema,
+    deferred_company_disable_default,
+)
 from autonomie.models.user import User
 
-from colander import SchemaNode
 
 from autonomie.tests.base import BaseTestCase
 
 def adduser(dbsession):
     user = User(login='test_forms_user',
                 lastname='lastname__éé',
-                firstname='firstname__éé')
+                firstname='firstname__éé',
+               email="a@a.fr")
     user.set_password(u"Tést$!Pass")
     dbsession.add(user)
     dbsession.flush()
     return user
 
 class TestFormsUser(BaseTestCase):
-    def test_isuseredit_form(self):
-        req = MagicMock(context=MagicMock(__name__='user'))
-        self.assertTrue(is_useredit_form(req))
-        req = MagicMock(context=MagicMock(__name__='other'))
-        self.assertFalse(is_useredit_form(req))
-
     def test_unique_login(self):
         adduser(self.session)
-        self.assertRaises(Invalid, unique_login, "nutt", "test_forms_user")
-        unique_login("nutt", "other unused login")
+        assert User.unique_login("test_forms_user") == False
+        User.unique_login("nutt", "other unused login")
 
     def test_auth(self):
         adduser(self.session)
-        form = PasswordChangeSchema()
+        form = get_password_schema()
         appstruct = {'login':'test_forms_user', 'password':u"Tést$!Pass"}
         auth(form, appstruct)
         appstruct = {'login':'test_forms_user', 'password':u"Tést$"}

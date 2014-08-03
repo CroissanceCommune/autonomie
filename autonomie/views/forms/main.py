@@ -37,47 +37,6 @@ from autonomie.views.forms import widgets as custom_widgets
 
 
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
-
-
-def get_users_options(roles=None):
-    """
-    Return the list of active users from the database formatted as choices:
-        [(user_id, user_label)...]
-
-    :param role: roles of the users we want
-        default:  all
-        values : ('contractor', 'manager', 'admin'))
-    """
-    if roles and not hasattr(roles, "__iter__"):
-        roles = [roles]
-    if roles:
-        query = user.get_user_by_roles(roles)
-    else:
-        query = user.User.query()
-    return [(unicode(u.id), render_api.format_account(u)) for u in query]
-
-
-def get_deferred_user_choice(roles=None, widget_options=None):
-    """
-        Return a colander deferred for users selection options
-    """
-    widget_options = widget_options or {}
-    default_option = widget_options.pop("default_option", None)
-    @colander.deferred
-    def user_select(node, kw):
-        """
-            Return a user select widget
-        """
-        choices = get_users_options(roles)
-        if default_option:
-            choices.insert(0, default_option)
-        return bootstrap_widget.ChosenSingleWidget(
-            values=choices,
-            **widget_options
-            )
-    return user_select
-
-
 @colander.deferred
 def deferred_autocomplete_widget(node, kw):
     """
@@ -140,7 +99,7 @@ def user_node(roles=None, **kw):
     widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
             colander.Integer(),
-            widget=get_deferred_user_choice(roles, widget_options),
+            widget=user.get_deferred_user_choice(roles, widget_options),
             **kw
             )
 
@@ -329,8 +288,7 @@ def id_node():
     return colander.SchemaNode(
         colander.Integer(),
         widget=deform_widget.HiddenWidget(),
-        default=None,
-        missing=None
+        missing=0,
         )
 
 

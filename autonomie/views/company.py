@@ -34,10 +34,12 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.company import Company
-from autonomie.utils.views import submit_btn
 from autonomie.utils.widgets import ViewLink
-from autonomie.views.forms import BaseFormView
-from autonomie.views.forms import merge_session_with_post
+from autonomie.views.forms import (
+    BaseFormView,
+    submit_btn,
+    merge_session_with_post,
+)
 from autonomie.views.forms.company import COMPANYSCHEMA
 
 

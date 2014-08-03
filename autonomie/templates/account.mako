@@ -38,7 +38,7 @@
                 % endfor
                 <dt>E-mail</dt><dd>${format_mail(account.email)}</dd>
             </dl>
-            <a href="${request.route_path('user', id=account.id, _query=dict(action='edit'))}" class="btn btn-primary">Éditer</a>
+            <a href="${request.route_path('user', id=account.id, _query=dict(action='accountedit'))}" class="btn btn-primary">Éditer</a>
         </div>
         <div class="well">
             % if len(account.companies) == 0:

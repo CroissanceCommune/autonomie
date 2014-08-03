@@ -27,6 +27,7 @@
     Copy of : https://github.com/Kotti/deform_bootstrap/pull/44
 """
 from deform import Form
+from deform.widget import FormWidget
 
 default_resources = {
         "chosen":{None:{'js':("jquery_chosen/chosen.jquery.js",),

@@ -55,7 +55,7 @@ from autonomie.models.task import (
         Task,
         Invoice,
         CancelInvoice,)
-from autonomie.views.base import BaseView
+from autonomie.views import BaseView
 from autonomie.views.forms.sage import (
         periodSchema,
         InvoiceNumberSchema,

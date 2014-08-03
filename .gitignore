@@ -10,3 +10,4 @@ dist
 build
 .ropeproject
 tobeignored
+node_modules

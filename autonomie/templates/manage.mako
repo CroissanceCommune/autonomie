@@ -30,34 +30,39 @@
 <br />
 <div class='row-fluid'>
     <div class='span6'>
-<table class="table table-striped table-condensed table-hover table-bordered">
-    <caption>Les devis, factures et avoirs en attent</caption>
-    <thead>
-        <tr>
-            <th>Entreprise</th>
-            <th>Nom du document</th>
-            <th>Statut</th>
-        </tr>
-    </thead>
-    <tbody>
-% for task in tasks:
-    <tr>
-        <td onclick="document.location='${task.url}'" class='rowlink'>
-            ${task.get_company().name}
-        </td>
-        <td onclick="document.location='${task.url}'" class='rowlink'>
-            ${task.name}
-        </td>
-        <td onclick="document.location='${task.url}'" class='rowlink'>
-            ${api.format_status(task)}
-        </td>
-    </tr>
+        % for dataset, table_title in (\
+        (estimations, u"Devis en attente",), \
+        (invoices, u"Factures et Avoirs en attente",), \
+        ):
+    <table class="table table-striped table-condensed table-hover table-bordered">
+        <caption>${table_title}</caption>
+        <thead>
+            <tr>
+                <th>Type de document</th>
+                <th>Entreprise</th>
+                <th>Demandé le</th>
+            </tr>
+        </thead>
+        <tbody>
+        % for task in dataset:
+            <tr>
+                <td onclick="document.location='${task.url}'" class='rowlink'>
+                    ${api.format_task_type(task)}
+                </td>
+                <td onclick="document.location='${task.url}'" class='rowlink'>
+                    ${task.get_company().name}
+                </td>
+                <td onclick="document.location='${task.url}'" class='rowlink'>
+                    ${api.format_date(task.statusDate)}
+                </td>
+            </tr>
+        % endfor
+    % if not dataset:
+        <tr><td colspan='3'>Aucun document en attente</td></tr>
+    % endif
+        </tbody>
+    </table>
 % endfor
-% if not tasks:
-    <tr><td colspan='3'>aucun document en attente</td></tr>
-% endif
-    </tbody>
-</table>
 <table class="table table-striped table-condensed table-hover table-bordered">
     <caption>Mes Activités / Rendez-vous à venir</caption>
     <thead>
@@ -90,7 +95,7 @@
             </tr>
         % endfor
         % if not activities:
-            <tr><td colspan='4'>aucune activité n'est prévue</td></tr>
+            <tr><td colspan='4'>Aucune activité n'est prévue</td></tr>
     % endif
     </tbody>
 </table>
@@ -107,7 +112,8 @@
     <thead>
         <tr>
             <th>Période</th>
-            <th>Statut</th>
+            <th>Entrepreneur</th>
+            <th>Demandé le</th>
         </tr>
     </thead>
     <tbody>
@@ -116,8 +122,11 @@
         <td onclick="document.location='${expense.url}'" class='rowlink'>
             ${api.month_name(expense.month)} ${expense.year}
         </td>
-        <td onclick="document.location='${expense.url}'" class='rowlink'>
-            ${api.format_expense_status(expense)}
+        <td>
+            ${api.format_account(expense.user)}
+        </td>
+        <td onclick="document.location='${task.url}'" class='rowlink'>
+            ${api.format_date(expense.status_date)}
         </td>
     </tr>
 % endfor

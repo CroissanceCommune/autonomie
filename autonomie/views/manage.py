@@ -48,15 +48,26 @@ def manage(request):
     """
         The manage view
     """
-    documents = Task.query()\
-            .with_polymorphic([Invoice, CancelInvoice, Estimation])\
+    query = Estimation.query()
+    query = query.join(Estimation.phase)
+    query = query.filter(
+        and_(
+            Estimation.CAEStatus == 'wait',
+            Phase.name is not None
+        )
+    )
+    estimations = query.order_by(Task.statusDate).all()
+    for item in estimations:
+        item.url = request.route_path(item.type_, id=item.id)
+
+    invoices = Task.query()\
+            .filter(Task.type_.in_(('invoice', 'cancelinvoice',)))\
             .join(Task.phase)\
             .filter(and_(Task.CAEStatus == 'wait', Phase.name is not None))\
-            .order_by(Task.statusDate).all()
+            .order_by(Task.type_).order_by(Task.statusDate).all()
 
-    for document in documents:
-        document.url = request.route_path(document.type_, id=document.id)
-
+    for item in invoices:
+        item.url = request.route_path(item.type_, id=item.id)
 
     expenses = ExpenseSheet.query()\
             .filter(ExpenseSheet.status == 'wait')\
@@ -79,7 +90,8 @@ def manage(request):
         activity.url = request.route_path("activity", id=activity.id)
 
     return dict(title=u"Documents en attente de validation",
-                tasks=documents,
+                invoices=invoices,
+                estimations=estimations,
                 expenses = expenses,
                 activities=activities)
 

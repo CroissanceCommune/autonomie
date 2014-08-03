@@ -30,8 +30,6 @@ from autonomie.views.workshop import (
     WorkshopAddView,
     WorkshopEditView,
     record_attendances_view,
-    WorkshopList,
-    CompanyWorkshopList,
     workshop_view,
     workshop_delete_view,
 )
@@ -76,6 +74,7 @@ class TestWorkshopAddView(BaseTest):
 
         appstruct = {
             'come_from': "/toto",
+            'name': 'test',
             'info1': 'header',
             'timeslots': [{
                 'name': 'timeslot',
@@ -108,6 +107,8 @@ class TestWorkshopEditView(BaseTest):
                 {
                     'name': u'Matinéee',
                     'id': timeslot_id,
+                    'start_time': req.context.timeslots[0].start_time,
+                    'end_time': req.context.timeslots[0].end_time,
                 },
                 {
                     'id': None,

@@ -27,6 +27,10 @@
         <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
             Modifier les données relatives à l'atelier
         </button>
+        <a class='btn' href='${request.route_path("workshop.pdf", id=request.context.id)}' >
+            <i class='icon-file'></i>
+            Télécharger la feuille d'émargement globale
+        </a>
         <div
             % if formerror is not UNDEFINED:
                 class='section-content'
@@ -74,10 +78,14 @@
 (${timeslot.duration[0]}h${timeslot.duration[1]})
 </p>
 <div>
-    <a class='btn' href='${request.route_path("timeslot.pdf", id=timeslot.id)}' ><i class='icon-file'></i>Télécharger la feuille d'émargement</a>
+    <a class='btn' href='${request.route_path("timeslot.pdf", id=timeslot.id)}' >
+        <i class='icon-file'></i>
+        Télécharger la feuille d'émargement pour cette tranche horaire
+    </a>
 </div>
-
-                            % for attendance in timeslot.attendances:
+<% attendances = timeslot.attendances %>
+<% attendances.sort(key=lambda a:a.user.lastname) %>
+                            % for attendance in attendances:
                                 <input type="hidden" name="__start__" value="attendance:mapping" />
                                 <% participant = attendance.user %>
                                 <% participant_url = request.route_path('user', id=participant.id) %>

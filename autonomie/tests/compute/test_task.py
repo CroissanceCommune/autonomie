@@ -42,6 +42,7 @@ DISCOUNTS = [{'amount':2000, 'tva':1960}]
 # so it fits the limit case
 #
 # Line totals should be floats (here they are *100)
+from autonomie.tests.base import Dummy
 TASK_LINES_TOTAL_HT = (12531.25, 22500, -5200)
 TASK_LINES_TVAS = (2456.125, 4410, -1019.2)
 
@@ -58,14 +59,6 @@ TVA = int(LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS + EXPENSE_TVA)
 
 # TASK_TOTAL = lines + tva + expenses rounded
 TASK_TOTAL = HT_TOTAL + TVA + TASK['expenses']
-
-print "TASK_TOTAL : %s" % TASK_TOTAL
-
-
-class Dummy(object):
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
 
 
 class DummyLine(Dummy, LineCompute):

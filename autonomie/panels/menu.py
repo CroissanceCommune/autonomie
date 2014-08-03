@@ -235,6 +235,9 @@ def get_admin_menus(request):
 
     menu.add(accompagnement)
 
+    href = request.route_path('userdatas')
+    menu.add_item(u"Gestion sociale", href=href)
+
     href = request.route_path("holidays")
     menu.add_item(u"Congés", icon="icon-plane", href=href)
     return menu

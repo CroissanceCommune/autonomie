@@ -49,7 +49,7 @@ from autonomie.models.task import (
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
 
-from autonomie.utils.views import submit_btn
+from autonomie.views.forms import submit_btn
 from autonomie.utils.widgets import (
         PopUp,
         ViewLink,

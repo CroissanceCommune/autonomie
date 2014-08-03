@@ -23,42 +23,51 @@
 #
 
 
-from autonomie.views.user import (UserAccount, user_delete, UserDisable,
-        UserAdd, UserEdit)
-from autonomie.tests.base import BaseFunctionnalTest
+from autonomie.views.user import (
+    user_delete,
+    UserAccountView,
+    UserDisable,
+    PermanentUserAddView,
+#    PermanentUserEditView,
+)
+from autonomie.tests.base import (
+    BaseFunctionnalTest,
+    Dummy,
+)
 from autonomie.models.user import User
-from autonomie.models.company import Company
 
-USER = {
+PWD = "Tést$!Pass"
+COMPANIES = ['company 1', 'company 2']
+
+APPSTRUCT = {
     "login": u'test_user',
     "lastname": u'lastname__\xe9\xe9',
     "firstname": u'firstname__éé',
-    "compte_tiers": "DC548748",
-    }
-PWD = "Tést$!Pass"
-COMPANIES = ['company 1', 'company 2']
-APPSTRUCT = {
-    'user':USER,
-    'password':{'pwd':PWD},
+    "email": u"Test@example.com",
+    'pwd': "Tést$!Pass",
     'companies':COMPANIES,
-        }
+}
+
 
 class Base(BaseFunctionnalTest):
     def addone(self):
-        self.config.add_route("user", "/users/{id:\d+}" )
+        appstruct = APPSTRUCT.copy()
+        self.config.add_route("user", "/users/{id:\d+}")
         request = self.get_csrf_request()
-        view = UserAdd(request)
-        view.submit_success(APPSTRUCT)
+        request.context = Dummy(__name__='root')
+        view = PermanentUserAddView(request)
+        view.submit_success(appstruct)
 
     def getone(self):
-        return User.query().filter(User.login==USER['login']).first()
+        return User.query().filter(User.login==APPSTRUCT['login']).first()
 
 class TestUserAccount(Base):
     def test_success(self):
+        self.config.add_route('account', '/account')
         self.addone()
         req = self.get_csrf_request()
         req.user = self.getone()
-        view = UserAccount(req)
+        view = UserAccountView(req)
         view.submit_success({'pwd':u"Né^PAs$$ù"})
         self.assertEqual(req.user.auth(u"Né^PAs$$ù"), True)
 
@@ -92,10 +101,6 @@ class TestUserAdd(Base):
     def test_success(self):
         self.addone()
         user = self.getone()
-        self.assertEqual(user.compte_tiers, USER['compte_tiers'])
+        self.assertEqual(user.email, APPSTRUCT['email'])
         self.assertTrue(user.auth(PWD))
         self.assertEqual(len(user.companies), 2)
-
-class TestUserEdit(Base):
-    def test_success(self):
-        pass

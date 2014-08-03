@@ -29,15 +29,28 @@
 import itertools
 import logging
 import openpyxl
-from openpyxl.style import Color, Fill
+from openpyxl.styles import (
+    Color,
+    fills,
+    Style,
+    NumberFormat,
+    PatternFill,
+    Font,
+)
+
 import cStringIO as StringIO
 from string import ascii_uppercase
 
-from autonomie.export.utils import write_file_to_request
+
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie.models.treasury import ExpenseType
 from autonomie.models.treasury import ExpenseKmType
 from autonomie.models.treasury import ExpenseTelType
+from autonomie.export.utils import write_file_to_request
+from autonomie.export.base import (
+    SqlaExporter,
+    BaseExporter,
+)
 
 
 log = logging.getLogger(__name__)
@@ -49,13 +62,45 @@ Color.Crimson = "FFDC143C"
 Color.header = "FFD9EDF7"
 Color.footer = "FFFCF8E3"
 
+EXCEL_NUMBER_FORMAT = '0.00'
+
+TITLE_STYLE = Style(font=Font(size=24, bold=True))
+HEADER_STYLE = Style(
+    font=Font(bold=True),
+    fill=PatternFill(
+        fill_type=fills.FILL_SOLID,
+        start_color=Color(rgb=Color.header)
+    )
+)
+BOLD_CELL = Style(
+    font=Font(bold=True)
+)
+NUMBER_CELL = Style(
+    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
+)
+FOOTER_CELL = Style(
+    font=Font(bold=True),
+    fill=PatternFill(
+        fill_type=fills.FILL_SOLID,
+        start_color=Color(rgb=Color.footer)
+    ),
+    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
+)
+LARGE_FOOTER_CELL = Style(
+    font=Font(bold=True, size=16),
+    fill=PatternFill(
+        fill_type=fills.FILL_SOLID,
+        start_color=Color(rgb=Color.footer)
+    ),
+    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
+)
+
 
 # A, B, C, ..., AA, AB, AC, ..., ZZ
 ASCII_UPPERCASE = list(ascii_uppercase) + list(
     ''.join(duple)
     for duple in itertools.combinations_with_replacement(ascii_uppercase, 2)
     )
-EXCEL_NUMBER_FORMAT = '0.00'
 EXPENSEKM_COLUMNS = [
     {
         'key': 'date',
@@ -97,21 +142,174 @@ EXPENSEKM_COLUMNS = [
         'key': 'total',
         'label': u'Indemnités',
         'letter': 'L',
-        'number_format': EXCEL_NUMBER_FORMAT,
+        'style': NUMBER_CELL,
     }
 ]
 
+class XlsWriter(object):
+    """
+    Class providing common tools to write excel files from tabular datas
 
-class ExcelExpense(object):
+    Has to be subclassed, the subclass should provide a _datas and a headers
+    attribute that contains the datas to render and the headers
+
+        _datas
+
+            list of tuples (each tuple is a row)
+
+        headers
+
+            list of dict containing the label of each column:
+                {'label': <a label>}
+
     """
-        Wrapper for excel export of an expense object
+    title = u"Export"
+    def __init__(self):
+        self.book = openpyxl.workbook.Workbook()
+        self.worksheet = self.book.active
+        self.worksheet.title = self.title
+
+    def save_book(self):
+        """
+        Return a file buffer containing the resulting xls
+        """
+        buf = StringIO.StringIO()
+        buf.write(openpyxl.writer.excel.save_virtual_workbook(self.book))
+        return buf
+
+    def set_color(self, cell, color):
+        """
+        Set the given color to the provided cell
+
+            cell
+
+                A xls cell object
+
+            color
+
+                A openpyxl color var
+        """
+        cell.style = cell.style.copy(font=Font(color=Color(rgb=color)))
+
+    def format_row(self, row):
+        """
+        The render method expects rows as lists, here we switch our row format
+        from dict to list respecting the order of the headers
+        """
+        res = []
+        headers = getattr(self, 'headers', [])
+        for column in headers:
+            column_name = column['name']
+            value = row.get(column_name, '')
+            res.append(value)
+        return res
+
+    def render(self):
+        """
+        Definitely render the workbook
+        """
+        self._render_headers()
+        self._render_rows()
+
+        return self.save_book()
+
+
+    def _render_rows(self):
+        """
+        Render the rows in the current stylesheet
+        """
+        _datas = getattr(self, '_datas', ())
+        for index, row in enumerate(_datas):
+            row_number = index + 2
+            for col_num, value in enumerate(row):
+                cell = self.worksheet.cell(row=row_number, column=col_num + 1)
+                cell.value = value
+
+    def _render_headers(self):
+        """
+        Write the headers row
+        """
+        headers = getattr(self, 'headers', ())
+        for index, col in enumerate(headers):
+            # We write the headers
+            cell = self.worksheet.cell(row=1, column=index + 1)
+            cell.value = col['label']
+
+
+class SqlaXlsExporter(XlsWriter, SqlaExporter):
     """
+    Main class used for exporting datas to the xls format
+
+    Models attributes output can be customized through the info param :
+
+        Column(Integer, infos={'export':
+            {'excel':<excel_specific_options>,
+             <main_export_options>
+            }
+        }
+
+    main_export_options and excel_specific_options can be :
+
+        label
+
+            label of the column header
+
+        format
+
+            a function that will be fired on each row to format the output
+
+        related_key
+
+            If the attribute is a relationship, the value of the given attribute
+            of the related object will be used to fill the cells
+
+        exclude
+
+            This data will not be inserted in the export if True
+
+    Usage:
+
+        a = SqlaXlsExporter(MyModel)
+        for i in MyModel.query().filter(<myfilter>):
+            a.add_row(i)
+        a.render()
+    """
+    config_key = 'excel'
+    def __init__(self, model):
+        XlsWriter.__init__(self)
+        SqlaExporter.__init__(self, model)
+
+
+class XlsExporter(XlsWriter, BaseExporter):
+    headers = ()
+
+    def __init__(self):
+        XlsWriter.__init__(self)
+        BaseExporter.__init__(self)
+
+
+class XlsExpense(XlsWriter):
+    """
+        Xls exporter of an expensesheet object
+
+        Provide two sheets : the expenses and the kilometric datas
+    """
+    title = "NDF"
 
     def __init__(self, expensesheet):
-        self.book = openpyxl.workbook.Workbook()
+        XlsWriter.__init__(self)
         self.model = expensesheet
         self.columns = self.get_columns()
         self.index = 2
+
+    def get_merged_cells(self, start, end):
+        """
+            returned merged cells of the current line index
+        """
+        cell_gap = '{1}{0}:{2}{0}'.format(self.index, start, end)
+        self.worksheet.merge_cells(cell_gap)
+        cell = self.worksheet.cell('{1}{0}'.format(self.index, start))
+        return cell
 
     def get_tel_column(self):
         """
@@ -190,8 +388,12 @@ class ExcelExpense(object):
         # Add the last columns
         columns.append({'label':'Tva', 'key':'tva',
             'formatter':integer_to_amount})
-        columns.append({'label':'Total', 'key':'total',
-            'formatter':integer_to_amount, 'number_format':EXCEL_NUMBER_FORMAT})
+        columns.append({
+            'label':'Total',
+            'key':'total',
+            'formatter':integer_to_amount,
+            'style': NUMBER_CELL
+        })
 
         # We set the appropriate letter to each column
         index = 0
@@ -207,19 +409,6 @@ class ExcelExpense(object):
             col['letter'] = letter
             col['last_letter'] = last_letter
         return columns
-
-    def get_merged_cells(self, start, end):
-        """
-            returned merged cells of the current line index
-        """
-        cell_gap = '{1}{0}:{2}{0}'.format(self.index, start, end)
-        self.worksheet.merge_cells(cell_gap)
-        cell = self.worksheet.cell('{1}{0}'.format(self.index, start))
-        return cell
-
-    def set_color(self, cell, color):
-        cell.style.fill.fill_type = Fill.FILL_SOLID
-        cell.style.fill.start_color.index = color
 
     def write_code(self):
         """
@@ -272,14 +461,12 @@ class ExcelExpense(object):
         """
         for column in columns:
             cell = self.get_column_cell(column)
-            cell.style.fill.fill_type = Fill.FILL_SOLID
-            cell.style.fill.start_color.index = Color.header
-            cell.style.font.bold = True
+            cell.style = HEADER_STYLE
             cell.value = column['label']
         self.index += 1
         for column in columns:
             cell = self.get_column_cell(column)
-            cell.style.font.bold = True
+            cell.style = BOLD_CELL
             cell.value = column.get('code', '')
         self.index += 1
 
@@ -309,12 +496,12 @@ class ExcelExpense(object):
         """
         col_dim = self.worksheet.column_dimensions.get(col_letter)
         if col_dim:
-            if col_dim.width == -1 or force:
+            if col_dim.width in (-1, None,) or force:
                 if width == 0:
-                    col_dim.visible = False
+                    col_dim.hidden = True
                 else:
                     col_dim.width = width
-                    col_dim.visible = True
+                    col_dim.hidden = False
 
     def write_table(self, columns, lines):
         """
@@ -327,16 +514,13 @@ class ExcelExpense(object):
             for column in columns:
                 cell = self.get_column_cell(column)
                 cell.value = self.get_cell_val(line, column)
-                if column.has_key('number_format'):
-                    cell.style.number_format.format_code = \
-                            column['number_format']
+                if column.has_key('style'):
+                    cell.style = column['style']
             self.index += 1
 
         for column in columns:
             cell = self.get_column_cell(column)
-            cell.style.font.bold = True
-            self.set_color(cell, Color.footer)
-            cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
+            cell.style = FOOTER_CELL
 
             if column.has_key('code'):
                 val = sum([line.total_ht
@@ -393,7 +577,7 @@ class ExcelExpense(object):
         txt = u"FRAIS DIRECT DE FONCTIONNEMENT (< à 30% DU SALAIRE BRUT \
 PAR MOIS)"
         cell = self.write_full_line(txt)
-        cell.style.font.color.index = Color.Crimson
+        self.set_color(cell, Color.Crimson)
         self.write_expense_table('1')
 
     def write_activity_expenses(self):
@@ -404,7 +588,7 @@ PAR MOIS)"
         txt = u"FRAIS CONCERNANT DIRECTEMENT VOTRE L'ACTIVITE AUPRES DE VOS \
 CLIENTS"
         cell = self.write_full_line(txt)
-        cell.style.font.color.index = Color.Crimson
+        self.set_color(cell, Color.Crimson)
         self.write_expense_table('2')
 
     def write_total(self):
@@ -413,15 +597,10 @@ CLIENTS"
         """
         cell = self.get_merged_cells('A', 'D')
         cell.value = u"Total des frais professionnel à payer"
-        cell.style.font.bold = True
-        cell.style.font.size = 16
-        self.set_color(cell, Color.footer)
+        cell.style = LARGE_FOOTER_CELL
         cell = self.get_merged_cells('E', 'E')
-        cell.style.font.bold = True
-        cell.style.font.size = 16
         cell.value = integer_to_amount(self.model.total)
-        cell.style.number_format.format_code = EXCEL_NUMBER_FORMAT
-        self.set_color(cell, Color.footer)
+        cell.style = LARGE_FOOTER_CELL
         self.index += 2
 
     def write_accord(self):
@@ -446,8 +625,7 @@ CLIENTS"
         title = u"Tableau de bord kilométrique de {0} {1}".\
                 format(user.lastname, user.firstname)
         cell = self.write_full_line(title)
-        cell.style.font.bold = True
-        cell.style.font.size = 24
+        cell.style = TITLE_STYLE
         # index has already been increased
         row_dim = self.worksheet.row_dimensions.get(self.index -1 )
         row_dim.height = 30
@@ -459,11 +637,9 @@ CLIENTS"
         """
             Return the current excel export as a String buffer (StringIO)
         """
-        self.worksheet = self.book.worksheets[0]
-        self.worksheet.title = "NDF"
         cell = self.write_full_line(u"Feuille de notes de frais")
-        cell.style.font.bold = True
-        cell.style.font.size = 24
+
+        cell.style = TITLE_STYLE
         # index has already been increased
         row_dim = self.worksheet.row_dimensions.get(self.index -1 )
         row_dim.height = 30
@@ -491,9 +667,7 @@ CLIENTS"
             if col_dim:
                 col_dim.width = 13
 
-        result = StringIO.StringIO()
-        self.book.save(result)
-        return result
+        return self.save_book()
 
 
 def make_excel_view(filename_builder, factory):
@@ -501,7 +675,7 @@ def make_excel_view(filename_builder, factory):
         Build an excel view of a model
         :param filename_builder: a callable that take the request as arg and
             return a filename
-        :param factory: the Excel factory that should be used to wrap the
+        :param factory: the Xls factory that should be used to wrap the
             request context the factory should provide a render method
             returning a file like object
     """

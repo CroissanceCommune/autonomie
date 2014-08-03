@@ -24,9 +24,11 @@
 
 import colander
 from mock import MagicMock, Mock
-from autonomie.views.forms.customer import deferred_ccode_valid, \
-                        get_customer_from_request, get_company_id_from_request
-from autonomie.models.customer import Customer
+from autonomie.models.customer import (
+    Customer,
+    deferred_ccode_valid,
+)
+
 from autonomie.tests.base import BaseTestCase
 
 class TestCustomer(BaseTestCase):
@@ -50,22 +52,3 @@ class TestCustomer(BaseTestCase):
         customer.__name__ = 'customer'
         validator = self.makeOne(customer)
         self.assertNotRaises(validator, 'nutt', u'IMDD')
-
-    def test_get_customer_from_request(self):
-        context = Mock(__name__='customer')
-        req = MagicMock(context=context)
-        self.assertEqual(get_customer_from_request(req), context)
-        context = Mock(__name__='other')
-        req = MagicMock(context=context)
-        self.assertEqual(get_customer_from_request(req), None)
-
-    def test_get_company_id_from_request(self):
-        company = Mock(id=1, __name__='company')
-        customer = MagicMock(__name__='customer', company=company)
-        req = MagicMock(context=customer)
-        self.assertEqual(get_company_id_from_request(req), 1)
-        req = MagicMock(context=company)
-        self.assertEqual(get_company_id_from_request(req), 1)
-        context = Mock(__name__='other')
-        req = MagicMock(context=context)
-        self.assertEqual(get_company_id_from_request(req), -1)

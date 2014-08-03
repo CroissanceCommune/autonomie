@@ -30,8 +30,6 @@ from autonomie.views.workshop import (
     WorkshopAddView,
     WorkshopEditView,
     record_attendances_view,
-    WorkshopList,
-    CompanyWorkshopList,
     workshop_view,
     workshop_delete_view,
 )

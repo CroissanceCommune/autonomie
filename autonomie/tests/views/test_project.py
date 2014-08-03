@@ -133,4 +133,5 @@ class TestActions(Base):
         req.context = project
         req.params['phase'] = u'Phasé'
         project_addphase(req)
+        self.session.commit()
         self.assertEqual(len(self.getOne().phases), 2)

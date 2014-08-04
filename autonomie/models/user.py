@@ -140,7 +140,7 @@ def get_id_foreignkey_col(foreignkey_str):
         Integer,
         ForeignKey(foreignkey_str),
         primary_key=True,
-        info=get_hidden_field_conf(),
+        info={'colanderalchemy': get_hidden_field_conf()},
     )
     return column
 

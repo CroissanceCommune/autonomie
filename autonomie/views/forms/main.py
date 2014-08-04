@@ -325,7 +325,9 @@ def deferred_company_customer_validator(node, kw):
     Ensure we don't query customers from other companies
     """
     company = kw['request'].context
-    return colander.OneOf([customer.id for customer in company.customers])
+    values = [-1]
+    values.extend([customer.id for customer in company.customers])
+    return colander.OneOf(values)
 
 
 def customer_node(is_admin=False):

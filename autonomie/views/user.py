@@ -904,21 +904,21 @@ def includeme(config):
         route_name='userdatas',
         request_param='action=new',
         renderer='/userdata.mako',
-        permission='admin',
+        permission='manage',
     )
 
     config.add_view(
         UserDatasEdit,
         route_name='userdata',
         renderer='/userdata.mako',
-        permission='admin'
+        permission='manage'
     )
 
     config.add_view(
         userdata_doctype_view,
         route_name='userdata',
         request_param='action=doctype',
-        permission='admin',
+        permission='manage',
     )
 
     config.add_view(

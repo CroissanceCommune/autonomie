@@ -49,7 +49,6 @@ from autonomie.views.forms.task import (
 )
 from autonomie.views.forms.estimations import (
     get_list_schema,
-    STATUS_OPTIONS,
 )
 from autonomie.views.forms import (
     merge_session_with_post,

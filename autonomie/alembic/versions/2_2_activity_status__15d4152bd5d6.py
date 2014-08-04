@@ -69,9 +69,10 @@ def upgrade():
     values = []
     for activity_id, conseiller_id in result:
         values.append("(%s, %s)" % (activity_id, conseiller_id))
-    query = "insert into activity_conseiller (`activity_id`, `account_id`) \
+    if values != []:
+        query = "insert into activity_conseiller (`activity_id`, `account_id`) \
 VALUES {0}".format(','.join(values))
-    op.execute(query)
+        op.execute(query)
 
     op.execute("alter table activity drop foreign key `activity_ibfk_2`;")
 

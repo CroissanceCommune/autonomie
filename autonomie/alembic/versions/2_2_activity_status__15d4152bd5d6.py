@@ -26,6 +26,8 @@ def upgrade():
     conn = get_bind()
     result = conn.execute(query)
 
+    handled = []
+
     for event_id, status, user_id, activity_id in result:
         if status == 'planned':
             user_status = 'registered'
@@ -42,17 +44,19 @@ def upgrade():
             status = 'cancelled'
 
         # create attendance for each participant
-        a = Attendance()
-        a.status = user_status
-        a.account_id = user_id
-        a.event_id = activity_id
-        session.add(a)
-        session.flush()
+        if (user_id, activity_id) not in handled:
+            a = Attendance()
+            a.status = user_status
+            a.account_id = user_id
+            a.event_id = activity_id
+            session.add(a)
+            session.flush()
 
-        # Update the event's status regarding the new norm
-        query = "update event set status='{0}' where id='{1}';".format(
-            status, event_id,)
-        op.execute(query)
+            # Update the event's status regarding the new norm
+            query = "update event set status='{0}' where id='{1}';".format(
+                status, event_id,)
+            op.execute(query)
+            handled.append((user_id, activity_id,))
 
     # Migrating activity to add duration and use datetimes
     op.add_column('activity', sa.Column('duration', sa.Integer, default=0))

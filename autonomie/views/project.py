@@ -258,6 +258,7 @@ def project_view(request):
             estimation.color = COLORS_SET[index]
             index += 1
 
+    for phase in phases:
         for invoice in phase.invoices:
             if invoice.estimation:
                 invoice.color = invoice.estimation.color
@@ -265,6 +266,7 @@ def project_view(request):
                 invoice.color = COLORS_SET[index]
                 index += 1
 
+    for phase in phases:
         for cancelinvoice in phase.cancelinvoices:
             if cancelinvoice.invoice:
                 cancelinvoice.color = cancelinvoice.invoice.color

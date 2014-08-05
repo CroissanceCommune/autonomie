@@ -37,6 +37,7 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
+    Float,
     ForeignKey,
     Date,
     Boolean,
@@ -1247,7 +1248,7 @@ class UserDatas(DBBASE):
     )
 
     parcours_taux_horaire = Column(
-        Integer(),
+        Float(),
         info={
             'colanderalchemy':
             {

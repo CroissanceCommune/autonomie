@@ -415,7 +415,7 @@ class UserDatasEdit(UserDatasAdd):
 
     @property
     def title(self):
-        return "Gestion sociale : {0}".format(
+        return u"Gestion sociale : {0}".format(
             format_account(self.request.context)
         )
 

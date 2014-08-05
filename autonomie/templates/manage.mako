@@ -122,7 +122,7 @@
         <td onclick="document.location='${expense.url}'" class='rowlink'>
             ${api.month_name(expense.month)} ${expense.year}
         </td>
-        <td>
+        <td onclick="document.location='${expense.url}'" class='rowlink'>
             ${api.format_account(expense.user)}
         </td>
         <td onclick="document.location='${expense.url}'" class='rowlink'>

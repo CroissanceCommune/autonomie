@@ -125,7 +125,7 @@
         <td>
             ${api.format_account(expense.user)}
         </td>
-        <td onclick="document.location='${task.url}'" class='rowlink'>
+        <td onclick="document.location='${expense.url}'" class='rowlink'>
             ${api.format_date(expense.status_date)}
         </td>
     </tr>

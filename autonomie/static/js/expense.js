@@ -835,7 +835,7 @@ AutonomieApp.Controller = {
     // Passing the new_element tags a creation used to highlight (or not) the
     // line
     var model = new ExpenseLine({
-      category: 1,
+      category: "1",
       new_element: true,
       date: AppOptions['today']
       });

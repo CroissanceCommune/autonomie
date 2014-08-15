@@ -75,7 +75,7 @@
     <% view_url = request.route_path(task.type_, id=task.id) %>
 
         <td
-            class='rowlink hidden-phone'
+            class='rowlink'
             onclick="document.location='${view_url}'">
             ${task.name}
         </td>
@@ -117,7 +117,7 @@
     </td>
     <td
         onclick="document.location='${view_url}'"
-        class='rowlink hidden-phone'>
+        class='rowlink'>
         ${task.name}
     </td>
     <td
@@ -164,7 +164,7 @@
     </td>
     <td
         onclick="document.location='${view_url}'"
-        class='rowlink'>
+        class='rowlink hidden-phone'>
         %if task.is_valid():
             <i class='icon icon-ok'></i>
         %elif task.is_draft():
@@ -277,7 +277,7 @@ else:
             <table class='table table-striped table-condensed'>
                 <thead>
                     <th></th>
-                    <th class="hidden-phone">Nom</th>
+                    <th>Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>
@@ -310,7 +310,7 @@ else:
                 <thead>
                     <th></th>
                     <th>Numéro</th>
-                    <th class="hidden-phone">Nom</th>
+                    <th>Nom</th>
                     <th class="hidden-phone">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>

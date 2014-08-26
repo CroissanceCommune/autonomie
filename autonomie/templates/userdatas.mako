@@ -69,10 +69,10 @@ url = request.route_path('userdatas.xls', _query=args)
                         <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
                         ${table_btn(del_url, \
                         u"Supprimer",  \
-                        u"Supprimer ce rendez-vous", \
+                        u"Supprimer cette entrée", \
                         icon='icon-trash', \
                         onclick=u"return confirm('Êtes vous sûr de vouloir \
-supprimer ce rendez-vous ?')")
+supprimer cette entrée ?')")
                         }
                     % endif
                 </td>

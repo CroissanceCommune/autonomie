@@ -1281,7 +1281,7 @@ class UserDatas(DBBASE):
     )
 
     parcours_salary = Column(
-        Integer(),
+        Float(),
         info={
             'colanderalchemy':
             {

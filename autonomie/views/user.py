@@ -611,12 +611,18 @@ def user_view(request):
                 user=request.context)
 
 
-def user_delete(request):
+def user_delete(account, request):
     """
         disable a user and its enteprises
     """
-    account = request.context
     try:
+        # First we disable associated companies if we're going to delete the
+        # only employee
+        for company in account.companies:
+            if len(company.employees) == 1:
+                company.disable()
+                request.dbsession.merge(company)
+
         log.debug(u"Deleting account : {0}".format(format_account(account)))
         request.dbsession.delete(account)
         request.dbsession.flush()
@@ -629,6 +635,38 @@ def user_delete(request):
                                             format_account(account))
         request.session.flash(err_msg, 'error')
     return HTTPFound(request.route_path("users"))
+
+
+def userdatas_delete(userdatas, request):
+    """
+    delete a user account and its userdatas
+    """
+    if userdatas.user is not None:
+        log.debug(u"Suppression des données  et du compte de : {0}".format(
+            format_account(userdatas)
+        ))
+        # Suppression du compte utilisateur (la cascade va entrainer la
+        # suppression des données associées)
+        user_delete(userdatas.user, request)
+        message = u"Les données de '{0}' ont bien été effacées".format(
+                                        format_account(userdatas))
+        request.session.flash(message)
+    else:
+        try:
+            log.debug(u"Suppression des données de : {0}".format(
+                format_account(userdatas)
+            ))
+            request.dbsession.delete(userdatas)
+            request.dbsession.flush()
+            message = u"Les données de '{0}' ont bien été effacées".format(
+                                            format_account(userdatas))
+            request.session.flash(message)
+        except:
+            log.exception(u"Erreur à la suppression des données")
+            err_msg = u"Erreur à la suppression des données de '{0}'".format(
+                                                format_account(userdatas))
+            request.session.flash(err_msg, 'error')
+    return HTTPFound(request.route_path('userdatas'))
 
 
 def user_enable(request):
@@ -697,7 +735,8 @@ class UserDisable(BaseFormView):
             user.disable()
             self.dbsession.merge(user)
             log.info(u"The user {0} has been disabled".format(
-                                                        format_account(user)))
+                         format_account(user))
+            )
             message = u"L'utilisateur {0} a été désactivé.".format(
                                                         format_account(user))
             self.session.flash(message)
@@ -940,6 +979,13 @@ def includeme(config):
     config.add_view(
         user_delete,
         route_name='user',
+        request_param='action=delete',
+        permission='manage'
+    )
+
+    config.add_view(
+        userdatas_delete,
+        route_name='userdata',
         request_param='action=delete',
         permission='manage'
     )

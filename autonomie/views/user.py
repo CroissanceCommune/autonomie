@@ -66,7 +66,7 @@ from autonomie.views.forms import (
 )
 
 from autonomie.views.render_api import format_account
-from autonomie.views.forms.widgets import AccordionFormWidget
+from autonomie.views.forms.widgets import AccordionFormWidget, TableFormWidget
 from autonomie.views.forms.user import (
     get_list_schema,
     get_account_schema,
@@ -489,6 +489,7 @@ class UserDatasEdit(UserDatasAdd):
             action=action,
             counter=self.counter
         )
+        form.widget = TableFormWidget()
         form.set_appstruct(appstruct)
         return form
 

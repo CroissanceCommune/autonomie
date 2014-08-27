@@ -78,8 +78,9 @@ class TestUserDelete(Base):
         self.addone()
         self.session.commit()
         req = self.get_csrf_request()
-        req.context = self.getone()
-        user_delete(req)
+        u = self.getone()
+        req.context = u
+        user_delete(u, req)
         self.session.commit()
         self.assertEqual(None, self.getone())
 

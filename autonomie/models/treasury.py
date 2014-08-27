@@ -170,7 +170,10 @@ class ExpenseSheet(DBBASE):
     user_id = Column(Integer, ForeignKey("accounts.id", ondelete="cascade"))
     status = Column(String(10), default='draft')
     status_user_id = Column(Integer, ForeignKey("accounts.id"))
-    status_date = Column(Date(), default=date.today(), onupdate=date.today())
+    status_date = Column(
+        Date(),
+        default=date.today,
+        onupdate=date.today)
     exported = Column(Boolean(), default=False)
     company = relationship("Company",
             backref=backref("expenses",

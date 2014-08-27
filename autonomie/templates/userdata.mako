@@ -27,11 +27,23 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-% if getattr(request.context, "user_id", None) is not None and request.context.__name__ == 'userdatas':
-    <div class='well'>
-        Ces données sont associées à un compte utilisateur : <a href='${request.route_path("user", id=request.context.user_id)}'>Voir</a>
-    </div>
+<% userdata = request.context %>
+<div class='well'>
+% if getattr(userdata, "user_id", None) is not None and userdata.__name__ == 'userdatas':
+        Ces données sont associées à un compte utilisateur : <a href='${request.route_path("user", id=userdata.user_id)}'>Voir</a>
+<% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
+<% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?'
+if userdata.user is not None:
+    del_msg += u' Le compte associé sera également supprimé.'
+    del_msg += u" Cette action n'est pas réversible."
+%>
+<a class='btn pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm(\"${del_msg}\");">
+    <i class="icon icon-trash"></i>
+    Supprimer les données
+</a>
 % endif
+</div>
+
 <ul class='nav nav-tabs'>
     <li class='active'>
     <a href="#form1" data-toggle='tab'>

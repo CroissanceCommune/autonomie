@@ -67,12 +67,16 @@ url = request.route_path('userdatas.xls', _query=args)
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer", icon='icon-pencil')}
                     % if api.has_permission('delete', userdata):
                         <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
+<% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?'
+if userdata.user is not None:
+    del_msg += u' Le compte associé sera également supprimé.'
+    del_msg += u" Cette action n'est pas réversible."
+%>
                         ${table_btn(del_url, \
                         u"Supprimer",  \
                         u"Supprimer cette entrée", \
                         icon='icon-trash', \
-                        onclick=u"return confirm('Êtes vous sûr de vouloir \
-supprimer cette entrée ?')")
+                        onclick=u"return confirm(\"%s\");" % del_msg)
                         }
                     % endif
                 </td>

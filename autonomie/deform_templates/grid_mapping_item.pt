@@ -6,8 +6,9 @@
                 category category|field.widget.category;
                 required required|field.required;
                 width getattr(field, 'width', '2');
+                field_css getattr(field.schema, 'css', '');
                 "
-                class="span${width} control-group ${field.error and ' ' + (error_class or '')}"
+                class="span${width} control-group ${field_css} ${field.error and ' ' + (error_class or '')}"
     title="${description}"
     id="item-${oid}"
     tal:omit-tag="hidden"

@@ -71,7 +71,11 @@ if userdata.user is not None:
     </div>
     % if doctypes_form is not UNDEFINED:
     <div class='tab-pane' id='form2'>
-        ${doctypes_form.render()|n}
+        <div class='span2'>
+        </div>
+        <div class='span8'>
+            ${doctypes_form.render()|n}
+        </div>
     </div>
     % endif
     % if account_form is not UNDEFINED and account_form is not None:

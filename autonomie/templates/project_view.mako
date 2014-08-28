@@ -49,10 +49,8 @@
         u"Télécharger la version PDF", \
         u"icon-file")}
         %if task.is_deletable(request):
-            ${table_btn(request.route_path(\
-            "estimation", \
-            id=task.id, \
-            _query=dict(action="delete")), \
+            ${table_btn(\
+            del_url,\
             u"Supprimer", \
             u"Supprimer le devis", \
             icon="icon-trash", \

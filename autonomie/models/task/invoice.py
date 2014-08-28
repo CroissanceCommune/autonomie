@@ -514,7 +514,11 @@ class CancelInvoice(Task, TaskCompute):
 
     invoice = relationship(
         "Invoice",
-        backref=backref("cancelinvoice", uselist=False),
+        backref=backref(
+            "cancelinvoice",
+            uselist=False,
+            cascade='all, delete-orphan',
+        ),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id")
 
     customer = relationship(

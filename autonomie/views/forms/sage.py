@@ -55,10 +55,8 @@ class PeriodSchema(colander.MappingSchema):
     """
         A form used to select a period
     """
-    start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
-            widget=main.get_date_input())
-    end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
-            widget=main.get_date_input())
+    start_date = colander.SchemaNode(colander.Date(), title=u"Date de début")
+    end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin")
     exported = EXPORTEDFIELD
 
 

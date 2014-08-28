@@ -65,10 +65,8 @@ def deferred_contractor_list(node, kw):
 
 
 class HolidaySchema(colander.MappingSchema):
-    start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
-            widget=main.get_date_input())
-    end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
-            widget=main.get_date_input())
+    start_date = colander.SchemaNode(colander.Date(), title=u"Date de début")
+    end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin")
 
 
 class HolidaysList(colander.SequenceSchema):
@@ -81,10 +79,8 @@ class HolidaysSchema(colander.MappingSchema):
 
 
 class SearchHolidaysSchema(colander.MappingSchema):
-    start_date = colander.SchemaNode(colander.Date(), title=u"Date de début",
-            widget=main.get_date_input())
-    end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin",
-            widget=main.get_date_input())
+    start_date = colander.SchemaNode(colander.Date(), title=u"Date de début")
+    end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin")
     user_id = colander.SchemaNode(colander.Integer(), title=u"Entrepreneur",
                        widget=deferred_contractor_list,
                        missing=None)

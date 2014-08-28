@@ -43,8 +43,11 @@ from autonomie.models.initialize import initialize_sql
 from autonomie.models.config import get_config
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
-from autonomie.utils.renderer import set_deform_renderer
-from autonomie.utils.renderer import set_json_renderer
+from autonomie.utils.renderer import (
+    set_deform_renderer,
+    set_json_renderer,
+    set_default_widgets,
+)
 from autonomie.utils.session import get_session_factory
 from autonomie.utils.deform_bootstrap_fix import (
     add_resources_to_registry,
@@ -150,6 +153,8 @@ def main(global_config, **settings):
     set_deform_renderer()
     # Set json renderer
     set_json_renderer(config)
+    # Set default widgets to custom ones
+    set_default_widgets()
     config.add_translation_dirs("colander:locale/", "deform:locale")
     add_resources_to_registry()
 

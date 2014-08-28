@@ -36,10 +36,13 @@ from pyramid.renderers import render
 from pyramid.renderers import JSON
 from pyramid.threadlocal import get_current_request
 
+from deform.schema import default_widget_makers as defaults
 from deform.form import Form
 from deform.template import ZPTRendererFactory
 
 from autonomie.i18n import translate
+from autonomie.views.forms import widgets
+
 
 log = logging.getLogger(__name__)
 
@@ -93,6 +96,14 @@ def set_deform_renderer():
     renderer = MultiRendererFactory(search_path=deform_template_dirs,
                                     translator=translate)
     Form.default_renderer = renderer
+
+
+def set_default_widgets():
+    """
+    Set custom date and datetime input widgets for a better user-experience
+    """
+    defaults[colander.DateTime] = widgets.CustomDateTimeInputWidget
+    defaults[colander.Date] = widgets.CustomDateInputWidget
 
 
 def set_json_renderer(config):

@@ -26,11 +26,7 @@ import colander
 import calendar
 import datetime
 import deform
-from deform_bootstrap import widget as bootstrap_widget
 
-from autonomie.models import user
-from autonomie.models import company
-from autonomie.models.task.invoice import get_invoice_years
 from autonomie.utils.fileupload import FileTempStore
 
 from autonomie.views.forms import widgets as custom_widgets
@@ -80,51 +76,6 @@ def get_datetime_input(**kw):
     """
     datetime_input = custom_widgets.CustomDateTimeInputWidget(**kw)
     return datetime_input
-
-
-def user_node(roles=None, **kw):
-    """
-    Return a schema node for user selection
-    roles: allow to restrict the selection to the given roles
-        (to select between admin, contractor and manager)
-    """
-    widget_options = kw.pop('widget_options', {})
-    return colander.SchemaNode(
-            colander.Integer(),
-            widget=user.get_deferred_user_choice(roles, widget_options),
-            **kw
-            )
-
-
-def get_deferred_company_choices(widget_options):
-    default_entry = widget_options.pop('default', None)
-    @colander.deferred
-    def deferred_company_choices(node, kw):
-        """
-        return a deferred company selection widget
-        """
-        values = [(comp.id, comp.name) for comp in company.Company.query()]
-        if default_entry is not None:
-            values.insert(0, default_entry)
-        return bootstrap_widget.ChosenSingleWidget(
-            values=values,
-            placeholder=u"Sélectionner une entreprise",
-            **widget_options
-            )
-    return deferred_company_choices
-
-
-def company_node(**kw):
-    """
-    Return a schema node for company selection
-
-    """
-    widget_options = kw.pop('widget_options', {})
-    return colander.SchemaNode(
-        colander.Integer(),
-        widget=get_deferred_company_choices(widget_options),
-        **kw
-        )
 
 
 def today_node(**kw):
@@ -202,12 +153,15 @@ def get_year_select_deferred(query_func, default_val=None):
     return deferred_widget
 
 
-def year_select_node(**kw):
+def year_select_node(query_func, **kw):
     """
     Return a year select node with defaults and missing values
+
+    :param query_func: a function to call that return the years we want to
+        display
     """
     title = kw.pop('title', u"")
-    query_func = kw.pop('query_func', get_invoice_years)
+    query_func = kw['query_func']
     missing = kw.pop('missing', default_year)
     widget_options = kw.pop('widget_options', {})
     default_val = widget_options.get('default_val')
@@ -272,6 +226,7 @@ def mail_node(**kw):
         validator=colander.Email(MAIL_ERROR_MESSAGE),
         **kw)
 
+
 def id_node():
     """
     Return a node for id recording (usefull in edition forms for retrieving
@@ -281,68 +236,6 @@ def id_node():
         colander.Integer(),
         widget=deform.widget.HiddenWidget(),
         missing=0,
-        )
-
-
-@colander.deferred
-def deferred_fullcustomer_list_widget(node, kw):
-    values = [('', '')]
-    for comp in company.Company.query():
-        values.append(
-            deform.widget.OptGroup(
-                comp.name,
-                *[(cust.id, cust.name) for cust in comp.customers]
-            )
-        )
-    return custom_widgets.CustomChosenOptGroupWidget(
-        values=values,
-        placeholder=u"Sélectionner un client"
-        )
-
-
-@colander.deferred
-def deferred_customer_list_widget(node, kw):
-    values = [(-1, u''), ]
-    company = kw['request'].context
-    values.extend(((cust.id, cust.name) for cust in company.customers))
-    return bootstrap_widget.ChosenSingleWidget(
-        values=values,
-        placeholder=u'Sélectionner un client',
-    )
-
-
-@colander.deferred
-def deferred_company_customer_validator(node, kw):
-    """
-    Ensure we don't query customers from other companies
-    """
-    company = kw['request'].context
-    values = [-1]
-    values.extend([customer.id for customer in company.customers])
-    return colander.OneOf(values)
-
-
-def customer_node(is_admin=False):
-    """
-    return a customer selection node
-
-        is_admin
-
-            is the associated view restricted to company's invoices
-    """
-    if is_admin:
-        deferred_customer_widget = deferred_fullcustomer_list_widget
-        deferred_customer_validator = None
-    else:
-        deferred_customer_widget = deferred_customer_list_widget
-        deferred_customer_validator = deferred_company_customer_validator
-
-    return colander.SchemaNode(
-            colander.Integer(),
-            name='customer_id',
-            widget=deferred_customer_widget,
-            validator=deferred_customer_validator,
-            missing=-1,
         )
 
 
@@ -360,16 +253,3 @@ def get_fileupload_widget(store_url, store_path, session, \
             )
     return deform.widget.FileUploadWidget(tmpstore,
                 template=TEMPLATES_PATH + "fileupload.mako")
-
-
-@colander.deferred
-def deferred_edit_widget(node, kw):
-    """
-        Dynamic assigned widget
-        returns a text widget disabled if edit is True in schema binding
-    """
-    if kw.get('edit'):
-        wid = custom_widgets.DisabledInput()
-    else:
-        wid = deform.widget.TextInputWidget()
-    return wid

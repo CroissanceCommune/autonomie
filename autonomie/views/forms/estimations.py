@@ -25,8 +25,9 @@
     forms schemas for estimation list related views
 """
 import colander
-from deform import widget as deform_widget
-
+import deform
+from autonomie.models.task.invoice import get_invoice_years
+from autonomie.models import company
 from autonomie.views.forms.lists import BaseListsSchema
 from autonomie.views.forms import main
 
@@ -43,16 +44,19 @@ def get_list_schema():
 
     del schema['search']
 
-    schema.insert(0, main.customer_node())
+    schema.insert(0, company.customer_node())
 
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name='status',
-        widget=deform_widget.SelectWidget(values=STATUS_OPTIONS),
+        widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
         validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
         missing='all'
     ))
-
-    schema.insert(0, main.year_select_node(name='year'))
+    node = main.year_select_node(
+        name='year',
+        query_func=get_invoice_years,
+    )
+    schema.insert(0, node)
 
     return schema

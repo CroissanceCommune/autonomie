@@ -107,6 +107,7 @@ class TableMappingWidget(deform.widget.MappingWidget):
     :param cols: number of columns we want
     """
     default_cols = 3
+    num_cols = 12
     template = TEMPLATES_PATH + "grid_mapping"
     item_template = TEMPLATES_PATH + "grid_mapping_item"
     readonly_template = TEMPLATES_PATH + "grid_mapping"
@@ -117,7 +118,11 @@ class TableMappingWidget(deform.widget.MappingWidget):
         Return children grouped regarding the grid description
         """
         cols = getattr(self, "cols", self.default_cols)
-        return list(grouper(field.children, cols, fillvalue=None))
+        width = self.num_cols / cols
+        for child in field.children:
+            child.width = width
+        res = list(grouper(field.children, cols, fillvalue=None))
+        return res
 
 
 class GridMappingWidget(TableMappingWidget):
@@ -323,6 +328,11 @@ class AccordionMappingWidget(GridMappingWidget):
         if not hasattr(self, '_tag_id'):
             self._tag_id = random_tag_id()
         return self._tag_id
+
+
+class TableFormWidget(TableMappingWidget):
+    template = TEMPLATES_PATH + "grid_form"
+    readonly_template = TEMPLATES_PATH + "grid_form"
 
 
 class GridFormWidget(GridMappingWidget):

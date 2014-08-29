@@ -45,7 +45,6 @@ from deform_bootstrap.widget import ChosenSingleWidget
 from pyramid.renderers import render
 
 from autonomie.utils.ascii import gen_random_string
-from autonomie.utils.fileupload import FileTempStore
 
 
 log = logging.getLogger(__name__)
@@ -287,22 +286,6 @@ class CustomChosenOptGroupWidget(widget.SelectWidget):
     """
     template = TEMPLATES_PATH + 'chosen_optgroup.pt'
 
-
-def get_fileupload_widget(store_url, store_path, session, \
-        default_filename=None, filters=None):
-    """
-        return a file upload widget
-    """
-    tmpstore = FileTempStore(
-            session,
-            store_path,
-            store_url,
-            default_filename=default_filename,
-            filters=filters,
-            )
-    return widget.FileUploadWidget(tmpstore,
-                template=TEMPLATES_PATH + "fileupload.mako")
-
 @colander.deferred
 def deferred_edit_widget(node, kw):
     """
@@ -314,20 +297,6 @@ def deferred_edit_widget(node, kw):
     else:
         wid = widget.TextInputWidget()
     return wid
-
-
-def get_deferred_edit_widget(**options):
-    """
-        Return a deferred edit widget
-    """
-    @colander.deferred
-    def deferred_edit_widget(node, kw):
-        if kw.get('edit'):
-            wid = DisabledInput()
-        else:
-            wid = widget.TextInputWidget(**options)
-        return wid
-    return deferred_edit_widget
 
 
 @colander.deferred

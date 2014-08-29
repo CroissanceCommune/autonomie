@@ -35,8 +35,7 @@ from autonomie import deform_extend
 
 
 TEMPLATES_PATH = "autonomie:deform_templates/"
-
-
+EXCLUDED = {'exclude': True}
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
 
 
@@ -166,7 +165,6 @@ def year_select_node(query_func, **kw):
         display
     """
     title = kw.pop('title', u"")
-    query_func = kw['query_func']
     missing = kw.pop('missing', default_year)
     widget_options = kw.pop('widget_options', {})
     default_val = widget_options.get('default_val')
@@ -220,6 +218,13 @@ def month_select_node(**kw):
             )
 
 
+def mail_validator():
+    """
+    Return an email entry validator with a custom error message
+    """
+    return colander.Email(MAIL_ERROR_MESSAGE)
+
+
 def mail_node(**kw):
     """
         Return a generic customized mail input field
@@ -228,7 +233,7 @@ def mail_node(**kw):
     return colander.SchemaNode(
         colander.String(),
         title=title,
-        validator=colander.Email(MAIL_ERROR_MESSAGE),
+        validator=mail_validator(),
         **kw)
 
 
@@ -292,3 +297,88 @@ def merge_session_with_post(model, app_struct):
         if value not in (None, colander.null,):
             setattr(model, key, value)
     return model
+
+
+def get_hidden_field_conf():
+    """
+    Return the model's info conf to get a colanderalchemy hidden widget
+    """
+    return {
+            'widget': deform.widget.HiddenWidget(),
+            'missing': None
+    }
+
+
+def get_deferred_select_validator(model):
+    """
+    Return a deferred validator based on the given model
+
+        model
+
+            Option model having at least two attributes id and label
+    """
+    @colander.deferred
+    def deferred_validator(binding_datas, request):
+        """
+        The deferred function that will be fired on schema binding
+        """
+        return colander.OneOf([m.id for m in model.query()])
+    return deferred_validator
+
+
+def get_deferred_select(model, multi=False, mandatory=False):
+    """
+    Return a deferred select widget based on the given model
+
+        model
+
+            Option model having at least two attributes id and label
+
+        multi
+
+            Should it support multiple item selection
+
+        mandatory
+
+            Is it a mandatory entry, if not, we insert a void value
+            default: False
+    """
+    @colander.deferred
+    def deferred_widget(binding_datas, request):
+        """
+        The deferred function that will be fired on schema binding
+        """
+        values = [(m.id, m.label) for m in model.query()]
+        if not mandatory:
+            values.insert(0, ('', ''))
+        return deform.widget.SelectWidget(values=values, multi=multi)
+    return deferred_widget
+
+
+def get_select(values, multi=False, mandatory=True):
+    """
+    Return a select widget with the provided options
+
+         values
+
+            options as expected by the deform select widget (a sequence of
+            2-uples: (id, label))
+    """
+    if not mandatory:
+        values.insert(0, ('', ''))
+    return deform.widget.SelectWidget(values=values, multi=False)
+
+
+def get_select_validator(options):
+    """
+    return a validator for the given options
+
+        options
+
+            options as expected by the deform select widget (a sequence of
+            2-uples : (id, label))
+
+    """
+    return colander.OneOf([o[0] for o in options])
+
+

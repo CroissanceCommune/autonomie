@@ -25,18 +25,23 @@ Main deferreds functions used in autonomie
 import colander
 import calendar
 import datetime
-from deform import widget as deform_widget
+import deform
 from deform_bootstrap import widget as bootstrap_widget
 
 from autonomie.models import user
 from autonomie.models import company
 from autonomie.models.task.invoice import get_invoice_years
-from autonomie.views import render_api
+from autonomie.utils.fileupload import FileTempStore
 
 from autonomie.views.forms import widgets as custom_widgets
 
 
+TEMPLATES_PATH = "autonomie:deform_templates/"
+
+
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
+
+
 @colander.deferred
 def deferred_autocomplete_widget(node, kw):
     """
@@ -46,7 +51,7 @@ def deferred_autocomplete_widget(node, kw):
     if choices:
         wid = bootstrap_widget.ChosenSingleWidget(values=choices)
     else:
-        wid = deform_widget.TextInputWidget()
+        wid = deform.widget.TextInputWidget()
     return wid
 
 
@@ -168,7 +173,7 @@ def come_from_node(**kw):
         kw["missing"] = ""
     return colander.SchemaNode(
             colander.String(),
-            widget=deform_widget.HiddenWidget(),
+            widget=deform.widget.HiddenWidget(),
             **kw
             )
 
@@ -179,9 +184,9 @@ def textarea_node(**kw):
     """
     css_class = kw.pop('css_class', None) or 'span10'
     if kw.pop('richwidget', None):
-        wid = deform_widget.RichTextWidget(css_class=css_class, theme="advanced")
+        wid = deform.widget.RichTextWidget(css_class=css_class, theme="advanced")
     else:
-        wid = deform_widget.TextAreaWidget(css_class=css_class)
+        wid = deform.widget.TextAreaWidget(css_class=css_class)
     return colander.SchemaNode(
             colander.String(),
             widget=wid,
@@ -205,7 +210,7 @@ def get_year_select_deferred(query_func, default_val=None):
         values = zip(years, years)
         if default_val is not None:
             values.insert(0, default_val)
-        return deform_widget.SelectWidget(values=values,
+        return deform.widget.SelectWidget(values=values,
                     css_class='input-small')
     return deferred_widget
 
@@ -247,7 +252,7 @@ def get_month_select_widget(widget_options):
     default_val = widget_options.get('default_val')
     if default_val is not None:
         options.insert(0, default_val)
-    return deform_widget.SelectWidget(values=options,
+    return deform.widget.SelectWidget(values=options,
                     css_class='input-small')
 
 
@@ -287,7 +292,7 @@ def id_node():
     """
     return colander.SchemaNode(
         colander.Integer(),
-        widget=deform_widget.HiddenWidget(),
+        widget=deform.widget.HiddenWidget(),
         missing=0,
         )
 
@@ -297,7 +302,7 @@ def deferred_fullcustomer_list_widget(node, kw):
     values = [('', '')]
     for comp in company.Company.query():
         values.append(
-            deform_widget.OptGroup(
+            deform.widget.OptGroup(
                 comp.name,
                 *[(cust.id, cust.name) for cust in comp.customers]
             )
@@ -352,3 +357,19 @@ def customer_node(is_admin=False):
             validator=deferred_customer_validator,
             missing=-1,
         )
+
+
+def get_fileupload_widget(store_url, store_path, session, \
+        default_filename=None, filters=None):
+    """
+        return a file upload widget
+    """
+    tmpstore = FileTempStore(
+            session,
+            store_path,
+            store_url,
+            default_filename=default_filename,
+            filters=filters,
+            )
+    return deform.widget.FileUploadWidget(tmpstore,
+                template=TEMPLATES_PATH + "fileupload.mako")

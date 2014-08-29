@@ -42,7 +42,7 @@ from autonomie.views.forms import (
     )
 from autonomie.views.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
-from autonomie.views.forms.widgets import get_fileupload_widget
+from autonomie.views.forms.main import get_fileupload_widget
 
 
 from .custom_types import AmountType

@@ -33,7 +33,7 @@ from deform import FileData
 from deform import widget
 
 from autonomie.views.forms.widgets import deferred_edit_widget
-from autonomie.views.forms.widgets import get_fileupload_widget
+from autonomie.views.forms.main import get_fileupload_widget
 from autonomie.views.forms.validators import validate_image_mime
 from autonomie.views.forms import main
 from autonomie.utils.image import ImageResizer

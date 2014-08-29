@@ -26,7 +26,8 @@
     Project model
 """
 import colander
-from deform import widget as deform_widget
+import deform
+
 from deform_bootstrap import widget as bootstrap_widget
 from sqlalchemy import (
     Table,
@@ -42,7 +43,7 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie.models import widgets
+from autonomie import forms
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
 from autonomie.models.base import (
@@ -137,7 +138,7 @@ class Project(Node):
     id = Column(
         ForeignKey('node.id'),
         primary_key=True,
-        info={'colanderalchemy': widgets.EXCLUDED}
+        info={'colanderalchemy': forms.EXCLUDED}
     )
 
     code = Column(
@@ -145,7 +146,7 @@ class Project(Node):
         info={
             'colanderalchemy': {
                 'title': u"Code",
-                'widget': deform_widget.TextInputWidget(mask='****')
+                'widget': deform.widget.TextInputWidget(mask='****')
             },
         },
         nullable=False,
@@ -164,7 +165,7 @@ class Project(Node):
         ForeignKey('company.id'),
         info={
             'options':{'csv_exclude':True},
-            'colanderalchemy': widgets.EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
         }
     )
 
@@ -174,7 +175,6 @@ class Project(Node):
             info={
                 "colanderalchemy":{
                     "title": "Date de début",
-                    "widget": widgets.get_date(),
                     "typ": colander.Date(),
                 }
             },
@@ -189,7 +189,6 @@ class Project(Node):
             info={
                 "colanderalchemy":{
                     "title": "Date de fin",
-                    "widget": widgets.get_date(),
                     "typ": colander.Date(),
                 }
             },
@@ -205,7 +204,7 @@ class Project(Node):
                 'label':u"Définition",
                   'colanderalchemy':{
                       'title': u"Définition",
-                      'widget': deform_widget.TextAreaWidget(
+                      'widget': deform.widget.TextAreaWidget(
                           css_class="span10"
                       ),
                   }
@@ -218,7 +217,7 @@ class Project(Node):
     archived = Column(
         String(255),
         default=0,
-        info={'colanderalchemy': widgets.EXCLUDED},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     customers = relationship(
@@ -226,7 +225,7 @@ class Project(Node):
         secondary=ProjectCustomer,
         backref=backref(
             'projects',
-            info={'colanderalchemy': widgets.EXCLUDED},
+            info={'colanderalchemy': forms.EXCLUDED},
         ),
         info={
             'colanderalchemy': {
@@ -320,12 +319,12 @@ class Phase(DBBASE):
     id = Column(
         Integer,
         primary_key=True,
-        info={'colanderalchemy': widgets.EXCLUDED},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     project_id = Column(
         ForeignKey('project.id'),
-        info={'colanderalchemy': widgets.EXCLUDED},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     name = Column("name", String(150), default=u'Phase par défaut')
@@ -334,15 +333,15 @@ class Phase(DBBASE):
         "Project",
         backref=backref(
             "phases",
-            info={'colanderalchemy': widgets.EXCLUDED},
+            info={'colanderalchemy': forms.EXCLUDED},
         ),
-        info={'colanderalchemy': widgets.EXCLUDED},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     creationDate = deferred(
         Column(
             CustomDateType,
-            info={'colanderalchemy': widgets.EXCLUDED},
+            info={'colanderalchemy': forms.EXCLUDED},
             default=get_current_timestamp,
         )
     )
@@ -350,7 +349,7 @@ class Phase(DBBASE):
     updateDate = deferred(
         Column(
             CustomDateType,
-            info={'colanderalchemy': widgets.EXCLUDED},
+            info={'colanderalchemy': forms.EXCLUDED},
             default=get_current_timestamp,
             onupdate=get_current_timestamp,
         )

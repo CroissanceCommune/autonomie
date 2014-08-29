@@ -37,7 +37,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, backref
 
-from autonomie.models import widgets
+from autonomie import forms
 from autonomie.models.base import (
     DBBASE,
     default_table_args,
@@ -61,20 +61,20 @@ class Node(DBBASE):
 
     created_at = Column(
         DateTime(),
-        info={'colanderalchemy': widgets.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED,},
         default=datetime.now(),
     )
 
     updated_at = Column(
         DateTime(),
-        info={'colanderalchemy': widgets.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED,},
         default=datetime.now(),
         onupdate=datetime.now()
     )
 
     parent_id = Column(
         ForeignKey('node.id'),
-        info={'colanderalchemy': widgets.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED,},
     )
 
     children = relationship(
@@ -83,15 +83,15 @@ class Node(DBBASE):
         backref=backref(
             'parent',
             remote_side=[id],
-            info={'colanderalchemy': widgets.EXCLUDED,},
+            info={'colanderalchemy': forms.EXCLUDED,},
         ),
         cascade='all',
-        info={'colanderalchemy': widgets.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED,},
     )
 
     type_ = Column(
         'type_',
         String(30),
-        info={'colanderalchemy': widgets.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED,},
         nullable=False,
     )

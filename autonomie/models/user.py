@@ -28,7 +28,7 @@
 import logging
 import datetime
 import colander
-from deform import widget as deform_widget
+import deform
 
 from hashlib import md5
 
@@ -57,12 +57,11 @@ from autonomie.views import render_api
 from deform_bootstrap import widget as bootstrap_widget
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
-from autonomie.models.widgets import (
+from autonomie.forms import (
     get_hidden_field_conf,
     EXCLUDED,
     get_select,
     get_select_validator,
-    get_date,
     get_deferred_select,
     mail_validator,
 )
@@ -207,7 +206,7 @@ class User(DBBASE):
         info={'colanderalchemy':
               {
                   'title': u'Mot de passe',
-                  'widget': deform_widget.CheckedPasswordWidget(),
+                  'widget': deform.widget.CheckedPasswordWidget(),
               }
         },
         nullable=False,
@@ -716,7 +715,6 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u"Date d'entrée au sociétariat",
                 'section': u'Synthèse',
-                'widget': get_date(),
             },
         },
         default=None,
@@ -816,7 +814,7 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u'Adresse',
                 'section': u'Coordonnées',
-                'widget': deform_widget.TextAreaWidget(),
+                'widget': deform.widget.TextAreaWidget(),
             }
         }
     )
@@ -895,7 +893,6 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u'Date de naissance',
                 'section': u'Coordonnées',
-                'widget': get_date(),
             }
         }
     )
@@ -906,7 +903,7 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u'Lieu de naissance',
                 'section': u'Coordonnées',
-                'widget': deform_widget.TextAreaWidget(),
+                'widget': deform.widget.TextAreaWidget(),
             }
         }
     )
@@ -937,7 +934,6 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u'Carte de séjour (fin de validité)',
                 'section': u'Coordonnées',
-                'widget': get_date(),
             }
         }
     )
@@ -1049,7 +1045,6 @@ class UserDatas(DBBASE):
             {
                 'title': u"Allocation adulte handicapé - échéance (expiration)",
                 'section': u'Statut',
-                'widget': get_date(),
             }
         }
     )
@@ -1073,7 +1068,6 @@ class UserDatas(DBBASE):
             {
                 'title': u'Date de fin de droit',
                 'section': u'Statut',
-                'widget': get_date(),
             }
         }
     )
@@ -1158,7 +1152,6 @@ class UserDatas(DBBASE):
             {
                 'title': u'Date info coll',
                 'section': u'Parcours',
-                'widget': get_date()
             }
         }
     )
@@ -1234,7 +1227,6 @@ class UserDatas(DBBASE):
                 'title': u"Date de début de contrat",
                 'description': u'Date du Cdi ou du début de Cdd',
                 "section": u"Parcours",
-                'widget': get_date(),
             }
         }
     )
@@ -1247,7 +1239,6 @@ class UserDatas(DBBASE):
                 'title': u"Date de fin de contrat",
                 'description': u'Date de fin de Cdd',
                 "section": u"Parcours",
-                'widget': get_date(),
             }
         }
     )
@@ -1259,7 +1250,6 @@ class UserDatas(DBBASE):
             {
                 'title': u'Dernier avenant',
                 'section': u'Parcours',
-                'widget': get_date(),
             }
         }
     )
@@ -1327,7 +1317,7 @@ class UserDatas(DBBASE):
             {
                 'title': u"Objectifs",
                 "section": u"Parcours",
-                "widget": deform_widget.TextAreaWidget(),
+                "widget": deform.widget.TextAreaWidget(),
             }
         }
     )
@@ -1355,7 +1345,6 @@ class UserDatas(DBBASE):
             {
                 'title': u"Date de la visite médicale",
                 'section': u'Parcours',
-                'widget': get_date(),
             }
         }
     )
@@ -1367,7 +1356,6 @@ class UserDatas(DBBASE):
             {
                 'title': u"Date limite",
                 'section': u'Parcours',
-                'widget': get_date(),
             }
         }
     )
@@ -1380,7 +1368,6 @@ class UserDatas(DBBASE):
             {
                 'title': u"Date de sortie",
                 'section': u'Sortie',
-                'widget': get_date(),
             }
         }
     )
@@ -1552,7 +1539,6 @@ class DateDiagnosticDatas(DBBASE):
         Date(),
         info={
             "title": u'Date du diagnostic',
-            "widget": get_date(),
         }
     )
     userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
@@ -1569,7 +1555,6 @@ class DateConventionCAPEDatas(DBBASE):
         Date(),
         info={
             "title": u'Date de la convention',
-            "widget": get_date(),
         }
     )
     userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
@@ -1586,7 +1571,6 @@ class DateDPAEDatas(DBBASE):
         Date(),
         info={
             "title": u'Date de la DPAE',
-            "widget": get_date(),
         }
     )
     userdatas_id = Column(

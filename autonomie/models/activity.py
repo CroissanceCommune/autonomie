@@ -50,7 +50,7 @@ from autonomie.models.base import (
     default_table_args,
     )
 from autonomie.models.node import Node
-from autonomie.models.widgets import EXCLUDED
+from autonomie.forms import EXCLUDED
 
 
 log = logging.getLogger(__name__)

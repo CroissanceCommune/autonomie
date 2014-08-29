@@ -31,47 +31,48 @@ import logging
 from zope.interface import implementer
 
 from sqlalchemy import (
-        Column,
-        Integer,
-        String,
-        ForeignKey,
-        Text,
-        )
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Text,
+)
 from sqlalchemy.orm import (
-        relationship,
-        deferred,
-        backref,
+    relationship,
+    deferred,
+    backref,
 )
 # Aye : ici on a du double dans la bdd, en attendant une éventuelle
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
 
-from autonomie.models import widgets
+from autonomie import forms
 from autonomie.models.types import (
-        CustomDateType,
-        CustomDateType2)
+    CustomDateType,
+    CustomDateType2,
+)
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
-        DBBASE,
-        default_table_args,
-        )
+    DBBASE,
+    default_table_args,
+)
 
 from autonomie.compute.task import (
-        EstimationCompute,
-        LineCompute,
-        )
+    EstimationCompute,
+    LineCompute,
+)
 from .interfaces import (
-        IValidatedTask,
-        IMoneyTask,
-        )
+    IValidatedTask,
+    IMoneyTask,
+)
 from .invoice import (
-        Invoice,
-        InvoiceLine,
-        )
+    Invoice,
+    InvoiceLine,
+)
 from .task import (
-        Task,
-        DiscountLine,
-        )
+    Task,
+    DiscountLine,
+)
 from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ class Estimation(Task, EstimationCompute):
         backref=backref(
             'estimations',
             order_by='Estimation.taskDate',
-            info={'colanderalchemy': widgets.EXCLUDED, },
+            info={'colanderalchemy': forms.EXCLUDED, },
         )
     )
     customer = relationship(
@@ -129,7 +130,7 @@ class Estimation(Task, EstimationCompute):
         backref=backref(
             'estimations',
             order_by='Estimation.taskDate',
-            info={'colanderalchemy': widgets.EXCLUDED, },
+            info={'colanderalchemy': forms.EXCLUDED, },
         )
     )
 

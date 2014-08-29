@@ -28,28 +28,28 @@
 from datetime import date
 from beaker.cache import cache_region
 from sqlalchemy import (
-        Column,
-        Date,
-        Integer,
-        String,
-        Float,
-        Enum,
-        Text,
-        Boolean,
-        ForeignKey,
-        distinct,
-        )
+    Column,
+    Date,
+    Integer,
+    String,
+    Float,
+    Enum,
+    Text,
+    Boolean,
+    ForeignKey,
+    distinct,
+)
 from sqlalchemy.orm import (
     relationship,
     backref,
-    )
+)
 
 from autonomie.models.base import (
-        DBBASE,
-        DBSESSION,
-        default_table_args,
-        )
-from autonomie.models.widgets import EXCLUDED
+    DBBASE,
+    DBSESSION,
+    default_table_args,
+)
+from autonomie.forms import EXCLUDED
 from autonomie.compute import math_utils
 
 from autonomie.models.statemachine import StateMachine

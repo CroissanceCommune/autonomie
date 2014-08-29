@@ -38,37 +38,39 @@ from deform import Form
 
 from autonomie.events.tasks import StatusChanged
 from autonomie.exception import Forbidden
+from autonomie.utils.pdf import (
+    write_pdf,
+    render_html,
+)
+from autonomie.resources import (
+    task_js,
+    duplicate as duplicate_js,
+)
 from autonomie.utils.widgets import (
-        Submit,
-        ViewLink,
-        PopUp,
-        )
+    Submit,
+    ViewLink,
+    PopUp,
+)
 from autonomie.models.customer import Customer
 from autonomie.models.project import (
-        Project,
-        Phase,
-        )
+    Project,
+    Phase,
+)
 from autonomie.models.tva import Tva
-from autonomie.views import BaseView
-from autonomie.views.forms.duplicate import (
-        DuplicateSchema,
-        EDIT_METADATASCHEMA,
-        )
-from autonomie.views.forms.task import (
-        FinancialYearSchema,
-        PaymentSchema,
-        SetProductsSchema,
-        )
-from autonomie.views.forms import BaseFormView
+from autonomie.views import (
+    BaseView,
+    BaseFormView,
+)
+from autonomie.forms.duplicate import (
+    DuplicateSchema,
+    EDIT_METADATASCHEMA,
+)
+from autonomie.forms.task import (
+    FinancialYearSchema,
+    PaymentSchema,
+    SetProductsSchema,
+)
 from autonomie.views.files import get_add_file_link
-from autonomie.utils.pdf import (
-        write_pdf,
-        render_html,
-        )
-from autonomie.resources import (
-        task_js,
-        duplicate as duplicate_js,
-        )
 
 DOCUMENT_TYPES = ('estimation', 'invoice', 'cancelinvoice')
 

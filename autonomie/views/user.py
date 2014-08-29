@@ -45,29 +45,17 @@ from autonomie.models.user import (
     CompanyDatas,
     USERDATAS_FORM_GRIDS,
 )
-
-
 from autonomie.models.company import Company
 from autonomie.utils.widgets import (
     ViewLink,
     PopUp,
     StaticWidget,
 )
-
-from autonomie.views import (
-    BaseListView,
-    BaseXlsView,
+from autonomie.deform_extend import (
+    AccordionFormWidget,
+    TableFormWidget,
 )
-
-from autonomie.views.forms import (
-    submit_btn,
-    cancel_btn,
-    BaseFormView,
-)
-
-from autonomie.views.render_api import format_account
-from autonomie.views.forms.widgets import AccordionFormWidget, TableFormWidget
-from autonomie.views.forms.user import (
+from autonomie.forms.user import (
     get_list_schema,
     get_account_schema,
     get_password_schema,
@@ -75,7 +63,14 @@ from autonomie.views.forms.user import (
     get_userdatas_list_schema,
     UserDisableSchema,
 )
-
+from autonomie.views import (
+    BaseListView,
+    BaseXlsView,
+    submit_btn,
+    cancel_btn,
+    BaseFormView,
+)
+from autonomie.views.render_api import format_account
 from autonomie.views.company import company_enable
 
 log = logging.getLogger(__name__)

@@ -28,41 +28,43 @@
 import logging
 import datetime
 from deform import (
-        Form,
-        ValidationFailure,
-        )
+    Form,
+    ValidationFailure,
+)
 
 from sqlalchemy import (
-            or_,
-            and_,
-            )
+    or_,
+    and_,
+)
 from sqlalchemy.orm import aliased
 
 from beaker.cache import cache_region
 
 from autonomie.models.task import (
-        Task,
-        Invoice,
-        CancelInvoice,
-        ManualInvoice,
-        )
+    Task,
+    Invoice,
+    CancelInvoice,
+    ManualInvoice,
+)
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
 
-from autonomie.views.forms import submit_btn
 from autonomie.utils.widgets import (
-        PopUp,
-        ViewLink,
-        )
+    PopUp,
+    ViewLink,
+)
 from autonomie.utils.pdf import write_pdf
 
 from autonomie.views.taskaction import html
 
-from autonomie.views.forms.invoices import (
-        get_list_schema,
-        pdfexportSchema,
-        )
-from autonomie.views import BaseListView
+from autonomie.forms.invoices import (
+    get_list_schema,
+    pdfexportSchema,
+)
+from autonomie.views import (
+    BaseListView,
+    submit_btn,
+)
 
 log = logging.getLogger(__name__)
 

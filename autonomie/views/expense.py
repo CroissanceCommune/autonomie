@@ -38,7 +38,7 @@ from pyramid.httpexceptions import (
 )
 
 from autonomie.exception import Forbidden
-from autonomie.views.forms.expense import (
+from autonomie.forms.expense import (
     ExpenseStatusSchema,
     PeriodSelectSchema,
     ExpenseLineSchema,
@@ -48,7 +48,6 @@ from autonomie.views.forms.expense import (
     get_list_schema,
     STATUS_OPTIONS
 )
-from autonomie.views import BaseListView
 from autonomie.models.treasury import (
     BaseExpenseLine,
     ExpenseType,
@@ -60,11 +59,6 @@ from autonomie.models.treasury import (
     Communication,
 )
 from autonomie.events.expense import StatusChanged
-from autonomie.views import BaseView
-from autonomie.views.render_api import (
-    month_name,
-    format_account,
-)
 from autonomie.utils.rest import (
     Apiv1Resp,
     RestError,
@@ -81,12 +75,18 @@ from autonomie.export.excel import (
     make_excel_view,
     XlsExpense,
 )
-from autonomie.views.forms import (
+from autonomie.resources import expense_js
+from autonomie.views import (
+    BaseView,
+    BaseListView,
     merge_session_with_post,
     BaseFormView,
     submit_btn,
 )
-from autonomie.resources import expense_js
+from autonomie.views.render_api import (
+    month_name,
+    format_account,
+)
 
 
 log = logging.getLogger(__name__)

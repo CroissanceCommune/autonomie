@@ -32,17 +32,22 @@ import colander
 
 from sqlalchemy import or_
 
-
 from autonomie.models.holiday import Holiday
-from autonomie.views.forms import merge_session_with_post
-from autonomie.utils.rest import RestJsonRepr
-from autonomie.utils.rest import RestError
-from autonomie.utils.rest import add_rest_views
-from autonomie.utils.rest import make_redirect_view
-from autonomie.views import BaseView
-from autonomie.views.forms import BaseFormView
-from autonomie.views.forms.holiday import HolidaySchema
-from autonomie.views.forms.holiday import searchSchema
+from autonomie.utils.rest import (
+    RestJsonRepr,
+    RestError,
+    add_rest_views,
+    make_redirect_view,
+)
+from autonomie.forms.holiday import (
+    HolidaySchema,
+    searchSchema,
+)
+from autonomie.views import (
+    BaseView,
+    BaseFormView,
+    merge_session_with_post,
+)
 from autonomie.resources import holiday_js
 
 

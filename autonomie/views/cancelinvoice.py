@@ -30,17 +30,17 @@ import logging
 from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.views.forms.task import (
+from autonomie.forms.task import (
     get_cancel_invoice_schema,
     get_cancel_invoice_appstruct,
     get_cancel_invoice_dbdatas,
-    )
+)
 from autonomie.models.task.invoice import (
-        CancelInvoice,
-        CancelInvoiceLine,
-        )
+    CancelInvoice,
+    CancelInvoiceLine,
+)
 from autonomie.views.files import FileUploadView
-from autonomie.views.forms import (
+from autonomie.views import (
     merge_session_with_post,
     submit_btn,
 )
@@ -55,7 +55,7 @@ from autonomie.views.taskaction import (
     task_pdf_view,
     task_html_view,
     make_task_delete_view,
-    )
+ )
 
 log = logging.getLogger(__name__)
 

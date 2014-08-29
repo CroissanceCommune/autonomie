@@ -26,7 +26,7 @@ import datetime
 import colander
 
 from autonomie.tests.base import BaseTestCase
-from autonomie.views.forms.holiday import date_validator, HolidaySchema
+from autonomie.forms.holiday import date_validator, HolidaySchema
 
 class TestHolidays(BaseTestCase):
     def test_date_validator(self):

@@ -26,10 +26,10 @@ import colander
 from pyramid import testing
 from mock import Mock
 
-from autonomie.views.forms import (
-        merge_session_with_post,
-        flatten_appstruct,
-        )
+from autonomie.forms import (
+    merge_session_with_post,
+    flatten_appstruct,
+)
 from autonomie.utils.files import (encode_path, decode_path, issubdir,
         filesizeformat)
 from autonomie.utils.rest import RestJsonRepr, RestError

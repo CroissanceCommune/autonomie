@@ -28,6 +28,8 @@
 import colander
 
 from autonomie.models.treasury import get_expense_years
+from autonomie.models.task.invoice import get_invoice_years
+from autonomie.models import user
 
 from autonomie.views.forms import main
 
@@ -69,7 +71,10 @@ class InvoiceNumberSchema(colander.MappingSchema):
     """
         Form schema for an invoice number selection (year + number)
     """
-    financial_year = main.year_select_node(title=u"Année comptable")
+    financial_year = main.year_select_node(
+        title=u"Année comptable",
+        query_func=get_invoice_years,
+    )
     officialNumber = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture')
@@ -80,7 +85,10 @@ class FromInvoiceNumberSchema(colander.MappingSchema):
     """
         Form schema for an invoice number selection (year + number)
     """
-    financial_year = main.year_select_node(title=u"Année comptable")
+    financial_year = main.year_select_node(
+        title=u"Année comptable",
+        query_func=get_invoice_years,
+    )
     start_officialNumber = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture',
@@ -107,7 +115,7 @@ class ExpenseSchema(colander.MappingSchema):
     """
     Schema for sage expense export
     """
-    user_id = main.user_node(title=u"Nom de l'entrepreneur",
+    user_id = user.user_node(title=u"Nom de l'entrepreneur",
         widget_options={'default_option':(u'0', u'Tous les entrepreneurs',)})
     year = main.year_select_node(title=u"Année", query_func=get_expense_years)
     month = main.month_select_node(title=u"Mois")

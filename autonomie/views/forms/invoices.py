@@ -29,6 +29,9 @@ import colander
 
 from deform import widget as deform_widget
 
+from autonomie.models import company
+from autonomie.models.task import invoice
+
 from autonomie.views.forms.lists import BaseListsSchema
 from autonomie.views.forms import main
 
@@ -58,17 +61,22 @@ def get_list_schema(is_admin=False):
             missing='both',
             ))
 
-    schema.insert(0, main.customer_node(is_admin))
+    schema.insert(0, company.customer_node(is_admin))
 
     if is_admin:
         schema.insert(0,
-            main.company_node(
+            company.company_node(
                 name='company_id',
                 missing=-1,
                 widget_options={'default': ('', '')}
             ))
 
-    schema.insert(0, main.year_select_node(name='year'))
+    node = main.year_select_node(
+        name='year',
+        query_func=invoice.get_invoice_years,
+    )
+
+    schema.insert(0, node)
 
     schema['search'].description = u"Identifiant du document"
 
@@ -90,7 +98,10 @@ class InvoicesPdfExport(colander.MappingSchema):
     """
         Schema for invoice bulk export
     """
-    year = main.year_select_node(title=u"Année comptable")
+    year = main.year_select_node(
+        title=u"Année comptable",
+        query_func=invoice.get_invoice_years
+    )
     start = colander.SchemaNode(
             colander.Integer(),
             title=u"Numéro de début",

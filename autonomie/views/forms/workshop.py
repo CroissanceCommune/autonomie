@@ -23,6 +23,7 @@ import colander
 from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
+from autonomie.models import user
 from autonomie.views.forms import (
     main,
     lists,
@@ -128,7 +129,7 @@ def get_list_schema(company=False):
             ))
 
     if not company:
-        schema.insert(0, main.user_node(
+        schema.insert(0, user.user_node(
             missing=-1,
             name='participant_id',
             widget_options={

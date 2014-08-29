@@ -31,10 +31,7 @@ import logging
 from deform import widget as deform_widget
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.models.user import (
-    User,
-    SITUATION_OPTIONS,
-)
+from autonomie.models import user
 from autonomie.models.company import Company
 from autonomie.views.forms import main
 from autonomie.views.forms.lists import BaseListsSchema
@@ -66,7 +63,7 @@ def get_unique_login_validator(user_id=None):
         """
         Test login unicity against database
         """
-        if not User.unique_login(value, user_id):
+        if not user.User.unique_login(value, user_id):
             message = u"Le login '{0}' n'est pas disponible.".format(
                                                             value)
             raise colander.Invalid(node, message)
@@ -81,7 +78,7 @@ def auth(form, value):
     login = value.get('login')
     log.debug(u"   +  Login {0}".format(login))
     password = value.get('password')
-    result = User.query().filter_by(login=login).first()
+    result = user.User.query().filter_by(login=login).first()
     if not result or not result.auth(password):
         log.debug(u"    - Authentication Error")
         message = u"Erreur d'authentification"
@@ -183,7 +180,7 @@ class CompanySchema(colander.SequenceSchema):
 
 SITUATION_SEARCH_OPTIONS = (
     ('', u"Sélectionner un statut",),
-) + SITUATION_OPTIONS
+) + user.SITUATION_OPTIONS
 
 
 class UserDisableSchema(colander.MappingSchema):
@@ -283,7 +280,7 @@ def get_userdatas_list_schema():
 
     schema.insert(
         0,
-        main.user_node(
+        user.user_node(
             roles=['manager', 'admin'],
             missing=-1,
             default=main.deferred_current_user_id,
@@ -301,7 +298,7 @@ def get_account_schema():
     Return the user account edition schema
     """
     return SQLAlchemySchemaNode(
-        User,
+        user.User,
         includes=('firstname', 'lastname', 'email',),
     )
 
@@ -311,7 +308,7 @@ def get_password_schema():
     Return the schema for user password change
     """
     schema = SQLAlchemySchemaNode(
-        User,
+        user.User,
         includes=('login', 'pwd',),
         title=u'Modification de mot de passe',
         validator=auth,
@@ -348,9 +345,9 @@ def get_user_schema(edit=False, permanent=True):
             Is this form related to permanent edition (managers or admins)
     """
     if permanent:
-        schema = SQLAlchemySchemaNode(User, excludes=('compte_tiers',))
+        schema = SQLAlchemySchemaNode(user.User, excludes=('compte_tiers',))
     else:
-        schema = SQLAlchemySchemaNode(User)
+        schema = SQLAlchemySchemaNode(user.User)
 
     if permanent:
         schema.insert(

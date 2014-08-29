@@ -27,6 +27,10 @@
 """
 import os
 import logging
+import colander
+import deform_bootstrap
+import deform
+from autonomie.views.forms import widgets as custom_widgets
 
 from sqlalchemy import (
     Column,
@@ -304,3 +308,100 @@ class Company(DBBASE):
                         reverse=True)
         offset = page_nb * nb_per_page
         return all_tasks[offset:offset + nb_per_page], len(all_tasks)
+
+
+# Company node related tools
+def get_deferred_company_choices(widget_options):
+    """
+    Build a deferred for company selection widget
+    """
+    default_entry = widget_options.pop('default', None)
+    @colander.deferred
+    def deferred_company_choices(node, kw):
+        """
+        return a deferred company selection widget
+        """
+        values = [(comp.id, comp.name) for comp in Company.query()]
+        if default_entry is not None:
+            values.insert(0, default_entry)
+        return deform_bootstrap.widget.ChosenSingleWidget(
+            values=values,
+            placeholder=u"Sélectionner une entreprise",
+            **widget_options
+            )
+    return deferred_company_choices
+
+
+def company_node(**kw):
+    """
+    Return a schema node for company selection
+    """
+    widget_options = kw.pop('widget_options', {})
+    return colander.SchemaNode(
+        colander.Integer(),
+        widget=get_deferred_company_choices(widget_options),
+        **kw
+        )
+
+
+# Customer node related tools
+@colander.deferred
+def deferred_fullcustomer_list_widget(node, kw):
+    values = [('', '')]
+    for comp in Company.query():
+        values.append(
+            deform.widget.OptGroup(
+                comp.name,
+                *[(cust.id, cust.name) for cust in comp.customers]
+            )
+        )
+    return custom_widgets.CustomChosenOptGroupWidget(
+        values=values,
+        placeholder=u"Sélectionner un client"
+        )
+
+
+@colander.deferred
+def deferred_customer_list_widget(node, kw):
+    values = [(-1, u''), ]
+    company = kw['request'].context
+    values.extend(((cust.id, cust.name) for cust in company.customers))
+    return deform_bootstrap.widget.ChosenSingleWidget(
+        values=values,
+        placeholder=u'Sélectionner un client',
+    )
+
+
+@colander.deferred
+def deferred_company_customer_validator(node, kw):
+    """
+    Ensure we don't query customers from other companies
+    """
+    company = kw['request'].context
+    values = [-1]
+    values.extend([customer.id for customer in company.customers])
+    return colander.OneOf(values)
+
+
+def customer_node(is_admin=False):
+    """
+    return a customer selection node
+
+        is_admin
+
+            is the associated view restricted to company's invoices
+    """
+    if is_admin:
+        deferred_customer_widget = deferred_fullcustomer_list_widget
+        deferred_customer_validator = None
+    else:
+        deferred_customer_widget = deferred_customer_list_widget
+        deferred_customer_validator = deferred_company_customer_validator
+
+    return colander.SchemaNode(
+            colander.Integer(),
+            name='customer_id',
+            widget=deferred_customer_widget,
+            validator=deferred_customer_validator,
+            missing=-1,
+        )

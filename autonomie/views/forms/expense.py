@@ -36,6 +36,8 @@ from autonomie.models.treasury import (
     ExpenseType,
     get_expense_years,
     )
+from autonomie.models import user
+from autonomie.models.task.invoice import get_invoice_years
 
 from autonomie.views.render_api import month_name
 from autonomie.views.forms import main
@@ -63,7 +65,7 @@ def deferred_type_id_validator(node, kw):
 
 
 class PeriodSelectSchema(colander.MappingSchema):
-    year = main.year_select_node()
+    year = main.year_select_node(query_func=get_invoice_years)
     month = main.month_select_node(title=u'')
 
 
@@ -171,7 +173,7 @@ def get_list_schema():
         widget_options={'default_val': (-1, '')},
     ))
 
-    schema.insert(0, main.user_node(
+    schema.insert(0, user.user_node(
         title=u"Utilisateur",
         missing=-1,
         name=u'owner_id',

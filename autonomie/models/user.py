@@ -397,6 +397,20 @@ def get_deferred_user_choice(roles=None, widget_options=None):
     return user_select
 
 
+def user_node(roles=None, **kw):
+    """
+    Return a schema node for user selection
+    roles: allow to restrict the selection to the given roles
+        (to select between admin, contractor and manager)
+    """
+    widget_options = kw.pop('widget_options', {})
+    return colander.SchemaNode(
+            colander.Integer(),
+            widget=get_deferred_user_choice(roles, widget_options),
+            **kw
+            )
+
+
 class ConfigurableOption(DBBASE):
     """
     Base class for options

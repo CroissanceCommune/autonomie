@@ -26,22 +26,23 @@
     Activity search schema (#TODO)
 """
 import colander
-from deform import widget as deform_widget
+import deform
 
 from autonomie.models.activity import (
-        ActivityType,
-        ActivityMode,
-        ActivityAction,
-        STATUS_SEARCH,
-        ATTENDANCE_STATUS,
-        ATTENDANCE_STATUS_SEARCH,
-        )
+    ActivityType,
+    ActivityMode,
+    ActivityAction,
+    STATUS_SEARCH,
+    ATTENDANCE_STATUS,
+    ATTENDANCE_STATUS_SEARCH,
+)
+from autonomie.models import user
 
 from autonomie.views.forms import (
-        main,
-        lists,
-        widgets as custom_widget,
-        )
+    main,
+    lists,
+    widgets as custom_widget,
+)
 
 
 def get_activity_types():
@@ -62,7 +63,7 @@ def get_subaction_options():
     options = [("", "Sélectionner une sous-action"),]
     for action in get_actions():
         gr_options = [(unicode(a.id), a.label) for a in action.children]
-        group = deform_widget.OptGroup(action.label, *gr_options)
+        group = deform.widget.OptGroup(action.label, *gr_options)
         options.append(group)
     return options
 
@@ -73,7 +74,7 @@ def get_deferred_select_type(default=False):
         values = [(unicode(a.id), a.label) for a in get_activity_types()]
         if default:
             values.insert(0, (-1, 'Tous les rendez-vous'))
-        return deform_widget.SelectWidget(values=values)
+        return deform.widget.SelectWidget(values=values)
     return deferred_select_type
 
 
@@ -81,20 +82,20 @@ def get_deferred_select_type(default=False):
 def deferred_select_mode(node, kw):
     modes = get_activity_modes()
     options = zip(modes, modes)
-    return deform_widget.SelectWidget(values=options)
+    return deform.widget.SelectWidget(values=options)
 
 
 @colander.deferred
 def deferred_select_action(node, kw):
     options = [("", u"Sélectionner une action"),]
     options.extend([(unicode(a.id), a.label) for a in get_actions()])
-    return deform_widget.SelectWidget(values=options)
+    return deform.widget.SelectWidget(values=options)
 
 
 @colander.deferred
 def deferred_select_subaction(node, kw):
     options = get_subaction_options()
-    return deform_widget.SelectWidget(values=options)
+    return deform.widget.SelectWidget(values=options)
 
 
 @colander.deferred
@@ -115,14 +116,14 @@ class ParticipantsSequence(colander.SequenceSchema):
     """
     Schema for the list of participants
     """
-    participant_id = main.user_node(title=u"", )
+    participant_id = user.user_node(title=u"", )
 
 
 class ConseillerSequence(colander.SequenceSchema):
     """
     Schema for the list of conseiller
     """
-    conseiller_id = main.user_node(
+    conseiller_id = user.user_node(
         title=u"Conseillers menant le rendez-vous",
         roles=['manager', 'admin'],
     )
@@ -136,7 +137,7 @@ class CreateActivitySchema(colander.MappingSchema):
 
     conseillers = ConseillerSequence(
         title=u"Conseillers",
-        widget=deform_widget.SequenceWidget(min_len=1)
+        widget=deform.widget.SequenceWidget(min_len=1)
     )
     datetime = main.now_node(title=u"Date de rendez-vous")
     type_id = colander.SchemaNode(
@@ -162,7 +163,7 @@ class CreateActivitySchema(colander.MappingSchema):
     )
     participants = ParticipantsSequence(
         title=u"Participants",
-        widget=deform_widget.SequenceWidget(min_len=1)
+        widget=deform.widget.SequenceWidget(min_len=1)
     )
 
 
@@ -191,7 +192,7 @@ class Attendance(colander.MappingSchema):
 
     status = colander.SchemaNode(
         colander.String(),
-        widget=deform_widget.RadioChoiceWidget(values=ATTENDANCE_STATUS),
+        widget=deform.widget.RadioChoiceWidget(values=ATTENDANCE_STATUS),
         validator=colander.OneOf([x[0] for x in ATTENDANCE_STATUS]),
         title=u'',
         missing=u'excused',
@@ -211,7 +212,7 @@ class RecordActivitySchema(colander.Schema):
     """
     attendances = Attendances(
         title=u'Présence',
-        widget=deform_widget.SequenceWidget(
+        widget=deform.widget.SequenceWidget(
             template='autonomie:deform_templates/fixed_len_sequence.pt',
             item_template='autonomie:deform_templates/fixed_len_sequence_item.pt')
     )
@@ -249,7 +250,7 @@ class RecordActivitySchema(colander.Schema):
         colander.Integer(),
         title=u'Durée',
         description=u"La durée du rendez-vous, en minute (ex : 90)",
-        widget=deform_widget.TextInputWidget(
+        widget=deform.widget.TextInputWidget(
             input_append='minutes',
         ),
     )
@@ -268,7 +269,7 @@ def get_list_schema(is_admin=False):
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name='status',
-        widget=deform_widget.SelectWidget(values=STATUS_SEARCH),
+        widget=deform.widget.SelectWidget(values=STATUS_SEARCH),
         validator=colander.OneOf([s[0] for s in STATUS_SEARCH]),
         default='all',
         missing='all'))
@@ -276,14 +277,14 @@ def get_list_schema(is_admin=False):
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name='user_status',
-        widget=deform_widget.SelectWidget(values=ATTENDANCE_STATUS_SEARCH),
+        widget=deform.widget.SelectWidget(values=ATTENDANCE_STATUS_SEARCH),
         validator=colander.OneOf([s[0] for s in ATTENDANCE_STATUS_SEARCH]),
         default='all',
         missing='all'))
 
 
     if is_admin:
-        schema.insert(0, main.user_node(
+        schema.insert(0, user.user_node(
             missing=-1,
             name='participant_id',
             widget_options={
@@ -292,7 +293,7 @@ def get_list_schema(is_admin=False):
             )
         )
 
-        schema.insert(0, main.user_node(
+        schema.insert(0, user.user_node(
             roles=['manager', 'admin'],
             missing=-1,
             default=main.deferred_current_user_id,

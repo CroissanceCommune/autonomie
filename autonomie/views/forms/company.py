@@ -28,12 +28,13 @@
 import os
 import colander
 import logging
+import deform
 
 from deform import FileData
-from deform import widget
 
 from autonomie.views.forms.validators import validate_image_mime
 from autonomie.views.forms import main
+from autonomie.views.forms import widgets as custom_widgets
 from autonomie.utils.image import ImageResizer
 
 log = logging.getLogger(__name__)
@@ -59,9 +60,9 @@ def deferred_edit_adminonly_widget(node, kw):
     """
     request = kw['request']
     if request.user.is_contractor():
-        return main.deferred_edit_widget(node, dict(edit=True))
+        return custom_widgets.DisabledInput()
     else:
-        return main.deferred_edit_widget(node, dict(edit=False))
+        return deform.widget.TextInputWidget()
 
 @colander.deferred
 def deferred_logo_widget(node, kw):
@@ -159,7 +160,7 @@ comptabilité",
 
     contribution = colander.SchemaNode(
             colander.Integer(),
-            widget=widget.TextInputWidget(
+            widget=deform.widget.TextInputWidget(
                 input_append="%",
                 css_class="span1"
                 ),

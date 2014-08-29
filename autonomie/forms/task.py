@@ -64,11 +64,11 @@ import colander
 from deform import widget
 from deform_bootstrap import widget as bootstrap_widget
 
-from autonomie.views.forms.widgets import (
+from autonomie.deform_extend import (
     DisabledInput,
     CustomSequenceWidget,
 )
-from autonomie.views.forms import main
+from autonomie import forms
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.tva import (
@@ -553,7 +553,7 @@ class TaskConfiguration(colander.MappingSchema):
         widget=deferred_phases_widget,
         default=deferred_default_phase
         )
-    taskDate = main.today_node(title=u"Date du devis")
+    taskDate = forms.today_node(title=u"Date du devis")
     description = colander.SchemaNode(
         colander.String(),
         title=u"Objet du devis",
@@ -653,7 +653,7 @@ class EstimationPaymentLine(colander.MappingSchema):
     paymentDate = colander.SchemaNode(
         colander.Date(),
         title=u'',
-        widget=main.get_date_input(css_class='span2'),
+        widget=forms.get_date_input(css_class='span2'),
         default=datetime.date.today(),
         css_class='span2',)
     amount = colander.SchemaNode(
@@ -863,7 +863,7 @@ class PaymentSchema(colander.MappingSchema):
     """
         colander schema for payment recording
     """
-    come_from = main.come_from_node()
+    come_from = forms.come_from_node()
     amount = colander.SchemaNode(AmountType(),
         title=u"Montant",
         validator=deferred_total_validator,

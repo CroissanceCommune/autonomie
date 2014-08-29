@@ -29,11 +29,11 @@ import colander
 from deform import widget
 
 from autonomie.models.task import invoice
-from autonomie.views.forms import main
+from autonomie import forms
 from .custom_types import AmountType
 
 class CommercialFormSchema(colander.MappingSchema):
-    year = main.year_select_node(query_func=invoice.get_invoice_years)
+    year = forms.year_select_node(query_func=invoice.get_invoice_years)
 
 
 class CommercialSetFormSchema(colander.MappingSchema):
@@ -44,7 +44,7 @@ class CommercialSetFormSchema(colander.MappingSchema):
         validator=colander.Range(1,12),
     )
     value = colander.SchemaNode(AmountType(), title=u"CA prévisionnel")
-    comment = main.textarea_node(
+    comment = forms.textarea_node(
         title=u"Commentaire",
         missing=u""
     )

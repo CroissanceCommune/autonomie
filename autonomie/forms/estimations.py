@@ -28,8 +28,7 @@ import colander
 import deform
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie.models import company
-from autonomie.views.forms.lists import BaseListsSchema
-from autonomie.views.forms import main
+from autonomie import forms
 
 
 STATUS_OPTIONS = (('all', u"Tous les devis", ),
@@ -40,7 +39,7 @@ STATUS_OPTIONS = (('all', u"Tous les devis", ),
 
 
 def get_list_schema():
-    schema = BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     del schema['search']
 
@@ -53,7 +52,7 @@ def get_list_schema():
         validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
         missing='all'
     ))
-    node = main.year_select_node(
+    node = forms.year_select_node(
         name='year',
         query_func=get_invoice_years,
     )

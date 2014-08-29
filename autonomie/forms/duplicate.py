@@ -25,7 +25,7 @@
 
 import colander
 from deform import widget
-from autonomie.views.forms import main
+from autonomie import forms
 
 def get_customers_from_request(request):
     project = request.context.project
@@ -164,7 +164,7 @@ class EditMetadataSchema(colander.MappingSchema):
         validator=colander.Length(max=255),
         missing="",
         )
-    taskDate = main.today_node(title=u"Date")
+    taskDate = forms.today_node(title=u"Date")
     phase_id = colander.SchemaNode(
         colander.Integer(),
         title=u"Phase",

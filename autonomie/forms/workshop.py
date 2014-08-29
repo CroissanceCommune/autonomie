@@ -24,11 +24,7 @@ from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models import user
-from autonomie.views.forms import (
-    main,
-    lists,
-    activity,
-    )
+from autonomie import forms
 
 
 def get_info_field(title):
@@ -42,7 +38,6 @@ def get_info_field(title):
         description=u"Utilisé dans la feuille d'émargement",
         missing="",
         )
-
 
 
 class LeaderSequence(colander.SequenceSchema):
@@ -65,7 +60,7 @@ def range_validator(form, values):
 
 
 class TimeslotSchema(colander.MappingSchema):
-    id = main.id_node()
+    id = forms.id_node()
     name = colander.SchemaNode(
         colander.String(),
         validator=colander.Length(max=255),
@@ -73,8 +68,8 @@ class TimeslotSchema(colander.MappingSchema):
         description=u"Intitulé utilisé dans la feuille d'émargement \
 correspondante (ex: Matinée 1)",
     )
-    start_time = main.now_node(title=u"Début de la tranche horaire")
-    end_time = main.now_node(title=u"Fin de la tranche horaire")
+    start_time = forms.now_node(title=u"Début de la tranche horaire")
+    end_time = forms.now_node(title=u"Fin de la tranche horaire")
 
 
 class TimeslotsSequence(colander.SequenceSchema):
@@ -88,7 +83,7 @@ class Workshop(colander.MappingSchema):
     """
     Schema for workshop creation/edition
     """
-    come_from = main.come_from_node()
+    come_from = forms.come_from_node()
     name = colander.SchemaNode(
         colander.String(),
         validator=colander.Length(max=255),
@@ -101,7 +96,7 @@ class Workshop(colander.MappingSchema):
     info1 = get_info_field(u"Sous-titre 1 (facultatif)")
     info2 = get_info_field(u"Sous-titre 2 (facultatif)")
     info3 = get_info_field(u"Sous-titre 3 (facultatif)")
-    participants = activity.ParticipantsSequence(
+    participants = forms.activity.ParticipantsSequence(
         title=u"Participants",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
@@ -117,10 +112,10 @@ def get_list_schema(company=False):
     """
     Return a schema for filtering workshop list
     """
-    schema = lists.BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     schema.insert(0,
-        main.today_node(
+        forms.today_node(
             name='date',
             default=None,
             missing=None,
@@ -147,8 +142,8 @@ class AttendanceEntry(colander.MappingSchema):
     Relationship edition
     Allows to edit the attendance status
     """
-    account_id = main.id_node()
-    timeslot_id = main.id_node()
+    account_id = forms.id_node()
+    timeslot_id = forms.id_node()
     status = colander.SchemaNode(
         colander.String(),
         widget=deform_widget.SelectWidget(values=ATTENDANCE_STATUS),

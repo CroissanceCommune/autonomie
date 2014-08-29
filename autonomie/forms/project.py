@@ -39,7 +39,7 @@ from autonomie.models.project import (
     deferred_customer_validator,
     deferred_default_customer,
 )
-from autonomie.views.forms.lists import BaseListsSchema
+from autonomie import forms
 
 log = logging.getLogger(__name__)
 
@@ -110,7 +110,7 @@ phaseSchema = PhaseSchema()
 
 
 def get_list_schema():
-    schema = BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     schema['search'].description = u"Projet ou nom du client"
 

@@ -33,8 +33,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models import user
 from autonomie.models.company import Company
-from autonomie.views.forms import main
-from autonomie.views.forms.lists import BaseListsSchema
+from autonomie import forms
 
 log = logging.getLogger(__name__)
 
@@ -245,7 +244,7 @@ def get_list_schema():
     """
     Return a schema for filtering the user list
     """
-    schema = BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     schema['search'].description = u"Nom, entreprise, activité"
 
@@ -264,7 +263,7 @@ def get_userdatas_list_schema():
     """
     Return a list schema for user datas
     """
-    schema = BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     schema['search'].description = u"Nom, prénom, entreprise"
 
@@ -283,7 +282,7 @@ def get_userdatas_list_schema():
         user.user_node(
             roles=['manager', 'admin'],
             missing=-1,
-            default=main.deferred_current_user_id,
+            default=forms.deferred_current_user_id,
             name='situation_follower_id',
             widget_options={
                 'default_option': (-1, ''),

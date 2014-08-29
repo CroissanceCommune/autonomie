@@ -32,9 +32,9 @@ import deform
 
 from deform import FileData
 
-from autonomie.views.forms.validators import validate_image_mime
-from autonomie.views.forms import main
-from autonomie.views.forms import widgets as custom_widgets
+from autonomie.forms.validators import validate_image_mime
+from autonomie import forms
+from autonomie import deform_extend
 from autonomie.utils.image import ImageResizer
 
 log = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ def deferred_edit_adminonly_widget(node, kw):
     """
     request = kw['request']
     if request.user.is_contractor():
-        return custom_widgets.DisabledInput()
+        return deform_extend.DisabledInput()
     else:
         return deform.widget.TextInputWidget()
 
@@ -71,7 +71,7 @@ def deferred_logo_widget(node, kw):
     """
     request = kw['request']
     path, url = get_upload_options_from_request(request, LOGO_PATH)
-    return main.get_fileupload_widget(url, path, request.session)
+    return forms.get_fileupload_widget(url, path, request.session)
 
 @colander.deferred
 def deferred_header_widget(node, kw):
@@ -80,7 +80,7 @@ def deferred_header_widget(node, kw):
     """
     request = kw['request']
     path, url = get_upload_options_from_request(request, HEADER_PATH)
-    return main.get_fileupload_widget(url, path, request.session,
+    return forms.get_fileupload_widget(url, path, request.session,
                                     filters=[HEADER_RESIZER.complete])
 
 
@@ -121,7 +121,7 @@ class CompanySchema(colander.MappingSchema):
             colander.String(),
             title=u'Activité')
 
-    email = main.mail_node(missing=u'')
+    email = forms.mail_node(missing=u'')
 
     phone = colander.SchemaNode(
             colander.String(),

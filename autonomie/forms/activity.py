@@ -23,7 +23,7 @@
     Activity related form schemas
 
     New activity creation
-    Activity search schema (#TODO)
+    Activity search schema
 """
 import colander
 import deform
@@ -38,11 +38,8 @@ from autonomie.models.activity import (
 )
 from autonomie.models import user
 
-from autonomie.views.forms import (
-    main,
-    lists,
-    widgets as custom_widget,
-)
+from autonomie import forms
+from autonomie import deform_extend
 
 
 def get_activity_types():
@@ -133,13 +130,13 @@ class CreateActivitySchema(colander.MappingSchema):
     """
         Activity creation schema
     """
-    come_from = main.come_from_node()
+    come_from = forms.come_from_node()
 
     conseillers = ConseillerSequence(
         title=u"Conseillers",
         widget=deform.widget.SequenceWidget(min_len=1)
     )
-    datetime = main.now_node(title=u"Date de rendez-vous")
+    datetime = forms.now_node(title=u"Date de rendez-vous")
     type_id = colander.SchemaNode(
         colander.Integer(),
         widget=get_deferred_select_type(),
@@ -180,13 +177,13 @@ class NewActivitySchema(CreateActivitySchema):
 
 
 class Attendance(colander.MappingSchema):
-    account_id = main.id_node()
-    event_id = main.id_node()
+    account_id = forms.id_node()
+    event_id = forms.id_node()
 
     username = colander.SchemaNode(
         colander.String(),
         title=u'',
-        widget=custom_widget.DisabledInput(),
+        widget=deform_extend.DisabledInput(),
         missing='',
         )
 
@@ -202,7 +199,7 @@ class Attendance(colander.MappingSchema):
 class Attendances(colander.SequenceSchema):
     attendance = Attendance(
         title=u'',
-        widget=custom_widget.InlineMappingWidget()
+        widget=deform_extend.InlineMappingWidget()
         )
 
 
@@ -216,31 +213,31 @@ class RecordActivitySchema(colander.Schema):
             template='autonomie:deform_templates/fixed_len_sequence.pt',
             item_template='autonomie:deform_templates/fixed_len_sequence_item.pt')
     )
-    point = main.textarea_node(
+    point = forms.textarea_node(
         title=u"Point de suivi",
         richwidget=True,
         missing='',
         )
 
-    objectifs = main.textarea_node(
+    objectifs = forms.textarea_node(
         title=u"Définition des objectifs",
         richwidget=True,
         missing='',
         )
 
-    action = main.textarea_node(
+    action = forms.textarea_node(
         title=u"Plan d'action et préconisations",
         richwidget=True,
         missing='',
         )
 
-    documents = main.textarea_node(
+    documents = forms.textarea_node(
         title=u"Documents produits",
         richwidget=True,
         missing='',
         )
 
-    notes = main.textarea_node(
+    notes = forms.textarea_node(
         title=u"Notes",
         richwidget=True,
         missing="",
@@ -257,7 +254,7 @@ class RecordActivitySchema(colander.Schema):
 
 
 def get_list_schema(is_admin=False):
-    schema = lists.BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     schema.insert(0, colander.SchemaNode(
         colander.Integer(),
@@ -296,7 +293,7 @@ def get_list_schema(is_admin=False):
         schema.insert(0, user.user_node(
             roles=['manager', 'admin'],
             missing=-1,
-            default=main.deferred_current_user_id,
+            default=forms.deferred_current_user_id,
             name='conseiller_id',
             widget_options={
                 'default_option': (-1, ''),

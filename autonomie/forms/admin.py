@@ -36,13 +36,9 @@ from deform import FileData
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.config import Config
-from autonomie.views.forms import (
-    main,
-    flatten_appstruct,
-    )
-from autonomie.views.forms.validators import validate_image_mime
+from autonomie import forms
+from autonomie.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
-from autonomie.views.forms.main import get_fileupload_widget
 
 
 from .custom_types import AmountType
@@ -67,7 +63,7 @@ def get_deferred_upload_widget(filename, filters=None):
         root_path = request.registry.settings.get('autonomie.assets')
         store_path = os.path.join(root_path, "main")
 
-        return get_fileupload_widget(
+        return forms.get_fileupload_widget(
                 store_url,
                 store_path,
                 request.session,
@@ -81,10 +77,10 @@ class EstimationConfig(colander.MappingSchema):
     """
         Schema for estimation configuration
     """
-    header = main.textarea_node(
+    header = forms.textarea_node(
         title=u"Cadre d'information spécifique (en entête des devis)",
         missing=u"")
-    footer = main.textarea_node(
+    footer = forms.textarea_node(
         title=u"Informations sur l'acceptation des devis",
         missing=u"")
 
@@ -97,13 +93,13 @@ class InvoiceConfig(colander.MappingSchema):
         colander.String(),
         title=u"Préfixer les numéros de facture",
         missing=u"")
-    header = main.textarea_node(
+    header = forms.textarea_node(
         title=u"Cadre d'information spécifique (en entête des factures)",
         missing=u"")
-    payment = main.textarea_node(
+    payment = forms.textarea_node(
         title=u"Information de paiement pour les factures",
         missing=u"")
-    late = main.textarea_node(
+    late = forms.textarea_node(
         title=u"Informations sur les délais de paiement",
         missing=u"")
 
@@ -112,19 +108,19 @@ class DocumentConfig(colander.MappingSchema):
     """
         Schema for document (estimation/invoice ...) configuration
     """
-    cgv = main.textarea_node(
+    cgv = forms.textarea_node(
         title=u"Conditions générales de vente",
         description=u"Les conditions générales sont placées en dernière \
 page des documents (devis/factures/avoirs)",
         missing=u'',
         richwidget=True)
-    footertitle = main.textarea_node(
+    footertitle = forms.textarea_node(
         title=u"Titre du pied de page",
         missing=u"")
-    footercourse = main.textarea_node(
+    footercourse = forms.textarea_node(
         title=u"Pied de page des documents liées aux formations",
         missing=u"")
-    footercontent = main.textarea_node(
+    footercontent = forms.textarea_node(
         title=u"Contenu du pied de page",
         missing=u"")
 
@@ -160,7 +156,7 @@ class SiteConfig(colander.MappingSchema):
         validator=validate_image_mime,
         default={"filename": "logo.png", "uid": "MAINLOGO"},
         )
-    welcome = main.textarea_node(
+    welcome = forms.textarea_node(
         title=u"Texte d'accueil",
         richwidget=True,
         missing=u'')
@@ -168,7 +164,7 @@ class SiteConfig(colander.MappingSchema):
 
 class MainConfig(colander.MappingSchema):
     """
-        Schema for main site configuration
+        Schema for forms.site configuration
     """
     site = SiteConfig()
     document = DocumentConfig(title=u'Document (devis et factures)')
@@ -179,7 +175,7 @@ class Product(colander.MappingSchema):
     """
         Form schema for a single product configuration
     """
-    id = main.id_node()
+    id = forms.id_node()
     name = colander.SchemaNode(colander.String(), title=u"Libellé")
     compte_cg = colander.SchemaNode(colander.String(), title=u"Compte CG")
 
@@ -191,7 +187,7 @@ class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
     """
-    id = main.id_node()
+    id = forms.id_node()
     name = colander.SchemaNode(
         colander.String(),
         title=u"Libellé du taux de TVA",
@@ -264,7 +260,7 @@ class ExpenseConfig(colander.MappingSchema):
     """
         Schema for the configuration of different expense types
     """
-    id = main.id_node()
+    id = forms.id_node()
 
     label = colander.SchemaNode(
         colander.String(),
@@ -369,7 +365,7 @@ class ActivityTypeConfig(colander.MappingSchema):
     """
         Schema for the configuration of different activity types
     """
-    id = main.id_node()
+    id = forms.id_node()
 
     label = colander.SchemaNode(
         colander.String(),
@@ -401,7 +397,7 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
 
 
 class ActivitySubActionConfig(colander.MappingSchema):
-    id = main.id_node()
+    id = forms.id_node()
 
     label = colander.SchemaNode(
         colander.String(),
@@ -415,7 +411,7 @@ class ActivitySubActionSeq(colander.SequenceSchema):
 
 
 class ActivityActionConfig(colander.Schema):
-    id = main.id_node()
+    id = forms.id_node()
     label = colander.SchemaNode(
         colander.String(),
         title=u"Intitulé de l'action",
@@ -770,7 +766,7 @@ def merge_config_datas(dbdatas, appstruct):
     """
         Merge the datas returned by form validation and the original dbdatas
     """
-    flat_appstruct = flatten_appstruct(appstruct)
+    flat_appstruct = forms.flatten_appstruct(appstruct)
     for name, value in flat_appstruct.items():
         dbdata = get_element_by_name(dbdatas, name)
         if not dbdata:

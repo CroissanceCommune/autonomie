@@ -31,7 +31,7 @@ from autonomie.models.treasury import get_expense_years
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie.models import user
 
-from autonomie.views.forms import main
+from autonomie import forms
 
 
 def date_validator(form, value):
@@ -71,7 +71,7 @@ class InvoiceNumberSchema(colander.MappingSchema):
     """
         Form schema for an invoice number selection (year + number)
     """
-    financial_year = main.year_select_node(
+    financial_year = forms.year_select_node(
         title=u"Année comptable",
         query_func=get_invoice_years,
     )
@@ -85,7 +85,7 @@ class FromInvoiceNumberSchema(colander.MappingSchema):
     """
         Form schema for an invoice number selection (year + number)
     """
-    financial_year = main.year_select_node(
+    financial_year = forms.year_select_node(
         title=u"Année comptable",
         query_func=get_invoice_years,
     )
@@ -117,6 +117,6 @@ class ExpenseSchema(colander.MappingSchema):
     """
     user_id = user.user_node(title=u"Nom de l'entrepreneur",
         widget_options={'default_option':(u'0', u'Tous les entrepreneurs',)})
-    year = main.year_select_node(title=u"Année", query_func=get_expense_years)
-    month = main.month_select_node(title=u"Mois")
+    year = forms.year_select_node(title=u"Année", query_func=get_expense_years)
+    month = forms.month_select_node(title=u"Mois")
     exported = EXPORTEDFIELD

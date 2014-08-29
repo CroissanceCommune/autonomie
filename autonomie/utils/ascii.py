@@ -64,3 +64,10 @@ def gen_random_string(size=15):
             size of the resulting string
     """
     return ''.join(random.choice(lowercase) for _ in range(size))
+
+
+def random_tag_id(size=15):
+    """
+    Return a random string supposed to be used as tag id
+    """
+    return gen_random_string(size)

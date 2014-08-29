@@ -52,7 +52,7 @@ from sqlalchemy.orm import (
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
 
-from autonomie.models import widgets
+from autonomie import forms
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
 from autonomie.exception import Forbidden
@@ -141,7 +141,7 @@ class Invoice(Task, InvoiceCompute):
         backref=backref(
             'invoices',
             order_by='Invoice.taskDate',
-            info={'colanderalchemy': widgets.EXCLUDED,},
+            info={'colanderalchemy': forms.EXCLUDED,},
         ),
     )
 
@@ -150,7 +150,7 @@ class Invoice(Task, InvoiceCompute):
         backref=backref(
             'invoices',
             order_by='Invoice.taskDate',
-            info={'colanderalchemy': widgets.EXCLUDED,},
+            info={'colanderalchemy': forms.EXCLUDED,},
         ),
     )
 
@@ -508,7 +508,7 @@ class CancelInvoice(Task, TaskCompute):
         backref=backref(
             'cancelinvoices',
             order_by='CancelInvoice.taskDate',
-            info={'colanderalchemy': widgets.EXCLUDED,},
+            info={'colanderalchemy': forms.EXCLUDED,},
         )
     )
 
@@ -527,7 +527,7 @@ class CancelInvoice(Task, TaskCompute):
         backref=backref(
             'cancelinvoices',
             order_by='CancelInvoice.taskDate',
-            info={'colanderalchemy': widgets.EXCLUDED,},
+            info={'colanderalchemy': forms.EXCLUDED,},
         )
     )
 
@@ -732,7 +732,7 @@ class ManualInvoice(Task):
         primaryjoin="Customer.id==ManualInvoice.customer_id",
         backref=backref(
             'manual_invoices',
-            info={'colanderalchemy': widgets.EXCLUDED,},
+            info={'colanderalchemy': forms.EXCLUDED,},
         ),
     )
     company_id = Column(
@@ -744,7 +744,7 @@ class ManualInvoice(Task):
         primaryjoin="Company.id==ManualInvoice.company_id",
         backref=backref(
             'manual_invoices',
-            info={'colanderalchemy': widgets.EXCLUDED,},
+            info={'colanderalchemy': forms.EXCLUDED,},
         ),
     )
     # State machine handling

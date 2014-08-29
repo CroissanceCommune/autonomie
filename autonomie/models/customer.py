@@ -37,25 +37,26 @@
 """
 import logging
 import colander
-from deform import widget as deform_widget
-from sqlalchemy import (
-        Column,
-        Integer,
-        String,
-        Text,
-        ForeignKey,
-    )
-from sqlalchemy.orm import (
-        deferred,
-        )
+import deform
 
-from autonomie.models import widgets
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    ForeignKey,
+)
+from sqlalchemy.orm import (
+    deferred,
+)
+
+from autonomie import forms
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
-        DBBASE,
-        default_table_args,
-        )
+    DBBASE,
+    default_table_args,
+)
 
 log = logging.getLogger(__name__)
 
@@ -126,7 +127,7 @@ class Customer(DBBASE):
         primary_key=True,
         info={
             'export':{'exclude':True},
-            'colanderalchemy': widgets.EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
         },
     )
 
@@ -137,7 +138,7 @@ class Customer(DBBASE):
             default=get_current_timestamp,
             info={
                 'export':{'exclude':True},
-                'colanderalchemy': widgets.EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
             },
         ),
         group='all',
@@ -151,7 +152,7 @@ class Customer(DBBASE):
             onupdate=get_current_timestamp,
             info={
                 'export':{'exclude':True},
-                'colanderalchemy': widgets.EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
             },
         ),
         group='all',
@@ -163,7 +164,7 @@ class Customer(DBBASE):
         ForeignKey('company.id'),
         info={
             'export':{'exclude':True},
-            'colanderalchemy': widgets.EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
         }
     )
 
@@ -184,7 +185,7 @@ class Customer(DBBASE):
         info={
             'colanderalchemy':{
                 'title': u"Code",
-                'widget': deform_widget.TextInputWidget(mask='****')
+                'widget': deform.widget.TextInputWidget(mask='****')
             }
         },
         nullable=False,
@@ -239,7 +240,7 @@ class Customer(DBBASE):
             info={
                 'colanderalchemy': {
                     'title': u'Adresse',
-                    'widget': deform_widget.TextAreaWidget(
+                    'widget': deform.widget.TextAreaWidget(
                         cols=25,
                         row=1,
                     )
@@ -297,7 +298,7 @@ class Customer(DBBASE):
             info={
                 'colanderalchemy':{
                     'title': u"E-mail",
-                    'validator': widgets.mail_validator(),
+                    'validator': forms.mail_validator(),
                 },
             },
             default='',
@@ -351,7 +352,7 @@ class Customer(DBBASE):
             info={
                   'colanderalchemy':{
                       'title': u"Commentaires",
-                      'widget': deform_widget.TextAreaWidget(
+                      'widget': deform.widget.TextAreaWidget(
                           css_class="span10"
                       ),
                   }

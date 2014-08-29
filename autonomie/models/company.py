@@ -30,7 +30,7 @@ import logging
 import colander
 import deform_bootstrap
 import deform
-from autonomie.views.forms import widgets as custom_widgets
+from autonomie import deform_extend
 
 from sqlalchemy import (
     Column,
@@ -44,7 +44,7 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie.models import widgets
+from autonomie import forms
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import (
     CustomDateType,
@@ -171,13 +171,13 @@ class Company(DBBASE):
         order_by="Customer.code",
         backref=backref(
             'company',
-            info={'colanderalchemy': widgets.EXCLUDED},
+            info={'colanderalchemy': forms.EXCLUDED},
         )
     )
     projects = relationship(
         "Project",
         order_by="Project.id",
-        backref=backref("company", info={'colanderalchemy': widgets.EXCLUDED}),
+        backref=backref("company", info={'colanderalchemy': forms.EXCLUDED}),
     )
     code_compta = deferred(
         Column(
@@ -355,7 +355,7 @@ def deferred_fullcustomer_list_widget(node, kw):
                 *[(cust.id, cust.name) for cust in comp.customers]
             )
         )
-    return custom_widgets.CustomChosenOptGroupWidget(
+    return deform_extend.CustomChosenOptGroupWidget(
         values=values,
         placeholder=u"Sélectionner un client"
         )

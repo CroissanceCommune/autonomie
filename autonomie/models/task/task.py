@@ -51,7 +51,7 @@ from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
-from autonomie.models.widgets import EXCLUDED
+from autonomie.forms import EXCLUDED
 from autonomie.models.tva import Tva
 from autonomie.exception import Forbidden
 

@@ -24,7 +24,7 @@
 
 import unittest
 import colander
-from autonomie.views.forms.validators import validate_image_mime
+from autonomie.forms.validators import validate_image_mime
 
 class ValidatorsTest(unittest.TestCase):
     def test_validate_image_mime(self):

@@ -23,7 +23,7 @@
 #
 
 from mock import MagicMock
-from autonomie.views.forms.project import customer_dictify
+from autonomie.forms.project import customer_dictify
 
 from autonomie.tests.base import BaseTestCase
 

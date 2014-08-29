@@ -23,7 +23,7 @@
 #
 
 from mock import MagicMock
-from autonomie.views.forms.company import get_upload_options_from_request
+from autonomie.forms.company import get_upload_options_from_request
 
 from autonomie.tests.base import BaseViewTest
 

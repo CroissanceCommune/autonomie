@@ -24,7 +24,7 @@
 
 from colander import Invalid
 from mock import MagicMock
-from autonomie.views.forms.user import (
+from autonomie.forms.user import (
     auth,
     get_password_schema,
     deferred_company_disable_default,

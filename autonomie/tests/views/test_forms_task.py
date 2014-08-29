@@ -28,9 +28,9 @@ from copy import deepcopy
 from mock import MagicMock
 
 from autonomie.tests.base import BaseTestCase
-from autonomie.views.forms.task import deferred_total_validator
-from autonomie.views.forms.task import deferred_payment_mode_validator
-from autonomie.views.forms.task import deferred_amount_default
+from autonomie.forms.task import deferred_total_validator
+from autonomie.forms.task import deferred_payment_mode_validator
+from autonomie.forms.task import deferred_amount_default
 
 DBDATAS = dict(
     estimation=dict(
@@ -184,14 +184,14 @@ def get_full_invoice_model(datas):
 
 class TestMatchTools(BaseTestCase):
     def test_estimation_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.task import EstimationMatch
+        from autonomie.forms.task import EstimationMatch
         e = EstimationMatch()
         result = e.toschema(DBDATAS, {})
         for field, group in e.matching_map:
             self.assertEqual(DBDATAS['estimation'][field], result[group][field])
 
     def test_estimationlines_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.task import TaskLinesMatch
+        from autonomie.forms.task import TaskLinesMatch
         e = TaskLinesMatch()
         result = e.toschema(DBDATAS, {})
         from copy import deepcopy
@@ -203,7 +203,7 @@ class TestMatchTools(BaseTestCase):
             self.assertEqual(result['lines']['lines'][i], line)
 
     def test_discountlines_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.task import DiscountLinesMatch
+        from autonomie.forms.task import DiscountLinesMatch
         d = DiscountLinesMatch()
         result = d.toschema(DBDATAS, {})
         from copy import deepcopy
@@ -212,7 +212,7 @@ class TestMatchTools(BaseTestCase):
             self.assertEqual(result['lines']['discounts'][i], line)
 
     def test_paymentlines_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.task import PaymentLinesMatch
+        from autonomie.forms.task import PaymentLinesMatch
         p = PaymentLinesMatch()
         result = p.toschema(DBDATAS, {})
         lines = deepcopy(DBDATAS['payment_lines'])
@@ -223,14 +223,14 @@ class TestMatchTools(BaseTestCase):
             self.assertEqual(result['payments']['payment_lines'][i], line)
 
     def test_invoice_dbdatas_to_appstruct(self):
-        from autonomie.views.forms.task import InvoiceMatch
+        from autonomie.forms.task import InvoiceMatch
         e = InvoiceMatch()
         result = e.toschema(DBDATAS, {})
         for field, group in e.matching_map:
             self.assertEqual(DBDATAS['invoice'][field], result[group][field])
 
     def test_appstruct_to_estimationdbdatas(self):
-        from autonomie.views.forms.task import EstimationMatch
+        from autonomie.forms.task import EstimationMatch
         datas_ = deepcopy(DATAS)
         e = EstimationMatch()
         result = e.todb(datas_, {})
@@ -239,28 +239,28 @@ class TestMatchTools(BaseTestCase):
         self.assertEqual(result['estimation'], dbdatas_['estimation'])
 
     def test_appstruct_to_estimationlinesdbdatas(self):
-        from autonomie.views.forms.task import TaskLinesMatch
+        from autonomie.forms.task import TaskLinesMatch
         datas_ = deepcopy(DATAS)
         e = TaskLinesMatch()
         result = e.todb(datas_, {})
         self.assertEqual(result['lines'], DBDATAS['lines'])
 
     def test_appstruct_to_discountlines_dbdatas(self):
-        from autonomie.views.forms.task import DiscountLinesMatch
+        from autonomie.forms.task import DiscountLinesMatch
         datas_ = deepcopy(DATAS)
         d = DiscountLinesMatch()
         result = d.todb(datas_, {})
         self.assertEqual(result['discounts'], DBDATAS['discounts'])
 
     def test_appstruct_to_paymentlinesdbdatas(self):
-        from autonomie.views.forms.task import PaymentLinesMatch
+        from autonomie.forms.task import PaymentLinesMatch
         p = PaymentLinesMatch()
         datas_ = deepcopy(DATAS)
         result = p.todb(datas_, {})
         self.assertEqual(result['payment_lines'], DBDATAS['payment_lines'])
 
     def test_appstruct_to_invoicedbdatas(self):
-        from autonomie.views.forms.task import InvoiceMatch
+        from autonomie.forms.task import InvoiceMatch
         e = InvoiceMatch()
         datas_ = deepcopy(INV_DATAS)
         result = e.todb(datas_, {})
@@ -282,7 +282,7 @@ class TestTaskForms(BaseTestCase):
         return MagicMock(context=task)
 
     def test_paymentform_schema_ok(self):
-        from autonomie.views.forms.task import PaymentSchema
+        from autonomie.forms.task import PaymentSchema
         schema = PaymentSchema().bind(request=self.request())
         form = deform.Form(schema)
         ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'),
@@ -303,7 +303,7 @@ class TestTaskForms(BaseTestCase):
         self.assertRaises(colander.Invalid, validator, c, u'pièce en chocolat')
 
     def test_customer_validator(self):
-        from autonomie.views.forms.task import deferred_customer_validator
+        from autonomie.forms.task import deferred_customer_validator
         func = deferred_customer_validator("nutt", {'request':self.request()})
         self.assertRaises(colander.Invalid, func, "nutt", 0)
         self.assertRaises(colander.Invalid, func, "nutt", 15)

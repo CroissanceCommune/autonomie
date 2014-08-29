@@ -23,9 +23,9 @@
 #
 
 import colander
-from autonomie.views.forms.custom_types import AmountType
-from autonomie.views.forms.custom_types import specialfloat
-from autonomie.views.forms.custom_types import Integer
+from autonomie.forms.custom_types import AmountType
+from autonomie.forms.custom_types import specialfloat
+from autonomie.forms.custom_types import Integer
 from autonomie.tests.base import BaseTestCase
 
 class TestType(BaseTestCase):

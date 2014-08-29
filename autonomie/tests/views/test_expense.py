@@ -41,7 +41,7 @@ from autonomie.views.expense import (
         get_bookmarks,
         BookMarkHandler,
         )
-from autonomie.views.forms.expense import ExpenseKmLineSchema, ExpenseLineSchema
+from autonomie.forms.expense import ExpenseKmLineSchema, ExpenseLineSchema
 from autonomie.tests.base import (
         BaseFunctionnalTest,
         BaseViewTest,

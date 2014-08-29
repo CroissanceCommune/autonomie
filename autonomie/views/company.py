@@ -35,12 +35,12 @@ from pyramid.security import has_permission
 
 from autonomie.models.company import Company
 from autonomie.utils.widgets import ViewLink
-from autonomie.views.forms import (
+from autonomie.views import (
     BaseFormView,
     submit_btn,
     merge_session_with_post,
 )
-from autonomie.views.forms.company import COMPANYSCHEMA
+from autonomie.forms.company import COMPANYSCHEMA
 
 
 log = logging.getLogger(__name__)

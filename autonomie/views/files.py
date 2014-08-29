@@ -38,12 +38,12 @@ from autonomie.export.utils import write_file_to_request
 from autonomie.utils.widgets import ViewLink
 from autonomie.models import DBSESSION
 from autonomie.models.files import File
-from autonomie.views.forms import (
-        BaseFormView,
-        merge_session_with_post,
-        )
-from autonomie.views.forms.files import FileUploadSchema
+from autonomie.forms.files import FileUploadSchema
 from autonomie.resources import fileupload_js
+from autonomie.views import (
+    BaseFormView,
+    merge_session_with_post,
+)
 
 
 UPLOAD_MISSING_DATAS_MSG = u"Des informations sont manquantes pour \

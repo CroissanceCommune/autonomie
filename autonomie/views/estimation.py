@@ -33,28 +33,29 @@ from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import extract
 from beaker.cache import cache_region
 
+from autonomie.exception import Forbidden
 from autonomie.models.task.estimation import (
     Estimation,
     EstimationLine,
     PaymentLine,
 )
-from autonomie.views.files import FileUploadView
 from autonomie.models.task.task import DiscountLine
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
-from autonomie.views.forms.task import (
+from autonomie.forms.task import (
     get_estimation_schema,
     get_estimation_appstruct,
     get_estimation_dbdatas,
 )
-from autonomie.views.forms.estimations import (
+from autonomie.forms.estimations import (
     get_list_schema,
 )
-from autonomie.views.forms import (
+from autonomie.views import (
     merge_session_with_post,
     submit_btn,
+    BaseListView,
 )
-from autonomie.exception import Forbidden
+from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
     TaskStatusView,
     TaskFormView,
@@ -64,7 +65,6 @@ from autonomie.views.taskaction import (
     task_html_view,
     make_task_delete_view,
 )
-from autonomie.views import BaseListView
 
 log = logging.getLogger(__name__)
 

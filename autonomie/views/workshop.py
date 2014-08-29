@@ -30,7 +30,7 @@ import datetime
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPForbidden,
-    )
+)
 from sqlalchemy import (
     or_,
     func,
@@ -43,35 +43,32 @@ from js.jquery_timepicker_addon import timepicker_fr
 from autonomie.models import workshop as models
 from autonomie.models.activity import Attendance
 from autonomie.models import user
-
 from autonomie.utils.pdf import (
-        render_html,
-        write_pdf,
-        )
+    render_html,
+    write_pdf,
+)
 from autonomie.export.csvtools import CsvExporter
 from autonomie.export.excel import XlsExporter
 from autonomie.utils.widgets import ViewLink
-from autonomie.views.forms import (
-    BaseFormView,
-    merge_session_with_post,
-    )
-from autonomie.views import (
-    BaseListView,
-    BaseCsvView,
-    BaseXlsView,
-)
-from autonomie.views.forms.workshop import (
+from autonomie.forms.workshop import (
     Workshop as WorkshopSchema,
     get_list_schema,
     ATTENDANCE_STATUS,
     Attendances as AttendanceSchema,
-    )
-
+)
+from autonomie.views import (
+    BaseListView,
+    BaseCsvView,
+    BaseXlsView,
+    BaseFormView,
+    merge_session_with_post,
+)
 from autonomie.views.render_api import (
     format_datetime,
     format_date,
     format_account,
 )
+
 
 log = logging.getLogger(__name__)
 
@@ -384,20 +381,20 @@ def stream_workshop_entries_for_export(query):
 
         duration = hours * 60 + minutes
 
-        for user in workshop.participants:
+        for participant in workshop.participants:
 
             attended = False
             for timeslot in workshop.timeslots:
                 # On exporte une ligne que si le user était là au moins une
                 # fois
-                if timeslot.user_status(user.id) == u'Présent':
+                if timeslot.user_status(participant.id) == u'Présent':
                     attended = True
                     break
 
             if attended:
                 yield {
                     "label" : workshop.name,
-                    "participant": format_account(user),
+                    "participant": format_account(participant),
                     "leaders": '\n'.join(workshop.leaders),
                     "duration": duration,
                 }

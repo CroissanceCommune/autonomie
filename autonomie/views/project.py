@@ -52,16 +52,16 @@ from autonomie.utils.widgets import (
     StaticWidget,
     PopUp,
 )
-from autonomie.views.forms.widgets import GridFormWidget
-from autonomie.views.forms import (
-    BaseFormView,
-    submit_btn,
-)
-from autonomie.views.forms.project import (
+from autonomie.forms.project import (
     get_list_schema,
     get_project_schema,
 )
-from autonomie.views import BaseListView
+from autonomie.deform_extend import GridFormWidget
+from autonomie.views import (
+    BaseFormView,
+    submit_btn,
+    BaseListView,
+)
 from autonomie.views.files import (
     FileUploadView,
     get_add_file_link,

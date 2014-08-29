@@ -16,16 +16,16 @@
 Views related to payments edition
 """
 import logging
-import deform
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
-from autonomie.views.forms import (
-        BaseFormView,
-        merge_session_with_post,
-        )
-from autonomie.views.forms.task import PaymentSchema
+
 from autonomie.utils.widgets import ViewLink
+from autonomie.forms.task import PaymentSchema
+from autonomie.views import (
+    BaseFormView,
+    merge_session_with_post,
+)
 
 log = logging.getLogger(__name__)
 
@@ -112,7 +112,6 @@ def payment_delete(context, request):
     Payment deletion view
     """
     invoice = context.task
-    user_id = request.user.id
 
     request.dbsession.delete(context)
 

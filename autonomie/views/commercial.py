@@ -29,10 +29,10 @@ import datetime
 import colander
 
 from sqlalchemy import (
-        extract,
-        and_,
-        or_,
-        )
+    extract,
+    and_,
+    or_,
+)
 from deform import Form
 from deform.exception import ValidationFailure
 from fanstatic import Resource
@@ -43,26 +43,27 @@ from autonomie.models.task import (
     Estimation,
     Invoice,
     CancelInvoice,
-    )
+)
 from autonomie.models.customer import Customer
 from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
-from autonomie.views import BaseView
-from autonomie.views.forms import (
+from autonomie.views import (
     merge_session_with_post,
     submit_btn,
+    BaseView,
 )
-from autonomie.views.forms.commercial import (
+from autonomie.forms.commercial import (
     CommercialFormSchema,
     CommercialSetFormSchema,
-    )
-
+)
 from autonomie.resources import (
     lib_autonomie,
     backbone,
 )
 
+
 commercial_js = Resource(lib_autonomie, "js/commercial.js", depends=[backbone])
+
 
 def get_year_range(year):
     """

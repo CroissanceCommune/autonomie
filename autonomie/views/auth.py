@@ -41,10 +41,10 @@ from deform import Form
 from deform import Button
 from deform import ValidationFailure
 
-from autonomie.views.forms.user import (
-        get_auth_schema,
-        get_json_auth_schema,
-        )
+from autonomie.forms.user import (
+    get_auth_schema,
+    get_json_auth_schema,
+)
 from autonomie.utils.rest import RestError
 
 log = logging.getLogger(__name__)

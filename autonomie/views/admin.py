@@ -65,8 +65,13 @@ from autonomie.models.user import (
     SocialDocTypeOption,
 )
 
-from autonomie.views.forms import submit_btn
-from autonomie.views.forms.admin import (
+from autonomie.views import (
+    submit_btn,
+    BaseFormView,
+    merge_session_with_post,
+)
+
+from autonomie.forms.admin import (
     MainConfig,
     TvaConfig,
     PaymentModeConfig,
@@ -79,10 +84,6 @@ from autonomie.views.forms.admin import (
     merge_config_datas,
     get_sequence_model_admin,
 )
-from autonomie.views.forms import (
-        BaseFormView,
-        merge_session_with_post,
-        )
 from autonomie.utils.widgets import ViewLink
 from js.tinymce import tinymce
 

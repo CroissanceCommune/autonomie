@@ -29,46 +29,45 @@
     from date to date
     from number to number (in a given year)
 """
-import itertools
 import logging
 import datetime
 from sqlalchemy import or_, and_
 
 from deform import (
-        Button,
-        Form,
-        )
+    Button,
+    Form,
+)
 from deform.exception import ValidationFailure
 
 from autonomie.compute.sage import (
-        InvoiceExport,
-        MissingData,
-        ExpenseExport,
-        )
+    InvoiceExport,
+    MissingData,
+    ExpenseExport,
+)
 from autonomie.export.sage import (
-        SageInvoiceCsvWriter,
-        SageExpenseCsvWriter,
-        )
+    SageInvoiceCsvWriter,
+    SageExpenseCsvWriter,
+)
 from autonomie.export.utils import write_file_to_request
-
-from autonomie.models.task import (
-        Task,
-        Invoice,
-        CancelInvoice,)
-from autonomie.views import BaseView
-from autonomie.views.forms.sage import (
-        periodSchema,
-        InvoiceNumberSchema,
-        FromInvoiceNumberSchema,
-        AllSchema,
-        ExpenseSchema,
-        ExpenseIdSchema,
-        )
-from autonomie.views.render_api import format_account
 from autonomie.models.treasury import (
-        ExpenseSheet,
-        ExpenseType,
-        )
+    ExpenseSheet,
+    ExpenseType,
+)
+from autonomie.models.task import (
+    Task,
+    Invoice,
+    CancelInvoice,
+)
+from autonomie.forms.sage import (
+    periodSchema,
+    InvoiceNumberSchema,
+    FromInvoiceNumberSchema,
+    AllSchema,
+    ExpenseSchema,
+    ExpenseIdSchema,
+)
+from autonomie.views import BaseView
+from autonomie.views.render_api import format_account
 
 log = logging.getLogger(__name__)
 

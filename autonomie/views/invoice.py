@@ -30,35 +30,38 @@ import logging
 from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.task.invoice import Invoice
-from autonomie.models.task.invoice import InvoiceLine
+from autonomie.exception import Forbidden
+from autonomie.models.task.invoice import (
+    Invoice,
+    InvoiceLine,
+)
 from autonomie.models.task.task import DiscountLine
-from autonomie.views.forms.task import (
-        get_invoice_schema,
-        get_invoice_appstruct,
-        get_invoice_dbdatas,
-        )
-from autonomie.views.forms import (
+from autonomie.forms.task import (
+    get_invoice_schema,
+    get_invoice_appstruct,
+    get_invoice_dbdatas,
+)
+from autonomie.views import (
     merge_session_with_post,
     submit_btn,
 )
-from autonomie.exception import Forbidden
 from autonomie.views.files import FileUploadView
-from autonomie.views.forms import submit_btn
 from autonomie.views.taskaction import (
-        TaskFormView,
-        get_paid_form,
-        get_set_financial_year_form,
-        get_set_products_form,
-        context_is_editable,
-        TaskStatusView,
-        populate_actionmenu,
-        task_pdf_view,
-        task_html_view,
-        make_task_delete_view,
-        )
+    TaskFormView,
+    get_paid_form,
+    get_set_financial_year_form,
+    get_set_products_form,
+    context_is_editable,
+    TaskStatusView,
+    populate_actionmenu,
+    task_pdf_view,
+    task_html_view,
+    make_task_delete_view,
+)
+
 
 log = logging.getLogger(__name__)
+
 
 def add_lines_to_invoice(task, appstruct):
     """

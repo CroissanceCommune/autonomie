@@ -42,18 +42,19 @@ from autonomie.utils.pdf import (
         render_html,
         write_pdf,
         )
-from autonomie.views import BaseListView
+from autonomie.views import (
+    BaseListView,
+    BaseFormView,
+    merge_session_with_post,
+)
+
 from autonomie.views.files import FileUploadView
 from autonomie.models.activity import (
     Activity,
     Attendance,
     )
 from autonomie.models import user
-from autonomie.views.forms import (
-    BaseFormView,
-    merge_session_with_post,
-    )
-from autonomie.views.forms.activity import (
+from autonomie.forms.activity import (
     CreateActivitySchema,
     NewActivitySchema,
     RecordActivitySchema,

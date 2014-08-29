@@ -27,6 +27,7 @@
 """
 import colander
 from deform import widget as deform_widget
+from deform_bootstrap import widget as bootstrap_widget
 from sqlalchemy import (
     Table,
     Column,
@@ -41,7 +42,6 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie.utils.form_widget import deferred_autocomplete_widget
 from autonomie.models import widgets
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
@@ -92,8 +92,10 @@ def get_customers_from_request(request):
 def deferred_customer_select(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
-    return deferred_autocomplete_widget(node,
-                        {'choices':build_customer_values(customers)})
+    return bootstrap_widget.ChosenSingleWidget(
+        values=build_customer_values(customers),
+        placeholder=u'Sélectionner un client',
+    )
 
 
 @colander.deferred

@@ -37,7 +37,6 @@ from autonomie.models.user import (
 )
 from autonomie.models.company import Company
 from autonomie.views.forms import main
-from autonomie.views.forms.widgets import deferred_edit_widget
 from autonomie.views.forms.lists import BaseListsSchema
 
 log = logging.getLogger(__name__)

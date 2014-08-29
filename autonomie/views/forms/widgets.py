@@ -41,9 +41,7 @@ from deform.i18n import _
 from deform import widget
 from translationstring import TranslationString
 
-from deform_bootstrap.widget import ChosenSingleWidget
 from pyramid.renderers import render
-
 from autonomie.utils.ascii import gen_random_string
 
 
@@ -285,31 +283,6 @@ class CustomChosenOptGroupWidget(widget.SelectWidget):
     unselection
     """
     template = TEMPLATES_PATH + 'chosen_optgroup.pt'
-
-@colander.deferred
-def deferred_edit_widget(node, kw):
-    """
-        Dynamic assigned widget
-        returns a text widget disabled if edit is True in schema binding
-    """
-    if kw.get('edit'):
-        wid = DisabledInput()
-    else:
-        wid = widget.TextInputWidget()
-    return wid
-
-
-@colander.deferred
-def deferred_autocomplete_widget(node, kw):
-    """
-        Dynamically assign a autocomplete single select widget
-    """
-    choices = kw.get('choices')
-    if choices:
-        wid = ChosenSingleWidget(values=choices)
-    else:
-        wid = widget.TextInputWidget()
-    return wid
 
 
 def grouper(iterable, items, fillvalue=None):

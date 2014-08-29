@@ -31,7 +31,7 @@ import deform
 
 from autonomie.utils.fileupload import FileTempStore
 
-from autonomie.views.forms import widgets as custom_widgets
+from autonomie import deform_extend
 
 
 TEMPLATES_PATH = "autonomie:deform_templates/"
@@ -68,7 +68,7 @@ def get_date_input(**kw):
     """
     Return a date input displaying a french user friendly format
     """
-    date_input = custom_widgets.CustomDateInputWidget(**kw)
+    date_input = deform_extend.CustomDateInputWidget(**kw)
     return date_input
 
 
@@ -76,7 +76,7 @@ def get_datetime_input(**kw):
     """
     Return a datetime input displaying a french user friendly format
     """
-    datetime_input = custom_widgets.CustomDateTimeInputWidget(**kw)
+    datetime_input = deform_extend.CustomDateTimeInputWidget(**kw)
     return datetime_input
 
 
@@ -258,3 +258,37 @@ def get_fileupload_widget(store_url, store_path, session, \
             )
     return deform.widget.FileUploadWidget(tmpstore,
                 template=TEMPLATES_PATH + "fileupload.mako")
+
+
+def flatten_appstruct(appstruct):
+    """
+        return a flattened appstruct, suppose all keys in the dict and subdict
+        are unique
+    """
+    res = {}
+    for key, value in appstruct.items():
+        if not isinstance(value, dict):
+            res[key] = value
+        else:
+            res.update(value)
+    return res
+
+
+def merge_session_with_post(model, app_struct):
+    """
+        Merge Deform validated datas with SQLAlchemy's objects
+        Allow to spare some lines of assigning datas to the object
+        before writing to database
+
+        model
+
+            The sqlalchemy model
+
+        app_struct
+
+            The datas retrieved for example from a form
+    """
+    for key, value in app_struct.items():
+        if value not in (None, colander.null,):
+            setattr(model, key, value)
+    return model

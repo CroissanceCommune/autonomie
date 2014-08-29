@@ -41,7 +41,8 @@ from sqlalchemy import desc, asc
 from webhelpers import paginate
 from pyramid.url import current_route_url
 
-from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS
+from autonomie.forms import merge_session_with_post, flatten_appstruct
+from autonomie.forms.lists import ITEMS_PER_PAGE_OPTIONS
 from autonomie.export.csvtools import SqlaCsvExporter
 from autonomie.export.excel import SqlaXlsExporter
 from autonomie.export.utils import write_file_to_request
@@ -434,37 +435,3 @@ class BaseFormView(FormView):
         open if there is an error
         """
         return dict(form=e.render(), formerror=True)
-
-
-def merge_session_with_post(model, app_struct):
-    """
-        Merge Deform validated datas with SQLAlchemy's objects
-        Allow to spare some lines of assigning datas to the object
-        before writing to database
-
-        model
-
-            The sqlalchemy model
-
-        app_struct
-
-            The datas retrieved for example from a form
-    """
-    for key, value in app_struct.items():
-        if value not in (None, colander.null,):
-            setattr(model, key, value)
-    return model
-
-
-def flatten_appstruct(appstruct):
-    """
-        return a flattened appstruct, suppose all keys in the dict and subdict
-        are unique
-    """
-    res = {}
-    for key, value in appstruct.items():
-        if not isinstance(value, dict):
-            res[key] = value
-        else:
-            res.update(value)
-    return res

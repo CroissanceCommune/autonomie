@@ -21,6 +21,8 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 """
 Main deferreds functions used in autonomie
+
+The widgets provided here are model agnostic
 """
 import colander
 import calendar
@@ -122,7 +124,10 @@ def textarea_node(**kw):
     """
     css_class = kw.pop('css_class', None) or 'span10'
     if kw.pop('richwidget', None):
-        wid = deform.widget.RichTextWidget(css_class=css_class, theme="advanced")
+        wid = deform.widget.RichTextWidget(
+            css_class=css_class,
+            theme="advanced",
+        )
     else:
         wid = deform.widget.TextAreaWidget(css_class=css_class)
     return colander.SchemaNode(

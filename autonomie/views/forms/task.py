@@ -62,24 +62,25 @@ import datetime
 
 import colander
 from deform import widget
+from deform_bootstrap import widget as bootstrap_widget
 
 from autonomie.views.forms.widgets import (
-        DisabledInput,
-        deferred_autocomplete_widget,
-        CustomSequenceWidget,
-        )
+    DisabledInput,
+    CustomSequenceWidget,
+)
 from autonomie.views.forms import main
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.tva import (
-        Tva,
-        Product,
-        )
+    Tva,
+    Product,
+)
 from .custom_types import (
-        QuantityType,
-        AmountType,
-        Integer,
-        )
+    QuantityType,
+    AmountType,
+    Integer,
+)
+
 
 log = logging.getLogger(__name__)
 DAYS = (
@@ -91,15 +92,20 @@ DAYS = (
         ('FEUIL', u'Feuillet(s)'),
         ('PACK', u'Forfait'),
         )
+
+
 TASKTYPES_LABELS = {
     'invoice': u'Facture',
     u'estimation': u'Devis',
     'cancelinvoice': u'Avoir',
     }
+
+
 PAYMENTDISPLAYCHOICES = (
         ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
         ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
         ('ALL', u"Le détail des paiements apparaît dans le PDF",),)
+
 
 TEMPLATES_URL = 'autonomie:deform_templates/'
 
@@ -139,7 +145,7 @@ def build_customer_value(customer=None):
     if customer:
         return (str(customer.id), customer.name)
     else:
-        return ("0", u"Sélectionnez")
+        return ("0", u"Sélectionner un client")
 
 
 def build_customer_values(customers):
@@ -167,8 +173,10 @@ def get_customers_from_request(request):
 def deferred_customer_list(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
-    return deferred_autocomplete_widget(node,
-            {'choices':build_customer_values(customers)})
+    return bootstrap_widget.ChosenSingleWidget(
+        values=build_customer_values(customers),
+        placeholder=u"Sélectionner un client",
+    )
 
 
 @colander.deferred

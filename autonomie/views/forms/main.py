@@ -43,19 +43,6 @@ MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
 
 
 @colander.deferred
-def deferred_autocomplete_widget(node, kw):
-    """
-        Dynamically assign a autocomplete single select widget
-    """
-    choices = kw.get('choices')
-    if choices:
-        wid = bootstrap_widget.ChosenSingleWidget(values=choices)
-    else:
-        wid = deform.widget.TextInputWidget()
-    return wid
-
-
-@colander.deferred
 def deferred_today(node, kw):
     """
         return a deferred value for "today"
@@ -321,7 +308,7 @@ def deferred_customer_list_widget(node, kw):
     return bootstrap_widget.ChosenSingleWidget(
         values=values,
         placeholder=u'Sélectionner un client',
-        )
+    )
 
 
 @colander.deferred
@@ -373,3 +360,16 @@ def get_fileupload_widget(store_url, store_path, session, \
             )
     return deform.widget.FileUploadWidget(tmpstore,
                 template=TEMPLATES_PATH + "fileupload.mako")
+
+
+@colander.deferred
+def deferred_edit_widget(node, kw):
+    """
+        Dynamic assigned widget
+        returns a text widget disabled if edit is True in schema binding
+    """
+    if kw.get('edit'):
+        wid = custom_widgets.DisabledInput()
+    else:
+        wid = deform.widget.TextInputWidget()
+    return wid

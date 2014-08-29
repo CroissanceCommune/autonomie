@@ -32,8 +32,6 @@ import logging
 from deform import FileData
 from deform import widget
 
-from autonomie.views.forms.widgets import deferred_edit_widget
-from autonomie.views.forms.main import get_fileupload_widget
 from autonomie.views.forms.validators import validate_image_mime
 from autonomie.views.forms import main
 from autonomie.utils.image import ImageResizer
@@ -61,9 +59,9 @@ def deferred_edit_adminonly_widget(node, kw):
     """
     request = kw['request']
     if request.user.is_contractor():
-        return deferred_edit_widget(node, dict(edit=True))
+        return main.deferred_edit_widget(node, dict(edit=True))
     else:
-        return deferred_edit_widget(node, dict(edit=False))
+        return main.deferred_edit_widget(node, dict(edit=False))
 
 @colander.deferred
 def deferred_logo_widget(node, kw):
@@ -72,7 +70,7 @@ def deferred_logo_widget(node, kw):
     """
     request = kw['request']
     path, url = get_upload_options_from_request(request, LOGO_PATH)
-    return get_fileupload_widget(url, path, request.session)
+    return main.get_fileupload_widget(url, path, request.session)
 
 @colander.deferred
 def deferred_header_widget(node, kw):
@@ -81,7 +79,7 @@ def deferred_header_widget(node, kw):
     """
     request = kw['request']
     path, url = get_upload_options_from_request(request, HEADER_PATH)
-    return get_fileupload_widget(url, path, request.session,
+    return main.get_fileupload_widget(url, path, request.session,
                                     filters=[HEADER_RESIZER.complete])
 
 

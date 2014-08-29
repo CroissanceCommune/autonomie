@@ -29,20 +29,16 @@
     * expenseline configuration
 """
 import colander
-from datetime import date
-from deform import widget as deform_widget
+import deform
 
 from autonomie.models.treasury import (
     ExpenseType,
     get_expense_years,
-    )
+)
 from autonomie.models import user
 from autonomie.models.task.invoice import get_invoice_years
-
-from autonomie.views.render_api import month_name
-from autonomie.views.forms import main
-from autonomie.views.forms.lists import BaseListsSchema
 from .custom_types import AmountType
+from autonomie import forms
 
 
 STATUS_OPTIONS = (
@@ -50,9 +46,7 @@ STATUS_OPTIONS = (
     ("valid", u'Validées', ),
     ("resulted", u'Payées', ),
     ("wait", u'En attente de validation', ),
-#    (u'Brouillon', 'draft'),
-#    (u'Invalidées', 'invalid'),
-    )
+)
 
 
 @colander.deferred
@@ -65,13 +59,13 @@ def deferred_type_id_validator(node, kw):
 
 
 class PeriodSelectSchema(colander.MappingSchema):
-    year = main.year_select_node(query_func=get_invoice_years)
-    month = main.month_select_node(title=u'')
+    year = forms.year_select_node(query_func=get_invoice_years)
+    month = forms.month_select_node(title=u'')
 
 
 class ExpenseStatusSchema(colander.MappingSchema):
     comment = colander.SchemaNode(colander.String(),
-            widget=deform_widget.TextAreaWidget(cols=80, rows=2),
+            widget=deform.widget.TextAreaWidget(cols=80, rows=2),
                                     title=u"Communication avec la CAE",
             description=u"Message à destination des membres de la CAE qui \
 valideront votre feuille de notes de frais",
@@ -83,7 +77,7 @@ class BaseLineSchema(colander.MappingSchema):
     """
         Base Expenseline schema
     """
-    date = main.today_node(missing=main.deferred_today)
+    date = forms.today_node(missing=forms.deferred_today)
     category = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf(('1', '2'))
@@ -148,25 +142,25 @@ class BookMarkSchema(colander.MappingSchema):
 
 
 def get_list_schema():
-    schema = BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     schema['search'].description = u"Identifiant du document"
 
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name=u'status',
-        widget=deform_widget.SelectWidget(values=STATUS_OPTIONS),
+        widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
         validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
         missing='all',
     ))
 
-    schema.insert(0, main.year_select_node(
+    schema.insert(0, forms.year_select_node(
         name='year',
         title=u"Année",
         query_func=get_expense_years,
     ))
 
-    schema.insert(0, main.month_select_node(
+    schema.insert(0, forms.month_select_node(
         title=u"Mois",
         missing=-1,
         name='month',

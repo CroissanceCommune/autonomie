@@ -28,7 +28,7 @@
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.customer import Customer
-from autonomie.views.forms.lists import BaseListsSchema
+from autonomie.forms.lists import BaseListsSchema
 
 def get_list_schema():
     schema = BaseListsSchema().clone()

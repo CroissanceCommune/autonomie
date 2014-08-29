@@ -33,7 +33,7 @@ from pyramid_deform import SessionFileUploadTempStore
 
 from autonomie.compute.math_utils import convert_to_int
 from autonomie.views.render_api import human_readable_filesize
-from autonomie.views.forms import main
+from autonomie import forms
 
 
 class SessionDBFileUploadTempStore(SessionFileUploadTempStore):
@@ -97,7 +97,7 @@ class FileUploadSchema(colander.Schema):
             widget=deform.widget.HiddenWidget(),
             )
 
-    come_from = main.come_from_node()
+    come_from = forms.come_from_node()
 
     filetype = colander.SchemaNode(
             colander.String(),

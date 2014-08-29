@@ -32,8 +32,7 @@ from deform import widget as deform_widget
 from autonomie.models import company
 from autonomie.models.task import invoice
 
-from autonomie.views.forms.lists import BaseListsSchema
-from autonomie.views.forms import main
+from autonomie import forms
 
 
 STATUS_OPTIONS = (("both", u"Toutes les factures", ),
@@ -50,7 +49,7 @@ def get_list_schema(is_admin=False):
         If True, we don't provide the company selection node and we reduce the
         customers to the current company's
     """
-    schema = BaseListsSchema().clone()
+    schema = forms.lists.BaseListsSchema().clone()
 
     schema.insert(0,
         colander.SchemaNode(
@@ -71,7 +70,7 @@ def get_list_schema(is_admin=False):
                 widget_options={'default': ('', '')}
             ))
 
-    node = main.year_select_node(
+    node = forms.year_select_node(
         name='year',
         query_func=invoice.get_invoice_years,
     )
@@ -98,7 +97,7 @@ class InvoicesPdfExport(colander.MappingSchema):
     """
         Schema for invoice bulk export
     """
-    year = main.year_select_node(
+    year = forms.year_select_node(
         title=u"Année comptable",
         query_func=invoice.get_invoice_years
     )

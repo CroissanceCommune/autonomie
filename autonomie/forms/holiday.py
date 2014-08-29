@@ -30,7 +30,6 @@ import logging
 
 from deform import widget
 from autonomie.models import user
-from autonomie.views.forms import main
 
 log = logging.getLogger(__name__)
 

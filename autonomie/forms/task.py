@@ -401,10 +401,6 @@ class TaskLine(colander.MappingSchema):
         AmountType(),
         widget=widget.TextInputWidget(
             template=TEMPLATES_URL + 'lineinput.mako'),
-        validator=colander.Range(
-            min=0,
-            min_err=u"Doit être positif",
-        ),
         css_class='span1')
     quantity = colander.SchemaNode(
         QuantityType(),
@@ -800,10 +796,6 @@ def get_cancel_invoice_schema():
     payments['paymentConditions'].title = title
     payments['paymentConditions'].description = u""
 
-    schema['lines']['lines']['taskline']['cost'].validator = colander.Range(
-        max=0,
-        max_err=u"Doit être négatif",
-    )
 
     schema.add(payments)
     return schema

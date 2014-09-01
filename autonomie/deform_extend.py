@@ -530,7 +530,9 @@ class CustomDateInputWidget(deform.widget.Widget):
     template = TEMPLATES_PATH + 'dateinput'
     readonly_template = 'readonly/textinput'
     size = None
-    requirements = (('jqueryui', None), )
+    requirements = (
+        ('modernizr', None),
+        ('jqueryui', None), )
     default_options = (('dateFormat', 'dd/mm/yy'),)
 
     def __init__(self, *args, **kwargs):
@@ -595,6 +597,7 @@ class CustomDateTimeInputWidget(CustomDateInputWidget):
     size = None
     style = None
     requirements = (
+        ('modernizr', None),
         ('jqueryui', None),
         ('datetimepicker', None),
         )
@@ -605,6 +608,7 @@ class CustomDateTimeInputWidget(CustomDateInputWidget):
                        ('separator', ' '))
 
     def serialize(self, field, cstruct, readonly=False):
+        print("Cstruct : %s" % cstruct)
         if cstruct in (colander.null, None):
             cstruct = ''
         if cstruct:
@@ -616,6 +620,7 @@ class CustomDateTimeInputWidget(CustomDateInputWidget):
         options = self.options
         options['altFormat'] = 'yy-mm-dd'
         separator = options.get('separator', ' ')
+        cstruct = separator.join(cstruct.split('T'))
         options = json.dumps(options)
         template = readonly and self.readonly_template or self.template
         return field.renderer(

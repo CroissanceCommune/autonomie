@@ -34,7 +34,10 @@ from sqlalchemy.orm import undefer_group
 from autonomie.models.activity import Activity
 from autonomie.models.company import Company
 from autonomie.models.customer import Customer
-from autonomie.models.files import File
+from autonomie.models.files import (
+    File,
+    Template,
+)
 from autonomie.models.project import Project
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import (
@@ -97,6 +100,7 @@ class RootFactory(dict):
             ('userdatas', 'userdatas', UserDatas, ),
             ('payments', 'payment', Payment, ),
             ('workshops', 'workshop', Workshop, ),
+            ('templates', 'template', Template, ),
             ('timeslots', 'timeslot', Timeslot, ),
             ):
 
@@ -274,3 +278,4 @@ def set_models_acls():
     Payment.__acl__ = property(get_base_acl)
     Workshop.__acl__ = property(get_activity_acl)
     Timeslot.__acl__ = property(get_base_acl)
+    Template.__acl__ = property(get_base_acl)

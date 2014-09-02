@@ -5,13 +5,21 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 """
 Py3o exporters
+
+
+>>> model = Company.query().first()
+>>> template = Template.query().first()
+>>> odt_file_datas = compile_template(model, template.data_obj)
 """
 from __future__ import absolute_import
+from cStringIO import StringIO
 
 from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
+
+from py3o.template import Template
 
 from .sqla import BaseSqlaExporter
 
@@ -134,3 +142,22 @@ class SqlaContext(BaseSqlaExporter):
             res[column['name']] = value
 
         return res
+
+
+def compile_template(instance, template):
+    """
+    Fill the given template with the instance's datas and return the odt file
+
+    :param instance: the instance of a model (like Userdatas, Company)
+    :param template: the template object to use
+    :return: a stringIO object filled with the resulting odt's informations
+    """
+    context_builder = SqlaContext(instance.__class__)
+    py3o_context = context_builder.compile_obj(instance)
+
+    output_doc = StringIO()
+
+    odt_builder = Template(template, output_doc)
+    odt_builder.render(py3o_context)
+
+    return output_doc

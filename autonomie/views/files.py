@@ -102,8 +102,10 @@ class FileUploadView(BaseFormView):
     redirection to the original page when the file is added
 
     """
+    factory = File
     schema = FileUploadSchema()
     title = u"Téléverser un fichier"
+    valid_msg = UPLOAD_OK_MSG
 
     def _parent_id(self):
         """
@@ -149,9 +151,9 @@ class FileUploadView(BaseFormView):
             Execute actions on the database
         """
         # Inserting in the database
-        file_object = File(**appstruct)
+        file_object = self.factory(**appstruct)
         self.request.dbsession.add(file_object)
-        self.request.session.flash(UPLOAD_OK_MSG)
+        self.request.session.flash(self.valid_msg)
 
     def submit_success(self, appstruct):
         """
@@ -161,7 +163,7 @@ class FileUploadView(BaseFormView):
         log.debug(appstruct)
 
         come_from = appstruct.pop('come_from')
-        appstruct.pop("filetype")
+        appstruct.pop("filetype", '')
 
         appstruct = self.format_appstruct(appstruct)
 
@@ -180,6 +182,8 @@ class FileEditView(FileUploadView):
 
         Current context is the file itself
     """
+    valid_msg = EDIT_OK_MSG
+
     @property
     def title(self):
         """
@@ -221,7 +225,7 @@ class FileEditView(FileUploadView):
     def persist_to_database(self, appstruct):
         merge_session_with_post(self.request.context, appstruct)
         self.request.dbsession.merge(self.request.context)
-        self.request.session.flash(EDIT_OK_MSG)
+        self.request.session.flash(self.valid_msg)
 
 
 def get_add_file_link(request):

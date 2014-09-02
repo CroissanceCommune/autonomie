@@ -24,7 +24,6 @@ Base export class
 """
 
 from sqlalchemy import (
-    inspect,
     Boolean,
     Date,
     DateTime,
@@ -33,11 +32,13 @@ from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
-from colanderalchemy.schema import _creation_order
 from autonomie.views.render_api import (
     format_date,
     format_datetime,
 )
+from .sqla import BaseSqlaExporter
+BLACKLISTED_KEYS = ()
+
 
 class BaseExporter(object):
     """
@@ -101,11 +102,8 @@ def get_formatter_from_column(column):
     """
     Return a formatter regarding the given SQLAlchemy column type
     """
-    print("Getting a formatter")
     column = column.columns[0]
     column_type = getattr(column.type, 'impl', column.type)
-    print column_type
-
     formatter = None
 
     if isinstance(column_type, Boolean):
@@ -115,26 +113,12 @@ def get_formatter_from_column(column):
         formatter = format_date
 
     elif isinstance(column_type, DateTime):
-        print("Its a datetime")
         formatter = format_datetime
 
     return formatter
 
 
-def get_info_field(prop):
-    """
-    Return the info attribute of the given property
-    """
-    if isinstance(prop, ColumnProperty):
-        column = prop.columns[0]
-
-    elif isinstance(prop, RelationshipProperty):
-        column = prop
-
-    return column.info
-
-
-class SqlaExporter(BaseExporter):
+class SqlaExporter(BaseExporter, BaseSqlaExporter):
     """
     Provide tools to inspect a model and provide the datas needed for the export
 
@@ -142,9 +126,9 @@ class SqlaExporter(BaseExporter):
     config_key = ''
 
     def __init__(self, model):
-        self.inspector = inspect(model)
+        BaseExporter.__init__(self)
+        BaseSqlaExporter.__init__(self, model)
         self.headers = self._collect_headers()
-        super(SqlaExporter, self).__init__()
 
     def _collect_headers(self):
         """
@@ -152,11 +136,12 @@ class SqlaExporter(BaseExporter):
         """
         res = []
 
-        columns = sorted(self.inspector.attrs, key=_creation_order)
+        for prop in self.get_sorted_columns():
 
-        for prop in columns:
+            if prop.key in BLACKLISTED_KEYS:
+                continue
 
-            info_dict = get_info_field(prop)
+            info_dict = self.get_info_field(prop)
             main_infos = info_dict.get('export', {}).copy()
 
             infos = main_infos.get(self.config_key, {})

@@ -83,6 +83,7 @@
           <div class='span6 offset3'>
             <div class="alert alert-error">
               <button class="close" data-dismiss="alert" type="button">×</button>
+              <i class='fa fa-warning'></i>
               ${api.clean_html(message)|n}
             </div>
           </div>

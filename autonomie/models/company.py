@@ -177,7 +177,13 @@ class Company(DBBASE):
     projects = relationship(
         "Project",
         order_by="Project.id",
-        backref=backref("company", info={'colanderalchemy': forms.EXCLUDED}),
+        backref=backref(
+            "company",
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                "py3o": {'exclude': True}
+            }
+        ),
     )
     code_compta = deferred(
         Column(

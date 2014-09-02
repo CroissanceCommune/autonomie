@@ -26,16 +26,16 @@
     Model for tva amounts
 """
 from sqlalchemy import (
-        Column,
-        Integer,
-        String,
-        ForeignKey,
-        Boolean,
-        )
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Boolean,
+)
 from sqlalchemy.orm import (
-        relationship,
-        backref,
-        )
+    relationship,
+    backref,
+)
 
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
@@ -85,8 +85,10 @@ class Product(DBBASE):
     compte_cg = Column("compte_cg", String(125))
     active = Column(Boolean(), default=True)
     tva_id = Column(Integer, ForeignKey("tva.id", ondelete="cascade"))
-    tva = relationship("Tva",
-            backref=backref("products", cascade="all, delete-orphan"))
+    tva = relationship(
+        "Tva",
+        backref=backref("products", cascade="all, delete-orphan")
+    )
 
     def __json__(self, request):
         return dict(

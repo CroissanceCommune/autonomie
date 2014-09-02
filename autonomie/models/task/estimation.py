@@ -121,7 +121,10 @@ class Estimation(Task, EstimationCompute):
         backref=backref(
             'estimations',
             order_by='Estimation.taskDate',
-            info={'colanderalchemy': forms.EXCLUDED, },
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         )
     )
     customer = relationship(
@@ -130,7 +133,10 @@ class Estimation(Task, EstimationCompute):
         backref=backref(
             'estimations',
             order_by='Estimation.taskDate',
-            info={'colanderalchemy': forms.EXCLUDED, },
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         )
     )
 

@@ -215,8 +215,11 @@ class User(DBBASE):
     companies = relationship(
         "Company",
         secondary=COMPANY_EMPLOYEE,
-        backref="employees",
-        info={'colanderalchemy':EXCLUDED},
+        backref=backref(
+            "employees",
+            info={'colanderalchemy': EXCLUDED, 'py3o': EXCLUDED},
+        ),
+        info={'colanderalchemy':EXCLUDED, 'py3o': EXCLUDED},
     )
 
     compte_tiers = Column(
@@ -698,6 +701,7 @@ class UserDatas(DBBASE):
             info={
                 'colanderalchemy': EXCLUDED,
                 'export': {'exclude': True},
+                "py3o": {'exclude': True},
             },
         ),
         info={

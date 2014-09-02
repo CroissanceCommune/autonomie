@@ -232,6 +232,7 @@ class Project(Node):
                 "title": u"Client",
                 "exclude": True,
             },
+            'py3o': {'exclude': True},
         }
     )
 
@@ -333,9 +334,9 @@ class Phase(DBBASE):
         "Project",
         backref=backref(
             "phases",
-            info={'colanderalchemy': forms.EXCLUDED},
+            info={'colanderalchemy': forms.EXCLUDED, 'py3o': {'exclude': True}},
         ),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': forms.EXCLUDED, 'py3o': {'exclude': True}},
     )
 
     creationDate = deferred(

@@ -26,16 +26,16 @@
 """
 
 from sqlalchemy import (
-        LargeBinary,
-        Integer,
-        Column,
-        ForeignKey,
-        String,
-        )
+    Integer,
+    Column,
+    ForeignKey,
+    String,
+    Boolean,
+)
 
 from sqlalchemy.orm import (
-        deferred,
-        )
+    deferred,
+)
 
 from sqlalchemy.dialects.mysql.base import LONGBLOB
 
@@ -69,3 +69,14 @@ class File(Node):
         Simple shortcut for getting a label for this file
         """
         return self.description or self.name
+
+
+class Template(File):
+    """
+    A template model for odt templates
+    """
+    __tablename__ = 'templates'
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'template'}
+    id = Column(ForeignKey('file.id'), primary_key=True)
+    active = Column(Boolean(), default=True)

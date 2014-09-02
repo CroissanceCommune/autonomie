@@ -30,6 +30,7 @@
 """
 import logging
 
+from sqlalchemy import desc
 from pyramid.httpexceptions import HTTPFound
 from autonomie.models.config import Config
 from autonomie.models.tva import (
@@ -65,12 +66,7 @@ from autonomie.models.user import (
     SocialDocTypeOption,
 )
 
-from autonomie.views import (
-    submit_btn,
-    BaseFormView,
-    merge_session_with_post,
-)
-
+from autonomie.models import files
 from autonomie.forms.admin import (
     MainConfig,
     TvaConfig,
@@ -84,8 +80,21 @@ from autonomie.forms.admin import (
     merge_config_datas,
     get_sequence_model_admin,
 )
+from autonomie.forms.files import get_template_upload_schema
 from autonomie.utils.widgets import ViewLink
 from js.tinymce import tinymce
+from autonomie.views import (
+    submit_btn,
+    BaseFormView,
+    BaseView,
+    merge_session_with_post,
+)
+from autonomie.views.files import (
+    FileUploadView,
+    FileEditView,
+    file_dl_view,
+)
+
 
 log = logging.getLogger(__name__)
 
@@ -149,7 +158,7 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
                 path=parent_route
             )
         )
-        for view, route_name in views_to_link_to:
+        for view, route_name, tmpl in views_to_link_to:
             request.actionmenu.add(
                 ViewLink(
                     view.title,
@@ -161,12 +170,26 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
     return myview
 
 
+def add_link_to_menu(request, label, path, title):
+    request.actionmenu.add(
+        ViewLink(
+            label,
+            path=path,
+            title=title,
+        )
+    )
+
+
 def populate_actionmenu(request):
     """
         Add a back to index link
     """
-    request.actionmenu.add(ViewLink(u"Revenir à l'index", path="admin_index",
-        title=u"Revenir à l'index de l'administration"))
+    add_link_to_menu(
+        request,
+        u"Revenir à l'index",
+        path="admin_index",
+        title=u"Revenir à l'index de l'administration",
+    )
 
 
 class AdminMain(BaseFormView):
@@ -775,6 +798,10 @@ class AdminOption(BaseFormView):
 
 
 def get_model_view(model):
+    """
+    Return a view object and a route_name for administrating a sequence of
+    models instances (like options)
+    """
     infos = model.__colanderalchemy_config__
     view_title = infos.get('title', u'Titre inconnu')
     class MyView(AdminOption):
@@ -786,12 +813,68 @@ def get_model_view(model):
     return (
         MyView,
         camel_case_to_name(model.__name__),
+        '/admin/main.mako',
     )
 
 
-def get_all_option_views():
+class TemplateUploadView(FileUploadView):
+    title = u"Administrer les modèles de documents"
+    factory = files.Template
+    schema = get_template_upload_schema()
+
+    def before(self, form):
+        come_from = self.request.referrer
+        log.debug(u"Coming from : %s" % come_from)
+
+        appstruct = {
+                'come_from': come_from
+                }
+        form.set_appstruct(appstruct)
+        add_link_to_menu(
+            self.request,
+            u"Revenir à la liste",
+            "templates",
+            "")
+
+
+class TemplateEditView(FileEditView):
+    valid_msg = u"Le fichier a bien été modifié"
+    factory = files.Template
+    schema = get_template_upload_schema()
+
+    def before(self, form):
+        FileEditView.before(self, form)
+        add_link_to_menu(
+            self.request,
+            u"Revenir à la liste",
+            "templates",
+            "",
+        )
+
+
+class TemplateList(BaseView):
     """
-    Return view_class, route_name for all option configuration views
+    Listview of templates
+    """
+    title = u"Modèles de documents"
+    def __call__(self):
+        add_link_to_menu(
+            self.request,
+            u"Retour",
+            path="admin_userdatas",
+            title=u"Retour à l'administration de la gestion sociale"
+        )
+
+        templates = files.Template.query()\
+                .order_by(desc(files.Template.active))\
+                .all()
+        return dict(templates=templates, title=self.title)
+
+
+def get_all_userdatas_views():
+    """
+    Return view_class, route_name for all option configuration views in the
+    userdatas module
     """
     for model in (
         ZoneOption,
@@ -807,6 +890,22 @@ def get_all_option_views():
         SocialDocTypeOption,
     ):
         yield get_model_view(model)
+    yield TemplateList, 'templates', '/admin/templates.mako'
+
+
+def template_disable(context, request):
+    """
+    Enable/disable a template
+    """
+    if context.active:
+        context.active = False
+        request.dbsession.merge(context)
+        request.session.flash(u"Le template a bien été désactivé")
+    else:
+        context.active = True
+        request.dbsession.merge(context)
+        request.session.flash(u"Le template a bien été activé")
+    return HTTPFound(request.route_path("templates"))
 
 
 def includeme(config):
@@ -859,15 +958,50 @@ def includeme(config):
     # User Datas view configuration
     config.add_route("admin_userdatas", "admin/userdatas")
 
-    all_option_views = list(get_all_option_views())
-    for view, route_name in all_option_views:
+    all_option_views = list(get_all_userdatas_views())
+    for view, route_name, tmpl in all_option_views:
         config.add_route(route_name, "admin/" + route_name)
         config.add_view(
             view,
             route_name=route_name,
-            renderer="admin/main.mako",
+            renderer=tmpl,
             permission="admin",
         )
+
+    config.add_route(
+        'template',
+        'admin/templates/{id}',
+        traverse="templates/{id}",
+    )
+
+    config.add_view(
+        template_disable,
+        route_name='template',
+        request_param='action=disable',
+        permission='admin',
+    )
+
+    config.add_view(
+        file_dl_view,
+        route_name='template',
+        permission='admin',
+    )
+
+    config.add_view(
+        TemplateEditView,
+        route_name='template',
+        renderer='admin/template_edit.mako',
+        request_param='action=edit',
+        permission='admin',
+    )
+
+    config.add_view(
+        TemplateUploadView,
+        route_name='templates',
+        renderer='admin/template_add.mako',
+        request_param='action=new',
+        permission='admin',
+    )
 
     config.add_view(
         make_enter_point_view(

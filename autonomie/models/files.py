@@ -24,7 +24,7 @@
 """
     File model
 """
-
+from cStringIO import StringIO
 from sqlalchemy import (
     Integer,
     Column,
@@ -69,6 +69,12 @@ class File(Node):
         Simple shortcut for getting a label for this file
         """
         return self.description or self.name
+
+    @property
+    def data_obj(self):
+        res = StringIO()
+        res.write(self.data)
+        return res
 
 
 class Template(File):

@@ -46,31 +46,36 @@ if userdata.user is not None:
 
 <ul class='nav nav-tabs'>
     <li class='active'>
-    <a href="#form1" data-toggle='tab'>
+    <a href="#tab1" data-toggle='tab'>
         Informations sociales
     </a>
     </li>
     % if doctypes_form is not UNDEFINED:
         <li>
-        <a href="#form2" data-toggle='tab'>
+        <a href="#tab2" data-toggle='tab'>
             Documents sociaux
         </a>
         </li>
     % endif
     % if account_form is not UNDEFINED and account_form is not None:
         <li>
-        <a href="#form3" data-toggle='tab'>
+        <a href="#tab3" data-toggle='tab'>
             Compte utilisateur
         </a>
         </li>
     % endif
+        <li>
+        <a href="#tab4" data-toggle='tab'>
+            Génération de documents
+        </a>
+        </li>
 </ul>
 <div class='tab-content'>
-    <div class='tab-pane active' id='form1'>
+    <div class='tab-pane active' id='tab1'>
         ${form|n}
     </div>
     % if doctypes_form is not UNDEFINED:
-    <div class='tab-pane' id='form2'>
+    <div class='tab-pane' id='tab2'>
         <div class='span2'>
         </div>
         <div class='span8'>
@@ -79,9 +84,17 @@ if userdata.user is not None:
     </div>
     % endif
     % if account_form is not UNDEFINED and account_form is not None:
-        <div class='tab-pane' id='form3'>
+        <div class='tab-pane' id='tab3'>
             ${account_form.render()|n}
-    </div>
+        </div>
     % endif
+    <div class='tab-pane' id='tab4'>
+        % for doctemplate in doctemplates:
+            <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
+            <a href="${url}">
+                ${doctemplate.description} ( ${doctemplate.name} )
+            </a>
+        % endfor
+    </div>
 </div>
 </%block>

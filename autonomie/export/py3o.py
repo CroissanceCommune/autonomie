@@ -18,10 +18,20 @@ from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
+from genshi.core import Markup
 
 from py3o.template import Template
 
 from .sqla import BaseSqlaExporter
+
+
+def format_py3o_val(value):
+    """
+    format a value to fit py3o's context
+
+    * Handle linebreaks
+    """
+    return Markup(unicode(value).replace('\n', '<text:line-break/>'))
 
 
 class SqlaContext(BaseSqlaExporter):
@@ -120,6 +130,7 @@ class SqlaContext(BaseSqlaExporter):
         for column in self.columns:
             if isinstance(column['__col__'], ColumnProperty):
                 value = getattr(obj, column['__col__'].key)
+                value = format_py3o_val(value)
 
             elif isinstance(column['__col__'], RelationshipProperty):
                 # 1- si la relation est directe (une AppOption), on override le

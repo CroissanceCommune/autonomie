@@ -143,54 +143,54 @@ def get_company_menu(request, cid, css=None):
     """
     menu = Menu(css=css)
     href = request.route_path("company_customers", id=cid)
-    menu.add_item(u"Clients", icon="icon-user", href=href)
+    menu.add_item(u"Clients", icon="fa fa-users", href=href)
 
     href = request.route_path("company_projects", id=cid)
-    menu.add_item(u"Projets", icon="icon-folder-open", href=href)
+    menu.add_item(u"Projets", icon="fa fa-folder-open-o", href=href)
 
     gestion = DropDown(label=u"Gestion")
 
     href = request.route_path("company_invoices", id=cid)
-    gestion.add_item(u"Factures", icon="icon-list-alt", href=href)
+    gestion.add_item(u"Factures", icon="fa fa-file", href=href)
 
     href = request.route_path("estimations", id=cid)
-    gestion.add_item(u"Devis", icon="icon-list-alt", href=href)
+    gestion.add_item(u"Devis", icon="fa fa-file-o", href=href)
 
     href = request.route_path("commercial_handling", id=cid)
-    gestion.add_item(u"Gestion commerciale", icon="icon-list-alt",
-            href=href)
+    gestion.add_item(
+        u"Gestion commerciale",
+        icon="fa fa-line-chart",
+        href=href
+    )
 
     href = request.route_path("company_expenses", id=cid)
-    gestion.add_item(u"Notes de frais", icon="icon-cog", href=href)
+    gestion.add_item(u"Notes de frais", icon="fa fa-credit-card", href=href)
 
     href = request.route_path("company_activities", id=cid)
-    gestion.add_item(u"Rendez-vous", icon="icon-list-alt", href=href)
+    gestion.add_item(u"Rendez-vous", icon="fa fa-calendar", href=href)
 
     href = request.route_path("company_workshops", id=cid)
-    gestion.add_item(u"Ateliers", icon="icon-list-alt", href=href)
+    gestion.add_item(u"Ateliers", icon="fa fa-slideshare", href=href)
 
     menu.add(gestion)
 
     docs = DropDown(label=u"Documents")
     href = request.route_path("treasury", id=cid)
-    docs.add_item(u"Trésorerie", icon="icon-info-sign", href=href)
+    docs.add_item(u"Trésorerie", icon="fa fa-bank", href=href)
 
     href = request.route_path("incomestatement", id=cid)
-    docs.add_item(u"Compte de résultat", icon="icon-info-sign",
+    docs.add_item(u"Compte de résultat", icon="fa fa-eur",
          href=href)
 
     href = request.route_path("salarysheet", id=cid)
-    docs.add_item(u"Bulletin de salaire", icon="icon-info-sign",
+    docs.add_item(u"Bulletin de salaire", icon="fa fa-file-text-o",
          href=href)
 
     menu.add(docs)
 
-    params = DropDown(label=u"Paramètres")
 
     href = request.route_path("company", id=cid)
-    params.add_item(u"Paramètres", icon="icon-cog", href=href)
-
-    menu.add(params)
+    menu.add_item(u"Paramètres", icon="fa fa-cogs", href=href)
     return menu
 
 
@@ -203,9 +203,9 @@ def get_admin_menus(request):
 
     documents = DropDown(label=u"Documents")
     href = request.route_path("invoices")
-    documents.add_item(u"Factures", icon="icon-list-alt", href=href)
+    documents.add_item(u"Factures", icon="fa fa-file", href=href)
     href = request.route_path('expenses')
-    documents.add_item(u'Notes de frais', icon='icon-list-alt', href=href)
+    documents.add_item(u'Notes de frais', icon='fa fa-file-o', href=href)
 
     menu.add(documents)
 
@@ -213,33 +213,39 @@ def get_admin_menus(request):
         treasury = DropDown(label=u"Comptabilité")
 
         href = request.route_path("sage_invoice_export")
-        treasury.add_item(u"Export des factures", icon="icon-list-alt",
-                href=href)
+        treasury.add_item(
+            u"Export des factures",
+            icon="fa fa-edit",
+            href=href
+        )
 
         href = request.route_path("sage_expense_export")
-        treasury.add_item(u"Export des notes de frais", icon="icon-list-alt",
-                href=href)
+        treasury.add_item(
+            u"Export des notes de frais",
+            icon="fa fa-credit-card",
+            href=href
+        )
         menu.add(treasury)
 
     if has_permission("admin", request.context, request):
         href = request.route_path("admin_index")
-        menu.add_item(u"Configuration", icon="icon-cog", href=href)
+        menu.add_item(u"Configuration", icon="fa fa-cogs", href=href)
 
     accompagnement = DropDown(label=u"Accompagnement")
 
     href = request.route_path('activities')
-    accompagnement.add_item(u"Rendez-vous", href=href)
+    accompagnement.add_item(u"Rendez-vous", href=href, icon="fa fa-calendar")
 
     href = request.route_path('workshops')
-    accompagnement.add_item(u"Ateliers", href=href)
+    accompagnement.add_item(u"Ateliers", href=href, icon="fa fa-slideshare")
 
     menu.add(accompagnement)
 
     href = request.route_path('userdatas')
-    menu.add_item(u"Gestion sociale", href=href)
+    menu.add_item(u"Gestion sociale", href=href, icon="fa fa-users")
 
     href = request.route_path("holidays")
-    menu.add_item(u"Congés", icon="icon-plane", href=href)
+    menu.add_item(u"Congés", icon="fa fa-space-shuttle", href=href)
     return menu
 
 
@@ -267,13 +273,13 @@ def get_usermenu(request):
     """
     menu = Menu()
     href = request.route_path('account')
-    menu.add_item(u"Mon compte", icon='ui-icon ui-icon-gear', href=href)
+    menu.add_item(u"Mon compte", icon='fa fa-cog', href=href)
 
     href = request.route_path('user_holidays', id=request.user.id)
-    menu.add_item(u"Mes congés", icon="icon-plane", href=href)
+    menu.add_item(u"Mes congés", icon="fa fa-space-shuttle", href=href)
 
     href = request.route_path("logout")
-    menu.add_item(u"Déconnexion", icon="ui-icon ui-icon-close", href=href)
+    menu.add_item(u"Déconnexion", icon="fa fa-close", href=href)
     return menu
 
 
@@ -303,7 +309,7 @@ def menu_panel(context, request):
         return {"usermenu": get_usermenu(request)}
 
     href = request.route_path("users")
-    menu.add_item(u"Annuaire", icon="icon-book", href=href)
+    menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
     ret_dict = {'menu': menu, "usermenu": get_usermenu(request)}
     return ret_dict
 

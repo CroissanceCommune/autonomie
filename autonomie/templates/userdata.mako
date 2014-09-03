@@ -89,6 +89,8 @@ if userdata.user is not None:
         </div>
     % endif
     <div class='tab-pane' id='tab4'>
+        <div class='row-fluid'>
+            <div class='span6'>
         % for doctemplate in doctemplates:
             <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
             <a class='btn btn-success' href="${url}">
@@ -96,6 +98,38 @@ if userdata.user is not None:
                 ${doctemplate.description} ( ${doctemplate.name} )
             </a>
         % endfor
+            </div>
+            <div class='span6'>
+                <h3>Historique des documents générés depuis Autonomie</h3>
+                <table class='table table-stripped table-condensed'>
+                    <thead>
+                        <th>Nom du document</th>
+                        <th>Généré par</th>
+                        <th>Date</th>
+                        <th class='text-right'>Actions</th>
+                    </thead>
+                    <tbody>
+                        % for history in userdata.template_history:
+                            <tr>
+                                <td>${history.template.description}</td>
+                                <td>${api.format_account(history.user)}</td>
+                                <td>${api.format_datetime(history.created_at)}</td>
+                                <td>
+                                    <a
+                                        class='btn btn-small'
+                                        href="${request.route_path('templatinghistory', id=history.id, _query=dict(action='delete'))}"
+                                        >Oublier
+                                    </a>
+                                </td>
+                            </tr>
+                        % endfor
+                        % if len(userdata.template_history) == 0:
+                            <tr><td colspan='4'>Aucun document n'a été généré pour ce compte</td></tr>
+                        % endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 </%block>

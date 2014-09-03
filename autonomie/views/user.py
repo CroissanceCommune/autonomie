@@ -239,7 +239,7 @@ class UserEditView(PermanentUserEditView):
         return self.request.route_path(
             "userdata",
             id=user_model.userdatas.id,
-            _anchor='form3'
+            _anchor='tab3'
         )
 
 
@@ -499,6 +499,31 @@ class UserDatasEdit(UserDatasAdd):
         return templates.all()
 
 
+def record_compilation(context, request, template):
+    """
+    Record the compilation of a template to be able to build an history
+    """
+    if isinstance(context, UserDatas):
+        history = files.TemplatingHistory(
+            user_id=request.user.id,
+            userdatas_id=context.id,
+            template_id=template.id)
+        log.debug(u"Storing an history object")
+        request.dbsession.add(history)
+
+
+def delete_templating_history_view(context, request):
+    userdatas = context.userdatas
+    request.dbsession.delete(context)
+    request.session.flash(u"L'élément a bien été supprimé de l'historique")
+    return HTTPFound(
+        request.route_path(
+            'userdata',
+            id=userdatas.id,
+            _anchor='tab4'
+        )
+    )
+
 def py3o_view(context, request):
     """
     py3o view :
@@ -506,11 +531,13 @@ def py3o_view(context, request):
         compile the template provided as argument using the current view
         context for templating
     """
+    log.debug(u"Asking for a template compilation")
     doctemplate_id = request.GET.get('template_id')
 
     if doctemplate_id:
         template = files.Template.get(doctemplate_id)
         if template:
+            log.debug(" + Templating (%s, %s)" % (template.name, template.id))
             try:
                 output = py3o.compile_template(context, template.data_obj)
                 write_file_to_request(
@@ -518,9 +545,14 @@ def py3o_view(context, request):
                     template.name,
                     output,
                 )
+                record_compilation(context, request, template)
                 return request.response
             except Exception, err:
                 print_exc()
+                log.exception(
+u"Une erreur est survenue à la compilation du template %s avec un contexte \
+de type %s et d'id %s" % (template.id, context.__class__, context.id)
+                             )
                 request.session.flash(
                     u"Erreur à la compilation du modèle, merci de contacter \
 votre administrateur",
@@ -934,6 +966,18 @@ def includeme(config):
     config.add_route(
         "userdatas.xls",
         "/userdatas.xls",
+    )
+    config.add_route(
+        "templatinghistory",
+        "/py3ostory/{id}",
+        traverse="/templatinghistory/{id}"
+    )
+
+    config.add_view(
+        delete_templating_history_view,
+        route_name="templatinghistory",
+        request_param="action=delete",
+        permission="manage",
     )
 
     config.add_route('account', '/account')

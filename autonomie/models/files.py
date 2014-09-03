@@ -24,6 +24,7 @@
 """
     File model
 """
+from datetime import datetime
 from cStringIO import StringIO
 from sqlalchemy import (
     Integer,
@@ -31,16 +32,23 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Boolean,
+    DateTime,
 )
 
 from sqlalchemy.orm import (
     deferred,
+    relationship,
+    backref,
 )
 
 from sqlalchemy.dialects.mysql.base import LONGBLOB
 
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    default_table_args,
+    DBBASE,
+)
 from autonomie.models.node import Node
+from autonomie.forms import EXCLUDED
 
 
 class File(Node):
@@ -86,3 +94,31 @@ class Template(File):
     __mapper_args__ = {'polymorphic_identity': 'template'}
     id = Column(ForeignKey('file.id'), primary_key=True)
     active = Column(Boolean(), default=True)
+
+
+class TemplatingHistory(DBBASE):
+    """
+    Record all the templating fired for a given userdata account
+    """
+    __tablename__ = "template_history"
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime(), default=datetime.now())
+    user_id = Column(ForeignKey('accounts.id'))
+    userdatas_id = Column(ForeignKey('user_datas.id'))
+    template_id = Column(ForeignKey('templates.id'))
+
+    user = relationship("User")
+    userdatas = relationship(
+        "UserDatas",
+        backref=backref(
+            "template_history",
+            cascade='all, delete-orphan',
+            info={
+                'colanderalchemy': EXCLUDED,
+                "py3o": EXCLUDED,
+                "export": EXCLUDED,
+            },
+        )
+    )
+    template = relationship("Template")

@@ -37,6 +37,7 @@ from autonomie.models.customer import Customer
 from autonomie.models.files import (
     File,
     Template,
+    TemplatingHistory,
 )
 from autonomie.models.project import Project
 from autonomie.models.task.estimation import Estimation
@@ -101,6 +102,7 @@ class RootFactory(dict):
             ('payments', 'payment', Payment, ),
             ('workshops', 'workshop', Workshop, ),
             ('templates', 'template', Template, ),
+            ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('timeslots', 'timeslot', Timeslot, ),
             ):
 
@@ -279,3 +281,4 @@ def set_models_acls():
     Workshop.__acl__ = property(get_activity_acl)
     Timeslot.__acl__ = property(get_base_acl)
     Template.__acl__ = property(get_base_acl)
+    TemplatingHistory.__acl__ = property(get_base_acl)

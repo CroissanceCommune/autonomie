@@ -213,14 +213,15 @@ class RecordActivitySchema(colander.Schema):
             template='autonomie:deform_templates/fixed_len_sequence.pt',
             item_template='autonomie:deform_templates/fixed_len_sequence_item.pt')
     )
-    point = forms.textarea_node(
-        title=u"Point de suivi",
+
+    objectifs = forms.textarea_node(
+        title=u"Objectifs du rendez-vous",
         richwidget=True,
         missing='',
         )
 
-    objectifs = forms.textarea_node(
-        title=u"Définition des objectifs",
+    point = forms.textarea_node(
+        title=u"Points abordés",
         richwidget=True,
         missing='',
         )

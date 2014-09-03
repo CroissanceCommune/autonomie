@@ -26,7 +26,7 @@
     <hr>
     <div class='row-fluid'>
         <div class='span6 offset3'>
-            <div class="alert alert-error">
+            <div class="alert alert-warning">
                 <i class='fa fa-warning'></i>
                 Les modèles de document doivent être au format odt pour pouvoir être utilisés par Autonomie
             </div>

@@ -28,6 +28,7 @@
 import logging
 import colander
 import deform
+from traceback import print_exc
 
 from colanderalchemy import SQLAlchemySchemaNode
 from js.deform import auto_need
@@ -518,19 +519,23 @@ def py3o_view(context, request):
                     output,
                 )
                 return request.response
-            except:
+            except Exception, err:
+                print_exc()
                 request.session.flash(
                     u"Erreur à la compilation du modèle, merci de contacter \
-votre administrateur"
+votre administrateur",
+                    "error"
                 )
+        else:
+            request.session.flash(
+                u"Impossible de mettre la main sur ce modèle",
+                "error"
+            )
+    else:
         request.session.flash(
-            u"Impossible de mettre la main sur ce modèle",
+            u"Les données fournies en paramètres sont invalides",
             "error"
         )
-    request.session.flash(
-        u"Les données fournies en paramètres sont invalides",
-        "error"
-    )
     return HTTPFound(request.route_path(context.type_, id=context.id))
 
 

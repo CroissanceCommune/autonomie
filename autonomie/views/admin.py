@@ -98,6 +98,11 @@ from autonomie.views.files import (
 
 log = logging.getLogger(__name__)
 
+
+UPLOAD_OK_MSG = u"Le modèle de document a bien été ajouté"
+EDIT_OK_MSG = u"Le modèle de document a bien été édité"
+
+
 def index(request):
     """
         Return datas for the index view
@@ -821,6 +826,7 @@ class TemplateUploadView(FileUploadView):
     title = u"Administrer les modèles de documents"
     factory = files.Template
     schema = get_template_upload_schema()
+    valid_msg = UPLOAD_OK_MSG
 
     def before(self, form):
         come_from = self.request.referrer
@@ -838,9 +844,10 @@ class TemplateUploadView(FileUploadView):
 
 
 class TemplateEditView(FileEditView):
-    valid_msg = u"Le fichier a bien été modifié"
+    valid_msg = u"Le modèle de document a bien été modifié"
     factory = files.Template
     schema = get_template_upload_schema()
+    valid_msg = EDIT_OK_MSG
 
     def before(self, form):
         FileEditView.before(self, form)

@@ -627,6 +627,7 @@ class UserDatasSocialDocTypes(DBBASE):
 
 class UserDatas(DBBASE):
     __table_args__ = default_table_args
+    type_ = "userdata"
     id = Column(
         Integer,
         primary_key=True,

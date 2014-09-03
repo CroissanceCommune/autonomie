@@ -35,9 +35,9 @@
 <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?'
 if userdata.user is not None:
     del_msg += u' Le compte associé sera également supprimé.'
-    del_msg += u" Cette action n'est pas réversible."
+    del_msg += u" Cette action n\\'est pas réversible."
 %>
-<a class='btn pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm(\"${del_msg}\");">
+<a class='btn pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
     <i class="icon icon-trash"></i>
     Supprimer les données
 </a>

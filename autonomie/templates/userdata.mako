@@ -91,7 +91,8 @@ if userdata.user is not None:
     <div class='tab-pane' id='tab4'>
         % for doctemplate in doctemplates:
             <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
-            <a href="${url}">
+            <a class='btn btn-success' href="${url}">
+                <i class="fa fa-file fa-1x"></i>
                 ${doctemplate.description} ( ${doctemplate.name} )
             </a>
         % endfor

@@ -101,6 +101,11 @@ if userdata.user is not None:
             </div>
             <div class='span6'>
                 <h3>Historique des documents générés depuis Autonomie</h3>
+                <span class='help-block'>
+                    <i class='fa fa-question-circle fa-2x'></i>
+                    Chaque fois qu'un utilisateur génère un document depuis cette page, une entrée est ajoutée à l'historique.<br />
+                    Si nécessaire, pour rendre plus pertinente cette liste, vous pouvez supprimer certains entrées.
+                </span>
                 <table class='table table-stripped table-condensed'>
                     <thead>
                         <th>Nom du document</th>
@@ -116,9 +121,10 @@ if userdata.user is not None:
                                 <td>${api.format_datetime(history.created_at)}</td>
                                 <td>
                                     <a
-                                        class='btn btn-small'
+                                        class='btn btn-danger'
                                         href="${request.route_path('templatinghistory', id=history.id, _query=dict(action='delete'))}"
-                                        >Oublier
+                                        ><i class='fa fa-trash fa-1x'></i>
+                                        Supprimer cette entrée
                                     </a>
                                 </td>
                             </tr>

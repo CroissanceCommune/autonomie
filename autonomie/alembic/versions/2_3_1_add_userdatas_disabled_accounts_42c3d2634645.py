@@ -24,22 +24,23 @@ def upgrade():
              .filter(user.User.userdatas==None)\
              .filter(user.User.primary_group==3):
         situation = "sortie"
-        userdata = user.UserDatas(
-            situation_situation=situation,
-            coordonnees_firstname=u.firstname,
-            coordonnees_lastname=u.lastname,
-            coordonnees_email1=u.email,
-            coordonnees_civilite=u'?',
-        )
-        userdata.user_id = u.id
-        for company in u.companies:
-            companydata = user.CompanyDatas(
-                title=company.goal,
-                name=company.name,
+        if u.email:
+            userdata = user.UserDatas(
+                situation_situation=situation,
+                coordonnees_firstname=u.firstname,
+                coordonnees_lastname=u.lastname,
+                coordonnees_email1=u.email,
+                coordonnees_civilite=u'?',
             )
-            userdata.activity_companydatas.append(companydata)
-        db.add(userdata)
-        db.flush()
+            userdata.user_id = u.id
+            for company in u.companies:
+                companydata = user.CompanyDatas(
+                    title=company.goal,
+                    name=company.name,
+                )
+                userdata.activity_companydatas.append(companydata)
+            db.add(userdata)
+            db.flush()
 
 
 def downgrade():

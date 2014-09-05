@@ -43,6 +43,7 @@ if userdata.user is not None:
 </a>
 % endif
 </div>
+<% user = request.context.user %>
 
 <ul class='nav nav-tabs'>
     <li class='active'>
@@ -61,6 +62,9 @@ if userdata.user is not None:
         <li>
         <a href="#form3" data-toggle='tab'>
             Compte utilisateur
+            % if not user.enabled():
+                <span class='label label-warning'>Ce compte a été désactivé</span>
+            % endif
         </a>
         </li>
     % endif

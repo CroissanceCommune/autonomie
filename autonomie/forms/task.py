@@ -318,7 +318,7 @@ def deferred_default_tva(node, kw):
     if default_tva is not None:
         return unicode(default_tva.value)
     else:
-        return None
+        return colander.null
 
 
 @colander.deferred

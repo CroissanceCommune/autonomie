@@ -117,19 +117,19 @@ def get_list_schema(company=False):
     schema.insert(0,
         forms.today_node(
             name='date',
-            default=None,
-            missing=None,
+            default=colander.null,
+            missing=colander.drop,
             description=u"Date de l'atelier",
             widget_options={'css_class': 'input-medium search-query'},
             ))
 
     if not company:
         schema.insert(0, user.user_node(
-            missing=-1,
+            missing=colander.drop,
             name='participant_id',
             widget_options={
                 'placeholder': u"Sélectionner un participant",
-                'default_option': (-1, ''),
+                'default_option': ('', ''),
                 }
         ))
 

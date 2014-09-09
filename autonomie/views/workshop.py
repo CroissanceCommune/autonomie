@@ -320,8 +320,8 @@ class WorkshopListTools(object):
         return query
 
     def filter_participant(self, query, appstruct):
-        participant_id = appstruct['participant_id']
-        if participant_id not in (None, -1):
+        participant_id = appstruct.get('participant_id')
+        if participant_id is not None:
             query = query.filter(
                 models.Workshop.attendances.any(
                     Attendance.account_id==participant_id
@@ -339,7 +339,7 @@ class WorkshopListTools(object):
         return query
 
     def filter_date(self, query, appstruct):
-        date = appstruct['date']
+        date = appstruct.get('date')
         if date is not None:
             query = query.filter(
                 models.Workshop.timeslots.any(

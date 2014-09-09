@@ -94,7 +94,7 @@ def deferred_default_contribution(node, kw):
     if cae_contribution is not None and cae_contribution.isdigit():
         return cae_contribution
     else:
-        return None
+        return colander.null
 
 
 def remove_admin_fields(schema, kw):

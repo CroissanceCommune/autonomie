@@ -35,11 +35,12 @@ Attendance sheet for a given timeslot (the current context)
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
     </head>
     <body>
+        <div>
         <img src="/assets/main/accompagnement_header.png" />
-
+        </div>
         % for index, i in enumerate(('info1', 'info2', 'info3')):
             % if getattr(workshop, i):
-                <h${index}>${getattr(workshop, i)} </h${index}>
+                <h${index + 1}>${getattr(workshop, i)} </h${index + 1}>
             % endif
         % endfor
 

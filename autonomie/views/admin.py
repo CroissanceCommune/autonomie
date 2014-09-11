@@ -462,8 +462,8 @@ class AdminActivities(BaseFormView):
     """
         Activity types config
     """
-    title = u"Configuration des activités"
-    validation_msg = u"Les activités ont bien été configurées"
+    title = u"Configuration du module accompagnement"
+    validation_msg = u"Le module a bien été configuré"
     schema = ActivityTypesConfig(title=u"")
     buttons = (submit_btn,)
 

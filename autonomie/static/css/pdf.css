@@ -22,7 +22,7 @@ html{
   padding-bottom:20px;
 }
 .lines{
-  border:1px solid #ddd;
+  border:1px solid #aaa;
   margin-bottom:33px;
 }
 .lines thead tr{
@@ -58,13 +58,13 @@ html{
   background-color:#f6f6f6;
   font-weight:bold;
   font-size:11px;
-  border:1px solid #ddd;
+  border:1px solid #aaa;
   -pdf-keep-with-next:true;
 }
 .content{
   font-size:9px;
   padding:3px;
-  border:1px solid #ddd;
+  border:1px solid #aaa;
   padding-bottom:4px;
   margin-bottom:12px;
 }

@@ -24,6 +24,8 @@ from py3o.template import Template
 
 from .sqla import BaseSqlaExporter
 
+from autonomie.models.config import get_config
+
 
 def format_py3o_val(value):
     """
@@ -38,7 +40,9 @@ class SqlaContext(BaseSqlaExporter):
     """
     Provide a tool to build a context dict based on a given model. The datas are
     built following the informations retrieved from the model's declaration.
-    Custom configuration can be achieved by customizing the info dict attribute from each column.
+
+    Custom configuration can be achieved by customizing the info dict attribute
+    from each column.
 
         config_key
 
@@ -159,12 +163,19 @@ def compile_template(instance, template):
     """
     Fill the given template with the instance's datas and return the odt file
 
+    For every instance class, common values are also inserted in the context
+    dict (and so can be used) :
+
+        * config values
+
     :param instance: the instance of a model (like Userdatas, Company)
     :param template: the template object to use
     :return: a stringIO object filled with the resulting odt's informations
     """
     context_builder = SqlaContext(instance.__class__)
     py3o_context = context_builder.compile_obj(instance)
+    # Add config datas in the context dict
+    py3o_context.update(get_config())
 
     output_doc = StringIO()
 

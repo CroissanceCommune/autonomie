@@ -25,4 +25,45 @@ de signaler cela aux développeurs directement ou en utilisant le système de
 tickets de github.
 Exception : pour les bogues de sécurité, merci d'écrire un courriel à autonomie@majerti.fr.
 
+Instructions pour l'installation du logiciel
+--------------------------------------------
 
+Installation des paquets (nécessaire pour l'installation dans un environnement
+virtuel):
+
+.. code-block:: console
+
+    apt-get install virtualenvwrapper libmysqlclient-dev build-essential libjpeg-dev libfreetype6 libfreetype6-dev zlib1g-dev python-mysqldb
+
+Création d'un environnement virtuel Python.
+
+.. code-block:: console
+
+    mkvirtualenv autonomie
+
+Téléchargement et installation de l'application
+
+.. code-block:: console
+
+    git clone https://github.com/Croissance_Commune/autonomie.git
+    cd autonomie
+    pip -r requirements.txt
+    python setup.py install
+    cp development.ini.sample development.ini
+
+Éditer le fichier development.ini et configurer votre logiciel (Accès à la base
+de données, différents répertoires de ressources statiques ...).
+
+Puis lancer l'application
+
+.. code-block:: console
+
+    pserve development.ini
+
+L'application synchronise automatiquement les modèles de données.
+
+Puis créer un compte administrateur
+
+.. code-block:: console
+
+    autonomie-admin development.ini add [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>]

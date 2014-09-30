@@ -18,6 +18,8 @@ Ceci est un logiciel libre, pour les conditions d'accès, d'utilisation, de copi
 Nouvelles fonctionnalités/Anomalies
 -----------------------------------
 
+Site officiel : http://autonomie.coop
+
 L'essentiel du développement est réalisé sur financement de Croissance Commune.
 
 Si vous rencontrez un bogue, ou avez une idée de fonctionnalité, il est possible

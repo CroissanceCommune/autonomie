@@ -184,7 +184,7 @@ class PermanentUserAddView(BaseFormView):
             company = self._get_company(company_name, user_model)
             user_model.companies.append(company)
 
-        self.dbsession.merge(user_model)
+        user_model = self.dbsession.merge(user_model)
 
         # Here we flush to get an id for the redirect
         self.dbsession.flush()

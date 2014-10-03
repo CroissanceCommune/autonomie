@@ -55,10 +55,13 @@ def add_admin(arguments):
     password = get_value(arguments, 'pwd', get_pwd())
     firstname = get_value(arguments, 'firstname', 'Admin')
     lastname = get_value(arguments, 'lastname', 'Majerti')
+    email = get_value(arguments, 'email', 'admin@example.com')
     user = User(login=login,
                 firstname=firstname,
                 primary_group=1,  #is an admin
-                lastname=lastname)
+                lastname=lastname,
+                email=email
+            )
     user.set_password(password)
     db = DBSESSION()
     db.add(user)
@@ -69,7 +72,7 @@ def add_admin(arguments):
 def add_admin_cmd():
     """Create an admin account in Autonomie
     Usage:
-        autonomie-admin <config_uri> add [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>]
+        autonomie-admin <config_uri> add [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--email=<email>]
 
     Options:
         -h --help     Show this screen.

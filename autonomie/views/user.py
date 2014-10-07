@@ -167,7 +167,7 @@ class PermanentUserAddView(BaseFormView):
             Add its companies
             Add a relationship between companies and the new account
         """
-        companies = set(appstruct.pop('companies', []))
+        company_ids = set(appstruct.pop('companies', []))
         password = appstruct.pop('pwd', None)
 
         if self.context.__name__ == 'user':
@@ -180,9 +180,12 @@ class PermanentUserAddView(BaseFormView):
         if password is not None:
             user_model.set_password(password)
 
-        for company_name in companies:
+        companies = []
+
+        for company_name in company_ids:
             company = self._get_company(company_name, user_model)
-            user_model.companies.append(company)
+            companies.append(company)
+        user_model.companies = companies
 
         user_model = self.dbsession.merge(user_model)
 

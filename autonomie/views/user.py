@@ -810,7 +810,7 @@ def get_edit_btn(user):
             "manage",
             path="user",
             id=user.id,
-            _query=dict(action="edit"),
+            _query=dict(action="edit_permanent"),
         )
 
 

@@ -280,6 +280,9 @@ ul.form-tabs li.error a {
 .form-row{
   padding-bottom: 4px;
 }
+.form-row select, .form-row input{
+  width: 100%;
+}
 .accordion-heading a{
   color: #555;
 }

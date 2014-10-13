@@ -237,7 +237,9 @@ class AdminTva(BaseFormView):
         """
         ids = []
         for tva in appstruct['tvas']:
-            ids.extend([product['id'] for product in tva['products']])
+            ids.extend([
+                product['id'] for product in tva['products'] if 'id' in product
+            ])
         return ids
 
     @staticmethod
@@ -245,7 +247,7 @@ class AdminTva(BaseFormView):
         """
             Return ids of tva remaining in the submitted config
         """
-        return [tva['id'] for tva in appstruct['tvas']]
+        return [tva['id'] for tva in appstruct['tvas'] if 'id' in tva]
 
     def disable_elements(self, factory, ids):
         """
@@ -268,7 +270,7 @@ class AdminTva(BaseFormView):
 
         for data in appstruct['tvas']:
             products = data.pop('products')
-            if data['id'] != 0:
+            if 'id' in data:
                 tva = Tva.get(data['id'])
                 merge_session_with_post(tva, data)
                 tva = self.dbsession.merge(tva)
@@ -278,7 +280,7 @@ class AdminTva(BaseFormView):
                 self.dbsession.add(tva)
 
             for prod in products:
-                if prod['id'] != 0:
+                if 'id' in prod:
                     product = Product.get(prod['id'])
                     product.tva = tva
                     merge_session_with_post(product, prod)
@@ -394,7 +396,7 @@ ont été configurés"
         """
         ids = []
         for key in self.factories:
-            ids.extend([data['id'] for data in appstruct[key]])
+            ids.extend([data['id'] for data in appstruct[key] if 'id' in data])
         return ids
 
     def _get_actual_config_obj(self, config_key):
@@ -445,7 +447,7 @@ ont été configurés"
 
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
-                if data.get('id', 0) not in (0, None):
+                if data.get('id') is not None:
                     type_ = factory.get(data['id'])
                     merge_session_with_post(type_, data)
                     self.dbsession.merge(type_)
@@ -492,8 +494,6 @@ class AdminActivities(BaseFormView):
                 for act in actions]
             }
 
-        print appstruct
-
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
@@ -502,7 +502,7 @@ class AdminActivities(BaseFormView):
         Return a dict id:data for the elements that are edited (with an id)
         """
         return dict((data['id'], data) for data in appstruct.get(key, {}) \
-            if data.get('id', 0) !=0)
+            if 'id' in data)
 
     def get_submitted_modes(self, appstruct):
         """
@@ -560,7 +560,7 @@ class AdminActivities(BaseFormView):
         """
         Add or edit an element of the given factory
         """
-        if datas['id'] != 0:
+        if 'id' in datas:
             element = factory.get(datas['id'])
             merge_session_with_post(element, datas)
             element = self.dbsession.merge(element)
@@ -732,7 +732,7 @@ class AdminOption(BaseFormView):
         """
         return dict((data['id'], data) \
                     for data in appstruct.get('datas', {}) \
-                    if data.get('id') != 0
+                    if 'id' in data
                    )
 
     def _disable_or_remove_elements(self, appstruct):
@@ -755,7 +755,7 @@ class AdminOption(BaseFormView):
         """
         node_schema = self.schema.children[0].children[0]
         element = node_schema.objectify(datas)
-        if element.id != 0:
+        if element.id is not None:
             element = self.dbsession.merge(element)
         else:
             self.dbsession.add(element)

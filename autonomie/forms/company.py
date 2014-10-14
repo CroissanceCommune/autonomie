@@ -43,6 +43,7 @@ LOGO_PATH = "logo"
 
 HEADER_RESIZER = ImageResizer(4, 1)
 
+
 def get_upload_options_from_request(request, directory):
     """
         Return the upload path and url from the request object
@@ -52,6 +53,7 @@ def get_upload_options_from_request(request, directory):
     store_path = os.path.join(rootpath, company.get_path(), directory)
     store_url = os.path.join("/assets", company.get_path(), directory)
     return store_path, store_url
+
 
 @colander.deferred
 def deferred_edit_adminonly_widget(node, kw):
@@ -64,24 +66,18 @@ def deferred_edit_adminonly_widget(node, kw):
     else:
         return deform.widget.TextInputWidget()
 
-@colander.deferred
-def deferred_logo_widget(node, kw):
-    """
-        Return the logo upload widget
-    """
-    request = kw['request']
-    path, url = get_upload_options_from_request(request, LOGO_PATH)
-    return forms.get_fileupload_widget(url, path, request.session)
 
 @colander.deferred
-def deferred_header_widget(node, kw):
-    """
-        Return the header upload widget
-    """
+def deferred_upload_header_widget(node, kw):
     request = kw['request']
-    path, url = get_upload_options_from_request(request, HEADER_PATH)
-    return forms.get_fileupload_widget(url, path, request.session,
-                                    filters=[HEADER_RESIZER.complete])
+    tmpstore = forms.files.SessionDBFileUploadTempStore(
+        request,
+        filters=HEADER_RESIZER.complete
+    )
+    return forms.files.CustomFileUploadWidget(
+        tmpstore,
+        template=forms.TEMPLATES_PATH + "fileupload.mako"
+    )
 
 
 @colander.deferred
@@ -134,21 +130,24 @@ class CompanySchema(colander.MappingSchema):
             missing=u'')
 
     logo = colander.SchemaNode(
-            FileData(),
-            widget=deferred_logo_widget,
-            title=u'Logo',
-            validator=validate_image_mime,
-            description=u"Charger un fichier de type image *.png *.jpeg \
+        FileData(),
+        widget=forms.files.deferred_upload_widget,
+        title="Choisir un logo",
+        validator=validate_image_mime,
+        missing=colander.drop,
+        description=u"Charger un fichier de type image *.png *.jpeg \
 *.jpg ...")
 
     header = colander.SchemaNode(
-            FileData(),
-            widget=deferred_header_widget,
-            title=u'Entête des fichiers PDF',
-            description=u"Charger un fichier de type image *.png *.jpeg \
+        FileData(),
+        widget=deferred_upload_header_widget,
+        title=u'Entête des fichiers PDF',
+        validator=validate_image_mime,
+        missing=colander.drop,
+        description=u"Charger un fichier de type image *.png *.jpeg \
 *.jpg ... Le fichier est idéalement au format 20/4 (par exemple 1000px x \
 200 px)",
-            validator=validate_image_mime)
+    )
 
     # Fields specific to the treasury
     code_compta = colander.SchemaNode(

@@ -228,7 +228,8 @@ class Company(DBBASE):
 
         for key, value in appstruct.items():
             setattr(self.header_file, key, value)
-        self.header_file.name = 'header.png'
+        if 'name' not in appstruct:
+            self.header_file.name = 'header.png'
         self.header_file.description = 'Header'
 
     @property
@@ -243,7 +244,8 @@ class Company(DBBASE):
 
         for key, value in appstruct.items():
             setattr(self.logo_file, key, value)
-        self.logo_file.name = 'logo.png'
+        if 'name' not in appstruct:
+            self.logo_file.name = 'logo.png'
         self.logo_file.description = 'Logo'
 
 

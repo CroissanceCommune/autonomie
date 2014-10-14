@@ -26,11 +26,15 @@
     Root factory <=> Acl handling
 """
 import logging
-from pyramid.security import Allow
-from pyramid.security import Authenticated
-from pyramid.security import ALL_PERMISSIONS
+from pyramid.security import (
+    Allow,
+    Everyone,
+    Authenticated,
+    ALL_PERMISSIONS,
+)
 from sqlalchemy.orm import undefer_group
 
+from autonomie.models.config import ConfigFiles
 from autonomie.models.activity import Activity
 from autonomie.models.company import Company
 from autonomie.models.customer import Customer
@@ -104,7 +108,12 @@ class RootFactory(dict):
                 self,
                 traversal_name,
                 object_name,
-                factory)
+                factory,
+            )
+
+        self['configfiles'] = TraversalDbAccess(
+            self, 'configfiles', 'config_file', ConfigFiles, 'key'
+        )
 
 
 class TraversalDbAccess(object):
@@ -114,11 +123,12 @@ class TraversalDbAccess(object):
     __acl__ = DEFAULT_PERM[:]
     dbsession = None
 
-    def __init__(self, parent, traversal_name, object_name, factory):
+    def __init__(self, parent, traversal_name, object_name, factory, id_key='id'):
         self.__parent__ = parent
         self.factory = factory
         self.object_name = object_name
         self.__name__ = traversal_name
+        self.id_key = id_key
 
     def __getitem__(self, key):
         return self._get_item(self.factory, key, self.object_name)
@@ -129,7 +139,7 @@ class TraversalDbAccess(object):
         dbsession = self.dbsession()
         obj = dbsession.query(klass)\
                        .options(undefer_group('edit'))\
-                       .filter(klass.id == key)\
+                       .filter(getattr(klass, self.id_key) == key)\
                        .scalar()
 
         if obj is None:
@@ -266,6 +276,7 @@ def set_models_acls():
     Here acls are set globally, but we'd like to set things more dynamically
     when different roles will be implemented
     """
+    ConfigFiles.__acl__ = [(Allow, Everyone, 'view'),]
     Company.__acl__ = property(get_company_acl)
     Project.__acl__ = property(get_customer_or_project_acls)
     Customer.__acl__ = property(get_customer_or_project_acls)

@@ -273,6 +273,7 @@ def includeme(config):
     """
     config.add_route("file", "/files/{id:\d+}", traverse="/files/{id}")
     config.add_route("filepng", "/files/{id:\d+}.png", traverse="/files/{id}")
+    config.add_route("public", "/public/{name}", traverse="/configfiles/{name}")
     config.add_view(
         file_dl_view,
         route_name='file',
@@ -282,6 +283,11 @@ def includeme(config):
     config.add_view(
         file_dl_view,
         route_name='filepng',
+        permission='view',
+    )
+    config.add_view(
+        file_dl_view,
+        route_name='public',
         permission='view',
     )
     config.add_view(

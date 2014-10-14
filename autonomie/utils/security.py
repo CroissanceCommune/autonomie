@@ -249,7 +249,14 @@ def get_file_acl(self):
     Compute the acls for a file object
     a file object's acls are simply the parent's
     """
-    return self.parent.__acl__
+    if self.parent is not None:
+        return self.parent.__acl__
+    elif self.company_header_backref is not None:
+        return self.company_header_backref.__acl__
+    elif self.company_logo_backref is not None:
+        return self.company_logo_backref.__acl__
+    else:
+        return []
 
 
 def set_models_acls():

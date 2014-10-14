@@ -21,33 +21,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-import datetime
-
-from mock import MagicMock
 from autonomie.models.company import Company
-from autonomie.models.customer import Customer
-from autonomie.models.project import Phase
-from autonomie.models.project import Project
-from autonomie.models.task import Estimation
 from .base import BaseTestCase
-
-TEST = dict(name=u"Test",
-            logo=u"logo.png",
-            header=u"header.png",
-            id=1)
 
 
 class TestCompanyModel(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
         self.company = Company(name=u"Test", id=1)
-        self.company.logo = dict(filename=u"logo.png")
-        self.company.header = dict(filename=u"header.png")
-
-    def test_get_path(self):
-        self.assertEqual(self.company.get_path(), "company/1")
-        self.assertEqual(self.company.get_logo_filepath(), "company/1/logo/logo.png")
-        self.assertEqual(self.company.get_header_filepath(), "company/1/header/header.png")
 
     def test_get_company_id(self):
         self.assertEqual(self.company.get_company_id(), 1)

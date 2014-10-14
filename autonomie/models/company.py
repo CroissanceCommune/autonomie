@@ -180,35 +180,6 @@ class Company(DBBASE):
         backref=backref('company_logo_backref', uselist=False),
     )
 
-
-    def get_path(self):
-        """
-            get the relative filepath specific to the given company
-        """
-        return os.path.join("company", str(self.id))
-
-    def get_header_filepath(self, request=None):
-        """
-            Returns the header's relative filepath
-        """
-        if self.header:
-            return os.path.join(self.get_path(),
-                            'header',
-                            self.header['filename'])
-        else:
-            return None
-
-    def get_logo_filepath(self):
-        """
-            Return the logo's relative filepath
-        """
-        if self.logo:
-            return os.path.join(self.get_path(),
-                            'logo',
-                             self.logo['filename'])
-        else:
-            return None
-
     def get_company_id(self):
         """
             Return the current company id

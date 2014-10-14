@@ -38,8 +38,6 @@ from autonomie import deform_extend
 from autonomie.utils.image import ImageResizer
 
 log = logging.getLogger(__name__)
-HEADER_PATH = "header"
-LOGO_PATH = "logo"
 
 HEADER_RESIZER = ImageResizer(4, 1)
 

@@ -55,6 +55,5 @@ class TestImageResize(unittest.TestCase):
         image2 = resizer.complete(image)
         self.assertFalse(image==image2)
         img_obj2 = Image.open(image2)
-        print img_obj2.size
         width, height = img_obj2.size
         self.assertEqual(width/height, 5)

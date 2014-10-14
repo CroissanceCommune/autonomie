@@ -81,8 +81,8 @@ class CustomDateType2(TypeDecorator):
 
 class CustomFileType(TypeDecorator):
     """
-        Custom Filetype used to glue deform fileupload tools with
-        the database element
+    Custom Filetype used to glue deform fileupload tools with
+    the database element
     """
     impl = String_type
 

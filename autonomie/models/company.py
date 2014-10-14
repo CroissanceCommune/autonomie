@@ -37,6 +37,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    ForeignKey,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -126,32 +127,6 @@ class Company(DBBASE):
             String(1),
             default="Y")
     )
-    logo = deferred(
-        Column(
-            "logo",
-            CustomFileType("logo_", 255)
-        ),
-        group='edit'
-    )
-    header = deferred(
-        Column(
-            "header",
-            CustomFileType("header_", 255)
-        ),
-        group='edit'
-    )
-    logoType = deferred(
-        Column(
-            "logoType",
-            String(255)
-        )
-    )
-    headerType = deferred(
-        Column(
-            "headerType",
-            String(255)
-        )
-    )
     RIB = deferred(
         Column(
             "RIB",
@@ -191,13 +166,28 @@ class Company(DBBASE):
         group='edit'
     )
 
+    header_id = Column(ForeignKey('file.id'))
+    header_file = relationship(
+        "File",
+        primaryjoin="File.id==Company.header_id",
+        backref=backref('company_header_backref', uselist=False),
+    )
+
+    logo_id = Column(ForeignKey('file.id'))
+    logo_file = relationship(
+        "File",
+        primaryjoin="File.id==Company.logo_id",
+        backref=backref('company_logo_backref', uselist=False),
+    )
+
+
     def get_path(self):
         """
             get the relative filepath specific to the given company
         """
         return os.path.join("company", str(self.id))
 
-    def get_header_filepath(self):
+    def get_header_filepath(self, request=None):
         """
             Returns the header's relative filepath
         """
@@ -225,6 +215,37 @@ class Company(DBBASE):
             Allows company id access through request's context
         """
         return self.id
+
+    @property
+    def header(self):
+        return self.header_file
+
+    @header.setter
+    def header(self, appstruct):
+        if self.header_file is None:
+            from autonomie.models.files import File
+            self.header_file = File()
+
+        for key, value in appstruct.items():
+            setattr(self.header_file, key, value)
+        self.header_file.name = 'header.png'
+        self.header_file.description = 'Header'
+
+    @property
+    def logo(self):
+        return self.logo_file
+
+    @logo.setter
+    def logo(self, appstruct):
+        if self.logo_file is None:
+            from autonomie.models.files import File
+            self.logo_file = File()
+
+        for key, value in appstruct.items():
+            setattr(self.logo_file, key, value)
+        self.logo_file.name = 'logo.png'
+        self.logo_file.description = 'Logo'
+
 
     @classmethod
     def query(cls, keys=None, active=True):

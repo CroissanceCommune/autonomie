@@ -26,16 +26,15 @@
 """
 
 from sqlalchemy import (
-        LargeBinary,
-        Integer,
-        Column,
-        ForeignKey,
-        String,
-        )
+    Integer,
+    Column,
+    ForeignKey,
+    String,
+)
 
 from sqlalchemy.orm import (
-        deferred,
-        )
+    deferred,
+)
 
 from sqlalchemy.dialects.mysql.base import LONGBLOB
 

@@ -60,14 +60,9 @@ class TestAvatar(BaseViewTest):
     """
     def test_avatar(self):
         from autonomie.utils.avatar import get_avatar
-        self.config.testing_securitypolicy(userid="authenticated")
-        request = testing.DummyRequest()
-        request._user = Mock(name="username")
-        avatar = get_avatar(request, self.session)
-        self.assertEqual(avatar, request._user)
         self.config.testing_securitypolicy(userid="contractor1")
-        request = testing.DummyRequest()
-        avatar = get_avatar(request, self.session)
+        request = self.get_csrf_request()
+        avatar = get_avatar(request)
         self.assertEqual(avatar.lastname, "LASTNAME_contractor1")
 
 

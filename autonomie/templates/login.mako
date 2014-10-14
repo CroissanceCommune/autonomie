@@ -48,7 +48,7 @@
 <div class='row'>
     <div class='span6 offset3 loginbox'>
         <div style='text-align:center;'>
-            <img src="/assets/main/logo.png" alt='Votre CAE' />
+            <img src="/public/logo.png" alt='Votre CAE' />
         </div>
         ${html_form|n}
     </div>

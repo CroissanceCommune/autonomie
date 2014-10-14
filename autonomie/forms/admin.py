@@ -155,11 +155,12 @@ class SiteConfig(colander.MappingSchema):
     """
     logo = colander.SchemaNode(
         FileData(),
-        widget=get_deferred_upload_widget('logo.png'),
-        title=u'Logo du site',
+        widget=forms.files.deferred_upload_widget,
+        title="Choisir un logo",
         validator=validate_image_mime,
-        default={"filename": "logo.png", "uid": "MAINLOGO"},
-        )
+        missing=colander.drop,
+        description=u"Charger un fichier de type image *.png *.jpeg \
+*.jpg ...")
     welcome = forms.textarea_node(
         title=u"Texte d'accueil",
         richwidget=True,
@@ -661,7 +662,7 @@ Contribution Organic",
 CAECONFIG = build_cae_config_schema()
 
 
-def get_config_appstruct(config_dict):
+def get_config_appstruct(request, config_dict, logo):
     """
         transform Config datas to ConfigSchema compatible appstruct
     """
@@ -682,6 +683,16 @@ def get_config_appstruct(config_dict):
                      'cgv': ''},
         "attached_filetypes": {}
     }
+    if logo is not None:
+        # TODO : Fix the url handling
+        appstruct['site']['logo'] = {
+            'uid': logo.id,
+            'filename': logo.name,
+            'preview_url': request.route_path(
+                'filepng',
+                id=logo.id,
+            )
+        }
     appstruct['site']['welcome'] = config_dict.get('welcome', '')
     appstruct['document']['footertitle'] = config_dict.get(
         'coop_pdffootertitle', ''

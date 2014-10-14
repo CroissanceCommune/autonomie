@@ -31,7 +31,10 @@
 import logging
 
 from pyramid.httpexceptions import HTTPFound
-from autonomie.models.config import Config
+from autonomie.models.config import (
+    Config,
+    ConfigFiles,
+)
 from autonomie.models.tva import (
         Tva,
         Product)
@@ -184,7 +187,8 @@ class AdminMain(BaseFormView):
             Add the appstruct to the form
         """
         config_dict = self.request.config
-        appstruct = get_config_appstruct(config_dict)
+        logo = ConfigFiles.get('logo.png')
+        appstruct = get_config_appstruct(self.request, config_dict, logo)
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
         tinymce.need()
@@ -195,6 +199,12 @@ class AdminMain(BaseFormView):
         """
         # la table config étant un stockage clé valeur
         # le merge_session_with_post ne peut être utilisé
+        logo = appstruct['site'].pop('logo', None)
+        if logo:
+            ConfigFiles.set('logo.png', logo)
+            self.request.session.pop('substanced.tempstore')
+            self.request.session.changed()
+
         dbdatas = self.dbsession.query(Config).all()
         appstruct = get_config_dbdatas(appstruct)
         dbdatas = merge_config_datas(dbdatas, appstruct)

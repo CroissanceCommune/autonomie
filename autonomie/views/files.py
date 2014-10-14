@@ -38,6 +38,7 @@ from autonomie.export.utils import write_file_to_request
 from autonomie.utils.widgets import ViewLink
 from autonomie.models import DBSESSION
 from autonomie.models.files import File
+from autonomie import forms
 from autonomie.forms.files import FileUploadSchema
 from autonomie.resources import fileupload_js
 from autonomie.views import (
@@ -115,41 +116,22 @@ class FileUploadView(BaseFormView):
         fileupload_js.need()
 
         come_from = self.request.referrer
-        log.debug(u"Coming from : %s" % come_from)
-
         parent_id = self._parent_id()
 
         appstruct = {
                 'parent_id': parent_id,
-                'come_from': come_from
+                'come_from': come_from,
                 }
         form.set_appstruct(appstruct)
 
-    def format_appstruct(self, appstruct):
-        """
-            Format the appstruct returned by the form to match the
-            datas structure expected for File add/edit
-        """
-        file_infos = appstruct.pop('upload')
-        # In edit if a new file has not be uploaded, the upload key doesn't
-        # contain any file data ('fp' key).
-        if file_infos.has_key('fp'):
-            # Ensure the provided file object isn't consumed yet
-            file_infos['fp'].seek(0)
-
-            # Retrieving file datas from the datas provided by the FileUploadWidget
-            appstruct['data'] = file_infos['fp'].read()
-            appstruct['size'] = len(appstruct['data'])
-            appstruct['mimetype'] = file_infos['mimetype']
-            appstruct['name'] = file_infos['filename']
-        return appstruct
 
     def persist_to_database(self, appstruct):
         """
             Execute actions on the database
         """
         # Inserting in the database
-        file_object = File(**appstruct)
+        file_object = File()
+        merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
         self.request.session.flash(UPLOAD_OK_MSG)
 
@@ -158,12 +140,12 @@ class FileUploadView(BaseFormView):
             Insert data in the database
         """
         log.debug(u"A file has been uploaded (add or edit)")
-        log.debug(appstruct)
 
         come_from = appstruct.pop('come_from')
         appstruct.pop("filetype")
 
-        appstruct = self.format_appstruct(appstruct)
+        appstruct = forms.flatten_appstruct(appstruct)
+
 
         self.persist_to_database(appstruct)
 
@@ -194,9 +176,14 @@ class FileEditView(FileUploadView):
         filedict = self.request.context.appstruct()
 
         filedict['upload'] = {
-                'filename': filedict['name'],
-                'uid': str(self.request.context.id),
-                }
+            'filename': filedict['name'],
+            'uid': str(self.request.context.id),
+            'preview_url': self.request.route_url(
+                'file',
+                id=self.request.context.id,
+                _query={'action': 'download'}
+            )
+        }
         # Since data is a deferred column it should not be present in the output
         # If in the request lifecycle, this column was already accessed, it will
         # be present and should be poped out (no need for it in this form)
@@ -209,7 +196,6 @@ class FileEditView(FileUploadView):
         fileupload_js.need()
 
         come_from = self.request.referrer
-        log.debug(u"Coming from : %s" % come_from)
 
 
         appstruct = {
@@ -286,28 +272,34 @@ def includeme(config):
     Configure views
     """
     config.add_route("file", "/files/{id:\d+}", traverse="/files/{id}")
+    config.add_route("filepng", "/files/{id:\d+}.png", traverse="/files/{id}")
     config.add_view(
-            file_dl_view,
-            route_name='file',
-            permission='view',
-            request_param='action=download',
-            )
+        file_dl_view,
+        route_name='file',
+        permission='view',
+        request_param='action=download',
+    )
     config.add_view(
-            file_view,
-            route_name="file",
-            permission='view',
-            renderer="file.mako",
-            )
+        file_dl_view,
+        route_name='filepng',
+        permission='view',
+    )
     config.add_view(
-            file_delete_view,
-            route_name='file',
-            permission='edit',
-            request_param='action=delete',
-            )
+        file_view,
+        route_name="file",
+        permission='view',
+        renderer="file.mako",
+    )
     config.add_view(
-            FileEditView,
-            route_name="file",
-            permission='edit',
-            renderer="base/formpage.mako",
-            request_param='action=edit',
-            )
+        file_delete_view,
+        route_name='file',
+        permission='edit',
+        request_param='action=delete',
+    )
+    config.add_view(
+        FileEditView,
+        route_name="file",
+        permission='edit',
+        renderer="base/formpage.mako",
+        request_param='action=edit',
+    )

@@ -19,6 +19,7 @@ logger = logging.getLogger("alembic.migrate_company_header")
 
 
 BASEFILEPATH = "/var/intranet_files/"
+BASEFILEPATH = "/home/gas/Developpement/git/autonomie/autonomie/intranet_files/"
 
 
 def load_file_struct(filepath, filename):
@@ -39,6 +40,8 @@ def upgrade():
     from autonomie.models.files import File
     from autonomie.models import DBSESSION
     from alembic.context import get_bind
+    from autonomie.models.config import ConfigFiles
+
     for i in ('header_id', 'logo_id',):
         col = sa.Column(i, sa.Integer, sa.ForeignKey('file.id'))
         op.add_column('company', col)
@@ -69,6 +72,16 @@ def upgrade():
                 company = session.merge(company)
                 session.flush()
 
+    filepath = "%s/main/logo.png" % BASEFILEPATH
+    if os.path.isfile(filepath):
+        ConfigFiles.set('logo.png', load_file_struct(filepath, 'logo.png'))
+
+    filepath = "%s/main/accompagnement_header.png" % BASEFILEPATH
+    if os.path.isfile(filepath):
+        ConfigFiles.set(
+            'accompagnement_header.png',
+            load_file_struct(filepath, 'accompagnement_header.png')
+        )
 
 def downgrade():
     for query in ("alter table company DROP FOREIGN KEY company_ibfk_1",
@@ -76,4 +89,4 @@ def downgrade():
         op.execute(query)
     op.drop_column('company', 'logo_id')
     op.drop_column('company', 'header_id')
-
+    op.drop_table('config_files')

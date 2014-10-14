@@ -156,7 +156,7 @@ class SiteConfig(colander.MappingSchema):
     logo = colander.SchemaNode(
         FileData(),
         widget=forms.files.deferred_upload_widget,
-        title="Choisir un logo",
+        title=u"Choisir un logo",
         validator=validate_image_mime,
         missing=colander.drop,
         description=u"Charger un fichier de type image *.png *.jpeg \
@@ -436,14 +436,12 @@ class MainActivityConfig(colander.MappingSchema):
     """
     header = colander.SchemaNode(
         FileData(),
-        widget=get_deferred_upload_widget('accompagnement_header.png'),
+        widget=forms.files.deferred_upload_widget,
         title=u'En-tête des sortie PDF',
         validator=validate_image_mime,
-        default={
-            "filename": "accompagnement_header.png",
-            "uid": "ACCOMPAGNEMENT_HEADER",
-            },
-        )
+        missing=colander.drop,
+        description=u"Charger un fichier de type image *.png *.jpeg \
+*.jpg ...")
 
 
 class ActivityTypesConfig(colander.Schema):
@@ -684,13 +682,12 @@ def get_config_appstruct(request, config_dict, logo):
         "attached_filetypes": {}
     }
     if logo is not None:
-        # TODO : Fix the url handling
         appstruct['site']['logo'] = {
             'uid': logo.id,
             'filename': logo.name,
             'preview_url': request.route_path(
-                'filepng',
-                id=logo.id,
+                'public',
+                name="logo.png",
             )
         }
     appstruct['site']['welcome'] = config_dict.get('welcome', '')

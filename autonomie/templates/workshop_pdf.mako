@@ -36,7 +36,7 @@ Attendance sheet for a given timeslot (the current context)
     </head>
     <body>
         <div>
-        <img src="/assets/main/accompagnement_header.png" />
+        <img src="/public/accompagnement_header.png" />
         </div>
         % for index, i in enumerate(('info1', 'info2', 'info3')):
             % if getattr(workshop, i):

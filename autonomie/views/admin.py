@@ -492,7 +492,9 @@ class AdminActivities(BaseFormView):
         query = query.filter(ActivityAction.parent_id==None)
         actions = query.filter(ActivityAction.active==True)
 
+
         appstruct = {
+            'main': {},
             'types': [type_.appstruct() for type_ in types],
             'modes': [mode.appstruct() for mode in modes],
             'actions': [
@@ -502,6 +504,17 @@ class AdminActivities(BaseFormView):
                 'children': [child.appstruct() for child in act.children],
                 }
                 for act in actions]
+        }
+
+        accompagnement_file = ConfigFiles.get('accompagnement_header.png')
+        if accompagnement_file is not None:
+            appstruct['main']['header'] = {
+                'uid': accompagnement_file.id,
+                'filename': accompagnement_file.name,
+                'preview_url': self.request.route_url(
+                    'public',
+                    name='accompagnement_header.png',
+                )
             }
 
         form.set_appstruct(appstruct)
@@ -613,6 +626,9 @@ class AdminActivities(BaseFormView):
         """
             Handle successfull expense configuration
         """
+        header = appstruct['main'].pop('header', None)
+        if header is not None:
+            ConfigFiles.set('accompagnement_header.png', header)
         # We delete the elements that are no longer in the appstruct
         self.disable_types(appstruct)
         self.disable_actions(appstruct)

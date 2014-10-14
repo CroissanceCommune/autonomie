@@ -183,7 +183,6 @@ class CompanyAdd(BaseFormView):
         return HTTPFound(self.request.route_path("company", id=company.id))
 
 
-
 class CompanyEdit(BaseFormView):
     """
         View class for company editing
@@ -204,18 +203,38 @@ class CompanyEdit(BaseFormView):
             prepopulate the form and the actionmenu
         """
         appstruct = self.request.context.appstruct()
+
+        for filetype in ('logo', 'header'):
+            # On récupère un éventuel id de fichier
+            file_id = appstruct.pop('%s_id' % filetype, '')
+            if file_id:
+                # Si il y a déjà un fichier de ce type dans la base on construit
+                # un appstruct avec un uid, un filename et une url de preview
+                appstruct[filetype] = {
+                    'uid': file_id,
+                    'filename': '%s.png' % file_id,
+                    'preview_url': self.request.route_path(
+                        'filepng',
+                        id=file_id,
+                    )
+                }
+
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request, self.request.context)
 
     def submit_success(self, appstruct):
         """
-            Edit the database entry and return reidrect
+            Edit the database entry and return redirect
         """
         company = merge_session_with_post(self.request.context, appstruct)
         company = self.dbsession.merge(company)
         self.dbsession.flush()
         message = u"Votre entreprise a bien été éditée"
         self.session.flash(message)
+        # Clear all informations stored in session by the tempstore used for the
+        # file upload widget
+        self.request.session.pop('substanced.tempstore')
+        self.request.session.changed()
         return HTTPFound(self.request.route_path("company", id=company.id))
 
 

@@ -141,7 +141,11 @@ class FileTypesConfig(colander.MappingSchema):
     """
         Configure file types that may be attached
     """
-    types = FileTypeConfig(title=u"")
+    types = FileTypeConfig(
+        title=u"Type de document attaché",
+        description=u"Utilisé dans les interfaces de dépôt de document pour \
+spécifier un type (PV de travaux, Bdc ...)"
+    )
 
 
 class SiteConfig(colander.MappingSchema):
@@ -159,7 +163,8 @@ class SiteConfig(colander.MappingSchema):
     welcome = forms.textarea_node(
         title=u"Texte d'accueil",
         richwidget=True,
-        missing=u'')
+        missing=u'',
+    )
 
 
 class MainConfig(colander.MappingSchema):
@@ -661,45 +666,53 @@ def get_config_appstruct(config_dict):
         transform Config datas to ConfigSchema compatible appstruct
     """
     appstruct = {
-        'site':     {'welcome': None},
+        'site':     {'welcome': ''},
         'document': {'estimation':  {
-                                    'header': None,
-                                    'footer': None,
+                                    'header': '',
+                                    'footer': '',
                                     },
                      'invoice':     {
-                                    'prefix': None,
-                                    'header': None,
-                                    'payment': None,
-                                     'late': None},
-                     'footertitle': None,
-                     'footercourse': None,
-                     'footercontent': None,
-                     'cgv': None},
+                                    'prefix': '',
+                                    'header': '',
+                                    'payment': '',
+                                     'late': ''},
+                     'footertitle': '',
+                     'footercourse': '',
+                     'footercontent': '',
+                     'cgv': ''},
         "attached_filetypes": {}
     }
-    appstruct['site']['welcome'] = config_dict.get('welcome')
+    appstruct['site']['welcome'] = config_dict.get('welcome', '')
     appstruct['document']['footertitle'] = config_dict.get(
-                                                       'coop_pdffootertitle')
+        'coop_pdffootertitle', ''
+    )
     appstruct['document']['footercourse'] = config_dict.get(
-                                                      'coop_pdffootercourse')
+        'coop_pdffootercourse', ''
+    )
     appstruct['document']['footercontent'] = config_dict.get(
-                                                        'coop_pdffootertext')
-    appstruct['document']['cgv'] = config_dict.get('coop_cgv')
+        'coop_pdffootertext', ''
+    )
+    appstruct['document']['cgv'] = config_dict.get('coop_cgv', '')
 
     appstruct['document']['estimation']['header'] = config_dict.get(
-                                                        'coop_estimationheader')
+        'coop_estimationheader', ''
+    )
     appstruct['document']['estimation']['footer'] = config_dict.get(
-                                                       'coop_estimationfooter')
+        'coop_estimationfooter', ''
+    )
 
     appstruct['document']['invoice']['prefix'] = config_dict.get(
-                                                    'invoiceprefix')
+        'invoiceprefix', ''
+    )
     appstruct['document']['invoice']['header'] = config_dict.get(
-                                                        'coop_invoiceheader')
-
+        'coop_invoiceheader', ''
+    )
     appstruct['document']['invoice']['payment'] = config_dict.get(
-                                                        'coop_invoicepayment')
+        'coop_invoicepayment', ''
+    )
     appstruct['document']['invoice']['late'] = config_dict.get(
-                                                        'coop_invoicelate')
+        'coop_invoicelate', ''
+    )
 
     appstruct["attached_filetypes"]['types'] = json.loads(
             config_dict.get('attached_filetypes', "[]")

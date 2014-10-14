@@ -72,6 +72,7 @@ def buffer_pdf(html):
 
 DATAURI_TMPL = u"data:{0};base64,{1}"
 FILEPATH_REGX = re.compile("^/files/(?P<fileid>[0-9]+).png")
+PUBLIC_FILES_REGX = re.compile("^/public/(?P<filekey>.+)")
 
 def fetch_resource(uri, rel):
     """
@@ -80,16 +81,26 @@ def fetch_resource(uri, rel):
         if the uri starts with /files : we're looking for a db file
         else we're looking for a static resource
     """
-    regex_group = FILEPATH_REGX.match(uri)
+    f_regex_group = FILEPATH_REGX.match(uri)
+    pf_regex_group = PUBLIC_FILES_REGX.match(uri)
 
-    if regex_group is not None:
+
+    if f_regex_group is not None:
         # C'est un modèle File que l'on doit renvoyer
-        filename = regex_group.group('fileid')
+        filename = f_regex_group.group('fileid')
         # On récupère l'objet fichier
         from autonomie.models.files import File
         fileobj = File.get(filename)
         b64_str = base64.encodestring(fileobj.getvalue())
         resource = DATAURI_TMPL.format(fileobj.mimetype, b64_str)
+
+    elif pf_regex_group is not None:
+        key = pf_regex_group.group('filekey')
+        from autonomie.models.config import ConfigFiles
+        fileobj = ConfigFiles.get(key)
+        b64_str = base64.encodestring(fileobj.getvalue())
+        resource = DATAURI_TMPL.format(fileobj.mimetype, b64_str)
+
     else:
         # C'est un fichier statique
         request = get_current_request()

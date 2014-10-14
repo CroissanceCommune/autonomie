@@ -30,7 +30,7 @@
         % for company in companies:
         <li class="span4">
         <div class="thumbnail">
-            <img src="/assets/${company.get_logo_filepath()}" title="${company.name}" alt="" style="max-height:200px;"/>
+            <img src="${api.img_url(company.logo_file)}" title="${company.name}" alt="" style="max-height:200px;"/>
             <div class="caption">
                 <h3>${company.name}</h3>
                 <p>

@@ -28,7 +28,7 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <div id='content'>
     <div class='header'>
-        <img src='/assets/${company.get_header_filepath()}' alt='${company.name}'/>
+        <img src='${api.img_url(company.header_file)}' alt='${company.name}'/>
     </div>
     <div class='row'>
         <div class='addressblock'>
@@ -176,18 +176,18 @@
     ## All infos beetween document lines and footer text (notes, payment conditions ...)
     </%block>
 
-    </div>
+</div>
     ## end of content
-    <div class='row' id='footer'>
-        % if config.has_key('coop_pdffootertitle'):
-            <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
-        %endif
-        % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
-            ${format_text(config.get('coop_pdffootercourse'))}<br />
-        % endif
-        % if config.has_key('coop_pdffootertext'):
-            ${format_text(config.get('coop_pdffootertext'))}
-        % endif
+<div class='row' id='footer'>
+    % if config.has_key('coop_pdffootertitle'):
+        <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
+    %endif
+    % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
+        ${format_text(config.get('coop_pdffootercourse'))}<br />
+    % endif
+    % if config.has_key('coop_pdffootertext'):
+        ${format_text(config.get('coop_pdffootertext'))}
+    % endif
 </div>
 % if bulk is UNDEFINED or not bulk:
 <pdf:nextpage />

@@ -186,8 +186,8 @@ path = request.current_route_path(_query=get_args)
         <p>
           ${company.goal}
         </p>
-        %if company.get_logo_filepath():
-          <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
+        %if company.logo_id:
+            <img src="${api.img_url(company.logo_file)}" alt=""  width="250px" />
         %endif
         <dl>
             % if company.email:

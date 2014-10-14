@@ -28,6 +28,8 @@
     write_pdf(request, filename, html)
 
 """
+import base64
+import re
 import pkg_resources
 import cStringIO as StringIO
 from os.path import join
@@ -68,24 +70,41 @@ def buffer_pdf(html):
     return result
 
 
+DATAURI_TMPL = u"data:{0};base64,{1}"
+FILEPATH_REGX = re.compile("^/files/(?P<fileid>[0-9]+).png")
+
 def fetch_resource(uri, rel):
     """
         Callback used by pisa to locally retrieve ressources
         giving the uri
+        if the uri starts with /files : we're looking for a db file
+        else we're looking for a static resource
     """
-    request = get_current_request()
-    introspector = request.registry.introspector
-    if uri.startswith('/'):
-        uri = uri[1:]
-    mainuri, sep, relative_filepath = uri.partition('/')
-    mainuri = mainuri + '/'
-    resource = ''
-    for staticpath in introspector.get_category('static views'):
-        if mainuri == staticpath['introspectable']['name']:
-            basepath = staticpath['introspectable']['spec']
-            resource = join(basepath, relative_filepath).encode('utf-8')
-            if ':' in resource:
-                package, filename = resource.split(':')
-                resource = pkg_resources.resource_filename(package, filename)
-            break
+    regex_group = FILEPATH_REGX.match(uri)
+
+    if regex_group is not None:
+        # C'est un modèle File que l'on doit renvoyer
+        filename = regex_group.group('fileid')
+        # On récupère l'objet fichier
+        from autonomie.models.files import File
+        fileobj = File.get(filename)
+        b64_str = base64.encodestring(fileobj.getvalue())
+        resource = DATAURI_TMPL.format(fileobj.mimetype, b64_str)
+    else:
+        # C'est un fichier statique
+        request = get_current_request()
+        introspector = request.registry.introspector
+        if uri.startswith('/'):
+            uri = uri[1:]
+        mainuri, sep, relative_filepath = uri.partition('/')
+        mainuri = mainuri + '/'
+        resource = ''
+        for staticpath in introspector.get_category('static views'):
+            if mainuri == staticpath['introspectable']['name']:
+                basepath = staticpath['introspectable']['spec']
+                resource = join(basepath, relative_filepath).encode('utf-8')
+                if ':' in resource:
+                    package, filename = resource.split(':')
+                    resource = pkg_resources.resource_filename(package, filename)
+                break
     return resource

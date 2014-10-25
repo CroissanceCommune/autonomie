@@ -48,3 +48,13 @@ def command(func, doc):
         pyramid_env['closer']()
     commit()
     return 0
+
+
+def get_value(arguments, key, default):
+    """
+        Return the value for key in arguments or default
+    """
+    val = arguments.get('--%s' % key)
+    if not val:
+        val = default
+    return val

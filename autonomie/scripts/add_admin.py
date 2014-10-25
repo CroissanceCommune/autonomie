@@ -26,11 +26,16 @@
     Command to add an admin to autonomie
 """
 import os
-from autonomie.scripts.utils import command
+from autonomie.scripts.utils import (
+    command,
+    get_value,
+)
 from autonomie.models import DBSESSION
 from autonomie.models.user import User
 
+
 PWD_LENGTH = 10
+
 
 def get_pwd():
     """
@@ -38,14 +43,6 @@ def get_pwd():
     """
     return os.urandom(PWD_LENGTH)
 
-def get_value(arguments, key, default):
-    """
-        Return the value for key in arguments or default
-    """
-    val = arguments.get('--%s' % key)
-    if not val:
-        val = default
-    return val
 
 def add_admin(arguments):
     """
@@ -68,6 +65,7 @@ def add_admin(arguments):
     db.flush()
     print u"Creating account %s with password %s" % (login, unicode(password))
     return user
+
 
 def add_admin_cmd():
     """Create an admin account in Autonomie

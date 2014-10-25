@@ -44,7 +44,7 @@ def get_pwd():
     return os.urandom(PWD_LENGTH)
 
 
-def add_admin(arguments):
+def add_admin(arguments, env):
     """
         Add an admin user to the database
     """

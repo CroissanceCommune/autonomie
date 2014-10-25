@@ -248,7 +248,7 @@ def migrate():
     Options:
         -h --help     Show this screen.
     """
-    def callback(arguments):
+    def callback(arguments, env):
         args = ()
         if arguments['list']:
             func = list_all

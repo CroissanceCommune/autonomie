@@ -31,7 +31,6 @@ from docopt import docopt
 from pyramid.paster import bootstrap
 from transaction import commit
 from pyramid.paster import setup_logging
-from transaction import commit
 
 
 def command(func, doc):
@@ -43,14 +42,14 @@ def command(func, doc):
     pyramid_env = bootstrap(args['<config_uri>'])
     setup_logging(args['<config_uri>'])
     try:
-        func(args)
+        func(args, pyramid_env)
     finally:
         pyramid_env['closer']()
     commit()
     return 0
 
 
-def get_value(arguments, key, default):
+def get_value(arguments, key, default=None):
     """
         Return the value for key in arguments or default
     """

@@ -21,56 +21,43 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+from pytest import fixture
 from mock import MagicMock
 from autonomie.models.project import Project
-from .base import BaseTestCase
 
 PROJECT = dict(name=u'project1',
                code=u"PRO1",
                company_id=1,
                 )
 
-EST_LIST1 = ["Devis 1", "Devis 3"]
-EST_LIST2 = ["Devis 1", "Devis deoko"]
-INV_LIST1 = ['Facture 1', "Facture d'acompte 2", "Facture 5"]
-INV_LIST2 = ['Facture 1', "Facture d'acompte 1", "Facture d'acompte 2"]
-CINV_LIST1 = ["Avoir 1", "Avoir 4"]
+EST_LIST = ["Devis 1", "Devis deoko"]
+INV_LIST = ['Facture 1', "Facture d'acompte 2", "Facture 5"]
+CINV_LIST = ["Avoir 1", "Avoir 4"]
 
-def get_project():
-    return Project(**PROJECT)
+@fixture(scope='module')
+def project():
+    p = Project(**PROJECT)
+    for i in EST_LIST:
+        p.estimations.append(MagicMock(number=i))
+    for i in INV_LIST:
+        p.invoices.append(MagicMock(number=i))
+    for i in CINV_LIST:
+        p.cancelinvoices.append(MagicMock(number=i))
+    return p
 
-def get_mocks(_list):
-    mocks = []
-    for i in _list:
-        mock = MagicMock()
-        mock.number = i
-        mocks.append(mock)
-    return mocks
 
-class TestProjectModel(BaseTestCase):
-    def get_number(self):
-        test_str = "Devis 5"
-        self.assertEqual(Project.get_number(test_str, "Devis "), 5)
-        self.assertEqual(Project.get_number(test_str, "Devistoto"), 0)
+def test_get_number():
+    test_str = "Devis 5"
+    assert Project.get_number(test_str, "Devis ") == 5
+    assert Project.get_number(test_str, "Devistoto") == 0
 
-    def test_get_next_estimation_number(self):
-        for elist, result in ((EST_LIST1, 4),  (EST_LIST2, 3)):
-            p1 = get_project()
-            for i in get_mocks(elist):
-                p1.estimations.append(i)
-            self.assertEqual(p1.get_next_estimation_number(), result)
+def test_get_next_estimation_number(project):
+    assert project.get_next_estimation_number() == 3
 
-    def test_get_next_invoice_number(self):
-        for ilist, result in ((INV_LIST1, 6), ([], 1), (INV_LIST2, 4)):
-            p1 = get_project()
-            for i in get_mocks(ilist):
-                p1.invoices.append(i)
-            self.assertEqual(p1.get_next_invoice_number(), result)
+def test_get_next_invoice_number(project):
+    assert project.get_next_invoice_number() == 6
+    project.invoices = []
+    assert project.get_next_invoice_number() == 1
 
-    def test_get_next_cancelinvoice_number(self):
-        for clist, result in ((CINV_LIST1, 5), ([], 1)):
-            p1 = get_project()
-            for i in get_mocks(clist):
-                p1.cancelinvoices.append(i)
-            self.assertEqual(p1.get_next_cancelinvoice_number(), result)
+def test_get_next_cancelinvoice_number(project):
+    assert project.get_next_cancelinvoice_number() == 5

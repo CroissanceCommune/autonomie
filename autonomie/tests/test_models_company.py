@@ -22,13 +22,6 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 from autonomie.models.company import Company
-from .base import BaseTestCase
 
-
-class TestCompanyModel(BaseTestCase):
-    def setUp(self):
-        BaseTestCase.setUp(self)
-        self.company = Company(name=u"Test", id=1)
-
-    def test_get_company_id(self):
-        self.assertEqual(self.company.get_company_id(), 1)
+def test_get_company_id():
+    assert Company(id=1).get_company_id() == 1

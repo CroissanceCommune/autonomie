@@ -189,7 +189,11 @@ def populate_db(session):
     from autonomie.models.customer import Customer
     cust = Customer(
         code='C001',
-        name='Client1'
+        name='Client1',
+        contactLastName=u'Client Lastname',
+        address=u'15 rue Victore Hugo',
+        zipCode='69003',
+        city='Lyon',
     )
     session.add(cust)
 

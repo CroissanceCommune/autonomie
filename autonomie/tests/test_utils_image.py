@@ -25,7 +25,7 @@
 """
     Test image resizing
 """
-import unittest
+import pytest
 import os
 from autonomie.tests.base import DATASDIR
 
@@ -33,27 +33,24 @@ from PIL import Image
 
 from autonomie.utils.image import ImageResizer
 
-class TestImageResize(unittest.TestCase):
-    def getOne(self):
-        return ImageResizer(5, 1)
+@pytest.fixture
+def resizer():
+    return ImageResizer(5, 1)
 
-    def test_resize_not_affect_equal(self):
-        resizer = self.getOne()
-        image = file(os.path.join(DATASDIR, 'entete5_1.png'), 'r')
-        image2 = resizer.complete(image)
-        self.assertEqual(image2, image)
+def test_resize_not_affect_equal(resizer):
+    image = file(os.path.join(DATASDIR, 'entete5_1.png'), 'r')
+    image2 = resizer.complete(image)
+    assert image2 == image
 
-    def test_resize_not_affect_less(self):
-        resizer = self.getOne()
-        image = file(os.path.join(DATASDIR, 'entete10_1.png'), 'r')
-        image2 = resizer.complete(image)
-        self.assertEqual(image2, image)
+def test_resize_not_affect_less(resizer):
+    image = file(os.path.join(DATASDIR, 'entete10_1.png'), 'r')
+    image2 = resizer.complete(image)
+    assert image2 == image
 
-    def test_resize(self):
-        resizer = self.getOne()
-        image = file(os.path.join(DATASDIR, 'entete2_1.png'), 'r')
-        image2 = resizer.complete(image)
-        self.assertFalse(image==image2)
-        img_obj2 = Image.open(image2)
-        width, height = img_obj2.size
-        self.assertEqual(width/height, 5)
+def test_resize(resizer):
+    image = file(os.path.join(DATASDIR, 'entete2_1.png'), 'r')
+    image2 = resizer.complete(image)
+    assert image != image2
+    img_obj2 = Image.open(image2)
+    width, height = img_obj2.size
+    assert width/height == 5

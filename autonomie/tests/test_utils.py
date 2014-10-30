@@ -22,75 +22,71 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import colander
-from pyramid import testing
 from mock import Mock
 
 from autonomie.forms import (
     merge_session_with_post,
     flatten_appstruct,
 )
-from autonomie.utils.files import (encode_path, decode_path, issubdir,
-        filesizeformat)
-from autonomie.utils.rest import RestJsonRepr, RestError
-
-from .base import BaseTestCase
-from .base import BaseViewTest
-from autonomie.tests.base import BaseFunctionnalTest
-
-
-class TestFormUtils(BaseTestCase):
-    def test_merge_session_with_post(self):
-        session = Mock()
-        post = dict(id=12, name="Dupont", lastname="Jean",
-                                accounts=['admin', 'user'])
-        merge_session_with_post(session, post)
-        self.assertTrue(session.name == 'Dupont')
-        self.assertTrue("admin" in session.accounts)
-
-    def test_flatten_appstruct(self):
-        appstruct = {'key1':'value1', 'key2': {'key3': 'value3'}}
-        self.assertEqual(flatten_appstruct(appstruct),
-                {'key1': 'value1', 'key3': 'value3'})
+from autonomie.utils.files import (
+    encode_path,
+    decode_path,
+    issubdir,
+    filesizeformat,
+)
+from autonomie.utils.rest import (
+    RestJsonRepr,
+    RestError,
+)
 
 
-class TestAvatar(BaseViewTest):
-    """
-        A dummy user is created in test initiliazition
-    """
-    def test_avatar(self):
-        from autonomie.utils.avatar import get_avatar
-        self.config.testing_securitypolicy(userid="contractor1")
-        request = self.get_csrf_request()
-        avatar = get_avatar(request)
-        self.assertEqual(avatar.lastname, "LASTNAME_contractor1")
+def test_merge_session_with_post():
+    session = Mock()
+    post = dict(id=12, name="Dupont", lastname="Jean",
+                            accounts=['admin', 'user'])
+    merge_session_with_post(session, post)
+    assert session.name == 'Dupont'
+    assert "admin" in session.accounts
+
+def test_flatten_appstruct():
+    appstruct = {'key1':'value1', 'key2': {'key3': 'value3'}}
+    assert flatten_appstruct(appstruct) == {'key1': 'value1', 'key3': 'value3'}
 
 
-class TestConfig(BaseTestCase):
-    def test_load_value(self):
-        from autonomie.models.config import get_config, Config
-        self.session.add(Config(name="name", value="value"))
-        self.session.flush()
-        all_ = get_config()
-        self.assertTrue("name" in all_.keys() and all_["name"] == "value")
+def test_avatar(dbsession, config, get_csrf_request):
+    from autonomie.utils.avatar import get_avatar
+    config.testing_securitypolicy(userid="user1_login")
+    request = get_csrf_request()
+    request.dbsession = dbsession
+    avatar = get_avatar(request)
+    assert avatar.lastname == "user1_lastname"
 
 
-class TestFileSystem(BaseTestCase):
-    def test_encode_decode(self):
-        st = u"$deù % ù$ùdeù % - /// //  \ \dekodok %spkoij  idje  ' kopk \""
-        encoded = encode_path(st)
-        self.assertEqual(decode_path(encoded), st)
+def test_load_value(dbsession):
+    from autonomie.models.config import get_config, Config
+    dbsession.add(Config(name="name", value="value"))
+    dbsession.flush()
+    all_ = get_config()
+    assert "name" in all_.keys()
+    assert all_["name"] == "value"
 
-    def test_issubdir(self):
-        self.assertTrue(issubdir("/root/foo", "/root/foo/bar"))
-        self.assertFalse(issubdir("/root/foo", "/root/bar"))
-        self.assertFalse(issubdir("/root/foo", "/root/../../foo/bar"))
 
-    def test_filesizeformat(self):
-        self.assertEqual(filesizeformat(1024, 0), "1ko")
-        self.assertEqual(filesizeformat(1024, 1), "1.0ko")
-        self.assertEqual(filesizeformat(1024*1024, 0), "1Mo")
-        self.assertEqual(filesizeformat(1024*1024, 1), "1.0Mo")
+def test_encode_decode():
+    st = u"$deù % ù$ùdeù % - /// //  \ \dekodok %spkoij  idje  ' kopk \""
+    encoded = encode_path(st)
+    assert decode_path(encoded) == st
+
+def test_issubdir():
+    assert(issubdir("/root/foo", "/root/foo/bar"))
+    assert(not issubdir("/root/foo", "/root/bar"))
+    assert(not issubdir("/root/foo", "/root/../../foo/bar"))
+
+def test_filesizeformat():
+    assert(filesizeformat(1024, 0) == "1ko")
+    assert(filesizeformat(1024, 1) == "1.0ko")
+    assert(filesizeformat(1024*1024, 0) == "1Mo")
+    assert(filesizeformat(1024*1024, 1) == "1.0Mo")
+
 
 class DummyModel(dict):
     def appstruct(self):
@@ -110,24 +106,30 @@ class DummyJsonRepr(RestJsonRepr):
     schema = DummySchema()
 
 
-class TestRestJsonRepr(BaseTestCase):
-    def test_json(self):
-        datas = DummyModel(schemakey=10, otherkey="dummy")
-        jsonrepr = DummyJsonRepr(datas)
-        self.assertEqual(set(jsonrepr.__json__('request').keys())\
-                .difference(datas.keys()), set([]))
+def test_json():
+    datas = DummyModel(schemakey=10, otherkey="dummy")
+    jsonrepr = DummyJsonRepr(datas)
+    assert(set(jsonrepr.__json__('request').keys())\
+            .difference(datas.keys()) == set([]))
 
-    def test_bind_params(self):
-        jsonrepr = DummyJsonRepr({}, bind_params=dict(test=5))
-        schema = jsonrepr.get_schema("request")
-        self.assertEqual(schema.bind_params.keys(), ['test'])
-        jsonrepr = DummyJsonRepr({})
-        schema = jsonrepr.get_schema("request")
-        self.assertEqual(schema.bind_params.keys(), ['request'])
+def test_bind_params():
+    jsonrepr = DummyJsonRepr({}, bind_params=dict(test=5))
+    schema = jsonrepr.get_schema("request")
+    assert(schema.bind_params.keys() == ['test'])
+    jsonrepr = DummyJsonRepr({})
+    schema = jsonrepr.get_schema("request")
+    assert(schema.bind_params.keys() == ['request'])
 
 
-class TestRestError(BaseFunctionnalTest):
-    def test_it(self):
-        err = RestError({}, 151)
-        self.assertEqual(err.status, u"151 Continue")
-        self.assertEqual(err.content_type, 'application/json')
+def test_it(config):
+    err = RestError({}, 151)
+    assert(err.status == u"151 Continue")
+    assert(err.content_type == 'application/json')
+
+
+def test_script_utils():
+    from autonomie.scripts.utils import get_value
+    args = {'--test': 'toto', '--': 'titi'}
+    assert get_value(args, 'test', '') == 'toto'
+    assert get_value(args, 'test1', 'test') == 'test'
+

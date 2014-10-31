@@ -25,8 +25,9 @@
 """
     All Authentication views
 """
-import logging
 import colander
+import logging
+import string
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPForbidden
@@ -50,6 +51,42 @@ from autonomie.utils.rest import RestError
 log = logging.getLogger(__name__)
 
 
+# TODO: could be styled a bit! Why not invoke bootstrap.css?
+_FORBIDDEN_BODY_TMPL = string.Template('''\
+${explanation}${br}${br}
+${detail}
+${html_comment}${br}${br}
+<a href='/'>
+<div>
+Retour &agrave; l'accueil
+</div>
+</a>
+''')
+
+
+class AutonomieForbidden(HTTPForbidden):
+    """
+    Slightly more user friendly than HTTPForbidden
+
+    Use when in HTML mode, not XHR.
+    """
+    explanation = u"Accès refusé."
+
+    def __init__(
+        self,
+        body_template=_FORBIDDEN_BODY_TMPL,
+        *args,
+        **kwargs
+        ):
+
+        HTTPForbidden.__init__(
+            self,
+            body_template=body_template,
+            *args,
+            **kwargs
+            )
+
+
 def forbidden_view(request):
     """
         The forbidden view (handles the redirection to login form)
@@ -58,7 +95,8 @@ def forbidden_view(request):
     login = authenticated_userid(request)
     if login:
         log.warn(u"An access has been forbidden to '{0}'".format(login))
-        redirect = HTTPForbidden()
+        # TODO : add some details with the detail= keyword
+        redirect = AutonomieForbidden()
     else:
         log.debug(u"An access has been forbidden to an unauthenticated user")
         #redirecting to the login page with the current path as param

@@ -31,7 +31,6 @@ from autonomie.views import render_api
 
 from autonomie.mail import (
     send_mail_from_event,
-    format_mail,
     format_link,
 )
 
@@ -83,7 +82,7 @@ class StatusChanged(object):
             return the recipients' emails
         """
         if self.document.owner.email:
-            email = [format_mail(self.document.owner.email)]
+            email = [self.document.owner.email]
         else:
             email = []
         return email
@@ -99,7 +98,7 @@ class StatusChanged(object):
             log.info(u"'{0}' has not set his email".format(
                                                     self.request.user.login))
             mail = "Unknown"
-        return format_mail(mail)
+        return mail
 
     @property
     def subject(self):

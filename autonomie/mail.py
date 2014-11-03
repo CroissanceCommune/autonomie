@@ -24,7 +24,16 @@ Mail utilities
 """
 import logging
 from pyramid_mailer import get_mailer
-from pyramid_mailer.message import Message
+from pyramid_mailer.message import (
+    Message,
+    Attachment,
+)
+
+from autonomie.exception import UndeliveredMail
+from autonomie.models.files import (
+    store_sent_mail,
+    check_if_mail_sent,
+)
 
 
 log = logging.getLogger(__file__)
@@ -40,6 +49,8 @@ Vous avez reçu ce mail car vous êtes utilisateurs de l'application Autonomie. 
 Si vous avez reçu ce mail par erreur, nous vous prions de nous \
 en excuser. Vous pouvez vous désincrire en écrivant à \
 {0}?subject=Unsubscribe-{1}."""
+
+
 
 
 def format_mail(mail):
@@ -62,11 +73,10 @@ def format_link(settings, link):
     return url
 
 
-def get_sender(request):
+def get_sender(settings):
     """
     Return the mail sender's address
     """
-    settings = request.registry.settings
     if 'mail.default_sender' in settings:
         mail = settings['mail.default_sender']
     else:
@@ -94,16 +104,31 @@ def _handle_optout(settings, mail_body):
 
 def send_mail(request, recipients, body, subject, attachment=None):
     """
-    Send an email
+    Try to send an email with the given datas
+
+    :param obj request: a pyramid request object
+    :param list recipients: A list of recipients strings
+    :param str body: The body of the email
+    :param str subject: The subject of the email
+    :param obj attachment: A pyramid_mailer.message.Attachment object
+
     """
+    if not hasattr(recipients, '__iter__'):
+        recipients = [recipients]
+
+    if len(recipients) == 0:
+        return False
     log.info(u"Sending an email to '{0}'".format(recipients))
     settings = request.registry.settings
     headers, mail_body = _handle_optout(settings, body)
     try:
+        recipients = [format_mail(recipient) for recipient in recipients]
+        sender = get_sender(settings)
+        sender = format_mail(sender)
         mailer = get_mailer(request)
         message = Message(
             subject=subject,
-            sender=get_sender(settings),
+            sender=sender,
             recipients=recipients,
             body=mail_body,
             extra_headers=headers
@@ -111,9 +136,13 @@ def send_mail(request, recipients, body, subject, attachment=None):
         if attachment:
             message.attach(attachment)
         mailer.send_immediately(message)
-    except:
+    except Exception:
+        import traceback
+        traceback.print_exc()
         log.exception(u" - An error has occured while sending the \
 email(s)")
+        return False
+    return True
 
 
 def send_mail_from_event(event):
@@ -128,7 +157,7 @@ def send_mail_from_event(event):
             The following attributes:
                 request : access to the current request object
                 sendermail: the mail's sender
-                recipients : list of recipients (a string)
+                recipients : list of recipients
                 subject : the mail's subject
                 body : the body of the mail
                 settings : the app settings

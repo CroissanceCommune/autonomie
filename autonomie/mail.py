@@ -173,3 +173,47 @@ def send_mail_from_event(event):
                 event.subject,
                 event.get_attachment(),
             )
+
+
+def send_salary_sheet(request, company, filename, filepath, force=False):
+    """
+    Send a salarysheet to the given company's e-mail
+
+    :param obj request: A pyramid request object
+    :param obj company: A company instance
+    :param str filepath: The path to the filename
+    :param bool force: Whether to force sending this file again
+    :returns: True or False
+    :TypeError UndeliveredMail: When the company has no mail or if the file has
+        already been sent and no force option was passed
+    """
+    filebuf = file(filepath, 'r')
+    filedatas = filebuf.read()
+
+    if not force and check_if_mail_sent(filedatas, company):
+        log.warn(u"Undelivered email : mail already sent")
+        raise UndeliveredMail(u"Mail already sent")
+
+    filebuf.seek(0)
+
+    if company.email is None:
+        log.warn(u"Undelivered email : no mail found for company {0}".format(
+            company.name)
+        )
+        raise UndeliveredMail(u"no mail found for company {0}".format(
+            company.name)
+        )
+    else:
+        print('Sending the file %s' % filepath)
+        print("Sending it to %s" % company.email)
+        attachment = Attachment(filename, "application/pdf", filebuf)
+        send_mail(
+            request,
+            company.email,
+            u"""Bonjour,
+Vous trouverez ci-joint votre bulletin de salaire.""",
+        u"Votre bulletin de salaire",
+            attachment,
+        )
+        store_sent_mail(filepath, filedatas, company)
+        return True

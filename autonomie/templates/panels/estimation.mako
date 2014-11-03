@@ -55,7 +55,7 @@
     <div class='row'>
         <table class='lines span12'>
             <thead>
-                <th colspan='${colspan}' style='text-align:left'>Conditions de paiement</th>
+                <th colspan='${colspan}' class='title' style='text-align:left'>Conditions de paiement</th>
             </thead>
             <tbody>
                 <tr>
@@ -115,4 +115,33 @@
 % if config.has_key('coop_estimationfooter'):
     ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
 %endif
+<table>
+    <thead>
+        <th style="width:65%">
+        </th>
+        <th style="width:35%" class='title'>
+            Bon pour accord
+        </th>
+    </thead>
+    <tbody>
+        <tr>
+            <td></td>
+            <td class="content">
+                Le :
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td class="content">
+                <i>Signature</i>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div>
 </%block>

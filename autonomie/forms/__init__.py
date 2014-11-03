@@ -126,6 +126,7 @@ def textarea_node(**kw):
         wid = deform.widget.RichTextWidget(
             css_class=css_class,
             theme="advanced",
+            options={'content_css': "/fanstatic/fanstatic/css/richtext.css"},
         )
     else:
         wid = deform.widget.TextAreaWidget(css_class=css_class)

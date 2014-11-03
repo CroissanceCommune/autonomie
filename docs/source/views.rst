@@ -26,5 +26,3 @@ The BaseFormView object allows easy configuration of form views.
 It's based on pyramid_deform FormView and extends a little bit its
 functionnalities.
 
-.. autoclass:: autonomie.views.forms.utils.BaseFormView
-    :members:

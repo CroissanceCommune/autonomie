@@ -11,8 +11,14 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
-    rest.rst
-
+    documents
+    expense
+    ftp
+    hacking
+    js_templates
+    models
+    rest
+    apidoc/modules
 
 .. include:: components.rst
 

@@ -84,7 +84,6 @@ def fetch_resource(uri, rel):
     f_regex_group = FILEPATH_REGX.match(uri)
     pf_regex_group = PUBLIC_FILES_REGX.match(uri)
 
-
     if f_regex_group is not None:
         # C'est un modèle File que l'on doit renvoyer
         filename = f_regex_group.group('fileid')
@@ -98,8 +97,13 @@ def fetch_resource(uri, rel):
         key = pf_regex_group.group('filekey')
         from autonomie.models.config import ConfigFiles
         fileobj = ConfigFiles.get(key)
-        b64_str = base64.encodestring(fileobj.getvalue())
-        resource = DATAURI_TMPL.format(fileobj.mimetype, b64_str)
+        if fileobj is not None:
+            b64_str = base64.encodestring(fileobj.getvalue())
+            mimetype = fileobj.mimetype
+        else:
+            b64_str = ""
+            mimetype = "image/png"
+        resource = DATAURI_TMPL.format(mimetype, b64_str)
 
     else:
         # C'est un fichier statique

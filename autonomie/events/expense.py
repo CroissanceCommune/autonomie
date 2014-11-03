@@ -26,15 +26,15 @@
 """
 import logging
 
-from autonomie.events.utils import (
+from autonomie.mail import (
     format_mail,
     format_link,
-    send_mail,
-    )
+    send_mail_from_event,
+)
 from autonomie.views.render_api import (
     format_account,
     format_expense_status,
-    )
+)
 
 log = logging.getLogger(__name__)
 
@@ -151,4 +151,4 @@ def includeme(config):
     """
     Pyramid's incusion mechanism
     """
-    config.add_subscriber(send_mail, StatusChanged)
+    config.add_subscriber(send_mail_from_event, StatusChanged)

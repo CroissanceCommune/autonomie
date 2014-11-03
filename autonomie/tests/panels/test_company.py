@@ -29,44 +29,43 @@ from autonomie.panels.company import (
         _get_items_per_page,
         )
 
-class TestCompanyPanelModule(BaseViewTest):
-    def test__get_page_number(self):
-        request = self.get_csrf_request(post={'page_nb':"5"})
-        assert _get_page_number(request, 'page_nb') == 5
-        assert _get_page_number(request, 'nutts') == 0
+def test__get_page_number(get_csrf_request):
+    request = get_csrf_request(post={'page_nb':"5"})
+    assert _get_page_number(request, 'page_nb') == 5
+    assert _get_page_number(request, 'nutts') == 0
 
-    def test__make_get_list_url(self):
-        func = _make_get_list_url("mylist")
-        assert func(0) == "#mylist/0"
-        assert func(5) == "#mylist/5"
+def test__make_get_list_url():
+    func = _make_get_list_url("mylist")
+    assert func(0) == "#mylist/0"
+    assert func(5) == "#mylist/5"
 
-    def test__get_post_int(self):
-        request = self.get_csrf_request(post={'posted_int': '5'})
-        assert _get_post_int(request, 'posted_int', 2) == 5
-        assert _get_post_int(request, 'nutts', 2) == 2
+def test__get_post_int(get_csrf_request):
+    request = get_csrf_request(post={'posted_int': '5'})
+    assert _get_post_int(request, 'posted_int', 2) == 5
+    assert _get_post_int(request, 'nutts', 2) == 2
 
-    def test__get_items_per_page(self):
-        default = 5
+def test__get_items_per_page(get_csrf_request):
+    default = 5
 
-        request = self.get_csrf_request()
-        assert _get_items_per_page(request, 'item_pp') == default
-        request = self.get_csrf_request(cookies={'item_pp':'abc'})
-        assert _get_items_per_page(request, 'item_pp') == default
-        request = self.get_csrf_request(post={'item_pp': 'abc'})
-        assert _get_items_per_page(request, 'item_pp') == default
+    request = get_csrf_request()
+    assert _get_items_per_page(request, 'item_pp') == default
+    request = get_csrf_request(cookies={'item_pp':'abc'})
+    assert _get_items_per_page(request, 'item_pp') == default
+    request = get_csrf_request(post={'item_pp': 'abc'})
+    assert _get_items_per_page(request, 'item_pp') == default
 
-        request = self.get_csrf_request(post={'item_pp': 5})
-        assert _get_items_per_page(request, 'item_pp') == 5
+    request = get_csrf_request(post={'item_pp': 5})
+    assert _get_items_per_page(request, 'item_pp') == 5
 
-        request = self.get_csrf_request(
-                post={'item_pp': '5'},
-                cookies={'item_pp':'10'}
-                )
-        assert _get_items_per_page(request, 'item_pp') == 5
+    request = get_csrf_request(
+            post={'item_pp': '5'},
+            cookies={'item_pp':'10'}
+            )
+    assert _get_items_per_page(request, 'item_pp') == 5
 
-        request = self.get_csrf_request(cookies={'item_pp':'10'})
-        assert _get_items_per_page(request, 'item_pp') == 10
+    request = get_csrf_request(cookies={'item_pp':'10'})
+    assert _get_items_per_page(request, 'item_pp') == 10
 
-        request = self.get_csrf_request(post={'item_pp': 'abc'},
-                cookies={'item_pp':'10'})
-        assert _get_items_per_page(request, 'item_pp') == 10
+    request = get_csrf_request(post={'item_pp': 'abc'},
+            cookies={'item_pp':'10'})
+    assert _get_items_per_page(request, 'item_pp') == 10

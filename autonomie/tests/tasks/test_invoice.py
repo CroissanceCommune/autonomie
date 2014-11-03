@@ -23,8 +23,9 @@
 #
 
 import datetime
+import pytest
+from pyramid import testing
 from mock import MagicMock
-from autonomie.tests.base import BaseTestCase, printstatus
 from autonomie.models.task import (CancelInvoice, ManualInvoice,
                                     Invoice, InvoiceLine, DiscountLine)
 from autonomie.models.user import User
@@ -54,187 +55,183 @@ INVOICE = dict( name=u"Facture 2",
                 expenses=0,
                 expenses_ht=0)
 
-class TestCancelInvoice(BaseTestCase):
-    def test_set_name(self):
-        cinv = CancelInvoice()
-        cinv.set_sequenceNumber(5)
-        cinv.set_name()
-        self.assertEqual(cinv.name, u"Avoir 5")
 
-    def test_get_number(self):
-        cinv = CancelInvoice()
-        cinv.project = MagicMock(code="PRO1")
-        cinv.customer = MagicMock(code="CLI1")
-        cinv.taskDate = datetime.date(1969, 07, 31)
-        cinv.set_sequenceNumber(15)
-        cinv.set_number()
-        self.assertEqual(cinv.number, u"PRO1_CLI1_A15_0769")
+@pytest.fixture
+def invoice():
+    inv = Invoice(**INVOICE)
+    for line in LINES:
+        inv.lines.append(InvoiceLine(**line))
+    for discount in DISCOUNTS:
+        inv.discounts.append(DiscountLine(**discount))
+    return inv
 
-class TestManualInvoice(BaseTestCase):
-    def test_tva_amount(self):
-        m = ManualInvoice(montant_ht=1950)
-        self.assertEqual(m.tva_amount(), 0)
 
-class TestInvoice(BaseTestCase):
+def test_set_name():
+    cinv = CancelInvoice()
+    cinv.set_sequenceNumber(5)
+    cinv.set_name()
+    assert cinv.name == u"Avoir 5"
 
-    def getOne(self):
-        inv = Invoice(**INVOICE)
-        for line in LINES:
-            inv.lines.append(InvoiceLine(**line))
-        for discount in DISCOUNTS:
-            inv.discounts.append(DiscountLine(**discount))
-        return inv
+def test_get_number():
+    cinv = CancelInvoice()
+    cinv.project = MagicMock(code="PRO1")
+    cinv.customer = MagicMock(code="CLI1")
+    cinv.taskDate = datetime.date(1969, 07, 31)
+    cinv.set_sequenceNumber(15)
+    cinv.set_number()
+    assert cinv.number == u"PRO1_CLI1_A15_0769"
 
-    def test_set_name(self):
-        invoice = Invoice()
-        invoice.set_sequenceNumber(5)
-        invoice.set_name()
-        self.assertEqual(invoice.name, u"Facture 5")
-        invoice.name = ""
-        invoice.set_name(sold=True)
-        self.assertEqual(invoice.name, u"Facture de solde")
-        invoice.name = ""
-        invoice.set_name(deposit=True)
-        self.assertEqual(invoice.name, u"Facture d'acompte 5")
+def test_tva_amount():
+    m = ManualInvoice(montant_ht=1950)
+    assert m.tva_amount() == 0
 
-    def test_set_number(self):
-        invoice = Invoice()
-        invoice.customer = MagicMock(code="CLI1")
-        invoice.project = MagicMock(code="PRO1")
-        seq_number = 15
-        invoice.set_sequenceNumber(15)
-        invoice.set_name()
-        date = datetime.date(1969, 07, 31)
-        invoice.taskDate = date
-        invoice.set_number()
-        self.assertEqual(invoice.number, u"PRO1_CLI1_F15_0769")
-        invoice.set_number(deposit=True)
-        self.assertEqual(invoice.number, u"PRO1_CLI1_FA15_0769")
 
-    def test_gen_cancelinvoice(self):
-        user = User.query().first()
-        project = Project.query().first()
-        inv = self.getOne()
-        inv.project = project
-        inv.owner = user
-        inv.statusPersonAccount = user
+def test_set_name():
+    invoice = Invoice()
+    invoice.set_sequenceNumber(5)
+    invoice.set_name()
+    assert invoice.name == u"Facture 5"
+    invoice.name = ""
+    invoice.set_name(sold=True)
+    assert invoice.name == u"Facture de solde"
+    invoice.name = ""
+    invoice.set_name(deposit=True)
+    assert invoice.name == u"Facture d'acompte 5"
 
-        self.session.add(inv)
-        self.session.flush()
-        cinv = inv.gen_cancelinvoice(user)
-        self.session.add(cinv)
-        self.session.flush()
 
-        self.assertEqual(cinv.name, "Avoir 1")
-        self.assertEqual(cinv.total_ht(), -1 * inv.total_ht())
-        today = datetime.date.today()
-        self.assertEqual(cinv.taskDate, today)
+def test_set_number():
+    invoice = Invoice()
+    invoice.customer = MagicMock(code="CLI1")
+    invoice.project = MagicMock(code="PRO1")
+    seq_number = 15
+    invoice.set_sequenceNumber(15)
+    invoice.set_name()
+    date = datetime.date(1969, 07, 31)
+    invoice.taskDate = date
+    invoice.set_number()
+    assert invoice.number == u"PRO1_CLI1_F15_0769"
+    invoice.set_number(deposit=True)
+    assert invoice.number == u"PRO1_CLI1_FA15_0769"
 
-    def test_gen_cancelinvoice_payment(self):
-        user = User.query().first()
-        project = Project.query().first()
-        inv = self.getOne()
-        inv.project = project
-        inv.owner = user
-        inv.statusPersonAccount = user
-        inv.record_payment(mode="c", amount=1500)
-        cinv = inv.gen_cancelinvoice(user)
-        self.assertEqual(len(cinv.lines),
-                          len(inv.lines) + len(inv.discounts) + 1)
-        self.assertEqual(cinv.lines[-1].cost, 1500)
 
-    def test_duplicate_invoice(self):
-        user = self.session.query(User).first()
-        customer = self.session.query(Customer).first()
-        project = self.session.query(Project).first()
-        phase = self.session.query(Phase).first()
-        inv = self.getOne()
-        inv.owner = user
-        inv.statusPersonAccount = user
-        inv.project = project
-        inv.phase = phase
-        inv.customer = customer
+def test_gen_cancelinvoice(dbsession, invoice):
+    user = User.query().first()
+    project = Project.query().first()
+    invoice.project = project
+    invoice.owner = user
+    invoice.statusPersonAccount = user
+    dbsession.add(invoice)
+    dbsession.flush()
+    cinv = invoice.gen_cancelinvoice(user)
+    dbsession.add(cinv)
+    dbsession.flush()
 
-        newinv = inv.duplicate(user, project, phase, customer)
-        self.assertEqual(len(inv.lines), len(newinv.lines))
-        self.assertEqual(len(inv.discounts), len(newinv.discounts))
-        self.assertEqual(inv.project, newinv.project)
-        self.assertEqual(newinv.statusPersonAccount, user)
-        self.assertEqual(newinv.phase, phase)
-        for key in "customer", "address", "expenses", "expenses_ht":
-            self.assertEqual(getattr(newinv, key), getattr(inv, key))
+    assert cinv.name == "Avoir 1"
+    assert cinv.total_ht() == -1 * invoice.total_ht()
+    today = datetime.date.today()
+    assert cinv.taskDate == today
 
-    def test_duplicate_invoice_financial_year(self):
-        user = self.session.query(User).first()
-        customer = self.session.query(Customer).first()
-        project = self.session.query(Project).first()
-        phase = self.session.query(Phase).first()
-        inv = self.getOne()
-        inv.owner = user
-        inv.statusPersonAccount = user
-        inv.project = project
-        inv.phase = phase
-        inv.customer = customer
-        inv.financial_year = 1900
+def test_gen_cancelinvoice_payment(dbsession, invoice):
+    user = User.query().first()
+    project = Project.query().first()
+    invoice.project = project
+    invoice.owner = user
+    invoice.statusPersonAccount = user
+    invoice.record_payment(mode="c", amount=1500)
+    cinv = invoice.gen_cancelinvoice(user)
+    assert len(cinv.lines) ==  len(invoice.lines) + len(invoice.discounts) + 1
+    assert cinv.lines[-1].cost == 1500
 
-        newinv = inv.duplicate(user, project, phase, customer)
-        self.assertEqual(newinv.financial_year, datetime.date.today().year)
+def test_duplicate_invoice(dbsession, invoice):
+    user = dbsession.query(User).first()
+    customer = dbsession.query(Customer).first()
+    project = dbsession.query(Project).first()
+    phase = dbsession.query(Phase).first()
+    invoice.owner = user
+    invoice.statusPersonAccount = user
+    invoice.project = project
+    invoice.phase = phase
+    invoice.customer = customer
+    invoice.address = customer.address
 
-    def test_duplicate_invoice_integration(self):
-        user = self.session.query(User).first()
-        printstatus(user)
-        project = self.session.query(Project).first()
-        phase = self.session.query(Phase).first()
-        customer = self.session.query(Customer).first()
+    newinvoice = invoice.duplicate(user, project, phase, customer)
+    assert len(invoice.lines) == len(newinvoice.lines)
+    assert len(invoice.discounts) == len(newinvoice.discounts)
+    assert invoice.project == newinvoice.project
+    assert newinvoice.statusPersonAccount == user
+    assert newinvoice.phase == phase
+    for key in "customer", "address", "expenses", "expenses_ht":
+        assert getattr(newinvoice, key) == getattr(invoice, key)
 
-        inv = self.getOne()
-        inv.phase = phase
-        inv.customer = customer
-        inv.owner = user
-        inv.statusPersonAccount = user
-        inv.project = project
-        self.session.add(inv)
-        self.session.flush()
-        newest = inv.duplicate(user, project, phase, customer)
-        self.session.add(newest)
-        self.session.flush()
-        self.assertEqual(newest.phase_id, phase.id)
-        self.assertEqual(newest.owner_id, user.id)
-        self.assertEqual(newest.statusPerson, user.id)
-        self.assertEqual(newest.project_id, project.id)
+def test_duplicate_invoice_financial_year(dbsession, invoice):
+    user = dbsession.query(User).first()
+    customer = dbsession.query(Customer).first()
+    project = dbsession.query(Project).first()
+    phase = dbsession.query(Phase).first()
+    invoice.owner = user
+    invoice.statusPersonAccount = user
+    invoice.project = project
+    invoice.phase = phase
+    invoice.customer = customer
+    invoice.financial_year = 1900
 
-#
-#    def test_valid_invoice(self):
-#        inv = get_invoice(stripped=True)
-#        self.session.add(inv)
-#        self.session.flush()
-#        self.config.testing_securitypolicy(userid='test', permissive=True)
-#        request = testing.DummyRequest()
-#        inv.set_status('wait', request, 1)
-#        self.session.merge(inv)
-#        self.session.flush()
-#        inv.set_status('valid', request, 1)
-#        today = datetime.date.today()
-#        self.assertEqual(inv.taskDate, today)
-#        self.assertEqual(inv.officialNumber, 1)
-#
-#    def test_valid_payment(self):
-#        inv = get_invoice(stripped=True)
-#        self.session.add(inv)
-#        self.session.flush()
-#        self.config.testing_securitypolicy(userid='test', permissive=True)
-#        request = testing.DummyRequest()
-#        inv.set_status('wait', request, 1)
-#        self.session.merge(inv)
-#        self.session.flush()
-#        inv.set_status('valid', request, 1)
-#        self.session.merge(inv)
-#        self.session.flush()
-#        inv.set_status("paid", request, 1, amount=150, mode="CHEQUE")
-#        inv = self.session.merge(inv)
-#        self.session.flush()
-#        invoice = self.session.query(Invoice)\
-#                .filter(Invoice.id==inv.id).first()
-#        self.assertEqual(invoice.CAEStatus, 'paid')
-#        self.assertEqual(len(invoice.payments), 1)
-#        self.assertEqual(invoice.payments[0].amount, 150)
+    newinvoice = invoice.duplicate(user, project, phase, customer)
+    assert newinvoice.financial_year == datetime.date.today().year
+
+def test_duplicate_invoice_integration(dbsession, invoice):
+    user = dbsession.query(User).first()
+    project = dbsession.query(Project).first()
+    phase = dbsession.query(Phase).first()
+    customer = dbsession.query(Customer).first()
+
+    invoice.phase = phase
+    invoice.customer = customer
+    invoice.owner = user
+    invoice.statusPersonAccount = user
+    invoice.project = project
+    dbsession.add(invoice)
+    dbsession.flush()
+    newest = invoice.duplicate(user, project, phase, customer)
+    dbsession.add(newest)
+    dbsession.flush()
+    assert newest.phase_id == phase.id
+    assert newest.owner_id == user.id
+    assert newest.statusPerson == user.id
+    assert newest.project_id == project.id
+
+
+def test_valid_invoice(config, dbsession, invoice):
+    dbsession.add(invoice)
+    dbsession.flush()
+    config.testing_securitypolicy(userid='test', permissive=True)
+
+    request = testing.DummyRequest()
+    invoice.set_status('wait', request, 1)
+    dbsession.merge(invoice)
+    dbsession.flush()
+    invoice.set_status('valid', request, 1)
+    today = datetime.date.today()
+    assert invoice.taskDate == today
+    assert invoice.officialNumber == 1
+
+def test_valid_payment(config, dbsession, invoice):
+    dbsession.add(invoice)
+    dbsession.flush()
+    config.testing_securitypolicy(userid='test', permissive=True)
+
+    request = testing.DummyRequest()
+    invoice.set_status('wait', request, 1)
+    dbsession.merge(invoice)
+    dbsession.flush()
+    invoice.set_status('valid', request, 1)
+    dbsession.merge(invoice)
+    dbsession.flush()
+    invoice.set_status("paid", request, 1, amount=150, mode="CHEQUE")
+    invoice = dbsession.merge(invoice)
+    dbsession.flush()
+    invoice = dbsession.query(Invoice)\
+            .filter(Invoice.id==invoice.id).first()
+
+    assert invoice.CAEStatus == 'paid'
+    assert len(invoice.payments) == 1
+    assert invoice.payments[0].amount == 150

@@ -63,23 +63,22 @@ def get_context():
     return context
 
 
-class TestSubscriber(BaseViewTest):
-    def test_get_cid(self):
-        request = MagicMock()
-        request.user = get_user()
-        request.context = get_context()
-        self.assertEqual(get_cid(request), 1)
-        request.user.companies.append(get_company(2))
-        self.assertEqual(get_cid(request), 200)
-        # ref bug :#522
-        request.user = get_manager()
-        self.assertEqual(get_cid(request), 200)
-        request.user = get_admin()
-        self.assertEqual(get_cid(request), 200)
+def test_get_cid():
+    request = MagicMock()
+    request.user = get_user()
+    request.context = get_context()
+    assert get_cid(request) == 1
+    request.user.companies.append(get_company(2))
+    assert get_cid(request) == 200
+    # ref bug :#522
+    request.user = get_manager()
+    assert get_cid(request) == 200
+    request.user = get_admin()
+    assert get_cid(request) == 200
 
-    def test_get_companies(self):
-        request = MagicMock()
-        request.user = get_user()
-        request.context = get_context()
-        self.assertEqual(get_companies(request), request.user.companies)
+def test_get_companies():
+    request = MagicMock()
+    request.user = get_user()
+    request.context = get_context()
+    assert get_companies(request) == request.user.companies
 

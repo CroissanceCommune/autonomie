@@ -26,6 +26,8 @@ from paste.deploy.loadwsgi import appconfig
 from pyramid import testing
 from mock import Mock
 from pyramid_beaker import BeakerSessionFactoryConfig
+from sqlalchemy import engine_from_config
+
 from autonomie.utils.widgets import ActionMenu
 
 HERE = os.path.dirname(__file__)
@@ -136,7 +138,7 @@ def config(request, settings):
     """ returns a Pyramid `Configurator` object initialized
         with Kotti's default (test) settings.
     """
-    from pyramid import testing
+    os.environ['TZ'] = "Europe/Paris"
     config = testing.setUp(settings=settings)
     request.addfinalizer(testing.tearDown)
     return config
@@ -156,7 +158,6 @@ def connection(request, settings):
     # to `rollback` after using `transaction.commit`...
     initialize_test_database(settings)
 
-    from sqlalchemy import engine_from_config
     from autonomie.models.base import DBSESSION, DBBASE
     engine = engine_from_config(settings, prefix='sqlalchemy.')
     _connection = engine.connect()

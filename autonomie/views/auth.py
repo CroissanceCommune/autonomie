@@ -42,6 +42,8 @@ from deform import Form
 from deform import Button
 from deform import ValidationFailure
 
+from js.bootstrap import bootstrap
+
 from autonomie.forms.user import (
     get_auth_schema,
     get_json_auth_schema,
@@ -49,42 +51,6 @@ from autonomie.forms.user import (
 from autonomie.utils.rest import RestError
 
 log = logging.getLogger(__name__)
-
-
-# TODO: could be styled a bit! Why not invoke bootstrap.css?
-_FORBIDDEN_BODY_TMPL = string.Template('''\
-${explanation}${br}${br}
-${detail}
-${html_comment}${br}${br}
-<a href='/'>
-<div>
-Retour &agrave; l'accueil
-</div>
-</a>
-''')
-
-
-class AutonomieForbidden(HTTPForbidden):
-    """
-    Slightly more user friendly than HTTPForbidden
-
-    Use when in HTML mode, not XHR.
-    """
-    explanation = u"Accès refusé."
-
-    def __init__(
-        self,
-        body_template=_FORBIDDEN_BODY_TMPL,
-        *args,
-        **kwargs
-        ):
-
-        HTTPForbidden.__init__(
-            self,
-            body_template=body_template,
-            *args,
-            **kwargs
-            )
 
 
 def forbidden_view(request):
@@ -95,17 +61,17 @@ def forbidden_view(request):
     login = authenticated_userid(request)
     if login:
         log.warn(u"An access has been forbidden to '{0}'".format(login))
-        # TODO : add some details with the detail= keyword
-        redirect = AutonomieForbidden()
+        bootstrap.need()
+        return_datas = {"title": u"Accès refusé",}
     else:
         log.debug(u"An access has been forbidden to an unauthenticated user")
         #redirecting to the login page with the current path as param
         loc = request.route_url('login', _query=(('nextpage', request.path),))
         if request.is_xhr:
-            redirect = dict(redirect=loc)
+            return_datas = dict(redirect=loc)
         else:
-            redirect = HTTPFound(location=loc)
-    return redirect
+            return_datas = HTTPFound(location=loc)
+    return return_datas
 
 
 def get_longtimeout():
@@ -209,14 +175,19 @@ def includeme(config):
     """
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
-    config.add_view(forbidden_view,
-                    context=HTTPForbidden,
-                    permission=NO_PERMISSION_REQUIRED,
-                    xhr=True,
-                    renderer='json')
-    config.add_view(forbidden_view,
-                    context=HTTPForbidden,
-                    permission=NO_PERMISSION_REQUIRED)
+    config.add_view(
+        forbidden_view,
+        context=HTTPForbidden,
+        permission=NO_PERMISSION_REQUIRED,
+        xhr=True,
+        renderer='json',
+    )
+    config.add_view(
+        forbidden_view,
+        context=HTTPForbidden,
+        permission=NO_PERMISSION_REQUIRED,
+        renderer="forbidden.mako"
+    )
     config.add_view(logout_view,
                     route_name='logout',
                     permission=NO_PERMISSION_REQUIRED)

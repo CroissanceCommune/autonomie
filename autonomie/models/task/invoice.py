@@ -350,7 +350,7 @@ class Invoice(Task, InvoiceCompute):
         self.payments.append(payment)
         return self.check_resulted(force_resulted=resulted)
 
-    def check_resulted(self, force_resulted=False):
+    def check_resulted(self, force_resulted=False, user_id=None):
         """
         Check if the invoice is resulted or not and set the appropriate status
         """
@@ -361,6 +361,8 @@ class Invoice(Task, InvoiceCompute):
             self.CAEStatus = 'paid'
         else:
             self.CAEStatus = 'valid'
+        if user_id is not None:
+            self.statusPerson = user_id
         return self
 
     def duplicate(self, user, project, phase, customer):

@@ -31,7 +31,10 @@
 import logging
 
 from pyramid.httpexceptions import HTTPFound
-from autonomie.models.config import Config
+from autonomie.models.config import (
+    Config,
+    ConfigFiles,
+)
 from autonomie.models.tva import (
         Tva,
         Product)
@@ -184,7 +187,8 @@ class AdminMain(BaseFormView):
             Add the appstruct to the form
         """
         config_dict = self.request.config
-        appstruct = get_config_appstruct(config_dict)
+        logo = ConfigFiles.get('logo.png')
+        appstruct = get_config_appstruct(self.request, config_dict, logo)
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
         tinymce.need()
@@ -195,6 +199,12 @@ class AdminMain(BaseFormView):
         """
         # la table config étant un stockage clé valeur
         # le merge_session_with_post ne peut être utilisé
+        logo = appstruct['site'].pop('logo', None)
+        if logo:
+            ConfigFiles.set('logo.png', logo)
+            self.request.session.pop('substanced.tempstore')
+            self.request.session.changed()
+
         dbdatas = self.dbsession.query(Config).all()
         appstruct = get_config_dbdatas(appstruct)
         dbdatas = merge_config_datas(dbdatas, appstruct)
@@ -237,7 +247,9 @@ class AdminTva(BaseFormView):
         """
         ids = []
         for tva in appstruct['tvas']:
-            ids.extend([product['id'] for product in tva['products']])
+            ids.extend([
+                product['id'] for product in tva['products'] if 'id' in product
+            ])
         return ids
 
     @staticmethod
@@ -245,7 +257,7 @@ class AdminTva(BaseFormView):
         """
             Return ids of tva remaining in the submitted config
         """
-        return [tva['id'] for tva in appstruct['tvas']]
+        return [tva['id'] for tva in appstruct['tvas'] if 'id' in tva]
 
     def disable_elements(self, factory, ids):
         """
@@ -268,7 +280,7 @@ class AdminTva(BaseFormView):
 
         for data in appstruct['tvas']:
             products = data.pop('products')
-            if data['id'] != 0:
+            if 'id' in data:
                 tva = Tva.get(data['id'])
                 merge_session_with_post(tva, data)
                 tva = self.dbsession.merge(tva)
@@ -278,7 +290,7 @@ class AdminTva(BaseFormView):
                 self.dbsession.add(tva)
 
             for prod in products:
-                if prod['id'] != 0:
+                if 'id' in prod:
                     product = Product.get(prod['id'])
                     product.tva = tva
                     merge_session_with_post(product, prod)
@@ -394,7 +406,7 @@ ont été configurés"
         """
         ids = []
         for key in self.factories:
-            ids.extend([data['id'] for data in appstruct[key]])
+            ids.extend([data['id'] for data in appstruct[key] if 'id' in data])
         return ids
 
     def _get_actual_config_obj(self, config_key):
@@ -445,7 +457,7 @@ ont été configurés"
 
         for key, (factory, polytype) in self.factories.items():
             for data in appstruct[key]:
-                if data.get('id', 0) not in (0, None):
+                if data.get('id') is not None:
                     type_ = factory.get(data['id'])
                     merge_session_with_post(type_, data)
                     self.dbsession.merge(type_)
@@ -480,7 +492,9 @@ class AdminActivities(BaseFormView):
         query = query.filter(ActivityAction.parent_id==None)
         actions = query.filter(ActivityAction.active==True)
 
+
         appstruct = {
+            'main': {},
             'types': [type_.appstruct() for type_ in types],
             'modes': [mode.appstruct() for mode in modes],
             'actions': [
@@ -490,9 +504,18 @@ class AdminActivities(BaseFormView):
                 'children': [child.appstruct() for child in act.children],
                 }
                 for act in actions]
-            }
+        }
 
-        print appstruct
+        accompagnement_file = ConfigFiles.get('accompagnement_header.png')
+        if accompagnement_file is not None:
+            appstruct['main']['header'] = {
+                'uid': accompagnement_file.id,
+                'filename': accompagnement_file.name,
+                'preview_url': self.request.route_url(
+                    'public',
+                    name='accompagnement_header.png',
+                )
+            }
 
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
@@ -502,7 +525,7 @@ class AdminActivities(BaseFormView):
         Return a dict id:data for the elements that are edited (with an id)
         """
         return dict((data['id'], data) for data in appstruct.get(key, {}) \
-            if data.get('id', 0) !=0)
+            if 'id' in data)
 
     def get_submitted_modes(self, appstruct):
         """
@@ -560,7 +583,7 @@ class AdminActivities(BaseFormView):
         """
         Add or edit an element of the given factory
         """
-        if datas['id'] != 0:
+        if 'id' in datas:
             element = factory.get(datas['id'])
             merge_session_with_post(element, datas)
             element = self.dbsession.merge(element)
@@ -603,6 +626,9 @@ class AdminActivities(BaseFormView):
         """
             Handle successfull expense configuration
         """
+        header = appstruct['main'].pop('header', None)
+        if header is not None:
+            ConfigFiles.set('accompagnement_header.png', header)
         # We delete the elements that are no longer in the appstruct
         self.disable_types(appstruct)
         self.disable_actions(appstruct)
@@ -732,7 +758,7 @@ class AdminOption(BaseFormView):
         """
         return dict((data['id'], data) \
                     for data in appstruct.get('datas', {}) \
-                    if data.get('id') != 0
+                    if 'id' in data
                    )
 
     def _disable_or_remove_elements(self, appstruct):
@@ -755,7 +781,7 @@ class AdminOption(BaseFormView):
         """
         node_schema = self.schema.children[0].children[0]
         element = node_schema.objectify(datas)
-        if element.id != 0:
+        if element.id is not None:
             element = self.dbsession.merge(element)
         else:
             self.dbsession.add(element)

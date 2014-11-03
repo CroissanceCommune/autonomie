@@ -21,8 +21,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-from .base import BaseTestCase
+import pytest
 from autonomie.models.user import User
 TEST1 = dict(login="user1_login", firstname="user1_firstname",
                     lastname="user1_lastname", email="user1@test.fr",
@@ -34,31 +33,32 @@ TEST3 = dict(login="user3_login", firstname="user3_firstname",
                     lastname="user3_lastname", email="user3@test.fr",
         primary_group=3)
 
-class TestUserModel(BaseTestCase):
-    def test_account(self):
-        a = User(**TEST1)
-        a.set_password('pwd')
-        self.assertTrue(a.auth("pwd"))
-        strange = "#;\'\\\" $25; é ö ô è à ù"
-        a.set_password(strange)
-        self.assertFalse(a.auth("pwd"))
-        self.assertTrue(a.auth(strange))
 
-    def test_get_company(self):
-        user1 = User.get(3)
-        cid = 1
-        company = user1.get_company(cid)
-        self.assertEqual(company.name, u'Laveur de K-ro')
-        self.assertRaises(KeyError, user1.get_company, 3000)
+def test_account():
+    a = User(**TEST1)
+    a.set_password('pwd')
+    assert a.auth("pwd")
+    strange = "#;\'\\\" $25; é ö ô è à ù"
+    a.set_password(strange)
+    assert not a.auth("pwd")
+    assert a.auth(strange)
 
-    def test_role(self):
-        a = User(**TEST1)
-        self.assertTrue(a.is_admin())
-        self.assertFalse(a.is_manager())
-        a = User(**TEST2)
-        self.assertTrue(a.is_manager())
-        self.assertFalse(a.is_admin())
-        a = User(**TEST3)
-        self.assertTrue(a.is_contractor())
-        self.assertFalse(a.is_admin())
+def test_get_company(dbsession):
+    user1 = User.query().first()
+    cid = 1
+    company = user1.get_company(cid)
+    assert company.name == u'company1'
+    with pytest.raises(KeyError):
+        user1.get_company(3000)
+
+def test_role():
+    a = User(**TEST1)
+    assert a.is_admin()
+    assert not a.is_manager()
+    a = User(**TEST2)
+    assert a.is_manager()
+    assert not a.is_admin()
+    a = User(**TEST3)
+    assert a.is_contractor()
+    assert not a.is_admin()
 

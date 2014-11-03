@@ -23,6 +23,7 @@
 #
 
 import datetime
+import pytest
 
 from autonomie.tests.base import BaseTestCase
 from autonomie.models.task.states import record_payment
@@ -45,47 +46,45 @@ PAYMENTS = [
             {'amount':1895, 'mode':'CHEQUE'},
             ]
 
-class TestPayment(BaseTestCase):
+@pytest.fixture
+def invoice():
+    inv = Invoice(**INVOICE)
+    inv.lines = [InvoiceLine(**LINE)]
+    for i in PAYMENTS:
+        inv.payments.append(Payment(**i))
+    return inv
 
-    def get_task(self):
-        inv = Invoice(**INVOICE)
-        inv.lines = [InvoiceLine(**LINE)]
-        for i in PAYMENTS:
-            inv.payments.append(Payment(**i))
-        return inv
 
-    def test_record_payment(self):
-        task = self.get_task()
-        request_params = {'amount':1500, 'mode':'cheque'}
-        record_payment(task, **request_params)
-        self.assertEqual(len(task.payments), 3)
-        self.assertEqual(task.payments[2].amount, 1500)
-        self.session.add(task)
-        self.session.flush()
+def test_record_payment(invoice):
+    request_params = {'amount':1500, 'mode':'cheque'}
+    record_payment(invoice, **request_params)
+    assert len(invoice.payments) == 3
+    assert invoice.payments[2].amount == 1500
 
-    def test_payment_get_amount(self):
-        payment = Payment(**PAYMENTS[1])
-        self.assertEqual(payment.get_amount(), 1895)
 
-    def test_invoice_topay(self):
-        task = self.get_task()
-        self.assertEqual(task.paid(), 3395)
-        self.assertEqual(task.topay(), 11960 - 3395)
+def test_payment_get_amount():
+    payment = Payment(**PAYMENTS[1])
+    assert payment.get_amount() == 1895
 
-    def test_resulted_manual(self):
-        task = self.get_task()
-        task.CAEStatus = 'wait'
-        task.CAEStatus = 'valid'
-        task.CAEStatus = 'paid'
-        request_params = {'amount':0, 'mode':'cheque', 'resulted':True}
-        record_payment(task, **request_params)
-        self.assertEqual(task.CAEStatus, 'resulted')
 
-    def test_resulted_auto(self):
-        task = self.get_task()
-        task.CAEStatus = 'wait'
-        task.CAEStatus = 'valid'
-        task.CAEStatus = 'paid'
-        request_params = {'amount':int(task.topay()), 'mode':'cheque'}
-        record_payment(task, **request_params)
-        self.assertEqual(task.CAEStatus, 'resulted')
+def test_invoice_topay(invoice):
+    assert invoice.paid() == 3395
+    assert invoice.topay() == 11960 - 3395
+
+
+def test_resulted_manual(invoice):
+    invoice.CAEStatus = 'wait'
+    invoice.CAEStatus = 'valid'
+    invoice.CAEStatus = 'paid'
+    request_params = {'amount':0, 'mode':'cheque', 'resulted':True}
+    record_payment(invoice, **request_params)
+    assert invoice.CAEStatus == 'resulted'
+
+
+def test_resulted_auto(invoice):
+    invoice.CAEStatus = 'wait'
+    invoice.CAEStatus = 'valid'
+    invoice.CAEStatus = 'paid'
+    request_params = {'amount':int(invoice.topay()), 'mode':'cheque'}
+    record_payment(invoice, **request_params)
+    assert invoice.CAEStatus == 'resulted'

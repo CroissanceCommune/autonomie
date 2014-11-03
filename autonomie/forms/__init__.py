@@ -245,7 +245,7 @@ def id_node():
     return colander.SchemaNode(
         colander.Integer(),
         widget=deform.widget.HiddenWidget(),
-        missing=0,
+        missing=colander.drop,
         )
 
 

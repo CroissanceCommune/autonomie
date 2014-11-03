@@ -23,6 +23,7 @@
 #
 
 import datetime
+import pytest
 from autonomie.tests.base import BaseTestCase
 
 from autonomie.models.project import Phase, Project
@@ -38,35 +39,36 @@ INVOICE = dict( name=u"Facture 2",
                 expenses=0,
                 expenses_ht=0)
 
-class TestPolymorphic(BaseTestCase):
-    def setitUp(self):
-        self.user = User(login=u"test_user1", firstname=u"firstname",
-                                              lastname=u"lastname")
-        self.project = Project(name=u"Projet", code=u"PROJ")
-        self.phase = Phase(name="test", project=self.project)
+@pytest.fixture
+def objects():
+    user = User(login=u"test_user1", firstname=u"firstname",
+                                       lastname=u"lastname")
+    project = Project(name=u"Projet", code=u"PROJ")
+    phase = Phase(name="test", project=project)
+    return (user, phase, project)
 
-    def test_invoice(self):
-        self.setitUp()
-        inv = Invoice(**INVOICE)
-        inv.project = self.project
-        inv.phase = self.phase
-        self.session.add(inv)
-        self.session.flush()
-        task = self.session.query(Task)\
-                .filter(Task.phase_id==self.phase.id).first()
-        self.assertTrue(isinstance(task, Invoice))
+def test_invoice(dbsession, objects):
+    user, phase, project = objects
+    inv = Invoice(**INVOICE)
+    inv.project = project
+    inv.phase = phase
+    dbsession.add(inv)
+    dbsession.flush()
+    task = dbsession.query(Task)\
+            .filter(Task.phase_id==phase.id).first()
+    assert isinstance(task, Invoice)
 
-    def test_payment(self):
-        self.setitUp()
-        inv = Invoice(**INVOICE)
-        inv.CAEStatus = "valid"
-        #inv.project = self.project
-        inv.phase = self.phase
-        inv.record_payment(amount=1500, mode="CHEQUE", resulted=True)
-        self.session.add(inv)
-        self.session.flush()
-        p1 = self.session.query(Payment).join(Task)\
-                .filter(Task.phase_id==self.phase.id).first()
-        self.assertTrue(isinstance(p1.task, Invoice))
-        self.assertFalse(isinstance(p1.task, CancelInvoice))
+def test_payment(dbsession, objects):
+    user, phase, project = objects
+    inv = Invoice(**INVOICE)
+    inv.CAEStatus = "valid"
+    #inv.project = project
+    inv.phase = phase
+    inv.record_payment(amount=1500, mode="CHEQUE", resulted=True)
+    dbsession.add(inv)
+    dbsession.flush()
+    p1 = dbsession.query(Payment).join(Task)\
+            .filter(Task.phase_id==phase.id).first()
+    assert isinstance(p1.task, Invoice)
+    assert not isinstance(p1.task, CancelInvoice)
 

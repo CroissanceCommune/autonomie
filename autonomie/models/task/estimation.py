@@ -121,6 +121,7 @@ class Estimation(Task, EstimationCompute):
         backref=backref(
             'estimations',
             order_by='Estimation.taskDate',
+            cascade="all,delete-orphan",
             info={'colanderalchemy': forms.EXCLUDED, },
         )
     )

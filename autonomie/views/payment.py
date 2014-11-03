@@ -64,7 +64,10 @@ class PaymentEdit(BaseFormView):
         # Check the invoice status
         force_resulted = appstruct.pop('resulted', False)
         invoice = payment_obj.task
-        invoice = invoice.check_resulted(force_resulted=force_resulted)
+        invoice = invoice.check_resulted(
+            force_resulted=force_resulted,
+            user_id=self.request.user.id
+        )
         self.dbsession.merge(invoice)
 
         come_from = appstruct.pop('come_from', None)
@@ -115,7 +118,7 @@ def payment_delete(context, request):
 
     request.dbsession.delete(context)
 
-    invoice = invoice.check_resulted()
+    invoice = invoice.check_resulted(user_id=request.user.id)
     request.dbsession.merge(invoice)
 
     redirect = request.route_path("invoice", id=invoice.id)

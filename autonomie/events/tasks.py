@@ -29,11 +29,10 @@ import logging
 
 from autonomie.views import render_api
 
-from autonomie.events.utils import (
-    send_mail,
-    format_mail,
+from autonomie.mail import (
+    send_mail_from_event,
     format_link,
-    )
+)
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +82,7 @@ class StatusChanged(object):
             return the recipients' emails
         """
         if self.document.owner.email:
-            email = [format_mail(self.document.owner.email)]
+            email = [self.document.owner.email]
         else:
             email = []
         return email
@@ -99,7 +98,7 @@ class StatusChanged(object):
             log.info(u"'{0}' has not set his email".format(
                                                     self.request.user.login))
             mail = "Unknown"
-        return format_mail(mail)
+        return mail
 
     @property
     def subject(self):
@@ -194,4 +193,4 @@ def includeme(config):
     """
     Pyramid's incusion mechanism
     """
-    config.add_subscriber(send_mail, StatusChanged)
+    config.add_subscriber(send_mail_from_event, StatusChanged)

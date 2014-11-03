@@ -26,7 +26,7 @@
     avatar related utilities
 """
 import logging
-from pyramid.security import authenticated_userid
+from pyramid.security import unauthenticated_userid
 
 from autonomie.models.user import User
 
@@ -37,8 +37,10 @@ def get_groups(login, request):
     """
         return the current user's groups
     """
-    user = get_user(login, request)
-    if user.is_admin():
+    user = request.user
+    if user is None:
+        return []
+    elif user.is_admin():
         return ['group:admin']
     elif user.is_manager():
         return ['group:manager']
@@ -46,24 +48,13 @@ def get_groups(login, request):
         return ['group:entrepreneur']
 
 
-def get_avatar(request, dbsession=None):
+def get_avatar(request):
     """
         Returns the current User object
     """
     log.info("Get avatar")
-    login = authenticated_userid(request)
-    get_user(login, request, dbsession)
-    log.info("  + Returning the user")
-    log.info(request._user)
-    return request._user
-
-
-def get_user(login, request, dbsession=None):
-    """
-        return a user object
-    """
-    if not dbsession:
-        dbsession = request.dbsession
-    if not hasattr(request, '_user'):
-        request._user = dbsession.query(User).filter_by(login=login).first()
-    return request._user
+    login = unauthenticated_userid(request)
+    if login is not None:
+        log.info("  + Returning the user")
+        user = request.dbsession.query(User).filter_by(login=login).first()
+        return user

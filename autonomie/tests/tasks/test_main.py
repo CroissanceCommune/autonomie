@@ -31,8 +31,10 @@
 """
 
 import datetime
+import unittest
+import pytest
 from zope.interface.verify import verifyObject
-from autonomie.tests.base import BaseViewTest
+from pyramid import testing
 
 from autonomie.models.task import Task
 from autonomie.models.task import Estimation
@@ -126,7 +128,7 @@ def get_task(factory):
     task.owner = user
     return task
 
-class TestTaskModels(BaseViewTest):
+class TestTaskModels(unittest.TestCase):
     def test_interfaces(self):
         self.assertTrue(verifyObject(ITask, Task()))
         self.assertTrue(verifyObject(IValidatedTask, Estimation()))
@@ -188,57 +190,59 @@ class TestTaskModels(BaseViewTest):
         self.assertTrue(task.is_valid())
         self.assertFalse(task.is_editable())
 
-    def _forbidden_state_change(self, task, from_state, to_states):
-        request = self.get_csrf_request()
-        self.config.testing_securitypolicy(userid='test', permissive=True)
+    def _forbidden_state_change(self, config, task, from_state, to_states):
+        request = testing.DummyRequest()
 
         for st in to_states:
             task.CAEStatus = from_state
-            self.assertRaises(Forbidden, task.set_status, st, request, 'test')
+            with pytest.raises(Forbidden):
+                task.set_status(st, request, 'test')
 
-    def _allowed_state_change(self, task, from_state, to_states):
-        request = self.get_csrf_request()
-        self.config.testing_securitypolicy(userid='test', permissive=True)
+    def _allowed_state_change(self, config, task, from_state, to_states):
+        request = testing.DummyRequest()
         for st in to_states:
             task.CAEStatus = from_state
             task.set_status(st, request, 'test')
-            self.assertEqual(task.CAEStatus, st)
+            assert task.CAEStatus == st
 
-
-    def test_status_change(self):
+    def test_status_change(self, config):
+        config.testing_securitypolicy(userid='test', permissive=True)
         # Estimation
         task = get_task(factory=Estimation)
-
-        request = self.get_csrf_request()
-        self.config.testing_securitypolicy(userid='test', permissive=True)
-
         status = 'draft'
         self._forbidden_state_change(
+            config,
             task, status,
             ("geninv", "aboest", "invalid"))
         self._allowed_state_change(
+            config,
             task, status,
             ('wait',))
 
         status = 'wait'
         self._forbidden_state_change(
+            config,
             task, status,
             ("draft", "geninv", ))
         self._allowed_state_change(
+            config,
             task, status,
             ('invalid', 'valid',))
 
         status = 'valid'
         self._forbidden_state_change(
+            config,
             task, status,
             ("draft", "invalid", )
             )
         self._allowed_state_change(
+            config,
             task, status,
             ("aboest", ))
 
         status = 'geninv'
         self._forbidden_state_change(
+            config,
             task, status,
             ("draft", "invalid", "valid", "aboest")
             )
@@ -247,28 +251,34 @@ class TestTaskModels(BaseViewTest):
         task = get_task(factory=Invoice)
         status = 'draft'
         self._forbidden_state_change(
+            config,
             task, status,
             ("aboinv", "invalid"))
         self._allowed_state_change(
+            config,
             task, status,
             ('wait',))
 
         status = 'wait'
         self._forbidden_state_change(
+            config,
             task, status,
             ("draft", ))
         self._allowed_state_change(
+            config,
             task, status,
             ('invalid', 'valid',))
 
         status = 'valid'
         self._forbidden_state_change(
+            config,
             task, status,
             ("draft", "invalid", )
             )
 
         status = "paid"
         self._forbidden_state_change(
+            config,
             task, status,
             ("draft", "invalid", "valid", "aboinv", )
             )
@@ -276,10 +286,12 @@ class TestTaskModels(BaseViewTest):
         task = get_task(factory=CancelInvoice)
         status = "draft"
         self._allowed_state_change(
+            config,
                 task, status, ('delete',))
 
         status = "valid"
         self._forbidden_state_change(
+            config,
             task, status,
             ("draft", ))
 

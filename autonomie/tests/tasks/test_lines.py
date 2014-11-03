@@ -21,10 +21,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+import unittest
 import datetime
 
-from autonomie.tests.base import BaseTestCase
 from autonomie.models.task import (InvoiceLine, CancelInvoiceLine,
                                         EstimationLine, PaymentLine)
 
@@ -37,7 +36,7 @@ PAYMENT_LINE = {'description':u"Début",
                 "amount":1000,
                 "rowIndex":1}
 
-class TestEstimationLine(BaseTestCase):
+class TestEstimationLine(unittest.TestCase):
     def test_duplicate_line(self):
         line = EstimationLine(**LINE)
         dline = line.duplicate()
@@ -55,7 +54,7 @@ class TestEstimationLine(BaseTestCase):
         self.assertEqual(i.total_ht(), 1.5625)
         self.assertEqual(i.total(), 1.86875)
 
-class TestInvoiceLine(BaseTestCase):
+class TestInvoiceLine(unittest.TestCase):
     def test_duplicate_line(self):
         line = InvoiceLine(**LINE)
         dline = line.duplicate()
@@ -75,7 +74,7 @@ class TestInvoiceLine(BaseTestCase):
         self.assertEqual(i.total_ht(), 1.5625)
         self.assertEqual(i.total(), 1.86875)
 
-class TestCancelInvoiceLine(BaseTestCase):
+class TestCancelInvoiceLine(unittest.TestCase):
     def test_duplicate_line(self):
         line = CancelInvoiceLine(**LINE)
         dline = line.duplicate()
@@ -87,7 +86,7 @@ class TestCancelInvoiceLine(BaseTestCase):
         self.assertEqual(i.total_ht(), 1.5625)
         self.assertEqual(i.total(), 1.86875)
 
-class TestPaymentLine(BaseTestCase):
+class TestPaymentLine(unittest.TestCase):
     def test_duplicate(self):
         line = PaymentLine(**PAYMENT_LINE)
         dline = line.duplicate()

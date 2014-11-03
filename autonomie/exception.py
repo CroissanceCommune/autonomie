@@ -39,3 +39,10 @@ class SignatureError(Forbidden):
         Exception for status modification calls with the wrong signature
     """
     message = u"Des informations manquent pour effectuer cette action"
+
+
+class UndeliveredMail(Exception):
+    """
+    A custom class for undelivered emails
+    """
+    pass

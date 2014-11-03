@@ -15,6 +15,7 @@ import sys, os
 
 #print "current working dir:", os.getcwd()
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../extensions'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 #import sphinxcontrib.httpdomain
 
 # If extensions (or modules to document with autodoc) are in another directory,

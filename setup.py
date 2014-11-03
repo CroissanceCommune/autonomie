@@ -3,9 +3,12 @@ from setuptools import setup
 
 entry_points = {
     "paste.app_factory": ["main=autonomie:main",],
-    "console_scripts": ["autonomie-migrate = autonomie.scripts:migrate",
-                        "autonomie-admin = autonomie.scripts:add_admin_cmd",
-                        "autonomie-fake = autonomie.scripts:populate_fake"],
+    "console_scripts": [
+        "autonomie-migrate = autonomie.scripts:migrate",
+        "autonomie-admin = autonomie.scripts:add_admin_cmd",
+        "autonomie-mail = autonomie.scripts.mail_files:mail_cmd",
+        "autonomie-fake = autonomie.scripts:populate_fake",
+    ],
     "fanstatic.libraries": ["autonomie = autonomie.resources:lib_autonomie"]
 }
 

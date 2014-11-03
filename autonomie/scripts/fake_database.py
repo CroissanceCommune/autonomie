@@ -272,7 +272,7 @@ def populate_fake():
     Options:
         -h --help     Show this screen.
     """
-    def callback(arguments):
+    def callback(arguments, env):
         if arguments['populate']:
             func = fake_database_fill
         elif arguments['populate_conf']:

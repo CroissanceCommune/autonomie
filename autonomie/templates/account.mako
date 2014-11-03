@@ -53,8 +53,8 @@
                 <a href="${request.route_path('company', id=company.id , _query=dict(edit=True))}">
                     <strong>${company.name}</strong>
                     <br />
-                    %if company.get_logo_filepath():
-                        <img src="/assets/${company.get_logo_filepath()}" alt=""  width="250px" />
+                    %if company.logo_id:
+                        <img src="${api.img_url(company.logo_file)}" alt=""  width="250px" />
                     %endif
                 </a>
                 <p>

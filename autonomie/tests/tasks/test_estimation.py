@@ -22,12 +22,15 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import unittest
+import pytest
 import datetime
 from mock import MagicMock
-from autonomie.tests.base import BaseTestCase
-from autonomie.models.task import (Estimation, DiscountLine, PaymentLine,
-                    EstimationLine, Invoice)
+from autonomie.models.task import (
+    Estimation,
+    DiscountLine,
+    PaymentLine,
+    EstimationLine,
+)
 
 from autonomie.models.customer import Customer
 from autonomie.models.project import Project, Phase
@@ -104,117 +107,121 @@ PAYMENTSSUM = sum([p['amount'] for p in PAYMENT_LINES[:-1]])
 
 EST_SOLD = EST_TOTAL - EST_DEPOSIT - PAYMENTSSUM
 
-class TestEstimation(BaseTestCase):
-    def getOne(self):
-        est = Estimation(**ESTIMATION)
-        for line in LINES:
-            est.lines.append(EstimationLine(**line))
-        for line in DISCOUNTS:
-            est.discounts.append(DiscountLine(**line))
-        for line in PAYMENT_LINES:
-            est.payment_lines.append(PaymentLine(**line))
-        return est
 
-    def test_set_number(self):
-        est = Estimation()
-        est.project = MagicMock(code="PRO1")
-        est.customer = MagicMock(code="CLI1")
-        est.taskDate = datetime.date(1969, 07, 31)
-        est.set_sequenceNumber(15)
-        est.set_number()
-        self.assertEqual(est.number, u"PRO1_CLI1_D15_0769")
+@pytest.fixture
+def estimation():
+    est = Estimation(**ESTIMATION)
+    for line in LINES:
+        est.lines.append(EstimationLine(**line))
+    for line in DISCOUNTS:
+        est.discounts.append(DiscountLine(**line))
+    for line in PAYMENT_LINES:
+        est.payment_lines.append(PaymentLine(**line))
+    return est
 
-    def test_set_name(self):
-        est = Estimation()
-        est.set_sequenceNumber(5)
-        est.set_name()
-        self.assertEqual(est.name, u"Devis 5")
+def test_set_number():
+    est = Estimation()
+    est.project = MagicMock(code="PRO1")
+    est.customer = MagicMock(code="CLI1")
+    est.taskDate = datetime.date(1969, 07, 31)
+    est.set_sequenceNumber(15)
+    est.set_number()
+    assert est.number == u"PRO1_CLI1_D15_0769"
 
-    def test_duplicate_estimation(self):
-        user = self.session.query(User).first()
-        customer = self.session.query(Customer).first()
-        project = self.session.query(Project).first()
-        phase = self.session.query(Phase).first()
-        est = self.getOne()
-        est.phase = phase
-        est.project = project
-        est.owner = user
-        est.customer = customer
-        est.statusPersonAccount = user
-        newest = est.duplicate(user, project, phase, customer)
-        for key in "customer", "address", "expenses", "expenses_ht":
-            self.assertEqual(getattr(newest, key), getattr(est, key))
-        self.assertEqual(newest.CAEStatus, 'draft')
-        self.assertEqual(newest.project, project)
-        self.assertEqual(newest.statusPersonAccount, user)
-        self.assertTrue(newest.number.startswith("VRND_IMDD_D2_"))
-        self.assertTrue(newest.phase, phase)
-        self.assertEqual(len(est.lines), len(newest.lines))
-        self.assertEqual(len(est.payment_lines), len(newest.payment_lines))
-        self.assertEqual(len(est.discounts), len(newest.discounts))
+def test_set_name():
+    est = Estimation()
+    est.set_sequenceNumber(5)
+    est.set_name()
+    assert est.name == u"Devis 5"
 
-    def test_duplicate_estimation_integration(self):
-        """
-            Here we test the duplication on a real world case
-            specifically, the customer is not loaded in the session
-            causing the insert statement to be fired during duplication
-        """
-        user = self.session.query(User).first()
-        customer = self.session.query(Customer).first()
-        project = self.session.query(Project).first()
-        phase = self.session.query(Phase).first()
-        est = self.getOne()
-        est.phase = phase
-        est.project = project
-        est.owner = user
-        est.customer = customer
-        est.statusPersonAccount = user
+def test_duplicate_estimation(dbsession, estimation):
+    user = dbsession.query(User).first()
+    customer = dbsession.query(Customer).first()
+    project = dbsession.query(Project).first()
+    phase = dbsession.query(Phase).first()
+    estimation.phase = phase
+    estimation.project = project
+    estimation.owner = user
+    estimation.customer = customer
+    estimation.statusPersonAccount = user
+    newestimation = estimation.duplicate(user, project, phase, customer)
+    for key in "customer", "address", "expenses", "expenses_ht":
+        assert getattr(newestimation, key) == getattr(estimation, key)
+    assert newestimation.CAEStatus == 'draft'
+    assert newestimation.project == project
+    assert newestimation.statusPersonAccount == user
+    assert newestimation.number.startswith("P001_C001_D2_")
+    assert newestimation.phase
+    assert phase
+    assert len(estimation.lines) == len(newestimation.lines)
+    assert len(estimation.payment_lines) == len(newestimation.payment_lines)
+    assert len(estimation.discounts) == len(newestimation.discounts)
 
-        self.assertEqual(est.statusPersonAccount, user)
-        self.assertEqual(est.project, project)
-        est = self.session.merge(est)
-        self.session.flush()
+##### WORK IN PROGRESS
 
-        newest = est.duplicate(user, project, phase, customer)
-        self.session.merge(newest)
-        self.session.flush()
-        self.assertEqual(newest.phase, phase)
+def test_duplicate_estimation_integration(dbsession, estimation):
+    """
+        Here we test the duplication on a real world case
+        specifically, the customer is not loaded in the session
+        causing the insert statement to be fired during duplication
+    """
+    user = dbsession.query(User).first()
+    customer = dbsession.query(Customer).first()
+    project = dbsession.query(Project).first()
+    phase = dbsession.query(Phase).first()
+    estimation.phase = phase
+    estimation.project = project
+    estimation.owner = user
+    estimation.customer = customer
+    estimation.statusPersonAccount = user
 
-    def assertPresqueEqual(self, val1, val2):
-        self.assertTrue(val1-val2 <= 1)
+    assert estimation.statusPersonAccount == user
+    assert estimation.project == project
+    estimation = dbsession.merge(estimation)
+    dbsession.flush()
 
-    @unittest.skip(u"Le calcul de TVA inversé conduit irrémediablement à ce pb")
-    def test_gen_invoice(self):
-        user = self.session.query(User).first()
-        customer = self.session.query(Customer).first()
-        project = self.session.query(Project).first()
-        phase = self.session.query(Phase).first()
-        est = self.getOne()
-        est.phase = phase
-        est.project = project
-        est.owner = user
-        est.customer = customer
-        est.statusPersonAccount = user
-        invoices = est.gen_invoices(user)
-        for inv in invoices:
-            self.session.add(inv)
-            self.session.flush()
-        invoices = Invoice.query().filter(Invoice.estimation_id==est.id).all()
-        #deposit :
-        deposit = invoices[0]
-        self.assertEqual(deposit.taskDate, datetime.date.today())
-        self.assertEqual(deposit.financial_year, datetime.date.today().year)
-        self.assertEqual(deposit.total(), est.deposit_amount_ttc())
-        #intermediate invoices:
-        intermediate_invoices = invoices[1:-1]
-        for index, line in enumerate(PAYMENT_LINES[:-1]):
-            inv = intermediate_invoices[index]
-            # Here, the rounding strategy should be reviewed
-            self.assertPresqueEqual(inv.total(), line['amount'])
-            self.assertEqual(inv.taskDate, line['paymentDate'])
-            self.assertEqual(inv.financial_year, line['paymentDate'].year)
-        for inv in invoices:
-            print inv.total()
-        total = sum([inv.total() for inv in invoices])
-        self.assertEqual(total, est.total())
+    newestimation = estimation.duplicate(user, project, phase, customer)
+    dbsession.merge(newestimation)
+    dbsession.flush()
+    assert newestimation.phase == phase
 
+def assertPresqueEqual(val1, val2):
+    """
+    A custom assert
+    """
+    assert val1-val2 <= 1
+
+@pytest.mark.xfail(reason=u"Le calcul de TVA inversé conduit irrémediablement à ce pb")
+def test_gen_invoice(dbsession, estimation):
+    user = dbsession.query(User).first()
+    customer = dbsession.query(Customer).first()
+    project = dbsession.query(Project).first()
+    phase = dbsession.query(Phase).first()
+    estimation.phase = phase
+    estimation.project = project
+    estimation.owner = user
+    estimation.customer = customer
+    estimation.statusPersonAccount = user
+    invoices = estimation.gen_invoices(user)
+    for inv in invoices:
+        dbsession.add(inv)
+        dbsession.flush()
+    invoices = Invoice.query().filter(
+        Invoice.estimationimation_id==estimation.id
+    ).all()
+    #deposit :
+    deposit = invoices[0]
+    assert deposit.taskDate == datetime.date.today()
+    assert deposit.financial_year == datetime.date.today().year
+    assert deposit.total() == estimation.deposit_amount_ttc()
+    #intermediate invoices:
+    intermediate_invoices = invoices[1:-1]
+    for index, line in enumerate(PAYMENT_LINES[:-1]):
+        inv = intermediate_invoices[index]
+        # Here, the rounding strategy should be reviewed
+        assert inv.total() - line['amount'] <= 1
+        assert inv.taskDate == line['paymentDate']
+        assert inv.financial_year == line['paymentDate'].year
+
+    total = sum([inv.total() for inv in invoices])
+    assert total == estimation.total()

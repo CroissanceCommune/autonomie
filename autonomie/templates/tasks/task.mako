@@ -43,21 +43,32 @@
             % endif
             @page {
                 size: a4 portrait;
-                margin:1cm;
-                margin-bottom:3.5cm;
                 % if not task.has_been_validated() and not task.is_cancelled():
                     background-image: url("${request.static_url('autonomie:static/{0}'.format(watermark), _app_url='')}");
                 % endif
-                @frame footer {
+                border: 1pt solid green;
+                @frame content_frame {
+                    margin: 1cm;
+                    % if hasattr(task, "course") and task.course == 1 and request.config.has_key('coop_pdffootercourse'):
+                        margin-bottom: 3.8cm;
+                    %else:
+                        margin-bottom: 2.8cm;
+                    % endif
+                    ##                    border: 1pt solid blue;
+                    border: 0pt solid white;
+                }
+                @frame footer_frame {
                     -pdf-frame-content: footer;
                     bottom: 0cm;
                     margin-left: 1cm;
                     margin-right: 1cm;
                     % if hasattr(task, "course") and task.course == 1 and request.config.has_key('coop_pdffootercourse'):
-                        height:4cm;
-                    % else:
                         height:3cm;
+                    % else:
+                        height:2cm;
                     % endif
+                    ## border: 1pt solid red;
+                    border: 0pt solid white;
                 }
             }
         </style>

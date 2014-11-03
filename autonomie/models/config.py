@@ -28,11 +28,70 @@
     Documents footers, headers ...
 """
 
-from sqlalchemy import Column
-from sqlalchemy import Text
-from sqlalchemy import String
-from autonomie.models.base import DBBASE
+from sqlalchemy import (
+    Column,
+    Text,
+    Integer,
+    String,
+)
+from sqlalchemy.dialects.mysql.base import LONGBLOB
+from sqlalchemy.orm import (
+    deferred,
+)
+
+from autonomie.models.base import DBBASE, DBSESSION
 from autonomie.models.base import default_table_args
+
+
+class ConfigFiles(DBBASE):
+    """
+        A file model
+    """
+    __tablename__ = 'config_files'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    key = Column(String(100), unique=True)
+    name = Column(String(100))
+    data = deferred(Column(LONGBLOB()))
+    mimetype = Column(String(100))
+    size = Column(Integer)
+
+    def getvalue(self):
+        """
+        Method making our file object compatible with the common file rendering
+        utility
+        """
+        return self.data
+
+    @property
+    def label(self):
+        """
+        Simple shortcut for getting a label for this file
+        """
+        return self.name
+
+    @classmethod
+    def get(cls, key):
+        """
+        Override the default get method to get by key and not by id
+        """
+        return cls.query().filter(cls.key==key).first()
+
+    @classmethod
+    def set(cls, key, appstruct):
+        """
+        Set a file for the given key, if the key isn't field yet, add a new
+        instance
+        """
+        instance = cls.get(key)
+        if instance is None:
+            instance = cls(key=key)
+        for attr_name, attr_value in appstruct.items():
+            setattr(instance, attr_name, attr_value)
+        if instance.id is not None:
+            DBSESSION().merge(instance)
+        else:
+            DBSESSION().add(instance)
 
 
 class Config(DBBASE):

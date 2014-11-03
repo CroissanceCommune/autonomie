@@ -343,3 +343,22 @@ class Api(object):
         get_args.update(args_dict)
         path = self.request.current_route_path(_query=get_args)
         return path
+
+    def file_url(self, fileobj):
+        """
+        Return the url to access the given fileobj
+        """
+        if fileobj is not None and fileobj.id is not None:
+            return self.request.route_path('file', id=fileobj.id)
+        else:
+            return ""
+
+
+    def img_url(self, fileobj):
+        """
+        Return the url to access the given fileobj as an image
+        """
+        if fileobj is not None and fileobj.id is not None:
+            return self.request.route_path('filepng', id=fileobj.id)
+        else:
+            return ""

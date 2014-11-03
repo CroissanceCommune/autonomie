@@ -24,22 +24,29 @@
 """
     File model
 """
-
+import hashlib
+from datetime import datetime
 from sqlalchemy import (
-        LargeBinary,
-        Integer,
-        Column,
-        ForeignKey,
-        String,
-        )
+    Integer,
+    Column,
+    ForeignKey,
+    DateTime,
+    String,
+)
 
 from sqlalchemy.orm import (
-        deferred,
-        )
+    deferred,
+    relationship,
+    backref,
+)
 
 from sqlalchemy.dialects.mysql.base import LONGBLOB
 
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    default_table_args,
+    DBBASE,
+    DBSESSION,
+)
 from autonomie.models.node import Node
 
 
@@ -69,3 +76,52 @@ class File(Node):
         Simple shortcut for getting a label for this file
         """
         return self.description or self.name
+
+
+class MailHistory(DBBASE):
+    """
+    Stores the history of mail sent by our application to any company
+    """
+    __tablename__ = 'mail_history'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    send_at = Column(
+        DateTime(),
+        default=datetime.now(),
+    )
+
+    filename = Column(String(100))
+    md5sum = Column(String(100))
+    company_id = Column(ForeignKey('company.id'), nullable=True)
+    company = relationship(
+        "Company",
+        backref=backref('mail_history'),
+    )
+
+
+def store_sent_mail(filename, filedatas, company):
+    """
+    Stores a sent email in the history
+
+    :param filename: The name of the file to send
+    :param filedatas: The file datas
+    :param obj company: a company instance
+    """
+    mail_history = MailHistory(
+        filename=filename,
+        md5sum=hashlib.md5(filedatas).hexdigest(),
+        company_id=company.id
+    )
+    DBSESSION().add(mail_history)
+    return mail_history
+
+
+def check_if_mail_sent(filedatas, company):
+    """
+    Check if the given file has already been sent
+    """
+    query = MailHistory.query()
+    query = query.filter(MailHistory.company_id==company.id)
+    md5sum = hashlib.md5(filedatas).hexdigest()
+    query = query.filter(MailHistory.md5sum==md5sum)
+    return query.first() is not None

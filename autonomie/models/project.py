@@ -310,6 +310,7 @@ class Project(Node):
                     archived=self.archived,
                     phases=phases)
 
+
 class Phase(DBBASE):
     """
         Phase d'un projet
@@ -333,6 +334,7 @@ class Phase(DBBASE):
         "Project",
         backref=backref(
             "phases",
+            cascade="all, delete-orphan",
             info={'colanderalchemy': forms.EXCLUDED},
         ),
         info={'colanderalchemy': forms.EXCLUDED},

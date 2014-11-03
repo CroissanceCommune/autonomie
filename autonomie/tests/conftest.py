@@ -132,15 +132,26 @@ def settings():
     _settings = appconfig('config:%s' % __current_test_ini_file(), "autonomie")
     return _settings
 
+@fixture
+def pyramid_request():
+    return testing.DummyRequest()
 
 @fixture
-def config(request, settings):
+def config(request, pyramid_request, settings):
     """ returns a Pyramid `Configurator` object initialized
         with Kotti's default (test) settings.
     """
     os.environ['TZ'] = "Europe/Paris"
-    config = testing.setUp(settings=settings)
+    config = testing.setUp(settings=settings, request=pyramid_request)
     request.addfinalizer(testing.tearDown)
+    from autonomie.utils.renderer import (
+        set_deform_renderer,
+        set_json_renderer,
+        set_default_widgets,
+    )
+    set_deform_renderer()
+    set_json_renderer(config)
+    set_default_widgets()
     return config
 
 
@@ -257,7 +268,7 @@ def dbsession(config, content, connection, request):
 
 
 @fixture
-def get_csrf_request():
+def get_csrf_request(pyramid_request):
     """
     Build a testing request builder with a csrf token
 
@@ -267,19 +278,47 @@ def get_csrf_request():
     def func(params=None, cookies=None, post=None):
         params = params or {}
         post = post or {}
+        cookies = cookies or {}
         def_csrf = 'default_csrf'
         if not  u'csrf_token' in post.keys():
             post.update({'csrf_token': def_csrf})
-        request = testing.DummyRequest(
-            params=params,
-            post=post,
-            cookies=cookies
-        )
-        request.session = BeakerSessionFactoryConfig()(request)
-        request.config = {}
+        pyramid_request.params = params
+        pyramid_request.POST = post
+        pyramid_request.cookies = cookies
+        pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
+        pyramid_request.config = {}
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
-        request.session.get_csrf_token = csrf_token
-        request.actionmenu = ActionMenu()
-        return request
+        pyramid_request.session.get_csrf_token = csrf_token
+        pyramid_request.actionmenu = ActionMenu()
+        return pyramid_request
+    return func
+
+
+@fixture
+def get_csrf_request_with_db(pyramid_request, dbsession):
+    """
+    Build a testing request builder with a csrf token and a db session object
+
+    :returns: a function to be called with params/cookies/post optionnal
+    arguments
+    """
+    def func(params=None, cookies=None, post=None):
+        cookies = cookies or {}
+        params = params or {}
+        post = post or {}
+        def_csrf = 'default_csrf'
+        if not  u'csrf_token' in post.keys():
+            post.update({'csrf_token': def_csrf})
+        pyramid_request.params = params
+        pyramid_request.POST = post
+        pyramid_request.cookies = cookies
+        pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
+        pyramid_request.dbsession = dbsession
+        pyramid_request.config = {}
+        csrf_token = Mock()
+        csrf_token.return_value = def_csrf
+        pyramid_request.session.get_csrf_token = csrf_token
+        pyramid_request.actionmenu = ActionMenu()
+        return pyramid_request
     return func

@@ -25,8 +25,9 @@
 """
     All Authentication views
 """
-import logging
 import colander
+import logging
+import string
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPForbidden
@@ -40,6 +41,8 @@ from pyramid.threadlocal import get_current_registry
 from deform import Form
 from deform import Button
 from deform import ValidationFailure
+
+from js.bootstrap import bootstrap
 
 from autonomie.forms.user import (
     get_auth_schema,
@@ -58,16 +61,17 @@ def forbidden_view(request):
     login = authenticated_userid(request)
     if login:
         log.warn(u"An access has been forbidden to '{0}'".format(login))
-        redirect = HTTPForbidden()
+        bootstrap.need()
+        return_datas = {"title": u"Accès refusé",}
     else:
         log.debug(u"An access has been forbidden to an unauthenticated user")
         #redirecting to the login page with the current path as param
         loc = request.route_url('login', _query=(('nextpage', request.path),))
         if request.is_xhr:
-            redirect = dict(redirect=loc)
+            return_datas = dict(redirect=loc)
         else:
-            redirect = HTTPFound(location=loc)
-    return redirect
+            return_datas = HTTPFound(location=loc)
+    return return_datas
 
 
 def get_longtimeout():
@@ -171,14 +175,19 @@ def includeme(config):
     """
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
-    config.add_view(forbidden_view,
-                    context=HTTPForbidden,
-                    permission=NO_PERMISSION_REQUIRED,
-                    xhr=True,
-                    renderer='json')
-    config.add_view(forbidden_view,
-                    context=HTTPForbidden,
-                    permission=NO_PERMISSION_REQUIRED)
+    config.add_view(
+        forbidden_view,
+        context=HTTPForbidden,
+        permission=NO_PERMISSION_REQUIRED,
+        xhr=True,
+        renderer='json',
+    )
+    config.add_view(
+        forbidden_view,
+        context=HTTPForbidden,
+        permission=NO_PERMISSION_REQUIRED,
+        renderer="forbidden.mako"
+    )
     config.add_view(logout_view,
                     route_name='logout',
                     permission=NO_PERMISSION_REQUIRED)

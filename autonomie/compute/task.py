@@ -36,7 +36,11 @@ def get_default_tva():
     """
         Return the default tva
     """
-    default_tva = Tva.get_default()
+    try:
+        default_tva = Tva.get_default()
+    except:
+        default_tva = None
+
     if default_tva:
         return default_tva.value
     else:

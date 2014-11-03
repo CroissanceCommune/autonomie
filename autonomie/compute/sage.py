@@ -92,10 +92,11 @@ class SageInvoice(object):
     expense_tva_compte_cg = None
     expense_tva_code = None
 
-    def __init__(self, invoice, config=None):
+    def __init__(self, invoice, config=None, default_tva=None):
         self.products = {}
         self.invoice = invoice
         self.config = config or {}
+        self.default_tva = default_tva or Tva.get_default()
 
     def get_product(self, compte_cg_produit, compte_cg_tva, code_tva):
         """
@@ -149,8 +150,8 @@ class SageInvoice(object):
         """
         if self.invoice.expenses > 0 or self.invoice.expenses_ht > 0:
             if self.expense_tva_compte_cg is None:
-                self.expense_tva_compte_cg = Tva.get_default().compte_cg
-                self.expense_tva_code = Tva.get_default().code
+                self.expense_tva_compte_cg = self.default_tva.compte_cg
+                self.expense_tva_code = self.default_tva.code
 
             prod = self.get_product(
                         self.config.get("compte_frais_annexes"),

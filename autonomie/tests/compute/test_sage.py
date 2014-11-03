@@ -21,30 +21,28 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-import py.test
+import pytest
 import datetime
 from mock import MagicMock
 
 from autonomie.compute.task import (
-        LineCompute,
-        TaskCompute,
-        InvoiceCompute,
-        )
+    LineCompute,
+    TaskCompute,
+    InvoiceCompute,
+)
 from autonomie.compute.sage import (
-        double_lines,
-        SageInvoice,
-        SageFacturation,
-        SageContribution,
-        SageAssurance,
-        SageCGScop,
-        SageContributionOrganic,
-        SageRGInterne,
-        SageRGClient,
-        InvoiceExport,
-        SageExpenseMain,
-        )
-
-from autonomie.tests.base import BaseTestCase
+    double_lines,
+    SageInvoice,
+    SageFacturation,
+    SageContribution,
+    SageAssurance,
+    SageCGScop,
+    SageContributionOrganic,
+    SageRGInterne,
+    SageRGClient,
+    InvoiceExport,
+    SageExpenseMain,
+)
 
 
 class Dummy(object):
@@ -93,11 +91,115 @@ def get_config():
             'code_journal_ndf':"JOURNALNDF",
             }
 
+@pytest.fixture
+def def_tva():
+    return MagicMock(
+        name="tva1",
+        value=1960,
+        default=0,
+        compte_cg="TVA0001",
+        code='CTVA0001'
+    )
+
+
+@pytest.fixture
+def tva():
+    return MagicMock(
+        name="tva2",
+        value=700,
+        default=0,
+        compte_cg="TVA0002",
+        code='CTVA0002'
+    )
+
+
+@pytest.fixture
+def invoice(def_tva, tva):
+
+    p1 = MagicMock(name="product 1", compte_cg="P0001", tva=def_tva)
+    p2 = MagicMock(name="product 2", compte_cg="P0002", tva=tva)
+    line1 = DummyLine(
+        cost=10000,
+        quantity=1,
+        tva=def_tva.value,
+        product=p1,
+        tva_object=def_tva
+    )
+    line2 = DummyLine(
+        cost=10000,
+        quantity=1,
+        tva=def_tva.value,
+        product=p1,
+        tva_object=def_tva,
+    )
+    line3 = DummyLine(
+        cost=10000,
+        quantity=1,
+        tva=tva.value,
+        product=p2,
+        tva_object=tva,
+    )
+
+    company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
+    customer = Dummy(name="customer", compte_tiers="CUSTOMER", compte_cg='CG_CUSTOMER')
+    invoice = TaskCompute()
+    invoice.default_tva = def_tva.value
+    invoice.expenses_tva = def_tva.value
+    invoice.taskDate = datetime.date(2013, 02, 02)
+    invoice.customer = customer
+    invoice.company = company
+    invoice.officialNumber = "INV_001"
+    invoice.lines = [line1, line2, line3]
+    invoice.expenses_ht = 10000
+    invoice.expenses = 10000
+    return invoice
+
+
+@pytest.fixture
+def invoice_discount(def_tva, tva, invoice):
+    discount1 = DummyLine(
+        cost=10000,
+        quantity=1,
+        tva=def_tva.value,
+        tva_object=def_tva
+    )
+    discount2 = DummyLine(
+        cost=10000,
+        quantity=1,
+        tva=tva.value,
+        tva_object=tva
+    )
+    invoice.discounts = [discount1, discount2]
+    return invoice
+
+
+@pytest.fixture
+def sageinvoice(def_tva, invoice):
+    return SageInvoice(
+        invoice=invoice,
+        config=get_config(),
+        default_tva=def_tva,
+    )
+
+@pytest.fixture
+def sageinvoice_discount(def_tva, invoice_discount):
+    return SageInvoice(
+        invoice=invoice_discount,
+        config=get_config(),
+        default_tva=def_tva
+    )
+
+
 def prepare(discount=False):
     tva1 = MagicMock(name="tva1", value=1960, default=0,
             compte_cg="TVA0001", code='CTVA0001')
-    tva2 = MagicMock(name="tva2", value=700, default=0,
-            compte_cg="TVA0002", code='CTVA0002')
+    tva2 = MagicMock(
+        name="tva2",
+        value=700,
+        default=0,
+        compte_cg="TVA0002",
+        code='CTVA0002'
+    )
 
     p1 = MagicMock(name="product 1", compte_cg="P0001", tva=tva1)
     p2 = MagicMock(name="product 2", compte_cg="P0002", tva=tva2)
@@ -112,6 +214,8 @@ def prepare(discount=False):
     company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
     customer = Dummy(name="customer", compte_tiers="CUSTOMER", compte_cg='CG_CUSTOMER')
     invoice = TaskCompute()
+    invoice.default_tva = 1960
+    invoice.expenses_tva = 1960
     invoice.taskDate = datetime.date(2013, 02, 02)
     invoice.customer = customer
     invoice.company = company
@@ -131,85 +235,65 @@ def prepare(discount=False):
     return ((tva1, tva2), (p1, p2), invoice)
 
 
-class TestSageInvoice(BaseTestCase):
-    """
-        test Sage Invoice wrapper that group lines by products
-    """
-    def test_get_products(self):
-        obj = SageInvoice(invoice=MagicMock())
-        obj.products['1'] = {'test_key':'test'}
-        self.assertTrue(
-                obj.get_product('1', 'dontcare', 'dontcare').has_key('test_key'))
-        self.assertEqual(len(obj.get_product('2', 'tva_compte_cg',
-            'tva_code').keys()), 3)
+def test_get_products(sageinvoice):
+    sageinvoice.products['1'] = {'test_key':'test'}
+    assert sageinvoice.get_product('1', 'dontcare', 'dontcare').has_key('test_key')
+    assert len(sageinvoice.get_product('2', 'tva_compte_cg', 'tva_code').keys()) == 3
 
-    def test_populate_invoice_lines(self):
-        tvas, products, invoice = prepare()
-        wrapper = SageInvoice(invoice=invoice)
-        wrapper._populate_invoice_lines()
-        wrapper._round_products()
-        self.assertEqual(wrapper.products.keys(), ['P0001', 'P0002'])
-        self.assertEqual(wrapper.products['P0001']['ht'], 20000)
-        self.assertEqual(wrapper.products['P0001']['tva'], 3920)
-        self.assertEqual(wrapper.products['P0002']['ht'], 10000)
-        self.assertEqual(wrapper.products['P0002']['tva'], 700)
+def test_populate_invoice_lines(sageinvoice):
+    sageinvoice._populate_invoice_lines()
+    sageinvoice._round_products()
+    assert sageinvoice.products.keys() == ['P0001', 'P0002']
+    assert sageinvoice.products['P0001']['ht'] == 20000
+    assert sageinvoice.products['P0001']['tva'] == 3920
+    assert sageinvoice.products['P0002']['ht'] == 10000
+    assert sageinvoice.products['P0002']['tva'] == 700
 
-    def test_populate_discount_lines(self):
-        tvas, products, invoice = prepare(discount=True)
-        wrapper = SageInvoice(invoice=invoice, config=get_config())
-        wrapper._populate_discounts()
-        wrapper._round_products()
-        self.assertEqual(wrapper.products.keys(), ['CG_RRR'])
-        self.assertEqual(
-                wrapper.products['CG_RRR']['code_tva'],
-                "CODE_TVA_RRR")
-        self.assertEqual(
-                wrapper.products['CG_RRR']['compte_cg_tva'],
-                "CG_TVA_RRR")
-        self.assertEqual(wrapper.products['CG_RRR']['ht'], 20000)
-        self.assertEqual(wrapper.products['CG_RRR']['tva'], 2660)
-
-        # If one of compte_cg_tva_rrr or code_tva_rrr is not def
-        # No entry should be returned
-        config = get_config()
-        config.pop("compte_cg_tva_rrr")
-        wrapper = SageInvoice(invoice=invoice, config=config)
-        wrapper._populate_discounts()
-        self.assertEqual(wrapper.products.keys(), [])
-
-        config = get_config()
-        config.pop("code_tva_rrr")
-        wrapper = SageInvoice(invoice=invoice, config=config)
-        wrapper._populate_discounts()
-        self.assertEqual(wrapper.products.keys(), [])
+def test_populate_discount_lines(sageinvoice_discount):
+    sageinvoice_discount._populate_discounts()
+    sageinvoice_discount._round_products()
+    assert sageinvoice_discount.products.keys() == ['CG_RRR']
+    assert sageinvoice_discount.products['CG_RRR']['code_tva'] == "CODE_TVA_RRR"
+    assert sageinvoice_discount.products['CG_RRR']['compte_cg_tva'] == "CG_TVA_RRR"
+    assert sageinvoice_discount.products['CG_RRR']['ht'] == 20000
+    assert sageinvoice_discount.products['CG_RRR']['tva'] == 2660
 
 
+def test_populate_discount_lines_without_compte_cg_tva(sageinvoice_discount):
+    # If one of compte_cg_tva_rrr or code_tva_rrr is not def
+    # No entry should be returned
+    sageinvoice_discount.config.pop("compte_cg_tva_rrr")
+    sageinvoice_discount._populate_discounts()
+    assert sageinvoice_discount.products.keys() == []
 
-    def test_populate_expenses(self):
-        tvas, products, invoice = prepare()
-        wrapper = SageInvoice(invoice=invoice, config=get_config())
-        wrapper.expense_tva_compte_cg = "TVA0001"
-        wrapper._populate_expenses()
-        wrapper._round_products()
-        self.assertEqual(wrapper.products.keys(), ['CG_FA'])
-        self.assertEqual(wrapper.products['CG_FA']['ht'], 20000)
-        self.assertEqual(wrapper.products['CG_FA']['tva'], 1960)
+def test_populate_discount_lines_without_code_tva(sageinvoice_discount):
+    sageinvoice_discount.config.pop("code_tva_rrr")
+    sageinvoice_discount._populate_discounts()
+    assert sageinvoice_discount.products.keys() == []
 
 
-class BaseBookEntryTest(BaseTestCase):
+def test_populate_expenses(sageinvoice):
+    sageinvoice.expense_tva_compte_cg = "TVA0001"
+    sageinvoice._populate_expenses()
+    sageinvoice._round_products()
+    assert sageinvoice.products.keys() == ['CG_FA']
+    assert sageinvoice.products['CG_FA']['ht'] == 20000
+    assert sageinvoice.products['CG_FA']['tva'] == 1960
+
+
+class BaseBookEntryTest():
     factory = None
 
     def _test_product_book_entry(
             self,
+            wrapped_invoice,
             method,
             exp_analytic_line,
             prod_cg='P0001'):
         """
         test a book_entry output (one of a product)
         """
-        tvas, products, invoice = prepare()
         config = get_config()
-        wrapped_invoice = SageInvoice(invoice=invoice, config=config)
         wrapped_invoice.populate()
         book_entry_factory = self.factory(config)
         book_entry_factory.set_invoice(wrapped_invoice)
@@ -225,16 +309,14 @@ class BaseBookEntryTest(BaseTestCase):
         exp_general_line['type_'] = 'G'
         exp_general_line.pop('num_analytique', '')
 
-        self.assertEqual(general_line, exp_general_line)
-        self.assertEqual(analytic_line, exp_analytic_line)
+        assert general_line == exp_general_line
+        assert analytic_line == exp_analytic_line
 
-    def _test_invoice_book_entry(self, method, exp_analytic_line):
+    def _test_invoice_book_entry(self, wrapped_invoice, method, exp_analytic_line):
         """
         test a book_entry output (one of a product)
         """
-        tvas, products, invoice = prepare()
         config = get_config()
-        wrapped_invoice = SageInvoice(invoice=invoice, config=config)
         wrapped_invoice.populate()
         book_entry_factory = self.factory(config)
         book_entry_factory.set_invoice(wrapped_invoice)
@@ -249,21 +331,20 @@ class BaseBookEntryTest(BaseTestCase):
         exp_general_line['type_'] = 'G'
         exp_general_line.pop('num_analytique', '')
 
-        self.assertEqual(general_line, exp_general_line)
-        self.assertEqual(analytic_line, exp_analytic_line)
+        assert general_line == exp_general_line
+        assert analytic_line == exp_analytic_line
 
 
 def decoratorfunc(a, b):
     return {'type_': 'A', 'key': 'value', 'num_analytique':'NUM'}
 
 
-class Testmain(BaseTestCase):
-    def test_double_lines(self):
-        res = list(double_lines(decoratorfunc)(None, None))
-        self.assertEqual(res, [
-            {'type_': 'G', 'key': 'value'},
-            {'type_': 'A', 'key': 'value', 'num_analytique':'NUM'}
-            ])
+def test_double_lines():
+    res = list(double_lines(decoratorfunc)(None, None))
+    assert res == [
+        {'type_': 'G', 'key': 'value'},
+        {'type_': 'A', 'key': 'value', 'num_analytique':'NUM'}
+        ]
 
 
 class TestSageFacturation(BaseBookEntryTest):
@@ -271,34 +352,34 @@ class TestSageFacturation(BaseBookEntryTest):
 
     def test__has_tva_value(self):
         product = {'tva': 0.5}
-        self.assertTrue(SageFacturation._has_tva_value(product))
+        assert SageFacturation._has_tva_value(product)
         product = {'tva': 0.0}
-        self.assertFalse(SageFacturation._has_tva_value(product))
+        assert not SageFacturation._has_tva_value(product)
         product = {'tva': -0.5}
-        self.assertTrue(SageFacturation._has_tva_value(product))
+        assert SageFacturation._has_tva_value(product)
 
-    def test_credit_totalht(self):
+    def test_credit_totalht(self, sageinvoice):
         res = {'libelle': 'customer company',
             'compte_cg': 'P0001',
             'num_analytique': 'COMP_CG',
             'code_tva': 'CTVA0001',
             'credit': 20000}
         method = "credit_totalht"
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_credit_tva(self):
+    def test_credit_tva(self, sageinvoice):
         res = {'libelle': 'customer company',
             'compte_cg': 'TVA0001',
             'num_analytique': 'COMP_CG',
             'code_tva': 'CTVA0001',
             'credit': 3920}
         method = "credit_tva"
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
         # Ref bug #30
 
 
-    def test_debit_ttc(self):
+    def test_debit_ttc(self, sageinvoice):
         method = "debit_ttc"
         res = {'libelle': 'customer company',
             'compte_cg': 'CG_CUSTOMER',
@@ -306,50 +387,50 @@ class TestSageFacturation(BaseBookEntryTest):
             'compte_tiers': 'CUSTOMER',
             'debit': 23920,
             'echeance': '040313'}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
 
 class TestSageContribution(BaseBookEntryTest):
     factory = SageContribution
 
-    def test_debit_entreprise(self):
+    def test_debit_entreprise(self, sageinvoice):
         method = "debit_entreprise"
         res = {'libelle': 'customer company',
             'compte_cg': 'CG_CONTRIB',
             'num_analytique': 'COMP_CG',
             'debit':2000}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_credit_entreprise(self):
+    def test_credit_entreprise(self, sageinvoice):
         method = "credit_entreprise"
         res = {'libelle': 'customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'COMP_CG',
             'credit':2000}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_debit_cae(self):
+    def test_debit_cae(self, sageinvoice):
         method = "debit_cae"
         res = {'libelle': 'customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'NUM_ANA',
             'debit':2000}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_credit_cae(self):
+    def test_credit_cae(self, sageinvoice):
         method = "credit_cae"
         res = {'libelle': 'customer company',
             'compte_cg': 'CG_CONTRIB',
             'num_analytique': 'NUM_ANA',
             'credit':2000}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
 
 class TestSageAssurance(BaseBookEntryTest):
     # Amount = 2000 0.05 * somme des ht des lignes + expense_ht
     factory = SageAssurance
 
-    def test_debit_entreprise(self):
+    def test_debit_entreprise(self, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -357,9 +438,9 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'debit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_credit_entreprise(self):
+    def test_credit_entreprise(self, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -367,9 +448,9 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'credit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_debit_cae(self):
+    def test_debit_cae(self, sageinvoice):
         method = 'debit_cae'
         res = {
                 'libelle': 'customer company',
@@ -377,9 +458,9 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_credit_cae(self):
+    def test_credit_cae(self, sageinvoice):
         method = 'credit_cae'
         res = {
                 'libelle': 'customer company',
@@ -387,13 +468,13 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'credit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
 
 class TestSageCGScop(BaseBookEntryTest):
     factory = SageCGScop
 
-    def test_debit_entreprise(self):
+    def test_debit_entreprise(self, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -401,9 +482,9 @@ class TestSageCGScop(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'debit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_credit_entreprise(self):
+    def test_credit_entreprise(self, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -411,9 +492,9 @@ class TestSageCGScop(BaseBookEntryTest):
                 'compte_cg': 'BANK_CG',
                 'credit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_debit_cae(self):
+    def test_debit_cae(self, sageinvoice):
         method = 'debit_cae'
         res = {
                 'libelle': 'customer company',
@@ -421,9 +502,9 @@ class TestSageCGScop(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_credit_cae(self):
+    def test_credit_cae(self, sageinvoice):
         method = 'credit_cae'
         res = {
                 'libelle': 'customer company',
@@ -431,7 +512,7 @@ class TestSageCGScop(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'credit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
 
 class TestSageContributionOrganic(BaseBookEntryTest):
@@ -439,7 +520,7 @@ class TestSageContributionOrganic(BaseBookEntryTest):
 
     libelle = 'Contribution Organic customer company'
 
-    def test_debit_entreprise(self):
+    def test_debit_entreprise(self, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': self.libelle,
@@ -447,9 +528,9 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'debit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_credit_entreprise(self):
+    def test_credit_entreprise(self, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': self.libelle,
@@ -457,9 +538,9 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'compte_cg': 'BANK_CG',
                 'credit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_debit_cae(self):
+    def test_debit_cae(self, sageinvoice):
         method = 'debit_cae'
         res = {
                 'libelle': self.libelle,
@@ -467,9 +548,9 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
-    def test_credit_cae(self):
+    def test_credit_cae(self, sageinvoice):
         method = 'credit_cae'
         res = {
                 'libelle': self.libelle,
@@ -477,49 +558,49 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'credit': 2000,
                 }
-        self._test_invoice_book_entry(method, res)
+        self._test_invoice_book_entry(sageinvoice, method, res)
 
 
 class TestSageRGInterne(BaseBookEntryTest):
     factory = SageRGInterne
 
-    def test_debit_entreprise(self):
+    def test_debit_entreprise(self, sageinvoice):
         method = "debit_entreprise"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'CG_RG_INT',
             'num_analytique': 'COMP_CG',
             'debit':1196}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_credit_entreprise(self):
+    def test_credit_entreprise(self, sageinvoice):
         method = "credit_entreprise"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'COMP_CG',
             'credit':1196}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_debit_cae(self):
+    def test_debit_cae(self, sageinvoice):
         method = "debit_cae"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'NUM_ANA',
             'debit':1196}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_credit_cae(self):
+    def test_credit_cae(self, sageinvoice):
         method = "credit_cae"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'CG_RG_INT',
             'num_analytique': 'NUM_ANA',
             'credit':1196}
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
 
 class TestSageRGClient(BaseBookEntryTest):
     factory = SageRGClient
 
-    def test_debit_entreprise(self):
+    def test_debit_entreprise(self, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': 'RG customer company',
@@ -528,9 +609,9 @@ class TestSageRGClient(BaseBookEntryTest):
                 'echeance':'020214',
                 'debit': 1196,
                 }
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
-    def test_credit_entreprise(self):
+    def test_credit_entreprise(self, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': 'RG customer company',
@@ -540,24 +621,24 @@ class TestSageRGClient(BaseBookEntryTest):
                 'echeance':'020214',
                 'credit': 1196,
                 }
-        self._test_product_book_entry(method, res)
+        self._test_product_book_entry(sageinvoice, method, res)
 
 
-class TestSageExport(BaseTestCase):
+class TestSageExport():
     def test_modules(self):
         config = {'sage_contribution':'1',
                 'sage_assurance':'1',
                 'sage_cgscop':'0'}
         exporter = InvoiceExport(config)
-        self.assertEqual(len(exporter.modules), 3)
+        assert len(exporter.modules) == 3
         sage_factories = [SageFacturation, SageContribution, SageAssurance]
         for fact in sage_factories:
-            self.assertTrue(True in [isinstance(module, fact)
-                for module in exporter.modules])
+            assert True in [isinstance(module, fact)
+                for module in exporter.modules]
 
 
-@py.test.mark.expense
-class TestSageExpenseMain(BaseTestCase):
+@pytest.mark.expense
+class TestSageExpenseMain():
     """
     Main Expense export module testing
     """

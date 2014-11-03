@@ -107,7 +107,7 @@ class CancelInvoiceAdd(TaskFormView):
         cinvoice.set_name()
         try:
             cinvoice = self.set_task_status(cinvoice)
-            cinvoice.invoice.check_resulted()
+            cinvoice.invoice.check_resulted(user_id=self.request.user.id)
             self.dbsession.merge(cinvoice.invoice)
             # Line handling
             cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
@@ -178,7 +178,7 @@ class CancelInvoiceEdit(TaskFormView):
         cinvoice = merge_session_with_post(cinvoice, appstruct["cancelinvoice"])
         try:
             cinvoice = self.set_task_status(cinvoice)
-            cinvoice.invoice.check_resulted()
+            cinvoice.invoice.check_resulted(user_id=self.request.user.id)
             self.dbsession.merge(cinvoice.invoice)
             # Line handling
             cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
@@ -219,7 +219,7 @@ class CancelInvoiceStatus(TaskStatusView):
         """
         log.debug(u"+ checking if the associated invoice is resulted")
         invoice = task.invoice
-        invoice = invoice.check_resulted()
+        invoice = invoice.check_resulted(user_id=self.request.user.id)
         self.request.dbsession.merge(invoice)
 
     def pre_set_financial_year_process(self, task, status, params):

@@ -51,7 +51,7 @@ translationstring==1.1
 venusian==1.0a7
 waitress==0.8.2
 wsgiref==0.1.2
-xhtml2pdf==0.0.4
+xhtml2pdf==0.0.6
 zope.component==4.0.1
 zope.deprecation==4.0.2
 zope.event==4.0.1

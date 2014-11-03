@@ -74,6 +74,24 @@ DATAURI_TMPL = u"data:{0};base64,{1}"
 FILEPATH_REGX = re.compile("^/files/(?P<fileid>[0-9]+).png")
 PUBLIC_FILES_REGX = re.compile("^/public/(?P<filekey>.+)")
 
+def get_db_file_resource(fileobj):
+    """
+    Return a resource string usable by Pisa for dynamically db loaded resources
+
+    :param obj fileobj: a file object with a mimetype attr and a get_value
+    method
+
+    :returns: a resource string (default : with a void png)
+    """
+    if fileobj is not None:
+        b64_str = base64.encodestring(fileobj.getvalue())
+        mimetype = fileobj.mimetype
+    else:
+        b64_str = ""
+        mimetype = "image/png"
+    return DATAURI_TMPL.format(mimetype, b64_str)
+
+
 def fetch_resource(uri, rel):
     """
         Callback used by pisa to locally retrieve ressources
@@ -90,20 +108,13 @@ def fetch_resource(uri, rel):
         # On récupère l'objet fichier
         from autonomie.models.files import File
         fileobj = File.get(filename)
-        b64_str = base64.encodestring(fileobj.getvalue())
-        resource = DATAURI_TMPL.format(fileobj.mimetype, b64_str)
+        resource = get_db_file_resource(fileobj)
 
     elif pf_regex_group is not None:
         key = pf_regex_group.group('filekey')
         from autonomie.models.config import ConfigFiles
         fileobj = ConfigFiles.get(key)
-        if fileobj is not None:
-            b64_str = base64.encodestring(fileobj.getvalue())
-            mimetype = fileobj.mimetype
-        else:
-            b64_str = ""
-            mimetype = "image/png"
-        resource = DATAURI_TMPL.format(mimetype, b64_str)
+        resource = get_db_file_resource(fileobj)
 
     else:
         # C'est un fichier statique

@@ -19,7 +19,6 @@ logger = logging.getLogger("alembic.migrate_company_header")
 
 
 BASEFILEPATH = "/var/intranet_files/"
-BASEFILEPATH = "/home/gas/Developpement/git/autonomie/autonomie/intranet_files/"
 
 
 def load_file_struct(filepath, filename):

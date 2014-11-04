@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger("alembic.migrate_company_header")
 
 
-BASEFILEPATH = "/var/intranet_files/"
+BASEFILEPATH = u"/var/intranet_files/"
 
 
 def load_file_struct(filepath, filename):
@@ -53,10 +53,10 @@ def upgrade():
 
     for id_, header, logo in result:
         company = Company.get(id_)
-        basepath = "%scompany/%s" % (BASEFILEPATH, id_,)
+        basepath = u"%scompany/%s" % (BASEFILEPATH, id_,)
 
         if header:
-            header_path = "%s/header/%s" % (basepath, header)
+            header_path = u"%s/header/%s" % (basepath, header)
             try:
                 file_datas = load_file_struct(header_path, header)
             except:
@@ -69,7 +69,7 @@ def upgrade():
                 session.flush()
 
         if logo:
-            logo_path = "%s/logo/%s" % (basepath, logo)
+            logo_path = u"%s/logo/%s" % (basepath, logo)
             try:
                 file_datas = load_file_struct(logo_path, logo)
             except:
@@ -81,11 +81,11 @@ def upgrade():
                 company = session.merge(company)
                 session.flush()
 
-    filepath = "%s/main/logo.png" % BASEFILEPATH
+    filepath = u"%s/main/logo.png" % BASEFILEPATH
     if os.path.isfile(filepath):
         ConfigFiles.set('logo.png', load_file_struct(filepath, 'logo.png'))
 
-    filepath = "%s/main/accompagnement_header.png" % BASEFILEPATH
+    filepath = u"%s/main/accompagnement_header.png" % BASEFILEPATH
     if os.path.isfile(filepath):
         ConfigFiles.set(
             'accompagnement_header.png',

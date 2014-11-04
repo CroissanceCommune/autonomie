@@ -90,7 +90,7 @@ class MailHistory(DBBASE):
         default=datetime.now(),
     )
 
-    filename = Column(String(100))
+    filepath = Column(String(255))
     md5sum = Column(String(100))
     company_id = Column(ForeignKey('company.id'), nullable=True)
     company = relationship(
@@ -99,16 +99,16 @@ class MailHistory(DBBASE):
     )
 
 
-def store_sent_mail(filename, filedatas, company):
+def store_sent_mail(filepath, filedatas, company):
     """
     Stores a sent email in the history
 
-    :param filename: The name of the file to send
+    :param filename: The path to the sent file
     :param filedatas: The file datas
     :param obj company: a company instance
     """
     mail_history = MailHistory(
-        filename=filename,
+        filepath=filepath,
         md5sum=hashlib.md5(filedatas).hexdigest(),
         company_id=company.id
     )

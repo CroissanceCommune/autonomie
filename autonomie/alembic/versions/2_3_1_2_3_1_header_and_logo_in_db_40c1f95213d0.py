@@ -58,7 +58,12 @@ def upgrade():
 
         if header:
             header_path = "%s/header/%s" % (basepath, header)
-            file_datas = load_file_struct(header_path, header)
+            try:
+                file_datas = load_file_struct(header_path, header)
+            except:
+                print("Error while loading a header")
+                print(id_)
+                file_datas = None
             if file_datas:
                 company.header = file_datas
                 session.add(company.header_file)
@@ -66,7 +71,12 @@ def upgrade():
 
         if logo:
             logo_path = "%s/logo/%s" % (basepath, logo)
-            file_datas = load_file_struct(logo_path, logo)
+            try:
+                file_datas = load_file_struct(logo_path, logo)
+            except:
+                print("Error while loading a logo")
+                print(id_)
+                file_datas = None
             if file_datas:
                 company.logo = file_datas
                 company = session.merge(company)

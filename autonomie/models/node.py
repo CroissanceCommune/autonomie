@@ -56,7 +56,7 @@ class Node(DBBASE):
         info={
             'colanderalchemy': {'title': u"Nom"},
         },
-        nullable=False,
+        nullable=True,
     )
 
     created_at = Column(

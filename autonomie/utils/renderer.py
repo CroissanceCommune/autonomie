@@ -64,6 +64,10 @@ class MultiRendererFactory(object):
                                 encoding="utf-8",
                                 translator=translator)
 
+    @property
+    def loader(self):
+        return self.default_renderer.loader
+
     def __call__(self, template_name, **kw):
         """
             Launched by the client library

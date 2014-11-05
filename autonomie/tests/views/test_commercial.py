@@ -25,80 +25,73 @@
 """
     Test the commercial handling module
 """
+import pytest
 from datetime import date
 from mock import Mock
 from autonomie.views.commercial import compute_turnover_difference
 from autonomie.views.commercial import DisplayCommercialHandling
 from autonomie.models.treasury import TurnoverProjection
 
-from autonomie.tests.base import BaseFunctionnalTest
-
 APPSTRUCT = {'month':11, 'value':'1500', 'comment':"Some comments go here"}
 
-class TestCommercial(BaseFunctionnalTest):
-    def addOne(self, year=None):
-        self.config.add_route('commercial_handling', '/')
-        req = self.get_csrf_request()
-        if year:
-            req.GET = {'year':year}
-        view = DisplayCommercialHandling(None, req)
-        view.submit_success(APPSTRUCT)
 
-    def getOne(self):
-        try:
-            return TurnoverProjection.query().first()
-        except:
-            return None
-
-    def get_csrf_request(self, post={}):
-        req = super(TestCommercial, self).get_csrf_request(post)
-        req.context = Mock(id=1)
-        return req
-
-    def test_compute_turnover_difference(self):
-        index = 0
-        projections = {}
-        turnovers = {}
-        self.assertEqual(None, compute_turnover_difference(index,
-                                                  projections, turnovers))
-        p = Mock(value=10)
-        projections = {0:p}
-        turnovers = {0:10}
-        self.assertEqual(None, compute_turnover_difference(1, projections, turnovers))
-        self.assertEqual(0, compute_turnover_difference(0, projections, turnovers))
+def getOne():
+    return TurnoverProjection.query().first()
 
 
-    def test_submit_year(self):
-        req = self.get_csrf_request()
-        req.GET = {'year':'2010'}
-        view = DisplayCommercialHandling(None, req)
-        self.assertEqual(view.submit_year(), {'year':2010})
-        req.GET = {}
-        self.assertEqual(view.submit_year(), {'year':date.today().year})
-
-    def test_add(self):
-        self.addOne()
-        proj = self.getOne()
-        self.assertNotEqual(proj, None)
-        self.assertEqual(proj.value, 1500)
-        self.assertEqual(proj.comment, u"Some comments go here")
-        self.assertEqual(proj.year, date.today().year)
-
-    def test_add_year(self):
-        self.addOne(2002)
-        proj = self.getOne()
-        self.assertNotEqual(proj, None)
-        self.assertEqual(proj.value, 1500)
-        self.assertEqual(proj.comment, u"Some comments go here")
-        self.assertEqual(proj.year, 2002)
+@pytest.fixture
+def proj(request, config, get_csrf_request_with_db):
+    config.add_route('commercial_handling', '/')
+    req = get_csrf_request_with_db()
+    req.context = Mock(id=1)
+    # On utilise la docstring pour stocker des paramètres, c sal mais ça marche
+    year = request.function.__doc__
+    if year:
+        req.GET = {'year':year}
+    view = DisplayCommercialHandling(None, req)
+    view.submit_success(APPSTRUCT)
+    return getOne()
 
 
-    def test_edit(self):
-        self.addOne()
-        appstruct = APPSTRUCT.copy()
-        appstruct['value'] = 10
-        req = self.get_csrf_request()
-        view = DisplayCommercialHandling(None, req)
-        view.submit_success(appstruct)
-        proj = self.getOne()
-        self.assertEqual(proj.value, 10)
+def test_compute_turnover_difference():
+    index = 0
+    projections = {}
+    turnovers = {}
+    assert None == compute_turnover_difference(index, projections, turnovers)
+    p = Mock(value=10)
+    projections = {0: p}
+    turnovers = {0: 10}
+    assert None == compute_turnover_difference(1, projections, turnovers)
+    assert 0 == compute_turnover_difference(0, projections, turnovers)
+
+
+def test_submit_year(get_csrf_request_with_db):
+    req = get_csrf_request_with_db()
+    req.GET = {'year':'2010'}
+    view = DisplayCommercialHandling(None, req)
+    assert view.submit_year() == {'year':2010}
+    req.GET = {}
+    assert view.submit_year() == {'year': date.today().year}
+
+
+def test_add(proj):
+    assert proj.value == 1500
+    assert proj.comment == u"Some comments go here"
+    assert proj.year == date.today().year
+
+
+def test_add_with_year(proj):
+    """2002"""
+    assert proj.value == 1500
+    assert proj.comment == u"Some comments go here"
+    assert proj.year == 2002
+
+
+def test_edit(proj, get_csrf_request_with_db):
+    appstruct = APPSTRUCT.copy()
+    appstruct['value'] = 10
+    req = get_csrf_request_with_db()
+    view = DisplayCommercialHandling(None, req)
+    view.submit_success(appstruct)
+    proj = getOne()
+    assert proj.value == 10

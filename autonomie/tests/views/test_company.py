@@ -22,9 +22,7 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
-from autonomie.views.company import (company_index, company_view, CompanyEdit,
-        CompanyAdd)
+import pytest
 from autonomie.models.user import User
 from autonomie.models.company import Company
 
@@ -36,46 +34,44 @@ APPSTRUCT = {
     "contribution": 80,
         }
 
-class Base(BaseFunctionnalTest):
-    def addOne(self):
-        self.config.add_route('company', '/')
-        view = CompanyAdd(self.get_csrf_request())
-        view.submit_success(APPSTRUCT)
+@pytest.fixture
+def company(config, get_csrf_request_with_db):
+    from autonomie.views.company import CompanyAdd
+    config.add_route('company', '/')
+    view = CompanyAdd(get_csrf_request_with_db())
+    view.submit_success(APPSTRUCT)
+    return getOne()
 
-    def getOne(self):
-        return Company.query().filter(Company.name==APPSTRUCT['name']).first()
+def getOne():
+    return Company.query().filter(Company.name==APPSTRUCT['name']).first()
 
 
-class TestCompany(BaseFunctionnalTest):
-    def test_company_index(self):
-        avatar = User.get(3)
-        self.config.add_route('company', '/company/{cid}')
-        self.config.add_static_view('static', 'autonomie:static')
-        request = self.get_csrf_request()
-        request._user = avatar
-        request.user = avatar
-        request.context = avatar.companies[0]
-        response = company_index(request)
-        self.assertEqual(avatar.companies[0].name, response['company'].name )
+def test_company_index(config, content, get_csrf_request_with_db):
+    from autonomie.views.company import company_index
+    avatar = User.query().first()
+    config.add_route('company', '/company/{cid}')
+    config.add_static_view('static', 'autonomie:static')
+    request = get_csrf_request_with_db()
+    request._user = avatar
+    request.user = avatar
+    request.context = avatar.companies[0]
+    response = company_index(request)
+    assert avatar.companies[0].name == response['company'].name
 
-class TestCompanyAdd(Base):
-    def test_success(self):
-        self.addOne()
-        company = self.getOne()
-        for key, val in APPSTRUCT.items():
-            self.assertEqual(getattr(company, key), val)
+def test_add(company):
+    from autonomie.views.company import CompanyAdd
+    for key, val in APPSTRUCT.items():
+        assert getattr(company, key) == val
 
-class TestCompanyEdit(Base):
-    def test_success(self):
-        self.addOne()
-        company = self.getOne()
-        req = self.get_csrf_request()
-        req.context = company
-        appstruct = APPSTRUCT.copy()
-        appstruct['phone'] = "+33 0606060606"
-        appstruct['contribution'] = 70
-        view = CompanyEdit(req)
-        view.submit_success(appstruct)
-        company = self.getOne()
-        self.assertEqual(company.phone, "+33 0606060606")
-        self.assertEqual(company.contribution, 70)
+def test_success(company, get_csrf_request_with_db):
+    from autonomie.views.company import CompanyEdit
+    req = get_csrf_request_with_db()
+    req.context = company
+    appstruct = APPSTRUCT.copy()
+    appstruct['phone'] = "+33 0606060606"
+    appstruct['contribution'] = 70
+    view = CompanyEdit(req)
+    view.submit_success(appstruct)
+    company = getOne()
+    assert company.phone == "+33 0606060606"
+    assert company.contribution == 70

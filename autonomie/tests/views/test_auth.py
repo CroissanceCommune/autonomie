@@ -26,20 +26,12 @@
     Tests
 """
 from mock import MagicMock
-from pyramid import testing
 
-from autonomie.tests.base import BaseFunctionnalTest
-from autonomie.tests.base import BaseViewTest
-
-class TestAuth(BaseFunctionnalTest):
-    """
-        Test the auth form and redirect
-    """
-    def test_redirect(self):
-        login_url = "http://localhost/login?nextpage=%2F"
-        res = self.app.get('/')
-        self.assertEqual(res.status_int, 302)
-        self.assertIn(login_url, dict(res.headerlist).values())
+def test_redirect(app):
+    login_url = "http://localhost/login?nextpage=%2F"
+    res = app.get('/')
+    assert res.status_int == 302
+    assert login_url in dict(res.headerlist).values()
 
 def get_avatar():
     user = MagicMock(name=u'test', companies=[])
@@ -55,19 +47,18 @@ def get_avatar2():
     user.companies = [MagicMock(name=u'Test', id=100)]
     return user
 
-class TestIndex(BaseViewTest):
-    def test_index_view(self):
-        from autonomie.views.index import index
-        self.config.add_route('company', '/company/{id}')
-        self.config.add_static_view('static', 'autonomie:static')
-        request = self.get_csrf_request()
-        avatar = get_avatar()
-        request._user = avatar
-        request.user = avatar
-        response = index(request)
-        self.assertEqual(avatar.companies, response['companies'])
-        avatar = get_avatar2()
-        request._user = avatar
-        request.user = avatar
-        response = index(request)
-        self.assertEqual(response.status_int, 302)
+def test_index_view(config, get_csrf_request):
+    from autonomie.views.index import index
+    config.add_route('company', '/company/{id}')
+    config.add_static_view('static', 'autonomie:static')
+    request = get_csrf_request()
+    avatar = get_avatar()
+    request._user = avatar
+    request.user = avatar
+    response = index(request)
+    assert avatar.companies == response['companies']
+    avatar = get_avatar2()
+    request._user = avatar
+    request.user = avatar
+    response = index(request)
+    assert response.status_int == 302

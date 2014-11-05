@@ -37,6 +37,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.config import Config
 from autonomie import forms
+from autonomie.forms import files
 from autonomie.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
 
@@ -155,7 +156,7 @@ class SiteConfig(colander.MappingSchema):
     """
     logo = colander.SchemaNode(
         FileData(),
-        widget=forms.files.deferred_upload_widget,
+        widget=files.deferred_upload_widget,
         title=u"Choisir un logo",
         validator=validate_image_mime,
         missing=colander.drop,
@@ -436,7 +437,7 @@ class MainActivityConfig(colander.MappingSchema):
     """
     header = colander.SchemaNode(
         FileData(),
-        widget=forms.files.deferred_upload_widget,
+        widget=files.deferred_upload_widget,
         title=u'En-tête des sortie PDF',
         validator=validate_image_mime,
         missing=colander.drop,

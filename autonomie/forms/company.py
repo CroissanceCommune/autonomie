@@ -34,6 +34,7 @@ from deform import FileData
 
 from autonomie.forms.validators import validate_image_mime
 from autonomie import forms
+from autonomie.forms import files
 from autonomie import deform_extend
 from autonomie.utils.image import ImageResizer
 
@@ -68,11 +69,11 @@ def deferred_edit_adminonly_widget(node, kw):
 @colander.deferred
 def deferred_upload_header_widget(node, kw):
     request = kw['request']
-    tmpstore = forms.files.SessionDBFileUploadTempStore(
+    tmpstore = files.SessionDBFileUploadTempStore(
         request,
         filters=HEADER_RESIZER.complete
     )
-    return forms.files.CustomFileUploadWidget(
+    return files.CustomFileUploadWidget(
         tmpstore,
         template=forms.TEMPLATES_PATH + "fileupload.mako"
     )
@@ -129,7 +130,7 @@ class CompanySchema(colander.MappingSchema):
 
     logo = colander.SchemaNode(
         FileData(),
-        widget=forms.files.deferred_upload_widget,
+        widget=files.deferred_upload_widget,
         title="Choisir un logo",
         validator=validate_image_mime,
         missing=colander.drop,

@@ -50,6 +50,12 @@ Si vous avez reçu ce mail par erreur, nous vous prions de nous \
 en excuser. Vous pouvez vous désincrire en écrivant à \
 {0}?subject=Unsubscribe-{1}."""
 
+SALARYSHEET_MAIL_MESSAGE = u"""Bonjour,
+Vous trouverez ci-joint votre bulletin de salaire.
+{0}
+"""
+
+SALARYSHEET_MAIL_SUBJECT = u"Votre bulletin de salaire"
 
 
 
@@ -175,7 +181,7 @@ def send_mail_from_event(event):
             )
 
 
-def send_salary_sheet(request, company, filename, filepath, force=False):
+def send_salary_sheet(request, company, filename, filepath, force=False, custom_msg=""):
     """
     Send a salarysheet to the given company's e-mail
 
@@ -207,12 +213,12 @@ def send_salary_sheet(request, company, filename, filepath, force=False):
         print('Sending the file %s' % filepath)
         print("Sending it to %s" % company.email)
         attachment = Attachment(filename, "application/pdf", filebuf)
+
         send_mail(
             request,
+            SALARYSHEET_MAIL_MESSAGE.format(custom_msg),
+            SALARYSHEET_MAIL_SUBJECT,
             company.email,
-            u"""Bonjour,
-Vous trouverez ci-joint votre bulletin de salaire.""",
-        u"Votre bulletin de salaire",
             attachment,
         )
         store_sent_mail(filepath, filedatas, company)

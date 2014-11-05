@@ -45,7 +45,6 @@ def launch_cmd(settings, cmd):
         Main entry to launch os commands
     """
     command_line = cmd.format(**settings)
-    print "Launching : %s" % command_line
     return os.system(command_line)
 
 
@@ -142,8 +141,16 @@ def config(request, pyramid_request, settings):
         with Kotti's default (test) settings.
     """
     os.environ['TZ'] = "Europe/Paris"
-    config = testing.setUp(settings=settings, request=pyramid_request)
+    from pyramid.registry import Registry
+    from pyramid_beaker import set_cache_regions_from_settings
+    registry = Registry()
+    registry.settings = settings
+    config = testing.setUp(registry=registry, settings=settings, request=pyramid_request)
+    config.include('pyramid_mako')
+    config.include('pyramid_chameleon')
+    set_cache_regions_from_settings(settings)
     request.addfinalizer(testing.tearDown)
+
     from autonomie.utils.renderer import (
         set_deform_renderer,
         set_json_renderer,
@@ -322,3 +329,15 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         pyramid_request.actionmenu = ActionMenu()
         return pyramid_request
     return func
+
+
+@fixture
+def wsgi_app(settings, dbsession):
+    from autonomie import base_configure
+    return base_configure({}, dbsession, **settings).make_wsgi_app()
+
+
+@fixture
+def app(wsgi_app):
+    from webtest import TestApp
+    return TestApp(wsgi_app)

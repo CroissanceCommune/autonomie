@@ -118,6 +118,17 @@ def main(global_config, **settings):
         Main function : returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
+    dbsession = initialize_sql(engine)
+
+    config = base_configure(global_config, dbsession, **settings)
+
+    return config.make_wsgi_app()
+
+
+def base_configure(global_config, dbsession, **settings):
+    """
+    All plugin and others configuration stuff
+    """
     session_factory = get_session_factory(settings)
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
@@ -130,7 +141,6 @@ def main(global_config, **settings):
     config.begin()
     config.commit()
 
-    dbsession = initialize_sql(engine)
     set_models_acls()
     TraversalDbAccess.dbsession = dbsession
 
@@ -157,8 +167,8 @@ def main(global_config, **settings):
     set_default_widgets()
     config.add_translation_dirs("colander:locale/", "deform:locale")
     add_resources_to_registry()
+    return config
 
-    return config.make_wsgi_app()
 
 __author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"
 __copyright__ = "Copyright 2012-2013, Croissance Commune"

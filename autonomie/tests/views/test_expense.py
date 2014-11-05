@@ -25,6 +25,8 @@
 """
     tests autonomie.views.expense
 """
+import pytest
+
 from datetime import date
 from autonomie.models.user import User
 from autonomie.models.company import Company
@@ -48,195 +50,188 @@ from autonomie.tests.base import (
         )
 
 
-class BaseExpense(BaseFunctionnalTest):
-    def company(self):
-        return Company.query().first()
-
-    def user(self):
-        return User.query().first()
-
-    def sheet(self, request):
-        year = date.today().year
-        month = date.today().month
-        cid = self.company().id
-        uid = self.user().id
-        return get_expense_sheet(request, year, month, cid, uid)
+@pytest.fixture
+def company(content):
+    return Company.query().first()
 
 
-class TestExpenseSheet(BaseExpense):
-    def get_type(self):
-        type_ = ExpenseType(label=u"Restauration", code="000065588")
-        self.session.add(type_)
-        self.session.flush()
-        return type_
-
-    def test_reset_success(self):
-        self.config.add_route('user_expenses', '/')
-        request = self.get_csrf_request()
-        sheet = self.sheet(request)
-        type_ = self.get_type()
-        sheet.lines.append(ExpenseLine(tva=1960, ht=150, type_object=type_))
-        self.session.merge(sheet)
-        self.session.flush()
-        request.context = sheet
-        view = ExpenseSheetView(request)
-        view.reset_success(appstruct={})
+@pytest.fixture
+def user(content):
+    return User.query().first()
 
 
-class TestRestExpenseLine(BaseExpense):
-    def test_getOne(self):
-        request = self.get_csrf_request()
-        request.context = self.sheet(request)
-        line = request.context.lines[0]
-        request.matchdict = {'lid':line.id}
-        view = RestExpenseLine(request)
-        self.assertEqual(view.getOne(), line)
-        request.matchdict = {'lid':0}
-        view = RestExpenseLine(request)
-        self.assertRaises(RestError, view.getOne)
-
-    def test_post(self):
-        request = self.get_csrf_request()
-        request.context = self.sheet(request)
-        appstruct = {'ht':'150.0',
-                     'tva':'15',
-                     'description':'Test',
-                     'date':'2112-10-12',
-                     'category':'1',
-                     'type_id':5}
-        request.json_body = appstruct
-        view = RestExpenseLine(request)
-        view.post()
-        sheet = self.sheet(request)
-        line = sheet.lines[-1]
-        self.assertEqual(line.tva, 1500)
-        self.assertEqual(line.ht, 15000)
-        self.assertEqual(line.date, date(2112, 10, 12))
-        self.assertEqual(line.type_id, 5)
-        self.assertEqual(line.category, u"1")
-        self.assertTrue(isinstance(line, ExpenseLine))
+@pytest.fixture
+def expensetype(dbsession):
+    type_ = ExpenseType(label=u"Restauration", code="000065588")
+    dbsession.add(type_)
+    dbsession.flush()
+    return type_
 
 
-class TestRestExpenseKmLine(BaseExpense):
-    def addOne(self):
-        request = self.get_csrf_request()
-        request.context = self.sheet(request)
-        appstruct = {'km':'150.0',
-                     'start':'point a',
-                     'end':'point b',
-                     'description':'Test',
-                     'date':'2112-10-12',
-                     'category':'1',
-                     'type_id':1}
-        request.json_body = appstruct
-        view = RestExpenseKmLine(request)
-        view.post()
-
-    def getOne(self):
-        request = self.get_csrf_request()
-        sheet = self.sheet(request)
-        return sheet.kmlines[-1]
-
-    def getIt(self):
-        elem = self.getOne()
-        request = self.get_csrf_request()
-        request.context = self.sheet(request)
-        request.matchdict['lid'] = elem.id
-        view = RestExpenseKmLine(request)
-        return view.getOne()
-
-    def test_get(self):
-        self.addOne()
-        elem = self.getOne()
-        line = self.getIt()
-        self.assertEqual(line.id, elem.id)
-
-    def test_post(self):
-        self.addOne()
-        line = self.getOne()
-        self.assertEqual(line.km, 15000)
-        self.assertEqual(line.start, u"point a")
-        self.assertEqual(line.end, u"point b")
-        self.assertEqual(line.date, date(2112, 10, 12))
-        self.assertEqual(line.type_id, 1)
-        self.assertEqual(line.category, u"1")
-        self.assertTrue(isinstance(line, ExpenseKmLine))
-
-    def test_put(self):
-        self.addOne()
-        line = self.getOne()
-        appstruct = {'km':'12.0',
-                     "start":"point a2",
-                     "end":"point b2",
-                     "date":line.date.isoformat(),
-                     "description":line.description,
-                     "category":line.category,
-                     "type_id":line.type_id}
-        request = self.get_csrf_request()
-        request.context = self.sheet(request)
-        request.matchdict['lid'] = line.id
-        request.json_body = appstruct
-        view = RestExpenseKmLine(request)
-        view.put()
-        line = self.getOne()
-        self.assertEqual(line.km, 1200)
-        self.assertEqual(line.start, u"point a2")
-        self.assertEqual(line.end, u"point b2")
-        self.assertEqual(line.type_id, 1)
+@pytest.fixture
+def expensekmtype(dbsession):
+    type_ = ExpenseKmType(label=u"Restauration", code="000065588", amount=0.625)
+    dbsession.add(type_)
+    dbsession.flush()
+    return type_
 
 
-class TestBookMarkHandler(BaseViewTest):
-    def get_handler(self, user):
-        req = self.get_csrf_request()
-        req.user = user
-        return BookMarkHandler(req)
+@pytest.fixture
+def sheet(user, company, get_csrf_request_with_db, expensetype):
+    request = get_csrf_request_with_db()
+    year = date.today().year
+    month = date.today().month
+    return get_expense_sheet(request, year, month, company.id, user.id)
 
-    def get_user(self):
-        return User.query().first()
+def test_reset_success(config, dbsession, get_csrf_request_with_db, sheet, expensetype):
+    config.add_route('user_expenses', '/')
+    request = get_csrf_request_with_db()
+    sheet.lines.append(ExpenseLine(tva=1960, ht=150, type_object=expensetype))
+    dbsession.merge(sheet)
+    dbsession.flush()
+    request.context = sheet
+    view = ExpenseSheetView(request)
+    view.reset_success(appstruct={})
 
-    def test_init(self):
-        user = self.get_user()
-        handler = self.get_handler(user)
-        self.assertEqual(handler.bookmarks, {})
 
-        user.session_datas = {'expense':
-            {'bookmarks':
-                {1:
-                    {'description':u'test', 'ht': 2.25, 'tva': 1.2}
-                }
-            }}
-        handler = self.get_handler(user)
-        self.assertEqual(handler.bookmarks,
-                        {1: {'description':u'test', 'ht': 2.25, 'tva': 1.2}})
+def test_get_line(dbsession, get_csrf_request_with_db, sheet, expensetype):
+    request = get_csrf_request_with_db()
+    request.context = sheet
+    sheet.lines.append(ExpenseLine(tva=1960, ht=150, type_object=expensetype))
+    dbsession.merge(sheet)
+    dbsession.flush()
+    line = request.context.lines[-1]
+    request.matchdict = {'lid':line.id}
+    view = RestExpenseLine(request)
+    assert view.getOne() == line
+    request.matchdict = {'lid':0}
+    view = RestExpenseLine(request)
+    with pytest.raises(RestError):
+        view.getOne()
 
-    def test_next_id(self):
-        user = self.get_user()
-        user.session_datas = {'expense':
-            {'bookmarks':
-                {"1":
-                    {'description':u'test 1', 'ht': 2.25, 'tva': 1.2},
-                 2:
-                    {'description':u'test 2', 'ht': 2.5, 'tva': 1.25},
+def test_post_line(get_csrf_request_with_db, sheet, expensetype):
+    request = get_csrf_request_with_db()
+    request.context = sheet
+    appstruct = {'ht':'150.0',
+                    'tva':'15',
+                    'description':'Test',
+                    'date':'2112-10-12',
+                    'category':'1',
+                    'type_id': expensetype.id}
+    request.json_body = appstruct
+    view = RestExpenseLine(request)
+    view.post()
+    line = sheet.lines[-1]
+    assert line.tva == 1500
+    assert line.ht == 15000
+    assert line.date == date(2112, 10, 12)
+    assert line.type_id == expensetype.id
+    assert line.category == u"1"
+    assert isinstance(line, ExpenseLine)
 
-                }
-            }}
-        handler = self.get_handler(user)
-        self.assertEqual(handler._next_id(), 3)
 
-    def test_store(self):
-        user = self.get_user()
-        handler = self.get_handler(user)
-        a = {'description':u'test 1', 'ht': 2.25, 'tva': 1.2}
-        handler.store(a)
-        self.session.flush()
-        b = {'description':u'test 2', 'ht': 2.5, 'tva': 1.25}
-        handler.store(b)
-        self.session.flush()
-        c = {'description':u'test 3', 'ht': 2.5, 'tva': 1.25}
-        handler.store(c)
-        self.session.flush()
-        user = self.get_user()
-        self.assertEqual(user.session_datas.keys(), ['expense'])
-        self.assertEqual(len(user.session_datas['expense']['bookmarks']), 3)
+@pytest.fixture
+def sheet_with_kmline(get_csrf_request_with_db, sheet, expensekmtype):
+    request = get_csrf_request_with_db()
+    request.context = sheet
+    appstruct = {'km':'150.0',
+                    'start':'point a',
+                    'end':'point b',
+                    'description':'Test',
+                    'date':'2112-10-12',
+                    'category':'1',
+                    'type_id': expensekmtype.id}
+    request.json_body = appstruct
+    view = RestExpenseKmLine(request)
+    view.post()
+    return sheet
 
-        self.assertEqual(user.session_datas['expense']['bookmarks'][3], c)
+def test_get_kmline(get_csrf_request_with_db, sheet_with_kmline):
+    """
+    Check the rest api return the same line object
+    """
+    line = sheet_with_kmline.kmlines[-1]
+    request = get_csrf_request_with_db()
+    request.context = sheet_with_kmline
+    request.matchdict['lid'] = line.id
+    view = RestExpenseKmLine(request)
+    rest_line = view.getOne()
+    assert line.id == rest_line.id
+
+def test_post_kmline(get_csrf_request_with_db, sheet_with_kmline, expensekmtype):
+    line = sheet_with_kmline.kmlines[-1]
+    assert line.km == 15000
+    assert line.start == u"point a"
+    assert line.end == u"point b"
+    assert line.date == date(2112, 10, 12)
+    assert line.type_id == expensekmtype.id
+    assert line.category == u"1"
+    assert isinstance(line, ExpenseKmLine)
+
+def test_put_kmline(get_csrf_request_with_db, sheet_with_kmline, expensekmtype):
+    line = sheet_with_kmline.kmlines[-1]
+    appstruct = {'km':'12.0',
+                    "start":"point a2",
+                    "end":"point b2",
+                    "date":line.date.isoformat(),
+                    "description":line.description,
+                    "category":line.category,
+                    "type_id":line.type_id}
+    request = get_csrf_request_with_db()
+    request.context = sheet_with_kmline
+    request.matchdict['lid'] = line.id
+    request.json_body = appstruct
+    view = RestExpenseKmLine(request)
+    view.put()
+    assert line.km == 1200
+    assert line.start == u"point a2"
+    assert line.end == u"point b2"
+    assert line.type_id == expensekmtype.id
+
+
+@pytest.fixture
+def bookmark_handler(get_csrf_request_with_db, user):
+    req = get_csrf_request_with_db()
+    req.user = user
+    return BookMarkHandler(req)
+
+
+def test_bookmark_handler_init(bookmark_handler, user, pyramid_request):
+    assert bookmark_handler.bookmarks == {}
+
+    user.session_datas = {'expense':
+        {'bookmarks':
+            {1:
+                {'description':u'test', 'ht': 2.25, 'tva': 1.2}
+            }
+        }}
+    bookmark_handler.refresh()
+    assert bookmark_handler.bookmarks == \
+                    {1: {'description':u'test', 'ht': 2.25, 'tva': 1.2}}
+
+def test_bookmark_handler_next_id(bookmark_handler, user):
+    user.session_datas = {'expense':
+        {'bookmarks':
+            {"1":
+                {'description':u'test 1', 'ht': 2.25, 'tva': 1.2},
+                2:
+                {'description':u'test 2', 'ht': 2.5, 'tva': 1.25},
+
+            }
+        }}
+    bookmark_handler.refresh()
+    assert bookmark_handler._next_id() == 3
+
+def test_bookmark_handler_store(dbsession, bookmark_handler, user):
+    a = {'description':u'test 1', 'ht': 2.25, 'tva': 1.2}
+    bookmark_handler.store(a)
+    dbsession.flush()
+    b = {'description':u'test 2', 'ht': 2.5, 'tva': 1.25}
+    bookmark_handler.store(b)
+    dbsession.flush()
+    c = {'description':u'test 3', 'ht': 2.5, 'tva': 1.25}
+    bookmark_handler.store(c)
+    dbsession.flush()
+    assert user.session_datas.keys() == ['expense']
+    assert len(user.session_datas['expense']['bookmarks']) == 3
+    assert user.session_datas['expense']['bookmarks'][3] == c

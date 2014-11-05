@@ -26,20 +26,18 @@ import colander
 from autonomie.forms.custom_types import AmountType
 from autonomie.forms.custom_types import specialfloat
 from autonomie.forms.custom_types import Integer
-from autonomie.tests.base import BaseTestCase
 
-class TestType(BaseTestCase):
-    def test_amount_type(self):
-        a = AmountType()
-        self.assertEqual(a.serialize(None, 15000), "150.0")
-        self.assertEqual(a.deserialize(None, u"79.4"), 7940)
-        self.assertEqual(a.deserialize(None, u"292,65"), 29265)
+def test_amount_type():
+    a = AmountType()
+    assert a.serialize(None, 15000) == "150.0"
+    assert a.deserialize(None, u"79.4") == 7940
+    assert a.deserialize(None, u"292,65") == 29265
 
-    def test_specialfloat(self):
-        a = u"495, 4 5€"
-        self.assertEqual(specialfloat( "", a), 495.45)
+def test_specialfloat():
+    a = u"495, 4 5€"
+    assert specialfloat( "", a) == 495.45
 
-    def test_integer(self):
-        i = Integer()
-        self.assertEqual(colander.null, i.serialize(None, None))
-        self.assertEqual("0", i.serialize(None, 0))
+def test_integer():
+    i = Integer()
+    assert colander.null == i.serialize(None, None)
+    assert "0" == i.serialize(None, 0)

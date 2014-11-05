@@ -240,6 +240,9 @@ def populate_db(session):
     c.customers.append(cust)
     c.projects.append(project)
     session.add(c)
+    from autonomie.scripts import fake_database
+    fake_database.set_configuration()
+
 
 
 @fixture(scope='session')

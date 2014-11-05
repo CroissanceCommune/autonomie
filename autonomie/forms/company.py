@@ -25,7 +25,6 @@
 """
     Company form schemas
 """
-import os
 import colander
 import logging
 import deform
@@ -41,17 +40,6 @@ from autonomie.utils.image import ImageResizer
 log = logging.getLogger(__name__)
 
 HEADER_RESIZER = ImageResizer(4, 1)
-
-
-def get_upload_options_from_request(request, directory):
-    """
-        Return the upload path and url from the request object
-    """
-    company = request.context
-    rootpath = request.registry.settings.get('autonomie.assets', '/tmp')
-    store_path = os.path.join(rootpath, company.get_path(), directory)
-    store_url = os.path.join("/assets", company.get_path(), directory)
-    return store_path, store_url
 
 
 @colander.deferred

@@ -25,10 +25,6 @@
 import datetime
 from mock import MagicMock
 
-from autonomie.views.invoice import InvoiceAdd
-from autonomie.views.invoice import InvoiceStatus
-from autonomie.views.invoice import duplicate
-from autonomie.views.taskaction import make_task_delete_view
 
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.user import User
@@ -81,6 +77,7 @@ class Base(BaseFunctionnalTest):
         return request
 
     def addOne(self):
+        from autonomie.views.invoice import InvoiceAdd
         self.config.add_route('project', '/')
         view = InvoiceAdd(self.request())
         view.submit_success(APPSTRUCT)
@@ -105,12 +102,14 @@ class TestInvoiceAdd(Base):
         self.addOne()
         invoice = self.getOne()
         request = self.request(task=invoice, post_args={'submit':'wait'})
+        from autonomie.views.invoice import InvoiceStatus
         view = InvoiceStatus(request)
         view()
         invoice = self.getOne()
         self.assertEqual(invoice.CAEStatus, "wait")
 
     def test_duplicate(self):
+        from autonomie.views.invoice import duplicate
         self.config.testing_securitypolicy(userid="test",
                 groupids=('admin',), permissive=True)
         self.config.add_route('invoice', '/inv')
@@ -125,6 +124,7 @@ class TestInvoiceAdd(Base):
         self.assertEqual(len(invoices), 2)
 
     def test_delete(self):
+        from autonomie.views.taskaction import make_task_delete_view
         self.addOne()
         invoice = self.getOne()
         invoice.CAEstatus = 'wait'

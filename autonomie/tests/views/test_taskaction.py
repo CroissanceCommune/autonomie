@@ -28,23 +28,24 @@ from pyramid import testing
 
 from autonomie.tests.base import BaseFunctionnalTest, BaseTestCase
 from autonomie.tests.base import BaseViewTest
-from autonomie.views.taskaction import (context_is_task, context_is_editable,
-        get_paid_form, get_duplicate_form)
 
 class TestFuncs(BaseViewTest):
     def test_context_is_task(self):
+        from autonomie.views.taskaction import context_is_task
         context = MagicMock()
         for i in ("invoice", "cancelinvoice", "estimation"):
             context.__name__ = i
             self.assertTrue(context_is_task(context))
 
     def test_context_is_not_task(self):
+        from autonomie.views.taskaction import context_is_task
         context = MagicMock()
         for i in ("project_invoices", "project_cancelinvoices", "project_estimations"):
             context.__name__ = i
             self.assertFalse(context_is_task(context))
 
     def test_context_is_editable(self):
+        from autonomie.views.taskaction import context_is_editable
         context = MagicMock()
         context.__name__ = "invoice"
         context.is_editable = lambda :True

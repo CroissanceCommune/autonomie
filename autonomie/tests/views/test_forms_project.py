@@ -25,11 +25,9 @@
 from mock import MagicMock
 from autonomie.forms.project import customer_dictify
 
-from autonomie.tests.base import BaseTestCase
 
-class TestProjectForm(BaseTestCase):
-    def test_customer_dictify(self):
-        customer = MagicMock(id=12)
-        # deform is expecting a string (while it's an integer type
-        self.assertEqual(customer_dictify(customer), 12)
+def test_customer_dictify():
+    customer = MagicMock(id=12)
+    # deform is expecting a string (while it's an integer type
+    assert customer_dictify(customer) == 12
 

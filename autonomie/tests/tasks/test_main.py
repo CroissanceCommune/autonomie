@@ -190,6 +190,7 @@ class TestTaskModels(unittest.TestCase):
         self.assertTrue(task.is_valid())
         self.assertFalse(task.is_editable())
 
+class TestStatusChange:
     def _forbidden_state_change(self, config, task, from_state, to_states):
         request = testing.DummyRequest()
 

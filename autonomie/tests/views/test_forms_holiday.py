@@ -24,16 +24,14 @@
 
 import datetime
 import colander
+import pytest
 
-from autonomie.tests.base import BaseTestCase
 from autonomie.forms.holiday import date_validator, HolidaySchema
 
-class TestHolidays(BaseTestCase):
-    def test_date_validator(self):
-        start_date = datetime.date(2012, 11, 1)
-        end_date = datetime.date(2012, 11, 2)
-        form = HolidaySchema()
-        self.assertNotRaises(date_validator, form, {'start_date':start_date,
-                                            'end_date': end_date})
-        self.assertRaises(colander.Invalid, date_validator, form,
-                               {'start_date':end_date, 'end_date': start_date})
+def test_date_validator():
+    start_date = datetime.date(2012, 11, 1)
+    end_date = datetime.date(2012, 11, 2)
+    form = HolidaySchema()
+    date_validator(form, {'start_date':start_date, 'end_date': end_date})
+    with pytest.raises(colander.Invalid):
+        date_validator(form, {'start_date':end_date, 'end_date': start_date})

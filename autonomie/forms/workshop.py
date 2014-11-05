@@ -25,6 +25,7 @@ from deform import widget as deform_widget
 from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models import user
 from autonomie import forms
+from autonomie.forms import lists, activity
 
 
 def get_info_field(title):
@@ -96,7 +97,7 @@ class Workshop(colander.MappingSchema):
     info1 = get_info_field(u"Sous-titre 1 (facultatif)")
     info2 = get_info_field(u"Sous-titre 2 (facultatif)")
     info3 = get_info_field(u"Sous-titre 3 (facultatif)")
-    participants = forms.activity.ParticipantsSequence(
+    participants = activity.ParticipantsSequence(
         title=u"Participants",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
@@ -112,7 +113,7 @@ def get_list_schema(company=False):
     """
     Return a schema for filtering workshop list
     """
-    schema = forms.lists.BaseListsSchema().clone()
+    schema = lists.BaseListsSchema().clone()
 
     schema.insert(0,
         forms.today_node(

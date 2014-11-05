@@ -21,17 +21,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-
-from autonomie.views.user import (
-    user_delete,
-    UserAccountView,
-    UserDisable,
-    PermanentUserAddView,
-#    PermanentUserEditView,
-)
+import pytest
 from autonomie.tests.base import (
-    BaseFunctionnalTest,
     Dummy,
 )
 from autonomie.models.user import User
@@ -49,59 +40,53 @@ APPSTRUCT = {
 }
 
 
-class Base(BaseFunctionnalTest):
-    def addone(self):
-        appstruct = APPSTRUCT.copy()
-        self.config.add_route("user", "/users/{id:\d+}")
-        request = self.get_csrf_request()
-        request.context = Dummy(__name__='root')
-        view = PermanentUserAddView(request)
-        view.submit_success(appstruct)
+@pytest.fixture
+def user(config, get_csrf_request_with_db):
+    from autonomie.views.user import PermanentUserAddView
+    appstruct = APPSTRUCT.copy()
+    config.add_route("user", "/users/{id:\d+}")
+    request = get_csrf_request_with_db()
+    request.context = Dummy(__name__='root')
+    view = PermanentUserAddView(request)
+    view.submit_success(appstruct)
+    return getone()
 
-    def getone(self):
-        return User.query().filter(User.login==APPSTRUCT['login']).first()
-
-class TestUserAccount(Base):
-    def test_success(self):
-        self.config.add_route('account', '/account')
-        self.addone()
-        req = self.get_csrf_request()
-        req.user = self.getone()
-        view = UserAccountView(req)
-        view.submit_success({'pwd':u"Né^PAs$$ù"})
-        self.assertEqual(req.user.auth(u"Né^PAs$$ù"), True)
+def getone():
+    return User.query().filter(User.login==APPSTRUCT['login']).first()
 
 
-class TestUserDelete(Base):
-    def test_func(self):
-        self.config.add_route('users', '/')
-        self.addone()
-        self.session.commit()
-        req = self.get_csrf_request()
-        u = self.getone()
-        req.context = u
-        user_delete(u, req)
-        self.session.commit()
-        self.assertEqual(None, self.getone())
+def test_myaccount_success(config, get_csrf_request_with_db, user):
+    from autonomie.views.user import UserAccountView
+    config.add_route('account', '/account')
+    req = get_csrf_request_with_db()
+    req.user = user
+    view = UserAccountView(req)
+    view.submit_success({'pwd':u"Né^PAs$$ù"})
+    assert req.user.auth(u"Né^PAs$$ù")
 
-class TestUserDisable(Base):
-    def test_success(self):
-        self.config.add_route('users', '/')
-        self.addone()
-        user = self.getone()
-        appstruct = {'disable':True, 'companies':True}
-        req = self.get_csrf_request()
-        req.context = user
-        view = UserDisable(req)
-        view.submit_success(appstruct)
-        self.assertFalse(user.enabled())
-        for company in user.companies:
-            self.assertEqual('N', company.active)
 
-class TestUserAdd(Base):
-    def test_success(self):
-        self.addone()
-        user = self.getone()
-        self.assertEqual(user.email, APPSTRUCT['email'])
-        self.assertTrue(user.auth(PWD))
-        self.assertEqual(len(user.companies), 2)
+def test_delete(config, dbsession, get_csrf_request_with_db, user):
+    from autonomie.views.user import user_delete
+    config.add_route('users', '/')
+    req = get_csrf_request_with_db()
+    req.context = user
+    user_delete(user, req)
+    dbsession.flush()
+    assert getone() is None
+
+def test_disable(config, get_csrf_request_with_db, user):
+    from autonomie.views.user import UserDisable
+    config.add_route('users', '/')
+    appstruct = {'disable':True, 'companies':True}
+    req = get_csrf_request_with_db()
+    req.context = user
+    view = UserDisable(req)
+    view.submit_success(appstruct)
+    assert not user.enabled()
+    for company in user.companies:
+        assert 'N' == company.active
+
+def test_success(user):
+    assert user.email == APPSTRUCT['email']
+    assert user.auth(PWD)
+    assert len(user.companies) == 2

@@ -25,8 +25,6 @@
 from mock import MagicMock
 from autonomie.models.project import Project
 from autonomie.models.company import Company
-from autonomie.views.project import (ProjectAdd, ProjectEdit,
-        project_addphase, project_archive, project_delete)
 
 from autonomie.tests.base import (
     BaseFunctionnalTest,
@@ -37,6 +35,7 @@ APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "customers":[]}
 
 class Base(BaseFunctionnalTest):
     def addOne(self, appstruct=APPSTRUCT):
+        from autonomie.views.project import ProjectAdd
         self.config.add_route('project', '/')
         req = self.get_csrf_request()
         company = Company.query().first()
@@ -70,6 +69,7 @@ class TestProjectAdd(Base):
 
 class TestProjectEdit(Base):
     def test_edit(self):
+        from autonomie.views.project import ProjectEdit
         self.addOne()
         project = self.getOne()
         req = self.get_csrf_request()
@@ -83,6 +83,7 @@ class TestProjectEdit(Base):
         self.assertEqual(project.definition, definition)
 
     def test_customer_remove(self):
+        from autonomie.views.project import ProjectEdit
         appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
         self.addOne(appstruct)
         project = self.getOne()
@@ -95,6 +96,7 @@ class TestProjectEdit(Base):
         self.assertEqual(len(project.customers), 0)
 
     def test_customer_add(self):
+        from autonomie.views.project import ProjectEdit
         self.addOne()
         project = self.getOne()
         req = self.get_csrf_request()
@@ -108,6 +110,7 @@ class TestProjectEdit(Base):
 
 class TestActions(Base):
     def test_delete(self):
+        from autonomie.views.project import project_delete
         self.addOne()
         req = self.get_csrf_request()
         req.referer = "test"
@@ -117,6 +120,7 @@ class TestActions(Base):
         self.assertEqual(self.getOne(), None)
 
     def test_archive(self):
+        from autonomie.views.project import project_archive
         self.addOne()
         req = self.get_csrf_request()
         req.referer = "test"
@@ -126,6 +130,7 @@ class TestActions(Base):
         self.assertEqual(self.getOne().archived, 1)
 
     def test_addphase(self):
+        from autonomie.views.project import project_addphase
         self.addOne()
         req = self.get_csrf_request()
         req.referer = "test"

@@ -21,10 +21,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
+
+import pytest
+
 from autonomie.models.customer import Customer
 from autonomie.models.company import Company
-from autonomie.views.customer import CustomerAdd, CustomerEdit, customer_view
-from autonomie.tests.base import BaseFunctionnalTest, Dummy
+from autonomie.views.customer import CustomerAdd, CustomerEdit
+from autonomie.tests.base import Dummy
 
 APPSTRUCT = {'name':'Company', 'contactLastName':u'Lastname',
              'contactFirstName':u'FirstName',
@@ -38,47 +41,37 @@ APPSTRUCT = {'name':'Company', 'contactLastName':u'Lastname',
 def get_user(contractor=True):
     return Dummy(is_contractor=lambda :contractor)
 
+@pytest.fixture
+def customer(config, content, get_csrf_request_with_db):
+    config.add_route('customer', '/')
+    request = get_csrf_request_with_db()
+    comp = Company.query().first()
+    comp.__name__ = 'company'
+    request.context = comp
+    request.user = get_user()
+    view = CustomerAdd(request)
+    view.submit_success(APPSTRUCT)
+    return getOne()
 
-class Base(BaseFunctionnalTest):
-    def addOne(self, contractor=True):
-        self.config.add_route('customer', '/')
-        request = self.get_csrf_request()
-        comp = Company.query().first()
-        comp.__name__ = 'company'
-        request.context = comp
-        request.user = get_user(contractor)
-        view = CustomerAdd(request)
-        view.submit_success(APPSTRUCT)
+def getOne():
+    return Customer.query().filter(Customer.name=='Company').one()
 
-    def getOne(self):
-        try:
-            return Customer.query().filter(Customer.name=='Company').one()
-        except:
-            return None
+def test_add(customer):
+    for attr, value in APPSTRUCT.items():
+        assert getattr(customer, attr) == value
 
-class TestCustomerAdd(Base):
-    def test_success(self):
-        self.addOne()
-        customer = self.getOne()
-        for attr, value in APPSTRUCT.items():
-            self.assertEqual(getattr(customer, attr), value)
-
-
-class TestCustomerEdit(Base):
-    def test_customer_edit(self):
-        self.addOne()
-        customer = self.getOne()
-        customer.__name__ = 'customer'
-        req = self.get_csrf_request()
-        req.context = customer
-        req.user = get_user(contractor=False)
-        appstruct = APPSTRUCT.copy()
-        appstruct['contactLastName'] = u"Changed Lastname"
-        appstruct['compte_cg'] = "1"
-        appstruct['compte_tiers'] = "2"
-        view = CustomerEdit(req)
-        view.submit_success(appstruct)
-        customer = self.getOne()
-        self.assertEqual(customer.contactLastName, u'Changed Lastname')
-        self.assertEqual(customer.compte_cg, "1")
-        self.assertEqual(customer.compte_tiers, "2")
+def test_customer_edit(customer, get_csrf_request_with_db):
+    customer.__name__ = 'customer'
+    req = get_csrf_request_with_db()
+    req.context = customer
+    req.user = get_user(contractor=False)
+    appstruct = APPSTRUCT.copy()
+    appstruct['contactLastName'] = u"Changed Lastname"
+    appstruct['compte_cg'] = "1"
+    appstruct['compte_tiers'] = "2"
+    view = CustomerEdit(req)
+    view.submit_success(appstruct)
+    customer = getOne()
+    assert customer.contactLastName == u'Changed Lastname'
+    assert customer.compte_cg == "1"
+    assert customer.compte_tiers == "2"

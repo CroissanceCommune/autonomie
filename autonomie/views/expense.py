@@ -98,9 +98,16 @@ class BookMarkHandler(object):
     """
     def __init__(self, request):
         self.request = request
-        session_datas = request.user.session_datas or {}
+        self.bookmarks = {}
+        self.load_bookmarks_from_current_request()
+
+    def load_bookmarks_from_current_request(self):
+        session_datas = self.request.user.session_datas or {}
         expense_datas = session_datas.get('expense', {})
         self.bookmarks = expense_datas.get('bookmarks', {})
+
+    def refresh(self):
+        self.load_bookmarks_from_current_request()
 
     def store(self, item):
         """

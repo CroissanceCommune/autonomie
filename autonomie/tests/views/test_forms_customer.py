@@ -21,34 +21,34 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+import pytest
 import colander
 from mock import MagicMock, Mock
 from autonomie.models.customer import (
     Customer,
     deferred_ccode_valid,
 )
+from autonomie.models.company import Company
 
-from autonomie.tests.base import BaseTestCase
+def makeOne(context):
+    request = MagicMock(context=context)
+    return deferred_ccode_valid("nutt", {'request':request})
 
-class TestCustomer(BaseTestCase):
-    def makeOne(self, context):
-        request = MagicMock(context=context)
-        return deferred_ccode_valid("nutt", {'request':request})
+def test_unique_ccode(dbsession, content):
+    # A IMDD exists in the database for the company with id 1
+    company = Company.query().first()
+    company.__name__ = 'company'
+    validator = makeOne(company)
+    with pytest.raises(colander.Invalid):
+        validator('nutt', u'C001')
+    validator('nutt', u'C002')
 
-    def test_unique_ccode(self):
-        # A IMDD exists in the database for the company with id 1
-        company = Mock(id=1, __name__='company')
-        validator = self.makeOne(company)
-        self.assertRaises(colander.Invalid, validator, 'nutt', u'IMDD')
-        self.assertNotRaises(validator, 'nutt', u'C002')
+    company = Mock(id=2, __name__='company')
+    validator = makeOne(company)
+    validator('nutt', u'C001')
 
-        company = Mock(id=2, __name__='company')
-        validator = self.makeOne(company)
-        self.assertNotRaises(validator, 'nutt', u'IMDD')
-
-        # In edit mode, no error is raised for the current_customer
-        customer = self.session.query(Customer).first()
-        customer.__name__ = 'customer'
-        validator = self.makeOne(customer)
-        self.assertNotRaises(validator, 'nutt', u'IMDD')
+    # In edit mode, no error is raised for the current_customer
+    customer = dbsession.query(Customer).first()
+    customer.__name__ = 'customer'
+    validator = makeOne(customer)
+    validator('nutt', u'C001')

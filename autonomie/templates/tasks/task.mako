@@ -62,11 +62,14 @@
                     bottom: 0cm;
                     margin-left: 1cm;
                     margin-right: 1cm;
-                    % if hasattr(task, "course") and task.course == 1 and request.config.has_key('coop_pdffootercourse'):
-                        height:3cm;
-                    % else:
-                        height:2cm;
-                    % endif
+                    <%
+if request.config.has_key('coop_pdffootertext'):
+    height = len(config.get('coop_pdffootertext').splitlines())
+if request.config.has_key('coop_pdffootercourse') and hasattr(task, "course"):
+    height += len(config.get('coop_pdffootercourse').splitlines())
+height *= 0.8
+%>
+                    height: ${height}cm;
                     ## border: 1pt solid red;
                     border: 0pt solid white;
                 }

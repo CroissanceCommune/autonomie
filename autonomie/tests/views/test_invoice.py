@@ -21,7 +21,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+import pytest
 import datetime
 from mock import MagicMock
 
@@ -29,7 +29,6 @@ from mock import MagicMock
 from autonomie.models.task.invoice import Invoice
 from autonomie.models.user import User
 from autonomie.models.project import Project
-from autonomie.tests.base import BaseFunctionnalTest
 
 TODAY = datetime.date.today()
 
@@ -50,89 +49,85 @@ APPSTRUCT = {'common': dict(phase_id=1,
         "submit":"draft"
         }
 
+@pytest.fixture
+def project(content):
+    return Project.query().first()
 
-class Base(BaseFunctionnalTest):
-    def task(self):
-        return MagicMock(topay=lambda :7940, __name__='invoice',
-                project=self.project())
+@pytest.fixture
+def task(project):
+    return MagicMock(
+        topay=lambda :7940,
+        __name__='invoice',
+        project=project)
 
-    def project(self):
-        return Project.query().first()
+@pytest.fixture
+def user(content):
+    return User.query().first()
 
-    def user(self):
-        return User.query().first()
 
-    def request(self, task=None, post_args=APPSTRUCT):
-        # Since the testing request separates post args from the webob params
-        request = self.get_csrf_request(params=post_args, post=post_args)
-        if task is None:
-            request.context = self.project()
-            request.context.__name__ = 'project'
-            request.matched_route = "project_invoices"
-        else:
-            request.matched_route = "invoice"
-            request.context = task
-        request.user = self.user()
-        request.actionmenu = set()
-        return request
+@pytest.fixture
+def invoice(config, get_csrf_request_with_db, project, user):
+    from autonomie.views.invoice import InvoiceAdd
+    config.add_route('project', '/')
+    request = get_csrf_request_with_db(post=APPSTRUCT)
+    request.context = project
+    request.context.__name__ = 'project'
+    request.matched_route = "project_invoices"
+    request.user = user
+    request.context = project
+    view = InvoiceAdd(request)
+    view.submit_success(APPSTRUCT)
+    return getone()
 
-    def addOne(self):
-        from autonomie.views.invoice import InvoiceAdd
-        self.config.add_route('project', '/')
-        view = InvoiceAdd(self.request())
-        view.submit_success(APPSTRUCT)
+def getone():
+    invoice = Invoice.query().filter(Invoice.phase_id==1).first()
+    if invoice is not None:
+        invoice.__name__ = 'invoice'
+    return invoice
 
-    def getOne(self):
-        try:
-            invoice = Invoice.query().filter(Invoice.phase_id==1).first()
-            invoice.__name__ = 'invoice'
-            return invoice
-        except:
-            return None
+def test_add_invoice(invoice):
+    assert invoice.phase_id == 1
+    assert len(invoice.lines) == 1
+    assert len(invoice.discounts) == 1
 
-class TestInvoiceAdd(Base):
-    def test_success(self):
-        self.addOne()
-        invoice = self.getOne()
-        self.assertEqual(invoice.phase_id, 1)
-        self.assertEqual(len(invoice.lines), 1)
-        self.assertEqual(len(invoice.discounts), 1)
+def test_change_status(invoice, get_csrf_request_with_db):
+    request = get_csrf_request_with_db(post={'submit':'wait'})
+    request.context = invoice
+    request.matched_route = "invoice"
 
-    def test_change_status(self):
-        self.addOne()
-        invoice = self.getOne()
-        request = self.request(task=invoice, post_args={'submit':'wait'})
-        from autonomie.views.invoice import InvoiceStatus
-        view = InvoiceStatus(request)
-        view()
-        invoice = self.getOne()
-        self.assertEqual(invoice.CAEStatus, "wait")
+    from autonomie.views.invoice import InvoiceStatus
+    view = InvoiceStatus(request)
+    view()
+    invoice = getone()
+    assert invoice.CAEStatus == "wait"
 
-    def test_duplicate(self):
-        from autonomie.views.invoice import duplicate
-        self.config.testing_securitypolicy(userid="test",
-                groupids=('admin',), permissive=True)
-        self.config.add_route('invoice', '/inv')
-        self.addOne()
-        invoice = self.getOne()
-        #The invoice status need to be at least wait to be duplicated
-        invoice.CAEStatus = 'wait'
-        request = self.request(task=invoice, post_args={'submit':'duplicate',
-            'phase':"1", 'project':"1", 'customer':"1"})
-        duplicate(request)
-        invoices = Invoice.query().filter(Invoice.phase_id==1).all()
-        self.assertEqual(len(invoices), 2)
+def test_duplicate(config, content, dbsession, invoice, get_csrf_request_with_db):
+    from autonomie.views.invoice import duplicate
+    config.testing_securitypolicy(userid="test", groupids=('admin',),
+                                  permissive=True)
+    config.add_route('invoice', '/inv')
+    #The invoice status need to be at least wait to be duplicated
+    invoice.CAEStatus = 'wait'
+    request = get_csrf_request_with_db(
+        post={'submit':'duplicate', 'phase':"1", 'project':"1", 'customer':"1"}
+    )
+    request.context = invoice
+    request.matched_route = "invoice"
+    duplicate(request)
+    dbsession.flush()
+    invoices = Invoice.query().filter(Invoice.phase_id==1).all()
+    assert len(invoices) == 2
 
-    def test_delete(self):
-        from autonomie.views.taskaction import make_task_delete_view
-        self.addOne()
-        invoice = self.getOne()
-        invoice.CAEstatus = 'wait'
-        request = self.request(task=invoice, post_args={'submit':'delete'})
-        view = make_task_delete_view("message")
-        view(request)
-        invoice = self.getOne()
-        self.assertEqual(invoice, None)
+def test_delete(invoice, get_csrf_request_with_db):
+    from autonomie.views.taskaction import make_task_delete_view
+    invoice.CAEstatus = 'wait'
+    request = get_csrf_request_with_db(post={'submit':'delete'})
+    request.context = invoice
+    request.matched_route = "invoice"
+    view = make_task_delete_view("message")
+    view(request)
+    invoice = getone()
+    assert invoice == None
 
 
 

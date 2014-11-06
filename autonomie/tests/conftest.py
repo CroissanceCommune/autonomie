@@ -205,6 +205,14 @@ def populate_db(session):
     user.set_password('o')
     session.add(user)
 
+    from autonomie.models.project import Project
+    project = Project(
+        name='Projet 1',
+        code='P001',
+        definition="Projet 1"
+    )
+    session.add(project)
+
     from autonomie.models.customer import Customer
     cust = Customer(
         code='C001',
@@ -214,15 +222,8 @@ def populate_db(session):
         zipCode='69003',
         city='Lyon',
     )
+    cust.projects.append(project)
     session.add(cust)
-
-    from autonomie.models.project import Project
-    project = Project(
-        name='Projet 1',
-        code='P001',
-        definition="Projet 1"
-    )
-    session.add(project)
 
     from autonomie.models.project import Phase
     phase = Phase(name='Phase de test')
@@ -288,6 +289,7 @@ def get_csrf_request(pyramid_request):
     def func(params=None, cookies=None, post=None):
         params = params or {}
         post = post or {}
+        params.update(post)
         cookies = cookies or {}
         def_csrf = 'default_csrf'
         if not  u'csrf_token' in post.keys():
@@ -317,6 +319,7 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         cookies = cookies or {}
         params = params or {}
         post = post or {}
+        params.update(post)
         def_csrf = 'default_csrf'
         if not  u'csrf_token' in post.keys():
             post.update({'csrf_token': def_csrf})

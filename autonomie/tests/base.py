@@ -21,108 +21,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-import os
-import unittest
-
-from pyramid import testing
-from mock import Mock
-
-from paste.deploy.loadwsgi import appconfig
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import sessionmaker
-from autonomie.utils.widgets import ActionMenu
-
-import autonomie.models.base
-from autonomie.models.base import DBBASE  # base declarative object
-from sqlalchemy.orm import scoped_session
-
-here = os.path.dirname(__file__)
-base_dir = os.path.join(here, '../..')
-
-def __current_test_ini_file():
-    local_test_ini = os.path.join(base_dir, 'test.ini')
-    if os.path.exists(local_test_ini):
-        return local_test_ini
-    return os.path.join(base_dir, 'travis.ini')
-settings = appconfig('config:%s' % __current_test_ini_file(), "autonomie")
-TMPDIR = os.path.join(here, 'tmp')
-DATASDIR = os.path.join(here, 'datas')
-
-
 class Dummy(object):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-
-
-class BaseTestCase(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.engine = engine_from_config(settings, prefix='sqlalchemy.')
-        cls.connection = cls.engine.connect()
-        cls.DBSession = scoped_session(sessionmaker(bind=cls.connection))
-        autonomie.models.base.DBSESSION = cls.DBSession
-
-    def setUp(self):
-        # begin a non-ORM transaction
-        self.trans = self.connection.begin()
-        # Get a new session
-        self.session = self.DBSession()
-        DBBASE.session = self.session
-
-    def tearDown(self):
-        # rollback - everything that happened with the
-        # dbsession above (including calls to commit())
-        # is rolled back.
-        testing.tearDown()
-        self.trans.rollback()
-        self.session.close()
-
-    def assertNotRaises(self, func, *args):
-        func(*args)
-
-class BaseViewTest(BaseTestCase):
-    """
-        Base class for testing views
-    """
-    def setUp(self):
-        super(BaseViewTest, self).setUp()
-        self.config = testing.setUp(request=testing.DummyRequest())
-
-    def make_session(self, request, **options):
-        from pyramid_beaker import BeakerSessionFactoryConfig
-        return BeakerSessionFactoryConfig(**options)(request)
-
-    def get_csrf_request(self, params={}, cookies=None, post={}):
-        """
-            Insert a dummy csrf token in the posted datas
-        """
-        def_csrf = 'default_csrf'
-        if not  u'csrf_token' in post.keys():
-            post.update({'csrf_token': def_csrf})
-        request = testing.DummyRequest(params=params, post=post, cookies=cookies)
-        request.session = self.make_session(request)
-        request.dbsession = self.session
-        request.config = {}
-        csrf_token = Mock()
-        csrf_token.return_value = def_csrf
-        request.session.get_csrf_token = csrf_token
-        request.actionmenu = ActionMenu()
-        return request
-
-class BaseFunctionnalTest(BaseViewTest):
-    @classmethod
-    def setUpClass(cls):
-        from autonomie import main
-        cls.app = main({}, **settings)
-        super(BaseFunctionnalTest, cls).setUpClass()
-
-    def setUp(self):
-        from webtest import TestApp
-        self.app = TestApp(self.app)
-        self.config = testing.setUp()
-        super(BaseFunctionnalTest, self).setUp()
 
 def printstatus(obj):
     """

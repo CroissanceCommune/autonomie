@@ -31,6 +31,8 @@ from sqlalchemy import engine_from_config
 from autonomie.utils.widgets import ActionMenu
 
 HERE = os.path.dirname(__file__)
+DATASDIR = os.path.join(HERE, 'datas')
+TMPDIR = os.path.join(HERE, 'tmp')
 
 
 def __current_test_ini_file():
@@ -129,23 +131,34 @@ def initialize_test_database(settings):
 @fixture(scope='session')
 def settings():
     _settings = appconfig('config:%s' % __current_test_ini_file(), "autonomie")
+    _settings["autonomie.ftpdir"] = DATASDIR
     return _settings
 
-@fixture
-def pyramid_request():
-    return testing.DummyRequest()
+@fixture(scope='session')
+def registry(settings):
+    from pyramid.registry import Registry
+    registry = Registry()
+    registry.settings = settings
+    return registry
 
 @fixture
-def config(request, pyramid_request, settings):
+def pyramid_request(registry, settings):
+    request = testing.DummyRequest()
+    request.registry = registry
+    return request
+
+@fixture
+def config(request, pyramid_request, settings, registry):
     """ returns a Pyramid `Configurator` object initialized
         with Kotti's default (test) settings.
     """
     os.environ['TZ'] = "Europe/Paris"
-    from pyramid.registry import Registry
     from pyramid_beaker import set_cache_regions_from_settings
-    registry = Registry()
-    registry.settings = settings
-    config = testing.setUp(registry=registry, settings=settings, request=pyramid_request)
+    config = testing.setUp(
+        registry=registry,
+        settings=settings,
+        request=pyramid_request
+    )
     config.include('pyramid_mako')
     config.include('pyramid_chameleon')
     set_cache_regions_from_settings(settings)

@@ -25,6 +25,7 @@
     File model
 """
 import hashlib
+import os
 from datetime import datetime
 from sqlalchemy import (
     Integer,
@@ -97,6 +98,10 @@ class MailHistory(DBBASE):
         "Company",
         backref=backref('mail_history'),
     )
+
+    @property
+    def filename(self):
+        return os.path.basename(self.filepath)
 
 
 def store_sent_mail(filepath, filedatas, company):

@@ -21,7 +21,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+import pytest
 from colander import Invalid
 from mock import MagicMock
 from autonomie.forms.user import (
@@ -32,9 +32,8 @@ from autonomie.forms.user import (
 from autonomie.models.user import User
 
 
-from autonomie.tests.base import BaseTestCase
-
-def adduser(dbsession):
+@pytest.fixture
+def user(dbsession):
     user = User(login='test_forms_user',
                 lastname='lastname__éé',
                 firstname='firstname__éé',
@@ -44,26 +43,24 @@ def adduser(dbsession):
     dbsession.flush()
     return user
 
-class TestFormsUser(BaseTestCase):
-    def test_unique_login(self):
-        adduser(self.session)
-        assert User.unique_login("test_forms_user") == False
-        User.unique_login("nutt", "other unused login")
+def test_unique_login(user):
+    assert User.unique_login("test_forms_user") == False
+    User.unique_login("nutt", "other unused login")
 
-    def test_auth(self):
-        adduser(self.session)
-        form = get_password_schema()
-        appstruct = {'login':'test_forms_user', 'password':u"Tést$!Pass"}
+def test_auth(user):
+    form = get_password_schema()
+    appstruct = {'login':'test_forms_user', 'password':u"Tést$!Pass"}
+    auth(form, appstruct)
+    appstruct = {'login':'test_forms_user', 'password':u"Tést$"}
+    with pytest.raises(Invalid):
         auth(form, appstruct)
-        appstruct = {'login':'test_forms_user', 'password':u"Tést$"}
-        self.assertRaises(Invalid, auth, form, appstruct)
 
-    def test_default_disable(self):
-        companies = [MagicMock(employees=range(2))]
-        user = MagicMock(companies=companies)
-        req = MagicMock(context=user)
-        self.assertFalse(deferred_company_disable_default("", {'request': req}))
-        companies = [MagicMock(employees=[1])]
-        user = MagicMock(companies=companies)
-        req = MagicMock(context=user)
-        self.assertTrue(deferred_company_disable_default("", {'request': req}))
+def test_default_disable():
+    companies = [MagicMock(employees=range(2))]
+    user = MagicMock(companies=companies)
+    req = MagicMock(context=user)
+    assert not deferred_company_disable_default("", {'request': req})
+    companies = [MagicMock(employees=[1])]
+    user = MagicMock(companies=companies)
+    req = MagicMock(context=user)
+    assert(deferred_company_disable_default("", {'request': req}))

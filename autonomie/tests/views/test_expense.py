@@ -44,10 +44,6 @@ from autonomie.views.expense import (
         BookMarkHandler,
         )
 from autonomie.forms.expense import ExpenseKmLineSchema, ExpenseLineSchema
-from autonomie.tests.base import (
-        BaseFunctionnalTest,
-        BaseViewTest,
-        )
 
 
 @pytest.fixture

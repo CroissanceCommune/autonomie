@@ -27,7 +27,7 @@
 """
 import os
 
-from .base import TMPDIR, DATASDIR
+from autonomie.tests.conftest import TMPDIR, DATASDIR
 from autonomie.utils import fileupload
 
 

@@ -24,7 +24,6 @@
 
 import datetime
 import pytest
-from autonomie.tests.base import BaseTestCase
 
 from autonomie.models.project import Phase, Project
 from autonomie.models.user import User

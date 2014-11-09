@@ -21,14 +21,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+import unittest
 import time
 import datetime
 import locale
-from autonomie.tests.base import BaseTestCase
 from autonomie.views import render_api
 
-class TestIt(BaseTestCase):
+class TestIt(unittest.TestCase):
     def test_format_amount(self):
         a = 1525
         b = 1525.3

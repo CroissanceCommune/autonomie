@@ -26,7 +26,6 @@ from mock import MagicMock
 from autonomie.panels.menu import get_cid
 from autonomie.panels.menu import get_companies
 
-from autonomie.tests.base import BaseViewTest
 
 def get_company(id):
     c = MagicMock()

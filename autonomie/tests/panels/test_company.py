@@ -21,7 +21,6 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from autonomie.tests.base import BaseViewTest
 from autonomie.panels.company import (
         _get_page_number,
         _make_get_list_url,

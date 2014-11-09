@@ -27,7 +27,7 @@
 """
 import pytest
 import os
-from autonomie.tests.base import DATASDIR
+from autonomie.tests.conftest import DATASDIR
 
 from PIL import Image
 

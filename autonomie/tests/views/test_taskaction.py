@@ -24,39 +24,34 @@
 
 
 from mock import MagicMock
-from pyramid import testing
 
-from autonomie.tests.base import BaseFunctionnalTest, BaseTestCase
-from autonomie.tests.base import BaseViewTest
 
-class TestFuncs(BaseViewTest):
-    def test_context_is_task(self):
-        from autonomie.views.taskaction import context_is_task
-        context = MagicMock()
-        for i in ("invoice", "cancelinvoice", "estimation"):
-            context.__name__ = i
-            self.assertTrue(context_is_task(context))
+def test_context_is_task(config):
+    from autonomie.views.taskaction import context_is_task
+    context = MagicMock()
+    for i in ("invoice", "cancelinvoice", "estimation"):
+        context.__name__ = i
+        assert(context_is_task(context))
 
-    def test_context_is_not_task(self):
-        from autonomie.views.taskaction import context_is_task
-        context = MagicMock()
-        for i in ("project_invoices", "project_cancelinvoices", "project_estimations"):
-            context.__name__ = i
-            self.assertFalse(context_is_task(context))
+def test_context_is_not_task(config):
+    from autonomie.views.taskaction import context_is_task
+    context = MagicMock()
+    for i in ("project_invoices", "project_cancelinvoices", "project_estimations"):
+        context.__name__ = i
+        assert not context_is_task(context)
 
-    def test_context_is_editable(self):
-        from autonomie.views.taskaction import context_is_editable
-        context = MagicMock()
-        context.__name__ = "invoice"
-        context.is_editable = lambda :True
-        self.assertTrue(context_is_editable(None, context))
-        context = MagicMock()
-        context.__name__ = "notinvoice"
-        self.assertTrue(context_is_editable(None, context))
-        context = MagicMock()
-        context.__name__ = 'invoice'
-        context.is_editable = lambda :False
-        context.is_waiting = lambda :True
-        request = self.get_csrf_request()
-        request.context = context
-        self.assertTrue(context_is_editable(request, context))
+def test_context_is_editable(config, pyramid_request):
+    from autonomie.views.taskaction import context_is_editable
+    context = MagicMock()
+    context.__name__ = "invoice"
+    context.is_editable = lambda :True
+    assert(context_is_editable(None, context))
+    context = MagicMock()
+    context.__name__ = "notinvoice"
+    assert(context_is_editable(None, context))
+    context = MagicMock()
+    context.__name__ = 'invoice'
+    context.is_editable = lambda :False
+    context.is_waiting = lambda :True
+    pyramid_request.context = context
+    assert(context_is_editable(pyramid_request, context))

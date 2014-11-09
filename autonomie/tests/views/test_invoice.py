@@ -67,6 +67,8 @@ def user(content):
 
 @pytest.fixture
 def invoice(config, get_csrf_request_with_db, project, user):
+    print(Invoice.query().all())
+    assert len(Invoice.query().all()) == 0
     from autonomie.views.invoice import InvoiceAdd
     config.add_route('project', '/')
     request = get_csrf_request_with_db(post=APPSTRUCT)
@@ -89,6 +91,7 @@ def test_add_invoice(invoice):
     assert invoice.phase_id == 1
     assert len(invoice.lines) == 1
     assert len(invoice.discounts) == 1
+    assert invoice.description == "Facture pour le customer test"
 
 def test_change_status(invoice, get_csrf_request_with_db):
     request = get_csrf_request_with_db(post={'submit':'wait'})

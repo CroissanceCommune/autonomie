@@ -26,8 +26,6 @@ import pytest
 from autonomie.models.user import User
 from autonomie.models.company import Company
 
-from autonomie.tests.base import BaseFunctionnalTest
-
 APPSTRUCT = {
     'name':u"Compané $& test",
     "goal":u"Be the best",

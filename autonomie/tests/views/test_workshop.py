@@ -21,7 +21,6 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import date, datetime
 from autonomie.models import (
-    activity,
     user,
     workshop,
 )
@@ -29,134 +28,126 @@ from autonomie.models import (
 from autonomie.views.workshop import (
     WorkshopAddView,
     WorkshopEditView,
-    record_attendances_view,
     workshop_view,
     workshop_delete_view,
 )
-from pyramid.events import BeforeRender
-from autonomie.views.subscribers import add_api
-from autonomie.tests.base import BaseFunctionnalTest
+
+import pytest
 
 
-class BaseTest(BaseFunctionnalTest):
-    def addOne(self):
-        appstruct = {
-            'name': 'Workshop',
-            'leaders': ['user1', 'user2'],
-            'datetime': date.today(),
-            'info1': 'Header1',
-        }
-        w = workshop.Workshop(**appstruct)
+@pytest.fixture
+def workshop_model(dbsession):
+    appstruct = {
+        'name': 'Workshop',
+        'leaders': ['user1', 'user2'],
+        'datetime': date.today(),
+        'info1': 'Header1',
+    }
+    w = workshop.Workshop(**appstruct)
 
-        start = datetime(2014, 06, 12, 8)
-        stop = datetime(2014, 06, 12, 12)
-        timeslot = workshop.Timeslot(
-            name=u'matinée',
-            start_time=start,
-            end_time=stop,
-        )
-        w.timeslots.append(timeslot)
-        self.session.add(w)
-        self.session.flush()
-        return w
+    start = datetime(2014, 06, 12, 8)
+    stop = datetime(2014, 06, 12, 12)
+    timeslot = workshop.Timeslot(
+        name=u'matinée',
+        start_time=start,
+        end_time=stop,
+    )
+    w.timeslots.append(timeslot)
+    dbsession.add(w)
+    dbsession.flush()
+    return w
 
-    def getOne(self):
-        return workshop.Workshop.query().first()
+def get_one():
+    return workshop.Workshop.query().first()
 
 
-class TestWorkshopAddView(BaseTest):
-    def test_success(self):
-        self.config.add_route('toto', '/toto')
-        self.config.add_route('workshop', '/workshop/{id}')
+def test_add_view(config, get_csrf_request_with_db):
+    config.add_route('toto', '/toto')
+    config.add_route('workshop', '/workshop/{id}')
 
-        start = datetime(2014, 06, 12, 15)
-        stop = datetime(2014, 06, 12, 18)
+    start = datetime(2014, 06, 12, 15)
+    stop = datetime(2014, 06, 12, 18)
 
-        appstruct = {
-            'come_from': "/toto",
-            'name': 'test',
-            'info1': 'header',
-            'timeslots': [{
-                'name': 'timeslot',
+    appstruct = {
+        'come_from': "/toto",
+        'name': 'test',
+        'info1': 'header',
+        'timeslots': [{
+            'name': 'timeslot',
+            'start_time': start,
+            'end_time': stop,
+        }]
+    }
+    view = WorkshopAddView(get_csrf_request_with_db())
+    result = view.submit_success(appstruct)
+    a = get_one()
+
+    assert a.info1 == 'header'
+    assert a.timeslots[0].start_time == start
+    assert a.timeslots[0].end_time == stop
+
+
+def test_edit_view(workshop_model, config, get_csrf_request_with_db):
+    req = get_csrf_request_with_db()
+    req.context = workshop_model
+    timeslot_id = req.context.timeslots[0].id
+    start = datetime(2014, 06, 12, 15)
+    stop = datetime(2014, 06, 12, 18)
+
+    config.add_route('workshop', '/workshop/{id}')
+    appstruct = {
+        'come_from': '',
+        'info2': 'subheader',
+        'timeslots': [
+            {
+                'name': u'Matinéee',
+                'id': timeslot_id,
+                'start_time': req.context.timeslots[0].start_time,
+                'end_time': req.context.timeslots[0].end_time,
+            },
+            {
+                'id': None,
+                'name': u'timeslot',
                 'start_time': start,
                 'end_time': stop,
-            }]
-        }
-        view = WorkshopAddView(self.get_csrf_request())
-        result = view.submit_success(appstruct)
-        a = self.getOne()
+            },
+        ]
+    }
+    view = WorkshopEditView(req)
+    result = view.submit_success(appstruct)
+    a = get_one()
 
-        assert a.info1 == 'header'
-        assert a.timeslots[0].start_time == start
-        assert a.timeslots[0].end_time == stop
+    assert a.timeslots[0].name == u'Matinéee'
+    assert a.timeslots[0].start_time == datetime(2014, 06, 12, 8)
 
-
-class TestWorkshopEditView(BaseTest):
-    def test_success(self):
-        req = self.get_csrf_request()
-        req.context = self.addOne()
-        timeslot_id = req.context.timeslots[0].id
-        start = datetime(2014, 06, 12, 15)
-        stop = datetime(2014, 06, 12, 18)
-
-        self.config.add_route('workshop', '/workshop/{id}')
-        appstruct = {
-            'come_from': '',
-            'info2': 'subheader',
-            'timeslots': [
-                {
-                    'name': u'Matinéee',
-                    'id': timeslot_id,
-                    'start_time': req.context.timeslots[0].start_time,
-                    'end_time': req.context.timeslots[0].end_time,
-                },
-                {
-                    'id': None,
-                    'name': u'timeslot',
-                    'start_time': start,
-                    'end_time': stop,
-                },
-            ]
-        }
-        view = WorkshopEditView(req)
-        result = view.submit_success(appstruct)
-        a = self.getOne()
-
-        assert a.timeslots[0].name == u'Matinéee'
-        assert a.timeslots[0].start_time == datetime(2014, 06, 12, 8)
-
-        assert a.timeslots[1].name == u'timeslot'
-        assert a.info2 == 'subheader'
+    assert a.timeslots[1].name == u'timeslot'
+    assert a.info2 == 'subheader'
 
 
-class TestWorkshopFuncViews(BaseTest):
+def test_workshop_view_only_view(workshop_model, config, get_csrf_request_with_db):
+    config.add_route('workshop', '/workshop/{id}')
+    request = get_csrf_request_with_db()
+    request.user = user.User.query().first()
+    result = workshop_view(workshop_model, request)
+    assert result.status == '302 Found'
+    assert result.location == '/workshop/{id}?action=edit'.format(
+        id=workshop_model.id
+    )
 
-    def test_workshop_view_only_view(self):
-        self.config.add_route('workshop', '/workshop/{id}')
-        context = self.addOne()
-        request = self.get_csrf_request()
-        request.user = user.User.query().first()
-        result = workshop_view(context, request)
-        assert result.status == '302 Found'
-        assert result.location == '/workshop/{id}?action=edit'.format(
-            id=context.id
-        )
+def test_workshop_delete_view(workshop_model, config, get_csrf_request_with_db):
+    config.add_route('workshops', '/workshops')
+    request = get_csrf_request_with_db()
+    request.referer = None
+    result = workshop_delete_view(workshop_model, request)
+    assert result.status == '302 Found'
+    assert result.location == '/workshops'
+    assert get_one() == None
 
-    def test_workshop_delete_view(self):
-        self.config.add_route('workshops', '/workshops')
-        request = self.get_csrf_request()
-        request.referer = None
-        context = self.addOne()
-        result = workshop_delete_view(context, request)
-        assert result.status == '302 Found'
-        assert result.location == '/workshops'
-        assert self.getOne() == None
-
-#    def test_timeslot_pdf_view(self):
-#        self.config.add_subscriber(add_api, BeforeRender)
-#        self.config.add_static_view("static", "autonomie:static")
+#    def test_timeslot_pdf_view(config, get_csrf_request_with_db):
+#        config.add_subscriber(add_api, BeforeRender)
+#        config.add_static_view("static", "autonomie:static")
 #        context = self.addTimeslot()
-#        request = self.get_csrf_request()
+#        request = get_csrf_request_with_db()
 #        result = timeslot_pdf_view(context, request)
 #        datestr = date.today().strftime("%e_%m_%Y")
 #        assert ('Content-Disposition',

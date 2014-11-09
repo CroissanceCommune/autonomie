@@ -25,7 +25,6 @@
 import datetime
 import pytest
 
-from autonomie.tests.base import BaseTestCase
 from autonomie.models.task.states import record_payment
 from autonomie.models.task import Payment
 from autonomie.models.task import Invoice, InvoiceLine

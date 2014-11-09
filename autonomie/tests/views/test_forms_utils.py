@@ -25,26 +25,20 @@
 import colander
 from autonomie.views import BaseFormView
 
-from autonomie.tests.base import BaseTestCase, BaseViewTest
+def test_init(get_csrf_request_with_db):
+    req = get_csrf_request_with_db()
+    form = BaseFormView(req)
+    assert(form.dbsession == req.dbsession)
+    assert(form.session == req.session)
 
-class TestBaseFormView(BaseViewTest):
-    def make_one(self, req):
-        return BaseFormView(req)
-
-    def test_init(self):
-        req = self.get_csrf_request()
-        form = self.make_one(req)
-        self.assertEqual(form.dbsession, req.dbsession)
-        self.assertEqual(form.session, req.session)
-
-    def test_more_vars_called(self):
-        req = self.get_csrf_request()
-        form = self.make_one(req)
-        form.schema = DummySchema()
-        form.add_template_vars = ('arg',)
-        form.arg = u"Test arg"
-        result = form.__call__()
-        self.assertTrue(result['arg'], u"Test arg")
+def test_more_vars_called(get_csrf_request_with_db):
+    req = get_csrf_request_with_db()
+    form = BaseFormView(req)
+    form.schema = DummySchema()
+    form.add_template_vars = ('arg',)
+    form.arg = u"Test arg"
+    result = form.__call__()
+    assert(result['arg'] == u"Test arg")
 
 
 class DummySchema(colander.MappingSchema):

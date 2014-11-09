@@ -21,122 +21,115 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-from mock import MagicMock
+import pytest
 from autonomie.models.project import Project
 from autonomie.models.company import Company
 
-from autonomie.tests.base import (
-    BaseFunctionnalTest,
-    Dummy,
-)
 
-APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "customers":[]}
+APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
 
-class Base(BaseFunctionnalTest):
-    def addOne(self, appstruct=APPSTRUCT):
-        from autonomie.views.project import ProjectAdd
-        self.config.add_route('project', '/')
-        req = self.get_csrf_request()
-        company = Company.query().first()
-        company.__name__ = 'company'
-        req.context = company
-        view = ProjectAdd(req)
-        view.submit_success(appstruct)
+@pytest.fixture
+def project(config, get_csrf_request_with_db):
+    from autonomie.views.project import ProjectAdd
+    config.add_route('project', '/')
+    req = get_csrf_request_with_db()
+    company = Company.query().first()
+    company.__name__ = 'company'
+    req.context = company
+    view = ProjectAdd(req)
+    appstruct = APPSTRUCT.copy()
+    view.submit_success(appstruct)
+    return getone()
 
-    def getOne(self):
-        try:
-            val = Project.query().filter(Project.name=="Projéct&$").one()
-            val.__name__ = 'project'
-        except:
-            val = None
-        return val
+def getone():
+    val = Project.query().filter(Project.name=="Projéct&$").first()
+    if val is not None:
+        val.__name__ = 'project'
+    return val
 
-
-class TestProjectAdd(Base):
-    def test_success(self):
-        self.addOne()
-        project = self.getOne()
-        self.assertEqual(project.code, "ABDC")
-        self.assertEqual(project.company_id, 1)
-
-    def test_customer(self):
-        appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
-        self.addOne(appstruct)
-        project = self.getOne()
-        self.assertEqual(len(project.customers), 1)
+@pytest.fixture
+def customer(dbsession):
+    from autonomie.models.customer import Customer
+    datas = {'name':'Company', 'contactLastName':u'Lastname',
+             'contactFirstName':u'FirstName',
+             'address':'Address should be multiline',
+             'zipCode': "21000",
+             "city": "Dijon",
+             'compte_cg':"Compte CG1515",
+             'compte_tiers':"Compte Tiers", 'code': 'CODE'}
+    c = Customer(**datas)
+    dbsession.add(c)
+    dbsession.flush()
+    return c
 
 
-class TestProjectEdit(Base):
-    def test_edit(self):
-        from autonomie.views.project import ProjectEdit
-        self.addOne()
-        project = self.getOne()
-        req = self.get_csrf_request()
-        req.context = project
-        appstruct = APPSTRUCT.copy()
-        definition = u"Super project, should e ^dmeù*"
-        appstruct['definition'] = definition
-        view = ProjectEdit(req)
-        view.submit_success(appstruct)
-        project = self.getOne()
-        self.assertEqual(project.definition, definition)
 
-    def test_customer_remove(self):
-        from autonomie.views.project import ProjectEdit
-        appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
-        self.addOne(appstruct)
-        project = self.getOne()
-        req = self.get_csrf_request()
-        req.context = project
-        appstruct["customers"] = []
-        view = ProjectEdit(req)
-        view.submit_success(appstruct)
-        project = self.getOne()
-        self.assertEqual(len(project.customers), 0)
 
-    def test_customer_add(self):
-        from autonomie.views.project import ProjectEdit
-        self.addOne()
-        project = self.getOne()
-        req = self.get_csrf_request()
-        req.context = project
-        appstruct = APPSTRUCT.copy()
-        appstruct['customers'] = ["1"]
-        view = ProjectEdit(req)
-        view.submit_success(appstruct)
-        project = self.getOne()
-        self.assertEqual(len(project.customers), 1)
 
-class TestActions(Base):
-    def test_delete(self):
-        from autonomie.views.project import project_delete
-        self.addOne()
-        req = self.get_csrf_request()
-        req.referer = "test"
-        project = self.getOne()
-        req.context = project
-        project_delete(req)
-        self.assertEqual(self.getOne(), None)
+def test_add(project):
+    assert project.code == "ABDC"
+    assert project.company_id == 1
+    assert len(project.customers) == 1
 
-    def test_archive(self):
-        from autonomie.views.project import project_archive
-        self.addOne()
-        req = self.get_csrf_request()
-        req.referer = "test"
-        project = self.getOne()
-        req.context = project
-        project_archive(req)
-        self.assertEqual(self.getOne().archived, 1)
+def test_edit(project, get_csrf_request_with_db):
+    from autonomie.views.project import ProjectEdit
+    req = get_csrf_request_with_db()
+    req.context = project
+    appstruct = APPSTRUCT.copy()
+    definition = u"Super project, should e ^dmeù*"
+    appstruct['definition'] = definition
+    view = ProjectEdit(req)
+    view.submit_success(appstruct)
+    project = getone()
+    assert(project.definition ==  definition)
 
-    def test_addphase(self):
-        from autonomie.views.project import project_addphase
-        self.addOne()
-        req = self.get_csrf_request()
-        req.referer = "test"
-        project = self.getOne()
-        req.context = project
-        req.params['phase'] = u'Phasé'
-        project_addphase(req)
-        self.session.commit()
-        self.assertEqual(len(self.getOne().phases), 2)
+def test_customer_remove(project, get_csrf_request_with_db):
+    from autonomie.views.project import ProjectEdit
+    req = get_csrf_request_with_db()
+    req.context = project
+    appstruct = APPSTRUCT.copy()
+    appstruct["customers"] = []
+    view = ProjectEdit(req)
+    view.submit_success(appstruct)
+    project = getone()
+    assert(len(project.customers) == 0)
+
+def test_customer_add(project, customer, get_csrf_request_with_db):
+    from autonomie.views.project import ProjectEdit
+    req = get_csrf_request_with_db()
+    req.context = project
+    appstruct = APPSTRUCT.copy()
+    appstruct['customers'] = ["1", customer.id]
+    view = ProjectEdit(req)
+    view.submit_success(appstruct)
+    project = getone()
+    assert(len(project.customers) == 2)
+
+def test_delete(project, get_csrf_request_with_db):
+    from autonomie.views.project import project_delete
+    req = get_csrf_request_with_db()
+    req.referer = "test"
+    project = getone()
+    req.context = project
+    project_delete(req)
+    assert(getone() is None)
+
+def test_archive(project, get_csrf_request_with_db):
+    from autonomie.views.project import project_archive
+    req = get_csrf_request_with_db()
+    req.referer = "test"
+    req.context = project
+    project_archive(req)
+    assert(getone().archived == 1)
+
+def test_addphase(dbsession, project, get_csrf_request_with_db):
+    from autonomie.views.project import project_addphase
+    from autonomie.models.project import Phase
+    req = get_csrf_request_with_db()
+    req.referer = "test"
+    req.context = project
+    req.params['phase'] = u'Phasé'
+    project_addphase(req)
+    dbsession.flush()
+    phases = Phase.query().filter(Phase.project==project).all()
+    assert(len(phases) == 2)

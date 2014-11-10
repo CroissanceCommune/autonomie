@@ -132,7 +132,8 @@ class FileUploadView(BaseFormView):
             Execute actions on the database
         """
         # Inserting in the database
-        file_object = self.factory(**appstruct)
+        file_object = self.factory()
+        merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
         self.request.session.flash(self.valid_msg)
 

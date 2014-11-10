@@ -26,6 +26,7 @@
     registration
 </%doc>
 <%inherit file="/base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
 <% userdata = request.context %>
 <div class='well'>
@@ -37,8 +38,8 @@ if userdata.user is not None:
     del_msg += u' Le compte associé sera également supprimé.'
     del_msg += u" Cette action n\\'est pas réversible."
 %>
-<a class='btn pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
-    <i class="icon icon-trash"></i>
+<a class='btn btn-danger pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
+    <i class="icon icon-white icon-trash"></i>
     Supprimer les données
 </a>
 % endif
@@ -50,6 +51,11 @@ if userdata.user is not None:
     <a href="#tab1" data-toggle='tab'>
         Informations sociales
     </a>
+    </li>
+    <li>
+        <a href="#tab4" data-toggle='tab'>
+            Génération de documents
+        </a>
     </li>
     % if doctypes_form is not UNDEFINED:
         <li>
@@ -68,31 +74,33 @@ if userdata.user is not None:
         </a>
         </li>
     % endif
-        <li>
-        <a href="#tab4" data-toggle='tab'>
-            Génération de documents
-        </a>
-        </li>
 </ul>
 <div class='tab-content'>
-    <div class='tab-pane active' id='tab1'>
+    <div class='tab-pane row-fluid active' id='tab1'>
         ${form|n}
     </div>
     % if doctypes_form is not UNDEFINED:
-    <div class='tab-pane' id='tab2'>
-        <div class='span2'>
-        </div>
+    <div class='tab-pane row-fluid' id='tab2'>
         <div class='span8'>
             ${doctypes_form.render()|n}
+        </div>
+        <div class='span4'>
+            <h3>Liste des documents déposés dans Autonomie</h3>
+            <a class='btn btn-success'
+                href="${request.route_path('userdata', id=userdata.id, _query=dict(action='attach_file'))}"
+                title="Déposer un document scanné dans autonomie">
+                Déposer un document
+            </a>
+            ${format_filelist(userdata)}
         </div>
     </div>
     % endif
     % if account_form is not UNDEFINED and account_form is not None:
-        <div class='tab-pane' id='tab3'>
+        <div class='tab-pane row-fluid' id='tab3'>
             ${account_form.render()|n}
         </div>
     % endif
-    <div class='tab-pane' id='tab4'>
+    <div class='tab-pane row-fluid' id='tab4'>
         <div class='row-fluid'>
             <div class='span6'>
         % for doctemplate in doctemplates:
@@ -102,6 +110,18 @@ if userdata.user is not None:
                 ${doctemplate.description} ( ${doctemplate.name} )
             </a>
         % endfor
+        % if doctemplates == []:
+            <div class='well'>
+            <i class='fa fa-question-circle fa-2x'></i>
+            Vous devez déposer des modèles de document dans Autonomie pour pouvoir accéder à cet outil.
+                <br />
+            % if request.user.is_admin():
+                <a href="${request.route_path('templates')}">Déposer de nouveau modèle de document</a>
+            % else:
+                Veuillez vous addresser à un administrateur.
+            % endif
+        </div>
+        % endif
             </div>
             <div class='span6'>
                 <h3>Historique des documents générés depuis Autonomie</h3>

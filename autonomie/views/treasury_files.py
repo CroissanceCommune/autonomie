@@ -25,14 +25,24 @@
 """
     This view displays the documents of the current company
 """
+import datetime
 import logging
 import os
 import mimetypes
 
-import datetime
-from pyramid.httpexceptions import HTTPForbidden
-from pyramid.httpexceptions import HTTPNotFound
-from autonomie.views import BaseView
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPNotFound,
+    HTTPFound,
+)
+
+from autonomie.models.files import MailHistory
+from autonomie.forms.lists import BaseListsSchema
+from autonomie.views import (
+    BaseView,
+    BaseListView,
+)
+from autonomie.mail import send_salary_sheet
 from autonomie.utils.ascii import force_ascii
 from autonomie.utils.files import (
     encode_path,
@@ -154,6 +164,17 @@ class File(object):
         return "<File : %s %s>" % (self.name, self.path)
 
 
+def digit_subdirs(path):
+    """
+        Return subdirectories of path which names are composed of digits
+    """
+    for name in os.listdir(path):
+        spath = os.path.join(path, name)
+        if os.path.isdir(spath) and name.isdigit():
+            yield name, spath
+
+
+
 class DisplayDirectoryView(BaseView):
     """
         Base view for document directory display
@@ -172,16 +193,6 @@ class DisplayDirectoryView(BaseView):
         """
         return os.path.join(get_root_directory(self.request),
                                             self._root_directory)
-
-    @staticmethod
-    def digit_subdirs(path):
-        """
-            Return subdirectories of path which names are composed of digits
-        """
-        for name in os.listdir(path):
-            spath = os.path.join(path, name)
-            if os.path.isdir(spath) and name.isdigit():
-                yield name, spath
 
     @staticmethod
     def list_files(path, prefix='___'):
@@ -207,9 +218,9 @@ class DisplayDirectoryView(BaseView):
         result_dict = {}
         if self.root_directory is not None and \
                 os.path.isdir(self.root_directory):
-            for year, year_path in self.digit_subdirs(self.root_directory):
+            for year, year_path in digit_subdirs(self.root_directory):
                 result_dict[year] = {}
-                for month, month_path in self.digit_subdirs(year_path):
+                for month, month_path in digit_subdirs(year_path):
                     result_dict[year][month] = self.list_files(month_path,
                                                                     prefix)
         return result_dict
@@ -285,6 +296,64 @@ class SalarySheet(DisplayDirectoryView):
     title = u"Bulletin de salaire"
     _root_directory = "salaire"
 
+
+class MailHistoryView(BaseListView):
+    """
+    A view showing the history of sent emails
+    """
+    schema = BaseListsSchema()
+    default_sort = 'send_at'
+    default_direction = 'desc'
+    sort_columns = {'send_at': 'send_at'}
+    title = u"Historique des mails envoyés"
+
+    def query(self):
+        return MailHistory.query()
+
+    def _build_return_value(self, schema, appstruct, query):
+        result = BaseListView._build_return_value(self, schema, appstruct, query)
+
+        for obj in result['records']:
+            splitted = obj.filepath.split('/')
+            filename = splitted[-1]
+            month = splitted[-2]
+            year = splitted[-3]
+
+            obj.month = month
+            obj.year = year
+
+        return result
+
+    def filter_company_id(self, query, appstruct):
+        search = appstruct.get('search')
+        if search:
+            query = query.filter(MailHistory.company_id==search)
+        return query
+
+
+def mailagain(request):
+    """
+    Send an email again based on its history entry
+    """
+    from autonomie.tasks import mail
+    mail.delay(
+        request.registry.settings
+    )
+
+    #history_entry = MailHistory.get(request.matchdict['id'])
+    #send_salary_sheet(
+    #    request,
+    #    history_entry.company,
+    #    history_entry.filename,
+    #    history_entry.filepath,
+    #    True,
+    #)
+
+    request.session.flash(u"Le mail a bien été envoyé")
+    url = request.route_path('mailhistory')
+    return HTTPFound(url)
+
+
 def includeme(config):
     """
         View and route inclusions
@@ -302,3 +371,18 @@ def includeme(config):
                         traverse=traverse)
     config.add_view(file_display, route_name="treasury_files",
                     request_param='name')
+
+    # mail history
+    config.add_route("mailhistory", '/mailhistory')
+    config.add_view(
+        MailHistoryView,
+        route_name='mailhistory',
+        renderer='mailhistory.mako',
+        permission="admin",
+    )
+    config.add_route("mail", "/mail/{id:\d+}")
+    config.add_view(
+        mailagain,
+        route_name="mail",
+        permission="admin",
+    )

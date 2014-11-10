@@ -199,6 +199,8 @@ def connection(request, settings):
         """
             drop the test database
         """
+        if __current_test_ini_file().endswith('travis.ini'):
+            return
         options = get_test_options_from_settings(settings)
         cmd = "echo \"echo 'drop database {db};' | {mysql_cmd}\" | at now"
         launch_cmd(options, cmd)

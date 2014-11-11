@@ -96,8 +96,9 @@ class SessionDBFileUploadTempStore(SessionFileUploadTempStore):
             return fbuf
 
     def preview_url(self, uid):
-        if getattr(self.request.context, 'type_', '') == 'file':
-            return self.request.route_path('file', id=self.request.context.id)
+        doctype = getattr(self.request.context, 'type_', '')
+        if doctype:
+            return self.request.route_path(doctype, id=self.request.context.id)
         else:
             return None
 
@@ -155,25 +156,36 @@ def filesize_validator(node, value):
 
 class FileUploadSchema(colander.Schema):
     parent_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deform.widget.HiddenWidget(),
-            )
+        colander.Integer(),
+        widget=deform.widget.HiddenWidget(),
+        missing=colander.drop,
+    )
 
     come_from = forms.come_from_node()
 
     filetype = colander.SchemaNode(
-            colander.String(),
-            widget=deferred_filetype_select,
-            missing="",
-            title=u"Type de fichier",
-            )
+        colander.String(),
+        widget=deferred_filetype_select,
+        missing="",
+        title=u"Type de fichier",
+    )
 
     description = colander.SchemaNode(colander.String())
 
     upload = colander.SchemaNode(
-            deform.FileData(),
-            widget=deferred_upload_widget,
-            title=u"Choix du fichier",
-            description=file_description(),
-            validator=filesize_validator,
-            )
+        deform.FileData(),
+        widget=deferred_upload_widget,
+        title=u"Choix du fichier",
+        description=file_description(),
+        validator=filesize_validator,
+    )
+
+
+def get_template_upload_schema():
+    """
+    Return the form schema for template upload
+    """
+    schema = FileUploadSchema().clone()
+    schema['upload'].description += u" Le fichier doit être au format ODT"
+    del schema['filetype']
+    return schema

@@ -83,10 +83,13 @@ class Node(DBBASE):
         backref=backref(
             'parent',
             remote_side=[id],
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         ),
         cascade='all',
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED, 'py3o': {'exclude': True}},
     )
 
     type_ = Column(

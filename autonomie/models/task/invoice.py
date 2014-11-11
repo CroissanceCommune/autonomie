@@ -141,7 +141,10 @@ class Invoice(Task, InvoiceCompute):
         backref=backref(
             'invoices',
             order_by='Invoice.taskDate',
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                "py3o": {'exclude': True},
+            },
         ),
     )
 
@@ -150,7 +153,10 @@ class Invoice(Task, InvoiceCompute):
         backref=backref(
             'invoices',
             order_by='Invoice.taskDate',
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         ),
     )
 
@@ -510,7 +516,10 @@ class CancelInvoice(Task, TaskCompute):
         backref=backref(
             'cancelinvoices',
             order_by='CancelInvoice.taskDate',
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         )
     )
 
@@ -529,7 +538,10 @@ class CancelInvoice(Task, TaskCompute):
         backref=backref(
             'cancelinvoices',
             order_by='CancelInvoice.taskDate',
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         )
     )
 
@@ -734,7 +746,10 @@ class ManualInvoice(Task):
         primaryjoin="Customer.id==ManualInvoice.customer_id",
         backref=backref(
             'manual_invoices',
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         ),
     )
     company_id = Column(
@@ -746,7 +761,10 @@ class ManualInvoice(Task):
         primaryjoin="Company.id==ManualInvoice.company_id",
         backref=backref(
             'manual_invoices',
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         ),
     )
     # State machine handling

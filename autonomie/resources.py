@@ -28,7 +28,6 @@ from fanstatic import Group
 from fanstatic import Library
 from fanstatic import Resource
 from js.bootstrap import bootstrap
-#from js.bootstrap import bootstrap_responsive_css
 from js.jquery import jquery
 from js.jqueryui import effects_highlight
 from js.jqueryui import effects_shake
@@ -110,6 +109,11 @@ tools = Group([_dom, _math, _date])
 bootstrap_responsive_css = Resource(lib_autonomie,
         "css/bootstrap-responsive.css", depends=[bootstrap])
 
+font_awesome_css = Resource(
+    lib_autonomie,
+    "css/font-awesome.min.css",
+    depends=[bootstrap_responsive_css])
+
 duplicate = Resource(
         lib_autonomie,
         "js/duplicate.js",
@@ -166,6 +170,7 @@ main_css = Resource(
 main_js = Group([main,
                  bootstrap,
                  bootstrap_responsive_css,
+                 font_awesome_css,
                  main_css,
                  jquery_form,
                  ui_autocomplete,

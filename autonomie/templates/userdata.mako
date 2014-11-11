@@ -47,20 +47,20 @@ if userdata.user is not None:
 
 <ul class='nav nav-tabs'>
     <li class='active'>
-    <a href="#form1" data-toggle='tab'>
+    <a href="#tab1" data-toggle='tab'>
         Informations sociales
     </a>
     </li>
     % if doctypes_form is not UNDEFINED:
         <li>
-        <a href="#form2" data-toggle='tab'>
+        <a href="#tab2" data-toggle='tab'>
             Documents sociaux
         </a>
         </li>
     % endif
     % if account_form is not UNDEFINED and account_form is not None:
         <li>
-        <a href="#form3" data-toggle='tab'>
+        <a href="#tab3" data-toggle='tab'>
             Compte utilisateur
             % if user is not None and not user.enabled():
                 <span class='label label-warning'>Ce compte a été désactivé</span>
@@ -68,13 +68,18 @@ if userdata.user is not None:
         </a>
         </li>
     % endif
+        <li>
+        <a href="#tab4" data-toggle='tab'>
+            Génération de documents
+        </a>
+        </li>
 </ul>
 <div class='tab-content'>
-    <div class='tab-pane active' id='form1'>
+    <div class='tab-pane active' id='tab1'>
         ${form|n}
     </div>
     % if doctypes_form is not UNDEFINED:
-    <div class='tab-pane' id='form2'>
+    <div class='tab-pane' id='tab2'>
         <div class='span2'>
         </div>
         <div class='span8'>
@@ -83,9 +88,58 @@ if userdata.user is not None:
     </div>
     % endif
     % if account_form is not UNDEFINED and account_form is not None:
-        <div class='tab-pane' id='form3'>
+        <div class='tab-pane' id='tab3'>
             ${account_form.render()|n}
-    </div>
+        </div>
     % endif
+    <div class='tab-pane' id='tab4'>
+        <div class='row-fluid'>
+            <div class='span6'>
+        % for doctemplate in doctemplates:
+            <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
+            <a class='btn btn-success' href="${url}">
+                <i class="fa fa-file fa-1x"></i>
+                ${doctemplate.description} ( ${doctemplate.name} )
+            </a>
+        % endfor
+            </div>
+            <div class='span6'>
+                <h3>Historique des documents générés depuis Autonomie</h3>
+                <span class='help-block'>
+                    <i class='fa fa-question-circle fa-2x'></i>
+                    Chaque fois qu'un utilisateur génère un document depuis cette page, une entrée est ajoutée à l'historique.<br />
+                    Si nécessaire, pour rendre plus pertinente cette liste, vous pouvez supprimer certains entrées.
+                </span>
+                <table class='table table-stripped table-condensed'>
+                    <thead>
+                        <th>Nom du document</th>
+                        <th>Généré par</th>
+                        <th>Date</th>
+                        <th class='text-right'>Actions</th>
+                    </thead>
+                    <tbody>
+                        % for history in userdata.template_history:
+                            <tr>
+                                <td>${history.template.description}</td>
+                                <td>${api.format_account(history.user)}</td>
+                                <td>${api.format_datetime(history.created_at)}</td>
+                                <td>
+                                    <a
+                                        class='btn btn-danger'
+                                        href="${request.route_path('templatinghistory', id=history.id, _query=dict(action='delete'))}"
+                                        ><i class='fa fa-trash fa-1x'></i>
+                                        Supprimer cette entrée
+                                    </a>
+                                </td>
+                            </tr>
+                        % endfor
+                        % if len(userdata.template_history) == 0:
+                            <tr><td colspan='4'>Aucun document n'a été généré pour ce compte</td></tr>
+                        % endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 </%block>

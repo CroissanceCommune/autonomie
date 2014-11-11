@@ -99,7 +99,10 @@ class Task(Node):
         primaryjoin="Task.statusPerson==User.id",
         backref=backref(
             "taskStatuses",
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         ),
     )
     owner = relationship(
@@ -107,14 +110,24 @@ class Task(Node):
         primaryjoin="Task.owner_id==User.id",
         backref=backref(
             "ownedTasks",
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'py3o': {'exclude': True},
+            },
         ),
     )
 
     phase = relationship(
         "Phase",
         primaryjoin="Task.phase_id==Phase.id",
-        backref=backref("tasks", order_by='Task.taskDate'),
+        backref=backref(
+            "tasks",
+            order_by='Task.taskDate',
+            info={
+                'colanderalchemy': EXCLUDED,
+                'py3o': {'exclude': True},
+            },
+        ),
         lazy="joined")
 
     state_machine = DEFAULT_STATE_MACHINES['base']
@@ -282,6 +295,9 @@ class TaskStatus(DBBASE):
         "User",
         backref=backref(
             "task_statuses",
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'py3o': EXCLUDED,
+            },
         )
     )

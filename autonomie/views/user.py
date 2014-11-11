@@ -77,6 +77,10 @@ from autonomie.views import (
 )
 from autonomie.views.render_api import format_account
 from autonomie.views.company import company_enable
+from autonomie.views.files import (
+    get_add_file_link,
+    FileUploadView,
+)
 
 log = logging.getLogger(__name__)
 
@@ -427,6 +431,10 @@ class UserDatasEdit(UserDatasAdd):
         form.set_appstruct(self.schema.dictify(self.request.context))
         self.counter = form.counter
         self.ensure_doctypes_rel()
+
+    def populate_actionmenu(self):
+        self.request.actionmenu.add(get_userdatas_list_btn())
+        self.request.actionmenu.add(get_add_file_link(self.request))
 
     def ensure_doctypes_rel(self):
         """
@@ -1109,4 +1117,11 @@ def includeme(config):
         route_name="userdata",
         request_param="action=py3o",
         permission="manage",
+    )
+    config.add_view(
+        FileUploadView,
+        route_name="userdata",
+        renderer='base/formpage.mako',
+        permission='manage',
+        request_param='action=attach_file',
     )

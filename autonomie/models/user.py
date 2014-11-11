@@ -57,6 +57,7 @@ from autonomie.views import render_api
 from deform_bootstrap import widget as bootstrap_widget
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
+from autonomie.models.node import Node
 from autonomie.forms import (
     get_hidden_field_conf,
     EXCLUDED,
@@ -625,11 +626,13 @@ class UserDatasSocialDocTypes(DBBASE):
     )
 
 
-class UserDatas(DBBASE):
+class UserDatas(Node):
+    __tablename__ = 'user_datas'
     __table_args__ = default_table_args
-    type_ = "userdata"
+    __mapper_args__ = {'polymorphic_identity': 'userdata'}
+
     id = Column(
-        Integer,
+        ForeignKey('node.id'),
         primary_key=True,
         info={
             'colanderalchemy': get_hidden_field_conf(),

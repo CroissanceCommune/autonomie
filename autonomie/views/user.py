@@ -64,6 +64,7 @@ from autonomie.forms.user import (
     get_account_schema,
     get_password_schema,
     get_user_schema,
+    get_userdatas_schema,
     get_userdatas_list_schema,
     UserDisableSchema,
 )
@@ -371,7 +372,7 @@ class UserAccountEditView(BaseFormView):
 
 class UserDatasAdd(BaseFormView):
     title = u"Gestion sociale"
-    schema = SQLAlchemySchemaNode(UserDatas)
+    schema = get_userdatas_schema() #SQLAlchemySchemaNode(UserDatas)
     validation_msg = u"Les informations sociales ont bien été enregistrées"
 
     def before(self, form):

@@ -182,13 +182,13 @@ class User(DBBASE, PersistentACLMixin):
 
     primary_group = Column(
         Integer,
-        info={'colanderalchemy':EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
         default=3,
     )
 
     active = Column(
         String(1),
-        info={'colanderalchemy':EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
         default='Y'
     )
 
@@ -211,7 +211,8 @@ class User(DBBASE, PersistentACLMixin):
               {
                   'title': u'Mot de passe',
                   'widget': deform.widget.CheckedPasswordWidget(),
-              }
+              },
+              'export': EXCLUDED
         },
         nullable=False,
     )
@@ -221,9 +222,9 @@ class User(DBBASE, PersistentACLMixin):
         secondary=COMPANY_EMPLOYEE,
         backref=backref(
             "employees",
-            info={'colanderalchemy': EXCLUDED, 'py3o': EXCLUDED},
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         ),
-        info={'colanderalchemy':EXCLUDED, 'py3o': EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
     )
 
     compte_tiers = Column(
@@ -239,7 +240,7 @@ class User(DBBASE, PersistentACLMixin):
 
     session_datas = Column(
         JsonEncodedDict,
-        info={'colanderalchemy':EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
         default=None,
     )
 
@@ -639,7 +640,6 @@ class UserDatas(Node):
         primary_key=True,
         info={
             'colanderalchemy': get_hidden_field_conf(),
-            'export': {'exclude': True},
         }
     )
 
@@ -649,7 +649,7 @@ class UserDatas(Node):
         info={
             'colanderalchemy': EXCLUDED,
             'export': {'exclude': True},
-             }
+        }
     )
     user = relationship(
         "User",
@@ -708,7 +708,6 @@ class UserDatas(Node):
             info={
                 'colanderalchemy': EXCLUDED,
                 'export': {'exclude': True},
-                "py3o": {'exclude': True},
             },
         ),
         info={
@@ -740,6 +739,9 @@ class UserDatas(Node):
                 'section': u"Coordonnées",
                 'widget': get_select(CIVILITE_OPTIONS),
             },
+            'export': {
+                'formatter': lambda val: dict(CIVILITE_OPTIONS).get(val),
+            }
         },
         nullable=False,
     )
@@ -968,6 +970,9 @@ class UserDatas(Node):
                 'widget': get_select(STATUS_OPTIONS),
                 'validator': get_select_validator(STATUS_OPTIONS),
             },
+            'export': {
+                'formatter': lambda val: dict(STATUS_OPTIONS).get(val),
+            }
         }
     )
 
@@ -1226,6 +1231,9 @@ class UserDatas(Node):
                 'title': u'Type de contrat',
                 'section': u'Parcours',
                 'widget': get_select(CONTRACT_OPTIONS)
+            },
+            'export': {
+                'formatter': lambda val: dict(CONTRACT_OPTIONS).get(val),
             }
         }
     )

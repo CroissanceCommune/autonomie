@@ -173,7 +173,6 @@ class TemplatingHistory(DBBASE, PersistentACLMixin):
             cascade='all, delete-orphan',
             info={
                 'colanderalchemy': EXCLUDED,
-                "py3o": EXCLUDED,
                 "export": EXCLUDED,
             },
         )

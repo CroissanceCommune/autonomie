@@ -79,7 +79,7 @@ class TurnoverProjection(DBBASE):
             order_by="TurnoverProjection.month",
             cascade="all, delete-orphan",
             info={
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         )
     )
@@ -199,7 +199,7 @@ class ExpenseSheet(DBBASE, PersistentACLMixin):
             order_by="ExpenseSheet.month",
             info={
                 'colanderalchemy': EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
             cascade="all, delete-orphan"
         ),
@@ -440,7 +440,7 @@ class Communication(DBBASE):
             cascade="all, delete-orphan",
             info={
                 'colanderalchemy': EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         )
     )

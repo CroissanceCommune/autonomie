@@ -124,7 +124,7 @@ class Estimation(Task, EstimationCompute):
             cascade="all,delete-orphan",
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         )
     )
@@ -136,7 +136,7 @@ class Estimation(Task, EstimationCompute):
             order_by='Estimation.taskDate',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         )
     )

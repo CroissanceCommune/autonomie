@@ -59,7 +59,10 @@ class Node(DBBASE, PersistentACLMixin):
     __mapper_args__ = {
             'polymorphic_on': 'type_',
             'polymorphic_identity':'nodes'}
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
     name = Column(
         String(255),
         info={
@@ -70,20 +73,20 @@ class Node(DBBASE, PersistentACLMixin):
 
     created_at = Column(
         DateTime(),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
         default=datetime.now(),
     )
 
     updated_at = Column(
         DateTime(),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
         default=datetime.now(),
         onupdate=datetime.now()
     )
 
     parent_id = Column(
         ForeignKey('node.id'),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     children = relationship(
@@ -94,17 +97,22 @@ class Node(DBBASE, PersistentACLMixin):
             remote_side=[id],
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
             },
         ),
         cascade='all',
-        info={'colanderalchemy': forms.EXCLUDED, 'py3o': {'exclude': True}},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     type_ = Column(
         'type_',
         String(30),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
         nullable=False,
     )
-    _acl = Column(MutableList.as_mutable(ACLType))
+    _acl = Column(
+        MutableList.as_mutable(ACLType),
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True}
+        },
+    )

@@ -102,7 +102,7 @@ class Task(Node):
             "taskStatuses",
             info={
                 'colanderalchemy': EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
     )
@@ -113,7 +113,7 @@ class Task(Node):
             "ownedTasks",
             info={
                 'colanderalchemy': EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
     )
@@ -126,7 +126,7 @@ class Task(Node):
             order_by='Task.taskDate',
             info={
                 'colanderalchemy': EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
         lazy="joined")
@@ -298,7 +298,7 @@ class TaskStatus(DBBASE):
             "task_statuses",
             info={
                 'colanderalchemy': EXCLUDED,
-                'py3o': EXCLUDED,
+                'export': EXCLUDED,
             },
         )
     )

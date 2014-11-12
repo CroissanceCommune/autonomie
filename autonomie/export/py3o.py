@@ -33,6 +33,8 @@ def format_py3o_val(value):
 
     * Handle linebreaks
     """
+    if value is None:
+        value = ""
     return Markup(unicode(value).replace('\n', '<text:line-break/>'))
 
 
@@ -101,27 +103,32 @@ class SqlaContext(BaseSqlaExporter):
         for prop in self.get_sorted_columns():
 
             info_dict = self.get_info_field(prop)
-            main_infos = info_dict.get(self.config_key, {}).copy()
+            export_infos = info_dict.get('export', {}).copy()
 
-            if main_infos.get('exclude', False):
+            main_infos = export_infos.get(self.config_key, {}).copy()
+
+            if export_infos.get('exclude', False) or main_infos.get('exclude', False):
                 continue
+
+            infos = export_infos
+            infos.update(main_infos)
 
             # Si la clé name n'est pas définit on la met au nom de la colonne
             # par défaut
-            main_infos.setdefault('name', prop.key)
-            main_infos['__col__'] = prop
+            infos.setdefault('name', prop.key)
+            infos['__col__'] = prop
             if isinstance(prop, RelationshipProperty):
                 join = str(prop.primaryjoin)
                 if join in self.rels:
                     continue
                 else:
                     self.rels.append(str(join))
-                    main_infos['__prop__'] = SqlaContext(
+                    infos['__prop__'] = SqlaContext(
                         prop.mapper,
                         rels=self.rels[:]
                     )
 
-            res.append(main_infos)
+            res.append(infos)
         return res
 
     def compile_obj(self, obj):
@@ -133,7 +140,12 @@ class SqlaContext(BaseSqlaExporter):
         res = {}
         for column in self.columns:
             if isinstance(column['__col__'], ColumnProperty):
-                value = getattr(obj, column['__col__'].key)
+                value = getattr(obj, column['__col__'].key, None)
+                formatter = column.get('formatter')
+
+                if formatter:
+                    value = formatter(value)
+
                 value = format_py3o_val(value)
 
             elif isinstance(column['__col__'], RelationshipProperty):
@@ -144,19 +156,33 @@ class SqlaContext(BaseSqlaExporter):
                 # 3- si la relation est uselist, on fait une liste d'élément
                 # liés
                 related = getattr(obj, column['__col__'].key)
-                if related is None:
-                    continue
                 if column['__col__'].uselist:
                     value = []
                     for rel_obj in related:
                         value.append(column['__prop__'].compile_obj(rel_obj))
                 else:
-
                     value = column['__prop__'].compile_obj(related)
 
             res[column['name']] = value
 
         return res
+
+
+def get_compilation_context(instance):
+    """
+    Return the compilation context for py3o templating
+
+    Build a deep dict representation of the given instance and add config values
+
+    :param obj instance: a SQLAAlchemy model instance
+    :return: a multi level dict with context datas
+    :rtype: dict
+    """
+    context_builder = SqlaContext(instance.__class__)
+    py3o_context = context_builder.compile_obj(instance)
+    # Add config datas in the context dict
+    py3o_context.update(get_config())
+    return py3o_context
 
 
 def compile_template(instance, template):
@@ -172,10 +198,7 @@ def compile_template(instance, template):
     :param template: the template object to use
     :return: a stringIO object filled with the resulting odt's informations
     """
-    context_builder = SqlaContext(instance.__class__)
-    py3o_context = context_builder.compile_obj(instance)
-    # Add config datas in the context dict
-    py3o_context.update(get_config())
+    py3o_context = get_compilation_context(instance)
 
     output_doc = StringIO()
 

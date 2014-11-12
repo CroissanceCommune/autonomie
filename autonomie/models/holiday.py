@@ -56,7 +56,7 @@ class Holiday(DBBASE):
         "User",
         backref=backref(
             "holidays",
-            info={'colanderalchemy': EXCLUDED, 'py3o': EXCLUDED,},
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED,},
             order_by="Holiday.start_date",
         ),
         primaryjoin="Holiday.user_id==User.id"

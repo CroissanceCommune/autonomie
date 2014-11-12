@@ -146,7 +146,7 @@ class Invoice(Task, InvoiceCompute):
             order_by='Invoice.taskDate',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                "py3o": {'exclude': True},
+                "export": {'exclude': True},
             },
         ),
     )
@@ -158,7 +158,7 @@ class Invoice(Task, InvoiceCompute):
             order_by='Invoice.taskDate',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
     )
@@ -521,7 +521,7 @@ class CancelInvoice(Task, TaskCompute):
             order_by='CancelInvoice.taskDate',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         )
     )
@@ -543,7 +543,7 @@ class CancelInvoice(Task, TaskCompute):
             order_by='CancelInvoice.taskDate',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         )
     )
@@ -751,7 +751,7 @@ class ManualInvoice(Task):
             'manual_invoices',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
     )
@@ -766,7 +766,7 @@ class ManualInvoice(Task):
             'manual_invoices',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'py3o': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
     )

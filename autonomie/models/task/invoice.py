@@ -354,6 +354,7 @@ class Invoice(Task, InvoiceCompute):
         """
         Check if the invoice is resulted or not and set the appropriate status
         """
+        old_status = self.CAEStatus
         log.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() == 0 or force_resulted:
             self.CAEStatus = 'resulted'
@@ -361,7 +362,8 @@ class Invoice(Task, InvoiceCompute):
             self.CAEStatus = 'paid'
         else:
             self.CAEStatus = 'valid'
-        if user_id is not None:
+        # If the status has changed, we update the statusPerson
+        if user_id is not None and old_status != self.CAEStatus:
             self.statusPerson = user_id
         return self
 

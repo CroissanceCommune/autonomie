@@ -278,6 +278,11 @@ def get_usermenu(request):
     href = request.route_path('user_holidays', id=request.user.id)
     menu.add_item(u"Mes congés", icon="fa fa-space-shuttle", href=href)
 
+    # C'est un entrepreneur
+    if request.user.userdatas is not None:
+        href = request.route_path('mydocuments')
+        menu.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
+
     href = request.route_path("logout")
     menu.add_item(u"Déconnexion", icon="fa fa-close", href=href)
     return menu

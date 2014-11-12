@@ -36,7 +36,10 @@ from pyramid.httpexceptions import (
     HTTPFound,
 )
 
-from autonomie.models.files import MailHistory
+from autonomie.models.files import (
+    MailHistory,
+    File,
+)
 from autonomie.forms.lists import BaseListsSchema
 from autonomie.views import (
     BaseView,
@@ -97,7 +100,7 @@ def current_years():
 
 
 
-class File(object):
+class AbstractFile(object):
     """
         File object abstraction
     """
@@ -161,7 +164,7 @@ class File(object):
         return request
 
     def __repr__(self):
-        return "<File : %s %s>" % (self.name, self.path)
+        return "<AbstractFile : %s %s>" % (self.name, self.path)
 
 
 def digit_subdirs(path):
@@ -206,7 +209,7 @@ class DisplayDirectoryView(BaseView):
             filepath = os.path.join(path, name)
             if os.path.isfile(filepath):
                 if isprefixed(name, prefix):
-                    file_obj = File(name, filepath)
+                    file_obj = AbstractFile(name, filepath)
                     result.append(file_obj)
         result.sort(key=lambda f:f.path)
         return result
@@ -264,11 +267,11 @@ def file_display(request):
         return HTTPForbidden()
 
     if os.path.isfile(filepath):
-        file_obj = File(filename, filepath)
+        file_obj = AbstractFile(filename, filepath)
         file_obj.as_response(request)
         return request.response
 
-    log.warn("File not found")
+    log.warn("AbstractFile not found")
     log.warn(filepath)
     return HTTPNotFound()
 
@@ -335,23 +338,35 @@ def mailagain(request):
     """
     Send an email again based on its history entry
     """
-    from autonomie.tasks import mail
-    mail.delay(
-        request.registry.settings
+    history_entry = MailHistory.get(request.matchdict['id'])
+    send_salary_sheet(
+        request,
+        history_entry.company,
+        history_entry.filename,
+        history_entry.filepath,
+        True,
     )
-
-    #history_entry = MailHistory.get(request.matchdict['id'])
-    #send_salary_sheet(
-    #    request,
-    #    history_entry.company,
-    #    history_entry.filename,
-    #    history_entry.filepath,
-    #    True,
-    #)
 
     request.session.flash(u"Le mail a bien été envoyé")
     url = request.route_path('mailhistory')
     return HTTPFound(url)
+
+
+def mydocuments_view(context, request):
+    """
+    View callable collecting datas for showing the social docs associated to the
+    current user's account
+
+    """
+    if request.user.userdatas is not None:
+        query = File.query()
+        documents = query.filter(File.parent_id==request.user.userdatas.id).all()
+    else:
+        documents = []
+    return dict(
+        title=u"Mes documents",
+        documents=documents,
+    )
 
 
 def includeme(config):
@@ -361,18 +376,48 @@ def includeme(config):
     # traverse is the path in the resource tree we provide to add a context to
     # our view
     traverse = '/companies/{id}'
+
+    # Add the file listing route/views
     for key, view in ("treasury", Treasury), \
                      ("incomestatement", IncomeStatement), \
                      ("salarysheet", SalarySheet):
-        config.add_route(key, "/company/{id:\d+}/%s" % key, traverse=traverse)
-        config.add_view(view, route_name=key,
-                renderer="treasury/documents.mako", permission="edit")
-    config.add_route("treasury_files", "/company/{id:\d+}/files/",
-                        traverse=traverse)
-    config.add_view(file_display, route_name="treasury_files",
-                    request_param='name')
+        config.add_route(
+            key,
+            "/company/{id:\d+}/%s" % key,
+            traverse=traverse
+        )
+        config.add_view(
+            view,
+            route_name=key,
+            renderer="treasury/documents.mako",
+            permission="edit",
+        )
 
-    # mail history
+    # Add the file display view
+    config.add_route(
+        "treasury_files",
+        "/company/{id:\d+}/files/",
+        traverse=traverse,
+    )
+    config.add_view(
+        file_display,
+        route_name="treasury_files",
+        request_param='name',
+    )
+
+    # Add the social documents display view
+    config.add_route(
+        "mydocuments",
+        "/mydocuments",
+    )
+    config.add_view(
+        mydocuments_view,
+        route_name="mydocuments",
+        renderer="mydocuments.mako",
+        permission="view",
+    )
+
+    # Add the mail history views
     config.add_route("mailhistory", '/mailhistory')
     config.add_view(
         MailHistoryView,

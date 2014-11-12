@@ -152,6 +152,7 @@ def _get_next_activity_form_options(request, counter=None):
             action=submit_url,
             )
 
+
 def _get_next_activity_form(request, counter):
     """
     Return the form used to configure the next activity

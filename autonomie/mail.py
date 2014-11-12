@@ -130,7 +130,6 @@ def send_mail(request, recipients, body, subject, attachment=None):
     try:
         recipients = [format_mail(recipient) for recipient in recipients]
         sender = get_sender(settings)
-        sender = format_mail(sender)
         mailer = get_mailer(request)
         message = Message(
             subject=subject,

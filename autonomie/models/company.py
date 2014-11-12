@@ -50,6 +50,7 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import (
     CustomDateType,
     CustomFileType,
+    PersistentACLMixin,
 )
 
 from autonomie.models.base import (
@@ -61,7 +62,7 @@ from autonomie.models.base import (
 log = logging.getLogger(__name__)
 
 
-class Company(DBBASE):
+class Company(DBBASE, PersistentACLMixin):
     """
         Company model
         Store all company specific stuff (headers, logos, RIB, ...)

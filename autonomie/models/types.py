@@ -180,6 +180,56 @@ class JsonEncodedList(TypeDecorator):
             value = json.loads(value)
         return value
 
+from pyramid.security import (
+    Allow,
+    Everyone,
+    Authenticated,
+    ALL_PERMISSIONS,
+)
+
+class PersistentACLMixin(object):
+    def _get_acl(self):
+
+        if getattr(self, '_acl', None) is None:
+            if getattr(self, "__default_acl__", None) is not None:
+                return self.__default_acl__
+            elif getattr(self, "parent", None) is not None:
+                return self.parent.__acl__
+            raise AttributeError('__acl__')
+        return self._acl
+
+    def _set_acl(self, value):
+        self._acl = value
+
+    def _del_acl(self):
+        self._acl = None
+
+    __acl__ = property(_get_acl, _set_acl, _del_acl)
+
+
+class ACLType(JsonEncodedList):
+    all_permissions_serialized = '__ALL_PERMISSIONS__'
+    defaults = [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, "group:manager", ("manage", "add", "edit", "view")),
+    ]
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = [list(ace) for ace in value if ace not in self.defaults]
+            for ace in value:
+                if ace[2] == ALL_PERMISSIONS:
+                    ace[2] = self.all_permissions_serialized
+        return JsonEncodedList.process_bind_param(self, value, dialect)
+
+    def process_result_value(self, value, dialect):
+        acl = JsonEncodedList.process_result_value(self, value, dialect)
+        if acl is not None:
+            for ace in acl:
+                if ace[2] == self.all_permissions_serialized:
+                    ace[2] = ALL_PERMISSIONS
+            return self.defaults + [tuple(ace) for ace in acl]
+
 
 class MutableDict(Mutable, dict):
     """
@@ -226,7 +276,6 @@ class MutableList(Mutable, list):
         Convert list to mutablelist
         """
         if not isinstance(value, MutableList):
-            print type(value)
             if isinstance(value, list):
                 return MutableList(value)
 

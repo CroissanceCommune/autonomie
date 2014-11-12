@@ -66,7 +66,10 @@ from autonomie.forms import (
     get_deferred_select,
     mail_validator,
 )
-from autonomie.models.types import JsonEncodedDict
+from autonomie.models.types import (
+    JsonEncodedDict,
+    PersistentACLMixin,
+)
 from autonomie.utils.ascii import camel_case_to_name
 
 
@@ -146,7 +149,7 @@ def get_id_foreignkey_col(foreignkey_str):
     return column
 
 
-class User(DBBASE):
+class User(DBBASE, PersistentACLMixin):
     """
         User model
     """

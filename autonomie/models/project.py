@@ -45,7 +45,9 @@ from sqlalchemy.orm import (
 
 from autonomie import forms
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.types import CustomDateType
+from autonomie.models.types import (
+    CustomDateType,
+)
 from autonomie.models.base import (
     default_table_args,
     DBBASE,

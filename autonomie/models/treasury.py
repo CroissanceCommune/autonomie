@@ -52,6 +52,7 @@ from autonomie.models.base import (
 from autonomie.forms import EXCLUDED
 from autonomie.compute import math_utils
 
+from autonomie.models.types import PersistentACLMixin
 from autonomie.models.statemachine import StateMachine
 
 MANAGER_PERMS = "manage"
@@ -154,7 +155,7 @@ class ExpenseStates(StateMachine):
     userid_attr = "status_user_id"
 
 
-class ExpenseSheet(DBBASE):
+class ExpenseSheet(DBBASE, PersistentACLMixin):
     """
         Model representing a whole ExpenseSheet
         An expensesheet is related to a company and an employee (one user may
@@ -257,7 +258,7 @@ class ExpenseSheet(DBBASE):
         return ret_dict.values()
 
 
-class BaseExpenseLine(DBBASE):
+class BaseExpenseLine(DBBASE, PersistentACLMixin):
     """
         Base models for expense lines
         :param type: Column for polymorphic discrimination

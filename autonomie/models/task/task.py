@@ -35,17 +35,18 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Text,
-    )
+)
 from sqlalchemy.orm import (
-        relationship,
-        validates,
-        deferred,
-        backref,
-        )
+    relationship,
+    validates,
+    deferred,
+    backref,
+)
 
 from autonomie.models.types import (
-        CustomDateType,
-        CustomDateType2)
+    CustomDateType,
+    CustomDateType2,
+)
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,

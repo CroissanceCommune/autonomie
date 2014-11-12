@@ -38,13 +38,22 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, backref
 
 from autonomie import forms
+from autonomie.models.types import (
+    ACLType,
+    PersistentACLMixin,
+    MutableList,
+)
 from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
 
 
-class Node(DBBASE):
+class Node(DBBASE, PersistentACLMixin):
+    """
+    A base node providing a parent<->children structure for most of the models
+    (usefull for file attachment)
+    """
     __tablename__ = 'node'
     __table_args__ = default_table_args
     __mapper_args__ = {
@@ -98,3 +107,4 @@ class Node(DBBASE):
         info={'colanderalchemy': forms.EXCLUDED,},
         nullable=False,
     )
+    _acl = Column(MutableList.as_mutable(ACLType))

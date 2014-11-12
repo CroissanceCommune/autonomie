@@ -50,6 +50,7 @@ from autonomie.models.base import (
     DBBASE,
     DBSESSION,
 )
+from autonomie.models.types import PersistentACLMixin
 from autonomie.models.node import Node
 from autonomie.forms import EXCLUDED
 
@@ -152,7 +153,7 @@ class Template(File):
     active = Column(Boolean(), default=True)
 
 
-class TemplatingHistory(DBBASE):
+class TemplatingHistory(DBBASE, PersistentACLMixin):
     """
     Record all the templating fired for a given userdata account
     """

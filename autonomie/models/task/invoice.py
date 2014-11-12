@@ -32,46 +32,49 @@ from zope.interface import implementer
 from beaker.cache import cache_region
 
 from sqlalchemy import (
-        Column,
-        Integer,
-        Boolean,
-        String,
-        ForeignKey,
-        DateTime,
-        Text,
-        func,
-        distinct,
-        )
+    Column,
+    Integer,
+    Boolean,
+    String,
+    ForeignKey,
+    DateTime,
+    Text,
+    func,
+    distinct,
+)
 from sqlalchemy.orm import (
-        relationship,
-        deferred,
-        backref,
-        validates,
+    relationship,
+    deferred,
+    backref,
+    validates,
 )
 # Aye : ici on a du double dans la bdd, en attendant une éventuelle
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
 
 from autonomie import forms
-from autonomie.models.types import CustomDateType
+from autonomie.models.types import (
+    CustomDateType,
+    PersistentACLMixin,
+)
 from autonomie.models.utils import get_current_timestamp
 from autonomie.exception import Forbidden
 from autonomie.models.base import (
-        DBSESSION,
-        DBBASE,
-        default_table_args,
-        )
+    DBSESSION,
+    DBBASE,
+    default_table_args,
+)
 
 from autonomie.compute.task import (
-        TaskCompute,
-        LineCompute,
-        InvoiceCompute,
-        )
+    TaskCompute,
+    LineCompute,
+    InvoiceCompute,
+)
 from .interfaces import (
-        IMoneyTask,
-        IInvoice,
-        IPaidTask,
-        )
+    IMoneyTask,
+    IInvoice,
+    IPaidTask,
+)
 from .task import Task
 from .states import DEFAULT_STATE_MACHINES
 
@@ -679,7 +682,7 @@ class CancelInvoiceLine(DBBASE, LineCompute):
 cost:{s.cost} quantity:{s.quantity} tva:{s.tva}".format(s=self)
 
 
-class Payment(DBBASE):
+class Payment(DBBASE, PersistentACLMixin):
     """
         Payment entry
     """

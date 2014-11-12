@@ -15,6 +15,8 @@ import sqlalchemy as sa
 
 
 def upgrade():
+    op.add_column('node', sa.Column('_acl', sa.Text()))
+
     from autonomie.models.base import DBSESSION
     from autonomie.models.node import Node
     session = DBSESSION()
@@ -55,3 +57,4 @@ def upgrade():
 
 def downgrade():
     op.execute("delete from node where type_='userdata'")
+    op.drop_column('node', '_acl')

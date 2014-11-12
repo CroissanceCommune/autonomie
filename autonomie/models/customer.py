@@ -51,7 +51,10 @@ from sqlalchemy.orm import (
 )
 
 from autonomie import forms
-from autonomie.models.types import CustomDateType
+from autonomie.models.types import (
+    CustomDateType,
+    PersistentACLMixin,
+)
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,
@@ -105,7 +108,7 @@ client".format(value)
     return unique_ccode
 
 
-class Customer(DBBASE):
+class Customer(DBBASE, PersistentACLMixin):
     """
         Customer model
         Stores the company and its main contact

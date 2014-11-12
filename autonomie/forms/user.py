@@ -383,5 +383,5 @@ def get_userdatas_schema():
     """
     Return the userdatas edition/add schema
     """
-    schema = SQLAlchemySchemaNode(user.UserDatas, excludes=('name',))
+    schema = SQLAlchemySchemaNode(user.UserDatas, excludes=('name', '_acl'))
     return schema

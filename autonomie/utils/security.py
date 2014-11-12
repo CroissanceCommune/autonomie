@@ -164,6 +164,17 @@ def get_base_acl(self):
     return acl
 
 
+def get_userdatas_acl(self):
+    """
+    Return the acls for userdatas
+    only the related account has view rights
+    """
+    acl = DEFAULT_PERM[:]
+    if self.user is not None:
+        acl.append((Allow, self.user.login, 'view'))
+    return acl
+
+
 def get_activity_acl(self):
     """
     Return acls for activities
@@ -290,7 +301,7 @@ def set_models_acls():
     Invoice.__default_acl__ = property(get_task_acl)
     CancelInvoice.__default_acl__ = property(get_task_acl)
     User.__default_acl__ = property(get_user_acl)
-    UserDatas.__default_acl__ = property(get_base_acl)
+    UserDatas.__default_acl__ = property(get_userdatas_acl)
     ExpenseSheet.__default_acl__ = property(get_expensesheet_acl)
     BaseExpenseLine.__default_acl__ = property(get_expense_acl)
     Activity.__default_acl__ = property(get_activity_acl)

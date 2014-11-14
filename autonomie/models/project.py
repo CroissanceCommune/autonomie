@@ -45,7 +45,9 @@ from sqlalchemy.orm import (
 
 from autonomie import forms
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.types import CustomDateType
+from autonomie.models.types import (
+    CustomDateType,
+)
 from autonomie.models.base import (
     default_table_args,
     DBBASE,
@@ -232,6 +234,7 @@ class Project(Node):
                 "title": u"Client",
                 "exclude": True,
             },
+            'export': {'exclude': True},
         }
     )
 
@@ -335,9 +338,15 @@ class Phase(DBBASE):
         backref=backref(
             "phases",
             cascade="all, delete-orphan",
-            info={'colanderalchemy': forms.EXCLUDED},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'export': {'exclude': True}
+            },
         ),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True}
+        },
     )
 
     creationDate = deferred(

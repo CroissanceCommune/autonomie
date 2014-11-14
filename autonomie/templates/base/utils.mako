@@ -210,9 +210,9 @@ path = request.current_route_path(_query=get_args)
             % endif
         </dl>
 </%def>
-<%def name="format_filelist(document)">
- % if document is not None:
-      % for child in document.children:
+<%def name="format_filelist(parent_node)">
+ % if parent_node is not None:
+      % for child in parent_node.children:
           % if loop.first:
               <ul>
           % endif
@@ -226,6 +226,45 @@ path = request.current_route_path(_query=get_args)
           % endif
       % endfor
   % endif
+</%def>
+<%def name="format_filetable(documents)">
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <th>Description</th>
+            <th>Nom du fichier</th>
+            <th>Taille</th>
+            <th>Déposé le</th>
+            <th>Dernière modification</th>
+            <th>Actions</th>
+        </thead>
+        <tbody>
+            % for child in documents:
+              <tr>
+                  <td>${child.description}</td>
+                  <td>${child.name}</td>
+                  <td>${api.human_readable_filesize(child.size)}</td>
+                  <td>${api.format_date(child.created_at)}</td>
+                  <td>${api.format_date(child.updated_at)}</td>
+                  <td>
+                  % if api.has_permission('edit', child):
+                      <a
+                          class='btn btn-small'
+                          href="${request.route_path('file', id=child.id)}"
+                          >Voir/éditer
+                      </a>
+                  % endif
+                      <a class="btn btn-small"
+                          href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
+                          Télécharger
+                      </a>
+                  </td>
+              </tr>
+            % endfor
+            % if documents == []:
+                <tr><td colspan='6'>Aucun document social n'est disponible</td></tr>
+            % endif
+        </tbody>
+  </table>
 </%def>
 <%def name="definition_list(items)">
     <%doc>

@@ -25,7 +25,6 @@
 """
     Company model
 """
-import os
 import logging
 import colander
 import deform_bootstrap
@@ -49,7 +48,7 @@ from autonomie import forms
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import (
     CustomDateType,
-    CustomFileType,
+    PersistentACLMixin,
 )
 
 from autonomie.models.base import (
@@ -61,7 +60,7 @@ from autonomie.models.base import (
 log = logging.getLogger(__name__)
 
 
-class Company(DBBASE):
+class Company(DBBASE, PersistentACLMixin):
     """
         Company model
         Store all company specific stuff (headers, logos, RIB, ...)
@@ -152,7 +151,13 @@ class Company(DBBASE):
     projects = relationship(
         "Project",
         order_by="Project.id",
-        backref=backref("company", info={'colanderalchemy': forms.EXCLUDED}),
+        backref=backref(
+            "company",
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                "export": {'exclude': True}
+            }
+        ),
     )
     code_compta = deferred(
         Column(
@@ -166,14 +171,20 @@ class Company(DBBASE):
         group='edit'
     )
 
-    header_id = Column(ForeignKey('file.id'))
+    header_id = Column(
+        ForeignKey('file.id'),
+        info={'colanderalchemy': forms.EXCLUDED, 'export': {'exclude': True}},
+    )
     header_file = relationship(
         "File",
         primaryjoin="File.id==Company.header_id",
         backref=backref('company_header_backref', uselist=False),
     )
 
-    logo_id = Column(ForeignKey('file.id'))
+    logo_id = Column(
+        ForeignKey('file.id'),
+        info={'colanderalchemy': forms.EXCLUDED, 'export': {'exclude': True}},
+    )
     logo_file = relationship(
         "File",
         primaryjoin="File.id==Company.logo_id",
@@ -273,8 +284,6 @@ class Company(DBBASE):
                     comments=self.comments,
                     RIB=self.RIB,
                     IBAN=self.IBAN,
-                    logo=self.get_logo_filepath(),
-                    header=self.get_header_filepath(),
                     customers=customers,
                     projects=projects)
 

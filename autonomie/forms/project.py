@@ -75,7 +75,7 @@ def get_project_schema():
     """
     Return the project Edition/add form schema
     """
-    schema = SQLAlchemySchemaNode(Project)
+    schema = SQLAlchemySchemaNode(Project, excludes=('_acl',))
 
     # Add a custom node to be able to associate existing customers
     customer_id_node = colander.SchemaNode(

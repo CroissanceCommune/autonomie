@@ -28,6 +28,7 @@
 import logging
 import colander
 import deform
+from traceback import print_exc
 
 from colanderalchemy import SQLAlchemySchemaNode
 from js.deform import auto_need
@@ -37,6 +38,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.decorator import reify
 
+from autonomie.models import files
 from autonomie.models.user import (
     User,
     UserDatas,
@@ -51,6 +53,8 @@ from autonomie.utils.widgets import (
     PopUp,
     StaticWidget,
 )
+from autonomie.export.utils import write_file_to_request
+from autonomie.export import py3o
 from autonomie.deform_extend import (
     AccordionFormWidget,
     TableFormWidget,
@@ -60,6 +64,7 @@ from autonomie.forms.user import (
     get_account_schema,
     get_password_schema,
     get_user_schema,
+    get_userdatas_schema,
     get_userdatas_list_schema,
     UserDisableSchema,
 )
@@ -72,6 +77,10 @@ from autonomie.views import (
 )
 from autonomie.views.render_api import format_account
 from autonomie.views.company import company_enable
+from autonomie.views.files import (
+    get_add_file_link,
+    FileUploadView,
+)
 
 log = logging.getLogger(__name__)
 
@@ -238,7 +247,7 @@ class UserEditView(PermanentUserEditView):
         return self.request.route_path(
             "userdata",
             id=user_model.userdatas.id,
-            _anchor='form3'
+            _anchor='tab3'
         )
 
 
@@ -367,7 +376,7 @@ class UserAccountEditView(BaseFormView):
 
 class UserDatasAdd(BaseFormView):
     title = u"Gestion sociale"
-    schema = SQLAlchemySchemaNode(UserDatas)
+    schema = get_userdatas_schema() #SQLAlchemySchemaNode(UserDatas)
     validation_msg = u"Les informations sociales ont bien été enregistrées"
 
     def before(self, form):
@@ -409,7 +418,7 @@ mot de passe : {1}".format(login, password, url)
 
 
 class UserDatasEdit(UserDatasAdd):
-    add_template_vars = ('doctypes_form', 'account_form',)
+    add_template_vars = ('doctypes_form', 'account_form', 'doctemplates', )
 
     @property
     def title(self):
@@ -422,6 +431,10 @@ class UserDatasEdit(UserDatasAdd):
         form.set_appstruct(self.schema.dictify(self.request.context))
         self.counter = form.counter
         self.ensure_doctypes_rel()
+
+    def populate_actionmenu(self):
+        self.request.actionmenu.add(get_userdatas_list_btn())
+        self.request.actionmenu.add(get_add_file_link(self.request))
 
     def ensure_doctypes_rel(self):
         """
@@ -490,6 +503,84 @@ class UserDatasEdit(UserDatasAdd):
         form.widget = TableFormWidget()
         form.set_appstruct(appstruct)
         return form
+
+    @property
+    def doctemplates(self):
+        templates = files.Template.query()
+        templates = templates.filter(files.Template.active==True)
+        return templates.all()
+
+
+def record_compilation(context, request, template):
+    """
+    Record the compilation of a template to be able to build an history
+    """
+    if isinstance(context, UserDatas):
+        history = files.TemplatingHistory(
+            user_id=request.user.id,
+            userdatas_id=context.id,
+            template_id=template.id)
+        log.debug(u"Storing an history object")
+        request.dbsession.add(history)
+
+
+def delete_templating_history_view(context, request):
+    userdatas = context.userdatas
+    request.dbsession.delete(context)
+    request.session.flash(u"L'élément a bien été supprimé de l'historique")
+    return HTTPFound(
+        request.route_path(
+            'userdata',
+            id=userdatas.id,
+            _anchor='tab4'
+        )
+    )
+
+def py3o_view(context, request):
+    """
+    py3o view :
+
+        compile the template provided as argument using the current view
+        context for templating
+    """
+    log.debug(u"Asking for a template compilation")
+    doctemplate_id = request.GET.get('template_id')
+
+    if doctemplate_id:
+        template = files.Template.get(doctemplate_id)
+        if template:
+            log.debug(" + Templating (%s, %s)" % (template.name, template.id))
+            try:
+                output = py3o.compile_template(context, template.data_obj)
+                write_file_to_request(
+                    request,
+                    template.name,
+                    output,
+                )
+                record_compilation(context, request, template)
+                return request.response
+            except Exception, err:
+                print_exc()
+                log.exception(
+u"Une erreur est survenue à la compilation du template %s avec un contexte \
+de type %s et d'id %s" % (template.id, context.__class__, context.id)
+                             )
+                request.session.flash(
+                    u"Erreur à la compilation du modèle, merci de contacter \
+votre administrateur",
+                    "error"
+                )
+        else:
+            request.session.flash(
+                u"Impossible de mettre la main sur ce modèle",
+                "error"
+            )
+    else:
+        request.session.flash(
+            u"Les données fournies en paramètres sont invalides",
+            "error"
+        )
+    return HTTPFound(request.route_path(context.type_, id=context.id))
 
 
 def userdata_doctype_view(userdata_model, request):
@@ -888,6 +979,18 @@ def includeme(config):
         "userdatas.xls",
         "/userdatas.xls",
     )
+    config.add_route(
+        "templatinghistory",
+        "/py3ostory/{id}",
+        traverse="/templatinghistory/{id}"
+    )
+
+    config.add_view(
+        delete_templating_history_view,
+        route_name="templatinghistory",
+        request_param="action=delete",
+        permission="manage",
+    )
 
     config.add_route('account', '/account')
 
@@ -1009,3 +1112,16 @@ def includeme(config):
         permission="manage",
     )
 
+    config.add_view(
+        py3o_view,
+        route_name="userdata",
+        request_param="action=py3o",
+        permission="manage",
+    )
+    config.add_view(
+        FileUploadView,
+        route_name="userdata",
+        renderer='base/formpage.mako',
+        permission='manage',
+        request_param='action=attach_file',
+    )

@@ -113,6 +113,7 @@ class Attendance(DBBASE):
         backref=backref(
             'attendances',
             cascade='all, delete-orphan',
+            info={'export': {'exclude': True},}
         )
     )
     user = relationship(
@@ -120,9 +121,15 @@ class Attendance(DBBASE):
         backref=backref(
             'event_attendances',
             cascade='all, delete-orphan',
-            info={'colanderalchemy':EXCLUDED},
+            info={
+                'colanderalchemy':EXCLUDED,
+                'export': {'exclude': True}
+            },
         ),
-        info={'colanderalchemy':EXCLUDED},
+        info={
+            'colanderalchemy':EXCLUDED,
+            'export': {'exclude': True}
+        },
     )
 
     # Used as default creator function by the association_proxy
@@ -224,9 +231,9 @@ class Activity(Event):
         backref=backref(
             'activities',
             order_by='Activity.datetime',
-            info={'colanderalchemy':EXCLUDED},
+            info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
         ),
-        info={'colanderalchemy':EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
     )
     action_label_obj = relationship(
             "ActivityAction",
@@ -279,4 +286,4 @@ class ActivityAction(DBBASE):
         primaryjoin="ActivityAction.id==ActivityAction.parent_id",
         backref=backref("parent", remote_side=[id]),
         cascade="all",
-        )
+    )

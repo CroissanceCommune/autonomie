@@ -38,19 +38,31 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, backref
 
 from autonomie import forms
+from autonomie.models.types import (
+    ACLType,
+    PersistentACLMixin,
+    MutableList,
+)
 from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
 
 
-class Node(DBBASE):
+class Node(DBBASE, PersistentACLMixin):
+    """
+    A base node providing a parent<->children structure for most of the models
+    (usefull for file attachment)
+    """
     __tablename__ = 'node'
     __table_args__ = default_table_args
     __mapper_args__ = {
             'polymorphic_on': 'type_',
             'polymorphic_identity':'nodes'}
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
     name = Column(
         String(255),
         info={
@@ -61,20 +73,20 @@ class Node(DBBASE):
 
     created_at = Column(
         DateTime(),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
         default=datetime.now(),
     )
 
     updated_at = Column(
         DateTime(),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
         default=datetime.now(),
         onupdate=datetime.now()
     )
 
     parent_id = Column(
         ForeignKey('node.id'),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     children = relationship(
@@ -83,15 +95,24 @@ class Node(DBBASE):
         backref=backref(
             'parent',
             remote_side=[id],
-            info={'colanderalchemy': forms.EXCLUDED,},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+            },
         ),
         cascade='all',
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     type_ = Column(
         'type_',
         String(30),
-        info={'colanderalchemy': forms.EXCLUDED,},
+        info={'colanderalchemy': forms.EXCLUDED},
         nullable=False,
+    )
+    _acl = Column(
+        MutableList.as_mutable(ACLType),
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True}
+        },
     )

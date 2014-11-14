@@ -35,17 +35,18 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Text,
-    )
+)
 from sqlalchemy.orm import (
-        relationship,
-        validates,
-        deferred,
-        backref,
-        )
+    relationship,
+    validates,
+    deferred,
+    backref,
+)
 
 from autonomie.models.types import (
-        CustomDateType,
-        CustomDateType2)
+    CustomDateType,
+    CustomDateType2,
+)
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,
@@ -99,7 +100,10 @@ class Task(Node):
         primaryjoin="Task.statusPerson==User.id",
         backref=backref(
             "taskStatuses",
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': {'exclude': True},
+            },
         ),
     )
     owner = relationship(
@@ -107,14 +111,24 @@ class Task(Node):
         primaryjoin="Task.owner_id==User.id",
         backref=backref(
             "ownedTasks",
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': {'exclude': True},
+            },
         ),
     )
 
     phase = relationship(
         "Phase",
         primaryjoin="Task.phase_id==Phase.id",
-        backref=backref("tasks", order_by='Task.taskDate'),
+        backref=backref(
+            "tasks",
+            order_by='Task.taskDate',
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': {'exclude': True},
+            },
+        ),
         lazy="joined")
 
     state_machine = DEFAULT_STATE_MACHINES['base']
@@ -282,6 +296,9 @@ class TaskStatus(DBBASE):
         "User",
         backref=backref(
             "task_statuses",
-            info={'colanderalchemy': EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': EXCLUDED,
+            },
         )
     )

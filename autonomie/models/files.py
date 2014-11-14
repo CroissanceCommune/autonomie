@@ -27,12 +27,14 @@
 import hashlib
 import os
 from datetime import datetime
+from cStringIO import StringIO
 from sqlalchemy import (
     Integer,
     Column,
     ForeignKey,
     DateTime,
     String,
+    Boolean,
 )
 
 from sqlalchemy.orm import (
@@ -48,7 +50,9 @@ from autonomie.models.base import (
     DBBASE,
     DBSESSION,
 )
+from autonomie.models.types import PersistentACLMixin
 from autonomie.models.node import Node
+from autonomie.forms import EXCLUDED
 
 
 class File(Node):
@@ -77,6 +81,12 @@ class File(Node):
         Simple shortcut for getting a label for this file
         """
         return self.description or self.name
+
+    @property
+    def data_obj(self):
+        res = StringIO()
+        res.write(self.data)
+        return res
 
 
 class MailHistory(DBBASE):
@@ -130,3 +140,41 @@ def check_if_mail_sent(filedatas, company):
     md5sum = hashlib.md5(filedatas).hexdigest()
     query = query.filter(MailHistory.md5sum==md5sum)
     return query.first() is not None
+
+
+class Template(File):
+    """
+    A template model for odt templates
+    """
+    __tablename__ = 'templates'
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'template'}
+    id = Column(ForeignKey('file.id'), primary_key=True)
+    active = Column(Boolean(), default=True)
+
+
+class TemplatingHistory(DBBASE, PersistentACLMixin):
+    """
+    Record all the templating fired for a given userdata account
+    """
+    __tablename__ = "template_history"
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime(), default=datetime.now())
+    user_id = Column(ForeignKey('accounts.id'))
+    userdatas_id = Column(ForeignKey('user_datas.id'))
+    template_id = Column(ForeignKey('templates.id'))
+
+    user = relationship("User")
+    userdatas = relationship(
+        "UserDatas",
+        backref=backref(
+            "template_history",
+            cascade='all, delete-orphan',
+            info={
+                'colanderalchemy': EXCLUDED,
+                "export": EXCLUDED,
+            },
+        )
+    )
+    template = relationship("Template")

@@ -52,6 +52,7 @@ from autonomie.models.base import (
 from autonomie.forms import EXCLUDED
 from autonomie.compute import math_utils
 
+from autonomie.models.types import PersistentACLMixin
 from autonomie.models.statemachine import StateMachine
 
 MANAGER_PERMS = "manage"
@@ -71,10 +72,17 @@ class TurnoverProjection(DBBASE):
     year = Column(Integer)
     comment = Column(Text, default="")
     value = Column(Integer)
-    company = relationship("Company",
-            backref=backref("turnoverprojections",
-                order_by="TurnoverProjection.month",
-                cascade="all, delete-orphan"))
+    company = relationship(
+        "Company",
+        backref=backref(
+            "turnoverprojections",
+            order_by="TurnoverProjection.month",
+            cascade="all, delete-orphan",
+            info={
+                'export': {'exclude': True},
+            },
+        )
+    )
 
 
 class ExpenseType(DBBASE):
@@ -147,7 +155,7 @@ class ExpenseStates(StateMachine):
     userid_attr = "status_user_id"
 
 
-class ExpenseSheet(DBBASE):
+class ExpenseSheet(DBBASE, PersistentACLMixin):
     """
         Model representing a whole ExpenseSheet
         An expensesheet is related to a company and an employee (one user may
@@ -175,17 +183,27 @@ class ExpenseSheet(DBBASE):
         default=date.today,
         onupdate=date.today)
     exported = Column(Boolean(), default=False)
-    company = relationship("Company",
-            backref=backref("expenses",
-                order_by="ExpenseSheet.month",
-                cascade="all, delete-orphan"))
-    user = relationship("User",
-            primaryjoin="ExpenseSheet.user_id==User.id",
-            backref=backref("expenses",
-                order_by="ExpenseSheet.month",
-                info={'colanderalchemy': EXCLUDED},
-                cascade="all, delete-orphan"),
-            )
+    company = relationship(
+        "Company",
+        backref=backref(
+            "expenses",
+            order_by="ExpenseSheet.month",
+            cascade="all, delete-orphan",
+        )
+    )
+    user = relationship(
+        "User",
+        primaryjoin="ExpenseSheet.user_id==User.id",
+        backref=backref(
+            "expenses",
+            order_by="ExpenseSheet.month",
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': {'exclude': True},
+            },
+            cascade="all, delete-orphan"
+        ),
+    )
     status_user = relationship(
         "User",
         primaryjoin="ExpenseSheet.status_user_id==User.id",
@@ -240,7 +258,7 @@ class ExpenseSheet(DBBASE):
         return ret_dict.values()
 
 
-class BaseExpenseLine(DBBASE):
+class BaseExpenseLine(DBBASE, PersistentACLMixin):
     """
         Base models for expense lines
         :param type: Column for polymorphic discrimination
@@ -264,10 +282,12 @@ class BaseExpenseLine(DBBASE):
     type_id = Column(Integer)
     sheet_id = Column(Integer,
             ForeignKey("expense_sheet.id", ondelete="cascade"))
-    type_object = relationship("ExpenseType",
-            primaryjoin='BaseExpenseLine.type_id==ExpenseType.id',
-            uselist=False,
-            foreign_keys=type_id)
+    type_object = relationship(
+        "ExpenseType",
+        primaryjoin='BaseExpenseLine.type_id==ExpenseType.id',
+        uselist=False,
+        foreign_keys=type_id,
+    )
 
 
 class ExpenseLine(BaseExpenseLine):
@@ -280,10 +300,14 @@ class ExpenseLine(BaseExpenseLine):
     id = Column(Integer, ForeignKey('baseexpense_line.id'), primary_key=True)
     ht = Column(Integer)
     tva = Column(Integer)
-    sheet = relationship("ExpenseSheet",
-                backref=backref("lines",
-                    order_by="ExpenseLine.date",
-                    cascade="all, delete-orphan"))
+    sheet = relationship(
+        "ExpenseSheet",
+        backref=backref(
+            "lines",
+            order_by="ExpenseLine.date",
+            cascade="all, delete-orphan"
+        )
+    )
 
     def __json__(self, request):
         return dict(
@@ -341,10 +365,14 @@ class ExpenseKmLine(BaseExpenseLine):
     start = Column(String(150), default="")
     end = Column(String(150), default="")
     km = Column(Integer)
-    sheet = relationship("ExpenseSheet",
-                backref=backref("kmlines",
-                    order_by="ExpenseLine.date",
-                    cascade="all, delete-orphan"))
+    sheet = relationship(
+        "ExpenseSheet",
+        backref=backref(
+            "kmlines",
+            order_by="ExpenseLine.date",
+            cascade="all, delete-orphan"
+        )
+    )
 
     def __json__(self, request):
         return dict(id=self.id,
@@ -394,16 +422,28 @@ class Communication(DBBASE):
     date = Column(Date(), default=date.today(), onupdate=date.today())
     expense_sheet_id = Column(Integer, ForeignKey("expense_sheet.id"))
 
-    expense_sheet = relationship("ExpenseSheet",
-            backref=backref("communications",
-                order_by="Communication.date",
-                cascade="all, delete-orphan"))
+    expense_sheet = relationship(
+        "ExpenseSheet",
+        backref=backref(
+            "communications",
+            order_by="Communication.date",
+            cascade="all, delete-orphan"
+        )
+    )
 
-    user = relationship("User",primaryjoin="Communication.user_id==User.id",
-            backref=backref("expense_communications",
-                order_by="Communication.date",
-                info={'colanderalchemy': EXCLUDED},
-                cascade="all, delete-orphan"))
+    user = relationship(
+        "User",
+        primaryjoin="Communication.user_id==User.id",
+        backref=backref(
+            "expense_communications",
+            order_by="Communication.date",
+            cascade="all, delete-orphan",
+            info={
+                'colanderalchemy': EXCLUDED,
+                'export': {'exclude': True},
+            },
+        )
+    )
 
 
 def get_expense_years():

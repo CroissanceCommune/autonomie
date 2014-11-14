@@ -377,3 +377,11 @@ def get_user_schema(edit=False, permanent=True):
         schema['login'].validator = get_unique_login_validator()
 
     return schema
+
+
+def get_userdatas_schema():
+    """
+    Return the userdatas edition/add schema
+    """
+    schema = SQLAlchemySchemaNode(user.UserDatas, excludes=('name', '_acl'))
+    return schema

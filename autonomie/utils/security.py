@@ -38,7 +38,11 @@ from autonomie.models.config import ConfigFiles
 from autonomie.models.activity import Activity
 from autonomie.models.company import Company
 from autonomie.models.customer import Customer
-from autonomie.models.files import File
+from autonomie.models.files import (
+    File,
+    Template,
+    TemplatingHistory,
+)
 from autonomie.models.project import Project
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import (
@@ -101,6 +105,8 @@ class RootFactory(dict):
             ('userdatas', 'userdatas', UserDatas, ),
             ('payments', 'payment', Payment, ),
             ('workshops', 'workshop', Workshop, ),
+            ('templates', 'template', Template, ),
+            ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('timeslots', 'timeslot', Timeslot, ),
             ):
 
@@ -155,6 +161,17 @@ def get_base_acl(self):
     """
     acl = DEFAULT_PERM[:]
     acl.append((Allow, Authenticated, 'view',))
+    return acl
+
+
+def get_userdatas_acl(self):
+    """
+    Return the acls for userdatas
+    only the related account has view rights
+    """
+    acl = DEFAULT_PERM[:]
+    if self.user is not None:
+        acl.append((Allow, self.user.login, 'view'))
     return acl
 
 
@@ -276,19 +293,21 @@ def set_models_acls():
     Here acls are set globally, but we'd like to set things more dynamically
     when different roles will be implemented
     """
-    ConfigFiles.__acl__ = [(Allow, Everyone, 'view'),]
-    Company.__acl__ = property(get_company_acl)
-    Project.__acl__ = property(get_customer_or_project_acls)
-    Customer.__acl__ = property(get_customer_or_project_acls)
-    Estimation.__acl__ = property(get_task_acl)
-    Invoice.__acl__ = property(get_task_acl)
-    CancelInvoice.__acl__ = property(get_task_acl)
-    User.__acl__ = property(get_user_acl)
-    UserDatas.__acl__ = property(get_base_acl)
-    ExpenseSheet.__acl__ = property(get_expensesheet_acl)
-    BaseExpenseLine.__acl__ = property(get_expense_acl)
-    Activity.__acl__ = property(get_activity_acl)
-    File.__acl__ = property(get_file_acl)
-    Payment.__acl__ = property(get_base_acl)
-    Workshop.__acl__ = property(get_activity_acl)
-    Timeslot.__acl__ = property(get_base_acl)
+    ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'),]
+    Company.__default_acl__ = property(get_company_acl)
+    Project.__default_acl__ = property(get_customer_or_project_acls)
+    Customer.__default_acl__ = property(get_customer_or_project_acls)
+    Estimation.__default_acl__ = property(get_task_acl)
+    Invoice.__default_acl__ = property(get_task_acl)
+    CancelInvoice.__default_acl__ = property(get_task_acl)
+    User.__default_acl__ = property(get_user_acl)
+    UserDatas.__default_acl__ = property(get_userdatas_acl)
+    ExpenseSheet.__default_acl__ = property(get_expensesheet_acl)
+    BaseExpenseLine.__default_acl__ = property(get_expense_acl)
+    Activity.__default_acl__ = property(get_activity_acl)
+    File.__default_acl__ = property(get_file_acl)
+    Payment.__default_acl__ = property(get_base_acl)
+    Workshop.__default_acl__ = property(get_activity_acl)
+    Timeslot.__default_acl__ = property(get_base_acl)
+    Template.__default_acl__ = property(get_base_acl)
+    TemplatingHistory.__default_acl__ = property(get_base_acl)

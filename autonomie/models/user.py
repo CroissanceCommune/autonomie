@@ -57,6 +57,7 @@ from autonomie.views import render_api
 from deform_bootstrap import widget as bootstrap_widget
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
+from autonomie.models.node import Node
 from autonomie.forms import (
     get_hidden_field_conf,
     EXCLUDED,
@@ -65,7 +66,10 @@ from autonomie.forms import (
     get_deferred_select,
     mail_validator,
 )
-from autonomie.models.types import JsonEncodedDict
+from autonomie.models.types import (
+    JsonEncodedDict,
+    PersistentACLMixin,
+)
 from autonomie.utils.ascii import camel_case_to_name
 
 
@@ -145,7 +149,7 @@ def get_id_foreignkey_col(foreignkey_str):
     return column
 
 
-class User(DBBASE):
+class User(DBBASE, PersistentACLMixin):
     """
         User model
     """
@@ -178,13 +182,13 @@ class User(DBBASE):
 
     primary_group = Column(
         Integer,
-        info={'colanderalchemy':EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
         default=3,
     )
 
     active = Column(
         String(1),
-        info={'colanderalchemy':EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
         default='Y'
     )
 
@@ -207,7 +211,8 @@ class User(DBBASE):
               {
                   'title': u'Mot de passe',
                   'widget': deform.widget.CheckedPasswordWidget(),
-              }
+              },
+              'export': EXCLUDED
         },
         nullable=False,
     )
@@ -215,8 +220,11 @@ class User(DBBASE):
     companies = relationship(
         "Company",
         secondary=COMPANY_EMPLOYEE,
-        backref="employees",
-        info={'colanderalchemy':EXCLUDED},
+        backref=backref(
+            "employees",
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+        ),
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
     )
 
     compte_tiers = Column(
@@ -232,7 +240,7 @@ class User(DBBASE):
 
     session_datas = Column(
         JsonEncodedDict,
-        info={'colanderalchemy':EXCLUDED},
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
         default=None,
     )
 
@@ -622,14 +630,16 @@ class UserDatasSocialDocTypes(DBBASE):
     )
 
 
-class UserDatas(DBBASE):
+class UserDatas(Node):
+    __tablename__ = 'user_datas'
     __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'userdata'}
+
     id = Column(
-        Integer,
+        ForeignKey('node.id'),
         primary_key=True,
         info={
             'colanderalchemy': get_hidden_field_conf(),
-            'export': {'exclude': True},
         }
     )
 
@@ -639,7 +649,7 @@ class UserDatas(DBBASE):
         info={
             'colanderalchemy': EXCLUDED,
             'export': {'exclude': True},
-             }
+        }
     )
     user = relationship(
         "User",
@@ -729,6 +739,9 @@ class UserDatas(DBBASE):
                 'section': u"Coordonnées",
                 'widget': get_select(CIVILITE_OPTIONS),
             },
+            'export': {
+                'formatter': lambda val: dict(CIVILITE_OPTIONS).get(val),
+            }
         },
         nullable=False,
     )
@@ -957,6 +970,9 @@ class UserDatas(DBBASE):
                 'widget': get_select(STATUS_OPTIONS),
                 'validator': get_select_validator(STATUS_OPTIONS),
             },
+            'export': {
+                'formatter': lambda val: dict(STATUS_OPTIONS).get(val),
+            }
         }
     )
 
@@ -1215,6 +1231,9 @@ class UserDatas(DBBASE):
                 'title': u'Type de contrat',
                 'section': u'Parcours',
                 'widget': get_select(CONTRACT_OPTIONS)
+            },
+            'export': {
+                'formatter': lambda val: dict(CONTRACT_OPTIONS).get(val),
             }
         }
     )

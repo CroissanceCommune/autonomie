@@ -743,6 +743,7 @@ class UserDatas(Node):
                 'formatter': lambda val: dict(CIVILITE_OPTIONS).get(val),
             }
         },
+        default=CIVILITE_OPTIONS[0][0],
         nullable=False,
     )
 

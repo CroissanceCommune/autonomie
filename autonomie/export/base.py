@@ -102,18 +102,19 @@ def get_formatter_from_column(column):
     """
     Return a formatter regarding the given SQLAlchemy column type
     """
-    column = column.columns[0]
-    column_type = getattr(column.type, 'impl', column.type)
     formatter = None
+    if hasattr(column, 'columns'):
+        column = column.columns[0]
+        column_type = getattr(column.type, 'impl', column.type)
 
-    if isinstance(column_type, Boolean):
-        formatter = format_boolean
+        if isinstance(column_type, Boolean):
+            formatter = format_boolean
 
-    elif isinstance(column_type, Date):
-        formatter = format_date
+        elif isinstance(column_type, Date):
+            formatter = format_date
 
-    elif isinstance(column_type, DateTime):
-        formatter = format_datetime
+        elif isinstance(column_type, DateTime):
+            formatter = format_datetime
 
     return formatter
 

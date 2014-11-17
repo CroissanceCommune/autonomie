@@ -46,3 +46,10 @@ class UndeliveredMail(Exception):
     A custom class for undelivered emails
     """
     pass
+
+
+class MissingMandatoryArgument(Exception):
+    """
+    Raised when a mandatory argument is missing
+    """
+    pass

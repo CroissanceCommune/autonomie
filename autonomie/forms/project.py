@@ -77,6 +77,8 @@ def get_project_schema():
     """
     schema = SQLAlchemySchemaNode(Project, excludes=('_acl',))
 
+    schema['name'].missing = colander.required
+
     # Add a custom node to be able to associate existing customers
     customer_id_node = colander.SchemaNode(
         colander.Integer(),

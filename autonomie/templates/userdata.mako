@@ -52,11 +52,13 @@ if userdata.user is not None:
         Informations sociales
     </a>
     </li>
+    % if doctemplates is not UNDEFINED:
     <li>
         <a href="#tab4" data-toggle='tab'>
             Génération de documents
         </a>
-    </li>
+        </li>
+    % endif
     % if doctypes_form is not UNDEFINED:
         <li>
         <a href="#tab2" data-toggle='tab'>
@@ -100,6 +102,7 @@ if userdata.user is not None:
             ${account_form.render()|n}
         </div>
     % endif
+    % if doctemplates is not UNDEFINED:
     <div class='tab-pane row-fluid' id='tab4'>
         <div class='row-fluid'>
             <div class='span6'>
@@ -161,5 +164,6 @@ if userdata.user is not None:
             </div>
         </div>
     </div>
+    % endif
 </div>
 </%block>

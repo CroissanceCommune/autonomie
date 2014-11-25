@@ -29,6 +29,11 @@
 <div class='row-fluid'>
     <div class='span5'>
         <div class='well'>
+            <div class='row-fluid'>
+                <div class='span2'>
+                    <i class='fa fa-4x fa-user'></i>
+                </div>
+                <div class='span10'>
             <dl class="dl-horizontal">
                 % for label, value in ((u'Identifiant', user.login), (u"Nom", user.lastname), (u"Prénom", user.firstname)):
                     %if value:
@@ -44,9 +49,12 @@
                     </dd>
                 % endif
             </dl>
+
 % if not user.enabled():
     <span class='label label-warning'>Ce compte a été désactivé</span>
 % endif
+</div>
+</div>
         </div>
     </div>
     <div class='span6 offset1'>

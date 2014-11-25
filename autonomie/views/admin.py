@@ -110,30 +110,58 @@ def index(request):
     """
         Return datas for the index view
     """
-    request.actionmenu.add(ViewLink(u"Configuration générale",
-        path='admin_main',
-        title=u"Configuration générale de votre installation d'autonomie"))
-    request.actionmenu.add(ViewLink(u"Configuration des taux de TVA",
-        path='admin_tva',
-        title=u"Configuration des taux de TVA proposés dans les devis et \
-factures"))
-    request.actionmenu.add(ViewLink(u"Configuration des modes de paiement",
-        path="admin_paymentmode",
-        title=u"Configuration des modes de paiement des factures"))
-    request.actionmenu.add(ViewLink(u"Configuration des unités de prestation",
-        path="admin_workunit",
-        title=u"Configuration des unités de prestation proposées \
-dans les formulaires"))
-    request.actionmenu.add(ViewLink(u"Configuration des notes de frais",
-        path="admin_expense",
-        title=u"Configuration des types de notes de frais"))
-    request.actionmenu.add(ViewLink(u"Configuration des informations comptables\
-            de la CAE",
-        path="admin_cae",
-        title=u"Configuration des différents comptes analytiques de la CAE"))
-    request.actionmenu.add(ViewLink(u"Configuration du module accompagnement",
-        path="admin_activity",
-        title=u"Configuration des types d'activité du module accompagnement"))
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration générale",
+            path='admin_main',
+            title=u"Configuration générale de votre installation d'autonomie"
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration comptable des produits et TVA collectés",
+            path='admin_tva',
+            title=u"Configuration des taux de TVA proposés dans les devis et \
+factures"
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration des modes de paiement",
+            path="admin_paymentmode",
+            title=u"Configuration des modes de paiement des factures"
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration des unités de prestation",
+            path="admin_workunit",
+            title=u"Configuration des unités de prestation proposées \
+dans les formulaires"
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration des notes de frais",
+            path="admin_expense",
+            title=u"Configuration des types de notes de frais"
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration comptable du module ventes",
+            path="admin_cae",
+            title=u"Configuration des différents comptes analytiques de la CAE"
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration du module accompagnement",
+            path="admin_activity",
+            title=u"Configuration des types d'activité du module \
+accompagnement"
+        )
+    )
     request.actionmenu.add(
         ViewLink(
             u"Administration de la gestion sociale",
@@ -675,7 +703,7 @@ class AdminCae(BaseFormView):
     """
         Cae information configuration
     """
-    title = u"Configuration de la CAE"
+    title = u"Configuration comptable du module ventes"
     validation_msg = u"Les informations ont bien été enregistrées"
     schema = CAECONFIG
     buttons = (submit_btn, )

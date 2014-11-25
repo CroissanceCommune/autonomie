@@ -276,27 +276,26 @@ class ExpenseConfig(colander.MappingSchema):
 
     code = colander.SchemaNode(
         colander.String(),
-        title=u"Code analytique",
+        title=u"Compte de charge de la dépense",
         validator=colander.Length(max=15))
 
     code_tva = colander.SchemaNode(
         colander.String(),
-        title=u"Code TVA",
+        title=u"Code TVA (si nécessaire)",
         missing="",
         validator=colander.Length(max=15))
 
     compte_tva = colander.SchemaNode(
         colander.String(),
-        title=u"Compte de TVA",
+        title=u"Compte de TVA déductible",
         missing="",
-        description=u"Compte de TVA déductible",
         validator=colander.Length(max=15))
 
     contribution = colander.SchemaNode(
         colander.Boolean(),
         title=u"Contribution",
         description=u"Ce type de frais est-il intégré dans la contribution \
-à la CAE?",
+à la CAE ?",
         )
 
 
@@ -353,17 +352,18 @@ class ExpenseTypesConfig(colander.MappingSchema):
     """
     code_journal = colander.SchemaNode(
         colander.String(),
-        title=u"Code journal",
+        title=u"Code journal utilisés pour notes de dépenses",
         description=u"Le code journal pour les notes de frais",
         missing="",
-        )
+    )
     compte_cg = colander.SchemaNode(
         colander.String(),
-        title=u"Compte CG",
+        title=u"Compte de tiers (classe 4) pour dépenses dues aux \
+entrepreneurs",
         description=u"Le compte général pour les notes de frais",
         missing="",
         )
-    expenses = ExpensesConfig(title=u'Frais généraux')
+    expenses = ExpensesConfig(title=u'Dépenses')
     expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
     expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
 
@@ -479,7 +479,7 @@ def build_cae_config_schema():
     fields =(
     (
         'code_journal',
-        u"Code journal",
+        u"Code journal ventes",
         u"Le code du journal dans Sage",
     ),
     (
@@ -505,34 +505,34 @@ def build_cae_config_schema():
     ),
     (
         'compte_cg_banque',
-        u"Compte CG Banque",
+        u"Compte banque de l'entrepreneur",
         "",
     ),
 
     (
         'compte_cg_assurance',
-        u"Compte CG assurance",
+        u"Compte de charge assurance",
         u"Requis pour le module d'écritures Assurance",
     ),
     (
         'compte_cgscop',
-        u"Compte CGSCOP",
+        u"Compte de charge CG Scop",
         u"Requis pour le module d'écritures CGSCOP",
     ),
     (
         'compte_cg_debiteur',
-        u"Compte CG de débiteur",
+        u"Compte de contrepartie pour CG Scop et Assurance",
         u"Requis pour le module d'écritures CGSCOP",
     ),
     (
         'compte_cg_organic',
-        u"Compte CG Organic",
+        u"Compte de charge Organic",
         u"Compte CG pour la contribution à l'Organic (requis pour le module \
 d'écritures Contribution Organic)",
     ),
     (
         'compte_cg_debiteur_organic',
-        u"Compte CG de débiteur Organic",
+        u"Compte de contrepartie Organic",
         u"Compte CG de débiteur pour la contribution à l'Organic (requis pour \
 le module d'écritures Contribution Organic)",
     ),

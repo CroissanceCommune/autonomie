@@ -33,6 +33,7 @@
 """
 import logging
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import NO_PERMISSION_REQUIRED
 
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils.widgets import ViewLink
@@ -292,7 +293,7 @@ def includeme(config):
     config.add_view(
         file_dl_view,
         route_name='public',
-        permission='view',
+        permission=NO_PERMISSION_REQUIRED,
     )
     config.add_view(
         file_view,

@@ -1,3 +1,3 @@
 include *.txt *.ini *.cfg *.rst
-recursive-include autonomie *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml *.pt
+recursive-include autonomie *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml *.pt *.eot *.svg *.otf *.ttf *.woff
 include autonomie/alembic/versions/*.py

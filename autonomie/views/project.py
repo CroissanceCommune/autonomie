@@ -245,6 +245,14 @@ def project_delete(request):
                                                             project.name))
     return HTTPFound(request.referer)
 
+
+def get_color(index):
+    """
+    return the color for the given index (uses modulo to avoid index errors
+    """
+    return COLORS_SET[index % len(COLORS_SET)]
+
+
 def project_view(request):
     """
         Return datas for displaying one project
@@ -255,7 +263,7 @@ def project_view(request):
 
     for phase in phases:
         for estimation in phase.estimations:
-            estimation.color = COLORS_SET[index]
+            estimation.color = get_color(index)
             index += 1
 
     for phase in phases:
@@ -263,7 +271,7 @@ def project_view(request):
             if invoice.estimation:
                 invoice.color = invoice.estimation.color
             else:
-                invoice.color = COLORS_SET[index]
+                invoice.color = get_color(index)
                 index += 1
 
     for phase in phases:
@@ -271,7 +279,7 @@ def project_view(request):
             if cancelinvoice.invoice:
                 cancelinvoice.color = cancelinvoice.invoice.color
             else:
-                cancelinvoice.color = COLORS_SET[index]
+                cancelinvoice.color = get_color(index)
                 index += 1
 
     # We get the latest used task and so we get the latest used phase

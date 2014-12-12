@@ -53,3 +53,10 @@ class MissingMandatoryArgument(Exception):
     Raised when a mandatory argument is missing
     """
     pass
+
+
+class InstanceNotFound(Exception):
+    """
+    Raised when no instance could be found
+    """
+    pass

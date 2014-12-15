@@ -33,9 +33,17 @@ Instructions pour l'installation du logiciel
 Installation des paquets (nécessaire pour l'installation dans un environnement
 virtuel):
 
+Sous Debian:
+
 .. code-block:: console
 
     apt-get install virtualenvwrapper libmysqlclient-dev build-essential libjpeg-dev libfreetype6 libfreetype6-dev zlib1g-dev python-mysqldb
+
+Sous Fedora:
+
+.. code-block:: console
+
+    yum install virtualenvwrapper mardiadb-devel python-devel libxslt-devel libxml2-devel libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel gcc
 
 Création d'un environnement virtuel Python.
 
@@ -49,7 +57,7 @@ Téléchargement et installation de l'application
 
     git clone https://github.com/Croissance_Commune/autonomie.git
     cd autonomie
-    pip -r requirements.txt
+    pip -r requirements.txt --allow-external PIL --allow-unverified PIL
     python setup.py install
     cp development.ini.sample development.ini
 

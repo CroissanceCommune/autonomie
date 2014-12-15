@@ -50,7 +50,7 @@ def userdata(dbsession):
     u = UserDatas(
         coordonnees_firstname="firstname",
         coordonnees_lastname="lastname",
-        coordonnees_email1="mail@mail.com"
+        coordonnees_email1="mail@mail.com",
     )
     dbsession.add(u)
     dbsession.flush()
@@ -163,3 +163,35 @@ def test_override_line(association_handler, userdata):
     assert res.coordonnees_lastname == u'lastname'
     assert res.coordonnees_firstname == u'Jane'
     assert res.coordonnees_email2 == 'g@p.fr'
+
+
+def test_identification_key(association_handler, userdata):
+    """
+    Test if we use another key than "id" to identify the duplicate entries
+    """
+    from autonomie.csv_import import CsvImporter
+    from autonomie.models.user import UserDatas
+
+    association_dict = {
+        'firstname': 'coordonnees_firstname',
+        'email': "coordonnees_email1",
+        'test': 'coordonnees_emergency_name',
+    }
+    association_handler.set_association_dict(association_dict)
+
+    importer = CsvImporter(
+        UserDatas,
+        get_buffer(),
+        association_handler,
+        action="update",
+        id_key="coordonnees_email1",
+    )
+    # Ici on utilise le même mail
+    new_datas = {
+        'email': "mail@mail.com",
+        'test': u"Emergency Contact"
+    }
+    res, msg = importer.import_line(new_datas)
+    assert res.coordonnees_lastname == u'lastname'
+    assert res.coordonnees_emergency_name == u"Emergency Contact"
+

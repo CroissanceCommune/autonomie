@@ -55,20 +55,25 @@ association)
 """
 import logging
 import csv
-from sqlalchemy.orm import RelationshipProperty
+from sqlalchemy.orm import (
+    RelationshipProperty,
+    exc as sqlalchemy_exc,
+)
 from sqlalchemy.schema import ColumnDefault
 
 from autonomie.export import sqla
 from autonomie.models.base import DBSESSION
 from autonomie.exception import (
     MissingMandatoryArgument,
-    InstanceNotFound,
+    MultipleInstanceFound,
 )
 
 
 log = logging.getLogger(__name__)
 
 MISSING_KEY_ERROR = u"Erreur : Le champ {0} est requis mais ne sera pas rempli"
+MULTIPLE_ENTRY_ERROR = u"Pour une même valeur clé ({0}), plusieurs entrées \
+ont été détectées, nous ne sommes pas en mesure de mettre à jour ces données."
 UNFILLED_VALUES = ('', None, 0)
 
 class CsvImportAssociator(sqla.BaseSqlaExporter):
@@ -226,6 +231,9 @@ class CsvImporter(object):
             * override: we override the datas if an id keys matches an existing
               object
 
+    :param int id_key: The id key to be used (by default, we use the model's id
+        to identify duplicate entries, else, we can use an external id
+
     Usage:
 
         association_handler = CsvImportAssociator(UserDatas)
@@ -233,7 +241,8 @@ class CsvImporter(object):
     """
     delimiter = ';'
     quotechar = '"'
-    def __init__(self, factory, csv_buffer, association_handler, action="insert"):
+    def __init__(self, factory, csv_buffer, association_handler,
+                 action="insert", id_key="id"):
         self.factory = factory
         self.csv_reader = csv.DictReader(
             csv_buffer,
@@ -249,6 +258,7 @@ class CsvImporter(object):
 u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             )
         self.action = action
+        self.id_key = id_key
 
     def import_datas(self):
         """
@@ -274,21 +284,42 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
 
         :param dict args: The args used to update the model
         :param bool override: should we override the existing datas ?
+        :raises sqlalchemy.orm.exc.NoResultFound: if no element is found
+        :raises sqlalchemy.orm.exc.MultipleResultsFound: if multiple element are
+        found
         """
-        model_id = args.pop("id", None)
-        if model_id is None:
-            return self._insert(args)
+        identification_value = args.pop(self.id_key, None)
 
-        model = self.factory.get(model_id)
-        if model is None:
-            raise InstanceNotFound(u"Aucune instance d'id {0} n'a pu être \
-trouvée dans la base de données".format(model_id))
+        if identification_value is None:
+            # No identification value is provided
+            model = self._insert(args)
 
-        for key, value in args.items():
-            if getattr(model, key) in UNFILLED_VALUES or override:
-                setattr(model, key, value)
-        model = DBSESSION().merge(model)
-        DBSESSION().flush()
+        else:
+            identification_column = getattr(self.factory, self.id_key)
+
+            try:
+                model = self.factory.query().filter(
+                    identification_column==identification_value
+                ).one()
+                for key, value in args.items():
+                    if getattr(model, key) in UNFILLED_VALUES or override:
+                        setattr(model, key, value)
+                model = DBSESSION().merge(model)
+                DBSESSION().flush()
+
+            except sqlalchemy_exc.NoResultFound:
+                # We first restore the poped identification column (if it's not
+                # the id key: id key should not be set but email can be used as
+                # identification key and should be set for new entries)
+                if self.id_key != 'id':
+                    args[self.id_key] = identification_value
+                model = self._insert(args)
+
+            except sqlalchemy_exc.MultipleResultsFound:
+                raise MultipleInstanceFound(MULTIPLE_ENTRY_ERROR.format(
+                    identification_value
+                ))
+
         return model
 
     def _override(self, args):

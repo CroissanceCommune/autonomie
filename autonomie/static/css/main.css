@@ -255,6 +255,9 @@ table.opa tfoot td{
   float: left;
   display: inline-block;
 }
+.chzn-container .chzn-results{
+  display: inline-block;
+}
 form.deform ul {
   list-style: none;
   margin-left: 0;
@@ -287,3 +290,4 @@ ul.form-tabs li.error a {
   color: #555;
 }
 .accordion-body.in:hover { overflow:visible; }
+

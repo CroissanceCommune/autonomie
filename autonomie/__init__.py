@@ -60,6 +60,7 @@ AUTONOMIE_MODULES = (
     "autonomie.events.expense",
     "autonomie.views.activity",
     "autonomie.views.auth",
+    "autonomie.views.csv_import",
     "autonomie.views.user",
     "autonomie.views.company",
     "autonomie.views.index",

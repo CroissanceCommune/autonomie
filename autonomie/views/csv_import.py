@@ -41,6 +41,7 @@ from autonomie.csv_import import (
     get_csv_reader,
 )
 from autonomie.models.user import UserDatas
+from autonomie.task import async_import_datas
 from autonomie.forms.csv_import import (
     CsvFileUploadSchema,
     AssociationSchema,
@@ -85,6 +86,21 @@ class CsvFileUploadView(BaseFormView):
         )
 
 
+def get_current_csv_filepath(request):
+    """
+    Return the csv filepath currently stored in the user's session
+
+    :returns: a filepath
+    :raises KeyError: if no file datas are stored in the current session
+    """
+    tempdir = request.registry.settings['pyramid_deform.tempdir']
+    file_uid = request.GET['uid']
+    file_informations = request.session['substanced.tempstore'][file_uid]
+    filename = file_informations['randid']
+    filepath = os.path.join(tempdir, filename)
+    return filepath
+
+
 def get_current_csv(request):
     """
     Return the csv file currently stored in the user's session
@@ -92,12 +108,8 @@ def get_current_csv(request):
     :returns: a csv dictreader object with the actual csv datas
     :raises KeyError: if no file datas are stored in the current session
     """
+    filepath = get_current_csv_filepath(request)
     # Related to pyramid_deform's way to store temporary datas on disk
-    tempdir = request.registry.settings['pyramid_deform.tempdir']
-    file_uid = request.GET['uid']
-    file_informations = request.session['substanced.tempstore'][file_uid]
-    filename = file_informations['randid']
-    filepath = os.path.join(tempdir, filename)
     filebuffer = open(filepath, 'r')
     return get_csv_reader(filebuffer)
 
@@ -152,6 +164,13 @@ def config_field_association(request):
             log.info(u"The resulting options : ")
             log.info(association_dict)
             log.info(u"Action : %s , id_key : %s" % (action, id_key))
+            csv_filepath = get_current_csv_filepath(request)
+            async_import_datas.delay(
+                association_dict,
+                csv_filepath,
+                id_key,
+                action,
+            )
     if 'cancel' in request.POST:
         return HTTPFound(request.route_path('import_step1'))
     else:

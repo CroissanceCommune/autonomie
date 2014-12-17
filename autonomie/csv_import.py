@@ -55,6 +55,7 @@ association)
 """
 import logging
 import csv
+from collections import OrderedDict
 from sqlalchemy.orm import (
     RelationshipProperty,
     exc as sqlalchemy_exc,
@@ -102,7 +103,7 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
         Collect the columns names and titles to be able to generate a
         importation form or guess associations
         """
-        result = {}
+        result = OrderedDict()
         for prop in self.get_sorted_columns():
             if prop.key in self.excludes:
                 continue
@@ -129,6 +130,12 @@ relationship")
             result[datas['name']] = datas
         return result
 
+    def get_columns(self):
+        """
+        A simple getter
+        """
+        return self.columns
+
     def guess_association_dict(self, csv_datas_headers):
         """
         Try to build an association dict between the header of the current csv
@@ -137,7 +144,7 @@ relationship")
         :returns: a dict with {headername: associated_column}
         :rtype: dict that's pickable (can be stored in the session)
         """
-        result = {}
+        result = OrderedDict()
         for header in csv_datas_headers:
             result[header] = None
             toguess = header.decode('utf-8').replace('*', '').lower()
@@ -206,6 +213,14 @@ relationship")
         return kwargs, unhandled
 
 
+def get_csv_reader(csv_buffer, delimiter=';', quotechar='"'):
+    return csv.DictReader(
+            csv_buffer,
+            delimiter=delimiter,
+            quotechar=quotechar,
+        )
+
+
 class CsvImporter(object):
     """
     A csv datas importer
@@ -244,12 +259,12 @@ class CsvImporter(object):
     def __init__(self, factory, csv_buffer, association_handler,
                  action="insert", id_key="id"):
         self.factory = factory
-        self.csv_reader = csv.DictReader(
-            csv_buffer,
-            delimiter=self.delimiter,
-            quotechar=self.quotechar,
-        )
         self.association_handler = association_handler
+        self.csv_reader = get_csv_reader(
+            csv_buffer,
+            self.delimiter,
+            self.quotechar
+        )
         self.in_error_fields = []
         self.unhandled_datas = []
         self.imported = []

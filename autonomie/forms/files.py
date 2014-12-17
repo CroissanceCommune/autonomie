@@ -53,7 +53,8 @@ class CustomFileUploadWidget(deform.widget.FileUploadWidget):
         if hasattr(data, 'has_key') and data.has_key('fp'):
 
             data['fp'].seek(0)
-            data['fp'] = self.tmpstore.filter_data(data['fp'])
+            if hasattr(self.tmpstore, 'filter_data'):
+                data['fp'] = self.tmpstore.filter_data(data['fp'])
 
             data['data'] = data['fp'].read()
             data['fp'].seek(0)

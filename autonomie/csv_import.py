@@ -146,14 +146,14 @@ relationship")
         """
         result = OrderedDict()
         for header in csv_datas_headers:
+            header = header.decode('utf-8')
             result[header] = None
-            toguess = header.decode('utf-8').replace('*', '').lower()
+            toguess = header.replace('*', '').lower()
             for column in self.columns.values():
                 name = column['name'].lower()
                 label = column['label'].lower()
                 if toguess in [name, label]:
                     result[header] = column['name']
-                    break
         return result
 
     def check_association_dict(self, association_dict):

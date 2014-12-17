@@ -59,9 +59,9 @@ def userdata(dbsession):
 
 def test_guess_association_dict(csv_datas, association_handler):
     res = association_handler.guess_association_dict(csv_datas.fieldnames)
-    assert res['PRénom'] == 'coordonnees_firstname'
-    assert res['Nom'] == 'coordonnees_lastname'
-    assert res['Unknown'] is None
+    assert res[u'PRénom'] == 'coordonnees_firstname'
+    assert res[u'Nom'] == 'coordonnees_lastname'
+    assert res[u'Unknown'] is None
 
     # Test field exclusion
     from autonomie.csv_import import CsvImportAssociator

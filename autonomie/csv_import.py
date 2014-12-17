@@ -199,7 +199,7 @@ relationship")
             if csv_key == 'id':
                 column_name = 'id'
             else:
-                column_name = self.association_dict.get(csv_key)
+                column_name = self.association_dict.get(csv_key.decode('utf-8'))
 
             if column_name is None:
                 unhandled[csv_key] = value
@@ -268,6 +268,9 @@ class CsvImporter(object):
         self.in_error_fields = []
         self.unhandled_datas = []
         self.imported = []
+        self.messages = []
+        self.err_messages = []
+
         if action not in ("insert", "update", "override"):
             raise KeyError(
 u"The action attr should be one of (\"insert\", \"update\", \"override\")"
@@ -280,7 +283,11 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         Import the datas provided in the csv_buffer as factory objects
         """
         for line in self.csv_reader:
-            self.import_line(line)
+            model, message = self.import_line(line)
+            if model is None:
+                self.err_messages.append(message)
+            else:
+                self.messages.append(message)
 
     def _insert(self, args):
         """

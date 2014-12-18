@@ -132,6 +132,7 @@ class AssociationEntry(colander.MappingSchema):
         colander.String(),
         title=u"Sera importé comme",
         widget=deferred_model_attribute_list_schema,
+        missing=colander.drop,
     )
 
 

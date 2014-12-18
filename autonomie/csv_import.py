@@ -312,7 +312,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         """
         identification_value = args.pop(self.id_key, None)
 
-        if identification_value is None:
+        if identification_value in UNFILLED_VALUES:
             # No identification value is provided
             model = self._insert(args)
 

@@ -63,6 +63,12 @@ def test_guess_association_dict(csv_datas, association_handler):
     assert res[u'Nom'] == 'coordonnees_lastname'
     assert res[u'Unknown'] is None
 
+    res = association_handler.guess_association_dict(
+        csv_datas.fieldnames,
+        {'Nom': 'coordonnees_ladiesname'}
+    )
+    assert res[u'PRénom'] == 'coordonnees_firstname'
+    assert res[u'Nom'] == 'coordonnees_ladiesname'
     # Test field exclusion
     from autonomie.csv_import import CsvImportAssociator
     from autonomie.models.user import UserDatas
@@ -92,9 +98,9 @@ def test_import_line(dbsession, csv_datas, association_handler):
 
 
     association_dict = {
-        'PRénom': 'coordonnees_firstname',
-        'Nom': 'coordonnees_lastname',
-        'Email 1': 'coordonnees_email1',
+        u'PRénom': 'coordonnees_firstname',
+        u'Nom': 'coordonnees_lastname',
+        u'Email 1': 'coordonnees_email1',
     }
     association_handler.set_association_dict(association_dict)
 
@@ -105,7 +111,7 @@ def test_import_line(dbsession, csv_datas, association_handler):
     assert res.coordonnees_firstname == u'Bienaimé'
     assert res.coordonnees_lastname == u'Arthur'
     assert sorted(importer.unhandled_datas[0].keys()) == sorted(['id', 'Unknown'])
-    assert importer.in_error_fields == []
+    assert importer.in_error_lines == []
 
     # We pop a mandatory argument
     association_dict.pop('Nom')
@@ -114,7 +120,7 @@ def test_import_line(dbsession, csv_datas, association_handler):
     res, msg = importer.import_line(line.copy())
 
     assert res is None
-    assert importer.in_error_fields == [line]
+    assert importer.in_error_lines == [line]
 
 
 def test_update_line(association_handler, userdata):

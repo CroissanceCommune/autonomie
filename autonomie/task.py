@@ -19,11 +19,16 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
+"""
+All asynchronous tasks runned through Autonomie are stored here
+Tasks are handled by a celery service
+Redis is used as the central bus
+"""
+import transaction
+import traceback
 
-
-import time
-from transaction import commit
 from celery.task import task
+
 from autonomie.models.user import UserDatas
 from autonomie.csv_import import (
     CsvImportAssociator,
@@ -36,20 +41,26 @@ def async_import_datas(association_dict, csv_filepath, id_key, action):
     Launch the import of the datas provided in the csv_filepath
     """
     print(association_dict)
-
+    transaction.begin()
     # TODO : handle the type of datas we import
-    associator = CsvImportAssociator(UserDatas)
-    associator.set_association_dict(association_dict)
-    csv_buffer = open(csv_filepath, 'r')
-    importer = CsvImporter(
-        UserDatas,
-        csv_buffer,
-        associator,
-        action=action,
-        id_key=id_key
-    )
-    importer.import_datas()
-    commit()
+    try:
+        associator = CsvImportAssociator(UserDatas)
+        associator.set_association_dict(association_dict)
+        csv_buffer = open(csv_filepath, 'r')
+        importer = CsvImporter(
+            UserDatas,
+            csv_buffer,
+            associator,
+            action=action,
+            id_key=id_key
+        )
+        importer.import_datas()
+    except:
+        traceback.print_exc()
+        transaction.abort()
+    else:
+        transaction.commit()
+
     result = dict(
         messages=importer.messages,
         err_messages=importer.err_messages,

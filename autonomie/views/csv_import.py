@@ -145,25 +145,30 @@ def config_field_association(request):
             Button('cancel', title=u"Annuler l'import",),
         )
     )
+
+    # Form submission
     if 'submit' in request.POST:
         controls = request.POST.items()
-        log.info(u"Field association has been configured, we're going to \
-    import")
         try:
             importation_datas = form.validate(controls)
         except ValidationFailure, form:
             log.exception(u"Error on field association")
         else:
+            log.info(u"Field association has been configured, we're going to \
+import")
             action = importation_datas['action']
-            id_key = importation_datas['id_key']
+            csv_id_key = importation_datas['id_key']
 
             from collections import OrderedDict
             association_dict = OrderedDict()
             for entry in importation_datas['entries']:
-                association_dict[entry['csv_field']] = entry['model_attribute']
-            log.info(u"The resulting options : ")
-            log.info(association_dict)
-            log.info(u"Action : %s , id_key : %s" % (action, id_key))
+                if entry.has_key('model_attribute'):
+                    association_dict[entry['csv_field']] = entry['model_attribute']
+
+            # On traduit la "valeur primaire" configuré par l'utilisateur en
+            # attribut de modèle (si il y en a une de configuré)
+            id_key = association_dict.get(csv_id_key, csv_id_key)
+
             csv_filepath = get_current_csv_filepath(request)
             async_import_datas.delay(
                 association_dict,
@@ -171,10 +176,13 @@ def config_field_association(request):
                 id_key,
                 action,
             )
-    if 'cancel' in request.POST:
+    # The form has been canceled going back to step 1
+    elif 'cancel' in request.POST:
         return HTTPFound(request.route_path('import_step1'))
+
     else:
         form.set_appstruct(appstruct)
+
     return dict(
         title=u"Import de données : associer les champs",
         form=form.render(),

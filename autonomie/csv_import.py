@@ -29,33 +29,14 @@ Csv based importation module
 3 - Generate form
 4 - Populate form (with auto-associated columns and optionnal loaded
 association)
-
-6 - For each line in csv:
-        kw_dict, resulting_columns = generate_a_kw_dict()
-        if id:
-            retrieve object
-            merge_session
-            try:
-                session.merge(object)
-                store_resulting_columns_in_resulting_with_id
-            except exception as e:
-                messages += e.message
-                store_line_in_trash_datas(line)
-        else:
-            new_object
-            merge_session
-
-
-
-        for col in columns:
-
-            if col in keys:
-
-
+5- insert or update elements
 """
 import logging
 import csv
+
+from cStringIO import StringIO
 from collections import OrderedDict
+
 from sqlalchemy.orm import (
     RelationshipProperty,
     exc as sqlalchemy_exc,
@@ -136,10 +117,13 @@ relationship")
         """
         return self.columns
 
-    def guess_association_dict(self, csv_datas_headers):
+    def guess_association_dict(self, csv_datas_headers, user_defined=None):
         """
         Try to build an association dict between the header of the current csv
         file we want to import and the model we want to generate
+
+        :param dict user_defined: An already defined association_dict we want to
+            use as reference
 
         :returns: a dict with {headername: associated_column}
         :rtype: dict that's pickable (can be stored in the session)
@@ -154,6 +138,12 @@ relationship")
                 label = column['label'].lower()
                 if toguess in [name, label]:
                     result[header] = column['name']
+
+        if user_defined is not None:
+            for key, value in user_defined.items():
+                if key in result:
+                    result[key] = value
+
         return result
 
     def check_association_dict(self, association_dict):

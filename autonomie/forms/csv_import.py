@@ -23,6 +23,7 @@
 Forms elements related to csv import
 """
 import colander
+import json
 import deform
 import pyramid_deform
 
@@ -67,6 +68,15 @@ format csv."
             raise colander.Invalid(node, message)
 
 
+@colander.deferred
+def deferred_preferences(node, kw):
+    request = kw['request']
+    associations = json.loads(request.config.get('csv_import', '{}'))
+
+    options = zip(associations.keys(), associations.keys())
+    options.insert(0, ('', u"- Sélectionner des préférences -"))
+    return deform.widget.SelectWidget(values=options)
+
 
 #TODO : provide quotechar and delimiter customization
 #TODO: provide a list of previsouly field association
@@ -74,6 +84,14 @@ class CsvFileUploadSchema(colander.Schema):
     """
     Csv import first step schema
     """
+    association = colander.SchemaNode(
+        colander.String(),
+        widget=deferred_preferences,
+        title=u"Type de fichiers",
+        description=u"Permet de pré-charger automatiquement des associations \
+de champs pour l'étape 2",
+        missing=colander.drop
+    )
     csv_file = colander.SchemaNode(
         deform.FileData(),
         widget=deferred_temporary_upload_widget,
@@ -163,3 +181,27 @@ base de données.",
         default=u"insert",
         missing=u"insert",
     )
+    record_association = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Enregistrer ?",
+        description=u"Voulez-vous conserver cette association de champ pour de \
+futures importations ?",
+    )
+    record_name = colander.SchemaNode(
+        colander.String(),
+        title=u"Nom de l'enregistrement",
+        description=u"Ce nom vous permettra de recharger cette association",
+        missing=colander.drop,
+    )
+
+def check_record_name(form, values):
+    """
+    If we record an association schema, we need the name
+    """
+    if values.get('record_association', False):
+        if not values.get('record_name'):
+            exc = colander.Invalid(form, u"Vous devez saisir un nom")
+            exc["record_name"] = u"Ce paramètre est requis"
+            raise exc
+
+ASSOCIATIONSCHEMA = AssociationSchema(validator=check_record_name)

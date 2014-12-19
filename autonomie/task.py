@@ -24,24 +24,61 @@ All asynchronous tasks runned through Autonomie are stored here
 Tasks are handled by a celery service
 Redis is used as the central bus
 """
+import time
 import transaction
-import traceback
 
 from celery.task import task
+from celery.utils.log import get_task_logger
 
 from autonomie.models.user import UserDatas
+from autonomie.models.job import CsvImportJob
 from autonomie.csv_import import (
     CsvImportAssociator,
     CsvImporter,
 )
 
-@task
-def async_import_datas(association_dict, csv_filepath, id_key, action):
+
+logger = get_task_logger(__name__)
+
+JOB_RETRIEVE_ERROR = u"We can't retrieve the job {jobid}, the task is cancelled"
+
+
+# Here we use the bind argument so that the task will be attached as a bound
+# method and thus we can access attributes like request
+@task(bind=True)
+def async_import_datas(self, job_id, association_dict, csv_filepath, id_key,
+                       action):
     """
     Launch the import of the datas provided in the csv_filepath
+
+    :param int job_id: The id of the db job object that should handle the return
+        datas
+    :param dict association_dict: describes the association
+        csv_key<->SQLA model attribute
+    :param str csv_filepath: The absolute path to the csv file
+    :param str id_key: The model attribute used to handle updates
+    :param str action: The name of the action we want to run
+        (insert/update/override)
     """
-    print(association_dict)
+    logger.info(u"We are launching an asynchronous csv import")
     transaction.begin()
+    from autonomie.models.base import DBSESSION
+    # We sleep a bit to wait for the current request to be finished : since we
+    # use a transaction manager, the delay call launched in a view is done
+    # before the job  element is commited to the bdd (at the end of the request)
+    # if we query for the job too early, the session will not be able to
+    # retrieve the newly created job
+    time.sleep(10)
+    job = DBSESSION().query(CsvImportJob).filter(
+        CsvImportJob.id==job_id
+    ).first()
+
+    if job is None:
+        logger.exception(JOB_RETRIEVE_ERROR.format(job_id))
+        return
+
+    task_id = self.request.id
+    job.jobid = task_id
     # TODO : handle the type of datas we import
     try:
         associator = CsvImportAssociator(UserDatas)
@@ -54,17 +91,18 @@ def async_import_datas(association_dict, csv_filepath, id_key, action):
             action=action,
             id_key=id_key
         )
+        logger.info(u"Importing the datas")
         importer.import_datas()
+        logger.info(u"We update the job informations")
+        for key, value in importer.log().items():
+            setattr(job, key, value)
+        DBSESSION().merge(job)
     except:
-        traceback.print_exc()
         transaction.abort()
+        logger.exception(u"The transaction was aborted")
+        logger.info(u"* Task FAILED !!!")
     else:
         transaction.commit()
-
-    result = dict(
-        messages=importer.messages,
-        err_messages=importer.err_messages,
-        in_error_fields=importer.in_error_fields,
-        unhandled_datas=importer.unhandled_datas,
-    )
-    return result
+        logger.info(u"The transaction has been commited")
+        logger.info(u"* Task SUCCEEDED !!!")
+    return ""

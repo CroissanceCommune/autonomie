@@ -27,5 +27,22 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
+% if info_message != UNDEFINED:
+<div class="alert alert-success">
+    ${info_message|n}
+</div>
+% endif
+% if warn_message != UNDEFINED:
+    <div class="alert alert-warn">
+        <i class='fa fa-warning'></i>
+        ${warn_message|n}
+    </div>
+% endif
+% if help_message != UNDEFINED:
+    <div class='alert alert-info'>
+    <i class='fa fa-question-circle fa-2x'></i>
+    ${help_message|n}
+    </div>
+% endif
 ${form|n}
 </%block>

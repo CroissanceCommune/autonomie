@@ -255,7 +255,7 @@ class CsvImporter(object):
             self.delimiter,
             self.quotechar
         )
-        self.in_error_fields = []
+        self.in_error_lines = []
         self.unhandled_datas = []
         self.imported = []
         self.messages = []
@@ -362,7 +362,46 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             message = u""
         except Exception as e:
             log.exception(u"Erreur lors de l'import de données")
-            self.in_error_fields.append(line)
+            log.error(e)
+            self.in_error_lines.append(line)
             res = None
             message = e.message
         return res, message
+
+    def gen_csv_str(self, datas):
+        """
+        Generate a csv string with the given datas
+
+        :param list datas: a list of dict representing csv rows
+        :returns: a csv string
+        :rtype: str
+        """
+        if not datas:
+            result = ""
+        else:
+            buf = StringIO()
+            fieldnames = datas[0].keys()
+            writer = csv.DictWriter(
+                buf,
+                fieldnames,
+                delimiter=self.delimiter,
+                quotechar=self.quotechar,
+            )
+            writer.writerows(datas)
+            result = buf.getvalue()
+        return result
+
+    def log(self):
+        """
+        return the datas we want to log in the database (see
+        models.job.CsvImportJob)
+        """
+        unhandled_datas_csv = self.gen_csv_str(self.unhandled_datas)
+        in_error_lines_csv = self.gen_csv_str(self.in_error_lines)
+        return dict(
+            unhandled_datas_csv=unhandled_datas_csv,
+            in_error_lines_csv=in_error_lines_csv,
+            messages=self.messages,
+            err_messages=self.err_messages,
+            status='done',
+        )

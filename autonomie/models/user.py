@@ -716,6 +716,9 @@ class UserDatas(Node):
                 'related_key': 'lastname',
                 'label': u"Conseiller",
             },
+            'import': {
+                'related_key': 'login',
+            }
         }
     )
 

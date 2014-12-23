@@ -1430,7 +1430,13 @@ class UserDatas(Node):
         """
         from autonomie.utils.ascii import gen_random_string
         if self.situation_situation == 'integre' and self.user_id is None:
-            login = self.coordonnees_email1,
+            login = self.coordonnees_email1
+            index = 0
+            # Fix #165: check login on account generation
+            while User.query().filter(User.login==login).count() > 0:
+                login = u"{0}_{1}".format(index, login)
+                index += 1
+
             password = gen_random_string(6)
             user = User(
                 login=login,
@@ -1451,13 +1457,18 @@ class UserDatas(Node):
         companies = []
         if self.situation_situation == 'integre' and self.user_id is None:
             for data in self.activity_companydatas:
-                company = Company(
-                    name=data.name,
-                    goal=data.title,
-                    email=self.coordonnees_email1,
-                    phone=self.coordonnees_tel,
-                    mobile=self.coordonnees_mobile,
-                )
+                # Try to retrieve an existing company (and avoid duplicates)
+                company = Company.query().filter(
+                    Company.name==data.name
+                ).first()
+                if company is None:
+                    company = Company(
+                        name=data.name,
+                        goal=data.title,
+                        email=self.coordonnees_email1,
+                        phone=self.coordonnees_tel,
+                        mobile=self.coordonnees_mobile,
+                    )
                 companies.append(company)
         return companies
 

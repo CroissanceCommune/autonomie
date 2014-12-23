@@ -43,6 +43,21 @@ logger = get_task_logger(__name__)
 JOB_RETRIEVE_ERROR = u"We can't retrieve the job {jobid}, the task is cancelled"
 
 
+def record_failure(job_id, task_id, e):
+    """
+    Record a job's failure
+    """
+    transaction.begin()
+    from autonomie.models.base import DBSESSION
+    job = DBSESSION().query(CsvImportJob).filter(
+        CsvImportJob.id==job_id
+    ).first()
+    job.jobid = task_id
+    job.status = "failed"
+    job.error_messages = [u"%s" % e]
+    transaction.commit()
+
+
 # Here we use the bind argument so that the task will be attached as a bound
 # method and thus we can access attributes like request
 @task(bind=True)
@@ -61,6 +76,11 @@ def async_import_datas(self, job_id, association_dict, csv_filepath, id_key,
         (insert/update/override)
     """
     logger.info(u"We are launching an asynchronous csv import")
+    logger.info(u"  The job id : %s" % job_id)
+    logger.info(u"  The csv_filepath : %s" % csv_filepath)
+    logger.info(u"  The association dict : %s" % association_dict)
+    logger.info(u"  The id key : %s" % id_key)
+
     transaction.begin()
     from autonomie.models.base import DBSESSION
     # We sleep a bit to wait for the current request to be finished : since we
@@ -96,11 +116,14 @@ def async_import_datas(self, job_id, association_dict, csv_filepath, id_key,
         logger.info(u"We update the job informations")
         for key, value in importer.log().items():
             setattr(job, key, value)
+        job.status = "completed"
         DBSESSION().merge(job)
-    except:
+    except Exception as e:
         transaction.abort()
         logger.exception(u"The transaction was aborted")
+        record_failure(job_id, task_id, e)
         logger.info(u"* Task FAILED !!!")
+        # TODO : log failed task
     else:
         transaction.commit()
         logger.info(u"The transaction has been commited")

@@ -36,7 +36,13 @@ import csv
 
 from cStringIO import StringIO
 from collections import OrderedDict
+from datetime import datetime
 
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Date,
+)
 from sqlalchemy.orm import (
     RelationshipProperty,
     exc as sqlalchemy_exc,
@@ -57,6 +63,76 @@ MISSING_KEY_ERROR = u"Erreur : Le champ {0} est requis mais ne sera pas rempli"
 MULTIPLE_ENTRY_ERROR = u"Pour une même valeur clé ({0}), plusieurs entrées \
 ont été détectées, nous ne sommes pas en mesure de mettre à jour ces données."
 UNFILLED_VALUES = ('', None, 0)
+
+BOOLEAN_FALSE = ('0', 'false', 'non', '', 'False')
+DATETIME_FORMAT = "%d/%m/%Y"
+
+
+def format_input_value(value, sqla_column_dict):
+    """
+    format value to fetch the database storage expectations
+    For example dates are input in dd/mm/yyyy format, we want datetime objects
+
+    Relationship technics:
+
+        ManyToOne relationship : we use the related_key (attribute of the
+        related element) to find the related element we're supposed to point to
+
+        OneToMany relationship: we use the related key (attribute of the related
+        element) to instantiate a new related element. NB: It only works with
+        related elements with one argument (typically list of dates ...)
+
+    :param str value: The value coming from the csv file
+    :param dict sqla_column_dict: The datas collected about the destination
+    attribute
+    :returns: The formatted value
+    :rtype: object (datetime) or string depending on the column
+    """
+
+    prop = sqla_column_dict['__col__']
+
+    res = value
+
+    if isinstance(prop, RelationshipProperty):
+        # Handle the relationship
+        # Get the id of the corresponding model and return it
+        if sqla_column_dict['rel_type'] == 'manytoone':
+            related_key = sqla_column_dict['related_key']
+            class_ = prop.mapper.class_
+            # We query the database to get the corresponding element filtering
+            # on the configured related_key
+            res = class_.query().filter(
+                getattr(class_, related_key)==value
+            ).one()
+        else:
+            # We have a one to many relationship, we generate an instance using
+            # the related_key as instanciation attribute
+            related_key = sqla_column_dict['related_key']
+            class_ = prop.mapper.class_
+            args = {related_key: value}
+            res = [class_(**args)]
+
+    else:
+
+        column = prop.columns[0]
+        column_type = getattr(column.type, 'impl', column.type)
+
+        if sqla_column_dict.has_key('formatter'):
+            res = sqla_column_dict['formatter'](value)
+
+        elif isinstance(column_type, Boolean):
+            if value in ('0', 'false', 'non', '', 'False'):
+                res = False
+            else:
+                res = True
+
+        elif isinstance(column_type, (DateTime, Date,)):
+            try:
+                res = datetime.strptime(value, '%d/%m/%Y')
+            except ValueError:
+                res = ""
+    return res
+
 
 class CsvImportAssociator(sqla.BaseSqlaExporter):
     """
@@ -85,6 +161,7 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
         importation form or guess associations
         """
         result = OrderedDict()
+        todrop = []
         for prop in self.get_sorted_columns():
             if prop.key in self.excludes:
                 continue
@@ -98,10 +175,21 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
             datas.update(import_dict)
 
             if isinstance(prop, RelationshipProperty):
-                if not import_dict.has_key('related_key'):
-                    print(u"Maybe there's missing some informations about a \
-relationship")
-                    continue
+
+                if prop.uselist:
+                    # A one to many relationship
+                    if not datas.has_key('related_key'):
+                        print("Missing infos about a relationship %s" % \
+                              prop.key)
+                        continue
+                    datas['rel_type'] = 'onetomany'
+                else:
+                    # A many to one relationship
+                    datas.setdefault('related_key', 'label')
+                    # We can drop the foreignky column from the importable
+                    # columns to avoid misunderstanding
+                    todrop.append("%s_id" % prop.key)
+                    datas['rel_type'] = 'manytoone'
             else:
                 column = prop.columns[0]
                 if not isinstance(column.default, ColumnDefault):
@@ -109,6 +197,9 @@ relationship")
                         datas['mandatory'] = True
 
             result[datas['name']] = datas
+
+        for key in todrop:
+            result.pop(key)
         return result
 
     def get_columns(self):
@@ -131,6 +222,8 @@ relationship")
         result = OrderedDict()
         for header in csv_datas_headers:
             header = header.decode('utf-8')
+            if not header:
+                continue
             result[header] = None
             toguess = header.replace('*', '').lower()
             for column in self.columns.values():
@@ -196,8 +289,8 @@ relationship")
 
             else:
                 column = self.columns.get(column_name)
-                if column is not None and column.has_key('formatter'):
-                    value = column['formatter'](value)
+                if column is not None:
+                    value = format_input_value(value, column)
                 kwargs[column_name] = value
 
         return kwargs, unhandled

@@ -208,7 +208,7 @@ def config_field_association(request):
     # We build a field - model attr associator
     associator = CsvImportAssociator(UserDatas)
     csv_obj = get_current_csv(filepath)
-    headers = csv_obj.fieldnames
+    headers = [header for header in csv_obj.fieldnames if header]
 
     schema = ASSOCIATIONSCHEMA.bind(
         associator=associator,
@@ -270,6 +270,7 @@ import")
             log.info(u" * The Celery Task {0} has been delayed, its result \
 should be retrieved from the CsvImportJob : {1}".format(celery_job.id, job.id)
                     )
+            return HTTPFound(request.route_path('job', id=job.id))
     # The form has been canceled going back to step 1
     elif 'cancel' in request.POST:
         log.info(u"Import has been cancelled")
@@ -298,6 +299,7 @@ should be retrieved from the CsvImportJob : {1}".format(celery_job.id, job.id)
                     "model_attribute": model_attribute
                 }
             )
+
         form.set_appstruct(appstruct)
 
     return dict(

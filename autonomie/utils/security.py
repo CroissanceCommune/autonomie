@@ -62,6 +62,9 @@ from autonomie.models.user import (
     User,
     UserDatas,
 )
+from autonomie.models.job import (
+    Job,
+)
 
 log = logging.getLogger(__name__)
 
@@ -100,6 +103,7 @@ class RootFactory(dict):
             ('expenselines', 'expenseline', BaseExpenseLine, ),
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
+            ('jobs', 'job', Job, ),
             ('projects', 'project', Project, ),
             ('users', 'user', User, ),
             ('userdatas', 'userdatas', UserDatas, ),
@@ -295,6 +299,7 @@ def set_models_acls():
     """
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'),]
     Company.__default_acl__ = property(get_company_acl)
+    Job.__default_acl__ = property(get_base_acl)
     Project.__default_acl__ = property(get_customer_or_project_acls)
     Customer.__default_acl__ = property(get_customer_or_project_acls)
     Estimation.__default_acl__ = property(get_task_acl)

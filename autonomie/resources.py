@@ -47,72 +47,63 @@ lib_autonomie = Library("fanstatic", "static")
 main = Resource(lib_autonomie, "js/main.js", depends=[ui_dialog, ui_sortable])
 
 jquery_tmpl = Resource(
-        lib_autonomie,
-        "js/vendors/jquery.tmpl.min.js",
-        depends=[jquery])
-_handlebar = Resource(
-        lib_autonomie,
-        "js/vendors/handlebars.runtime-v1.1.2.js")
-_underscore = Resource(
-        lib_autonomie,
-        "js/vendors/underscore.js",
-        minified="js/vendors/underscore-min.js")
-_backbone = Resource(
-        lib_autonomie,
-        "js/vendors/backbone.js",
-        minified="js/vendors/backbone-min.js",
-        depends=[_underscore])
-_backbone_marionnette = Resource(
-        lib_autonomie,
-        "js/vendors/backbone.marionette.js",
-        minified="js/vendors/backbone.marionette.min.js",
-        depends=[_backbone])
-_backbone_validation = Resource(
-        lib_autonomie,
-        "js/vendors/backbone-validation.js",
-        minified="js/vendors/backbone-validation-min.js",
-        depends=[_backbone])
-
-_backbone_validation_bootstrap = Resource(
-        lib_autonomie,
-        "js/backbone-validation-bootstrap.js",
-        depends=[_backbone_validation])
-_backbone_popup = Resource(
-        lib_autonomie,
-        "js/backbone-popup.js",
-        depends=[_backbone_marionnette]);
-
-_backbone_tuning = Resource(
-        lib_autonomie,
-        "js/backbone-tuning.js",
-        depends=[_backbone_marionnette, _handlebar, main])
-
-backbone = Group([_backbone_validation_bootstrap,
-                  _backbone_tuning, _backbone_popup])
-
-
-templates = Resource(lib_autonomie,
-        "js/template.js", depends=[_handlebar])
-
-_date = Resource(
-        lib_autonomie,
-        "js/date.js", depends=[timepicker_js])
-_dom = Resource(
-        lib_autonomie,
-        "js/dom.js",
-        depends=[jquery])
-_math = Resource(
-        lib_autonomie,
-        "js/math.js")
-tools = Group([_dom, _math, _date])
-
-bootstrap_responsive_css = Resource(lib_autonomie,
-        "css/bootstrap-responsive.css", depends=[bootstrap])
-
-font_awesome_css = Resource(
     lib_autonomie,
-    "css/font-awesome.min.css",
-    depends=[bootstrap_responsive_css])
+    "js/vendors/jquery.tmpl.min.js",
+    depends=[jquery]
+)
+_handlebar = Resource(
+    lib_autonomie,
+    "js/vendors/handlebars.runtime.js"
+)
+_underscore = Resource(
+    lib_autonomie,
+    "js/vendors/underscore.js",
+    minified="js/vendors/underscore-min.js"
+)
+_backbone = Resource(
+    lib_autonomie,
+    "js/vendors/backbone.js",
+    minified="js/vendors/backbone-min.js",
+    depends=[_underscore]
+)
+_backbone_marionnette = Resource(
+    lib_autonomie,
+    "js/vendors/backbone.marionette.js",
+    minified="js/vendors/backbone.marionette.min.js",
+    depends=[_backbone]
+)
+_backbone_validation = Resource(
+    lib_autonomie,
+    "js/vendors/backbone-validation.js",
+    minified="js/vendors/backbone-validation-min.js",
+    depends=[_backbone]
+)
+_backbone_validation_bootstrap = Resource(
+    lib_autonomie,
+    "js/backbone-validation-bootstrap.js",
+    depends=[_backbone_validation]
+)
+_backbone_popup = Resource(
+    lib_autonomie,
+    "js/backbone-popup.js",
+    depends=[_backbone_marionnette]
+)
+_backbone_tuning = Resource(
+    lib_autonomie,
+    "js/backbone-tuning.js",
+    depends=[_backbone_marionnette, _handlebar, main]
+)
+backbone = Group(
+    [_backbone_validation_bootstrap, _backbone_tuning, _backbone_popup]
+)
+
+
+templates = Resource(lib_autonomie, "js/template.js", depends=[_handlebar])
+
+_date = Resource(lib_autonomie, "js/date.js", depends=[timepicker_js])
+_dom = Resource(lib_autonomie, "js/dom.js", depends=[jquery])
+_math = Resource(lib_autonomie, "js/math.js")
+tools = Group([_dom, _math, _date])
 
 duplicate = Resource(
         lib_autonomie,
@@ -128,58 +119,100 @@ address = Resource(
         depends=[jquery])
 tva = Resource(lib_autonomie, "js/tva.js", depends=[jquery])
 task = Resource(
-        lib_autonomie,
-        "js/task.js",
-        depends=[tools, jquery_tmpl, address, discount, duplicate, backbone,
-            templates, tva])
+    lib_autonomie,
+    "js/task.js",
+    depends=[
+        tools,
+        jquery_tmpl,
+        address,
+        discount,
+        duplicate,
+        backbone,
+        templates,
+        tva]
+)
 task_list_js = Resource(
-        lib_autonomie,
-        "js/task_list.js",
-        depends=[tools, jquery, backbone])
+    lib_autonomie,
+    "js/task_list.js",
+    depends=[tools, jquery, backbone]
+)
 event_list_js = Resource(
-        lib_autonomie,
-        "js/event_list.js",
-        depends=[tools, jquery, backbone])
+    lib_autonomie,
+    "js/event_list.js",
+    depends=[tools, jquery, backbone]
+)
+job_js = Resource(
+    lib_autonomie,
+    "js/job.js",
+    depends=[tools, jquery, backbone, templates]
+)
 message_js = Resource(
-        lib_autonomie,
-        "js/message.js",
-        depends=[templates, jquery])
+    lib_autonomie,
+    "js/message.js",
+    depends=[templates, jquery]
+)
 expense_js = Resource(
-        lib_autonomie,
-        "js/expense.js",
-        depends=[backbone, templates, tools, effects_highlight, effects_shake,
-            message_js])
-
+    lib_autonomie,
+    "js/expense.js",
+    depends=[
+        backbone,
+        templates,
+        tools,
+        effects_highlight,
+        effects_shake,
+        message_js]
+)
 holiday_js = Resource(
-        lib_autonomie,
-        "js/holiday.js",
-        depends=[backbone, templates, tools, effects_highlight, effects_shake,
-            message_js])
+    lib_autonomie,
+    "js/holiday.js",
+    depends=[
+        backbone,
+        templates,
+        tools,
+        effects_highlight,
+        effects_shake,
+        message_js]
+)
 
+
+bootstrap_responsive_css = Resource(
+    lib_autonomie,
+    "css/bootstrap-responsive.css",
+    depends=[bootstrap]
+)
+font_awesome_css = Resource(
+    lib_autonomie,
+    "css/font-awesome.min.css",
+    depends=[bootstrap_responsive_css]
+)
 jquery_theme_css = Resource(
-        lib_autonomie,
-        "css/theme/jquery-ui-1.8.16.custom.css")
+    lib_autonomie,
+    "css/theme/jquery-ui-1.8.16.custom.css"
+)
 main_css = Resource(
-        lib_autonomie,
-        "css/main.css",
-        depends=[bootstrap, bootstrap_responsive_css, jquery_theme_css]
-        )
-
+    lib_autonomie,
+    "css/main.css",
+    depends=[
+        bootstrap,
+        bootstrap_responsive_css,
+        jquery_theme_css,
+        font_awesome_css,
+    ]
+)
 
 # Main javascript requirements
-main_js = Group([main,
-                 bootstrap,
-                 bootstrap_responsive_css,
-                 font_awesome_css,
-                 main_css,
-                 jquery_form,
-                 ui_autocomplete,
-                 ui_datepicker_fr,
-                 jquery_maskedinput,
-                 deform_bootstrap_js,
-                 chosen_jquery,
-                 tools,
-                 ])
+main_js = Group([
+    main,
+    bootstrap,
+    main_css,
+    jquery_form,
+    ui_autocomplete,
+    ui_datepicker_fr,
+    jquery_maskedinput,
+    deform_bootstrap_js,
+    chosen_jquery,
+    tools,
+])
 # Javascript requirements for task pages/forms
 task_js = Group([main,
                  bootstrap,

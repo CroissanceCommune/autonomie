@@ -31,13 +31,16 @@ from sqlalchemy import (
     DateTime,
     Text,
 )
-from autonomie.models.types import JsonEncodedList
+from autonomie.models.types import (
+    JsonEncodedList,
+    PersistentACLMixin,
+)
 from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
 
-class Job(DBBASE):
+class Job(DBBASE, PersistentACLMixin):
     """
     Base job model, used to communicate a job's status between the main pyramid
     app and celery asynchronous tasks
@@ -48,6 +51,7 @@ class Job(DBBASE):
         'polymorphic_on': 'type_',
         'polymorphic_identity':'job'
     }
+    label = u"Tâche générique"
     id = Column(
         Integer,
         primary_key=True,
@@ -75,6 +79,15 @@ class Job(DBBASE):
         nullable=False,
     )
 
+    def todict(self):
+        return dict(
+            label=self.label,
+            jobid=self.jobid,
+            status=self.status,
+            created_at=self.created_at.strftime("%H:%M %d/%m/%Y"),
+            updated_at=self.updated_at.strftime("%H:%M %d/%m/%Y"),
+        )
+
 
 class CsvImportJob(Job):
     """
@@ -88,3 +101,13 @@ class CsvImportJob(Job):
     error_messages = Column(JsonEncodedList, default=None)
     in_error_csv = Column(Text(), default=None)
     unhandled_datas_csv = Column(Text(), default=None)
+    label = u"Import de données"
+
+    def todict(self):
+        res = Job.todict(self)
+        res['label'] = self.label
+        res['messages'] = self.messages
+        res['error_messages'] = self.error_messages
+        res['in_error_csv'] = self.in_error_csv
+        res['unhandled_datas_csv'] = self.unhandled_datas_csv
+        return res

@@ -49,12 +49,29 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.schema import ColumnDefault
 
+from autonomie.utils import ascii
 from autonomie.export import sqla
 from autonomie.models.base import DBSESSION
 from autonomie.exception import (
     MissingMandatoryArgument,
     MultipleInstanceFound,
 )
+from autonomie.models.user import UserDatas
+
+
+MODELS_CONFIGURATION = {'userdatas': {
+    'factory': UserDatas,
+    'excludes': (
+        'name',
+        'created_at',
+        'updated_at',
+        'type_',
+        '_acl',
+        'parent_id',
+        'parent',
+    ),
+    'label': u"Données de gestion sociale",
+}}
 
 
 log = logging.getLogger(__name__)
@@ -66,6 +83,16 @@ UNFILLED_VALUES = ('', None, 0)
 
 BOOLEAN_FALSE = ('0', 'false', 'non', '', 'False')
 DATETIME_FORMAT = "%d/%m/%Y"
+
+
+def get_csv_import_associator(key):
+    """
+    Build a csv import associator regarding the provided model
+    """
+    return CsvImportAssociator(
+        MODELS_CONFIGURATION[key]['factory'],
+        MODELS_CONFIGURATION[key]['excludes']
+    )
 
 
 def format_input_value(value, sqla_column_dict):
@@ -109,6 +136,8 @@ def format_input_value(value, sqla_column_dict):
             # the related_key as instanciation attribute
             related_key = sqla_column_dict['related_key']
             class_ = prop.mapper.class_
+            if sqla_column_dict.has_key('formatter'):
+                value = sqla_column_dict['formatter'](value)
             args = {related_key: value}
             res = [class_(**args)]
 
@@ -199,6 +228,10 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
             result[datas['name']] = datas
 
         for key in todrop:
+            ui_label = result[key].get('label')
+            rel_key = key[:-3]
+            if rel_key in result:
+                result[rel_key]['label'] = ui_label
             result.pop(key)
         return result
 
@@ -221,7 +254,7 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
         """
         result = OrderedDict()
         for header in csv_datas_headers:
-            header = header.decode('utf-8')
+            header = ascii.force_unicode(header)
             if not header:
                 continue
             result[header] = None
@@ -277,12 +310,13 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
         kwargs = {}
         unhandled = {}
         for csv_key, value in csv_line.items():
-            value = value.decode('utf-8')
+            value = ascii.force_unicode(value)
 
             if csv_key == 'id':
                 column_name = 'id'
             else:
-                column_name = self.association_dict.get(csv_key.decode('utf-8'))
+                key = ascii.to_utf8(csv_key)
+                column_name = self.association_dict.get(key)
 
             if column_name is None:
                 unhandled[csv_key] = value
@@ -302,6 +336,17 @@ def get_csv_reader(csv_buffer, delimiter=';', quotechar='"'):
             delimiter=delimiter,
             quotechar=quotechar,
         )
+
+def get_csv_importer(model_type, csv_buffer, association_handler,
+                 action="insert", id_key="id"):
+    factory = MODELS_CONFIGURATION[model_type]['factory']
+    return CsvImporter(
+        factory,
+        csv_buffer,
+        association_handler,
+        action,
+        id_key,
+    )
 
 
 class CsvImporter(object):
@@ -353,6 +398,8 @@ class CsvImporter(object):
         self.imported = []
         self.messages = []
         self.err_messages = []
+        self.new_count = 0
+        self.update_count = 0
 
         if action not in ("insert", "update", "override"):
             raise KeyError(
@@ -369,19 +416,27 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             model, message = self.import_line(line)
             if model is None:
                 self.err_messages.append(message)
-            else:
+            elif message is not None:
                 self.messages.append(message)
+        self.messages.append(
+            u"{0} nouvelles entrées ont été traitées".format(self.new_count)
+        )
+        self.messages.append(
+            u"{0} entrées existantes ont été traitées".format(self.update_count)
+        )
 
     def _insert(self, args):
         """
         Insert an instance in the database
 
         :param dict args: The args used to instanciate our new model
+        :returns: a tuple (model, updated_token) where updated_token is a
+        boolean saying if it's an update
         """
         model = self.factory(**args)
         DBSESSION().add(model)
         DBSESSION().flush()
-        return model
+        return model, False
 
     def _update(self, args, override=False):
         """
@@ -389,12 +444,12 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
 
         :param dict args: The args used to update the model
         :param bool override: should we override the existing datas ?
-        :raises sqlalchemy.orm.exc.NoResultFound: if no element is found
-        :raises sqlalchemy.orm.exc.MultipleResultsFound: if multiple element are
-        found
+        :raises: sqlalchemy insert or update errors
+        :returns: a tuple (model, updated_token) where updated_token is a
+        boolean saying if it's an update
         """
         identification_value = args.pop(self.id_key, None)
-
+        updated = False
         if identification_value in UNFILLED_VALUES:
             # No identification value is provided
             model = self._insert(args)
@@ -411,6 +466,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                         setattr(model, key, value)
                 model = DBSESSION().merge(model)
                 DBSESSION().flush()
+                updated = True
 
             except sqlalchemy_exc.NoResultFound:
                 # We first restore the poped identification column (if it's not
@@ -425,7 +481,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                     identification_value
                 ))
 
-        return model
+        return model, updated
 
     def _override(self, args):
         """
@@ -433,6 +489,8 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         or insert a new one if no id is provided
 
         :param dict args: The args used to update the model
+        :returns: a tuple (model, updated_token) where updated_token is a
+        boolean saying if it's an update
         """
         return self._update(args, override=True)
 
@@ -442,17 +500,22 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         :returns: a duple with the newly_created model (or None) and a
             message
         """
+        message = None
+        print(line)
         args, unhandled_columns = self.association_handler.collect_args(line)
 
         function = getattr(self, "_{0}".format(self.action))
         # Here we should handle edition
         try:
-            model = function(args)
+            model, updated = function(args)
             self.imported.append(model)
             unhandled_columns['id'] = model.id
             self.unhandled_datas.append(unhandled_columns)
             res = model
-            message = u""
+            if updated:
+                self.update_count += 1
+            else:
+                self.new_count += 1
         except Exception as e:
             log.exception(u"Erreur lors de l'import de données")
             log.error(e)
@@ -473,13 +536,17 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             result = ""
         else:
             buf = StringIO()
-            fieldnames = datas[0].keys()
+            fieldnames = [key for key in datas[0].keys() if key != ""]
             writer = csv.DictWriter(
                 buf,
                 fieldnames,
                 delimiter=self.delimiter,
                 quotechar=self.quotechar,
+                extrasaction='ignore',
+                quoting=csv.QUOTE_ALL,
             )
+            writer.writeheader()
+            datas = ascii.to_utf8(datas)
             writer.writerows(datas)
             result = buf.getvalue()
         return result

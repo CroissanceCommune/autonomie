@@ -78,12 +78,25 @@ def deferred_preferences(node, kw):
     return deform.widget.SelectWidget(values=options)
 
 
+def get_model_type_select():
+    values = []
+    for key, value in csv_import.MODELS_CONFIGURATION.items():
+        values.append((key, value['label']))
+
+    return deform.widget.SelectWidget(values=values)
+
+
 #TODO : provide quotechar and delimiter customization
-#TODO: provide a list of previsouly field association
 class CsvFileUploadSchema(colander.Schema):
     """
     Csv import first step schema
     """
+    model_type = colander.SchemaNode(
+        colander.String(),
+        widget=get_model_type_select(),
+        title=u"Type de données",
+        default='userdatas',
+    )
     association = colander.SchemaNode(
         colander.String(),
         widget=deferred_preferences,

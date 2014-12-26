@@ -34,9 +34,32 @@ var JobModule = AutonomieApp.module(
             running = false;
           }
         }
+        var has_err_message = false;
+        var err_message = "";
+        _.each(this.model.get('error_messages'), function(item){
+            if (item !== ''){
+              err_message += item + "<br />";
+              has_err_message = true;
+            }
+          }
+        );
+        var has_message = false;
+        var message = "";
+        _.each(this.model.get('messages'), function(item){
+            if (item !== ''){
+              message += item + "<br />";
+              has_message = true;
+            }
+          }
+        );
+
         return {
           running: running,
-          failed: failed
+          failed: failed,
+          err_message: new Handlebars.SafeString(err_message),
+          message: new Handlebars.SafeString(message),
+          has_message: has_message,
+          has_err_message: has_err_message
           };
       }
     });

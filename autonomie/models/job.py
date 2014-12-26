@@ -84,8 +84,8 @@ class Job(DBBASE, PersistentACLMixin):
             label=self.label,
             jobid=self.jobid,
             status=self.status,
-            created_at=self.created_at.strftime("%H:%M %d/%m/%Y"),
-            updated_at=self.updated_at.strftime("%H:%M %d/%m/%Y"),
+            created_at=self.created_at.strftime("%d/%m/%Y à %H:%M"),
+            updated_at=self.updated_at.strftime("%d/%m/%Y à %H:%M"),
         )
 
 
@@ -103,11 +103,20 @@ class CsvImportJob(Job):
     unhandled_datas_csv = Column(Text(), default=None)
     label = u"Import de données"
 
+    def is_not_void_str(self, value):
+        """
+        Return True if the string contains datas
+        """
+        return not (value is None or len(value) == 0)
+
+
     def todict(self):
         res = Job.todict(self)
         res['label'] = self.label
         res['messages'] = self.messages
         res['error_messages'] = self.error_messages
-        res['in_error_csv'] = self.in_error_csv
-        res['unhandled_datas_csv'] = self.unhandled_datas_csv
+        res['has_errors'] = self.is_not_void_str(self.in_error_csv)
+        res['has_unhandled_datas'] = self.is_not_void_str(
+            self.unhandled_datas_csv
+        )
         return res

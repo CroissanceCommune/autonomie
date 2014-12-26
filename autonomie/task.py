@@ -30,11 +30,10 @@ import transaction
 from celery.task import task
 from celery.utils.log import get_task_logger
 
-from autonomie.models.user import UserDatas
 from autonomie.models.job import CsvImportJob
 from autonomie.csv_import import (
-    CsvImportAssociator,
-    CsvImporter,
+    get_csv_import_associator,
+    get_csv_importer,
 )
 
 
@@ -61,11 +60,12 @@ def record_failure(job_id, task_id, e):
 # Here we use the bind argument so that the task will be attached as a bound
 # method and thus we can access attributes like request
 @task(bind=True)
-def async_import_datas(self, job_id, association_dict, csv_filepath, id_key,
-                       action):
+def async_import_datas(
+    self, model_type, job_id, association_dict, csv_filepath, id_key, action):
     """
     Launch the import of the datas provided in the csv_filepath
 
+    :param str model_type: A handled model_type
     :param int job_id: The id of the db job object that should handle the return
         datas
     :param dict association_dict: describes the association
@@ -101,11 +101,11 @@ def async_import_datas(self, job_id, association_dict, csv_filepath, id_key,
     job.jobid = task_id
     # TODO : handle the type of datas we import
     try:
-        associator = CsvImportAssociator(UserDatas)
+        associator = get_csv_import_associator(model_type)
         associator.set_association_dict(association_dict)
         csv_buffer = open(csv_filepath, 'r')
-        importer = CsvImporter(
-            UserDatas,
+        importer = get_csv_importer(
+            model_type,
             csv_buffer,
             associator,
             action=action,

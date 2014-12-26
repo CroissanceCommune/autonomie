@@ -71,6 +71,7 @@ from autonomie.models.types import (
     PersistentACLMixin,
 )
 from autonomie.utils.ascii import camel_case_to_name
+from autonomie.utils.date import str_to_date
 
 
 ADMIN_PRIMARY_GROUP = 1
@@ -630,6 +631,13 @@ class UserDatasSocialDocTypes(DBBASE):
     )
 
 
+def get_dict_key_from_value(val, dict_):
+    for key, value in dict_.items():
+        if value == val:
+            return key
+    raise KeyError()
+
+
 class UserDatas(Node):
     __tablename__ = 'user_datas'
     __table_args__ = default_table_args
@@ -639,7 +647,9 @@ class UserDatas(Node):
         ForeignKey('node.id'),
         primary_key=True,
         info={
-            'colanderalchemy': get_hidden_field_conf(),
+            'colanderalchemy': {'exclude': True,
+                                'title': u"Identifiant Autonomie"
+            },
         }
     )
 
@@ -682,6 +692,12 @@ class UserDatas(Node):
             },
             'export': {
                 'formatter': lambda val: dict(SITUATION_OPTIONS).get(val),
+            },
+            'import': {
+                'formatter': lambda val: get_dict_key_from_value(
+                    val,
+                    dict(SITUATION_OPTIONS),
+                )
             }
         },
     )
@@ -1184,7 +1200,12 @@ class UserDatas(Node):
             {
                 'title': u'Date diagnostic',
                 'section': u'Parcours',
+            },
+            'import': {
+                "related_key": "date",
+                "formatter": str_to_date
             }
+
         }
     )
 
@@ -1213,6 +1234,10 @@ class UserDatas(Node):
                 "title": u"Date convention CAPE",
                 'section': u'Parcours',
             },
+            'import': {
+                'related_key': 'date',
+                "formatter": str_to_date
+            },
         }
     )
 
@@ -1223,6 +1248,10 @@ class UserDatas(Node):
             'colanderalchemy':{
                 "title": u"Date DPAE",
                 'section': u'Parcours',
+            },
+            'import': {
+                'related_key': 'date',
+                "formatter": str_to_date
             },
         }
     )

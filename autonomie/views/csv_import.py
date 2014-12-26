@@ -39,10 +39,9 @@ from deform import (
 )
 
 from autonomie.csv_import import (
-    CsvImportAssociator,
     get_csv_reader,
+    get_csv_import_associator,
 )
-from autonomie.models.user import UserDatas
 from autonomie.models.config import Config
 from autonomie.models.job import CsvImportJob
 from autonomie.models.base import DBSESSION
@@ -99,7 +98,7 @@ associer les champs de votre fichier avec des entrées de gestion sociale."
         log.debug(u"A csv file has been uploaded")
         uid = appstruct['csv_file']['uid']
         association = appstruct.get('association')
-        _query=dict(uid=uid)
+        _query=dict(uid=uid, model_type=appstruct['model_type'])
         if association:
             _query['association'] = association
         return HTTPFound(
@@ -200,13 +199,15 @@ def config_field_association(request):
 
     :param request: the pyramid request object
     """
+    model_type = request.GET['model_type']
+
     # We first count the number of elements in the file
     filepath = get_current_csv_filepath(request)
     num_lines = count_entries(filepath)
     info_message = IMPORT_INFO.format(count=num_lines)
 
     # We build a field - model attr associator
-    associator = CsvImportAssociator(UserDatas)
+    associator = get_csv_import_associator(model_type)
     csv_obj = get_current_csv(filepath)
     headers = [header for header in csv_obj.fieldnames if header]
 
@@ -260,6 +261,7 @@ import")
             DBSESSION().flush()
 
             celery_job = async_import_datas.delay(
+                model_type,
                 job.id,
                 association_dict,
                 csv_filepath,

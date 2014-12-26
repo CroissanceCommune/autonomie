@@ -22,7 +22,12 @@
 """
 Job related pages
 """
+import csv
+import cStringIO as StringIO
+from pyramid.httpexceptions import HTTPNotFound
 
+from autonomie.utils.ascii import force_utf8
+from autonomie.export.utils import write_file_to_request
 from autonomie.models.job import (
     Job,
 )
@@ -81,13 +86,34 @@ class JobList(BaseListView):
         return query
 
 
-def stream_csv(context, request):
+def make_stream_csv_by_key(job_key, filename):
     """
-    Stream resulting csv datas resulting from an import
+    Build a view streaming the key attr of the current context as a csv file
 
-    :param context: The csv import job instance
+    :param str job_key: an attribute of the associated context
+    :param str filename: A filename used to stream the datas
     """
-    pass
+    def stream_csv(context, request):
+        """
+        Stream resulting csv datas resulting from an import
+
+        :param context: The csv import job instance
+        """
+        csv_str_datas = getattr(context, job_key, {})
+        if csv_str_datas is None or len(csv_str_datas) == 0:
+            raise HTTPNotFound()
+
+        f_buf = StringIO.StringIO()
+        f_buf.write(csv_str_datas.encode('utf-8'))
+        write_file_to_request(
+            request,
+            "%s.csv" % filename,
+            f_buf,
+            "text/csv",
+        )
+        return request.response
+
+    return stream_csv
 
 
 def includeme(config):
@@ -105,3 +131,19 @@ def includeme(config):
         renderer="/jobs.mako",
         permission="admin",
     )
+    config.add_view(
+        make_stream_csv_by_key('in_error_csv', 'fichier_erreur.csv'),
+        route_name='job',
+        request_param='action=errors.csv',
+        permission='admin',
+    )
+    config.add_view(
+        make_stream_csv_by_key(
+            'unhandled_datas_csv',
+            'fichier_non_traitées.csv'
+        ),
+        route_name='job',
+        request_param='action=unhandled.csv',
+        permission='admin',
+    )
+

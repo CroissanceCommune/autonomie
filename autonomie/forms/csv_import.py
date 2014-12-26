@@ -34,9 +34,9 @@ from autonomie import forms
 
 IMPORTATION_TYPE_OPTIONS = (
     (u"insert", u"Insérer de nouvelles données",),
-    (u"update", u"Compléter des données existantes (les données déjà saisies \
-     seront conservées)"),
-    (u"override", u"Mettre à jour les données existantes"),
+    (u"update", u"Mise à jour : Compléter des données existantes (les données \
+déjà saisies seront conservées)"),
+    (u"override", u"Mise à jour : Mettre à jour les données existantes"),
 )
 
 
@@ -91,11 +91,21 @@ class CsvFileUploadSchema(colander.Schema):
     """
     Csv import first step schema
     """
+    csv_file = colander.SchemaNode(
+        deform.FileData(),
+        widget=deferred_temporary_upload_widget,
+        title=u"Fichier csv",
+        description=u"Fichier csv contenant les données à importer (delimiter: \
+';' quotechar: '\"'), le fichier doit être enregistré au format utf-8",
+        validator=check_csv_content,
+    )
     model_type = colander.SchemaNode(
         colander.String(),
-        widget=get_model_type_select(),
+    #    widget=get_model_type_select(),
+        widget=deform.widget.HiddenWidget(),
         title=u"Type de données",
         default='userdatas',
+        missing='userdatas',
     )
     association = colander.SchemaNode(
         colander.String(),
@@ -104,14 +114,6 @@ class CsvFileUploadSchema(colander.Schema):
         description=u"Permet de pré-charger automatiquement des associations \
 de champs pour l'étape 2",
         missing=colander.drop
-    )
-    csv_file = colander.SchemaNode(
-        deform.FileData(),
-        widget=deferred_temporary_upload_widget,
-        title=u"Fichier csv",
-        description=u"Fichier csv contenant les données à importer (delimiter: \
-';' quotechar: '\"'), le fichier doit être enregistré au format utf-8",
-        validator=check_csv_content,
     )
 
 
@@ -176,24 +178,6 @@ class AssociationSchema(colander.MappingSchema):
         widget=deferred_seq_widget,
         title=u"Association des données"
     )
-    id_key = colander.SchemaNode(
-        colander.String(),
-        title=u"Identifiant unique",
-        description=u"Dans le cas de mise à jour de données, vous pouvez \
-définir quel champ doit être utilisé pour retrouver des entrées existantes \
-dans la base de données.",
-        widget=deferred_id_key_widget,
-        missing="id", # par défaut on identifie grâce à l'attribut id
-    )
-    action = colander.SchemaNode(
-        colander.String(),
-        title=u"Type d'importation",
-        description=u"Définit la politique d'insertion d'informations dans la \
-base de données.",
-        widget=deform.widget.RadioChoiceWidget(values=IMPORTATION_TYPE_OPTIONS),
-        default=u"insert",
-        missing=u"insert",
-    )
     record_association = colander.SchemaNode(
         colander.Boolean(),
         title=u"Enregistrer ?",
@@ -205,6 +189,24 @@ futures importations ?",
         title=u"Nom de l'enregistrement",
         description=u"Ce nom vous permettra de recharger cette association",
         missing=colander.drop,
+    )
+    action = colander.SchemaNode(
+        colander.String(),
+        title=u"Type d'importation",
+        description=u"Définit la politique d'insertion d'informations dans la \
+base de données.",
+        widget=deform.widget.RadioChoiceWidget(values=IMPORTATION_TYPE_OPTIONS),
+        default=u"insert",
+        missing=u"insert",
+    )
+    id_key = colander.SchemaNode(
+        colander.String(),
+        title=u"Identifiant unique",
+        description=u"Dans le cas de mise à jour de données, vous pouvez \
+définir quel champ doit être utilisé pour retrouver des entrées existantes \
+dans la base de données.",
+        widget=deferred_id_key_widget,
+        missing="id", # par défaut on identifie grâce à l'attribut id
     )
 
 def check_record_name(form, values):

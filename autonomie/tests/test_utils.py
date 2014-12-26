@@ -38,6 +38,7 @@ from autonomie.utils.rest import (
     RestJsonRepr,
     RestError,
 )
+from autonomie.utils import date
 
 
 def test_merge_session_with_post():
@@ -132,4 +133,10 @@ def test_script_utils():
     args = {'--test': 'toto', '--': 'titi'}
     assert get_value(args, 'test', '') == 'toto'
     assert get_value(args, 'test1', 'test') == 'test'
+
+def test_str_to_date():
+    import datetime
+    assert date.str_to_date("12/11/2014") == datetime.datetime(2014, 11, 12)
+    assert date.str_to_date("12-11-2014") == datetime.datetime(2014, 11, 12)
+    assert date.str_to_date(None) == ""
 

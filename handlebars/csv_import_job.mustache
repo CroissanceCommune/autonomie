@@ -1,21 +1,65 @@
-<h1>Importation de données</h1>
+<div class='row-fluid'>
+<div class='span6'>
+<h2>Import de données</h2>
 <ul>
 <li>Identifiant de la tâche : {{ jobid }} </li>
 <li>Initialisée le : {{ created_at }} </li>
 <li>Mise à jour le : {{ updated_at }} </li>
 </ul>
+</div>
+<div class="span3 offset3">
 {{#if running}}
-<div class="orange_text">
-<i class="fa fa-cog fa-spin fa-4x"></i><h3>L'import est en cours</h3>
+<div class="well text-center btn-warning">
+<i class="fa fa-cog fa-spin fa-4x"></i>
+<br />
+<b>L'import est en cours</b>
 </div>
 {{else}}
 
 {{#if failed}}
-<div class="red_text"><i class="fa fa-warning fa-4x"></i> <h3>L'import a échoué</h3></div>
+<div class="well text-center btn-danger">
+<i class="fa fa-warning fa-4x"></i>
+<br />
+<b>L'import a échoué</b>
+</div>
 {{else}}
 
-<div class="green_text"><i class="fa fa-check fa-4x"></i><h3>L'import s'est déroulé avec succès</h3></div>
+<div class="well text-center btn-success">
+<i class="fa fa-check fa-4x"></i>
+<br />
+<b>L'import s'est déroulé avec succès</b>
+</div>
 
-<h3>RAPPORT</h3>
 {{/if}}
 {{/if}}
+</div>
+</div>
+<hr />
+{{^running}}
+<div class='row-fluid'>
+<div class='span6'>
+<h4>Messages</h4>
+{{ message }}
+{{^has_message}}
+Aucun message n'é été retourné
+{{/has_message}}
+<h4>Erreurs</h4>
+{{ err_message }}
+{{^has_err_message }}
+Aucune erreur n'a été retournée
+{{/has_err_message }}
+</div>
+<div class='span6'>
+<h4>Télécharger des données</h4>
+{{#has_unhandled_datas}}
+Télécharger les données du fichier qui n'ont pas été importées :
+<a class='btn btn-warning' href="{{url}}?action=unhandled.csv">Télécharger</a>
+{{/has_unhandled_datas}}
+<hr>
+{{#has_errors}}
+Télécharger les lignes du fichier contenant des erreurs :
+<a class='btn btn-danger' href="{{url}}?action=errors.csv">Télécharger</a>
+{{/has_errors}}
+</div>
+</div>
+{{/running}}

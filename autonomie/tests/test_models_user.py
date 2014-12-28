@@ -26,6 +26,7 @@ from autonomie.models.user import (
     User,
     UserDatas,
     CompanyDatas,
+    CaeSituationOption,
 )
 TEST1 = dict(login="user1_login", firstname="user1_firstname",
                     lastname="user1_lastname", email="user1@test.fr",
@@ -38,8 +39,9 @@ TEST3 = dict(login="user3_login", firstname="user3_firstname",
         primary_group=3)
 
 def get_userdatas():
+    option = CaeSituationOption(label="Integre", is_integration=True)
     return UserDatas(
-        situation_situation='integre',
+        situation_situation=option,
         coordonnees_lastname="test",
         coordonnees_firstname="test",
         coordonnees_email1="test@test.fr",

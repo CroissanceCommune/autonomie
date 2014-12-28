@@ -32,6 +32,7 @@
 <div class='well'>
 % if getattr(userdata, "user_id", None) is not None and userdata.__name__ == 'userdatas':
         Ces données sont associées à un compte utilisateur : <a href='${request.route_path("user", id=userdata.user_id)}'>Voir</a>
+% endif
 <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
 <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?'
 if userdata.user is not None:
@@ -42,7 +43,6 @@ if userdata.user is not None:
     <i class="icon icon-white icon-trash"></i>
     Supprimer les données
 </a>
-% endif
 </div>
 <% user = getattr(request.context, "user", None) %>
 

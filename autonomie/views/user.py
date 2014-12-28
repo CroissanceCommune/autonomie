@@ -634,9 +634,9 @@ class UserDatasListClass(object):
         """
         log.debug("APPSTRUCT : %s" % appstruct)
         situation = appstruct.get('situation_situation')
-        if situation not in (None, ''):
+        if situation is not None:
             query = query.filter(
-                UserDatas.situation_situation==situation
+                UserDatas.situation_situation_id==situation
             )
         return query
 

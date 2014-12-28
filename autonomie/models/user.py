@@ -93,6 +93,7 @@ COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
         mysql_engine=default_table_args['mysql_engine'])
 
 
+#TODO Remove this one
 SITUATION_OPTIONS = (
     ('reu_info', u"Réunion d'information",),
     ("entretien", u"Entretien",),
@@ -565,6 +566,17 @@ class ParcoursStatusOption(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
+class CaeSituationOption(ConfigurableOption):
+    """
+    Possible values for the cae status "Situation actuelle dans la cae"
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Situation dans la CAE",
+        'validation_msg': u"Les types de situations ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+
 class MotifSortieOption(ConfigurableOption):
     """
     Possible values for exit motivation
@@ -680,26 +692,43 @@ class UserDatas(Node):
     )
 
     # INFORMATIONS GÉNÉRALES : CF CAHIER DES CHARGES #
-    situation_situation = Column(
-        String(20),
+    #situation_situation = Column(
+    #    String(20),
+    #    info={
+    #        'colanderalchemy': {
+    #            'title': u"Situation actuelle dans la CAE",
+    #            'section': u'Synthèse',
+    #            'widget': get_select(SITUATION_OPTIONS),
+    #            'validator': get_select_validator(SITUATION_OPTIONS),
+    #            'default': SITUATION_OPTIONS[0][0],
+    #        },
+    #        'export': {
+    #            'formatter': lambda val: dict(SITUATION_OPTIONS).get(val),
+    #        },
+    #        'import': {
+    #            'formatter': lambda val: get_dict_key_from_value(
+    #                val,
+    #                dict(SITUATION_OPTIONS),
+    #            )
+    #        }
+    #    },
+    #)
+
+    situation_situation_id = Column(
+        ForeignKey("cae_situation_option.id"),
         info={
-            'colanderalchemy': {
+            'colanderalchemy':
+            {
                 'title': u"Situation actuelle dans la CAE",
                 'section': u'Synthèse',
-                'widget': get_select(SITUATION_OPTIONS),
-                'validator': get_select_validator(SITUATION_OPTIONS),
-                'default': SITUATION_OPTIONS[0][0],
-            },
-            'export': {
-                'formatter': lambda val: dict(SITUATION_OPTIONS).get(val),
-            },
-            'import': {
-                'formatter': lambda val: get_dict_key_from_value(
-                    val,
-                    dict(SITUATION_OPTIONS),
-                )
+                'widget': get_deferred_select(CaeSituationOption),
             }
-        },
+        }
+    )
+
+    situation_situation = relationship(
+        "CaeSituationOption",
+        info={'colanderalchemy': EXCLUDED},
     )
 
     situation_follower_id = Column(

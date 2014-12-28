@@ -259,6 +259,22 @@ def get_list_schema():
     return schema
 
 
+@colander.deferred
+def deferred_situation_select(node, kw):
+    values = [('', u"Sélectionner un statut")]
+    options = user.CaeSituationOption.query()
+    for option in options:
+        values.append((option.id, option.label))
+    return deform_widget.SelectWidget(values=values)
+
+
+@colander.deferred
+def deferred_situation_id_validator(node, kw):
+    return colander.OneOf(
+        [option.id for option in user.CaeSituationOption.query()]
+    )
+
+
 def get_userdatas_list_schema():
     """
     Return a list schema for user datas
@@ -268,13 +284,12 @@ def get_userdatas_list_schema():
     schema['search'].description = u"Nom, prénom, entreprise"
 
     schema.insert(0, colander.SchemaNode(
-        colander.String(),
+        colander.Integer(),
         name='situation_situation',
-        widget=deform_widget.SelectWidget(values=SITUATION_SEARCH_OPTIONS),
-        validator=colander.OneOf([s[0] for s in SITUATION_SEARCH_OPTIONS]),
-        default='',
-        missing='',
-        )
+        widget=deferred_situation_select,
+        validator=deferred_situation_id_validator,
+        missing=colander.drop,
+    )
     )
 
     schema.insert(

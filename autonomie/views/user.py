@@ -393,6 +393,9 @@ class UserDatasAdd(BaseFormView):
         else:
             model = self.schema.objectify(appstruct)
 
+        model = self.dbsession.merge(model)
+        self.dbsession.flush()
+
         user, login, password = model.gen_user_account()
 
         companies = model.gen_companies()

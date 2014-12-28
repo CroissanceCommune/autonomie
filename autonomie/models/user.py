@@ -93,7 +93,10 @@ COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
         mysql_engine=default_table_args['mysql_engine'])
 
 
-#TODO Remove this one
+# TODO : Remove SITUATION_OPTIONS (!! is used in migration script)
+# TODO : Handle situation configuration (is_integration required)
+# TODO : Handle situation initialization in initialize_sql
+# TODO : Handle situation_situation_default (should point to the first option)
 SITUATION_OPTIONS = (
     ('reu_info', u"Réunion d'information",),
     ("entretien", u"Entretien",),
@@ -575,6 +578,8 @@ class CaeSituationOption(ConfigurableOption):
         'validation_msg': u"Les types de situations ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')
+    # Is this element related to the integration process of a PP
+    is_integration = Column(Boolean(), default=False)
 
 
 class MotifSortieOption(ConfigurableOption):
@@ -716,6 +721,7 @@ class UserDatas(Node):
 
     situation_situation_id = Column(
         ForeignKey("cae_situation_option.id"),
+        nullable=False,
         info={
             'colanderalchemy':
             {
@@ -1487,7 +1493,7 @@ class UserDatas(Node):
         Generate a user account for the given model
         """
         from autonomie.utils.ascii import gen_random_string
-        if self.situation_situation == 'integre' and self.user_id is None:
+        if self.situation_situation.is_integration and self.user_id is None:
             login = self.coordonnees_email1
             index = 0
             # Fix #165: check login on account generation
@@ -1513,7 +1519,7 @@ class UserDatas(Node):
         """
         from autonomie.models.company import Company
         companies = []
-        if self.situation_situation == 'integre' and self.user_id is None:
+        if self.situation_situation.is_integration and self.user_id is None:
             for data in self.activity_companydatas:
                 # Try to retrieve an existing company (and avoid duplicates)
                 company = Company.query().filter(

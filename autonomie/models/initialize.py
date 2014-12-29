@@ -30,6 +30,17 @@ from autonomie.models.base import DBBASE
 from autonomie.scripts.migrate import fetch_head
 
 
+def populate_config(session):
+    """
+    Initialize required configuration elements
+    """
+    from autonomie.models.user import CaeSituationOption
+    query = session.query(CaeSituationOption)
+    if query.filter(CaeSituationOption.is_integration==True).count() == 0:
+        session.add(CaeSituationOption(label=u"Intégré", is_integration=True))
+        session.flush()
+
+
 def initialize_sql(engine):
     """
         Initialize the database engine
@@ -39,4 +50,6 @@ def initialize_sql(engine):
     if not engine.table_names():
         fetch_head()
     DBBASE.metadata.create_all(engine)
+
+    populate_config(DBSESSION())
     return DBSESSION

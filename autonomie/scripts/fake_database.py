@@ -197,6 +197,22 @@ def add_activity_action(label, **kw):
     session.flush()
     return a
 
+def add_situation_status():
+    from autonomie.models.user import CaeSituationOption
+    session = DBSESSION()
+    session.add(
+        CaeSituationOption(label=u"Réunion d'information", order=0)
+    )
+    session.add(
+        CaeSituationOption(label=u"Intégré", order=0, is_integration=True)
+    )
+    session.add(
+        CaeSituationOption(label=u"Sortie", order=0)
+    )
+    session.flush()
+
+
+
 def set_configuration():
     print("Adding configuration elements")
     add_payment_mode(u"par chèque")
@@ -230,6 +246,8 @@ def set_configuration():
     add_activity_action(
         u"Module 3 : Accompagnement renforcé - Etape : Business model \
 commercial, économique et social", parent=a)
+
+    add_situation_status()
 
 
 

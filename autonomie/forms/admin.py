@@ -816,7 +816,10 @@ def get_sequence_model_admin(model, title=u""):
         colander.SchemaNode(
             colander.Sequence(),
             node_schema,
-            widget=deform_widget.SequenceWidget(min_len=1),
+            widget=deform_widget.SequenceWidget(
+                min_len=1,
+                orderable=True,
+            ),
             title=title,
             name='datas')
     )

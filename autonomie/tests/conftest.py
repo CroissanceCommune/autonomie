@@ -360,8 +360,9 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
 
 @fixture
 def wsgi_app(settings, dbsession):
-    from autonomie import base_configure
-    return base_configure({}, dbsession, **settings).make_wsgi_app()
+    from autonomie import base_configure, prepare_config
+    config = prepare_config(**settings)
+    return base_configure(config, dbsession, **settings).make_wsgi_app()
 
 
 @fixture

@@ -120,17 +120,16 @@ def main(global_config, **settings):
         Main function : returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
+    config = prepare_config(**settings)
+
     dbsession = initialize_sql(engine)
 
-    config = base_configure(global_config, dbsession, **settings)
+    config = base_configure(config, dbsession, **settings)
 
     return config.make_wsgi_app()
 
 
-def base_configure(global_config, dbsession, **settings):
-    """
-    All plugin and others configuration stuff
-    """
+def prepare_config(**settings):
     session_factory = get_session_factory(settings)
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
@@ -142,7 +141,13 @@ def base_configure(global_config, dbsession, **settings):
                         session_factory=session_factory)
     config.begin()
     config.commit()
+    return config
 
+
+def base_configure(config, dbsession, **settings):
+    """
+    All plugin and others configuration stuff
+    """
     set_models_acls()
     TraversalDbAccess.dbsession = dbsession
 

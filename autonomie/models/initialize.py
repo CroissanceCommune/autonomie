@@ -37,8 +37,23 @@ def populate_config(session):
     from autonomie.models.user import CaeSituationOption
     query = session.query(CaeSituationOption)
     if query.filter(CaeSituationOption.is_integration==True).count() == 0:
-        session.add(CaeSituationOption(label=u"Intégré", is_integration=True))
+        print("Populating the configuration")
+        session.add(CaeSituationOption(
+            label=u"Réunion d'information",
+            order=0,
+        ))
+        session.add(CaeSituationOption(
+            label=u"Intégré",
+            is_integration=True,
+            order=1,
+        ))
+        session.add(CaeSituationOption(
+            label=u"Sortie",
+            order=2,
+        ))
         session.flush()
+        from transaction import commit
+        commit()
 
 
 def initialize_sql(engine):

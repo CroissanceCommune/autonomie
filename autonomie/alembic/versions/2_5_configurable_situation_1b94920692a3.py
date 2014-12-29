@@ -24,6 +24,16 @@ def upgrade():
             sa.ForeignKey("cae_situation_option.id"),
         )
     )
+    op.add_column(
+        "configurable_option",
+        sa.Column(
+            "order",
+            sa.Integer,
+            default=0
+        )
+    )
+
+
     from autonomie.models.user import (
         CaeSituationOption,
         SITUATION_OPTIONS,

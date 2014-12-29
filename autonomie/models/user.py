@@ -97,6 +97,7 @@ COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
 # TODO : Handle situation configuration (is_integration required)
 # TODO : Handle situation initialization in initialize_sql
 # TODO : Handle situation_situation_default (should point to the first option)
+# TODO : test import situation_situation
 SITUATION_OPTIONS = (
     ('reu_info', u"Réunion d'information",),
     ("entretien", u"Entretien",),
@@ -442,6 +443,11 @@ class ConfigurableOption(DBBASE):
         default=True,
         info={'colanderalchemy': EXCLUDED}
     )
+    order = Column(
+        Integer,
+        default=0,
+        info={'colanderalchemy': EXCLUDED}
+    )
     type_ = Column(
         'type_',
         String(30),
@@ -464,6 +470,7 @@ class ConfigurableOption(DBBASE):
     def query(cls):
         query = super(ConfigurableOption, cls).query()
         query = query.filter(ConfigurableOption.active==True)
+        query = query.order_by(ConfigurableOption.order)
         return query
 
 
@@ -579,7 +586,11 @@ class CaeSituationOption(ConfigurableOption):
     }
     id = get_id_foreignkey_col('configurable_option.id')
     # Is this element related to the integration process of a PP
-    is_integration = Column(Boolean(), default=False)
+    is_integration = Column(
+        Boolean(),
+        default=False,
+        info={'colanderalchemy': get_hidden_field_conf()},
+    )
 
 
 class MotifSortieOption(ConfigurableOption):

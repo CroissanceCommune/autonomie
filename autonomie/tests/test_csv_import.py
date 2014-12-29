@@ -21,8 +21,8 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
 import cStringIO as StringIO
-csv_string = """Nom;Email 1;PRénom;Unknown
-Arthur;b.arthur;Bienaimé;Datas
+csv_string = """Nom;Email 1;PRénom;Unknown;Status
+Arthur;b.arthur;Bienaimé;Datas;Réunion d'information
 """
 
 def get_buffer():
@@ -46,8 +46,9 @@ def association_handler():
 
 @pytest.fixture
 def userdata(dbsession):
-    from autonomie.models.user import UserDatas
+    from autonomie.models.user import (UserDatas, CaeSituationOption,)
     u = UserDatas(
+        situation_situation=CaeSituationOption.query().first(),
         coordonnees_firstname="firstname",
         coordonnees_lastname="lastname",
         coordonnees_email1="mail@mail.com",
@@ -98,6 +99,7 @@ def test_import_line(dbsession, csv_datas, association_handler):
 
 
     association_dict = {
+        u"Status": u"situation_situation",
         u'PRénom': 'coordonnees_firstname',
         u'Nom': 'coordonnees_lastname',
         u'Email 1': 'coordonnees_email1',
@@ -110,6 +112,7 @@ def test_import_line(dbsession, csv_datas, association_handler):
 
     assert res.coordonnees_firstname == u'Bienaimé'
     assert res.coordonnees_lastname == u'Arthur'
+    assert res.situation_situation.label == u"Réunion d'information"
     assert sorted(importer.unhandled_datas[0].keys()) == sorted(['id', 'Unknown'])
     assert importer.in_error_lines == []
 

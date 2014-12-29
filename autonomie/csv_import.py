@@ -315,8 +315,10 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
             if csv_key == 'id':
                 column_name = 'id'
             else:
-                key = ascii.to_utf8(csv_key)
+                key = ascii.force_unicode(csv_key)
                 column_name = self.association_dict.get(key)
+                if column_name is None:
+                    column_name = self.association_dict.get(csv_key)
 
             if column_name is None:
                 unhandled[csv_key] = value
@@ -452,7 +454,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         updated = False
         if identification_value in UNFILLED_VALUES:
             # No identification value is provided
-            model = self._insert(args)
+            model, updated = self._insert(args)
 
         else:
             identification_column = getattr(self.factory, self.id_key)
@@ -474,7 +476,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                 # identification key and should be set for new entries)
                 if self.id_key != 'id':
                     args[self.id_key] = identification_value
-                model = self._insert(args)
+                model, updated = self._insert(args)
 
             except sqlalchemy_exc.MultipleResultsFound:
                 raise MultipleInstanceFound(MULTIPLE_ENTRY_ERROR.format(
@@ -517,6 +519,8 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             else:
                 self.new_count += 1
         except Exception as e:
+            print(u"Erreur")
+            print(e)
             log.exception(u"Erreur lors de l'import de données")
             log.error(e)
             self.in_error_lines.append(line)

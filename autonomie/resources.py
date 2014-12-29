@@ -173,6 +173,15 @@ holiday_js = Resource(
         effects_shake,
         message_js]
 )
+admin_option_js = Resource(
+    lib_autonomie,
+    "js/admin_option.js",
+    depends=[
+        backbone,
+        templates,
+        tools
+    ]
+)
 
 
 bootstrap_responsive_css = Resource(

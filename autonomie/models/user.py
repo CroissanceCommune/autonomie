@@ -904,6 +904,9 @@ class UserDatas(Node):
             'colanderalchemy': {
                 'title': u'Code postal',
                 'section': u'Coordonnées',
+            },
+            'py3o': {
+                'formatter': lambda z: u"%05d" % z
             }
         }
     )

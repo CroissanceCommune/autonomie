@@ -74,7 +74,7 @@ from autonomie.resources import admin_option_js
 from autonomie.models import files
 from autonomie.forms.admin import (
     MainConfig,
-    TvaConfig,
+    get_tva_config_schema,
     PaymentModeConfig,
     WorkUnitConfig,
     ExpenseTypesConfig,
@@ -280,7 +280,7 @@ class AdminTva(BaseFormView):
     """
     title = u"Configuration des taux de TVA"
     validation_msg = u"Les taux de TVA ont bien été modifiés"
-    schema = TvaConfig()
+    schema = get_tva_config_schema()
     buttons = (submit_btn,)
 
     def before(self, form):

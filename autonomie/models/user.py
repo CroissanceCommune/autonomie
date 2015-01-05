@@ -51,12 +51,16 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.util import classproperty
 from sqlalchemy.event import listen
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from autonomie.views import render_api
 
 from deform_bootstrap import widget as bootstrap_widget
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    DBBASE,
+    DBSESSION,
+    default_table_args,
+)
 from autonomie.models.node import Node
 from autonomie.forms import (
     get_hidden_field_conf,
@@ -83,27 +87,29 @@ ROLES = {
     'admin': 1,
     'manager': 2,
     'contractor': 3,
-    }
+}
+
+# We need to store this datas here (before we find a solution to place a
+# hashbang in an alembic migratino script)
 
 
-COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
-        Column("company_id", Integer, ForeignKey('company.id')),
-        Column("account_id", Integer, ForeignKey('accounts.id')),
-        mysql_charset=default_table_args['mysql_charset'],
-        mysql_engine=default_table_args['mysql_engine'])
+COMPANY_EMPLOYEE = Table(
+    'company_employee',
+    DBBASE.metadata,
+    Column("company_id", Integer, ForeignKey('company.id')),
+    Column("account_id", Integer, ForeignKey('accounts.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
 
 
-# TODO : Remove SITUATION_OPTIONS (!! is used in migration script)
-# TODO : Handle situation configuration (is_integration required)
-# TODO : Handle situation initialization in initialize_sql
-# TODO : Handle situation_situation_default (should point to the first option)
-# TODO : test import situation_situation
-SITUATION_OPTIONS = (
-    ('reu_info', u"Réunion d'information",),
-    ("entretien", u"Entretien",),
-    ("integre", u"Intégré",),
-    ("sortie", u"Sortie",),
-    ("refus", u"Refus",),
+USER_ROLES = Table(
+    'user_roles',
+    DBBASE.metadata,
+    Column('user_id', Integer, ForeignKey('accounts.id')),
+    Column('role_id', Integer, ForeignKey('roles.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
 )
 
 
@@ -153,6 +159,43 @@ def get_id_foreignkey_col(foreignkey_str):
         info={'colanderalchemy': get_hidden_field_conf()},
     )
     return column
+
+
+class Role(DBBASE):
+    """
+    Available roles used in autonomie
+    """
+    __tablename__ = 'roles'
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': EXCLUDED}
+    )
+    name = Column(
+        String(30),
+        nullable=False,
+        info={'colanderalchemy': {'title': u"Nom du rôle"}}
+    )
+    label = Column(
+        String(50),
+        nullable=False,
+        info={'colanderalchemy': {'title': u"Libellé"}},
+    )
+    primary = Column(
+        Boolean(),
+        default=False,
+        info={'colanderalchemy': {'title': u"Is this a primary role"}}
+    )
+
+    @classmethod
+    def _find_one(cls, name):
+        """
+        Used as a creator for the initialization proxy
+        """
+        with DBSESSION.no_autoflush:
+            res = DBSESSION.query(Role).filter(Role.name==name).one()
+        return res
 
 
 class User(DBBASE, PersistentACLMixin):
@@ -232,6 +275,20 @@ class User(DBBASE, PersistentACLMixin):
         ),
         info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
     )
+    _roles = relationship(
+        "Role",
+        secondary=USER_ROLES,
+        backref=backref(
+            "users",
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+        ),
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+    )
+    roles = association_proxy(
+        "_roles",
+        "name",
+        creator=Role._find_one
+    )
 
     compte_tiers = Column(
         String(30),
@@ -289,19 +346,19 @@ class User(DBBASE, PersistentACLMixin):
         """
             return true if the user is and administrator
         """
-        return self.primary_group == ADMIN_PRIMARY_GROUP
+        return 'admin' in self.roles
 
     def is_manager(self):
         """
             return True if the user is a manager
         """
-        return self.primary_group == MANAGER_PRIMARY_GROUP
+        return "manager" in self.roles
 
     def is_contractor(self):
         """
             return True if the user is a contractor
         """
-        return self.primary_group == CONTRACTOR_PRIMARY_GROUP
+        return "contractor" in self.roles
 
     @classmethod
     def query(cls, ordered=True, only_active=True):
@@ -367,8 +424,10 @@ def get_user_by_roles(roles):
     """
         Return user by roles
     """
-    roles_ids = [ROLES[role] for role in roles if role in ROLES.keys()]
-    return User.query().filter(User.primary_group.in_(roles_ids))
+    from sqlalchemy import or_
+    conditions = [User.roles.contains(role) for role in roles]
+    where_clause = or_(*conditions)
+    return User.query.filter(where_clause)
 
 
 def get_users_options(roles=None):

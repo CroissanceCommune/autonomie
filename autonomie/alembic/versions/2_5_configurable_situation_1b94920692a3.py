@@ -1,4 +1,5 @@
-"""2.5 : configurable_situation
+#-*-coding:utf-8-*-
+"""2.5 : refactor userdatas situations and roles
 
 Revision ID: 1b94920692a3
 Revises: 46beb4c6f140
@@ -13,6 +14,20 @@ down_revision = '46beb4c6f140'
 from alembic import op
 import sqlalchemy as sa
 
+SITUATION_OPTIONS = (
+    ('reu_info', u"Réunion d'information",),
+    ("entretien", u"Entretien",),
+    ("integre", u"Intégré",),
+    ("sortie", u"Sortie",),
+    ("refus", u"Refus",),
+)
+
+
+PRIMARY_ROLES = (
+    ('admin', 1),
+    ('manager', 2),
+    ('contractor', 3),
+)
 
 def upgrade():
     from alembic.context import get_bind
@@ -33,10 +48,8 @@ def upgrade():
         )
     )
 
-
     from autonomie.models.user import (
         CaeSituationOption,
-        SITUATION_OPTIONS,
     )
     from autonomie.models.base import DBSESSION
     temp_dict = {}
@@ -56,13 +69,19 @@ def upgrade():
     for id, situation in result:
         option_id = temp_dict.get(situation)
         if option_id is None:
-            import warnings
-            warnings.warn("We don't know about this situation : %s \
-id: %s" % (situation, id))
             continue
         query = "update user_datas set situation_situation_id='{0}' \
 where id='{1}'".format(option_id, id)
         op.execute(query)
+
+    from autonomie.models.user import (Role, User)
+    for name, index in PRIMARY_ROLES:
+        role = Role.query().filter(Role.name==name).one()
+        users = User.query().filter(User.primary_group==index)
+        for user in users:
+            user._roles.append(role)
+            DBSESSION().merge(user)
+            DBSESSION().flush()
 
 
 def downgrade():

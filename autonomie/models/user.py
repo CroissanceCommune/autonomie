@@ -195,6 +195,7 @@ class Role(DBBASE):
         """
         with DBSESSION.no_autoflush:
             res = DBSESSION.query(Role).filter(Role.name==name).one()
+
         return res
 
 
@@ -427,7 +428,7 @@ def get_user_by_roles(roles):
     from sqlalchemy import or_
     conditions = [User.roles.contains(role) for role in roles]
     where_clause = or_(*conditions)
-    return User.query.filter(where_clause)
+    return User.query().filter(where_clause)
 
 
 def get_users_options(roles=None):

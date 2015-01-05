@@ -66,12 +66,13 @@ def get_userdatas():
 @pytest.fixture
 def userdatas(dbsession):
     model = get_userdatas()
+    print model
     dbsession.add(model)
     dbsession.flush()
     return model
 
 
-def test_account():
+def test_account(dbsession):
     a = User(**TEST1)
     a.set_password('pwd')
     assert a.auth("pwd")
@@ -88,7 +89,7 @@ def test_get_company(dbsession):
     with pytest.raises(KeyError):
         user1.get_company(3000)
 
-def test_role():
+def test_role(dbsession):
     a = User(**TEST1)
     assert a.is_admin()
     assert not a.is_manager()

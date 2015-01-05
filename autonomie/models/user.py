@@ -417,8 +417,11 @@ class User(DBBASE, PersistentACLMixin):
         """
         return self.active == 'Y'
 
-    def __repr__(self):
+    def __unicode__(self):
         return u"<User {s.id} '{s.lastname} {s.firstname}'>".format(s=self)
+
+    def __repr__(self):
+        return self.__unicode__().encode('utf-8')
 
 
 def get_user_by_roles(roles):

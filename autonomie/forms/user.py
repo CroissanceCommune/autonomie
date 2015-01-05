@@ -177,11 +177,6 @@ class CompanySchema(colander.SequenceSchema):
         widget=deferred_company_input)
 
 
-SITUATION_SEARCH_OPTIONS = (
-    ('', u"Sélectionner un statut",),
-) + user.SITUATION_OPTIONS
-
-
 class UserDisableSchema(colander.MappingSchema):
     disable = colander.SchemaNode(
         colander.Boolean(),

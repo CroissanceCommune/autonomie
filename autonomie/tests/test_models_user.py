@@ -28,15 +28,27 @@ from autonomie.models.user import (
     CompanyDatas,
     CaeSituationOption,
 )
-TEST1 = dict(login="user1_login", firstname="user1_firstname",
-                    lastname="user1_lastname", email="user1@test.fr",
-                    primary_group=1)
-TEST2 = dict(login="user2_login", firstname="user2_firstname",
-                    lastname="user2_lastname", email="user2@test.fr",
-                    primary_group=2)
-TEST3 = dict(login="user3_login", firstname="user3_firstname",
-                    lastname="user3_lastname", email="user3@test.fr",
-        primary_group=3)
+TEST1 = dict(
+    login="user1_login",
+    firstname="user1_firstname",
+    lastname="user1_lastname",
+    email="user1@test.fr",
+    roles=['admin'],
+)
+TEST2 = dict(
+    login="user2_login",
+    firstname="user2_firstname",
+    lastname="user2_lastname",
+    email="user2@test.fr",
+    roles=['manager'],
+)
+TEST3 = dict(
+    login="user3_login",
+    firstname="user3_firstname",
+    lastname="user3_lastname",
+    email="user3@test.fr",
+    roles=['contractor'],
+)
 
 def get_userdatas():
     option = CaeSituationOption(label="Integre", is_integration=True)

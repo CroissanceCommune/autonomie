@@ -32,12 +32,9 @@ from autonomie.models.base import DBBASE
 from autonomie.scripts.migrate import fetch_head
 
 
-ROLES = (
-    ('admin', u'Administrateur', True),
-    ('manager', u"Membre de l'équipe d'appui", True),
-    ('contractor', u"Entrepreneur", True),
-    ('estimation_validation', u"Peut valider ses propres devis", False),
-    ('invoice_validation', u"Peut valider ses propres factures", False),
+GROUPS = (
+    ('estimation_validation', u"Peut valider ses propres devis", ),
+    ('invoice_validation', u"Peut valider ses propres factures", ),
 )
 
 
@@ -64,15 +61,14 @@ def populate_situation_options(session):
         session.flush()
 
 
-def populate_roles(session):
+def populate_groups(session):
     """
-    Populate the roles in the database
+    Populate the groups in the database
     """
-    from autonomie.models.user import Role
-    if Role.query().count() == 0:
-        print("populating roles")
-        for name, label, primary in ROLES:
-            session.add(Role(name=name, label=label, primary=primary))
+    from autonomie.models.user import Group
+    if Group.query().count() == 0:
+        for name, label in GROUPS:
+            session.add(Group(name=name, label=label))
         session.flush()
 
 
@@ -80,7 +76,7 @@ def populate_config(session):
     """
     Initialize required configuration elements
     """
-    for func in (populate_situation_options, populate_roles):
+    for func in (populate_situation_options, populate_groups):
         try:
             func(session)
         except sqlalchemy.exc.OperationalError as e:

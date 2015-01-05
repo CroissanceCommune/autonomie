@@ -23,12 +23,6 @@ SITUATION_OPTIONS = (
 )
 
 
-PRIMARY_ROLES = (
-    ('admin', 1),
-    ('manager', 2),
-    ('contractor', 3),
-)
-
 def upgrade():
     from alembic.context import get_bind
     op.add_column(
@@ -73,15 +67,6 @@ def upgrade():
         query = "update user_datas set situation_situation_id='{0}' \
 where id='{1}'".format(option_id, id)
         op.execute(query)
-
-    from autonomie.models.user import (Role, User)
-    for name, index in PRIMARY_ROLES:
-        role = Role.query().filter(Role.name==name).one()
-        users = User.query().filter(User.primary_group==index)
-        for user in users:
-            user._roles.append(role)
-            DBSESSION().merge(user)
-            DBSESSION().flush()
 
 
 def downgrade():

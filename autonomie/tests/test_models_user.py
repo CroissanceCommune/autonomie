@@ -33,21 +33,21 @@ TEST1 = dict(
     firstname="user1_firstname",
     lastname="user1_lastname",
     email="user1@test.fr",
-    roles=['admin'],
+    primary_group=1,
 )
 TEST2 = dict(
     login="user2_login",
     firstname="user2_firstname",
     lastname="user2_lastname",
     email="user2@test.fr",
-    roles=['manager'],
+    primary_group=2,
 )
 TEST3 = dict(
     login="user3_login",
     firstname="user3_firstname",
     lastname="user3_lastname",
     email="user3@test.fr",
-    roles=['contractor'],
+    primary_group=3,
 )
 
 def get_userdatas():
@@ -66,7 +66,6 @@ def get_userdatas():
 @pytest.fixture
 def userdatas(dbsession):
     model = get_userdatas()
-    print model
     dbsession.add(model)
     dbsession.flush()
     return model

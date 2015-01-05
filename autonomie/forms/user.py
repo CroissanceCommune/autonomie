@@ -38,17 +38,6 @@ from autonomie import forms
 log = logging.getLogger(__name__)
 
 
-MANAGER_ROLES = (
-    (2, u'Membre de la coopérative'),
-)
-
-
-ADMIN_ROLES = (
-    (1, u'Administrateur'),
-    (2, u'Membre de la coopérative'),
-)
-
-
 def get_unique_login_validator(user_id=None):
     """
     Return a unique login validator
@@ -114,18 +103,28 @@ def deferred_company_input(node, kw):
     return wid
 
 
+def get_user_admin_roles(user):
+    """
+    Return the list of roles a user can administrate
+
+    :param obj user: a User model instance
+
+    :returns: A list of duples (id, label)
+    """
+    res = []
+    for role in user.ROLES.values():
+        if role['id'] > user.primary_group:
+            res.append( (role['id'], role['label'],) )
+    return res
+
+
 @colander.deferred
 def deferred_primary_group_widget(node, kw):
     """
         Return the primary group widget regarding the current user
     """
     user = kw['request'].user
-    if user.is_admin():
-        roles = ADMIN_ROLES
-    elif user.is_manager():
-        roles = MANAGER_ROLES
-    else:
-        roles = []
+    roles = get_user_admin_roles(user)
     return deform_widget.RadioChoiceWidget(values=roles)
 
 
@@ -136,12 +135,7 @@ def deferred_primary_group_validator(node, kw):
         regarding the current user
     """
     user = kw['request'].user
-    if user.is_admin():
-        roles = ADMIN_ROLES
-    elif user.is_manager():
-        roles = MANAGER_ROLES
-    else:
-        roles = []
+    roles = get_user_admin_roles(user)
     return colander.OneOf([x[0] for x in roles])
 
 

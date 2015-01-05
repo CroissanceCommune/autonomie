@@ -235,7 +235,7 @@ commercial, économique et social", parent=a)
     session = DBSESSION()
     from autonomie.models import initialize
     initialize.populate_situation_options(session)
-    initialize.populate_roles(session)
+    initialize.populate_groups(session)
 
 
 

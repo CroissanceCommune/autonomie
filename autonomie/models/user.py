@@ -83,11 +83,16 @@ MANAGER_PRIMARY_GROUP = 2
 CONTRACTOR_PRIMARY_GROUP = 3
 
 
-ROLES = {
-    'admin': 1,
-    'manager': 2,
-    'contractor': 3,
+ROLES= {
+    'admin': {'id': ADMIN_PRIMARY_GROUP, 'label': u"Administrateur",},
+    'manager': {
+        'id': MANAGER_PRIMARY_GROUP,
+        'label': u"Membre de l'équipe d'appui"
+    },
+    'contractor': {'id': CONTRACTOR_PRIMARY_GROUP, 'label': u"Entrepreneur"},
 }
+
+
 
 # We need to store this datas here (before we find a solution to place a
 # hashbang in an alembic migratino script)
@@ -103,11 +108,11 @@ COMPANY_EMPLOYEE = Table(
 )
 
 
-USER_ROLES = Table(
-    'user_roles',
+USER_GROUPS = Table(
+    'user_groups',
     DBBASE.metadata,
     Column('user_id', Integer, ForeignKey('accounts.id')),
-    Column('role_id', Integer, ForeignKey('roles.id')),
+    Column('group_id', Integer, ForeignKey('groups.id')),
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine'],
 )
@@ -161,11 +166,11 @@ def get_id_foreignkey_col(foreignkey_str):
     return column
 
 
-class Role(DBBASE):
+class Group(DBBASE):
     """
     Available roles used in autonomie
     """
-    __tablename__ = 'roles'
+    __tablename__ = 'groups'
     __table_args__ = default_table_args
     id = Column(
         Integer,
@@ -175,17 +180,12 @@ class Role(DBBASE):
     name = Column(
         String(30),
         nullable=False,
-        info={'colanderalchemy': {'title': u"Nom du rôle"}}
+        info={'colanderalchemy': {'title': u"Nom du groupe"}}
     )
     label = Column(
         String(50),
         nullable=False,
         info={'colanderalchemy': {'title': u"Libellé"}},
-    )
-    primary = Column(
-        Boolean(),
-        default=False,
-        info={'colanderalchemy': {'title': u"Is this a primary role"}}
     )
 
     @classmethod
@@ -194,7 +194,7 @@ class Role(DBBASE):
         Used as a creator for the initialization proxy
         """
         with DBSESSION.no_autoflush:
-            res = DBSESSION.query(Role).filter(Role.name==name).one()
+            res = DBSESSION.query(cls).filter(cls.name==name).one()
 
         return res
 
@@ -276,19 +276,19 @@ class User(DBBASE, PersistentACLMixin):
         ),
         info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
     )
-    _roles = relationship(
-        "Role",
-        secondary=USER_ROLES,
+    _groups = relationship(
+        "Group",
+        secondary=USER_GROUPS,
         backref=backref(
             "users",
             info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         ),
         info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
     )
-    roles = association_proxy(
-        "_roles",
+    groups = association_proxy(
+        "_groups",
         "name",
-        creator=Role._find_one
+        creator=Group._find_one
     )
 
     compte_tiers = Column(
@@ -347,19 +347,19 @@ class User(DBBASE, PersistentACLMixin):
         """
             return true if the user is and administrator
         """
-        return 'admin' in self.roles
+        return self.primary_group == ADMIN_PRIMARY_GROUP
 
     def is_manager(self):
         """
             return True if the user is a manager
         """
-        return "manager" in self.roles
+        return self.primary_group == MANAGER_PRIMARY_GROUP
 
     def is_contractor(self):
         """
             return True if the user is a contractor
         """
-        return "contractor" in self.roles
+        return self.primary_group == CONTRACTOR_PRIMARY_GROUP
 
     @classmethod
     def query(cls, ordered=True, only_active=True):
@@ -426,12 +426,10 @@ class User(DBBASE, PersistentACLMixin):
 
 def get_user_by_roles(roles):
     """
-        Return user by roles
+    Return user by primary roles
     """
-    from sqlalchemy import or_
-    conditions = [User.roles.contains(role) for role in roles]
-    where_clause = or_(*conditions)
-    return User.query().filter(where_clause)
+    ids = set([ROLES[role]['id'] for role in roles if role in ROLES])
+    return User.query().filter(User.primary_group.in_(ids))
 
 
 def get_users_options(roles=None):

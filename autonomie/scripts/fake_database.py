@@ -197,21 +197,6 @@ def add_activity_action(label, **kw):
     session.flush()
     return a
 
-def add_situation_status():
-    from autonomie.models.user import CaeSituationOption
-    session = DBSESSION()
-    session.add(
-        CaeSituationOption(label=u"Réunion d'information", order=0)
-    )
-    session.add(
-        CaeSituationOption(label=u"Intégré", order=0, is_integration=True)
-    )
-    session.add(
-        CaeSituationOption(label=u"Sortie", order=0)
-    )
-    session.flush()
-
-
 
 def set_configuration():
     print("Adding configuration elements")
@@ -247,7 +232,10 @@ def set_configuration():
         u"Module 3 : Accompagnement renforcé - Etape : Business model \
 commercial, économique et social", parent=a)
 
-    add_situation_status()
+    session = DBSESSION()
+    from autonomie.models import initialize
+    initialize.populate_situation_options(session)
+    initialize.populate_roles(session)
 
 
 

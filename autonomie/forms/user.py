@@ -27,8 +27,8 @@
 """
 import colander
 import logging
+import deform
 
-from deform import widget as deform_widget
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models import user
@@ -98,7 +98,7 @@ def deferred_company_input(node, kw):
         Deferred company autocomplete input widget
     """
     companies = get_companies_choices()
-    wid = deform_widget.AutocompleteInputWidget(values=companies,
+    wid = deform.widget.AutocompleteInputWidget(values=companies,
             template="autonomie:deform_templates/autocomple_input.pt")
     return wid
 
@@ -125,7 +125,7 @@ def deferred_primary_group_widget(node, kw):
     """
     user = kw['request'].user
     roles = get_user_admin_roles(user)
-    return deform_widget.RadioChoiceWidget(values=roles)
+    return deform.widget.RadioChoiceWidget(values=roles)
 
 
 @colander.deferred
@@ -196,7 +196,7 @@ class BaseAuthSchema(colander.MappingSchema):
     )
     password = colander.SchemaNode(
         colander.String(),
-        widget=deform_widget.PasswordWidget(),
+        widget=deform.widget.PasswordWidget(),
         title="Mot de passe",
     )
 
@@ -207,10 +207,10 @@ class AuthSchema(BaseAuthSchema):
     """
     nextpage = colander.SchemaNode(
         colander.String(),
-        widget=deform_widget.HiddenWidget())
+        widget=deform.widget.HiddenWidget())
     remember_me = colander.SchemaNode(
         colander.Boolean(),
-        widget=deform_widget.CheckboxWidget(),
+        widget=deform.widget.CheckboxWidget(),
         title="Rester connecté",
     )
 
@@ -241,7 +241,7 @@ def get_list_schema():
         colander.String(),
         name='disabled',
         missing="0",
-        widget=deform_widget.HiddenWidget(),
+        widget=deform.widget.HiddenWidget(),
         validator=colander.OneOf(('0', '1'))
         )
     )
@@ -254,7 +254,7 @@ def deferred_situation_select(node, kw):
     options = user.CaeSituationOption.query()
     for option in options:
         values.append((option.id, option.label))
-    return deform_widget.SelectWidget(values=values)
+    return deform.widget.SelectWidget(values=values)
 
 
 @colander.deferred
@@ -321,18 +321,44 @@ def get_password_schema():
         1,
         colander.SchemaNode(
             colander.String(),
-            widget=deform_widget.PasswordWidget(),
+            widget=deform.widget.PasswordWidget(),
             name='password',
             title=u'Mot de passe actuel',
             default=u'',
         )
     )
 
-    schema['login'].widget = deform_widget.HiddenWidget()
+    schema['login'].widget = deform.widget.HiddenWidget()
     # Remove login validation
     schema['login'].validator = None
 
     return schema
+
+
+def get_groups():
+    """
+    Return the available groups as a list of 2-uples (id, label)
+    """
+    groups = user.Group.query().all()
+    return [(group.name, group.label) for group in groups]
+
+@colander.deferred
+def deferred_group_validator(node, kw):
+    """
+    Return a validator that checks that the validated datas matches the existing
+    groups
+    """
+    groups = get_groups()
+    return colander.ContainsOnly([group[0] for group in groups])
+
+
+@colander.deferred
+def deferred_group_widget(node, kw):
+    """
+    Return a widget for group selection
+    """
+    groups = get_groups()
+    return deform.widget.CheckboxChoiceWidget(values=groups)
 
 
 def get_user_schema(edit=False, permanent=True):
@@ -363,12 +389,22 @@ def get_user_schema(edit=False, permanent=True):
                 title=u"Rôle de l'utilisateur",
             )
         )
+    else:
+        schema.add(
+            colander.SchemaNode(
+                colander.Set(),
+                name="groups",
+                validator=deferred_group_validator,
+                widget=deferred_group_widget,
+                title=u"Groupes de l'utilisateur",
+            )
+        )
 
     schema.add(
         CompanySchema(
             name='companies',
             title=u"Entreprise(s)",
-            widget=deform_widget.SequenceWidget(
+            widget=deform.widget.SequenceWidget(
                 add_subitem_text_template=u"Ajouter une entreprise"
             )
         )

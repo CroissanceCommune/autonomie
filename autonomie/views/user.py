@@ -177,6 +177,7 @@ class PermanentUserAddView(BaseFormView):
             Add a relationship between companies and the new account
         """
         company_ids = set(appstruct.pop('companies', []))
+        groups = set(appstruct.pop('groups', []))
         password = appstruct.pop('pwd', None)
 
         if self.context.__name__ == 'user':
@@ -188,6 +189,9 @@ class PermanentUserAddView(BaseFormView):
 
         if password is not None:
             user_model.set_password(password)
+
+        if groups:
+            user_model.groups = groups
 
         companies = []
 
@@ -483,6 +487,7 @@ class UserDatasEdit(UserDatasAdd):
             appstruct = schema.dictify(user_obj)
             appstruct.pop('pwd')
             appstruct['companies'] = [c.name for c in user_obj.companies]
+            appstruct['groups'] = user_obj.groups
             form.set_appstruct(appstruct)
         return form
 

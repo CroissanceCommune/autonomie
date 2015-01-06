@@ -260,17 +260,17 @@ def test_populate_discount_lines(sageinvoice_discount):
 
 
 def test_populate_discount_lines_without_compte_cg_tva(sageinvoice_discount):
-    # If one of compte_cg_tva_rrr or code_tva_rrr is not def
+    # If one compte_cg_tva_rrr is not def
     # No entry should be returned
     sageinvoice_discount.config.pop("compte_cg_tva_rrr")
     sageinvoice_discount._populate_discounts()
     assert sageinvoice_discount.products.keys() == []
 
 def test_populate_discount_lines_without_code_tva(sageinvoice_discount):
+    # If the code tva is not def, it should work
     sageinvoice_discount.config.pop("code_tva_rrr")
     sageinvoice_discount._populate_discounts()
-    assert sageinvoice_discount.products.keys() == []
-
+    assert sageinvoice_discount.products.keys() != []
 
 def test_populate_expenses(sageinvoice):
     sageinvoice.expense_tva_compte_cg = "TVA0001"

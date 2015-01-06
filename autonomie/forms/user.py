@@ -103,17 +103,17 @@ def deferred_company_input(node, kw):
     return wid
 
 
-def get_user_admin_roles(user):
+def get_user_admin_roles(user_obj):
     """
     Return the list of roles a user can administrate
 
-    :param obj user: a User model instance
+    :param obj user_obj: a User model instance
 
     :returns: A list of duples (id, label)
     """
     res = []
     for role in user.ROLES.values():
-        if role['id'] > user.primary_group:
+        if role['id'] > user_obj.primary_group:
             res.append( (role['id'], role['label'],) )
     return res
 

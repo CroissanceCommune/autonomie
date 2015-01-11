@@ -1,9 +1,8 @@
 <%doc>
- * Copyright (C) 2012-2013 Croissance Commune
+ * Copyright (C) 2012-2014 Croissance Commune
  * Authors:
        * Arezki Feth <f.a@majerti.fr>;
        * Miotte Julien <j.m@majerti.fr>;
-       * Pettier Gabriel;
        * TJEBBES Gaston <g.t@majerti.fr>
 
  This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -21,28 +20,17 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
 <%doc>
-    Simple page for form rendering
+Main job page
+should load dynamically the datas about a job execution
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-% if info_message != UNDEFINED:
-<div class="alert alert-success">
-    ${info_message|n}
+<div class="row-fluid">
+    <div class="span8 offset2" id="ajax_container">
+    </div>
 </div>
-% endif
-% if warn_message != UNDEFINED:
-    <div class="alert alert-warn">
-        <i class='fa fa-warning'></i>
-        ${warn_message|n}
-    </div>
-% endif
-% if help_message != UNDEFINED:
-    <div class='alert alert-info'>
-    <i class='fa fa-question-circle fa-2x'></i>
-    ${help_message|n}
-    </div>
-% endif
-${form|n}
+<script type='text/javascript'>
+    AppOptions['url'] = "${url}";
+</script>
 </%block>

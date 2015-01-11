@@ -27,6 +27,7 @@ from sqlalchemy import (
     Boolean,
     Date,
     DateTime,
+    inspect,
 )
 from sqlalchemy.orm import (
     ColumnProperty,
@@ -123,6 +124,9 @@ class SqlaExporter(BaseExporter, BaseSqlaExporter):
     """
     Provide tools to inspect a model and provide the datas needed for the export
 
+    If relation:
+        if related_key :
+            {'title': id_field_title, 'related_key': related_key}
     """
     config_key = ''
 
@@ -163,14 +167,95 @@ class SqlaExporter(BaseExporter, BaseSqlaExporter):
             # We keep the original prop in case it's usefull
             main_infos['__col__'] = prop
 
-            if isinstance(prop, RelationshipProperty) \
-               and not main_infos.has_key('related_key'):
-                print("Maybe there's missing some informations about a \
-relationship")
-                continue
+            if isinstance(prop, RelationshipProperty):
+                main_infos = self._collect_relationship(main_infos, prop, res)
+                if not main_infos or not main_infos.has_key('related_key'):
+                    # If still no success, we forgot this one
+                    print("Maybe there's missing some informations \
+about a relationship")
+                    continue
+            else:
+                main_infos = self._merge_many_to_one_field_from_fkey(
+                    main_infos, prop, res
+                )
+                if main_infos is None:
+                    continue
 
             res.append(main_infos)
         return res
+
+    def _collect_relationship(self, main_infos, prop, result):
+        """
+        collect a relationship header:
+            * remove onetomany relationship
+            * merge foreignkeys with associated manytoone rel if we were able to
+                find an attribute that will represent the destination model
+                (generally a label of a configurable option)
+
+        :param dict main_infos: The already collected datas about this column
+        :param obj prop: The property mapper of the relationship
+        :param list result: The actual collected headers
+        :returns: a dict with the datas matching this header
+        """
+        # No handling of the uselist relationships for the moment
+        if prop.uselist:
+            main_infos = None
+        else:
+            related_field_inspector = inspect(prop.mapper)
+
+            self._merge_many_to_one_field(main_infos, prop, result)
+
+            if not main_infos.has_key('related_key'):
+                # If one of those keys exists in the corresponding
+                # option, we use it as reference key
+                for rel_key in ('label', 'name', 'title'):
+                    if related_field_inspector.attrs.has_key(rel_key):
+                        main_infos['related_key'] = rel_key
+                        break
+        return main_infos
+
+    def _merge_many_to_one_field(self, main_infos, prop, result):
+        """
+        Find the associated id foreignkey and get the title from it
+        Remove this fkey field from the export
+
+        :param dict main_infos: The already collected datas about this column
+        :param obj prop: The property mapper of the relationship
+        :param list result: The actual collected headers
+        :returns: a title
+        """
+        title = None
+        # We first find the related foreignkey to get the good title
+        rel_base = list(prop.local_columns)[0]
+        related_fkey_name = rel_base.name
+        for val in result:
+            if val['name'] == related_fkey_name:
+                title = val['label']
+                main_infos['label'] = title
+                result.remove(val)
+                break
+
+        return main_infos
+
+    def _merge_many_to_one_field_from_fkey(self, main_infos, prop, result):
+        """
+        Find the relationship associated with this fkey and set the title
+
+        :param dict main_infos: The already collected datas about this column
+        :param obj prop: The property mapper of the relationship
+        :param list result: The actual collected headers
+        :returns: a main_infos dict or None
+        """
+        if prop.columns[0].foreign_keys and prop.key.endswith('_id'):
+            # We have a foreign key, we'll try to merge it with the
+            # associated foreign key
+            rel_name = prop.key[0:-3]
+            for val in result:
+                if val["name"] == rel_name:
+                    val["label"] = main_infos['label']
+                    main_infos = None # We can forget this field in export
+                    break
+        return main_infos
 
     def add_row(self, obj):
         """
@@ -197,7 +282,7 @@ relationship")
         """
         Format the value of the attribute 'name' from the given object
         """
-        val = getattr(obj, name)
+        val = getattr(obj, name, None)
 
         formatter = column.get('formatter')
         if formatter is None:

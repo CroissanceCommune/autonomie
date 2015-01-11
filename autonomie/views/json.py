@@ -26,20 +26,32 @@
     Json API views
 """
 
-def json_project(request):
+def json_model_view(request):
     """
-        Return a json representation of the project
+        Return a json representation of a model
     """
     return request.context.todict()
+
 
 def includeme(config):
     """
         Configure the views for this module
     """
     for route_name in "project", "company", "customer":
-        config.add_view(json_project,
-                        route_name=route_name,
-                        renderer='json',
-                        request_method='GET',
-                        xhr=True,
-                        permission='edit')
+        config.add_view(
+            json_model_view,
+            route_name=route_name,
+            renderer='json',
+            request_method='GET',
+            xhr=True,
+            permission='edit'
+        )
+
+    config.add_view(
+        json_model_view,
+        route_name="job",
+        renderer="json",
+        request_method="GET",
+        xhr=True,
+        permission="admin",
+    )

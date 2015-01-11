@@ -27,8 +27,8 @@
 """
 import colander
 import logging
+import deform
 
-from deform import widget as deform_widget
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models import user
@@ -36,17 +36,6 @@ from autonomie.models.company import Company
 from autonomie import forms
 
 log = logging.getLogger(__name__)
-
-
-MANAGER_ROLES = (
-    (2, u'Membre de la coopérative'),
-)
-
-
-ADMIN_ROLES = (
-    (1, u'Administrateur'),
-    (2, u'Membre de la coopérative'),
-)
 
 
 def get_unique_login_validator(user_id=None):
@@ -109,9 +98,24 @@ def deferred_company_input(node, kw):
         Deferred company autocomplete input widget
     """
     companies = get_companies_choices()
-    wid = deform_widget.AutocompleteInputWidget(values=companies,
+    wid = deform.widget.AutocompleteInputWidget(values=companies,
             template="autonomie:deform_templates/autocomple_input.pt")
     return wid
+
+
+def get_user_admin_roles(user_obj):
+    """
+    Return the list of roles a user can administrate
+
+    :param obj user_obj: a User model instance
+
+    :returns: A list of duples (id, label)
+    """
+    res = []
+    for role in user.ROLES.values():
+        if role['id'] > user_obj.primary_group:
+            res.append( (role['id'], role['label'],) )
+    return res
 
 
 @colander.deferred
@@ -120,13 +124,8 @@ def deferred_primary_group_widget(node, kw):
         Return the primary group widget regarding the current user
     """
     user = kw['request'].user
-    if user.is_admin():
-        roles = ADMIN_ROLES
-    elif user.is_manager():
-        roles = MANAGER_ROLES
-    else:
-        roles = []
-    return deform_widget.RadioChoiceWidget(values=roles)
+    roles = get_user_admin_roles(user)
+    return deform.widget.RadioChoiceWidget(values=roles)
 
 
 @colander.deferred
@@ -136,12 +135,7 @@ def deferred_primary_group_validator(node, kw):
         regarding the current user
     """
     user = kw['request'].user
-    if user.is_admin():
-        roles = ADMIN_ROLES
-    elif user.is_manager():
-        roles = MANAGER_ROLES
-    else:
-        roles = []
+    roles = get_user_admin_roles(user)
     return colander.OneOf([x[0] for x in roles])
 
 
@@ -177,11 +171,6 @@ class CompanySchema(colander.SequenceSchema):
         widget=deferred_company_input)
 
 
-SITUATION_SEARCH_OPTIONS = (
-    ('', u"Sélectionner un statut",),
-) + user.SITUATION_OPTIONS
-
-
 class UserDisableSchema(colander.MappingSchema):
     disable = colander.SchemaNode(
         colander.Boolean(),
@@ -207,7 +196,7 @@ class BaseAuthSchema(colander.MappingSchema):
     )
     password = colander.SchemaNode(
         colander.String(),
-        widget=deform_widget.PasswordWidget(),
+        widget=deform.widget.PasswordWidget(),
         title="Mot de passe",
     )
 
@@ -218,10 +207,10 @@ class AuthSchema(BaseAuthSchema):
     """
     nextpage = colander.SchemaNode(
         colander.String(),
-        widget=deform_widget.HiddenWidget())
+        widget=deform.widget.HiddenWidget())
     remember_me = colander.SchemaNode(
         colander.Boolean(),
-        widget=deform_widget.CheckboxWidget(),
+        widget=deform.widget.CheckboxWidget(),
         title="Rester connecté",
     )
 
@@ -252,11 +241,27 @@ def get_list_schema():
         colander.String(),
         name='disabled',
         missing="0",
-        widget=deform_widget.HiddenWidget(),
+        widget=deform.widget.HiddenWidget(),
         validator=colander.OneOf(('0', '1'))
         )
     )
     return schema
+
+
+@colander.deferred
+def deferred_situation_select(node, kw):
+    values = [('', u"Sélectionner un statut")]
+    options = user.CaeSituationOption.query()
+    for option in options:
+        values.append((option.id, option.label))
+    return deform.widget.SelectWidget(values=values)
+
+
+@colander.deferred
+def deferred_situation_id_validator(node, kw):
+    return colander.OneOf(
+        [option.id for option in user.CaeSituationOption.query()]
+    )
 
 
 def get_userdatas_list_schema():
@@ -268,13 +273,12 @@ def get_userdatas_list_schema():
     schema['search'].description = u"Nom, prénom, entreprise"
 
     schema.insert(0, colander.SchemaNode(
-        colander.String(),
+        colander.Integer(),
         name='situation_situation',
-        widget=deform_widget.SelectWidget(values=SITUATION_SEARCH_OPTIONS),
-        validator=colander.OneOf([s[0] for s in SITUATION_SEARCH_OPTIONS]),
-        default='',
-        missing='',
-        )
+        widget=deferred_situation_select,
+        validator=deferred_situation_id_validator,
+        missing=colander.drop,
+    )
     )
 
     schema.insert(
@@ -317,18 +321,44 @@ def get_password_schema():
         1,
         colander.SchemaNode(
             colander.String(),
-            widget=deform_widget.PasswordWidget(),
+            widget=deform.widget.PasswordWidget(),
             name='password',
             title=u'Mot de passe actuel',
             default=u'',
         )
     )
 
-    schema['login'].widget = deform_widget.HiddenWidget()
+    schema['login'].widget = deform.widget.HiddenWidget()
     # Remove login validation
     schema['login'].validator = None
 
     return schema
+
+
+def get_groups():
+    """
+    Return the available groups as a list of 2-uples (id, label)
+    """
+    groups = user.Group.query().all()
+    return [(group.name, group.label) for group in groups]
+
+@colander.deferred
+def deferred_group_validator(node, kw):
+    """
+    Return a validator that checks that the validated datas matches the existing
+    groups
+    """
+    groups = get_groups()
+    return colander.ContainsOnly([group[0] for group in groups])
+
+
+@colander.deferred
+def deferred_group_widget(node, kw):
+    """
+    Return a widget for group selection
+    """
+    groups = get_groups()
+    return deform.widget.CheckboxChoiceWidget(values=groups)
 
 
 def get_user_schema(edit=False, permanent=True):
@@ -359,12 +389,22 @@ def get_user_schema(edit=False, permanent=True):
                 title=u"Rôle de l'utilisateur",
             )
         )
+    else:
+        schema.add(
+            colander.SchemaNode(
+                colander.Set(),
+                name="groups",
+                validator=deferred_group_validator,
+                widget=deferred_group_widget,
+                title=u"Groupes de l'utilisateur",
+            )
+        )
 
     schema.add(
         CompanySchema(
             name='companies',
             title=u"Entreprise(s)",
-            widget=deform_widget.SequenceWidget(
+            widget=deform.widget.SequenceWidget(
                 add_subitem_text_template=u"Ajouter une entreprise"
             )
         )

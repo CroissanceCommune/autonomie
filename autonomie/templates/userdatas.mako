@@ -31,6 +31,13 @@
             Nouvelle entrée gestion sociale
         </a>
     </li>
+    % if api.has_permission('admin'):
+    <li>
+        <a href="${request.route_path('import_step1')}">
+            Importer des données
+        </a>
+        </li>
+    % endif
     <li> ${form|n} </li>
     <li class='pull-right'>
     <%

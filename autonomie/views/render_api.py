@@ -25,12 +25,19 @@
 """
     render api, usefull functions usable inside templates
 """
-import datetime
 import locale
 import calendar
 import bleach
+
 from copy import deepcopy
 from pyramid.security import has_permission as base_has_permission
+
+from autonomie.utils.date import (
+    format_date,
+    format_short_date,
+    format_long_date,
+    format_datetime,
+)
 
 ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p', 'span', 'h1',
                                             'h2', 'h3', 'h4', 'h5', 'hr',
@@ -187,59 +194,6 @@ def format_quantity(quantity):
         return locale.format('%g', quantity, grouping=True)
     else:
         return ""
-
-
-def format_short_date(date):
-    """
-        return a short printable version of the date obj
-    """
-    if isinstance(date, datetime.date):
-        resp = date.strftime("%e/%m/%Y")
-    elif not date:
-        resp = u""
-    else:
-        resp = datetime.datetime.fromtimestamp(float(date)).strftime(
-                                                            "%d/%m/%Y %H:%M")
-    return resp
-
-
-def format_datetime(datetime_object, timeonly=False):
-    """
-    format a datetime object
-    """
-    res = datetime_object.strftime("%H:%M")
-    if not timeonly:
-        day = datetime_object.strftime("%d/%m/%Y")
-        res = u"%s à %s" % (day, res)
-    return res
-
-
-def format_long_date(date):
-    """
-        return a long printable version of the date obj
-    """
-    if isinstance(date, datetime.date):
-        resp = u"{0}".format(
-            date.strftime("%e %B %Y").decode('utf-8').capitalize()
-        )
-    elif not date:
-        resp = u""
-    else:
-        date = datetime.datetime.fromtimestamp(float(date))
-        resp = u"{0}".format(
-            date.strftime("%e %B %Y").decode('utf-8').capitalize()
-        )
-    return resp
-
-
-def format_date(date, short=True):
-    """
-        return a pretty print version of the date object
-    """
-    if short:
-        return format_short_date(date)
-    else:
-        return format_long_date(date)
 
 
 def format_paymentmode(paymentmode):

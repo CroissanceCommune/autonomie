@@ -161,11 +161,20 @@ textarea{
 .invoice_resulted_tr, .estimation_geninv_tr, .green_tr{
   background-color:#c4ffaa;
 }
+.green_text{
+  color: #c4ffaa;
+}
 .invoice_paid_tr, .orange_tr{
   background-color:#ffb266;
 }
+.orange_text{
+  color: #ffb266;
+}
 .invoice_tolate_tr, .estimation_aboest_tr, .red_tr{
   background-color:#f9aaaa;
+}
+.red_text{
+  color: #f9aaaa;
 }
 .invoice_cancelled_tr, {
   background-color:#eeeeee;

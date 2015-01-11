@@ -28,6 +28,7 @@
 import logging
 from pyramid.security import (
     Allow,
+    Deny,
     Everyone,
     Authenticated,
     ALL_PERMISSIONS,
@@ -62,12 +63,17 @@ from autonomie.models.user import (
     User,
     UserDatas,
 )
+from autonomie.models.job import (
+    Job,
+)
 
 log = logging.getLogger(__name__)
 
+
 DEFAULT_PERM = [
     (Allow, "group:admin", ALL_PERMISSIONS,),
-    (Allow, "group:manager", ("manage", "add", "edit", "view")),
+    (Deny, "group:manager", ('admin', )),
+    (Allow, "group:manager", ALL_PERMISSIONS,),
 ]
 
 
@@ -100,6 +106,7 @@ class RootFactory(dict):
             ('expenselines', 'expenseline', BaseExpenseLine, ),
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
+            ('jobs', 'job', Job, ),
             ('projects', 'project', Project, ),
             ('users', 'user', User, ),
             ('userdatas', 'userdatas', UserDatas, ),
@@ -229,18 +236,76 @@ def get_task_acl(self):
     return acl
 
 
-def get_customer_or_project_acls(self):
+def get_estimation_acl(self):
     """
-        Compute the project's acls
+    Return the acls for estimations
+    """
+    acls = get_task_acl(self)
+    for user in self.project.company.employees:
+        if "estimation_validation" in user.groups:
+            acls.append((Allow, user.login, ("valid.estimation")))
+        else:
+            acls.append((Allow, user.login, ("wait.estimation")))
+
+    return acls
+
+
+def get_invoice_acl(self):
+    """
+    Return the acls for invoices
+    """
+    acls = get_task_acl(self)
+    for user in self.project.company.employees:
+        if "invoice_validation" in user.groups:
+            acls.append((Allow, user.login, ("valid.invoice")))
+        else:
+            acls.append((Allow, user.login, ("wait.invoice")))
+    return acls
+
+
+def get_customer_acls(self):
+    """
+    Compute the customer's acls
     """
     acl = DEFAULT_PERM[:]
-    acl.extend(
-        [(Allow,
-          u"%s" % user.login,
-          ("view", "edit", "add"))
-         for user in self.company.employees]
-    )
+    for user in self.company.employees:
+        acl.append(
+            (Allow, user.login, ('view', 'edit', 'add'))
+        )
     return acl
+
+
+def get_project_acls(self):
+    """
+    Return acls for a project
+    """
+    acl = DEFAULT_PERM[:]
+    for user in self.company.employees:
+        acl.append(
+            (Allow, user.login, ('view', 'edit', 'add'))
+        )
+        if "estimation_validation" in user.groups:
+            # The user can validate its estimations
+            acl.append(
+                (Allow, user.login, ('valid.estimation',))
+            )
+        else:
+            # The user need to ask for validation process
+            acl.append(
+                (Allow, user.login, ('wait.estimation',))
+            )
+        if "invoice_validation" in user.groups:
+            acl.append(
+                (Allow, user.login, ('valid.invoice',))
+            )
+        else:
+            # The user need to ask for validation process
+            acl.append(
+                (Allow, user.login, ('wait.invoice',))
+            )
+
+    return acl
+
 
 
 def get_expensesheet_acl(self):
@@ -295,11 +360,12 @@ def set_models_acls():
     """
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'),]
     Company.__default_acl__ = property(get_company_acl)
-    Project.__default_acl__ = property(get_customer_or_project_acls)
-    Customer.__default_acl__ = property(get_customer_or_project_acls)
-    Estimation.__default_acl__ = property(get_task_acl)
-    Invoice.__default_acl__ = property(get_task_acl)
-    CancelInvoice.__default_acl__ = property(get_task_acl)
+    Job.__default_acl__ = property(get_base_acl)
+    Project.__default_acl__ = property(get_project_acls)
+    Customer.__default_acl__ = property(get_customer_acls)
+    Estimation.__default_acl__ = property(get_estimation_acl)
+    Invoice.__default_acl__ = property(get_invoice_acl)
+    CancelInvoice.__default_acl__ = property(get_invoice_acl)
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)
     ExpenseSheet.__default_acl__ = property(get_expensesheet_acl)

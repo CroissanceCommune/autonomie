@@ -133,8 +133,8 @@ class SageInvoice(object):
             compte cg for this specific book entry type is defined
         """
         compte_cg_tva = self.config.get('compte_cg_tva_rrr')
-        code_tva = self.config.get('code_tva_rrr')
-        if compte_cg_tva and code_tva:
+        code_tva = self.config.get('code_tva_rrr', "")
+        if compte_cg_tva:
             for line in self.invoice.discounts:
                 prod = self.get_product(
                         self.config.get('compte_rrr'),

@@ -47,6 +47,15 @@ def force_utf8(value):
     return value
 
 
+def force_unicode(value):
+    """
+    return an utf-8 unicode entry
+    """
+    if isinstance(value, str):
+        value = value.decode('utf-8')
+    return value
+
+
 def camel_case_to_name(name):
     """
     Used to convert a classname to a lowercase name
@@ -71,3 +80,26 @@ def random_tag_id(size=15):
     Return a random string supposed to be used as tag id
     """
     return gen_random_string(size)
+
+
+def to_utf8(datas):
+    """
+    Force utf8 string entries in the given datas
+    """
+    res = datas
+    if isinstance(datas, dict):
+        res = {}
+        for key, value in datas.items():
+            key = to_utf8(key)
+            value = to_utf8(value)
+            res[key] = value
+
+    elif isinstance(datas, (list, tuple)):
+        res = []
+        for data in datas:
+            res.append(to_utf8(data))
+
+    elif isinstance(datas, unicode):
+        res = datas.encode('utf-8')
+
+    return res

@@ -67,12 +67,14 @@ from autonomie.models.user import (
     ParcoursStatusOption,
     MotifSortieOption,
     SocialDocTypeOption,
+    CaeSituationOption,
 )
+from autonomie.resources import admin_option_js
 
 from autonomie.models import files
 from autonomie.forms.admin import (
     MainConfig,
-    TvaConfig,
+    get_tva_config_schema,
     PaymentModeConfig,
     WorkUnitConfig,
     ExpenseTypesConfig,
@@ -278,7 +280,7 @@ class AdminTva(BaseFormView):
     """
     title = u"Configuration des taux de TVA"
     validation_msg = u"Les taux de TVA ont bien été modifiés"
-    schema = TvaConfig()
+    schema = get_tva_config_schema()
     buttons = (submit_btn,)
 
     def before(self, form):
@@ -780,6 +782,7 @@ class AdminOption(BaseFormView):
     redirect_path = 'admin_index'
     disable = True
     _schema = None
+    js_resources = []
 
     @property
     def schema(self):
@@ -798,6 +801,12 @@ class AdminOption(BaseFormView):
         """
         Populate the form with existing elements
         """
+        if not hasattr(self.js_resources, '__iter__'):
+            self.js_resources = (self.js_resources,)
+
+        for js_resource in self.js_resources:
+            js_resource.need()
+
         appstruct = {'datas': [elem.appstruct() \
                                for elem in self.factory.query()]}
         form.set_appstruct(appstruct)
@@ -831,12 +840,13 @@ class AdminOption(BaseFormView):
                 else:
                     self.dbsession.delete(element)
 
-    def _add_or_edit(self, datas):
+    def _add_or_edit(self, index, datas):
         """
         Add or edit an element of the given factory
         """
         node_schema = self.schema.children[0].children[0]
         element = node_schema.objectify(datas)
+        element.order = index
         if element.id is not None:
             element = self.dbsession.merge(element)
         else:
@@ -849,14 +859,14 @@ class AdminOption(BaseFormView):
         """
         self._disable_or_remove_elements(appstruct)
 
-        for datas in appstruct.get('datas', []):
-            self._add_or_edit(datas)
+        for index, datas in enumerate(appstruct.get('datas', [])):
+            self._add_or_edit(index, datas)
 
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path(self.redirect_path))
 
 
-def get_model_view(model):
+def get_model_view(model, js_requirements=[]):
     """
     Return a view object and a route_name for administrating a sequence of
     models instances (like options)
@@ -869,6 +879,7 @@ def get_model_view(model):
         factory = model
         schema = get_sequence_model_admin(model, u"")
         redirect_path = 'admin_userdatas'
+        js_resources=js_requirements
     return (
         MyView,
         camel_case_to_name(model.__name__),
@@ -951,7 +962,12 @@ def get_all_userdatas_views():
         SocialDocTypeOption,
     ):
         yield get_model_view(model)
+    yield get_model_view(
+        CaeSituationOption,
+        js_requirements=admin_option_js,
+    )
     yield TemplateList, 'templates', '/admin/templates.mako'
+
 
 
 def template_disable(context, request):

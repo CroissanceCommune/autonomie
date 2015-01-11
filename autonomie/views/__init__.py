@@ -164,6 +164,7 @@ class BaseListClass(BaseView):
         if self.schema is not None:
             schema = self.schema.bind(**self._get_bind_params())
             try:
+                print(self.request.GET)
                 appstruct = schema.deserialize(self.request.GET)
             except colander.Invalid as e:
                 # If values are not valid, we want the default ones to be provided

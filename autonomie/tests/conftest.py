@@ -31,6 +31,7 @@ from sqlalchemy import engine_from_config
 from autonomie.utils.widgets import ActionMenu
 
 HERE = os.path.dirname(__file__)
+print HERE
 DATASDIR = os.path.join(HERE, 'datas')
 TMPDIR = os.path.join(HERE, 'tmp')
 
@@ -65,9 +66,11 @@ def test_connect(settings):
     ret_code = launch_cmd(settings, cmd)
 
     if ret_code != 0:
+
         err_str = """
     actual err_code = %s\n
-    You need to configure the test.ini file so that this script can connect\n
+
+    1- You need to configure the test.ini file so that this script can connect\n
     to the Mysql database:
 
         ...\n
@@ -77,6 +80,9 @@ def test_connect(settings):
         ...\n
         testdb.mysql_cmd=mysql -uroot -p<password>\n
         ...\n
+
+
+    2- Ensure mysql server is started and reachable with the given configuration
         """ % ret_code
 
         print err_str
@@ -354,8 +360,9 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
 
 @fixture
 def wsgi_app(settings, dbsession):
-    from autonomie import base_configure
-    return base_configure({}, dbsession, **settings).make_wsgi_app()
+    from autonomie import base_configure, prepare_config
+    config = prepare_config(**settings)
+    return base_configure(config, dbsession, **settings).make_wsgi_app()
 
 
 @fixture

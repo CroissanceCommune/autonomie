@@ -25,9 +25,68 @@
 """
     Initialization function
 """
+import sqlalchemy
+
 from autonomie.models.base import DBSESSION
 from autonomie.models.base import DBBASE
 from autonomie.scripts.migrate import fetch_head
+
+
+GROUPS = (
+    ('estimation_validation', u"Peut valider ses propres devis", ),
+    ('invoice_validation', u"Peut valider ses propres factures", ),
+)
+
+
+def populate_situation_options(session):
+    """
+    Populate the CAE situation options
+    """
+    from autonomie.models.user import CaeSituationOption
+    query = session.query(CaeSituationOption)
+    if query.filter(CaeSituationOption.is_integration==True).count() == 0:
+        session.add(CaeSituationOption(
+            label=u"Réunion d'information",
+            order=0,
+        ))
+        session.add(CaeSituationOption(
+            label=u"Intégré",
+            is_integration=True,
+            order=1,
+        ))
+        session.add(CaeSituationOption(
+            label=u"Sortie",
+            order=2,
+        ))
+        session.flush()
+
+
+def populate_groups(session):
+    """
+    Populate the groups in the database
+    """
+    from autonomie.models.user import Group
+    if Group.query().count() == 0:
+        for name, label in GROUPS:
+            session.add(Group(name=name, label=label))
+        session.flush()
+
+
+def populate_config(session):
+    """
+    Initialize required configuration elements
+    """
+    for func in (populate_situation_options, populate_groups):
+        try:
+            func(session)
+        except sqlalchemy.exc.OperationalError as e:
+            print("The seem to be an error in the population process")
+            print(e)
+
+    from transaction import commit
+    commit()
+
+
 
 
 def initialize_sql(engine):
@@ -38,5 +97,12 @@ def initialize_sql(engine):
     DBBASE.metadata.bind = engine
     if not engine.table_names():
         fetch_head()
+
+    print("Setting the metadatas")
     DBBASE.metadata.create_all(engine)
+    from transaction import commit
+    commit()
+
+    print("Populating the config")
+    populate_config(DBSESSION())
     return DBSESSION

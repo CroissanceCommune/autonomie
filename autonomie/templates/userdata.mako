@@ -30,18 +30,19 @@
 <%block name="content">
 <% userdata = request.context %>
 <div class='well'>
-% if getattr(userdata, "user_id", None) is not None and userdata.__name__ == 'userdatas':
+% if userdata.__name__ == 'userdatas':
+    % if getattr(userdata, "user_id", None) is not None:
         Ces données sont associées à un compte utilisateur : <a href='${request.route_path("user", id=userdata.user_id)}'>Voir</a>
-<% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
-<% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?'
-if userdata.user is not None:
-    del_msg += u' Le compte associé sera également supprimé.'
-    del_msg += u" Cette action n\\'est pas réversible."
-%>
-<a class='btn btn-danger pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
-    <i class="icon icon-white icon-trash"></i>
-    Supprimer les données
-</a>
+    % endif
+    <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
+    <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?' %>
+    % if userdata.user is not None:
+        <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
+    % endif
+    <a class='btn btn-danger pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
+        <i class="icon icon-white icon-trash"></i>
+        Supprimer les données
+    </a>
 % endif
 </div>
 <% user = getattr(request.context, "user", None) %>

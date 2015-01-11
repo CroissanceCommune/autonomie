@@ -197,6 +197,7 @@ def add_activity_action(label, **kw):
     session.flush()
     return a
 
+
 def set_configuration():
     print("Adding configuration elements")
     add_payment_mode(u"par chèque")
@@ -230,6 +231,11 @@ def set_configuration():
     add_activity_action(
         u"Module 3 : Accompagnement renforcé - Etape : Business model \
 commercial, économique et social", parent=a)
+
+    session = DBSESSION()
+    from autonomie.models import initialize
+    initialize.populate_situation_options(session)
+    initialize.populate_groups(session)
 
 
 

@@ -55,38 +55,40 @@ from autonomie.utils.deform_bootstrap_fix import (
 
 
 AUTONOMIE_MODULES = (
-    "autonomie.views.static",
-    "autonomie.events.tasks",
-    "autonomie.events.expense",
     "autonomie.views.activity",
-    "autonomie.views.auth",
-    "autonomie.views.user",
-    "autonomie.views.company",
-    "autonomie.views.index",
-    "autonomie.views.customer",
-    "autonomie.views.project",
-    "autonomie.views.company_invoice",
     "autonomie.views.admin",
-    "autonomie.views.manage",
-    "autonomie.views.holiday",
-    "autonomie.views.tests",
-    "autonomie.views.taskaction",
-    "autonomie.views.estimation",
-    "autonomie.views.invoice",
+    "autonomie.views.auth",
     "autonomie.views.cancelinvoice",
-    "autonomie.views.json",
-    "autonomie.views.subscribers",
     "autonomie.views.commercial",
-    "autonomie.views.treasury_files",
+    "autonomie.views.company",
+    "autonomie.views.company_invoice",
+    "autonomie.views.csv_import",
+    "autonomie.views.customer",
+    "autonomie.views.estimation",
     "autonomie.views.expense",
-    "autonomie.views.sage",
     "autonomie.views.files",
+    "autonomie.views.holiday",
+    "autonomie.views.index",
+    "autonomie.views.invoice",
+    "autonomie.views.job",
+    "autonomie.views.json",
+    "autonomie.views.manage",
     "autonomie.views.payment",
+    "autonomie.views.project",
+    "autonomie.views.sage",
+    "autonomie.views.static",
+    "autonomie.views.subscribers",
+    "autonomie.views.taskaction",
+    "autonomie.views.tests",
+    "autonomie.views.treasury_files",
+    "autonomie.views.user",
     "autonomie.views.workshop",
     "autonomie.panels.menu",
     "autonomie.panels.task",
     "autonomie.panels.company",
     "autonomie.panels.invoicetable",
+    "autonomie.events.tasks",
+    "autonomie.events.expense",
     )
 
 
@@ -118,17 +120,16 @@ def main(global_config, **settings):
         Main function : returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
+    config = prepare_config(**settings)
+
     dbsession = initialize_sql(engine)
 
-    config = base_configure(global_config, dbsession, **settings)
+    config = base_configure(config, dbsession, **settings)
 
     return config.make_wsgi_app()
 
 
-def base_configure(global_config, dbsession, **settings):
-    """
-    All plugin and others configuration stuff
-    """
+def prepare_config(**settings):
     session_factory = get_session_factory(settings)
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
@@ -140,7 +141,13 @@ def base_configure(global_config, dbsession, **settings):
                         session_factory=session_factory)
     config.begin()
     config.commit()
+    return config
 
+
+def base_configure(config, dbsession, **settings):
+    """
+    All plugin and others configuration stuff
+    """
     set_models_acls()
     TraversalDbAccess.dbsession = dbsession
 

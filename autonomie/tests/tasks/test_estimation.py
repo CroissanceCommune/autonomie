@@ -191,8 +191,8 @@ def assertPresqueEqual(val1, val2):
     """
     assert val1-val2 <= 1
 
-@pytest.mark.xfail(reason=u"Le calcul de TVA inversé conduit irrémediablement à ce pb")
-def test_gen_invoice(dbsession, estimation):
+def test_light_gen_invoice(dbsession, estimation):
+    from autonomie.models.task import Invoice
     user = dbsession.query(User).first()
     customer = dbsession.query(Customer).first()
     project = dbsession.query(Project).first()
@@ -207,7 +207,34 @@ def test_gen_invoice(dbsession, estimation):
         dbsession.add(inv)
         dbsession.flush()
     invoices = Invoice.query().filter(
-        Invoice.estimationimation_id==estimation.id
+        Invoice.estimation_id==estimation.id
+    ).all()
+    #deposit :
+    deposit = invoices[0]
+    assert deposit.taskDate == datetime.date.today()
+    assert deposit.financial_year == datetime.date.today().year
+    assert deposit.total() == estimation.deposit_amount_ttc()
+    #intermediate invoices:
+    intermediate_invoices = invoices[1:-1]
+
+@pytest.mark.xfail(reason=u"Le calcul de TVA inversé conduit irrémediablement à ce pb")
+def test_gen_invoice(dbsession, estimation):
+    from autonomie.models.task import Invoice
+    user = dbsession.query(User).first()
+    customer = dbsession.query(Customer).first()
+    project = dbsession.query(Project).first()
+    phase = dbsession.query(Phase).first()
+    estimation.phase = phase
+    estimation.project = project
+    estimation.owner = user
+    estimation.customer = customer
+    estimation.statusPersonAccount = user
+    invoices = estimation.gen_invoices(user)
+    for inv in invoices:
+        dbsession.add(inv)
+        dbsession.flush()
+    invoices = Invoice.query().filter(
+        Invoice.estimation_id==estimation.id
     ).all()
     #deposit :
     deposit = invoices[0]

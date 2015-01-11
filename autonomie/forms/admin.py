@@ -231,6 +231,41 @@ class TvaConfig(colander.MappingSchema):
         widget=deform_widget.SequenceWidget(orderable=True))
 
 
+TVA_UNIQUE_VALUE_MSG = u"Veillez à utiliser des valeurs différentes pour les \
+différents taux de TVA. Pour les tvas de valeurs nulles, merci d'utiliser des \
+valeurs négatives pour les distinguer (-1, -2...), elles seront ramenées à 0 \
+pour toutes les opérations de calcul."
+
+
+TVA_NO_DEFAULT_SET_MSG = u"Veuillez définir au moins une tva par défaut."
+
+
+def tva_form_validator(form, values):
+    """
+    Ensure we've got a unique tva value and at least one default tva in our form
+    """
+    vals = []
+    default = False
+    for tva in values['tvas']:
+        if tva['value'] in vals:
+            message = TVA_UNIQUE_VALUE_MSG
+            raise colander.Invalid(form, message)
+        vals.append(tva['value'])
+
+        if tva['default'] == 1:
+            default = True
+    if not default:
+        message = TVA_NO_DEFAULT_SET_MSG
+        raise colander.Invalid(form, message)
+
+
+def get_tva_config_schema():
+    return TvaConfig(
+        title=u"Configuration des taux de TVA",
+        validator=tva_form_validator
+    )
+
+
 class PaymentModeSequence(colander.SequenceSchema):
     """
         Single payment mode configuration scheme
@@ -816,7 +851,10 @@ def get_sequence_model_admin(model, title=u""):
         colander.SchemaNode(
             colander.Sequence(),
             node_schema,
-            widget=deform_widget.SequenceWidget(min_len=1),
+            widget=deform_widget.SequenceWidget(
+                min_len=1,
+                orderable=True,
+            ),
             title=title,
             name='datas')
     )

@@ -36,7 +36,7 @@ from sqlalchemy import (
     DateTime,
     Text,
     Boolean,
-    )
+)
 from sqlalchemy.orm import (
     deferred,
     relationship,

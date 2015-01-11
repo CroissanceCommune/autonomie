@@ -51,12 +51,16 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.util import classproperty
 from sqlalchemy.event import listen
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from autonomie.views import render_api
 
 from deform_bootstrap import widget as bootstrap_widget
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    DBBASE,
+    DBSESSION,
+    default_table_args,
+)
 from autonomie.models.node import Node
 from autonomie.forms import (
     get_hidden_field_conf,
@@ -71,6 +75,7 @@ from autonomie.models.types import (
     PersistentACLMixin,
 )
 from autonomie.utils.ascii import camel_case_to_name
+from autonomie.utils.date import str_to_date
 
 
 ADMIN_PRIMARY_GROUP = 1
@@ -78,26 +83,38 @@ MANAGER_PRIMARY_GROUP = 2
 CONTRACTOR_PRIMARY_GROUP = 3
 
 
-ROLES = {
-    'admin': 1,
-    'manager': 2,
-    'contractor': 3,
-    }
+ROLES= {
+    'admin': {'id': ADMIN_PRIMARY_GROUP, 'label': u"Administrateur",},
+    'manager': {
+        'id': MANAGER_PRIMARY_GROUP,
+        'label': u"Membre de l'équipe d'appui"
+    },
+    'contractor': {'id': CONTRACTOR_PRIMARY_GROUP, 'label': u"Entrepreneur"},
+}
 
 
-COMPANY_EMPLOYEE = Table('company_employee', DBBASE.metadata,
-        Column("company_id", Integer, ForeignKey('company.id')),
-        Column("account_id", Integer, ForeignKey('accounts.id')),
-        mysql_charset=default_table_args['mysql_charset'],
-        mysql_engine=default_table_args['mysql_engine'])
+
+# We need to store this datas here (before we find a solution to place a
+# hashbang in an alembic migratino script)
 
 
-SITUATION_OPTIONS = (
-    ('reu_info', u"Réunion d'information",),
-    ("entretien", u"Entretien",),
-    ("integre", u"Intégré",),
-    ("sortie", u"Sortie",),
-    ("refus", u"Refus",),
+COMPANY_EMPLOYEE = Table(
+    'company_employee',
+    DBBASE.metadata,
+    Column("company_id", Integer, ForeignKey('company.id')),
+    Column("account_id", Integer, ForeignKey('accounts.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
+
+
+USER_GROUPS = Table(
+    'user_groups',
+    DBBASE.metadata,
+    Column('user_id', Integer, ForeignKey('accounts.id')),
+    Column('group_id', Integer, ForeignKey('groups.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
 )
 
 
@@ -147,6 +164,42 @@ def get_id_foreignkey_col(foreignkey_str):
         info={'colanderalchemy': get_hidden_field_conf()},
     )
     return column
+
+
+class Group(DBBASE):
+    """
+    Available groups used in autonomie
+    """
+    __tablename__ = 'groups'
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': EXCLUDED}
+    )
+    name = Column(
+        String(30),
+        nullable=False,
+        info={'colanderalchemy': {'title': u"Nom du groupe"}}
+    )
+    label = Column(
+        String(50),
+        nullable=False,
+        info={'colanderalchemy': {'title': u"Libellé"}},
+    )
+
+    @classmethod
+    def _find_one(cls, name_or_id):
+        """
+        Used as a creator for the initialization proxy
+        """
+        with DBSESSION.no_autoflush:
+            res = DBSESSION.query(cls).get(name_or_id)
+            if res is None:
+                # We try with the id
+                res = DBSESSION.query(cls).filter(cls.name==name_or_id).one()
+
+        return res
 
 
 class User(DBBASE, PersistentACLMixin):
@@ -225,6 +278,20 @@ class User(DBBASE, PersistentACLMixin):
             info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         ),
         info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+    )
+    _groups = relationship(
+        "Group",
+        secondary=USER_GROUPS,
+        backref=backref(
+            "users",
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+        ),
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+    )
+    groups = association_proxy(
+        "_groups",
+        "name",
+        creator=Group._find_one
     )
 
     compte_tiers = Column(
@@ -353,16 +420,19 @@ class User(DBBASE, PersistentACLMixin):
         """
         return self.active == 'Y'
 
-    def __repr__(self):
+    def __unicode__(self):
         return u"<User {s.id} '{s.lastname} {s.firstname}'>".format(s=self)
+
+    def __repr__(self):
+        return self.__unicode__().encode('utf-8')
 
 
 def get_user_by_roles(roles):
     """
-        Return user by roles
+    Return user by primary roles
     """
-    roles_ids = [ROLES[role] for role in roles if role in ROLES.keys()]
-    return User.query().filter(User.primary_group.in_(roles_ids))
+    ids = set([ROLES[role]['id'] for role in roles if role in ROLES])
+    return User.query().filter(User.primary_group.in_(ids))
 
 
 def get_users_options(roles=None):
@@ -437,6 +507,11 @@ class ConfigurableOption(DBBASE):
         default=True,
         info={'colanderalchemy': EXCLUDED}
     )
+    order = Column(
+        Integer,
+        default=0,
+        info={'colanderalchemy': EXCLUDED}
+    )
     type_ = Column(
         'type_',
         String(30),
@@ -459,6 +534,7 @@ class ConfigurableOption(DBBASE):
     def query(cls):
         query = super(ConfigurableOption, cls).query()
         query = query.filter(ConfigurableOption.active==True)
+        query = query.order_by(ConfigurableOption.order)
         return query
 
 
@@ -564,6 +640,23 @@ class ParcoursStatusOption(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
+class CaeSituationOption(ConfigurableOption):
+    """
+    Possible values for the cae status "Situation actuelle dans la cae"
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Situation dans la CAE",
+        'validation_msg': u"Les types de situations ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+    # Is this element related to the integration process of a PP
+    is_integration = Column(
+        Boolean(),
+        default=False,
+        info={'colanderalchemy': get_hidden_field_conf()},
+    )
+
+
 class MotifSortieOption(ConfigurableOption):
     """
     Possible values for exit motivation
@@ -630,6 +723,13 @@ class UserDatasSocialDocTypes(DBBASE):
     )
 
 
+def get_dict_key_from_value(val, dict_):
+    for key, value in dict_.items():
+        if value == val:
+            return key
+    raise KeyError()
+
+
 class UserDatas(Node):
     __tablename__ = 'user_datas'
     __table_args__ = default_table_args
@@ -639,7 +739,9 @@ class UserDatas(Node):
         ForeignKey('node.id'),
         primary_key=True,
         info={
-            'colanderalchemy': get_hidden_field_conf(),
+            'colanderalchemy': {'exclude': True,
+                                'title': u"Identifiant Autonomie"
+            },
         }
     )
 
@@ -670,20 +772,44 @@ class UserDatas(Node):
     )
 
     # INFORMATIONS GÉNÉRALES : CF CAHIER DES CHARGES #
-    situation_situation = Column(
-        String(20),
+    #situation_situation = Column(
+    #    String(20),
+    #    info={
+    #        'colanderalchemy': {
+    #            'title': u"Situation actuelle dans la CAE",
+    #            'section': u'Synthèse',
+    #            'widget': get_select(SITUATION_OPTIONS),
+    #            'validator': get_select_validator(SITUATION_OPTIONS),
+    #            'default': SITUATION_OPTIONS[0][0],
+    #        },
+    #        'export': {
+    #            'formatter': lambda val: dict(SITUATION_OPTIONS).get(val),
+    #        },
+    #        'import': {
+    #            'formatter': lambda val: get_dict_key_from_value(
+    #                val,
+    #                dict(SITUATION_OPTIONS),
+    #            )
+    #        }
+    #    },
+    #)
+
+    situation_situation_id = Column(
+        ForeignKey("cae_situation_option.id"),
+        nullable=False,
         info={
-            'colanderalchemy': {
+            'colanderalchemy':
+            {
                 'title': u"Situation actuelle dans la CAE",
                 'section': u'Synthèse',
-                'widget': get_select(SITUATION_OPTIONS),
-                'validator': get_select_validator(SITUATION_OPTIONS),
-                'default': SITUATION_OPTIONS[0][0],
-            },
-            'export': {
-                'formatter': lambda val: dict(SITUATION_OPTIONS).get(val),
+                'widget': get_deferred_select(CaeSituationOption),
             }
-        },
+        }
+    )
+
+    situation_situation = relationship(
+        "CaeSituationOption",
+        info={'colanderalchemy': EXCLUDED},
     )
 
     situation_follower_id = Column(
@@ -716,6 +842,9 @@ class UserDatas(Node):
                 'related_key': 'lastname',
                 'label': u"Conseiller",
             },
+            'import': {
+                'related_key': 'login',
+            }
         }
     )
 
@@ -743,6 +872,7 @@ class UserDatas(Node):
                 'formatter': lambda val: dict(CIVILITE_OPTIONS).get(val),
             }
         },
+        default=CIVILITE_OPTIONS[0][0],
         nullable=False,
     )
 
@@ -838,6 +968,9 @@ class UserDatas(Node):
             'colanderalchemy': {
                 'title': u'Code postal',
                 'section': u'Coordonnées',
+            },
+            'py3o': {
+                'formatter': lambda z: u"%05d" % z
             }
         }
     )
@@ -1180,7 +1313,12 @@ class UserDatas(Node):
             {
                 'title': u'Date diagnostic',
                 'section': u'Parcours',
+            },
+            'import': {
+                "related_key": "date",
+                "formatter": str_to_date
             }
+
         }
     )
 
@@ -1209,6 +1347,10 @@ class UserDatas(Node):
                 "title": u"Date convention CAPE",
                 'section': u'Parcours',
             },
+            'import': {
+                'related_key': 'date',
+                "formatter": str_to_date
+            },
         }
     )
 
@@ -1219,6 +1361,10 @@ class UserDatas(Node):
             'colanderalchemy':{
                 "title": u"Date DPAE",
                 'section': u'Parcours',
+            },
+            'import': {
+                'related_key': 'date',
+                "formatter": str_to_date
             },
         }
     )
@@ -1425,8 +1571,14 @@ class UserDatas(Node):
         Generate a user account for the given model
         """
         from autonomie.utils.ascii import gen_random_string
-        if self.situation_situation == 'integre' and self.user_id is None:
-            login = self.coordonnees_email1,
+        if self.situation_situation.is_integration and self.user_id is None:
+            login = self.coordonnees_email1
+            index = 0
+            # Fix #165: check login on account generation
+            while User.query().filter(User.login==login).count() > 0:
+                login = u"{0}_{1}".format(index, login)
+                index += 1
+
             password = gen_random_string(6)
             user = User(
                 login=login,
@@ -1445,15 +1597,20 @@ class UserDatas(Node):
         """
         from autonomie.models.company import Company
         companies = []
-        if self.situation_situation == 'integre' and self.user_id is None:
+        if self.situation_situation.is_integration and self.user_id is None:
             for data in self.activity_companydatas:
-                company = Company(
-                    name=data.name,
-                    goal=data.title,
-                    email=self.coordonnees_email1,
-                    phone=self.coordonnees_tel,
-                    mobile=self.coordonnees_mobile,
-                )
+                # Try to retrieve an existing company (and avoid duplicates)
+                company = Company.query().filter(
+                    Company.name==data.name
+                ).first()
+                if company is None:
+                    company = Company(
+                        name=data.name,
+                        goal=data.title,
+                        email=self.coordonnees_email1,
+                        phone=self.coordonnees_tel,
+                        mobile=self.coordonnees_mobile,
+                    )
                 companies.append(company)
         return companies
 

@@ -18,6 +18,10 @@ from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
+from sqlalchemy import (
+    Date,
+    DateTime,
+)
 from genshi.core import Markup
 
 from py3o.template import Template
@@ -33,9 +37,36 @@ def format_py3o_val(value):
 
     * Handle linebreaks
     """
-    if value is None:
-        value = ""
     return Markup(unicode(value).replace('\n', '<text:line-break/>'))
+
+
+def format_value(column_dict, value):
+    """
+    Format a value coming from the database (for example converts datetimes to
+    strings)
+
+    :param column_dict: The column datas collected during inspection
+    :param value: A value coming from the database
+    """
+    formatter = column_dict.get('formatter')
+    prop = column_dict['__col__']
+    sqla_column = prop.columns[0]
+    column_type = getattr(sqla_column.type, 'impl', sqla_column.type)
+
+    res = value
+
+    if value in ('', None,):
+        res = ''
+
+    elif formatter is not None:
+        res = formatter(value)
+
+    elif isinstance(column_type, DateTime):
+        res = value.strftime("%H:%M %d/%m/%Y")
+
+    elif isinstance(column_type, Date):
+        res = value.strftime("%d/%m/%Y")
+    return res
 
 
 class SqlaContext(BaseSqlaExporter):
@@ -107,7 +138,8 @@ class SqlaContext(BaseSqlaExporter):
 
             main_infos = export_infos.get(self.config_key, {}).copy()
 
-            if export_infos.get('exclude', False) or main_infos.get('exclude', False):
+            if export_infos.get('exclude', False) or main_infos.get('exclude',
+                                                                    False):
                 continue
 
             infos = export_infos
@@ -141,10 +173,8 @@ class SqlaContext(BaseSqlaExporter):
         for column in self.columns:
             if isinstance(column['__col__'], ColumnProperty):
                 value = getattr(obj, column['__col__'].key, None)
-                formatter = column.get('formatter')
 
-                if formatter:
-                    value = formatter(value)
+                value = format_value(column, value)
 
                 value = format_py3o_val(value)
 

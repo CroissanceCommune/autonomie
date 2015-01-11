@@ -42,7 +42,11 @@ class State(object):
     def __init__(self, name, permission=None, callback=None, model_state=True,
             status_attr="status", userid_attr="user_id"):
         self.name = name
-        self.permission = permission or "edit"
+        if permission is None:
+            permission = ["edit"]
+        if not hasattr(permission, "__iter__"):
+            permission = [permission]
+        self.permissions = permission
         self.callback = callback
         self.model_state = model_state
         self.status_attr = status_attr
@@ -53,7 +57,13 @@ class State(object):
             return True if this state assignement is allowed
             in the current request
         """
-        return has_permission(self.permission, context, request)
+        res = False
+        for permission in self.permissions:
+            if request.has_permission(permission, context):
+                res = True
+                break
+
+        return res
 
     def process(self, model, user_id, **kw):
         """
@@ -69,7 +79,7 @@ class State(object):
 
     def __repr__(self):
         return "< State %s allowed for %s (ModelState : %s)>" % (
-                self.name, self.permission, self.model_state,)
+                self.name, self.permissions, self.model_state,)
 
 
 class StateMachine(object):

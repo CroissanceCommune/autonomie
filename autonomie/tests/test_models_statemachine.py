@@ -27,7 +27,7 @@
 """
 from mock import MagicMock
 from pyramid import testing
-from autonomie.models.statemachine import StateMachine
+from autonomie.models.statemachine import StateMachine, State
 from autonomie.exception import Forbidden
 
 import pytest
@@ -38,7 +38,15 @@ def state_machine():
     state_machine = StateMachine()
     state_machine.add_transition(
             'draft', 'wait', "edit", lambda model, user_id:(model, 2))
+    state_machine.add_transition(
+        "wait", "invalid", ("edit", "manage"), lambda model, user_id:(model, 2)
+    )
     return state_machine
+
+
+@pytest.fixture
+def state():
+    return State("invalid", permission=("edit", "manage"))
 
 
 @pytest.fixture(scope='function')
@@ -72,6 +80,16 @@ def test_process_failure(config, state_machine, model):
 
     with pytest.raises(Forbidden):
         state_machine.process(model, request, 'test', 'invalid')
+
+
+def test_allowed(config, state, model):
+    config.testing_securitypolicy(userid="test", permissive=True,)
+    request = testing.DummyRequest()
+
+    assert state.allowed(request, model)
+    config.testing_securitypolicy(userid="test", permissive=False,)
+    request = testing.DummyRequest()
+    assert not state.allowed(request, model)
 
 
 def test_process_caestate(config, state_machine, model):

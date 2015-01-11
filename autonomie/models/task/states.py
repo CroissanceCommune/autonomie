@@ -163,15 +163,16 @@ def get_est_state():
         invalid
         aboest
     """
+    wait = ('wait', 'wait.estimation')
     duplicate = ('duplicate', 'view', duplicate_task, False,)
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
-    valid = ('valid', MANAGER_PERMS, set_date,)
+    valid = ('valid', 'valid.estimation', set_date,)
     invalid = ('invalid', MANAGER_PERMS,)
     geninv = ('geninv', None, gen_invoices,)
     delete = ('delete', None, None, False,)
     result = {}
-    result['draft'] = ('draft', 'wait', 'delete', valid, edit_metadata)
-    result['invalid'] = ('draft', 'wait', 'delete', edit_metadata)
+    result['draft'] = ('draft', wait, 'delete', valid, edit_metadata)
+    result['invalid'] = ('draft', wait, 'delete', edit_metadata)
     result['wait'] = (valid, invalid, duplicate, 'delete', edit_metadata)
     result['valid'] = ('aboest', geninv, duplicate, 'delete', edit_metadata)
     result['aboest'] = (delete, edit_metadata)
@@ -190,9 +191,10 @@ def get_inv_state():
         resulted
         aboinv
     """
+    wait = ('wait', 'wait.invoice')
     duplicate = ('duplicate', 'view', duplicate_task, False,)
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
-    valid = ('valid', MANAGER_PERMS, valid_callback,)
+    valid = ('valid', "valid.invoice", valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
     aboinv = ('aboinv', MANAGER_PERMS,)
     paid = ('paid', MANAGER_PERMS, record_payment,)
@@ -205,8 +207,8 @@ def get_inv_state():
     products = ("set_products", MANAGER_PERMS, set_products,
             False,)
     result = {}
-    result['draft'] = ('draft', 'wait', delete, valid,)
-    result['invalid'] = ('draft', 'wait', delete, )
+    result['draft'] = ('draft', wait, delete, valid,)
+    result['invalid'] = ('draft', wait, delete, )
     result['wait'] = (valid, invalid, duplicate, delete, financial_year,
             edit_metadata,)
     result['valid'] = (paid, resulted, gencinv, duplicate, mdelete,

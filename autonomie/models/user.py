@@ -168,7 +168,7 @@ def get_id_foreignkey_col(foreignkey_str):
 
 class Group(DBBASE):
     """
-    Available roles used in autonomie
+    Available groups used in autonomie
     """
     __tablename__ = 'groups'
     __table_args__ = default_table_args
@@ -189,12 +189,15 @@ class Group(DBBASE):
     )
 
     @classmethod
-    def _find_one(cls, name):
+    def _find_one(cls, name_or_id):
         """
         Used as a creator for the initialization proxy
         """
         with DBSESSION.no_autoflush:
-            res = DBSESSION.query(cls).filter(cls.name==name).one()
+            res = DBSESSION.query(cls).get(name_or_id)
+            if res is None:
+                # We try with the id
+                res = DBSESSION.query(cls).filter(cls.name==name_or_id).one()
 
         return res
 

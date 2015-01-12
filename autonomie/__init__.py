@@ -125,6 +125,7 @@ def main(global_config, **settings):
     dbsession = initialize_sql(engine)
 
     config = base_configure(config, dbsession, **settings)
+    config.configure_celery(global_config['__file__'])
 
     return config.make_wsgi_app()
 

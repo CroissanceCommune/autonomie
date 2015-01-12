@@ -565,5 +565,4 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             error_messages=self.err_messages,
             status='done',
         )
-        print(result)
         return result

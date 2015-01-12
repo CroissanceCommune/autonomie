@@ -503,7 +503,6 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             message
         """
         message = None
-        print(line)
         args, unhandled_columns = self.association_handler.collect_args(line)
 
         function = getattr(self, "_{0}".format(self.action))
@@ -519,10 +518,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             else:
                 self.new_count += 1
         except Exception as e:
-            print(u"Erreur")
-            print(e)
             log.exception(u"Erreur lors de l'import de données")
-            log.error(e)
             self.in_error_lines.append(line)
             res = None
             message = e.message
@@ -562,10 +558,12 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         """
         unhandled_datas_csv = self.gen_csv_str(self.unhandled_datas)
         in_error_lines_csv = self.gen_csv_str(self.in_error_lines)
-        return dict(
+        result = dict(
             unhandled_datas_csv=unhandled_datas_csv,
             in_error_lines_csv=in_error_lines_csv,
             messages=self.messages,
-            err_messages=self.err_messages,
+            error_messages=self.err_messages,
             status='done',
         )
+        print(result)
+        return result

@@ -190,8 +190,7 @@ class PermanentUserAddView(BaseFormView):
         if password is not None:
             user_model.set_password(password)
 
-        if groups:
-            user_model.groups = groups
+        user_model.groups = groups
 
         companies = []
 

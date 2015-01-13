@@ -37,13 +37,13 @@ Sous Debian:
 
 .. code-block:: console
 
-    apt-get install virtualenvwrapper libmysqlclient-dev build-essential libjpeg-dev libfreetype6 libfreetype6-dev zlib1g-dev python-mysqldb
+    apt-get install virtualenvwrapper libmysqlclient-dev build-essential libjpeg-dev libfreetype6 libfreetype6-dev zlib1g-dev python-mysqldb redis-server
 
 Sous Fedora:
 
 .. code-block:: console
 
-    yum install virtualenvwrapper mardiadb-devel python-devel libxslt-devel libxml2-devel libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel gcc
+    yum install virtualenvwrapper mardiadb-devel python-devel libxslt-devel libxml2-devel libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel gcc redis-server
 
 Création d'un environnement virtuel Python.
 
@@ -64,13 +64,21 @@ Téléchargement et installation de l'application
 Éditer le fichier development.ini et configurer votre logiciel (Accès à la base
 de données, différents répertoires de ressources statiques ...).
 
-Puis lancer l'application
+Puis lancer l'application web
 
 .. code-block:: console
 
     pserve development.ini
 
-L'application synchronise automatiquement les modèles de données.
+Ainsi que le service d'éxécution des tâches asynchrones
+
+.. code-block:: console
+
+    celery worker -A pyramid_celery.celery_app --ini development.ini
+
+.. note::
+
+    L'application synchronise automatiquement les modèles de données.
 
 Puis créer un compte administrateur
 

@@ -85,11 +85,12 @@ def test_process_failure(config, state_machine, model):
 def test_allowed(config, state, model):
     config.testing_securitypolicy(userid="test", permissive=True,)
     request = testing.DummyRequest()
+    assert state.allowed(model, request)
 
-    assert state.allowed(request, model)
+def test_not_allowed(config, state, model):
     config.testing_securitypolicy(userid="test", permissive=False,)
     request = testing.DummyRequest()
-    assert not state.allowed(request, model)
+    assert not state.allowed(model, request,)
 
 
 def test_process_caestate(config, state_machine, model):

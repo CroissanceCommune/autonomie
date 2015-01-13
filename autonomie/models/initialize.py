@@ -76,18 +76,15 @@ def populate_config(session):
     """
     Initialize required configuration elements
     """
-    pass
-#    for func in (populate_situation_options, populate_groups):
-#        try:
-#            func(session)
-#        except sqlalchemy.exc.OperationalError as e:
-#            print("The seem to be an error in the population process")
-#            print(e)
-#
-#    from transaction import commit
-#    commit()
+    for func in (populate_situation_options, populate_groups):
+        try:
+            func(session)
+        except sqlalchemy.exc.OperationalError as e:
+            print("The seem to be an error in the population process")
+            print(e)
 
-
+    from transaction import commit
+    commit()
 
 
 def initialize_sql(engine):

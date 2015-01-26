@@ -177,6 +177,8 @@ class GlobalInvoicesList(BaseListView):
         number = appstruct['search']
         if number and number != -1:
             prefix = self.request.config.get('invoiceprefix', '')
+            if prefix and number.startswith(prefix):
+                number = number[len(prefix):]
             number = number.strip(prefix)
             query = query.filter(or_(Invoice.officialNumber == number,
                                 CancelInvoice.officialNumber == number,

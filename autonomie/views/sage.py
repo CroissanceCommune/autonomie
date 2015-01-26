@@ -179,7 +179,8 @@ class SageInvoiceExportPage(BaseView):
 
     def _filter_number(self, query, number, year, strict=False):
         prefix = self.request.config.get('invoiceprefix', '')
-        number = number.strip(prefix)
+        if prefix and number.startswith(prefix):
+            number = number[len(prefix):]
         if strict:
             query = query.filter(
                 or_(Invoice.officialNumber == number,

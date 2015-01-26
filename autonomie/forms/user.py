@@ -113,7 +113,7 @@ def get_user_admin_roles(user_obj):
     """
     res = []
     for role in user.ROLES.values():
-        if role['id'] > user_obj.primary_group:
+        if role['id'] >= user_obj.primary_group:
             res.append( (role['id'], role['label'],) )
     return res
 

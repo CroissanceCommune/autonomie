@@ -209,10 +209,17 @@ def month_name(index):
     """
         Return the name of the month number "index"
     """
+    result = u""
+    if not isinstance(index, int):
+        try:
+            index = int(index)
+        except ValueError as e:
+            return u""
+
     if index in range(1, 13):
-        return calendar.month_name[index].decode('utf-8')
-    else:
-        return u""
+        result = calendar.month_name[index].decode('utf-8')
+
+    return result
 
 
 def clean_html(text):

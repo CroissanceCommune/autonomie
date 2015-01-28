@@ -48,6 +48,13 @@ class UndeliveredMail(Exception):
     pass
 
 
+class MailAlreadySent(Exception):
+    """
+    A custom class for mail that were already sent
+    """
+    pass
+
+
 class MissingMandatoryArgument(Exception):
     """
     Raised when a mandatory argument is missing

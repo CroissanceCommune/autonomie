@@ -984,6 +984,18 @@ def template_disable(context, request):
         request.session.flash(u"Le template a bien été activé")
     return HTTPFound(request.route_path("templates"))
 
+def console_view(request):
+    """
+    """
+    for label, route in (
+        (u"Historique mail salaire", 'mailhistory',),
+        (u"Tâches celery", 'jobs',),
+    ):
+        request.actionmenu.add(
+            ViewLink(label, path=route, title=label)
+        )
+    return dict(title=u"Console de supervision")
+
 
 def includeme(config):
     """
@@ -1090,5 +1102,16 @@ def includeme(config):
         renderer='admin/index.mako',
         permission="admin",
     )
+
+    # Hidden console view
+    config.add_route("admin_console", "admin_console/")
+    config.add_view(
+        console_view,
+        route_name="admin_console",
+        renderer="admin/index.mako",
+        permission="admin",
+    )
+
+
 
 

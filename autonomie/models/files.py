@@ -114,29 +114,30 @@ class MailHistory(DBBASE):
         return os.path.basename(self.filepath)
 
 
-def store_sent_mail(filepath, filedatas, company):
+def store_sent_mail(filepath, filedatas, company_id):
     """
     Stores a sent email in the history
 
     :param filename: The path to the sent file
     :param filedatas: The file datas
-    :param obj company: a company instance
+    :param int company_id: the id of a company instance
     """
     mail_history = MailHistory(
         filepath=filepath,
         md5sum=hashlib.md5(filedatas).hexdigest(),
-        company_id=company.id
+        company_id=company_id
     )
-    DBSESSION().add(mail_history)
     return mail_history
 
 
-def check_if_mail_sent(filedatas, company):
+def check_if_mail_sent(filedatas, company_id):
     """
     Check if the given file has already been sent
+    :param str filedatas: The content of a file
+    :param int company_id: The id of a company
     """
     query = MailHistory.query()
-    query = query.filter(MailHistory.company_id==company.id)
+    query = query.filter(MailHistory.company_id==company_id)
     md5sum = hashlib.md5(filedatas).hexdigest()
     query = query.filter(MailHistory.md5sum==md5sum)
     return query.first() is not None

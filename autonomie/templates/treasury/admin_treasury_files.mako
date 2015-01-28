@@ -23,7 +23,7 @@
 <%inherit file="/base.mako"></%inherit>
 <%block name='content'>
     % if errors:
-        % if "companies" in errors:
+        % if "mails" in errors:
             <div class="alert alert-error">
                 Veuillez sélectionner au moins un fichier à envoyer
                 % if force == False:
@@ -61,7 +61,7 @@
                     <th>Déjà envoyé ?</th>
                 </thead>
                 <tbody>
-                    <input type="hidden" name="__start__" value="companies:sequence" />
+                    <input type="hidden" name="__start__" value="mails:sequence" />
             % for data in datas.values():
                 % for file_dict in data:
                     <tr>
@@ -70,17 +70,17 @@
                         <% id_ = file_dict['company'].id %>
                         <td>
                             % if file_dict['company'].email:
-                            <input type="hidden" name="__start__" value="company:mapping"/>
+                            <input type="hidden" name="__start__" value="mail:mapping"/>
                             <input type="hidden" name="company_id" value="${file_dict['company'].id}" />
                             <input type="checkbox"
                                     name="attachment"
                                     value="${filename}"
-                                    % if {'id': id_, 'filename': filename} in mails:
+                                    % if {'company_id': id_, 'attachment': filename} in mails:
                                         checked
                                     % endif
                             >
                                     </input>
-                            <input type="hidden" name="__end__" value="company:mapping"/>
+                            <input type="hidden" name="__end__" value="mail:mapping"/>
                             % else:
                                e-mail non renseigné
                             % endif
@@ -93,14 +93,14 @@
                             </a>
                         </td>
                         <td>
-                            % if file_obj.is_in_mail_history(compay):
+                            % if file_obj.is_in_mail_history(file_dict['company']):
                                 <i class="fa fa-check-circle-o fa-1x"></i>
                             % endif
                         </td>
                     </tr>
                 % endfor
             % endfor
-            <input type="hidden" name="__end__" value="companies:sequence" />
+            <input type="hidden" name="__end__" value="mails:sequence" />
             </tbody>
             </table>
             <div class="well span12">
@@ -140,7 +140,7 @@
 <%block name="footerjs">
 $('#check_all').change(
     function(){
-        $('input[name=filename]').prop('checked', this.checked);
+    $('input[name=attachment]').prop('checked', this.checked);
     }
 );
 </%block>

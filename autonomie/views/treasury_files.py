@@ -493,18 +493,13 @@ class MailTreasuryFilesView(BaseView):
 
     def _prepare_attachment(self, root_path, mail):
         """
-        Add the full filepath to the dicts
-        :param dict mail_dicts: The list of dict representing a mail to
-        send in the form {'id': company_id 'filename': The name of the file to
-        send}
-        :returns: The same entry but with the full filepath added to the dict
+        Return the attachment absolute filepath
+        :param str root_path: The directory we manage
+        :param dict mail_dicts: The dict representing a mail
+        :returns: The full file path
         """
         # On ajoute le filepath aux dict des mails à envoyer
-        mail['attachment_path'] = os.path.join(
-                    root_path,
-                    mail['attachment']
-            )
-        return mail
+        return os.path.join(root_path, mail['attachment'])
 
     def _prepare_message(self, message_tmpl, company, year, month):
         """
@@ -540,7 +535,7 @@ should be retrieved from the MailingJob : {1}".format(celery_job.id, job.id)
             title=self.title,
             mail_subject=DEFAULT_MAIL_OBJECT[filetype],
             mail_message=DEFAULT_MAIL_MESSAGE[filetype],
-            companies=(),
+            mails=(),
             force=False,
             errors={},
         )
@@ -577,12 +572,14 @@ the informations")
         result['datas'] = datas
 
         if 'submit' in self.request.params:
+            logger.info(" -> Datas were submitted")
             # L'utilisateur a demandé l'envoi de mail
             try:
                 appstruct = peppercorn.parse(self.request.params.items())
                 form_datas = MailSendingSchema().deserialize(appstruct)
 
             except colander.Invalid as e:
+                logger.exception(u" - Submitted datas are invalid")
                 result.update(self.request.params)
                 result['errors'] = e.asdict()
 

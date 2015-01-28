@@ -60,7 +60,7 @@
                         <td>${file_.name}</td>
                         <td>${file_.size}</td>
                         <td>${api.format_date(file_.mod_date)}</td>
-                        <td><a href="${file_.url(request)}">Télécharger</a></td>
+                        <td><a href="${file_.url(request)}">Télécharger&nbsp;<i class="fa fa-file-pdf-o fa-1x"></i></a></td>
                     </tr>
                 % endfor
             % endfor

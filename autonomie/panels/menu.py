@@ -225,6 +225,13 @@ def get_admin_menus(request):
             icon="fa fa-credit-card",
             href=href
         )
+        href = request.route_path("admin_treasury_all")
+        treasury.add_item(
+            u"Bulletins de salaire",
+            icon="fa fa-send-o",
+            href=href
+        )
+
         menu.add(treasury)
 
     if has_permission("admin", request.context, request):

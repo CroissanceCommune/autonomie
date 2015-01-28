@@ -29,14 +29,17 @@ from pyramid_mailer.message import (
     Attachment,
 )
 
-from autonomie.exception import UndeliveredMail
+from autonomie.exception import (
+    UndeliveredMail,
+    MailAlreadySent,
+)
 from autonomie.models.files import (
     store_sent_mail,
     check_if_mail_sent,
 )
 
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 
 UNSUBSCRIBE_MSG = u"<mailto:{0}?subject=Unsubscribe-{1}>"
@@ -52,7 +55,6 @@ en excuser. Vous pouvez vous désincrire en écrivant à \
 
 SALARYSHEET_MAIL_MESSAGE = u"""Bonjour,
 Vous trouverez ci-joint votre bulletin de salaire.
-{0}
 """
 
 SALARYSHEET_MAIL_SUBJECT = u"Votre bulletin de salaire"
@@ -180,45 +182,53 @@ def send_mail_from_event(event):
             )
 
 
-def send_salary_sheet(request, company, filename, filepath, force=False, custom_msg=""):
+def send_salary_sheet(
+    request, email, company_id, filename, filepath, force=False,
+    message=None, subject=None):
     """
     Send a salarysheet to the given company's e-mail
 
     :param obj request: A pyramid request object
-    :param obj company: A company instance
+    :param str company_mail: The mail to send it to
+    :param int company_id: The id of the associated company
     :param str filepath: The path to the filename
     :param bool force: Whether to force sending this file again
-    :returns: True or False
-    :TypeError UndeliveredMail: When the company has no mail or if the file has
+    :param str message: The mail message
+    :param str subject: The mail subject
+    :returns: A MailHistory instance
+    :TypeError UndeliveredMail: When the company has no mail
+    :TypeError MailAlreadySent: if the file has
         already been sent and no force option was passed
     """
     filebuf = file(filepath, 'r')
     filedatas = filebuf.read()
 
-    if not force and check_if_mail_sent(filedatas, company):
-        log.warn(u"Undelivered email : mail already sent")
-        raise UndeliveredMail(u"Mail already sent")
+    if not force and check_if_mail_sent(filedatas, company_id):
+        log.warn(u"Mail already sent : mail already sent")
+        raise MailAlreadySent(u"Mail already sent")
 
     filebuf.seek(0)
 
-    if company.email is None:
-        log.warn(u"Undelivered email : no mail found for company {0}".format(
-            company.name)
+    if email is None:
+        log.warn(u"Undelivered email : no mail provided for company {0}".format(
+            company_id)
         )
-        raise UndeliveredMail(u"no mail found for company {0}".format(
-            company.name)
+        raise UndeliveredMail(u"no mail provided for company {0}".format(
+            company_id)
         )
     else:
-        print('Sending the file %s' % filepath)
-        print("Sending it to %s" % company.email)
+        log.info('Sending the file %s' % filepath)
+        log.info("Sending it to %s" % email)
         attachment = Attachment(filename, "application/pdf", filebuf)
+
+        subject = subject or SALARYSHEET_MAIL_SUBJECT
+        message = message or SALARYSHEET_MAIL_MESSAGE
 
         send_mail(
             request,
-            SALARYSHEET_MAIL_MESSAGE.format(custom_msg),
-            SALARYSHEET_MAIL_SUBJECT,
-            company.email,
+            email,
+            message,
+            subject,
             attachment,
         )
-        store_sent_mail(filepath, filedatas, company)
-        return True
+        return store_sent_mail(filepath, filedatas, company_id)

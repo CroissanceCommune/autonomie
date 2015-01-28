@@ -76,7 +76,14 @@ def mail_it(arguments, env):
         print('Sending the file %s' % filepath)
         print("Sending it to %s" % company.email)
         sender = SENDERS.get(filetype)
-        sender(env['request'], company, filename, filepath, force)
+        sender(
+            env['request'],
+            company.email,
+            company.id,
+            filename,
+            filepath,
+            force,
+        )
 
 
 def mail_cmd():

@@ -46,12 +46,8 @@ def job_view(context, request):
     job_js.need()
     populate_actionmenu(request)
 
-    if context.type_ == "csv_import":
-        title = u"Import de données"
-    else:
-        title = u"Action inconnue"
     return dict(
-        title=title,
+        title=context.label,
         url=request.route_path('job', id=context.id),
     )
 

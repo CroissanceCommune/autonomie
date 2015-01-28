@@ -32,5 +32,6 @@ should load dynamically the datas about a job execution
 </div>
 <script type='text/javascript'>
     AppOptions['url'] = "${url}";
+    AppOptions['dataType'] = "${request.context.type_}"
 </script>
 </%block>

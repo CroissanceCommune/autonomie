@@ -17,11 +17,14 @@ var JobModule = AutonomieApp.module(
   function(JobModule, AutonomieApp, Backbone, Marionette, $, _){
     var JobView = Marionette.ItemView.extend({
       tagName: "div",
-      initialize: function(){
+      initialize: function(datas){
         this.listenTo(this.model, 'change', this.render, this);
+        this.dataType = datas['dataType'];
       },
       getTemplate: function(){
-        return "csv_import_job";
+        // Le nom du template correspond au type_ du modèle de job que l'on
+        // affiche
+        return this.dataType;
       },
       templateHelpers: function(){
         var failed = false;
@@ -59,7 +62,8 @@ var JobModule = AutonomieApp.module(
           err_message: new Handlebars.SafeString(err_message),
           message: new Handlebars.SafeString(message),
           has_message: has_message,
-          has_err_message: has_err_message
+          has_err_message: has_err_message,
+          dataType: this.dataType
           };
       }
     });
@@ -78,7 +82,9 @@ var JobModule = AutonomieApp.module(
     });
     JobModule.addInitializer(function(options){
       JobModule.job = new JobModel({url: AppOptions.url});
-      JobModule.job_view = new JobView({model: JobModule.job});
+      JobModule.job_view = new JobView(
+          {model: JobModule.job, dataType: AppOptions.dataType}
+        );
       AutonomieApp.job.show(JobModule.job_view);
     });
   }

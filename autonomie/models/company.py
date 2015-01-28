@@ -72,7 +72,8 @@ class Company(DBBASE, PersistentACLMixin):
     goal = deferred(
         Column(
             "object",
-            String(255)
+            String(255),
+            default="",
         ),
         group='edit'
     )
@@ -162,7 +163,7 @@ class Company(DBBASE, PersistentACLMixin):
     code_compta = deferred(
         Column(
             String(30),
-            default=0
+            default=""
         ),
         group="edit",
     )

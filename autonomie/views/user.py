@@ -47,6 +47,7 @@ from autonomie.models.user import (
     CompanyDatas,
     USERDATAS_FORM_GRIDS,
 )
+from autonomie.models.files import File
 from autonomie.models.company import Company
 from autonomie.utils.widgets import (
     ViewLink,
@@ -959,6 +960,24 @@ Cette action n'est pas réversible."
                                      id=user_id, _query=dict(action="delete"))
 
 
+def mydocuments_view(context, request):
+    """
+    View callable collecting datas for showing the social docs associated to the
+    current user's account
+    """
+    if request.user.userdatas is not None:
+        query = File.query()
+        documents = query.filter(
+            File.parent_id==request.user.userdatas.id
+        ).all()
+    else:
+        documents = []
+    return dict(
+        title=u"Mes documents",
+        documents=documents,
+    )
+
+
 def includeme(config):
     """
         Declare all the routes and views related to this model
@@ -1131,4 +1150,15 @@ def includeme(config):
         renderer='base/formpage.mako',
         permission='manage',
         request_param='action=attach_file',
+    )
+    # Add the social documents display view
+    config.add_route(
+        "mydocuments",
+        "/mydocuments",
+    )
+    config.add_view(
+        mydocuments_view,
+        route_name="mydocuments",
+        renderer="mydocuments.mako",
+        permission="view",
     )

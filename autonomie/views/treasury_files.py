@@ -25,11 +25,14 @@
 """
     This view displays the documents of the current company
 """
+import os
+import re
 import datetime
 import logging
-import os
 import mimetypes
+import colander
 
+import peppercorn
 from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPNotFound,
@@ -38,14 +41,19 @@ from pyramid.httpexceptions import (
 
 from autonomie.models.files import (
     MailHistory,
-    File,
+    check_if_mail_sent,
 )
 from autonomie.forms.lists import BaseListsSchema
+from autonomie.forms.treasury_files import MailSendingSchema
 from autonomie.views import (
     BaseView,
     BaseListView,
 )
+from autonomie.models.company import Company
+from autonomie.models.job import MailingJob
+from autonomie.views.render_api import month_name
 from autonomie.mail import send_salary_sheet
+from autonomie.task import async_mail_salarysheets
 from autonomie.utils.ascii import force_ascii
 from autonomie.utils.files import (
     encode_path,
@@ -54,8 +62,32 @@ from autonomie.utils.files import (
     filesizeformat,
 )
 
+DEFAULT_MAIL_OBJECT = {
+    'salaire': u"""Votre bulletin de salaire"""
+}
 
-log = logging.getLogger(__name__)
+
+DEFAULT_MAIL_MESSAGE = {
+    'salaire': u"""Bonjour {company.name},
+Vous trouverez ci-joint votre bulletin de salaire pour la période {month}/{year}.
+""",
+}
+
+# Regexp permettant de récupérer le code analytique depuis le nom d'un fichier
+REGEXP = re.compile('(?P<code_compta>[^_]+).')
+
+
+_NULLCODES = ["0", 0, "", None]
+
+
+logger = logging.getLogger(__name__)
+
+
+def is_valid_year(year_str):
+    """
+    Return True if the given string seems to be a valid year
+    """
+    return year_str.isdigit() and len(year_str) == 4
 
 
 def get_root_directory(request):
@@ -69,17 +101,42 @@ def get_root_directory(request):
     return absdir
 
 
-_NULLCODES = ["0", 0, "", None]
+def get_code_compta(filename):
+    """
+    Get the code compta extracted from the given filename
+    :param str filename: A filename in which we should find the code
+    """
+    groups = REGEXP.match(filename)
+    if groups is None:
+        raise Exception(
+            "The given filepath doesn't match the regexp : %s" % (
+                filename
+            )
+        )
+    return groups.group("code_compta")
+
+
+def get_company_by_code(code_compta):
+    """
+    Return the company associated to this code_compta
+    :param str code_compta: The analytic code of the company to find
+    """
+    query = Company.query().filter(Company.code_compta==code_compta)
+    return query.first()
+
 
 def code_is_not_null(code):
     """
-        Return True if the given code is not null
+    Return True if the given code is not null
+    :param str code: The code to check
     """
     return code not in _NULLCODES
 
+
 def isprefixed(filename, prefix='___'):
     """
-        Return True if the filename startswith prefix + '_'
+    Return True if the filename startswith prefix + '_'
+    return False if bool(prefix) is False
     """
     prefix += '_'
     if prefix == '____':
@@ -90,7 +147,8 @@ def isprefixed(filename, prefix='___'):
 
 def current_years():
     """
-        return a list of the years that should be considered as currents
+    return a list of the years that should be considered as currents
+    :returns: The current year and the precedent one if we're in january
     """
     today = datetime.date.today()
     result = [str(today.year)]
@@ -99,10 +157,45 @@ def current_years():
     return result
 
 
+def digit_subdirs(path):
+    """
+    Return subdirectories of path which names are composed of digits
+    """
+    for name in os.listdir(path):
+        spath = os.path.join(path, name)
+        if os.path.isdir(spath) and name.isdigit():
+            yield name, spath
+
+
+def list_files(path, prefix='___'):
+    """
+    Return files in path that are prefixed with prefix
+
+    :param str prefix: the prefix of the file
+        (e.g : 125 for a file starting by 125_)
+    :returns: A sorted list of abstract file objects
+    """
+    # prefix has a strange form since the prefix is a security point and a
+    # void one could lead to security issues
+    result = []
+    for name in os.listdir(path):
+        filepath = os.path.join(path, name)
+        if os.path.isfile(filepath):
+            if prefix and not isprefixed(name, prefix):
+                continue
+            file_obj = AbstractFile(name, filepath)
+            result.append(file_obj)
+    result.sort(key=lambda f:f.path)
+    return result
+
 
 class AbstractFile(object):
     """
-        File object abstraction
+    File object abstraction used to easily handle treasury files
+    Provides :
+        * meta informations
+        * urls generation
+        * other infos
     """
     def __init__(self, name, path):
         self.name = name
@@ -113,22 +206,22 @@ class AbstractFile(object):
     @property
     def mod_date(self):
         """
-            return a datetime object for the atime of the file
+        return a datetime object for the atime of the file
         """
         return datetime.datetime.fromtimestamp(self._mod_time)
 
     @property
     def size(self):
         """
-            Return a pretty printing value of the file
+        Return a pretty printing value of the file
         """
         return filesizeformat(self._size)
 
     @property
     def mimetype(self):
         """
-            Return the mimetype of the file, "text/plain"
-            if None could be found
+        Return the mimetype of the file, "text/plain"
+        if None could be found
         """
         mtype = mimetypes.guess_type(self.path)[0]
         if mtype is None:
@@ -138,23 +231,44 @@ class AbstractFile(object):
     @property
     def datas(self):
         """
-            Return the content of the file
+        Return the content of the file
         """
         return open(self.path).read()
 
-    def url(self, request):
+    @property
+    def code(self):
         """
-            return the url to fetch the given file
+        The code compta found in the filename
         """
+        try:
+            res = get_code_compta(self.name)
+        except Exception:
+            res = None
+        return res
+
+    def url(self, request, company_id=None):
+        """
+        return the url to fetch the given file
+
+        :param obj request: The current request object
+        :param int company_id: The id of the company owning the document
+            (default: the current request context)
+        """
+        if company_id is None:
+            company_id = request.context.id
+
         root_directory = get_root_directory(request)
         relpath = self.path.replace(root_directory, "", 1)
-        return request.route_path("treasury_files",
-                id=request.context.id,
-                _query=dict(name=encode_path(relpath)))
+
+        return request.route_path(
+            "treasury_files",
+            id=company_id,
+            _query=dict(name=encode_path(relpath))
+        )
 
     def as_response(self, request):
         """
-            Stream the file in the current request's response
+        Stream the file in the current request's response
         """
         request.response.content_type = self.mimetype
         request.response.headerlist.append(
@@ -166,25 +280,25 @@ class AbstractFile(object):
     def __repr__(self):
         return "<AbstractFile : %s %s>" % (self.name, self.path)
 
-
-def digit_subdirs(path):
-    """
-        Return subdirectories of path which names are composed of digits
-    """
-    for name in os.listdir(path):
-        spath = os.path.join(path, name)
-        if os.path.isdir(spath) and name.isdigit():
-            yield name, spath
-
+    def is_in_mail_history(self, company):
+        """
+        Return True if this file is already in the mail history
+        (based on the md5 sum of the content)
+        :param obj company: The company to which this file should have been sent
+        """
+        return check_if_mail_sent(
+            open(self.path, 'r').read(),
+            company.id,
+        )
 
 
 class DisplayDirectoryView(BaseView):
     """
-        Base view for document directory display
-        Given a directory, it looks up for all subdirectories of the form :
-            <root_dir>/<year>/<month>
-        to find files of the form
-        <code analytique>_annee_mois_semaine
+    Base view for document directory display
+    Given a directory, it looks up for all subdirectories of the form :
+        <root_dir>/<year>/<month>
+    to find files of the form
+    <code analytique>_annee_mois_semaine
     """
     title = u""
     _root_directory = None
@@ -197,23 +311,6 @@ class DisplayDirectoryView(BaseView):
         return os.path.join(get_root_directory(self.request),
                                             self._root_directory)
 
-    @staticmethod
-    def list_files(path, prefix='___'):
-        """
-            Return files in path that are prefixed with prefix
-        """
-        # prefix has a strange form since the prefix is a security point and a
-        # void one could lead to security issues
-        result = []
-        for name in os.listdir(path):
-            filepath = os.path.join(path, name)
-            if os.path.isfile(filepath):
-                if isprefixed(name, prefix):
-                    file_obj = AbstractFile(name, filepath)
-                    result.append(file_obj)
-        result.sort(key=lambda f:f.path)
-        return result
-
     def collect_documents(self, prefix):
         """
             collect all documents restricted to the given prefix
@@ -224,8 +321,10 @@ class DisplayDirectoryView(BaseView):
             for year, year_path in digit_subdirs(self.root_directory):
                 result_dict[year] = {}
                 for month, month_path in digit_subdirs(year_path):
-                    result_dict[year][month] = self.list_files(month_path,
-                                                                    prefix)
+                    result_dict[year][month] = list_files(
+                        month_path,
+                        prefix,
+                    )
         return result_dict
 
     def __call__(self):
@@ -240,9 +339,282 @@ class DisplayDirectoryView(BaseView):
                 )
 
 
+class TreasuryFilesView(DisplayDirectoryView):
+    """
+        List the Treasury directory
+    """
+    title = u"Trésorerie"
+    _root_directory = "tresorerie"
+
+
+class IncomeStatementFilesView(DisplayDirectoryView):
+    """
+        List the Income Statements
+    """
+    title = u"Compte de résultat"
+    _root_directory = "resultat"
+
+
+class SalarySheetFilesView(DisplayDirectoryView):
+    """
+        List the salary sheets
+    """
+    title = u"Bulletin de salaire"
+    _root_directory = "salaire"
+
+
+class AdminTreasuryView(BaseView):
+    """
+    Admin View for documents supervision (mailing ...)
+    """
+    title = u"Administration des fichiers"
+    filetypes = ('salaire', ) #'trésorerie', 'resultat')
+
+    def __init__(self, context, request):
+        BaseView.__init__(self, context, request)
+        self.root_directory = get_root_directory(request)
+
+    def collect_years_and_months(self):
+        """
+        Collect years and months for which we have files
+        """
+        result = {}
+        for type_ in self.filetypes:
+            type_dir = os.path.join(self.root_directory, type_)
+            for year, year_dir in digit_subdirs(type_dir):
+                result[year] = {}
+                for month, month_dir in digit_subdirs(year_dir):
+                    label = month_name(month)
+                    if label:
+                        if month not in result[year]:
+                            result[year][month] = dict(
+                                label=label,
+                                url=self.request.route_path(
+                                    'admin_treasury_files',
+                                    filetype=type_,
+                                    year=year,
+                                    month=month,
+                                ),
+                                nbfiles=len(os.listdir(month_dir))
+                            )
+        return result
+
+    def __call__(self):
+        return dict(
+            title=self.title,
+            datas=self.collect_years_and_months(),
+            current_years=current_years()
+        )
+
+
+class MailTreasuryFilesView(BaseView):
+    """
+    View used to mail salary sheets
+
+    Following url parameters are mandatory :
+
+        filetype
+
+            The filetype we'd like to list
+
+        year
+
+        month
+    """
+    title = u"Envoi de fichiers par e-mail"
+
+    def collect_files(self, path):
+        """
+        Collect files and associated companies for the given view
+        """
+        datas = {}
+        files = list_files(path, prefix=None)
+
+        for abstract_file in files:
+
+            code = abstract_file.code
+            if code is None:
+                continue
+            company = get_company_by_code(code)
+            if company is None:
+                continue
+
+            datas.setdefault(company.id, []).append(
+                {
+                    'file': abstract_file,
+                    'company': company,
+                }
+            )
+        return datas
+
+    def _prepare_mails(self, datas, form_datas, root_path, year, month):
+        """
+        Prepare the emails adding some informations in it
+
+        :param dict datas: The file listing datas
+        :param dict form_datas: The validated submitted datas
+        :param str root_path: The absolute root_path to the files
+        :param int year: The year associated to the files
+        :param int month: The month associated to the files
+        """
+        force = form_datas.get('force', False)
+        message_tmpl = form_datas['mail_message']
+        subject = form_datas['mail_subject']
+
+        mails = []
+        for mail_dict in form_datas['mails']:
+            # Le form renvoie des couples (company_id, attachment), on
+            # enlève ceux pour lesquels aucune pièce jointe n'est
+            # remplie (la case n'a pas été cochée)
+            if "attachment" not in mail_dict.keys():
+                continue
+
+            filedatas = self._get_file_datas_entry(datas, mail_dict)
+            company = filedatas['company']
+
+            # Si on ne force pas l'envoi, on va enlever les documents
+            # qui ont déjà été envoyé
+            if not force:
+                if filedatas['file'].is_in_mail_history(company):
+                    continue
+
+            mail_dict['attachment_path'] = self._prepare_attachment(
+                root_path,
+                mail_dict,
+            )
+            mail_dict['message'] = self._prepare_message(
+                message_tmpl, company, year, month)
+            mail_dict['subject'] = subject
+            mail_dict['email'] = company.email
+
+            mails.append(mail_dict)
+        return mails
+
+
+    def _prepare_attachment(self, root_path, mail):
+        """
+        Add the full filepath to the dicts
+        :param dict mail_dicts: The list of dict representing a mail to
+        send in the form {'id': company_id 'filename': The name of the file to
+        send}
+        :returns: The same entry but with the full filepath added to the dict
+        """
+        # On ajoute le filepath aux dict des mails à envoyer
+        mail['attachment_path'] = os.path.join(
+                    root_path,
+                    mail['attachment']
+            )
+        return mail
+
+    def _prepare_message(self, message_tmpl, company, year, month):
+        """
+        Format the mail content
+        """
+        return message_tmpl.format(company=company, year=year, month=month)
+
+
+    def _send_mails(self, mails, force):
+        """
+        Launch the task for mail sending
+        """
+        job = MailingJob()
+        self.request.dbsession.add(job)
+        self.request.dbsession.flush()
+
+        celery_job = async_mail_salarysheets.delay(
+            job.id,
+            mails,
+            force,
+        )
+
+        logger.info(u" * The Celery Task {0} has been delayed, its result \
+should be retrieved from the MailingJob : {1}".format(celery_job.id, job.id)
+                    )
+        return HTTPFound(self.request.route_path('job', id=job.id))
+
+    def _base_result_dict(self, filetype):
+        """
+        Returns the base view result dict
+        """
+        return dict(
+            title=self.title,
+            mail_subject=DEFAULT_MAIL_OBJECT[filetype],
+            mail_message=DEFAULT_MAIL_MESSAGE[filetype],
+            companies=(),
+            force=False,
+            errors={},
+        )
+
+    def _get_file_datas_entry(self, datas, mail):
+        """
+        Return the file datas entry corresponding to the submitted mail datas
+        :param dict datas: The collected datas about all handled files
+        :param dict mail: The submitted datas corresponding to a mail that
+        should be sent
+        """
+        company_id = mail['company_id']
+        filename = mail['attachment']
+        company_files_datas = datas[company_id]
+        for file_datas in company_files_datas:
+            if file_datas['file'].name == filename:
+                return file_datas
+        raise KeyError(u"The submitted datas are invalid, we can't retrieve \
+the informations")
+
+    def __call__(self):
+        """
+        The main entry for our view
+        """
+        logger.info("Calling the treasury files view")
+        filetype = self.request.matchdict['filetype']
+        year = self.request.matchdict['year']
+        month = self.request.matchdict['month']
+        root_directory = get_root_directory(self.request)
+        root_path = os.path.join(root_directory, filetype, year, month)
+
+        result = self._base_result_dict(filetype)
+        datas = self.collect_files(root_path)
+        result['datas'] = datas
+
+        if 'submit' in self.request.params:
+            # L'utilisateur a demandé l'envoi de mail
+            try:
+                appstruct = peppercorn.parse(self.request.params.items())
+                form_datas = MailSendingSchema().deserialize(appstruct)
+
+            except colander.Invalid as e:
+                result.update(self.request.params)
+                result['errors'] = e.asdict()
+
+            else:
+                logger.info(" + Submitted datas are valid")
+                mails = self._prepare_mails(
+                    datas,
+                    form_datas,
+                    root_path,
+                    year,
+                    month,
+                )
+
+                # On check qu'il y a au moins une entrée pour laquelle on va
+                # envoyer un mail
+                if len(mails) == 0:
+
+                    result['errors'] = {
+                        'companies': u"Veuillez sélectionner au moins \
+    une entreprise"}
+                    result.update(form_datas)
+                    return result
+
+                force = form_datas.get('force', False)
+                return self._send_mails(mails, force)
+
+        return result
+
+
 def file_display(request):
     """
-        Stream a file
+    Stream a file
     """
     root_path = get_root_directory(request)
     rel_filepath = decode_path(request.params['name'])
@@ -253,17 +625,17 @@ def file_display(request):
     company_code = request.context.code_compta
 
     if not code_is_not_null(company_code):
-        log.warn("Current context has no code")
+        logger.warn("Current context has no code")
         return HTTPForbidden()
 
     if not isprefixed(filename, company_code):
-        log.warn("Current context has no code")
+        logger.warn("Current context has no code")
         return HTTPForbidden()
 
     if not issubdir(root_path, filepath):
-        log.warn("Given filepath is not a subdirectory")
-        log.warn(filepath)
-        log.warn(root_path)
+        logger.warn("Given filepath is not a subdirectory")
+        logger.warn(filepath)
+        logger.warn(root_path)
         return HTTPForbidden()
 
     if os.path.isfile(filepath):
@@ -271,33 +643,9 @@ def file_display(request):
         file_obj.as_response(request)
         return request.response
 
-    log.warn("AbstractFile not found")
-    log.warn(filepath)
+    logger.warn("AbstractFile not found")
+    logger.warn(filepath)
     return HTTPNotFound()
-
-
-
-class Treasury(DisplayDirectoryView):
-    """
-        List the Treasury directory
-    """
-    title = u"Trésorerie"
-    _root_directory = "tresorerie"
-
-
-class IncomeStatement(DisplayDirectoryView):
-    """
-        List the Income Statements
-    """
-    title = u"Compte de résultat"
-    _root_directory = "resultat"
-
-class SalarySheet(DisplayDirectoryView):
-    """
-        List the salary sheets
-    """
-    title = u"Bulletin de salaire"
-    _root_directory = "salaire"
 
 
 class MailHistoryView(BaseListView):
@@ -314,11 +662,18 @@ class MailHistoryView(BaseListView):
         return MailHistory.query()
 
     def _build_return_value(self, schema, appstruct, query):
-        result = BaseListView._build_return_value(self, schema, appstruct, query)
+        """
+        add month and years attribute to each file record
+        """
+        result = BaseListView._build_return_value(
+            self,
+            schema,
+            appstruct,
+            query
+        )
 
         for obj in result['records']:
             splitted = obj.filepath.split('/')
-            filename = splitted[-1]
             month = splitted[-2]
             year = splitted[-3]
 
@@ -352,23 +707,6 @@ def mailagain(request):
     return HTTPFound(url)
 
 
-def mydocuments_view(context, request):
-    """
-    View callable collecting datas for showing the social docs associated to the
-    current user's account
-
-    """
-    if request.user.userdatas is not None:
-        query = File.query()
-        documents = query.filter(File.parent_id==request.user.userdatas.id).all()
-    else:
-        documents = []
-    return dict(
-        title=u"Mes documents",
-        documents=documents,
-    )
-
-
 def includeme(config):
     """
         View and route inclusions
@@ -378,9 +716,9 @@ def includeme(config):
     traverse = '/companies/{id}'
 
     # Add the file listing route/views
-    for key, view in ("treasury", Treasury), \
-                     ("incomestatement", IncomeStatement), \
-                     ("salarysheet", SalarySheet):
+    for key, view in ("treasury", TreasuryFilesView), \
+                     ("incomestatement", IncomeStatementFilesView), \
+                     ("salarysheet", SalarySheetFilesView):
         config.add_route(
             key,
             "/company/{id:\d+}/%s" % key,
@@ -405,17 +743,6 @@ def includeme(config):
         request_param='name',
     )
 
-    # Add the social documents display view
-    config.add_route(
-        "mydocuments",
-        "/mydocuments",
-    )
-    config.add_view(
-        mydocuments_view,
-        route_name="mydocuments",
-        renderer="mydocuments.mako",
-        permission="view",
-    )
 
     # Add the mail history views
     config.add_route("mailhistory", '/mailhistory')
@@ -429,5 +756,27 @@ def includeme(config):
     config.add_view(
         mailagain,
         route_name="mail",
+        permission="admin",
+    )
+
+    # Add the admin files view
+    config.add_route(
+        "admin_treasury_all",
+        "/treasury_files/",
+    )
+    config.add_route(
+        "admin_treasury_files",
+        "/treasury_files/{filetype}/{year}/{month}/",
+    )
+    config.add_view(
+        AdminTreasuryView,
+        route_name="admin_treasury_all",
+        renderer="/treasury/admin_treasury_all.mako",
+        permission="admin",
+    )
+    config.add_view(
+        MailTreasuryFilesView,
+        route_name="admin_treasury_files",
+        renderer="/treasury/admin_treasury_files.mako",
         permission="admin",
     )

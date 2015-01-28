@@ -120,3 +120,23 @@ class CsvImportJob(Job):
             self.unhandled_datas_csv
         )
         return res
+
+
+class MailingJob(Job):
+    """
+    Store mailing job status
+    """
+    __tablename__ = 'mailing_job'
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'mailing'}
+    id = Column(Integer, ForeignKey('job.id'), primary_key=True)
+    messages = Column(JsonEncodedList, default=None)
+    error_messages = Column(JsonEncodedList, default=None)
+    label = u"Envoi de mail"
+
+    def todict(self):
+        res = Job.todict(self)
+        res['label'] = self.label
+        res['messages'] = self.messages
+        res['error_messages'] = self.error_messages
+        return res

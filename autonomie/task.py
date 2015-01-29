@@ -139,6 +139,7 @@ def async_import_datas(
         associator.set_association_dict(association_dict)
         csv_buffer = open(csv_filepath, 'r')
         importer = get_csv_importer(
+            DBSESSION(),
             model_type,
             csv_buffer,
             associator,

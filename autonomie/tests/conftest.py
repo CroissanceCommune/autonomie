@@ -173,11 +173,9 @@ def config(request, pyramid_request, settings, registry):
     from autonomie.utils.renderer import (
         set_deform_renderer,
         set_json_renderer,
-        set_default_widgets,
     )
     set_deform_renderer()
     set_json_renderer(config)
-    set_default_widgets()
     return config
 
 

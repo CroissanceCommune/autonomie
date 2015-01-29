@@ -107,7 +107,12 @@ def test_import_line(dbsession, csv_datas, association_handler):
     association_handler.set_association_dict(association_dict)
 
     line = csv_datas.next()
-    importer = CsvImporter(UserDatas, get_buffer(), association_handler)
+    importer = CsvImporter(
+        dbsession,
+        UserDatas,
+        get_buffer(),
+        association_handler
+    )
     res, msg = importer.import_line(line.copy())
 
     assert res.coordonnees_firstname == u'Bienaimé'
@@ -119,14 +124,19 @@ def test_import_line(dbsession, csv_datas, association_handler):
     # We pop a mandatory argument
     association_dict.pop('Nom')
     association_handler.set_association_dict(association_dict)
-    importer = CsvImporter(UserDatas, get_buffer(), association_handler)
+    importer = CsvImporter(
+        dbsession,
+        UserDatas,
+        get_buffer(),
+        association_handler
+    )
     res, msg = importer.import_line(line.copy())
 
     assert res is None
     assert importer.in_error_lines == [line]
 
 
-def test_update_line(association_handler, userdata):
+def test_update_line(association_handler, userdata, dbsession):
     from autonomie.csv_import import CsvImporter
     from autonomie.models.user import UserDatas
 
@@ -137,6 +147,7 @@ def test_update_line(association_handler, userdata):
     association_handler.set_association_dict(association_dict)
 
     importer = CsvImporter(
+        dbsession,
         UserDatas,
         get_buffer(),
         association_handler,
@@ -150,7 +161,7 @@ def test_update_line(association_handler, userdata):
     assert res.coordonnees_email2 == 'g@p.fr'
 
 
-def test_override_line(association_handler, userdata):
+def test_override_line(dbsession, association_handler, userdata):
     from autonomie.csv_import import CsvImporter
     from autonomie.models.user import UserDatas
 
@@ -161,6 +172,7 @@ def test_override_line(association_handler, userdata):
     association_handler.set_association_dict(association_dict)
 
     importer = CsvImporter(
+        dbsession,
         UserDatas,
         get_buffer(),
         association_handler,
@@ -174,7 +186,7 @@ def test_override_line(association_handler, userdata):
     assert res.coordonnees_email2 == 'g@p.fr'
 
 
-def test_identification_key(association_handler, userdata):
+def test_identification_key(dbsession, association_handler, userdata):
     """
     Test if we use another key than "id" to identify the duplicate entries
     """
@@ -189,6 +201,7 @@ def test_identification_key(association_handler, userdata):
     association_handler.set_association_dict(association_dict)
 
     importer = CsvImporter(
+        dbsession,
         UserDatas,
         get_buffer(),
         association_handler,

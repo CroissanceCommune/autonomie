@@ -345,10 +345,17 @@ def get_csv_reader(csv_buffer, delimiter=';', quotechar='"'):
             quotechar=quotechar,
         )
 
-def get_csv_importer(model_type, csv_buffer, association_handler,
-                 action="insert", id_key="id"):
+def get_csv_importer(
+    dbsession,
+    model_type,
+    csv_buffer,
+    association_handler,
+    action="insert",
+    id_key="id"):
+
     factory = MODELS_CONFIGURATION[model_type]['factory']
     return CsvImporter(
+        dbsession,
         factory,
         csv_buffer,
         association_handler,
@@ -370,6 +377,7 @@ class CsvImporter(object):
     auto-compute relationship values
     auto-find which fields are imported
 
+    :param class dbssession: The dbsession to use for import
     :param class factory: The type of model we want to import
     :param obj csv_buffer: A file buffer containing csv datas
     :param obj association_handler: The object handling the association
@@ -388,12 +396,13 @@ class CsvImporter(object):
     Usage:
 
         association_handler = CsvImportAssociator(UserDatas)
-        importer = CsvImporter(UserDatas, file('users.csv', 'r'),
+        importer = CsvImporter(DbSession(), UserDatas, file('users.csv', 'r'),
     """
     delimiter = ';'
     quotechar = '"'
-    def __init__(self, factory, csv_buffer, association_handler,
+    def __init__(self, dbsession, factory, csv_buffer, association_handler,
                  action="insert", id_key="id"):
+        self.dbsession = dbsession
         self.factory = factory
         self.association_handler = association_handler
         self.csv_reader = get_csv_reader(
@@ -442,8 +451,8 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         boolean saying if it's an update
         """
         model = self.factory(**args)
-        DBSESSION().add(model)
-        DBSESSION().flush()
+        self.dbsession.add(model)
+        self.dbsession.flush()
         return model, False
 
     def _update(self, args, override=False):
@@ -474,8 +483,8 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                 for key, value in args.items():
                     if getattr(model, key) in UNFILLED_VALUES or override:
                         setattr(model, key, value)
-                model = DBSESSION().merge(model)
-                DBSESSION().flush()
+                model = self.dbsession.merge(model)
+                self.dbsession.flush()
                 updated = True
 
             except sqlalchemy_exc.NoResultFound:

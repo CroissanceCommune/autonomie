@@ -75,6 +75,7 @@ MODELS_CONFIGURATION = {'userdatas': {
 
 
 log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 MISSING_KEY_ERROR = u"Erreur : Le champ {0} est requis mais ne sera pas rempli"
 MULTIPLE_ENTRY_ERROR = u"Pour une même valeur clé ({0}), plusieurs entrées \
@@ -130,7 +131,7 @@ def format_input_value(value, sqla_column_dict):
             # on the configured related_key
             res = class_.query().filter(
                 getattr(class_, related_key)==value
-            ).one()
+            ).first()
         else:
             # We have a one to many relationship, we generate an instance using
             # the related_key as instanciation attribute
@@ -326,8 +327,13 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
             else:
                 column = self.columns.get(column_name)
                 if column is not None:
-                    value = format_input_value(value, column)
-                kwargs[column_name] = value
+                    new_value = format_input_value(value, column)
+                    if new_value is not None:
+                        kwargs[column_name] = new_value
+                    else:
+                        unhandled[csv_key] = value
+                else:
+                    kwargs[column_name] = value
 
         return kwargs, unhandled
 
@@ -460,9 +466,11 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             identification_column = getattr(self.factory, self.id_key)
 
             try:
+
                 model = self.factory.query().filter(
                     identification_column==identification_value
                 ).one()
+
                 for key, value in args.items():
                     if getattr(model, key) in UNFILLED_VALUES or override:
                         setattr(model, key, value)

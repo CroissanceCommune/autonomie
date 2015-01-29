@@ -55,8 +55,8 @@ from autonomie.utils.widgets import (
     StaticWidget,
 )
 from autonomie.export.utils import write_file_to_request
-from autonomie.export import py3o
-from autonomie.deform_extend import (
+from sqla_inspect import py3o
+from deform_bootstrap_extensions import (
     AccordionFormWidget,
     TableFormWidget,
 )
@@ -559,7 +559,11 @@ def py3o_view(context, request):
         if template:
             log.debug(" + Templating (%s, %s)" % (template.name, template.id))
             try:
-                output = py3o.compile_template(context, template.data_obj)
+                output = py3o.compile_template(
+                    context,
+                    template.data_obj,
+                    request.config
+                )
                 write_file_to_request(
                     request,
                     template.name,

@@ -47,8 +47,8 @@ from autonomie.utils.pdf import (
     render_html,
     write_pdf,
 )
-from autonomie.export.csvtools import CsvExporter
-from autonomie.export.excel import XlsExporter
+from sqla_inspect.csv import CsvExporter
+from sqla_inspect.excel import XlsExporter
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.workshop import (
     Workshop as WorkshopSchema,

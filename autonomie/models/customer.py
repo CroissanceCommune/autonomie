@@ -261,7 +261,7 @@ class Customer(DBBASE, PersistentACLMixin):
             info={
                 'colanderalchemy':{
                     'title': u'Code postal',
-                }
+                },
             },
             nullable=False,
         ),

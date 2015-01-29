@@ -68,3 +68,10 @@ def write_file_to_request(request, filename, buf, headers=None):
     request.response.write(buf.getvalue())
     return request
 
+def format_boolean(value):
+    """
+    Format a boolean value
+    """
+    return "Y" and value or "N"
+
+

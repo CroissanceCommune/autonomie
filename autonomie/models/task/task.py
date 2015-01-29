@@ -27,6 +27,8 @@
     represents a base task, with a status, an owner, a phase
 """
 import logging
+import colander
+import deform
 
 from zope.interface import implementer
 from sqlalchemy import (
@@ -52,9 +54,12 @@ from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
-from autonomie.forms import EXCLUDED
+from autonomie.forms import (
+    EXCLUDED,
+ #   get_deferred_select,
+)
+from autonomie.models.user import get_deferred_user_choice
 from autonomie.models.tva import Tva
-from autonomie.exception import Forbidden
 
 from .interfaces import ITask
 from .states import DEFAULT_STATE_MACHINES
@@ -63,6 +68,9 @@ from autonomie.models.node import Node
 
 log = logging.getLogger(__name__)
 
+
+ALL_STATES = ('draft', 'wait', 'valid', 'invalid', 'geninv',
+              'aboest', 'gencinv', 'resulted', 'paid', )
 
 @implementer(ITask)
 class Task(Node):
@@ -74,27 +82,73 @@ class Task(Node):
     __mapper_args__ = {'polymorphic_identity': 'task'}
 
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
-    phase_id = Column("phase_id", ForeignKey('phase.id'))
-    CAEStatus = Column('CAEStatus', String(10))
-    statusComment = Column("statusComment", Text)
-    statusPerson = Column("statusPerson",
-                          ForeignKey('accounts.id'))
+    phase_id = Column(
+        ForeignKey('phase.id'),
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": {'exclude': True},
+        },
+    )
+    CAEStatus = Column(
+        String(10),
+        info={
+            'colanderalchemy': {
+                'widget': deform.widget.SelectWidget(
+                    values=zip(ALL_STATES, ALL_STATES)
+                )
+            }
+        }
+    )
+    statusComment = Column(
+        Text,
+        info={"colanderalchemy": {'widget': deform.widget.TextAreaWidget()}},
+    )
+    statusPerson = Column(
+        ForeignKey('accounts.id'),
+        info={
+            'colanderalchemy': {'widget': get_deferred_user_choice()},
+            "export": {'exclude': True},
+        },
+    )
     statusDate = Column(
-        "statusDate",
         CustomDateType,
         default=get_current_timestamp,
-        )
-    taskDate = Column("taskDate", CustomDateType2)
-    owner_id = Column("owner_id", ForeignKey('accounts.id'))
+        info={'colanderalchemy': {'typ': colander.Date}}
+    )
+    taskDate = Column(
+        CustomDateType2,
+        info={'colanderalchemy': {'typ': colander.Date}}
+    )
+    owner_id = Column(
+        ForeignKey('accounts.id'),
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": {'exclude': True},
+        },
+    )
     creationDate = deferred(
-        Column("creationDate", CustomDateType,
-               default=get_current_timestamp)
+        Column(
+            CustomDateType,
+            default=get_current_timestamp,
+            info={
+                'colanderalchemy': EXCLUDED,
+                "export": {'exclude': True},
+            },
+        )
     )
     updateDate = Column(
-        "updateDate", CustomDateType,
+        CustomDateType,
         default=get_current_timestamp,
-        onupdate=get_current_timestamp)
-    description = Column("description", Text)
+        onupdate=get_current_timestamp,
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": {'exclude': True},
+        },
+    )
+    description = Column(
+        Text,
+        info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
+    )
     statusPersonAccount = relationship(
         "User",
         primaryjoin="Task.statusPerson==User.id",
@@ -105,6 +159,10 @@ class Task(Node):
                 'export': {'exclude': True},
             },
         ),
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'exclude': True},
+        },
     )
     owner = relationship(
         "User",
@@ -116,6 +174,10 @@ class Task(Node):
                 'export': {'exclude': True},
             },
         ),
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'exclude': True},
+        },
     )
 
     phase = relationship(
@@ -129,6 +191,10 @@ class Task(Node):
                 'export': {'exclude': True},
             },
         ),
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'exclude': True},
+        },
         lazy="joined")
 
     state_machine = DEFAULT_STATE_MACHINES['base']
@@ -228,15 +294,38 @@ class DiscountLine(DBBASE, LineCompute):
     """
     __tablename__ = 'discount'
     __table_args__ = default_table_args
-    id = Column("id", Integer, primary_key=True, nullable=False)
-    task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
-    tva = Column("tva", Integer, nullable=False, default=196)
-    amount = Column("amount", Integer)
-    description = Column("description", Text)
-    task = relationship("Task",
-        backref=backref('discounts',
+    id = Column(
+        Integer,
+        primary_key=True,
+        nullable=False,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
+    )
+    task_id = Column(
+        Integer,
+        ForeignKey(
+            'task.id',
+            ondelete="cascade",
+        ),
+        info={'colanderalchemy': EXCLUDED}
+    )
+    tva = Column(
+        Integer,
+        nullable=False,
+        default=196
+    )
+    amount = Column(Integer)
+    description = Column(
+        Text,
+        info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}}
+    )
+    task = relationship(
+        "Task",
+        backref=backref(
+            'discounts',
             order_by='DiscountLine.tva',
-            cascade="all, delete-orphan"))
+            cascade="all, delete-orphan"
+        )
+    )
 
     def duplicate(self):
         """
@@ -279,19 +368,30 @@ class TaskStatus(DBBASE):
     """
     __tablename__ = 'task_status'
     __table_args__ = default_table_args
-    id = Column("id", Integer, primary_key=True)
-    task_id = Column('task_id',
+    id = Column(Integer, primary_key=True)
+    task_id = Column(
         Integer,
-        ForeignKey('task.id', ondelete="cascade"))
-    statusCode = Column("statusCode", String(10))
-    statusComment = Column("statusComment", Text)
-    statusPerson = Column("statusPerson", Integer, ForeignKey('accounts.id'))
-    statusDate = Column("statusDate",
+        ForeignKey('task.id', ondelete="cascade"),
+    )
+    statusCode = Column(String(10))
+    statusComment = Column(
+        Text,
+        info={"colanderalchemy": {'widget': deform.widget.TextAreaWidget()}},
+    )
+    statusPerson = Column(Integer, ForeignKey('accounts.id'))
+    statusDate = Column(
         CustomDateType,
-        default=get_current_timestamp)
-    task = relationship("Task",
-        backref=backref("statuses",
-            cascade="all, delete-orphan"))
+        default=get_current_timestamp,
+        info={'colanderalchemy': {'typ': colander.Date}}
+    )
+    task = relationship(
+        "Task",
+        backref=backref(
+            "statuses",
+            cascade="all, delete-orphan",
+            info={'colanderalchemy': EXCLUDED}
+        )
+    )
     statusPersonAccount = relationship(
         "User",
         backref=backref(

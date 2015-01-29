@@ -64,7 +64,7 @@ import colander
 from deform import widget
 from deform_bootstrap import widget as bootstrap_widget
 
-from autonomie.deform_extend import (
+from deform_bootstrap_extensions import (
     DisabledInput,
     CustomSequenceWidget,
 )

@@ -29,7 +29,7 @@ import logging
 import colander
 import deform_bootstrap
 import deform
-from autonomie import deform_extend
+import deform_bootstrap_extensions
 
 from sqlalchemy import (
     Column,
@@ -359,7 +359,7 @@ def deferred_fullcustomer_list_widget(node, kw):
                 *[(cust.id, cust.name) for cust in comp.customers]
             )
         )
-    return deform_extend.CustomChosenOptGroupWidget(
+    return deform_bootstrap_extensions.CustomChosenOptGroupWidget(
         values=values,
         placeholder=u"Sélectionner un client"
         )

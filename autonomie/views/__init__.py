@@ -43,8 +43,8 @@ from pyramid.url import current_route_url
 
 from autonomie.forms import merge_session_with_post, flatten_appstruct
 from autonomie.forms.lists import ITEMS_PER_PAGE_OPTIONS
-from autonomie.export.csvtools import SqlaCsvExporter
-from autonomie.export.excel import SqlaXlsExporter
+from sqla_inspect.csv import SqlaCsvExporter
+from sqla_inspect.excel import SqlaXlsExporter
 from autonomie.export.utils import write_file_to_request
 
 

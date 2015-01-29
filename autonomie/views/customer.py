@@ -48,7 +48,7 @@ from autonomie.forms.customer import (
     get_list_schema,
     get_customer_schema,
 )
-from autonomie.deform_extend import GridFormWidget
+from deform_bootstrap_extensions import GridFormWidget
 from autonomie.views import (
     BaseListView,
     BaseCsvView,

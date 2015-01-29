@@ -27,6 +27,8 @@
 """
 import datetime
 import logging
+import colander
+import deform
 
 from zope.interface import implementer
 from beaker.cache import cache_region
@@ -108,33 +110,64 @@ class Invoice(Task, InvoiceCompute):
     __mapper_args__ = {
                        'polymorphic_identity': 'invoice',
                        }
-    id = Column("id", ForeignKey('task.id'), primary_key=True)
+    id = Column(
+        ForeignKey('task.id'),
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
+    )
 
-    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
-    estimation_id = Column("estimation_id", ForeignKey('estimation.id'))
-    project_id = Column("project_id", ForeignKey('project.id'))
+    customer_id = Column(
+        Integer,
+        ForeignKey('customer.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    estimation_id = Column(
+        ForeignKey('estimation.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    project_id = Column(
+        ForeignKey('project.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
 
-    sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
-    _number = Column("number", String(100), nullable=False)
+    sequenceNumber = Column(
+        Integer,
+        nullable=False,
+    )
+    _number = Column(
+        "number",
+        String(100),
+        nullable=False,
+    )
     paymentConditions = deferred(
-        Column("paymentConditions", Text),
-        group='edit')
+        Column(
+            Text,
+            info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
+        ),
+        group='edit',
+    )
     deposit = deferred(
-        Column('deposit', Integer, nullable=False, default=0),
-        group='edit')
+        Column(Integer, nullable=False, default=0),
+        group='edit',
+    )
     course = deferred(
-        Column('course', Integer, nullable=False, default=0),
-        group='edit')
-    officialNumber = Column("officialNumber", Integer)
-    paymentMode = Column("paymentMode", String(10))
-    discountHT = Column('discountHT', Integer, default=0)
+        Column(Integer, nullable=False, default=0),
+        group='edit'
+    )
+    officialNumber = Column(Integer)
     displayedUnits = deferred(
-        Column('displayedUnits', Integer, nullable=False, default=0),
+        Column(Integer, nullable=False, default=0),
+        group='edit'
+    )
+    expenses = deferred(Column(Integer, default=0), group='edit')
+    expenses_ht = deferred(
+        Column(Integer, default=0, nullable=False),
         group='edit')
-    expenses = deferred(Column('expenses', Integer, default=0), group='edit')
-    expenses_ht = deferred(Column(Integer, default=0, nullable=False),
-                        group='edit')
-    address = Column("address", Text, default="")
+    address = Column(
+        Text,
+        default="",
+        info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
+    )
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
 
@@ -149,6 +182,10 @@ class Invoice(Task, InvoiceCompute):
                 "export": {'exclude': True},
             },
         ),
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            "export": {'exclude': True},
+        },
     )
 
     project = relationship(
@@ -161,12 +198,21 @@ class Invoice(Task, InvoiceCompute):
                 'export': {'exclude': True},
             },
         ),
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        },
     )
 
     estimation = relationship(
         "Estimation",
         backref="invoices",
-        primaryjoin="Invoice.estimation_id==Estimation.id")
+        primaryjoin="Invoice.estimation_id==Estimation.id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        },
+    )
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
 
@@ -268,15 +314,6 @@ class Invoice(Task, InvoiceCompute):
             else:
                 taskname_tmpl = u"Facture {0}"
             self.name = taskname_tmpl.format(self.sequenceNumber)
-
-    @validates("paymentMode")
-    def validate_paymentMode(self, key, paymentMode):
-        """
-            Validate the paymentMode
-        """
-        if not paymentMode in ('CHEQUE', 'VIREMENT'):
-            raise Forbidden(u'Mode de paiement inconnu')
-        return paymentMode
 
     @classmethod
     def get_officialNumber(cls):
@@ -405,7 +442,6 @@ class Invoice(Task, InvoiceCompute):
         invoice.deposit = self.deposit
         invoice.course = self.course
         invoice.displayedUnits = self.displayedUnits
-        invoice.discountHT = self.discountHT
         invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
         invoice.financial_year = date.year
@@ -426,32 +462,63 @@ class InvoiceLine(DBBASE, LineCompute):
     """
     __tablename__ = 'invoice_line'
     __table_args__ = default_table_args
-    id = Column("id", Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey('invoice.id', ondelete="cascade"))
-    rowIndex = Column("rowIndex", Integer, default=1)
-    description = Column("description", Text)
-    cost = Column(Integer, default=0)
-    tva = Column("tva", Integer, nullable=False, default=196)
-    quantity = Column(DOUBLE, default=1)
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
+    )
+    task_id = Column(
+        Integer,
+        ForeignKey('invoice.id', ondelete="cascade"),
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    rowIndex = Column(Integer, default=1,)
+    description = Column(Text)
+    cost = Column(Integer, default=0,)
+    tva = Column(
+        Integer,
+        nullable=False,
+        default=196,
+    )
+    quantity = Column(
+        DOUBLE,
+        default=1,
+    )
     creationDate = deferred(
-        Column("creationDate",
-               CustomDateType,
-               default=get_current_timestamp))
+        Column(
+            CustomDateType,
+            default=get_current_timestamp,
+            info={'colanderalchemy': forms.EXCLUDED},
+        )
+    )
     updateDate = deferred(
-        Column("updateDate",
-               CustomDateType,
-               default=get_current_timestamp,
-               onupdate=get_current_timestamp))
-    unity = Column("unity", String(100))
-    product_id = Column(Integer)
+        Column(
+            CustomDateType,
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp,
+            info={'colanderalchemy': forms.EXCLUDED}
+        )
+    )
+    unity = Column(String(100),)
+    product_id = Column(
+        Integer,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
     task = relationship(
         "Invoice",
-        backref=backref("lines", order_by='InvoiceLine.rowIndex',
-                        cascade="all, delete-orphan"))
-    product = relationship("Product",
-            primaryjoin="Product.id==InvoiceLine.product_id",
-            uselist=False,
-            foreign_keys=product_id)
+        backref=backref(
+            "lines",
+            order_by='InvoiceLine.rowIndex',
+            cascade="all, delete-orphan"
+        )
+    )
+    product = relationship(
+        "Product",
+        primaryjoin="Product.id==InvoiceLine.product_id",
+        uselist=False,
+        foreign_keys=product_id,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
 
     def duplicate(self):
         """
@@ -499,7 +566,7 @@ class CancelInvoice(Task, TaskCompute):
     invoice_id = Column(Integer, ForeignKey('invoice.id'),
                                                         default=None)
     project_id = Column(Integer, ForeignKey('project.id'))
-    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
+    customer_id = Column(Integer, ForeignKey('customer.id'))
 
     sequenceNumber = deferred(Column(Integer), group='edit')
     _number = Column("number", String(100))
@@ -507,12 +574,13 @@ class CancelInvoice(Task, TaskCompute):
         Column(String(255), default=None),
         group='edit')
     officialNumber = deferred(Column(Integer, default=None), group='edit')
-    paymentMode = deferred(Column(String(80), default=None), group='edit')
     displayedUnits = Column(Integer, default=0)
     expenses = deferred(Column(Integer, default=0), group='edit')
-    expenses_ht = deferred(Column(Integer, default=0, nullable=False),
-                                                            group='edit')
-    address = Column("address", Text, default="")
+    expenses_ht = deferred(
+        Column(Integer, default=0, nullable=False),
+        group='edit'
+    )
+    address = Column(Text, default="")
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
 
@@ -534,6 +602,7 @@ class CancelInvoice(Task, TaskCompute):
             "cancelinvoice",
             uselist=False,
             cascade='all, delete-orphan',
+            info={'colanderalchemy': forms.EXCLUDED,}
         ),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id")
 

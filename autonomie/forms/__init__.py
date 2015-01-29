@@ -28,10 +28,10 @@ import colander
 import calendar
 import datetime
 import deform
+import deform_bootstrap_extensions
 
 from autonomie.utils.fileupload import FileTempStore
 
-from autonomie import deform_extend
 
 
 TEMPLATES_PATH = "autonomie:deform_templates/"
@@ -67,7 +67,7 @@ def get_date_input(**kw):
     """
     Return a date input displaying a french user friendly format
     """
-    date_input = deform_extend.CustomDateInputWidget(**kw)
+    date_input = deform_bootstrap_extensions.CustomDateInputWidget(**kw)
     return date_input
 
 
@@ -75,7 +75,7 @@ def get_datetime_input(**kw):
     """
     Return a datetime input displaying a french user friendly format
     """
-    datetime_input = deform_extend.CustomDateTimeInputWidget(**kw)
+    datetime_input = deform_bootstrap_extensions.CustomDateTimeInputWidget(**kw)
     return datetime_input
 
 

@@ -41,8 +41,6 @@ from deform.form import Form
 from deform.template import ZPTRendererFactory
 
 from autonomie.i18n import translate
-from autonomie import deform_extend
-
 
 log = logging.getLogger(__name__)
 
@@ -100,14 +98,6 @@ def set_deform_renderer():
     renderer = MultiRendererFactory(search_path=deform_template_dirs,
                                     translator=translate)
     Form.default_renderer = renderer
-
-
-def set_default_widgets():
-    """
-    Set custom date and datetime input widgets for a better user-experience
-    """
-    defaults[colander.DateTime] = deform_extend.CustomDateTimeInputWidget
-    defaults[colander.Date] = deform_extend.CustomDateInputWidget
 
 
 def set_json_renderer(config):

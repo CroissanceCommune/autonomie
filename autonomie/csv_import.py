@@ -50,7 +50,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.schema import ColumnDefault
 
 from autonomie.utils import ascii
-from autonomie.export import sqla
+from sqla_inspect.base import BaseSqlaInspector
 from autonomie.models.base import DBSESSION
 from autonomie.exception import (
     MissingMandatoryArgument,
@@ -164,7 +164,7 @@ def format_input_value(value, sqla_column_dict):
     return res
 
 
-class CsvImportAssociator(sqla.BaseSqlaExporter):
+class CsvImportAssociator(BaseSqlaInspector):
     """
     An importation tool used to associate csv datas to a destination dict
 
@@ -180,7 +180,7 @@ class CsvImportAssociator(sqla.BaseSqlaExporter):
     config_key = 'import'
 
     def __init__(self, model, excludes=()):
-        sqla.BaseSqlaExporter.__init__(self, model)
+        BaseSqlaInspector.__init__(self, model)
         self.model = model
         self.excludes = excludes
         self.columns = self._collect_columns()

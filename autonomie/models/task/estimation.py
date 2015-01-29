@@ -85,37 +85,28 @@ class Estimation(Task, EstimationCompute):
     """
     __tablename__ = 'estimation'
     __table_args__ = default_table_args
-    id = Column("id", ForeignKey('task.id'), primary_key=True, nullable=False)
-    sequenceNumber = Column("sequenceNumber", Integer, nullable=False)
+    id = Column(ForeignKey('task.id'), primary_key=True, nullable=False)
+    sequenceNumber = Column(Integer, nullable=False)
     _number = Column("number", String(100), nullable=False)
-    tva = Column("tva", Integer, nullable=False, default=196)
-    deposit = Column("deposit", Integer, default=0)
-    paymentConditions = deferred(
-        Column("paymentConditions", Text),
-        group='edit')
-    exclusions = deferred(Column("exclusions", Text), group='edit')
-    project_id = Column("project_id", ForeignKey('project.id'))
-    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
-    manualDeliverables = deferred(
-        Column("manualDeliverables", Integer),
-        group='edit')
-    course = deferred(
-        Column('course', Integer, nullable=False, default=0),
-        group='edit')
+    deposit = Column(Integer, default=0)
+    paymentConditions = deferred(Column(Text), group='edit')
+    exclusions = deferred(Column(Text), group='edit')
+    project_id = Column(ForeignKey('project.id'))
+    customer_id = Column(Integer, ForeignKey('customer.id'))
+    manualDeliverables = deferred(Column(Integer), group='edit')
+    course = deferred(Column(Integer, nullable=False, default=0), group='edit')
     displayedUnits = deferred(
-        Column('displayedUnits', Integer, nullable=False, default=0),
-        group='edit')
-    discountHT = Column('discountHT', Integer, default=0)
-    expenses = deferred(
-        Column('expenses', Integer, default=0),
-        group='edit')
+        Column(Integer, nullable=False, default=0),
+        group='edit'
+    )
+    expenses = deferred(Column(Integer, default=0), group='edit')
     expenses_ht = deferred(
         Column(Integer, default=0, nullable=False),
         group='edit')
     paymentDisplay = deferred(
-        Column('paymentDisplay', String(20), default="SUMMARY"),
+        Column(String(20), default="SUMMARY"),
         group='edit')
-    address = Column("address", Text, default="")
+    address = Column(Text, default="")
     project = relationship(
         "Project",
         backref=backref(
@@ -197,7 +188,6 @@ class Estimation(Task, EstimationCompute):
         estimation.manualDeliverables = self.manualDeliverables
         estimation.course = self.course
         estimation.displayedUnits = self.displayedUnits
-        estimation.discountHT = self.discountHT
         estimation.expenses = self.expenses
         estimation.expenses_ht = self.expenses_ht
         estimation.paymentDisplay = self.paymentDisplay
@@ -419,23 +409,23 @@ class EstimationLine(DBBASE, LineCompute):
     """
     __tablename__ = 'estimation_line'
     __table_args__ = default_table_args
-    id = Column("id", Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
-    rowIndex = Column("rowIndex", Integer)
-    description = Column("description", Text)
+    rowIndex = Column(Integer)
+    description = Column(Text)
     cost = Column(Integer, default=0)
     quantity = Column(DOUBLE, default=1)
-    tva = Column("tva", Integer, nullable=False, default=196)
+    tva = Column(Integer, nullable=False, default=196)
     creationDate = deferred(
-        Column("creationDate",
+        Column(
             CustomDateType,
             default=get_current_timestamp))
     updateDate = deferred(
-        Column("updateDate",
+        Column(
             CustomDateType,
             default=get_current_timestamp,
             onupdate=get_current_timestamp))
-    unity = Column("unity", String(100))
+    unity = Column(String(100))
     task = relationship(
         "Estimation",
         backref=backref("lines", order_by='EstimationLine.rowIndex',
@@ -478,21 +468,21 @@ class PaymentLine(DBBASE):
     """
     __tablename__ = 'estimation_payment'
     __table_args__ = default_table_args
-    id = Column("id", Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
-    rowIndex = Column("rowIndex", Integer)
-    description = Column("description", Text)
-    amount = Column("amount", Integer)
+    rowIndex = Column(Integer)
+    description = Column(Text)
+    amount = Column(Integer)
     creationDate = deferred(
-        Column("creationDate",
+        Column(
             CustomDateType,
             default=get_current_timestamp))
     updateDate = deferred(
-        Column("updateDate",
+        Column(
             CustomDateType,
             default=get_current_timestamp,
             onupdate=get_current_timestamp))
-    paymentDate = Column("paymentDate", CustomDateType2)
+    paymentDate = Column(CustomDateType2)
     task = relationship(
         "Estimation",
         backref=backref('payment_lines', order_by='PaymentLine.rowIndex',

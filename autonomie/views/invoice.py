@@ -27,6 +27,7 @@
 """
 import logging
 
+from colanderalchemy import SQLAlchemySchemaNode
 from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
@@ -44,6 +45,7 @@ from autonomie.forms.task import (
 from autonomie.views import (
     merge_session_with_post,
     submit_btn,
+    BaseFormView,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
@@ -338,6 +340,24 @@ def set_products(request):
     return ret_dict
 
 
+class AdminInvoice(BaseFormView):
+    """
+    Vue pour l'administration de factures ?token=admin
+
+    Vue accessible aux utilisateurs admin
+    """
+    schema = SQLAlchemySchemaNode(Invoice)
+    msg = u"Vos modifications ont bien été enregistrées"
+
+    def before(self, form):
+        form.set_appstruct(self.schema.dictify(self.context))
+
+    def submit_success(self, appstruct):
+        model = self.schema.objectify(appstruct, self.context)
+        self.dbsession.merge(model)
+        self.request.session.flash(self.msg)
+
+
 def includeme(config):
     config.add_route('project_invoices',
                      '/projects/{id:\d+}/invoices',
@@ -406,3 +426,11 @@ def includeme(config):
             permission='edit',
             request_param='action=attach_file',
             )
+
+    config.add_view(
+        AdminInvoice,
+        route_name='invoice',
+        renderer="base/formpage.mako",
+        permission="admin",
+        request_param="token=admin",
+    )

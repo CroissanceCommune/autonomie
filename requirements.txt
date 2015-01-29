@@ -60,3 +60,5 @@ zope.sqlalchemy==0.7.1
 celery==3.1.17
 pyramid-celery==2.0.0-rc3
 redis==2.10.3
+sqla_inspect
+deform_bootstrap_extensions

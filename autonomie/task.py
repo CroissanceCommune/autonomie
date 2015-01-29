@@ -121,6 +121,7 @@ def async_import_datas(
     logger.info(u"  The csv_filepath : %s" % csv_filepath)
     logger.info(u"  The association dict : %s" % association_dict)
     logger.info(u"  The id key : %s" % id_key)
+    logger.info(u"  Action : %s" % action)
 
     from autonomie.models.base import DBSESSION
     transaction.begin()

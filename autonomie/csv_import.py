@@ -229,11 +229,12 @@ class CsvImportAssociator(BaseSqlaInspector):
             result[datas['name']] = datas
 
         for key in todrop:
-            ui_label = result[key].get('label')
-            rel_key = key[:-3]
-            if rel_key in result:
-                result[rel_key]['label'] = ui_label
-            result.pop(key)
+            if key in result:
+                ui_label = result[key].get('label')
+                rel_key = key[:-3]
+                if rel_key in result:
+                    result[rel_key]['label'] = ui_label
+                result.pop(key)
         return result
 
     def get_columns(self):

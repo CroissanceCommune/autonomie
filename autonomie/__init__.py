@@ -167,7 +167,7 @@ def set_export_blacklist():
     """
     from sqla_inspect.export import BLACKLISTED_KEYS
 
-    BLACKLISTED_KEYS = ('_acl', 'password', )
+    BLACKLISTED_KEYS = ('_acl', 'password', 'parent_id', 'parent', 'type_')
 
 
 def base_configure(config, dbsession, **settings):

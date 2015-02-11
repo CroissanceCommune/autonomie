@@ -809,7 +809,10 @@ class UserDatas(Node):
 
     situation_situation = relationship(
         "CaeSituationOption",
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
 
     situation_follower_id = Column(
@@ -1000,7 +1003,10 @@ class UserDatas(Node):
 
     coordonnees_zone = relationship(
         'ZoneOption',
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
 
     coordonnees_zone_qual_id = Column(
@@ -1018,7 +1024,10 @@ class UserDatas(Node):
 
     coordonnees_zone_qual = relationship(
         'ZoneQualificationOption',
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
 
     coordonnees_sex = Column(
@@ -1134,7 +1143,10 @@ class UserDatas(Node):
 
     coordonnees_study_level = relationship(
         'StudyLevelOption',
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
     coordonnees_emergency_name = Column(
         String(50),
@@ -1184,7 +1196,10 @@ class UserDatas(Node):
 
     statut_social_status = relationship(
         'SocialStatusOption',
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
     statut_handicap_allocation_expiration = Column(
         Date(),
@@ -1236,7 +1251,10 @@ class UserDatas(Node):
 
     activity_typologie = relationship(
         'ActivityTypeOption',
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
     activity_pcs_id = Column(
         ForeignKey('pcs_option.id'),
@@ -1252,7 +1270,10 @@ class UserDatas(Node):
 
     activity_pcs = relationship(
         'PcsOption',
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
     activity_companydatas = relationship(
         "CompanyDatas",
@@ -1281,7 +1302,10 @@ class UserDatas(Node):
 
     parcours_prescripteur = relationship(
         "PrescripteurOption",
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
     parcours_prescripteur_name = Column(
         String(50),
@@ -1336,7 +1360,10 @@ class UserDatas(Node):
 
     parcours_non_admission = relationship(
         "NonAdmissionOption",
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
 
     parcours_convention_cape = relationship(
@@ -1501,7 +1528,10 @@ class UserDatas(Node):
 
     parcours_status = relationship(
         "ParcoursStatusOption",
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
     parcours_medical_visit = Column(
         Date(),
@@ -1551,7 +1581,10 @@ class UserDatas(Node):
 
     sortie_motif = relationship(
         'MotifSortieOption',
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
     )
 
 

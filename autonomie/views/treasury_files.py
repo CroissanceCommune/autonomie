@@ -31,6 +31,7 @@ import datetime
 import logging
 import mimetypes
 import colander
+import redis.exceptions
 
 import peppercorn
 from pyramid.httpexceptions import (
@@ -114,6 +115,16 @@ def get_code_compta(filename):
             )
         )
     return groups.group("code_compta")
+
+
+def belongs_to_company(filename):
+    """
+    Check if a file belongs to a company
+
+    :param str filename: The filename we want to check
+    """
+    code_compta = get_code_compta(filename)
+    return Company.query().filter(Company.code_compta==code_compta).count() > 0
 
 
 def get_company_by_code(code_compta):
@@ -374,6 +385,29 @@ class AdminTreasuryView(BaseView):
         BaseView.__init__(self, context, request)
         self.root_directory = get_root_directory(request)
 
+    def get_entry(self, result, year, month, month_dir, type_):
+        """
+        Return an entry for the listing for admin files
+        """
+        result = None
+        label = month_name(month)
+        if label:
+            all_files = [filename for filename in os.listdir(month_dir)\
+                            if belongs_to_company(filename)]
+            if len(all_files) > 0:
+                url = self.request.route_path(
+                    'admin_treasury_files',
+                    filetype=type_,
+                    year=year,
+                    month=month,
+                )
+                result = {
+                    "label": label,
+                    "url": url,
+                    "nbfiles": len(all_files),
+                }
+        return result
+
     def collect_years_and_months(self):
         """
         Collect years and months for which we have files
@@ -384,19 +418,18 @@ class AdminTreasuryView(BaseView):
             for year, year_dir in digit_subdirs(type_dir):
                 result[year] = {}
                 for month, month_dir in digit_subdirs(year_dir):
-                    label = month_name(month)
-                    if label:
-                        if month not in result[year]:
-                            result[year][month] = dict(
-                                label=label,
-                                url=self.request.route_path(
-                                    'admin_treasury_files',
-                                    filetype=type_,
-                                    year=year,
-                                    month=month,
-                                ),
-                                nbfiles=len(os.listdir(month_dir))
-                            )
+                    if month in result[year]:
+                        continue
+
+                    entry = self.get_entry(
+                        result,
+                        year,
+                        month,
+                        month_dir,
+                        type_
+                    )
+                    if entry is not None:
+                        result[year][month] = entry
         return result
 
     def __call__(self):
@@ -516,15 +549,22 @@ class MailTreasuryFilesView(BaseView):
         self.request.dbsession.add(job)
         self.request.dbsession.flush()
 
-        celery_job = async_mail_salarysheets.delay(
-            job.id,
-            mails,
-            force,
-        )
-
-        logger.info(u" * The Celery Task {0} has been delayed, its result \
+        try:
+            celery_job = async_mail_salarysheets.delay(
+                job.id,
+                mails,
+                force,
+            )
+            logger.info(u" * The Celery Task {0} has been delayed, its result \
 should be retrieved from the MailingJob : {1}".format(celery_job.id, job.id)
                     )
+        except redis.exceptions.ConnectionError:
+            logger.exception(u"La connexion redis à la base de données n'est \
+pas possible")
+            self.request.session.flash(
+                u"Un problème de connexion a été rencontré, l'outil d'envoi \
+de mail n'est pas disponible", 'error')
+
         return HTTPFound(self.request.route_path('job', id=job.id))
 
     def _base_result_dict(self, filetype):

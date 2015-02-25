@@ -333,6 +333,13 @@ class ExpenseConfig(colander.MappingSchema):
 à la CAE ?",
         )
 
+    active = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Actif",
+        description=u"En décochant cette entrée, elle n'apparaîtra plus dans \
+l'interface, mais restera associée aux notes de frais existantes."
+    )
+
 
 class ExpenseKmConfig(ExpenseConfig):
     """

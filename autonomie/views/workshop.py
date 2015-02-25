@@ -223,7 +223,7 @@ qui n'appartient pas au contexte courant !!!!")
         datas.sort(key=lambda val: val['start_time'])
 
         for data in datas:
-            id_ = data.pop('id')
+            id_ = data.pop('id', None)
             if id_ is None:
                 # New timeslots
                 objects.append(models.Timeslot(**data))

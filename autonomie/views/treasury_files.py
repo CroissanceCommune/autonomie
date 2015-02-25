@@ -123,8 +123,12 @@ def belongs_to_company(filename):
 
     :param str filename: The filename we want to check
     """
-    code_compta = get_code_compta(filename)
-    return Company.query().filter(Company.code_compta==code_compta).count() > 0
+    try:
+        code_compta = get_code_compta(filename)
+        result = Company.query().filter(Company.code_compta==code_compta).count() > 0
+    except:
+        result = False
+    return result
 
 
 def get_company_by_code(code_compta):

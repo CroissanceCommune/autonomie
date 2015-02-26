@@ -107,6 +107,15 @@ class ExpenseType(DBBASE):
     compte_tva = Column(String(15), default="")
     contribution = Column(Boolean(), default=False)
 
+    def __json__(self, request=None):
+        return {
+            "id": self.id,
+            "value": str(self.id),
+            "active": self.active,
+            "code": self.code,
+            "label": u"{0} ({1})".format(self.label, self.code),
+        }
+
 
 class ExpenseKmType(ExpenseType):
     """
@@ -117,6 +126,11 @@ class ExpenseKmType(ExpenseType):
     __mapper_args__ = dict(polymorphic_identity='expensekm')
     id = Column(Integer, ForeignKey('expense_type.id'), primary_key=True)
     amount = Column(Float(precision=4))
+
+    def __json__(self, request=None):
+        res = ExpenseType.__json__(self)
+        res['amount'] = self.amount
+        return res
 
 
 class ExpenseTelType(ExpenseType):
@@ -129,6 +143,11 @@ class ExpenseTelType(ExpenseType):
     id = Column(Integer, ForeignKey('expense_type.id'), primary_key=True)
     percentage = Column(Integer)
     initialize = Column(Boolean, default=True)
+
+    def __json__(self, request=None):
+        res = ExpenseType.__json__(self)
+        res['percentage'] = self.percentage
+        return res
 
 
 def build_state_machine():

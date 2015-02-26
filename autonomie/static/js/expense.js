@@ -36,7 +36,7 @@ var BookMarkModel = Backbone.Model.extend({
     }
   },
   getType: function(type_id){
-    return _.find(AppOptions['expensetypes'], function(type){return type['value'] == type_id;});
+    return _.find(AppOptions['expense_types'], function(type){return type['value'] == type_id;});
   }
   });
 
@@ -141,7 +141,7 @@ var ExpenseLine = BaseExpenseModel.extend({
   total: function(){
     var total = this.getHT() + this.getTva();
     if (this.isSpecial()){
-      var percentage = this.getTypeOption(AppOptions['teltypes']).percentage;
+      var percentage = this.getTypeOption(AppOptions['expensetel_types']).percentage;
       total = getPercent(total, percentage);
     }
     return total;
@@ -156,11 +156,11 @@ var ExpenseLine = BaseExpenseModel.extend({
     /*
      * return True if this expense is a special one (related to phone)
      */
-    return this.getTypeOption(AppOptions['teltypes']) !== undefined;
+    return this.getTypeOption(AppOptions['expensetel_types']) !== undefined;
   },
   hasNoType: function(){
-    var isnottel = _.isUndefined(this.getTypeOption(AppOptions['teltypes']));
-    var isnotexp = _.isUndefined(this.getTypeOption(AppOptions['expensetypes']));
+    var isnottel = _.isUndefined(this.getTypeOption(AppOptions['expensetel_types']));
+    var isnotexp = _.isUndefined(this.getTypeOption(AppOptions['expense_types']));
     if (isnottel && isnotexp){
       return true;
     }else{
@@ -170,9 +170,9 @@ var ExpenseLine = BaseExpenseModel.extend({
   getTypeOptions: function(){
     var arr;
     if (this.isSpecial()){
-      arr = AppOptions['teltypes'];
+      arr = AppOptions['expensetel_types'];
     }else{
-      arr = AppOptions['expensetypes'];
+      arr = AppOptions['expense_types'];
     }
     return arr;
   }
@@ -227,7 +227,7 @@ var ExpenseKmLine = BaseExpenseModel.extend({
     /*
      *  Return the reference used for compensation of km fees
      */
-    var elem = _.where(AppOptions['kmtypes'], {value:this.get('type_id')})[0];
+    var elem = _.where(AppOptions['expensekm_types'], {value:this.get('type_id')})[0];
     if (elem === undefined){
       return 0;
     }
@@ -242,7 +242,7 @@ var ExpenseKmLine = BaseExpenseModel.extend({
     return parseFloat(this.get('km'));
   },
   getTypeOptions: function(){
-    return AppOptions['kmtypes'];
+    return AppOptions['expensekm_types'];
   }
 });
 
@@ -678,7 +678,7 @@ var ExpenseFormView = BaseExpenseFormView.extend({
     return this.updateSelectOptions(category_options, category);
   },
   getTypeOptions: function(){
-    var type_options = AppOptions['expensetypes'];
+    var type_options = _.where(AppOptions['expense_types'], {active: true});
     var type_id = this.model.get('type_id');
     return this.updateSelectOptions(type_options, type_id);
   }
@@ -699,7 +699,7 @@ var ExpenseKmFormView = BaseExpenseFormView.extend({
 
   },
   getTypeOptions: function(){
-    var type_options = AppOptions['kmtypes'];
+    var type_options = _.where(AppOptions['expensekm_types'], {active: true});
     var type_id = this.model.get('type_id');
     return this.updateSelectOptions(type_options, type_id);
   }
@@ -712,7 +712,9 @@ var ExpenseTelFormView = BaseFormView.extend({
     form:"#expenseTelForm"
   },
   templateHelpers: function(){
-    return {type_options: AppOptions['teltypes']};
+    return {
+      type_options: _.where(AppOptions['expensetel_types'], {active: true})
+    };
   }
 });
 

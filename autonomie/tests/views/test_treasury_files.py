@@ -153,12 +153,12 @@ def test_notfound(get_csrf_request):
     result = file_display(request)
     assert(isinstance(result, HTTPNotFound))
 
-def test_admin_treasury(config, pyramid_request):
+def test_admin_treasury(config, pyramid_request, company_125):
     config.add_route("admin_treasury_files", "/{filetype}/{year}/{month}/",)
     view = AdminTreasuryView(None, pyramid_request)
     result_dict = view()
     assert set(result_dict['datas'].keys()) == set(('2010', '2011'))
-    assert result_dict['datas']['2011']['9']['nbfiles'] == 12
+    assert result_dict['datas']['2011']['9']['nbfiles'] == 4
 
 
 def test_mail_treasury_files(dbsession, config, get_csrf_request, company_125):

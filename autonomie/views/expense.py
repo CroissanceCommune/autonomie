@@ -165,42 +165,48 @@ def get_bookmarks(request):
     return BookMarkHandler(request).bookmarks.values()
 
 
+def load_type_ids_from_expense(expense):
+    """
+    Load the ids of the expense types used in this expense
+
+    :returns: a list of ids
+    """
+    res = []
+    if getattr(expense, '__name__', None) == 'expense':
+        for line in expense.lines:
+            res.append(line.type_id)
+        for line in expense.kmlines:
+            res.append(line.type_id)
+
+    return res
+
+
 def expense_options(request):
     """
-        Return options related to the expense configuration
+    Return options related to the expense configuration
     """
-    options = dict()
+    # Load types already used in this expense
+    current_expenses_used_types = load_type_ids_from_expense(request.context)
 
-    options["expensetypes"] = [
+    options = {
+        "expense_types": [],
+        "expensekm_types": [],
+        "expensetel_types": [],
+    }
+    for etype in ExpenseType.query():
+        if etype.id in current_expenses_used_types or etype.active:
+            key = "%s_types" % etype.type
+            options[key].append(etype)
+
+    options['categories'] = [
         {
-        "label":u"{0} ({1})".format(e.label, e.code),
-        "value":str(e.id)
-        }for e in ExpenseType.query()\
-                .filter(ExpenseType.active==True)
-                .filter(ExpenseType.type=='expense')]
-
-    options["kmtypes"] =  [
-        {
-        "label":u"{0} ({1})".format(e.label, e.code),
-        "value":str(e.id),
-        "amount":e.amount
-        }for e in ExpenseKmType.query().filter(ExpenseKmType.active==True)]
-
-    options["teltypes"] = [
-        {
-        "label":u"{0} ({1})".format(e.label, e.code),
-        "value":str(e.id),
-        "percentage":e.percentage
-        }for e in ExpenseTelType.query().filter(ExpenseTelType.active==True)]
-
-    options['categories'] = [{
-        'value':'1',
-        'label':u"Frais liés au fonctionnement de l'entreprise"
+            'value':'1',
+            'label':u"Frais liés au fonctionnement de l'entreprise"
         },
         {
-        'value':'2',
-        'label':u"Frais concernant directement votre activité auprès de vos \
-clients"
+            'value':'2',
+            'label':u"Frais concernant directement votre activité auprès \
+de vos clients"
         }]
 
     options['bookmarks'] = get_bookmarks(request)
@@ -806,8 +812,8 @@ class Expensev1(BaseView):
 
 def expense_optionsv1(request):
     """
-        Return the options for expense edition (type of expenses, associated
-        datas)
+    Return the options for expense edition (type of expenses, associated
+    datas)
     """
     return dict(status='success', result=expense_options(request))
 
@@ -1019,6 +1025,8 @@ def includeme(config):
     config.add_route("expenseoptionsv1", "/api/v1/expenseoptions")
 
     add_rest_views(config, "expenselinev1", Expensev1)
-    config.add_view(expense_optionsv1,
-            route_name="expenseoptionsv1",
-            renderer="json")
+    config.add_view(
+        expense_optionsv1,
+        route_name="expenseoptionsv1",
+        renderer="json"
+    )

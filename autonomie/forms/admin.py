@@ -303,6 +303,13 @@ class ExpenseConfig(colander.MappingSchema):
         Schema for the configuration of different expense types
     """
     id = forms.id_node()
+    active = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Actif",
+        default=True,
+        description=u"En décochant cette entrée, elle n'apparaîtra plus dans \
+l'interface, mais restera associée aux notes de frais existantes."
+    )
 
     label = colander.SchemaNode(
         colander.String(),
@@ -332,13 +339,6 @@ class ExpenseConfig(colander.MappingSchema):
         description=u"Ce type de frais est-il intégré dans la contribution \
 à la CAE ?",
         )
-
-    active = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Actif",
-        description=u"En décochant cette entrée, elle n'apparaîtra plus dans \
-l'interface, mais restera associée aux notes de frais existantes."
-    )
 
 
 class ExpenseKmConfig(ExpenseConfig):

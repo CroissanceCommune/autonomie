@@ -108,7 +108,15 @@
                 <input type='text' class='span10' name="mail_subject" value="${mail_subject}"></input>
                 <label for="mail_message">Message</label>
                 <textarea name="mail_message" class='span10'>${mail_message}</textarea>
-                <span class="help-block">Le contenu du message (les variables entre {} seront remplacées par les variables correspondantes)</span>
+                <span class="help-block">Le contenu du message (les variables entre {} seront remplacées par les variables correspondantes):
+                    <ul class='unstyled'>
+                        <li>{company.name} : Nom de l'entreprise</li>
+                        <li>{company.employees[0].lastname} : Nom du premier employé de l'entreprise</li>
+                        <li>{company.employees[0].firstname} : Prénom du premier employé de l'entreprise</li>
+                        <li>{month} : mois du bulletin de salaire</li>
+                        <li>{year} : année du bulletin de salaire</li>
+                    </ul>
+                </span>
                 <label for="force">Forcer l'envoi des documents déjà expédiés ?</label>
                 <input type="checkbox" value="force" name="force"
                 % if force:

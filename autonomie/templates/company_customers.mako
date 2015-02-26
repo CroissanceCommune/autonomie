@@ -57,7 +57,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                     <td onclick="${onclick}" class="rowlink" >${customer.name}</td>
                     <td onclick="${onclick}" class="visible-desktop rowlink" >${customer.contactLastName} ${customer.contactFirstName}</td>
                     <td style="text-align:right">
-                        ${table_btn(url, u"Voir/Éditer", u"Voir/Éditer ce client", icon=u"icon-pencil")}
+                        ${table_btn(url, u"Modifier", u"Modifier ce client", icon=u"icon-pencil")}
                     </td>
                 </tr>
             % endfor

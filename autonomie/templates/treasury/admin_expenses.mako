@@ -88,7 +88,7 @@ else:
                 </td>
                 <td>
                     <% url = request.route_path('expense', id=expense.id) %>
-                    ${table_btn(url, u'Voir/Éditer', u"Voir la note de frais", icon="pencil" )}
+                    ${table_btn(url, u'Modifier', u"Voir la note de frais", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
                     ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="icon-file" )}
                 </td>

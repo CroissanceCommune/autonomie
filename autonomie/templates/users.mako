@@ -46,7 +46,7 @@
         % if records:
             % for user in records:
                 <tr>
-                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user, reverse=True)}</td>
+                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user)}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.email}</td>
                     <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >
                             % for company in user.companies:

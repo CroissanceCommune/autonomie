@@ -131,7 +131,7 @@ def format_activity_status(activity):
     return status_str
 
 
-def format_account(account, reverse=False, upper=True):
+def format_account(account, reverse=True, upper=True):
     """
         return {firstname} {lastname}
     """
@@ -147,7 +147,7 @@ def format_account(account, reverse=False, upper=True):
     return format_name(firstname, lastname, reverse, upper)
 
 
-def format_name(firstname, lastname, reverse=False, upper=True):
+def format_name(firstname, lastname, reverse=True, upper=True):
     """
         format firstname and lastname in a common format
     """

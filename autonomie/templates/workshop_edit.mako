@@ -97,7 +97,7 @@
                                <div class='control-group'>
                                    <label class="control-label" for="${tag_id}">
                                         <a href='${participant_url}' title='Voir le compte de ce participant'>
-                                            ${api.format_account(participant, reverse=True)}
+                                            ${api.format_account(participant)}
                                         </a>
                                    </label>
                                    <div class='controls'>

@@ -34,7 +34,10 @@ from deform import FileData
 
 from autonomie.forms.validators import validate_image_mime
 from autonomie import forms
-from autonomie.forms import files
+from autonomie.forms import (
+    files,
+    lists,
+)
 from autonomie.utils.image import ImageResizer
 
 log = logging.getLogger(__name__)
@@ -95,6 +98,7 @@ class CompanySchema(colander.MappingSchema):
     """
         Company add/edit form schema
     """
+    user_id = forms.id_node()
     name = colander.SchemaNode(
             colander.String(),
             widget=deferred_edit_adminonly_widget,
@@ -170,3 +174,19 @@ comptabilité",
 
 
 COMPANYSCHEMA = CompanySchema(after_bind=remove_admin_fields)
+
+
+def get_list_schema(company=False):
+    """
+    Return a schema for filtering companies list
+    """
+    schema = lists.BaseListsSchema().clone()
+    schema.add(
+        colander.SchemaNode(
+        colander.String(),
+        name='active',
+        missing="Y",
+        validator=colander.OneOf(('N', 'Y')),
+        widget=deform.widget.HiddenWidget())
+    )
+    return schema

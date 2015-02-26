@@ -29,18 +29,29 @@
 
 import logging
 
+from webhelpers.html.builder import HTML
+
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.models.company import Company
-from autonomie.utils.widgets import ViewLink
+from autonomie.models.user import User
+from autonomie.utils.widgets import (
+    ViewLink,
+    StaticWidget,
+)
 from autonomie.views import (
     BaseFormView,
     submit_btn,
     merge_session_with_post,
+    BaseListView,
 )
-from autonomie.forms.company import COMPANYSCHEMA
+from autonomie.forms.company import (
+    COMPANYSCHEMA,
+    CompanySchema,
+    get_list_schema,
+)
 
 
 log = logging.getLogger(__name__)
@@ -131,29 +142,96 @@ def company_view(request):
                 link_list=link_list)
 
 
-def company_enable(request, company=None):
+ENABLE_MSG = u"L'entreprise {0} a été (ré)activée."
+DISABLE_MSG = u"L'entreprise {0} a été désactivée."
+
+ENABLE_ERR_MSG = u"Erreur à l'activation de l'entreprise {0}."
+DISABLE_ERR_MSG = u"Erreur à la désactivation de l'entreprise {0}."
+
+
+def company_toggle_active(request, company, msg, err_msg, action):
     """
-        Enable a company
+    Toggle compay enabled/disabled
     """
     if company is None:
         company = request.context
-    if not company.enabled():
-        try:
-            company.enable()
-            request.dbsession.merge(company)
-            log.info(u"The company {0} has been enabled".\
-                    format(company.name))
-            message = u"L'entreprise {0} a été (ré)activée".\
-                    format(company.name)
-            request.session.flash(message)
-        except:
-            err_msg = u"Erreur à l'activation de l'entreprise {0}"\
-                    .format(company.name)
-            log.exception(err_msg)
-            request.session.flash(err_msg, "error")
-    if request.context.__name__ == 'company':
-        return HTTPFound(request.route_path("users"))
 
+    try:
+        getattr(company, action)()
+        request.dbsession.merge(company)
+        message = msg.format(company.name)
+        log.info(message)
+        request.session.flash(message)
+        request.session.flash(message)
+    except:
+        err_message = err_msg.format(company.name)
+        log.exception(err_message)
+        request.session.flash(err_message, "error")
+
+    if request.context.__name__ != 'company':
+        # We don't want to raise a redirect if the view code is called from
+        # another view
+        return
+    else:
+        come_from = request.referer
+        return HTTPFound(come_from)
+
+
+def company_disable(request, company=None):
+    """
+    Disable a company
+    """
+    msg = DISABLE_MSG
+    err_msg = DISABLE_ERR_MSG
+    action = "disable"
+    return company_toggle_active(request, company, msg, err_msg, action)
+
+
+def company_enable(request, company=None):
+    """
+    Ensable a company
+    """
+    msg = ENABLE_MSG
+    err_msg = ENABLE_ERR_MSG
+    action = "enable"
+    return company_toggle_active(request, company, msg, err_msg, action)
+
+
+class CompanyList(BaseListView):
+    title = u"Entreprises"
+    schema = get_list_schema()
+    sort_columns = dict(name=Company.name)
+    default_sort = 'name'
+    default_direction = 'asc'
+
+    def query(self):
+        return Company.query(active=False)
+
+    def filter_active(self, query, appstruct):
+        active = appstruct['active']
+        return query.filter(Company.active == active)
+
+    def filter_search(self, query, appstruct):
+        search = appstruct.get('search')
+        if search:
+            query = query.filter(Company.name.like('%' + search + '%'))
+        return query
+
+    def populate_actionmenu(self, appstruct):
+        self.request.actionmenu.add(self._get_active_btn(appstruct))
+
+    def _get_active_btn(self, appstruct):
+        """
+            return the show active button
+        """
+        active = appstruct['active']
+        if active == 'N':
+            url = self.request.current_route_path(_query=dict(active="Y"))
+            link = HTML.a(u"Afficher les entreprises actives",  href=url)
+        else:
+            url = self.request.current_route_path(_query=dict(active="N"))
+            link = HTML.a(u"Afficher les entreprises désactivées", href=url)
+        return StaticWidget(link)
 
 class CompanyAdd(BaseFormView):
     """
@@ -161,21 +239,28 @@ class CompanyAdd(BaseFormView):
     """
     add_template_vars = ('title',)
     title = u"Ajouter une entreprise"
-    schema = COMPANYSCHEMA
+    schema = CompanySchema()
     buttons = (submit_btn,)
 
     def before(self, form):
         """
-            prepopulate the form and the actionmenu
+        prepopulate the form and the actionmenu
         """
         populate_actionmenu(self.request)
+        if 'user_id' in self.request.params:
+            form.set_appstruct(dict(user_id=self.request.params['user_id']))
 
     def submit_success(self, appstruct):
         """
-            Edit the database entry and return reidrect
+        Edit the database entry and return redirect
         """
+        user_id = appstruct.get('user_id')
         company = Company()
         company = merge_session_with_post(company, appstruct)
+        if user_id is not None:
+            user_account = User.get(user_id)
+            if user_account is not None:
+                company.employees.append(user_account)
         self.dbsession.add(company)
         self.dbsession.flush()
         message = u"L'entreprise '{0}' a bien été ajoutée".format(company.name)
@@ -297,33 +382,69 @@ def includeme(config):
     """
         Add all company related views
     """
-    config.add_route('company', '/company/{id:\d+}', traverse='/companies/{id}')
-    config.add_view(company_index,
-                    route_name='company',
-                    renderer='company_index.mako',
-                    request_param='action=index',
-                    permission='edit')
-    config.add_view(company_view,
-                    route_name='company',
-                    renderer='company.mako',
-                    permission="view")
-    config.add_view(CompanyEdit,
-                    route_name='company',
-                    renderer='company_edit.mako',
-                    request_param='action=edit',
-                    permission="edit")
-    config.add_view(company_enable,
-                    route_name='company',
-                    renderer='company_edit.mako',
-                    request_param='action=enable',
-                    permission="edit")
+    config.add_route(
+        'companies',
+        "/companies",
+    )
+    config.add_route(
+        'company',
+        '/companies/{id:\d+}',
+        traverse='/companies/{id}'
+    )
+    config.add_view(
+        CompanyList,
+        route_name='companies',
+        renderer='companies.mako',
+        permission='manage',
+    )
+    config.add_view(
+        CompanyAdd,
+        route_name='companies',
+        renderer="base/formpage.mako",
+        request_param="action=add",
+        permission="manage",
+    )
+    config.add_view(
+        company_index,
+        route_name='company',
+        renderer='company_index.mako',
+        request_param='action=index',
+        permission='edit',
+    )
+    config.add_view(
+        company_view,
+        route_name='company',
+        renderer='company.mako',
+        permission="view",
+    )
+    config.add_view(
+        CompanyEdit,
+        route_name='company',
+        renderer='base/formpage.mako',
+        request_param='action=edit',
+        permission="edit",
+    )
+    config.add_view(
+        company_enable,
+        route_name='company',
+        request_param='action=enable',
+        permission="edit",
+    )
+    config.add_view(
+        company_disable,
+        route_name='company',
+        request_param='action=disable',
+        permission="edit",
+    )
     # same panel as html view
     for panel, request_param in (
             ('company_tasks', 'action=tasks_html',),
             ('company_events', 'action=events_html',),
             ):
-        config.add_view(make_panel_wrapper_view(panel),
-                route_name='company',
-                renderer="panel_wrapper.mako",
-                request_param=request_param,
-                permission="edit")
+        config.add_view(
+            make_panel_wrapper_view(panel),
+            route_name='company',
+            renderer="panel_wrapper.mako",
+            request_param=request_param,
+            permission="edit",
+        )

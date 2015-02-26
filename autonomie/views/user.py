@@ -68,6 +68,7 @@ from autonomie.forms.user import (
     get_userdatas_schema,
     get_userdatas_list_schema,
     UserDisableSchema,
+    get_company_association_schema,
 )
 from autonomie.views import (
     BaseListView,
@@ -171,13 +172,32 @@ class PermanentUserAddView(BaseFormView):
         """
         return self.request.route_path("user", id=user_model.id)
 
+    def _handle_companies(self, company_names, user_model):
+        """
+        Handle companies if needed
+
+        if company_names is None (contractor case): nothing happens
+        if company_names is [] (permanent case): user will have no companies
+        """
+        if company_names is not None:
+            companies = []
+
+            for company_name in company_names:
+                company = self._get_company(company_name, user_model)
+                companies.append(company)
+            user_model.companies = companies
+
     def submit_success(self, appstruct):
         """
             Add a user to the database
             Add its companies
             Add a relationship between companies and the new account
         """
-        company_ids = set(appstruct.pop('companies', []))
+        if "companies" in appstruct:
+            company_names = set(appstruct.pop('companies'))
+        else:
+            company_names = None
+
         groups = set(appstruct.pop('groups', []))
         password = appstruct.pop('pwd', None)
 
@@ -193,12 +213,7 @@ class PermanentUserAddView(BaseFormView):
 
         user_model.groups = groups
 
-        companies = []
-
-        for company_name in company_ids:
-            company = self._get_company(company_name, user_model)
-            companies.append(company)
-        user_model.companies = companies
+        self._handle_companies(company_names, user_model)
 
         user_model = self.dbsession.merge(user_model)
 
@@ -425,7 +440,11 @@ mot de passe : {1}".format(login, password, url)
 
 
 class UserDatasEdit(UserDatasAdd):
-    add_template_vars = ('doctypes_form', 'account_form', 'doctemplates', )
+    add_template_vars = (
+        'doctypes_form',
+        'account_form',
+        'doctemplates',
+    )
 
     @property
     def title(self):
@@ -517,6 +536,42 @@ class UserDatasEdit(UserDatasAdd):
         templates = files.Template.query()
         templates = templates.filter(files.Template.active==True)
         return templates.all()
+
+
+class CompanyAssociationView(BaseFormView):
+    """
+    Associate a user with a company
+    """
+    title = u"Associer un utlisateur à une entreprise"
+    schema = get_company_association_schema()
+
+    def before(self, form):
+        self.request.actionmenu.add(
+            ViewLink(
+                "Retour",
+                "manage",
+                path="userdata",
+                id=self.context.id,
+                _anchor="tab5"
+            )
+        )
+
+    def submit_success(self, appstruct):
+        print("Submit")
+        print(appstruct)
+        for name in appstruct.get('companies', []):
+            company = Company.query().filter(Company.name==name).first()
+            if company is not None:
+                self.context.user.companies.append(company)
+                self.request.dbsession.merge(self.context.user)
+
+        url = self.request.route_path(
+            "userdata",
+            id=self.context.id,
+            _anchor="tab5"
+        )
+        return HTTPFound(url)
+
 
 
 def record_compilation(context, request, template):
@@ -1119,6 +1174,14 @@ def includeme(config):
         userdatas_delete,
         route_name='userdata',
         request_param='action=delete',
+        permission='manage'
+    )
+
+    config.add_view(
+        CompanyAssociationView,
+        route_name='userdata',
+        request_param='action=associate',
+        renderer="base/formpage.mako",
         permission='manage'
     )
 

@@ -26,6 +26,7 @@
     registration
 </%doc>
 <%inherit file="/base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
 <% userdata = request.context %>
@@ -74,6 +75,13 @@
             % if user is not None and not user.enabled():
                 <span class='label label-warning'>Ce compte a été désactivé</span>
             % endif
+        </a>
+        </li>
+    % endif
+    % if user is not None:
+        <li>
+        <a href="#tab5" data-toggle='tab'>
+            Entreprise(s)
         </a>
         </li>
     % endif
@@ -165,6 +173,62 @@
             </div>
         </div>
     </div>
+    % endif
+    % if user is not None:
+        <div class='tab-pane row-fluid' id='tab5'>
+            <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}" class='btn btn-success'>
+                Associer à une nouvelle entreprise
+            </a>
+            <a href="${request.route_path('userdata', id=userdata.id, _query=dict(action='associate'))}" class='btn btn-success'>
+                Associer à une entreprise existante
+            </a>
+            <table class="table table-striped table-condensed table-hover">
+                <thead>
+                    <th>Nom</th>
+                    <th>Adresse e-mail</th>
+                    <th>Entrepreneur(s)</th>
+                    <th style="text-align:center">Actions</th>
+                </thead>
+                <tbody>
+                    % for company in user.companies:
+                        <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
+                        <% onclick = "document.location='{url}'".format(url=url) %>
+                        <tr>
+                            <td onclick="${onclick}" class="rowlink">
+                                ${company.name}
+                                % if not company.enabled():
+                                    <span class='label label-warning'>Cette entreprise a été désactivée</span>
+                                % endif
+                            </td>
+                            <td onclick="${onclick}" class="rowlink">
+                                ${company.email}
+                            </td>
+                            <td onclick="${onclick}" class="rowlink">
+                                <ul>
+                                    % for user in company.employees:
+                                        <li>
+                                            <a href="${request.route_path('user', id=user.id)}">
+                                                ${api.format_account(user)}
+                                            </a>
+                                        </li>
+                                    % endfor
+                                </ul>
+                            </td>
+                            <td>
+                                ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='icon-pencil')}
+                                % if company.enabled():
+                                    <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
+                                    ${table_btn(url, u"Désactiver", u"désactiver l'entreprise", icon='icon-pencil')}
+                                % else:
+                                    <% url = request.route_path('company', id=company.id, _query=dict(action="enable")) %>
+                                    ${table_btn(url, u"Activer", u"Activer l'entreprise", icon='icon-pencil')}
+                                % endif
+                            </td>
+                        </tr>
+                    % endfor
+                </tbody>
+            </table>
+        </div>
     % endif
 </div>
 </%block>

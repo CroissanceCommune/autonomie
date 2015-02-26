@@ -98,8 +98,10 @@ def deferred_company_input(node, kw):
         Deferred company autocomplete input widget
     """
     companies = get_companies_choices()
-    wid = deform.widget.AutocompleteInputWidget(values=companies,
-            template="autonomie:deform_templates/autocomple_input.pt")
+    wid = deform.widget.AutocompleteInputWidget(
+        values=companies,
+        template="autonomie:deform_templates/autocomple_input.pt"
+    )
     return wid
 
 
@@ -389,6 +391,15 @@ def get_user_schema(edit=False, permanent=True):
                 title=u"Rôle de l'utilisateur",
             )
         )
+        schema.add(
+            CompanySchema(
+                name='companies',
+                title=u"Entreprise(s)",
+                widget=deform.widget.SequenceWidget(
+                    add_subitem_text_template=u"Ajouter une entreprise"
+                )
+            )
+        )
     else:
         schema.add(
             colander.SchemaNode(
@@ -400,15 +411,6 @@ def get_user_schema(edit=False, permanent=True):
             )
         )
 
-    schema.add(
-        CompanySchema(
-            name='companies',
-            title=u"Entreprise(s)",
-            widget=deform.widget.SequenceWidget(
-                add_subitem_text_template=u"Ajouter une entreprise"
-            )
-        )
-    )
 
     if edit:
         schema['login'].validator = deferred_login_validator
@@ -416,6 +418,26 @@ def get_user_schema(edit=False, permanent=True):
     else:
         schema['login'].validator = get_unique_login_validator()
 
+    return schema
+
+
+def get_company_association_schema():
+    """
+    Return the schema used to associate a user to an existing company
+    """
+    schema = colander.Schema()
+    schema.add(
+        CompanySchema(
+            name='companies',
+            title=u"Entreprise(s)",
+            widget=deform.widget.SequenceWidget(
+                add_subitem_text_template=u"Ajouter une entreprise",
+                min_len=1,
+            ),
+            description=u"Taper les premières lettres du nom \
+d'une entreprise existante"
+        )
+    )
     return schema
 
 

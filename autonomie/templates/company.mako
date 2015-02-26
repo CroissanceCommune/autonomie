@@ -52,9 +52,15 @@
             <h3>Il n'y a aucun compte associé à cette entreprise</h3>
         %endif
 
-        % for empl in company.employees:
-            <a href="${request.route_path('user', id=empl.id)}" title='Voir ce compte'>
-                <i class='icon-user'></i>${empl.lastname} ${empl.firstname}
+        % for user in company.employees:
+            % if getattr(user, 'userdatas', None) and not request.user.is_contractor():
+                <% url = request.route_path('userdata', id=user.userdatas.id) %>
+            % else:
+                <% url = request.route_path('user', id=user.id) %>
+            % endif
+
+            <a href="${url}" title='Voir ce compte'>
+                <i class='icon-user'></i>${api.format_account(user)}
             </a>
             <br />
             <br />

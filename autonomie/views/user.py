@@ -557,8 +557,6 @@ class CompanyAssociationView(BaseFormView):
         )
 
     def submit_success(self, appstruct):
-        print("Submit")
-        print(appstruct)
         for name in appstruct.get('companies', []):
             company = Company.query().filter(Company.name==name).first()
             if company is not None:

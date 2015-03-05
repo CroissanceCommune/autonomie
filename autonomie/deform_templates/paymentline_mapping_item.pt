@@ -1,0 +1,16 @@
+<div tal:attributes="class= field.schema.css_class">
+    ${structure: field.serialize(cstruct)}
+    % if field.error and not field.widget.hidden and not field.typ.__class__.__name__=='Mapping':
+        <span class="help-inline">
+            % for msg in field.error.messages():
+                <span>${msg}</span>
+                ${msg}
+            % endfor
+        </span>
+    % endif
+    % if field.description:
+        <span class="help-block">
+            ${field.description}
+        </span>
+    % endif
+</div>

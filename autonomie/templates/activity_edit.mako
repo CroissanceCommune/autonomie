@@ -25,10 +25,10 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
-<a class='btn pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='icon-file'></i>PDF</a>
+<a class='btn btn-default pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>PDF</a>
 <% activity = request.context %>
-<div class='row-fluid'>
-    <div class='span4'>
+<div class='row'>
+    <div class='col-md-4'>
             <% companies = set() %>
             <div class='well'>
                 <h3>Participants</h3>
@@ -64,7 +64,7 @@
                 ${format_filelist(activity)}
             </div>
     </div>
-    <div class='span8'>
+    <div class='col-md-8'>
             <div class='well'>
                 <% items = (\
                 (u'Conseiller(s)', ', '.join([api.format_account(conseiller) for conseiller in activity.conseillers])), \
@@ -74,11 +74,11 @@
                     (u"Mode d'entretien", activity.mode), \
                     )\
                 %>
-                <div class='row-fluid'>
-                    <div class='span7'>
+                <div class='row'>
+                    <div class='col-md-7'>
                         ${definition_list(items)}
                     </div>
-                    <div class='span5'>
+                    <div class='col-md-5'>
                         <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
                             Editer
                         </button>
@@ -107,8 +107,8 @@
         ${record_form|n}
     </div>
 </div>
-<div class='row-fluid'>
-    <div class="span4">
+<div class='row'>
+    <div class="col-md-4">
     </div>
 </div>
 </%block>

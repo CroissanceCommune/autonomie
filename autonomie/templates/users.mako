@@ -45,21 +45,25 @@
     <tbody>
         % if records:
             % for user in records:
-                <tr>
-                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${api.format_account(user)}</td>
-                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >${user.email}</td>
-                    <td onclick="document.location='${request.route_path("user", id=user.id)}'" class="rowlink" >
+                % if not request.user.is_contractor() and user.userdatas is not None:
+                    <% url = request.route_path('userdata', id=user.userdatas.id) %>
+                % else:
+                    <% url = request.route_path('user', id=user.id) %>
+                %endif
+                <tr class="clickable-row" data-href="${url}">
+                    <td>${api.format_account(user)}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <ul class="list-unstyled">
                             % for company in user.companies:
-                                    <blockquote>
-                                        ${company.name}
+                                <li>
+                                ${company.name} (<small>${company.goal}</small>)
                                     % if not company.enabled():
                                         <span class='label label-warning'>Cette entreprise a été désactivée</span>
                                     % endif
-                                        <small>
-                                            ${company.goal}
-                                        </small>
-                                    </blockquote>
+                                </li>
                             % endfor
+                        </ul>
                     </td>
                 </tr>
             % endfor

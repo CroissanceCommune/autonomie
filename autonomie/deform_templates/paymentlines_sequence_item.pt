@@ -1,0 +1,14 @@
+<div
+  class='row taskline'
+  tal:attributes="style background-color:#d54836 and field.error"
+  id="${field.oid}">
+    <div class='col-md-1'>
+        <button
+          type='button'
+          class='close'
+          onclick="$(this).parent().parent().remove();">
+          x
+        </button>
+    </div>
+</div>
+

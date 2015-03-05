@@ -24,8 +24,8 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%block name='actionmenu'>
-<div class='row-fluid'>
-    <div class='span12'>
+<div class='row'>
+    <div class='col-md-12'>
         ${form|n}
     </div>
 </div>

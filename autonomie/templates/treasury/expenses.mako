@@ -28,8 +28,8 @@
 % if conf_msg is not UNDEFINED:
     <br /><br />
     <div class='row'>
-        <div class='span6 offset3'>
-            <div class="alert alert-error">
+        <div class='col-md-6 col-md-offset-3'>
+            <div class="alert alert-danger">
                 ${conf_msg}
             </div>
         </div>
@@ -39,7 +39,7 @@
             <div class='section-header'>
                 <a href="#" data-toggle='collapse' data-target='#year_${year}'>
                     <div>
-                        <i style="vertical-align:middle" class="icon-folder-open"></i>&nbsp;${year}
+                        <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;${year}
                     </div>
                 </a>
             </div>
@@ -66,8 +66,8 @@
                     <td>${api.format_expense_status(expense)}</td>
                     <td>${api.format_amount(expense.total, trim=True)|n}</td>
                     <td style='text-align:right'>
-                        ${table_btn(request.route_path('expense', id=expense.id), u"Voir", u"Voir cette note de frais", 'icon-search')}
-                        ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de frais au format xslx", "icon-file")}
+                        ${table_btn(request.route_path('expense', id=expense.id), u"Voir", u"Voir cette note de frais", 'glyphicon glyphicon-search')}
+                        ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de frais au format xslx", "glyphicon glyphicon-file")}
                     </td>
                 </tr>
             % endfor

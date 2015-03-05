@@ -53,7 +53,7 @@
         <% colspan = 1 %>
     % endif
     <div class='row'>
-        <table class='lines span12'>
+        <table class='lines col-md-12'>
             <thead>
                 <th colspan='${colspan}' class='title' style='text-align:left'>Conditions de paiement</th>
             </thead>

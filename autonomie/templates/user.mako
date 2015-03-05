@@ -26,14 +26,14 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_company" />
 <%block name='content'>
-<div class='row-fluid'>
-    <div class='span5'>
+<div class='row'>
+    <div class='col-md-5'>
         <div class='well'>
-            <div class='row-fluid'>
-                <div class='span2'>
+            <div class='row'>
+                <div class='col-md-2'>
                     <i class='fa fa-4x fa-user'></i>
                 </div>
-                <div class='span10'>
+                <div class='col-md-10'>
             <dl class="dl-horizontal">
                 % for label, value in ((u'Identifiant', user.login), (u"Nom", user.lastname), (u"Prénom", user.firstname)):
                     %if value:
@@ -57,7 +57,7 @@
 </div>
         </div>
     </div>
-    <div class='span6 offset1'>
+    <div class='col-md-6 col-md-offset-1'>
         <div class='well'>
             % if len(user.companies) <= 1:
                 <h3>Entreprise</h3>

@@ -29,9 +29,12 @@
 <%namespace file="/base/utils.mako" import="esc"/>
 <%namespace file="/base/utils.mako" import="address"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
+
+
 <%block name='css'>
 <link href="${request.static_url('autonomie:static/css/task.css')}" rel="stylesheet"  type="text/css" />
 </%block>
+
 <%block name='content'>
 % if request.context.type_ in ('cancelinvoice', 'estimation', 'invoice'):
      <div class='well'>
@@ -50,8 +53,8 @@
         </dl>
 ${form|n}
     <div style="display:none;" id='discount_popup'>
-        <form id="discount_temp" class="form-horizontal">
-            <div class="control-group">
+        <form id="discount_temp" class="">
+            <div class="form-group">
                 <div class="controls">
             <select id="discount_type_select">
                 <option value="value" selected="true">En montant fixe</option>
@@ -59,20 +62,20 @@ ${form|n}
             </select>
              </div>
          </div>
-            <div class="control-group">
+            <div class="form-group">
                 <label class='control-label' for="discount_temp_description">Description</label>
                 <div class="controls">
                     <textarea name="discount_temp_description" rows="2"></textarea>
                 </div>
             </div>
             <div id='value_configuration'>
-                <div class="control-group">
+                <div class="form-group">
                     <label class='control-label' for="discount_temp_value">Montant</label>
                     <div class="controls">
                         <input type="text" name="discount_temp_value">
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="form-group">
                     <label class='control-label' for="discount_temp_tva">Tva</label>
                     <div class="controls">
                         <select name="discount_temp_tva" >
@@ -88,12 +91,12 @@ ${form|n}
                 </div>
             </div>
             <div id='percent_configuration' style='display:none'>
-                <div class="control-group">
+                <div class="form-group">
                     <label class='control-label' for="discount_temp_percent">Pourcentage</label>
                     <div class="controls">
-                        <div class="input-append">
+                        <div class="input-group">
                             <!-- Important : ici le span et l'input sont sur la même ligne (les espaces font bugger le rendu -->
-                            <input type="text" name="discount_temp_percent" class="span2" style="z-index:2500;"><span class="add-on">%</span>
+                            <input type="text" name="discount_temp_percent" class="col-md-2" style="z-index:2500;"><span class="input-group-addon">%</span>
                         </div>
                     </div>
                 </div>
@@ -117,6 +120,11 @@ AppOptions['loadurl'] = "${load_options_url}";
     AppOptions['manager'] = false;
 % else:
     AppOptions['manager'] = true;
+% endif
+% if edit:
+    AppOptions['edit'] = true;
+% else:
+    AppOptions['edit'] = false;
 % endif
 </%block>
 

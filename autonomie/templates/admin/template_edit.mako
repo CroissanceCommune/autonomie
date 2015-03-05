@@ -22,8 +22,8 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name='content'>
-<div class='row-fluid'>
-    <div class='span6 offset3 well'>
+<div class='row'>
+    <div class='col-md-6 col-md-offset-3 well'>
         <dl class='dl-horizontal'>
             <dt>Description du fichier</dt><dd>${request.context.description}</dd>
             <dt>Nom du fichier</dt><dd> ${request.context.name}</dd>
@@ -37,8 +37,8 @@
 </div>
 <h3 class='text-center'>Éditer</h3>
 <hr>
-<div class='row-fluid'>
-    <div class='span6 offset3'>
+<div class='row'>
+    <div class='col-md-6 col-md-offset-3'>
         ${form|n}
     </div>
 </div>

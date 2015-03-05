@@ -1,0 +1,71 @@
+<div>
+    <input type="hidden" name="__start__" value="${field.name}:sequence"/>
+    <div class='row linesblockheader'>
+        <div class='col-md-5'>Libellé</div>
+        <div class='col-md-2'>Date</div>
+        <div class='col-md-2 col-md-offset-2 paymentamount'>Montant</div>
+    </div>
+    <div id='account_container' style='display:none;'>
+        <div class='col-md-5' style="margin-left:0px;">Facture d'acompte</div>
+        <div class='col-md-2'>À la commande</div>
+        <div class='col-md-2 col-md-offset-2 paymentamount' id='account_amount'><div class='input'>0,00 €</div></div>
+    </div>
+    <div id='paymentcontainer'></div>
+    <input type="hidden" name="__end__" value="${field.name}:sequence"/>
+    <script
+      type="text/javascript"
+      tal:define="solde subfields[-1][0];
+                  soldefield subfields[-1][1];
+                  intermediary_payments subfields[:-1];"
+    >
+    function initPaymentRows(){
+      var description = "";
+      <!-- We format the lines to display them correctly in the text area -->
+      <tal:for
+          tal:repeat="line solde.get('description', 'Solde').splitlines()">
+        description += "${line}";
+        <tal:if tal:condition='not repeat.line.end'>
+        description += "\n";
+        </tal:if>
+      </tal:for>
+          var solde = {
+              amount:formatAmount("${solde.get('amount')}"),
+              description:description,
+              paymentDate:"${solde.get('paymentDate')}",
+              readonly:true,
+              id:1000
+          };
+        <!-- Display errors if needed -->
+        <tal:if tal:condition="soldefield.error">
+          <tal:for tal:repeat="pair soldefield.error.asdict().items()">
+            solde["${pair[0]}_error"] = "${pair[1]}";
+          </tal:for>
+        </tal:if>
+        addPaymentRow(solde, "#paymentcontainer");
+
+        <!-- We go through the other payment rows and we add them in readonly mode (js code further checks if we need to make them editable-->
+        <tal:for tal:repeat="sub intermediary_payments">
+          var description = "";
+          <tal:for tal:repeat="line sub[0]['description'].splitlines()">
+            description += "${line}";
+            <tal:if tal:condition='not repeat.line.end'>
+            description += "\n";
+            </tal:if>
+          </tal:for>
+          var row = {
+              amount:formatAmount("${sub[0].get('amount')}"),
+              description:description,
+              paymentDate:"${sub[0].get('paymentDate')}",
+              readonly:true
+          };
+          <!-- Display errors if needed -->
+          <tal:if tal:condition="sub[1].error">
+            <tal:for tal:repeat="pair sub[1].error.asdict().items()">
+              row["${pair[0]}_error"] = "${pair[1]}";
+            </tal:for>
+          </tal:if>
+          addPaymentRow(row);
+        </tal:for>
+    }
+    </script>
+</div>

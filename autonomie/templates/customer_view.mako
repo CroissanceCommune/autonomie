@@ -28,8 +28,8 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="table_btn" />
 <%block name='content'>
-<div class="row-fluid">
-    <div class='span4'>
+<div class="row">
+    <div class='col-md-4'>
         <div class='well'>
             <h3>Entreprise ${customer.name.upper()}</h3>
             <dl>
@@ -87,9 +87,9 @@
             </dl>
         </div>
     </div>
-    <div class='span8'>
+    <div class='col-md-8'>
         <h2>Projets</h2>
-        <a class='btn' href='${request.route_path("company_projects", id=customer.company.id, _query=dict(action="add", customer=customer.id))}'>
+        <a class='btn btn-default' href='${request.route_path("company_projects", id=customer.company.id, _query=dict(action="add", customer=customer.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>Nouveau projet
         </a>
         %if customer.projects:
@@ -116,7 +116,7 @@
                                 </td>
                                 <td>
                                     <div class='btn-group'>
-                                        ${table_btn(request.route_path("project", id=project.id), u"Voir", "Voir ce projet", icon=u"icon-pencil")}
+                                        ${table_btn(request.route_path("project", id=project.id), u"Voir", "Voir ce projet", icon=u"glyphicon glyphicon-pencil")}
                                         %if not project.is_archived():
                                             ${table_btn(request.route_path("project_estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"ui-icon-plusthick")}
                                             ${table_btn(request.route_path("project_invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"ui-icon-plusthick")}
@@ -136,8 +136,8 @@
         %endif
     </div>
 </div>
-<div class='row-fluid'>
-    <div class='span12'>
+<div class='row'>
+    <div class='col-md-12'>
         <div class='well'>
             % if customer.comments:
                 <h3>Commentaires</h3>

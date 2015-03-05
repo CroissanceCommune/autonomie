@@ -29,7 +29,7 @@
     #period_form label{
         width:0px;
     }
-    #period_form .control-group, #period_form .form-actions{
+    #period_form .form-group, #period_form .form-actions{
         float:left;
         display:inline-block;
         padding:5px;
@@ -43,16 +43,16 @@
     }
 </style>
 <br />
-<div class="row-fluid">
+<div class="row">
     <div id="header-container">
     </div>
 </div>
-<a class='btn pull-right' href='#print'><i class='icon-print'></i>Imprimer</a>
-<a class='btn pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='icon-file'></i>Export</a>
+<a class='btn btn-default pull-right' href='#print'><i class='glyphicon glyphicon-print'></i>Imprimer</a>
+<a class='btn btn-default pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>Export</a>
 ${period_form.render()|n}
 <hr />
     <div class="well hidden-print">
-        <span class="label label-important"><i class='icon-white icon-play'></i></span>
+        <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
 % if request.context.status == 'resulted':
         Cette note de frais a été payée.
 % elif request.context.status == 'valid':
@@ -82,7 +82,7 @@ ${period_form.render()|n}
 </p>
 % endif
     </div>
-<div class="row-fluid hidden-print">
+<div class="row hidden-print">
 % for com in communication_history:
     % if loop.first:
         <div class="well">
@@ -100,17 +100,17 @@ ${period_form.render()|n}
 </div>
 % if edit:
     <div class="hidden-print">
-    <a href="#lines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais</a>
-    <a href="#kmlines/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>
-    <a href="#tel/add" class='btn btn-large visible-tablet hidden-desktop' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
+        <a href="#lines/add" class='btn btn-info visible-sm hidden-lg' title="Ajouter une ligne"><i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter des frais</a>
+        <a href="#kmlines/add" class='btn btn-info visible-sm hidden-lg' title="Ajouter une ligne"><i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>
+        <a href="#tel/add" class='btn btn-info visible-sm hidden-lg' title="Ajouter une ligne"><i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
 </div>
 % endif
-<div class='row-fluid'>
-    <div class='span12' id="expenses"></div>
+<div class='row'>
+    <div class='col-md-12' id="expenses"></div>
 </div>
-<div class='row-fluid'>
-    <div class='span12' id="expenseskm"></div>
-    <div id="form-container" class='span4'></div>
+<div class='row'>
+    <div class='col-md-12' id="expenseskm"></div>
+    <div id="form-container" class='col-md-4'></div>
 </div>
 <hr />
 <p class='lead' id='total' style='text-align:right'></p>

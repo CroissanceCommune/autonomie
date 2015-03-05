@@ -1,0 +1,3 @@
+<div class='form-group estimationamounts col-md-offset-9 row'>
+  <div class="col-md-6"><label>${options['label']}</label></div><div class='col-md-6' id="${options['id']}"><div class='input'></div></div>
+</div>

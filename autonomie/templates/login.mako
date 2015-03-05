@@ -23,31 +23,30 @@
 </%doc>
 
 <%inherit file="base.mako" ></%inherit>
+<%block name="headtitle">
+</%block>
 <%block name='content'>
 <style>
-    .form-horizontal .form-actions{
-        padding:15px 30px;
-    }
-    .form-actions .btn{
-        width:100%;
-        padding:5px;
-    }
     .loginbox{
-        border:1px solid #ddd;
-        overflow:hidden;
-        border-radius: 4px 4px 4px 4px;
-        margin-top:10px;
-        background-color:#efefef;
-        padding-top:5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-top:15px;
     }
     .loginbox legend{
+        text-align:center;
+    }
+    .loginbox img-div{
+        margin-bottom:15px;
+        text-align:center;
+    }
+    .loginbox h1{
         text-align:center;
     }
 </style>
 <div class='container'>
 <div class='row'>
-    <div class='span6 offset3 loginbox'>
-        <div style='text-align:center;'>
+    <div class='col-md-6 col-md-offset-3 loginbox'>
+        <div style='text-align:center; margin-bottom:15px;'>
             <img src="/public/logo.png" alt='Votre CAE' />
         </div>
         ${html_form|n}

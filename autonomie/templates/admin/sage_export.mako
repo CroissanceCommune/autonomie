@@ -25,20 +25,20 @@
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
 % if check_messages is not None:
-    <div class='row-fluid'>
-        <div class='span6 offset3'>
+    <div class='row'>
+        <div class='col-md-6 col-md-offset-3'>
             <h2>${check_messages['title']}</h2>
         </div>
     </div>
-    <p class='text-error'>
+    <p class='text-danger'>
     % for message in check_messages['errors']:
         <b>*</b> ${message|n}<br />
     % endfor
     </p>
 % endif
 % for form in forms:
-    <div class='row-fluid'>
-    <div class='span6 offset3'>
+    <div class='row'>
+    <div class='col-md-6 col-md-offset-3'>
         ${form|n}
     </div>
 </div>

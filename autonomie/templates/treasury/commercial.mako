@@ -24,8 +24,8 @@
 
 <%inherit file="/base.mako"></%inherit>
 <%block name='content'>
-<div class='row-fluid'>
-<div class='span8 offset2'>
+<div class='row'>
+<div class='col-md-8 col-md-offset-2'>
 <table class='table table-striped table-bordered' style="margin-top:15px">
 <tr><td><b>Nombre de devis rédigés</b></td><td><b>${estimations}</b></td></tr>
 <tr><td><b>Nombre de devis concrétisés</b></td><td><b>${validated_estimations}</b></td></tr>
@@ -33,12 +33,12 @@
 </table>
 </div>
 </div>
-<div class='row-fluid'>
-    <div class='span2 offset8'>
+<div class='row'>
+    <div class='col-md-2 col-md-offset-8'>
         ${year_form.render()|n}
     </div>
 </div>
-<div class='row-fluid'>
+<div class='row'>
     <table class='table table-striped table-bordered' style="margin-top:15px">
         <thead>
             <th>Description</th>
@@ -63,7 +63,7 @@
                             % else:
                                 onclick='setTurnoverProjectionForm("${i}");'>
                             % endif
-                            <i class="icon icon-pencil"></i>
+                            <i class="glyphicon glyphicon-pencil"></i>
                         </a>
                     </td>
                 % endfor
@@ -102,8 +102,8 @@
         </tbody>
     </table>
 </div>
-<div class='row-fluid'>
-    <div class='span6 offset2 well' id="form_container">
+<div class='row'>
+    <div class='col-md-6 col-md-offset-2 well' id="form_container">
         <a class="close" onclick="$('#form_container').fadeOut('slow');" title="Enlever">×</a>
         ${form.render()|n}
     </div>

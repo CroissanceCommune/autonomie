@@ -55,9 +55,9 @@ pager template
 
 <a href="${api.urlupdate(args_dict)}" class='${css_class}'>
     %if direction =='asc':
-        <i class="icon-chevron-up"></i>
+        <i class="glyphicon glyphicon-chevron-up"></i>
     %else:
-        <i class="icon-chevron-down"></i>
+        <i class="glyphicon glyphicon-chevron-down"></i>
     %endif
   ${label}
   </a>

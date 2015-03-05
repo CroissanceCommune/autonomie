@@ -37,10 +37,10 @@ Submit buttons for special form renderings
 % if elem.icon:
 % if hasattr(elem.icon, "__iter__"):
 % for icon in elem.icon:
- <i class="${icon}"></i>
+    <i class="glyphicon glyphicon-${icon}"></i>
 % endfor
 % else:
- <i class='${elem.icon}'></i>
+    <i class='glyphicon glyphicon-${elem.icon}'></i>
 % endif
 % endif
 ${elem.label}

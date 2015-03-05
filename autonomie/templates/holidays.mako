@@ -28,16 +28,16 @@ Template for holidays search
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="print_date" />
 <%block name='content'>
-<div class='row-fluid' style="padding-top:10px;">
-    <div class='span6 offset3'>
+<div class='row' style="padding-top:10px;">
+    <div class='col-md-6 col-md-offset-3'>
         ${form|n}
         %if start_date and end_date:
             <h3>Congés entre le ${print_date(start_date)} et le ${print_date(end_date)}</h3>
         % endif
     </div>
 </div>
-<div class='row-fluid'>
-    <div class='span6 offset3'>
+<div class='row'>
+    <div class='col-md-6 col-md-offset-3'>
         % if holidays:
         % for holiday in holidays:
             %if holiday.user:

@@ -1,0 +1,15 @@
+<div class='form-group estimationamounts col-md-offset-9 col-md-3 col-xs-4 row' id='total_ht'>
+  <div class="col-xs-6">
+    <label>Total HT</label>
+  </div>
+  <div class='col-xs-6'>
+    <div class='input'>
+  </div>
+</div>
+</div>
+<div class='form-group estimationamounts col-md-offset-9 col-md-3 row col-xs-4' id='tvalist'>
+</div>
+<div class='form-group estimationamounts col-md-offset-9 col-md-3 row col-xs-4' id='total_ttc'>
+  <div class="col-md-6"><label>Total TTC</label></div>
+    <div class='col-md-6'><div class='input'></div></div>
+</div>

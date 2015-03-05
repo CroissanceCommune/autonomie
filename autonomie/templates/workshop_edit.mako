@@ -22,13 +22,13 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-<div class='row-fluid'>
-    <div class='span7'>
+<div class='row'>
+    <div class='col-md-7'>
         <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
             Modifier les données relatives à l'atelier
         </button>
-        <a class='btn' href='${request.route_path("workshop.pdf", id=request.context.id)}' >
-            <i class='icon-file'></i>
+        <a class='btn btn-default' href='${request.route_path("workshop.pdf", id=request.context.id)}' >
+            <i class='glyphicon glyphicon-file'></i>
             Télécharger la feuille d'émargement globale
         </a>
         <div
@@ -46,7 +46,7 @@
 
     <h3>Émargement</h3>
     <form method='POST'
-        class="deform form-horizontal deform" accept-charset="utf-8"
+        class="deform  deform" accept-charset="utf-8"
         enctype="multipart/form-data" action="${request.route_path('workshop',\
         id=request.context.id, _query=dict(action='record'))}">
 
@@ -78,8 +78,8 @@
 (${timeslot.duration[0]}h${timeslot.duration[1]})
 </p>
 <div>
-    <a class='btn' href='${request.route_path("timeslot.pdf", id=timeslot.id)}' >
-        <i class='icon-file'></i>
+    <a class='btn btn-default' href='${request.route_path("timeslot.pdf", id=timeslot.id)}' >
+        <i class='glyphicon glyphicon-file'></i>
         Télécharger la feuille d'émargement pour cette tranche horaire
     </a>
 </div>
@@ -94,17 +94,16 @@
                                <% tag_id = "presence_%s_%s" % (timeslot.id, participant.id) %>
                                <input type='hidden' name='account_id' value='${participant.id}' />
                                <input type='hidden' name='timeslot_id' value='${timeslot.id}' />
-                               <div class='control-group'>
-                                   <label class="control-label" for="${tag_id}">
+                               <div class='form-group'>
+                                   <label class="col-sm-2" for="${tag_id}">
                                         <a href='${participant_url}' title='Voir le compte de ce participant'>
                                             ${api.format_account(participant)}
                                         </a>
                                    </label>
-                                   <div class='controls'>
                                        <input type='hidden' value='status:rename' name='__start__' />
                                        % for index, value  in enumerate(available_status):
                                            <% val, label = value %>
-                                           <label class='radio inline' for='${tag_id}-${index}'>
+                                           <label class='radio-inline' >
                                                <input id='${tag_id}' name='${tag_id}' type='radio' \
                                                % if status == val:
                                                    checked \
@@ -113,7 +112,6 @@
                                            </label>
                                        % endfor
                                        <input type='hidden' name='__end__' />
-                                   </div>
                                </div>
                                <input type='hidden' name='__end__' value='attendance:mapping' />
                            % endfor

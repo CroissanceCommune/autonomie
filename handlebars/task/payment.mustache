@@ -1,0 +1,51 @@
+<div class='row paymentline' id="paymentline_{{ id }}">
+    <input type="hidden" name="__start__" value="payment_lines:mapping"/>
+    <div
+    class='col-md-5 form-group {{#if description_error}}has-error{{/if}}'>
+        <textarea class="form-control" name="description">{{#if description}}{{ description }}{{else}}Livrable{{/if}}
+        </textarea>
+        {{#if description_error}}
+        <span class='help-block'>
+            {{ description_error }}
+        </span>
+        {{/if}}
+    </div>
+    <div class='col-md-2 form-group {{#if paymentDate_error}}has-error{{/if}}' id="date_{{ id }}">
+        <input type="hidden" name="__start__" value="paymentDate:mapping"></input>
+        <input class='input-sm' type='text' id="paymentDate_{{ id }}" name="displayDate" {{#if paymentDate}}value="{{ paymentDate }}"{{/if}}></input>
+        <input class='form-control' type='hidden' id="paymentDate_{{ id }}_altField" name="date" {{#if paymentDate}}value="{{ paymentDate }}"{{/if}}></input>
+        {{#if paymentDate_error}}
+        <span class='help-block'>
+            {{ paymentDate_error }}
+        </span>
+        {{/if}}
+        <input type="hidden" name="__end__" value="paymentDate:mapping"></input>
+    </div>
+    {{#if readonly}}
+    <div class='col-md-2 col-md-offset-2 paymentamount form-group {{#if amount_error}}has-error{{/if}}'>
+        <div class='input'>{{#if amount}}{{{ amount }}}{{/if}}</div>
+        <input type='hidden' value="{{#if amount}}{{{ amount }}}{{/if}}" name="amount"></input>
+        {{#if amount_error}}
+        <span class='help-block'>
+            {{ amount_error }}
+        </span>
+        {{/if}}
+    </div>
+    {{else}}
+    <div class='col-md-2 form-group col-md-offset2 paymentamount {{#if amount_error}}has-error{{/if}}'>
+        <input class='input-sm' type='text' name="amount" id="amount_{{ id }}" value="{{#if amount}}{{{ amount }}}{{else}}0,00 €{{/if}}"></input>
+        <button class='btn btn-info pull-right' type="button" onclick='addPaymentRow({readonly:false, description:"Paiement"}, "#paymentline_{{ id }}");'>
+            +
+        </button>
+        {{#if amount_error}}
+        <span class='help-block'>
+            {{ amount_error }}
+        </span>
+        {{/if}}
+    </div>
+    <div class='col-md-1'>
+        <button type='button' class='close' onclick="delRow('paymentline_{{ id }}');">x</button>
+    </div>
+    {{/if}}
+    <input type="hidden" name="__end__" value="payment_lines:mapping"/>
+</div>

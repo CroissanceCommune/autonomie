@@ -1,78 +1,99 @@
 <form
-  id="${field.formid}"
-  class="deform ${field.bootstrap_form_style | 'form-horizontal'}
-         ${field.css_class}"
-  action="${field.action}"
-  method="${field.method}"
+  tal:define="style style|field.widget.style;
+              css_class css_class|string:${field.widget.css_class or field.css_class or ''};
+              item_template item_template|field.widget.item_template;
+              autocomplete autocomplete|field.autocomplete;
+              title title|field.title;
+              errormsg errormsg|field.errormsg;
+              description description|field.description;
+              buttons buttons|field.buttons;
+              use_ajax use_ajax|field.use_ajax;
+              ajax_options ajax_options|field.ajax_options;
+              formid formid|field.formid;
+              action action|field.action or None;
+              method method|field.method;"
+  tal:attributes="autocomplete autocomplete;
+                  style style;
+                  class css_class;
+                  action action;"
+  id="${formid}"
+  method="${method}"
   enctype="multipart/form-data"
   accept-charset="utf-8"
   i18n:domain="deform"
-  tal:define="inline getattr(field, 'bootstrap_form_style', None) == 'form-inline';
-              autocomplete autocomplete|field.autocomplete;"
-  tal:attributes="autocomplete autocomplete">
-  <fieldset>
+  >
 
-    <legend tal:condition="field.title">${field.title}</legend>
+  <fieldset class="deformFormFieldset">
+
+    <legend tal:condition="title">${title}</legend>
 
     <input type="hidden" name="_charset_" />
-    <input type="hidden" name="__formid__" value="${field.formid}"/>
+    <input type="hidden" name="__formid__" value="${formid}"/>
 
-    <div class="alert alert-block alert-error" tal:condition="field.error">
-      <span class="errorMsgLbl" i18n:translate="">
-        There was a problem with your submission
-      </span>
-      <br />
-      <span class="errorMsg" i18n:translate="">
-        Errors have been highlighted below
-      </span>
+    <div class="alert alert-danger" tal:condition="field.error">
+      <div class="errorMsgLbl" i18n:translate=""
+        >There was a problem with your submission</div>
       <p class="errorMsg">${field.errormsg}</p>
     </div>
 
-    <div
-        tal:define="rndr field.renderer;
-                    tmpl field.widget.item_template"
-        tal:repeat="f field.children"
-        tal:replace="structure
-                     rndr(tmpl,field=f,cstruct=cstruct.get(f.name, null))" />
+    <p class="section first" tal:condition="description">
+      ${description}
+    </p>
 
-    <div tal:condition="field.buttons" tal:omit-tag="inline" class="form-actions">
-      <tal:block repeat="button field.buttons">
+    <div tal:repeat="child field"
+         tal:replace="structure child.render_template(item_template)"/>
+
+    <div class="form-group">
+      <tal:loop tal:repeat="button buttons">
         <tal:if tal:condition="hasattr(button, 'render')">
-        ${structure:button.render(request)}
+          ${structure:button.render(request)}
         </tal:if>
         <tal:if tal:condition="not hasattr(button, 'render')">
-          <button
-              tal:attributes="disabled button.disabled"
-              id="${field.formid+button.name}"
+        <button
+              tal:define="btn_disposition repeat.button.start and 'btn-primary' or 'btn-default';
+              btn_icon button.icon|None"
+              tal:attributes="disabled button.disabled if button.disabled else None"
+              id="${formid+button.name}"
               name="${button.name}"
               type="${button.type}"
-              class="btn ${repeat.button.start and 'btn-primary' or ''} ${button.css_class}"
+              class="btn ${btn_disposition} ${button.css_class}"
               value="${button.value}">
-            <i tal:condition="hasattr(button, 'icon') and button.icon"
-                       class="${button.icon}"></i>
-            ${button.title}
-          </button>
+          <i tal:condition="btn_icon" class="${btn_icon}"> </i>
+          ${button.title}
+        </button>
         </tal:if>
-      </tal:block>
+      </tal:loop>
     </div>
 
   </fieldset>
 
-  <script type="text/javascript" tal:condition="field.use_ajax">
-    deform.addCallback(
-       '${field.formid}',
-       function(oid) {
-         var options = {
-           target: '#' + oid,
-           replaceTarget: true,
-           success: function() {
-             deform.processCallbacks();
-             deform.focusFirstInput();
+  <script type="text/javascript" tal:condition="use_ajax">
+   deform.addCallback(
+     '${formid}',
+     function(oid) {
+       var target = '#' + oid;
+       var options = {
+         target: target,
+         replaceTarget: true,
+         success: function() {
+           deform.processCallbacks();
+           deform.focusFirstInput(target);
+         },
+         beforeSerialize: function() {
+           // See http://bit.ly/1agBs9Z (hack to fix tinymce-related ajax bug)
+           if ('tinymce' in window) {
+             $(tinymce.get()).each(
+               function(i, el) {
+                 var content = el.getContent();
+                 var editor_input = document.getElementById(el.id);
+                 editor_input.value = content;
+             });
            }
-         };
-         var extra_options = ${field.ajax_options} || {};
-         $('#' + oid).ajaxForm($.extend(options, extra_options));
-       }
-    );
+         }
+       };
+       var extra_options = ${ajax_options} || {};
+       $('#' + oid).ajaxForm($.extend(options, extra_options));
+     }
+   );
   </script>
 </form>

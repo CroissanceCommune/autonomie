@@ -1,4 +1,4 @@
-<form class='navbar-form offset1 pull-right form-search form-inline'
+<form class='form-search form-inline'
   id='search_form'
   method='GET'
   accept-charset="utf-8"
@@ -12,7 +12,8 @@
     <tal:for tal:repeat="item field.children" tal:define="rndr field.renderer; tmpl field.widget.item_template">
 
         <tal:code tal:define="not_wrapped item.widget.template not in ('textinput', 'deform_bootstrap_extensions:templates/datetimeinput', 'deform_bootstrap_extensions:templates/dateinput')" >
-        <div class='pull-left inline-element' tal:omit-tag="not_wrapped">
+        <div class='form-group'>
+          <!--tal:omit-tag="not_wrapped or not item.description">-->
           <div tal:replace="structure item.render(cstruct=cstruct.get(item.name, null))" />
           <span class='help-block' tal:condition="item.description" tal:content="item.description" />
         </div>

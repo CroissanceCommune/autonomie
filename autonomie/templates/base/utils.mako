@@ -41,7 +41,7 @@
     %endif
 </%def>
 <%def name="searchform(label='Rechercher', html='', helptext=None)">
-    <form class='navbar-form pull-right form-search offset3 form-inline' id='search_form' method='GET'>
+    <form class='navbar-form pull-right form-search col-md-offset-3 form-inline' id='search_form' method='GET'>
         <div class='pull-left' style='padding-right:3px'>
             <input type='text' name='search' class='input-medium search-query' value="${request.params.get('search', '')}">
         % if helptext:
@@ -49,7 +49,7 @@
         %endif
         </div>
         ${html|n}
-        <select class='span1' name='nb'>
+        <select class='col-md-1' name='nb'>
             % for text, value in (('10 par page', u'10'), ('20 par page', u'20'), ('30 par page', u'30'), ("40 par page", u'40'), ('50 par page', u'50'), ('Tous', u'1000'),):
                 <% nb_item = request.GET.get("nb") %>
                 % if nb_item == value or request.cookies.get('items_per_page') == value:
@@ -59,7 +59,7 @@
                 %endif
             % endfor
         </select>
-        <button type="submit" class="btn">${label}</button>
+        <button type="submit" class="btn btn-default">${label}</button>
     </form>
 </%def>
 <%def name="urlbuild(args_dict)">
@@ -106,13 +106,15 @@ path = request.current_route_path(_query=get_args)
         ${data.replace('.', ',')}
     %endif
 </%def>
-<%def name="format_text(data)">
+<%def name="format_text(data, breaklines=True)">
     <%doc>
         Replace \n with br for html output
     </%doc>
-    %if data is not UNDEFINED and data is not None:
-        ${api.clean_html(data.replace(u'\n', u'<br />'))|n}
+    <% text = data %>
+    %if data is not UNDEFINED and data is not None and breaklines:
+        <% text = text.replace(u'\n', u'<br />') %>
     %endif
+    ${api.clean_html(text)|n}
 </%def>
 <%def name="format_customer(customer, link=True)">
     <%doc>
@@ -150,7 +152,7 @@ path = request.current_route_path(_query=get_args)
         Render an email address
     </%doc>
     % if mail is not UNDEFINED and mail is not None:
-        <a href="mailto:${mail}">${mail}&nbsp;<i class="icon-envelope"></i></a>
+        <a href="mailto:${mail}">${mail}&nbsp;<i class="glyphicon glyphicon-envelope"></i></a>
     % endif
 </%def>
 <%def name="format_phone(phone)">
@@ -158,12 +160,12 @@ path = request.current_route_path(_query=get_args)
         Render a phone with a phone link
     </%doc>
     % if phone is not UNDEFINED and phone is not None:
-        <a class="visible-mobile hidden-desktop" href="tel://${phone}">${phone}</a>
-        <span class="hidden-mobile visible-desktop">${phone}</span>
+        <a class="visible-mobile hidden-lg" href="tel://${phone}">${phone}</a>
+        <span class="hidden-mobile visible-lg">${phone}</span>
     % endif
 </%def>
 <%def name="table_btn(href, label, title, icon=None, onclick=None, icotext=None)">
-    <a class='btn btn-small' href='${href}' title="${title}"
+    <a class='btn btn-default' href='${href}' title="${title}"
         % if onclick:
             onclick="${onclick}"
         % endif
@@ -172,9 +174,9 @@ path = request.current_route_path(_query=get_args)
             <span>${api.clean_html(icotext)|n}</span>
         % endif
         %if icon:
-            <i class='icon ${icon}'></i>
+            <i class='glyphicon glyph${icon}'></i>
         %endif
-        <span class="visible-desktop hidden-tablet" style="display:inline">
+        <span class="visible-lg hidden-sm" style="display:inline">
             ${label}
         </span>
     </a>
@@ -248,12 +250,12 @@ path = request.current_route_path(_query=get_args)
                   <td>
                   % if api.has_permission('edit', child):
                       <a
-                          class='btn btn-small'
+                          class='btn btn-sm'
                           href="${request.route_path('file', id=child.id)}"
                           >Voir/éditer
                       </a>
                   % endif
-                      <a class="btn btn-small"
+                      <a class="btn btn-sm"
                           href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
                           Télécharger
                       </a>

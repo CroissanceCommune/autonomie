@@ -32,7 +32,7 @@
     <% workshop = event.workshop %>
     <% url = request.route_path('workshop', id=workshop.id) %>
     <% onclick = "document.location='{url}'".format(url=url) %>
-    <td onclick="${onclick}" class="rowlink visible-desktop" >
+    <td onclick="${onclick}" class="rowlink visible-lg" >
             Atelier
         </td>
         <td  onclick="${onclick}" class="rowlink" >
@@ -41,17 +41,17 @@
         <td onclick="${onclick}" class="rowlink">
             ${', '.join(workshop.leaders)}
         </td>
-        <td class="visible-desktop rowlink" onclick="${onclick}">
+        <td class="visible-lg rowlink" onclick="${onclick}">
             ${workshop.name} (${event.name})
         </td>
-        <td class="visible-desktop" style="text-align:right">
-            ${table_btn(url, u"Voir", u"Voir l'atelier", icon='icon-search')}
+        <td class="visible-lg" style="text-align:right">
+            ${table_btn(url, u"Voir", u"Voir l'atelier", icon='glyphicon glyphicon-search')}
         </td>
 </%def>
 <%def name='activity_row(event)'>
     <% url = request.route_path('activity', id=event.id) %>
     <% onclick = "document.location='{url}'".format(url=url) %>
-    <td onclick="${onclick}" class="rowlink visible-desktop" >
+    <td onclick="${onclick}" class="rowlink visible-lg" >
             Rendez-vous
         </td>
         <td  onclick="${onclick}" class="rowlink" >
@@ -60,14 +60,14 @@
         <td onclick="${onclick}" class="rowlink">
             ${', '.join([api.format_account(conseiller) for conseiller in event.conseillers])}
         </td>
-        <td class="visible-desktop rowlink" onclick="${onclick}">
+        <td class="visible-lg rowlink" onclick="${onclick}">
             % if event.type_object is not None:
                 ${event.type_object.label}
             % endif
              (${event.mode})
         </td>
-        <td class="visible-desktop" style="text-align:right">
-            ${table_btn(url, u"Voir", u"Voir l'évènement", icon='icon-search')}
+        <td class="visible-lg" style="text-align:right">
+            ${table_btn(url, u"Voir", u"Voir l'évènement", icon='glyphicon glyphicon-search')}
         </td>
 </%def>
 <div class='section-header'>Vos rendez-vous</div>
@@ -85,7 +85,7 @@ Afficher <select id='number_of_events'>
 éléments à la fois
 <table class='table table-stripped'>
     <thead>
-        <th class="visible-desktop">
+        <th class="visible-lg">
             Type
         </th>
         <th>
@@ -94,10 +94,10 @@ Afficher <select id='number_of_events'>
         <th>
             Conseiller / Animateur
         </th>
-        <th class="visible-desktop">
+        <th class="visible-lg">
             Intitulé
         </th>
-        <th class="visible-desktop">
+        <th class="visible-lg">
         </th>
     </thead>
     <tbody>

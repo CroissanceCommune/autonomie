@@ -26,7 +26,7 @@
 Template used to render a search form
 </%doc>
 <% from autonomie.views.forms.lists import ITEMS_PER_PAGE_OPTIONS %>
-<form class='navbar-form offset1 pull-right form-search form-inline' id='${elem.id_}' method='GET'>
+<form class='navbar-form col-md-offset-1 pull-right form-search form-inline' id='${elem.id_}' method='GET'>
     <div class='pull-left'>
         <input type='text' name='search' class='input-medium search-query' value="${elem.defaults['search']}">
         % if elem.helptext:
@@ -42,5 +42,5 @@ Template used to render a search form
             %endif
         % endfor
     </select>
-    <button type="submit" class="btn" class='vertical-align:bottom;'>${elem.submit_text}</button>
+    <button type="submit" class="btn btn-default" class='vertical-align:bottom;'>${elem.submit_text}</button>
 </form>

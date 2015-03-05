@@ -31,7 +31,7 @@
     <meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW,ALL">
   </head>
   <body>
-      <div class="hero-unit">
+      <div class="jumbotron">
           <h1>
             ${title}
         </h1>

@@ -30,8 +30,8 @@
 <%namespace file="/base/utils.mako" import="format_phone" />
 <%namespace file="/base/utils.mako" import="format_company" />
 <%block name='content'>
-<div class='row-fluid'>
-    <div class="span5">
+<div class='row'>
+    <div class="col-md-5">
         <div class='well'>
             ${format_company(company)}
             % if not company.enabled():
@@ -42,7 +42,7 @@
         %endfor
         </div>
     </div>
-    <div class="span6 offset1">
+    <div class="col-md-6 col-md-offset-1">
         <div class='well'>
         %if len(company.employees) > 1:
             <h3>Employé(s)</h3>
@@ -60,7 +60,7 @@
             % endif
 
             <a href="${url}" title='Voir ce compte'>
-                <i class='icon-user'></i>${api.format_account(user)}
+                <i class='glyphicon glyphicon-user'></i>${api.format_account(user)}
             </a>
             <br />
             <br />

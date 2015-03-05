@@ -1,0 +1,14 @@
+<div class='col-md-2 form-group col-md-offset-2 paymentamount {{#if amount_error}}has-error{{/if}}'>
+    <input class='input-sm' type='text' name="amount" id="amount_{{ id }}" value="{{#if amount}}{{{ amount }}}{{else}}0,00 €{{/if}}"></input>
+    <button class='btn btn-info pull-right' type="button" onclick='addPaymentRow({readonly:false, description:"Paiement"}, "#paymentline_{{ id }}");'>
+        + Ajouter une échéance
+    </button>
+    {{# if amount_error}}
+    <span class='help-block'>
+        {{ amount_error }}
+    </span>
+    {{/if}}
+</div>
+<div class='col-md-1'>
+    <button type='button' class='close' onclick="delRow('paymentline_{{ id }}');">x</button>
+</div>

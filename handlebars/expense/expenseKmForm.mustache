@@ -1,0 +1,59 @@
+<form id='expenseKmForm' class='form' action='#' onsubmit='return false;'>
+
+<div class="form-group">
+<label for='category'>Catégorie de frais</label>
+{{#category_options }}
+<div class='radio'>
+<label>
+<input type='radio' name='category' value='{{value}}' {{#selected}}checked{{/selected}}> {{label}}
+</label>
+</div>
+{{/category_options }}
+</div>
+
+<div class="form-group">
+<label  for='type_id'>Véhicule</label>
+{{#type_options}}
+<div  class="radio">
+<label>
+<input type='radio' name='type_id' value='{{value}}' {{#selected}}checked{{/selected}}> {{label}}
+</label>
+</div>
+{{/type_options}}
+</div>
+
+<div class="form-group">
+<label  for='altdate'>Date</label>
+<input name="altdate" class="form-control" type="text" autocomplete="off">
+<input name="date" class="form-control" type="hidden">
+</div>
+
+
+<div class="form-group">
+<label  for='start'>Point de départ</label>
+<input type='text' class='form-control' name='start' value='{{start}}'/>
+</div>
+
+<div class="form-group">
+<label  for='end'>Point d'arrivée</label>
+<input type='text' class='form-control' name='end' value='{{end}}'/>
+</div>
+
+<div class="form-group">
+<label  for='ht'>Nombre de Kilomètres</label>
+<div class="input-group">
+    <input type='text' class='form-control' name='km' value='{{ km }}' /><span class="input-group-addon">Km</span>
+</div>
+</div>
+
+<div class='form-group'>
+<label  for='description'>Description</label>
+<input type='text' class='form-control' name='description' value='{{description}}' />
+<span class="help-block"> Le cas échéant, indiquer la prestation liée à ces frais</span>
+</div>
+
+<div class="form-actions">
+<button type="submit" class="btn btn-success" name='submit'>Valider</button>
+<button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+</div>
+</form>

@@ -28,112 +28,125 @@
 <%inherit file="/base.mako"></%inherit >
 <%block name="content">
 <br />
-<div class='row-fluid'>
-    <div class='span6'>
+<div class='row'>
+    <div class='col-md-6'>
         % for dataset, table_title in (\
         (estimations, u"Devis en attente",), \
         (invoices, u"Factures et Avoirs en attente",), \
         ):
-    <table class="table table-striped table-condensed table-hover table-bordered">
-        <caption>${table_title}</caption>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            ${table_title}
+        </div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>Type de document</th>
+                    <th>Entreprise</th>
+                    <th>Demandé le</th>
+                </tr>
+            </thead>
+            <tbody>
+            % for task in dataset:
+                <tr class="clickable-row" data-href="${task.url}">
+                    <td>
+                        ${api.format_task_type(task)}
+                    </td>
+                    <td>
+                        ${task.get_company().name}
+                    </td>
+                    <td>
+                        ${api.format_date(task.statusDate)}
+                    </td>
+                </tr>
+            % endfor
+        % if not dataset:
+            <tr><td colspan='3'>Aucun document en attente</td></tr>
+        % endif
+            </tbody>
+        </table>
+    </div>
+% endfor
+<div class="panel panel-default">
+    <div class="panel-heading">Mes Activités / Rendez-vous à venir</div>
+    <table class="table table-striped table-condensed table-hover">
         <thead>
             <tr>
-                <th>Type de document</th>
-                <th>Entreprise</th>
-                <th>Demandé le</th>
+                <th>Date</th>
+                <th>Participant</th>
+                <th>Mode</th>
+                <th>Nature du rendez-vous</th>
             </tr>
         </thead>
         <tbody>
-        % for task in dataset:
-            <tr>
-                <td onclick="document.location='${task.url}'" class='rowlink'>
-                    ${api.format_task_type(task)}
-                </td>
-                <td onclick="document.location='${task.url}'" class='rowlink'>
-                    ${task.get_company().name}
-                </td>
-                <td onclick="document.location='${task.url}'" class='rowlink'>
-                    ${api.format_date(task.statusDate)}
-                </td>
-            </tr>
-        % endfor
-    % if not dataset:
-        <tr><td colspan='3'>Aucun document en attente</td></tr>
-    % endif
+            % for activity in activities:
+                <tr class="clickable-row" data-href="${activity.url}">
+                    <td>
+                        ${api.format_datetime(activity.datetime)}
+                    </td>
+                    <td>
+                        <ul>
+                        % for participant in activity.participants:
+                            <li>${api.format_account(participant)}</li>
+                        % endfor
+                        </ul>
+                    </td>
+                    <td>
+                        ${activity.mode}
+                    </td>
+                    <td>
+                        ${activity.type_object.label}
+                    </td>
+                </tr>
+            % endfor
+            % if not activities:
+                <tr><td colspan='4'>Aucune activité n'est prévue</td></tr>
+
+            % else:
+                <a
+                    class='btn btn-primary'
+                    href="${request.route_path('activities', _query=dict(conseiller_id=request.user.id))}"
+                    >
+                    Voir plus
+                </a>
+            % endif
         </tbody>
     </table>
-% endfor
-<table class="table table-striped table-condensed table-hover table-bordered">
-    <caption>Mes Activités / Rendez-vous à venir</caption>
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Participant</th>
-            <th>Mode</th>
-            <th>Nature du rendez-vous</th>
-        </tr>
-    </thead>
-    <tbody>
-        % for activity in activities:
-            <tr>
-                <td onclick="document.location='${activity.url}'" class='rowlink'>
-                    ${api.format_datetime(activity.datetime)}
+</div>
+</div>
+<div class='col-md-6'>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Les feuilles de notes de frais en attente
+        </div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>Période</th>
+                    <th>Entrepreneur</th>
+                    <th>Demandé le</th>
+                </tr>
+            </thead>
+            <tbody>
+        % for expense in expenses:
+            <tr class="clickable-row" data-href="${expense.url}">
+                <td>
+                    ${api.month_name(expense.month)} ${expense.year}
                 </td>
-                <td onclick="document.location='${activity.url}'" class='rowlink'>
-                    <ul>
-                    % for participant in activity.participants:
-                        <li>${api.format_account(participant)}</li>
-                    % endfor
-                    </ul>
+                <td>
+                    ${api.format_account(expense.user)}
                 </td>
-                <td onclick="document.location='${activity.url}'" class='rowlink'>
-                    ${activity.mode}
-                </td>
-                <td onclick="document.location='${activity.url}'" class='rowlink'>
-                    ${activity.type_object.label}
+                <td>
+                    ${api.format_date(expense.status_date)}
                 </td>
             </tr>
         % endfor
-        % if not activities:
-            <tr><td colspan='4'>Aucune activité n'est prévue</td></tr>
-    % endif
-    </tbody>
-</table>
-<a
-    class='btn btn-primary'
-    href="${request.route_path('activities', _query=dict(conseiller_id=request.user.id))}"
-    >
-    Voir plus
-</a>
+        % if not expenses:
+            <tr><td colspan='3'>Aucun document en attente</td></tr>
+        % endif
+            </tbody>
+        </table>
+    </div>
 </div>
-<div class='span6'>
-<table class="table table-striped table-condensed table-hover table-bordered">
-    <caption>Les feuilles de notes de frais en attente</caption>
-    <thead>
-        <tr>
-            <th>Période</th>
-            <th>Entrepreneur</th>
-            <th>Demandé le</th>
-        </tr>
-    </thead>
-    <tbody>
-% for expense in expenses:
-    <tr>
-        <td onclick="document.location='${expense.url}'" class='rowlink'>
-            ${api.month_name(expense.month)} ${expense.year}
-        </td>
-        <td onclick="document.location='${expense.url}'" class='rowlink'>
-            ${api.format_account(expense.user)}
-        </td>
-        <td onclick="document.location='${expense.url}'" class='rowlink'>
-            ${api.format_date(expense.status_date)}
-        </td>
-    </tr>
-% endfor
-% if not expenses:
-    <tr><td colspan='3'>Aucun document en attente</td></tr>
-% endif
-    </tbody>
-</table>
 </div>
 </%block>

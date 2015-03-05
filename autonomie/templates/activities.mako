@@ -34,13 +34,13 @@
     %endif
     </li>
 </ul>
-<div class='row-fluid'>
-<div class='span8'>
+<div class='row'>
+<div class='col-md-8'>
     <div class='row'>
         ${form|n}
     </div>
 </div>
-        <div class='span4'>
+        <div class='col-md-4'>
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>
@@ -92,9 +92,11 @@ elif activity.status == 'closed':
                     ${api.format_datetime(activity.datetime)}
                 </td>
                 <td onclick="${onclick}" class="rowlink">
+                    <ul>
                     % for conseiller in activity.conseillers:
-                        ${api.format_account(conseiller)}
+                        <li>${api.format_account(conseiller)}</li>
                     % endfor
+                    </ul>
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     <ul>
@@ -114,13 +116,13 @@ elif activity.status == 'closed':
                 <td>
                     % if api.has_permission('edit', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
-                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='icon-pencil')}
+                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='glyphicon glyphicon-pencil')}
                         <% del_url = request.route_path('activity', id=activity.id, _query=dict(action="delete")) %>
-                        ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='icon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
+                        ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='glyphicon glyphicon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
                         <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
-                        ${table_btn(pdf_url, u"PDF", u"Télécharger la sortie PDF pour impression", icon='icon-file')}
+                        ${table_btn(pdf_url, u"PDF", u"Télécharger la sortie PDF pour impression", icon='glyphicon glyphicon-file')}
                     % else:
-                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='icon-search')}
+                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='glyphicon glyphicon-search')}
                     % endif
                 </td>
             </tr>

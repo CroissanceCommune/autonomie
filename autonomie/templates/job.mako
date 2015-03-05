@@ -26,8 +26,8 @@ should load dynamically the datas about a job execution
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-<div class="row-fluid">
-    <div class="span8 offset2" id="ajax_container">
+<div class="row">
+    <div class="col-md-8 col-md-offset-2" id="ajax_container">
     </div>
 </div>
 <script type='text/javascript'>

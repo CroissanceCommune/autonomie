@@ -344,7 +344,7 @@ class UserList(BaseListView):
             url = self.request.current_route_path(_query=dict(disabled="1"))
             link = HTML.a(u"Afficher les comptes désactivés",  href=url)
         else:
-            url = self.request.current_route_path(_query=dict(archived="0"))
+            url = self.request.current_route_path(_query=dict(disabled="0"))
             link = HTML.a(u"Afficher uniquement les comptes actifs", href=url)
         return StaticWidget(link)
 

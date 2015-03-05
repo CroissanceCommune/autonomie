@@ -28,76 +28,58 @@
 import logging
 import datetime
 import colander
-import os
+import deform
 
+from decimal import Decimal
 from pkg_resources import resource_filename
 
-from pyramid.renderers import render
+from deform.template import ZPTRendererFactory
+
 from pyramid.renderers import JSON
 from pyramid.threadlocal import get_current_request
 
-from deform.schema import default_widget_makers as defaults
-from deform.form import Form
-from deform.template import ZPTRendererFactory
-
-from autonomie.i18n import translate
 
 log = logging.getLogger(__name__)
 
 
-class MultiRendererFactory(object):
+class CustomRenderer(ZPTRendererFactory):
     """
-        Multi renderer, allows rendering deform widgets
-        in multiple formats
-        chameleon by default and mako if not
+    Custom renderer needed to ensure our buttons (see utils/widgets.py) can be
+    added in the form actions list
+    It adds the current request object to the rendering context
     """
-    def __init__(self,
-                    search_path,
-                    auto_reload=True,
-                    translator=None):
-        #FIXME : auto_reload should be retrived from inifile
-        self.default_renderer = ZPTRendererFactory(
-                                search_path=search_path,
-                                auto_reload=auto_reload,
-                                encoding="utf-8",
-                                translator=translator)
-
-    @property
-    def loader(self):
-        return self.default_renderer.loader
-
     def __call__(self, template_name, **kw):
-        """
-            Launched by the client library
-        """
-        return self.load(template_name, **kw)
-
-    def load(self, template_name, **kw):
-        """
-            Load the appropriate engine
-            chameleon by default mako if not
-        """
-        if os.path.splitext(template_name)[1] == "":
-            if "request" not in kw:
-                kw['request'] = get_current_request()
-            return self.default_renderer(template_name, **kw)
-        else:
-            return render(template_name, kw)
+        if "request" not in kw:
+            kw['request'] = get_current_request()
+        return ZPTRendererFactory.__call__(self, template_name, **kw)
 
 
-def set_deform_renderer():
+def get_search_path():
     """
-        Returns a deform renderer allowing translation and multi-rendering
+    Add autonomie's deform custom templates to the loader
     """
-    deform_template_dirs = (
-        resource_filename('autonomie', 'templates/deform'),
-        resource_filename('deform_bootstrap', 'templates/'),
-        resource_filename('deform', 'templates/'),
-        )
+    path = resource_filename('autonomie', 'templates/deform')
+    return (path, deform.template.default_dir,)
 
-    renderer = MultiRendererFactory(search_path=deform_template_dirs,
-                                    translator=translate)
-    Form.default_renderer = renderer
+
+def set_custom_form_renderer(config):
+    """
+    Uses an extended renderer that ensures the request object is on our form
+    rendering context
+    Code largely inspired from pyramid_deform/__init__.py
+    """
+    # Add translation directories
+    config.add_translation_dirs('colander:locale', 'deform:locale')
+    config.add_static_view(
+        "static-deform",
+        'deform:static',
+        cache_max_age=3600
+    )
+    # Initialize the Renderer
+    from pyramid_deform import translator
+    renderer = CustomRenderer(get_search_path(), translator=translator)
+
+    deform.form.Form.default_renderer = renderer
 
 
 def set_json_renderer(config):
@@ -109,6 +91,51 @@ def set_json_renderer(config):
         return obj.isoformat()
     json_renderer.add_adapter(datetime.datetime, toisoformat)
     json_renderer.add_adapter(datetime.date, toisoformat)
-    json_renderer.add_adapter(colander._null, lambda _,r:"null")
+    json_renderer.add_adapter(colander._null, lambda _, r:"null")
+
+    def decimal_to_num(obj, request):
+        return float(obj)
+
+    json_renderer.add_adapter(Decimal, decimal_to_num)
+
     config.add_renderer('json', json_renderer)
     return config
+
+
+def set_export_formatters():
+    """
+    Globally set export formatters in the sqla_inspect registry
+    """
+    from sqla_inspect.export import FORMATTERS_REGISTRY
+    from sqlalchemy import (
+        Boolean,
+        Date,
+        DateTime,
+    )
+    from autonomie.views import render_api
+    from autonomie.export.utils import format_boolean
+    FORMATTERS_REGISTRY.add_formatter(Date, render_api.format_date)
+    FORMATTERS_REGISTRY.add_formatter(DateTime, render_api.format_datetime)
+    FORMATTERS_REGISTRY.add_formatter(Boolean, format_boolean)
+
+
+def set_export_blacklist():
+    """
+    Globally set an export blacklist
+    """
+    from sqla_inspect.export import BLACKLISTED_KEYS
+
+    BLACKLISTED_KEYS = ('_acl', 'password', 'parent_id', 'parent', 'type_')
+
+
+def customize_renderers(config):
+    """
+    Customize the different renderers
+    """
+    # Json
+    set_json_renderer(config)
+    # deform
+    set_custom_form_renderer(config)
+    # Exporters
+    set_export_formatters()
+    set_export_blacklist()

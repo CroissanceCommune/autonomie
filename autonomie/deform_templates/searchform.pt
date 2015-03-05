@@ -11,7 +11,7 @@
 
     <tal:for tal:repeat="item field.children" tal:define="rndr field.renderer; tmpl field.widget.item_template">
 
-        <tal:code tal:define="not_wrapped item.widget.template not in ('textinput', 'deform_bootstrap_extensions:templates/datetimeinput', 'deform_bootstrap_extensions:templates/dateinput')" >
+        <tal:code tal:define="not_wrapped item.widget.template not in ('textinput', 'deform_extensions:templates/datetimeinput', 'deform_extensions:templates/dateinput')" >
         <div class='form-group'>
           <!--tal:omit-tag="not_wrapped or not item.description">-->
           <div tal:replace="structure item.render(cstruct=cstruct.get(item.name, null))" />

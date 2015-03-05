@@ -27,7 +27,7 @@ import json
 import deform
 import pyramid_deform
 
-from deform_bootstrap_extensions import DisabledInput
+from deform_extensions import DisabledInput
 from autonomie import csv_import
 from autonomie import forms
 

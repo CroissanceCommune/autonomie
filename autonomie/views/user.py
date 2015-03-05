@@ -56,7 +56,7 @@ from autonomie.utils.widgets import (
 )
 from autonomie.export.utils import write_file_to_request
 from sqla_inspect import py3o
-from deform_bootstrap_extensions import (
+from deform_extensions import (
     AccordionFormWidget,
     TableFormWidget,
 )

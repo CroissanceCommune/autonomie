@@ -28,7 +28,7 @@
 import logging
 import colander
 import deform
-import deform_bootstrap_extensions
+import deform_extensions
 
 from sqlalchemy import (
     Column,

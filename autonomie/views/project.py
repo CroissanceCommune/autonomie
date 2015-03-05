@@ -56,7 +56,7 @@ from autonomie.forms.project import (
     get_list_schema,
     get_project_schema,
 )
-from deform_bootstrap_extensions import GridFormWidget
+from deform_extensions import GridFormWidget
 from autonomie.views import (
     BaseFormView,
     submit_btn,

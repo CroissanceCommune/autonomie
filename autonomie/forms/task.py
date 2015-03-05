@@ -63,7 +63,7 @@ import datetime
 import colander
 import deform
 
-from deform_bootstrap_extensions import (
+from deform_extensions import (
     DisabledInput,
     GridMappingWidget,
 )

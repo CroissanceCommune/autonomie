@@ -27,7 +27,7 @@
 """
 import colander
 import deform
-import deform_bootstrap_extensions
+import deform_extensions
 
 from autonomie.models.activity import (
     ActivityType,
@@ -183,7 +183,7 @@ class Attendance(colander.MappingSchema):
     username = colander.SchemaNode(
         colander.String(),
         title=u'',
-        widget=deform_bootstrap_extensions.DisabledInput(),
+        widget=deform_extensions.DisabledInput(),
         missing='',
         )
 
@@ -199,7 +199,7 @@ class Attendance(colander.MappingSchema):
 class Attendances(colander.SequenceSchema):
     attendance = Attendance(
         title=u'',
-        widget=deform_bootstrap_extensions.InlineMappingWidget()
+        widget=deform_extensions.InlineMappingWidget()
         )
 
 

@@ -29,7 +29,7 @@ import colander
 import logging
 import deform
 
-import deform_bootstrap_extensions
+import deform_extensions
 from deform import FileData
 
 from autonomie.forms.validators import validate_image_mime
@@ -52,7 +52,7 @@ def deferred_edit_adminonly_widget(node, kw):
     """
     request = kw['request']
     if request.user.is_contractor():
-        return deform_bootstrap_extensions.DisabledInput()
+        return deform_extensions.DisabledInput()
     else:
         return deform.widget.TextInputWidget()
 

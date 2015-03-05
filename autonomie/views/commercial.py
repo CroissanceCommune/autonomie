@@ -56,13 +56,7 @@ from autonomie.forms.commercial import (
     CommercialFormSchema,
     CommercialSetFormSchema,
 )
-from autonomie.resources import (
-    lib_autonomie,
-    backbone,
-)
-
-
-commercial_js = Resource(lib_autonomie, "js/commercial.js", depends=[backbone])
+from autonomie.resources import commercial_js
 
 
 def get_year_range(year):

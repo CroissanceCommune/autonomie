@@ -356,7 +356,7 @@ class Customer(DBBASE, PersistentACLMixin):
                   'colanderalchemy':{
                       'title': u"Commentaires",
                       'widget': deform.widget.TextAreaWidget(
-                          css_class="span10"
+                          css_class="col-md-10"
                       ),
                   }
             },
@@ -403,22 +403,26 @@ class Customer(DBBASE, PersistentACLMixin):
             :returns: a dict version of the customer object
         """
         projects = [project.todict() for project in self.projects]
-        return dict(id=self.id,
-                    code=self.code,
-                    comments=self.comments,
-                    intraTVA=self.intraTVA,
-                    address=self.address,
-                    zipCode=self.zipCode,
-                    city=self.city,
-                    country=self.country,
-                    phone=self.phone,
-                    email=self.email,
-                    contactLastName=self.contactLastName,
-                    contactFirstName=self.contactFirstName,
-                    name=self.name,
-                    projects=projects,
-                    full_address=self.full_address
-                    )
+        return dict(
+            id=self.id,
+            code=self.code,
+            comments=self.comments,
+            intraTVA=self.intraTVA,
+            address=self.address,
+            zipCode=self.zipCode,
+            city=self.city,
+            country=self.country,
+            phone=self.phone,
+            email=self.email,
+            contactLastName=self.contactLastName,
+            contactFirstName=self.contactFirstName,
+            name=self.name,
+            projects=projects,
+            full_address=self.full_address
+        )
+
+    def __json__(self, request):
+        return self.todict()
 
     @property
     def full_address(self):

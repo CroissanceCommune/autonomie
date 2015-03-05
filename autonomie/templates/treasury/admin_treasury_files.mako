@@ -24,7 +24,7 @@
 <%block name='content'>
     % if errors:
         % if "mails" in errors:
-            <div class="alert alert-error">
+            <div class="alert alert-danger">
                 Veuillez sélectionner au moins un fichier à envoyer
                 % if force == False:
                     (si vous désirez forcer l'envoi de documents, vous devez cocher l'option "Forcer l'envoi des documents déjà expédiés ?")
@@ -32,15 +32,15 @@
             </div>
         % endif
         % if "mail_subject" in errors or "mail_message" in errors:
-            <div class="alert alert-error">
+            <div class="alert alert-danger">
                 Le sujet et le contenu du mail ne peuvent être vide
             </div>
         % endif
 
     % endif
     <form accept-charset="utf-8" enctype="multipart/form-data" method="POST" action="">
-        <div class='row-fluid'>
-        <div class='span12'>
+        <div class='row'>
+        <div class='col-md-12'>
             <span class='help-block'>
                 <i class='fa fa-question-circle fa-2x'></i>
                 Depuis cette interface, vous pouvez envoyer des documents par e-mail.
@@ -54,7 +54,13 @@
             <table class="table table-striped table-bordered">
                 <caption>Sélection des documents</caption>
                 <thead>
-                    <th class="span2"><label class='checkbox inline'><input type="checkbox" id="check_all"></input><b>Tous</b></label></th>
+                    <th class="col-md-2">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" id="check_all"></input><b>Tous</b>
+                            </label>
+                        </div>
+                    </th>
                     <th>Entreprise</th>
                     <th>Adresse de l'entreprise</th>
                     <th>Nom du fichier</th>
@@ -103,35 +109,43 @@
             <input type="hidden" name="__end__" value="mails:sequence" />
             </tbody>
             </table>
-            <div class="well span12">
-                <label for="subject">Objet de l'e-mail</label>
-                <input type='text' class='span10' name="mail_subject" value="${mail_subject}"></input>
-                <label for="mail_message">Message</label>
-                <textarea name="mail_message" class='span10'>${mail_message}</textarea>
-                <span class="help-block">Le contenu du message (les variables entre {} seront remplacées par les variables correspondantes):
-                    <ul class='unstyled'>
-                        <li>{company.name} : Nom de l'entreprise</li>
-                        <li>{company.employees[0].lastname} : Nom du premier employé de l'entreprise</li>
-                        <li>{company.employees[0].firstname} : Prénom du premier employé de l'entreprise</li>
-                        <li>{month} : mois du bulletin de salaire</li>
-                        <li>{year} : année du bulletin de salaire</li>
-                    </ul>
-                </span>
-                <label for="force">Forcer l'envoi des documents déjà expédiés ?</label>
-                <input type="checkbox" value="force" name="force"
-                % if force:
-                    checked
-                % endif
-                />
-                <span class="help-block">
-                    Si vous ne cochez pas cette case seul les documents qui \
-                    n'ont pas encore été expédiés seront envoyés.
-                </span>
+            <div class="well col-md-12">
+                <div class="form-group">
+                    <label for="subject">Objet de l'e-mail</label>
+                    <input type='text' name="mail_subject" value="${mail_subject}" class="form-control" placeholder="Sujet de l'email"></input>
+                </div>
+                <div class="form-group">
+                     <label for="mail_message">Message</label>
+                     <textarea name="mail_message" class="form-control">${mail_message}</textarea>
+                        <span class="help-block">Le contenu du message (les variables entre {} seront remplacées par les variables correspondantes):
+                            <ul class='list-unstyled'>
+                                <li>{company.name} : Nom de l'entreprise</li>
+                                <li>{company.employees[0].lastname} : Nom du premier employé de l'entreprise</li>
+                                <li>{company.employees[0].firstname} : Prénom du premier employé de l'entreprise</li>
+                                <li>{month} : mois du bulletin de salaire</li>
+                                <li>{year} : année du bulletin de salaire</li>
+                            </ul>
+                        </span>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="force" name="force"
+                        % if force:
+                            checked
+                        % endif
+                        />
+                        Forcer l'envoi des documents déjà expédiés
+                    ?</label>
+                    <p class="help-block">
+                        Si vous ne cochez pas cette case seul les documents qui \
+                        n'ont pas encore été expédiés seront envoyés.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-    <div class="row-fluid">
-        <div class="span12">
+    <div class="row">
+        <div class="col-md-12">
             <div class="form-actions">
                 <button class="btn btn-primary"
                     type="submit"

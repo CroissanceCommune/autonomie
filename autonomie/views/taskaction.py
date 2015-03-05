@@ -43,7 +43,7 @@ from autonomie.utils.pdf import (
     render_html,
 )
 from autonomie.resources import (
-    task_js,
+    task,
     duplicate as duplicate_js,
 )
 from autonomie.utils.widgets import (
@@ -591,8 +591,10 @@ class TaskStatusView(StatusView):
 
 class TaskFormView(BaseFormView):
     model = None
+    # Tag to know if it's an edition or an add view
+    edit = False
     def __init__(self, request):
-        task_js.need()
+        task.need()
         super(TaskFormView, self).__init__(request)
         self.buttonmaker = TaskFormActions(request, model=self.model)
         self.context = self.request.context

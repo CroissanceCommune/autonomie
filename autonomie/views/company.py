@@ -93,7 +93,7 @@ def company_view(request):
             "manage",
             path="company_customers",
             id=company.id,
-            icon='icon-arrow-right'
+            icon='arrow-right'
         )
     )
 
@@ -103,7 +103,7 @@ def company_view(request):
             "manage",
             path="company_projects",
             id=company.id,
-            icon='icon-arrow-right'
+            icon='arrow-right'
         )
     )
 
@@ -113,7 +113,7 @@ def company_view(request):
             "manage",
             path="company_invoices",
             id=company.id,
-            icon='icon-arrow-right'
+            icon='arrow-right'
         )
     )
 
@@ -123,7 +123,7 @@ def company_view(request):
             "manage",
             path="company_activities",
             id=company.id,
-            icon='icon-arrow-right'
+            icon='arrow-right'
         )
     )
 
@@ -133,7 +133,7 @@ def company_view(request):
             "manage",
             path="company_workshops",
             id=company.id,
-            icon='icon-arrow-right'
+            icon='arrow-right'
         )
     )
 

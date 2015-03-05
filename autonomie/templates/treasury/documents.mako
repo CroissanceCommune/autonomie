@@ -24,7 +24,7 @@
 
 <%inherit file="/base.mako"></%inherit>
 <%block name='content'>
-<div class='row-fluid'>
+<div class='row'>
     <% keys = documents.keys() %>
     <% keys.sort() %>
     % for year in keys:
@@ -32,7 +32,7 @@
         <div class='section-header'>
             <a href="#" data-toggle='collapse' data-target='#year_${year}'>
                 <div>
-                    <i style="vertical-align:middle" class="icon-folder-open"></i>&nbsp;${year}
+                    <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;${year}
                 </div>
             </a>
         </div>

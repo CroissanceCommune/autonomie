@@ -80,10 +80,12 @@ class EstimationConfig(colander.MappingSchema):
     """
     header = forms.textarea_node(
         title=u"Cadre d'information spécifique (en entête des devis)",
-        missing=u"")
+        missing=u"",
+    )
     footer = forms.textarea_node(
         title=u"Informations sur l'acceptation des devis",
-        missing=u"")
+        missing=u"",
+    )
 
 
 class InvoiceConfig(colander.MappingSchema):
@@ -96,13 +98,16 @@ class InvoiceConfig(colander.MappingSchema):
         missing=u"")
     header = forms.textarea_node(
         title=u"Cadre d'information spécifique (en entête des factures)",
-        missing=u"")
+        missing=u"",
+    )
     payment = forms.textarea_node(
         title=u"Information de paiement pour les factures",
-        missing=u"")
+        missing=u"",
+    )
     late = forms.textarea_node(
         title=u"Informations sur les délais de paiement",
-        missing=u"")
+        missing=u"",
+    )
 
 
 class DocumentConfig(colander.MappingSchema):
@@ -114,16 +119,20 @@ class DocumentConfig(colander.MappingSchema):
         description=u"Les conditions générales sont placées en dernière \
 page des documents (devis/factures/avoirs)",
         missing=u'',
-        richwidget=True)
+        richwidget=True,
+    )
     footertitle = forms.textarea_node(
         title=u"Titre du pied de page",
-        missing=u"")
+        missing=u"",
+    )
     footercourse = forms.textarea_node(
         title=u"Pied de page des documents liées aux formations",
-        missing=u"")
+        missing=u"",
+    )
     footercontent = forms.textarea_node(
         title=u"Contenu du pied de page",
-        missing=u"")
+        missing=u"",
+    )
 
     estimation = EstimationConfig(title=u'Devis')
     invoice = InvoiceConfig(title=u"Factures")
@@ -132,10 +141,8 @@ page des documents (devis/factures/avoirs)",
 class FileTypeConfig(colander.SequenceSchema):
     name = colander.SchemaNode(
         colander.String(),
-        title=u"Type de document",
-        description=u"Le libellé permet d'identifier plus facilement les \
-documents attachés aux factures",
-            )
+        title=u"",
+    )
 
 
 class FileTypesConfig(colander.MappingSchema):
@@ -143,9 +150,10 @@ class FileTypesConfig(colander.MappingSchema):
         Configure file types that may be attached
     """
     types = FileTypeConfig(
-        title=u"Type de document attaché",
+        title=u"Libellé",
         description=u"Utilisé dans les interfaces de dépôt de document pour \
-spécifier un type (PV de travaux, Bdc ...)"
+spécifier un type (PV de travaux, Bdc ...). Ces libellés permettent \
+d'identifier plus facilement les documents attachés aux factures",
     )
 
 
@@ -166,6 +174,7 @@ class SiteConfig(colander.MappingSchema):
         title=u"Texte d'accueil",
         richwidget=True,
         missing=u'',
+        admin=True,
     )
 
 
@@ -198,11 +207,11 @@ class TvaItem(colander.MappingSchema):
     name = colander.SchemaNode(
         colander.String(),
         title=u"Libellé du taux de TVA",
-        css_class='span2')
+        css_class='col-md-2')
     value = colander.SchemaNode(
         AmountType(),
         title=u"Montant",
-        css_class='span2')
+        css_class='col-md-2')
     compte_cg = colander.SchemaNode(
         colander.String(),
         missing="",
@@ -499,7 +508,7 @@ class ActivityTypesConfig(colander.Schema):
         title=u"Configuration des modes d'entretien"
             )
     actions = ActivityActionSeq(
-        title=u"Configuration des intitulés d'action"
+        title=u"Configuration des intitulés"
         )
 
 

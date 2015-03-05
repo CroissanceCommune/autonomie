@@ -42,19 +42,40 @@ function setPopUp(id, title){
    * Make the div with id `id` becomes a dialog with title `title`
    */
   $("#" + id).dialog(
-      { autoOpen: false,
+      {
+        autoOpen: false,
         resize:'auto',
-    modal:true,
-    width:"auto",
-    height:"auto",
-    title:title,
-    open: function(event, ui){
-      $('.ui-widget').css('width','60%');
-      $('.ui-widget').css('height','80%');
-      $('.ui-widget').css('left', '20%');
-      $('.ui-widget-content').css('height','auto');
+        modal:true,
+        width:"auto",
+        height:"auto",
+        title:title,
+        open: function(event, ui){
+          $('.ui-widget').css('width','60%');
+          $('.ui-widget').css('height','80%');
+          $('.ui-widget').css('left', '20%');
+          $('.ui-widget-content').css('height','auto');
+          // Fix bootstrap + jqueryui conflict
+          var closeBtn = $('.ui-dialog-titlebar-close');
+          closeBtn.addClass("ui-button ui-widget ui-state-default " +
+            "ui-corner-all ui-button-icon-only");
+          closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
+          'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
+            }
+        }
+    );
+  }
+  function setClickableRow(){
+    /*
+     * Set all rows with clickable-row class clickable
+     */
+    $('.clickable-row').on('click', function(){
+      var href = $(this).data("href");
+      if (_.isUndefined(href)){
+        alert('Erreur, aucun lien spécifié, contactez votre administrateur');
+      }else{
+        window.document.location = $(this).data("href");
     }
-      });
+  });
 }
 $(function(){
   var hash = window.location.hash;
@@ -66,4 +87,6 @@ $(function(){
     window.location.hash = this.hash;
     $('html,body').scrollTop(scrollmem);
   });
+  setClickableRow();
 });
+

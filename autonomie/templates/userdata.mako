@@ -41,18 +41,18 @@
         <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
     % endif
     <a class='btn btn-danger pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
-        <i class="icon icon-white icon-trash"></i>
+        <i class="glyphicon glyphicon-white icon-trash"></i>
         Supprimer les données
     </a>
 % endif
 </div>
 <% user = getattr(request.context, "user", None) %>
 
-<ul class='nav nav-tabs'>
+<ul class='nav nav-tabs' role="tablist">
     <li class='active'>
-    <a href="#tab1" data-toggle='tab'>
-        Informations sociales
-    </a>
+        <a href="#tab1" data-toggle='tab' aria-expanded="false" aria-controls="home" role="tab">
+            Informations sociales
+        </a>
     </li>
     % if doctemplates is not UNDEFINED:
     <li>
@@ -87,15 +87,15 @@
     % endif
 </ul>
 <div class='tab-content'>
-    <div class='tab-pane row-fluid active' id='tab1'>
+    <div class='tab-pane row active' id='tab1'>
         ${form|n}
     </div>
     % if doctypes_form is not UNDEFINED:
-    <div class='tab-pane row-fluid' id='tab2'>
-        <div class='span8'>
+    <div class='tab-pane row' id='tab2'>
+        <div class='col-md-8'>
             ${doctypes_form.render()|n}
         </div>
-        <div class='span4'>
+        <div class='col-md-4'>
             <h3>Liste des documents déposés dans Autonomie</h3>
             <a class='btn btn-success'
                 href="${request.route_path('userdata', id=userdata.id, _query=dict(action='attach_file'))}"
@@ -107,14 +107,14 @@
     </div>
     % endif
     % if account_form is not UNDEFINED and account_form is not None:
-        <div class='tab-pane row-fluid' id='tab3'>
+        <div class='tab-pane row' id='tab3'>
             ${account_form.render()|n}
         </div>
     % endif
     % if doctemplates is not UNDEFINED:
-    <div class='tab-pane row-fluid' id='tab4'>
-        <div class='row-fluid'>
-            <div class='span6'>
+    <div class='tab-pane row' id='tab4'>
+        <div class='row'>
+            <div class='col-md-6'>
         % for doctemplate in doctemplates:
             <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
             <a class='btn btn-success' href="${url}">
@@ -135,7 +135,7 @@
         </div>
         % endif
             </div>
-            <div class='span6'>
+            <div class='col-md-6'>
                 <h3>Historique des documents générés depuis Autonomie</h3>
                 <span class='help-block'>
                     <i class='fa fa-question-circle fa-2x'></i>
@@ -175,7 +175,7 @@
     </div>
     % endif
     % if user is not None:
-        <div class='tab-pane row-fluid' id='tab5'>
+        <div class='tab-pane row' id='tab5'>
             <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}" class='btn btn-success'>
                 Associer à une nouvelle entreprise
             </a>
@@ -215,13 +215,13 @@
                                 </ul>
                             </td>
                             <td>
-                                ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='icon-pencil')}
+                                ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
                                 % if company.enabled():
                                     <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
-                                    ${table_btn(url, u"Désactiver", u"désactiver l'entreprise", icon='icon-pencil')}
+                                    ${table_btn(url, u"Désactiver", u"désactiver l'entreprise", icon='glyphicon glyphicon-pencil')}
                                 % else:
                                     <% url = request.route_path('company', id=company.id, _query=dict(action="enable")) %>
-                                    ${table_btn(url, u"Activer", u"Activer l'entreprise", icon='icon-pencil')}
+                                    ${table_btn(url, u"Activer", u"Activer l'entreprise", icon='glyphicon glyphicon-pencil')}
                                 % endif
                             </td>
                         </tr>

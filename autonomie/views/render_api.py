@@ -39,9 +39,10 @@ from autonomie.utils.date import (
     format_datetime,
 )
 
-ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + ['font', 'br', 'p', 'span', 'h1',
-                                            'h2', 'h3', 'h4', 'h5', 'hr',
-                                            'img']
+ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + [
+    'font', 'br', 'p', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'hr', 'img',
+    'div', 'pre',
+]
 ALLOWED_HTML_ATTRS = deepcopy(bleach.ALLOWED_ATTRIBUTES)
 ALLOWED_HTML_ATTRS['font'] = ['color']
 ALLOWED_HTML_ATTRS['*'] = ['class', 'style']

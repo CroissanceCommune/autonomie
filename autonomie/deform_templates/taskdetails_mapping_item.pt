@@ -1,0 +1,49 @@
+<tal:if tal:condition="field.title">
+  <span tal:omit-tag="" tal:condition="field.widget.__dict__.has_key('before')">
+        ${structure:field.renderer(field.widget.before, options=field.widget.before_options)}
+  </span>
+  <div tal:define="error_class error_class|field.widget.error_class;
+                 description description|field.description;
+                 title title|field.title;
+                 oid oid|field.oid;
+                 hidden hidden|field.widget.hidden;
+                 category category|field.widget.category;
+                 structural hidden or category == 'structural';
+                 required required|field.required;"
+     class="form-group estimationamounts col-md-offset-9 ${field.error and 'has-error' or ''} ${field.widget.item_css_class or ''}"
+     title="${description}"
+     id="item-${oid}"
+     tal:omit-tag="structural"
+     i18n:domain="deform">
+
+       <label for="${field.oid}"
+              class="control-label ${required and 'required' or ''}"
+             tal:condition="not structural"
+             id="req-${field.oid}"
+         >
+        ${field.title}
+      </label>
+       <span tal:replace="structure field.serialize(cstruct).strip()"/>
+       <p class="help-block"
+         tal:define="errstr 'error-%s' % field.oid"
+         tal:repeat="msg field.error.messages()"
+         i18n:translate=""
+         tal:attributes="id repeat.msg.index==0 and errstr or
+         ('%s-%s' % (errstr, repeat.msg.index))"
+         tal:condition="field.error and not field.widget.hidden and not field.typ.__class__.__name__=='Mapping'">
+        ${msg}
+      </p>
+
+      <p tal:condition="field.description and not field.widget.hidden"
+         class="help-block" >
+        ${field.description}
+      </p>
+  </div>
+
+    <span tal:omit-tag="" tal:condition="field.widget.__dict__.has_key('after')">
+        ${structure:field.renderer(field.widget.after, options=field.widget.after_options)}
+    </span>
+</tal:if>
+<tal:if tal:condition="not field.title">
+    ${structure: field.serialize(cstruct).strip()}
+</tal:if>

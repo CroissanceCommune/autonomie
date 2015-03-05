@@ -28,11 +28,11 @@ Admin expenses list view
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='actionmenu'>
-<div class='row-fluid'>
-    <div class='span7'>
+<div class='row'>
+    <div class='col-md-7'>
         ${form|n}
     </div>
-    <div class='span4'>
+    <div class='col-md-4'>
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>
@@ -90,7 +90,7 @@ else:
                     <% url = request.route_path('expense', id=expense.id) %>
                     ${table_btn(url, u'Modifier', u"Voir la note de frais", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
-                    ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="icon-file" )}
+                    ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="glyphicon glyphicon-file" )}
                 </td>
             </tr>
         % endfor

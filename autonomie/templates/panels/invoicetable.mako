@@ -67,7 +67,7 @@ else:
         <tr class='invoice_cancelled_tr'>
             <td class='invoice_cancelled'>
                 <span class="label label-important">
-                    <i class="icon-white icon-remove"></i>
+                    <i class="glyphicon glyphicon-white icon-remove"></i>
                 </span>
                 % elif document.is_tolate():
         <tr class='invoice_tolate_tr'>
@@ -104,19 +104,17 @@ else:
                 ${api.format_date(document.taskDate)}
             </td>
             <td>
-                <blockquote>
-                    %if document.is_viewable():
-                        <a href="${request.route_path(document.type_, id=document.id)}"
-                            title='Voir le document'>${document.number}</a>
-                    %else:
-                        ${document.number}
-                    %endif
-                    % if not is_admin_view:
-                    <small>
-                        ${format_text(document.description)}
-                    </small>
-                    % endif
-                </blockquote>
+                %if document.is_viewable():
+                    <a href="${request.route_path(document.type_, id=document.id)}"
+                        title='Voir le document'>${document.number}</a>
+                %else:
+                    ${document.number}
+                %endif
+                % if not is_admin_view:
+                <small>
+                    ${format_text(document.description)}
+                </small>
+                % endif
             </td>
             <td class='invoice_company_name'>
                 ${format_customer(document.get_customer())}
@@ -155,10 +153,10 @@ else:
             </td>
             <td>
                 % if document.is_viewable():
-                    <a class='btn'
+                    <a class='btn btn-default'
                         href='${request.route_path(document.type_, id=document.id, _query=dict(view="pdf"))}'
                         title="Télécharger la version PDF">
-                        <i class='icon icon-file'></i>
+                        <i class='glyphicon glyphicon-file'></i>
                     </a>
                 %endif
             </td>
@@ -169,10 +167,10 @@ else:
                 % elif hasattr(document, 'invoice'):
                     ${format_filelist(document.invoice)}
                   % endif
-                  <a class='btn'
+                  <a class='btn btn-default'
                       href='${request.route_path(document.type_, id=document.id, _query=dict(action="attach_file"))}'
                       title="Attacher un fichier">
-                      <i class='icon icon-plus'></i>
+                      <i class='glyphicon glyphicon-plus'></i>
                   </a>
               </td>
         </tr>

@@ -27,6 +27,7 @@
 """
 import logging
 
+from colanderalchemy import SQLAlchemySchemaNode
 from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
@@ -43,6 +44,7 @@ from autonomie.views.files import FileUploadView
 from autonomie.views import (
     merge_session_with_post,
     submit_btn,
+    BaseEditView,
 )
 from autonomie.exception import Forbidden
 from autonomie.views.taskaction import (
@@ -78,7 +80,9 @@ class CancelInvoiceAdd(TaskFormView):
     schema = get_cancel_invoice_schema()
     buttons = (submit_btn,)
     model = CancelInvoice
-    add_template_vars = ('title', 'company', 'tvas', 'load_options_url', )
+    add_template_vars = (
+        'title', 'company', 'tvas', 'load_options_url', 'edit',
+    )
 
     @property
     def company(self):
@@ -128,7 +132,10 @@ class CancelInvoiceEdit(TaskFormView):
     schema = get_cancel_invoice_schema()
     buttons = (submit_btn,)
     model = CancelInvoice
-    add_template_vars = ('title', 'company', 'tvas', 'load_options_url', )
+    edit = True
+    add_template_vars = (
+        'title', 'company', 'tvas', 'load_options_url', 'edit',
+    )
 
     @property
     def company(self):
@@ -273,6 +280,10 @@ def set_products(request):
     return ret_dict
 
 
+class AdminCancelInvoice(BaseEditView):
+    schema = SQLAlchemySchemaNode(CancelInvoice)
+
+
 def includeme(config):
     config.add_route('project_cancelinvoices',
                     '/projects/{id:\d+}/cancelinvoices',
@@ -333,3 +344,11 @@ def includeme(config):
             permission='edit',
             request_param='action=attach_file',
             )
+
+    config.add_view(
+        AdminCancelInvoice,
+        route_name='cancelinvoice',
+        renderer="base/formpage.mako",
+        permission="admin",
+        request_param="token=admin",
+    )

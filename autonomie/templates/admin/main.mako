@@ -27,8 +27,8 @@
 <link href="${request.static_url('autonomie:static/css/admin.css')}" rel="stylesheet"  type="text/css" />
 </%block>
 <%block name='content'>
-<div class='row-fluid'>
-    <div class="span10 offset1">
+<div class='row'>
+    <div class="col-md-10 col-md-offset-1">
         ${form|n}
     </div>
 </div>

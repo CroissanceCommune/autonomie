@@ -1,0 +1,36 @@
+<form id='expenseTelForm' class='form ' action='#' onsubmit='return false;'>
+
+<div class="form-group">
+<label class="control-label" for='type_id'>Type de frais</label>
+<div class='controls'>
+<select class='input-xlarge' name='type_id'>
+{{#type_options }}
+<option value='{{value}}' {{#selected}}selected='true'{{/selected}}>{{label}}</option>
+{{/type_options }}
+</select>
+</div>
+</div>
+
+<div class="form-group">
+<label class="control-label" for='ht'>Montant HT</label>
+<div class='controls'>
+<div class="input-group">
+    <input type='text' class='input-small' name='ht' value='{{ ht }}' /><span class="input-group-addon">&euro;</span>
+</div>
+</div>
+</div>
+
+<div class="form-group">
+<label class="control-label" for='tva'>Montant de la Tva</label>
+<div class='controls'>
+<div class="input-group">
+<input type='text' class='input-small' name='tva' value='{{ tva }}' /><span class="input-group-addon">&euro;</span>
+</div>
+</div>
+</div>
+
+<div class="form-actions">
+<button type="submit" class="btn btn-primary" name='submit'>Valider</button>
+<button type="reset" class="btn btn-default" name="cancel">Annuler</button>
+</div>
+</form>

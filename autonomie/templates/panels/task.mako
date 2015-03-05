@@ -47,7 +47,7 @@
         <% colspan = 1 %>
     % endif
     <div class='row'>
-        <table class="lines span12">
+        <table class="lines col-md-12">
             <thead>
                 <tr>
                     <th class="description">Intitulé des postes</th>
@@ -63,7 +63,7 @@
             <tbody>
                 % for line in task.lines:
                     <tr>
-                        <td class="description">${format_text(line.description)}</td>
+                        <td class="description">${format_text(line.description, False)}</td>
                         %if task.displayedUnits == 1:
                             <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€&nbsp;x&nbsp;${api.format_quantity(line.quantity)} ${line.unity}</td>
                         % endif
@@ -193,8 +193,7 @@
 <pdf:nextpage />
 <div id="cgv">
     % if config.has_key('coop_cgv'):
-        <% data = config.get('coop_cgv').replace(u'\n', u'') %>
-        ${format_text(data)}
+        ${format_text(data, False)}
     % endif
 </div>
 % endif

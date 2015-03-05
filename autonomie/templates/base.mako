@@ -21,10 +21,9 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
+<html lang="fr">
 <%namespace file="/base/utils.mako" import="searchform"/>
-<html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <%block name="header">
@@ -42,22 +41,21 @@
 
     <%block name="headjs" />
 
-    <link href="${request.static_url('deform_bootstrap:static/chosen_bootstrap.css')}" rel="stylesheet"  type="text/css" rel="stylesheet"/>
     <%block name="css" />
   </head>
   <body>
-      <header class="hidden-print">
+    <header class="hidden-print">
             ${request.layout_manager.render_panel('menu')}
             ${request.layout_manager.render_panel('submenu')}
     </header>
     <%block name="headtitle">
-    <div class='pagetitle visible-desktop hidden-tablet hidden-print'>
+    <div class='pagetitle visible-lg hidden-sm hidden-print'>
       <h2 >
         ${title}
       </h2>
     </div>
     </%block>
-    <div style='margin:10px'>
+    <div class="container-fluid">
         <div class='subnav hidden-print'>
         <%block name="actionmenu">
         % if action_menu is not UNDEFINED and not action_menu.void():
@@ -70,7 +68,7 @@
       <%block name='pop_message'>
       % for message in request.session.pop_flash(queue=""):
           <div class='row hidden-print'>
-          <div class='span6 offset3'>
+          <div class='col-md-6 col-md-offset-3'>
             <div class="alert alert-success">
               <button class="close" data-dismiss="alert" type="button">×</button>
               ${api.clean_html(message)|n}
@@ -80,8 +78,8 @@
       % endfor
       % for message in request.session.pop_flash(queue="error"):
           <div class='row hidden-print'>
-          <div class='span6 offset3'>
-            <div class="alert alert-error">
+          <div class='col-md-6 col-md-offset-3'>
+            <div class="alert alert-danger">
               <button class="close" data-dismiss="alert" type="button">×</button>
               <i class='fa fa-warning'></i>
               ${api.clean_html(message)|n}

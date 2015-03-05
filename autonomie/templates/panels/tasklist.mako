@@ -43,7 +43,7 @@ Afficher <select id='number_of_tasks'>
 éléments à la fois
 <table class='table table-stripped tasklist'>
     <thead>
-        <th class="visible-desktop">
+        <th class="visible-lg">
             Nom du document
         </th>
         <th>
@@ -52,10 +52,10 @@ Afficher <select id='number_of_tasks'>
         <th>
             Client
         </th>
-        <th class="visible-desktop">
+        <th class="visible-lg">
             Dernière modification
         </th>
-        <th class="visible-desktop">
+        <th class="visible-lg">
         </th>
     </thead>
     <tbody>
@@ -63,7 +63,7 @@ Afficher <select id='number_of_tasks'>
             <tr>
                 <% url = request.route_path(task.type_, id=task.id) %>
                 <% onclick = "document.location='{url}'".format(url=url) %>
-                <td class="visible-desktop rowlink" onclick="${onclick}">
+                <td class="visible-lg rowlink" onclick="${onclick}">
                     ${task.name}
                 </td>
                 <td  onclick="${onclick}" class="rowlink" >
@@ -72,9 +72,9 @@ Afficher <select id='number_of_tasks'>
                 <td onclick="${onclick}" class="rowlink">
                     ${format_customer(task.customer, False)}
                 </td>
-                <td class="visible-desktop rowlink">${api.format_status(task)}</td>
-                <td class="visible-desktop" style="text-align:right">
-                    ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"icon-search")}
+                <td class="visible-lg rowlink">${api.format_status(task)}</td>
+                <td class="visible-lg" style="text-align:right">
+                    ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"glyphicon glyphicon-search")}
                 </td>
             </tr>
         % endfor

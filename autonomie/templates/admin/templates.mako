@@ -23,8 +23,8 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
-<div class='row-fluid'>
-    <div class="span10 offset1">
+<div class='row'>
+    <div class="col-md-10 col-md-offset-1">
     <div class='well'>
         <a class='btn btn-success'
         href="${request.route_path('templates', _query=dict(action='new'))}"
@@ -33,7 +33,7 @@
         Ajouter
     </a>
     </div>
-    <div class="alert alert-warn">
+    <div class="alert alert-danger">
         <i class='fa fa-warning'></i>
         Les modèles de document doivent être au format odt pour pouvoir être utilisés par Autonomie
     </div>
@@ -56,12 +56,12 @@
             <td>${api.format_date(template.updated_at)}</td>
             <td style="text-align:right">
                 <% url = request.route_path('template', id=template.id) %>
-                ${table_btn(url, u"Voir", u"Voir ce modèle", icon=u"icon-pencil")}
+                ${table_btn(url, u"Voir", u"Voir ce modèle", icon=u"glyphicon glyphicon-pencil")}
                 <% url = request.route_path('template', id=template.id, _query=dict(action='edit')) %>
-                ${table_btn(url, u"Éditer", u"Éditer ce modèle", icon=u"icon-pencil")}
+                ${table_btn(url, u"Éditer", u"Éditer ce modèle", icon=u"glyphicon glyphicon-pencil")}
                 <% url = request.route_path('template', id=template.id, _query=dict(action='disable')) %>
                 <% label = template.active and u"Désactiver" or u"Activer" %>
-                ${table_btn(url, label, u"Ce modèle doit-il être visible dans Autonomie ?", icon=u"icon-remove")}
+                ${table_btn(url, label, u"Ce modèle doit-il être visible dans Autonomie ?", icon=u"glyphicon glyphicon-remove")}
             </td>
         </tr>
     % endfor

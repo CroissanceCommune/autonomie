@@ -39,13 +39,13 @@
       %if elem.icon:
         %if hasattr(elem.icon, "__iter__"):
             %for icon in elem.icon:
-                <i class="${icon}"></i>
+                <i class="glyphicon glyphicon-${icon}"></i>
             % endfor
         %else:
-          <i class='${elem.icon}'></i>
+            <i class='glyphicon glyphicon-${elem.icon}'></i>
         % endif
       % endif
-      <span class="visible-desktop hidden-tablet" style="display:inline">
+      <span class="visible-lg hidden-sm" style="display:inline">
       ${elem.label}
       </span>
     </a>

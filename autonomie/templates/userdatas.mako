@@ -44,7 +44,7 @@
 args = request.GET
 url = request.route_path('userdatas.xls', _query=args)
 %>
-<a class='btn pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='icon-file'></i>Exporter</a>
+<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='glyphicon glyphicon-file'></i>Exporter</a>
     </li>
 </ul>
 </%block>
@@ -71,7 +71,7 @@ url = request.route_path('userdatas.xls', _query=args)
                 </td>
                 <td style='text-align:right'>
                         <% edit_url = request.route_path('userdata', id=userdata.id) %>
-                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer", icon='icon-pencil')}
+                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer", icon='glyphicon glyphicon-pencil')}
                     % if api.has_permission('delete', userdata):
                         <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
 <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?'
@@ -82,7 +82,7 @@ if userdata.user is not None:
                         ${table_btn(del_url, \
                         u"Supprimer",  \
                         u"Supprimer cette entrée", \
-                        icon='icon-trash', \
+                        icon='glyphicon glyphicon-trash', \
                         onclick=u"return confirm(\"%s\");" % del_msg)
                         }
                     % endif

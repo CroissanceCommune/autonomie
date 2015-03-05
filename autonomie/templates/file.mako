@@ -23,8 +23,8 @@
 </%doc>
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
-<div class='row-fluid'>
-    <div class='span6 offset3 well'>
+<div class='row'>
+    <div class='col-md-6 col-md-offset-3 well'>
         <dl class='dl-horizontal'>
             <dt>Description du fichier</dt><dd>${file.description}</dd>
             <dt>Nom du fichier</dt><dd> ${file.name}</dd>

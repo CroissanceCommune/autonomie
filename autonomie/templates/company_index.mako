@@ -30,8 +30,8 @@
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
-<div class='row-fluid'>
-    <div class='span4'>
+<div class='row'>
+    <div class='col-md-4'>
         %if elapsed_invoices:
             <div class='well' style="margin-top:10px">
                 <div class='section-header'>
@@ -39,17 +39,17 @@
                 </div>
                 <table class='table table-stripped'>
                     <thead>
-                        <th class="visible-desktop">Numéro</th>
+                        <th class="visible-lg">Numéro</th>
                         <th>Client</th>
                         <th>Total</th>
-                        <th class="visible-desktop"></th>
+                        <th class="visible-lg"></th>
                     </thead>
                     <tbody>
                         % for invoice in elapsed_invoices[:5]:
                             <tr>
                                 <% url = request.route_path("invoice", id=invoice.id) %>
                                 <% onclick = "document.location='{url}'".format(url=url) %>
-                                <td class="visible-desktop rowlink" onclick="${onclick}">
+                                <td class="visible-lg rowlink" onclick="${onclick}">
                                     ${request.config.get('invoiceprefix')}${invoice.officialNumber}
                                 </td>
                                 <td class="rowlink" onclick="${onclick}">
@@ -58,8 +58,8 @@
                                 <td class="rowlink" onclick="${onclick}">
                                     ${api.format_amount(invoice.total())|n}&nbsp;€
                                 </td>
-                                <td class="visible-desktop" style="text-align:right">
-                                    ${table_btn(request.route_path("invoice", id=invoice.id), u"Voir", u"Voir ce document", icon=u"icon-search")}
+                                <td class="visible-lg" style="text-align:right">
+                                    ${table_btn(request.route_path("invoice", id=invoice.id), u"Voir", u"Voir ce document", icon=u"glyphicon glyphicon-search")}
                                 </td>
                             </tr>
                         % endfor
@@ -80,7 +80,7 @@
             </div>
         %endif
     </div>
-    <div class='span6 offset1'>
+    <div class='col-md-6 col-md-offset-1'>
         % if request.config.has_key('welcome'):
             <p>
                 ${format_text(request.config['welcome'])}
@@ -88,13 +88,13 @@
         % endif
     </div>
 </div>
-<div class='row-fluid'>
-    <div class='span6'>
+<div class='row'>
+    <div class='col-md-6'>
         <div class='well tasklist' style="margin-top:10px" id='tasklist_container'>
             ${request.layout_manager.render_panel('company_tasks')}
         </div>
     </div>
-    <div class='span6'>
+    <div class='col-md-6'>
         <div class='well tasklist' style="margin-top:10px" id='event_container'>
             ${request.layout_manager.render_panel('company_events')}
         </div>

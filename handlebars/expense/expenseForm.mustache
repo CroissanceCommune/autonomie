@@ -1,0 +1,80 @@
+<form id='expenseForm' class='form ' action='#' onsubmit='return false;'>
+
+{{#unless id }}
+<button class='btn btn-block btn-primary' onclick="$('#bookmarks').toggle();" type='button'>Mes Favoris     >>></button>
+<div id='bookmarks' class='well' style='display:none'>
+<table class="table table-condensed table-stripped table-bordered">
+{{#bookmark_options}}
+<tr>
+<td>
+{{#attributes}}{{description}} - HT:{{ht}} € - TVA:{{tva}} € ({{type.label}}) {{/attributes}}
+</td>
+<td>
+<a class="btn btn-success edit" data-cid='{{cid}}'>
+    <i class="glyphicon glyphicon-ok"></i>
+</a>
+<a class="btn btn-danger delete"  data-cid='{{cid}}'>
+    <i class="glyphicon glyphicon-remove-sign"></i>
+</a>
+</td>
+</tr>
+{{/bookmark_options}}
+</table>
+</div>
+<hr />
+<br />
+{{/unless}}
+
+<div class="form-group">
+<label  for='category'>Catégorie de frais</label>
+{{#category_options }}
+<div class='radio'>
+<label>
+<input type='radio' name='category' value='{{value}}' {{#selected}}checked{{/selected}}> {{label}}
+</label>
+</div>
+{{/category_options }}
+</div>
+
+
+<div class="form-group">
+<label  for='type_id'>Type de frais</label>
+<div class='controls'>
+<select class=form-control' name='type_id'>
+{{#type_options }}
+<option value='{{value}}' {{#selected}}selected='true'{{/selected}}>{{label}}</option>
+{{/type_options }}
+</select>
+</div>
+</div>
+
+<div class="form-group">
+<label  for='altdate'>Date</label>
+<input class="form-control" name="altdate" type="text" autocomplete="off">
+<input class="form-control" name="date" type="hidden">
+</div>
+
+<div class="form-group">
+<label  for='description'>Description</label>
+<input class="form-control"type='text' name='description' value='{{description}}'/>
+</div>
+
+<div class="form-group">
+<label  for='ht'>Montant HT</label>
+<div class="input-group">
+    <input class="form-control"type='text' name='ht' value='{{ ht }}' /><span class="input-group-addon">&euro;</span>
+</div>
+</div>
+
+<div class="form-group">
+<label  for='tva'>Montant de la Tva</label>
+<div class="input-group">
+<input class="form-control"type='text' name='tva' value='{{ tva }}' /><span class="input-group-addon">&euro;</span>
+</div>
+</div>
+
+<div class="form-actions">
+<button type="submit" class="btn btn-success" name='submit'>Valider</button>
+<button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+</div>
+</form>

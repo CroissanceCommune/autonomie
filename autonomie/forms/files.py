@@ -110,7 +110,7 @@ def deferred_upload_widget(node, kw):
     tmpstore = SessionDBFileUploadTempStore(request)
     return CustomFileUploadWidget(
         tmpstore,
-        template=forms.TEMPLATES_PATH + "fileupload.mako"
+        template=forms.TEMPLATES_PATH + "fileupload.pt"
     )
 
 

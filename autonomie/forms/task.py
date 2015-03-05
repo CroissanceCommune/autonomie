@@ -61,12 +61,11 @@ import logging
 import datetime
 
 import colander
-from deform import widget
-from deform_bootstrap import widget as bootstrap_widget
+import deform
 
 from deform_bootstrap_extensions import (
     DisabledInput,
-    CustomSequenceWidget,
+    GridMappingWidget,
 )
 from autonomie import forms
 from autonomie.models.task.invoice import PaymentMode
@@ -108,6 +107,16 @@ PAYMENTDISPLAYCHOICES = (
 
 
 TEMPLATES_URL = 'autonomie:deform_templates/'
+
+
+MAIN_INFOS_GRID = (
+    (('name', 6), ('phase_id', 6),),
+    (('taskDate', 6), ('financial_year', 6),),
+    (('customer_id', 6), ('address', 6),),
+    (('description', 12),),
+    (('course', 12),),
+    (('displayedUnits', 12),),
+)
 
 
 def get_percents():
@@ -173,7 +182,7 @@ def get_customers_from_request(request):
 def deferred_customer_list(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
-    return bootstrap_widget.ChosenSingleWidget(
+    return deform.widget.Select2Widget(
         values=build_customer_values(customers),
         placeholder=u"Sélectionner un client",
     )
@@ -246,9 +255,7 @@ def get_unities():
 @colander.deferred
 def deferred_unity_widget(node, kw):
     unities = get_unities()
-    return widget.SelectWidget(
-                     values=zip(unities, unities),
-                     template=TEMPLATES_URL + 'unity.mako')
+    return deform.widget.SelectWidget(values=zip(unities, unities))
 
 
 def _is_in(datas):
@@ -278,9 +285,9 @@ def deferred_product_validator(node, kw):
 def deferred_financial_year_widget(node, kw):
     request = kw['request']
     if request.user.is_admin() or request.user.is_manager():
-        return widget.TextInputWidget(mask='9999')
+        return deform.widget.TextInputWidget(mask='9999')
     else:
-        return widget.HiddenWidget()
+        return deform.widget.HiddenWidget()
 
 
 @colander.deferred
@@ -289,10 +296,7 @@ def deferred_tvas_widget(node, kw):
         return a tva widget
     """
     tvas = get_tva_choices()
-    wid = widget.SelectWidget(
-        values=tvas,
-        css_class='span1',
-        template=TEMPLATES_URL + 'select.mako')
+    wid = deform.widget.SelectWidget(values=tvas)
     return wid
 
 
@@ -302,10 +306,7 @@ def deferred_product_widget(node, kw):
         return a widget for product selection
     """
     products = get_product_choices()
-    wid = widget.SelectWidget(
-        values=products,
-        css_class='span2',
-        template=TEMPLATES_URL + 'select.mako')
+    wid = deform.widget.SelectWidget(values=products)
     return wid
 
 
@@ -381,7 +382,7 @@ def deferred_phases_widget(node, kw):
     request = kw['request']
     phases = get_phases_from_request(request)
     choices = get_phase_choices(phases)
-    wid = widget.SelectWidget(values=choices)
+    wid = deform.widget.SelectWidget(values=choices)
     return wid
 
 
@@ -389,94 +390,91 @@ class TaskLine(colander.MappingSchema):
     """
         A single estimation line
     """
-    description = colander.SchemaNode(
-        colander.String(),
-        widget=widget.TextAreaWidget(
-            cols=45, rows=4,
-            template=TEMPLATES_URL + 'prestation.mako',
-            css_class='span3'),
-         missing=u'',
-         css_class='span3')
+    description = forms.textarea_node(
+        missing=u'',
+        richwidget=True,
+        css_class='col-md-3',
+    )
     cost = colander.SchemaNode(
         AmountType(),
-        widget=widget.TextInputWidget(
-            template=TEMPLATES_URL + 'lineinput.mako'),
-        css_class='span1')
+        widget=deform.widget.TextInputWidget(),
+        validator=forms.positive_validator,
+        css_class='col-md-1')
     quantity = colander.SchemaNode(
         QuantityType(),
-        widget=widget.TextInputWidget(
-            template=TEMPLATES_URL + 'lineinput.mako'),
-        validator=colander.Range(
-            min=0,
-            min_err=u"Doit être positif",
-        ),
-        css_class='span1')
+        widget=deform.widget.TextInputWidget(),
+        validator=forms.positive_validator,
+        css_class='col-md-1')
     unity = colander.SchemaNode(
         colander.String(),
         widget=deferred_unity_widget,
         validator=deferred_unity_validator,
         missing=u"",
-        css_class='span2')
+        css_class='col-md-2')
     tva = colander.SchemaNode(
         Integer(),
         widget=deferred_tvas_widget,
         default=deferred_default_tva,
         validator=deferred_tva_validator,
-        css_class='span1',
+        css_class='col-md-1',
         title=u'TVA')
     product_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deferred_product_widget,
-            validator=deferred_product_validator,
-            missing="",
-            css_class="span2",
-            title=u"Code produit")
+        colander.Integer(),
+        widget=deferred_product_widget,
+        validator=deferred_product_validator,
+        missing="",
+        css_class="col-md-2",
+        title=u"Code produit",
+    )
 
 
 class DiscountLine(colander.MappingSchema):
     """
         A single estimation line
     """
-    description = colander.SchemaNode(
-        colander.String(),
-        widget=widget.TextAreaWidget(
-            cols=60, rows=4,
-            template=TEMPLATES_URL + 'prestation.mako',
-            css_class='span4'),
-         missing=u'',
-         css_class='span4')
+    description = forms.textarea_node(
+        missing=u'',
+        richwidget=True,
+        css_class='col-md-4',
+    )
     amount = colander.SchemaNode(
         AmountType(),
-        widget=widget.TextInputWidget(
-            template=TEMPLATES_URL + 'lineinput.mako'),
-        css_class='span1')
+        widget=deform.widget.TextInputWidget(),
+        css_class='col-md-1',
+        validator=forms.positive_validator,
+    )
     tva = colander.SchemaNode(
         Integer(),
         widget=deferred_tvas_widget,
         default=deferred_default_tva,
-        css_class='span2 offset3',
-        title=u'TVA')
+        css_class='col-md-2 col-md-offset-3',
+        title=u'TVA',
+    )
 
 
 class TaskLines(colander.SequenceSchema):
     """
-        Sequence of estimation lines
+        Sequence of task lines
     """
     taskline = TaskLine(
-        widget=widget.MappingWidget(
-            template=TEMPLATES_URL + 'taskline_mapping.mako',
-            item_template=TEMPLATES_URL + 'taskline_mapping_item.mako')
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + 'inline_mapping.pt',
+            item_template=TEMPLATES_URL + 'inline_mapping_item.pt',
+            item_css_class="taskline",
+        )
     )
 
 
 class DiscountLines(colander.SequenceSchema):
     """
-        Sequence of estimation lines
+        Sequence of discount lines
     """
     discountline = DiscountLine(
-        widget=widget.MappingWidget(
-            template=TEMPLATES_URL + 'discountline_mapping.mako',
-            item_template=TEMPLATES_URL + 'discountline_mapping_item.mako')
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + 'inline_mapping.pt',
+            item_template=TEMPLATES_URL + 'inline_mapping_item.pt',
+            item_css_class="discountline",
+        ),
     )
 
 
@@ -486,39 +484,51 @@ class TaskLinesBlock(colander.MappingSchema):
         with estimation and invoice lines and all the stuff
     """
     lines = TaskLines(
-        widget=CustomSequenceWidget(
-            template=TEMPLATES_URL + 'tasklines_sequence.mako',
-            item_template=TEMPLATES_URL + 'tasklines_sequence_item.mako',
-            min_len=1),
-        title=u'')
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + 'tasklines_sequence.pt',
+            orderable=True,
+            min_len=1,
+            add_subitem_text_template=u"Ajouter une ligne",
+        ),
+        title=u'',
+    )
     discounts = DiscountLines(
-        widget=CustomSequenceWidget(
-            template=TEMPLATES_URL + 'discountlines_sequence.mako',
-            item_template=TEMPLATES_URL + 'discountlines_sequence_item.mako'),
-        title=u'')
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + 'discountlines_sequence.pt',
+            orderable=True,
+            add_subitem_text_template=u"Ajouter une remise",
+        ),
+        title=u'',
+    )
     expenses_ht = colander.SchemaNode(
-            AmountType(),
-            widget=widget.TextInputWidget(
-                template=TEMPLATES_URL + 'wrappable_input.mako',
-                ),
-            title=u"Frais forfaitaires (HT)",
-            missing=0)
-    default_tva = colander.SchemaNode(colander.Integer(),
-            title=u"",
-            widget=widget.HiddenWidget(
-                template=TEMPLATES_URL + 'hiddeninput.mako',
-                ), default=deferred_default_tva)
+        AmountType(),
+        widget=deform.widget.TextInputWidget(
+            template=TEMPLATES_URL + 'wrappable_input.pt'
+        ),
+        title=u"Frais forfaitaires (HT)",
+        missing=0,
+        validator=forms.positive_validator,
+    )
+
+    default_tva = colander.SchemaNode(
+        colander.Integer(),
+        title=u"",
+        widget=deform.widget.HiddenWidget(),
+        default=deferred_default_tva,
+    )
     expenses = colander.SchemaNode(
         AmountType(),
-        widget=widget.TextInputWidget(
-            template=TEMPLATES_URL + 'wrappable_input.mako',
-            before=TEMPLATES_URL + 'tvalist.mako',
+        widget=deform.widget.TextInputWidget(
+            template=TEMPLATES_URL + 'wrappable_input.pt',
+            before=TEMPLATES_URL + 'tvalist.pt',
             before_options={'label': u'Montant TVA', 'id': 'tvapart'},
-            after=TEMPLATES_URL + 'staticinput.mako',
+            after=TEMPLATES_URL + 'staticinput.pt',
             after_options={'label': u'Total TTC', 'id': 'total'}
         ),
         title=u'Frais Réel (TTC)',
-        missing=0)
+        missing=0,
+        validator=forms.positive_validator,
+    )
 
 
 class TaskConfiguration(colander.MappingSchema):
@@ -538,11 +548,10 @@ class TaskConfiguration(colander.MappingSchema):
         widget=deferred_customer_list,
         validator=deferred_customer_validator
         )
-    address = colander.SchemaNode(
-        colander.String(),
+    address = forms.textarea_node(
         title=u"Nom et adresse du client",
-        widget=widget.TextAreaWidget(rows=4, cols=60)
-        )
+        widget_options={'rows':4}
+    )
     phase_id = colander.SchemaNode(
         colander.String(),
         title=u"Phase où insérer le devis",
@@ -550,22 +559,20 @@ class TaskConfiguration(colander.MappingSchema):
         default=deferred_default_phase
         )
     taskDate = forms.today_node(title=u"Date du devis")
-    description = colander.SchemaNode(
-        colander.String(),
-        title=u"Objet du devis",
-        widget=widget.TextAreaWidget(css_class="span8"),
-    )
+    description = forms.textarea_node(title=u"Objet du devis")
     course = colander.SchemaNode(
         colander.Integer(),
-        title=u"Formation ?",
-        description=deferred_course_title,
-        widget=widget.CheckboxWidget(true_val="1", false_val="0")
+        title=u"",
+        label=deferred_course_title,
+        widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
+        missing=0,
     )
     displayedUnits = colander.SchemaNode(
         colander.Integer(),
-        title=u"Afficher le détail",
-        description=u"Afficher le détail des prestations dans le PDF ?",
-        widget=widget.CheckboxWidget(true_val="1", false_val="0")
+        title="",
+        label=u"Afficher le détail des prestations dans la sortie PDF ?",
+        widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
+        missing=0,
     )
 
 
@@ -573,10 +580,8 @@ class TaskNotes(colander.MappingSchema):
     """
         Notes
     """
-    exclusions = colander.SchemaNode(
-        colander.String(),
+    exclusions = forms.textarea_node(
         title=u'Notes',
-        widget=widget.TextAreaWidget(css_class='span10'),
         missing=u"",
         description=u"Note complémentaires concernant les prestations décrites"
     )
@@ -586,24 +591,27 @@ class TaskCommunication(colander.MappingSchema):
     """
         Communication avec la CAE
     """
-    statusComment = colander.SchemaNode(
-        colander.String(),
+    statusComment = forms.textarea_node(
+        title=u'',
         missing=u'',
-        title=u'Communication Entrepreneur/CAE',
-        widget=widget.TextAreaWidget(css_class='span10'),
         description=u"Message à destination des membres de la CAE qui \
-valideront votre document (n'apparaît pas dans le PDF)")
+valideront votre document (n'apparaît pas dans le PDF)",
+    )
 
 
 class TaskSchema(colander.MappingSchema):
     """
         colander base Schema for task edition
     """
-    common = TaskConfiguration(title=u"")
+    common = TaskConfiguration(
+        title=u"",
+        widget=GridMappingWidget(named_grid=MAIN_INFOS_GRID),
+    )
     lines = TaskLinesBlock(
         title=u"Détail des prestations",
-        widget=widget.MappingWidget(
-            item_template=TEMPLATES_URL + 'estimationdetails_item.mako')
+        widget=deform.widget.MappingWidget(
+            item_template=TEMPLATES_URL + 'taskdetails_mapping_item.pt'
+        )
     )
 
 
@@ -614,22 +622,16 @@ def remove_admin_fields(schema, kw):
         if doctype != 'estimation':
             del schema['lines']['lines']['taskline']['product_id']
         schema['lines']['lines'].is_admin = False
-        schema['lines']['lines']['taskline']['description'].css_class = 'span4'
-        schema['lines']['lines']['taskline']['description'].widget.css_class = 'span4'
-        schema['lines']['lines']['taskline']['tva'].css_class = 'span2'
-        schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span2'
+        schema['lines']['lines']['taskline']['description'].css_class = 'col-md-4'
+        schema['lines']['lines']['taskline']['tva'].css_class = 'col-md-2'
     else:
         schema['lines']['lines'].is_admin = True
         if doctype != 'estimation':
-            schema['lines']['lines']['taskline']['description'].css_class = 'span3'
-            schema['lines']['lines']['taskline']['description'].widget.css_class = 'span3'
-            schema['lines']['lines']['taskline']['tva'].css_class = 'span1'
-            schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span1'
+            schema['lines']['lines']['taskline']['description'].css_class = 'col-md-3'
+            schema['lines']['lines']['taskline']['tva'].css_class = 'col-md-1'
         else:
-            schema['lines']['lines']['taskline']['description'].css_class = 'span4'
-            schema['lines']['lines']['taskline']['description'].widget.css_class = 'span4'
-            schema['lines']['lines']['taskline']['tva'].css_class = 'span2'
-            schema['lines']['lines']['taskline']['tva'].widget.css_class = 'span2'
+            schema['lines']['lines']['taskline']['description'].css_class = 'col-md-4'
+            schema['lines']['lines']['taskline']['tva'].css_class = 'col-md-2'
 
 
 TASKSCHEMA = TaskSchema(after_bind=remove_admin_fields)
@@ -641,24 +643,10 @@ class EstimationPaymentLine(colander.MappingSchema):
     """
     description = colander.SchemaNode(
         colander.String(),
-        title=u'',
-        widget=widget.TextInputWidget(
-            template=TEMPLATES_URL + 'prestation.mako',
-            css_class='span5'),
-        css_class='span5',)
-    paymentDate = colander.SchemaNode(
-        colander.Date(),
-        title=u'',
-        widget=forms.get_date_input(css_class='span2'),
-        default=datetime.date.today(),
-        css_class='span2',)
-    amount = colander.SchemaNode(
-        AmountType(),
-        title=u'',
-        widget=widget.TextInputWidget(
-            template=TEMPLATES_URL + 'amount.mako',
-            css_class='span5'),
-        css_class='span2 offset2')
+        default=u"Solde",
+    )
+    paymentDate = forms.today_node()
+    amount = colander.SchemaNode(AmountType(), default=0)
 
 
 class EstimationPaymentLines(colander.SequenceSchema):
@@ -666,9 +654,9 @@ class EstimationPaymentLines(colander.SequenceSchema):
         Sequence of payment lines
     """
     line = EstimationPaymentLine(
-        widget=widget.MappingWidget(
-            template=TEMPLATES_URL + 'paymentline_mapping.mako',
-            item_template=TEMPLATES_URL + 'paymentline_mapping_item.mako')
+        widget=deform.widget.MappingWidget()
+#            template=TEMPLATES_URL + 'paymentline_mapping.mako',
+#            item_template=TEMPLATES_URL + 'paymentline_mapping_item.mako')
     )
 
 
@@ -680,49 +668,38 @@ class EstimationPayments(colander.MappingSchema):
         colander.Integer(),
         title=u"Acompte à la commande",
         default=0,
-        widget=widget.SelectWidget(
+        widget=deform.widget.SelectWidget(
             values=get_percents(),
-            css_class='span2')
+            css_class='col-md-2')
     )
     payment_times = colander.SchemaNode(
         colander.Integer(),
         title=u"Paiement en ",
         default=1,
-        widget=widget.SelectWidget(values=get_payment_times(),
-                                     css_class='span2')
+        widget=deform.widget.SelectWidget(values=get_payment_times(),
+                                     css_class='col-md-2')
     )
     paymentDisplay = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in PAYMENTDISPLAYCHOICES]),
-        widget=widget.RadioChoiceWidget(values=PAYMENTDISPLAYCHOICES),
+        widget=deform.widget.RadioChoiceWidget(values=PAYMENTDISPLAYCHOICES),
         title=u"Affichage des paiements",
         default="SUMMARY")
     payment_lines = EstimationPaymentLines(
-        widget=CustomSequenceWidget(
-            template=TEMPLATES_URL + 'paymentlines_sequence.mako',
-            item_template=TEMPLATES_URL + 'paymentlines_sequence_item.mako',
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + 'paymentlines_sequence.pt',
+            item_template=TEMPLATES_URL + 'paymentlines_sequence_item.pt',
             min_len=1),
         title=u'',
         description=u"Définissez les échéances de paiement")
-    paymentConditions = colander.SchemaNode(
-        colander.String(),
-        missing=u'',
-        title=u'Conditions de paiement',
-        widget=widget.TextAreaWidget(css_class='span10'),
-        description=u"Précisez les conditions de paiement dans votre devis")
+    paymentConditions = forms.textarea_node(title=u"Conditions de paiement")
 
 
 class InvoicePayments(colander.MappingSchema):
     """
         Conditions de paiement de la facture
     """
-    paymentConditions = colander.SchemaNode(
-        colander.String(),
-        missing=u'',
-        title=u'Conditions de paiement',
-        widget=widget.TextAreaWidget(css_class='span10'),
-        description=u"Les conditions de paiement sont requises \
-dans les factures")
+    paymentConditions = forms.textarea_node(title="")
 
 
 def get_estimation_schema():
@@ -731,11 +708,13 @@ def get_estimation_schema():
     """
     schema = TASKSCHEMA.clone()
     schema['lines']['lines'].doctype = "estimation"
-    tmpl = 'autonomie:deform_templates/paymentdetails_item.mako'
+    tmpl = 'autonomie:deform_templates/paymentdetails_item.pt'
     schema.add(TaskNotes(title=u"Notes", name="notes"))
     schema.add(
         EstimationPayments(title=u'Conditions de paiement',
-                           widget=widget.MappingWidget(item_template=tmpl),
+                           widget=deform.widget.MappingWidget(
+                               item_template=tmpl
+                           ),
                            name='payments')
     )
     schema.add(
@@ -796,6 +775,11 @@ def get_cancel_invoice_schema():
     payments['paymentConditions'].title = title
     payments['paymentConditions'].description = u""
 
+    schema['lines']['expenses_ht'].validator = forms.negative_validator
+    schema['lines']['expenses'].validator = forms.negative_validator
+    # cancelinvoice costs can both be positive or negative paiments and
+    # discounts
+    schema['lines']['lines']['taskline']['cost'].validator = None
 
     schema.add(payments)
     return schema
@@ -833,8 +817,9 @@ def deferred_total_validator(node, kw):
     max_msg = u"Le montant ne doit pas dépasser %s (total ttc - somme \
 des paiements + montant d'un éventuel avoir)" % (topay / 100.0)
     min_msg = u"Le montant doit être positif"
-    return colander.Range(min=0, max=topay, min_err=min_msg,
-                                                   max_err=max_msg)
+    return colander.Range(
+        min=0, max=topay, min_err=min_msg, max_err=max_msg,
+    )
 
 
 @colander.deferred
@@ -843,7 +828,7 @@ def deferred_payment_mode_widget(node, kw):
         dynamically retrieves the payment modes
     """
     modes = [(mode.label, mode.label) for mode in PaymentMode.query()]
-    return widget.SelectWidget(values=modes)
+    return deform.widget.SelectWidget(values=modes)
 
 
 @colander.deferred
@@ -886,25 +871,25 @@ class ProductTaskLine(colander.MappingSchema):
     """
     id = colander.SchemaNode(
             colander.Integer(),
-            widget=widget.HiddenWidget(),
+            widget=deform.widget.HiddenWidget(),
             missing=u"",
             css_class="span0")
     description = colander.SchemaNode(
         colander.String(),
         widget=DisabledInput(),
          missing=u'',
-         css_class='span3')
+         css_class='col-md-3')
     tva = colander.SchemaNode(
         AmountType(),
         widget=DisabledInput(),
-        css_class='span1',
+        css_class='col-md-1',
         title=u'TVA')
     product_id = colander.SchemaNode(
             colander.Integer(),
             widget=deferred_product_widget,
             validator=deferred_product_validator,
             missing="",
-            css_class="span2",
+            css_class="col-md-2",
             title=u"Code produit")
 
 
@@ -917,7 +902,7 @@ class SetProductsSchema(colander.MappingSchema):
         Form schema used to configure Products
     """
     lines = ProductTaskLines(
-        widget=widget.SequenceWidget(
+        widget=deform.widget.SequenceWidget(
             template=TEMPLATES_URL + 'product_tasklines.pt',
             item_template=TEMPLATES_URL + 'product_tasklines_item.pt',
             min_len=1),
@@ -1183,3 +1168,5 @@ def set_payment_times(appstruct, dbdatas):
         appstruct.setdefault('payments', {})['payment_times'] = max(1,
                                         len(dbdatas.get('payment_lines')))
     return appstruct
+
+

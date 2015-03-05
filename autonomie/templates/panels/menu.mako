@@ -41,111 +41,114 @@
 </%def>
 <%def name="render_dropdown(elem)">
     <li class='dropdown'>
-        <a class='dropdown-toggle' data-toggle='dropdown' href='#'>
+    <a class='dropdown-toggle' data-toggle='dropdown' href='#' role='button' aria-expanded="false">
             ${elem.get('label', '')}
-        <b class="caret"></b>
+            <span class="caret"></span>
         </a>
-        <ul class='dropdown-menu'>
+        <ul class='dropdown-menu' role="menu">
         % for item in elem.items:
             ${render_item(item)}
         % endfor
         </ul>
     </li>
 </%def>
-% if  menu is not UNDEFINED:
-    <div class="navbar navbar-inverse">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
-          <button class="btn btn-navbar" data-target=".menu" data-toggle="collapse" type="button">
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
+% if menu is not UNDEFINED or usermenu is not UNDEFINED:
+    <nav class="navbar navbar-inverse">
+
+    <div class="container-fluid">
+
+        <div class="navbar-header">
+            <button
+                type="button"
+                class="navbar-toggle collapsed"
+                data-target=".menu"
+                data-toggle="collapse"
+            >
+              <span class="glyphicon glyphicon-bar"></span>
+              <span class="glyphicon glyphicon-bar"></span>
+              <span class="glyphicon glyphicon-bar"></span>
           </button>
-          <div class="nav-collapse menu collapse">
-            <ul
-                % if hasattr(elem, "css"):
-                    class="nav ${menu.css}"
-                % else:
-                    class='nav'
-                % endif
-                >
-                % for item in menu.items:
-                    % if item.__type__ == 'item':
-                        ${render_item(item)}
-                    % elif item.__type__ == 'static':
-                        ${render_static(item)}
-                    % elif item.__type__ == 'dropdown':
-                        ${render_dropdown(item)}
+          <a class="navbar-brand" href='/'><i class='glyphicon glyphicon-white icon-home'></i>Autonomie</a>
+        </div>
+
+        <div class="navbar-collapse menu collapse">
+
+    % if  menu is not UNDEFINED:
+               <ul
+                    % if hasattr(elem, "css"):
+                        class="nav navbar-nav ${menu_css}"
+                    % else:
+                      class="nav navbar-nav"
                     % endif
-                    <li class='divider-vertical'></li>
-                % endfor
-            </ul>
-% elif usermenu is not UNDEFINED:
-    ## Is there is no menu, but there is a usermenu, we need to display it
-    <div class="navbar navbar-inverse">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="brand" href='/'><i class='icon-white icon-home'></i>Autonomie</a>
-          <button class="btn btn-navbar" data-target=".menu" data-toggle="collapse" type="button">
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-          </button>
-          <div class="nav-collapse menu collapse">
-% endif
-% if usermenu is not UNDEFINED:
-    <ul class="nav pull-right">
-        <li class="dropdown pull-right">
-            <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-                <i class="icon-white icon-user"></i>
-              ${request.user.lastname} ${request.user.firstname}
-              <span class="caret"></span>
-            </a>
-                <ul class='dropdown-menu'>
-                    % for item in usermenu.items:
-                    ${render_item(item)}
-                    <li class="divider"></li>
-                % endfor
-            </ul>
-        </li>
-     </ul>
-</div>
-</div>
-</div>
-</div>
+                    >
+                    % for item in menu.items:
+                        % if item.__type__ == 'item':
+                            ${render_item(item)}
+                        % elif item.__type__ == 'static':
+                            ${render_static(item)}
+                        % elif item.__type__ == 'dropdown':
+                            ${render_dropdown(item)}
+                        % endif
+                    % endfor
+              </ul>
+    % endif
+    % if usermenu is not UNDEFINED:
+        <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown pull-right">
+                <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                    <i class="glyphicon glyphicon-white icon-user"></i>
+                  ${request.user.lastname} ${request.user.firstname}
+                  <span class="caret"></span>
+                </a>
+                    <ul class='dropdown-menu'>
+                        % for item in usermenu.items:
+                        ${render_item(item)}
+                        <li class="divider"></li>
+                    % endfor
+                </ul>
+            </li>
+         </ul>
+    % endif
+## We close the main menu
+    </div>
+    </div>
+    </nav>
 % endif
 % if submenu is not UNDEFINED:
     ## No usermenu, it's the submenu's bar
-        <div class="navbar navbar-inverse">
-        <div class="navbar-inner">
-          <div class="container">
-              <button class="btn btn-navbar" data-target=".submenu" data-toggle="collapse" type="button">
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-              </button>
-              <div class='nav-collapse submenu collapse'>
-    <ul
-        % if hasattr(elem, "css"):
-            class="nav ${submenu.css}"
-        % else:
-            class='nav'
-        % endif
-        >
-        % for item in submenu.items:
-            % if item.__type__ == 'item':
-                ${render_item(item)}
-            % elif item.__type__ == 'static':
-                ${render_static(item)}
-            % elif item.__type__ == 'dropdown':
-                ${render_dropdown(item)}
-            % endif
-            <li class='divider-vertical'></li>
-        % endfor
-    </ul>
-</div>
-</div>
-</div>
-</div>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button
+                    type="button"
+                    class="navbar-toggle collapsed"
+                    data-target=".submenu"
+                    data-toggle="collapse"
+                    >
+                      <span class="glyphicon glyphicon-bar"></span>
+                      <span class="glyphicon glyphicon-bar"></span>
+                      <span class="glyphicon glyphicon-bar"></span>
+                  </button>
+              </navbar>
+              <div class='navbar-collapse submenu collapse'>
+                    <ul
+                        % if hasattr(elem, "css"):
+                            class="nav navbar-nav ${submenu.css}"
+                        % else:
+                            class='nav navbar-nav'
+                        % endif
+                        >
+                        % for item in submenu.items:
+                            % if item.__type__ == 'item':
+                                ${render_item(item)}
+                            % elif item.__type__ == 'static':
+                                ${render_static(item)}
+                            % elif item.__type__ == 'dropdown':
+                                ${render_dropdown(item)}
+                            % endif
+                        % endfor
+                    </ul>
+            </div>
+        </div>
+    </nav>
 % endif

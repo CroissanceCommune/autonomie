@@ -38,7 +38,7 @@
         % endif
         >
         %if elem.icon:
-            <i class='${elem.icon}'></i>
+            <i class='glyphicon glyphicon-${elem.icon}'></i>
         % endif
         ${elem.label}
     </a>

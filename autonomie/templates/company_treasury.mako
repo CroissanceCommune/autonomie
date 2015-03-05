@@ -33,8 +33,8 @@
     </li>
 </ul>
 <div>
-    <form class='form-search form-horizontal' id='search_form' method='GET'>
-                <select name='year' id='year-select' class='span2'>
+    <form class='form-search ' id='search_form' method='GET'>
+                <select name='year' id='year-select' class='col-md-2'>
                     %for year in years:
                         %if unicode(current_year) == unicode(year):
                             <option selected="1" value='${year}'>${year}</option>

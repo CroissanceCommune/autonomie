@@ -25,6 +25,24 @@
 
 var AppOptions;
 var Facade = new Object();
+var Selectors = {
+  expenses_ht: 'input[name=expenses_ht]',
+  expenses: 'input[name=expenses]',
+  totalinput: ".linetotal .input",
+  tva: "select[name=tva]",
+  cost: "input[name=cost]",
+  quantity: "input[name=quantity]",
+  amount: "input[name=amount]",
+  default_tva: 'input[name=default_tva]',
+  taskline: ".taskline",
+  discountline: ".discountline",
+  discount_headers: "#discount-header",
+  tasklines_ht: "#tasklines_ht .input",
+  tvalist: "#tvalist",
+  total_ht: "#total_ht .input",
+  total_ttc: "#total_ttc .input",
+  total: '#total .input'
+};
 
 function delRow(id){
   /*
@@ -49,7 +67,7 @@ var Row = Backbone.Model.extend({
     return 0;
   },
   TVA:function(){
-    var tva = this.row.find("select[name=tva]").val();
+    var tva = this.row.find(Selectors.tva).val();
     if (tva <0){
       tva = 0;
     }
@@ -62,7 +80,7 @@ var Row = Backbone.Model.extend({
     return this.ht + this.tva_amount;
   },
   update:function(){
-    var totalinput = this.row.find(".linetotal .input");
+    var totalinput = this.row.find(Selectors.totalinput);
     totalinput.empty().html( formatAmount(this.HT(), false) );
     return this.row;
   }
@@ -73,10 +91,10 @@ var TaskRow = Row.extend({
    */
   type:"task",
   getCost: function(){
-    return this.row.find("input[name=cost]").val();
+    return this.row.find(Selectors.cost).val();
   },
   getQuantity:function(){
-    return this.row.find("input[name=quantity]").val();
+    return this.row.find(Selectors.quantity).val();
   },
   HT:function(){
     var q = this.getQuantity();
@@ -90,7 +108,7 @@ var DiscountRow = Row.extend({
    */
   type:"discount",
   getAmount:function(){
-    var amount = this.row.find("input[name=amount]").val();
+    var amount = this.row.find(Selectors.amount).val();
     return transformToCents(amount);
   },
   HT:function(){
@@ -105,7 +123,10 @@ var ExpenseRow = Row.extend({
   type:'expense',
   TVA:function(){
     // This tva value should be set dynamically
-    var tva = $('input[name=default_tva]').val();
+    var tva_object = _.find(
+      AppOptions['tvas'], function(val){return val['default'];}
+    );
+    var tva = tva_object.value.toString();
     return transformToCents(tva);
   },
   HT:function(){
@@ -206,29 +227,29 @@ function getTvaLine(tva, tva_amount){
    * Return the tva display line
    */
   var label = tva /100 + " %";
-  var template = $( '#tvaTmpl' ).template();
-  return $.tmpl(template, {'label':label, 'value':formatAmount(tva_amount)});
+  var datas = {'label':label, 'value':formatAmount(tva_amount)};
+  return Handlebars.templates['tvalist.mustache'](datas);
 }
 function getExpenses(){
   /*
    *  Return the current expense configured
    */
-  return transformToCents( $('input[name=expenses]').val() );
+  return transformToCents( $(Selectors.expenses).val() );
 }
 function getExpensesHT() {
   /*
    * Return the current HT expenses configured
    */
-  return transformToCents( $('input[name=expenses_ht]').val() );
+  return transformToCents( $(Selectors.expenses_ht).val() );
 }
 function getCollection(){
   /*
    * Return the collection of rows related to the payment information
    */
   var collection = new RowCollection();
-  collection.load('.taskline', TaskRow);
-  collection.load('.discountline', DiscountRow);
-  collection.add(new ExpenseRow('input[name=expenses_ht]'));
+  collection.load(Selectors.taskline, TaskRow);
+  collection.load(Selectors.discountline, DiscountRow);
+  collection.add(new ExpenseRow(Selectors.expenses_ht));
   return collection;
 }
 function computeTotal(){
@@ -245,17 +266,17 @@ function computeTotal(){
   console.log(total_ttc);
   console.log(total_ht);
   console.log(tvas);
-  $('#tasklines_ht .input').empty().html(formatAmount(tasklines_ht, false));
-  $('#tvalist').empty();
+  $(Selectors.tasklines_ht).empty().html(formatAmount(tasklines_ht, false));
+  $(Selectors.tvalist).empty();
   for (var index in tvas){
     var line = getTvaLine(index, tvas[index]);
-    $('#tvalist').append(line);
+    $(Selectors.tvalist).append(line);
   }
-  $('#total_ht .input').empty().html(formatAmount(total_ht));
-  $('#total_ttc .input').empty().html(formatAmount(total_ttc));
+  $(Selectors.total_ht).empty().html(formatAmount(total_ht));
+  $(Selectors.total_ttc).empty().html(formatAmount(total_ttc));
   var expenses = getExpenses();
   var total = total_ttc + expenses;
-  $('#total .input').empty().html(formatAmount(total));
+  $(Selectors.total).empty().html(formatAmount(total));
   $(Facade).trigger('totalchanged');
 }
 /*
@@ -282,7 +303,7 @@ function setPaymentRows(){
   $("#paymentcontainer").empty();
   var nbpayments = getNbPayments();
   var topay = getToPayAfterDeposit();
-  if (nbpayments === -1){
+  if (manualDeliverables(nbpayments)){
     // we ask for manual payment configuration
     // we want two lines (one manually configured,
     //  one fitting the total value)
@@ -341,10 +362,10 @@ function addPaymentRow(args, after){
     args['id'] = id;
   }
   if (args['readonly'] === undefined){
-    if (getNbPayments()>0){
-      args['readonly'] = true;
-    }else{
+    if (manualDeliverables()){
       args['readonly'] = false;
+    }else{
+      args['readonly'] = true;
     }
   }
   var line = getPaymentRow(args);
@@ -377,20 +398,19 @@ function getNbPayments(){
    */
   return parseInt($("select[name=payment_times]").val(), 10);
 }
-function getRow(args){
-  /*
-   * Return html code for an estimation line
-   */
-  var template = $( '#prestationTmpl' ).template();
-  return $.tmpl(  template, args );
+function manualDeliverables(nbpayments){
+  if (_.isUndefined(nbpayments)){
+    nbpayments = getNbPayments();
+  }
+  return nbpayments == -1;
 }
 function getPaymentRow(args){
   /*
    *  return a payment line in html format
    *  @param:args: templating datas
    */
-  var template = $( '#paymentTmpl' ).template();
-  html = $.tmpl(  template, args );
+  var template = Handlebars.templates['payment.mustache'];
+  html = template( args );
   return html;
 }
 function setDepositAmount(deposit){
@@ -435,7 +455,7 @@ function getTotal(){
   /*
    * Return the current total
    */
-  return transformToCents($('#total .input').text());
+  return transformToCents($(Selectors.total).text());
 }
 function setDeposit(){
   /*
@@ -457,7 +477,7 @@ function updatePaymentRows(){
    * Update payment rows
    */
   var nbpayments = getNbPayments();
-  if (nbpayments === -1){
+  if (manualDeliverables(nbpayments)){
     updateSoldAmount();
   }else{
     if ($('.paymentline').length != nbpayments){
@@ -504,8 +524,8 @@ function getAmountInput(args){
    * Return an amount input
    */
 
-  var tmpl = $('#paymentAmountTmpl').template();
-  return $.tmpl( tmpl, args );
+  var tmpl = Handlebars.templates['paymentAmountTmpl.mustache'];
+  return tmpl( args );
 }
 function setPaymentRowsToEditable(){
   /*
@@ -553,19 +573,115 @@ function fetchFormOptions(){
     alert("Une erreur a été rencontrée, contactez votre administrateur.");
   }
 }
+function fetchFormContext(){
+  /*
+   * In case of edition, get the context in json format and build some form
+   * fields regarding the datas
+   */
+  var url = document.URL;
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    cache:false,
+    success: function(datas){
+      console.log(datas);
+    }
+  });
+}
+function fireAmountChange(){
+  /*
+   * Fire an amount change on the line containing the current form_element
+   */
+  console.log("Amount changed");
+  var input_tag = $(this);
+  var row = $(this).parent().parent().parent();
+  $(Facade).trigger("linechange", row);
+  $(Facade).trigger("totalchange", row);
+}
+function fireTvaChange(){
+  onTvaSelect(this);
+  fireAmountChange();
+}
+function addTaskLine(link_dom_element){
+  console.log(link_dom_element);
+  deform.appendSequenceItem(link_dom_element);
+  setTaskLinesBehaviours();
+  return false;
+}
+function setTaskLinesBehaviours(){
+  /*
+   * Set the field behaviours on page load
+   */
+  var s = Selectors.taskline + " " + Selectors.cost;
+  $(s).off("blur");
+  $(s).on("blur", fireAmountChange);
+
+  s = Selectors.taskline + " " + Selectors.quantity;
+  $(s).off("blur");
+  $(s).on("blur", fireAmountChange);
+
+  s = Selectors.taskline + " " + Selectors.tva;
+  $(s).off('change');
+  $(s).on('change', fireTvaChange);
+}
+function setDiscountLinesBehaviours(){
+  /*
+   * Set the field behaviours on page load
+   */
+  var s = Selectors.discountline + " " + Selectors.amount;
+  $(s).off("blur");
+  $(s).on("blur", fireAmountChange);
+
+  s = Selectors.discountline + " " + Selectors.tva;
+  $(s).off('change');
+  $(s).on('change', fireAmountChange);
+}
+function toggleDiscountHeader(){
+  /*
+   * Show or hide the discount header
+   */
+  if ($(Selectors.discountline).length > 0){
+    $(Selectors.discount_headers).removeClass('hidden');
+  } else {
+    $(Selectors.discount_headers).addClass('hidden');
+  }
+}
+function setExpenseBehaviour(){
+  /*
+   * set the behaviour on expense ht change
+   */
+  $(Selectors.expenses_ht).off('blur');
+  $(Selectors.expenses_ht).on('blur', fireAmountChange);
+}
+function setPaymentsBehaviour(){
+   $('select[name=deposit]').change(function(){
+      $(Facade).trigger('depositchange', this);
+  });
+  $('select[name=payment_times]').change(function(){
+      $(Facade).trigger('payment_timeschange', this);
+  });
+}
 function initialize(){
   /*
    *  Initialize the document edition UI
    */
   fetchFormOptions();
-  var row;
-  if (getNbPayments() < 1 ){
+  if (AppOptions['edit']){
+    fetchFormContext();
+  }
+  setTaskLinesBehaviours();
+  setDiscountLinesBehaviours();
+  setExpenseBehaviour();
+  initPaymentRows();
+  if ( manualDeliverables() ){
      /*
       * Add a row if needed and update rows to fit manual configuration
       * (set them editable for example)
       */
      setPaymentRowsToEditable();
   }
+  setPaymentsBehaviour();
+  var row;
   $(Facade).bind('linechange', function(event, element){
     if ($(element).find("input[name=amount]").length === 0){
       row = new TaskRow(element);
@@ -596,10 +712,10 @@ function initialize(){
     updatePaymentRows();
   });
 
-  $('.taskline').each(function(){
-    $(Facade).trigger('linechange', this);
-  });
-  $('.discountline').each(function(){
+  /*
+   * We trigger the changes on page load
+   */
+  $('.row').each(function(){
     $(Facade).trigger('linechange', this);
   });
   $(Facade).trigger('totalchange');

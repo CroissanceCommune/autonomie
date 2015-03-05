@@ -23,8 +23,8 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_filetable" />
 <%block name='content'>
-<div class="row-fluid" style="margin-top:10px">
-    <div class="span12">
+<div class="row" style="margin-top:10px">
+    <div class="col-md-12">
         <span class='help-block'>
             <i class='fa fa-question-circle fa-2x'></i>
             Retrouvez ici l'ensemble des documents sociaux ayant été associés à votre compte dans Autonomie.

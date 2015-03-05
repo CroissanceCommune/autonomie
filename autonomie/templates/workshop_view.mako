@@ -23,7 +23,7 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="definition_list"/>
 <%block name="content">
-<div class='row-fluid'>
+<div class='row'>
     <table class="table table-striped table-condensed table-hover">
         <thead>
             <tr>

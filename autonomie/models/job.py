@@ -88,6 +88,9 @@ class Job(DBBASE, PersistentACLMixin):
             updated_at=self.updated_at.strftime("%d/%m/%Y à %H:%M"),
         )
 
+    def __json__(self, request):
+        return self.todict()
+
 
 class CsvImportJob(Job):
     """

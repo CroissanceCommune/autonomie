@@ -34,7 +34,7 @@
 <div class='container' style='overflow:hidden'>
     <div class='well'>
         <p>
-            <span class="label label-important"><i class='icon-white icon-play'></i></span>
+            <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
             %if task.statusPersonAccount  is not UNDEFINED and task.statusPersonAccount:
                 <strong>${api.format_status(task)}</strong>
             %else:
@@ -95,7 +95,7 @@
                 <li>
                 <p>
                     Les factures suivantes ont été générées depuis ce devis :
-                    <ul class='unstyled'>
+                    <ul class='list-unstyled'>
                         % for invoice in task.invoices:
                             <li>
                                 <a href="${request.route_path('invoice', id=invoice.id)}">${invoice.number}</a>

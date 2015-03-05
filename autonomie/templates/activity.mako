@@ -25,8 +25,8 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%block name="content">
-<a class='btn pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='icon-file'></i>PDF</a>
-<div class='row-fluid'>
+<a class='btn btn-default pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>PDF</a>
+<div class='row'>
                 <% items = (\
                 (u'Conseiller(s)', ','.join([api.format_account(conseiller) for conseiller in activity.conseillers])), \
                     (u'Horaire', api.format_datetime(activity.datetime)), \
@@ -52,9 +52,7 @@
         %>
         % for label, attr in options:
             <h3>${label}</h3>
-            <blockquote>
-                ${format_text(getattr(activity, attr))}
-            </blockquote>
+            ${format_text(getattr(activity, attr))}
         % endfor
 
 </div>

@@ -29,11 +29,11 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%block name='actionmenu'>
-<div class='row-fluid'>
-    <div class='span7'>
+<div class='row'>
+    <div class='col-md-7'>
         ${form|n}
     </div>
-    <div class='span4'>
+    <div class='col-md-4'>
         <table class='table table-bordered'>
             <tr>
                 <td class='estimation_geninv'><br /></td>
@@ -73,9 +73,8 @@
             </td>
             <td>${api.format_date(document.taskDate)}</td>
             <td>
-                <blockquote><a href="${request.route_path("estimation", id=document.id)}" title="Voir le document">${document.name}</a>
-                    <small>${format_text(document.description)}</small>
-                    </blockquote>
+                <a href="${request.route_path("estimation", id=document.id)}" title="Voir le document">${document.name}</a>
+                <small>${format_text(document.description)}</small>
             </td>
             <td class='invoice_company_name'>
                 ${format_customer(document.get_customer())}
@@ -92,10 +91,10 @@
                  ${api.format_amount(document.total())|n}&nbsp;€
              </td>
               <td>
-                      <a class='btn'
+                      <a class='btn btn-default'
                           href='${request.route_path("estimation", id=document.id, _query=dict(view="pdf"))}'
                           title="Télécharger la version PDF">
-                          <i class='icon icon-file'></i>
+                          <i class='glyphicon glyphicon-file'></i>
                       </a>
               </td>
           </tr>

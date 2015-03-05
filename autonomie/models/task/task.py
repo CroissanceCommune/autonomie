@@ -206,6 +206,24 @@ class Task(Node):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def __json__(self, request):
+        """
+        Return the datas used by the json renderer to represent this task
+        """
+        return dict(
+            phase_id=self.phase_id,
+            status=self.CAEStatus,
+            date=self.taskDate,
+            owner_id=self.owner_id,
+            description=self.description,
+            status_history=[
+                status.__json__(request) for status in self.statuses
+            ],
+            discounts=[
+                discount.__json__(request) for discount in self.discounts
+            ],
+        )
+
     def set_status(self, status, request, user_id, **kw):
         """
             set the status of a task through the state machine
@@ -327,6 +345,13 @@ class DiscountLine(DBBASE, LineCompute):
         )
     )
 
+    def __json__(self, request):
+        return dict(
+            descriptin=self.description,
+            amount=self.amount,
+            tva=self.tva,
+        )
+
     def duplicate(self):
         """
             return the equivalent InvoiceLine
@@ -402,3 +427,9 @@ class TaskStatus(DBBASE):
             },
         )
     )
+    def __json__(self, request):
+        result = dict(date=self.statusDate)
+        result['code'] = self.statusCode
+        if self.statusPersonAccount is not None:
+            result['account'] = self.statusPersonAccount.__json__(request)
+        return result

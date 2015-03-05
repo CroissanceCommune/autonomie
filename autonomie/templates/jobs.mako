@@ -25,13 +25,13 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='actionmenu'>
-<div class='row-fluid'>
-<div class='span8'>
+<div class='row'>
+<div class='col-md-8'>
     <div class='row'>
         ${form|n}
     </div>
 </div>
-        <div class='span4'>
+        <div class='col-md-4'>
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>
@@ -83,13 +83,13 @@ elif job.status == 'completed':
                 </td>
                 <td>
                     <% view_url = request.route_path('job', id=job.id) %>
-                    ${table_btn(view_url, u"Voir", u"Voir la tâche", icon='icon-pencil')}
+                    ${table_btn(view_url, u"Voir", u"Voir la tâche", icon='glyphicon glyphicon-pencil')}
                     <% del_url = request.route_path('job', id=job.id, _query=dict(action="delete")) %>
                     ${table_btn(\
                     del_url, \
                     u"Supprimer",  \
                     u"Supprimer cette entrée d'historique", \
-                    icon='icon-trash', \
+                    icon='glyphicon glyphicon-trash', \
                     onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cette entrée d'historique ?')")}
                 </td>
             </tr>

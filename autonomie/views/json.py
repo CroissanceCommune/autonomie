@@ -30,14 +30,15 @@ def json_model_view(request):
     """
         Return a json representation of a model
     """
-    return request.context.todict()
+    return request.context
 
 
 def includeme(config):
     """
         Configure the views for this module
     """
-    for route_name in "project", "company", "customer":
+    for route_name in "project", "company", "customer", "estimation", \
+                      "invoice", "cancelinvoice":
         config.add_view(
             json_model_view,
             route_name=route_name,

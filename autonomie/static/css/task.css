@@ -1,21 +1,13 @@
-.input{
-padding:6px 1px;
-margin:1px;
-}
 .taskline{
-margin-bottom:5px;
-padding-bottom:2px;
-padding-top:2px;
-border-bottom:1px solid #dddddd;
+  border-bottom:1px solid #dddddd;
 }
 .linesblockheader{
-background-color:#f2f2f2;
-margin-bottom:10px;
-font-weight:bold;
-}
-.estimationform .control-group{
-margin-bottom:2px;
+  background-color:#f2f2f2;
+  margin-bottom:10px;
 }
 .paymentamount{
-text-align:right;
+  text-align:right;
+}
+.panel-heading{
+  font-weight: bold;
 }

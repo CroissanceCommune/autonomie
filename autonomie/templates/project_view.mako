@@ -41,19 +41,19 @@
         ${table_btn(view_url, \
         u"Voir/Modifier", \
         u"Voir/éditer ce devis", \
-        u"icon-pencil")}
+        u"glyphicon glyphicon-pencil")}
 
         ${table_btn( \
         pdf_url,
         u"PDF", \
         u"Télécharger la version PDF", \
-        u"icon-file")}
+        u"glyphicon glyphicon-file")}
         %if task.is_deletable(request):
             ${table_btn(\
             del_url,\
             u"Supprimer", \
             u"Supprimer le devis", \
-            icon="icon-trash", \
+            icon="glyphicon glyphicon-trash", \
             onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
         %endif
     </td>
@@ -78,18 +78,18 @@
             ${task.name}
         </td>
         <td
-            class='rowlink hidden-phone'
+            class='rowlink hidden-xs'
             onclick="document.location='${view_url}'">
         %if task.is_cancelled():
             <span class="label label-important">
-                <i class="icon-white icon-remove"></i>
+                <i class="glyphicon glyphicon-white icon-remove"></i>
             </span>
         %elif task.is_draft():
-            <i class='icon icon-bold'></i>
+            <i class='glyphicon glyphicon-bold'></i>
         %elif task.CAEStatus == 'geninv':
-            <i class='icon icon-tasks'></i>
+            <i class='glyphicon glyphicon-tasks'></i>
         %elif task.is_waiting():
-            <i class='icon icon-time'></i>
+            <i class='glyphicon glyphicon-time'></i>
         %endif
         ${api.format_status(task)}
     </td>
@@ -120,17 +120,17 @@
     </td>
     <td
         onclick="document.location='${view_url}'"
-        class='rowlink hidden-phone'>
+        class='rowlink hidden-xs'>
         %if task.is_cancelled():
             <span class="label label-important">
-                <i class="icon-white icon-remove"></i>
+                <i class="glyphicon glyphicon-white icon-remove"></i>
             </span>
         %elif task.is_resulted():
-            <i class='icon icon-ok'></i>
+            <i class='glyphicon glyphicon-ok'></i>
         %elif task.is_draft():
-            <i class='icon icon-bold'></i>
+            <i class='glyphicon glyphicon-bold'></i>
         %elif task.is_waiting():
-            <i class='icon icon-time'></i>
+            <i class='glyphicon glyphicon-time'></i>
         %endif
         ${api.format_status(task)}
     </td>
@@ -162,19 +162,19 @@
     </td>
     <td
         onclick="document.location='${view_url}'"
-        class='rowlink hidden-phone'>
+        class='rowlink hidden-xs'>
         %if task.is_valid():
-            <i class='icon icon-ok'></i>
+            <i class='glyphicon glyphicon-ok'></i>
         %elif task.is_draft():
-            <i class='icon icon-bold'></i>
+            <i class='glyphicon glyphicon-bold'></i>
         %endif
         ${api.format_status(task)}</td>
         ${action_cell(task, view_url)}
 </tr>
 </%def>
 
-<div class='row-fluid collapse' id='project-addphase'>
-    <div class='span4 offset4'>
+<div class='row collapse' id='project-addphase'>
+    <div class='col-md-4 col-md-offset-4'>
         <h3>Ajouter une phase</h3>
         <form class='navbar-form' method='POST' action="${request.route_path('project', id=project.id, _query=dict(action='addphase'))}">
             <input type='text' name='phase' />
@@ -183,11 +183,11 @@
         <br />
     </div>
 </div>
-<div class='row-fluid collapse' id='project-description'>
-    <div class="span8 offset2">
+<div class='row collapse' id='project-description'>
+    <div class="col-md-8 col-md-offset-2">
         <div class="well">
-            <div class='row-fluid'>
-                <div class='span6'>
+            <div class='row'>
+                <div class='col-md-6'>
                     <h3>Client(s)</h3>
                     % for customer in project.customers:
                         <div class='well'>
@@ -197,7 +197,7 @@
                         </div>
                     % endfor
                 </div>
-                <div class="span6">
+                <div class="col-md-6">
                     <dl>
                         %if project.type:
                             <dt>Type de projet :</dt> <dd>${project.type}</dd>
@@ -228,8 +228,8 @@
         </div>
     </div>
 </div>
-<div class='row-fluid'>
-    <div class='accordion' id='phase_accordion'>
+<div class='row'>
+    <div class='panel-group' id='phase_accordion'>
     %for phase in project.phases:
         % if len(project.phases) > 1:
             %if phase == latest_phase:
@@ -237,8 +237,8 @@
             %else:
                 <% section_css = 'collapse' %>
             %endif
-                <div class='accordion-group'>
-                    <div class='accordion-heading section-header'>
+            <div class='panel panel-default'>
+                <div class='panel-heading section-header'>
                     <a href="#phase_${phase.id}"
                         data-toggle='collapse'
                         data-parent='#phase_accordion'
@@ -251,23 +251,23 @@ else:
     label = phase.name
 %>
                             <i style="vertical-align:middle"
-                                class="icon-folder-open">
+                                class="glyphicon glyphicon-folder-open">
                             </i>&nbsp;${label}
                         </div>
                     </a>
                 </div>
-                <div class="accordion-body ${section_css}"
+                <div class="panel-collapse ${section_css}"
                     id='phase_${phase.id}'>
-                    <div class='accordion-inner'>
+                    <div class='panel-body'>
         % else:
-            <div class='accordion'>
-                <div class='accordion-group'>
-                <div class="accordion-body" id='phase_${phase.id}'>
-                    <div class=''>
+            <div class='panel-group'>
+                <div class='panel panel-default'>
+                    <div class="panel-collapse" id='phase_${phase.id}'>
+                        <div class='panel-body'>
         % endif
 
         <h3 class='pull-left' style="padding-right:10px;">Devis</h3>
-        <a class='btn' href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'>
+        <a class='btn btn-default' href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'>
             <span class='ui-icon ui-icon-plusthick'></span>Nouveau devis
         </a>
 
@@ -276,7 +276,7 @@ else:
                 <thead>
                     <th></th>
                     <th>Nom</th>
-                    <th class="hidden-phone">État</th>
+                    <th class="hidden-xs">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>
                 %for task in phase.estimations:
@@ -295,7 +295,7 @@ else:
             style='padding-right:10px;font-weight:100;'>
             Facture(s)
         </h3>
-        <a class='btn'
+        <a class='btn btn-default'
             href='${request.route_path(\
             "project_invoices", \
             id=project.id, \
@@ -309,7 +309,7 @@ else:
                     <th></th>
                     <th>Numéro</th>
                     <th>Nom</th>
-                    <th class="hidden-phone">État</th>
+                    <th class="hidden-xs">État</th>
                     <th style="text-align:center">Action</th>
                 </thead>
                 %for task in phase.invoices:

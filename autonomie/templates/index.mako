@@ -24,11 +24,11 @@
 
 <%inherit file="base.mako"></%inherit>
 <%block name='content'>
-<div class='row-fluid'>
+<div class='row'>
 % if companies:
     <ul class="thumbnails">
         % for company in companies:
-        <li class="span4">
+        <li class="col-md-4">
         <div class="thumbnail">
             <img src="${api.img_url(company.logo_file)}" title="${company.name}" alt="" style="max-height:200px;"/>
             <div class="caption">

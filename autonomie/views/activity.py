@@ -425,46 +425,46 @@ class ActivityList(BaseListView):
         """
         Return the id of the conseiller leading the activities
         """
-        return appstruct['conseiller_id']
+        return appstruct.get('conseiller_id')
 
     def filter_conseiller(self, query, appstruct):
         """
         Add a filter on the conseiller to the current query
         """
         conseiller_id = self._get_conseiller_id(appstruct)
-        if conseiller_id != -1:
+        if conseiller_id is not None:
             query = query.filter(
                 Activity.conseillers.any(user.User.id==conseiller_id)
             )
         return query
 
     def filter_participant(self, query, appstruct):
-        participant_id = appstruct['participant_id']
+        participant_id = appstruct.get('participant_id')
 
-        if participant_id != -1:
+        if participant_id is not None:
             query = query.filter(
                 Activity.attendances.any(Attendance.account_id==participant_id)
                 )
         return query
 
     def filter_user_status(self, query, appstruct):
-        status = appstruct['user_status']
-        if status != 'all':
+        status = appstruct.get("user_status")
+        if status is not None:
             query = query.filter(
                 Activity.attendances.any(Attendance.status==status)
             )
         return query
 
     def filter_type(self, query, appstruct):
-        type_id = appstruct['type_id']
-        if type_id != -1:
+        type_id = appstruct.get('type_id')
+        if type_id is not None:
             query = query.filter(Activity.type_id == type_id)
         return query
 
     def filter_status(self, query, appstruct):
-        status = appstruct['status']
+        status = appstruct.get('status')
 
-        if status != 'all':
+        if status is not None:
             query = query.filter(Activity.status == status)
 
         return query

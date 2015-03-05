@@ -27,7 +27,7 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-<div class="span6 offset2">
+<div class="col-md-6 col-md-offset-2">
     ${form|n}
 </div>
 </%block>

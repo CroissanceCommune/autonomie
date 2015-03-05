@@ -24,10 +24,10 @@
 
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-<div class='row-fluid'>
-    <div class="span8 offset2" id="holidays"></div>
+<div class='row'>
+    <div class="col-md-8 col-md-offset-2" id="holidays"></div>
 </div>
-<div id="form-container" class='span4'>
+<div id="form-container" class='col-md-4'>
 </div>
 <div id='messageboxes'>
 </div>

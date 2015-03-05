@@ -37,11 +37,11 @@
     <li>
     </li>
 </ul>
-<div class='row-fluid'>
-    <div class='span7'>
+<div class='row'>
+    <div class='col-md-7'>
         ${form|n}
     </div>
-    <div class='span4'>
+    <div class='col-md-4'>
         <table class='table table-bordered'>
             <tr>
                 <td class='invoice_resulted'><br /></td>

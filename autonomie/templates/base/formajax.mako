@@ -30,11 +30,4 @@
 % endif
 % if not form is UNDEFINED:
     ${form|n}
-    <script>
-        ## fix a deform bug : when sending a form through ajax response, the
-        ## 'ajaxification' of the form is not fired in a full html page, this
-        ## firing is ensured by the deform.js script, here we force this
-        deform.loaded = false;
-        deform.load()
-    </script>
 % endif

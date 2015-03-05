@@ -198,12 +198,13 @@ class Submit(Widget):
     js = None
     type_ = 'submit'
     icon = None
+    disabled = False
 
     def __init__(self, label, value, title=None,
                             request=None, confirm=None, name="submit"):
         self.label = label
         self.value = value
-        self.name = name
+        self.name = name or "submit"
         self.title = title or self.label
         if confirm:
             self.js = u"return confirm('{0}')".format(

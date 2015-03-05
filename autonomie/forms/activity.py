@@ -70,7 +70,7 @@ def get_deferred_select_type(default=False):
     def deferred_select_type(node, kw):
         values = [(unicode(a.id), a.label) for a in get_activity_types()]
         if default:
-            values.insert(0, (-1, 'Tous les rendez-vous'))
+            values.insert(0, ("", 'Tous les rendez-vous'))
         return deform.widget.SelectWidget(values=values)
     return deferred_select_type
 
@@ -262,43 +262,40 @@ def get_list_schema(is_admin=False):
         name='type_id',
         widget=get_deferred_select_type(True),
         validator=deferred_type_validator,
-        missing=-1))
+        missing=colander.drop))
 
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name='status',
         widget=deform.widget.SelectWidget(values=STATUS_SEARCH),
         validator=colander.OneOf([s[0] for s in STATUS_SEARCH]),
-        default='all',
-        missing='all'))
+        missing=colander.drop))
 
     schema.insert(0, colander.SchemaNode(
         colander.String(),
         name='user_status',
         widget=deform.widget.SelectWidget(values=ATTENDANCE_STATUS_SEARCH),
         validator=colander.OneOf([s[0] for s in ATTENDANCE_STATUS_SEARCH]),
-        default='all',
-        missing='all'))
+        missing=colander.drop))
 
 
     if is_admin:
         schema.insert(0, user.user_node(
-            missing=-1,
+            missing=colander.drop,
             name='participant_id',
             widget_options={
-                'default_option': (-1, ''),
-                'placeholder': u"Sélectionner un participant"},
+                'default_option': ("", u"- Sélectionner un participant -"),
+            }
             )
         )
 
         schema.insert(0, user.user_node(
             roles=['manager', 'admin'],
-            missing=-1,
-            default=forms.deferred_current_user_id,
+            missing=colander.drop,
             name='conseiller_id',
             widget_options={
-                'default_option': (-1, ''),
-                'placeholder': u"Sélectionner un conseiller"},
+                'default_option': ("", u"- Sélectionner un conseiller -"),
+            }
             )
         )
 

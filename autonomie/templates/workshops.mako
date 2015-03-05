@@ -42,9 +42,9 @@
 args = request.GET
 url = request.route_path('workshops.xls', _query=args)
 %>
-<a class='btn pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='icon-file'></i>Excel</a>
+<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='glyphicon glyphicon-file'></i>Excel</a>
 <% url = request.route_path('workshops.csv', _query=args) %>
-<a class='btn pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='icon-file'></i>Csv</a>
+<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='glyphicon glyphicon-file'></i>Csv</a>
     </li>
 </ul>
 </%block>
@@ -104,7 +104,7 @@ url = request.route_path('workshops.xls', _query=args)
                                     <% pdf_url = request.route_path("timeslot.pdf", id=timeslot.id) %>
                                     <a href="${pdf_url}"
                                         title="Télécharger la sortie PDF pour impression"
-                                        icon='icon-file'>
+                                        icon='glyphicon glyphicon-file'>
                                         Du ${api.format_datetime(timeslot.start_time)} au \
     ${api.format_datetime(timeslot.end_time)} \
     (${timeslot.duration[0]}h${timeslot.duration[1]})
@@ -131,12 +131,12 @@ url = request.route_path('workshops.xls', _query=args)
                 <td>
                     % if api.has_permission('manage', workshop):
                         <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
-                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='icon-pencil')}
+                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='glyphicon glyphicon-pencil')}
 
                         <% del_url = request.route_path('workshop', id=workshop.id, _query=dict(action="delete")) %>
-                        ${table_btn(del_url, u"Supprimer",  u"Supprimer cet atelier", icon='icon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')")}
+                        ${table_btn(del_url, u"Supprimer",  u"Supprimer cet atelier", icon='glyphicon glyphicon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')")}
                     % elif api.has_permission("view", workshop):
-                        ${table_btn(url, u"Voir", u"Voir l'atelier", icon='icon-search')}
+                        ${table_btn(url, u"Voir", u"Voir l'atelier", icon='glyphicon glyphicon-search')}
                     % endif
                 </td>
             </tr>

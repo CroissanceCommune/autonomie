@@ -129,8 +129,7 @@ def get_list_schema(company=False):
             missing=colander.drop,
             name='participant_id',
             widget_options={
-                'placeholder': u"Sélectionner un participant",
-                'default_option': ('', ''),
+                'default_option': ('', u"- Sélectionner un participant -"),
                 }
         ))
 

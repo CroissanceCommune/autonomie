@@ -73,7 +73,7 @@ Attendance sheet for a given timeslot (the current context)
         <br />
         <div><b>Titre de l'atelier ou de la formation</b> : ${workshop.name}</div>
         <div class='row'>
-            <table class="lines span12">
+            <table class="lines col-md-12">
                 <thead>
                     <tr>
                         <th class="description">Participants</th>

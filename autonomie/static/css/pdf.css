@@ -11,6 +11,9 @@
 html{
   font-size:11px;
 }
+.description{
+  line-height: 12px;
+}
 .addressblock{
   position:relative;
   padding-left:500px;
@@ -94,4 +97,8 @@ font-size: 14px;
 }
 .upper{
 text-transform: uppercase;
+}
+p{
+  margin: 2px;
+  padding: 2px 0px;
 }

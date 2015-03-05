@@ -65,7 +65,7 @@ ATTENDANCE_STATUS = (
     )
 
 ATTENDANCE_STATUS_SEARCH = (
-    ('all', u'Tous les rendez-vous',),
+    ('', u'Tous les rendez-vous',),
     ('absent', u'Un des participants était absent',),
     ('excused', u'Un des participants était excusé',),
     ('attended', u'Les participants étaient présents',),
@@ -79,7 +79,7 @@ STATUS = (
     )
 
 STATUS_SEARCH = (
-    ("all", u"Tous les rendez-vous", ),
+    ("", u"Tous les rendez-vous", ),
     ("planned", u"Planifiés", ),
     ("closed", u"Terminés", ),
     ("cancelled", u"Annulés", ),

@@ -66,7 +66,7 @@ def deferred_upload_header_widget(node, kw):
     )
     return files.CustomFileUploadWidget(
         tmpstore,
-        template=forms.TEMPLATES_PATH + "fileupload.mako"
+        template=forms.TEMPLATES_PATH + "fileupload.pt"
     )
 
 
@@ -152,7 +152,7 @@ comptabilité",
             colander.Integer(),
             widget=deform.widget.TextInputWidget(
                 input_append="%",
-                css_class="span1"
+                css_class="col-md-1"
                 ),
             validator=colander.Range(min=0, max=100,
                 min_err=u"Veuillez fournir un nombre supérieur à 0",

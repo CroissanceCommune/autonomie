@@ -31,7 +31,6 @@ from sqlalchemy import engine_from_config
 from autonomie.utils.widgets import ActionMenu
 
 HERE = os.path.dirname(__file__)
-print HERE
 DATASDIR = os.path.join(HERE, 'datas')
 TMPDIR = os.path.join(HERE, 'tmp')
 
@@ -170,12 +169,8 @@ def config(request, pyramid_request, settings, registry):
     set_cache_regions_from_settings(settings)
     request.addfinalizer(testing.tearDown)
 
-    from autonomie.utils.renderer import (
-        set_deform_renderer,
-        set_json_renderer,
-    )
-    set_deform_renderer()
-    set_json_renderer(config)
+    from autonomie.utils.renderer import customize_renderers
+    customize_renderers(config)
     return config
 
 

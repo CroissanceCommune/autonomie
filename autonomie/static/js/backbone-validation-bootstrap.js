@@ -29,7 +29,7 @@ function showError(control, error){
    * shows error 'message' to the group group in a twitter bootstrap
    * friendly manner
    */
-  var group = control.parents(".control-group");
+  var group = control.parents(".form-group");
   group.addClass("error");
   if (group.find(".help-inline").length === 0){
     group.find(".controls").append(
@@ -43,7 +43,7 @@ function hideFormError(form){
    * Remove bootstrap style errors from the whole form
    */
     form.find(".alert").remove();
-    var groups = form.find(".control-group");
+    var groups = form.find(".form-group");
     groups.removeClass("error");
     groups.find(".help-inline.error-message").remove();
     groups.find(".help-inline .error").remove();
@@ -52,7 +52,7 @@ function hideFormError(form){
 function hideFieldError(control){
   /*"""
    */
-   var group = control.parents(".control-group");
+   var group = control.parents(".form-group");
    group.removeClass("error");
    group.find(".help-inline.error-message").remove();
    return control;

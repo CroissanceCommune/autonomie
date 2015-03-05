@@ -167,28 +167,68 @@ class ProjectsList(BaseListView):
             Return action buttons with permission handling
         """
         btns = []
-        btns.append(ItemActionLink(u"Voir", "view", css='btn',
-                path="project", icon="icon-search"))
-        btns.append(ItemActionLink(u"Devis", "edit", css="btn",
-            title=u"Nouveau devis",
-            path="project_estimations", icon=("icon-file", )))
-        btns.append(ItemActionLink(u"Facture", "edit", css="btn",
-            title=u"Nouvelle facture",
-            path="project_invoices", icon=("icon-file", )))
+        btns.append(
+            ItemActionLink(
+                u"Voir",
+                "view",
+                css='btn btn-default',
+                path="project",
+                icon="search"
+        ))
+        btns.append(
+            ItemActionLink(
+                u"Devis",
+                "edit",
+                css="btn btn-default",
+                title=u"Nouveau devis",
+                path="project_estimations",
+                icon="file",
+        ))
+        btns.append(
+            ItemActionLink(
+                u"Facture",
+                "edit",
+                css="btn btn-default",
+                title=u"Nouvelle facture",
+                path="project_invoices",
+                icon="file",
+            )
+        )
         if self.request.params.get('archived', '0') == '0':
-            btns.append(ItemActionLink(u"Archiver", "edit", css="btn",
-                   confirm=u'Êtes-vous sûr de vouloir archiver ce projet ?',
-                                path="project",
-                                title=u"Archiver le projet",
-                                _query=dict(action="archive"),
-                                icon="icon-book"))
+            btns.append(
+                ItemActionLink(
+                    u"Archiver",
+                    "edit",
+                    css="btn btn-default",
+                    confirm=u'Êtes-vous sûr de vouloir archiver ce projet ?',
+                    path="project",
+                    title=u"Archiver le projet",
+                    _query=dict(action="archive"),
+                    icon="book",
+                )
+            )
         else:
-            del_link = ItemActionLink(u"Supprimer", "edit", css="btn",
-                   confirm=u'Êtes-vous sûr de vouloir supprimer ce projet ?',
-                                      path="project",
-                                      title=u"Supprimer le projet",
-                                      _query=dict(action="delete"),
-                                      icon="icon-trash")
+            btns.append(
+                ItemActionLink(
+                    u"Désarchiver",
+                    "edit",
+                    css="btn btn-default",
+                    path="project",
+                    title=u"Désarchiver le projet",
+                    _query=dict(action="archive"),
+                    icon="book",
+                )
+            )
+            del_link = ItemActionLink(
+                u"Supprimer",
+                "edit",
+                css="btn btn-danger",
+                confirm=u'Êtes-vous sûr de vouloir supprimer ce projet ?',
+                path="project",
+                title=u"Supprimer le projet",
+                _query=dict(action="delete"),
+                icon="trash"
+            )
 
             def is_deletable_perm(context, req):
                 """
@@ -229,10 +269,13 @@ def project_archive(request):
         Archive the current project
     """
     project = request.context
-    project.archived = 1
-    request.dbsession.merge(project)
-    request.session.flash(u"Le projet '{0}' a été archivé"\
+    if project.archived == '0':
+        project.archived = "1"
+    else:
+        project.archived = "0"
+        request.session.flash(u"Le projet '{0}' a été désarchivé"\
             .format(project.name))
+    request.dbsession.merge(project)
     return HTTPFound(request.referer)
 
 def project_delete(request):

@@ -55,7 +55,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from autonomie.views import render_api
 
-from deform_bootstrap import widget as bootstrap_widget
 from autonomie.models.base import (
     DBBASE,
     DBSESSION,
@@ -426,6 +425,13 @@ class User(DBBASE, PersistentACLMixin):
     def __repr__(self):
         return self.__unicode__().encode('utf-8')
 
+    def __json__(self, request):
+        return dict(
+            lastname=self.lastname,
+            firstname=self.firstname,
+        )
+
+
 
 def get_user_by_roles(roles):
     """
@@ -467,7 +473,7 @@ def get_deferred_user_choice(roles=None, widget_options=None):
         choices = get_users_options(roles)
         if default_option:
             choices.insert(0, default_option)
-        return bootstrap_widget.ChosenSingleWidget(
+        return deform.widget.Select2Widget(
             values=choices,
             **widget_options
             )
@@ -1647,6 +1653,43 @@ class UserDatas(Node):
                 companies.append(company)
         return companies
 
+
+# One to one test relationship
+
+#class ExtendedUserDatas(DBBASE):
+#    """
+#    Datas extension
+#    """
+#    id = Column(
+#        ForeignKey(UserDatas.id),
+#        primary_key=True,
+#        info={
+#            'colanderalchemy': EXCLUDED,
+#            'export': {'label': 'Extension'},
+#        }
+#    )
+#    test_value = Column(
+#        String(255),
+#        info={
+#            'colanderalchemy': {
+#                'section': 'Custom datas',
+#                'title': u"Valeur test"
+#            }
+#        }
+#    )
+#    userdata = relationship(
+#        UserDatas,
+#        backref=backref(
+#            'extension',
+#            uselist=False,
+#            info={
+#                'colanderalchemy': {'section': 'Custom datas',},
+#                'export': {'label': 'Extension', }
+#            }
+#        ),
+#        uselist=False,
+#    )
+#
 
 # multi-valued user-datas
 class ExternalActivityDatas(DBBASE):

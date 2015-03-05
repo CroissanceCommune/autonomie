@@ -28,7 +28,6 @@
 import colander
 import deform
 
-from deform_bootstrap import widget as bootstrap_widget
 from sqlalchemy import (
     Table,
     Column,
@@ -95,7 +94,7 @@ def get_customers_from_request(request):
 def deferred_customer_select(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
-    return bootstrap_widget.ChosenSingleWidget(
+    return deform.widget.Select2Widget(
         values=build_customer_values(customers),
         placeholder=u'Sélectionner un client',
     )
@@ -176,7 +175,7 @@ class Project(Node):
             CustomDateType,
             info={
                 "colanderalchemy":{
-                    "title": "Date de début",
+                    "title": u"Date de début",
                     "typ": colander.Date(),
                 }
             },
@@ -190,7 +189,7 @@ class Project(Node):
             CustomDateType,
             info={
                 "colanderalchemy":{
-                    "title": "Date de fin",
+                    "title": u"Date de fin",
                     "typ": colander.Date(),
                 }
             },
@@ -207,7 +206,7 @@ class Project(Node):
                   'colanderalchemy':{
                       'title': u"Définition",
                       'widget': deform.widget.TextAreaWidget(
-                          css_class="span10"
+                          css_class="col-md-10"
                       ),
                   }
             },
@@ -260,13 +259,13 @@ class Project(Node):
         """
             Return True if the project is archived
         """
-        return self.archived == 1
+        return self.archived == "1"
 
     def is_deletable(self):
         """
             Return True if this project could be deleted
         """
-        return self.archived == 1 and not self.invoices
+        return self.archived == "1" and not self.invoices
 
     def get_company_id(self):
         return self.company.id
@@ -312,6 +311,9 @@ class Project(Node):
                     type=self.type,
                     archived=self.archived,
                     phases=phases)
+
+    def __json__(self, request):
+        return self.todict()
 
 
 class Phase(DBBASE):

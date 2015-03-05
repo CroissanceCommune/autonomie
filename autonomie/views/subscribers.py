@@ -35,7 +35,7 @@ from pyramid.threadlocal import get_current_request
 
 from autonomie.i18n import translate
 from autonomie.utils.widgets import ActionMenu
-from autonomie.resources import main_js
+from autonomie.resources import main_group
 from autonomie.views.render_api import Api
 
 log = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def log_request(event):
     http_version = request.http_version
     referer = request.referer
     user_agent = request.user_agent
-    log.info(u"## The current incoming request ##")
+    log.info(u"####################  NEW REQUEST COMING #################")
     log.info(event.request)
     log.info(u"The current session")
     log.info(event.request.session)
@@ -101,7 +101,7 @@ def add_main_js(event):
     """
         Add the main required javascript dependency
     """
-    main_js.need()
+    main_group.need()
 
 
 def includeme(config):

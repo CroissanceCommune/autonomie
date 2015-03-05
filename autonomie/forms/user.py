@@ -100,7 +100,7 @@ def deferred_company_input(node, kw):
     companies = get_companies_choices()
     wid = deform.widget.AutocompleteInputWidget(
         values=companies,
-        template="autonomie:deform_templates/autocomple_input.pt"
+#        template="autonomie:deform_templates/autocomple_input.pt"
     )
     return wid
 

@@ -353,7 +353,7 @@ accessible.")
         form = get_period_form(request, action_url)
         popup = PopUp("user_expense_{0}".format(uid), u"Créer", form.render())
         request.popups[popup.name] = popup
-        user_buttons[user.id] = popup.open_btn(css="btn")
+        user_buttons[user.id] = popup.open_btn(css="btn btn-default")
     return dict(title=title,
             expense_sheets=expense_sheets,
             user_buttons=user_buttons,

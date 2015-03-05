@@ -127,7 +127,7 @@ var discount = {
     this.get_percent_input().val('');
     this.get_value_input().val('');
     this.get_description_textarea().val();
-    this.el.find(".control-group").removeClass('error');
+    this.el.find(".form-group").removeClass('has-error');
     this.el.find(".help-inline.error-message").remove();
     this.select.change();
   },
@@ -144,7 +144,7 @@ var discount = {
     });
   },
   popup:function(container){
-    this.container = $(container).parent().parent();
+    this.container = container;
     this.el = $('#discount_popup');
     this.value_tag = this.get_value_tag();
     this.percent_tag = this.get_percent_tag();
@@ -213,11 +213,16 @@ var discount = {
     return false;
   },
   add_line:function(description, value, tva){
+    console.log("add a line : %s %s %s", description, value, tva);
     deform.appendSequenceItem(this.container);
     var line = $('.discountline').last();
-    line.children().find("textarea").val(description);
+    var textarea = line.children().find("textarea");
+    textarea.val(description);
+    tinyMCE.get(textarea.attr('id')).setContent(description);
     line.children().find("input[name=amount]").val(value);
     line.children().find("select[name=tva]").val(tva);
+    setDiscountLinesBehaviours();
+
     $(Facade).trigger("linechange", line);
     $(Facade).trigger('totalchange', line);
   }

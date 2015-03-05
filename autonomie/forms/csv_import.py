@@ -49,7 +49,7 @@ def deferred_temporary_upload_widget(node, kw):
     tmpstore = pyramid_deform.SessionFileUploadTempStore(request)
     return forms.files.CustomFileUploadWidget(
         tmpstore,
-        template=forms.TEMPLATES_PATH + "fileupload.mako"
+        template=forms.TEMPLATES_PATH + "fileupload.pt"
     )
 
 
@@ -158,7 +158,7 @@ class AssociationEntry(colander.MappingSchema):
     """
     csv_field = colander.SchemaNode(
         colander.String(),
-        title=u"Champ du fichier csv",
+        title=u"Libellé dans le fichier",
         widget=DisabledInput(),
     )
     model_attribute = colander.SchemaNode(
@@ -170,7 +170,7 @@ class AssociationEntry(colander.MappingSchema):
 
 
 class AssociationEntries(colander.SequenceSchema):
-    entry = AssociationEntry()
+    entry = AssociationEntry( title=u"Champ du fichier csv")
 
 
 class AssociationSchema(colander.MappingSchema):

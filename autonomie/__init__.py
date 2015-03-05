@@ -44,13 +44,9 @@ from autonomie.models.config import get_config
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
 from autonomie.utils.renderer import (
-    set_deform_renderer,
-    set_json_renderer,
+    customize_renderers,
 )
 from autonomie.utils.session import get_session_factory
-from autonomie.utils.deform_bootstrap_fix import (
-    add_resources_to_registry,
-)
 
 
 AUTONOMIE_MODULES = (
@@ -99,15 +95,8 @@ def add_static_views(config, settings):
     config.add_static_view(
             statics,
             "autonomie:static",
-            cache_max_age=3600)
-    config.add_static_view(
-            statics + "-deform",
-            "deform:static",
-            cache_max_age=3600)
-    config.add_static_view(
-            statics + "-deform_bootstrap",
-            "deform_bootstrap:static",
-            cache_max_age=3600)
+            cache_max_age=3600,
+    )
 
     # Adding a static view to the configured assets
     assets = settings.get('autonomie.assets', '/var/intranet_files')
@@ -130,6 +119,9 @@ def main(global_config, **settings):
 
 
 def prepare_config(**settings):
+    """
+    Prepare the configuration object to setup the main application elements
+    """
     session_factory = get_session_factory(settings)
     set_cache_regions_from_settings(settings)
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
@@ -142,32 +134,6 @@ def prepare_config(**settings):
     config.begin()
     config.commit()
     return config
-
-
-def set_export_formatters():
-    """
-    Globally set export formatters in the sqla_inspect registry
-    """
-    from sqla_inspect.export import FORMATTERS_REGISTRY
-    from sqlalchemy import (
-        Boolean,
-        Date,
-        DateTime,
-    )
-    from autonomie.views import render_api
-    from autonomie.export.utils import format_boolean
-    FORMATTERS_REGISTRY.add_formatter(Date, render_api.format_date)
-    FORMATTERS_REGISTRY.add_formatter(DateTime, render_api.format_datetime)
-    FORMATTERS_REGISTRY.add_formatter(Boolean, format_boolean)
-
-
-def set_export_blacklist():
-    """
-    Globally set an export blacklist
-    """
-    from sqla_inspect.export import BLACKLISTED_KEYS
-
-    BLACKLISTED_KEYS = ('_acl', 'password', 'parent_id', 'parent', 'type_')
 
 
 def base_configure(config, dbsession, **settings):
@@ -191,15 +157,7 @@ def base_configure(config, dbsession, **settings):
     for module in AUTONOMIE_MODULES:
         config.include(module)
 
-    # Set deform multi renderer handling translation for both chameleon and
-    # mako templates
-    set_deform_renderer()
-    # Set json renderer
-    set_json_renderer(config)
-    set_export_formatters()
-    set_export_blacklist()
-    config.add_translation_dirs("colander:locale/", "deform:locale")
-    add_resources_to_registry()
+    customize_renderers(config)
     return config
 
 

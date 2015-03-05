@@ -75,7 +75,7 @@ class CsvFileUploadView(BaseFormView):
     title = u"Import des dossiers, étape 1 : chargement d'un fichier csv"
     help_message = u"Pour importer des données, vous devez disposer d'un \
 fichier de type csv : <br /> \
-            <ul class='unstyled'> \
+            <ul class='list-unstyled'> \
 <li>Utilisant le caractère ';' comme séparateur </li>\
 <li>Utilisant le caractère ' \" ' comme délimiteur de chaîne de caractères </li>\
 <li>Enregistré au format utf-8.</li></ul> \

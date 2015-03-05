@@ -27,7 +27,6 @@
 """
 import logging
 import colander
-import deform_bootstrap
 import deform
 import deform_bootstrap_extensions
 
@@ -288,6 +287,9 @@ class Company(DBBASE, PersistentACLMixin):
                     customers=customers,
                     projects=projects)
 
+    def __json__(self, request):
+        return self.todict()
+
     def get_tasks(self):
         """
         Get all tasks for this company, as a list
@@ -328,7 +330,7 @@ def get_deferred_company_choices(widget_options):
         values = [(comp.id, comp.name) for comp in Company.query()]
         if default_entry is not None:
             values.insert(0, default_entry)
-        return deform_bootstrap.widget.ChosenSingleWidget(
+        return deform.widget.Select2Widget(
             values=values,
             placeholder=u"Sélectionner une entreprise",
             **widget_options
@@ -359,7 +361,7 @@ def deferred_fullcustomer_list_widget(node, kw):
                 *[(cust.id, cust.name) for cust in comp.customers]
             )
         )
-    return deform_bootstrap_extensions.CustomChosenOptGroupWidget(
+    return deform.widget.Select2Widget(
         values=values,
         placeholder=u"Sélectionner un client"
         )
@@ -370,7 +372,7 @@ def deferred_customer_list_widget(node, kw):
     values = [(-1, u''), ]
     company = kw['request'].context
     values.extend(((cust.id, cust.name) for cust in company.customers))
-    return deform_bootstrap.widget.ChosenSingleWidget(
+    return deform.widget.Select2Widget(
         values=values,
         placeholder=u'Sélectionner un client',
     )

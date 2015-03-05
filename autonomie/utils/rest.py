@@ -31,6 +31,8 @@ from pyramid.response import Response
 
 from pyramid.renderers import render
 
+
+# Not used : but kept in case of it's sure
 def allowed_methods(*allowed):
     """
         Custom predict checking if the HTTP method in the allowed set.

@@ -120,16 +120,54 @@ def come_from_node(**kw):
 def textarea_node(**kw):
     """
     Return a node for storing Text objects
+
+    richtext (True / False)
+
+        should we provide a rich text widget if True, richtext_options dict
+        values will be passed to the CKEditor library
+
+    admin (True / False)
+
+        Should we provide a widget with all options
+
+    widget_options
+
+        Options passed to the widget's class
+
     """
-    css_class = kw.pop('css_class', None) or 'span10'
+    widget_options = kw.pop('widget_options', {})
+
     if kw.pop('richwidget', None):
+
+        # If the admin option is set,
+        admin_field = kw.pop('admin', False)
+
+        plugins = [
+            "lists",
+            "searchreplace visualblocks fullscreen",
+            "contextmenu paste"
+        ]
+        menubar = False
+        if admin_field:
+            plugins.append("insertdatetime searchreplace code table")
+            plugins.append("advlist link autolink")
+            menubar = True
+
+        options = kw.pop("richtext_options", {})
+        options.update({
+            'content_css': "/fanstatic/fanstatic/css/richtext.css",
+            'language': "fr_FR",
+            'menubar': menubar,
+            'plugins': plugins
+        })
+
         wid = deform.widget.RichTextWidget(
-            css_class=css_class,
-            theme="advanced",
-            options={'content_css': "/fanstatic/fanstatic/css/richtext.css"},
+            options=options.items(),
+            **widget_options
         )
     else:
-        wid = deform.widget.TextAreaWidget(css_class=css_class)
+        widget_options.setdefault("rows", 4)
+        wid = deform.widget.TextAreaWidget(**widget_options)
     return colander.SchemaNode(
             colander.String(),
             widget=wid,
@@ -263,7 +301,7 @@ def get_fileupload_widget(store_url, store_path, session, \
             filters=filters,
             )
     return deform.widget.FileUploadWidget(tmpstore,
-                template=TEMPLATES_PATH + "fileupload.mako")
+                template=TEMPLATES_PATH + "fileupload.pt")
 
 
 def flatten_appstruct(appstruct):
@@ -383,3 +421,11 @@ def get_select_validator(options):
     return colander.OneOf([o[0] for o in options])
 
 
+positive_validator = colander.Range(
+            min=0,
+            min_err=u"Doit être positif",
+        )
+negative_validator = colander.Range(
+            max=0,
+            min_err=u"Doit être négatif",
+        )

@@ -70,12 +70,12 @@ class Tva(DBBASE):
 
     def __json__(self, request):
         return dict(
-                id=self.id,
-                value=self.value,
-                name=self.name,
-                products=[product.__json__(request) \
-                        for product in self.products]
-                )
+            id=self.id,
+            value=self.value,
+            name=self.name,
+            default=self.default == 1,
+            products=[product.__json__(request) for product in self.products],
+        )
 
 class Product(DBBASE):
     __tablename__ = 'product'

@@ -438,3 +438,21 @@ class BaseFormView(FormView):
         # On loggue l'erreur colander d'origine
         log.exception(e.error)
         return dict(form=e.render(), formerror=True)
+
+
+class BaseEditView(BaseFormView):
+    """
+    Admin view that should be subclassed adding a colanderalchemy schema
+
+    class AdminModel(BaseEditView):
+        schema = SQLAlchemySchemaNode(MyModel)
+    """
+    msg = u"Vos modifications ont bien été enregistrées"
+
+    def before(self, form):
+        form.set_appstruct(self.schema.dictify(self.context))
+
+    def submit_success(self, appstruct):
+        model = self.schema.objectify(appstruct, self.context)
+        self.dbsession.merge(model)
+        self.request.session.flash(self.msg)

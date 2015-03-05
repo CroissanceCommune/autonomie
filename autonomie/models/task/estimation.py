@@ -400,7 +400,27 @@ class Estimation(Task, EstimationCompute):
         self.payments = lines
 
     def __repr__(self):
-        return u"<Estimation id:{s.id}>".format(s=self)
+        return u"<Estimation id:{s.id} ({s.CAEStatus}>".format(s=self)
+
+    def __json__(self, request):
+        result = Task.__json__(self, request)
+        result.update(
+            dict(
+                deposit=self.deposit,
+                payment_conditions=self.paymentConditions,
+                exclusions=self.exclusions,
+                customer_id=self.customer_id,
+                manual_deliverables=self.manualDeliverables,
+                course=self.course,
+                displayed_units=self.displayedUnits,
+                expenses_ht=self.expenses_ht,
+                payment_display=self.paymentDisplay,
+                address=self.address,
+                lines=[line.__json__(request) for line in self.lines],
+                payments=[line.__json__(request) for line in self.payment_lines]
+            )
+        )
+        return result
 
 
 class EstimationLine(DBBASE, LineCompute):
@@ -461,6 +481,16 @@ class EstimationLine(DBBASE, LineCompute):
         return u"<EstimationLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
  quantity:{s.quantity} tva:{s.tva}".format(s=self)
 
+    def __json__(self, request):
+        return dict(
+            index=self.rowIndex,
+            description=self.description,
+            cost=self.cost,
+            quantity=self.quantity,
+            tva=self.tva,
+            unity=self.unity,
+        )
+
 
 class PaymentLine(DBBASE):
     """
@@ -500,3 +530,11 @@ class PaymentLine(DBBASE):
     def __repr__(self):
         return u"<PaymentLine id:{s.id} task_id:{s.task_id} amount:{s.amount}\
  date:{s.paymentDate}".format(s=self)
+
+    def __json__(self, request):
+        return dict(
+            index=self.rowIndex,
+            description=self.description,
+            cost=self.amount,
+            date=self.paymentDate,
+        )

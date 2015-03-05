@@ -45,7 +45,7 @@ from autonomie.forms.task import (
 from autonomie.views import (
     merge_session_with_post,
     submit_btn,
-    BaseFormView,
+    BaseEditView,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
@@ -86,7 +86,9 @@ class InvoiceAdd(TaskFormView):
     schema = get_invoice_schema()
     buttons = (submit_btn,)
     model = Invoice
-    add_template_vars = ('title', 'company', 'tvas', 'load_options_url', )
+    add_template_vars = (
+        'title', 'company', 'tvas', 'load_options_url', 'edit',
+    )
 
     @property
     def company(self):
@@ -133,7 +135,10 @@ class InvoiceEdit(TaskFormView):
     schema = get_invoice_schema()
     buttons = (submit_btn,)
     model = Invoice
-    add_template_vars = ('title', 'company', 'tvas', 'load_options_url', )
+    edit = True
+    add_template_vars = (
+        'title', 'company', 'tvas', 'load_options_url', 'edit',
+    )
 
     @property
     def company(self):
@@ -340,22 +345,13 @@ def set_products(request):
     return ret_dict
 
 
-class AdminInvoice(BaseFormView):
+class AdminInvoice(BaseEditView):
     """
     Vue pour l'administration de factures ?token=admin
 
     Vue accessible aux utilisateurs admin
     """
     schema = SQLAlchemySchemaNode(Invoice)
-    msg = u"Vos modifications ont bien été enregistrées"
-
-    def before(self, form):
-        form.set_appstruct(self.schema.dictify(self.context))
-
-    def submit_success(self, appstruct):
-        model = self.schema.objectify(appstruct, self.context)
-        self.dbsession.merge(model)
-        self.request.session.flash(self.msg)
 
 
 def includeme(config):

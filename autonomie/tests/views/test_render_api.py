@@ -42,6 +42,6 @@ class TestIt(unittest.TestCase):
 
     def test_format_name(self):
         self.assertEqual(render_api.format_name(None, u"LastName"),
-                                                         u" LASTNAME")
+                                                         u"LASTNAME ")
         self.assertEqual(render_api.format_name(u"Firstname", None),
-                                                        u"Firstname ")
+                                                        u" Firstname")

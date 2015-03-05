@@ -154,7 +154,9 @@ class PermanentUserAddView(BaseFormView):
         log.info(u"Adding company : %s" % name)
         company = Company()
         company.name = name
-        company.goal = u"Entreprise de {0}".format(format_account(user))
+        company.goal = u"Entreprise de {0}".format(
+            format_account(user, reverse=False)
+        )
         company.contribution = self.request.config.get('contribution_cae')
         company = self.dbsession.merge(company)
         self.dbsession.flush()

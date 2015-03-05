@@ -152,7 +152,7 @@ class StatusChanged(object):
         else:
             comment = u"Aucun"
 
-        username = render_api.format_account(self.document.owner)
+        username = render_api.format_account(self.document.owner, reverse=False)
         return MAIL_TMPL.format(
                 determinant=determinant,
                 username=username,

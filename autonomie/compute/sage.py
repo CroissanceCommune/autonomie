@@ -943,7 +943,7 @@ class SageExpenseBase(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"{0}/frais {1} {2}".format(
-                render_api.format_account(self.expense.user),
+                render_api.format_account(self.expense.user, reverse=False),
                 self.expense.month,
                 self.expense.year
                 )

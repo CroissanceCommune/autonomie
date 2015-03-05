@@ -217,7 +217,7 @@ class Project(Node):
 
     archived = Column(
         String(255),
-        default=0,
+        default="0",
         info={'colanderalchemy': forms.EXCLUDED},
     )
 

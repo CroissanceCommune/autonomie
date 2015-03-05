@@ -55,15 +55,6 @@ cancel_btn = Button(name="cancel", type="submit", title=u"Annuler")
 log = logging.getLogger(__name__)
 
 
-def get_page_url(request, page):
-    """
-        Return a url generator for pagination
-    """
-    args = request.GET
-    args['page'] = str(page)
-    return current_route_url(request, page=page, _query=args)
-
-
 class BaseView(object):
     def __init__(self, context, request=None):
         if request is None:
@@ -210,7 +201,7 @@ class BaseListView(BaseListClass):
             wraps the current SQLA query with pagination
         """
         # Url builder for page links
-        page_url = partial(get_page_url, request=self.request)
+        page_url = paginate.PageURL_WebOb(self.request)
         current_page = appstruct['page']
         items_per_page = appstruct['items_per_page']
         return paginate.Page(query,

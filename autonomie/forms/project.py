@@ -117,10 +117,10 @@ def get_list_schema():
     schema['search'].description = u"Projet ou nom du client"
 
     schema.add(colander.SchemaNode(
-        colander.String(),
+        colander.Boolean(),
         name='archived',
-        missing="0",
-        validator=colander.OneOf(('0', '1')),
-        widget=deform_widget.HiddenWidget()))
+        missing=False,
+        widget=deform_widget.HiddenWidget())
+    )
 
     return schema

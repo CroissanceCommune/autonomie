@@ -103,21 +103,21 @@
                 </thead>
                 <tbody>
                     % for project in customer.projects:
-                        %if project.is_archived():
+                        %if project.archived:
                             <tr class='tableelement' style='background-color:#999' id="${project.id}">
                             %else:
                                 <tr class='tableelement' id="${project.id}">
                                 %endif
                                 <td>${project.code}</td>
                                 <td>${project.name}
-                                    %if project.is_archived():
+                                    %if project.archived:
                                         (ce projet a été archivé)
                                     %endif
                                 </td>
                                 <td>
                                     <div class='btn-group'>
                                         ${table_btn(request.route_path("project", id=project.id), u"Voir", "Voir ce projet", icon=u"glyphicon glyphicon-pencil")}
-                                        %if not project.is_archived():
+                                        %if not project.archived:
                                             ${table_btn(request.route_path("project_estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"ui-icon-plusthick")}
                                             ${table_btn(request.route_path("project_invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"ui-icon-plusthick")}
                                             ${table_btn(request.route_path("project", id=project.id, _query=dict(action="archive")), u"Archiver", u"Archiver ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');", icon=u"ui-icon-folder-collapsed")}

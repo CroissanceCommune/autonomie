@@ -35,6 +35,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Text,
+    Boolean,
 )
 from sqlalchemy.orm import (
     deferred,
@@ -216,8 +217,8 @@ class Project(Node):
     )
 
     archived = Column(
-        String(255),
-        default="0",
+        Boolean(),
+        default=False,
         info={'colanderalchemy': forms.EXCLUDED},
     )
 
@@ -255,17 +256,11 @@ class Project(Node):
                 return invoice
         raise KeyError("No such task in this project")
 
-    def is_archived(self):
-        """
-            Return True if the project is archived
-        """
-        return self.archived == "1"
-
     def is_deletable(self):
         """
             Return True if this project could be deleted
         """
-        return self.archived == "1" and not self.invoices
+        return self.archived and not self.invoices
 
     def get_company_id(self):
         return self.company.id

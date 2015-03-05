@@ -147,11 +147,11 @@ class ProjectsList(BaseListView):
             return the show archived button
         """
         archived = appstruct['archived']
-        if archived == '0':
-            url = self.request.current_route_path(_query=dict(archived="1"))
+        if not archived:
+            url = self.request.current_route_path(_query=dict(archived="true"))
             link = HTML.a(u"Afficher les projets archivés",  href=url)
         else:
-            url = self.request.current_route_path(_query=dict(archived="0"))
+            url = self.request.current_route_path(_query=dict(archived="false"))
             link = HTML.a(u"Afficher les projets actifs", href=url)
         return StaticWidget(link)
 
@@ -194,7 +194,7 @@ class ProjectsList(BaseListView):
                 icon="file",
             )
         )
-        if self.request.params.get('archived', '0') == '0':
+        if self.request.params.get('archived', '0') in ('0', 'false'):
             btns.append(
                 ItemActionLink(
                     u"Archiver",
@@ -269,12 +269,13 @@ def project_archive(request):
         Archive the current project
     """
     project = request.context
-    if project.archived == '0':
-        project.archived = "1"
+    if not project.archived:
+        project.archived = True
     else:
-        project.archived = "0"
-        request.session.flash(u"Le projet '{0}' a été désarchivé"\
-            .format(project.name))
+        project.archived = False
+        request.session.flash(
+            u"Le projet '{0}' a été désarchivé".format(project.name)
+        )
     request.dbsession.merge(project)
     return HTTPFound(request.referer)
 

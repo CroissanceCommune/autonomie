@@ -41,7 +41,7 @@
         <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
     % endif
     <a class='btn btn-danger pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
-        <i class="glyphicon glyphicon-white icon-trash"></i>
+        <i class="glyphicon glyphicon-white glyphicon-trash"></i>
         Supprimer les données
     </a>
 % endif
@@ -115,13 +115,17 @@
     <div class='tab-pane row' id='tab4'>
         <div class='row'>
             <div class='col-md-6'>
+            <ul class="nav nav-pills nav-stacked">
         % for doctemplate in doctemplates:
             <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
-            <a class='btn btn-success' href="${url}">
-                <i class="fa fa-file fa-1x"></i>
-                ${doctemplate.description} ( ${doctemplate.name} )
-            </a>
+                <li>
+                    <a href="${url}">
+                        <i class="fa fa-file fa-1x"></i>
+                        ${doctemplate.description} ( ${doctemplate.name} )
+                    </a>
+                </li>
         % endfor
+            </ul>
         % if doctemplates == []:
             <div class='well'>
             <i class='fa fa-question-circle fa-2x'></i>
@@ -155,13 +159,13 @@
                                 <td>${history.template.description}</td>
                                 <td>${api.format_account(history.user)}</td>
                                 <td>${api.format_datetime(history.created_at)}</td>
-                                <td>
-                                    <a
-                                        class='btn btn-danger'
-                                        href="${request.route_path('templatinghistory', id=history.id, _query=dict(action='delete'))}"
-                                        ><i class='fa fa-trash fa-1x'></i>
-                                        Supprimer cette entrée
-                                    </a>
+                                <td class='text-right'>
+                                    <% url = request.route_path('templatinghistory', id=history.id, _query=dict(action='delete')) %>
+                                    ${table_btn(url, \
+                                    u"Supprimer cette entrée",\
+                                    u"Supprimer cette entrée de l'historique", \
+                                    icon='trash', \
+                                    css_class="btn-danger")}
                                 </td>
                             </tr>
                         % endfor
@@ -176,10 +180,14 @@
     % endif
     % if user is not None:
         <div class='tab-pane row' id='tab5'>
-            <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}" class='btn btn-success'>
+            <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}"
+                class='btn btn-info'>
+                <i class="glyphicon glyphicon-plus"></i>
                 Associer à une nouvelle entreprise
             </a>
-            <a href="${request.route_path('userdata', id=userdata.id, _query=dict(action='associate'))}" class='btn btn-success'>
+            <a href="${request.route_path('userdata', id=userdata.id, _query=dict(action='associate'))}"
+                class='btn btn-info'>
+                <i class="glyphicon glyphicon-link"></i>
                 Associer à une entreprise existante
             </a>
             <table class="table table-striped table-condensed table-hover">
@@ -193,11 +201,17 @@
                     % for company in user.companies:
                         <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
                         <% onclick = "document.location='{url}'".format(url=url) %>
-                        <tr>
+                        % if not company.enabled():
+                            <tr class="danger">
+                        % else:
+                            <tr>
+                        % endif
                             <td onclick="${onclick}" class="rowlink">
                                 ${company.name}
                                 % if not company.enabled():
-                                    <span class='label label-warning'>Cette entreprise a été désactivée</span>
+                                    <span class='label label-danger'>
+                                        Cette entreprise a été désactivée
+                                    </span>
                                 % endif
                             </td>
                             <td onclick="${onclick}" class="rowlink">
@@ -218,10 +232,18 @@
                                 ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
                                 % if company.enabled():
                                     <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
-                                    ${table_btn(url, u"Désactiver", u"désactiver l'entreprise", icon='glyphicon glyphicon-pencil')}
+                                    ${table_btn(url, \
+                                    u"Désactiver", \
+                                    u"désactiver l'entreprise", \
+                                    icon='glyphicon glyphicon-book', \
+                                    css_class="btn-danger")}
                                 % else:
                                     <% url = request.route_path('company', id=company.id, _query=dict(action="enable")) %>
-                                    ${table_btn(url, u"Activer", u"Activer l'entreprise", icon='glyphicon glyphicon-pencil')}
+                                    ${table_btn(url, \
+                                    u"Activer", \
+                                    u"Activer l'entreprise", \
+                                    icon='glyphicon glyphicon-book', \
+                                    css_class="btn-success")}
                                 % endif
                             </td>
                         </tr>

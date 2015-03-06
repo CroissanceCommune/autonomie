@@ -131,12 +131,17 @@ url = request.route_path('workshops.xls', _query=args)
                 <td>
                     % if api.has_permission('manage', workshop):
                         <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
-                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='glyphicon glyphicon-pencil')}
+                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='pencil')}
 
                         <% del_url = request.route_path('workshop', id=workshop.id, _query=dict(action="delete")) %>
-                        ${table_btn(del_url, u"Supprimer",  u"Supprimer cet atelier", icon='glyphicon glyphicon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')")}
+                        ${table_btn(del_url, \
+                        u"Supprimer",  \
+                        u"Supprimer cet atelier", \
+                        icon='trash', \
+                        onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')", \
+                        css_class="btn-danger")}
                     % elif api.has_permission("view", workshop):
-                        ${table_btn(url, u"Voir", u"Voir l'atelier", icon='glyphicon glyphicon-search')}
+                        ${table_btn(url, u"Voir", u"Voir l'atelier", icon='search')}
                     % endif
                 </td>
             </tr>

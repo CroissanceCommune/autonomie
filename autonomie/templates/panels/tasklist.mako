@@ -74,7 +74,7 @@ Afficher <select id='number_of_tasks'>
                 </td>
                 <td class="visible-lg rowlink">${api.format_status(task)}</td>
                 <td class="visible-lg" style="text-align:right">
-                    ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"glyphicon glyphicon-search")}
+                    ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"search")}
                 </td>
             </tr>
         % endfor

@@ -164,8 +164,8 @@ path = request.current_route_path(_query=get_args)
         <span class="hidden-mobile visible-lg">${phone}</span>
     % endif
 </%def>
-<%def name="table_btn(href, label, title, icon=None, onclick=None, icotext=None)">
-    <a class='btn btn-default' href='${href}' title="${title}"
+<%def name="table_btn(href, label, title, icon=None, onclick=None, icotext=None, css_class='')">
+    <a class='btn btn-default ${css_class}' href='${href}' title="${title}"
         % if onclick:
             onclick="${onclick}"
         % endif
@@ -174,7 +174,7 @@ path = request.current_route_path(_query=get_args)
             <span>${api.clean_html(icotext)|n}</span>
         % endif
         %if icon:
-            <i class='glyphicon glyph${icon}'></i>
+            <i class='glyphicon glyphicon-${icon}'></i>
         %endif
         <span class="visible-lg hidden-sm" style="display:inline">
             ${label}

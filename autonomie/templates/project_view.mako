@@ -54,7 +54,8 @@
             u"Supprimer", \
             u"Supprimer le devis", \
             icon="glyphicon glyphicon-trash", \
-            onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');")}
+            onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');",\
+            css_class="btn-danger")}
         %endif
     </td>
 </%def>

@@ -116,13 +116,27 @@ elif activity.status == 'closed':
                 <td>
                     % if api.has_permission('edit', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
-                        ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer le rendez-vous", icon='glyphicon glyphicon-pencil')}
+                        ${table_btn(edit_url, \
+                        u"Voir/éditer", \
+                        u"Voir / Éditer le rendez-vous", \
+                        icon='pencil')}
                         <% del_url = request.route_path('activity', id=activity.id, _query=dict(action="delete")) %>
-                        ${table_btn(del_url, u"Supprimer",  u"Supprimer ce rendez-vous", icon='glyphicon glyphicon-trash', onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')")}
+                        ${table_btn(del_url, \
+                        u"Supprimer",  \
+                        u"Supprimer ce rendez-vous", \
+                        icon='trash', \
+                        onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')", \
+                        css_class="btn-danger")}
                         <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
-                        ${table_btn(pdf_url, u"PDF", u"Télécharger la sortie PDF pour impression", icon='glyphicon glyphicon-file')}
+                        ${table_btn(pdf_url, \
+                        u"PDF", \
+                        u"Télécharger la sortie PDF pour impression", \
+                        icon='file')}
                     % else:
-                        ${table_btn(url, u"Voir", u"Voir le rendez-vous", icon='glyphicon glyphicon-search')}
+                        ${table_btn(url, \
+                        u"Voir", \
+                        u"Voir le rendez-vous", \
+                        icon='search')}
                     % endif
                 </td>
             </tr>

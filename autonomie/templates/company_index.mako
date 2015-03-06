@@ -59,7 +59,12 @@
                                     ${api.format_amount(invoice.total())|n}&nbsp;€
                                 </td>
                                 <td class="visible-lg" style="text-align:right">
-                                    ${table_btn(request.route_path("invoice", id=invoice.id), u"Voir", u"Voir ce document", icon=u"glyphicon glyphicon-search")}
+                                    ${table_btn(\
+                                    request.route_path("invoice", id=invoice.id), \
+                                    u"Voir", \
+                                    u"Voir ce document", \
+                                    icon=u"search")\
+                                    }
                                 </td>
                             </tr>
                         % endfor

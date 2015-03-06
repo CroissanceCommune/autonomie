@@ -21,7 +21,6 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="/base.mako"></%inherit>
-<%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%block name='actionmenu'>
 <div class='row'>

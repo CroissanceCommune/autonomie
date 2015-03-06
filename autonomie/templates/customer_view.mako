@@ -116,13 +116,20 @@
                                 </td>
                                 <td>
                                     <div class='btn-group'>
-                                        ${table_btn(request.route_path("project", id=project.id), u"Voir", "Voir ce projet", icon=u"glyphicon glyphicon-pencil")}
+                                        ${table_btn(request.route_path("project", id=project.id), u"Voir", "Voir ce projet", icon=u"pencil")}
                                         %if not project.archived:
-                                            ${table_btn(request.route_path("project_estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"ui-icon-plusthick")}
-                                            ${table_btn(request.route_path("project_invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"ui-icon-plusthick")}
-                                            ${table_btn(request.route_path("project", id=project.id, _query=dict(action="archive")), u"Archiver", u"Archiver ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');", icon=u"ui-icon-folder-collapsed")}
+                                            ${table_btn(request.route_path("project_estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"plus")}
+                                            ${table_btn(request.route_path("project_invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"plus")}
+                                            ${table_btn(request.route_path("project", id=project.id, _query=dict(action="archive")), u"Archiver", u"Archiver ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');", icon=u"book")}
                                         %elif project.is_deletable():
-                                            ${table_btn(request.route_path("project", id=project.id, _query=dict(action="delete")), u"Supprimer", u"Supprimer ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');", icon=u"ui-icon-trash")}
+                                            <% del_url = request.route_path("project", id=project.id, _query=dict(action="delete")) %>
+                                            ${table_btn(del_url,\
+                                            u"Supprimer", \
+                                            u"Supprimer ce projet", \
+                                            onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce projet ?');", \
+                                            icon=u"trash", \
+                                            css_class='btn-danger'\
+                                            )}
                                         %endif
                                     </div>
                                 </td>

@@ -56,12 +56,12 @@
             <td>${api.format_date(template.updated_at)}</td>
             <td style="text-align:right">
                 <% url = request.route_path('template', id=template.id) %>
-                ${table_btn(url, u"Voir", u"Voir ce modèle", icon=u"glyphicon glyphicon-pencil")}
+                ${table_btn(url, u"Voir", u"Voir ce modèle", icon=u"pencil")}
                 <% url = request.route_path('template', id=template.id, _query=dict(action='edit')) %>
-                ${table_btn(url, u"Éditer", u"Éditer ce modèle", icon=u"glyphicon glyphicon-pencil")}
+                ${table_btn(url, u"Modifier", u"Éditer ce modèle", icon=u"pencil")}
                 <% url = request.route_path('template', id=template.id, _query=dict(action='disable')) %>
                 <% label = template.active and u"Désactiver" or u"Activer" %>
-                ${table_btn(url, label, u"Ce modèle doit-il être visible dans Autonomie ?", icon=u"glyphicon glyphicon-remove")}
+                ${table_btn(url, label, u"Ce modèle doit-il être visible dans Autonomie ?", icon=u"remove")}
             </td>
         </tr>
     % endfor

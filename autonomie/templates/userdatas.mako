@@ -83,7 +83,8 @@ if userdata.user is not None:
                         u"Supprimer",  \
                         u"Supprimer cette entrée", \
                         icon='glyphicon glyphicon-trash', \
-                        onclick=u"return confirm(\"%s\");" % del_msg)
+                        onclick=u"return confirm(\"%s\");" % del_msg,\
+                        css_class="btn-danger")
                         }
                     % endif
                 </td>

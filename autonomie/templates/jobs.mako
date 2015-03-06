@@ -83,14 +83,14 @@ elif job.status == 'completed':
                 </td>
                 <td>
                     <% view_url = request.route_path('job', id=job.id) %>
-                    ${table_btn(view_url, u"Voir", u"Voir la tâche", icon='glyphicon glyphicon-pencil')}
+                    ${table_btn(view_url, u"Voir", u"Voir la tâche", icon='pencil')}
                     <% del_url = request.route_path('job', id=job.id, _query=dict(action="delete")) %>
                     ${table_btn(\
                     del_url, \
                     u"Supprimer",  \
                     u"Supprimer cette entrée d'historique", \
-                    icon='glyphicon glyphicon-trash', \
-                    onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cette entrée d'historique ?')")}
+                    icon='trash', \
+                    onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cette entrée d'historique ?')", css_class="btn-danger")}
                 </td>
             </tr>
         % endfor

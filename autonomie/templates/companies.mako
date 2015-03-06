@@ -56,13 +56,13 @@
                     </ul>
                 </td>
                 <td>
-                    ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
+                    ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='pencil')}
                     % if company.enabled():
                         <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
-                        ${table_btn(url, u"Désactiver", u"désactiver l'entreprise", icon='glyphicon glyphicon-pencil')}
+                        ${table_btn(url, u"Désactiver", u"désactiver l'entreprise", icon='book')}
                     % else:
                         <% url = request.route_path('company', id=company.id, _query=dict(action="enable")) %>
-                        ${table_btn(url, u"Activer", u"Activer l'entreprise", icon='glyphicon glyphicon-pencil')}
+                        ${table_btn(url, u"Activer", u"Activer l'entreprise", icon='book')}
                     % endif
                 </td>
             </tr>

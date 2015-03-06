@@ -45,7 +45,7 @@
             ${workshop.name} (${event.name})
         </td>
         <td class="visible-lg" style="text-align:right">
-            ${table_btn(url, u"Voir", u"Voir l'atelier", icon='glyphicon glyphicon-search')}
+            ${table_btn(url, u"Voir", u"Voir l'atelier", icon='search')}
         </td>
 </%def>
 <%def name='activity_row(event)'>

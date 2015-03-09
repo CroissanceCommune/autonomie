@@ -11,6 +11,9 @@
 body{
   padding:0px;
 }
+td.actions, th.actions{
+  text-align: right;
+}
 .pagetitle{
   padding:10px 0 5px 15%;
   border-bottom:1px solid #ddd;

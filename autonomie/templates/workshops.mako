@@ -62,7 +62,7 @@ url = request.route_path('workshops.xls', _query=args)
             % else:
                 <th>Horaires</th>
             % endif
-            <th style="text-align:center">Actions</th>
+            <th class="actions">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -128,7 +128,7 @@ url = request.route_path('workshops.xls', _query=args)
                         % endfor
                     % endif
                 </td>
-                <td>
+                <td class="actions">
                     % if api.has_permission('manage', workshop):
                         <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='pencil')}

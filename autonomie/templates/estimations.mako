@@ -60,7 +60,7 @@
         <th>Montant HT</th>
         <th>TVA</th>
         <th>TTC</th>
-        <th>PDF</th>
+        <th class="actions">PDF</th>
     </thead>
     <tbody>
         % if records:
@@ -90,7 +90,7 @@
              <td>
                  ${api.format_amount(document.total())|n}&nbsp;€
              </td>
-              <td>
+             <td class="actions">
                       <a class='btn btn-default'
                           href='${request.route_path("estimation", id=document.id, _query=dict(view="pdf"))}'
                           title="Télécharger la version PDF">

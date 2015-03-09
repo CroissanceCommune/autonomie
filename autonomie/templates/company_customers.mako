@@ -44,7 +44,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
             <th class="visible-lg">${sortable("Code", "code")}</th>
             <th>${sortable("Entreprise", "name")}</th>
             <th class="visible-lg">${sortable("Nom du contact principal", "contactLastName")}</th>
-            <th style="text-align:center">Actions</th>
+            <th class="actions">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -56,7 +56,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                     <td onclick="${onclick}" class="visible-lg rowlink" >${customer.code}</td>
                     <td onclick="${onclick}" class="rowlink" >${customer.name}</td>
                     <td onclick="${onclick}" class="visible-lg rowlink" >${customer.contactLastName} ${customer.contactFirstName}</td>
-                    <td style="text-align:right">
+                    <td class="actions">
                         ${table_btn(url, u"Modifier", u"Modifier ce client", icon=u"pencil")}
                     </td>
                 </tr>

@@ -37,7 +37,7 @@
         task.type_,
         id=task.id,
         _query=dict(action="delete")) %>
-    <td style="text-align:right">
+    <td class="actions">
         ${table_btn(view_url, \
         u"Voir/Modifier", \
         u"Voir/éditer ce devis", \
@@ -278,7 +278,7 @@ else:
                     <th></th>
                     <th>Nom</th>
                     <th class="hidden-xs">État</th>
-                    <th style="text-align:center">Action</th>
+                    <th class="actions">Action</th>
                 </thead>
                 %for task in phase.estimations:
                     ${estimation_row(task)}

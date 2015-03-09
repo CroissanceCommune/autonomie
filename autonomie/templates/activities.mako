@@ -68,7 +68,7 @@
             <th>Participant(s)</th>
             <th>Nature du Rdv</th>
             <th>Mode de Rdv</th>
-            <th style="text-align:center">Actions</th>
+            <th class="actions">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -113,13 +113,18 @@ elif activity.status == 'closed':
                 <td onclick="${onclick}" class="rowlink">
                     ${activity.mode}
                 </td>
-                <td>
+                <td class="actions">
                     % if api.has_permission('edit', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, \
                         u"Voir/éditer", \
                         u"Voir / Éditer le rendez-vous", \
                         icon='pencil')}
+                        <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
+                        ${table_btn(pdf_url, \
+                        u"PDF", \
+                        u"Télécharger la sortie PDF pour impression", \
+                        icon='file')}
                         <% del_url = request.route_path('activity', id=activity.id, _query=dict(action="delete")) %>
                         ${table_btn(del_url, \
                         u"Supprimer",  \
@@ -127,11 +132,6 @@ elif activity.status == 'closed':
                         icon='trash', \
                         onclick=u"return confirm('Êtes vous sûr de vouloir supprimer ce rendez-vous ?')", \
                         css_class="btn-danger")}
-                        <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
-                        ${table_btn(pdf_url, \
-                        u"PDF", \
-                        u"Télécharger la sortie PDF pour impression", \
-                        icon='file')}
                     % else:
                         ${table_btn(url, \
                         u"Voir", \

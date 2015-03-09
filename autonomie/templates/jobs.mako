@@ -57,7 +57,7 @@
             <th>${sortable(u"Date d'éxécution", "created_at")}</th>
             <th>Type de tâche</th>
             <th>Statut</th>
-            <th style="text-align:center">Actions</th>
+            <th class="actions">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -81,7 +81,7 @@ elif job.status == 'completed':
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                 </td>
-                <td>
+                <td class="actions">
                     <% view_url = request.route_path('job', id=job.id) %>
                     ${table_btn(view_url, u"Voir", u"Voir la tâche", icon='pencil')}
                     <% del_url = request.route_path('job', id=job.id, _query=dict(action="delete")) %>

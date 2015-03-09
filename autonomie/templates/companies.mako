@@ -35,7 +35,7 @@
         <th>${sortable("Nom", "name")}</th>
         <th>Adresse e-mail</th>
         <th>Entrepreneur(s)</th>
-        <th style="text-align:center">Actions</th>
+        <th class="actions">Actions</th>
     </thead>
     <tbody>
         % for company in records:
@@ -55,7 +55,7 @@
                         % endfor
                     </ul>
                 </td>
-                <td>
+                <td class="actions">
                     ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='pencil')}
                     % if company.enabled():
                         <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>

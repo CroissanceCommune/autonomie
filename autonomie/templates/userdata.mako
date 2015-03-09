@@ -30,10 +30,20 @@
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
 <% userdata = request.context %>
+<% user = getattr(request.context, "user", None) %>
 <div class='well'>
 % if userdata.__name__ == 'userdatas':
     % if getattr(userdata, "user_id", None) is not None:
         Ces données sont associées à un compte utilisateur : <a href='${request.route_path("user", id=userdata.user_id)}'>Voir</a>
+        <% disable_url = request.route_path('user', id=userdata.user_id, _query=dict(action='disable')) %>
+        <% disable_msg = u'Êtes vous sûr de vouloir désactiver le compte de cet utilisateur ?' %>
+        ${table_btn(disable_url, \
+        u"Désactiver le compte", \
+        u"Désactiver le compte associé à cette entrée de gestion sociale", \
+        onclick="return confirm('${disable_msg}');", \
+        icon="book",
+        css_class="btn-warn", \
+        )}
     % endif
     <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
     <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?' %>
@@ -46,7 +56,6 @@
     </a>
 % endif
 </div>
-<% user = getattr(request.context, "user", None) %>
 
 <ul class='nav nav-tabs' role="tablist">
     <li class='active'>

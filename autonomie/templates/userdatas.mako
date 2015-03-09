@@ -54,7 +54,7 @@ url = request.route_path('userdatas.xls', _query=args)
         <tr>
             <th>${sortable("Nom", "lastname")}</th>
             <th>Accompagnateur</th>
-            <th style="text-align:center">Actions</th>
+            <th class="actions">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -69,7 +69,7 @@ url = request.route_path('userdatas.xls', _query=args)
                 <td onclick="${onclick}" class="rowlink">
                     ${api.format_account(userdata.situation_follower)}
                 </td>
-                <td style='text-align:right'>
+                <td class="actions">
                         <% edit_url = request.route_path('userdata', id=userdata.id) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer", icon='glyphicon glyphicon-pencil')}
                     % if api.has_permission('delete', userdata):

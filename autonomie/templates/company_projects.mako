@@ -39,7 +39,7 @@
             <th>${sortable(u"Code", "code")}</th>
             <th>${sortable(u"Nom", "name")}</th>
             <th>Clients</th>
-            <th style="text-align:center">Actions</th>
+            <th class="actions">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -57,7 +57,7 @@
                             % endfor
                         </ul>
                     </td>
-                    <td style="text-align:right">
+                    <td class="actions">
                         % for btn in item_actions:
                             ${btn.render(request, project)|n}
                         % endfor

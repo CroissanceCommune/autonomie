@@ -31,29 +31,54 @@
 <%block name="content">
 <% userdata = request.context %>
 <% user = getattr(request.context, "user", None) %>
-<div class='well'>
 % if userdata.__name__ == 'userdatas':
-    % if getattr(userdata, "user_id", None) is not None:
-        Ces données sont associées à un compte utilisateur : <a href='${request.route_path("user", id=userdata.user_id)}'>Voir</a>
-        <% disable_url = request.route_path('user', id=userdata.user_id, _query=dict(action='disable')) %>
-        <% disable_msg = u'Êtes vous sûr de vouloir désactiver le compte de cet utilisateur ?' %>
-        ${table_btn(disable_url, \
-        u"Désactiver le compte", \
-        u"Désactiver le compte associé à cette entrée de gestion sociale", \
-        onclick="return confirm('${disable_msg}');", \
-        icon="book",
-        css_class="btn-warn", \
-        )}
+    <div class="row well">
+    % if user is not None:
+        <div class='col-xs-10'>
+            Ces données sont associées à un compte utilisateur
+        </div>
     % endif
-    <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
-    <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?' %>
-    % if userdata.user is not None:
-        <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
-    % endif
-    <a class='btn btn-danger pull-right' href="${del_url}" title="Supprimer ces données" onclick="return confirm('${del_msg}');">
-        <i class="glyphicon glyphicon-white glyphicon-trash"></i>
-        Supprimer les données
-    </a>
+    <div class="col-xs-2">
+        % if user is not None:
+            <% url = request.route_path("user", id=userdata.user_id) %>
+            ${table_btn(url,
+            u"Voir",
+            u"Voir le compte associé à cette entrée de gestion sociale",
+            icon="search",
+            )}
+
+            % if user.enabled():
+                <% disable_url = request.route_path('user', \
+                    id=userdata.user_id, \
+                    _query=dict(action='disable')) %>
+                <% disable_msg = u'Êtes vous sûr de vouloir désactiver le compte de cet utilisateur ?' %>
+
+                ${table_btn(disable_url, \
+                u"Désactiver le compte", \
+                u"Désactiver le compte associé à cette entrée de gestion sociale", \
+                onclick="return confirm('%s');" % disable_msg, \
+                icon="book",
+                css_class="btn-warning", \
+                )}
+            % endif
+        % endif
+
+        % if user is not None and not user.enabled() or user is None:
+            <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
+            <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?' %>
+            % if user is not None:
+                <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
+            % endif
+            ${table_btn(del_url,
+            u"Supprimer les données",
+            u"Supprimer ces données de gestion sociale",
+            onclick="return confirm('%s');" % del_msg,
+            icon="trash",
+            css_class="glyphicon-white btn-danger"
+            )}
+        % endif
+        </div>
+    </div>
 % endif
 </div>
 
@@ -262,4 +287,7 @@
         </div>
     % endif
 </div>
+</%block>
+<%block name="footerjs">
+setAuthCheckBeforeSubmit('#userdatas_edit');
 </%block>

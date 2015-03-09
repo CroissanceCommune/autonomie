@@ -62,8 +62,85 @@ class RestError(HTTPError):
 
 
 class Apiv1Resp(dict):
-    def __init__(self, body, status='success'):
-        dict.__init__(self, status=status, result=body)
+    """
+    v1 api Response object
+
+    Returns a dict that should be sent as a json object
+
+        request
+
+            The pyramid request object
+
+        datas
+
+            The datas to be sent in the data key of the result
+
+        status
+
+            The status of the response (one of ['success', 'error'])
+
+    The response contains :
+
+        id
+            The id of the request if one is provided by passing the js client
+            Check for the '_' key as jquery handles it
+            ex:
+                $.ajax({..., cache:false, ...});
+
+        api
+
+            The version of the api
+
+        status
+
+            the status of the request
+
+        datas
+
+            The datas sent through the request
+            In case of errors, the datas are of the form:
+                datas: {'messages': [list of messages]}
+
+    """
+    _id_key = '_'
+    _version = "1.0"
+    def __init__(self, request, datas={}, status='success'):
+        dict.__init__(
+            self,
+            status=status,
+            datas=datas,
+            id=request.GET.get(self._id_key, ''),
+            api=self._version
+        )
+
+
+class Apiv1Error(Apiv1Resp):
+    """
+    Error response
+    """
+    def __init__(self, request, datas=None, messages=None):
+        if datas is None:
+            datas = {}
+
+        if messages is not None:
+            if not hasattr(messages, '__iter__'):
+                messages = [messages]
+            datas['messages'] = messages
+
+        Apiv1Resp.__init__(self, request, datas=datas, status='error')
+
+
+class ApivJsonRpc2Resp(dict):
+    """
+    A response corresponding to the jsonrpc v2 protocol
+    """
+
+    def __init__(self, request):
+        self.resp = self.base_dict()
+
+    def base_dict(self, request):
+        id_ = request.params.get('id', '')
+        return dict(id=id_, jsonrpc=self._version)
 
 
 class RestJsonRepr(object):

@@ -399,6 +399,7 @@ class UserDatasAdd(BaseFormView):
     title = u"Gestion sociale"
     schema = get_userdatas_schema() #SQLAlchemySchemaNode(UserDatas)
     validation_msg = u"Les informations sociales ont bien été enregistrées"
+    form_options = (('formid', "userdatas_edit"),)
 
     def before(self, form):
         auto_need(form)
@@ -864,15 +865,28 @@ class UserDisable(BaseFormView):
             title of the form
         """
         return u"Désactivation du compte {0}".format(
-                                         format_account(self.request.context))
+            format_account(self.context)
+        )
 
     def before(self, form):
         """
             Redirect if the cancel button was clicked
         """
         if "cancel" in self.request.POST:
-            user_id = self.request.context.id
+            user_id = self.context.id
             raise HTTPFound(self.request.route_path("user", id=user_id))
+
+    def _get_redirect_url(self):
+        """
+        Return the url we want to redirect the user to
+        """
+        if getattr(self.context, 'userdatas', None):
+            return self.request.route_path(
+                "userdata",
+                id=self.context.userdatas.id
+            )
+        else:
+            return self.request.route_path("user", id=self.context.id)
 
     def submit_success(self, appstruct):
         """
@@ -881,8 +895,8 @@ class UserDisable(BaseFormView):
         if appstruct.get('companies', False):
             self._disable_companies()
         if appstruct.get('disable', False):
-            self._disable_user(self.request.context)
-        return HTTPFound(self.request.route_path("users"))
+            self._disable_user(self.context)
+        return HTTPFound(self._get_redirect_url())
 
     def _disable_user(self, user):
         """
@@ -895,7 +909,8 @@ class UserDisable(BaseFormView):
                          format_account(user))
             )
             message = u"L'utilisateur {0} a été désactivé.".format(
-                                                        format_account(user))
+                format_account(user)
+            )
             self.session.flash(message)
 
     def _disable_companies(self):
@@ -905,9 +920,12 @@ class UserDisable(BaseFormView):
         for company in self.request.context.companies:
             company.disable()
             self.dbsession.merge(company)
-            log.info(u"The company {0} has been disabled".format(company.name))
+            log.info(
+                u"The company {0} has been disabled".format(company.name)
+            )
             message = u"L'entreprise '{0}' a bien été désactivée.".format(
-                                                company.name)
+                company.name
+            )
             self.session.flash(message)
             for employee in company.employees:
                 self._disable_user(employee)

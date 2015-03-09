@@ -28,6 +28,20 @@ td.actions, th.actions{
   line-height:15px;
   margin:3px 50px 3px 0px;
 }
+/* Le formulaire d'authentification */
+.authentication-form fieldset{
+  width:90%;
+  padding-left:5%;
+}
+form.authentication-form input[type=text], form.authentication-form input[type=password]{
+  width: 100%;
+}
+.authentication-form .form-actions{
+  padding: 20px 0 20px 0;
+}
+.authentication-form .form-actions button{
+  font-size: 16px;
+}
 .ui-icon{
   float:left;
   margin-right:3px;

@@ -209,11 +209,14 @@ class AuthSchema(BaseAuthSchema):
     """
     nextpage = colander.SchemaNode(
         colander.String(),
-        widget=deform.widget.HiddenWidget())
+        widget=deform.widget.HiddenWidget(),
+        missing=colander.drop,
+    )
     remember_me = colander.SchemaNode(
         colander.Boolean(),
         widget=deform.widget.CheckboxWidget(),
         title="Rester connecté",
+        missing=False,
     )
 
 

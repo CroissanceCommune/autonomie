@@ -68,32 +68,34 @@
   </fieldset>
 
   <script type="text/javascript" tal:condition="use_ajax">
-   deform.addCallback(
-     '${formid}',
-     function(oid) {
-       var target = '#' + oid;
-       var options = {
-         target: target,
-         replaceTarget: true,
-         success: function() {
-           deform.processCallbacks();
-           deform.focusFirstInput(target);
-         },
-         beforeSerialize: function() {
-           // See http://bit.ly/1agBs9Z (hack to fix tinymce-related ajax bug)
-           if ('tinymce' in window) {
-             $(tinymce.get()).each(
-               function(i, el) {
-                 var content = el.getContent();
-                 var editor_input = document.getElementById(el.id);
-                 editor_input.value = content;
-             });
+     deform.addCallback(
+       '${formid}',
+       function(oid) {
+         var target = '#' + oid;
+         var options = {
+           target: target,
+           replaceTarget: true,
+           success: function() {
+             deform.processCallbacks();
+             deform.focusFirstInput(target);
+           },
+           beforeSerialize: function() {
+             // See http://bit.ly/1agBs9Z (hack to fix tinymce-related ajax bug)
+             if ('tinymce' in window) {
+               $(tinymce.get()).each(
+                 function(i, el) {
+                   var content = el.getContent();
+                   var editor_input = document.getElementById(el.id);
+                   editor_input.value = content;
+               });
+             }
            }
-         }
-       };
-       var extra_options = ${ajax_options} || {};
-       $('#' + oid).ajaxForm($.extend(options, extra_options));
-     }
-   );
+         };
+         var extra_options = ${ajax_options} || {};
+         $('#' + oid).ajaxForm($.extend(options, extra_options));
+       }
+     );
+    deform.processCallbacks();
+    deform.focusFirstInput();
   </script>
 </form>

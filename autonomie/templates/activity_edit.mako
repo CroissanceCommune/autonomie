@@ -112,3 +112,6 @@
     </div>
 </div>
 </%block>
+<%block name="footerjs">
+setAuthCheckBeforeSubmit('#record_form');
+</%block>

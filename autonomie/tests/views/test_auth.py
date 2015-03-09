@@ -29,9 +29,23 @@ from mock import MagicMock
 
 def test_redirect(app):
     login_url = "http://localhost/login?nextpage=%2F"
-    res = app.get('/')
-    assert res.status_int == 302
-    assert login_url in dict(res.headerlist).values()
+    resp = app.get('/')
+    assert resp.status_int == 302
+    assert login_url in dict(resp.headerlist).values()
+
+def test_xhr_redirect(app):
+    login_url = "http://localhost/login?nextpage=%2F"
+    resp = app.get('/', xhr=True)
+    assert resp.status_int == 200
+    assert resp.json['redirect'] == login_url
+
+
+def test_check_login(app, config):
+    login_url = "http://localhost/api/v1/login"
+    resp = app.get(login_url, xhr=True)
+    assert resp.json['status'] == 'error'
+    assert resp.json['datas'].has_key('login_form')
+
 
 def get_avatar():
     user = MagicMock(name=u'test', companies=[])
@@ -40,12 +54,14 @@ def get_avatar():
     user.companies = [MagicMock(name=u'Test', id=100), MagicMock(name=u'Test2', id=101)]
     return user
 
+
 def get_avatar2():
     user = MagicMock(name=u'test2')
     user.is_admin = lambda :False
     user.is_manager = lambda :False
     user.companies = [MagicMock(name=u'Test', id=100)]
     return user
+
 
 def test_index_view(config, get_csrf_request):
     from autonomie.views.index import index

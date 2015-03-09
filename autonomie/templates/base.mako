@@ -97,6 +97,7 @@
         % endfor
       % endif
     </div>
+    <div id='login_form' style='display:none'></div>
     <script type='text/javascript'>
       <%block name='footerjs' />
       $('#company-select-menu').change(function(){window.location = $(this).val();});

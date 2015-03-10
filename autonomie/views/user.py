@@ -47,7 +47,10 @@ from autonomie.models.user import (
     CompanyDatas,
     USERDATAS_FORM_GRIDS,
 )
-from autonomie.models.files import File
+from autonomie.models.files import (
+    File,
+    TemplatingHistory,
+)
 from autonomie.models.company import Company
 from autonomie.utils.widgets import (
     ViewLink,
@@ -1047,11 +1050,16 @@ def mydocuments_view(context, request):
         documents = query.filter(
             File.parent_id==request.user.userdatas.id
         ).all()
+        query = TemplatingHistory.query()
+        generated_docs = query.filter(
+            TemplatingHistory.userdatas_id==request.user.userdatas.id,
+        ).all()
     else:
         documents = []
     return dict(
         title=u"Mes documents",
         documents=documents,
+        generated_docs=generated_docs,
     )
 
 
@@ -1227,7 +1235,7 @@ def includeme(config):
         py3o_view,
         route_name="userdata",
         request_param="action=py3o",
-        permission="manage",
+        permission="view",
     )
     config.add_view(
         FileUploadView,

@@ -230,12 +230,6 @@ function getTvaLine(tva, tva_amount){
   var datas = {'label':label, 'value':formatAmount(tva_amount)};
   return Handlebars.templates['tvalist.mustache'](datas);
 }
-function getExpenses(){
-  /*
-   *  Return the current expense configured
-   */
-  return transformToCents( $(Selectors.expenses).val() );
-}
 function getExpensesHT() {
   /*
    * Return the current HT expenses configured
@@ -256,7 +250,6 @@ function computeTotal(){
   /*
    * Compute the main totals
    */
-  console.log("Computing total");
   var collection = getCollection();
   var tasklines_ht = collection.HT("task");
   var total_ht = collection.HT();
@@ -274,9 +267,6 @@ function computeTotal(){
   }
   $(Selectors.total_ht).empty().html(formatAmount(total_ht));
   $(Selectors.total_ttc).empty().html(formatAmount(total_ttc));
-  var expenses = getExpenses();
-  var total = total_ttc + expenses;
-  $(Selectors.total).empty().html(formatAmount(total));
   $(Facade).trigger('totalchanged');
 }
 /*
@@ -421,7 +411,7 @@ function setDepositAmount(deposit){
    */
   if (deposit > 0){
     $("#account_amount .input").html(formatAmount(deposit));
-    $("#account_container").css("display", "table-row");
+    $("#account_container").show();
   }else{
     $("#account_container").hide();
   }
@@ -455,7 +445,7 @@ function getTotal(){
   /*
    * Return the current total
    */
-  return transformToCents($(Selectors.total).text());
+  return transformToCents($(Selectors.total_ttc).text());
 }
 function setDeposit(){
   /*

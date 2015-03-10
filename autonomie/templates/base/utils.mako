@@ -230,35 +230,30 @@ path = request.current_route_path(_query=get_args)
   % endif
 </%def>
 <%def name="format_filetable(documents)">
-    <table class="table table-striped table-bordered table-hover">
+    <table class="table table-striped table-hover">
         <thead>
             <th>Description</th>
             <th>Nom du fichier</th>
-            <th>Taille</th>
             <th>Déposé le</th>
-            <th>Dernière modification</th>
-            <th>Actions</th>
+            <th class="actions">Actions</th>
         </thead>
         <tbody>
             % for child in documents:
               <tr>
                   <td>${child.description}</td>
                   <td>${child.name}</td>
-                  <td>${api.human_readable_filesize(child.size)}</td>
-                  <td>${api.format_date(child.created_at)}</td>
                   <td>${api.format_date(child.updated_at)}</td>
-                  <td>
-                  % if api.has_permission('edit', child):
-                      <a
-                          class='btn btn-sm'
-                          href="${request.route_path('file', id=child.id)}"
-                          >Voir/éditer
-                      </a>
-                  % endif
-                      <a class="btn btn-sm"
-                          href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
-                          Télécharger
-                      </a>
+                  <td class="actions">
+                      % if api.has_permission('edit', child):
+                        ${table_btn(request.route_path('file', id=child.id),
+                            u"Voir/Modifier",
+                            u"Voir/Modifier ce document",
+                            icon="pencil")}
+                      % endif
+                      ${table_btn(request.route_path('file', id=child.id, _query=dict(action='download')),
+                      u"Télécharger",
+                      u"Télécharger ce document",
+                      icon="download-alt")}
                   </td>
               </tr>
             % endfor

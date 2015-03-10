@@ -5,7 +5,7 @@
         <div class='col-md-2'>Date</div>
         <div class='col-md-2 col-md-offset-2 paymentamount'>Montant</div>
     </div>
-    <div id='account_container' style='display:none;'>
+    <div id='account_container' style='display:none;' class="row">
         <div class='col-md-5' style="margin-left:0px;">Facture d'acompte</div>
         <div class='col-md-2'>À la commande</div>
         <div class='col-md-2 col-md-offset-2 paymentamount' id='account_amount'><div class='input'>0,00 €</div></div>

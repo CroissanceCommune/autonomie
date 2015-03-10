@@ -672,7 +672,9 @@ function initialize(){
   setTaskLinesBehaviours();
   setDiscountLinesBehaviours();
   setExpenseBehaviour();
-  initPaymentRows();
+  if (typeof(initPaymentRows) !== 'undefined'){
+    initPaymentRows();
+  }
   if ( manualDeliverables() ){
      /*
       * Add a row if needed and update rows to fit manual configuration

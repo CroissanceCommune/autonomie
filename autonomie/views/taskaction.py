@@ -217,7 +217,7 @@ class TaskFormActions(object):
         """
             Return the button for document validation
         """
-        yield Submit(u"Valider le document",
+        yield Submit(u"Enregistrer et valider",
                     value="valid",
                     request=self.request)
 
@@ -225,7 +225,7 @@ class TaskFormActions(object):
         """
             Return the button for document invalidation
         """
-        yield Submit(u"Document invalide",
+        yield Submit(u"Enregistrer et invalider le document",
                      value="invalid",
                      request=self.request)
 
@@ -261,17 +261,28 @@ class TaskFormActions(object):
         """
             Return the save to draft button
         """
-        yield Submit(u"Enregistrer comme brouillon",
-                            value="draft",
-                            request=self.request)
+        label = u"Enregistrer comme brouillon"
+        if context_is_task(self.context):
+            if self.context.is_waiting():
+                if not self.request.user.is_contractor():
+                    return
+                label = u"Annuler la mise en validation et repasser en \
+brouillon"
+        yield Submit(
+            label,
+            value="draft",
+            request=self.request,
+        )
 
     def _wait_btn(self):
         """
             Return the btn for asking document validation
         """
-        yield Submit(u"Enregistrer et demander la validation",
-                       value="wait",
-                       request=self.request)
+        label = u"Enregistrer et demander la validation"
+        if context_is_task(self.context):
+            if self.context.is_waiting():
+                label = u"Enregistrer et garder en attente"
+        yield Submit(label, value="wait", request=self.request)
 
     def _duplicate_form(self):
         """

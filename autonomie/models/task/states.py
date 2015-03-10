@@ -164,6 +164,7 @@ def get_est_state():
         aboest
     """
     wait = ('wait', 'wait.estimation')
+    manager_wait = ('wait', MANAGER_PERMS,)
     duplicate = ('duplicate', 'view', duplicate_task, False,)
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', 'valid.estimation', set_date,)
@@ -173,7 +174,8 @@ def get_est_state():
     result = {}
     result['draft'] = ('draft', wait, 'delete', valid, edit_metadata)
     result['invalid'] = ('draft', wait, 'delete', edit_metadata)
-    result['wait'] = (valid, invalid, duplicate, 'delete', edit_metadata)
+    result['wait'] = ('draft', manager_wait, valid, invalid, duplicate,
+                      'delete', edit_metadata)
     result['valid'] = ('aboest', geninv, duplicate, 'delete', edit_metadata)
     result['aboest'] = (delete, edit_metadata)
     result['geninv'] = (duplicate, edit_metadata)
@@ -192,6 +194,8 @@ def get_inv_state():
         aboinv
     """
     wait = ('wait', 'wait.invoice')
+    manager_wait = ('wait', MANAGER_PERMS,)
+
     duplicate = ('duplicate', 'view', duplicate_task, False,)
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', "valid.invoice", valid_callback,)
@@ -209,8 +213,15 @@ def get_inv_state():
     result = {}
     result['draft'] = ('draft', wait, delete, valid,)
     result['invalid'] = ('draft', wait, delete, )
-    result['wait'] = (valid, invalid, duplicate, delete, financial_year,
-            edit_metadata,)
+    result['wait'] = (
+        "draft",
+        manager_wait,
+        valid,
+        invalid,
+        duplicate,
+        delete,
+        financial_year,
+        edit_metadata,)
     result['valid'] = (paid, resulted, gencinv, duplicate, mdelete,
             edit_metadata, financial_year, products,)
     result['paid'] = (paid, resulted, gencinv, duplicate, financial_year,
@@ -238,8 +249,15 @@ def get_cinv_state():
             False,)
     result = {}
     result['draft'] = ('wait', 'delete', valid )
-    result['wait'] = (valid, invalid, 'delete', financial_year, edit_metadata,
-        products, )
+    result['wait'] = (
+        "draft",
+        valid,
+        invalid,
+        'delete',
+        financial_year,
+        edit_metadata,
+        products,
+    )
     result['invalid'] = ('draft', 'wait', edit_metadata, products, )
     result['valid'] = (financial_year, edit_metadata, products, )
     return result

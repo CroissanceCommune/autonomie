@@ -215,15 +215,7 @@ class AbstractFile(object):
     def __init__(self, name, path):
         self.name = name
         self.path = path
-        self._mod_time = os.path.getatime(path)
         self._size = os.path.getsize(path)
-
-    @property
-    def mod_date(self):
-        """
-        return a datetime object for the atime of the file
-        """
-        return datetime.datetime.fromtimestamp(self._mod_time)
 
     @property
     def size(self):

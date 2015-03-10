@@ -46,8 +46,7 @@
                     <th>Mois</th>
                     <th>Nom du fichier</th>
                     <th>Taille</th>
-                    <th>Dernière consultation</th>
-                    <th>Télécharger</th>
+                    <th class="actions">Télécharger</th>
                 </thead>
                 <tbody>
             <% months = subdirs.keys() %>
@@ -59,8 +58,7 @@
                         <td>${api.month_name(int(month))}</td>
                         <td>${file_.name}</td>
                         <td>${file_.size}</td>
-                        <td>${api.format_date(file_.mod_date)}</td>
-                        <td><a href="${file_.url(request)}">Télécharger&nbsp;<i class="fa fa-file-pdf-o fa-1x"></i></a></td>
+                        <td class="actions"><a href="${file_.url(request)}">Télécharger&nbsp;<i class="fa fa-file-pdf-o fa-1x"></i></a></td>
                     </tr>
                 % endfor
             % endfor

@@ -152,6 +152,22 @@ function setPopUp(id, title){
     }
   });
 }
+function enableForm(form_id){
+  $(form_id).find('select').prop('disabled', false);
+  $(form_id).find('input').prop('disabled', false);
+  $(form_id).find('select').select2('enable', true);
+  $(form_id).find('textarea').prop('disabled', false);
+  $(form_id).find('button[type=submit]').prop('disabled', false);
+  $(form_id).find('a').removeClass('disabled');
+}
+function disableForm(form_id){
+  $(form_id).find('select').prop('disabled', true);
+  $(form_id).find('input').prop('disabled', true);
+  $(form_id).find('select').select2('enable', false);
+  $(form_id).find('textarea').prop('disabled', true);
+  $(form_id).find('button[type=submit]').prop('disabled', true);
+  $(form_id).find('a').addClass('disabled');
+}
 $(function(){
   var hash = window.location.hash;
   hash && $('ul.nav a[href="' + hash + '"]').tab('show');

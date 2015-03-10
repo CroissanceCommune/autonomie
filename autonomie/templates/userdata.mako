@@ -122,6 +122,9 @@
 </ul>
 <div class='tab-content'>
     <div class='tab-pane row active' id='tab1'>
+        <button type="button" class="btn btn-default" onclick="javascript:enableForm('#userdatas_edit');$(this).hide();" style="margin-bottom: 15px">
+            Dégeler le formulaire
+        </button>
         ${form|n}
     </div>
     % if doctypes_form is not UNDEFINED:
@@ -290,4 +293,5 @@
 </%block>
 <%block name="footerjs">
 setAuthCheckBeforeSubmit('#userdatas_edit');
+disableForm("#userdatas_edit");
 </%block>

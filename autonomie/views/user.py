@@ -230,7 +230,7 @@ class PermanentUserEditView(PermanentUserAddView):
     """
         User edition view
     """
-    validate_msg = u"Le compte a bien été édité"
+    validate_msg = u"Le compte a bien été modifié"
     schema = get_user_schema(edit=True)
 
     @reify

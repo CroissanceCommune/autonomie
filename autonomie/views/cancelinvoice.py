@@ -191,7 +191,7 @@ class CancelInvoiceEdit(TaskFormView):
             cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
             cinvoice = self.dbsession.merge(cinvoice)
             self.dbsession.flush()
-            self.session.flash(u"L'avoir a bien été éditée.")
+            self.session.flash(u"L'avoir a bien été modifié.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",

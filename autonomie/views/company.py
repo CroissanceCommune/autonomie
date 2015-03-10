@@ -314,7 +314,7 @@ class CompanyEdit(BaseFormView):
         company = merge_session_with_post(self.request.context, appstruct)
         company = self.dbsession.merge(company)
         self.dbsession.flush()
-        message = u"Votre entreprise a bien été éditée"
+        message = u"Votre entreprise a bien été modifiée"
         self.session.flash(message)
         # Clear all informations stored in session by the tempstore used for the
         # file upload widget

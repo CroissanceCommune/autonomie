@@ -105,7 +105,7 @@ log = logging.getLogger(__name__)
 
 
 UPLOAD_OK_MSG = u"Le modèle de document a bien été ajouté"
-EDIT_OK_MSG = u"Le modèle de document a bien été édité"
+EDIT_OK_MSG = u"Le modèle de document a bien été modifié"
 
 
 def index(request):

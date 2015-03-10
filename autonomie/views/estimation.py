@@ -200,7 +200,7 @@ class EstimationEdit(TaskFormView):
             estimation = add_lines_to_estimation(estimation, appstruct)
             estimation = self.dbsession.merge(estimation)
             self.dbsession.flush()
-            self.session.flash(u"Le devis a bien été éditée.")
+            self.session.flash(u"Le devis a bien été modifié.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",

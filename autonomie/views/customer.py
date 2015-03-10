@@ -195,7 +195,7 @@ class CustomerEdit(CustomerAdd):
     """
     Customer edition form
     """
-    validation_msg = u"Le client a été édité avec succès"
+    validation_msg = u"Le client a été modifié avec succès"
 
     @reify
     def title(self):

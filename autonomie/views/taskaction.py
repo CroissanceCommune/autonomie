@@ -585,7 +585,7 @@ class TaskStatusView(StatusView):
 
     def post_edit_metadata_process(self, task, status, params):
         task = self.request.dbsession.merge(task)
-        msg = u"Le document a bien été édité"
+        msg = u"Le document a bien été modifié"
         self.request.session.flash(msg)
 
 

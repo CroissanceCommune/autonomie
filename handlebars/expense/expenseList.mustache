@@ -1,68 +1,86 @@
 <div>
-<table class="opa table table-bordered table-condensed">
-    <caption>
-    Frais liés au fonctionnement de l'entreprise
-    {{#edit}}
-    <div class="inline-element">
-    <a href="#lines/add/1" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
-    <a href="#tel/add" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une lignei de frais téléphonique"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
+    <div class="row">
+        <div class="col-xs-4">
+            <h3 style="margin-top:0px">
+                Achats
+            </h3>
+            <span class="help-block">
+                Dépenses liées au fonctionnement de l'entreprise
+            </span>
+        </div>
+        <div class="col-xs-8">
+            {{#edit}}
+            <div>
+            <a href="#lines/add/1" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+            <a href="#tel/add" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une lignei de frais téléphonique"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
+            </div>
+            {{/edit}}
+        </div>
     </div>
-    {{/edit}}
-    </caption>
-    <thead>
-        <th>Date</th>
-        <th>Type de frais</th>
-        <th>Description</th>
-        <th>Montant HT</th>
-        <th>Tva</th>
-        <th>Total</th>
-        {{#edit}}
-        <th class="hidden-print">Actions</th>
+    <table class="opa table table-bordered table-condensed">
+        <thead>
+            <th>Date</th>
+            <th>Type de frais</th>
+            <th>Description</th>
+            <th>Montant HT</th>
+            <th>Tva</th>
+            <th>Total</th>
+            {{#edit}}
+            <th class="hidden-print">Actions</th>
+                {{/edit}}
+        </thead>
+        <tbody class='internal'>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan='5'>Total</td>
+                <td id='internal_total'></td>
+            {{#edit}}
+                <td class="hidden-print"></td>
+                {{/edit}}
+            </tr>
+        </tfoot>
+    </table>
+    <br />
+    <div class="row">
+        <div class="col-xs-4">
+            <h3 style="margin-top:0px">
+                Frais
+            </h3>
+            <span class="help-block">
+                Dépenses concernant directement votre activité auprès de vos clients
+            </span>
+        </div>
+        <div class="col-xs-8">
+            {{#edit}}
+            <div>
+                <a href="#lines/add/2" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+            </div>
             {{/edit}}
-    </thead>
-    <tbody class='internal'>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan='5'>Total</td>
-            <td id='internal_total'></td>
-        {{#edit}}
-            <td class="hidden-print"></td>
-            {{/edit}}
-        </tr>
-    </tfoot>
-</table>
-<br />
-<table class="opa table table-bordered table-condensed">
-    <caption>
-    Frais concernant directement votre activité auprès de vos clients
-    {{#edit}}
-    <div class="inline-element">
-    <a href="#lines/add/2" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+        </div>
     </div>
-    {{/edit}}
-    </caption>
-    <thead>
-        <th>Date</th>
-        <th>Type de frais</th>
-        <th>Description</th>
-        <th>Montant HT</th>
-        <th>Tva</th>
-        <th>Total</th>
-        {{#edit}}
-        <th class="hidden-print">Actions</th>
-        {{/edit}}
-    </thead>
-    <tbody class='activity'>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan='5'>Total</td>
-            <td id='activity_total'></td>
-        {{#edit}}
-            <td class="hidden-print"></td>
+    <table class="opa table table-bordered table-condensed">
+        <thead>
+            <th>Date</th>
+            <th>Type de frais</th>
+            <th>Description</th>
+            <th>Montant HT</th>
+            <th>Tva</th>
+            <th>Total</th>
+            {{#edit}}
+            <th class="hidden-print">Actions</th>
             {{/edit}}
-        </tr>
-    </tfoot>
-</table>
+        </thead>
+        <tbody class='activity'>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan='5'>Total</td>
+                <td id='activity_total'></td>
+            {{#edit}}
+                <td class="hidden-print"></td>
+                {{/edit}}
+            </tr>
+        </tfoot>
+    </table>
 </div>

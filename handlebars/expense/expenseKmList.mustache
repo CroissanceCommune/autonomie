@@ -1,14 +1,23 @@
 <div>
-
-    <table class="opa table table-striped table-bordered table-condensed">
-        <caption>
-        Frais kilométriques liés au fonctionnement de l'entreprise
+    <div class="row">
+        <div class="col-xs-4">
+            <h3 style="margin-top:0px">
+                Dépenses kilométriques : Achats
+            </h3>
+            <span class="help-block">
+                Dépenses liées au fonctionnement de l'entreprise
+            </span>
+        </div>
+        <div class="col-xs-8">
             {{#edit}}
-            <div class="inline-element">
-<a href="#kmlines/add/1" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+            <div>
+                <a href="#kmlines/add/1" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
             </div>
             {{/edit}}
-        </caption>
+        </div>
+    </div>
+
+    <table class="opa table table-striped table-bordered table-condensed">
         <thead>
             <th>Date</th>
             <th>Type</th>
@@ -34,15 +43,24 @@
         </tfoot>
     </table>
     <br/>
-    <table class="opa table table-striped table-bordered table-condensed">
-        <caption>
-            Frais kilométriques concernant directement votre activité auprès de vos clients
+    <div class="row">
+        <div class="col-xs-4">
+            <h3 style="margin-top:0px">
+                Dépenses kilométriques : Frais
+            </h3>
+            <span class="help-block">
+                Dépenses concernant directement votre activité auprès de vos clients
+            </span>
+        </div>
+        <div class="col-xs-8">
             {{#edit}}
-            <div class="inline-element">
-<a href="#kmlines/add/2" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+            <div>
+                <a href="#kmlines/add/2" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
             </div>
             {{/edit}}
-        </caption>
+        </div>
+    </div>
+    <table class="opa table table-striped table-bordered table-condensed">
         <thead>
             <th>Date</th>
             <th>Type</th>

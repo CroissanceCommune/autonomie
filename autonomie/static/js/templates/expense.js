@@ -112,19 +112,19 @@ templates['expenseKmForm.mustache'] = template({"1":function(depth0,helpers,part
     + "' />\n<span class=\"help-block\"> Le cas échéant, indiquer la prestation liée à ces frais</span>\n</div>\n\n<div class=\"form-actions\">\n<button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n<button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n</div>\n</form>\n";
 },"useData":true});
 templates['expenseKmList.mustache'] = template({"1":function(depth0,helpers,partials,data) {
-  return "            <div class=\"inline-element\">\n<a href=\"#kmlines/add/1\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
+  return "            <div>\n                <a href=\"#kmlines/add/1\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
   },"3":function(depth0,helpers,partials,data) {
   return "            <th class=\"hidden-print\">Actions</th>\n";
   },"5":function(depth0,helpers,partials,data) {
   return "                <td class=\"hidden-print\"></td>\n";
   },"7":function(depth0,helpers,partials,data) {
-  return "            <div class=\"inline-element\">\n<a href=\"#kmlines/add/2\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
+  return "            <div>\n                <a href=\"#kmlines/add/2\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div>\n\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <caption>\n        Frais kilométriques liés au fonctionnement de l'entreprise\n";
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div>\n    <div class=\"row\">\n        <div class=\"col-xs-4\">\n            <h3 style=\"margin-top:0px\">\n                Dépenses kilométriques : Achats\n            </h3>\n            <span class=\"help-block\">\n                Dépenses liées au fonctionnement de l'entreprise\n            </span>\n        </div>\n        <div class=\"col-xs-8\">\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </caption>\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n";
+  buffer += "        </div>\n    </div>\n\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -132,11 +132,11 @@ templates['expenseKmList.mustache'] = template({"1":function(depth0,helpers,part
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "            </tr>\n        </tfoot>\n    </table>\n    <br/>\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <caption>\n            Frais kilométriques concernant directement votre activité auprès de vos clients\n";
+  buffer += "            </tr>\n        </tfoot>\n    </table>\n    <br/>\n    <div class=\"row\">\n        <div class=\"col-xs-4\">\n            <h3 style=\"margin-top:0px\">\n                Dépenses kilométriques : Frais\n            </h3>\n            <span class=\"help-block\">\n                Dépenses concernant directement votre activité auprès de vos clients\n            </span>\n        </div>\n        <div class=\"col-xs-8\">\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </caption>\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n";
+  buffer += "        </div>\n    </div>\n    <table class=\"opa table table-striped table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type</th>\n            <th>Prestation</th>\n            <th>Point de départ</th>\n            <th>Point d'arrivée</th>\n            <th>Kms</th>\n            <th>Indemnités</th>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -174,39 +174,39 @@ templates['expenseKm.mustache'] = template({"1":function(depth0,helpers,partials
   return buffer;
 },"useData":true});
 templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partials,data) {
-  return "    <div class=\"inline-element\">\n    <a href=\"#lines/add/1\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n    <a href=\"#tel/add\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une lignei de frais téléphonique\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>\n    </div>\n";
+  return "            <div>\n            <a href=\"#lines/add/1\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            <a href=\"#tel/add\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une lignei de frais téléphonique\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>\n            </div>\n";
   },"3":function(depth0,helpers,partials,data) {
-  return "        <th class=\"hidden-print\">Actions</th>\n";
+  return "            <th class=\"hidden-print\">Actions</th>\n";
   },"5":function(depth0,helpers,partials,data) {
-  return "            <td class=\"hidden-print\"></td>\n";
+  return "                <td class=\"hidden-print\"></td>\n";
   },"7":function(depth0,helpers,partials,data) {
-  return "    <div class=\"inline-element\">\n    <a href=\"#lines/add/2\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n    </div>\n";
+  return "            <div>\n                <a href=\"#lines/add/2\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div>\n<table class=\"opa table table-bordered table-condensed\">\n    <caption>\n    Frais liés au fonctionnement de l'entreprise\n";
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div>\n    <div class=\"row\">\n        <div class=\"col-xs-4\">\n            <h3 style=\"margin-top:0px\">\n                Achats\n            </h3>\n            <span class=\"help-block\">\n                Dépenses liées au fonctionnement de l'entreprise\n            </span>\n        </div>\n        <div class=\"col-xs-8\">\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "    </caption>\n    <thead>\n        <th>Date</th>\n        <th>Type de frais</th>\n        <th>Description</th>\n        <th>Montant HT</th>\n        <th>Tva</th>\n        <th>Total</th>\n";
+  buffer += "        </div>\n    </div>\n    <table class=\"opa table table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type de frais</th>\n            <th>Description</th>\n            <th>Montant HT</th>\n            <th>Tva</th>\n            <th>Total</th>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "    </thead>\n    <tbody class='internal'>\n    </tbody>\n    <tfoot>\n        <tr>\n            <td colspan='5'>Total</td>\n            <td id='internal_total'></td>\n";
+  buffer += "        </thead>\n        <tbody class='internal'>\n        </tbody>\n        <tfoot>\n            <tr>\n                <td colspan='5'>Total</td>\n                <td id='internal_total'></td>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </tr>\n    </tfoot>\n</table>\n<br />\n<table class=\"opa table table-bordered table-condensed\">\n    <caption>\n    Frais concernant directement votre activité auprès de vos clients\n";
+  buffer += "            </tr>\n        </tfoot>\n    </table>\n    <br />\n    <div class=\"row\">\n        <div class=\"col-xs-4\">\n            <h3 style=\"margin-top:0px\">\n                Frais\n            </h3>\n            <span class=\"help-block\">\n                Dépenses concernant directement votre activité auprès de vos clients\n            </span>\n        </div>\n        <div class=\"col-xs-8\">\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "    </caption>\n    <thead>\n        <th>Date</th>\n        <th>Type de frais</th>\n        <th>Description</th>\n        <th>Montant HT</th>\n        <th>Tva</th>\n        <th>Total</th>\n";
+  buffer += "        </div>\n    </div>\n    <table class=\"opa table table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type de frais</th>\n            <th>Description</th>\n            <th>Montant HT</th>\n            <th>Tva</th>\n            <th>Total</th>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "    </thead>\n    <tbody class='activity'>\n    </tbody>\n    <tfoot>\n        <tr>\n            <td colspan='5'>Total</td>\n            <td id='activity_total'></td>\n";
+  buffer += "        </thead>\n        <tbody class='activity'>\n        </tbody>\n        <tfoot>\n            <tr>\n                <td colspan='5'>Total</td>\n                <td id='activity_total'></td>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  return buffer + "        </tr>\n    </tfoot>\n</table>\n</div>\n";
+  return buffer + "            </tr>\n        </tfoot>\n    </table>\n</div>\n";
 },"useData":true});
 templates['expense.mustache'] = template({"1":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;

@@ -201,11 +201,13 @@ def expense_options(request):
     options['categories'] = [
         {
             'value':'1',
-            'label':u"Frais liés au fonctionnement de l'entreprise"
+            "label": u"Achat",
+            'description':u"Frais liés au fonctionnement de l'entreprise"
         },
         {
             'value':'2',
-            'label':u"Frais concernant directement votre activité auprès \
+            "label": u"Frais",
+            'description':u"Frais concernant directement votre activité auprès \
 de vos clients"
         }]
 

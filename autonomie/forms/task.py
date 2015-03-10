@@ -393,6 +393,7 @@ class TaskLine(colander.MappingSchema):
     description = forms.textarea_node(
         missing=u'',
         richwidget=True,
+        richtext_options={"height": "100px"},
         css_class='col-md-3',
     )
     cost = colander.SchemaNode(
@@ -435,6 +436,7 @@ class DiscountLine(colander.MappingSchema):
     description = forms.textarea_node(
         missing=u'',
         richwidget=True,
+        richtext_options={"height": "100px"},
         css_class='col-md-4',
     )
     amount = colander.SchemaNode(
@@ -503,7 +505,9 @@ class TaskLinesBlock(colander.MappingSchema):
     expenses_ht = colander.SchemaNode(
         AmountType(),
         widget=deform.widget.TextInputWidget(
-            template=TEMPLATES_URL + 'wrappable_input.pt'
+            template=TEMPLATES_URL + 'wrappable_input.pt',
+            after=TEMPLATES_URL + 'tvalist.pt',
+            after_options={'label': u'Montant TVA', 'id': 'tvapart'},
         ),
         title=u"Frais forfaitaires (HT)",
         missing=0,
@@ -516,19 +520,19 @@ class TaskLinesBlock(colander.MappingSchema):
         widget=deform.widget.HiddenWidget(),
         default=deferred_default_tva,
     )
-    expenses = colander.SchemaNode(
-        AmountType(),
-        widget=deform.widget.TextInputWidget(
-            template=TEMPLATES_URL + 'wrappable_input.pt',
-            before=TEMPLATES_URL + 'tvalist.pt',
-            before_options={'label': u'Montant TVA', 'id': 'tvapart'},
-            after=TEMPLATES_URL + 'staticinput.pt',
-            after_options={'label': u'Total TTC', 'id': 'total'}
-        ),
-        title=u'Frais Réel (TTC)',
-        missing=0,
-        validator=forms.positive_validator,
-    )
+#    expenses = colander.SchemaNode(
+#        AmountType(),
+#        widget=deform.widget.TextInputWidget(
+#            template=TEMPLATES_URL + 'wrappable_input.pt',
+#            before=TEMPLATES_URL + 'tvalist.pt',
+#            before_options={'label': u'Montant TVA', 'id': 'tvapart'},
+#            after=TEMPLATES_URL + 'staticinput.pt',
+#            after_options={'label': u'Total TTC', 'id': 'total'}
+#        ),
+#        title=u'Frais Réel (TTC)',
+#        missing=0,
+#        validator=forms.positive_validator,
+#    )
 
 
 class TaskConfiguration(colander.MappingSchema):
@@ -776,7 +780,7 @@ def get_cancel_invoice_schema():
     payments['paymentConditions'].description = u""
 
     schema['lines']['expenses_ht'].validator = forms.negative_validator
-    schema['lines']['expenses'].validator = forms.negative_validator
+#    schema['lines']['expenses'].validator = forms.negative_validator
     # cancelinvoice costs can both be positive or negative paiments and
     # discounts
     schema['lines']['lines']['taskline']['cost'].validator = None
@@ -1011,7 +1015,7 @@ class InvoiceMatch(MappingWrapper):
         ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
-        ('expenses', 'lines'),
+#        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('paymentConditions', 'payments'),
         ('statusComment', 'communication'),
@@ -1029,7 +1033,7 @@ class EstimationMatch(MappingWrapper):
         ('address', 'common'),
         ('course', 'common'),
         ('displayedUnits', 'common'),
-        ('expenses', 'lines'),
+#        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('exclusions', 'notes'),
         ('paymentConditions', 'payments'),
@@ -1053,7 +1057,7 @@ class CancelInvoiceMatch(MappingWrapper):
         ('customer_id', 'common'),
         ('address', 'common'),
         ('displayedUnits', 'common'),
-        ('expenses', 'lines'),
+#        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('reimbursementConditions', 'payments'),
     )

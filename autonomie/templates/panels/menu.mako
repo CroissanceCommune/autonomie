@@ -53,7 +53,7 @@
     </li>
 </%def>
 % if menu is not UNDEFINED or usermenu is not UNDEFINED:
-    <nav class="navbar navbar-inverse navbar-static-top">
+    <nav class="navbar navbar-inverse">
 
     <div class="container-fluid">
 
@@ -116,7 +116,7 @@
 % endif
 % if submenu is not UNDEFINED:
     ## No usermenu, it's the submenu's bar
-    <nav class="navbar navbar-inverse navbar-static-top">
+    <nav class="navbar navbar-inverse">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button

@@ -200,6 +200,9 @@ def get_admin_menus(request):
     """
     menu = Menu()
 
+    if has_permission("admin", request.context, request):
+        href = request.route_path("admin_index")
+        menu.add_item(u"Configuration", icon="fa fa-cogs", href=href)
 
     documents = DropDown(label=u"Documents")
     href = request.route_path("invoices")
@@ -233,10 +236,6 @@ def get_admin_menus(request):
         )
 
         menu.add(treasury)
-
-    if has_permission("admin", request.context, request):
-        href = request.route_path("admin_index")
-        menu.add_item(u"Configuration", icon="fa fa-cogs", href=href)
 
     accompagnement = DropDown(label=u"Accompagnement")
 

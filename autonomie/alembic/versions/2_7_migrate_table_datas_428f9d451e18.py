@@ -17,6 +17,32 @@ import sqlalchemy as sa
 def upgrade():
     op.execute("alter table project modify archived BOOLEAN;")
 
+    for name in ('ht', 'tva', 'ttc'):
+        col = sa.Column(name, sa.Integer, default=0)
+        op.add_column('task', col)
+
+    from autonomie.models.base import DBSESSION
+    session = DBSESSION()
+
+    from autonomie.models.task import (
+        Invoice,
+        CancelInvoice,
+        Estimation,
+    )
+    index = 0
+    for factory in (Invoice, CancelInvoice, Estimation,):
+        for document in factory.query().all():
+            document.ttc = document.total()
+            document.ht = document.total_ht()
+            document.tva = document.tva_amount()
+            session.merge(document)
+            index += 1
+        if index % 50 == 0:
+            session.flush()
+
 
 def downgrade():
     op.execute("alter table project modify archived VARCHAR(255);")
+
+    for name in ('ht', 'tva', 'ttc'):
+        op.drop_column('task', name)

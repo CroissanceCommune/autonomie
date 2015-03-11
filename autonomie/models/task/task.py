@@ -149,6 +149,9 @@ class Task(Node):
         Text,
         info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
     )
+    ht = Column(Integer, default=0)
+    tva = Column(Integer, default=0)
+    ttc = Column(Integer, default=0)
     statusPersonAccount = relationship(
         "User",
         primaryjoin="Task.statusPerson==User.id",
@@ -195,7 +198,16 @@ class Task(Node):
             'colanderalchemy': EXCLUDED,
             'export': {'exclude': True},
         },
-        lazy="joined")
+        lazy="joined"
+    )
+
+    discounts = relationship(
+        "DiscountLine",
+        order_by='DiscountLine.tva',
+        cascade="all, delete-orphan",
+        backref=backref('task'),
+    )
+
 
     state_machine = DEFAULT_STATE_MACHINES['base']
 
@@ -335,14 +347,6 @@ class DiscountLine(DBBASE, LineCompute):
     description = Column(
         Text,
         info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}}
-    )
-    task = relationship(
-        "Task",
-        backref=backref(
-            'discounts',
-            order_by='DiscountLine.tva',
-            cascade="all, delete-orphan"
-        )
     )
 
     def __json__(self, request):

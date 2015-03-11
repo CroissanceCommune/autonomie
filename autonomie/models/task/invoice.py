@@ -159,6 +159,7 @@ class Invoice(Task, InvoiceCompute):
         Column(Integer, nullable=False, default=0),
         group='edit'
     )
+    # Not used in latest invoices
     expenses = deferred(Column(Integer, default=0), group='edit')
     expenses_ht = deferred(
         Column(Integer, default=0, nullable=False),
@@ -212,6 +213,12 @@ class Invoice(Task, InvoiceCompute):
             'colanderalchemy': forms.EXCLUDED,
             'export': {'exclude': True},
         },
+    )
+    lines = relationship(
+        "InvoiceLine",
+        order_by='InvoiceLine.rowIndex',
+        cascade="all, delete-orphan",
+        backref="task",
     )
 
     state_machine = DEFAULT_STATE_MACHINES['invoice']
@@ -504,14 +511,14 @@ class InvoiceLine(DBBASE, LineCompute):
         Integer,
         info={'colanderalchemy': forms.EXCLUDED}
     )
-    task = relationship(
-        "Invoice",
-        backref=backref(
-            "lines",
-            order_by='InvoiceLine.rowIndex',
-            cascade="all, delete-orphan"
-        )
-    )
+#    task = relationship(
+#        "Invoice",
+#        backref=backref(
+#            "lines",
+#            order_by='InvoiceLine.rowIndex',
+#            cascade="all, delete-orphan"
+#        )
+#    )
     product = relationship(
         "Product",
         primaryjoin="Product.id==InvoiceLine.product_id",
@@ -800,120 +807,120 @@ class PaymentMode(DBBASE):
     label = Column(String(120))
 
 
-@implementer(IInvoice)
-class ManualInvoice(Task):
-    __tablename__ = 'manualinv'
-    __table_args__ = default_table_args
-    __mapper_args__ = {'polymorphic_identity': 'manualinvoice'}
-    id = Column("id", ForeignKey('task.id'), primary_key=True)
-    officialNumber = Column(
-        "officialNumber",
-        Integer,
-        nullable=False,
-        default=0)
-    montant_ht = Column("montant_ht", Integer)
-    tva = Column("tva", Integer)
-    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
-    financial_year = Column(Integer, nullable=False)
-    customer = relationship(
-        "Customer",
-        primaryjoin="Customer.id==ManualInvoice.customer_id",
-        backref=backref(
-            'manual_invoices',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        ),
-    )
-    company_id = Column(
-        'compagnie_id',
-        Integer,
-        ForeignKey('company.id'))
-    company = relationship(
-        "Company",
-        primaryjoin="Company.id==ManualInvoice.company_id",
-        backref=backref(
-            'manual_invoices',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        ),
-    )
-    # State machine handling
-    state_machine = DEFAULT_STATE_MACHINES['manualinvoice']
-    paid_states = ('resulted',)
-    not_paid_states = ('valid',)
-    valid_states = paid_states + not_paid_states
-
-    @property
-    def number(self):
-        """
-            return the invoice number
-        """
-        return u"FACT_MAN_{0}".format(self.officialNumber)
-
-    # IInvoice interface
-    def total_ht(self):
-        return int(self.montant_ht * 100)
-
-    def tva_amount(self):
-        total_ht = self.total_ht()
-        if self.tva:
-            tva = int(self.tva)
-        else:
-            tva = 0
-        tva = max(tva, 0)
-        return int(float(total_ht) * (tva / 10000.0))
-
-    def total(self):
-        return self.total_ht() + self.tva_amount()
-
-    def is_cancelled(self):
-        return False
-
-    def is_tolate(self):
-        today = datetime.date.today()
-        elapsed = today - self.taskDate
-        if elapsed > datetime.timedelta(days=45):
-            tolate = True
-        else:
-            tolate = False
-        return not self.is_resulted() and tolate
-
-    def is_paid(self):
-        return False
-
-    def is_resulted(self):
-        return self.CAEStatus in self.paid_states
-
-    def get_company(self):
-        return self.company
-
-    def get_customer(self):
-        return self.customer
-
-    def is_viewable(self):
-        return False
-
-    @property
-    def project(self):
-        """
-            Return a fake project used to access customer and company
-            on an uniform way
-        """
-        return FakeProject(customer=self.customer, company=self.company)
-
-    @classmethod
-    def get_officialNumber(cls):
-        """
-            Return the greatest officialNumber actually used in the
-            ManualInvoice table
-        """
-        current_year = datetime.date.today().year
-        return DBSESSION().query(func.max(ManualInvoice.officialNumber)).filter(
-                    func.year(ManualInvoice.taskDate) == current_year)
+#@implementer(IInvoice)
+#class ManualInvoice(Task):
+#    __tablename__ = 'manualinv'
+#    __table_args__ = default_table_args
+#    __mapper_args__ = {'polymorphic_identity': 'manualinvoice'}
+#    id = Column("id", ForeignKey('task.id'), primary_key=True)
+#    officialNumber = Column(
+#        "officialNumber",
+#        Integer,
+#        nullable=False,
+#        default=0)
+#    montant_ht = Column("montant_ht", Integer)
+#    tva = Column("tva", Integer)
+#    customer_id = Column('customer_id', Integer, ForeignKey('customer.id'))
+#    financial_year = Column(Integer, nullable=False)
+#    customer = relationship(
+#        "Customer",
+#        primaryjoin="Customer.id==ManualInvoice.customer_id",
+#        backref=backref(
+#            'manual_invoices',
+#            info={
+#                'colanderalchemy': forms.EXCLUDED,
+#                'export': {'exclude': True},
+#            },
+#        ),
+#    )
+#    company_id = Column(
+#        'compagnie_id',
+#        Integer,
+#        ForeignKey('company.id'))
+#    company = relationship(
+#        "Company",
+#        primaryjoin="Company.id==ManualInvoice.company_id",
+#        backref=backref(
+#            'manual_invoices',
+#            info={
+#                'colanderalchemy': forms.EXCLUDED,
+#                'export': {'exclude': True},
+#            },
+#        ),
+#    )
+#    # State machine handling
+#    state_machine = DEFAULT_STATE_MACHINES['manualinvoice']
+#    paid_states = ('resulted',)
+#    not_paid_states = ('valid',)
+#    valid_states = paid_states + not_paid_states
+#
+#    @property
+#    def number(self):
+#        """
+#            return the invoice number
+#        """
+#        return u"FACT_MAN_{0}".format(self.officialNumber)
+#
+#    # IInvoice interface
+#    def total_ht(self):
+#        return int(self.montant_ht * 100)
+#
+#    def tva_amount(self):
+#        total_ht = self.total_ht()
+#        if self.tva:
+#            tva = int(self.tva)
+#        else:
+#            tva = 0
+#        tva = max(tva, 0)
+#        return int(float(total_ht) * (tva / 10000.0))
+#
+#    def total(self):
+#        return self.total_ht() + self.tva_amount()
+#
+#    def is_cancelled(self):
+#        return False
+#
+#    def is_tolate(self):
+#        today = datetime.date.today()
+#        elapsed = today - self.taskDate
+#        if elapsed > datetime.timedelta(days=45):
+#            tolate = True
+#        else:
+#            tolate = False
+#        return not self.is_resulted() and tolate
+#
+#    def is_paid(self):
+#        return False
+#
+#    def is_resulted(self):
+#        return self.CAEStatus in self.paid_states
+#
+#    def get_company(self):
+#        return self.company
+#
+#    def get_customer(self):
+#        return self.customer
+#
+#    def is_viewable(self):
+#        return False
+#
+#    @property
+#    def project(self):
+#        """
+#            Return a fake project used to access customer and company
+#            on an uniform way
+#        """
+#        return FakeProject(customer=self.customer, company=self.company)
+#
+#    @classmethod
+#    def get_officialNumber(cls):
+#        """
+#            Return the greatest officialNumber actually used in the
+#            ManualInvoice table
+#        """
+#        current_year = datetime.date.today().year
+#        return DBSESSION().query(func.max(ManualInvoice.officialNumber)).filter(
+#                    func.year(ManualInvoice.taskDate) == current_year)
 
 class FakeProject(object):
     def __init__(self, **kw):
@@ -939,3 +946,27 @@ def get_invoice_years():
             years.append(current)
         return years
     return taskyears()
+
+
+from sqlalchemy.event import listen
+
+
+def _cache_amounts(mapper, connection, target):
+    """
+    Set amounts in the cached amount vars to be able to provide advanced search
+    ... options in the invoice list page
+    """
+    print("Setting the amount of the current invoice")
+    print(target)
+    print(target.lines)
+    target.ht = target.total_ht()
+    target.ttc = target.total()
+    target.tva = target.tva_amount()
+
+listen(Invoice, "before_insert", _cache_amounts, propagate=True)
+listen(Invoice, "before_update", _cache_amounts, propagate=True)
+
+
+#listen(Invoice.expenses_ht, "set", _cache_amounts, propagate=True)
+#listen(Invoice.lines, "append", _cache_amounts, propagate=True)
+#listen(Task.discounts, "append", _cache_amounts, propagate=True)

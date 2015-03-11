@@ -131,10 +131,12 @@ CIVILITE_OPTIONS = (
 
 STATUS_OPTIONS = (
     ('single', u"Célibataire", ),
-    ('maried', u'Marié', ),
-    ('pacsed', u"Pacsé", ),
+    ('maried', u'Marié(e)', ),
+#    ('divorced', u"Divorcé(e)", ),
+    ('pacsed', u"Pacsé(e)", ),
+#    ('widow', u"Veuf(ve)", ),
     ('isolated', u"Parent isolé", ),
-    ("free_union", u"union libre", ),
+    ("free_union", u"Union libre", ),
 )
 
 

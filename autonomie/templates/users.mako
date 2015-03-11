@@ -51,13 +51,14 @@
                     <% url = request.route_path('user', id=user.id) %>
                 %endif
                 <tr class="clickable-row" data-href="${url}">
-                    <td>${api.format_account(user)}</td>
+                    <td><a href="${url}">${api.format_account(user)}</a></td>
                     <td>${user.email}</td>
                     <td>
                         <ul class="list-unstyled">
                             % for company in user.companies:
+                                <% company_url = request.route_path('company', id=company.id) %>
                                 <li>
-                                ${company.name} (<small>${company.goal}</small>)
+                                <a href="${company_url}">${company.name} (<small>${company.goal}</small>)</a>
                                     % if not company.enabled():
                                         <span class='label label-warning'>Cette entreprise a été désactivée</span>
                                     % endif

@@ -13,7 +13,6 @@ down_revision = '41116dd5c5c8'
 
 from autonomie.alembic.utils import force_rename_table
 from autonomie.alembic.utils import table_exists
-from autonomie.models.task.invoice import ManualInvoice
 
 
 import datetime
@@ -28,6 +27,7 @@ from autonomie.models import DBBASE
 from autonomie.models.task.invoice import Payment
 
 def upgrade():
+    from autonomie.models.task.invoice import ManualInvoice
     # Fix an error in table names for some installations
     class OldManualInvoice(DBBASE):
         """

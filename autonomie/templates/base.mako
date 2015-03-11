@@ -44,10 +44,8 @@
     <%block name="css" />
   </head>
   <body>
-    <header class="hidden-print">
-            ${request.layout_manager.render_panel('menu')}
-            ${request.layout_manager.render_panel('submenu')}
-    </header>
+    ${request.layout_manager.render_panel('menu')}
+    ${request.layout_manager.render_panel('submenu')}
     <%block name="headtitle">
     <div class='pagetitle visible-lg hidden-sm hidden-print'>
       <h2 >

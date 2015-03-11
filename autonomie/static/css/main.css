@@ -28,6 +28,10 @@ td.actions, th.actions{
   line-height:15px;
   margin:3px 50px 3px 0px;
 }
+.headmenu{
+  border-radius: 0px;
+  margin-bottom:0px;
+}
 /* Le formulaire d'authentification */
 .authentication-form fieldset{
   width:90%;

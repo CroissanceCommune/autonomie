@@ -53,7 +53,7 @@
     </li>
 </%def>
 % if menu is not UNDEFINED or usermenu is not UNDEFINED:
-    <nav class="navbar navbar-inverse">
+    <header class="navbar navbar-inverse hidden-print headmenu">
 
     <div class="container-fluid">
 
@@ -64,14 +64,15 @@
                 data-target=".menu"
                 data-toggle="collapse"
             >
-              <span class="glyphicon glyphicon-bar"></span>
-              <span class="glyphicon glyphicon-bar"></span>
-              <span class="glyphicon glyphicon-bar"></span>
+              <span class="sr-only">Afficher le menu</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href='/'><i class='glyphicon glyphicon-white icon-home'></i>Autonomie</a>
         </div>
 
-        <div class="navbar-collapse menu collapse">
+        <nav class="navbar-collapse menu collapse ">
 
     % if  menu is not UNDEFINED:
                <ul
@@ -110,13 +111,13 @@
          </ul>
     % endif
 ## We close the main menu
+</nav>
     </div>
-    </div>
-    </nav>
+</header>
 % endif
 % if submenu is not UNDEFINED:
     ## No usermenu, it's the submenu's bar
-    <nav class="navbar navbar-inverse">
+    <header class="navbar navbar-inverse hidden-print headmenu">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button
@@ -125,12 +126,13 @@
                     data-target=".submenu"
                     data-toggle="collapse"
                     >
-                      <span class="glyphicon glyphicon-bar"></span>
-                      <span class="glyphicon glyphicon-bar"></span>
-                      <span class="glyphicon glyphicon-bar"></span>
+                      <span class="sr-only">Afficher le sous-menu</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
                   </button>
-              </navbar>
-              <div class='navbar-collapse submenu collapse'>
+              </div>
+              <nav class='navbar-collapse submenu collapse'>
                     <ul
                         % if hasattr(elem, "css"):
                             class="nav navbar-nav ${submenu.css}"
@@ -148,7 +150,7 @@
                             % endif
                         % endfor
                     </ul>
-            </div>
+                </nav>
         </div>
-    </nav>
+    </header>
 % endif

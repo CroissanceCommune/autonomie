@@ -48,7 +48,7 @@ LINES = [{'description':u'text1',
 DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 
 INVOICE = dict( name=u"Facture 2",
-                sequenceNumber=2,
+                sequence_number=2,
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 _number=u"invoicenumber",
@@ -68,7 +68,7 @@ def invoice():
 
 def test_set_name():
     cinv = CancelInvoice()
-    cinv.set_sequenceNumber(5)
+    cinv.set_sequence_number(5)
     cinv.set_name()
     assert cinv.name == u"Avoir 5"
 
@@ -77,7 +77,7 @@ def test_get_number():
     cinv.project = MagicMock(code="PRO1")
     cinv.customer = MagicMock(code="CLI1")
     cinv.taskDate = datetime.date(1969, 07, 31)
-    cinv.set_sequenceNumber(15)
+    cinv.set_sequence_number(15)
     cinv.set_number()
     assert cinv.number == u"PRO1_CLI1_A15_0769"
 
@@ -88,7 +88,7 @@ def test_tva_amount():
 
 def test_set_name():
     invoice = Invoice()
-    invoice.set_sequenceNumber(5)
+    invoice.set_sequence_number(5)
     invoice.set_name()
     assert invoice.name == u"Facture 5"
     invoice.name = ""
@@ -104,7 +104,7 @@ def test_set_number():
     invoice.customer = MagicMock(code="CLI1")
     invoice.project = MagicMock(code="PRO1")
     seq_number = 15
-    invoice.set_sequenceNumber(15)
+    invoice.set_sequence_number(15)
     invoice.set_name()
     date = datetime.date(1969, 07, 31)
     invoice.taskDate = date

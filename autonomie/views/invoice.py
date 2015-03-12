@@ -112,7 +112,7 @@ class InvoiceAdd(TaskFormView):
         invoice.project = self.context
         invoice.owner = self.request.user
         invoice = merge_session_with_post(invoice, appstruct["invoice"])
-        invoice.set_sequenceNumber(snumber)
+        invoice.set_sequence_number(snumber)
         invoice.set_number()
         invoice.set_name()
         try:

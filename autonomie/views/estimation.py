@@ -117,7 +117,7 @@ class EstimationAdd(TaskFormView):
         estimation.project = self.context
         estimation.owner = self.request.user
         estimation = merge_session_with_post(estimation, appstruct["estimation"])
-        estimation.set_sequenceNumber(snumber)
+        estimation.set_sequence_number(snumber)
         estimation.set_number()
         estimation.set_name()
         try:

@@ -38,7 +38,7 @@ from autonomie.models.user import User
 
 
 ESTIMATION = dict(name=u"Devis 2",
-                sequenceNumber=2,
+                sequence_number=2,
                 _number=u"estnumber",
                 displayedUnits="1",
                 expenses=1500,
@@ -124,13 +124,13 @@ def test_set_number():
     est.project = MagicMock(code="PRO1")
     est.customer = MagicMock(code="CLI1")
     est.taskDate = datetime.date(1969, 07, 31)
-    est.set_sequenceNumber(15)
+    est.set_sequence_number(15)
     est.set_number()
     assert est.number == u"PRO1_CLI1_D15_0769"
 
 def test_set_name():
     est = Estimation()
-    est.set_sequenceNumber(5)
+    est.set_sequence_number(5)
     est.set_name()
     assert est.name == u"Devis 5"
 

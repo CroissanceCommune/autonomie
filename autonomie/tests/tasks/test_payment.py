@@ -30,7 +30,7 @@ from autonomie.models.task import Payment
 from autonomie.models.task import Invoice, InvoiceLine
 
 INVOICE = dict( name=u"Facture 2",
-                sequenceNumber=2,
+                sequence_number=2,
                 taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 _number=u"invoicenumber",

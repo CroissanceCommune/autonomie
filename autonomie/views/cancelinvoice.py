@@ -106,7 +106,7 @@ class CancelInvoiceAdd(TaskFormView):
         cinvoice.project = self.context
         cinvoice.owner = self.request.user
         cinvoice = merge_session_with_post(cinvoice, appstruct["cancelinvoice"])
-        cinvoice.set_sequenceNumber(snumber)
+        cinvoice.set_sequence_number(snumber)
         cinvoice.set_number()
         cinvoice.set_name()
         try:

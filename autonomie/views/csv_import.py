@@ -237,6 +237,10 @@ def config_field_association(request):
 import")
             action = importation_datas['action']
             csv_id_key = importation_datas['id_key']
+            force_rel_creation = importation_datas.get(
+                'force_rel_creation',
+                False,
+            )
 
             from collections import OrderedDict
             association_dict = OrderedDict()
@@ -267,6 +271,7 @@ import")
                 csv_filepath,
                 id_key,
                 action,
+                force_rel_creation,
             )
 
             log.info(u" * The Celery Task {0} has been delayed, its result \

@@ -99,7 +99,7 @@ def get_csv_import_associator(key):
     )
 
 
-def format_input_value(value, sqla_column_dict):
+def format_input_value(value, sqla_column_dict, force_rel_creation=False):
     """
     format value to fetch the database storage expectations
     For example dates are input in dd/mm/yyyy format, we want datetime objects
@@ -116,6 +116,10 @@ def format_input_value(value, sqla_column_dict):
     :param str value: The value coming from the csv file
     :param dict sqla_column_dict: The datas collected about the destination
     attribute
+    :param bool force_rel_creation: Should we force the creation of a related
+    element on import (default False), only in case of many to one
+    relationships.  Note : the related_key attribute should be sufficient to
+    create a new instance of the related element
     :returns: The formatted value
     :rtype: object (datetime) or string depending on the column
     """
@@ -132,10 +136,14 @@ def format_input_value(value, sqla_column_dict):
             class_ = prop.mapper.class_
             # We query the database to get the corresponding element filtering
             # on the configured related_key
-            with DBSESSION.no_autoflush:
-                res = class_.query().filter(
-                    getattr(class_, related_key)==value
-                ).first()
+            res = class_.query().filter(
+                getattr(class_, related_key)==value
+            ).first()
+            if res is None and force_rel_creation:
+                if value is not None and value.strip():
+                    print("Creating a new element : %s %s"%(related_key, value))
+                    creation_dict = {related_key: value}
+                    res = class_(**creation_dict)
         else:
             # We have a one to many relationship, we generate an instance using
             # the related_key as instanciation attribute
@@ -306,7 +314,7 @@ class CsvImportAssociator(BaseSqlaInspector):
         """
         self.association_dict = association_dict
 
-    def collect_args(self, csv_line):
+    def collect_args(self, csv_line, force_rel_creation=False):
         """
         Collect the arguments to be used to build the new model
         * get the value from the csv_line
@@ -314,6 +322,8 @@ class CsvImportAssociator(BaseSqlaInspector):
         * place it in a new dict with the model attribute names as keys
 
         :param dict line: a csv line as a dict
+        :param bool force_rel_creation: Should we try to build related
+        configuration option on the fly ?
         :returns: a tuple with the args to be used for instanciation and the
             resting values
         """
@@ -336,7 +346,11 @@ class CsvImportAssociator(BaseSqlaInspector):
             else:
                 column = self.columns.get(column_name)
                 if column is not None:
-                    new_value = format_input_value(value, column)
+                    new_value = format_input_value(
+                        value,
+                        column,
+                        force_rel_creation,
+                    )
                     if new_value is not None:
                         kwargs[column_name] = new_value
                     else:
@@ -359,7 +373,8 @@ def get_csv_importer(
     csv_buffer,
     association_handler,
     action="insert",
-    id_key="id"):
+    id_key="id",
+    force_rel_creation=False):
 
     factory = MODELS_CONFIGURATION[model_type]['factory']
     return CsvImporter(
@@ -369,6 +384,7 @@ def get_csv_importer(
         association_handler,
         action,
         id_key,
+        force_rel_creation,
     )
 
 
@@ -409,7 +425,7 @@ class CsvImporter(object):
     delimiter = ';'
     quotechar = '"'
     def __init__(self, dbsession, factory, csv_buffer, association_handler,
-                 action="insert", id_key="id"):
+                 action="insert", id_key="id", force_rel_creation=False):
         self.dbsession = dbsession
         self.factory = factory
         self.association_handler = association_handler
@@ -434,6 +450,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             self.association_handler.check_association_dict()
         self.action = action
         self.id_key = id_key
+        self.force_rel_creation = force_rel_creation
 
     def import_datas(self):
         """
@@ -530,7 +547,10 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             message
         """
         message = None
-        args, unhandled_columns = self.association_handler.collect_args(line)
+        args, unhandled_columns = self.association_handler.collect_args(
+            line,
+            self.force_rel_creation,
+        )
 
         function = getattr(self, "_{0}".format(self.action))
         # Here we should handle edition

@@ -102,7 +102,8 @@ def get_job(celery_request, job_model, job_id):
 # method and thus we can access attributes like request
 @task(bind=True)
 def async_import_datas(
-    self, model_type, job_id, association_dict, csv_filepath, id_key, action):
+    self, model_type, job_id, association_dict, csv_filepath, id_key, action,
+    force_rel_creation):
     """
     Launch the import of the datas provided in the csv_filepath
 
@@ -115,6 +116,8 @@ def async_import_datas(
     :param str id_key: The model attribute used to handle updates
     :param str action: The name of the action we want to run
         (insert/update/override)
+    :param bool force_rel_creation: Force the creation of configurable related
+    elements
     """
     logger.info(u"We are launching an asynchronous csv import")
     logger.info(u"  The job id : %s" % job_id)
@@ -144,7 +147,8 @@ def async_import_datas(
             csv_buffer,
             associator,
             action=action,
-            id_key=id_key
+            id_key=id_key,
+            force_rel_creation=force_rel_creation,
         )
         logger.info(u"Importing the datas")
         importer.import_datas()

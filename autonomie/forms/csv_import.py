@@ -208,6 +208,15 @@ dans la base de données.",
         widget=deferred_id_key_widget,
         missing="id", # par défaut on identifie grâce à l'attribut id
     )
+    force_rel_creation = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Forcer la création d'élément de configuration",
+        description=u"Si des entrées correspondent à des champs à valeur \
+multiple dont les options sont configurables depuis l'interface \
+d'administration, et qu'aucun option ne correspond, une nouvelle option \
+sera créée automatiquement.",
+        default=False,
+    )
 
 def check_record_name(form, values):
     """

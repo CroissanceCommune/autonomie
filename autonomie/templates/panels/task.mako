@@ -41,7 +41,7 @@
         <%block name='information'>
         </%block>
     </div>
-    %if task.displayedUnits == 1:
+    %if task.display_units == 1:
         <% colspan = 3 %>
     %else:
         <% colspan = 1 %>
@@ -51,7 +51,7 @@
             <thead>
                 <tr>
                     <th class="description">Intitulé des postes</th>
-                    %if task.displayedUnits == 1:
+                    %if task.display_units == 1:
                         <th class="quantity">P.U.</th>
                         <th class="quantity">Qté</th>
                     % endif
@@ -65,7 +65,7 @@
                 % for line in task.lines:
                     <tr>
                         <td class="description">${format_text(line.description, False)}</td>
-                        %if task.displayedUnits == 1:
+                        %if task.display_units == 1:
                             <td class="quantity">${api.format_amount(line.cost)|n}</td>
                             <td class="quantity">${api.format_quantity(line.quantity)} ${line.unity}</td>
                         % endif

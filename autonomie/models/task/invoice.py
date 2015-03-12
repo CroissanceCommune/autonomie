@@ -104,27 +104,46 @@ class Invoice(Task, InvoiceCompute):
     """
     __tablename__ = 'invoice'
     __table_args__ = default_table_args
-    __mapper_args__ = {
-                       'polymorphic_identity': 'invoice',
-                       }
+    __mapper_args__ = {'polymorphic_identity': 'invoice',}
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
-
-    estimation_id = Column(
-        ForeignKey('estimation.id'),
-        info={'colanderalchemy': {'exclude': True}},
-    )
-
-    paymentConditions = deferred(
+    address = deferred(
         Column(
             Text,
-            info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
+            default="",
+            info={
+                'colanderalchemy': {
+                    'widget': deform.widget.TextAreaWidget()
+                }
+            },
         ),
         group='edit',
     )
+    # Not used in latest invoices
+    expenses = deferred(Column(Integer, default=0), group='edit')
+    expenses_ht = deferred(
+        Column(
+            Integer,
+            default=0,
+            nullable=False
+        ),
+        group='edit',
+    )
+    paymentConditions = deferred(
+        Column(
+            Text,
+            info={
+                'colanderalchemy': {
+                    'widget': deform.widget.TextAreaWidget()
+                }
+            },
+        ),
+        group='edit',
+    )
+    # Common with only estimations
     deposit = deferred(
         Column(Integer, nullable=False, default=0),
         group='edit',
@@ -133,23 +152,16 @@ class Invoice(Task, InvoiceCompute):
         Column(Integer, nullable=False, default=0),
         group='edit'
     )
+    # Common with only cancelinvoices
     officialNumber = Column(Integer)
-    displayedUnits = deferred(
-        Column(Integer, nullable=False, default=0),
-        group='edit'
-    )
-    # Not used in latest invoices
-    expenses = deferred(Column(Integer, default=0), group='edit')
-    expenses_ht = deferred(
-        Column(Integer, default=0, nullable=False),
-        group='edit')
-    address = Column(
-        Text,
-        default="",
-        info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
-    )
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
+
+    estimation_id = Column(
+        ForeignKey('estimation.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
+
 
     estimation = relationship(
         "Estimation",
@@ -300,7 +312,7 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.expenses_ht = -1 * self.expenses_ht
         cancelinvoice.financial_year = self.financial_year
-        cancelinvoice.displayedUnits = self.displayedUnits
+        cancelinvoice.display_units = self.display_units
         cancelinvoice.statusPersonAccount = user
         cancelinvoice.project = self.project
         cancelinvoice.owner = user
@@ -394,7 +406,7 @@ class Invoice(Task, InvoiceCompute):
         invoice.paymentConditions = self.paymentConditions
         invoice.deposit = self.deposit
         invoice.course = self.course
-        invoice.displayedUnits = self.displayedUnits
+        invoice.display_units = self.display_units
         invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
         invoice.financial_year = date.year
@@ -516,23 +528,26 @@ class CancelInvoice(Task, TaskCompute):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-    displayedUnits = Column(Integer, default=0)
+
+    address = Column(Text, default="")
+    expenses = deferred(Column(Integer, default=0), group='edit')
+    expenses_ht = deferred(
+        Column(Integer, default=0, nullable=False),
+        group='edit'
+    )
+
+    reimbursementConditions = deferred(
+        Column(String(255), default=None),
+        group='edit'
+    )
+
     invoice_id = Column(
         Integer,
         ForeignKey('invoice.id'),
         default=None
     )
 
-    reimbursementConditions = deferred(
-        Column(String(255), default=None),
-        group='edit')
     officialNumber = deferred(Column(Integer, default=None), group='edit')
-    expenses = deferred(Column(Integer, default=0), group='edit')
-    expenses_ht = deferred(
-        Column(Integer, default=0, nullable=False),
-        group='edit'
-    )
-    address = Column(Text, default="")
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
 

@@ -40,7 +40,7 @@ from autonomie.models.user import User
 ESTIMATION = dict(name=u"Devis 2",
                 sequence_number=2,
                 _number=u"estnumber",
-                displayedUnits="1",
+                display_units="1",
                 expenses=1500,
                 deposit=20,
                 exclusions=u"Notes",

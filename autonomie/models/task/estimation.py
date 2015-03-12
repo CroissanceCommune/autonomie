@@ -27,6 +27,7 @@
 """
 import datetime
 import logging
+import deform
 
 from zope.interface import implementer
 
@@ -86,24 +87,30 @@ class Estimation(Task, EstimationCompute):
     __tablename__ = 'estimation'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'estimation', }
-    id = Column(ForeignKey('task.id'), primary_key=True, nullable=False)
-    deposit = Column(Integer, default=0)
-    paymentConditions = deferred(Column(Text), group='edit')
-    exclusions = deferred(Column(Text), group='edit')
-    manualDeliverables = deferred(Column(Integer), group='edit')
-    course = deferred(Column(Integer, nullable=False, default=0), group='edit')
-    displayedUnits = deferred(
-        Column(Integer, nullable=False, default=0),
-        group='edit'
+    id = Column(
+        ForeignKey('task.id'),
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
+    address = Column(Text, default="")
     expenses = deferred(Column(Integer, default=0), group='edit')
     expenses_ht = deferred(
         Column(Integer, default=0, nullable=False),
-        group='edit')
+        group='edit'
+    )
+
+    paymentConditions = deferred(Column(Text), group='edit')
+
+    # common with only invoices
+    deposit = Column(Integer, default=0)
+    course = deferred(Column(Integer, nullable=False, default=0), group='edit')
+
+    # Specific to estimations
+    exclusions = deferred(Column(Text), group='edit')
+    manualDeliverables = deferred(Column(Integer), group='edit')
     paymentDisplay = deferred(
         Column(String(20), default="SUMMARY"),
         group='edit')
-    address = Column(Text, default="")
 
     state_machine = DEFAULT_STATE_MACHINES['estimation']
 
@@ -158,7 +165,7 @@ class Estimation(Task, EstimationCompute):
         estimation.exclusions = self.exclusions
         estimation.manualDeliverables = self.manualDeliverables
         estimation.course = self.course
-        estimation.displayedUnits = self.displayedUnits
+        estimation.display_units = self.display_units
         estimation.expenses = self.expenses
         estimation.expenses_ht = self.expenses_ht
         estimation.paymentDisplay = self.paymentDisplay
@@ -182,7 +189,7 @@ class Estimation(Task, EstimationCompute):
         """
         invoice.taskDate = datetime.date.today()
         invoice.financial_year = invoice.taskDate.year
-        invoice.displayedUnits = 0
+        invoice.display_units = 0
         invoice.set_name(deposit=True)
         invoice.set_number(deposit=True)
 
@@ -198,7 +205,7 @@ class Estimation(Task, EstimationCompute):
         """
         invoice.taskDate = paymentline.paymentDate
         invoice.financial_year = paymentline.paymentDate.year
-        invoice.displayedUnits = 0
+        invoice.display_units = 0
         invoice.set_name()
         invoice.set_number()
         for tva, amount in amounts.items():
@@ -231,7 +238,7 @@ class Estimation(Task, EstimationCompute):
         invoice.set_name(sold=is_sold)
         invoice.set_number()
 
-        invoice.displayedUnits = self.displayedUnits
+        invoice.display_units = self.display_units
         invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
         for line in self._sold_invoice_lines(paid_lines):
@@ -378,15 +385,10 @@ class Estimation(Task, EstimationCompute):
         result.update(
             dict(
                 deposit=self.deposit,
-                payment_conditions=self.paymentConditions,
                 exclusions=self.exclusions,
-                customer_id=self.customer_id,
                 manual_deliverables=self.manualDeliverables,
                 course=self.course,
-                displayed_units=self.displayedUnits,
-                expenses_ht=self.expenses_ht,
                 payment_display=self.paymentDisplay,
-                address=self.address,
                 lines=[line.__json__(request) for line in self.lines],
                 payments=[line.__json__(request) for line in self.payment_lines]
             )

@@ -163,6 +163,13 @@ class Task(Node):
     )
     sequence_number = deferred(Column(Integer), group='edit')
     _number = Column(String(100), nullable=False)
+    display_units = deferred(
+        Column(
+            Integer,
+            default=0
+        ),
+        group='edit'
+    )
     statusPersonAccount = relationship(
         "User",
         primaryjoin="Task.statusPerson==User.id",
@@ -271,6 +278,11 @@ class Task(Node):
             status=self.CAEStatus,
             date=self.taskDate,
             owner_id=self.owner_id,
+            customer_id=self.customer_id,
+            displayed_units=self.display_units,
+            expenses_ht=self.expenses_ht,
+            address=self.address,
+            payment_conditions=self.payment_conditions,
             description=self.description,
             status_history=[
                 status.__json__(request) for status in self.statuses

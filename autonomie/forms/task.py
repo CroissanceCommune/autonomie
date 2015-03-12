@@ -115,7 +115,7 @@ MAIN_INFOS_GRID = (
     (('customer_id', 6), ('address', 6),),
     (('description', 12),),
     (('course', 12),),
-    (('displayedUnits', 12),),
+    (('display_units', 12),),
 )
 
 
@@ -571,7 +571,7 @@ class TaskConfiguration(colander.MappingSchema):
         widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
         missing=0,
     )
-    displayedUnits = colander.SchemaNode(
+    display_units = colander.SchemaNode(
         colander.Integer(),
         title="",
         label=u"Afficher le détail des prestations dans la sortie PDF ?",
@@ -1014,7 +1014,7 @@ class InvoiceMatch(MappingWrapper):
         ('customer_id', 'common'),
         ('address', 'common'),
         ('course', 'common'),
-        ('displayedUnits', 'common'),
+        ('display_units', 'common'),
 #        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('paymentConditions', 'payments'),
@@ -1032,7 +1032,7 @@ class EstimationMatch(MappingWrapper):
         ('customer_id', 'common'),
         ('address', 'common'),
         ('course', 'common'),
-        ('displayedUnits', 'common'),
+        ('display_units', 'common'),
 #        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('exclusions', 'notes'),
@@ -1056,7 +1056,7 @@ class CancelInvoiceMatch(MappingWrapper):
         ('description', 'common'),
         ('customer_id', 'common'),
         ('address', 'common'),
-        ('displayedUnits', 'common'),
+        ('display_units', 'common'),
 #        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('reimbursementConditions', 'payments'),

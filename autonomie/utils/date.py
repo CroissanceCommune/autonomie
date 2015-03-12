@@ -37,7 +37,10 @@ def str_to_date(str_date):
             try:
                 res = datetime.datetime.strptime(str_date, "%d-%m-%Y")
             except ValueError:
-                res = ""
+                try:
+                    res = datetime.datetime.strptime(str_date, "%Y-%m-%d")
+                except ValueError:
+                    res = ""
     return res
 
 

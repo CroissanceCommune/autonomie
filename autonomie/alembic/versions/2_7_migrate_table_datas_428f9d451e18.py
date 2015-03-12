@@ -1,3 +1,4 @@
+#-*-coding:utf-8-*-
 """2.7 : migrate table datas
 
 Revision ID: 428f9d451e18
@@ -15,11 +16,20 @@ import sqlalchemy as sa
 
 
 def upgrade():
+    # Ajout et modification de la structure de données existantes
     op.execute("alter table project modify archived BOOLEAN;")
 
     for name in ('ht', 'tva', 'ttc'):
         col = sa.Column(name, sa.Integer, default=0)
         op.add_column('task', col)
+    col = sa.Column("project_id", sa.Integer, sa.ForeignKey('project.id'))
+    op.add_column("task", col)
+    col = sa.Column("customer_id", sa.Integer, sa.ForeignKey('customer.id'))
+    op.add_column("task", col)
+
+    # Migration des donnees vers la nouvelle structure
+    from alembic.context import get_bind
+    conn = get_bind()
 
     from autonomie.models.base import DBSESSION
     session = DBSESSION()
@@ -39,6 +49,18 @@ def upgrade():
             index += 1
         if index % 50 == 0:
             session.flush()
+
+    # Migration des customer_id et project_id au niveau de la table Task
+
+    for type_ in "invoice", "cancelinvoice", "estimation":
+        request = "select id, customer_id, project_id, number, sequenceNumber from %s;" % type_
+        result = conn.execute(request)
+
+        for index, (id, c_id, p_id, number, seq_number) in enumerate(result):
+            request = "update task set project_id=%s, customer_id=%s, _number=%s, sequence_number=%s where id=%s;" % (p_id, c_id, number, seq_number, id,)
+            op.execute(request)
+            if index % 50 == 0:
+                session.flush()
 
 
 def downgrade():

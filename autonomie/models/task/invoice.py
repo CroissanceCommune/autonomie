@@ -88,15 +88,12 @@ def get_next_officialNumber():
         Return the next available official number
     """
     a = Invoice.get_officialNumber().first()[0]
-    b = ManualInvoice.get_officialNumber().first()[0]
     c = CancelInvoice.get_officialNumber().first()[0]
     if not a:
         a = 0
-    if not b:
-        b = 0
     if not c:
         c = 0
-    next_ = max(a, b, c) + 1
+    next_ = max(a, c) + 1
     return int(next_)
 
 
@@ -116,29 +113,11 @@ class Invoice(Task, InvoiceCompute):
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
 
-    customer_id = Column(
-        Integer,
-        ForeignKey('customer.id'),
-        info={'colanderalchemy': {'exclude': True}},
-    )
     estimation_id = Column(
         ForeignKey('estimation.id'),
         info={'colanderalchemy': {'exclude': True}},
     )
-    project_id = Column(
-        ForeignKey('project.id'),
-        info={'colanderalchemy': {'exclude': True}},
-    )
 
-    sequenceNumber = Column(
-        Integer,
-        nullable=False,
-    )
-    _number = Column(
-        "number",
-        String(100),
-        nullable=False,
-    )
     paymentConditions = deferred(
         Column(
             Text,
@@ -171,39 +150,6 @@ class Invoice(Task, InvoiceCompute):
     )
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
-
-    customer = relationship(
-        "Customer",
-        primaryjoin="Customer.id==Invoice.customer_id",
-        backref=backref(
-            'invoices',
-            order_by='Invoice.taskDate',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                "export": {'exclude': True},
-            },
-        ),
-        info={
-            'colanderalchemy': forms.EXCLUDED,
-            "export": {'exclude': True},
-        },
-    )
-
-    project = relationship(
-        "Project",
-        backref=backref(
-            'invoices',
-            order_by='Invoice.taskDate',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        ),
-        info={
-            'colanderalchemy': forms.EXCLUDED,
-            'export': {'exclude': True},
-        },
-    )
 
     estimation = relationship(
         "Estimation",
@@ -299,18 +245,18 @@ class Invoice(Task, InvoiceCompute):
 
     def set_number(self, deposit=False):
         if deposit:
-            tasknumber_tmpl = u"FA{s.sequenceNumber}_{s.taskDate:%m%y}"
+            tasknumber_tmpl = u"FA{s.sequence_number}_{s.taskDate:%m%y}"
         else:
-            tasknumber_tmpl = u"F{s.sequenceNumber}_{s.taskDate:%m%y}"
+            tasknumber_tmpl = u"F{s.sequence_number}_{s.taskDate:%m%y}"
         self._number = tasknumber_tmpl.format(s=self)
 
-    def set_sequenceNumber(self, snumber):
+    def set_sequence_number(self, snumber):
         """
             Set the sequencenumber of an invoice
             :param snumber: sequence number get through
                 project.get_next_invoice_number()
         """
-        self.sequenceNumber = snumber
+        self.sequence_number = snumber
 
     def set_name(self, deposit=False, sold=False):
         if self.name in [None, ""]:
@@ -320,7 +266,7 @@ class Invoice(Task, InvoiceCompute):
                 taskname_tmpl = u"Facture de solde"
             else:
                 taskname_tmpl = u"Facture {0}"
-            self.name = taskname_tmpl.format(self.sequenceNumber)
+            self.name = taskname_tmpl.format(self.sequence_number)
 
     @classmethod
     def get_officialNumber(cls):
@@ -343,7 +289,7 @@ class Invoice(Task, InvoiceCompute):
         seq_number = self.project.get_next_cancelinvoice_number()
         cancelinvoice = CancelInvoice()
         cancelinvoice.taskDate = datetime.date.today()
-        cancelinvoice.set_sequenceNumber(seq_number)
+        cancelinvoice.set_sequence_number(seq_number)
         cancelinvoice.set_name()
         cancelinvoice.set_number()
         cancelinvoice.address = self.address
@@ -434,7 +380,7 @@ class Invoice(Task, InvoiceCompute):
         invoice.customer = customer
         invoice.project = project
         invoice.taskDate = date
-        invoice.set_sequenceNumber(seq_number)
+        invoice.set_sequence_number(seq_number)
         invoice.set_number()
         invoice.set_name()
         if customer.id == self.customer_id:
@@ -570,18 +516,17 @@ class CancelInvoice(Task, TaskCompute):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-    invoice_id = Column(Integer, ForeignKey('invoice.id'),
-                                                        default=None)
-    project_id = Column(Integer, ForeignKey('project.id'))
-    customer_id = Column(Integer, ForeignKey('customer.id'))
+    displayedUnits = Column(Integer, default=0)
+    invoice_id = Column(
+        Integer,
+        ForeignKey('invoice.id'),
+        default=None
+    )
 
-    sequenceNumber = deferred(Column(Integer), group='edit')
-    _number = Column("number", String(100))
     reimbursementConditions = deferred(
         Column(String(255), default=None),
         group='edit')
     officialNumber = deferred(Column(Integer, default=None), group='edit')
-    displayedUnits = Column(Integer, default=0)
     expenses = deferred(Column(Integer, default=0), group='edit')
     expenses_ht = deferred(
         Column(Integer, default=0, nullable=False),
@@ -590,18 +535,6 @@ class CancelInvoice(Task, TaskCompute):
     address = Column(Text, default="")
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
-
-    project = relationship(
-        "Project",
-        backref=backref(
-            'cancelinvoices',
-            order_by='CancelInvoice.taskDate',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        )
-    )
 
     invoice = relationship(
         "Invoice",
@@ -612,19 +545,6 @@ class CancelInvoice(Task, TaskCompute):
             info={'colanderalchemy': forms.EXCLUDED,}
         ),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id")
-
-    customer = relationship(
-        "Customer",
-        primaryjoin="Customer.id==CancelInvoice.customer_id",
-        backref=backref(
-            'cancelinvoices',
-            order_by='CancelInvoice.taskDate',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        )
-    )
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
@@ -665,7 +585,7 @@ class CancelInvoice(Task, TaskCompute):
     def set_name(self):
         if self.name in [None, ""]:
             taskname_tmpl = u"Avoir {0}"
-            self.name = taskname_tmpl.format(self.sequenceNumber)
+            self.name = taskname_tmpl.format(self.sequence_number)
 
     @classmethod
     def get_officialNumber(cls):
@@ -683,16 +603,16 @@ class CancelInvoice(Task, TaskCompute):
         """
         return False
 
-    def set_sequenceNumber(self, snumber):
+    def set_sequence_number(self, snumber):
         """
             Set the sequencenumber of an invoice
             :param snumber: sequence number get through
                 project.get_next_invoice_number()
         """
-        self.sequenceNumber = snumber
+        self.sequence_number = snumber
 
     def set_number(self):
-        tasknumber_tmpl = u"A{s.sequenceNumber}_{s.taskDate:%m%y}"
+        tasknumber_tmpl = u"A{s.sequence_number}_{s.taskDate:%m%y}"
         self._number = tasknumber_tmpl.format(s=self)
 
     @property
@@ -946,27 +866,3 @@ def get_invoice_years():
             years.append(current)
         return years
     return taskyears()
-
-
-from sqlalchemy.event import listen
-
-
-def _cache_amounts(mapper, connection, target):
-    """
-    Set amounts in the cached amount vars to be able to provide advanced search
-    ... options in the invoice list page
-    """
-    print("Setting the amount of the current invoice")
-    print(target)
-    print(target.lines)
-    target.ht = target.total_ht()
-    target.ttc = target.total()
-    target.tva = target.tva_amount()
-
-listen(Invoice, "before_insert", _cache_amounts, propagate=True)
-listen(Invoice, "before_update", _cache_amounts, propagate=True)
-
-
-#listen(Invoice.expenses_ht, "set", _cache_amounts, propagate=True)
-#listen(Invoice.lines, "append", _cache_amounts, propagate=True)
-#listen(Task.discounts, "append", _cache_amounts, propagate=True)

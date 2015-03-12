@@ -85,14 +85,11 @@ class Estimation(Task, EstimationCompute):
     """
     __tablename__ = 'estimation'
     __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'estimation', }
     id = Column(ForeignKey('task.id'), primary_key=True, nullable=False)
-    sequenceNumber = Column(Integer, nullable=False)
-    _number = Column("number", String(100), nullable=False)
     deposit = Column(Integer, default=0)
     paymentConditions = deferred(Column(Text), group='edit')
     exclusions = deferred(Column(Text), group='edit')
-    project_id = Column(ForeignKey('project.id'))
-    customer_id = Column(Integer, ForeignKey('customer.id'))
     manualDeliverables = deferred(Column(Integer), group='edit')
     course = deferred(Column(Integer, nullable=False, default=0), group='edit')
     displayedUnits = deferred(
@@ -107,32 +104,6 @@ class Estimation(Task, EstimationCompute):
         Column(String(20), default="SUMMARY"),
         group='edit')
     address = Column(Text, default="")
-    project = relationship(
-        "Project",
-        backref=backref(
-            'estimations',
-            order_by='Estimation.taskDate',
-            cascade="all,delete-orphan",
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        )
-    )
-    customer = relationship(
-        "Customer",
-        primaryjoin="Customer.id==Estimation.customer_id",
-        backref=backref(
-            'estimations',
-            order_by='Estimation.taskDate',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        )
-    )
-
-    __mapper_args__ = {'polymorphic_identity': 'estimation', }
 
     state_machine = DEFAULT_STATE_MACHINES['estimation']
 
@@ -171,7 +142,7 @@ class Estimation(Task, EstimationCompute):
         estimation.customer = customer
         estimation.project = project
         estimation.taskDate = date
-        estimation.set_sequenceNumber(seq_number)
+        estimation.set_sequence_number(seq_number)
         estimation.set_number()
         estimation.set_name()
         if customer.id == self.customer_id:
@@ -289,7 +260,7 @@ class Estimation(Task, EstimationCompute):
         inv.course=self.course
         inv.address = self.address
         inv.CAEStatus = "draft"
-        inv.set_sequenceNumber(seq_number)
+        inv.set_sequence_number(seq_number)
         return inv
 
     def gen_invoices(self, user):
@@ -337,14 +308,14 @@ class Estimation(Task, EstimationCompute):
     def set_name(self):
         if self.name in [None, ""]:
             taskname_tmpl = u"Devis {0}"
-            self.name = taskname_tmpl.format(self.sequenceNumber)
+            self.name = taskname_tmpl.format(self.sequence_number)
 
     def set_number(self):
-        tasknumber_tmpl = u"D{s.sequenceNumber}_{s.taskDate:%m%y}"
+        tasknumber_tmpl = u"D{s.sequence_number}_{s.taskDate:%m%y}"
         self._number = tasknumber_tmpl.format(s=self)
 
-    def set_sequenceNumber(self, snumber):
-        self.sequenceNumber = snumber
+    def set_sequence_number(self, snumber):
+        self.sequence_number = snumber
 
     @property
     def number(self):

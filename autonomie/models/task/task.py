@@ -38,6 +38,8 @@ from sqlalchemy import (
     ForeignKey,
     Text,
 )
+from sqlalchemy.event import listen
+
 from sqlalchemy.orm import (
     relationship,
     validates,
@@ -54,10 +56,7 @@ from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
-from autonomie.forms import (
-    EXCLUDED,
- #   get_deferred_select,
-)
+from autonomie import forms
 from autonomie.models.user import get_deferred_user_choice
 from autonomie.models.tva import Tva
 
@@ -85,7 +84,7 @@ class Task(Node):
     phase_id = Column(
         ForeignKey('phase.id'),
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
             "export": {'exclude': True},
         },
     )
@@ -122,7 +121,7 @@ class Task(Node):
     owner_id = Column(
         ForeignKey('accounts.id'),
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
             "export": {'exclude': True},
         },
     )
@@ -131,7 +130,7 @@ class Task(Node):
             CustomDateType,
             default=get_current_timestamp,
             info={
-                'colanderalchemy': EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
                 "export": {'exclude': True},
             },
         )
@@ -141,7 +140,7 @@ class Task(Node):
         default=get_current_timestamp,
         onupdate=get_current_timestamp,
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
             "export": {'exclude': True},
         },
     )
@@ -152,18 +151,30 @@ class Task(Node):
     ht = Column(Integer, default=0)
     tva = Column(Integer, default=0)
     ttc = Column(Integer, default=0)
+    project_id = Column(
+        Integer,
+        ForeignKey('project.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    customer_id = Column(
+        Integer,
+        ForeignKey('customer.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    sequence_number = deferred(Column(Integer), group='edit')
+    _number = Column(String(100), nullable=False)
     statusPersonAccount = relationship(
         "User",
         primaryjoin="Task.statusPerson==User.id",
         backref=backref(
             "taskStatuses",
             info={
-                'colanderalchemy': EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
             },
         ),
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
             'export': {'exclude': True},
         },
     )
@@ -173,12 +184,12 @@ class Task(Node):
         backref=backref(
             "ownedTasks",
             info={
-                'colanderalchemy': EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
             },
         ),
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
             'export': {'exclude': True},
         },
     )
@@ -190,12 +201,12 @@ class Task(Node):
             "tasks",
             order_by='Task.taskDate',
             info={
-                'colanderalchemy': EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
             },
         ),
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': forms.EXCLUDED,
             'export': {'exclude': True},
         },
         lazy="joined"
@@ -208,6 +219,39 @@ class Task(Node):
         backref=backref('task'),
     )
 
+    project = relationship(
+        "Project",
+        primaryjoin="Task.project_id==Project.id",
+        backref=backref(
+            'tasks',
+            order_by='Task.taskDate',
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'export': {'exclude': True},
+            },
+        ),
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        },
+    )
+
+    customer = relationship(
+        "Customer",
+        primaryjoin="Customer.id==Task.customer_id",
+        backref=backref(
+            'tasks',
+            order_by='Task.taskDate',
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'export': {'exclude': True},
+            },
+        ),
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            "export": {'exclude': True},
+        },
+    )
 
     state_machine = DEFAULT_STATE_MACHINES['base']
 
@@ -336,7 +380,7 @@ class DiscountLine(DBBASE, LineCompute):
             'task.id',
             ondelete="cascade",
         ),
-        info={'colanderalchemy': EXCLUDED}
+        info={'colanderalchemy': forms.EXCLUDED}
     )
     tva = Column(
         Integer,
@@ -418,7 +462,7 @@ class TaskStatus(DBBASE):
         backref=backref(
             "statuses",
             cascade="all, delete-orphan",
-            info={'colanderalchemy': EXCLUDED}
+            info={'colanderalchemy': forms.EXCLUDED}
         )
     )
     statusPersonAccount = relationship(
@@ -426,8 +470,8 @@ class TaskStatus(DBBASE):
         backref=backref(
             "task_statuses",
             info={
-                'colanderalchemy': EXCLUDED,
-                'export': EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
+                'export': forms.EXCLUDED,
             },
         )
     )
@@ -437,3 +481,18 @@ class TaskStatus(DBBASE):
         if self.statusPersonAccount is not None:
             result['account'] = self.statusPersonAccount.__json__(request)
         return result
+
+
+def _cache_amounts(mapper, connection, target):
+    """
+    Set amounts in the cached amount vars to be able to provide advanced search
+    ... options in the invoice list page
+    """
+    log.info("Caching the task amounts")
+    target.ht = target.total_ht()
+    target.ttc = target.total()
+    target.tva = target.tva_amount()
+
+
+listen(Task, "before_insert", _cache_amounts, propagate=True)
+listen(Task, "before_update", _cache_amounts, propagate=True)

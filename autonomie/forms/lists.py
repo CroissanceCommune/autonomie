@@ -30,7 +30,7 @@ ITEMS_PER_PAGE_OPTIONS = ((u'10', u'10 par page',),
                           (u'30', u'30 par page', ),
                           (u'40', u"40 par page", ),
                           (u'50', u'50 par page', ),
-                          (u"1000", u'Tous',))
+                          (u"1000000", u'Tous',))
 
 
 @colander.deferred

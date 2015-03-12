@@ -1,16 +1,16 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 templates['csv_import.mustache'] = template({"1":function(depth0,helpers,partials,data) {
-  return "<div class=\"well text-center btn-warning\">\n<i class=\"fa fa-cog fa-spin fa-4x\"></i>\n<br />\n<b>L'import est en cours</b>\n</div>\n";
+  return "<div class=\"text-center btn btn-warning\">\n<i class=\"fa fa-cog fa-spin fa-4x\"></i>\n<br />\n<b>L'import est en cours</b>\n</div>\n";
   },"3":function(depth0,helpers,partials,data) {
   var stack1, buffer = "\n";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.failed : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.program(6, data),"data":data});
   if (stack1 != null) { buffer += stack1; }
   return buffer;
 },"4":function(depth0,helpers,partials,data) {
-  return "<div class=\"well text-center btn-danger\">\n<i class=\"fa fa-warning fa-4x\"></i>\n<br />\n<b>L'import a échoué</b>\n</div>\n";
+  return "<div class=\"text-center btn btn-danger\">\n<i class=\"fa fa-warning fa-4x\"></i>\n<br />\n<b>L'import a échoué</b>\n</div>\n";
   },"6":function(depth0,helpers,partials,data) {
-  return "\n<div class=\"well text-center btn-success\">\n<i class=\"fa fa-check fa-4x\"></i>\n<br />\n<b>L'import s'est déroulé avec succès</b>\n</div>\n\n";
+  return "\n<div class=\"text-center btn btn-success\">\n<i class=\"fa fa-check fa-4x\"></i>\n<br />\n<b>L'import s'est déroulé avec succès</b>\n</div>\n\n";
   },"8":function(depth0,helpers,partials,data) {
   var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n<div class='col-md-6'>\n<h4>Messages</h4>\n"
     + escapeExpression(((helper = (helper = helpers.message || (depth0 != null ? depth0.message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"message","hash":{},"data":data}) : helper)))
@@ -64,16 +64,16 @@ templates['csv_import.mustache'] = template({"1":function(depth0,helpers,partial
   return buffer;
 },"useData":true});
 templates['mailing.mustache'] = template({"1":function(depth0,helpers,partials,data) {
-  return "<div class=\"well text-center btn-warning\">\n<i class=\"fa fa-cog fa-spin fa-4x\"></i>\n<br />\n<b>L'envoi est en cours</b>\n</div>\n";
+  return "<div class=\"btn text-center btn-warning\">\n<i class=\"fa fa-cog fa-spin fa-4x\"></i>\n<br />\n<b>L'envoi est en cours</b>\n</div>\n";
   },"3":function(depth0,helpers,partials,data) {
   var stack1, buffer = "\n";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.failed : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.program(6, data),"data":data});
   if (stack1 != null) { buffer += stack1; }
   return buffer;
 },"4":function(depth0,helpers,partials,data) {
-  return "<div class=\"well text-center btn-danger\">\n<i class=\"fa fa-warning fa-4x\"></i>\n<br />\n<b>L'envoi a échoué</b>\n</div>\n";
+  return "<div class=\"btn text-center btn-danger\">\n<i class=\"fa fa-warning fa-4x\"></i>\n<br />\n<b>L'envoi a échoué</b>\n</div>\n";
   },"6":function(depth0,helpers,partials,data) {
-  return "\n<div class=\"well text-center btn-success\">\n<i class=\"fa fa-check fa-4x\"></i>\n<br />\n<b>L'envoi s'est déroulé avec succès</b>\n</div>\n\n";
+  return "\n<div class=\"btn text-center btn-success\">\n<i class=\"fa fa-check fa-4x\"></i>\n<br />\n<b>L'envoi s'est déroulé avec succès</b>\n</div>\n\n";
   },"8":function(depth0,helpers,partials,data) {
   var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n<div class='col-md-12'>\n<h4>Messages</h4>\n"
     + escapeExpression(((helper = (helper = helpers.message || (depth0 != null ? depth0.message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"message","hash":{},"data":data}) : helper)))

@@ -45,8 +45,8 @@
     <strong>Objet : </strong>${format_text(task.description)}<br />
 </%block>
 <%block name="notes_and_conditions">
-        %if task.reimbursementConditions:
-            ${table(u"Conditions de remboursement", task.reimbursementConditions)}
+        %if task.payment_conditions:
+            ${table(u"Conditions de remboursement", task.payment_conditions)}
         % endif
         % if config.has_key('coop_reimbursement'):
             ${table(u"Mode de remboursement", config['coop_reimbursement'])}

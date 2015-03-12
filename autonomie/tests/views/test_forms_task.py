@@ -40,7 +40,7 @@ DBDATAS = dict(
         deposit=20,
         exclusions="Ne sera pas fait selon la règle",
         paymentDisplay="ALL",
-        paymentConditions="Payer à l'heure",
+        payment_conditions="Payer à l'heure",
         phase_id=485,
         taskDate="10-12-2012",
         description="Devis pour le customer test",
@@ -54,7 +54,7 @@ DBDATAS = dict(
         display_units="1",
         expenses=2000,
         expenses_ht=150,
-        paymentConditions="Payer à l'heure",
+        payment_conditions="Payer à l'heure",
         phase_id=415,
         taskDate="15-12-2012",
         financial_year=2012,
@@ -120,7 +120,7 @@ DATAS = {'common': dict(
     {'description':"Milieu", "paymentDate":"13-12-2012","amount":15000},
     {'description':"Fin", "paymentDate":"14-12-2012","amount":150},
     ],
-        paymentConditions="Payer à l'heure",
+        payment_conditions="Payer à l'heure",
     ),
     "communication":dict(statusComment=u"Aucun commentaire"),
                     }
@@ -157,7 +157,7 @@ INV_DATAS = {'common': dict(
              'amount':1000,
              'tva':700},
     ],),
-    'payments':dict(paymentConditions="Payer à l'heure"),
+    'payments':dict(payment_conditions="Payer à l'heure"),
     "communication":dict(statusComment=u"Aucun commentaire"),
     }
 

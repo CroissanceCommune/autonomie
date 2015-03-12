@@ -92,15 +92,6 @@ class Estimation(Task, EstimationCompute):
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
-    address = Column(Text, default="")
-    expenses = deferred(Column(Integer, default=0), group='edit')
-    expenses_ht = deferred(
-        Column(Integer, default=0, nullable=False),
-        group='edit'
-    )
-
-    paymentConditions = deferred(Column(Text), group='edit')
-
     # common with only invoices
     deposit = Column(Integer, default=0)
     course = deferred(Column(Integer, nullable=False, default=0), group='edit')

@@ -45,7 +45,7 @@ ESTIMATION = dict(name=u"Devis 2",
                 deposit=20,
                 exclusions=u"Notes",
                 paymentDisplay=u"ALL",
-                paymentConditions=u"Conditions de paiement",
+                payment_conditions=u"Conditions de paiement",
                 taskDate=datetime.date(2012, 12, 10),
                 description=u"Description du devis",
                 manualDeliverables=1)

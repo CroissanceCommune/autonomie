@@ -60,7 +60,7 @@
             <tbody>
                 <tr>
                     <td colspan='${colspan}'>
-                        ${task.paymentConditions}
+                        ${task.payment_conditions}
                         <br />
                         % if task.deposit > 0 :
                             Un acompte, puis paiement en ${task.get_nb_payment_lines()} fois.
@@ -108,8 +108,8 @@
         </table>
 </div>
 %else:
-    %if task.paymentConditions:
-        ${table(u"Conditions de paiement", task.paymentConditions)}
+    %if task.payment_conditions:
+        ${table(u"Conditions de paiement", task.payment_conditions)}
     % endif
 % endif
 % if config.has_key('coop_estimationfooter'):

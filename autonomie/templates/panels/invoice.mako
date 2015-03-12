@@ -44,8 +44,8 @@
 % endif
 </%block>
 <%block name="notes_and_conditions">
-%if task.paymentConditions:
-    ${table(u"Conditions de paiement", task.paymentConditions)}
+%if task.payment_conditions:
+    ${table(u"Conditions de paiement", task.payment_conditions)}
 % endif
 % if config.has_key('coop_invoicepayment'):
     <% paymentinfo = config.get('coop_invoicepayment')%>

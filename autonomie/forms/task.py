@@ -696,14 +696,14 @@ class EstimationPayments(colander.MappingSchema):
             min_len=1),
         title=u'',
         description=u"Définissez les échéances de paiement")
-    paymentConditions = forms.textarea_node(title=u"Conditions de paiement")
+    payment_conditions = forms.textarea_node(title=u"Conditions de paiement")
 
 
 class InvoicePayments(colander.MappingSchema):
     """
         Conditions de paiement de la facture
     """
-    paymentConditions = forms.textarea_node(title="")
+    payment_conditions = forms.textarea_node(title="")
 
 
 def get_estimation_schema():
@@ -776,8 +776,8 @@ def get_cancel_invoice_schema():
     title = u"Conditions de remboursement"
     del schema['lines']['discounts']
     payments = InvoicePayments(title=title, name='payments').clone()
-    payments['paymentConditions'].title = title
-    payments['paymentConditions'].description = u""
+    payments['payment_conditions'].title = title
+    payments['payment_conditions'].description = u""
 
     schema['lines']['expenses_ht'].validator = forms.negative_validator
 #    schema['lines']['expenses'].validator = forms.negative_validator
@@ -1017,7 +1017,7 @@ class InvoiceMatch(MappingWrapper):
         ('display_units', 'common'),
 #        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
-        ('paymentConditions', 'payments'),
+        ('payment_conditions', 'payments'),
         ('statusComment', 'communication'),
     )
     dbtype = 'invoice'
@@ -1036,7 +1036,7 @@ class EstimationMatch(MappingWrapper):
 #        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('exclusions', 'notes'),
-        ('paymentConditions', 'payments'),
+        ('payment_conditions', 'payments'),
 
         # estimation only attrs
         ('paymentDisplay', 'payments'),
@@ -1059,7 +1059,7 @@ class CancelInvoiceMatch(MappingWrapper):
         ('display_units', 'common'),
 #        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
-        ('reimbursementConditions', 'payments'),
+        ('payment_conditions', 'payments'),
     )
     dbtype = 'cancelinvoice'
 

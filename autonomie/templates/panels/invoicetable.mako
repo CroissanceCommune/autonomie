@@ -45,9 +45,9 @@ else:
         <th>${sortable(u"Émise le", 'taskDate')}</th>
         <th>${sortable(u"Nom de la facture", 'number')}</th>
         <th>${sortable(u"Client", 'customer')}</th>
-        <th>Montant HT</th>
-        <th>TVA</th>
-        <th>TTC</th>
+        <th>${sortable(u"Montant HT", "ht")}</th>
+        <th>${sortable(u"TVA", "ht")}</th>
+        <th>${sortable(u"TTC", "ttc")}</th>
         <th>Information de paiement</th>
         <th>PDF</th>
         <th>Fichiers attachés</th>

@@ -161,8 +161,14 @@ class Task(Node):
         ForeignKey('customer.id'),
         info={'colanderalchemy': {'exclude': True}},
     )
-    sequence_number = deferred(Column(Integer), group='edit')
-    _number = Column(String(100), nullable=False)
+    sequence_number = deferred(
+        Column(Integer),
+        group='edit',
+    )
+    _number = Column(
+        String(100),
+        nullable=False,
+    )
     display_units = deferred(
         Column(
             Integer,
@@ -170,6 +176,43 @@ class Task(Node):
         ),
         group='edit'
     )
+    # Not used in latest invoices
+    expenses = deferred(
+        Column(Integer, default=0),
+        group='edit'
+    )
+    expenses_ht = deferred(
+        Column(
+            Integer,
+            default=0
+        ),
+        group='edit',
+    )
+    address = deferred(
+        Column(
+            Text,
+            default="",
+            info={
+                'colanderalchemy': {
+                    'widget': deform.widget.TextAreaWidget()
+                }
+            },
+        ),
+        group='edit',
+    )
+    payment_conditions = deferred(
+        Column(
+            Text,
+            info={
+                'colanderalchemy': {
+                    'widget': deform.widget.TextAreaWidget()
+                }
+            },
+        ),
+        group='edit',
+    )
+
+    # Relationships
     statusPersonAccount = relationship(
         "User",
         primaryjoin="Task.statusPerson==User.id",
@@ -279,7 +322,7 @@ class Task(Node):
             date=self.taskDate,
             owner_id=self.owner_id,
             customer_id=self.customer_id,
-            displayed_units=self.display_units,
+            display_units=self.display_units,
             expenses_ht=self.expenses_ht,
             address=self.address,
             payment_conditions=self.payment_conditions,

@@ -44,7 +44,7 @@ APPSTRUCT = {'common': dict(phase_id=1,
                         'unity':'days', 'quantity':12, 'tva':1960}],
                      discounts=[{'description':'remise1', 'amount':1000,
                          'tva':1960}],),
-        'payments':dict(paymentConditions="Payer à l'heure"),
+        'payments':dict(payment_conditions="Payer à l'heure"),
         "communication":dict(statusComment=u"Aucun commentaire"),
         "submit":"draft"
         }

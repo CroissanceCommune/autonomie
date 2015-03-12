@@ -110,39 +110,6 @@ class Invoice(Task, InvoiceCompute):
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
-    address = deferred(
-        Column(
-            Text,
-            default="",
-            info={
-                'colanderalchemy': {
-                    'widget': deform.widget.TextAreaWidget()
-                }
-            },
-        ),
-        group='edit',
-    )
-    # Not used in latest invoices
-    expenses = deferred(Column(Integer, default=0), group='edit')
-    expenses_ht = deferred(
-        Column(
-            Integer,
-            default=0,
-            nullable=False
-        ),
-        group='edit',
-    )
-    paymentConditions = deferred(
-        Column(
-            Text,
-            info={
-                'colanderalchemy': {
-                    'widget': deform.widget.TextAreaWidget()
-                }
-            },
-        ),
-        group='edit',
-    )
     # Common with only estimations
     deposit = deferred(
         Column(Integer, nullable=False, default=0),
@@ -318,18 +285,25 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.owner = user
         cancelinvoice.phase = self.phase
         cancelinvoice.customer_id = self.customer_id
+
         for line in self.lines:
-            cancelinvoice.lines.append(line.gen_cancelinvoice_line())
+            cancelinvoice.lines.append(
+                line.gen_cancelinvoice_line()
+            )
         rowindex = self.get_next_row_index()
+
         for discount in self.discounts:
-            discount_line = CancelInvoiceLine(cost=discount.amount,
-                                          tva=discount.tva,
-                                          quantity=1,
-                                          description=discount.description,
-                                          rowIndex=rowindex,
-                                          unity='NONE')
+            discount_line = CancelInvoiceLine(
+                cost=discount.amount,
+                tva=discount.tva,
+                quantity=1,
+                description=discount.description,
+                rowIndex=rowindex,
+                unity='NONE',
+            )
             rowindex += 1
             cancelinvoice.lines.append(discount_line)
+
         for index, payment in enumerate(self.payments):
             paid_line = CancelInvoiceLine(
                 cost=payment.amount,
@@ -337,7 +311,8 @@ class Invoice(Task, InvoiceCompute):
                 quantity=1,
                 description=u"Paiement {0}".format(index + 1),
                 rowIndex=rowindex,
-                unity='NONE')
+                unity='NONE',
+            )
             rowindex += 1
             cancelinvoice.lines.append(paid_line)
         return cancelinvoice
@@ -469,14 +444,6 @@ class InvoiceLine(DBBASE, LineCompute):
         Integer,
         info={'colanderalchemy': forms.EXCLUDED}
     )
-#    task = relationship(
-#        "Invoice",
-#        backref=backref(
-#            "lines",
-#            order_by='InvoiceLine.rowIndex',
-#            cascade="all, delete-orphan"
-#        )
-#    )
     product = relationship(
         "Product",
         primaryjoin="Product.id==InvoiceLine.product_id",
@@ -528,18 +495,6 @@ class CancelInvoice(Task, TaskCompute):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-
-    address = Column(Text, default="")
-    expenses = deferred(Column(Integer, default=0), group='edit')
-    expenses_ht = deferred(
-        Column(Integer, default=0, nullable=False),
-        group='edit'
-    )
-
-    reimbursementConditions = deferred(
-        Column(String(255), default=None),
-        group='edit'
-    )
 
     invoice_id = Column(
         Integer,

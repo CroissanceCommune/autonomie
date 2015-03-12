@@ -36,7 +36,6 @@ import csv
 
 from cStringIO import StringIO
 from collections import OrderedDict
-from datetime import datetime
 
 from sqlalchemy import (
     Boolean,
@@ -49,7 +48,10 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.schema import ColumnDefault
 
-from autonomie.utils import ascii
+from autonomie.utils import (
+    ascii,
+    date as date_utils,
+)
 from sqla_inspect.base import BaseSqlaInspector
 from autonomie.models.base import DBSESSION
 from autonomie.exception import (
@@ -77,7 +79,8 @@ MODELS_CONFIGURATION = {'userdatas': {
 log = logging.getLogger(__name__)
 logger = logging.getLogger(__name__)
 
-MISSING_KEY_ERROR = u"Erreur : Le champ {0} est requis mais ne sera pas rempli"
+MISSING_KEY_ERROR = u"Erreur : Le champ {0} ({1}) est requis mais n'a pas été \
+configuré à l'étape 2"
 MULTIPLE_ENTRY_ERROR = u"Pour une même valeur clé ({0}), plusieurs entrées \
 ont été détectées, nous ne sommes pas en mesure de mettre à jour ces données."
 UNFILLED_VALUES = ('', None, 0)
@@ -129,9 +132,10 @@ def format_input_value(value, sqla_column_dict):
             class_ = prop.mapper.class_
             # We query the database to get the corresponding element filtering
             # on the configured related_key
-            res = class_.query().filter(
-                getattr(class_, related_key)==value
-            ).first()
+            with DBSESSION.no_autoflush:
+                res = class_.query().filter(
+                    getattr(class_, related_key)==value
+                ).first()
         else:
             # We have a one to many relationship, we generate an instance using
             # the related_key as instanciation attribute
@@ -157,10 +161,7 @@ def format_input_value(value, sqla_column_dict):
                 res = True
 
         elif isinstance(column_type, (DateTime, Date,)):
-            try:
-                res = datetime.strptime(value, '%d/%m/%Y')
-            except ValueError:
-                res = ""
+            res = date_utils.str_to_date(value)
     return res
 
 
@@ -223,7 +224,7 @@ class CsvImportAssociator(BaseSqlaInspector):
             else:
                 column = prop.columns[0]
                 if not isinstance(column.default, ColumnDefault):
-                    if not column.nullable:
+                    if not column.nullable and prop.key != 'id':
                         datas['mandatory'] = True
 
             result[datas['name']] = datas
@@ -234,6 +235,8 @@ class CsvImportAssociator(BaseSqlaInspector):
                 rel_key = key[:-3]
                 if rel_key in result:
                     result[rel_key]['label'] = ui_label
+                if result[key].get('mandatory'):
+                    result[rel_key]['mandatory'] = True
                 result.pop(key)
         return result
 
@@ -274,20 +277,25 @@ class CsvImportAssociator(BaseSqlaInspector):
 
         return result
 
-    def check_association_dict(self, association_dict):
+    def check_association_dict(self, association_dict=None):
         """
         Check that the provided association dict fills mandatory arguments
 
         :TypeError MissingMandatoryArgument: if mandatory argument is missing
             and id is in the provided keys
         """
+        if association_dict is None:
+            association_dict = self.association_dict
         values = association_dict.values()
         if 'id' not in values:
             for column in self.columns.values():
                 if column.get('mandatory'):
                     if column['name'] not in values:
                         raise MissingMandatoryArgument(
-                           MISSING_KEY_ERROR.format(column['name'])
+                           MISSING_KEY_ERROR.format(
+                               column['label'],
+                               column['name']
+                           )
                         )
 
     def set_association_dict(self, association_dict):
@@ -335,7 +343,6 @@ class CsvImportAssociator(BaseSqlaInspector):
                         unhandled[csv_key] = value
                 else:
                     kwargs[column_name] = value
-
         return kwargs, unhandled
 
 
@@ -423,6 +430,8 @@ class CsvImporter(object):
             raise KeyError(
 u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             )
+        if action == 'insert':
+            self.association_handler.check_association_dict()
         self.action = action
         self.id_key = id_key
 

@@ -369,7 +369,7 @@ def deferred_fullcustomer_list_widget(node, kw):
 
 @colander.deferred
 def deferred_customer_list_widget(node, kw):
-    values = [(-1, u''), ]
+    values = [(-1, u'Tous les clients'), ]
     company = kw['request'].context
     values.extend(((cust.id, cust.name) for cust in company.customers))
     return deform.widget.Select2Widget(

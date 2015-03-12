@@ -26,9 +26,9 @@
 <%namespace file="/base/utils.mako" import="format_filelist" />
 
 <%
-totalht = sum([invoice.total_ht() for invoice in records])
-totaltva = sum([invoice.tva_amount() for invoice in records])
-totalttc = sum([invoice.total() for invoice in records])
+totalht = sum([invoice.ht for invoice in records])
+totaltva = sum([invoice.tva for invoice in records])
+totalttc = sum([invoice.ttc for invoice in records])
 if is_admin_view:
     columns = 12
 else:
@@ -37,7 +37,7 @@ else:
 
 <table class="table table-condensed table-bordered">
     <thead>
-        <th><span class="ui-icon ui-icon-comment"></span></th>
+        <th><span class="glyphicon glyphicon-comment"></span></th>
         <th>${sortable(u"Identifiant", "officialNumber")}</th>
     % if is_admin_view:
         <th>${sortable(u"Entrepreneur", 'company')}</th>
@@ -120,13 +120,13 @@ else:
                 ${format_customer(document.get_customer())}
             </td>
             <td>
-                <strong>${api.format_amount(document.total_ht())|n}&nbsp;€</strong>
+                <strong>${api.format_amount(document.ht)|n}&nbsp;€</strong>
             </td>
             <td>
-                ${api.format_amount(document.tva_amount())|n}&nbsp;€
+                ${api.format_amount(document.tva)|n}&nbsp;€
             </td>
             <td>
-                ${api.format_amount(document.total())|n}&nbsp;€
+                ${api.format_amount(document.ttc)|n}&nbsp;€
             </td>
             <td>
                 % if len(document.payments) == 1 and document.is_resulted():

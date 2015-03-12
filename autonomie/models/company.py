@@ -353,7 +353,7 @@ def company_node(**kw):
 # Customer node related tools
 @colander.deferred
 def deferred_fullcustomer_list_widget(node, kw):
-    values = [('', '')]
+    values = [('', u"Tous les clients")]
     for comp in Company.query():
         values.append(
             deform.widget.OptGroup(

@@ -948,6 +948,10 @@ def get_all_userdatas_views():
     Return view_class, route_name for all option configuration views in the
     userdatas module
     """
+    yield get_model_view(
+        CaeSituationOption,
+        js_requirements=admin_option_js,
+    )
     for model in (
         ZoneOption,
         ZoneQualificationOption,
@@ -962,10 +966,6 @@ def get_all_userdatas_views():
         SocialDocTypeOption,
     ):
         yield get_model_view(model)
-    yield get_model_view(
-        CaeSituationOption,
-        js_requirements=admin_option_js,
-    )
     yield TemplateList, 'templates', '/admin/templates.mako'
 
 

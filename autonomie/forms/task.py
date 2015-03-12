@@ -154,7 +154,7 @@ def build_customer_value(customer=None):
     if customer:
         return (str(customer.id), customer.name)
     else:
-        return ("0", u"Sélectionner un client")
+        return ("", u"Sélectionner un client")
 
 
 def build_customer_values(customers):

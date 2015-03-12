@@ -27,7 +27,8 @@ def invoicetable_panel(context, request, records, is_admin_view=False):
     """
     return dict(
             records=records,
-            is_admin_view=is_admin_view)
+            is_admin_view=is_admin_view,
+    )
 
 def includeme(config):
     """

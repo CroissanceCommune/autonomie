@@ -238,6 +238,18 @@ class Project(Node):
         }
     )
 
+    @property
+    def invoices(self):
+        return [task for task in tasks if task.type_=="invoice"]
+
+    @property
+    def estimations(self):
+        return [task for task in tasks if task.type_=="estimation"]
+
+    @property
+    def cancelinvoices(self):
+        return [task for task in tasks if task.type_=="cancelinvoice"]
+
     def get_estimation(self, taskid):
         """
             Returns the estimation with id taskid
@@ -277,20 +289,28 @@ class Project(Node):
             return 0
 
     def get_next_estimation_number(self):
-        all_nums = [self.get_number(est.number, "Devis ")
-                                        for est in self.estimations]
-        all_nums.append(len(self.estimations))
+        all_nums = [
+            self.get_number(est.number, "Devis ")
+            for est in self.estimations
+        ]
+        all_nums.append(
+            len(self.estimations)
+        )
         return max(all_nums) + 1
 
     def get_next_invoice_number(self):
-        all_nums = [self.get_number(inv.number, "Facture ")
-                                            for inv in self.invoices]
+        all_nums = [
+            self.get_number(inv.number, "Facture ")
+            for inv in self.invoices
+        ]
         all_nums.append(len(self.invoices))
         return max(all_nums) + 1
 
     def get_next_cancelinvoice_number(self):
-        all_nums = [self.get_number(cinv.number, "Avoir ")
-                                        for cinv in self.cancelinvoices]
+        all_nums = [
+            self.get_number(cinv.number, "Avoir ")
+            for cinv in self.cancelinvoices
+        ]
         all_nums.append(len(self.cancelinvoices))
         return max(all_nums) + 1
 
@@ -299,13 +319,15 @@ class Project(Node):
             Return a dict view of this object
         """
         phases = [phase.todict() for phase in self.phases]
-        return dict(id=self.id,
-                    name=self.name,
-                    code=self.code,
-                    definition=self.definition,
-                    type=self.type,
-                    archived=self.archived,
-                    phases=phases)
+        return dict(
+            id=self.id,
+            name=self.name,
+            code=self.code,
+            definition=self.definition,
+            type=self.type,
+            archived=self.archived,
+            phases=phases,
+        )
 
     def __json__(self, request):
         return self.todict()

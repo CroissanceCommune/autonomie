@@ -212,7 +212,7 @@ def test_valid_invoice(config, dbsession, invoice):
     invoice.set_status('valid', request, 1)
     today = datetime.date.today()
     assert invoice.taskDate == today
-    assert invoice.officialNumber == 1
+    assert invoice.official_number == 1
 
 def test_valid_payment(config, dbsession, invoice):
     dbsession.add(invoice)

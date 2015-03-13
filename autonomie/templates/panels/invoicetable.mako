@@ -38,7 +38,7 @@ else:
 <table class="table table-condensed table-bordered">
     <thead>
         <th><span class="glyphicon glyphicon-comment"></span></th>
-        <th>${sortable(u"Identifiant", "officialNumber")}</th>
+        <th>${sortable(u"Identifiant", "official_number")}</th>
     % if is_admin_view:
         <th>${sortable(u"Entrepreneur", 'company')}</th>
     % endif
@@ -48,7 +48,7 @@ else:
         <th>${sortable(u"Montant HT", "ht")}</th>
         <th>${sortable(u"TVA", "ht")}</th>
         <th>${sortable(u"TTC", "ttc")}</th>
-        <th>Information de paiement</th>
+        <th>${sortable(u"Paiement", "payment")}</th>
         <th>PDF</th>
         <th>Fichiers attachés</th>
     </thead>
@@ -89,7 +89,7 @@ else:
         %endif
             </td>
             <td>
-                ${request.config.get('invoiceprefix')}${document.officialNumber}
+                ${request.config.get('invoiceprefix')}${document.official_number}
             </td>
             % if is_admin_view:
             <td>

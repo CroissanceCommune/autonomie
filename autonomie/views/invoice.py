@@ -289,7 +289,7 @@ class InvoiceStatus(TaskStatusView):
 
     def post_valid_process(self, task, status, params):
         msg = u"La facture porte le numéro <b>{0}</b>"
-        self.session.flash(msg.format(task.officialNumber))
+        self.session.flash(msg.format(task.official_number))
 
 
 def register_payment(request):

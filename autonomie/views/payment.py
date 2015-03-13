@@ -36,7 +36,7 @@ def payment_view(context, request):
     """
     populate_actionmenu(request)
     return dict(title=u"Paiement pour la facture {0}"\
-            .format(context.task.officialNumber))
+            .format(context.task.official_number))
 
 
 class PaymentEdit(BaseFormView):

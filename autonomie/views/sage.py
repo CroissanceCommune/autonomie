@@ -183,12 +183,12 @@ class SageInvoiceExportPage(BaseView):
             number = number[len(prefix):]
         if strict:
             query = query.filter(
-                or_(Invoice.officialNumber == number,
-                    CancelInvoice.officialNumber  == number))
+                or_(Invoice.official_number == number,
+                    CancelInvoice.official_number  == number))
         else:
             query = query.filter(
-                or_(Invoice.officialNumber >= number,
-                    CancelInvoice.officialNumber  >= number))
+                or_(Invoice.official_number >= number,
+                    CancelInvoice.official_number  >= number))
 
         return query.filter(
                 or_(Invoice.financial_year == year,
@@ -206,15 +206,15 @@ class SageInvoiceExportPage(BaseView):
             start_date = query_params_dict['start_date']
             end_date = query_params_dict['end_date']
             query = self._filter_date(query, start_date, end_date)
-        elif 'officialNumber' in query_params_dict:
-            officialNumber = query_params_dict['officialNumber']
+        elif 'official_number' in query_params_dict:
+            official_number = query_params_dict['official_number']
             financial_year = query_params_dict['financial_year']
-            query = self._filter_number(query, officialNumber, financial_year,
+            query = self._filter_number(query, official_number, financial_year,
                     strict=True)
-        elif 'start_officialNumber' in query_params_dict:
-            officialNumber = query_params_dict['start_officialNumber']
+        elif 'start_official_number' in query_params_dict:
+            official_number = query_params_dict['start_official_number']
             financial_year = query_params_dict['financial_year']
-            query = self._filter_number(query, officialNumber, financial_year,
+            query = self._filter_number(query, official_number, financial_year,
                     strict=False)
         if not 'exported' in query_params_dict or \
                 not query_params_dict.get('exported'):
@@ -264,7 +264,7 @@ class SageInvoiceExportPage(BaseView):
 
         prefix = self.request.config.get('invoiceprefix', '')
         for invoice in invoices:
-            officialNumber = "%s%s" % (prefix, invoice.officialNumber)
+            official_number = "%s%s" % (prefix, invoice.official_number)
             for line in invoice.lines:
                 if not self.check_invoice_line(line):
                     invoice_url = self.request.route_path('invoice',
@@ -272,7 +272,7 @@ class SageInvoiceExportPage(BaseView):
                     message = u"La facture {0} n'est pas exportable :"
                     message += u" des comptes produits sont manquants"
                     message += u" <a href='{1}'>Voir le document</a>"
-                    message = message.format(officialNumber, invoice_url)
+                    message = message.format(official_number, invoice_url)
                     res['errors'].append(message)
                     break
 
@@ -287,7 +287,7 @@ class SageInvoiceExportPage(BaseView):
 sont manquantes"
                 message += u" <a href='{2}'>Voir l'entreprise</a>"
                 message = message.format(
-                        officialNumber,
+                        official_number,
                         invoice.company.name,
                         company_url)
                 res['errors'].append(message)
@@ -305,7 +305,7 @@ sont manquantes"
 sont manquantes"
                 message += u" <a href='{2}'>Voir l'entreprise</a>"
                 message = message.format(
-                        officialNumber,
+                        official_number,
                         invoice.customer.name,
                         customer_url)
                 res['errors'].append(message)
@@ -317,7 +317,7 @@ sont manquantes"
     def record_exported(self, invoices):
         for invoice in invoices:
             log.info("The invoice number {1} (id : {0}) has been exported"\
-                    .format(invoice.id, invoice.officialNumber))
+                    .format(invoice.id, invoice.official_number))
             invoice.exported = True
             self.request.dbsession.merge(invoice)
 

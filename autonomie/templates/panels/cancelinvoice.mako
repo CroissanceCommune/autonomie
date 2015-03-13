@@ -36,10 +36,10 @@
     </div>
 </%def>
 <%block name='information'>
-    <strong>Avoir N°</strong>${request.config.get('invoiceprefix')}${task.officialNumber}<br />
+    <strong>Avoir N°</strong>${request.config.get('invoiceprefix')}${task.official_number}<br />
     <strong>Libellé : </strong>${task.number}<br />
     % if task.invoice:
-        <span  style='color:#999'> <strong style='color:#999'>Référence facture N°</strong>${request.config.get('invoiceprefix')}${task.invoice.officialNumber} (${task.invoice.number})</span> <br />
+        <span  style='color:#999'> <strong style='color:#999'>Référence facture N°</strong>${request.config.get('invoiceprefix')}${task.invoice.official_number} (${task.invoice.number})</span> <br />
         <br />
     % endif
     <strong>Objet : </strong>${format_text(task.description)}<br />

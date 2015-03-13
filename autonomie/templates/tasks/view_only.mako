@@ -49,8 +49,8 @@
                     Vous ne pouvez plus modifier ce document car il est en attente de validation.
                 % else:
                     Vous ne pouvez plus modifier ce document car il a déjà été validé.
-                    % if hasattr(task, 'officialNumber'):
-                        Il porte le numéro <b>${request.config.get('invoiceprefix')}${task.officialNumber}</b>.
+                    % if hasattr(task, 'official_number'):
+                        Il porte le numéro <b>${request.config.get('invoiceprefix')}${task.official_number}</b>.
                     % endif
                 % endif
             </p>
@@ -110,7 +110,7 @@
                 <li>
                 <p>
                     Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">
-                        ${request.config.get('invoiceprefix')}${task.invoice.officialNumber}
+                        ${request.config.get('invoiceprefix')}${task.invoice.official_number}
                     </a>
                 </p>
                 </li>

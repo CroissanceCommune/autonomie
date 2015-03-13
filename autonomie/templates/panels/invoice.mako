@@ -36,7 +36,7 @@
     </div>
 </%def>
 <%block name='information'>
-<strong>Facture N°</strong>${request.config.get('invoiceprefix')}${task.officialNumber}<br />
+<strong>Facture N°</strong>${request.config.get('invoiceprefix')}${task.official_number}<br />
 <strong>Libellé : </strong>${task.number}<br />
 <strong>Objet : </strong>${format_text(task.description)}<br />
 % if config.has_key('coop_invoiceheader'):

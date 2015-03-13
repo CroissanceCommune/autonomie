@@ -251,7 +251,7 @@ class CancelInvoiceStatus(TaskStatusView):
     def post_valid_process(self, task, status, params):
         msg = u"L'avoir porte le numéro <b>{0}</b>"
         self.session.flash(msg.format(
-            self.request.config.get('invoiceprefix','') + task.officialNumber))
+            self.request.config.get('invoiceprefix','') + task.official_number))
 
 
 def set_financial_year(request):

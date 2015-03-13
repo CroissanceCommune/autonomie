@@ -23,28 +23,20 @@ def upgrade():
     for name in ('ht', 'tva', 'ttc'):
         col = sa.Column(name, sa.Integer, default=0)
         op.add_column('task', col)
-    col = sa.Column("project_id", sa.Integer, sa.ForeignKey('project.id'))
-    op.add_column("task", col)
-    col = sa.Column("customer_id", sa.Integer, sa.ForeignKey('customer.id'))
-    op.add_column("task", col)
-    col = sa.Column("_number", sa.String(10))
-    op.add_column("task", col)
-    col = sa.Column("sequence_number", sa.Integer)
-    op.add_column("task", col)
 
-    col = sa.Column("display_units", sa.Integer, default=0)
-    op.add_column("task", col)
-
-    col = sa.Column('expenses', sa.Integer, default=0)
-    op.add_column("task", col)
-    col = sa.Column('expenses_ht', sa.Integer, default=0)
-    op.add_column("task", col)
-    col = sa.Column('address', sa.Text, default="")
-    op.add_column("task", col)
-
-    col = sa.Column('payment_conditions', sa.Text, default="")
-    op.add_column("task", col)
-
+    for col in (
+        sa.Column("project_id", sa.Integer, sa.ForeignKey('project.id')),
+        sa.Column("customer_id", sa.Integer, sa.ForeignKey('customer.id')),
+        sa.Column("_number", sa.String(10)),
+        sa.Column("sequence_number", sa.Integer),
+        sa.Column("display_units", sa.Integer, default=0),
+        sa.Column('expenses', sa.Integer, default=0),
+        sa.Column('expenses_ht', sa.Integer, default=0),
+        sa.Column('address', sa.Text, default=""),
+        sa.Column('payment_conditions', sa.Text, default=""),
+        sa.Column("official_number", sa.Integer, default=None),
+    ):
+        op.add_column("task", col)
 
     # Migration des donnees vers la nouvelle structure
     from alembic.context import get_bind
@@ -98,6 +90,23 @@ where id=:id;"
                 expenses_ht=expenses_ht,
                 address=address,
                 conditions=conditions,
+                id=id,
+            )
+            if index % 50 == 0:
+                session.flush()
+
+    for type_ in ('invoice', 'cancelinvoice'):
+        request = "select id, officialNumber from %s" % (type_,)
+        result = conn.execute(request)
+
+        for index, (id, official_number) in enumerate(result):
+            request = sa.text(u"update task set \
+official_number=:official_number \
+where id=:id;"
+                             )
+            conn.execute(
+                request,
+                official_number=official_number,
                 id=id,
             )
             if index % 50 == 0:

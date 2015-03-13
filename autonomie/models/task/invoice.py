@@ -83,12 +83,12 @@ from .states import DEFAULT_STATE_MACHINES
 log = logging.getLogger(__name__)
 
 
-def get_next_officialNumber():
+def get_next_official_number():
     """
         Return the next available official number
     """
-    a = Invoice.get_officialNumber().first()[0]
-    c = CancelInvoice.get_officialNumber().first()[0]
+    a = Invoice.get_official_number().first()[0]
+    c = CancelInvoice.get_official_number().first()[0]
     if not a:
         a = 0
     if not c:
@@ -120,7 +120,6 @@ class Invoice(Task, InvoiceCompute):
         group='edit'
     )
     # Common with only cancelinvoices
-    officialNumber = Column(Integer)
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
 
@@ -248,15 +247,15 @@ class Invoice(Task, InvoiceCompute):
             self.name = taskname_tmpl.format(self.sequence_number)
 
     @classmethod
-    def get_officialNumber(cls):
+    def get_official_number(cls):
         """
-            Return the next officialNumber available in the Invoice's table
+            Return the next official_number available in the Invoice's table
             Take the max of official Number
             when taskDate startswith the current year
             taskdate is a string (YYYYMMDD)
         """
         current_year = datetime.date.today().year
-        return DBSESSION().query(func.max(Invoice.officialNumber)).filter(
+        return DBSESSION().query(func.max(Invoice.official_number)).filter(
                 Invoice.taskDate.between(current_year * 10000,
                                          (current_year + 1) * 10000
                                     ))
@@ -324,7 +323,7 @@ class Invoice(Task, InvoiceCompute):
         """
             Validate an invoice
         """
-        self.officialNumber = get_next_officialNumber()
+        self.official_number = get_next_official_number()
         self.taskDate = datetime.date.today()
 
     def record_payment(self, mode, amount, resulted=False):
@@ -502,7 +501,6 @@ class CancelInvoice(Task, TaskCompute):
         default=None
     )
 
-    officialNumber = deferred(Column(Integer, default=None), group='edit')
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
 
@@ -558,13 +556,13 @@ class CancelInvoice(Task, TaskCompute):
             self.name = taskname_tmpl.format(self.sequence_number)
 
     @classmethod
-    def get_officialNumber(cls):
+    def get_official_number(cls):
         """
-            Return the greatest officialNumber actually used in the
+            Return the greatest official_number actually used in the
             ManualInvoice table
         """
         current_year = datetime.date.today().year
-        return DBSESSION().query(func.max(CancelInvoice.officialNumber)).filter(
+        return DBSESSION().query(func.max(CancelInvoice.official_number)).filter(
                     func.year(CancelInvoice.taskDate) == current_year)
 
     def is_tolate(self):
@@ -595,7 +593,7 @@ class CancelInvoice(Task, TaskCompute):
             Validate a cancelinvoice
             Generates an official number
         """
-        self.officialNumber = get_next_officialNumber()
+        self.official_number = get_next_official_number()
         self.taskDate = datetime.date.today()
 
 
@@ -661,26 +659,9 @@ class Payment(DBBASE, PersistentACLMixin):
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
     task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
-    task = relationship(
-        "Task",
-        primaryjoin="Task.id==Payment.task_id",
-        backref=backref('payments',
-            order_by='Payment.date',
-            cascade="all, delete-orphan"))
 
     def get_amount(self):
         return self.amount
-
-    def get_mode_str(self):
-        """
-            Return a user-friendly string describing the payment Mode
-        """
-        if self.mode == 'CHEQUE':
-            return u"par chèque"
-        elif self.mode == 'VIREMENT':
-            return u"par virement"
-        else:
-            return u"mode paiement inconnu"
 
     def __repr__(self):
         return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\

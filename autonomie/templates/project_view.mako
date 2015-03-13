@@ -112,7 +112,7 @@
     <td
         onclick="document.location='${view_url}'"
         class='rowlink'>
-        ${request.config.get('invoiceprefix')}${task.officialNumber}
+        ${request.config.get('invoiceprefix')}${task.official_number}
     </td>
     <td
         onclick="document.location='${view_url}'"
@@ -151,9 +151,9 @@
     <td
         onclick="document.location='${view_url}'"
         class='rowlink'>
-    ${request.config.get('invoiceprefix')}${task.officialNumber}
+    ${request.config.get('invoiceprefix')}${task.official_number}
     % if task.invoice:
-        (lié à la facture ${request.config.get('invoiceprefix')}${task.invoice.officialNumber})
+        (lié à la facture ${request.config.get('invoiceprefix')}${task.invoice.official_number})
     % endif
     </td>
     <td

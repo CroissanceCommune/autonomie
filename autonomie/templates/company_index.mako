@@ -50,7 +50,7 @@
                                 <% url = request.route_path("invoice", id=invoice.id) %>
                                 <% onclick = "document.location='{url}'".format(url=url) %>
                                 <td class="visible-lg rowlink" onclick="${onclick}">
-                                    ${request.config.get('invoiceprefix')}${invoice.officialNumber}
+                                    ${request.config.get('invoiceprefix')}${invoice.official_number}
                                 </td>
                                 <td class="rowlink" onclick="${onclick}">
                                     ${format_customer(invoice.customer, False)}

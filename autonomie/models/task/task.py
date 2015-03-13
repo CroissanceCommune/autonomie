@@ -169,6 +169,13 @@ class Task(Node):
         String(100),
         nullable=False,
     )
+    official_number = deferred(
+        Column(
+            Integer,
+            default=None,
+        ),
+        group='edit'
+    )
     display_units = deferred(
         Column(
             Integer,
@@ -301,6 +308,15 @@ class Task(Node):
             'colanderalchemy': forms.EXCLUDED,
             "export": {'exclude': True},
         },
+    )
+    payments = relationship(
+        "Payment",
+        primaryjoin="Task.id==Payment.task_id",
+        backref=backref(
+            'task',
+        ),
+        order_by='Payment.date',
+        cascade="all, delete-orphan"
     )
 
     state_machine = DEFAULT_STATE_MACHINES['base']

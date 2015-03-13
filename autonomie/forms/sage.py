@@ -75,7 +75,7 @@ class InvoiceNumberSchema(colander.MappingSchema):
         title=u"Année comptable",
         query_func=get_invoice_years,
     )
-    officialNumber = colander.SchemaNode(
+    official_number = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture')
     exported = EXPORTEDFIELD
@@ -89,7 +89,7 @@ class FromInvoiceNumberSchema(colander.MappingSchema):
         title=u"Année comptable",
         query_func=get_invoice_years,
     )
-    start_officialNumber = colander.SchemaNode(
+    start_official_number = colander.SchemaNode(
             colander.String(),
             title=u'Numéro de facture',
             description=u"Numéro de facture à partir duquel vous voulez \

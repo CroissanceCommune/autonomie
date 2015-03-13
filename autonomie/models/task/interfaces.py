@@ -150,7 +150,7 @@ class IInvoice(Interface):
         See templates/invoices.mako (under invoice.model) to see the expected
         common informations
     """
-    officialNumber = Attribute("""official number used in sage""")
+    official_number = Attribute("""official number used in sage""")
 
     def total_ht():
         """

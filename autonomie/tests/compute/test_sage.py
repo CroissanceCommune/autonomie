@@ -148,7 +148,7 @@ def invoice(def_tva, tva):
     invoice.taskDate = datetime.date(2013, 02, 02)
     invoice.customer = customer
     invoice.company = company
-    invoice.officialNumber = "INV_001"
+    invoice.official_number = "INV_001"
     invoice.lines = [line1, line2, line3]
     invoice.expenses_ht = 10000
     invoice.expenses = 10000
@@ -219,7 +219,7 @@ def prepare(discount=False):
     invoice.taskDate = datetime.date(2013, 02, 02)
     invoice.customer = customer
     invoice.company = company
-    invoice.officialNumber = "INV_001"
+    invoice.official_number = "INV_001"
     invoice.lines = [line1, line2, line3]
 
     if discount:

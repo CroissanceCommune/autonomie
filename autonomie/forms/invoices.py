@@ -33,6 +33,7 @@ from autonomie.models import company
 from autonomie.models.task import invoice
 
 from autonomie import forms
+from autonomie.forms import custom_types
 
 
 STATUS_OPTIONS = (("both", u"Toutes les factures", ),
@@ -63,12 +64,24 @@ def get_list_schema(is_admin=False):
     schema.insert(0, company.customer_node(is_admin))
 
     if is_admin:
-        schema.insert(0,
+        schema.insert(
+            0,
+            colander.SchemaNode(
+                custom_types.AmountType(),
+                name='ttc',
+                missing=colander.drop,
+                description=u"Montant TTC",
+            )
+        )
+
+        schema.insert(
+            0,
             company.company_node(
                 name='company_id',
-                missing=-1,
-                widget_options={'default': ('', '')}
-            ))
+                missing=colander.drop,
+                widget_options={'default': ('', u'Toutes les entreprises')}
+            )
+        )
 
     node = forms.year_select_node(
         name='year',

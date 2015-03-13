@@ -164,11 +164,11 @@ class GlobalInvoicesList(BaseListView):
         return query
 
     def _get_company_id(self, appstruct):
-        return appstruct['company_id']
+        return appstruct.get('company_id')
 
     def filter_company(self, query, appstruct):
         company_id = self._get_company_id(appstruct)
-        if company_id != -1:
+        if company_id is not None:
             query = query.filter(Project.company_id==company_id)
         return query
 
@@ -178,12 +178,14 @@ class GlobalInvoicesList(BaseListView):
             prefix = self.request.config.get('invoiceprefix', '')
             if prefix and number.startswith(prefix):
                 number = number[len(prefix):]
-            query = query.filter(
-                or_(
-                    Invoice.official_number == number,
-                    CancelInvoice.official_number == number,
-                )
-            )
+            query = query.filter(Task.official_number == number)
+        return query
+
+    def filter_ttc(self, query, appstruct):
+        ttc = appstruct.get('ttc')
+        if ttc is not None:
+            log.info(u"Filtering by ttc amount : %s" % ttc)
+            query = query.filter(Task.ttc == ttc)
         return query
 
     def filter_customer(self, query, appstruct):
@@ -252,34 +254,6 @@ class GlobalInvoicesList(BaseListView):
             )
         )
 
-#    def _sort(self, query, appstruct):
-#        """
-#            Custom sort function
-#            Since we're using polymorphism, we can't order by child specific
-#            attributes
-#        """
-#        direction = appstruct['direction']
-#        if direction == 'asc':
-#            reverse = False
-#        else:
-#            reverse = True
-#
-#        sort_key = appstruct['sort']
-#        sort = self.sort_columns[sort_key]
-#
-#        def sort_func(a):
-#            """
-#                dinamycally built sort_key func
-#                sort is a path of attributes like (a,b,c) which gives a.b.c
-#            """
-#            res = a
-#            for e in sort:
-#                res = getattr(res, e)
-#            return res
-#
-#        invoices = query.all()
-#        invoices = sorted(invoices, key=sort_func, reverse=reverse)
-#        return invoices
 
 
 class CompanyInvoicesList(GlobalInvoicesList):
@@ -312,26 +286,18 @@ def query_documents_for_export(from_number, to_number, year):
     """
     # querying the database
     query = Task.query().with_polymorphic([Invoice, CancelInvoice])
-    query = query.filter(or_(
-        Invoice.official_number >= from_number,
-        CancelInvoice.official_number >= from_number,
-        ))
+    query = query.filter(Task.official_number >= from_number)
 
     # Default provided in the form schema is -1
     if to_number > 0:
-        query = query.filter(or_(
-            Invoice.official_number <= to_number,
-            CancelInvoice.official_number <= to_number,
-            ))
+        query = query.filter(Task.official_number <= to_number)
     query = query.filter(
         or_(
             Invoice.financial_year == year,
             CancelInvoice.financial_year == year,
-            ))
-    records = query.all()
-    # We need to sort by official_number manually (there are two different
-    # columns, one for invoices, the other for cancelinvoices)
-    records = sorted(records, key=lambda a: a.official_number)
+        )
+    )
+    records = query.order_by(Task.official_number).all()
     return records
 
 

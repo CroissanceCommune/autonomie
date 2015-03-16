@@ -86,16 +86,14 @@ def format_status(task, full=True):
     """
         return a formatted status string
     """
+    status = task.CAEStatus
+
     if task.type_ == 'invoice':
         genre = u"e"
     else:
         genre = u""
-    status_str = STATUS.get(task.CAEStatus, DEF_STATUS).format(genre=genre)
-    if task.type_ == 'cancelinvoice':
-        if task.is_resulted():
-            status_str = u"Validé"
-        elif task.is_paid():
-            status_str = u"Payé partiellement"
+
+    status_str = STATUS.get(status, DEF_STATUS).format(genre=genre)
     suffix = u" par {0} le {1}"\
             .format(format_account(task.statusPersonAccount),
                                         format_date(task.statusDate))

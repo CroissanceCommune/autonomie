@@ -178,7 +178,7 @@ def get_est_state():
                       'delete', edit_metadata)
     result['valid'] = ('aboest', geninv, duplicate, 'delete', edit_metadata)
     result['aboest'] = (delete, edit_metadata)
-    result['geninv'] = (duplicate, edit_metadata)
+    result['geninv'] = (duplicate, edit_metadata, geninv)
     return result
 
 

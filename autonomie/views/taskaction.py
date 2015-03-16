@@ -414,10 +414,23 @@ brouillon"
         """
             Return a button for invoice generation
         """
-        yield Submit(u"Générer les factures",
-                  title=u"Générer les factures correspondantes au devis",
-                  value="geninv",
-                  request=self.request)
+        if not self.context.invoices :
+            yield Submit(
+                u"Générer les factures",
+                title=u"Générer les factures correspondantes au devis",
+                value="geninv",
+                request=self.request,
+            )
+        else:
+            yield Submit(
+                u"Re-générer les factures",
+                title=u"Re-générer les factures correspondantes au devis",
+                value="geninv",
+                request=self.request,
+                confirm=u"Êtes-vous sûr de vouloir re-générer des factures \
+pour ce devis ?"
+            )
+
 
     def _paid_form(self):
         """
@@ -744,6 +757,9 @@ def make_task_delete_view(valid_msg):
             request.session.flash(u"Une erreur inconnue s'est produite",
                     queue="error")
         else:
+            if task.type_ == 'invoice' and task.estimation is not None:
+                task.estimation.CAEStatus = 'valid'
+            request.dbsession.merge(task.estimation)
             request.dbsession.delete(task)
             message = valid_msg.format(task=task)
             request.session.flash(message)

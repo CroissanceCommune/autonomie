@@ -242,7 +242,7 @@ class InvoiceStatus(TaskStatusView):
         self.request.dbsession.flush()
         id_ = cancelinvoice.id
         log.debug(u"Generated cancelinvoice {0}".format(id_))
-        msg = u"Un avoir a été généré, vous pouvez l'éditer \
+        msg = u"Un avoir a été généré, vous pouvez le modifier \
 <a href='{0}'>Ici</a>."
         msg = msg.format(self.request.route_path("cancelinvoice", id=id_))
         self.session.flash(msg)
@@ -253,7 +253,7 @@ class InvoiceStatus(TaskStatusView):
         self.request.dbsession.flush()
         id_ = invoice.id
         log.debug(u"Duplicated invoice : {0}".format(id_))
-        msg = u"La facture a bien été dupliquée, vous pouvez l'éditer \
+        msg = u"La facture a bien été dupliquée, vous pouvez le modifier \
 <a href='{0}'>Ici</a>."
         msg = msg.format(self.request.route_path("invoice", id=id_))
         self.request.session.flash(msg)

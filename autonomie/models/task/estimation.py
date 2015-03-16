@@ -152,7 +152,7 @@ class Estimation(Task, EstimationCompute):
         estimation.CAEStatus = "draft"
 
         estimation.deposit = self.deposit
-        estimation.paymentConditions = self.paymentConditions
+        estimation.payment_conditions = self.payment_conditions
         estimation.exclusions = self.exclusions
         estimation.manualDeliverables = self.manualDeliverables
         estimation.course = self.course
@@ -253,7 +253,7 @@ class Estimation(Task, EstimationCompute):
         inv.estimation = self
 
         # Common args
-        inv.paymentConditions=self.paymentConditions
+        inv.payment_conditions=self.payment_conditions
         inv.description=self.description
         inv.course=self.course
         inv.address = self.address

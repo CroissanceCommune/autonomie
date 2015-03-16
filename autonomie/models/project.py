@@ -240,15 +240,15 @@ class Project(Node):
 
     @property
     def invoices(self):
-        return [task for task in tasks if task.type_=="invoice"]
+        return [task for task in self.tasks if task.type_=="invoice"]
 
     @property
     def estimations(self):
-        return [task for task in tasks if task.type_=="estimation"]
+        return [task for task in self.tasks if task.type_=="estimation"]
 
     @property
     def cancelinvoices(self):
-        return [task for task in tasks if task.type_=="cancelinvoice"]
+        return [task for task in self.tasks if task.type_=="cancelinvoice"]
 
     def get_estimation(self, taskid):
         """

@@ -377,7 +377,7 @@ class Invoice(Task, InvoiceCompute):
         invoice.CAEStatus = 'draft'
         invoice.description = self.description
 
-        invoice.paymentConditions = self.paymentConditions
+        invoice.payment_conditions = self.payment_conditions
         invoice.deposit = self.deposit
         invoice.course = self.course
         invoice.display_units = self.display_units

@@ -651,6 +651,27 @@ function setPaymentsBehaviour(){
       $(Facade).trigger('payment_timeschange', this);
   });
 }
+/*
+ * Set behaviours for payment conditions change
+ */
+var payment_condition_handler = {
+  getEl: function() {
+    return $("select[name=payment_conditions_select]");
+  },
+  set: function(val) {
+    $("textarea[name=payment_conditions]").val(val);
+  },
+  selected: function() {
+    return this.getEl().children('option:selected').html();
+  },
+  change: function(){
+    option = this.selected();
+    if (option !== ''){
+      this.set(option);
+    }
+  }
+};
+
 function initialize(){
   /*
    *  Initialize the document edition UI
@@ -717,6 +738,12 @@ function initialize(){
   });
   cleanProductSelects();
   $('#deform textarea').first().focus();
+
+  payment_condition_handler.getEl().change(
+    function(){
+      payment_condition_handler.change();
+    }
+  );
 }
 $(function(){
   initialize();

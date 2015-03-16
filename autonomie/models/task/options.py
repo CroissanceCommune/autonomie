@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# * Copyright (C) 2012-2013 Croissance Commune
+# * Copyright (C) 2012-2014 Croissance Commune
 # * Authors:
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-#       * Pettier Gabriel;
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #
 # This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -20,26 +19,29 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
-#
+from sqlalchemy import (
+    Column,
+    Boolean,
+)
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
 
-"""
-    The task package entry
-"""
-from .invoice import Invoice
-from .invoice import CancelInvoice
-from .invoice import InvoiceLine
-from .invoice import CancelInvoiceLine
-#from .invoice import ManualInvoice
-from .invoice import Payment
-from .estimation import Estimation
-from .estimation import EstimationLine
-from .estimation import PaymentLine
-from .task import Task
-from .task import DiscountLine
-from .task import TaskStatus
-from .unity import WorkUnit
-from .options import PaymentConditions
-__author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"
-__copyright__ = "Copyright 2012-2013, Croissance Commune"
-__license__ = "GPL"
-__version__ = "3.0"
+class PaymentConditions(ConfigurableOption):
+    __colanderalchemy_config__ = {
+        'title': u"Conditions de paiement",
+        'validation_msg': u"Les conditions de paiement ont bien \
+été configurées",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+    default = Column(
+        Boolean(),
+        default=False,
+        info={
+            'colanderalchemy': {
+                'title': u"Valeur par défaut",
+                'description': u"Condition de paiement rempliées par défaut ?",
+            }
+        }
+    )

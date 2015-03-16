@@ -69,7 +69,10 @@ from deform_extensions import (
 )
 from autonomie import forms
 from autonomie.models.task.invoice import PaymentMode
-from autonomie.models.task import WorkUnit
+from autonomie.models.task import (
+    WorkUnit,
+    PaymentConditions,
+)
 from autonomie.models.tva import (
     Tva,
     Product,
@@ -386,6 +389,17 @@ def deferred_phases_widget(node, kw):
     return wid
 
 
+@colander.deferred
+def deferred_default_payment_condition(node, kw):
+    entry = PaymentConditions.query().filter(
+        PaymentConditions.default==True
+    ).first()
+    if entry is not None:
+        return entry.label
+    else:
+        return ""
+
+
 class TaskLine(colander.MappingSchema):
     """
         A single estimation line
@@ -520,19 +534,6 @@ class TaskLinesBlock(colander.MappingSchema):
         widget=deform.widget.HiddenWidget(),
         default=deferred_default_tva,
     )
-#    expenses = colander.SchemaNode(
-#        AmountType(),
-#        widget=deform.widget.TextInputWidget(
-#            template=TEMPLATES_URL + 'wrappable_input.pt',
-#            before=TEMPLATES_URL + 'tvalist.pt',
-#            before_options={'label': u'Montant TVA', 'id': 'tvapart'},
-#            after=TEMPLATES_URL + 'staticinput.pt',
-#            after_options={'label': u'Total TTC', 'id': 'total'}
-#        ),
-#        title=u'Frais Réel (TTC)',
-#        missing=0,
-#        validator=forms.positive_validator,
-#    )
 
 
 class TaskConfiguration(colander.MappingSchema):
@@ -696,14 +697,32 @@ class EstimationPayments(colander.MappingSchema):
             min_len=1),
         title=u'',
         description=u"Définissez les échéances de paiement")
-    payment_conditions = forms.textarea_node(title=u"Conditions de paiement")
+
+    payment_conditions_select = colander.SchemaNode(
+        colander.String(),
+        widget=forms.get_deferred_select(PaymentConditions),
+        title=u"Conditions de paiement prédéfinies",
+    )
+
+    payment_conditions = forms.textarea_node(
+        title=u"Conditions de paiement",
+        default=deferred_default_payment_condition,
+    )
 
 
 class InvoicePayments(colander.MappingSchema):
     """
         Conditions de paiement de la facture
     """
-    payment_conditions = forms.textarea_node(title="")
+    payment_conditions_select = colander.SchemaNode(
+        colander.String(),
+        widget=forms.get_deferred_select(PaymentConditions),
+        title=u"",
+    )
+
+    payment_conditions = forms.textarea_node(title="",
+        default=deferred_default_payment_condition,
+)
 
 
 def get_estimation_schema():

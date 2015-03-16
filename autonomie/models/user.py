@@ -49,7 +49,6 @@ from sqlalchemy.orm import (
     relationship,
     backref,
 )
-from sqlalchemy.util import classproperty
 from sqlalchemy.event import listen
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -73,7 +72,10 @@ from autonomie.models.types import (
     JsonEncodedDict,
     PersistentACLMixin,
 )
-from autonomie.utils.ascii import camel_case_to_name
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
 from autonomie.utils.date import str_to_date
 
 
@@ -147,24 +149,6 @@ CONTRACT_OPTIONS = (
 
 
 log = logging.getLogger(__name__)
-
-
-def get_id_foreignkey_col(foreignkey_str):
-    """
-    Return an id column as a foreignkey with correct colander configuration
-
-        foreignkey_str
-
-            The foreignkey our id is pointing to
-    """
-    column = Column(
-        "id",
-        Integer,
-        ForeignKey(foreignkey_str),
-        primary_key=True,
-        info={'colanderalchemy': get_hidden_field_conf()},
-    )
-    return column
 
 
 class Group(DBBASE):
@@ -494,56 +478,6 @@ def user_node(roles=None, **kw):
             widget=get_deferred_user_choice(roles, widget_options),
             **kw
             )
-
-
-class ConfigurableOption(DBBASE):
-    """
-    Base class for options
-    """
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={'colanderalchemy': get_hidden_field_conf()}
-    )
-    label = Column(
-        String(100),
-        info={'colanderalchemy': {'title': u'Libellé'}},
-    )
-    active = Column(
-        Boolean(),
-        default=True,
-        info={'colanderalchemy': EXCLUDED}
-    )
-    order = Column(
-        Integer,
-        default=0,
-        info={'colanderalchemy': EXCLUDED}
-    )
-    type_ = Column(
-        'type_',
-        String(30),
-        nullable=False,
-        info={'colanderalchemy': EXCLUDED}
-        )
-
-    @classproperty
-    def __mapper_args__(cls):
-        name = cls.__name__
-        if name == 'ConfigurableOption':
-            return {
-                'polymorphic_on': 'type_',
-                'polymorphic_identity':'configurable_option'
-            }
-        else:
-            return {'polymorphic_identity': camel_case_to_name(name)}
-
-    @classmethod
-    def query(cls):
-        query = super(ConfigurableOption, cls).query()
-        query = query.filter(ConfigurableOption.active==True)
-        query = query.order_by(ConfigurableOption.order)
-        return query
 
 
 class ZoneOption(ConfigurableOption):

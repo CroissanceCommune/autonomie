@@ -69,6 +69,7 @@ from autonomie.models.user import (
     SocialDocTypeOption,
     CaeSituationOption,
 )
+from autonomie.models.task import PaymentConditions
 from autonomie.resources import admin_option_js
 
 from autonomie.models import files
@@ -132,6 +133,13 @@ factures"
             u"Configuration des modes de paiement",
             path="admin_paymentmode",
             title=u"Configuration des modes de paiement des factures"
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration des conditions de paiement",
+            path="payment_conditions",
+            title=u"Configuration des conditions de paiement"
         )
     )
     request.actionmenu.add(
@@ -866,7 +874,7 @@ class AdminOption(BaseFormView):
         return HTTPFound(self.request.route_path(self.redirect_path))
 
 
-def get_model_view(model, js_requirements=[]):
+def get_model_view(model, js_requirements=[], r_path="admin_userdatas"):
     """
     Return a view object and a route_name for administrating a sequence of
     models instances (like options)
@@ -878,7 +886,7 @@ def get_model_view(model, js_requirements=[]):
         validation_msg = infos.get('validation_msg', u'')
         factory = model
         schema = get_sequence_model_admin(model, u"")
-        redirect_path = 'admin_userdatas'
+        redirect_path = r_path
         js_resources=js_requirements
     return (
         MyView,
@@ -1011,37 +1019,73 @@ def includeme(config):
     config.add_route("admin_activity", "admin/activity")
     config.add_route("admin_cae", "admin/cae")
 
-    config.add_view(index, route_name='admin_index',
-                 renderer='admin/index.mako',
-                 permission='admin')
+    config.add_view(
+        index,
+        route_name='admin_index',
+        renderer='admin/index.mako',
+        permission='admin',
+    )
 
-    config.add_view(AdminMain, route_name="admin_main",
-                 renderer="admin/main.mako",
-                 permission='admin')
+    config.add_view(
+        AdminMain,
+        route_name="admin_main",
+        renderer="admin/main.mako",
+        permission='admin',
+    )
 
-    config.add_view(AdminTva, route_name='admin_tva',
-                 renderer="admin/main.mako",
-                 permission='admin')
+    config.add_view(
+        AdminTva,
+        route_name='admin_tva',
+        renderer="admin/main.mako",
+        permission='admin',
+    )
 
-    config.add_view(AdminPaymentMode, route_name='admin_paymentmode',
-                renderer="admin/main.mako",
-                permission='admin')
+    config.add_view(
+        AdminPaymentMode,
+        route_name='admin_paymentmode',
+        renderer="admin/main.mako",
+        permission='admin',
+    )
 
-    config.add_view(AdminWorkUnit, route_name='admin_workunit',
-                renderer="admin/main.mako",
-                permission='admin')
+    view, route_name, tmpl = get_model_view(
+        PaymentConditions,
+        r_path="admin_index",
+    )
+    config.add_route(route_name, "admin/" + route_name)
+    config.add_view(
+        view,
+        route_name=route_name,
+        renderer=tmpl,
+        permission="admin",
+    )
 
-    config.add_view(AdminExpense, route_name='admin_expense',
-                renderer="admin/main.mako",
-                permission='admin')
+    config.add_view(
+        AdminWorkUnit,
+        route_name='admin_workunit',
+        renderer="admin/main.mako",
+        permission='admin',
+    )
 
-    config.add_view(AdminActivities, route_name='admin_activity',
-                renderer="admin/main.mako",
-                permission='admin')
+    config.add_view(
+        AdminExpense,
+        route_name='admin_expense',
+        renderer="admin/main.mako",
+        permission='admin',
+    )
 
-    config.add_view(AdminCae, route_name='admin_cae',
-            renderer="admin/main.mako",
-            permission="admin")
+    config.add_view(
+        AdminActivities,
+        route_name='admin_activity',
+        renderer="admin/main.mako",
+        permission='admin',
+    )
+
+    config.add_view(
+        AdminCae,
+        route_name='admin_cae',
+        renderer="admin/main.mako",
+        permission="admin",
+    )
 
 
     # User Datas view configuration

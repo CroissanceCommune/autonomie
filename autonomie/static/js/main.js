@@ -126,17 +126,20 @@ function setPopUp(id, title){
         title:title,
         open: function(event, ui){
           $('.ui-widget').css('width','60%');
-          $('.ui-widget').css('height','80%');
           $('.ui-widget').css('left', '20%');
           $('.ui-widget-content').css('height','auto');
+          // Fix dialog height if content is too big for the current window
+          if ($(this).parent().height() > $(window).height()) {
+            $(this).height($(window).height()*0.9);
+          }
           // Fix bootstrap + jqueryui conflict
           var closeBtn = $('.ui-dialog-titlebar-close');
           closeBtn.addClass("ui-button ui-widget ui-state-default " +
             "ui-corner-all ui-button-icon-only");
           closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
           'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
-            }
         }
+      }
     );
   }
   function setClickableRow(){

@@ -52,6 +52,13 @@ var Popup = Backbone.Marionette.Region.extend({
         height:"auto",
         title:this_.title,
         hide: "fadeOut",
+        open: function(event, ui){
+          var closeBtn = $('.ui-dialog-titlebar-close');
+          closeBtn.addClass("ui-button ui-widget ui-state-default " +
+            "ui-corner-all ui-button-icon-only");
+          closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
+          'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
+        },
         close:function(event, ui){
           this_.close();
         }

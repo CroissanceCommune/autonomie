@@ -20,6 +20,7 @@ def upgrade():
     # Ajout et modification de la structure de données existantes
     op.execute("alter table project modify archived BOOLEAN;")
 
+
     for name in ('ht', 'tva', 'ttc'):
         col = sa.Column(name, sa.Integer, default=0)
         op.add_column('task', col)
@@ -41,7 +42,6 @@ def upgrade():
     # Migration des donnees vers la nouvelle structure
     from alembic.context import get_bind
     conn = get_bind()
-
     from autonomie.models.base import DBSESSION
     session = DBSESSION()
 
@@ -121,6 +121,30 @@ where id=:id;"
             index += 1
         if index % 50 == 0:
             session.flush()
+
+    # Drop old constraints
+    for table in ('estimation', 'invoice', 'cancelinvoice'):
+        for num in [2,3,4]:
+            key = "%s_ibfk_%s" % (table, num,)
+            cmd = "ALTER TABLE %s DROP FOREIGN KEY %s;" % (table, key)
+            try:
+                print(cmd)
+                conn.execute(cmd)
+            except:
+                print("Error while droping a foreignkey : %s %s" % (table, key))
+
+        for column in ('customer_id', 'project_id', 'number', \
+                       'sequenceNumber', 'displayedUnits', 'expenses', \
+                       'expenses_ht', 'address'):
+            op.drop_column(table, column)
+
+    op.drop_column('cancelinvoice', 'reimbursementConditions')
+    op.drop_column('estimation', 'paymentConditions')
+    op.drop_column('invoice', 'paymentConditions')
+
+    for table in ('invoice', 'cancelinvoice'):
+        op.drop_column(table, 'officialNumber')
+
 
 
 def downgrade():

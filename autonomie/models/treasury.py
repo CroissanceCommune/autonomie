@@ -202,7 +202,8 @@ class ExpenseSheet(Node):
     status_date = Column(
         Date(),
         default=date.today,
-        onupdate=date.today)
+        onupdate=date.today
+    )
     exported = Column(Boolean(), default=False)
     company = relationship(
         "Company",

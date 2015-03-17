@@ -704,9 +704,10 @@ class SageContributionOrganic(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_debiteur_organic'],
-                num_analytique=self.config['numero_analytique'],
-                credit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_debiteur_organic'],
+            num_analytique=self.config['numero_analytique'],
+            credit=self.get_amount(),
+        )
         return entry
 
     def yield_entries(self):
@@ -915,14 +916,20 @@ class InvoiceExport(object):
 
 class SageExpenseBase(BaseSageBookEntryFactory):
     static_columns = (
-            'code_journal',
-            'date',
-            'libelle',
-            'num_feuille',
-            'type_',
-            )
-    variable_columns = ('compte_cg', 'num_analytique', 'compte_tiers',
-            'code_tva', 'debit', 'credit')
+        'code_journal',
+        'date',
+        'libelle',
+        'num_feuille',
+        'type_',
+    )
+    variable_columns = (
+        'compte_cg',
+        'num_analytique',
+        'compte_tiers',
+        'code_tva',
+        'debit',
+        'credit',
+    )
 
     def set_expense(self, expense):
         self.expense = expense
@@ -934,7 +941,8 @@ class SageExpenseBase(BaseSageBookEntryFactory):
 
     @property
     def date(self):
-        return format_sage_date(self.expense.status_date)
+        expense_date = datetime.date(self.expense.year, self.expense.month, 1)
+        return format_sage_date(expense_date)
 
     @property
     def num_feuille(self):
@@ -943,10 +951,10 @@ class SageExpenseBase(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"{0}/frais {1} {2}".format(
-                render_api.format_account(self.expense.user, reverse=False),
-                self.expense.month,
-                self.expense.year
-                )
+            render_api.format_account(self.expense.user, reverse=False),
+            self.expense.month,
+            self.expense.year
+        )
 
 
 class SageExpenseMain(SageExpenseBase):
@@ -970,11 +978,11 @@ class SageExpenseMain(SageExpenseBase):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_ndf'],
-                num_analytique=self.company.code_compta,
-                compte_tiers=self.expense.user.compte_tiers,
-                credit=total,
-                )
+            compte_cg=self.config['compte_cg_ndf'],
+            num_analytique=self.company.code_compta,
+            compte_tiers=self.expense.user.compte_tiers,
+            credit=total,
+        )
         return entry
 
     @double_lines
@@ -988,7 +996,7 @@ class SageExpenseMain(SageExpenseBase):
             num_analytique=self.company.code_compta,
             code_tva=type_object.code_tva,
             debit=ht,
-            )
+        )
         return entry
 
     @double_lines
@@ -1005,7 +1013,7 @@ in type_object")
             num_analytique=self.company.code_compta,
             code_tva=type_object.code_tva,
             debit=tva,
-            )
+        )
         return entry
 
     @double_lines
@@ -1018,7 +1026,7 @@ in type_object")
             compte_cg=self.config['compte_cg_contribution'],
             num_analytique=self.company.code_compta,
             credit=value,
-            )
+        )
         return entry
 
     @double_lines
@@ -1031,7 +1039,7 @@ in type_object")
             compte_cg=self.config['compte_cg_banque'],
             num_analytique=self.company.code_compta,
             debit=value,
-            )
+        )
         return entry
 
     @double_lines
@@ -1041,10 +1049,10 @@ in type_object")
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.config['numero_analytique'],
-                credit=value,
-                )
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.config['numero_analytique'],
+            credit=value,
+        )
         return entry
 
     @double_lines
@@ -1054,10 +1062,10 @@ in type_object")
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_contribution'],
-                num_analytique=self.config['numero_analytique'],
-                debit=value,
-                )
+            compte_cg=self.config['compte_cg_contribution'],
+            num_analytique=self.config['numero_analytique'],
+            debit=value,
+        )
         return entry
 
     def yield_entries(self):
@@ -1087,7 +1095,8 @@ in type_object")
                             self._credit_entreprise,
                             self._debit_entreprise,
                             self._credit_cae,
-                            self._debit_cae,):
+                            self._debit_cae,
+                    ):
                         yield method(contribution)
         else:
             log.warn(u"Exporting a void expense : {0}".format(self.expense.id))

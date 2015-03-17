@@ -702,6 +702,7 @@ class EstimationPayments(colander.MappingSchema):
         colander.String(),
         widget=forms.get_deferred_select(PaymentConditions),
         title=u"Conditions de paiement prédéfinies",
+        missing=colander.drop,
     )
 
     payment_conditions = forms.textarea_node(
@@ -718,6 +719,7 @@ class InvoicePayments(colander.MappingSchema):
         colander.String(),
         widget=forms.get_deferred_select(PaymentConditions),
         title=u"",
+        missing=colander.drop,
     )
 
     payment_conditions = forms.textarea_node(title="",

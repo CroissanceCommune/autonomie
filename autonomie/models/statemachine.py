@@ -70,8 +70,8 @@ class State(object):
             process the expected actions after status change
         """
         if self.model_state:
-            setattr(model, self.status_attr, self.name)
             setattr(model, self.userid_attr, user_id)
+            setattr(model, self.status_attr, self.name)
         if self.callback:
             return self.callback(model, user_id=user_id, **kw)
         else:

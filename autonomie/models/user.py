@@ -610,6 +610,17 @@ class MotifSortieOption(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
+class TypeSortieOption(ConfigurableOption):
+    """
+    Possible values for exit form
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Type de sortie",
+        'validation_msg': u"Les types de sortie ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+
 class SocialDocTypeOption(ConfigurableOption):
     """
     Different social doc types
@@ -1411,7 +1422,7 @@ class UserDatas(Node):
     )
 
     parcours_num_hours = Column(
-        Integer(),
+        Float(),
         info={
             'colanderalchemy':
             {
@@ -1523,6 +1534,26 @@ class UserDatas(Node):
 
     sortie_motif = relationship(
         'MotifSortieOption',
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
+    )
+
+    sortie_type_id = Column(
+        ForeignKey('type_sortie_option.id'),
+        info={
+            'colanderalchemy':
+            {
+                'title': u"Type de sortie",
+                'section': u'Sortie',
+                'widget': get_deferred_select(TypeSortieOption),
+            }
+        }
+    )
+
+    sortie_type = relationship(
+        'TypeSortieOption',
         info={
             'colanderalchemy': EXCLUDED,
             'export': {'related_key': 'label'},

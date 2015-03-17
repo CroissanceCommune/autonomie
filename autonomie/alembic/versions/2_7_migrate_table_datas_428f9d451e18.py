@@ -39,6 +39,10 @@ def upgrade():
     ):
         op.add_column("task", col)
 
+    col = sa.Column("sortie_type_id", sa.ForeignKey('type_sortie_option.id'))
+    op.add_column("user_datas", col)
+    op.execute("alter table user_datas modify parcours_num_hours float DEFAULT NULL")
+
     # Migration des donnees vers la nouvelle structure
     from alembic.context import get_bind
     conn = get_bind()

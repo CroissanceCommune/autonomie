@@ -145,6 +145,11 @@ def get_module_group():
         "js/template.js",
         depends=[handlebar]
     )
+    # Messages
+    message_js = get_resource(
+        "js/message.js",
+        depends=[handlebar]
+    )
     return Group(
         [
             backbone_marionnette,
@@ -154,6 +159,7 @@ def get_module_group():
             main_templates,
             effects_highlight,
             effects_shake,
+            message_js,
         ]
     )
 

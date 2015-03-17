@@ -92,7 +92,7 @@ class RestHoliday(BaseView):
 
     def getOne(self):
         """
-            get an expense line
+            get an holiday entry
         """
         lid = self.request.matchdict.get('lid')
         for holiday in self.request.context.holidays:

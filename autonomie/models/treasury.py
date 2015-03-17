@@ -54,6 +54,7 @@ from autonomie.compute import math_utils
 
 from autonomie.models.types import PersistentACLMixin
 from autonomie.models.statemachine import StateMachine
+from autonomie.models.node import Node
 
 MANAGER_PERMS = "manage"
 
@@ -174,7 +175,7 @@ class ExpenseStates(StateMachine):
     userid_attr = "status_user_id"
 
 
-class ExpenseSheet(DBBASE, PersistentACLMixin):
+class ExpenseSheet(Node):
     """
         Model representing a whole ExpenseSheet
         An expensesheet is related to a company and an employee (one user may
@@ -190,7 +191,8 @@ class ExpenseSheet(DBBASE, PersistentACLMixin):
     """
     __tablename__ = 'expense_sheet'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
+    __mapper_args__ = {'polymorphic_identity': 'expensesheet'}
+    id = Column(ForeignKey('node.id'), primary_key=True)
     month = Column(Integer)
     year = Column(Integer)
     company_id = Column(Integer, ForeignKey("company.id", ondelete="cascade"))
@@ -482,4 +484,11 @@ def get_expense_years():
             years.append(current)
         return years
     return expenseyears()
+
+
+def get_expense_sheet_name(month, year):
+    """
+    Return the name of an expensesheet
+    """
+    return u"expense_{0}_{1}".format(month, year)
 

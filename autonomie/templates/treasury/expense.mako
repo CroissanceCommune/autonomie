@@ -24,6 +24,7 @@
 
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_text" />
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
 <style>
     #period_form label{
@@ -81,7 +82,13 @@ ${period_form.render()|n}
     </small>
 </p>
 % endif
+</div>
+<div class="row hidden-print">
+    <div class="well">
+        <b>Justificatifs</b>
+        ${format_filelist(request.context)}
     </div>
+</div>
 <div class="row hidden-print">
 % for com in communication_history:
     % if loop.first:

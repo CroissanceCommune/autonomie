@@ -57,6 +57,7 @@ from autonomie.models.treasury import (
     ExpenseLine,
     ExpenseKmLine,
     Communication,
+    get_expense_sheet_name,
 )
 from autonomie.events.expense import StatusChanged
 from autonomie.utils.rest import (
@@ -86,6 +87,10 @@ from autonomie.views import (
 from autonomie.views.render_api import (
     month_name,
     format_account,
+)
+from autonomie.views.files import (
+    get_add_file_link,
+    FileUploadView,
 )
 
 
@@ -286,6 +291,7 @@ def get_new_expense_sheet(year, month, cid, uid):
         Return a new expense sheet for the given 4-uple
     """
     expense = ExpenseSheet()
+    expense.name = get_expense_sheet_name(month, year)
     expense.year = year
     expense.month = month
     expense.company_id = cid
@@ -390,7 +396,10 @@ def expenses_access_view(request):
     expense = get_expense_sheet(request, year, month, cid, uid)
     # Here we use a temporary redirect since the expense we redirect too may
     # have change if it was reset
-    return HTTPTemporaryRedirect(request.route_path("expense", id=expense.id))
+    return HTTPTemporaryRedirect(request.route_path(
+        "expensesheet",
+        id=expense.id)
+    )
 
 
 def get_expense_history(expensesheet):
@@ -517,6 +526,12 @@ perdues) ?")
         btn = ViewLink(u"Revenir à la liste", "view", path="company_expenses",
                 id=self.request.context.company.id)
         self.request.actionmenu.add(btn)
+        btn = get_add_file_link(
+            self.request,
+            label=u"Déposer des justificatifs",
+            perm="view",
+        )
+        self.request.actionmenu.add(btn)
 
     def submit_success(self, appstruct):
         """
@@ -547,8 +562,12 @@ perdues) ?")
             self.request.session.flash(err.message, queue='error')
 
 
-        return HTTPFound(self.request.route_url("expense",
-                                                id=self.request.context.id))
+        return HTTPFound(
+            self.request.route_url(
+                "expensesheet",
+                id=self.request.context.id
+            )
+        )
 
     def _store_communication(self, comment):
         """
@@ -953,9 +972,11 @@ def includeme(config):
 
     traverse = "/expenses/{id}"
 
-    config.add_route("expense",
-            "/expenses/{id:\d+}",
-            traverse=traverse)
+    config.add_route(
+        "expensesheet",
+        "/expenses/{id:\d+}",
+        traverse=traverse
+    )
     config.add_route("expensejson",
             "/expenses/{id:\d+}.json",
             traverse=traverse)
@@ -994,7 +1015,7 @@ def includeme(config):
         permission="edit")
 
     config.add_view(ExpenseSheetView,
-        route_name="expense",
+        route_name="expensesheet",
         renderer="treasury/expense.mako")
 
     config.add_view(expensesheet_json_view,
@@ -1003,11 +1024,13 @@ def includeme(config):
         renderer="json")
 
     # Xls export
-    config.add_view(make_excel_view(excel_filename, XlsExpense),
-            route_name="expensexlsx")
+    config.add_view(
+        make_excel_view(excel_filename, XlsExpense),
+        route_name="expensexlsx"
+    )
 
     # Rest interface
-    redirect_to_expense = make_redirect_view("expense")
+    redirect_to_expense = make_redirect_view("expensesheet")
     add_rest_views(config, "expenseline", RestExpenseLine)
     config.add_view(redirect_to_expense, route_name="expenseline")
     config.add_view(redirect_to_expense, route_name="expenselines")
@@ -1031,4 +1054,12 @@ def includeme(config):
         expense_optionsv1,
         route_name="expenseoptionsv1",
         renderer="json"
+    )
+
+    config.add_view(
+        FileUploadView,
+        route_name="expensesheet",
+        renderer='base/formpage.mako',
+        permission='view',
+        request_param='action=attach_file',
     )

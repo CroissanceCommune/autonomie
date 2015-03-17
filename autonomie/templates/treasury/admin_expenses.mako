@@ -63,7 +63,7 @@ Admin expenses list view
     </thead>
     <tbody>
         % for expense in records:
-            <% url = request.route_path('expense', id=expense.id) %>
+            <% url = request.route_path('expensesheet', id=expense.id) %>
             <% onclick = "document.location='{url}'".format(url=url) %>
             <%
 if expense.status == 'valid':
@@ -87,7 +87,7 @@ else:
                     ${api.format_amount(expense.total, trim=True)|n}&nbsp;&euro;
                 </td>
                 <td>
-                    <% url = request.route_path('expense', id=expense.id) %>
+                    <% url = request.route_path('expensesheet', id=expense.id) %>
                     ${table_btn(url, u'Modifier', u"Voir la note de frais", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
                     ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="file" )}

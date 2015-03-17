@@ -73,7 +73,7 @@ def manage(request):
             .filter(ExpenseSheet.status == 'wait')\
             .order_by(ExpenseSheet.month).all()
     for expense in expenses:
-        expense.url = request.route_path("expense", id=expense.id)
+        expense.url = request.route_path("expensesheet", id=expense.id)
 
 
     user_id = request.user.id

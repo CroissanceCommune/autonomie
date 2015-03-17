@@ -15,6 +15,38 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.orm import undefer_group
 
+def make_expense_nodes(conn, session):
+    from autonomie.models.node import Node
+    req = "select max(id) from node"
+    result = conn.execute(req).fetchall()
+    max_id = result[0][0]
+    print("The new max_id is : %s" % max_id)
+
+    request = "select id, month, year from expense_sheet"
+    result = conn.execute(request)
+
+    op.execute("SET FOREIGN_KEY_CHECKS=0;")
+
+    from autonomie.models.treasury import get_expense_sheet_name
+
+    for index, (id, month,year) in enumerate(result):
+        max_id += 1
+        new_id = max_id
+        name = get_expense_sheet_name(month, year)
+        node = Node(
+            id=new_id,
+            name=name,
+            type_='expensesheet',
+        )
+        session.add(node)
+        # Update relationships
+        for key, table in ("sheet_id", "baseexpense_line"), ("expense_sheet_id", "communication"):
+            op.execute("update {0} set {2}={1} where {2}={3}".format(table, new_id, key, id))
+        op.execute("update expense_sheet set id={0} where id={1}".format(new_id, id))
+        if index % 50 == 0:
+            session.flush()
+    op.execute("SET FOREIGN_KEY_CHECKS=1;")
+
 
 def upgrade():
     # Ajout et modification de la structure de données existantes
@@ -39,15 +71,19 @@ def upgrade():
     ):
         op.add_column("task", col)
 
-    col = sa.Column("sortie_type_id", sa.ForeignKey('type_sortie_option.id'))
+    col = sa.Column("sortie_type_id", sa.Integer, sa.ForeignKey('type_sortie_option.id'))
     op.add_column("user_datas", col)
     op.execute("alter table user_datas modify parcours_num_hours float DEFAULT NULL")
+
 
     # Migration des donnees vers la nouvelle structure
     from alembic.context import get_bind
     conn = get_bind()
     from autonomie.models.base import DBSESSION
     session = DBSESSION()
+
+    # Expenses will be nodes
+    make_expense_nodes(conn, session)
 
     from autonomie.models.task import (
         Invoice,

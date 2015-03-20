@@ -40,7 +40,6 @@ from autonomie.models.task import Task
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
 from autonomie.models.task import CancelInvoice
-from autonomie.models.task import ManualInvoice
 from autonomie.models.task.interfaces import ITask
 from autonomie.models.task.interfaces import IValidatedTask
 from autonomie.models.task.interfaces import IPaidTask
@@ -136,7 +135,6 @@ class TestTaskModels(unittest.TestCase):
         self.assertTrue(verifyObject(IPaidTask, CancelInvoice()))
         self.assertTrue(verifyObject(IInvoice, Invoice()))
         self.assertTrue(verifyObject(IInvoice, CancelInvoice()))
-        self.assertTrue(verifyObject(IInvoice, ManualInvoice()))
 
     def test_task_status(self):
         task = get_task(factory=Task)

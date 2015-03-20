@@ -26,7 +26,7 @@ import datetime
 import pytest
 from pyramid import testing
 from mock import MagicMock
-from autonomie.models.task import (CancelInvoice, ManualInvoice,
+from autonomie.models.task import (CancelInvoice,
                                     Invoice, InvoiceLine, DiscountLine)
 from autonomie.models.user import User
 from autonomie.models.customer import Customer
@@ -80,11 +80,6 @@ def test_get_number():
     cinv.set_sequence_number(15)
     cinv.set_number()
     assert cinv.number == u"PRO1_CLI1_A15_0769"
-
-def test_tva_amount():
-    m = ManualInvoice(montant_ht=1950)
-    assert m.tva_amount() == 0
-
 
 def test_set_name():
     invoice = Invoice()

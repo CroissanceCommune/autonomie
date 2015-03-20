@@ -12,9 +12,9 @@ WebOb==1.4
 alembic==0.6.5
 bleach==1.4.1
 colander==1.0
-deform=2.0a2
+deform==2.0a2
 docopt==0.5.0
-fanstatic=1.0a5
+fanstatic==1.0a5
 ipython==2.1.0
 js.bootstrap==3.3.1
 js.chosen==0.9.14

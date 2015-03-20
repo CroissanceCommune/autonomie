@@ -134,7 +134,7 @@ def get_max_allowedfilesize():
 
 
 @colander.deferred
-def file_description():
+def file_description(node, kw):
     """
         Return the file upload field description
     """
@@ -188,7 +188,8 @@ def get_template_upload_schema():
     """
     Return the form schema for template upload
     """
-    schema = FileUploadSchema().clone()
-    schema['upload'].description += u" Le fichier doit être au format ODT"
-    del schema['filetype']
+    def add_description(node, kw):
+        node['upload'].description += u" Le fichier doit être au format ODT"
+        del node['filetype']
+    schema = FileUploadSchema(after_bind=add_description)
     return schema

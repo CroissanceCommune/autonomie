@@ -192,19 +192,21 @@
                     </thead>
                     <tbody>
                         % for history in userdata.template_history:
-                            <tr>
-                                <td>${history.template.description}</td>
-                                <td>${api.format_account(history.user)}</td>
-                                <td>${api.format_datetime(history.created_at)}</td>
-                                <td class='text-right'>
-                                    <% url = request.route_path('templatinghistory', id=history.id, _query=dict(action='delete')) %>
-                                    ${table_btn(url, \
-                                    u"Supprimer cette entrée",\
-                                    u"Supprimer cette entrée de l'historique", \
-                                    icon='trash', \
-                                    css_class="btn-danger")}
-                                </td>
-                            </tr>
+                            % if history.template is not None:
+                                <tr>
+                                    <td>${history.template.description}</td>
+                                    <td>${api.format_account(history.user)}</td>
+                                    <td>${api.format_datetime(history.created_at)}</td>
+                                    <td class='text-right'>
+                                        <% url = request.route_path('templatinghistory', id=history.id, _query=dict(action='delete')) %>
+                                        ${table_btn(url, \
+                                        u"Supprimer cette entrée",\
+                                        u"Supprimer cette entrée de l'historique", \
+                                        icon='trash', \
+                                        css_class="btn-danger")}
+                                    </td>
+                                </tr>
+                            % endif
                         % endfor
                         % if len(userdata.template_history) == 0:
                             <tr><td colspan='4'>Aucun document n'a été généré pour ce compte</td></tr>

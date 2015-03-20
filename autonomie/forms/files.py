@@ -133,6 +133,7 @@ def get_max_allowedfilesize():
     return convert_to_int(size, default)
 
 
+@colander.deferred
 def file_description():
     """
         Return the file upload field description
@@ -141,6 +142,7 @@ def file_description():
     return u"Taille maximale : {0}".format(human_readable_filesize(size))
 
 
+@colander.deferred
 def filesize_validator(node, value):
     """
     Validates the file's size
@@ -177,7 +179,7 @@ class FileUploadSchema(colander.Schema):
         deform.FileData(),
         widget=deferred_upload_widget,
         title=u"Choix du fichier",
-        description=file_description(),
+        description=file_description,
         validator=filesize_validator,
     )
 

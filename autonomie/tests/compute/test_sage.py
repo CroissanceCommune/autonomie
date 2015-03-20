@@ -65,31 +65,31 @@ class DummyInvoice(Dummy, InvoiceCompute):
 
 def get_config():
     return {
-            'code_journal': 'CODE_JOURNAL',
-            'compte_cg_contribution':'CG_CONTRIB',
-            'compte_rrr': 'CG_RRR',
-            'compte_frais_annexes': 'CG_FA',
-            'compte_cg_assurance': 'CG_ASSUR',
-            'compte_cg_debiteur': 'CG_DEB',
-            'compte_cgscop': 'CG_SCOP',
-            'compte_cg_organic': "CG_ORGA",
-            'compte_cg_debiteur_organic': "CG_DEB_ORGA",
-            'compte_rg_externe': 'CG_RG_EXT',
-            'compte_rg_interne': 'CG_RG_INT',
-            'compte_cg_banque': 'BANK_CG',
-            'compte_cg_tva_rrr': "CG_TVA_RRR",
-            "code_tva_rrr": "CODE_TVA_RRR",
-            'numero_analytique': 'NUM_ANA',
-            'rg_coop': 'CG_RG_COOP',
-            'taux_assurance': "5",
-            'taux_cgscop': "5",
-            'taux_rg_interne': "5",
-            'taux_rg_client': "5",
-            'taux_contribution_organic': "5",
-            'contribution_cae': "10",
-            'compte_cg_ndf': "CGNDF",
-            'code_journal_ndf':"JOURNALNDF",
-            }
+        'code_journal': 'CODE_JOURNAL',
+        'compte_cg_contribution':'CG_CONTRIB',
+        'compte_rrr': 'CG_RRR',
+        'compte_frais_annexes': 'CG_FA',
+        'compte_cg_assurance': 'CG_ASSUR',
+        'compte_cg_debiteur': 'CG_DEB',
+        'compte_cgscop': 'CG_SCOP',
+        'compte_cg_organic': "CG_ORGA",
+        'compte_cg_debiteur_organic': "CG_DEB_ORGA",
+        'compte_rg_externe': 'CG_RG_EXT',
+        'compte_rg_interne': 'CG_RG_INT',
+        'compte_cg_banque': 'BANK_CG',
+        'compte_cg_tva_rrr': "CG_TVA_RRR",
+        "code_tva_rrr": "CODE_TVA_RRR",
+        'numero_analytique': 'NUM_ANA',
+        'rg_coop': 'CG_RG_COOP',
+        'taux_assurance': "5",
+        'taux_cgscop': "5",
+        'taux_rg_interne': "5",
+        'taux_rg_client': "5",
+        'taux_contribution_organic': "5",
+        'contribution_cae': "10",
+        'compte_cg_ndf': "CGNDF",
+        'code_journal_ndf':"JOURNALNDF",
+    }
 
 @pytest.fixture
 def def_tva():
@@ -659,20 +659,20 @@ class TestSageExpenseMain():
             )
 
         return MagicMock(
-                company=company,
-                user=user,
-                month=5,
-                year=2014,
-                date=datetime.date.today(),
-                )
+            company=company,
+            user=user,
+            month=5,
+            year=2014,
+            date=datetime.date.today(),
+        )
 
     def get_type_obj(self, contrib=True):
         return MagicMock(
-                code='ETYPE1',
-                code_tva='CODETVA',
-                compte_tva='COMPTETVA',
-                contribution=contrib,
-                )
+            code='ETYPE1',
+            code_tva='CODETVA',
+            compte_tva='COMPTETVA',
+            contribution=contrib,
+        )
 
     def test_base_entry(self):
         factory = self.get_factory()

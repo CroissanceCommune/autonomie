@@ -96,49 +96,136 @@ ASCII_UPPERCASE = list(ascii_uppercase) + list(
     ''.join(duple)
     for duple in itertools.combinations_with_replacement(ascii_uppercase, 2)
     )
+
+
+class Column(object):
+    """
+    A column object
+    """
+    def __init__(self, label, letter=None, last_letter=None):
+        self.label = label
+        self.code = ""
+        self.ht = 0
+        self.force_visible = False
+        self.additional_cell_nb = None
+        self.style = None
+        self.set_letter(letter, last_letter)
+
+    def set_letter(self, start, end=None):
+        self.start = start
+        self.end = end or start
+
+    @property
+    def start_letter(self):
+        return self.start
+
+    @property
+    def end_letter(self):
+        return self.end
+
+    def reset_ht(self):
+        self.ht = 0
+
+
+class StaticColumn(Column):
+    """
+    A static column object representing static datas representation
+    """
+    static = True
+    def __init__(
+        self,
+        label,
+        key,
+        formatter=None,
+        style=None,
+        nb_col=None,
+        letter=None,
+        last_letter=None
+    ):
+        Column.__init__(self, label, letter, last_letter)
+        self.key = key
+        self.formatter = formatter
+        self.style = style
+        self.additional_cell_nb = nb_col
+
+    def get_val(self, line):
+        val = getattr(line, self.key, "")
+        if self.formatter is not None:
+            val = self.formatter(val)
+        return val
+
+
+
+class TypedColumn(Column):
+    static = False
+    def __init__(
+        self,
+        type_object,
+        label=None,
+        letter=None,
+        last_letter=None
+    ):
+        if label is None:
+            label = type_object.label
+
+        Column.__init__(self, label)
+        self.id = type_object.id
+        self.code = type_object.code
+        self.set_letter(letter, last_letter)
+
+    def get_val(self, line):
+        if hasattr(line, 'ht'):
+            val = integer_to_amount(line.ht)
+        else:
+            val = integer_to_amount(line.total)
+        # Le total_ht s'affiche en bas de page en mode calculée
+        self.ht += integer_to_amount(line.total_ht)
+        return val
+
+
 EXPENSEKM_COLUMNS = [
-    {
-        'key': 'date',
-        'label': u'Date',
-        'letter': 'A',
-    },
-    {
-        'key': 'vehicle',
-        'label': u'Type de véhicule',
-        'letter': 'B',
-        'last_letter': 'C',
-    },
-    {
-        'key': 'start',
-        'label': u'Lieu de départ',
-        'letter': 'D',
-        'last_letter': 'E',
-    },
-    {
-        'key': 'end',
-        'label': u"Lieu d'arrivée",
-        'letter': 'F',
-        'last_letter': 'G',
-    },
-    {
-        'key': 'description',
-        'label': u'Description/Mission',
-        'letter': 'H',
-        'last_letter': 'J',
-    },
-    {
-        'formatter': integer_to_amount,
-        'key': 'km',
-        'label': 'Nombre de kms',
-        'letter': 'K',
-    },
-    {
-        'formatter': integer_to_amount,
-        'key': 'total',
-        'label': u'Indemnités',
-        'letter': 'L',
-        'style': NUMBER_CELL,
-    }
+    StaticColumn(
+        key='date',
+        label=u'Date',
+        letter='A',
+    ),
+    StaticColumn(
+        key='vehicle',
+        label=u'Type de véhicule',
+        letter='B',
+        last_letter='C'
+    ),
+    StaticColumn(
+        key='start',
+        label=u'Lieu de départ',
+        letter='D',
+        last_letter='E',
+    ),
+    StaticColumn(
+        key='end',
+        label=u"Lieu d'arrivée",
+        letter='F',
+        last_letter='G',
+    ),
+    StaticColumn(
+        key='description',
+        label=u'Description/Mission',
+        letter='H',
+        last_letter='J',
+    ),
+    StaticColumn(
+        formatter= integer_to_amount,
+        key='km',
+        label=u'Nombre de kms',
+        letter='K',
+    ),
+    StaticColumn(
+        formatter=integer_to_amount,
+        key='total',
+        label=u'Indemnités',
+        letter='L',
+        style=NUMBER_CELL,
+    )
 ]
 
 
@@ -170,27 +257,26 @@ class XlsExpense(XlsWriter):
         Return the columns associated to telephonic expenses
         """
         teltype = ExpenseTelType.query().first()
-        cols = []
+        col = None
         if teltype:
             # Tel expenses should be visible
-            col = {
-                'label': "Téléphonie",
-                'code': teltype.code,
-                }
+            col = TypedColumn(teltype, label=u"Téléphonie")
             if teltype.initialize:
-                col['force_visible'] = True
-            cols.append(col)
-        return cols
+                col.force_visible = True
+        return col
 
     def get_km_column(self):
         """
         Return the columns associated to km expenses
         """
         kmtype = ExpenseKmType.query().first()
+        col = None
         if kmtype:
-            return [{'label': "Frais de déplacement", 'code': kmtype.code}]
-        else:
-            return []
+            col = TypedColumn(
+                kmtype,
+                label=u"Frais de déplacement",
+            )
+        return col
 
     def get_disabled_types_columns(self):
         """
@@ -201,11 +287,12 @@ class XlsExpense(XlsWriter):
             if not type_.active and type_.type != 'expensetel':
                 if type_.id not in types:
                     types.append(type_.id)
-                    yield {
-                         'label':"%s (ce type de frais n'existe plus)"\
-                                 % (type_.label),
-                         'code':type_.code
-                     }
+                    yield TypedColumn(
+                        type_,
+                        label="%s (ce type de frais n'existe plus)" % (
+                            type_.label
+                        )
+                    )
 
     def get_columns(self):
         """
@@ -214,18 +301,24 @@ class XlsExpense(XlsWriter):
         """
         columns = []
         # Add the two first columns
-        columns.append({'label':'Date', 'key':'date'})
-        columns.append({
-            'label':'Description',
-            'key':'description',
-            'additional_cell_nb':3})
-        # Telephonic fees are only available as internal expenses
-        columns.extend(self.get_tel_column())
-        km_columns = self.get_km_column()
-        columns.extend(km_columns)
+        columns.append(StaticColumn(label='Date', key='date'))
+        columns.append(
+            StaticColumn(
+                label='Description',
+                key='description',
+                nb_col=3
+            )
+        )
 
-        if len(km_columns) > 0:
-            kmtype_code = km_columns[0]['code']
+        # Telephonic fees are only available as internal expenses
+        tel_column = self.get_tel_column()
+        if tel_column is not None:
+            columns.append(tel_column)
+
+        km_column = self.get_km_column()
+        if km_column:
+            columns.append(km_column)
+            kmtype_code = km_column.code
         else:
             kmtype_code = None
 
@@ -234,34 +327,41 @@ class XlsExpense(XlsWriter):
                 .filter(ExpenseType.active==True)
         for type_ in commontypes:
             # Here's a hack to allow to group km fee types and displacement fees
-            if kmtype_code is not None and type_.code != kmtype_code:
-                columns.append({'label':type_.label, 'code':type_.code})
+            if kmtype_code is not None and \
+               type_.code != kmtype_code:
+                columns.append(TypedColumn(type_))
 
         columns.extend(self.get_disabled_types_columns())
 
         # Add the last columns
-        columns.append({'label':'Tva', 'key':'tva',
-            'formatter':integer_to_amount})
-        columns.append({
-            'label':'Total',
-            'key':'total',
-            'formatter':integer_to_amount,
-            'style': NUMBER_CELL
-        })
+        columns.append(
+            StaticColumn(
+                label='Tva',
+                key='tva',
+                formatter=integer_to_amount
+            )
+        )
+        columns.append(
+            StaticColumn(
+                label="Total",
+                key="total",
+                formatter=integer_to_amount,
+                style=NUMBER_CELL,
+            )
+        )
 
         # We set the appropriate letter to each column
         index = 0
         for col in columns:
             letter = ASCII_UPPERCASE[index]
-            additional_cell_nb = col.get('additional_cell_nb')
+            additional_cell_nb = col.additional_cell_nb
             if additional_cell_nb:
                 last_letter = ASCII_UPPERCASE[index + additional_cell_nb]
                 index += additional_cell_nb + 1
             else:
                 last_letter = letter
                 index += 1
-            col['letter'] = letter
-            col['last_letter'] = last_letter
+            col.set_letter(letter, last_letter)
         return columns
 
     def write_code(self):
@@ -305,8 +405,8 @@ class XlsExpense(XlsWriter):
         """
             Return the cell corresponding to a given column
         """
-        letter = column['letter']
-        last_letter = column.get('last_letter', letter)
+        letter = column.start_letter
+        last_letter = column.end_letter
         return self.get_merged_cells(letter, last_letter)
 
     def write_table_header(self, columns):
@@ -316,37 +416,56 @@ class XlsExpense(XlsWriter):
         for column in columns:
             cell = self.get_column_cell(column)
             cell.style = HEADER_STYLE
-            cell.value = column['label']
+            cell.value = column.label
         self.index += 1
         for column in columns:
             cell = self.get_column_cell(column)
             cell.style = BOLD_CELL
-            cell.value = column.get('code', '')
+            cell.value = column.code
         self.index += 1
 
-    def get_cell_val(self, line, column):
+    def get_formatted_cell_val(self, line, column):
         """
-            return the value for a given cell for the current line
+        For a given expense line, check if a value should be provided in the
+        given column
         """
-        if line.type_object is None:
-            val = ""
-        elif column.has_key('key'):
-            val = getattr(line, column['key'], '')
-            formatter = column.get('formatter')
-            if val and formatter:
-                val = formatter(val)
-        elif column['code'] == line.type_object.code:
-            if hasattr(line, 'ht'):
-                val = integer_to_amount(line.ht)
-            else:
-                val = integer_to_amount(line.total)
+        val = ""
+
+        if line.type_object is not None and column.static:
+            val = column.get_val(line)
+
+        return val
+
+    def get_cell_val(self, line, column, by_id=True):
+        """
+        For a given expense line, check if a value should be provided in the
+        given column
+
+        :param obj line: a expense line object
+        :param dict column: a dict describing a column
+        :param bool by_id: Should the match be done by id
+        :return: a value if the the given line is form the type of column ''
+        """
+        val = ""
+        # Première passe, on essaye de retrouver le type de frais par id
+        if by_id:
+            if column.id == line.type_object.id:
+                val = column.get_val(line)
+
+        # Deuxième passe, on essaye de retrouver le type de frais par code
         else:
-            val = ""
+            if column.code == line.type_object.code:
+                val = column.get_val(line)
+
         return val
 
     def set_col_width(self, col_letter, width, force=False):
         """
-            Set the width of a given column
+        Set the width of a given column
+
+        :param str col_letter: the letter for the column
+        :param int width: The width of the given column
+        :param bool force: force the display of the column
         """
         col_dim = self.worksheet.column_dimensions.get(col_letter)
         if col_dim:
@@ -359,53 +478,104 @@ class XlsExpense(XlsWriter):
 
     def write_table(self, columns, lines):
         """
-            write a table with headers and content
-            :param columns: list of dict
-            :params lines: list of models to be written
+        write a table with headers and content
+        :param columns: list of dict
+        :params lines: list of models to be written
         """
         self.write_table_header(columns)
         for line in lines:
+            got_value = False
+
             for column in columns:
                 cell = self.get_column_cell(column)
-                cell.value = self.get_cell_val(line, column)
-                if column.has_key('style'):
-                    cell.style = column['style']
+
+                if column.static:
+                    # On récupère les valeurs pour les colonnes fixes
+                    value = self.get_formatted_cell_val(
+                        line,
+                        column,
+                    )
+                else:
+                    # On récupère les valeurs pour les colonnes spécifiques à
+                    # chaque type de données
+
+                    # Première passe on essaye de remplir les colonnes pour la
+                    # ligne de frais données en fonction de l'id du type de
+                    # frais associé
+                    value = self.get_cell_val(line, column, by_id=True)
+                    if value:
+                        got_value = True
+
+                cell.value = value
+                if column.style:
+                    cell.style = column.style
+
+            # Deuxième passe, on a rempli aucune case pour cette ligne on va
+            # essayer de remplir les colonnes en recherchant le type de frais
+            # par code
+            if not got_value:
+                print("On fait une deuxième passe")
+                print(got_value)
+                print(value)
+                for column in columns:
+                    cell = self.get_column_cell(column)
+
+                    if not column.static and not got_value:
+                        value = self.get_cell_val(
+                            line,
+                            column,
+                            by_id=False,
+                        )
+                        if value:
+                            print("On a une valeur")
+                            print(column)
+                            got_value = True
+
+                        cell.value = value
+
+                        if column.style:
+                            cell.style = column.style
+
             self.index += 1
 
         for column in columns:
             cell = self.get_column_cell(column)
             cell.style = FOOTER_CELL
 
-            if column.has_key('code'):
-                val = sum([line.total_ht
-                        for line in lines
-                        if line.type_object and
-                        line.type_object.code == column['code']]
-                        )
-                cell.value = integer_to_amount(val)
+            if not column.static:
+                value = column.ht
+                cell.value = value
 
-                if val == 0 and not column.get('force_visible', False):
+                if value == 0 and not column.force_visible:
                     col_width = 0
                 else:
                     col_width = 13
-                self.set_col_width(column['letter'], col_width)
+                self.set_col_width(column.start_letter, col_width)
 
-            elif column.get('key') == 'description':
+            elif column.key == 'description':
                 cell.value = "Totaux"
 
-            elif column.get('key') == 'tva':
+            elif column.key == 'tva':
                 cell.value = integer_to_amount(
-                        sum([getattr(line, 'total_tva', 0) for line in lines]))
+                    sum(
+                        [
+                            getattr(line, 'total_tva', 0) for line in lines
+                        ]
+                    )
+                )
 
-            elif column.get('key') == 'total':
+            elif column.key == 'total':
                 cell.value = integer_to_amount(
-                        sum([line.total for line in lines]))
+                    sum(
+                        [line.total for line in lines]
+                    )
+                )
 
         self.index += 4
 
     def write_expense_table(self, category):
         """
-            write expenses tables for the given category
+        write expenses tables for the given category
         """
         lines = [line for line in self.model.lines
                             if line.category == category]
@@ -415,9 +585,12 @@ class XlsExpense(XlsWriter):
         self.write_table(self.columns, lines)
         self.index += 2
 
+        for column in self.columns:
+            column.reset_ht()
+
     def write_full_line(self, txt, start="A", end="J"):
         """
-            Write a full line, merging cells
+        Write a full line, merging cells
         """
         cell = self.get_merged_cells(start, end)
         cell.value = txt
@@ -426,7 +599,7 @@ class XlsExpense(XlsWriter):
 
     def write_internal_expenses(self):
         """
-            write the internal expense table to the current worksheet
+        write the internal expense table to the current worksheet
         """
         txt = u"FRAIS DIRECT DE FONCTIONNEMENT (< à 30% DU SALAIRE BRUT \
 PAR MOIS)"
@@ -436,8 +609,7 @@ PAR MOIS)"
 
     def write_activity_expenses(self):
         """
-
-            write the activity expense table to the current worksheet
+        write the activity expense table to the current worksheet
         """
         txt = u"FRAIS CONCERNANT DIRECTEMENT VOTRE L'ACTIVITE AUPRES DE VOS \
 CLIENTS"
@@ -465,10 +637,11 @@ CLIENTS"
         cell.value = u"Accord après vérification"
         self.index += 1
         self.worksheet.merge_cells(
-                start_row=self.index,
-                end_row=self.index + 4,
-                start_column=1,
-                end_column=4)
+            start_row=self.index,
+            end_row=self.index + 4,
+            start_column=1,
+            end_column=4,
+        )
 
     def write_km_book(self):
         """
@@ -480,6 +653,7 @@ CLIENTS"
                 format(user.lastname, user.firstname)
         cell = self.write_full_line(title)
         cell.style = TITLE_STYLE
+
         # index has already been increased
         row_dim = self.worksheet.row_dimensions.get(self.index -1 )
         row_dim.height = 30

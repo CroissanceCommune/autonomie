@@ -222,11 +222,11 @@ class TestStatusChange:
         self._forbidden_state_change(
             config,
             task, status,
-            ("draft", "geninv", ))
+            ("geninv", ))
         self._allowed_state_change(
             config,
             task, status,
-            ('invalid', 'valid',))
+            ("draft", 'invalid', 'valid',))
 
         status = 'valid'
         self._forbidden_state_change(
@@ -259,14 +259,10 @@ class TestStatusChange:
             ('wait',))
 
         status = 'wait'
-        self._forbidden_state_change(
-            config,
-            task, status,
-            ("draft", ))
         self._allowed_state_change(
             config,
             task, status,
-            ('invalid', 'valid',))
+            ("draft", 'invalid', 'valid',))
 
         status = 'valid'
         self._forbidden_state_change(

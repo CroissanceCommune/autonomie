@@ -92,8 +92,9 @@ class TaskCompute(object):
         """
             compute the HT amount
         """
+        expenses_ht = self.expenses_ht or 0
         return floor(self.lines_total_ht() - self.discount_total_ht() +
-                    self.expenses_ht)
+                    expenses_ht)
 
     def get_tvas(self):
         """
@@ -139,7 +140,8 @@ class TaskCompute(object):
         """
             return the amount of the expenses
         """
-        result = int(self.expenses)
+        expenses = self.expenses or 0
+        result = int(expenses)
         return result
 
     def get_expenses_tva(self):
@@ -411,8 +413,9 @@ class LineCompute(object):
             Compute the line's total
         """
         # Discount have amount attr not cost
-        cost = getattr(self, "amount", self.cost)
-        return float(cost) * float(self.quantity)
+        cost = getattr(self, "amount", self.cost) or 0
+        quantity = self.quantity or 0
+        return float(cost) * float(quantity)
 
     def tva_amount(self):
         """

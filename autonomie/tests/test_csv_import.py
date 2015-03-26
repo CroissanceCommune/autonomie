@@ -40,9 +40,8 @@ def csv_datas():
 
 @pytest.fixture
 def association_handler():
-    from autonomie.csv_import import CsvImportAssociator
-    from autonomie.models.user import UserDatas
-    return CsvImportAssociator(UserDatas)
+    from autonomie.csv_import import get_csv_import_associator
+    return get_csv_import_associator('userdatas')
 
 @pytest.fixture
 def userdata(dbsession):
@@ -124,16 +123,16 @@ def test_import_line(dbsession, csv_datas, association_handler):
     # We pop a mandatory argument
     association_dict.pop('Nom')
     association_handler.set_association_dict(association_dict)
-    importer = CsvImporter(
-        dbsession,
-        UserDatas,
-        get_buffer(),
-        association_handler
-    )
-    res, msg = importer.import_line(line.copy())
 
-    assert res is None
-    assert importer.in_error_lines == [line]
+    from autonomie.exception import MissingMandatoryArgument
+
+    with pytest.raises(MissingMandatoryArgument):
+        importer = CsvImporter(
+            dbsession,
+            UserDatas,
+            get_buffer(),
+            association_handler
+        )
 
 
 def test_update_line(association_handler, userdata, dbsession):

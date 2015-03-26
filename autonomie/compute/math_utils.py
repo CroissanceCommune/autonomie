@@ -43,7 +43,6 @@ def floor(value):
         >>> floor(296.9985265)
         296
     """
-    print(value)
     if not isinstance(value, Decimal):
         value = Decimal(str(value))
     return int(dec_round(value, 0))

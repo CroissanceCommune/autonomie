@@ -775,7 +775,10 @@ class UserDatas(Node):
                   'title': u'Accompagnateur',
                   'section': u'Synthèse',
                   'widget': get_deferred_user_choice(
-                      roles=['admin', 'manager']
+                      roles=['admin', 'manager'],
+                      widget_options={
+                          'default_option': ('', ''),
+                      }
                   ),
               },
               'export': {'exclude': True},

@@ -27,7 +27,7 @@
 """
 import math
 from decimal import Decimal
-from decimal import ROUND_DOWN
+from decimal import ROUND_HALF_UP
 
 PRECISION_LEVEL = 2
 
@@ -43,16 +43,24 @@ def floor(value):
         >>> floor(296.9985265)
         296
     """
+    print(value)
     if not isinstance(value, Decimal):
         value = Decimal(str(value))
-    return int(dec_round(value, 1))
+    return int(dec_round(value, 0))
 
 
 def dec_round(dec, precision):
     """
-        Return a decimal object rounded to precision
+    Return a decimal object rounded to precision
+
+    :param int precision: the number of decimals we want after the comma
     """
-    return dec.quantize(Decimal(str(math.pow(10, -precision))), ROUND_DOWN)
+    # On construit un nombre qui a le même nombre de 0 après la virgule que
+    # ce que l'on veut en définitive
+    precision_reference_tmpl = "%%.%df" % precision
+    precision_reference = precision_reference_tmpl % 1
+    precision = Decimal(precision_reference)
+    return dec.quantize(precision, ROUND_HALF_UP)
 
 
 def amount(value, precision=2):
@@ -75,7 +83,7 @@ def integer_to_amount(value, precision=2):
     """
     flat_point = Decimal(str(math.pow(10, -precision)))
     val = Decimal(str(value)) * flat_point
-    return float(Decimal(str(val)).quantize(flat_point, ROUND_DOWN))
+    return float(Decimal(str(val)).quantize(flat_point, ROUND_HALF_UP))
 
 
 def percentage(value, _percent):

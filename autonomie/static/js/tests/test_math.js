@@ -52,10 +52,10 @@ test("Transformations des strings en centimes", function(){
   equal(transformToCents("15,25"), 15.25);
   equal(transformToCents("15,25658"), 15.25658);
   equal(round(583.06), 583.06);
-  equal(round(1.009), 1);
+  equal(round(1.009), 1.01);
   equal(round(1.001), 1);
   equal(formatPrice(1), "1,00");
-  equal(formatPrice(1.256, true), "1,25");
+  equal(formatPrice(1.256, true), "1,26");
   equal(formatPrice(1.255555, false), "1,2555...");
   equal(formatPrice(1.2555, false), "1,2555");
   equal(formatPrice(583.06), formatPrice(583.06, false));

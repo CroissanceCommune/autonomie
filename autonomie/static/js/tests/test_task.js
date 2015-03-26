@@ -132,15 +132,15 @@ test("Groupe de ligne", function(){
 test("Contrôle sur le solde", function(){
   initTest();
   computeTotal();
-  equal($('#tasklines_ht .input').text(), "228,3125" + insecable + '€');
-  equal($('#total_ht .input').text(), '128,31' + insecable + '€');
-  equal($('#total .input').text(), '138,27' + insecable + '€');
+  equal($(Selectors.tasklines_ht).text(), "228,3125" + insecable + '€');
+  equal($(Selectors.total_ht).text(), '128,31' + insecable + '€');
+  equal($(Selectors.total_ttc).text(), '138,27' + insecable + '€');
   equal(getTotal(), 138.27);
 });
 module("Ligne de configuration des paiements");
 test("Calcul de l'acompte", function(){
   initTest();
-  $('#total .input').empty().html(formatAmount(1.07));
+  $(Selectors.total_ttc).empty().html(formatAmount(1.07));
   equal(getDeposit(), 0.05);
   equal(getToPayAfterDeposit(), 1.02);
 });

@@ -26,15 +26,6 @@
 Page de tests javascript
 </%doc>
 <%inherit file="/base.mako"></%inherit>
-<%block name='headjs'>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/tests/test_math.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/tests/test_dom.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/tests/test_date.js')}"></script>
-<script type="text/javascript" src="${request.static_url('autonomie:static/js/tests/test_task.js')}"></script>
-</%block>
-<%block name='css'>
-<link rel="stylesheet" href="${request.static_url('autonomie:static/js/tests/qunit.css')}" />
-</%block>
 <%block name='content'>
 <h1 id="qunit-header">${title}</h1>
 <h2 id="qunit-banner"></h2>

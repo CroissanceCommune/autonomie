@@ -217,32 +217,20 @@ holiday_js = get_module_resource("holiday", tmpl=True)
 admin_option_js = get_module_resource("admin_option")
 commercial_js = get_module_resource("commercial")
 
-
-## Main javascript requirements
-#main_js = Group([
-#    main,
-#    bootstrap,
-#    main_css,
-#    jquery_form,
-#    ui_autocomplete,
-#    jquery_maskedinput,
-#    chosen_jquery,
-#    tools,
-#])
-## Javascript requirements for task pages/forms
-#task_js = Group([
-#    main,
-#    bootstrap,
-#    ui_datepicker_fr,
-#    task]
-#)
-#
 # Test tools
-test_js = Group([
-    main_group,
-    task,
-    jquery_qunit],
-)
+def get_test_resource():
+    res = []
+    for i in ('math', 'date', 'dom', 'task'):
+        res.append(
+            get_resource(
+                "js/tests/test_%s.js" % i,
+                depends=(jquery_qunit, main_group, task)
+            )
+        )
+    return Group(res)
+
+
+test_js = get_test_resource()
 
 # File upload page js requirements
 fileupload_js = get_resource(

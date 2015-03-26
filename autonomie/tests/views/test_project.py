@@ -120,7 +120,7 @@ def test_archive(project, get_csrf_request_with_db):
     req.referer = "test"
     req.context = project
     project_archive(req)
-    assert(getone().archived == "1")
+    assert(getone().archived)
 
 def test_addphase(dbsession, project, get_csrf_request_with_db):
     from autonomie.views.project import project_addphase

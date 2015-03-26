@@ -22,8 +22,15 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from autonomie.compute.task import (LineCompute, TaskCompute,
-        EstimationCompute, InvoiceCompute, reverse_tva, compute_tva)
+from autonomie.compute.task import (
+    LineCompute,
+    TaskCompute,
+    EstimationCompute,
+    InvoiceCompute,
+    reverse_tva,
+    compute_tva
+)
+from autonomie.compute import math_utils
 
 TASK = {"expenses":1500, "expenses_ht":1000}
 LINES = [{'cost':10025, 'tva':1960, 'quantity':1.25},
@@ -53,8 +60,8 @@ DISCOUNT_TOTAL_HT = sum([d['amount']for d in DISCOUNTS])
 DISCOUNT_TVAS = (392,)
 DISCOUNT_TOTAL_TVAS = sum(DISCOUNT_TVAS)
 
-HT_TOTAL =  int(LINES_TOTAL_HT - DISCOUNT_TOTAL_HT + TASK['expenses_ht'])
-TVA = int(LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS + EXPENSE_TVA)
+HT_TOTAL =  math_utils.floor(LINES_TOTAL_HT - DISCOUNT_TOTAL_HT + TASK['expenses_ht'])
+TVA = math_utils.floor(LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS + EXPENSE_TVA)
 
 # TASK_TOTAL = lines + tva + expenses rounded
 TASK_TOTAL = HT_TOTAL + TVA + TASK['expenses']
@@ -207,7 +214,7 @@ class TestEstimationCompute():
     def test_deposit_amount_ttc(self):
         task = self.getOne()
         # 2606.78 = 2004 * 119.6 / 100 + 200 * 105/100
-        assert task.deposit_amount_ttc() == 2606
+        assert task.deposit_amount_ttc() == 2607
 
     # Payment lines (with equal repartition)
     def test_get_nb_payment_lines(self):
@@ -223,8 +230,8 @@ class TestEstimationCompute():
 
     def test_paymentline_amount_ttc(self):
         task = self.getOne()
-        # 3475 = int(2672 * 119.6/100 + 266 * 105/100.0)
-        assert task.paymentline_amount_ttc() == 3475
+        # 3475.712 = 2672 * 119.6/100 + 266 * 105/100.0
+        assert task.paymentline_amount_ttc() == 3476
 
     def test_sold(self):
         task = self.getOne()

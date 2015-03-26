@@ -23,7 +23,7 @@
  */
 
 
-var AppOptions;
+window.AppOptions = window.AppOptions || {};
 var Facade = new Object();
 var Selectors = {
   expenses_ht: 'input[name=expenses_ht]',
@@ -126,8 +126,12 @@ var ExpenseRow = Row.extend({
     var tva_object = _.find(
       AppOptions['tvas'], function(val){return val['default'];}
     );
-    var tva = tva_object.value.toString();
-    return transformToCents(tva);
+    if (_.isUndefined(tva_object)){
+      return transformToCents("0");
+    }else{
+      var tva = tva_object.value.toString();
+      return transformToCents(tva);
+    }
   },
   HT:function(){
     return transformToCents(this.row.val());

@@ -759,7 +759,7 @@ def make_task_delete_view(valid_msg):
         else:
             if task.type_ == 'invoice' and task.estimation is not None:
                 task.estimation.CAEStatus = 'valid'
-            request.dbsession.merge(task.estimation)
+                request.dbsession.merge(task.estimation)
             request.dbsession.delete(task)
             message = valid_msg.format(task=task)
             request.session.flash(message)

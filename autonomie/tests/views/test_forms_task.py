@@ -35,7 +35,6 @@ DBDATAS = dict(
         name=u"Nom du devis",
         course="0",
         display_units="1",
-        expenses=1500,
         expenses_ht=150,
         deposit=20,
         exclusions="Ne sera pas fait selon la règle",
@@ -52,7 +51,6 @@ DBDATAS = dict(
         name=u"Nom de la facture",
         course="0",
         display_units="1",
-        expenses=2000,
         expenses_ht=150,
         payment_conditions="Payer à l'heure",
         phase_id=415,
@@ -100,7 +98,6 @@ DATAS = {'common': dict(
     course="0",
     display_units="1",),
     'lines': dict(
-        expenses=1500,
         expenses_ht=150,
         lines=[
     {'description':'text1', 'cost':10000, 'unity':'days', 'quantity':12, 'tva':1960},
@@ -135,7 +132,6 @@ INV_DATAS = {'common': dict(
     course="0",
     display_units="1",),
     'lines':dict(
-        expenses=2000,
         expenses_ht=150,
         lines=[
             {'description':'text1',

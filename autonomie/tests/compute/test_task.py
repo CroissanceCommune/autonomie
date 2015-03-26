@@ -139,9 +139,9 @@ class TestTaskCompute():
         # cf ticket #501
         # line total : 12.875
         # tva : 2.5235 -> 2.52
-        # A confirmer :l'arrondi ici bas
-        # => total : 15.39 (au lieu de 15.395)
-        assert task.total_ttc() == 1539
+        # A confirmer :l'arrondi ici HALF UP
+        # => total : 15.40 (au lieu de 15.395)
+        assert task.total_ttc() == 1540
 
     def test_total(self):
         est = get_task()

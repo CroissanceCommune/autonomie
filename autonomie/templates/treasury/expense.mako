@@ -105,13 +105,6 @@ ${period_form.render()|n}
     % endif
 % endfor
 </div>
-% if edit:
-    <div class="hidden-print">
-        <a href="#lines/add" class='btn btn-info visible-sm hidden-lg' title="Ajouter une ligne"><i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter des frais</a>
-        <a href="#kmlines/add" class='btn btn-info visible-sm hidden-lg' title="Ajouter une ligne"><i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter des frais kilométriques</a>
-        <a href="#tel/add" class='btn btn-info visible-sm hidden-lg' title="Ajouter une ligne"><i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>
-</div>
-% endif
 <div class='row'>
     <div class='col-md-12' id="expenses"></div>
 </div>

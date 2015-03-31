@@ -174,13 +174,13 @@ templates['expenseKm.mustache'] = template({"1":function(depth0,helpers,partials
   return buffer;
 },"useData":true});
 templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partials,data) {
-  return "            <div>\n            <a href=\"#lines/add/1\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            <a href=\"#tel/add\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une lignei de frais téléphonique\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>\n            </div>\n";
+  return "            <div>\n            <a href=\"#lines/add/1\" class='btn btn-info' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            <a href=\"#tel/add\" class='btn btn-info' title=\"Ajouter une lignei de frais téléphonique\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>\n            </div>\n";
   },"3":function(depth0,helpers,partials,data) {
   return "            <th class=\"hidden-print\">Actions</th>\n";
   },"5":function(depth0,helpers,partials,data) {
   return "                <td class=\"hidden-print\"></td>\n";
   },"7":function(depth0,helpers,partials,data) {
-  return "            <div>\n                <a href=\"#lines/add/2\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
+  return "            <div>\n                <a href=\"#lines/add/2\" class='btn btn-info' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div>\n    <div class=\"row\">\n        <div class=\"col-xs-4\">\n            <h3 style=\"margin-top:0px\">\n                Achats\n            </h3>\n            <span class=\"help-block\">\n                Dépenses liées au fonctionnement de l'entreprise\n            </span>\n        </div>\n        <div class=\"col-xs-8\">\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));

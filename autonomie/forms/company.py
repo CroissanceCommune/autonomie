@@ -162,6 +162,12 @@ comptabilité",
             missing=deferred_default_contribution,
             description=u"Pourcentage que cette entreprise contribue à la CAE")
 
+    cgv = forms.textarea_node(
+        title=u"Conditions générales complémentaires",
+        richwidget=True,
+        missing="",
+    )
+
     RIB = colander.SchemaNode(
             colander.String(),
             title=u'RIB',

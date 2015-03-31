@@ -75,6 +75,9 @@ def upgrade():
     op.add_column("user_datas", col)
     op.execute("alter table user_datas modify parcours_num_hours float DEFAULT NULL")
 
+    col = sa.Column("cgv", sa.Text, default="")
+    op.add_column("company", col)
+
 
     # Migration des donnees vers la nouvelle structure
     from alembic.context import get_bind

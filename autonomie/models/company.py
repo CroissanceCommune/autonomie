@@ -191,6 +191,11 @@ class Company(DBBASE, PersistentACLMixin):
         backref=backref('company_logo_backref', uselist=False),
     )
 
+    cgv = deferred(
+        Column(Text, default=''),
+        group='edit',
+    )
+
     def get_company_id(self):
         """
             Return the current company id

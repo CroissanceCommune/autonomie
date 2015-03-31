@@ -601,8 +601,8 @@ class XlsExpense(XlsWriter):
         """
         write the internal expense table to the current worksheet
         """
-        txt = u"FRAIS DIRECT DE FONCTIONNEMENT (< à 30% DU SALAIRE BRUT \
-PAR MOIS)"
+        txt = u"ACHATS (frais direct de fonctionnement, < à 30% du salaire \
+brut par mois)"
         cell = self.write_full_line(txt)
         self.set_color(cell, Color.Crimson)
         self.write_expense_table('1')
@@ -611,8 +611,8 @@ PAR MOIS)"
         """
         write the activity expense table to the current worksheet
         """
-        txt = u"FRAIS CONCERNANT DIRECTEMENT VOTRE L'ACTIVITE AUPRES DE VOS \
-CLIENTS"
+        txt = u"FRAIS (frais concernant directement votre l'activite aupres \
+de vos clients)"
         cell = self.write_full_line(txt)
         self.set_color(cell, Color.Crimson)
         self.write_expense_table('2')

@@ -83,11 +83,14 @@ ${period_form.render()|n}
 </p>
 % endif
 </div>
-<div class="row hidden-print">
-    <div class="well">
-        <b>Justificatifs</b>
-        ${format_filelist(request.context)}
-    </div>
+<div class="well hidden-print">
+    <h5>Justificatifs</h5>
+    ${format_filelist(request.context)}
+    % if not request.context.children:
+        <small>
+            Aucun justificatif n'a été déposé
+        </small>
+    % endif
 </div>
 <div class="row hidden-print">
 % for com in communication_history:

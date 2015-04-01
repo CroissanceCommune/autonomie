@@ -105,7 +105,6 @@ class PhaseSchema(colander.MappingSchema):
     """
         Schema for phase
     """
-    id = forms.id_node()
     name = colander.SchemaNode(
         colander.String(),
         title=u"Nom du dossier",

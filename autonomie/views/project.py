@@ -387,11 +387,17 @@ def project_view(request):
 
 
 class ProjectAdd(BaseFormView):
-    add_template_vars = ('title',)
+    add_template_vars = ('title', 'codes', )
     title = u"Ajout d'un nouveau projet"
     schema = get_project_schema()
     buttons = (submit_btn,)
     validation_msg = u"Le projet a été ajouté avec succès"
+
+    @property
+    def codes(self):
+        codes = [project.code for project in self.context.projects]
+        codes.sort()
+        return codes
 
     def before(self, form):
         populate_actionmenu(self.request)
@@ -431,7 +437,7 @@ class ProjectAdd(BaseFormView):
 
 
 class ProjectEdit(ProjectAdd):
-    add_template_vars = ('title', 'project',)
+    add_template_vars = ('title', 'project', 'codes',)
     validation_msg = u"Le projet a été modifié avec succès"
 
     def appstruct(self):
@@ -447,6 +453,13 @@ class ProjectEdit(ProjectAdd):
     @reify
     def project(self):
         return self.request.context
+
+    @property
+    def codes(self):
+        codes = [project.code for project in self.context.company.projects \
+                if project is not self.context]
+        codes.sort()
+        return codes
 
 
 def populate_actionmenu(request, project=None):

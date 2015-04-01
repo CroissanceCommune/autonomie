@@ -147,6 +147,39 @@ def check_begin_end_date(form, value):
             raise exc
 
 
+def get_projects_from_request(request):
+    """
+    Return the projects of the current company (we fetch the company from the
+    request context)
+    """
+    if request.context.__name__ == 'project':
+        # Edition (we don't want the current project)
+        projects = [project for project in request.context.company.projects \
+                    if project != request.context]
+    elif request.context.__name__ == 'company':
+        projects = request.context.projects
+    else:
+        raise Exception("We can't retrieve the projects from something that's \
+not a a project itself or a company")
+
+    return projects
+
+
+@colander.deferred
+def deferred_project_code_validator(node, kw):
+    request = kw['request']
+    projects = get_projects_from_request(request)
+
+    def unique_pcode(node, code):
+        if code.upper() in [project.code.upper() for project in projects]:
+            raise colander.Invalid(
+                node,
+                u"Ce code est déjà utilisé pour identifier un autre projet"
+            )
+
+    return colander.All(colander.Length(min=4, max=4), unique_pcode)
+
+
 class Project(Node):
     """
         The project model
@@ -168,7 +201,8 @@ class Project(Node):
         info={
             'colanderalchemy': {
                 'title': u"Code",
-                'widget': deform.widget.TextInputWidget(mask='****')
+                'widget': deform.widget.TextInputWidget(mask='****'),
+                'validator': deferred_project_code_validator,
             },
         },
         nullable=False,

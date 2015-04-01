@@ -41,11 +41,13 @@ def project(config, get_csrf_request_with_db):
     view.submit_success(appstruct)
     return getone()
 
+
 def getone():
     val = Project.query().filter(Project.name=="Projéct&$").first()
     if val is not None:
         val.__name__ = 'project'
     return val
+
 
 @pytest.fixture
 def customer(dbsession):
@@ -61,9 +63,6 @@ def customer(dbsession):
     dbsession.add(c)
     dbsession.flush()
     return c
-
-
-
 
 
 def test_add(project):
@@ -122,14 +121,30 @@ def test_archive(project, get_csrf_request_with_db):
     project_archive(req)
     assert(getone().archived)
 
-def test_addphase(dbsession, project, get_csrf_request_with_db):
-    from autonomie.views.project import project_addphase
+def test_addphase(config, dbsession, project, get_csrf_request_with_db):
+    from autonomie.views.project import PhaseAddFormView
     from autonomie.models.project import Phase
+    config.add_route('project/{id}', '/')
     req = get_csrf_request_with_db()
-    req.referer = "test"
     req.context = project
-    req.params['phase'] = u'Phasé'
-    project_addphase(req)
+    view = PhaseAddFormView(req)
+    view.submit_success({'name': u'Phasé'})
     dbsession.flush()
     phases = Phase.query().filter(Phase.project==project).all()
     assert(len(phases) == 2)
+
+def test_editphase(config, dbsession, project, get_csrf_request_with_db):
+    from autonomie.views.project import PhaseEditFormView
+    from autonomie.models.project import Phase
+    phase = Phase(name='test', project=project)
+    dbsession.merge(phase)
+    dbsession.flush()
+
+    config.add_route('project/{id}', '/')
+    req = get_csrf_request_with_db()
+    req.context = phase
+    view = PhaseEditFormView(req)
+    view.submit_success({'name': u'Phasé'})
+    dbsession.flush()
+    phase = Phase.get(phase.id)
+    assert(phase.name == u'Phasé')

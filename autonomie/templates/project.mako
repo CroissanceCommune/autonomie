@@ -25,33 +25,19 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
-% if hasattr(project, "id") and project.id:
-    <div class='row collapse' id='project-description'>
-        <div class="col-md-8 col-md-offset-2">
-    <div class="well">
-                    <h3>Client(s)</h3>
-                    % for customer in project.customers:
-                        <div class='well'>
-                            <address>
-                                ${format_text(customer.full_address)}
-                            </address>
-                        </div>
-                    % endfor
-        %if project.type:
-            <b>Type de projet :</b> ${project.type}
-        % endif
-        <br />
-        % if project.definition:
-            <h3>Définition du projet</h3>
-            ${project.definition}
-        % endif
-    </div>
-</div>
-</div>
-% endif
 <div class='row'>
     <div class='col-md-6 col-md-offset-3'>
         ${form|n}
+    </div>
+    <div class='col-md-3'>
+        <h4>Codes projet utilisés</h4>
+        <ul>
+            % for code in codes:
+                <li>
+                    ${code.upper()}
+                </li>
+            % endfor
+        </ul>
     </div>
 </div>
 </%block>

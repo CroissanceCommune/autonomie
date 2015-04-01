@@ -28,5 +28,15 @@
     <div class="col-md-6 col-md-offset-3">
         ${form|n}
     </div>
+    <div class='col-md-3'>
+        <h4>Codes client utilisés</h4>
+        <ul>
+            % for code in codes:
+                <li>
+                    ${code.upper()}
+                </li>
+            % endfor
+        </ul>
+    </div>
 </div>
 </%block>

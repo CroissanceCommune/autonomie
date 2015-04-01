@@ -64,48 +64,32 @@ from autonomie.models.base import (
 log = logging.getLogger(__name__)
 
 
-def get_customer_from_request(request):
-    if request.context.__name__ == 'customer':
-        return request.context
-    else:
-        return None
-
-
-def get_company_id_from_request(request):
+def get_customers_from_request(request):
     if request.context.__name__ == 'company':
-        return request.context.id
+        return request.context.customers
     elif request.context.__name__ == 'customer':
-        return request.context.company.id
+        return [customer for customer in request.context.company.customers \
+                if customer is not request.context]
     else:
-        return -1
+        return []
 
 
 @colander.deferred
 def deferred_ccode_valid(node, kw):
     request = kw['request']
-    company_id = get_company_id_from_request(request)
-    customer = get_customer_from_request(request)
+    customers = get_customers_from_request(request)
 
     def unique_ccode(node, value):
         """
             Test customer code unicity
         """
-        if len(value) != 4:
-            message = u"Le code client doit contenir 4 caractères."
-            raise colander.Invalid(node, message)
-        #Test unicity
-        query = Customer.query().filter(Customer.company_id == company_id)\
-                .filter(Customer.code == value)
-        if customer:
-            # In edit mode, it will always fail
-            query = query.filter(Customer.id != customer.id)
-        result = query.all()
+        if value.upper() in [customer.code.upper() for customer in customers]:
+            raise colander.Invalid(
+                node,
+                u"Ce code est déjà utilisé pour identifier un autre client",
+            )
 
-        if len(result):
-            message = u"Vous avez déjà utilisé ce code '{0}' pour un autre \
-client".format(value)
-            raise colander.Invalid(node, message)
-    return unique_ccode
+    return colander.All(colander.Length(min=4, max=4), unique_ccode)
 
 
 class Customer(DBBASE, PersistentACLMixin):
@@ -188,7 +172,8 @@ class Customer(DBBASE, PersistentACLMixin):
         info={
             'colanderalchemy':{
                 'title': u"Code",
-                'widget': deform.widget.TextInputWidget(mask='****')
+                'widget': deform.widget.TextInputWidget(mask='****'),
+                'validator': deferred_ccode_valid,
             }
         },
         nullable=False,

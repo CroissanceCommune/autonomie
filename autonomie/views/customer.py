@@ -142,15 +142,25 @@ class CustomerAdd(BaseFormView):
     """
     Customer add form
     """
+    add_template_vars = ('title', 'codes', )
     title = u"Ajouter un client"
     _schema = None
     buttons = (submit_btn,)
     validation_msg = u"Le client a bien été ajouté"
 
     @property
+    def codes(self):
+        codes = [model.code for model in self.context.customers]
+        codes.sort()
+        return codes
+
+    # Schema is here a property since we need to build it dynamically regarding
+    # the current request (the same should have been built using the after_bind
+    # method ?)
+    @property
     def schema(self):
         """
-        Dynamically create the schema regarding the current request
+        The getter for our schema property
         """
         if self._schema == None:
             self._schema = get_customer_schema(self.request)
@@ -159,8 +169,9 @@ class CustomerAdd(BaseFormView):
     @schema.setter
     def schema(self, value):
         """
-        A setter for the schema attribute (needed because of the baseclass in
-        pyramid_deform)
+        A setter for the schema property
+        The BaseClass in pyramid_deform gets and sets the schema attribute that
+        is here transformed as a property
         """
         self._schema = value
 
@@ -195,7 +206,14 @@ class CustomerEdit(CustomerAdd):
     """
     Customer edition form
     """
+    add_template_vars = ('title', 'codes',)
     validation_msg = u"Le client a été modifié avec succès"
+
+    def appstruct(self):
+        """
+        Populate the form with the current edited context (customer)
+        """
+        return self.schema.dictify(self.request.context)
 
     @reify
     def title(self):
@@ -203,11 +221,12 @@ class CustomerEdit(CustomerAdd):
             self.request.context.name
         )
 
-    def appstruct(self):
-        """
-        Populate the form with the current edited context (customer)
-        """
-        return self.schema.dictify(self.request.context)
+    @property
+    def codes(self):
+        codes = [model.code for model in self.context.company.customers \
+                if model is not self.context]
+        codes.sort()
+        return codes
 
 
 def populate_actionmenu(request, context):

@@ -43,7 +43,12 @@ def test_unique_ccode(dbsession, content):
         validator('nutt', u'C001')
     validator('nutt', u'C002')
 
-    company = Mock(id=2, __name__='company')
+    company = Company(
+        name="company2",
+        goal="Company of user2",
+        phone='0457858586',
+    )
+    company.__name__ = 'company'
     validator = makeOne(company)
     validator('nutt', u'C001')
 

@@ -173,19 +173,9 @@
         ${action_cell(task, view_url)}
 </tr>
 </%def>
-
-<div class='row collapse' id='project-addphase'>
-    <div class='col-md-4 col-md-offset-4'>
-        <h3>Ajouter une phase</h3>
-        <form class='navbar-form' method='POST' action="${request.route_path('project', id=project.id, _query=dict(action='addphase'))}">
-            <input type='text' name='phase' />
-            <button class='btn btn-primary' type='submit' name='submit' value='addphase'>Valider</button>
-        </form>
-        <br />
-    </div>
-</div>
+<br />
 <div class='row collapse' id='project-description'>
-    <div class="col-md-8 col-md-offset-2">
+    <div class="col-md-10 col-md-offset-1">
         <div class="well">
             <div class='row'>
                 <div class='col-md-6'>
@@ -244,7 +234,6 @@
                         data-toggle='collapse'
                         data-parent='#phase_accordion'
                         class='accordion-toggle'>
-                        <div>
                             <%
 if phase.is_default():
     label = u"Phase par défaut"
@@ -253,9 +242,28 @@ else:
 %>
                             <i style="vertical-align:middle"
                                 class="glyphicon glyphicon-folder-open">
-                            </i>&nbsp;${label}
-                        </div>
+                            </i>
+                            &nbsp;${label}&nbsp;
                     </a>
+                    <a
+                        href="${request.route_path('phase', id=phase.id)}"
+                        title="Éditer le libellé de cette phase"
+                        >
+                        <i style="vertical-align:middle"
+                            class="glyphicon glyphicon-pencil">
+                        </i>
+                    </a>
+                    % if len(phase.tasks) == 0:
+                    <a
+                        href="${request.route_path('phase', id=phase.id, _query=dict(action='delete'))}"
+                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette phase ?');"
+                        title="Éditer le libellé de cette phase"
+                        >
+                        <i style="vertical-align:middle"
+                            class="glyphicon glyphicon-trash">
+                        </i>
+                    </a>
+                    % endif
                 </div>
                 <div class="panel-collapse ${section_css}"
                     id='phase_${phase.id}'>

@@ -26,16 +26,6 @@
 <%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
 % if hasattr(project, "id") and project.id:
-    <div class='row collapse' id='project-addphase'>
-        <div class='col-md-4 col-md-offset-4'>
-            <h3>Ajouter une phase</h3>
-            <form class='navbar-form' method='POST' action="${request.route_path('project', id=project.id, _query=dict(action='addphase'))}">
-                <input type='text' name='phase' />
-                <button class='btn btn-primary' type='submit' name='submit' value='addphase'>Valider</button>
-            </form>
-            <br />
-        </div>
-    </div>
     <div class='row collapse' id='project-description'>
         <div class="col-md-8 col-md-offset-2">
     <div class="well">

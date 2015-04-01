@@ -133,11 +133,9 @@ textarea{
   margin-top:6px;
 }
 .section-header{
-  padding:3px 0px;
-  margin:2px;
+  padding: 12px 2px;
   font-weight:bold;
-  border-bottom:1px solid #ddd;
-  font-size:15px;
+  font-size:14px;
 }
 /* Invoice list */
 .invoice_resulted, .estimation_geninv, .green_td{
@@ -183,7 +181,6 @@ textarea{
   background-color:#eeeeee;
 }
 .section-header a{
-    display:block;
     padding-left:10px;
     padding-bottom:5px;
     padding-top:5px;
@@ -209,15 +206,8 @@ h3.floatted{
     padding-left:10px;
     border-left:2px solid #d1d1d1;
 }
-.deform button{
-  padding:4px 10px;
-  font-size:1em;
-}
 form.deform{
   margin-bottom:0px;
-}
-.form-actions{
-  margin-bottom:5px;
 }
 .table-disable-hover.table tbody tr:hover td,
 .table-disable-hover.table tbody tr:hover th {

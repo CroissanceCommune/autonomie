@@ -31,7 +31,7 @@
     <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
 </%block>
 <%block name='content'>
-<div class='container' style='overflow:hidden'>
+<div class='col-md-10 col-md-offset-1' style='overflow:hidden'>
     <div class='well'>
         <p>
             <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
@@ -158,9 +158,11 @@
             enctype="multipart/form-data"
             method="POST"
             action="${route}">
-            % for button in submit_buttons:
-                ${button.render(request)|n}
-            % endfor
+                % for button in submit_buttons:
+                    <div style="padding:5px 5px; display:inline-block;">
+                        ${button.render(request)|n}
+                    </div>
+                % endfor
         </form>
     </div>
         <div class='well'>
@@ -173,7 +175,7 @@
           % endif
 
     </div>
-    <div style='border:1px solid #ddd; margin:3px;'>
+    <div class="container-fluid" style="border: 1px solid #dedede; background-color: #fdfdfd;">
             ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}
     </div>
 </div>

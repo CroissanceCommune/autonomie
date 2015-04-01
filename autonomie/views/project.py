@@ -55,6 +55,10 @@ from autonomie.utils.widgets import (
 from autonomie.forms.project import (
     get_list_schema,
     get_project_schema,
+    PhaseSchema,
+)
+from autonomie.forms import (
+    merge_session_with_post,
 )
 from deform_extensions import GridFormWidget
 from autonomie.views import (
@@ -70,9 +74,65 @@ from autonomie.views.files import (
 log = logging.getLogger(__name__)
 
 
+class PhaseAddFormView(BaseFormView):
+    title = u"Ajouter une phase au projet"
+    schema = PhaseSchema()
+
+    def submit_success(self, appstruct):
+        model = Phase()
+        model.project_id = self.context.id
+        merge_session_with_post(model, appstruct)
+        self.dbsession.add(model)
+        redirect = self.request.route_path(
+            "project",
+            id=model.project_id,
+        )
+        return HTTPFound(redirect)
+
+
+class PhaseEditFormView(BaseFormView):
+    title = u"Édition de la phase"
+    schema = PhaseSchema()
+
+    def before(self, form):
+        form.set_appstruct(self.context.appstruct())
+
+    def submit_success(self, appstruct):
+        merge_session_with_post(self.context, appstruct)
+        self.dbsession.merge(self.context)
+        redirect = self.request.route_path(
+            "project",
+            id=self.context.project_id,
+        )
+        return HTTPFound(redirect)
+
+
+def phase_delete_view(context, request):
+    """
+    Phase deletion view
+
+    Allows to delete phases without documents
+    :param obj context: The current phase
+    :param obj request: The pyramid request object
+    """
+    redirect = request.route_path(
+        "project",
+        id=context.project_id,
+    )
+    if len(context.tasks) == 0:
+        msg = u"La phase {0} a été supprimée".format(context.name)
+        request.dbsession.delete(context)
+        request.session.flash(msg)
+    else:
+        msg = u"Impossible de supprimer la phase {0}, elle contient \
+des documents".format(context.name)
+        request.session.flash(msg, 'error')
+    return HTTPFound(redirect)
+
+
 def get_project_form(request):
     """
-        Returns the project add/edit form
+    Returns the project add/edit form
     """
     schema = get_project_schema().bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
@@ -94,12 +154,12 @@ de créer de nouveaux projets")
 
 class ProjectsList(BaseListView):
     """
-        The project list view is compound of :
-            * the list of projects with action buttons (view, delete ...)
-            * an action menu with:
-                * links
-                * an add projectform popup
-                * a searchform
+    The project list view is compound of :
+        * the list of projects with action buttons (view, delete ...)
+        * an action menu with:
+            * links
+            * an add projectform popup
+            * a searchform
     """
     add_template_vars = ('title', 'item_actions',)
     title = u"Liste des projets"
@@ -240,33 +300,9 @@ class ProjectsList(BaseListView):
         return btns
 
 
-def project_addphase(request):
-    """
-        Add a phase to the current project
-    """
-    #TODO : utiliser deform pour manager l'ajout de phase (pour le principe)
-    # This one should be a Form View
-    project = request.context
-    if not request.params.get('phase'):
-        request.session.flash(u"Le nom de la phase est obligatoire",
-                                                            queue='error')
-        anchor = "showphase"
-    else:
-        phasename = request.params.get('phase')
-        phase = Phase()
-        phase.name = phasename
-        phase.project_id = project.id
-        request.dbsession.add(phase)
-        request.session.flash(u"La phase {0} a bien été \
-rajoutée".format(phasename))
-        anchor = ""
-    return HTTPFound(request.route_path('project', id=project.id,
-                                                    _anchor=anchor))
-
-
 def project_archive(request):
     """
-        Archive the current project
+    Archive the current project
     """
     project = request.context
     if not project.archived:
@@ -278,6 +314,7 @@ def project_archive(request):
         )
     request.dbsession.merge(project)
     return HTTPFound(request.referer)
+
 
 def project_delete(request):
     """
@@ -342,6 +379,7 @@ def project_view(request):
         request.context.name,
         ", ".join(customer_names)
     )
+
     return dict(title=title,
                 project=request.context,
                 company=request.context.company,
@@ -421,76 +459,131 @@ def populate_actionmenu(request, project=None):
         if has_permission("edit", project, request):
             request.actionmenu.add(get_edit_btn(project.id))
             request.actionmenu.add(get_detail_btn())
-            request.actionmenu.add(get_phase_btn())
+            request.actionmenu.add(get_phase_btn(project.id))
             request.actionmenu.add(get_add_file_link(request))
 
+
 def get_list_view_btn(cid):
-    return ViewLink(u"Liste des projets", "edit",
-                         path="company_projects",
-                                          id=cid)
+    return ViewLink(
+        u"Liste des projets",
+        "edit",
+        path="company_projects",
+        id=cid,
+    )
+
 
 def get_view_btn(id_):
     return ViewLink(u"Voir", path="project", id=id_)
 
+
 def get_edit_btn(id_):
-    return ViewLink(u"Modifier",  path="project", id=id_,
-                                    _query=dict(action="edit"))
+    return ViewLink(
+        u"Modifier",
+        path="project",
+        id=id_,
+        _query=dict(action="edit"),
+    )
+
 
 def get_detail_btn():
     return ToggleLink(u"Afficher les détails", target="project-description")
 
-def get_phase_btn():
-    return ToggleLink(u"Ajouter une phase", target="project-addphase",
-                                                       css="addphase")
+
+def get_phase_btn(id_):
+    return ViewLink(
+        u"Ajouter une phase (sous-dossier)",
+        path="project",
+        id=id_,
+        _query=dict(action="addphase"),
+    )
+
 
 def includeme(config):
-    config.add_route('company_projects',
-                     '/company/{id:\d+}/projects',
-                     traverse='/companies/{id}')
-    config.add_route('project',
-                     '/projects/{id:\d+}',
-                     traverse='/projects/{id}')
-    config.add_view(ProjectAdd,
-                    route_name='company_projects',
-                    renderer='project.mako',
-                    request_method='POST',
-                    permission='edit')
-    config.add_view(ProjectAdd,
-                    route_name='company_projects',
-                    renderer='project.mako',
-                    request_param='action=add',
-                    permission='edit')
-    config.add_view(ProjectEdit,
-                    route_name='project',
-                    renderer='project.mako',
-                    request_param='action=edit',
-                    permission='edit')
-    config.add_view(project_view,
-                    route_name='project',
-                    renderer='project_view.mako',
-                    permission='view')
-    config.add_view(project_delete,
-                    route_name="project",
-                    request_param="action=delete",
-                    permission='edit')
-    config.add_view(project_archive,
-                    route_name="project",
-                    request_param="action=archive",
-                    permission='edit')
-    config.add_view(project_addphase,
-                    route_name="project",
-                    request_param="action=addphase",
-                    permission='edit')
-    config.add_view(ProjectsList,
-                    route_name='company_projects',
-                    renderer='company_projects.mako',
-                    request_method='GET',
-                    permission='edit')
-
+    config.add_route(
+        'company_projects',
+        '/company/{id:\d+}/projects',
+        traverse='/companies/{id}',
+    )
+    config.add_route(
+        'project',
+        '/projects/{id:\d+}',
+        traverse='/projects/{id}',
+    )
+    config.add_route(
+        'phase',
+        '/phases/{id:\d+}',
+        traverse='/phases/{id}',
+    )
     config.add_view(
-            FileUploadView,
-            route_name="project",
-            renderer='base/formpage.mako',
-            permission='edit',
-            request_param='action=attach_file',
-            )
+        ProjectAdd,
+        route_name='company_projects',
+        renderer='project.mako',
+        request_method='POST',
+        permission='edit',
+    )
+    config.add_view(
+        ProjectAdd,
+        route_name='company_projects',
+        renderer='project.mako',
+        request_param='action=add',
+        permission='edit',
+    )
+    config.add_view(
+        ProjectEdit,
+        route_name='project',
+        renderer='project.mako',
+        request_param='action=edit',
+        permission='edit',
+    )
+    config.add_view(
+        project_view,
+        route_name='project',
+        renderer='project_view.mako',
+        permission='view',
+    )
+    config.add_view(
+        project_delete,
+        route_name="project",
+        request_param="action=delete",
+        permission='edit',
+    )
+    config.add_view(
+        project_archive,
+        route_name="project",
+        request_param="action=archive",
+        permission='edit',
+    )
+    config.add_view(
+        PhaseAddFormView,
+        route_name="project",
+        request_param="action=addphase",
+        renderer="base/formpage.mako",
+        permission='edit',
+    )
+    config.add_view(
+        PhaseEditFormView,
+        route_name="phase",
+        renderer="base/formpage.mako",
+        permission='edit',
+    )
+    config.add_view(
+        phase_delete_view,
+        route_name="phase",
+        renderer="base/formpage.mako",
+        permission='edit',
+        request_param="action=delete",
+    )
+    config.add_view(
+        ProjectsList,
+        route_name='company_projects',
+        renderer='company_projects.mako',
+        request_method='GET',
+        permission='edit',
+    )
+    config.add_view(
+        FileUploadView,
+        route_name="project",
+        renderer='base/formpage.mako',
+        permission='edit',
+        request_param='action=attach_file',
+    )

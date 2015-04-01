@@ -27,8 +27,7 @@
 """
 import colander
 import logging
-
-from deform import widget as deform_widget
+import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
 
@@ -94,21 +93,23 @@ def get_project_schema():
         colander.SchemaNode(
         colander.Sequence(),
         customer_id_node,
-        widget=deform_widget.SequenceWidget(min_len=1),
+        widget=deform.widget.SequenceWidget(min_len=1),
         title=u"Clients",
         name='customers')
     )
     return schema
 
+
 class PhaseSchema(colander.MappingSchema):
     """
         Schema for phase
     """
-    name = colander.SchemaNode(colander.String(),
-            validator=colander.Length(max=150))
-
-
-phaseSchema = PhaseSchema()
+    id = forms.id_node()
+    name = colander.SchemaNode(
+        colander.String(),
+        title=u"Nom du dossier",
+        validator=colander.Length(max=150),
+    )
 
 
 def get_list_schema():
@@ -120,7 +121,7 @@ def get_list_schema():
         colander.Boolean(),
         name='archived',
         missing=False,
-        widget=deform_widget.HiddenWidget())
+        widget=deform.widget.HiddenWidget())
     )
 
     return schema

@@ -47,6 +47,7 @@ from autonomie import forms
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import (
     CustomDateType,
+    PersistentACLMixin,
 )
 from autonomie.models.base import (
     default_table_args,
@@ -333,7 +334,7 @@ class Project(Node):
         return self.todict()
 
 
-class Phase(DBBASE):
+class Phase(DBBASE, PersistentACLMixin):
     """
         Phase d'un projet
     """

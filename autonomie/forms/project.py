@@ -97,6 +97,7 @@ def get_project_schema():
         title=u"Clients",
         name='customers')
     )
+
     return schema
 
 

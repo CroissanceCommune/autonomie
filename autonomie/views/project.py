@@ -432,6 +432,7 @@ class ProjectAdd(BaseFormView):
 
 class ProjectEdit(ProjectAdd):
     add_template_vars = ('title', 'project',)
+    validation_msg = u"Le projet a été modifié avec succès"
 
     def appstruct(self):
         """

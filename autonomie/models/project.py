@@ -130,6 +130,23 @@ def deferred_customer_validator(node, kw):
     return colander.Function(customer_oneof)
 
 
+def check_begin_end_date(form, value):
+    """
+    Check the project beginning date preceeds the end date
+    """
+    ending = value.get('endingDate')
+    starting = value.get('startingDate')
+
+    if ending is not None and starting is not None:
+        if not ending >= starting:
+            exc = colander.Invalid(
+                form,
+                u"La date de début doit précéder la date de fin du projet"
+            )
+            exc['startingDate'] = u"Doit précéder la date de fin"
+            raise exc
+
+
 class Project(Node):
     """
         The project model
@@ -137,6 +154,8 @@ class Project(Node):
     __tablename__ = 'project'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'project'}
+
+    __colanderalchemy_config__ = {'validator': check_begin_end_date}
 
     id = Column(
         ForeignKey('node.id'),

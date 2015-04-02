@@ -36,7 +36,6 @@ from autonomie.models.job import (
     CsvImportJob,
     MailingJob,
 )
-from autonomie.models.company import Company
 from autonomie.mail import (
     send_salary_sheet,
     UndeliveredMail,
@@ -103,7 +102,7 @@ def get_job(celery_request, job_model, job_id):
 @task(bind=True)
 def async_import_datas(
     self, model_type, job_id, association_dict, csv_filepath, id_key, action,
-    force_rel_creation):
+    force_rel_creation, default_values):
     """
     Launch the import of the datas provided in the csv_filepath
 
@@ -118,6 +117,7 @@ def async_import_datas(
         (insert/update/override)
     :param bool force_rel_creation: Force the creation of configurable related
     elements
+    :param default_values: default_values used to initialize new objects
     """
     logger.info(u"We are launching an asynchronous csv import")
     logger.info(u"  The job id : %s" % job_id)
@@ -125,6 +125,7 @@ def async_import_datas(
     logger.info(u"  The association dict : %s" % association_dict)
     logger.info(u"  The id key : %s" % id_key)
     logger.info(u"  Action : %s" % action)
+    logger.info(u"  Default initialization values : %s" % default_values)
 
     from autonomie.models.base import DBSESSION
     transaction.begin()
@@ -136,7 +137,6 @@ def async_import_datas(
 
     job.jobid = self.request.id
 
-    # TODO : handle the type of datas we import
     try:
         associator = get_csv_import_associator(model_type)
         associator.set_association_dict(association_dict)
@@ -149,6 +149,7 @@ def async_import_datas(
             action=action,
             id_key=id_key,
             force_rel_creation=force_rel_creation,
+            default_values=default_values
         )
         logger.info(u"Importing the datas")
         importer.import_datas()

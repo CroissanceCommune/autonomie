@@ -145,7 +145,10 @@ class Company(DBBASE, PersistentACLMixin):
         order_by="Customer.code",
         backref=backref(
             'company',
-            info={'colanderalchemy': forms.EXCLUDED},
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+                'export': {'exclude': True},
+            },
         )
     )
     projects = relationship(

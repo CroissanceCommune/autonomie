@@ -55,6 +55,10 @@ from autonomie.views import (
     BaseFormView,
     submit_btn,
 )
+from autonomie.views.csv_import import (
+    CsvFileUploadView,
+    ConfigFieldAssociationView,
+)
 
 log = logging.getLogger(__name__)
 
@@ -255,50 +259,121 @@ def get_edit_btn(customer_id):
                                         _query=dict(action="edit"))
 
 
+class CustomerImportStep1(CsvFileUploadView):
+    title = u"Import des clients, étape 1 : chargement d'un fichier au \
+format csv"
+    model_types = ("customers",)
+    default_model_type = 'customers'
+
+    def get_next_step_route(self, args):
+        return self.request.route_path(
+            "company_customers_import_step2",
+            id=self.context.id,
+            _query=args
+        )
+
+
+class CustomerImportStep2(ConfigFieldAssociationView):
+     title = u"Import de clients, étape 2 : associer les champs"
+     model_types = CustomerImportStep1.model_types
+
+     def get_previous_step_route(self):
+         return self.request.route_path(
+             "company_customers_import_step1",
+             id=self.context.id,
+         )
+
+     def get_default_values(self):
+         log.info("Asking for default values : %s" % self.context.id)
+         return dict(company_id=self.context.id)
+
+
 def includeme(config):
     """
         Add module's views
     """
-    config.add_route('customer',
-                     '/customers/{id}',
-                     traverse='/customers/{id}')
+    config.add_route(
+        'customer',
+        '/customers/{id}',
+        traverse='/customers/{id}',
+    )
 
-    config.add_route('company_customers',
-                     '/company/{id:\d+}/customers',
-                     traverse='/companies/{id}')
-    config.add_route('customers.csv',
-                     '/company/{id:\d+}/customers.csv',
-                     traverse='/companies/{id}')
+    config.add_route(
+        'company_customers',
+        '/company/{id:\d+}/customers',
+        traverse='/companies/{id}',
+    )
 
-    config.add_view(CustomerAdd,
-                    route_name='company_customers',
-                    renderer='customer.mako',
-                    request_method='POST',
-                    permission='edit')
-    config.add_view(CustomerAdd,
-                    route_name='company_customers',
-                    renderer='customer.mako',
-                    request_param='action=add',
-                    permission='edit')
-    config.add_view(CustomerEdit,
-                    route_name='customer',
-                    renderer='customer.mako',
-                    request_param='action=edit',
-                    permission='edit')
+    config.add_route(
+        'customers.csv',
+        '/company/{id:\d+}/customers.csv',
+        traverse='/companies/{id}'
+    )
 
-    config.add_view(CustomersListView,
-                    route_name='company_customers',
-                    renderer='company_customers.mako',
-                    request_method='GET',
-                    permission='edit')
 
-    config.add_view(CustomersCsv,
-                    route_name='customers.csv',
-                    request_method='GET',
-                    permission='edit')
+    for i in range(2):
+        index = i + 1
+        route_name = 'company_customers_import_step%d' % index
+        path = '/company/{id:\d+}/customers/import/%d' %index
+        config.add_route(route_name, path, traverse='/companies/{id}')
 
-    config.add_view(customer_view,
-                    route_name='customer',
-                    renderer='customer_view.mako',
-                    request_method='GET',
-                    permission='view')
+    config.add_view(
+        CustomerAdd,
+        route_name='company_customers',
+        renderer='customer.mako',
+        request_method='POST',
+        permission='edit',
+    )
+
+    config.add_view(
+        CustomerAdd,
+        route_name='company_customers',
+        renderer='customer.mako',
+        request_param='action=add',
+        permission='edit',
+    )
+
+    config.add_view(
+        CustomerEdit,
+        route_name='customer',
+        renderer='customer.mako',
+        request_param='action=edit',
+        permission='edit',
+    )
+
+    config.add_view(
+        CustomersListView,
+        route_name='company_customers',
+        renderer='company_customers.mako',
+        request_method='GET',
+        permission='edit',
+    )
+
+    config.add_view(
+        CustomersCsv,
+        route_name='customers.csv',
+        request_method='GET',
+        permission='edit',
+    )
+
+    config.add_view(
+        customer_view,
+        route_name='customer',
+        renderer='customer_view.mako',
+        request_method='GET',
+        permission='view',
+    )
+
+    config.add_view(
+        CustomerImportStep1,
+        route_name="company_customers_import_step1",
+        permission="edit",
+        renderer="base/formpage.mako",
+    )
+
+    config.add_view(
+        CustomerImportStep2,
+        route_name="company_customers_import_step2",
+        permission="edit",
+        renderer="base/formpage.mako",
+    )

@@ -53,7 +53,9 @@ def job_view(context, request):
 
 
 def populate_actionmenu(request):
-    request.actionmenu.add(ViewLink(u"Liste des tâches", path="jobs"))
+    request.actionmenu.add(
+        ViewLink(u"Liste des tâches", path="jobs", perm='admin')
+    )
 
 
 class JobList(BaseListView):

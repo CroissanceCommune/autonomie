@@ -23,6 +23,9 @@
 Celery tasks related models
 """
 from datetime import datetime
+from pyramid.security import (
+    Allow,
+)
 from sqlalchemy import (
     Integer,
     Column,
@@ -34,6 +37,8 @@ from sqlalchemy import (
 from autonomie.models.types import (
     JsonEncodedList,
     PersistentACLMixin,
+    ACLType,
+    MutableList,
 )
 from autonomie.models.base import (
     DBBASE,
@@ -78,6 +83,9 @@ class Job(DBBASE, PersistentACLMixin):
         String(30),
         nullable=False,
     )
+    _acl = Column(
+        MutableList.as_mutable(ACLType),
+    )
 
     def todict(self):
         return dict(
@@ -90,6 +98,13 @@ class Job(DBBASE, PersistentACLMixin):
 
     def __json__(self, request):
         return self.todict()
+
+    def set_owner(self, login):
+        """
+        Set the job owner's acls
+        """
+        self._acl = [(Allow, login, ('add', 'edit', 'view',))]
+
 
 
 class CsvImportJob(Job):

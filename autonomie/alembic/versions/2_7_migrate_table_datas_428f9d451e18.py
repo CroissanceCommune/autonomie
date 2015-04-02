@@ -78,6 +78,9 @@ def upgrade():
     col = sa.Column("cgv", sa.Text, default="")
     op.add_column("company", col)
 
+    col = sa.Column('_acl', sa.Text)
+    op.add_column("job", col)
+
 
     # Migration des donnees vers la nouvelle structure
     from alembic.context import get_bind

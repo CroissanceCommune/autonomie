@@ -53,27 +53,41 @@ from autonomie.utils import (
     date as date_utils,
 )
 from sqla_inspect.base import BaseSqlaInspector
-from autonomie.models.base import DBSESSION
 from autonomie.exception import (
     MissingMandatoryArgument,
     MultipleInstanceFound,
 )
 from autonomie.models.user import UserDatas
+from autonomie.models.customer import Customer
 
 
-MODELS_CONFIGURATION = {'userdatas': {
-    'factory': UserDatas,
-    'excludes': (
-        'name',
-        'created_at',
-        'updated_at',
-        'type_',
-        '_acl',
-        'parent_id',
-        'parent',
-    ),
-    'label': u"Données de gestion sociale",
-}}
+MODELS_CONFIGURATION = {
+    'userdatas': {
+        'factory': UserDatas,
+        'excludes': (
+            'name',
+            'created_at',
+            'updated_at',
+            'type_',
+            '_acl',
+            'parent_id',
+            'parent',
+        ),
+        'label': u"Données de gestion sociale",
+        'permission': 'admin',
+    },
+    'customers': {
+        'factory': Customer,
+        'excludes': (
+            'created_at',
+            'updated_at',
+            'company_id',
+            'company',
+        ),
+        'label': u"Clients",
+        'permission': 'edit',
+    }
+}
 
 
 log = logging.getLogger(__name__)
@@ -374,7 +388,8 @@ def get_csv_importer(
     association_handler,
     action="insert",
     id_key="id",
-    force_rel_creation=False):
+    force_rel_creation=False,
+    default_values=()):
 
     factory = MODELS_CONFIGURATION[model_type]['factory']
     return CsvImporter(
@@ -385,6 +400,7 @@ def get_csv_importer(
         action,
         id_key,
         force_rel_creation,
+        default_values,
     )
 
 
@@ -417,6 +433,11 @@ class CsvImporter(object):
     :param int id_key: The id key to be used (by default, we use the model's id
         to identify duplicate entries, else, we can use an external id
 
+    :param bool force_rel_creation: Force the creation of related configuration
+    elements ?
+
+    :param dict default_values: Default arguments used to initialize new entries
+
     Usage:
 
         association_handler = CsvImportAssociator(UserDatas)
@@ -425,7 +446,8 @@ class CsvImporter(object):
     delimiter = ';'
     quotechar = '"'
     def __init__(self, dbsession, factory, csv_buffer, association_handler,
-                 action="insert", id_key="id", force_rel_creation=False):
+                 action="insert", id_key="id", force_rel_creation=False,
+                 default_values=None):
         self.dbsession = dbsession
         self.factory = factory
         self.association_handler = association_handler
@@ -451,25 +473,37 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         self.action = action
         self.id_key = id_key
         self.force_rel_creation = force_rel_creation
+        self.default_init_values = default_values or {}
 
-    def import_datas(self):
+    def import_datas(self, persist=True):
         """
         Import the datas provided in the csv_buffer as factory objects
+
+        :param bool fake: Should datas be persisted to the database (default
+        True)
         """
         for line in self.csv_reader:
-            model, message = self.import_line(line)
+            model, message = self.import_line(line, persist=persist)
             if model is None:
                 self.err_messages.append(message)
             elif message is not None:
                 self.messages.append(message)
+
+        if persist:
+            new_entry_msg = u"{0} nouvelles entrées ont été traitées"
+            update_entry_msg = u"{0} entrées existantes ont été traitées"
+        else:
+            new_entry_msg = u"{0} nouvelles entrées seront créées"
+            update_entry_msg = u"{0} entrées existantes seront mises à jour"
+
         self.messages.append(
-            u"{0} nouvelles entrées ont été traitées".format(self.new_count)
+            new_entry_msg.format(self.new_count)
         )
         self.messages.append(
-            u"{0} entrées existantes ont été traitées".format(self.update_count)
+            update_entry_msg.format(self.update_count)
         )
 
-    def _insert(self, args):
+    def _insert(self, args, persist=True):
         """
         Insert an instance in the database
 
@@ -477,12 +511,16 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         :returns: a tuple (model, updated_token) where updated_token is a
         boolean saying if it's an update
         """
+        for key, value in self.default_init_values.items():
+            args[key] = value
+
         model = self.factory(**args)
-        self.dbsession.add(model)
-        self.dbsession.flush()
+        if persist:
+            self.dbsession.add(model)
+            self.dbsession.flush()
         return model, False
 
-    def _update(self, args, override=False):
+    def _update(self, args, override=False, persist=True):
         """
         Update an element in the database or insert one if no id is provided
 
@@ -510,8 +548,9 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                 for key, value in args.items():
                     if getattr(model, key) in UNFILLED_VALUES or override:
                         setattr(model, key, value)
-                model = self.dbsession.merge(model)
-                self.dbsession.flush()
+                if persist:
+                    model = self.dbsession.merge(model)
+                    self.dbsession.flush()
                 updated = True
 
             except sqlalchemy_exc.NoResultFound:
@@ -529,7 +568,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
 
         return model, updated
 
-    def _override(self, args):
+    def _override(self, args, persist=True):
         """
         Update an element overriding attributes with the newly provided values
         or insert a new one if no id is provided
@@ -538,9 +577,9 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         :returns: a tuple (model, updated_token) where updated_token is a
         boolean saying if it's an update
         """
-        return self._update(args, override=True)
+        return self._update(args, override=True, persist=persist)
 
-    def import_line(self, line):
+    def import_line(self, line, persist=True):
         """
         Import one line of a csv file
         :returns: a duple with the newly_created model (or None) and a
@@ -555,7 +594,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         function = getattr(self, "_{0}".format(self.action))
         # Here we should handle edition
         try:
-            model, updated = function(args)
+            model, updated = function(args, persist=persist)
             self.imported.append(model)
             unhandled_columns['id'] = model.id
             self.unhandled_datas.append(unhandled_columns)

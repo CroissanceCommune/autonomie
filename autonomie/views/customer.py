@@ -116,6 +116,13 @@ class CustomersListView(CustomersListTools, BaseListView):
             self.request.popups = {popup.name: popup}
             self.request.actionmenu.add(popup.open_btn())
 
+            link = ViewLink(
+                u"Importer des clients",
+                path='company_customers_import_step1',
+                id=self.context.id,
+            )
+            self.request.actionmenu.add(link)
+
 
 class CustomersCsv(CustomersListTools, BaseCsvView):
     """

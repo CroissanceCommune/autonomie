@@ -596,7 +596,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         try:
             model, updated = function(args, persist=persist)
             self.imported.append(model)
-            unhandled_columns['id'] = model.id
+            unhandled_columns['Identifiant Autonomie'] = model.id
             self.unhandled_datas.append(unhandled_columns)
             res = model
             if updated:

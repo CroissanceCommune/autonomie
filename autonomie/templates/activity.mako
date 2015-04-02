@@ -24,6 +24,7 @@
 <%namespace file="/base/utils.mako" import="definition_list" />
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_text" />
+<%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
 <a class='btn btn-default pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>PDF</a>
 <div class='row'>
@@ -36,6 +37,8 @@
                     )
                 %>
         ${definition_list(items)}
+        <strong>Fichiers attachés</strong>
+        ${format_filelist(activity)}
         <h3>Participants</h3>
         % for participant in activity.participants:
             <dl class="dl-horizontal">

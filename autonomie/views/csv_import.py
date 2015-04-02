@@ -31,10 +31,13 @@ from __future__ import absolute_import
 import os
 import logging
 import json
-from pyramid.httpexceptions import HTTPFound
+
+from collections import OrderedDict
+from pyramid.httpexceptions import (
+    HTTPFound,
+    HTTPForbidden,
+)
 from deform import (
-    Form,
-    ValidationFailure,
     Button,
 )
 
@@ -47,8 +50,8 @@ from autonomie.models.job import CsvImportJob
 from autonomie.models.base import DBSESSION
 from autonomie.task import async_import_datas
 from autonomie.forms.csv_import import (
-    CsvFileUploadSchema,
-    ASSOCIATIONSCHEMA,
+    get_csv_file_upload_schema,
+    get_association_schema,
 )
 from autonomie.resources import fileupload_js
 from autonomie.views import BaseFormView
@@ -63,8 +66,7 @@ SESSION_KEY = "csv_import"
 
 IMPORT_INFO = u"Vous vous apprêtez à importer (ou mettre à jour) {count} \
 entrées. <br /> Vous allez désormais configurer le lien entre les colonnes de \
-votre fichier csv et les entrées de gestion sociale auxquelles elles \
-correspondent."
+votre fichier csv et les entrées auxquelles elles correspondent."
 
 
 #TODO : ask the type of model we want to import in step 1
@@ -81,8 +83,37 @@ fichier de type csv : <br /> \
 <li>Enregistré au format utf-8.</li></ul> \
 Une fois le fichier chargé, vous aller être redirigé vers un formulaire pour \
 associer les champs de votre fichier avec des entrées de gestion sociale."
-    schema = CsvFileUploadSchema()
+    _schema = None
     add_template_vars = ('title', 'help_message')
+    default_model_type = 'userdatas'
+    model_types = ('userdatas',)
+
+    def get_bind_data(self):
+        return dict(
+            request=self.request,
+            model_types=self.model_types,
+        )
+
+    # Schema is here a property since we need to build it dynamically regarding
+    # the current request (the same should have been built using the after_bind
+    # method ?)
+    @property
+    def schema(self):
+        """
+        The getter for our schema property
+        """
+        if self._schema == None:
+            self._schema = get_csv_file_upload_schema(self.request)
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        """
+        A setter for the schema property
+        The BaseClass in pyramid_deform gets and sets the schema attribute that
+        is here transformed as a property
+        """
+        self._schema = value
 
 
     def before(self, form):
@@ -90,6 +121,7 @@ associer les champs de votre fichier avec des entrées de gestion sociale."
         Ensure the fileupload js stuff is loaded
         """
         fileupload_js.need()
+        form.set_appstruct({'model_type': self.default_model_type})
 
     def submit_success(self, appstruct):
         """
@@ -101,12 +133,14 @@ associer les champs de votre fichier avec des entrées de gestion sociale."
         _query=dict(uid=uid, model_type=appstruct['model_type'])
         if association:
             _query['association'] = association
-        return HTTPFound(
-            self.request.route_path(
-                'import_step2',
-                _query=_query,
-            )
-        )
+        return HTTPFound(self.get_next_step_route(_query))
+
+    def get_next_step_route(self, args):
+        """
+        Returns the path to the next step of the import process (should be
+        overriden by subclassing views)
+        """
+        return self.request.route_path("import_step2", _query=args)
 
 
 def get_current_csv_filepath(request):
@@ -192,111 +226,88 @@ def record_preference(request, name, association_dict):
     return associations
 
 
-def config_field_association(request):
+class ConfigFieldAssociationView(BaseFormView):
     """
     View for field association configuration
     Dynamically build a form regarding the previously stored csv datas
 
     :param request: the pyramid request object
     """
-    model_type = request.GET['model_type']
-
-    # We first count the number of elements in the file
-    filepath = get_current_csv_filepath(request)
-    num_lines = count_entries(filepath)
-    info_message = IMPORT_INFO.format(count=num_lines)
-
-    # We build a field - model attr associator
-    associator = get_csv_import_associator(model_type)
-    csv_obj = get_current_csv(filepath)
-    headers = [header for header in csv_obj.fieldnames if header]
-
-    schema = ASSOCIATIONSCHEMA.bind(
-        associator=associator,
-        csv_headers=headers
+    add_template_vars = ("title", "info_message",)
+    title = u"Import de données, étape 2 : associer les champs"
+    _schema = None
+    buttons=(
+        Button('submit', title=u"Lancer l'import",),
+        Button('cancel', title=u"Annuler l'import",),
     )
-    form = Form(
-        schema=schema,
-        buttons=(
-            Button('submit', title=u"Lancer l'import",),
-            Button('cancel', title=u"Annuler l'import",),
+    model_types = CsvFileUploadView.model_types
+
+    def __init__(self, context, request):
+        BaseFormView.__init__(self, request)
+        self.model_type = self.request.GET['model_type']
+
+        if self.model_type not in self.model_types:
+            raise HTTPForbidden()
+
+        # We first count the number of elements in the file
+        self.filepath = get_current_csv_filepath(self.request)
+
+        # We build a field - model attr associator
+        self.associator = get_csv_import_associator(self.model_type)
+        _csv_obj = get_current_csv(self.filepath)
+        self.headers = [header for header in _csv_obj.fieldnames if header]
+
+    # Schema is here a property since we need to build it dynamically regarding
+    # the current request (the same should have been built using the after_bind
+    # method ?)
+    @property
+    def schema(self):
+        """
+        The getter for our schema property
+        """
+        if self._schema == None:
+            self._schema = get_association_schema(self.request)
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        """
+        A setter for the schema property
+        The BaseClass in pyramid_deform gets and sets the schema attribute that
+        is here transformed as a property
+        """
+        self._schema = value
+
+    def get_bind_data(self):
+        """
+        Returns the datas used whend binding the schema for field association
+        """
+        return dict(
+            associator=self.associator,
+            csv_headers=self.headers
         )
-    )
 
-    # Form submission
-    if 'submit' in request.POST:
-        controls = request.POST.items()
-
-        try:
-            importation_datas = form.validate(controls)
-        except ValidationFailure, form:
-            log.exception(u"Error on field association")
-
-        else:
-            log.info(u"Field association has been configured, we're going to \
-import")
-            action = importation_datas['action']
-            csv_id_key = importation_datas['id_key']
-            force_rel_creation = importation_datas.get(
-                'force_rel_creation',
-                False,
-            )
-
-            from collections import OrderedDict
-            association_dict = OrderedDict()
-            for entry in importation_datas['entries']:
-                if entry.has_key('model_attribute'):
-                    association_dict[entry['csv_field']] = \
-                            entry['model_attribute']
-
-            if importation_datas.get('record_association', False):
-                name = importation_datas['record_name']
-                record_preference(request, name, association_dict)
-
-            # On traduit la "valeur primaire" configuré par l'utilisateur en
-            # attribut de modèle (si il y en a une de configuré)
-            id_key = association_dict.get(csv_id_key, csv_id_key)
-
-            csv_filepath = get_current_csv_filepath(request)
-
-            # We initialize a job record in the database
-            job = CsvImportJob()
-            DBSESSION().add(job)
-            DBSESSION().flush()
-
-            celery_job = async_import_datas.delay(
-                model_type,
-                job.id,
-                association_dict,
-                csv_filepath,
-                id_key,
-                action,
-                force_rel_creation,
-            )
-
-            log.info(u" * The Celery Task {0} has been delayed, its result \
-should be retrieved from the CsvImportJob : {1}".format(celery_job.id, job.id)
-                    )
-            return HTTPFound(request.route_path('job', id=job.id))
-    # The form has been canceled going back to step 1
-    elif 'cancel' in request.POST:
-        log.info(u"Import has been cancelled")
-        return HTTPFound(request.route_path('import_step1'))
-
-    else:
-        log.info(u"We initialize the association form")
-        if request.GET.has_key('association'):
-            preference_name = request.GET['association']
+    def before(self, form):
+        """
+        Initialize the datas used in the view process and populate the form
+        """
+        if self.request.GET.has_key('association'):
+            preference_name = self.request.GET['association']
             preference = get_preference(preference_name)
-            association_dict = associator.guess_association_dict(
-                headers,
+            association_dict = self.associator.guess_association_dict(
+                self.headers,
                 preference,
             )
         else:
             # We try to guess the association dict to initialize the form
-            association_dict = associator.guess_association_dict(headers)
+            association_dict = self.associator.guess_association_dict(
+                self.headers
+            )
 
 
+        log.info(u"We initialize the association form")
+        log.info(association_dict)
+        log.info(self.headers)
         # We initialize the form
         appstruct = {'entries': []}
         for csv_key, model_attribute in association_dict.items():
@@ -308,12 +319,103 @@ should be retrieved from the CsvImportJob : {1}".format(celery_job.id, job.id)
             )
 
         form.set_appstruct(appstruct)
+        return form
 
-    return dict(
-        title=u"Import des dossiers, étape 2 : associer les champs",
-        form=form.render(),
-        info_message=info_message,
-    )
+    @property
+    def info_message(self):
+        num_lines = count_entries(self.filepath)
+        return IMPORT_INFO.format(count=num_lines)
+
+    def get_recording_job(self):
+        """
+        Initialize a job for importation recording
+        """
+        # We initialize a job record in the database
+        job = CsvImportJob()
+        job.set_owner(self.request.user.login)
+        DBSESSION().add(job)
+        DBSESSION().flush()
+        return job
+
+    def build_association_dict(self, importation_datas):
+        """
+        Build the association dict that describes matching between csv and model
+        fields
+        """
+        # On génère le dictionnaire d'association qui va être utilisé pour
+        # l'import
+        association_dict = OrderedDict()
+        for entry in importation_datas['entries']:
+            if entry.has_key('model_attribute'):
+                association_dict[entry['csv_field']] = \
+                        entry['model_attribute']
+        return association_dict
+
+    def get_default_values(self):
+        """
+        Returns default values for object initialization
+        Usefull for subclasses to force some attribute values (like company_id)
+        """
+        return {}
+
+    def submit_success(self, importation_datas):
+        """
+        Submission has been called and datas have been validated
+
+        :param dict importation_datas: The datas we want to import
+        """
+        log.info(u"Field association has been configured, we're going to \
+import")
+        action = importation_datas['action']
+        csv_id_key = importation_datas['id_key']
+        force_rel_creation = importation_datas.get(
+            'force_rel_creation',
+            False,
+        )
+
+        association_dict = self.build_association_dict(importation_datas)
+
+        # On enregistre le dictionnaire d'association de champs
+        if importation_datas.get('record_association', False):
+            name = importation_datas['record_name']
+            record_preference(self.request, name, association_dict)
+
+        # On traduit la "valeur primaire" configurée par l'utilisateur en
+        # attribut de modèle (si il y en a une de configurée)
+        # Colonne du fichier csv -> attribut du modèle à importer
+        id_key = association_dict.get(csv_id_key, csv_id_key)
+
+        job = self.get_recording_job()
+
+        celery_job = async_import_datas.delay(
+            self.model_type,
+            job.id,
+            association_dict,
+            self.filepath,
+            id_key,
+            action,
+            force_rel_creation,
+            self.get_default_values(),
+        )
+
+        log.info(u" * The Celery Task {0} has been delayed, its result \
+should be retrieved from the CsvImportJob : {1}".format(celery_job.id, job.id)
+                )
+        return HTTPFound(
+            self.request.route_path('job', id=job.id)
+        )
+
+    def get_previous_step_route(self):
+        """
+        Return the path to the previous step of our importation process
+        Should be overriden by subclassing views
+        """
+        return self.request.route_path("import_step1")
+
+    def cancel_success(self, appstruct):
+        return HTTPFound(self.get_previous_step_route())
+
+    cancel_failure = cancel_success
 
 
 def includeme(config):
@@ -329,7 +431,7 @@ def includeme(config):
         renderer="base/formpage.mako",
     )
     config.add_view(
-        config_field_association,
+        ConfigFieldAssociationView,
         route_name="import_step2",
         permission="admin",
         renderer="base/formpage.mako",

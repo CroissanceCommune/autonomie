@@ -65,8 +65,7 @@ log = logging.getLogger(__name__)
 SESSION_KEY = "csv_import"
 
 IMPORT_INFO = u"Vous vous apprêtez à importer (ou mettre à jour) {count} \
-entrées. <br /> Vous allez désormais configurer le lien entre les colonnes de \
-votre fichier csv et les entrées auxquelles elles correspondent."
+entrée(s)."
 
 
 #TODO : ask the type of model we want to import in step 1
@@ -75,7 +74,10 @@ class CsvFileUploadView(BaseFormView):
     First step view for csv file importation
     """
     title = u"Import des dossiers, étape 1 : chargement d'un fichier csv"
-    help_message = u"Pour importer des données, vous devez disposer d'un \
+    help_message = u"L'import de données, permet, depuis un fichier de type csv, \
+d'insérer de nouvelle données dans Autonomie, ou de mettre à jour \
+des données existantes. \
+Pour importer des données, vous devez disposer d'un \
 fichier de type csv : <br /> \
             <ul class='list-unstyled'> \
 <li>Utilisant le caractère ';' comme séparateur </li>\
@@ -233,7 +235,18 @@ class ConfigFieldAssociationView(BaseFormView):
 
     :param request: the pyramid request object
     """
-    add_template_vars = ("title", "info_message",)
+    help_message = u"Vous vous apprêtez à importer des données depuis le \
+fichier fournit à l'étape précédente. <br /> \
+À cette étape, vous allez : \
+            <ul>\
+        <li>Choisir la méthode d'import de données (nouvelle entrées, \
+mise à jour de données)</li>\
+        <li>Dans le cas de la mise à jour de données : Sélectionner le \
+champ de votre fichier qui sera utilisé pour retrouver les données déjà \
+présentes dans Autonomie</li> \
+        <li>Associer les colonnes de votre fichier avec les attributs \
+d'Autonomie correspondant</li>"
+    add_template_vars = ("title", "info_message", "help_message", )
     title = u"Import de données, étape 2 : associer les champs"
     _schema = None
     buttons=(

@@ -21,7 +21,16 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 """
 Forms elements related to csv import
+
+
+1- Upload a csv file and choose the type of datas you want to import
+
+2- Associate the datas with the model's columns
+
+
+
 """
+import logging
 import colander
 import json
 import deform
@@ -38,6 +47,9 @@ IMPORTATION_TYPE_OPTIONS = (
 déjà saisies seront conservées)"),
     (u"override", u"Mise à jour : Mettre à jour les données existantes"),
 )
+
+
+log = logging.getLogger(__name__)
 
 
 @colander.deferred
@@ -78,12 +90,28 @@ def deferred_preferences(node, kw):
     return deform.widget.SelectWidget(values=options)
 
 
-def get_model_type_select():
-    values = []
-    for key, value in csv_import.MODELS_CONFIGURATION.items():
-        values.append((key, value['label']))
+@colander.deferred
+def deferred_model_type_widget(node, kw):
+    model_types = kw['model_types']
 
-    return deform.widget.SelectWidget(values=values)
+    if len(model_types) == 1:
+        result = deform.widget.HiddenWidget()
+    else:
+        request = kw['request']
+        values = []
+        for key in model_types:
+            value = csv_import.MODELS_CONFIGURATION.get(key)
+            if value is None:
+                log.warn(u"The following importation model type doesn't \
+exists : {0}".format(key))
+
+            permission = value['permission']
+            if request.has_permission(permission, request.context):
+                values.append((key, value['label']))
+
+        result = deform.widget.SelectWidget(values=values)
+
+    return result
 
 
 #TODO : provide quotechar and delimiter customization
@@ -101,11 +129,8 @@ class CsvFileUploadSchema(colander.Schema):
     )
     model_type = colander.SchemaNode(
         colander.String(),
-    #    widget=get_model_type_select(),
-        widget=deform.widget.HiddenWidget(),
+        widget=deferred_model_type_widget,
         title=u"Type de données",
-        default='userdatas',
-        missing='userdatas',
     )
     association = colander.SchemaNode(
         colander.String(),
@@ -115,6 +140,16 @@ class CsvFileUploadSchema(colander.Schema):
 de champs pour l'étape 2",
         missing=colander.drop
     )
+
+
+def get_csv_file_upload_schema(request):
+    """
+    Return an import csv file upload schema regarding the current user's rights
+    """
+    schema = CsvFileUploadSchema().clone()
+    if not request.user.is_admin():
+        del schema['association']
+    return schema
 
 
 @colander.deferred
@@ -147,8 +182,8 @@ def deferred_seq_widget(node, kw):
     """
     csv_headers = kw['csv_headers']
     return deform.widget.SequenceWidget(
-        min_len=len(csv_headers),
-        max_len=len(csv_headers),
+        min_len=len(set(csv_headers)),
+        max_len=len(set(csv_headers)),
     )
 
 
@@ -174,22 +209,6 @@ class AssociationEntries(colander.SequenceSchema):
 
 
 class AssociationSchema(colander.MappingSchema):
-    entries = AssociationEntries(
-        widget=deferred_seq_widget,
-        title=u"Association des données"
-    )
-    record_association = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Enregistrer ?",
-        description=u"Voulez-vous conserver cette association de champ pour de \
-futures importations ?",
-    )
-    record_name = colander.SchemaNode(
-        colander.String(),
-        title=u"Nom de l'enregistrement",
-        description=u"Ce nom vous permettra de recharger cette association",
-        missing=colander.drop,
-    )
     action = colander.SchemaNode(
         colander.String(),
         title=u"Type d'importation",
@@ -207,6 +226,22 @@ définir quel champ doit être utilisé pour retrouver des entrées existantes \
 dans la base de données.",
         widget=deferred_id_key_widget,
         missing="id", # par défaut on identifie grâce à l'attribut id
+    )
+    entries = AssociationEntries(
+        widget=deferred_seq_widget,
+        title=u"Association des données"
+    )
+    record_association = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Enregistrer ?",
+        description=u"Voulez-vous conserver cette association de champ pour de \
+futures importations ?",
+    )
+    record_name = colander.SchemaNode(
+        colander.String(),
+        title=u"Nom de l'enregistrement",
+        description=u"Ce nom vous permettra de recharger cette association",
+        missing=colander.drop,
     )
     force_rel_creation = colander.SchemaNode(
         colander.Boolean(),
@@ -228,4 +263,15 @@ def check_record_name(form, values):
             exc["record_name"] = u"Ce paramètre est requis"
             raise exc
 
-ASSOCIATIONSCHEMA = AssociationSchema(validator=check_record_name)
+
+def get_association_schema(request):
+    """
+    Returns a form schema used to configure field association for csv import
+    """
+    schema = AssociationSchema(validator=check_record_name).clone()
+
+    if not request.user.is_admin():
+        del schema['force_rel_creation']
+        del schema['record_association']
+        del schema['record_name']
+    return schema

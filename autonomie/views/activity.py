@@ -473,14 +473,17 @@ class ActivityList(BaseListView):
 class ActivityListContractor(ActivityList):
     schema = get_list_schema(is_admin=False)
     def _get_conseiller_id(self, appstruct):
-        return -1
+        return None
 
     def filter_participant(self, query, appstruct):
         company = self.context
+        log.info("The current context : %s" % company.id)
         participants_ids = [u.id for u in company.employees]
+        log.info(participants_ids)
         query = query.filter(
             Activity.attendances.any(Attendance.account_id.in_(participants_ids))
-            )
+        )
+        log.debug(query)
         return query
 
 

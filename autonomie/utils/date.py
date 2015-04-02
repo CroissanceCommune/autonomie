@@ -44,17 +44,28 @@ def str_to_date(str_date):
     return res
 
 
+def get_strftime_from_date(date_obj, template_str):
+    """
+    Return the result of date.strftime(template_str) handling exceptions
+    """
+    try:
+        resp = date_obj.strftime(template_str)
+    except ValueError:
+        resp = ""
+    return resp
+
+
 def format_short_date(date):
     """
         return a short printable version of the date obj
     """
     if isinstance(date, datetime.date):
-        resp = date.strftime("%e/%m/%Y")
+        resp = get_strftime_from_date(date, "%e/%m/%Y")
     elif not date:
         resp = u""
     else:
-        resp = datetime.datetime.fromtimestamp(float(date)).strftime(
-                                                            "%d/%m/%Y %H:%M")
+        date_obj = datetime.datetime.fromtimestamp(float(date))
+        resp = get_strftime_from_date(date_obj, "%d/%m/%Y %H:%M")
     return resp
 
 
@@ -62,9 +73,9 @@ def format_datetime(datetime_object, timeonly=False):
     """
     format a datetime object
     """
-    res = datetime_object.strftime("%H:%M")
+    res = get_strftime_from_date(datetime_object, "%H:%M")
     if not timeonly:
-        day = datetime_object.strftime("%d/%m/%Y")
+        day = get_strftime_from_date(datetime_object, "%d/%m/%Y")
         res = u"%s à %s" % (day, res)
     return res
 
@@ -74,16 +85,14 @@ def format_long_date(date):
         return a long printable version of the date obj
     """
     if isinstance(date, datetime.date):
-        resp = u"{0}".format(
-            date.strftime("%e %B %Y").decode('utf-8').capitalize()
-        )
+        str_date = get_strftime_from_date(date, "%e %B %Y")
+        resp = u"{0}".format(str_date.decode('utf-8').capitalize())
     elif not date:
         resp = u""
     else:
         date = datetime.datetime.fromtimestamp(float(date))
-        resp = u"{0}".format(
-            date.strftime("%e %B %Y").decode('utf-8').capitalize()
-        )
+        str_date = get_strftime_from_date(date, "%e %B %Y")
+        resp = u"{0}".format(str_date.decode('utf-8').capitalize())
     return resp
 
 

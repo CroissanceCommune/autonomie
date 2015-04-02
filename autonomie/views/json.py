@@ -54,5 +54,5 @@ def includeme(config):
         renderer="json",
         request_method="GET",
         xhr=True,
-        permission="admin",
+        permission="view",
     )

@@ -121,7 +121,7 @@ def includeme(config):
         job_view,
         route_name='job',
         renderer="/job.mako",
-        permission='admin',
+        permission='view',
     )
     config.add_view(
         JobList,
@@ -133,7 +133,7 @@ def includeme(config):
         make_stream_csv_by_key('in_error_csv', 'fichier_erreur.csv'),
         route_name='job',
         request_param='action=errors.csv',
-        permission='admin',
+        permission='view',
     )
     config.add_view(
         make_stream_csv_by_key(
@@ -142,6 +142,6 @@ def includeme(config):
         ),
         route_name='job',
         request_param='action=unhandled.csv',
-        permission='admin',
+        permission='view',
     )
 

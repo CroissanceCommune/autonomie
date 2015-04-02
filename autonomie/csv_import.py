@@ -545,6 +545,15 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                     identification_column==identification_value
                 ).one()
 
+                for key, value in self.default_init_values.items():
+                    if getattr(model, key) != value:
+                        log.warn(u"POSSIBLE BREAK IN ATTEMPT")
+                        log.warn(u"Importation process, default values :")
+                        log.warn(self.default_init_values)
+                        log.warn("The model they try to edit : %s" % model.id)
+                        raise Exception(u"POSSIBLE BREAK IN ATTEMPT !!!!!!")
+
+
                 for key, value in args.items():
                     if getattr(model, key) in UNFILLED_VALUES or override:
                         setattr(model, key, value)

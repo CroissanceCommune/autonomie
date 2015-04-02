@@ -113,12 +113,14 @@ class Customer(DBBASE, PersistentACLMixin):
         Integer,
         primary_key=True,
         info={
-            'export':{'exclude':True},
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {
+                'exclude': True,
+                'title': u"Identifiant Autonomie",
+            }
         },
     )
 
-    creationDate = deferred(
+    created_at = deferred(
         Column(
             "creationDate",
             CustomDateType,
@@ -131,7 +133,7 @@ class Customer(DBBASE, PersistentACLMixin):
         group='all',
     )
 
-    updateDate = deferred(
+    updated_at = deferred(
         Column(
             "updateDate",
             CustomDateType,

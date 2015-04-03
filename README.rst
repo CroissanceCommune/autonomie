@@ -55,7 +55,7 @@ Téléchargement et installation de l'application
 
 .. code-block:: console
 
-    git clone https://github.com/Croissance_Commune/autonomie.git
+    git clone https://github.com/CroissanceCommune/autonomie.git
     cd autonomie
     pip -r requirements.txt --allow-external PIL --allow-unverified PIL
     python setup.py install

@@ -57,7 +57,7 @@ Téléchargement et installation de l'application
 
     git clone https://github.com/CroissanceCommune/autonomie.git
     cd autonomie
-    pip -r requirements.txt --allow-external PIL --allow-unverified PIL
+    pip install -r requirements.txt --allow-external PIL --allow-unverified PIL
     python setup.py install
     cp development.ini.sample development.ini
 

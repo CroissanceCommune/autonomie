@@ -326,7 +326,7 @@ class Project(Node):
         """
             Return True if this project could be deleted
         """
-        return self.archived and not self.invoices
+        return self.archived and not self.tasks
 
     def get_company_id(self):
         return self.company.id

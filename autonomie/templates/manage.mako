@@ -104,7 +104,7 @@
 
             % else:
                 <a
-                    class='btn btn-primary'
+                    class='btn btn-primary btn-sm'
                     href="${request.route_path('activities', _query=dict(conseiller_id=request.user.id))}"
                     >
                     Voir plus

@@ -72,12 +72,12 @@
                 </table>
                 % if len(elapsed_invoices) > 5:
                     <b>...</b>
-                    <a class='btn btn-primary'
+                    <a class='btn btn-primary btn-sm'
                         href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">
                         Voir plus
                     </a>
                 % else:
-                    <a class='btn btn-primary'
+                    <a class='btn btn-primary btn-sm'
                         href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">
                         Voir
                     </a>

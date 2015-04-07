@@ -231,7 +231,7 @@ class ProjectsList(BaseListView):
             ItemActionLink(
                 u"Voir",
                 "view",
-                css='btn btn-default',
+                css='btn btn-default btn-sm',
                 path="project",
                 icon="search"
         ))
@@ -239,7 +239,7 @@ class ProjectsList(BaseListView):
             ItemActionLink(
                 u"Devis",
                 "edit",
-                css="btn btn-default",
+                css="btn btn-default btn-sm",
                 title=u"Nouveau devis",
                 path="project_estimations",
                 icon="file",
@@ -248,7 +248,7 @@ class ProjectsList(BaseListView):
             ItemActionLink(
                 u"Facture",
                 "edit",
-                css="btn btn-default",
+                css="btn btn-default btn-sm",
                 title=u"Nouvelle facture",
                 path="project_invoices",
                 icon="file",
@@ -259,7 +259,7 @@ class ProjectsList(BaseListView):
                 ItemActionLink(
                     u"Archiver",
                     "edit",
-                    css="btn btn-default",
+                    css="btn btn-default btn-sm",
                     confirm=u'Êtes-vous sûr de vouloir archiver ce projet ?',
                     path="project",
                     title=u"Archiver le projet",
@@ -272,7 +272,7 @@ class ProjectsList(BaseListView):
                 ItemActionLink(
                     u"Désarchiver",
                     "edit",
-                    css="btn btn-default",
+                    css="btn btn-default btn-sm",
                     path="project",
                     title=u"Désarchiver le projet",
                     _query=dict(action="archive"),

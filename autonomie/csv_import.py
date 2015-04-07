@@ -103,6 +103,12 @@ BOOLEAN_FALSE = ('0', 'false', 'non', '', 'False')
 DATETIME_FORMAT = "%d/%m/%Y"
 
 
+DEFAULT_DELIMITER = ';'
+DEFAULT_QUOTECHAR = '"'
+DELIMITERS = (';', ',', ":")
+QUOTECHARS = ('"', '"')
+
+
 def get_csv_import_associator(key):
     """
     Build a csv import associator regarding the provided model
@@ -374,22 +380,29 @@ class CsvImportAssociator(BaseSqlaInspector):
         return kwargs, unhandled
 
 
-def get_csv_reader(csv_buffer, delimiter=';', quotechar='"'):
+def get_csv_reader(
+        csv_buffer,
+        delimiter=DEFAULT_DELIMITER,
+        quotechar=DEFAULT_QUOTECHAR,
+    ):
     return csv.DictReader(
             csv_buffer,
-            delimiter=delimiter,
-            quotechar=quotechar,
+            delimiter=str(delimiter),
+            quotechar=str(quotechar),
         )
 
 def get_csv_importer(
-    dbsession,
-    model_type,
-    csv_buffer,
-    association_handler,
-    action="insert",
-    id_key="id",
-    force_rel_creation=False,
-    default_values=()):
+        dbsession,
+        model_type,
+        csv_buffer,
+        association_handler,
+        action="insert",
+        id_key="id",
+        force_rel_creation=False,
+        default_values=(),
+        delimiter=DEFAULT_DELIMITER,
+        quotechar=DEFAULT_QUOTECHAR,
+    ):
 
     factory = MODELS_CONFIGURATION[model_type]['factory']
     return CsvImporter(
@@ -401,6 +414,8 @@ def get_csv_importer(
         id_key,
         force_rel_creation,
         default_values,
+        delimiter,
+        quotechar,
     )
 
 
@@ -445,17 +460,22 @@ class CsvImporter(object):
     """
     delimiter = ';'
     quotechar = '"'
-    def __init__(self, dbsession, factory, csv_buffer, association_handler,
-                 action="insert", id_key="id", force_rel_creation=False,
-                 default_values=None):
+    def __init__(
+            self,
+            dbsession,
+            factory,
+            csv_buffer,
+            association_handler,
+            action="insert",
+            id_key="id",
+            force_rel_creation=False,
+            default_values=None,
+            delimiter=DEFAULT_DELIMITER,
+            quotechar=DEFAULT_QUOTECHAR,
+        ):
         self.dbsession = dbsession
         self.factory = factory
         self.association_handler = association_handler
-        self.csv_reader = get_csv_reader(
-            csv_buffer,
-            self.delimiter,
-            self.quotechar
-        )
         self.in_error_lines = []
         self.unhandled_datas = []
         self.imported = []
@@ -468,12 +488,22 @@ class CsvImporter(object):
             raise KeyError(
 u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             )
+
         if action == 'insert':
             self.association_handler.check_association_dict()
+
         self.action = action
         self.id_key = id_key
         self.force_rel_creation = force_rel_creation
         self.default_init_values = default_values or {}
+
+        self.quotechar = str(quotechar)
+        self.delimiter = str(delimiter)
+        self.csv_reader = get_csv_reader(
+            csv_buffer,
+            self.delimiter,
+            self.quotechar
+        )
 
     def import_datas(self, persist=True):
         """

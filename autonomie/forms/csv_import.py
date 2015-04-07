@@ -140,6 +140,24 @@ class CsvFileUploadSchema(colander.Schema):
 de champs pour l'étape 2",
         missing=colander.drop
     )
+    delimiter = colander.SchemaNode(
+        colander.String(),
+        title=u"Caractère utilisé pour délimiter les champs du fichier",
+        widget=deform.widget.SelectWidget(
+            values=zip(csv_import.DELIMITERS, csv_import.DELIMITERS),
+        ),
+        default=csv_import.DEFAULT_DELIMITER,
+        missing=csv_import.DEFAULT_DELIMITER,
+    )
+    quotechar = colander.SchemaNode(
+        colander.String(),
+        title=u"Caractère utilisé pour délimiter les chaînes de caractères",
+        widget=deform.widget.SelectWidget(
+            values=zip(csv_import.QUOTECHARS, csv_import.QUOTECHARS),
+        ),
+        default=csv_import.DEFAULT_QUOTECHAR,
+        missing=csv_import.DEFAULT_QUOTECHAR,
+    )
 
 
 def get_csv_file_upload_schema(request):

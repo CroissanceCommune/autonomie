@@ -76,15 +76,15 @@ class CsvFileUploadView(BaseFormView):
     title = u"Import des dossiers, étape 1 : chargement d'un fichier csv"
     help_message = u"L'import de données, permet, depuis un fichier de type csv, \
 d'insérer de nouvelle données dans Autonomie, ou de mettre à jour \
-des données existantes. \
+des données existantes. <br />\
 Pour importer des données, vous devez disposer d'un \
-fichier de type csv : <br /> \
-            <ul class='list-unstyled'> \
-<li>Utilisant le caractère ';' comme séparateur </li>\
-<li>Utilisant le caractère ' \" ' comme délimiteur de chaîne de caractères </li>\
-<li>Enregistré au format utf-8.</li></ul> \
+fichier : <br /> \
+            <ul> \
+                <li>Enregistré au format csv;</li> \
+                <li>Enregistré au format utf-8.</li> \
+            </ul> \
 Une fois le fichier chargé, vous aller être redirigé vers un formulaire pour \
-associer les champs de votre fichier avec des entrées de gestion sociale."
+associer les champs de votre fichier avec les données d'Autonomie."
     _schema = None
     add_template_vars = ('title', 'help_message')
     default_model_type = 'userdatas'
@@ -132,7 +132,12 @@ associer les champs de votre fichier avec des entrées de gestion sociale."
         log.debug(u"A csv file has been uploaded")
         uid = appstruct['csv_file']['uid']
         association = appstruct.get('association')
-        _query=dict(uid=uid, model_type=appstruct['model_type'])
+        _query=dict(
+            uid=uid,
+            model_type=appstruct['model_type'],
+            delimiter=appstruct['delimiter'],
+            quotechar=appstruct['quotechar'],
+        )
         if association:
             _query['association'] = association
         return HTTPFound(self.get_next_step_route(_query))
@@ -160,7 +165,7 @@ def get_current_csv_filepath(request):
     return filepath
 
 
-def get_current_csv(filepath):
+def get_current_csv(filepath, delimiter, quotechar):
     """
     Return the csv file currently stored in the user's session
 
@@ -169,7 +174,7 @@ def get_current_csv(filepath):
     """
     # Related to pyramid_deform's way to store temporary datas on disk
     filebuffer = open(filepath, 'r')
-    return get_csv_reader(filebuffer)
+    return get_csv_reader(filebuffer, delimiter, quotechar)
 
 def count_entries(filepath):
     """
@@ -258,6 +263,8 @@ d'Autonomie correspondant</li>"
     def __init__(self, context, request):
         BaseFormView.__init__(self, request)
         self.model_type = self.request.GET['model_type']
+        self.quotechar = self.request.GET['quotechar']
+        self.delimiter = self.request.GET['delimiter']
 
         if self.model_type not in self.model_types:
             raise HTTPForbidden()
@@ -267,7 +274,7 @@ d'Autonomie correspondant</li>"
 
         # We build a field - model attr associator
         self.associator = get_csv_import_associator(self.model_type)
-        _csv_obj = get_current_csv(self.filepath)
+        _csv_obj = get_current_csv(self.filepath, self.delimiter, self.quotechar)
         self.headers = [header for header in _csv_obj.fieldnames if header]
 
     # Schema is here a property since we need to build it dynamically regarding
@@ -409,6 +416,8 @@ import")
             action,
             force_rel_creation,
             self.get_default_values(),
+            self.delimiter,
+            self.quotechar,
         )
 
         log.info(u" * The Celery Task {0} has been delayed, its result \

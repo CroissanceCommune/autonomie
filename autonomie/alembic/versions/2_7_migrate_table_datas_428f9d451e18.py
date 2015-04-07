@@ -74,6 +74,8 @@ def upgrade():
     col = sa.Column("sortie_type_id", sa.Integer, sa.ForeignKey('type_sortie_option.id'))
     op.add_column("user_datas", col)
     op.execute("alter table user_datas modify parcours_num_hours float DEFAULT NULL")
+    op.execute("alter table external_activity_datas modify hours float DEFAULT NULL")
+    op.execute("alter table external_activity_datas modify brut_salary float DEFAULT NULL")
 
     col = sa.Column("cgv", sa.Text, default="")
     op.add_column("company", col)

@@ -371,7 +371,7 @@ def set_models_acls():
     """
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'),]
     Company.__default_acl__ = property(get_company_acl)
-    Job.__default_acl__ = property(get_base_acl)
+    Job.__default_acl__ = DEFAULT_PERM[:]
     Project.__default_acl__ = property(get_project_acls)
     Phase.__acl__ = property(get_phase_acls)
     Customer.__default_acl__ = property(get_customer_acls)

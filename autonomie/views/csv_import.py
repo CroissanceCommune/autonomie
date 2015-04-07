@@ -68,10 +68,17 @@ IMPORT_INFO = u"Vous vous apprêtez à importer (ou mettre à jour) {count} \
 entrée(s)."
 
 
-#TODO : ask the type of model we want to import in step 1
 class CsvFileUploadView(BaseFormView):
     """
     First step view for csv file importation
+
+    HEre we get :
+        1- a csv file
+        2- a model type
+        3- a delimiter
+        4- a quotechar
+
+    2,3 and 4 are carried to the next step view through the request's GET params
     """
     title = u"Import des dossiers, étape 1 : chargement d'un fichier csv"
     help_message = u"L'import de données, permet, depuis un fichier de type csv, \

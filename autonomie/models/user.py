@@ -1442,6 +1442,7 @@ class UserDatas(Node):
             {
                 'title': u"Salaire brut",
                 'section': u'Parcours',
+                'widget': deform.widget.TextInputWidget(readonly=True),
             }
         }
     )
@@ -1681,7 +1682,7 @@ class ExternalActivityDatas(DBBASE):
              }
                  )
     hours = Column(
-        Integer,
+        Float(),
         info={'colanderalchemy':
               {
                   'title': u"Nombre d'heures",
@@ -1689,7 +1690,7 @@ class ExternalActivityDatas(DBBASE):
              }
     )
     brut_salary = Column(
-        Integer,
+        Float(),
         info={'colanderalchemy':
               {
                   'title': u'Salaire brut',
@@ -1832,6 +1833,23 @@ USERDATAS_FORM_GRIDS = {
         ((2, True), (2, True), (2, True)),
     )
 }
+
+
+def salary_compute(mapper, connection, target):
+    """
+    Compute the salary of a user
+    """
+    val1 = target.parcours_taux_horaire
+    val2 = target.parcours_num_hours
+    try:
+        res = val1 * val2
+    except:
+        res = 0
+    target.parcours_salary = res
+
+
+listen(UserDatas, "before_insert", salary_compute, propagate=True)
+listen(UserDatas, "before_update", salary_compute, propagate=True)
 
 
 # Registering event handlers to keep datas synchronized

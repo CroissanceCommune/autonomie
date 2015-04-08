@@ -374,7 +374,7 @@ class BaseFormView(FormView):
     buttons = (submit_btn,)
 
     def __init__(self, request):
-        super(BaseFormView, self).__init__(request)
+        FormView.__init__(self, request)
         self.context = request.context
         self.dbsession = self.request.dbsession
         self.session = self.request.session
@@ -384,7 +384,7 @@ class BaseFormView(FormView):
 
     def __call__(self):
         try:
-            result = super(BaseFormView, self).__call__()
+            result = FormView.__call__(self)
         except colander.Invalid, exc:
             self.logger.exception(
                 "Exception while rendering form "

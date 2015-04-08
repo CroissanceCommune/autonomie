@@ -403,6 +403,7 @@ class UserDatasAdd(BaseFormView):
     schema = get_userdatas_schema() #SQLAlchemySchemaNode(UserDatas)
     validation_msg = u"Les informations sociales ont bien été enregistrées"
     form_options = (('formid', "userdatas_edit"),)
+    buttons = (submit_btn, cancel_btn,)
 
     def before(self, form):
         auto_need(form)
@@ -416,6 +417,47 @@ class UserDatasAdd(BaseFormView):
         if self.context.__name__ == 'userdatas':
             model = self.schema.objectify(appstruct, self.context)
         else:
+            from autonomie.views import render_api
+            confirmation = self.request.GET.get('confirmation', '0')
+            lastname = appstruct['coordonnees_lastname']
+            email = appstruct['coordonnees_email1']
+            if lastname and confirmation == '0':
+                query = UserDatas.query().filter(
+                    or_(
+                        UserDatas.coordonnees_lastname==lastname,
+                        UserDatas.coordonnees_email1==email,
+                    )
+                )
+                query_count = query.count()
+                if query_count > 0:
+                    if query_count == 1:
+                        msg = u"Une entrée de gestion sociale similaire \
+a déjà été créée: <ul>"
+                    else:
+                        msg = u"{0} entrées de gestion sociale similaires ont \
+déjà été créées : <ul>".format(query_count)
+
+                    for entry in query:
+                        msg += u"<li><a href='%s'>%s (%s)</a></li>" % (
+                            self.request.route_path('userdata', id=entry.id),
+                            render_api.format_account(entry),
+                            entry.coordonnees_email1,
+                        )
+                    msg += u"</ul>"
+                    form = self._get_form()
+                    form.action = self.request.current_route_path(
+                        _query={'action': 'new', 'confirmation':'1'}
+                    )
+                    form.set_appstruct(appstruct)
+                    datas = dict(
+                        form=form.render(),
+                        confirmation_message=msg,
+                        confirm_form_id=form.formid,
+                    )
+                    datas.update(self._more_template_vars())
+                    return datas
+
+
             model = self.schema.objectify(appstruct)
 
         model = self.dbsession.merge(model)
@@ -443,6 +485,11 @@ mot de passe : {1}".format(login, password, url)
 
         self.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path('userdata', id=model.id))
+
+    def cancel_success(self, appstruct):
+        return HTTPFound(self.request.route_path('userdatas'))
+
+    cancel_failure = cancel_success
 
 
 class UserDatasEdit(UserDatasAdd):

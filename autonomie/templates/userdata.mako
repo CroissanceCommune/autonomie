@@ -28,6 +28,7 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
+<%namespace file="/base/utils.mako" import="format_text" />
 <%block name="content">
 <% userdata = request.context %>
 <% user = getattr(request.context, "user", None) %>
@@ -79,6 +80,23 @@
         % endif
         </div>
     </div>
+% else:
+    ## IT's a new entry
+    % if confirmation_message is not UNDEFINED:
+        <div class="alert alert-warning">
+            ${format_text(confirmation_message)}
+            <button
+                class="btn btn-default btn-success"
+                onclick="submitForm('#${confirm_form_id}');">
+                Confirmer l'ajout
+            </button>
+            <button
+                class="btn btn-default btn-danger"
+                onclick="submitForm('#${confirm_form_id}', 'cancel');">
+                Annuler la saisie
+            </button>
+        </div>
+    % endif
 % endif
 </div>
 
@@ -122,9 +140,16 @@
 </ul>
 <div class='tab-content'>
     <div class='tab-pane row active' id='tab1'>
-        <button type="button" class="btn btn-default" onclick="javascript:enableForm('#userdatas_edit');$(this).hide();" style="margin-bottom: 15px">
-            Dégeler le formulaire
-        </button>
+            % if request.context.__name__ == 'userdatas':
+                <button
+                    type="button"
+                    class="btn btn-default"
+                    onclick="javascript:enableForm('#userdatas_edit');$(this).hide();"
+                    style="margin-bottom: 15px"
+                    >
+                    Dégeler le formulaire
+                </button>
+            % endif
         ${form|n}
     </div>
     % if doctypes_form is not UNDEFINED:
@@ -295,5 +320,7 @@
 </%block>
 <%block name="footerjs">
 setAuthCheckBeforeSubmit('#userdatas_edit');
-disableForm("#userdatas_edit");
+% if request.context.__name__ == 'userdatas':
+    disableForm("#userdatas_edit");
+% endif
 </%block>

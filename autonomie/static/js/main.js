@@ -171,6 +171,27 @@ function disableForm(form_id){
   $(form_id).find('button[type=submit]').prop('disabled', true);
   $(form_id).find('a').addClass('disabled');
 }
+function submitForm(form_selector, name){
+  /*
+   * Submit a form from outside
+   *
+   * :param str name: The name of the button we want to click on
+   *  (see bugs.jquery.com/ticket/4652 to understand why we don't use simply
+   *  form.submit())
+   */
+  var btn_name = name || 'submit';
+  var form_object = $(form_selector);
+
+  var btn_object = form_object.find("button[name=" + btn_name + "]");
+  if (btn_object.length === 0){
+    console.log("No form submit button match this name : %s", btn_name );
+    if (btn_name === 'submit'){
+      form_object.submit();
+    }
+  }else{
+    btn_object.click();
+  }
+}
 $(function(){
   var hash = window.location.hash;
   hash && $('ul.nav a[href="' + hash + '"]').tab('show');

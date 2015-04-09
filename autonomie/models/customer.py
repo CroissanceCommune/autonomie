@@ -422,6 +422,19 @@ class Customer(DBBASE, PersistentACLMixin):
             address += u"\n{0}".format(self.country)
         return address
 
+    @property
+    def invoices(self):
+        return [task for task in self.tasks if task.type_=="invoice"]
+
+    @property
+    def estimations(self):
+        return [task for task in self.tasks if task.type_=="estimation"]
+
+    @property
+    def cancelinvoices(self):
+        return [task for task in self.tasks if task.type_=="cancelinvoice"]
+
+
 
 FORM_GRID = (
     ((4, True,), (2, True), ),

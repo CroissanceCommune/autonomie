@@ -37,6 +37,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Text,
+    Boolean,
 )
 from sqlalchemy.event import listen
 
@@ -215,6 +216,18 @@ class Task(Node):
                     'widget': deform.widget.TextAreaWidget()
                 }
             },
+        ),
+        group='edit',
+    )
+    round_floor = deferred(
+        Column(
+            Boolean(),
+            default=False,
+            info={
+                'colanderalchemy': {
+                    'title': u"Méthode d'arrondi 'à l'ancienne' ?"
+                }
+            }
         ),
         group='edit',
     )

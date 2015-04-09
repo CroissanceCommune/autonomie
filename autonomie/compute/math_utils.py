@@ -26,16 +26,20 @@
     Math utilities used for computing
 """
 import math
-from decimal import Decimal
-from decimal import ROUND_HALF_UP
+from decimal import (
+    Decimal,
+    ROUND_HALF_UP,
+    ROUND_DOWN,
+)
 
 PRECISION_LEVEL = 2
 
 
-def floor(value):
+def floor(value, round_floor=False):
     """
         floor a float value
         :param value: float value to be rounded
+        :param bool round_floor: Should the data be floor rounded ?
         :return: an integer
 
         >>> floor(296.9999999)
@@ -45,21 +49,26 @@ def floor(value):
     """
     if not isinstance(value, Decimal):
         value = Decimal(str(value))
-    return int(dec_round(value, 0))
+    return int(dec_round(value, 0, round_floor))
 
 
-def dec_round(dec, precision):
+def dec_round(dec, precision, round_floor=False):
     """
     Return a decimal object rounded to precision
 
     :param int precision: the number of decimals we want after the comma
+    :param bool round_floor: Should the data be floor rounded ?
     """
+    if round_floor:
+        method = ROUND_DOWN
+    else:
+        method = ROUND_HALF_UP
     # On construit un nombre qui a le même nombre de 0 après la virgule que
     # ce que l'on veut en définitive
     precision_reference_tmpl = "%%.%df" % precision
     precision_reference = precision_reference_tmpl % 1
     precision = Decimal(precision_reference)
-    return dec.quantize(precision, ROUND_HALF_UP)
+    return dec.quantize(precision, method)
 
 
 def amount(value, precision=2):

@@ -293,18 +293,6 @@ class Project(Node):
         }
     )
 
-    @property
-    def invoices(self):
-        return [task for task in self.tasks if task.type_=="invoice"]
-
-    @property
-    def estimations(self):
-        return [task for task in self.tasks if task.type_=="estimation"]
-
-    @property
-    def cancelinvoices(self):
-        return [task for task in self.tasks if task.type_=="cancelinvoice"]
-
     def get_estimation(self, taskid):
         """
             Returns the estimation with id taskid
@@ -323,9 +311,31 @@ class Project(Node):
                 return invoice
         raise KeyError("No such task in this project")
 
+    def get_associated_tasks_by_type(self, type_str):
+        """
+        Return the tasks of type type_str associated to the current object
+        """
+        from autonomie.models.task import Task
+        return DBSESSION().query(Task).filter_by(
+            project_id=self.id, type_=type_str
+        ).all()
+
+    @property
+    def invoices(self):
+        return self.get_associated_tasks_by_type('invoice')
+
+    @property
+    def estimations(self):
+        return self.get_associated_tasks_by_type('estimation')
+
+    @property
+    def cancelinvoices(self):
+        return self.get_associated_tasks_by_type('cancelinvoice')
+
     def has_tasks(self):
         from autonomie.models.task import Task
-        return DBSESSION().query(Task.id).filter_by(project_id=self.id).count() > 0
+        num = DBSESSION().query(Task.id).filter_by(project_id=self.id).count()
+        return num > 0
 
     def is_deletable(self):
         """

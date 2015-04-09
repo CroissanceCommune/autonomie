@@ -29,6 +29,7 @@ import logging
 
 from sqlalchemy import or_
 from sqlalchemy.orm import undefer_group
+from webhelpers.html.builder import HTML
 
 from deform import Form
 
@@ -42,7 +43,9 @@ from autonomie.models.customer import (
 )
 from autonomie.utils.widgets import (
     ViewLink,
+    StaticWidget,
     PopUp,
+    ItemActionLink,
 )
 from autonomie.forms.customer import (
     get_list_schema,
@@ -87,7 +90,12 @@ class CustomersListTools(object):
 
     def query(self):
         company = self.request.context
-        return Customer.query().filter(Customer.company_id == company.id)
+        return Customer.query().filter_by(company_id=company.id)
+
+    def filter_archived(self, query, appstruct):
+        archived = appstruct['archived']
+        query = query.filter_by(archived=archived)
+        return query
 
     def filter_name_or_contact(self, records, appstruct):
         """
@@ -105,6 +113,7 @@ class CustomersListView(CustomersListTools, BaseListView):
     """
     Customer listing view
     """
+    add_template_vars = ('item_actions', 'title', )
     def populate_actionmenu(self, appstruct):
         """
         Populate the actionmenu regarding the user's rights
@@ -123,6 +132,86 @@ class CustomersListView(CustomersListTools, BaseListView):
             )
             self.request.actionmenu.add(link)
 
+        self.request.actionmenu.add(self._get_archived_btn(appstruct))
+
+    def _get_archived_btn(self, appstruct):
+        """
+            return the show archived button
+        """
+        archived = appstruct['archived']
+        if not archived:
+            url = self.request.current_route_path(_query=dict(archived="true"))
+            link = HTML.a(u"Afficher les clients archivés",  href=url)
+        else:
+            url = self.request.current_route_path(_query=dict(archived="false"))
+            link = HTML.a(u"Afficher les clients actifs", href=url)
+        return StaticWidget(link)
+
+    @property
+    def item_actions(self):
+        """
+            return action buttons builder
+        """
+        return self._get_actions()
+
+    def _get_actions(self):
+        """
+            Return action buttons with permission handling
+        """
+        btns = []
+        btns.append(
+            ItemActionLink(
+                u"Voir",
+                "view",
+                css='btn btn-default btn-sm',
+                path="customer",
+                icon="search"
+        ))
+        if self.request.params.get('archived', '0') in ('0', 'false'):
+            btns.append(
+                ItemActionLink(
+                    u"Archiver",
+                    "edit",
+                    css="btn btn-default btn-sm",
+                    confirm=u'Êtes-vous sûr de vouloir archiver ce client ?',
+                    path="customer",
+                    title=u"Archiver le projet",
+                    _query=dict(action="archive"),
+                    icon="book",
+                )
+            )
+        else:
+            btns.append(
+                ItemActionLink(
+                    u"Désarchiver",
+                    "edit",
+                    css="btn btn-default btn-sm",
+                    path="customer",
+                    title=u"Désarchiver le client",
+                    _query=dict(action="archive"),
+                    icon="book",
+                )
+            )
+            del_link = ItemActionLink(
+                u"Supprimer",
+                "edit",
+                css="btn btn-danger",
+                confirm=u'Êtes-vous sûr de vouloir supprimer ce client ?',
+                path="customer",
+                title=u"Supprimer le client",
+                _query=dict(action="delete"),
+                icon="trash"
+            )
+
+            def is_deletable_perm(context, req):
+                """
+                    Return True if the current item (context) is deletable
+                """
+                return context.is_deletable()
+            del_link.set_special_perm_func(is_deletable_perm)
+            btns.append(del_link)
+        return btns
+
 
 class CustomersCsv(CustomersListTools, BaseCsvView):
     """
@@ -138,6 +227,33 @@ class CustomersCsv(CustomersListTools, BaseCsvView):
         company = self.request.context
         return Customer.query().options(undefer_group('edit'))\
                 .filter(Customer.company_id == company.id)
+
+
+def customer_archive(request):
+    """
+    Archive the current customer
+    """
+    customer = request.context
+    if not customer.archived:
+        customer.archived = True
+    else:
+        customer.archived = False
+        request.session.flash(
+            u"Le client '{0}' a été désarchivé".format(customer.name)
+        )
+    request.dbsession.merge(customer)
+    return HTTPFound(request.referer)
+
+
+def customer_delete(request):
+    """
+        Delete the current customer
+    """
+    customer = request.context
+    request.dbsession.delete(customer)
+    request.session.flash(u"Le client '{0}' a bien été supprimé".format(
+                                                            customer.name))
+    return HTTPFound(request.referer)
 
 
 def customer_view(request):
@@ -369,6 +485,18 @@ def includeme(config):
         renderer='customer_view.mako',
         request_method='GET',
         permission='view',
+    )
+    config.add_view(
+        customer_delete,
+        route_name="customer",
+        request_param="action=delete",
+        permission='edit',
+    )
+    config.add_view(
+        customer_archive,
+        route_name="customer",
+        request_param="action=archive",
+        permission='edit',
     )
 
     config.add_view(

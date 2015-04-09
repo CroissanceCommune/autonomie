@@ -17,7 +17,9 @@ import sqlalchemy as sa
 def upgrade():
     col = sa.Column('activity_id', sa.Integer(), sa.ForeignKey('company_activity.id'))
     op.add_column('company_datas', col)
+    col = sa.Column('archived', sa.Boolean(), default=False, server_default="0")
+    op.add_column('customer', col)
 
 
 def downgrade():
-    pass
+    op.drop_column('customer', 'archived')

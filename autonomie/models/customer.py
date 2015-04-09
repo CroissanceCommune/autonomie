@@ -44,6 +44,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    Boolean,
     ForeignKey,
 )
 from sqlalchemy.orm import (
@@ -59,6 +60,7 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 
 log = logging.getLogger(__name__)
@@ -378,6 +380,12 @@ class Customer(DBBASE, PersistentACLMixin):
         ),
         group="edit",
     )
+    archived = Column(
+        Boolean(),
+        default=False,
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
+
 
     def get_company_id(self):
         """
@@ -405,7 +413,8 @@ class Customer(DBBASE, PersistentACLMixin):
             contactFirstName=self.contactFirstName,
             name=self.name,
             projects=projects,
-            full_address=self.full_address
+            full_address=self.full_address,
+            archived=self.archived,
         )
 
     def __json__(self, request):
@@ -422,18 +431,37 @@ class Customer(DBBASE, PersistentACLMixin):
             address += u"\n{0}".format(self.country)
         return address
 
+    def get_associated_tasks_by_type(self, type_str):
+        """
+        Return the tasks of type type_str associated to the current object
+        """
+        from autonomie.models.task import Task
+        return DBSESSION().query(Task).filter_by(
+            customer_id=self.id, type_=type_str
+        ).all()
+
     @property
     def invoices(self):
-        return [task for task in self.tasks if task.type_=="invoice"]
+        return self.get_associated_tasks_by_type('invoice')
 
     @property
     def estimations(self):
-        return [task for task in self.tasks if task.type_=="estimation"]
+        return self.get_associated_tasks_by_type('estimation')
 
     @property
     def cancelinvoices(self):
-        return [task for task in self.tasks if task.type_=="cancelinvoice"]
+        return self.get_associated_tasks_by_type('cancelinvoice')
 
+    def has_tasks(self):
+        from autonomie.models.task import Task
+        num = DBSESSION().query(Task.id).filter_by(customer_id=self.id).count()
+        return num > 0
+
+    def is_deletable(self):
+        """
+            Return True if this project could be deleted
+        """
+        return self.archived and not self.has_tasks()
 
 
 FORM_GRID = (

@@ -25,6 +25,8 @@
 """
     Customer handling forms schemas
 """
+import deform
+import colander
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.customer import Customer
@@ -33,6 +35,12 @@ from autonomie.forms.lists import BaseListsSchema
 def get_list_schema():
     schema = BaseListsSchema().clone()
     schema['search'].description = u"Entreprise ou contact principal"
+    schema.add(colander.SchemaNode(
+        colander.Boolean(),
+        name='archived',
+        missing=False,
+        widget=deform.widget.HiddenWidget())
+    )
 
     return schema
 

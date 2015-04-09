@@ -418,7 +418,6 @@ class User(DBBASE, PersistentACLMixin):
         )
 
 
-
 def get_user_by_roles(roles):
     """
     Return user by primary roles

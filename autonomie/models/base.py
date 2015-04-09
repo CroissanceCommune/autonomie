@@ -42,11 +42,19 @@ class ORMClass(object):
         Base class for our models providing usefull query and get methods
     """
     @classmethod
-    def query(cls):
+    def query(cls, *args):
         """
             return a query
         """
-        return DBSESSION().query(cls)
+        if not args:
+            return DBSESSION().query(cls)
+        else:
+            query_args = []
+            for arg in args:
+                cls_attr = getattr(cls, arg, None)
+                if cls_attr is not None:
+                    query_args.append(cls_attr)
+            return DBSESSION().query(*query_args)
 
     @classmethod
     def get(cls, id_):

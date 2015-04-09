@@ -34,6 +34,7 @@ from sqlalchemy import extract
 from beaker.cache import cache_region
 
 from autonomie.exception import Forbidden
+from autonomie.models.task import Task
 from autonomie.models.task.estimation import (
     Estimation,
     EstimationLine,
@@ -306,7 +307,7 @@ class EstimationList(BaseListView):
     default_direction = 'desc'
 
     def query(self):
-        query = Estimation.query().join(Project).join(Customer)
+        query = Estimation.query().join(Task.project).join(Task.customer)
         company_id = self.request.context.id
         query = query.filter(Project.company_id==company_id)
         return query

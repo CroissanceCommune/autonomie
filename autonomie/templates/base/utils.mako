@@ -210,6 +210,16 @@ path = request.current_route_path(_query=get_args)
                     <dd>${getattr(company, key) or u"Non renseigné"}</dd>
                 % endfor
             % endif
+            % if company.activities:
+                <dt>Domaine(s) d'activité</dt>
+                <dd>
+                    <ul>
+                        % for activity in company.activities:
+                            <li>${activity.label}</li>
+                        % endfor
+                    </ul>
+                </dd>
+            % endif
         </dl>
 </%def>
 <%def name="format_filelist(parent_node)">

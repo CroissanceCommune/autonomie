@@ -110,7 +110,7 @@ class StatusChanged(object):
         owner = format_account(self.expense.user)
         date = u"{0}/{1}".format(self.expense.month, self.expense.year)
         status_verb = get_status_verb(self.new_status)
-        addr = self.request.route_url("expense", id=self.expense.id)
+        addr = self.request.route_url("expensesheet", id=self.expense.id)
         addr = format_link(self.settings, addr)
 
         return MAIL_TMPL.format(

@@ -103,6 +103,7 @@ BOOLEAN_FALSE = ('0', 'false', 'non', '', 'False')
 DATETIME_FORMAT = "%d/%m/%Y"
 
 
+DEFAULT_ID_LABEL = "Identifiant Autonomie"
 DEFAULT_DELIMITER = ';'
 DEFAULT_QUOTECHAR = '"'
 DELIMITERS = (';', ',', ":")
@@ -635,7 +636,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         try:
             model, updated = function(args, persist=persist)
             self.imported.append(model)
-            unhandled_columns['Identifiant Autonomie'] = model.id
+            unhandled_columns[DEFAULT_ID_LABEL] = model.id
             self.unhandled_datas.append(unhandled_columns)
             res = model
             if updated:

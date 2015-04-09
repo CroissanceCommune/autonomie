@@ -93,7 +93,7 @@ def test_collect_kwargs(association_handler):
 
 
 def test_import_line(dbsession, csv_datas, association_handler):
-    from autonomie.csv_import import CsvImporter
+    from autonomie.csv_import import CsvImporter, DEFAULT_ID_LABEL
     from autonomie.models.user import UserDatas
 
 
@@ -117,7 +117,7 @@ def test_import_line(dbsession, csv_datas, association_handler):
     assert res.coordonnees_firstname == u'Bienaimé'
     assert res.coordonnees_lastname == u'Arthur'
     assert res.situation_situation.label == u"Réunion d'information"
-    assert sorted(importer.unhandled_datas[0].keys()) == sorted(['id', 'Unknown'])
+    assert sorted(importer.unhandled_datas[0].keys()) == sorted([DEFAULT_ID_LABEL, 'Unknown'])
     assert importer.in_error_lines == []
 
     # We pop a mandatory argument

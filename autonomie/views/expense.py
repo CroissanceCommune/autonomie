@@ -256,8 +256,13 @@ def get_period_form(request, action_url=""):
         Return a form to select the period of the expense sheet
     """
     schema = PeriodSelectSchema().bind(request=request)
-    form = Form(schema=schema, buttons=(submit_btn,), method='GET',
-                            formid='period_form', action=action_url)
+    form = Form(
+        schema=schema,
+        buttons=(submit_btn,),
+        method='GET',
+        formid='period_form',
+        action=action_url,
+    )
     return form
 
 

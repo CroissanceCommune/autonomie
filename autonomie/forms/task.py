@@ -413,7 +413,6 @@ class TaskLine(colander.MappingSchema):
     cost = colander.SchemaNode(
         AmountType(),
         widget=deform.widget.TextInputWidget(),
-        validator=forms.positive_validator,
         css_class='col-md-1')
     quantity = colander.SchemaNode(
         QuantityType(),
@@ -801,10 +800,6 @@ def get_cancel_invoice_schema():
     payments['payment_conditions'].description = u""
 
     schema['lines']['expenses_ht'].validator = forms.negative_validator
-#    schema['lines']['expenses'].validator = forms.negative_validator
-    # cancelinvoice costs can both be positive or negative paiments and
-    # discounts
-    schema['lines']['lines']['taskline']['cost'].validator = None
 
     schema.add(payments)
     return schema

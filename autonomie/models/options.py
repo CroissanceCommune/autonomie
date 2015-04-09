@@ -87,8 +87,8 @@ class ConfigurableOption(DBBASE):
             return {'polymorphic_identity': camel_case_to_name(name)}
 
     @classmethod
-    def query(cls):
-        query = super(ConfigurableOption, cls).query()
+    def query(cls, *args):
+        query = super(ConfigurableOption, cls).query(*args)
         query = query.filter(ConfigurableOption.active==True)
         query = query.order_by(ConfigurableOption.order)
         return query

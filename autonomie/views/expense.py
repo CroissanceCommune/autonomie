@@ -486,13 +486,13 @@ perdues) ?")
         """
             Return a validation button
         """
-        return Submit(u"Valider", "valid", request=self.request)
+        return Submit(u"Valider le document", "valid", request=self.request)
 
     def _invalid_btn(self):
         """
             Return an invalidation button
         """
-        return Submit(u"Invalider", "invalid", request=self.request)
+        return Submit(u"Invalider le document", "invalid", request=self.request)
 
     def _resulted_btn(self):
         """

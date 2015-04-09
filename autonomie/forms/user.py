@@ -242,6 +242,16 @@ def get_list_schema():
 
     schema['search'].description = u"Nom, entreprise, activité"
 
+    schema.add(
+        colander.SchemaNode(
+            colander.Integer(),
+            name='activity_id',
+            missing=colander.drop,
+            widget=forms.company.deferred_company_datas_select,
+            validator=forms.company.deferred_company_datas_validator,
+        )
+    )
+
     schema.add(colander.SchemaNode(
         colander.String(),
         name='disabled',

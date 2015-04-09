@@ -32,6 +32,8 @@ import deform
 import deform_extensions
 from deform import FileData
 
+from autonomie.models.company import CompanyActivity
+
 from autonomie.forms.validators import validate_image_mime
 from autonomie import forms
 from autonomie.forms import (
@@ -94,6 +96,28 @@ def remove_admin_fields(schema, kw):
         del schema['contribution']
 
 
+@colander.deferred
+def deferred_company_datas_select(node, kw):
+    return deform.widget.SelectWidget(
+        values=CompanyActivity.query('id', 'label').all()
+    )
+
+
+@colander.deferred
+def deferred_company_datas_validator(node, kw):
+    ids = [entry[0] for entry in CompanyActivity.query('id')]
+    return colander.OneOf(ids)
+
+
+class CompanyActivitySchema(colander.SequenceSchema):
+    id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"un domaine",
+        widget=deferred_company_datas_select,
+        validator=deferred_company_datas_validator,
+    )
+
+
 class CompanySchema(colander.MappingSchema):
     """
         Company add/edit form schema
@@ -106,7 +130,12 @@ class CompanySchema(colander.MappingSchema):
 
     goal = colander.SchemaNode(
             colander.String(),
-            title=u'Activité')
+            title=u"Descriptif de l'activité")
+
+    activities = CompanyActivitySchema(
+        title=u"Domaines d'activité",
+        missing=colander.drop,
+    )
 
     email = forms.mail_node(missing=u'')
 

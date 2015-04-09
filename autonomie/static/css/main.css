@@ -46,6 +46,10 @@ form.authentication-form input[type=text], form.authentication-form input[type=p
 .authentication-form .form-actions button{
   font-size: 16px;
 }
+.loginbox img{
+  width:100%;
+  height: auto;
+}
 .ui-icon{
   float:left;
   margin-right:3px;

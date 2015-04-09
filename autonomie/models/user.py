@@ -60,6 +60,7 @@ from autonomie.models.base import (
     default_table_args,
 )
 from autonomie.models.node import Node
+from autonomie.models.company import CompanyActivity
 from autonomie.forms import (
     get_hidden_field_conf,
     EXCLUDED,
@@ -724,27 +725,6 @@ class UserDatas(Node):
     )
 
     # INFORMATIONS GÉNÉRALES : CF CAHIER DES CHARGES #
-    #situation_situation = Column(
-    #    String(20),
-    #    info={
-    #        'colanderalchemy': {
-    #            'title': u"Situation actuelle dans la CAE",
-    #            'section': u'Synthèse',
-    #            'widget': get_select(SITUATION_OPTIONS),
-    #            'validator': get_select_validator(SITUATION_OPTIONS),
-    #            'default': SITUATION_OPTIONS[0][0],
-    #        },
-    #        'export': {
-    #            'formatter': lambda val: dict(SITUATION_OPTIONS).get(val),
-    #        },
-    #        'import': {
-    #            'formatter': lambda val: get_dict_key_from_value(
-    #                val,
-    #                dict(SITUATION_OPTIONS),
-    #            )
-    #        }
-    #    },
-    #)
 
     situation_situation_id = Column(
         ForeignKey("cae_situation_option.id"),
@@ -1620,6 +1600,8 @@ class UserDatas(Node):
                         phone=self.coordonnees_tel,
                         mobile=self.coordonnees_mobile,
                     )
+                    if data.activity is not None:
+                        company.activities.append(data.activity)
                 companies.append(company)
         return companies
 
@@ -1745,6 +1727,25 @@ class CompanyDatas(DBBASE):
             {
                 'title': u"Site internet",
             }
+        }
+    )
+    activity_id = Column(
+        ForeignKey("company_activity.id"),
+        info={
+            'colanderalchemy': {
+                'title': u"Domaine d'activité",
+                "widget": get_deferred_select(
+                    CompanyActivity
+                ),
+            }
+        }
+    )
+
+    activity = relationship(
+        "CompanyActivity",
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
         }
     )
     userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})

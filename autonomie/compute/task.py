@@ -29,7 +29,7 @@
 import operator
 import math
 from autonomie.models.tva import Tva
-from autonomie.compute.math_utils import floor
+from autonomie.compute import math_utils
 
 
 def get_default_tva():
@@ -75,6 +75,10 @@ class TaskCompute(object):
     expenses = 0
     expenses_ht = 0
     expenses_tva = -1
+    round_floor = False
+
+    def floor(self, amount):
+        return math_utils.floor(amount, self.round_floor)
 
     def lines_total_ht(self):
         """
@@ -93,8 +97,10 @@ class TaskCompute(object):
             compute the HT amount
         """
         expenses_ht = self.expenses_ht or 0
-        return floor(self.lines_total_ht() - self.discount_total_ht() +
-                    expenses_ht)
+        total_ht = self.lines_total_ht() - \
+                self.discount_total_ht() + \
+                expenses_ht
+        return self.floor(total_ht)
 
     def get_tvas(self):
         """
@@ -122,7 +128,9 @@ class TaskCompute(object):
         """
             Compute the sum of the TVAs amount of TVA
         """
-        return floor(sum(tva for tva in self.get_tvas().values()))
+        return self.floor(
+            sum(tva for tva in self.get_tvas().values())
+        )
 
     def total_ttc(self):
         """
@@ -258,7 +266,7 @@ class EstimationCompute(TaskCompute):
         """
         ret_dict = {}
         for tva, total_ht in self.tva_parts().items():
-            ret_dict[tva] = floor(total_ht * int(self.deposit) / 100.0)
+            ret_dict[tva] = self.floor(total_ht * int(self.deposit) / 100.0)
         return ret_dict
 
     def deposit_amount(self):
@@ -269,7 +277,7 @@ class EstimationCompute(TaskCompute):
         warnings.warn("deprecated", DeprecationWarning)
         if self.deposit > 0:
             total = self.total_ht()
-            return floor(total * int(self.deposit) / 100.0)
+            return self.floor(total * int(self.deposit) / 100.0)
         return 0
 
     def get_nb_payment_lines(self):
@@ -354,7 +362,7 @@ class EstimationCompute(TaskCompute):
             for tva, total_ht in self.deposit_amounts().items():
                 line = LineCompute(cost=total_ht, tva=tva)
                 total_ttc += line.total()
-            return floor(total_ttc)
+            return self.floor(total_ttc)
         return 0
 
     def paymentline_amount_ttc(self):
@@ -364,7 +372,7 @@ class EstimationCompute(TaskCompute):
         total_ttc = 0
         for tva, total_ht in self.paymentline_amounts().items():
             line = LineCompute(cost=total_ht, tva=tva)
-            total_ttc += floor(line.total())
+            total_ttc += self.floor(line.total())
         return total_ttc
 
     def sold(self):

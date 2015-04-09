@@ -41,7 +41,8 @@ var Selectors = {
   tvalist: "#tvalist",
   total_ht: "#total_ht .input",
   total_ttc: "#total_ttc .input",
-  total: '#total .input'
+  total: '#total .input',
+  deform_close: ".deformClosebutton"
 };
 
 function delRow(id){
@@ -597,7 +598,6 @@ function fireTvaChange(){
   fireAmountChange();
 }
 function addTaskLine(link_dom_element){
-  console.log(link_dom_element);
   deform.appendSequenceItem(link_dom_element);
   setTaskLinesBehaviours();
   return false;
@@ -607,16 +607,28 @@ function setTaskLinesBehaviours(){
    * Set the field behaviours on page load
    */
   var s = Selectors.taskline + " " + Selectors.cost;
-  $(s).off("blur");
-  $(s).on("blur", fireAmountChange);
+  s = $(s);
+  s.off("blur");
+  s.on("blur", fireAmountChange);
 
   s = Selectors.taskline + " " + Selectors.quantity;
-  $(s).off("blur");
-  $(s).on("blur", fireAmountChange);
+  s = $(s);
+  s.off("blur");
+  s.on("blur", fireAmountChange);
 
   s = Selectors.taskline + " " + Selectors.tva;
-  $(s).off('change');
-  $(s).on('change', fireTvaChange);
+  s = $(s);
+  s.off('change');
+  s.on('change', fireTvaChange);
+
+  s = $(Selectors.taskline + " " + Selectors.deform_close);
+  s = $(s);
+  s.removeAttr('onclick');
+  s.off('click.removeit');
+  s.on("click.removeit", function(){
+    deform.removeSequenceItem(this);
+    computeTotal();
+  });
 }
 function setDiscountLinesBehaviours(){
   /*

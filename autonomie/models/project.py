@@ -52,6 +52,7 @@ from autonomie.models.types import (
 from autonomie.models.base import (
     default_table_args,
     DBBASE,
+    DBSESSION,
 )
 from autonomie.models.node import Node
 
@@ -322,11 +323,15 @@ class Project(Node):
                 return invoice
         raise KeyError("No such task in this project")
 
+    def has_tasks(self):
+        from autonomie.models.task import Task
+        return DBSESSION().query(Task.id).filter_by(project_id=self.id).count() > 0
+
     def is_deletable(self):
         """
             Return True if this project could be deleted
         """
-        return self.archived and not self.tasks
+        return self.archived and not self.has_tasks()
 
     def get_company_id(self):
         return self.company.id

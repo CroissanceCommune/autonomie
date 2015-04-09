@@ -54,7 +54,10 @@ from autonomie.models.activity import (
 from autonomie.utils.ascii import (
     camel_case_to_name,
 )
-from autonomie.models.company import Company
+from autonomie.models.company import (
+    Company,
+    CompanyActivity,
+)
 from autonomie.models.user import (
     ZoneOption,
     ZoneQualificationOption,
@@ -177,6 +180,13 @@ accompagnement"
             u"Administration de la gestion sociale",
             path='admin_userdatas',
             title=u"Configuration des types pour la gestion sociale",
+        )
+    )
+    request.actionmenu.add(
+        ViewLink(
+            u"Configuration des domaines d'activité des entreprises",
+            path="company_activity",
+            title=u"Configuration des domaines d'activité des entreprises"
         )
     )
     return dict(title=u"Administration du site")
@@ -1047,17 +1057,18 @@ def includeme(config):
         permission='admin',
     )
 
-    view, route_name, tmpl = get_model_view(
-        PaymentConditions,
-        r_path="admin_index",
-    )
-    config.add_route(route_name, "admin/" + route_name)
-    config.add_view(
-        view,
-        route_name=route_name,
-        renderer=tmpl,
-        permission="admin",
-    )
+    for model in (PaymentConditions, CompanyActivity):
+        view, route_name, tmpl = get_model_view(
+            model,
+            r_path="admin_index",
+        )
+        config.add_route(route_name, "admin/" + route_name)
+        config.add_view(
+            view,
+            route_name=route_name,
+            renderer=tmpl,
+            permission="admin",
+        )
 
     config.add_view(
         AdminWorkUnit,

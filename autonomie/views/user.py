@@ -51,7 +51,10 @@ from autonomie.models.files import (
     File,
     TemplatingHistory,
 )
-from autonomie.models.company import Company
+from autonomie.models.company import (
+    Company,
+    CompanyActivity,
+)
 from autonomie.utils.widgets import (
     ViewLink,
     PopUp,
@@ -292,6 +295,7 @@ class UserList(BaseListView):
         """
             Return the main query for our list view
         """
+        log.debug("Queryiing")
         return User.query(ordered=False, only_active=False)\
                 .outerjoin(User.companies)
 
@@ -299,6 +303,7 @@ class UserList(BaseListView):
         """
             filter the query with the provided search argument
         """
+        log.debug("Filtering name")
         search = appstruct['search']
         if search:
             query = query.filter(
@@ -308,6 +313,24 @@ class UserList(BaseListView):
                 User.companies.any(Company.goal.like("%" + search + "%"))
                 ))
 
+        return query
+
+    def filter_activity_id(self, query, appstruct):
+        """
+        filter the query with company activities
+        """
+        log.debug("Filtering by activity id")
+        log.debug(appstruct)
+        activity_id = appstruct.get('activity_id')
+        if activity_id:
+            query = query.filter(
+                User.companies.any(
+                    Company.activities.any(
+                        CompanyActivity.id == activity_id
+                    )
+                )
+            )
+            log.debug(query)
         return query
 
     def filter_disabled(self, query, appstruct):

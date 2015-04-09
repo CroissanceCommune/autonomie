@@ -35,7 +35,10 @@ from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie.models.company import Company
+from autonomie.models.company import (
+    Company,
+    CompanyActivity,
+)
 from autonomie.models.user import User
 from autonomie.utils.widgets import (
     ViewLink,
@@ -233,6 +236,21 @@ class CompanyList(BaseListView):
             link = HTML.a(u"Afficher les entreprises désactivées", href=url)
         return StaticWidget(link)
 
+
+def fetch_activities_objects(appstruct):
+    """
+    Fetch company activities in order to be able to associate them to the
+    company
+    """
+    activities = appstruct.pop('activities', None)
+    if activities:
+        return [
+            CompanyActivity.get(activity_id) \
+                for activity_id in activities
+        ]
+    return []
+
+
 class CompanyAdd(BaseFormView):
     """
         View class for company add
@@ -256,6 +274,7 @@ class CompanyAdd(BaseFormView):
         """
         user_id = appstruct.get('user_id')
         company = Company()
+        company.activities = fetch_activities_objects(appstruct)
         company = merge_session_with_post(company, appstruct)
         if user_id is not None:
             user_account = User.get(user_id)
@@ -288,6 +307,7 @@ class CompanyEdit(BaseFormView):
             prepopulate the form and the actionmenu
         """
         appstruct = self.request.context.appstruct()
+        appstruct['activities'] = [a.id for a in self.request.context.activities]
 
         for filetype in ('logo', 'header'):
             # On récupère un éventuel id de fichier
@@ -311,6 +331,7 @@ class CompanyEdit(BaseFormView):
         """
             Edit the database entry and return redirect
         """
+        self.request.context.activities = fetch_activities_objects(appstruct)
         company = merge_session_with_post(self.request.context, appstruct)
         company = self.dbsession.merge(company)
         self.dbsession.flush()

@@ -519,7 +519,7 @@ function getAmountInput(args){
    * Return an amount input
    */
 
-  var tmpl = Handlebars.templates['paymentAmountTmpl.mustache'];
+  var tmpl = Handlebars.templates['paymentAmount.mustache'];
   return tmpl( args );
 }
 function setPaymentRowsToEditable(){

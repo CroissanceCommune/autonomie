@@ -175,7 +175,7 @@
           % endif
 
     </div>
-    <div class="container-fluid" style="border: 1px solid #dedede; background-color: #fdfdfd;">
+    <div class="container-fluid task_view" style="border: 1px solid #dedede; background-color: #fdfdfd;">
             ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}
     </div>
 </div>

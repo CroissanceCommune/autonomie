@@ -313,3 +313,8 @@ input[name=altdate], input[name=date]{
   z-index: 1100;
   position: relative;
 }
+/* Affichage html de la sortie pdf des documents */
+.task_view img{
+  max-width: 100%;
+  height: auto;
+}

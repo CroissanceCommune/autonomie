@@ -40,6 +40,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.compute.math_utils import percent
 from autonomie.models.task import (
+    Task,
     Estimation,
     Invoice,
     CancelInvoice,
@@ -133,7 +134,7 @@ class DisplayCommercialHandling(BaseView):
         """
             Query for estimations
         """
-        return Estimation.query().join(Project)\
+        return Estimation.query().join(Task.project)\
                     .filter(Project.company_id==self.request.context.id)\
                     .filter(extract('year', Estimation.taskDate)==self.year)
 
@@ -167,7 +168,7 @@ class DisplayCommercialHandling(BaseView):
         result = dict(year_total=0)
         for month in range(1, 13):
 
-            invoices = Invoice.query().join(Project)
+            invoices = Invoice.query().join(Task.project)
             invoices = invoices.filter(
                 Project.company_id==self.request.context.id
                 )
@@ -194,7 +195,7 @@ class DisplayCommercialHandling(BaseView):
                 )
             invoice_sum = sum([invoice.total_ht() for invoice in invoices])
 
-            cinvoices = CancelInvoice.query().join(Project)
+            cinvoices = CancelInvoice.query().join(Task.project)
             cinvoices = cinvoices.filter(
                     Project.company_id==self.request.context.id
                     )

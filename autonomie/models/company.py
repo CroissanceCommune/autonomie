@@ -31,6 +31,7 @@ import deform
 import deform_extensions
 
 from sqlalchemy import (
+    Table,
     Column,
     Integer,
     String,
@@ -49,6 +50,10 @@ from autonomie.models.types import (
     CustomDateType,
     PersistentACLMixin,
 )
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
 
 from autonomie.models.base import (
     DBBASE,
@@ -57,6 +62,27 @@ from autonomie.models.base import (
 )
 
 log = logging.getLogger(__name__)
+
+
+COMPANY_ACTIVITY = Table(
+    'company_activity_rel',
+    DBBASE.metadata,
+    Column("company_id", Integer, ForeignKey('company.id')),
+    Column("activity_id", Integer, ForeignKey('company_activity.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
+
+
+class CompanyActivity(ConfigurableOption):
+    """
+    Company activities
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Domaine d'activité",
+        'validation_msg': u"Les domaines d'activité ont bien été configurées",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
 
 
 class Company(DBBASE, PersistentACLMixin):
@@ -197,6 +223,20 @@ class Company(DBBASE, PersistentACLMixin):
     cgv = deferred(
         Column(Text, default=''),
         group='edit',
+    )
+    activities = relationship(
+        "CompanyActivity",
+        secondary=COMPANY_ACTIVITY,
+        backref=backref(
+            'companies',
+            info={'colanderalchemy': forms.EXCLUDED, 'export': forms.EXCLUDED},
+        ),
+        info={
+            'colanderalchemy': {
+                'title': u'Activités',
+            },
+            'export': forms.EXCLUDED
+        },
     )
 
     def get_company_id(self):

@@ -150,7 +150,7 @@ templates['expenseKm.mustache'] = template({"1":function(depth0,helpers,partials
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "<td class=\"hidden-print\"><a class='btn btn-default' href='"
     + escapeExpression(((helper = (helper = helpers.edit_url || (depth0 != null ? depth0.edit_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"edit_url","hash":{},"data":data}) : helper)))
-    + "' ><i class='icon icon-pencil'></i>&nbsp;Éditer</a>\n<a class='btn btn-default remove'><i class='icon icon-remove-sign'></i>&nbsp;Supprimer</td>\n";
+    + "' ><i class='glyphicon glyphicon-pencil'></i>&nbsp;Éditer</a>\n<a class='btn btn-default remove'><i class='glyphicon glyphicon-remove-sign'></i>&nbsp;Supprimer</td>\n";
 },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<td>"
     + escapeExpression(((helper = (helper = helpers.altdate || (depth0 != null ? depth0.altdate : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"altdate","hash":{},"data":data}) : helper)))
@@ -212,9 +212,9 @@ templates['expense.mustache'] = template({"1":function(depth0,helpers,partials,d
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "<td class='hidden-print'><a class='btn btn-default' href='"
     + escapeExpression(((helper = (helper = helpers.edit_url || (depth0 != null ? depth0.edit_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"edit_url","hash":{},"data":data}) : helper)))
-    + "' ><i class='icon icon-pencil'></i>&nbsp;Éditer</a>\n<a class='btn btn-default remove'><i class='icon icon-remove-sign'></i>&nbsp;Supprimer</a>\n<a class='btn btn-default' href='"
+    + "' ><i class='glyphicon glyphicon-pencil'></i>&nbsp;Éditer</a>\n<a class='btn btn-default remove'><i class='glyphicon glyphicon-remove-sign'></i>&nbsp;Supprimer</a>\n<a class='btn btn-default' href='"
     + escapeExpression(((helper = (helper = helpers.bookmark_url || (depth0 != null ? depth0.bookmark_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"bookmark_url","hash":{},"data":data}) : helper)))
-    + "'><i class='icon-star-empty'></i>&nbsp;Favoris</a>\n</td>\n";
+    + "'><i class='glyphicon glyphicon-star-empty'></i>&nbsp;Favoris</a>\n</td>\n";
 },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<td>"
     + escapeExpression(((helper = (helper = helpers.altdate || (depth0 != null ? depth0.altdate : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"altdate","hash":{},"data":data}) : helper)))

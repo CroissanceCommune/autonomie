@@ -66,7 +66,7 @@
                     <tr>
                         <td class="description">${format_text(line.description, False)}</td>
                         %if task.display_units == 1:
-                            <td class="quantity">${api.format_amount(line.cost)|n}</td>
+                            <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€</td>
                             <td class="quantity">${api.format_quantity(line.quantity)} ${line.unity}</td>
                         % endif
                         <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>

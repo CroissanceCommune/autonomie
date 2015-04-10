@@ -150,7 +150,7 @@ class StaticColumn(Column):
 
     def get_val(self, line):
         val = getattr(line, self.key, "")
-        if self.formatter is not None:
+        if self.formatter is not None and val:
             val = self.formatter(val)
         return val
 
@@ -514,9 +514,6 @@ class XlsExpense(XlsWriter):
             # essayer de remplir les colonnes en recherchant le type de frais
             # par code
             if not got_value:
-                print("On fait une deuxième passe")
-                print(got_value)
-                print(value)
                 for column in columns:
                     cell = self.get_column_cell(column)
 
@@ -527,8 +524,6 @@ class XlsExpense(XlsWriter):
                             by_id=False,
                         )
                         if value:
-                            print("On a une valeur")
-                            print(column)
                             got_value = True
 
                         cell.value = value

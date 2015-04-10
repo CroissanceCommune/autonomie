@@ -71,6 +71,7 @@ from autonomie.models.user import (
     MotifSortieOption,
     SocialDocTypeOption,
     CaeSituationOption,
+    TypeSortieOption,
 )
 from autonomie.models.task import PaymentConditions
 from autonomie.resources import admin_option_js
@@ -982,6 +983,7 @@ def get_all_userdatas_views():
         ParcoursStatusOption,
         MotifSortieOption,
         SocialDocTypeOption,
+        TypeSortieOption,
     ):
         yield get_model_view(model)
     yield TemplateList, 'templates', '/admin/templates.mako'

@@ -113,7 +113,7 @@ ${period_form.render()|n}
 </div>
 <div class='row'>
     <div class='col-md-12' id="expenseskm"></div>
-    <div id="form-container" class='col-md-4'></div>
+    <div id="form-container"></div>
 </div>
 <hr />
 <p class='lead' id='total' style='text-align:right'></p>

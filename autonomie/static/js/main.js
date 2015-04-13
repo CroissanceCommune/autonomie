@@ -116,43 +116,60 @@ function setPopUp(id, title){
   /*
    * Make the div with id `id` becomes a dialog with title `title`
    */
-  $("#" + id).dialog(
-      {
-        autoOpen: false,
-        resize:'auto',
-        modal:true,
-        width:"auto",
-        height:"auto",
-        title:title,
-        open: function(event, ui){
-          $('.ui-widget').css('width','60%');
-          $('.ui-widget').css('left', '20%');
-          $('.ui-widget-content').css('height','auto');
-          // Fix dialog height if content is too big for the current window
-          if ($(this).parent().height() > $(window).height()) {
-            $(this).height($(window).height()*0.9);
-          }
-          // Fix bootstrap + jqueryui conflict
-          var closeBtn = $('.ui-dialog-titlebar-close');
-          closeBtn.addClass("ui-button ui-widget ui-state-default " +
-            "ui-corner-all ui-button-icon-only");
-          closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
-          'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
+  var window_height = $(window).height();
+  var window_width = $(window).width();
+  $("#" + id).dialog({
+      autoOpen: false,
+      height:"auto",
+      width: "auto",
+      resizable: true,
+      modal:true,
+      fluid: true,
+      position: ['center','middle'],
+      maxHeight: window_height * 0.9,
+      maxWidth: window_width * 0.9,
+      title: title,
+      hide: "fadeOut",
+      open: function(event, ui){
+        //$(this).css('height','auto');
+        // Get the content width
+        var content_width = $(this).width();
+        var window_ratio = window_width * 0.8;
+
+        // Get the best width to use between window's or content's
+        var dialog_width = Math.min(content_width + 50, window_width);
+        var dialog = $(this).parent();
+        dialog.width(dialog_width);
+
+        // We need to set the left attr
+        var padding = (window_width - dialog_width) / 2.0;
+        dialog.css('left', padding + 'px');
+
+        // Fix dialog height if content is too big for the current window
+        if (dialog.height() > $(window).height()) {
+            dialog.height($(window).height()*0.9);
         }
+        // Show close button (jquery + bootstrap problem)
+        var closeBtn = $('.ui-dialog-titlebar-close');
+        closeBtn.addClass("ui-button ui-widget ui-state-default " +
+          "ui-corner-all ui-button-icon-only");
+        closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
+        'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
+      }
       }
     );
   }
-  function setClickableRow(){
-    /*
-     * Set all rows with clickable-row class clickable
-     */
-    $('.clickable-row').on('click', function(){
-      var href = $(this).data("href");
-      if (_.isUndefined(href)){
-        alert('Erreur, aucun lien spécifié, contactez votre administrateur');
-      }else{
-        window.document.location = $(this).data("href");
-    }
+function setClickableRow(){
+  /*
+   * Set all rows with clickable-row class clickable
+   */
+  $('.clickable-row').on('click', function(){
+    var href = $(this).data("href");
+    if (_.isUndefined(href)){
+      alert('Erreur, aucun lien spécifié, contactez votre administrateur');
+    }else{
+      window.document.location = $(this).data("href");
+   }
   });
 }
 function enableForm(form_id){

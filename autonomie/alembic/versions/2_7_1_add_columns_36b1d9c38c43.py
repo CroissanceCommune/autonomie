@@ -20,6 +20,10 @@ def upgrade():
     col = sa.Column('archived', sa.Boolean(), default=False, server_default="0")
     op.add_column('customer', col)
 
+    # Migration de accompagnement_header.png en activity_header.png
+    op.execute('update config_files set key="activity_header_img.png" where \
+key="accompagnement_header.png";')
+
 
 def downgrade():
     op.drop_column('customer', 'archived')

@@ -482,25 +482,45 @@ class ActivityActionSeq(colander.SequenceSchema):
     action = ActivityActionConfig(title=u"Action")
 
 
-class MainActivityConfig(colander.MappingSchema):
+def get_file_dl_node(title, additionnal_description=""):
     """
-    Mapping schema for main configuration
+    Return a file download node
     """
-    header = colander.SchemaNode(
+    description = u"Charger un fichier de type image *.png *.jpeg *.jpg ... \
+{0}".format(additionnal_description)
+
+    return colander.SchemaNode(
         FileData(),
         widget=files.deferred_upload_widget,
-        title=u'En-tête des sortie PDF',
+        title=title,
         validator=validate_image_mime,
         missing=colander.drop,
-        description=u"Charger un fichier de type image *.png *.jpeg \
-*.jpg ...")
+        description=description,
+    )
+
+
+class PdfConfig(colander.MappingSchema):
+    """
+    Mapping schema for activity pdf output configuration
+    """
+    header_img = get_file_dl_node(title=u'En-tête des sortie PDF')
+    footer_img = get_file_dl_node(
+        u'Image du pied de page des sorties PDF',
+        u"Si aucun fichier n'est fourni, le pied de page des factures est \
+utilisé",
+    )
+    footer = forms.textarea_node(
+        title=u"Texte du pied de page des sorties PDF",
+        missing=u"",
+    )
 
 
 class ActivityTypesConfig(colander.Schema):
     """
-        The schema for activity types configuration
+    The schema for activity types configuration
     """
-    main = MainActivityConfig(title=u"")
+    activity = PdfConfig(title=u"Rendez-vous")
+    workshop = PdfConfig(title=u"Ateliers")
     types = ActivityTypesSeqConfig(
         title=u"Configuration des natures de rendez-vous"
             )

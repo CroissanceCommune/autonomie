@@ -571,7 +571,8 @@ class AdminActivities(BaseFormView):
 
 
         appstruct = {
-            'main': {},
+            'activity': {'footer': self.request.config.get("activity_footer", "")},
+            'workshop': {'footer': self.request.config.get("workshop_footer", "")},
             'types': [type_.appstruct() for type_ in types],
             'modes': [mode.appstruct() for mode in modes],
             'actions': [
@@ -583,16 +584,21 @@ class AdminActivities(BaseFormView):
                 for act in actions]
         }
 
-        accompagnement_file = ConfigFiles.get('accompagnement_header.png')
-        if accompagnement_file is not None:
-            appstruct['main']['header'] = {
-                'uid': accompagnement_file.id,
-                'filename': accompagnement_file.name,
-                'preview_url': self.request.route_url(
-                    'public',
-                    name='accompagnement_header.png',
-                )
-            }
+        # On récupère les fichiers si iles existens et on peuple l'appstruct
+        # avec les méta informations qui y sont associées
+        for data_type in ("activity", "workshop"):
+            for file_type in ("header_img", "footer_img"):
+                file_name = "%s_%s.png" % (data_type, file_type)
+                file_model = ConfigFiles.get(file_name)
+                if file_model is not None:
+                    appstruct[data_type][file_type] = {
+                    'uid': file_model.id,
+                    'filename': file_model.name,
+                    'preview_url': self.request.route_url(
+                        'public',
+                        name=file_name,
+                    )
+                }
 
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
@@ -699,13 +705,30 @@ class AdminActivities(BaseFormView):
 
             self._add_or_edit(data, ActivityAction)
 
+    def store_pdf_conf(self, appstruct, data_type):
+        """
+        Store the pdf configuration for the given type
+
+        :param dict appstruct: The submitted datas
+        :param str data_type: workshop/activity
+        """
+        for file_type in ("header_img", "footer_img"):
+            file_datas = appstruct[data_type].get(file_type)
+            if file_datas:
+                file_name = "%s_%s.png" % (data_type, file_type)
+                ConfigFiles.set(file_name, file_datas)
+
+        Config.set(
+            "%s_footer" % data_type,
+            appstruct[data_type].get('footer', '')
+        )
+
     def submit_success(self, appstruct):
         """
             Handle successfull expense configuration
         """
-        header = appstruct['main'].pop('header', None)
-        if header is not None:
-            ConfigFiles.set('accompagnement_header.png', header)
+        self.store_pdf_conf(appstruct, 'activity')
+        self.store_pdf_conf(appstruct, 'workshop')
         # We delete the elements that are no longer in the appstruct
         self.disable_types(appstruct)
         self.disable_actions(appstruct)

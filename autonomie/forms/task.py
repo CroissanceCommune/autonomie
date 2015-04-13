@@ -798,10 +798,15 @@ def get_cancel_invoice_schema():
     payments = InvoicePayments(title=title, name='payments').clone()
     payments['payment_conditions'].title = title
     payments['payment_conditions'].description = u""
+    payments['payment_conditions'].missing = u""
 
     schema['lines']['expenses_ht'].validator = forms.negative_validator
 
     schema.add(payments)
+    schema.add(
+        TaskCommunication(title=u'Communication Entrepreneur/CAE',
+                          name='communication')
+    )
     return schema
 
 
@@ -1076,6 +1081,7 @@ class CancelInvoiceMatch(MappingWrapper):
 #        ('expenses', 'lines'),
         ('expenses_ht', 'lines'),
         ('payment_conditions', 'payments'),
+        ('statusComment', 'communication'),
     )
     dbtype = 'cancelinvoice'
 

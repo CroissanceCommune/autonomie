@@ -83,9 +83,7 @@
         Télécharger la feuille d'émargement pour cette tranche horaire
     </a>
 </div>
-<% attendances = timeslot.attendances %>
-<% attendances.sort(key=lambda a:a.user.lastname) %>
-                            % for attendance in attendances:
+                            % for attendance in timeslot.sorted_attendances:
                                 <input type="hidden" name="__start__" value="attendance:mapping" />
                                 <% participant = attendance.user %>
                                 <% participant_url = request.route_path('user', id=participant.id) %>
@@ -94,7 +92,7 @@
                                <% tag_id = "presence_%s_%s" % (timeslot.id, participant.id) %>
                                <input type='hidden' name='account_id' value='${participant.id}' />
                                <input type='hidden' name='timeslot_id' value='${timeslot.id}' />
-                               <div class='form-group'>
+                               <div class='row form-group'>
                                    <label class="col-sm-2" for="${tag_id}">
                                         <a href='${participant_url}' title='Voir le compte de ce participant'>
                                             ${api.format_account(participant)}

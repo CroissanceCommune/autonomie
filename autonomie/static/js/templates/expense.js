@@ -93,7 +93,7 @@ templates['expenseKmForm.mustache'] = template({"1":function(depth0,helpers,part
     + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))
     + "\n</label>\n</div>\n";
 },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, escapeExpression=this.escapeExpression, buffer = "<form id='expenseKmForm' class='form' action='#' onsubmit='return false;'>\n\n<div class=\"form-group\">\n<label for='category'>Catégorie de frais</label>\n";
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, escapeExpression=this.escapeExpression, buffer = "<form id='expenseKmForm' class='form' action='#' onsubmit='return false;'>\n\n<div class=\"row\">\n<div class=\"col-md-4\">\n<div class=\"form-group\">\n<label for='category'>Catégorie de frais</label>\n";
   stack1 = ((helper = (helper = helpers.category_options || (depth0 != null ? depth0.category_options : depth0)) != null ? helper : helperMissing),(options={"name":"category_options","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.category_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -109,7 +109,7 @@ templates['expenseKmForm.mustache'] = template({"1":function(depth0,helpers,part
     + escapeExpression(((helper = (helper = helpers.km || (depth0 != null ? depth0.km : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"km","hash":{},"data":data}) : helper)))
     + "' /><span class=\"input-group-addon\">Km</span>\n</div>\n</div>\n\n<div class='form-group'>\n<label  for='description'>Description</label>\n<input type='text' class='form-control' name='description' value='"
     + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
-    + "' />\n<span class=\"help-block\"> Le cas échéant, indiquer la prestation liée à ces frais</span>\n</div>\n\n<div class=\"form-actions\">\n<button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n<button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n</div>\n</form>\n";
+    + "' />\n<span class=\"help-block\"> Le cas échéant, indiquer la prestation liée à ces frais</span>\n</div>\n\n<div class=\"form-actions\">\n<button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n<button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n</div>\n</div>\n</div>\n</form>\n";
 },"useData":true});
 templates['expenseKmList.mustache'] = template({"1":function(depth0,helpers,partials,data) {
   return "            <div>\n                <a href=\"#kmlines/add/1\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";

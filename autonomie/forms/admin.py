@@ -29,9 +29,7 @@ import os
 import colander
 import logging
 import simplejson as json
-
-from deform import widget as deform_widget
-from deform import FileData
+import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
 
@@ -163,7 +161,7 @@ class SiteConfig(colander.MappingSchema):
         logos ...
     """
     logo = colander.SchemaNode(
-        FileData(),
+        deform.FileData(),
         widget=files.deferred_upload_widget,
         title=u"Choisir un logo",
         validator=validate_image_mime,
@@ -223,10 +221,10 @@ class TvaItem(colander.MappingSchema):
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",
-        widget=deform_widget.CheckboxWidget(true_val="1", false_val="0"))
+        widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"))
     products = ProductSequence(
         title=u"",
-        widget=deform_widget.SequenceWidget(orderable=False))
+        widget=deform.widget.SequenceWidget(orderable=False))
 
 
 class TvaSequence(colander.SequenceSchema):
@@ -237,7 +235,7 @@ class TvaConfig(colander.MappingSchema):
     tvas = TvaSequence(
         title=u"",
         missing=u'',
-        widget=deform_widget.SequenceWidget(orderable=True))
+        widget=deform.widget.SequenceWidget(orderable=True))
 
 
 TVA_UNIQUE_VALUE_MSG = u"Veillez à utiliser des valeurs différentes pour les \
@@ -288,7 +286,7 @@ class PaymentModeConfig(colander.MappingSchema):
     paymentmodes = PaymentModeSequence(
         title=u"",
         missing=u"",
-        widget=deform_widget.SequenceWidget(orderable=True))
+        widget=deform.widget.SequenceWidget(orderable=True))
 
 
 class WorkUnitSequence(colander.SequenceSchema):
@@ -304,7 +302,7 @@ class WorkUnitConfig(colander.MappingSchema):
     workunits = WorkUnitSequence(
         title=u"",
         missing=u"",
-        widget=deform_widget.SequenceWidget(orderable=True))
+        widget=deform.widget.SequenceWidget(orderable=True))
 
 
 class ExpenseConfig(colander.MappingSchema):
@@ -454,9 +452,8 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
     activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
 
 
-class ActivitySubActionConfig(colander.MappingSchema):
+class ActionConfig(colander.MappingSchema):
     id = forms.id_node()
-
     label = colander.SchemaNode(
         colander.String(),
         title=u"Intitulé",
@@ -465,21 +462,65 @@ class ActivitySubActionConfig(colander.MappingSchema):
 
 
 class ActivitySubActionSeq(colander.SequenceSchema):
-    subaction = ActivitySubActionConfig(title=u"Sous-action")
+    subaction = ActionConfig(title=u"")
 
 
 class ActivityActionConfig(colander.Schema):
     id = forms.id_node()
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Intitulé de l'action",
-        validator=colander.Length(max=100)
-        )
-    children = ActivitySubActionSeq( title=u"Sous actions")
+        title=u"Intitulé",
+        validator=colander.Length(max=255)
+    )
+    children = ActivitySubActionSeq(title=u"Sous action")
 
 
 class ActivityActionSeq(colander.SequenceSchema):
     action = ActivityActionConfig(title=u"Action")
+
+
+class WorkshopInfo3Seq(colander.SequenceSchema):
+    child = ActionConfig(title=u"Sous-action 2")
+
+
+class WorkshopInfo2(colander.Schema):
+    id = forms.id_node()
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Intitulé",
+        validator=colander.Length(max=255)
+    )
+    children = WorkshopInfo3Seq(
+        title=u"",
+        widget=deform.widget.SequenceWidget(
+            add_subitem_text_template=u"Ajouter une sous-action 2",
+            orderable=True,
+        )
+    )
+
+
+class WorkshopInfo2Seq(colander.SequenceSchema):
+    child = WorkshopInfo2(title=u"Sous-action 1")
+
+
+class WorkshopInfo1(colander.Schema):
+    id = forms.id_node()
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Intitulé",
+        validator=colander.Length(max=255)
+    )
+    children = WorkshopInfo2Seq(
+        title=u'',
+        widget=deform.widget.SequenceWidget(
+           add_subitem_text_template=u"Ajouter une sous-action 1",
+            orderable=True,
+        )
+    )
+
+
+class WorkshopInfo1Seq(colander.SequenceSchema):
+    actions = WorkshopInfo1(title=u'Action')
 
 
 def get_file_dl_node(title, additionnal_description=""):
@@ -490,7 +531,7 @@ def get_file_dl_node(title, additionnal_description=""):
 {0}".format(additionnal_description)
 
     return colander.SchemaNode(
-        FileData(),
+        deform.FileData(),
         widget=files.deferred_upload_widget,
         title=title,
         validator=validate_image_mime,
@@ -506,8 +547,7 @@ class PdfConfig(colander.MappingSchema):
     header_img = get_file_dl_node(title=u'En-tête des sortie PDF')
     footer_img = get_file_dl_node(
         u'Image du pied de page des sorties PDF',
-        u"Si aucun fichier n'est fourni, le pied de page des factures est \
-utilisé",
+        u"Vient se placer au-dessus du texte du pied de page",
     )
     footer = forms.textarea_node(
         title=u"Texte du pied de page des sorties PDF",
@@ -515,21 +555,38 @@ utilisé",
     )
 
 
-class ActivityTypesConfig(colander.Schema):
+class ActivityConfigSchema(colander.Schema):
     """
     The schema for activity types configuration
     """
-    activity = PdfConfig(title=u"Rendez-vous")
-    workshop = PdfConfig(title=u"Ateliers")
+    pdf = PdfConfig(title=u"Rendez-vous")
     types = ActivityTypesSeqConfig(
         title=u"Configuration des natures de rendez-vous"
-            )
+    )
     modes = ActivityModesSeqConfig(
         title=u"Configuration des modes d'entretien"
-            )
+    )
     actions = ActivityActionSeq(
-        title=u"Configuration des intitulés"
-        )
+        title=u"Configuration des intitulés des actions",
+        description=u"Utilisez comme titres dans les sorties PDF",
+    )
+
+
+class WorkshopConfigSchema(colander.MappingSchema):
+    pdf = PdfConfig(title=u"Ateliers")
+    actions = WorkshopInfo1Seq(
+        title=u"Configuration des intitulés des actions",
+        description=u"Utilisez comme titres dans les sorties PDF",
+    )
+
+
+class AccompagnementConfigSchema(colander.Schema):
+    activity = ActivityConfigSchema(
+        title=u"Configuration du module Rendez-vous"
+    )
+    workshop = WorkshopConfigSchema(title=u"Configuration du module Atelier")
+
+
 
 
 class CaeConfig(colander.MappingSchema):
@@ -707,7 +764,7 @@ Contribution Organic",
     export_schema.add(
         colander.SchemaNode(
             colander.String(),
-            widget=deform_widget.CheckboxWidget(
+            widget=deform.widget.CheckboxWidget(
                 template='autonomie:deform_templates/checkbox_readonly.pt',
                 ),
             title=u"Module facturation",
@@ -719,7 +776,7 @@ Contribution Organic",
         export_schema.add(
             colander.SchemaNode(
                 colander.String(),
-                widget=deform_widget.CheckboxWidget(true_val="1", false_val="0"),
+                widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
                 title=title,
                 description=description,
                 name=key)
@@ -887,7 +944,7 @@ def get_sequence_model_admin(model, title=u""):
         colander.SchemaNode(
             colander.Sequence(),
             node_schema,
-            widget=deform_widget.SequenceWidget(
+            widget=deform.widget.SequenceWidget(
                 min_len=1,
                 orderable=True,
             ),

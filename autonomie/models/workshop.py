@@ -27,13 +27,17 @@ from sqlalchemy import (
     ForeignKey,
     String,
     DateTime,
-    )
+    Boolean,
+)
 from sqlalchemy.orm import (
     relationship,
     backref,
-    )
+)
 
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    default_table_args,
+    DBBASE,
+)
 from autonomie.models.types import JsonEncodedList
 from autonomie.models.activity import Event
 
@@ -53,9 +57,24 @@ class Workshop(Event):
     __mapper_args__ = {'polymorphic_identity': 'workshop'}
     id = Column(Integer, ForeignKey('event.id'), primary_key=True)
     # Libellé pour la sortie pdf
-    info1 = Column(String(125), default="")
-    info2 = Column(String(125), default="")
-    info3 = Column(String(125), default="")
+    #info1 = Column(String(125), default="")
+    #info2 = Column(String(125), default="")
+    #info3 = Column(String(125), default="")
+    info1_id = Column(ForeignKey('workshop_action.id'))
+    info2_id = Column(ForeignKey('workshop_action.id'))
+    info3_id = Column(ForeignKey('workshop_action.id'))
+    info1 = relationship(
+        "WorkshopAction",
+        primaryjoin="Workshop.info1_id==WorkshopAction.id",
+    )
+    info2 = relationship(
+        "WorkshopAction",
+        primaryjoin="Workshop.info2_id==WorkshopAction.id",
+    )
+    info3 = relationship(
+        "WorkshopAction",
+        primaryjoin="Workshop.info3_id==WorkshopAction.id",
+    )
     leaders = Column(JsonEncodedList)
 
     @property
@@ -65,6 +84,26 @@ class Workshop(Event):
         """
         return u"Atelier '{0}' animé par {1}".format(
             self.name, ', '.join(self.leaders))
+
+    def duplicate(self):
+        new_item = Workshop(
+            name=self.name,
+            _acl=self._acl,
+            datetime=self.datetime,
+            status=self.status,
+            leaders=self.leaders,
+            info1=self.info1,
+            info2=self.info2,
+            info3=self.info3,
+        )
+
+        for attendance in self.attendances:
+            new_item.attendances.append(attendance.duplicate())
+
+        for timeslot in self.timeslots:
+            new_item.timeslots.append(timeslot.duplicate())
+
+        return new_item
 
 
 class Timeslot(Event):
@@ -96,3 +135,33 @@ class Timeslot(Event):
         minutes, seconds = divmod(rest, 60)
         hours = 24 * time_delta.days + hours
         return hours, minutes
+
+    def duplicate(self):
+        timeslot = Timeslot(
+            name=self.name,
+            _acl=self._acl,
+            datetime=self.datetime,
+            status=self.status,
+            start_time=self.start_time,
+            end_time=self.end_time,
+        )
+
+        for attendance in self.attendances:
+            timeslot.attendances.append(attendance.duplicate())
+
+        return timeslot
+
+
+class WorkshopAction(DBBASE):
+    __tablename__ = 'workshop_action'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(String(255))
+    active = Column(Boolean(), default=True)
+    parent_id = Column(ForeignKey("workshop_action.id"))
+    children = relationship(
+        "WorkshopAction",
+        primaryjoin="WorkshopAction.id==WorkshopAction.parent_id",
+        backref=backref("parent", remote_side=[id]),
+        cascade="all",
+    )

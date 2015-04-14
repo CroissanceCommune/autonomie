@@ -113,7 +113,7 @@ class Attendance(DBBASE):
         backref=backref(
             'attendances',
             cascade='all, delete-orphan',
-            info={'export': {'exclude': True},}
+            info={'export': {'exclude': True},},
         )
     )
     user = relationship(
@@ -141,6 +141,14 @@ class Attendance(DBBASE):
         if status is not None:
             self.status = status
 
+    def duplicate(self):
+        attendance = Attendance(
+            account_id=self.account_id,
+            status=self.status,
+        )
+        attendance.event_id = self.event_id
+        return attendance
+
 
 class Event(Node):
     """
@@ -159,8 +167,17 @@ class Event(Node):
     @property
     def sorted_participants(self):
         p = self.participants
-        p = sorted(p, key=lambda u:u.lastname)
+        p = sorted(p, key=lambda u:u.lastname.lower())
         return p
+
+    @property
+    def sorted_attendances(self):
+        attendances = self.attendances
+        attendances = sorted(
+            attendances,
+            key=lambda att: att.user.lastname.lower()
+        )
+        return attendances
 
     def user_status(self, user_id):
         """
@@ -278,7 +295,7 @@ class ActivityAction(DBBASE):
     __tablename__ = 'activity_action'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
-    label = Column(String(100))
+    label = Column(String(255))
     active = Column(Boolean(), default=True)
     parent_id = Column(ForeignKey("activity_action.id"))
     children = relationship(

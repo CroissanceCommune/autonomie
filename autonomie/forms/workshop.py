@@ -20,9 +20,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import colander
+import deform
 from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
+from autonomie.models.workshop import WorkshopAction
 from autonomie.models import user
 from autonomie import forms
 from autonomie.forms import lists, activity
@@ -39,6 +41,41 @@ def get_info_field(title):
         description=u"Utilisé dans la feuille d'émargement",
         missing="",
         )
+
+
+def get_info1():
+    query = WorkshopAction.query()
+    query = query.filter(WorkshopAction.active==True)
+    return query.filter(WorkshopAction.parent_id==None)
+
+
+@colander.deferred
+def deferred_info1(node, kw):
+    options = [(unicode(a.id), a.label) for a in get_info1()]
+    return deform.widget.SelectWidget(values=options)
+
+
+@colander.deferred
+def deferred_info2(node, kw):
+    options = [("", u"- Sélectionner un sous-titre -")]
+    for info1 in get_info1():
+        if info1.children:
+            group_options = [(unicode(a.id), a.label) for a in info1.children]
+            group = deform.widget.OptGroup(info1.label, *group_options)
+            options.append(group)
+    return deform.widget.SelectWidget(values=options)
+
+
+@colander.deferred
+def deferred_info3(node, kw):
+    options = [("", u"- Sélectionner un sous-titre -")]
+    for info1 in get_info1():
+        for info2 in info1.children:
+            group_label = u"{1}".format(info1.label, info2.label)
+            group_options = [(unicode(a.id), a.label) for a in info2.children]
+            group = deform.widget.OptGroup(group_label, *group_options)
+            options.append(group)
+    return deform.widget.SelectWidget(values=options)
 
 
 class LeaderSequence(colander.SequenceSchema):
@@ -94,9 +131,21 @@ class Workshop(colander.MappingSchema):
         title=u"Animateur(s)/Animatrice(s)",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
-    info1 = get_info_field(u"Sous-titre 1 (facultatif)")
-    info2 = get_info_field(u"Sous-titre 2 (facultatif)")
-    info3 = get_info_field(u"Sous-titre 3 (facultatif)")
+    info1_id = colander.SchemaNode(
+        colander.Integer(),
+        widget=deferred_info1,
+        title=u"Intitulé de l'action financée 1"
+    )
+    info2_id = colander.SchemaNode(
+        colander.Integer(),
+        widget=deferred_info2,
+        title=u"Intitulé de l'action financée 2"
+    )
+    info3_id = colander.SchemaNode(
+        colander.Integer(),
+        widget=deferred_info3,
+        title=u"Intitulé de l'action financée 3"
+    )
     participants = activity.ParticipantsSequence(
         title=u"Participants",
         widget=deform_widget.SequenceWidget(min_len=1),

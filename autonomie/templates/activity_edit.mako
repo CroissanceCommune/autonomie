@@ -69,7 +69,20 @@
                     </div>
                 % endfor
                 <strong>Fichiers attachés</strong>
-                ${format_filelist(activity)}
+                <div>
+                    ${format_filelist(activity)}
+                </div>
+                <% resulting_companies = set(activity.companies).difference(companies) %>
+                % if resulting_companies:
+                    <strong>Autres entreprises concernées</strong>
+                    % for company in resulting_companies:
+                        <div>
+                            <a href="${request.route_path('company', id=company.id)}">
+                                ${company.name}
+                            </a>
+                        </div>
+                    % endfor
+                % endif
             </div>
     </div>
     <div class='col-md-8'>

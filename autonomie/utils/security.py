@@ -186,14 +186,25 @@ def get_userdatas_acl(self):
     return acl
 
 
-def get_activity_acl(self):
+def get_event_acl(self):
     """
-    Return acls for activities
+    Return acls fr events participants can view
     """
     acl = DEFAULT_PERM[:]
     acl.extend(
         [(Allow, u"%s" % user.login, "view") for user in self.participants]
-            )
+    )
+    return acl
+
+
+def get_activity_acl(self):
+    """
+    Return acls for activities : companies can also view
+    """
+    acl = get_event_acl(self)
+    for companies in self.companies:
+        for user in companies.employees:
+            acl.append((Allow, u"%s" % user.login, "view",))
     return acl
 
 
@@ -385,7 +396,7 @@ def set_models_acls():
     Activity.__default_acl__ = property(get_activity_acl)
     File.__default_acl__ = property(get_file_acl)
     Payment.__default_acl__ = property(get_base_acl)
-    Workshop.__default_acl__ = property(get_activity_acl)
+    Workshop.__default_acl__ = property(get_event_acl)
     Timeslot.__default_acl__ = property(get_base_acl)
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)

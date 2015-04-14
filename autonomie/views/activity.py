@@ -53,7 +53,10 @@ from autonomie.models.activity import (
     Activity,
     Attendance,
     )
-from autonomie.models import user
+from autonomie.models import (
+    user,
+    company,
+)
 from autonomie.forms.activity import (
     CreateActivitySchema,
     NewActivitySchema,
@@ -94,21 +97,29 @@ ACTIVITY_PDF_BUTTON = deform.Button(
 )
 
 
+def handle_rel_in_appstruct(appstruct):
+    """
+    Change related element ids in associated elements for further merge
+
+    :param dict appstruct: The submitted dict
+    """
+    for (key, model) in (('participants', user.User),
+                         ('conseillers', user.User),
+                         ('companies', company.Company),
+                        ):
+        ids = set(appstruct.pop(key, []))
+        if ids:
+            datas = model.query().filter(model.id.in_(ids)).all()
+            appstruct[key] = datas
+    return appstruct
+
+
 def new_activity(request, appstruct):
     """
     Add a new activity in the database
     """
     activity = Activity(status="planned")
-
-    participants_ids = set(appstruct.pop('participants', []))
-    if participants_ids:
-        appstruct['participants'] = [user.User.get(id_) \
-            for id_ in participants_ids]
-
-    conseillers_ids = set(appstruct.pop('conseillers', []))
-    if conseillers_ids:
-        appstruct['conseillers'] = [user.User.get(id_) \
-            for id_ in conseillers_ids]
+    appstruct = handle_rel_in_appstruct(appstruct)
 
     merge_session_with_post(activity, appstruct)
     request.dbsession.add(activity)
@@ -190,9 +201,11 @@ def _get_appstruct_from_activity(activity):
     appstruct = activity.appstruct()
     participants = activity.participants
     conseillers = activity.conseillers
+    companies = activity.companies
 
     appstruct['participants'] = [p.id for p in participants]
     appstruct['conseillers'] = [c.id for c in conseillers]
+    appstruct['companies'] = [c.id for c in companies]
     appstruct['attendances'] = [
         {
         'event_id': att.event_id,
@@ -381,13 +394,7 @@ class ActivityEditView(BaseFormView):
         """
         called when the edition form is submitted
         """
-        # Retrieving participants
-        participants_ids = set(appstruct.pop('participants', []))
-        appstruct['participants'] = [user.User.get(id_) \
-                for id_ in participants_ids]
-        conseillers_ids = set(appstruct.pop('conseillers', []))
-        appstruct['conseillers'] = [user.User.get(id_) \
-                                    for id_ in conseillers_ids]
+        appstruct = handle_rel_in_appstruct(appstruct)
 
         message = u"Les informations ont bien été mises à jour"
         return record_changes(

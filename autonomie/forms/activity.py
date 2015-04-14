@@ -38,6 +38,7 @@ from autonomie.models.activity import (
     ATTENDANCE_STATUS_SEARCH,
 )
 from autonomie.models import user
+from autonomie.models import company
 
 from autonomie import forms
 
@@ -113,7 +114,7 @@ class ParticipantsSequence(colander.SequenceSchema):
     """
     Schema for the list of participants
     """
-    participant_id = user.user_node(title=u"", )
+    participant_id = user.user_node(title=u"un participant", )
 
 
 class ConseillerSequence(colander.SequenceSchema):
@@ -121,9 +122,16 @@ class ConseillerSequence(colander.SequenceSchema):
     Schema for the list of conseiller
     """
     conseiller_id = user.user_node(
-        title=u"Conseillers menant le rendez-vous",
+        title=u"un conseiller",
         roles=['manager', 'admin'],
     )
+
+
+class CompanySequence(colander.SequenceSchema):
+    """
+    schema for the list of attached companies
+    """
+    company_id = company.company_node(title=u"une entreprise")
 
 
 class CreateActivitySchema(colander.MappingSchema):
@@ -133,7 +141,7 @@ class CreateActivitySchema(colander.MappingSchema):
     come_from = forms.come_from_node()
 
     conseillers = ConseillerSequence(
-        title=u"Conseillers",
+        title=u"Conseillers menant le rendez-vous",
         widget=deform.widget.SequenceWidget(min_len=1)
     )
     datetime = forms.now_node(title=u"Date de rendez-vous")
@@ -160,7 +168,13 @@ class CreateActivitySchema(colander.MappingSchema):
     )
     participants = ParticipantsSequence(
         title=u"Participants",
+        description=u"Participants attendus au rendez-vous",
         widget=deform.widget.SequenceWidget(min_len=1)
+    )
+    companies = CompanySequence(
+        title=u"Entreprises concernées (donner le droit de consultation)",
+        description=u"Les membres de ces entreprises qui ne participent \
+pas au rendez-vous peuvent quand même le consulter.",
     )
 
 

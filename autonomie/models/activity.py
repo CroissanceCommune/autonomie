@@ -96,6 +96,14 @@ ACTIVITY_CONSEILLER = Table(
     mysql_engine=default_table_args['mysql_engine']
 )
 
+ACTIVITY_COMPANY = Table(
+    'activity_company_rel',
+    DBBASE.metadata,
+    Column("activity_id", Integer, ForeignKey('activity.id')),
+    Column("company_id", Integer, ForeignKey('company.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine']
+)
 
 class Attendance(DBBASE):
     """
@@ -238,10 +246,11 @@ class Activity(Event):
     duration = deferred(Column(Integer, default=0), group='edit')
 
     type_object = relationship(
-            "ActivityType",
-            primaryjoin="Activity.type_id==ActivityType.id",
-            uselist=False,
-            foreign_keys=type_id)
+        "ActivityType",
+        primaryjoin="Activity.type_id==ActivityType.id",
+        uselist=False,
+        foreign_keys=type_id,
+    )
     conseillers = relationship(
         'User',
         secondary=ACTIVITY_CONSEILLER,
@@ -253,13 +262,26 @@ class Activity(Event):
         info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
     )
     action_label_obj = relationship(
-            "ActivityAction",
-            primaryjoin="Activity.action_id==ActivityAction.id",
-            )
+        "ActivityAction",
+        primaryjoin="Activity.action_id==ActivityAction.id",
+    )
     subaction_label_obj = relationship(
-            "ActivityAction",
-            primaryjoin="Activity.subaction_id==ActivityAction.id",
-            )
+        "ActivityAction",
+        primaryjoin="Activity.subaction_id==ActivityAction.id",
+    )
+    # PErmet de configurer des 'acls' pour permettre à d'autres personnes de
+    # consulter les rendez-vous
+    companies = relationship(
+        "Company",
+        secondary=ACTIVITY_COMPANY,
+        backref=backref(
+            'accompagnement_activities',
+            order_by='Activity.datetime',
+            info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+        ),
+        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+    )
+
 
     @property
     def action_label(self):

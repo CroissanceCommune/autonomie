@@ -121,7 +121,6 @@ class WorkshopAddView(BaseFormView):
         auto_need(form)
         timepicker_fr.need()
         default_timeslots = get_default_timeslots()
-        print default_timeslots
         form.set_appstruct({'timeslots': default_timeslots})
 
     def submit_success(self, appstruct):
@@ -485,6 +484,7 @@ def timeslots_pdf_output(timeslots, workshop, request):
 
     return request.response
 
+
 def timeslot_pdf_view(timeslot, request):
     """
     Return a pdf attendance sheet for the given timeslot
@@ -555,6 +555,23 @@ def workshop_delete_view(workshop, request):
     if not url:
         url = request.route_path('workshops')
     return HTTPFound(url)
+
+
+def workshop_duplicate_view(workshop, request):
+    """
+    workshop duplication view
+    :param obj workshop: The workshop to duplicate
+    :param obj request: The request object
+    """
+    new_workshop = workshop.duplicate()
+    new_workshop = request.dbsession.merge(new_workshop)
+    request.dbsession.flush()
+    request.session.flash(
+        u"L'atelier a bien été dupliqué, vous pouvez le modifier ici \
+<a href='{0}'>Ici</a>.".format(
+    request.route_path("workshop", id=new_workshop.id))
+    )
+    return HTTPFound(request.route_path('workshops'))
 
 
 def populate_actionmenu(request):
@@ -662,6 +679,13 @@ def includeme(config):
         route_name='workshop',
         permission='manage',
         request_param='action=delete',
+    )
+
+    config.add_view(
+        workshop_duplicate_view,
+        route_name='workshop',
+        permission='manage',
+        request_param='action=duplicate',
     )
 
     config.add_view(

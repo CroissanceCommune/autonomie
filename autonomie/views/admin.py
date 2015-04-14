@@ -51,6 +51,7 @@ from autonomie.models.activity import (
     ActivityMode,
     ActivityAction,
 )
+from autonomie.models.workshop import WorkshopAction
 from autonomie.utils.ascii import (
     camel_case_to_name,
 )
@@ -83,7 +84,7 @@ from autonomie.forms.admin import (
     PaymentModeConfig,
     WorkUnitConfig,
     ExpenseTypesConfig,
-    ActivityTypesConfig,
+    AccompagnementConfigSchema,
     CAECONFIG,
     get_config_appstruct,
     get_config_dbdatas,
@@ -553,62 +554,80 @@ class AdminActivities(BaseFormView):
     """
     title = u"Configuration du module accompagnement"
     validation_msg = u"Le module a bien été configuré"
-    schema = ActivityTypesConfig(title=u"")
+    schema = AccompagnementConfigSchema(title=u"")
     buttons = (submit_btn,)
+
+    def _add_pdf_img_to_appstruct(self, data_type, appstruct):
+        for file_type in ("header_img", "footer_img"):
+            file_name = "%s_%s.png" % (data_type, file_type)
+            file_model = ConfigFiles.get(file_name)
+            if file_model is not None:
+                appstruct["pdf"][file_type] = {
+                'uid': file_model.id,
+                'filename': file_model.name,
+                'preview_url': self.request.route_url(
+                    'public',
+                    name=file_name,
+                )
+            }
+
+    def _recursive_action_appstruct(self, actions):
+        appstruct = []
+        for action in actions:
+            action_appstruct = action.appstruct()
+            if action.children is not None:
+                action_appstruct['children'] = self._recursive_action_appstruct(
+                    action.children
+                )
+            appstruct.append(action_appstruct)
+        return appstruct
 
     def before(self, form):
         """
             Add appstruct to the current form object
         """
         query = ActivityType.query()
-        types = query.filter(ActivityType.active==True)
+        types = query.filter_by(active=True)
 
         modes = ActivityMode.query()
 
         query = ActivityAction.query()
-        query = query.filter(ActivityAction.parent_id==None)
-        actions = query.filter(ActivityAction.active==True)
+        query = query.filter_by(parent_id=None)
+        actions = query.filter_by(active=True)
 
 
-        appstruct = {
-            'activity': {'footer': self.request.config.get("activity_footer", "")},
-            'workshop': {'footer': self.request.config.get("workshop_footer", "")},
+        activity_appstruct = {
+            'pdf': {'footer': self.request.config.get("activity_footer", "")},
             'types': [type_.appstruct() for type_ in types],
             'modes': [mode.appstruct() for mode in modes],
-            'actions': [
-                {
-                'id': act.id,
-                'label': act.label,
-                'children': [child.appstruct() for child in act.children],
-                }
-                for act in actions]
+            'actions': self._recursive_action_appstruct(actions)
+        }
+        self._add_pdf_img_to_appstruct('activity', activity_appstruct)
+
+        query = WorkshopAction.query()
+        query = query.filter_by(parent_id=None)
+        actions = query.filter_by(active=True)
+
+        workshop_appstruct = {
+            'pdf': {'footer': self.request.config.get("workshop_footer", "")},
+            'actions': self._recursive_action_appstruct(actions)
         }
 
-        # On récupère les fichiers si iles existens et on peuple l'appstruct
-        # avec les méta informations qui y sont associées
-        for data_type in ("activity", "workshop"):
-            for file_type in ("header_img", "footer_img"):
-                file_name = "%s_%s.png" % (data_type, file_type)
-                file_model = ConfigFiles.get(file_name)
-                if file_model is not None:
-                    appstruct[data_type][file_type] = {
-                    'uid': file_model.id,
-                    'filename': file_model.name,
-                    'preview_url': self.request.route_url(
-                        'public',
-                        name=file_name,
-                    )
-                }
-
-        form.set_appstruct(appstruct)
+        form.set_appstruct(
+            {
+                "activity": activity_appstruct,
+                'workshop': workshop_appstruct
+            }
+        )
         populate_actionmenu(self.request)
 
-    def get_edited_elements(self, appstruct, key):
+    def get_edited_elements(self, appstruct, key=None):
         """
         Return a dict id:data for the elements that are edited (with an id)
         """
-        return dict((data['id'], data) for data in appstruct.get(key, {}) \
-            if 'id' in data)
+        if key is not None:
+            appstruct = appstruct.get(key, {})
+        return dict((data['id'], data) for data in appstruct if 'id' in data)
 
     def get_submitted_modes(self, appstruct):
         """
@@ -627,25 +646,34 @@ class AdminActivities(BaseFormView):
                 element.active = False
                 self.dbsession.merge(element)
 
-    def disable_actions(self, appstruct):
+    def recursive_collect_ids(self, appstruct, key=None):
+        result = []
+        if key is not None:
+            appstruct = appstruct.get(key, [])
+        for local_appstruct in appstruct:
+            if 'children' in local_appstruct.keys():
+                children_ids = self.recursive_collect_ids(
+                    local_appstruct,
+                    'children'
+                )
+                result.extend(children_ids)
+            if 'id' in local_appstruct:
+                result.append(local_appstruct['id'])
+        return result
+
+    def disable_actions(self, appstruct, factory):
         """
         Disable actions that are not active anymore
         """
-        edited_actions = self.get_edited_elements(appstruct, 'actions')
+        # on récupère les ids des actions encore dans la config
+        ids = self.recursive_collect_ids(appstruct, 'actions')
+        from sqlalchemy import not_
 
-        for element in ActivityAction.query()\
-                .filter(ActivityAction.parent_id==None):
-            if element.id not in edited_actions.keys():
-                element.active = False
-                self.dbsession.merge(element)
-            # On désactive ensuite les enfants
-            datas = edited_actions.get(element.id, {})
-            edited_children = self.get_edited_elements(
-                datas, "children")
-            for child in element.children:
-                if child.id in edited_children.keys():
-                    child.active = False
-                    self.dbsession.merge(element)
+        for element in factory.query().filter(
+            not_(getattr(factory, 'id').in_(ids))
+        ):
+            element.active = False
+            self.dbsession.merge(element)
 
     def delete_modes(self, appstruct):
         """
@@ -686,57 +714,67 @@ class AdminActivities(BaseFormView):
     def add_modes(self, new_modes):
         """
         Add new modes
+        modes are not relationships so we don't need to keep them
         """
         for mode in new_modes:
             new_mode_obj = ActivityMode(label=mode)
             self.dbsession.add(new_mode_obj)
 
-    def add_actions(self, appstruct):
+    def add_actions(self, appstruct, key, factory):
         """
-        Add new actions
+        Add recursively new actions (with parent-child relationship)
         """
-        for data in appstruct["actions"]:
-            # First replace children datas by children objects
-            children_datas = data.pop('children')
-            data['children'] = []
-            for child_datas in children_datas:
-                child = self._add_or_edit(child_datas, ActivityAction)
-                data['children'].append(child)
-
-            self._add_or_edit(data, ActivityAction)
+        result = []
+        for action_appstruct in appstruct[key]:
+            # On remplace les noeuds children par des instances
+            if 'children' in action_appstruct:
+                action_appstruct['children'] = self.add_actions(
+                    action_appstruct,
+                    'children',
+                    factory
+                )
+            result.append(self._add_or_edit(action_appstruct, factory))
+        return result
 
     def store_pdf_conf(self, appstruct, data_type):
         """
         Store the pdf configuration for the given type
 
-        :param dict appstruct: The submitted datas
-        :param str data_type: workshop/activity
+        :param dict appstruct: The datas in which we will find the pdf
+        configuration
+        :param str data_type: activity/workshop
         """
+        pdf_appstruct = appstruct['pdf']
         for file_type in ("header_img", "footer_img"):
-            file_datas = appstruct[data_type].get(file_type)
+            file_datas = pdf_appstruct.get(file_type)
             if file_datas:
                 file_name = "%s_%s.png" % (data_type, file_type)
                 ConfigFiles.set(file_name, file_datas)
 
         Config.set(
             "%s_footer" % data_type,
-            appstruct[data_type].get('footer', '')
+            pdf_appstruct.get('footer', '')
         )
 
     def submit_success(self, appstruct):
         """
             Handle successfull expense configuration
         """
-        self.store_pdf_conf(appstruct, 'activity')
-        self.store_pdf_conf(appstruct, 'workshop')
+        activity_appstruct = appstruct.get('activity')
+        workshop_appstruct = appstruct.get('workshop')
+
+        self.store_pdf_conf(activity_appstruct, 'activity')
+        self.store_pdf_conf(workshop_appstruct, 'workshop')
         # We delete the elements that are no longer in the appstruct
-        self.disable_types(appstruct)
-        self.disable_actions(appstruct)
-        new_modes = self.delete_modes(appstruct)
+        self.disable_types(activity_appstruct)
+        self.disable_actions(activity_appstruct, ActivityAction)
+        self.disable_actions(workshop_appstruct, WorkshopAction)
+        new_modes = self.delete_modes(activity_appstruct)
         self.dbsession.flush()
 
-        self.add_types(appstruct)
-        self.add_actions(appstruct)
+        self.add_types(activity_appstruct)
+        self.add_actions(activity_appstruct, "actions", ActivityAction)
+        self.add_actions(workshop_appstruct, "actions", WorkshopAction)
         self.add_modes(new_modes)
 
         self.request.session.flash(self.validation_msg)

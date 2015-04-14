@@ -112,16 +112,28 @@ class Config(DBBASE):
     value = Column("config_value", Text())
 
     @classmethod
-    def get(cls, keyname):
+    def get(cls, keyname, default=None):
         query = super(Config, cls).query()
         query = query.filter(Config.app=='autonomie')
         query = query.filter(Config.name==keyname)
-        return query.first()
+        result = query.first()
+        if default and result is None:
+            result = default
+        return result
 
     @classmethod
     def query(cls):
         query = super(Config, cls).query()
         return query.filter(Config.app=='autonomie')
+
+    @classmethod
+    def set(cls, key, value):
+        instance = cls.get(key)
+        if instance is None:
+            instance = cls(name=key)
+
+        instance.value = value
+        DBSESSION().merge(instance)
 
 
 def get_config():

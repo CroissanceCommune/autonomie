@@ -25,8 +25,16 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
-<a class='btn btn-default pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>PDF</a>
 <% activity = request.context %>
+<% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
+% if activity.status != 'planned':
+<a
+    class='btn btn-default pull-right'
+    href='${pdf_url}'
+    >
+    <i class='glyphicon glyphicon-file'></i>Voir le PDF
+</a>
+% endif
 <div class='row'>
     <div class='col-md-4'>
             <% companies = set() %>
@@ -113,5 +121,10 @@
 </div>
 </%block>
 <%block name="footerjs">
+<% activity = request.context %>
+<% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
 setAuthCheckBeforeSubmit('#record_form');
+if (window.location.search.indexOf("show=pdf") != -1){
+window.open("${pdf_url}");
+}
 </%block>

@@ -78,12 +78,20 @@ NEW_ACTIVITY_BUTTON = deform.Button(
 ACTIVITY_RECORD_BUTTON = deform.Button(
     name="closed",
     type="submit",
-    title=u"Enregistrer et Terminer le rendez-vous")
+    title=u"Enregistrer et Terminer le rendez-vous",
+)
 
 ACTIVITY_CANCEL_BUTTON = deform.Button(
     name="cancelled",
     type="submit",
-    title=u"Enregistrer et Annuler le rendez-vous")
+    title=u"Enregistrer et Annuler le rendez-vous",
+)
+
+ACTIVITY_PDF_BUTTON = deform.Button(
+    name="pdf",
+    type="submit",
+    title=u"Enregistrer et afficher le PDF",
+)
 
 
 def new_activity(request, appstruct):
@@ -108,7 +116,8 @@ def new_activity(request, appstruct):
     return activity
 
 
-def record_changes(request, appstruct, message, gotolist=False):
+def record_changes(request, appstruct, message, gotolist=False,
+                   query_options=None):
     """
     Record changes on the current activity, changes could be :
         edition
@@ -116,16 +125,17 @@ def record_changes(request, appstruct, message, gotolist=False):
     """
     activity = merge_session_with_post(request.context, appstruct)
     request.dbsession.merge(activity)
-    request.session.flash(message)
+    if message:
+        request.session.flash(message)
     if gotolist:
         url = request.route_path(
             'activities',
             )
     else:
         url = request.route_path(
-            'activity',
+            "activity",
             id=request.context.id,
-            _query=dict(action='edit'),
+            _query=query_options,
             )
 
     return HTTPFound(url)
@@ -329,7 +339,11 @@ class ActivityEditView(BaseFormView):
         )
         form = deform.Form(
             schema=RecordActivitySchema().bind(request=self.request),
-            buttons=(ACTIVITY_RECORD_BUTTON, ACTIVITY_CANCEL_BUTTON,),
+            buttons=(
+                ACTIVITY_RECORD_BUTTON,
+                ACTIVITY_CANCEL_BUTTON,
+                ACTIVITY_PDF_BUTTON,
+            ),
             counter=self.counter,
             formid="record_form",
             action=submit_url,
@@ -366,14 +380,23 @@ class ActivityEditView(BaseFormView):
                                     for id_ in conseillers_ids]
 
         message = u"Les informations ont bien été mises à jour"
-        return record_changes(self.request, appstruct, message)
+        return record_changes(
+            self.request,
+            appstruct,
+            message,
+            query_options={'action': 'edit'}
+        )
 
 
 class ActivityRecordView(BaseFormView):
     add_template_vars = ()
 
     schema = RecordActivitySchema()
-    buttons = (ACTIVITY_RECORD_BUTTON, ACTIVITY_CANCEL_BUTTON, )
+    buttons = (
+        ACTIVITY_RECORD_BUTTON,
+        ACTIVITY_CANCEL_BUTTON,
+        ACTIVITY_PDF_BUTTON,
+    )
 
     def record_attendance(self, appstruct):
         """
@@ -405,6 +428,19 @@ class ActivityRecordView(BaseFormView):
         self.record_attendance(appstruct)
         self.context.status = 'cancelled'
         return record_changes(self.request, appstruct, message, gotolist=True)
+
+    def pdf_success(self, appstruct):
+        """
+        Called when the pdf button is clicked
+        """
+        self.record_attendance(appstruct)
+        return record_changes(
+            self.request,
+            appstruct,
+            message=None,
+            gotolist=False,
+            query_options={'action': 'edit', 'show': 'pdf'},
+        )
 
 
 class ActivityList(BaseListView):

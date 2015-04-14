@@ -88,9 +88,11 @@ url = request.route_path('workshops.xls', _query=args)
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     <ul>
-                        % for lead in workshop.leaders:
-                            <li>${lead}</li>
-                        % endfor
+                        % if workshop.leaders:
+                            % for lead in workshop.leaders:
+                                <li>${lead}</li>
+                            % endfor
+                        % endif
                     </ul>
                 </td>
                 <td onclick="${onclick}" class="rowlink">

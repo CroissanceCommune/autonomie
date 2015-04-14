@@ -22,9 +22,9 @@
 """
     Activity related views
 
-    1- An activity is initialized with a date, a status and a conseiller
-    2- An activity is filled and optionnally a new one is initialized
-    3- Activities are filled
+    1- Add Edit activity metadatas
+    2- Record activity attendances and datas
+    3- Program a new activity
 """
 import logging
 import deform
@@ -122,6 +122,13 @@ def record_changes(request, appstruct, message, gotolist=False,
     Record changes on the current activity, changes could be :
         edition
         record
+
+    :param obj request: The pyramid request (context should be an activity)
+    :param dict appstruct: The submitted datas
+    :param str message: The string to display on user message
+    :param bool gotolist: Should we redirect the user to the list view
+    :param dict query_options: In case of single activity page redirect, add
+    those options to the url
     """
     activity = merge_session_with_post(request.context, appstruct)
     request.dbsession.merge(activity)
@@ -224,8 +231,8 @@ def populate_actionmenu(request):
 
 class NewActivityView(BaseFormView):
     """
-        View for new activity creation
-        Only accessible with manage rights
+    View for new activity creation
+    Only accessible with manage rights
     """
     title = u"Créer un nouveau rendez-vous"
     schema = NewActivitySchema()
@@ -301,7 +308,10 @@ class NewActivityAjaxView(BaseFormView):
 
 class ActivityEditView(BaseFormView):
     """
-    Activity panel : used during the activity to save datas
+    Activity Edition View, entry point for activity recording, allow to modify
+    metadatas, provide forms for other actions :
+        recording
+        program new activity
     """
     add_template_vars = ('title',
         'next_activity_form',
@@ -389,6 +399,10 @@ class ActivityEditView(BaseFormView):
 
 
 class ActivityRecordView(BaseFormView):
+    """
+    Allow to record an activity content (attendance and datas)
+    Should only return redirect
+    """
     add_template_vars = ()
 
     schema = RecordActivitySchema()
@@ -507,6 +521,9 @@ class ActivityList(BaseListView):
 
 
 class ActivityListContractor(ActivityList):
+    """
+    Activity list but for contractors
+    """
     schema = get_list_schema(is_admin=False)
     def _get_conseiller_id(self, appstruct):
         return None

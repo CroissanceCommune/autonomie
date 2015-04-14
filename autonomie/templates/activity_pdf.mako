@@ -30,11 +30,35 @@
         <meta name="KEYWORDS" CONTENT="">
         <meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW,ALL">
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
+        <% config = request.config %>
+        <style>
+                    <%
+if config.has_key('activity_footer'):
+    footer_height = len(config.get('activity_footer').splitlines())
+    footer_height = footer_height * 0.8 + 2;
+%>
+
+            @page {
+                size: a4 portrait;
+                @frame content_frame {
+                    margin: 1cm;
+                    border: 0pt solid white;
+                    margin-bottom: ${footer_height}cm;
+                }
+                @frame footer_frame {
+                    -pdf-frame-content: footer_content;
+                    bottom: 0cm;
+                    margin-left: 1cm;
+                    margin-right: 1cm;
+                    height: ${footer_height}cm;
+                    border: 0pt solid white;
+                    vertical-align:bottom;
+                }
+            }
+        </style>
     </head>
     <body>
-        <% config = request.config %>
-
-        <img src="/public/accompagnement_header.png" />
+        <img src="/public/activity_header_img.png" />
 
         <div class='text12'><b>Date : </b> le ${api.format_date(activity.datetime)}</div>
         <div class='text12'><b>Durée : </b> ${activity.duration}</div>
@@ -83,13 +107,14 @@
             </td>
             </tr>
             </table>
-    <div class='row' id='footer'>
-        % if config.has_key('coop_pdffootertitle'):
-            <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
-        %endif
-        % if config.has_key('coop_pdffootertext'):
-            ${format_text(config.get('coop_pdffootertext'))}
-        % endif
-</div>
+
+      <div id="footer_content">
+        <img src="/public/activity_footer_img.png" />
+        <div class='row' id='footer'>
+            % if config.has_key('activity_footer'):
+                ${format_text(config.get('activity_footer'))}
+            % endif
+        </div>
+    </div>
 </body>
 </html>

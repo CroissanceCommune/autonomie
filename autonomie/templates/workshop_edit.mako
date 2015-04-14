@@ -27,6 +27,11 @@
         <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
             Modifier les données relatives à l'atelier
         </button>
+        <a class='btn btn-default'
+            href='${request.route_path("workshop", id=request.context.id, _query=dict(action="duplicate"))}' >
+            <i class='glyphicon glyphicon-duplicate'></i>
+            Dupliquer cet atelier
+        </a>
         <a class='btn btn-default' href='${request.route_path("workshop.pdf", id=request.context.id)}' >
             <i class='glyphicon glyphicon-file'></i>
             Télécharger la feuille d'émargement globale

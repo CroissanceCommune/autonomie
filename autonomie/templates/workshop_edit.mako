@@ -23,7 +23,7 @@
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
 <div class='row'>
-    <div class='col-md-7'>
+    <div class='col-md-12'>
         <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
             Modifier les données relatives à l'atelier
         </button>

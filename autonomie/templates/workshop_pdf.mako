@@ -113,7 +113,16 @@ if request.config.has_key('workshop_footer'):
                     % for user in participants:
                         <tr>
                             <td>
-                                ${api.format_account(user)} ( ${"'".join([c.name for c in user.companies])} )
+                                ${api.format_account(user)}
+                                % for c in user.companies:
+                                    % if loop.first:
+                                        -
+                                    % endif
+                                    ${c.name}
+                                    % if c.activities:
+                                        <small>(${','.join([activity.label for activity in c.activities])})</small>
+                                    % endif
+                                % endfor
                             </td>
                             % for timeslot in timeslots:
                                 <td><br /></td>

@@ -31,9 +31,9 @@
     <div class='col-md-3'>
         <h4>Codes client utilisés</h4>
         <ul>
-            % for code in codes:
+            % for code, name in codes:
                 <li>
-                    ${code.upper()}
+                ${code.upper()} (${name})
                 </li>
             % endfor
         </ul>

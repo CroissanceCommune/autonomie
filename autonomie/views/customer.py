@@ -161,7 +161,7 @@ class CustomerAdd(BaseFormView):
 
     @property
     def codes(self):
-        codes = [model.code for model in self.context.customers]
+        codes = [(model.code, model.name) for model in self.context.customers]
         codes.sort()
         return codes
 
@@ -234,7 +234,7 @@ class CustomerEdit(CustomerAdd):
 
     @property
     def codes(self):
-        codes = [model.code for model in self.context.company.customers \
+        codes = [(model.code, model.name) for model in self.context.company.customers \
                 if model is not self.context]
         codes.sort()
         return codes

@@ -395,7 +395,8 @@ class ProjectAdd(BaseFormView):
 
     @property
     def codes(self):
-        codes = [project.code for project in self.context.projects]
+        codes = [(project.code, project.name) \
+         for project in self.context.projects]
         codes.sort()
         return codes
 

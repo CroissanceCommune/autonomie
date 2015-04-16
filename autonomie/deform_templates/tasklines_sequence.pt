@@ -21,7 +21,7 @@
   <!-- Custom datas insertion -->
 
     <div class='row linesblockheader'>
-      <div class="col-md-11">
+      <div class="col-md-11 hidden-sm hidden-xs">
         <tal:if tal:condition="field.schema.is_admin and field.schema.doctype is not 'estimation'">
         <div class='col-md-3'>Prestation</div>
         <div class='col-md-1'>Prix/unité</div>

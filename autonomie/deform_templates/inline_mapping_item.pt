@@ -12,6 +12,15 @@
   tal:omit-tag="structural"
   i18n:domain="deform">
 
+  <label for="${oid}"
+         class="control-label hidden-md hidden-lg ${required and 'required' or ''}"
+         tal:condition="not structural"
+         id="req-${oid}"
+         >
+    ${title}
+  </label>
+
+
   <div tal:define="input_prepend field.widget.input_prepend | None;
                  input_append field.widget.input_append  | None"
      tal:omit-tag="not (input_prepend or input_append)"

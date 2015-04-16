@@ -405,6 +405,7 @@ class TaskLine(colander.MappingSchema):
         A single estimation line
     """
     description = forms.textarea_node(
+        title=u"Prestation",
         missing=u'',
         richwidget=True,
         richtext_options={"height": "100px"},
@@ -412,15 +413,18 @@ class TaskLine(colander.MappingSchema):
     )
     cost = colander.SchemaNode(
         AmountType(),
+        title=u"Prix/unité",
         widget=deform.widget.TextInputWidget(),
         css_class='col-md-1')
     quantity = colander.SchemaNode(
         QuantityType(),
+        title=u"Quantité",
         widget=deform.widget.TextInputWidget(),
         validator=forms.positive_validator,
         css_class='col-md-1')
     unity = colander.SchemaNode(
         colander.String(),
+        title=u"Unité",
         widget=deferred_unity_widget,
         validator=deferred_unity_validator,
         missing=u"",
@@ -434,11 +438,11 @@ class TaskLine(colander.MappingSchema):
         title=u'TVA')
     product_id = colander.SchemaNode(
         colander.Integer(),
+        title=u"Code produit",
         widget=deferred_product_widget,
         validator=deferred_product_validator,
         missing="",
         css_class="col-md-2",
-        title=u"Code produit",
     )
 
 
@@ -448,22 +452,24 @@ class DiscountLine(colander.MappingSchema):
     """
     description = forms.textarea_node(
         missing=u'',
+        title=u"Remise",
         richwidget=True,
         richtext_options={"height": "100px"},
         css_class='col-md-4',
     )
     amount = colander.SchemaNode(
         AmountType(),
+        title=u"Montant",
         widget=deform.widget.TextInputWidget(),
         css_class='col-md-1',
         validator=forms.positive_validator,
     )
     tva = colander.SchemaNode(
         Integer(),
+        title=u'TVA',
         widget=deferred_tvas_widget,
         default=deferred_default_tva,
         css_class='col-md-2 col-md-offset-3',
-        title=u'TVA',
     )
 
 

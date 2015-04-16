@@ -397,18 +397,19 @@ format csv"
 
 
 class CustomerImportStep2(ConfigFieldAssociationView):
-     title = u"Import de clients, étape 2 : associer les champs"
-     model_types = CustomerImportStep1.model_types
 
-     def get_previous_step_route(self):
-         return self.request.route_path(
-             "company_customers_import_step1",
-             id=self.context.id,
-         )
+    title = u"Import de clients, étape 2 : associer les champs"
+    model_types = CustomerImportStep1.model_types
 
-     def get_default_values(self):
-         log.info("Asking for default values : %s" % self.context.id)
-         return dict(company_id=self.context.id)
+    def get_previous_step_route(self):
+        return self.request.route_path(
+            "company_customers_import_step1",
+            id=self.context.id,
+        )
+
+    def get_default_values(self):
+        log.info("Asking for default values : %s" % self.context.id)
+        return dict(company_id=self.context.id)
 
 
 def includeme(config):

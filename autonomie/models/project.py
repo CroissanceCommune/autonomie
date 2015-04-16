@@ -155,7 +155,7 @@ def get_projects_from_request(request):
     if request.context.__name__ == 'project':
         # Edition (we don't want the current project)
         projects = [project for project in request.context.company.projects \
-                    if project != request.context]
+                    if project.id != request.context.id]
     elif request.context.__name__ == 'company':
         projects = request.context.projects
     else:

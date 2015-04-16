@@ -30,7 +30,10 @@
         simple view, add_phase, edit, ...
 """
 import logging
-from sqlalchemy import or_
+from sqlalchemy import (
+    or_,
+    distinct,
+)
 from webhelpers.html.builder import HTML
 from deform import Form
 
@@ -38,6 +41,7 @@ from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
+from autonomie.models.base import DBSESSION
 from autonomie.models.project import (
     Project,
     Phase,
@@ -174,8 +178,9 @@ class ProjectsList(BaseListView):
         # We can't have projects without having customers
         if not company.customers:
             redirect_to_customerslist(self.request, company)
-        return Project.query().outerjoin(Project.customers).filter(
-                            Project.company_id == company.id)
+        main_query = DBSESSION().query(distinct(Project.id), Project)
+        main_query = main_query.outerjoin(Project.customers)
+        return main_query.filter(Project.company_id == company.id)
 
     def filter_archived(self, query, appstruct):
         archived = appstruct['archived']

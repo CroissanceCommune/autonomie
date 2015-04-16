@@ -33,12 +33,16 @@ from traceback import print_exc
 from colanderalchemy import SQLAlchemySchemaNode
 from js.deform import auto_need
 from webhelpers.html.builder import HTML
-from sqlalchemy import or_
+from sqlalchemy import (
+    or_,
+    distinct,
+)
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.decorator import reify
 
 from autonomie.models import files
+from autonomie.models.base import DBSESSION
 from autonomie.models.user import (
     User,
     UserDatas,
@@ -296,8 +300,8 @@ class UserList(BaseListView):
             Return the main query for our list view
         """
         log.debug("Queryiing")
-        return User.query(ordered=False, only_active=False)\
-                .outerjoin(User.companies)
+        query = DBSESSION().query(distinct(User.id), User)
+        return query.outerjoin(User.companies)
 
     def filter_name_search(self, query, appstruct):
         """

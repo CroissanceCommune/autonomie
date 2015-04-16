@@ -44,7 +44,7 @@
     </thead>
     <tbody>
         % if records:
-            % for user in records:
+            % for id, user in records:
                 % if not request.user.is_contractor() and user.userdatas is not None:
                     <% url = request.route_path('userdata', id=user.userdatas.id) %>
                 % else:

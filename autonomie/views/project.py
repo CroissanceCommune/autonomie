@@ -456,8 +456,9 @@ class ProjectEdit(ProjectAdd):
 
     @property
     def codes(self):
-        codes = [project.code for project in self.context.company.projects \
-                if project.id != self.context.id]
+        codes = [(project.code, project.name) \
+            for project in self.context.company.projects \
+                 if project.id != self.context.id]
         codes.sort()
         return codes
 

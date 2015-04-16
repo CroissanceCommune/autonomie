@@ -134,6 +134,7 @@ function setPopUp(id, title){
         //$(this).css('height','auto');
         // Get the content width
         var content_width = $(this).width();
+        var window_width = $(window).width();
         var window_ratio = window_width * 0.8;
 
         // Get the best width to use between window's or content's
@@ -143,6 +144,7 @@ function setPopUp(id, title){
 
         // We need to set the left attr
         var padding = (window_width - dialog_width) / 2.0;
+        console.log("Setting the padding to %spx", padding);
         dialog.css('left', padding + 'px');
 
         // Fix dialog height if content is too big for the current window

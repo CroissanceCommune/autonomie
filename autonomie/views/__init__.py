@@ -36,13 +36,9 @@ from pyramid_deform import FormView
 from pyramid.security import has_permission
 from js.tinymce import tinymce
 
-from functools import partial
 from sqlalchemy import desc, asc
 from webhelpers import paginate
-from pyramid.url import current_route_url
 
-from autonomie.forms import merge_session_with_post, flatten_appstruct
-from autonomie.forms.lists import ITEMS_PER_PAGE_OPTIONS
 from sqla_inspect.csv import SqlaCsvExporter
 from sqla_inspect.excel import SqlaXlsExporter
 from autonomie.export.utils import write_file_to_request
@@ -91,7 +87,7 @@ class BaseListClass(BaseView):
     """
     schema = None
     default_sort = 'name'
-    sort_columns = {'name':'name'}
+    sort_columns = {'name': 'name'}
     default_direction = 'asc'
 
     def _get_bind_params(self):
@@ -158,8 +154,8 @@ class BaseListClass(BaseView):
                 print(self.request.GET)
                 appstruct = schema.deserialize(self.request.GET)
             except colander.Invalid as e:
-                # If values are not valid, we want the default ones to be provided
-                # see the schema definition
+                # If values are not valid, we want the default ones to be
+                # provided see the schema definition
                 log.error("CURRENT SEARCH VALUES ARE NOT VALID")
                 log.error(e)
                 appstruct = schema.deserialize({})
@@ -284,7 +280,6 @@ class BaseCsvView(BaseListClass):
         """
         for item in query.all():
             yield item
-
 
     def _init_writer(self):
         return self.writer(self.model)
@@ -414,9 +409,12 @@ class BaseFormView(FormView):
         use_ajax = getattr(self, 'use_ajax', False)
         ajax_options = getattr(self, 'ajax_options', '{}')
         self.schema = self.schema.bind(**self.get_bind_data())
-        form = self.form_class(self.schema, buttons=self.buttons,
-                        use_ajax=use_ajax, ajax_options=ajax_options,
-                        **dict(self.form_options))
+        form = self.form_class(
+            self.schema,
+            buttons=self.buttons,
+            use_ajax=use_ajax, ajax_options=ajax_options,
+            **dict(self.form_options)
+        )
         self.before(form)
         return form
 

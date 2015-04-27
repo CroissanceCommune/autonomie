@@ -22,9 +22,11 @@ from pyramid.security import has_permission
 
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.task import PaymentSchema
+from autonomie.forms import (
+    merge_session_with_post,
+)
 from autonomie.views import (
     BaseFormView,
-    merge_session_with_post,
 )
 
 log = logging.getLogger(__name__)

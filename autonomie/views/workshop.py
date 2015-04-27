@@ -61,6 +61,8 @@ from autonomie.views import (
     BaseCsvView,
     BaseXlsView,
     BaseFormView,
+)
+from autonomie.forms import(
     merge_session_with_post,
 )
 from autonomie.views.render_api import (

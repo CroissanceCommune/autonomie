@@ -43,10 +43,12 @@ from autonomie.forms.holiday import (
     HolidaySchema,
     searchSchema,
 )
+from autonomie.forms import (
+    merge_session_with_post,
+)
 from autonomie.views import (
     BaseView,
     BaseFormView,
-    merge_session_with_post,
 )
 from autonomie.resources import holiday_js
 

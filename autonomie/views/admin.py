@@ -94,6 +94,8 @@ from autonomie.views import (
     submit_btn,
     BaseFormView,
     BaseView,
+)
+from autonomie.forms import (
     merge_session_with_post,
 )
 from autonomie.views.files import (

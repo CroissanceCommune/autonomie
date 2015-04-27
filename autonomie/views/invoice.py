@@ -42,8 +42,10 @@ from autonomie.forms.task import (
     get_invoice_appstruct,
     get_invoice_dbdatas,
 )
-from autonomie.views import (
+from autonomie.forms import (
     merge_session_with_post,
+)
+from autonomie.views import (
     submit_btn,
     BaseEditView,
 )

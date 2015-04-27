@@ -41,10 +41,12 @@ from autonomie.utils.widgets import (
     ViewLink,
     StaticWidget,
 )
+from autonomie.forms import (
+    merge_session_with_post,
+)
 from autonomie.views import (
     BaseFormView,
     submit_btn,
-    merge_session_with_post,
     BaseListView,
 )
 from autonomie.forms.company import (

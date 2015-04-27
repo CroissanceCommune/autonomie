@@ -44,7 +44,6 @@ from autonomie.forms.files import FileUploadSchema
 from autonomie.resources import fileupload_js
 from autonomie.views import (
     BaseFormView,
-    merge_session_with_post,
 )
 
 
@@ -134,7 +133,7 @@ class FileUploadView(BaseFormView):
         """
         # Inserting in the database
         file_object = self.factory()
-        merge_session_with_post(file_object, appstruct)
+        forms.merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
         self.request.session.flash(self.valid_msg)
 
@@ -210,7 +209,7 @@ class FileEditView(FileUploadView):
         form.set_appstruct(appstruct)
 
     def persist_to_database(self, appstruct):
-        merge_session_with_post(self.request.context, appstruct)
+        forms.merge_session_with_post(self.request.context, appstruct)
         self.request.dbsession.merge(self.request.context)
         self.request.session.flash(self.valid_msg)
 

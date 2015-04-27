@@ -40,6 +40,7 @@ from autonomie.models.activity import (
 from autonomie.models import user
 
 from autonomie import forms
+from autonomie.forms import lists
 
 
 def get_activity_types():
@@ -255,7 +256,7 @@ class RecordActivitySchema(colander.Schema):
 
 
 def get_list_schema(is_admin=False):
-    schema = forms.lists.BaseListsSchema().clone()
+    schema = lists.BaseListsSchema().clone()
 
     schema.insert(0, colander.SchemaNode(
         colander.Integer(),

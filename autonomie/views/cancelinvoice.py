@@ -40,9 +40,11 @@ from autonomie.models.task.invoice import (
     CancelInvoice,
     CancelInvoiceLine,
 )
+from autonomie.forms import (
+    merge_session_with_post,
+)
 from autonomie.views.files import FileUploadView
 from autonomie.views import (
-    merge_session_with_post,
     submit_btn,
     BaseEditView,
 )

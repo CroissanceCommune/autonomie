@@ -53,7 +53,7 @@
                     <th class="description">Intitulé des postes</th>
                     %if task.display_units == 1:
                         <th class="quantity">P.U.</th>
-                        <th class="quantity">Qté</th>
+                        <th class="unity">Qté</th>
                     % endif
                     <th class="price">Prix</th>
                     % if multiple_tvas:
@@ -67,7 +67,7 @@
                         <td class="description">${format_text(line.description, False)}</td>
                         %if task.display_units == 1:
                             <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€</td>
-                            <td class="quantity">${api.format_quantity(line.quantity)} ${line.unity}</td>
+                            <td class="unity">${api.format_quantity(line.quantity)} ${line.unity}</td>
                         % endif
                         <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
                         % if multiple_tvas:

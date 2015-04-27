@@ -35,7 +35,9 @@
                     <%
 if config.has_key('activity_footer'):
     footer_height = len(config.get('activity_footer').splitlines())
-    footer_height = footer_height * 0.8 + 2;
+    footer_height = footer_height * 0.8 + 2
+else:
+    footer_height = 2
 %>
 
             @page {

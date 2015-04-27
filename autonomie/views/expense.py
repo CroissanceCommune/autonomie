@@ -77,10 +77,12 @@ from autonomie.export.excel import (
     XlsExpense,
 )
 from autonomie.resources import expense_js
+from autonomie.forms import (
+    merge_session_with_post,
+)
 from autonomie.views import (
     BaseView,
     BaseListView,
-    merge_session_with_post,
     BaseFormView,
     submit_btn,
 )

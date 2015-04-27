@@ -45,6 +45,8 @@ from autonomie.utils.pdf import (
 from autonomie.views import (
     BaseListView,
     BaseFormView,
+)
+from autonomie.forms import (
     merge_session_with_post,
 )
 

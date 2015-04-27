@@ -48,8 +48,10 @@ from autonomie.models.task import (
 from autonomie.models.customer import Customer
 from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
-from autonomie.views import (
+from autonomie.forms import (
     merge_session_with_post,
+)
+from autonomie.views import (
     submit_btn,
     BaseView,
 )

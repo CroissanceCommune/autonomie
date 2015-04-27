@@ -51,8 +51,10 @@ from autonomie.forms.task import (
 from autonomie.forms.estimations import (
     get_list_schema,
 )
-from autonomie.views import (
+from autonomie.forms import (
     merge_session_with_post,
+)
+from autonomie.views import (
     submit_btn,
     BaseListView,
 )

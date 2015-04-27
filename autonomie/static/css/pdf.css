@@ -44,10 +44,14 @@ html{
 }
 .lines .tva{
   text-align:right;
-  width:10%;
-  font-size:11px;
+  width:12%;
+  font-size:9px;
 }
 .lines .quantity{
+  text-align:center;
+  width:20%;
+}
+.lines .unity{
   text-align:center;
   width:30%;
 }

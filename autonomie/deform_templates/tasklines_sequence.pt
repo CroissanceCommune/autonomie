@@ -79,6 +79,17 @@
                containerSelector: "#${oid}-orderable",
                itemSelector: ".deformSeqItem",
                placeholder: '<span class="glyphicon glyphicon-arrow-right placeholder"></span>',
+               start: function(e, ui){
+                $(this).find('textarea.tinymce').each(function(){
+                    tinyMCE.execCommand( 'mceRemoveEditor', false, $(this).attr('id') );
+                    $(this).height("15px");
+                });
+               },
+               stop: function(e, ui){
+                $(this).find('textarea.tinymce').each(function(){
+                    tinyMCE.execCommand( 'mceAddEditor', false, $(this).attr('id') );
+                });
+               },
                onDragStart: function ($item, container, _super) {
                  var offset = $item.offset(),
                  pointer = container.rootGroup.pointer

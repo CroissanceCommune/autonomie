@@ -1443,6 +1443,7 @@ class UserDatas(Node):
                 'title': u"Salaire brut",
                 'section': u'Parcours',
                 'widget': deform.widget.TextInputWidget(readonly=True),
+                'description': u"Ce champ est rempli automatiquement",
             }
         }
     )

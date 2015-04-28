@@ -28,7 +28,6 @@ import locale
 locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
 locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
 from pyramid.config import Configurator
-from pyramid_beaker import session_factory_from_settings
 from pyramid_beaker import set_cache_regions_from_settings
 from sqlalchemy import engine_from_config
 
@@ -93,9 +92,9 @@ def add_static_views(config, settings):
     """
     statics = settings.get('autonomie.statics', 'static')
     config.add_static_view(
-            statics,
-            "autonomie:static",
-            cache_max_age=3600,
+        statics,
+        "autonomie:static",
+        cache_max_age=3600,
     )
 
     # Adding a static view to the configured assets
@@ -127,10 +126,12 @@ def prepare_config(**settings):
     auth_policy = SessionAuthenticationPolicy(callback=get_groups)
     acl_policy = ACLAuthorizationPolicy()
 
-    config = Configurator(settings=settings,
-                        authentication_policy=auth_policy,
-                        authorization_policy=acl_policy,
-                        session_factory=session_factory)
+    config = Configurator(
+        settings=settings,
+        authentication_policy=auth_policy,
+        authorization_policy=acl_policy,
+        session_factory=session_factory,
+    )
     config.begin()
     config.commit()
     return config
@@ -150,7 +151,7 @@ def base_configure(config, dbsession, **settings):
     # Adding some usefull properties to the request object
     config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
-    config.set_request_property(lambda _:get_config(), 'config')
+    config.set_request_property(lambda _: get_config(), 'config')
 
     add_static_views(config, settings)
 

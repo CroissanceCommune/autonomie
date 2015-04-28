@@ -412,7 +412,17 @@ class InvoiceLine(DBBASE, LineCompute):
         info={'colanderalchemy': forms.EXCLUDED}
     )
     rowIndex = Column(Integer, default=1,)
-    description = Column(Text)
+    description = Column(
+        Text,
+        info={'colanderalchemy': {
+            'widget': deform.widget.RichTextWidget(
+                options={
+                    'language': "fr_FR",
+                    'content_css': "/fanstatic/fanstatic/css/richtext.css",
+                },
+            )
+        }},
+    )
     cost = Column(Integer, default=0,)
     tva = Column(
         Integer,
@@ -613,7 +623,18 @@ class CancelInvoiceLine(DBBASE, LineCompute):
         default=datetime.datetime.now,
         onupdate=datetime.datetime.now)
     rowIndex = Column(Integer)
-    description = Column(Text, default="")
+    description = Column(
+        Text,
+        default="",
+        info={'colanderalchemy': {
+            'widget': deform.widget.RichTextWidget(
+                options={
+                    'language': "fr_FR",
+                    'content_css': "/fanstatic/fanstatic/css/richtext.css",
+                },
+            )
+        }},
+    )
     cost = Column(Integer, default=0)
     tva = Column("tva", Integer, nullable=False, default=196)
     quantity = Column(DOUBLE, default=1)

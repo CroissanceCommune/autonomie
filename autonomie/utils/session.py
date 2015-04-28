@@ -26,10 +26,14 @@
     Custom beaker session handling allowing to use a remember me cookie
     that allows long time connections
 """
-import os
+import logging
 
 from beaker.session import SessionObject
 from pyramid_beaker import session_factory_from_settings
+
+
+logger = logging.getLogger(__name__)
+
 
 def get_session_factory(settings):
     """
@@ -45,6 +49,7 @@ def get_session_factory(settings):
             options = self._options.copy()
             if "remember_me" in request.cookies.keys():
                 options['timeout'] = self._longtimeout
+
             SessionObject.__init__(self, request.environ, **options)
             def session_callback(request, response):
                 exception = getattr(request, 'exception', None)

@@ -522,7 +522,9 @@ class CancelInvoice(Task, TaskCompute):
             cascade='all, delete-orphan',
             info={'colanderalchemy': forms.EXCLUDED,}
         ),
-        primaryjoin="CancelInvoice.invoice_id==Invoice.id")
+        primaryjoin="CancelInvoice.invoice_id==Invoice.id",
+        info={'colanderalchemy': forms.EXCLUDED,}
+    )
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )

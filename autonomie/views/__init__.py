@@ -34,6 +34,7 @@ from deform import Form
 from deform import Button
 from pyramid_deform import FormView
 from pyramid.security import has_permission
+from pyramid.httpexceptions import HTTPFound
 from js.tinymce import tinymce
 
 from sqlalchemy import desc, asc
@@ -445,3 +446,32 @@ class BaseEditView(BaseFormView):
         model = self.schema.objectify(appstruct, self.context)
         self.dbsession.merge(model)
         self.request.session.flash(self.msg)
+
+
+class DisableView(BaseView):
+    """
+    Main view for enabling/disabling elements
+
+    class MyDisableView(DisableView):
+        enable_msg = u"Has been enabled"
+        disabled_msg = u"Has been disabled"
+        redirect_route = u"The route name"
+    """
+    enable_msg = ""
+    disable_msg = ""
+    redirect_route = ""
+
+    @property
+    def redirect(self):
+        return self.request.route_path(self.redirect_route)
+
+    def __call__(self):
+        if self.context.active:
+            self.context.active = False
+            self.request.dbsession.merge(self.context)
+            self.request.session.flash(self.disable_msg)
+        else:
+            self.context.active = True
+            self.request.dbsession.merge(self.context)
+            self.request.session.flash(self.enable_msg)
+        return HTTPFound(self.redirect)

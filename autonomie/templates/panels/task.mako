@@ -47,7 +47,7 @@
         <% colspan = 1 %>
     % endif
     <div class='row'>
-        <table class="lines col-md-12">
+        <table class="lines col-xs-12">
             <thead>
                 <tr>
                     <th class="description">Intitulé des postes</th>

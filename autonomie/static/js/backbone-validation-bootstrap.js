@@ -30,12 +30,12 @@ function showError(control, error){
    * friendly manner
    */
   var group = control.parents(".form-group");
-  group.addClass("error");
-  if (group.find(".help-inline").length === 0){
-    group.find(".controls").append(
-    "<span class=\"help-inline error-message\"></span>");
+  group.addClass("has-error");
+  if (group.find(".help-block").length === 0){
+    group.append(
+    "<span class=\"help-block error-message\"></span>");
   }
-  var target = group.find(".help-inline");
+  var target = group.find(".help-block");
   return target.text(error);
 }
 function hideFormError(form){

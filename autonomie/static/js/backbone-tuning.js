@@ -29,25 +29,34 @@ Backbone.Marionette.Renderer.render = function(template_name, data){
   return template_obj(data);
 };
 
-var AutonomieApp = null;
-AutonomieApp = new Backbone.Marionette.Application();
-AutonomieApp.navigate = function(route,  options){
-  options || (options = {});
-  Backbone.history.navigate(route, options);
+var AutonomieApp = new Backbone.Marionette.Application();
+
+var controller = {
+  appindex: function(){
+    console.log("appindex");
+  }
 };
-AutonomieApp.on("initialize:after", function(){
+
+var MainRouter = Backbone.Marionette.AppRouter.extend({
+  controller: controller,
+  appRoutes: {
+    "": "appindex"
+  }
+});
+
+AutonomieApp.on("start", function(){
   /*
    *""" Launche the history (controller and router stuff)
    */
-  if ((Backbone.history)&&(! Backbone.History.started)){
+  AutonomieApp.router = new MainRouter();
+  if (Backbone.history){
     Backbone.history.start();
   }
 });
+
 $(function(){
   AutonomieApp.start();
 });
-
-var Autonomie = {};
 
 
 // Provide a default table item view
@@ -100,7 +109,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
    */
   events: {
     'click button[name=submit]':'onFormSubmit',
-    'click button[name=cancel]':'close'
+    'click button[name=cancel]':'destroy'
   },
   initialize: function(options){
     // In case of add forms, we need to pass a dest collection that will be
@@ -160,31 +169,27 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     /*
      * Called when adding an element
      */
-
     // Collection.create doesn't fire the validation, we need to set datas to
     // our model before'
     this.model.set(this.formDatas(), {validate:true});
 
     if (! this.model.isValid() ){
-      Backbone.Validation.unbind(this);
       return false;
     }
 
     // We now add the item to the dest collection
     var this_ = this;
     this.destCollection.create(
-      this.model,
+      this.model.toJSON(),
       {
         success:function(){
           displayServerSuccess("Vos données ont bien été sauvegardées");
-          Backbone.Validation.unbind(this_);
-          this_.close();
+          this_.destroy();
         },
         error: function(){
           displayServerError("Une erreur a été rencontrée lors de la " +
             "sauvegarde de vos données");
         },
-        wait:true,
         sort:true
       }
     );
@@ -213,20 +218,19 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
 //          collection.add(this_.model);
 
           displayServerSuccess("Vos données ont bien été sauvegardées");
-          Backbone.Validation.unbind(this_);
           // When closing it's as we called return (next code is not called)
-          this_.close();
+          this_.destroy();
         },
         error:function(model, xhr, options){
           displayServerError("Une erreur a été rencontrée lors de la " +
               "sauvegarde de vos données");
-        },
-        wait:true
+        }
       }
     );
 
   },
   onFormSubmit: function(e){
+    console.log(this.model);
     Backbone.Validation.bind(this);
     e.preventDefault();
     var this_ = this;
@@ -243,78 +247,3 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     return true;
   }
 });
-
-
-Autonomie.addFormInitialize = function(options){
-  /*
-   * Custom add form initialization
-   */
-};
-
-
-Autonomie.editFormInitialize = function(options){
-  /*
-   * Custom edit form initialization
-   */
-};
-
-Autonomie.addsubmit = function(e){
-  /*
-   *  Handle add form submissions
-   */
-  e.preventDefault();
-  var this_ = this;
-  // We get a clone of the attributes passed to our current model
-  // In order not to affect the model when extending the "data" object
-  var data = _.clone(this.model.attributes);
-
-  var form_datas = this.ui.form.serializeObject();
-
-  _.extend(data, form_datas);
-
-  // Here we need to use the model to which Backbone.Validation was bound in
-  // the initialize method to launch validation, if not, the model dynamically
-  // created below with destCollection.create has no validate method (that is
-  // added when binding)
-//  if( ! this.model._validate(data, {validate:true})){
-//    return false;
-//  }
-  this.destCollection.create(data,
-    { success:function(){
-        displayServerSuccess("Vos données ont bien été sauvegardées");
-        Backbone.Validation.unbind(this_);
-        this_.close();
-       },
-      error: function(){
-        displayServerError("Une erreur a été rencontrée lors de la " +
-          "sauvegarde de vos données");
-      },
-      wait:true,
-      validate:true,
-      sort:true}
-  );
-  Backbone.Validation.unbind(this);
-  return false;
-};
-Autonomie.editsubmit =  function(e){
-    var collection = this.model.collection;
-    e.preventDefault();
-    var this_ = this;
-    var data = this.ui.form.serializeObject();
-    this.model.save(data, {
-      success:function(){
-        collection.remove(this_.model);
-        collection.add(this_.model);
-        displayServerSuccess("Vos données ont bien été sauvegardées");
-        Backbone.Validation.unbind(this_);
-        this_.close();
-      },
-      error:function(model, xhr, options){
-        displayServerError("Une erreur a été rencontrée lors de la " +
-            "sauvegarde de vos données");
-      },
-      wait:true
-    });
-  Backbone.Validation.unbind(this);
-  return false;
-};

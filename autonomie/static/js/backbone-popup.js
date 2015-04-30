@@ -32,7 +32,7 @@ var Popup = Backbone.Marionette.Region.extend({
    */
   el: "#popup",
   constructor:function(){
-    _.bindAll(this, "closeModal", "reset", "onShow", "getEl");
+    _.bindAll(this, "closeModal", "reset", "onShow", "getEl", 'onEmpty');
     Backbone.Marionette.Region.prototype.constructor.apply(this, arguments);
   },
   getEl: function(selector){
@@ -46,9 +46,8 @@ var Popup = Backbone.Marionette.Region.extend({
     var window_height = $(window).height();
     var window_width = $(window).width();
     var this_ = this;
-    view.on("close", this.closeModal, this);
     this.$el.dialog({
-      autoOpen: false,
+      autoOpen: true,
       height:"auto",
       width: "auto",
       resizable: false,
@@ -85,11 +84,14 @@ var Popup = Backbone.Marionette.Region.extend({
         closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
         'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
       },
-      close:function(event, ui){
-        this_.close();
+      close: function(){
+        AutonomieApp.router.navigate("index", {trigger: true});
       }
     });
     this.$el.dialog('open');
+  },
+  onEmpty: function(){
+    this.closeModal();
   },
   closeModal: function(){
     if (this.$el.dialog("isOpen")){

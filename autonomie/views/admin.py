@@ -37,14 +37,15 @@ from autonomie.models.config import (
     ConfigFiles,
 )
 from autonomie.models.tva import (
-        Tva,
-        Product)
+    Tva,
+    Product,
+)
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.treasury import (
-        ExpenseType,
-        ExpenseKmType,
-        ExpenseTelType,
+    ExpenseType,
+    ExpenseKmType,
+    ExpenseTelType,
 )
 from autonomie.models.activity import (
     ActivityType,
@@ -98,6 +99,7 @@ from autonomie.views import (
     submit_btn,
     BaseFormView,
     BaseView,
+    DisableView,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -312,11 +314,12 @@ class AdminTva(BaseFormView):
         appstruct = []
         for tva in Tva.query().all():
             struct = tva.appstruct()
-            struct['products'] = [product.appstruct()
-                    for product in tva.products]
+            struct['products'] = [
+                product.appstruct() for product in tva.products
+            ]
             appstruct.append(struct)
 
-        form.set_appstruct({'tvas':appstruct})
+        form.set_appstruct({'tvas': appstruct})
         populate_actionmenu(self.request)
         log.debug("AdminTva struct: %s", appstruct)
 
@@ -399,7 +402,7 @@ class AdminPaymentMode(BaseFormView):
             Add appstruct to the current form object
         """
         appstruct = [mode.label for mode in PaymentMode.query()]
-        form.set_appstruct({'paymentmodes':appstruct})
+        form.set_appstruct({'paymentmodes': appstruct})
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
@@ -430,7 +433,7 @@ class AdminWorkUnit(BaseFormView):
             Add appstruct to the current form object
         """
         appstruct = [mode.label for mode in WorkUnit.query()]
-        form.set_appstruct({'workunits':appstruct})
+        form.set_appstruct({'workunits': appstruct})
         populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
@@ -456,9 +459,9 @@ class AdminExpense(BaseFormView):
 ont été configurés"
     schema = ExpenseTypesConfig()
     buttons = (submit_btn,)
-    factories = {'expenses':(ExpenseType, 'expense'),
-                 'expenseskm':(ExpenseKmType, 'expensekm'),
-                 'expensestel':(ExpenseTelType, 'expensetel')}
+    factories = {'expenses': (ExpenseType, 'expense'),
+                 'expenseskm': (ExpenseKmType, 'expensekm'),
+                 'expensestel': (ExpenseTelType, 'expensetel')}
 
     def _get_config_key(self, rel_keyname):
         return rel_keyname + "_ndf"
@@ -474,9 +477,10 @@ ont été configurés"
             appstruct[key] = self.request.config.get(cfg_key, '')
 
         for key, (factory, polytype) in self.factories.items():
-            appstruct[key] = [e.appstruct() for e in factory.query()\
-                                            .filter(factory.type==polytype)\
-                                            .filter(factory.active==True)]
+            query = factory.query().filter(factory.type == polytype)
+            query = query.filter(factory.active == True)
+            appstruct[key] = [e.appstruct() for e in query]
+
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request)
 
@@ -525,7 +529,7 @@ ont été configurés"
 
         # We delete the elements that are no longer in the appstruct
         for (factory, polytype) in self.factories.values():
-            for element in factory.query().filter(factory.type==polytype):
+            for element in factory.query().filter(factory.type == polytype):
                 if element.id not in all_ids:
                     element.active = False
                     self.dbsession.merge(element)
@@ -565,13 +569,13 @@ class AdminActivities(BaseFormView):
             file_model = ConfigFiles.get(file_name)
             if file_model is not None:
                 appstruct["pdf"][file_type] = {
-                'uid': file_model.id,
-                'filename': file_model.name,
-                'preview_url': self.request.route_url(
-                    'public',
-                    name=file_name,
-                )
-            }
+                    'uid': file_model.id,
+                    'filename': file_model.name,
+                    'preview_url': self.request.route_url(
+                        'public',
+                        name=file_name,
+                    )
+                }
 
     def _recursive_action_appstruct(self, actions):
         appstruct = []
@@ -596,7 +600,6 @@ class AdminActivities(BaseFormView):
         query = ActivityAction.query()
         query = query.filter_by(parent_id=None)
         actions = query.filter_by(active=True)
-
 
         activity_appstruct = {
             'pdf': {'footer': self.request.config.get("activity_footer", "")},
@@ -889,8 +892,9 @@ class AdminOption(BaseFormView):
         for js_resource in self.js_resources:
             js_resource.need()
 
-        appstruct = {'datas': [elem.appstruct() \
-                               for elem in self.factory.query()]}
+        appstruct = {'datas': [
+            elem.appstruct() for elem in self.factory.query()
+        ]}
         form.set_appstruct(appstruct)
         self.populate_actionmenu()
 
@@ -903,10 +907,11 @@ class AdminOption(BaseFormView):
         """
         Return the elements that are edited (already have an id)
         """
-        return dict((data['id'], data) \
-                    for data in appstruct.get('datas', {}) \
-                    if 'id' in data
-                   )
+        return dict(
+            (data['id'], data)
+            for data in appstruct.get('datas', {})
+            if 'id' in data
+        )
 
     def _disable_or_remove_elements(self, appstruct):
         """
@@ -955,13 +960,14 @@ def get_model_view(model, js_requirements=[], r_path="admin_userdatas"):
     """
     infos = model.__colanderalchemy_config__
     view_title = infos.get('title', u'Titre inconnu')
+
     class MyView(AdminOption):
         title = view_title
         validation_msg = infos.get('validation_msg', u'')
         factory = model
         schema = get_sequence_model_admin(model, u"")
         redirect_path = r_path
-        js_resources=js_requirements
+        js_resources = js_requirements
     return (
         MyView,
         camel_case_to_name(model.__name__),
@@ -980,8 +986,8 @@ class TemplateUploadView(FileUploadView):
         log.debug(u"Coming from : %s" % come_from)
 
         appstruct = {
-                'come_from': come_from
-                }
+            'come_from': come_from
+        }
         form.set_appstruct(appstruct)
         add_link_to_menu(
             self.request,
@@ -1011,6 +1017,7 @@ class TemplateList(BaseView):
     Listview of templates
     """
     title = u"Modèles de documents"
+
     def __call__(self):
         add_link_to_menu(
             self.request,
@@ -1020,8 +1027,8 @@ class TemplateList(BaseView):
         )
 
         templates = files.Template.query()\
-                .order_by(desc(files.Template.active))\
-                .all()
+            .order_by(desc(files.Template.active))\
+            .all()
         return dict(templates=templates, title=self.title)
 
 
@@ -1052,20 +1059,11 @@ def get_all_userdatas_views():
     yield TemplateList, 'templates', '/admin/templates.mako'
 
 
+class TemplateDisableView(DisableView):
+    enable_msg = u"Le template a bien été activé"
+    disable_msg = u"Le template a bien été désactivé"
+    redirect_route = "templates"
 
-def template_disable(context, request):
-    """
-    Enable/disable a template
-    """
-    if context.active:
-        context.active = False
-        request.dbsession.merge(context)
-        request.session.flash(u"Le template a bien été désactivé")
-    else:
-        context.active = True
-        request.dbsession.merge(context)
-        request.session.flash(u"Le template a bien été activé")
-    return HTTPFound(request.route_path("templates"))
 
 def console_view(request):
     """
@@ -1163,7 +1161,6 @@ def includeme(config):
         permission="admin",
     )
 
-
     # User Datas view configuration
     config.add_route("admin_userdatas", "admin/userdatas")
 
@@ -1184,7 +1181,7 @@ def includeme(config):
     )
 
     config.add_view(
-        template_disable,
+        TemplateDisableView,
         route_name='template',
         request_param='action=disable',
         permission='admin',
@@ -1231,7 +1228,3 @@ def includeme(config):
         renderer="admin/index.mako",
         permission="admin",
     )
-
-
-
-

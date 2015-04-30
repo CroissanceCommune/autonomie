@@ -71,6 +71,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.project",
     "autonomie.views.sage",
     "autonomie.views.static",
+    "autonomie.views.statistics",
     "autonomie.views.subscribers",
     "autonomie.views.taskaction",
     "autonomie.views.tests",

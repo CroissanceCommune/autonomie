@@ -29,26 +29,22 @@ from fanstatic import Library
 from fanstatic import Resource
 from js.bootstrap import (
     bootstrap,
-    bootstrap_css,
-    bootstrap_js
 )
 from js.jquery import jquery
 from js.jqueryui import effects_highlight
 from js.jqueryui import effects_shake
 from js.jqueryui import ui_dialog
 from js.jqueryui import ui_sortable
-from js.jqueryui import ui_autocomplete
 from js.jqueryui import ui_datepicker_fr
 from js.jqueryui import bootstrap as jqueryui_bootstrap_theme
 from js.jquery_timepicker_addon import timepicker_js
-from js.jquery_maskedinput import jquery_maskedinput
 from js.jquery_form import jquery_form
-from js.chosen import chosen_jquery
 from js.jquery_qunit import jquery_qunit
 
 lib_autonomie = Library("fanstatic", "static")
 
-#ui_dialog.depends.add(bootstrap_js)
+# ui_dialog.depends.add(bootstrap_js)
+
 
 def get_resource(filepath, minified=None, depends=None):
     """
@@ -60,6 +56,7 @@ def get_resource(filepath, minified=None, depends=None):
         minified=minified,
         depends=depends,
     )
+
 
 def get_main_group():
     """
@@ -213,9 +210,11 @@ event_list_js = get_module_resource('event_list')
 job_js = get_module_resource("job", tmpl=True)
 
 expense_js = get_module_resource("expense", tmpl=True)
+statistics_js = get_module_resource('statistics', tmpl=True)
 holiday_js = get_module_resource("holiday", tmpl=True)
 admin_option_js = get_module_resource("admin_option")
 commercial_js = get_module_resource("commercial")
+
 
 # Test tools
 def get_test_resource():
@@ -234,5 +233,6 @@ test_js = get_test_resource()
 
 # File upload page js requirements
 fileupload_js = get_resource(
-        "js/fileupload.js",
-        depends=[main_group])
+    "js/fileupload.js",
+    depends=[main_group],
+)

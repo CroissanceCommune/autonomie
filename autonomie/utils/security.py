@@ -69,6 +69,10 @@ from autonomie.models.user import (
 from autonomie.models.job import (
     Job,
 )
+from autonomie.models.statistics import (
+    StatisticSheet,
+    StatisticEntry,
+)
 
 log = logging.getLogger(__name__)
 
@@ -110,16 +114,18 @@ class RootFactory(dict):
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
             ('jobs', 'job', Job, ),
-            ('projects', 'project', Project, ),
-            ('phases', 'phase', Phase, ),
-            ('users', 'user', User, ),
-            ('userdatas', 'userdatas', UserDatas, ),
             ('payments', 'payment', Payment, ),
-            ('workshops', 'workshop', Workshop, ),
+            ('phases', 'phase', Phase, ),
+            ('projects', 'project', Project, ),
+            ('statistics', 'statistic', StatisticSheet,),
+            ('statistic_entries', 'statistic_entry', StatisticEntry,),
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('timeslots', 'timeslot', Timeslot, ),
-            ):
+            ('users', 'user', User, ),
+            ('userdatas', 'userdatas', UserDatas, ),
+            ('workshops', 'workshop', Workshop, ),
+        ):
 
             self[traversal_name] = TraversalDbAccess(
                 self,
@@ -140,7 +146,8 @@ class TraversalDbAccess(object):
     __acl__ = DEFAULT_PERM[:]
     dbsession = None
 
-    def __init__(self, parent, traversal_name, object_name, factory, id_key='id'):
+    def __init__(self, parent, traversal_name, object_name, factory,
+                 id_key='id'):
         self.__parent__ = parent
         self.factory = factory
         self.object_name = object_name
@@ -170,6 +177,8 @@ def get_base_acl(self):
     """
         return the base acls
     """
+    print("Getting acls")
+    print(self)
     acl = DEFAULT_PERM[:]
     acl.append((Allow, Authenticated, 'view',))
     return acl
@@ -329,7 +338,6 @@ def get_project_acls(self):
     return acl
 
 
-
 def get_expensesheet_acl(self):
     """
         Compute the expense Sheet acl
@@ -339,8 +347,12 @@ def get_expensesheet_acl(self):
     else:
         user_rights = ("view",)
     acl = DEFAULT_PERM[:]
-    acl.extend([(Allow, u"%s" % user.login, user_rights)
-            for user in self.company.employees])
+    acl.extend(
+        [
+            (Allow, u"%s" % user.login, user_rights)
+            for user in self.company.employees
+        ]
+    )
     return acl
 
 
@@ -353,8 +365,12 @@ def get_expense_acl(self):
     else:
         user_rights = ("view",)
     acl = DEFAULT_PERM[:]
-    acl.extend([(Allow, u"%s" % user.login, user_rights)
-        for user in self.sheet.company.employees])
+    acl.extend(
+        [
+            (Allow, u"%s" % user.login, user_rights)
+            for user in self.sheet.company.employees
+        ]
+    )
     return acl
 
 
@@ -380,23 +396,25 @@ def set_models_acls():
     Here acls are set globally, but we'd like to set things more dynamically
     when different roles will be implemented
     """
-    ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'),]
+    Activity.__default_acl__ = property(get_activity_acl)
+    BaseExpenseLine.__default_acl__ = property(get_expense_acl)
+    CancelInvoice.__default_acl__ = property(get_invoice_acl)
     Company.__default_acl__ = property(get_company_acl)
-    Job.__default_acl__ = DEFAULT_PERM[:]
-    Project.__default_acl__ = property(get_project_acls)
-    Phase.__acl__ = property(get_phase_acls)
+    ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'), ]
     Customer.__default_acl__ = property(get_customer_acls)
     Estimation.__default_acl__ = property(get_estimation_acl)
-    Invoice.__default_acl__ = property(get_invoice_acl)
-    CancelInvoice.__default_acl__ = property(get_invoice_acl)
-    User.__default_acl__ = property(get_user_acl)
-    UserDatas.__default_acl__ = property(get_userdatas_acl)
     ExpenseSheet.__default_acl__ = property(get_expensesheet_acl)
-    BaseExpenseLine.__default_acl__ = property(get_expense_acl)
-    Activity.__default_acl__ = property(get_activity_acl)
     File.__default_acl__ = property(get_file_acl)
+    Invoice.__default_acl__ = property(get_invoice_acl)
+    Job.__default_acl__ = DEFAULT_PERM[:]
     Payment.__default_acl__ = property(get_base_acl)
-    Workshop.__default_acl__ = property(get_event_acl)
-    Timeslot.__default_acl__ = property(get_base_acl)
+    Phase.__acl__ = property(get_phase_acls)
+    Project.__default_acl__ = property(get_project_acls)
+    StatisticSheet.__default_acl__ = property(get_base_acl)
+    StatisticEntry.__default_acl__ = property(get_base_acl)
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
+    Timeslot.__default_acl__ = property(get_base_acl)
+    User.__default_acl__ = property(get_user_acl)
+    UserDatas.__default_acl__ = property(get_userdatas_acl)
+    Workshop.__default_acl__ = property(get_event_acl)

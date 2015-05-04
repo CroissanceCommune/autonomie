@@ -177,8 +177,6 @@ def get_base_acl(self):
     """
         return the base acls
     """
-    print("Getting acls")
-    print(self)
     acl = DEFAULT_PERM[:]
     acl.append((Allow, Authenticated, 'view',))
     return acl

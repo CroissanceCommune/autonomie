@@ -867,7 +867,7 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     }
   };
 
-  router = Backbone.Marionette.AppRouter.extend({
+  var router = Backbone.Marionette.AppRouter.extend({
     /*
      *  Local route configuration
      *
@@ -888,64 +888,29 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
       "print": "print"
     }
   });
+  var setupModule = function(data){
+    /*
+     * Initialize the module's datas
+     */
+    _.extend(AppOptions, data['options']);
+    Expense.expense = new ExpenseSheet(data['expense']);
+    Expense.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
+
+    Expense.router.controller.index();
+
+    // Setup the event listening
+    AutonomieApp.vent.on("expense.totalchanged", function(){
+      var text = "Total des frais professionnels à payer : ";
+      var total = Expense.expense.lines.total() +  Expense.expense.kmlines.total();
+      text += formatAmount(total);
+      $('#total').html(text);
+    });
+  };
 
   Expense.addInitializer(function(options){
     Expense.router = new router();
-    $.ajax({
-      url: AppOptions['loadurl'],
-      dataType: 'json',
-      async: false,
-      mimeType: "textPlain",
-      data: {},
-      cache: false,
-      success: function(data) {
-        _.extend(AppOptions, data['options']);
-        Expense.expense = new ExpenseSheet(data['expense']);
-        Expense.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
-        Expense.router.controller.index();
-        AutonomieApp.vent.on("expense.totalchanged", function(){
-          var text = "Total des frais professionnels à payer : ";
-          var total = Expense.expense.lines.total() +  Expense.expense.kmlines.total();
-          text += formatAmount(total);
-          $('#total').html(text);
-        });
-      },
-      error: function(){
-        alert("Une erreur a été rencontrée, contactez votre administrateur.");
-      }
-    });
+    var ajax_call = initLoad(AppOptions['loadurl']);
+    ajax_call.then(setupModule);
   });
+
 });
-
-
-
-
-
-
-// AutonomieApp.addInitializer(function(options){
-//   /*
-//    *  Application initialization
-//    */
-//   if (AppOptions['loadurl'] !== undefined){
-//     $.ajax({
-//       url: AppOptions['loadurl'],
-//       dataType: 'json',
-//       async: false,
-//       mimeType: "textPlain",
-//       data: {},
-//       cache: false,
-//       success: function(data) {
-//         console.log("Successfull");
-//         _.extend(AppOptions, data['options']);
-//         AutonomieApp.expense = new ExpenseSheet(data['expense']);
-//         AutonomieApp.router = new AutonomieApp.Router({controller:AutonomieApp.Controller});
-//         AutonomieApp.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
-//       },
-//       error: function(){
-//         alert("Une erreur a été rencontrée, contactez votre administrateur.");
-//       }
-//     });
-//   }else{
-//     alert("Une erreur a été rencontrée, contactez votre administrateur.");
-//   }
-// });

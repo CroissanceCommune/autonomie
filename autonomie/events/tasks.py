@@ -81,7 +81,7 @@ class StatusChanged(object):
         """
             return the recipients' emails
         """
-        if self.document.owner.email:
+        if self.document.owner and self.document.owner.email:
             email = [self.document.owner.email]
         else:
             email = []

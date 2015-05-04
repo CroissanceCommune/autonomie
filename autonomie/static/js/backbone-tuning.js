@@ -247,3 +247,21 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     return true;
   }
 });
+
+function initLoad(url){
+  /*
+   * Load function ideal for module initialization
+   *
+   * :param url: The url to load
+   */
+  return $.ajax({
+    url:url,
+    dataType: 'json',
+    mimeType: "textPlain",
+    data: {},
+    cache: false,
+    error: function(){
+      alert("Une erreur a été rencontrée, contactez votre administrateur.");
+    }
+  });
+}

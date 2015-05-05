@@ -98,8 +98,10 @@ def remove_admin_fields(schema, kw):
 
 @colander.deferred
 def deferred_company_datas_select(node, kw):
+    values = CompanyActivity.query('id', 'label').all()
+    values.insert(0, ('', "- Sélectionner un type d'activité"))
     return deform.widget.SelectWidget(
-        values=CompanyActivity.query('id', 'label').all()
+        values=values
     )
 
 

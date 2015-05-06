@@ -1,7 +1,25 @@
-<form class="form-inline">
+{{#if title}}
+<h3>
+    {{ title }}
+    <button class='btn btn-default btn-xs edit' style='font-size:9px' title="Éditer le titre de la feuille de statistiques">
+    <i class="glyphicon glyphicon-pencil" style="vertical-align:middle"> </i>
+    </button>
+</h3>
+{{/if}}
+<form class="form-inline"
+{{#if title}}
+    style='display:none'
+{{/if}}
+>
   <div class="form-group">
-    <label for="title">Intitulé de la feuille de statistique</label>
-    <input type="text" class="form-control" id="title" placeholder="Titre">
+    <label class='control-label' for="title">Intitulé de la feuille de statistique</label>
+    <input type="text" name='title' class="form-control" id="title" placeholder="Titre" value='{{title}}'>
   </div>
-  <button type="submit" class="btn btn-primary">Ajouter</button>
+    <button type="button" class="btn btn-primary submit">
+    {{#if title}}
+        Modifier
+    {{ else }}
+        Ajouter
+    {{/if}}
+    </button>
 </form>

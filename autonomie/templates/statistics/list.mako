@@ -26,11 +26,13 @@
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
     <div class='well'>
-        <button class='btn btn-success'
+        <button class='btn btn-success btn-add'
         title="Créer une nouvelle feuille de statistiques"
     >
         Ajouter
-    </a>
+        </button>
+        <div style="display:none" id='form-container'>
+        </div>
     </div>
     <div class="alert alert-danger">
         <i class='fa fa-warning'></i>
@@ -71,4 +73,8 @@
     </table>
     </div>
 </div>
+</%block>
+<%block name='footerjs'>
+AppOptions = {};
+AppOptions['submiturl'] = "${submiturl}";
 </%block>

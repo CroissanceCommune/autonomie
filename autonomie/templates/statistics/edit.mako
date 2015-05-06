@@ -22,9 +22,18 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
-    <h1>Feuille de stats</h1>
+<div class='row'>
+    <div class='col-xs-12' id='sheet'>
+    </div>
+</div>
+<div class='row'>
+    <div class='col-xs-12' id='entrylist'>
+    </div>
+</div>
+<div id='messageboxes'></div>
 </%block>
 <%block name="footerjs">
 AppOptions = {};
 AppOptions['loadurl'] = "${loadurl}";
+AppOptions['contexturl'] = "${contexturl}";
 </%block>

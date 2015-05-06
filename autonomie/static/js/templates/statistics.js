@@ -1,8 +1,5 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
-templates['entries.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  return "<table>\n<thead>\n</thead>\n</table>\n";
-  },"useData":true});
 templates['entry_list.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   return "<h4>Entrées statistiques</h4>\n<table class=\"table table-bordered table-condensed\">\n    <thead>\n        <th>Intitulé</th>\n        <th>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n";
   },"useData":true});

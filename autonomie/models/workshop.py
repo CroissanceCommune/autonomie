@@ -97,11 +97,11 @@ class Workshop(Event):
             info3=self.info3,
         )
 
-        for attendance in self.attendances:
-            new_item.attendances.append(attendance.duplicate())
-
         for timeslot in self.timeslots:
             new_item.timeslots.append(timeslot.duplicate())
+
+        for participant in self.participants:
+            new_item.participants.append(participant)
 
         return new_item
 
@@ -146,8 +146,8 @@ class Timeslot(Event):
             end_time=self.end_time,
         )
 
-        for attendance in self.attendances:
-            timeslot.attendances.append(attendance.duplicate())
+        for participant in self.participants:
+            timeslot.participants.append(participant)
 
         return timeslot
 

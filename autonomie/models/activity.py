@@ -152,9 +152,7 @@ class Attendance(DBBASE):
     def duplicate(self):
         attendance = Attendance(
             account_id=self.account_id,
-            status=self.status,
         )
-        attendance.event_id = self.event_id
         return attendance
 
 

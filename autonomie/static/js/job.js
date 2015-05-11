@@ -12,6 +12,9 @@
  * Job view js code (model and view)
  */
 var AppOptions = {};
+AutonomieApp.addRegions({
+  job: "#ajax_container"
+});
 var JobModule = AutonomieApp.module(
   "JobModule",
   function(JobModule, AutonomieApp, Backbone, Marionette, $, _){
@@ -80,15 +83,16 @@ var JobModule = AutonomieApp.module(
         this.fetch();
       }
     });
-    JobModule.addInitializer(function(options){
+    JobModule.on('start', function(){
       JobModule.job = new JobModel({url: AppOptions.url});
       JobModule.job_view = new JobView(
-          {model: JobModule.job, dataType: AppOptions.dataType}
-        );
+        {model: JobModule.job, dataType: AppOptions.dataType}
+      );
       AutonomieApp.job.show(JobModule.job_view);
     });
   }
 );
-AutonomieApp.addRegions({
-  job: "#ajax_container"
+
+$(function(){
+  AutonomieApp.start();
 });

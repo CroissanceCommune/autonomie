@@ -83,15 +83,14 @@ var ActivityModule = AutonomieApp.module('ActivityModule' ,
         this.setNbItemsSelectBehaviour();
       }
     };
-    AutonomieApp.addInitializer(function(){
-      // Here we have code launched before backbone history starts (we need to
-      // create all routers before))
-      // We manually launch the index since it's not the role of our event
-      // module to do that
-      console.log("Start The Activity Module");
-      ActivityModule.router = new ActivityModule.Router( {controller: ActivityModule.Controller});
+    ActivityModule.on('start', function(){
+      ActivityModule.router = new ActivityModule.Router( {
+        controller: ActivityModule.Controller
+      });
       ActivityModule.Controller.index();
     });
-    }
-);
+});
 
+$(function(){
+  AutonomieApp.start();
+});

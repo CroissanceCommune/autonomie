@@ -72,6 +72,7 @@ from autonomie.models.job import (
 from autonomie.models.statistics import (
     StatisticSheet,
     StatisticEntry,
+    BaseStatisticCriterion,
 )
 
 log = logging.getLogger(__name__)
@@ -119,6 +120,8 @@ class RootFactory(dict):
             ('projects', 'project', Project, ),
             ('statistics', 'statistic', StatisticSheet,),
             ('statistic_entries', 'statistic_entry', StatisticEntry,),
+            ('statistic_criteria', 'statistic_criterion',
+             BaseStatisticCriterion,),
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('timeslots', 'timeslot', Timeslot, ),
@@ -408,8 +411,9 @@ def set_models_acls():
     Payment.__default_acl__ = property(get_base_acl)
     Phase.__acl__ = property(get_phase_acls)
     Project.__default_acl__ = property(get_project_acls)
-    StatisticSheet.__default_acl__ = property(get_base_acl)
-    StatisticEntry.__default_acl__ = property(get_base_acl)
+    StatisticSheet.__acl__ = property(get_base_acl)
+    StatisticEntry.__acl__ = property(get_base_acl)
+    BaseStatisticCriterion.__acl__ = property(get_base_acl)
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)

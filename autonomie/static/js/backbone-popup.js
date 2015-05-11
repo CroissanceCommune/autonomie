@@ -83,9 +83,9 @@ var Popup = Backbone.Marionette.Region.extend({
           "ui-corner-all ui-button-icon-only");
         closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
         'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
-      },
-      close: function(){
-        AutonomieApp.router.navigate("index", {trigger: true});
+        closeBtn.on("click.redirect", function(){
+          AutonomieApp.router.navigate("index", {trigger: true});
+        });
       }
     });
     this.$el.dialog('open');

@@ -33,13 +33,26 @@ from autonomie.statistics import inspect
 
 from autonomie.resources import statistics_js
 from autonomie.models.user import UserDatas
-from autonomie.models.statistics import StatisticSheet
+from autonomie.models.statistics import (
+    StatisticSheet,
+    StatisticEntry,
+    CommonStatisticCriterion,
+    OptListStatisticCriterion,
+    DateStatisticCriterion,
+)
 from autonomie.utils import rest
 from autonomie.views import (
     BaseView,
     DisableView,
 )
 
+
+CRITERION_MODELS = {
+    "date": DateStatisticCriterion,
+    "num": CommonStatisticCriterion,
+    "opt_rel": OptListStatisticCriterion,
+    "string": CommonStatisticCriterion
+}
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +132,15 @@ def statistic_form_options(context, request):
 
     return dict(
         columns=inspector.get_json_columns(),
+        sheet_edit_url=request.route_path(
+            'statistic',
+            id=context.id,
+            _query=dict(action='edit')
+        ),
+        entry_root_url=request.route_path(
+            'statistic_entries',
+            id=context.id,
+        ),
     )
 
 
@@ -143,10 +165,7 @@ class RestStatisticSheet(BaseView):
     def get(self):
         return {
             'sheet': self.context,
-            'entries': [
-                {'title': 'test', 'id': 5},
-                {'title': u'entrée 2', 'id': 8},
-            ],
+            'entries': self.context.entries
         }
 
     def put(self):
@@ -163,6 +182,149 @@ class RestStatisticSheet(BaseView):
         sheet = self.schema.objectify(attributes, self.context)
         sheet = self.request.dbsession.merge(sheet)
         return sheet
+
+
+class RestStatisticEntry(BaseView):
+    """
+    Json rest api for statistic entries handling
+    """
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(
+            StatisticEntry,
+            includes=('title', 'description',),
+        )
+
+    def get(self):
+        """
+        Return the entry matching the context
+        """
+        return self.context
+
+    def collection_get(self):
+        """
+        Return the list of entries
+        context is the parent sheet
+        """
+        return self.context.entries
+
+    def post(self):
+        """
+        Entry add view
+
+        context is the parent sheet
+        """
+        submitted = self.request.json_body
+        logger.debug(u"Submitting %s" % submitted)
+
+        try:
+            attributes = self.schema.deserialize(submitted)
+        except colander.Invalid, err:
+            logger.exception("  - Erreur")
+            logger.exception(submitted)
+            raise rest.RestError(err.asdict(), 400)
+
+        logger.debug(attributes)
+        entry = self.schema.objectify(attributes)
+        entry.sheet = self.context
+        self.request.dbsession.add(entry)
+        self.request.dbsession.flush()
+        logger.debug(entry)
+        return entry
+
+    def put(self):
+        """
+        edit a given entry
+
+        context is the current entry
+        """
+        submitted = self.request.json_body
+        logger.debug(u"Submitting %s" % submitted)
+
+        try:
+            attributes = self.schema.deserialize(submitted)
+        except colander.Invalid, err:
+            logger.exception("  - Erreur")
+            logger.exception(submitted)
+            raise rest.RestError(err.asdict(), 400)
+
+        logger.debug(attributes)
+        entry = self.schema.objectify(attributes, self.context)
+        entry = self.request.dbsession.merge(entry)
+        return entry
+
+    def delete(self):
+        """
+        Delete the given entry
+        """
+        self.request.dbsession.delete(self.context)
+        return {}
+
+
+class RestStatisticCriterion(BaseView):
+    """
+    Api rest pour la gestion des critères statistiques
+    """
+    def schema(self, model_type):
+        model = CRITERION_MODELS.get(model_type)
+        return SQLAlchemySchemaNode(
+            model,
+            excludes=('type_', 'type'),
+        )
+
+    def collection_get(self):
+        return self.context.criteria
+
+    def post(self):
+        submitted = self.request.json_body
+        logger.debug(u"Submitting %s" % submitted)
+
+        model_type = submitted['type']
+        schema = self.schema(model_type)
+
+        try:
+            attributes = schema.deserialize(submitted)
+        except colander.Invalid, err:
+            logger.exception("  - Erreur")
+            logger.exception(submitted)
+            raise rest.RestError(err.asdict(), 400)
+
+        logger.debug(attributes)
+        criterion = self.schema.objectify(attributes)
+        criterion.entry = self.context
+        self.request.dbsession.add(criterion)
+        self.request.dbsession.flush()
+        logger.debug(criterion)
+        return criterion
+
+    def get(self):
+        return self.context
+
+    def put(self):
+        submitted = self.request.json_body
+        logger.debug(u"Submitting %s" % submitted)
+
+        model_type = submitted['type']
+        schema = self.schema(model_type)
+
+        try:
+            attributes = schema.deserialize(submitted)
+        except colander.Invalid, err:
+            logger.exception("  - Erreur")
+            logger.exception(submitted)
+            raise rest.RestError(err.asdict(), 400)
+
+        logger.debug(attributes)
+        criterion = self.schema.objectify(attributes, self.context)
+        self.request.dbsession.merge(criterion)
+        return criterion
+
+    def delete(self):
+        """
+        Delete the given entry
+        """
+        self.request.dbsession.delete(self.context)
+        return {}
 
 
 def includeme(config):
@@ -182,9 +344,24 @@ def includeme(config):
     )
 
     config.add_route(
+        'statistic_entries',
+        '/statistics/{id}/entries',
+        traverse='/statistics/{id}',
+    )
+    config.add_route(
         'statistic_entry',
-        '/statistics/entries/{id:\d+}',
-        traverse='/statistic_entries/{id}',
+        '/statistics/{id}/entries/{eid:\d+}',
+        traverse='/statistic_entries/{eid}',
+    )
+    config.add_route(
+        "statistic_criteria",
+        "/statistics/{id}/entries/{eid:\d+}/criteria",
+        traverse='/statistic_entries/{eid}',
+    )
+    config.add_route(
+        "statistic_criterion",
+        "/statistics/{id}/entries/{eid:\d+}/criteria/{cid:\d+}",
+        traverse='/statistic_criteria/{cid}',
     )
 
     config.add_view(
@@ -235,6 +412,46 @@ def includeme(config):
             RestStatisticSheet,
             attr=attr,
             route_name='statistic',
+            request_method=attr.upper(),
+            permission='manage',
+            renderer='json',
+            xhr=True,
+        )
+
+    for attr in ('put', 'get', 'delete'):
+        config.add_view(
+            RestStatisticEntry,
+            attr=attr,
+            route_name='statistic_entry',
+            request_method=attr.upper(),
+            permission='manage',
+            renderer='json',
+            xhr=True,
+        )
+        config.add_view(
+            RestStatisticCriterion,
+            attr=attr,
+            route_name='statistic_criterion',
+            request_method=attr.upper(),
+            permission='manage',
+            renderer='json',
+            xhr=True,
+        )
+
+    for attr in ('post', 'collection_get'):
+        config.add_view(
+            RestStatisticEntry,
+            attr=attr,
+            route_name='statistic_entries',
+            request_method=attr.upper(),
+            permission='manage',
+            renderer='json',
+            xhr=True,
+        )
+        config.add_view(
+            RestStatisticCriterion,
+            attr=attr,
+            route_name='statistic_criteria',
             request_method=attr.upper(),
             permission='manage',
             renderer='json',

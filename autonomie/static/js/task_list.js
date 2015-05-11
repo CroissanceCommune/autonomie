@@ -84,13 +84,14 @@ var TaskModule = AutonomieApp.module('TaskModule' ,
         this.setNbItemsSelectBehaviour();
       }
     };
-    AutonomieApp.addInitializer(function(){
-      // Here we have code launched before backbone history starts (we need to
-      // create all routers before))
-      // We manually launch the index since it's not the role of our task
-      // module to do that
-      TaskModule.router = new TaskModule.Router( {controller: TaskModule.Controller});
+    TaskModule.on('start', function(){
+      TaskModule.router = new TaskModule.Router(
+        {controller: TaskModule.Controller}
+      );
       TaskModule.Controller.index();
     });
-    }
-);
+});
+
+$(function(){
+  AutonomieApp.start();
+});

@@ -1,0 +1,15 @@
+<form >
+    <div class="form-group">
+        <label class='control-label' for="title">Intitulé de l'entrée statistique <b class='required'>*</b></label>
+        <input type="text" name='title' class="form-control" id="title" placeholder="Titre" value='{{title}}'>
+        <span class='help-block'>
+            Sera utilisé dans le fichier de sortie
+        </span>
+    </div>
+    <div class="form-group">
+        <label class='control-label' for="title">Description de l'entrée statistique</label>
+        <textarea name='description' class="form-control" id="title" placeholder="Description">{{description}}</textarea>
+    </div>
+    <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+    <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+</form>

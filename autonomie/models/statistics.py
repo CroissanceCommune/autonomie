@@ -53,14 +53,14 @@ from autonomie.models.base import (
 )
 from autonomie.models.types import (
     JsonEncodedList,
-    PersistentACLMixin,
     ACLType,
     MutableList,
+    # PersistentACLMixin,
 )
 from autonomie import forms
 
 
-class StatisticSheet(DBBASE, PersistentACLMixin):
+class StatisticSheet(DBBASE):  # , PersistentACLMixin):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     created_at = Column(
@@ -88,7 +88,7 @@ class StatisticSheet(DBBASE, PersistentACLMixin):
         )
 
 
-class StatisticEntry(DBBASE, PersistentACLMixin):
+class StatisticEntry(DBBASE):  # , PersistentACLMixin):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     title = Column(String(255))
@@ -109,8 +109,15 @@ class StatisticEntry(DBBASE, PersistentACLMixin):
             result.append(criterion)
         return result
 
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            title=self.title,
+            description=self.description,
+        )
 
-class StatisticCriterion(DBBASE):
+
+class BaseStatisticCriterion(DBBASE):
     """
     Statistic criterion
     :param str key: The key allows us to match the column we will build a query
@@ -125,13 +132,21 @@ class StatisticCriterion(DBBASE):
     will use
     """
     __table_args__ = default_table_args
+    __mapper_args__ = {
+        'polymorphic_on': 'type_',
+        'polymorphic_identity': 'base',
+    }
+
     id = Column(Integer, primary_key=True)
     key = Column(String(255))
     method = Column(String(25))
-    search1 = Column(String(255), default="")
-    search2 = Column(String(255), default="")
-    searches = Column(JsonEncodedList())
     type = Column(String(10))
+    type_ = Column(
+        'type_',
+        String(30),
+        info={'colanderalchemy': forms.EXCLUDED},
+        nullable=False,
+    )
     entry_id = Column(ForeignKey('statistic_entry.id'))
     entry = relationship(
         "StatisticEntry",
@@ -144,15 +159,42 @@ class StatisticCriterion(DBBASE):
             value=str(self.id),
             key=self.key,
             method=self.method,
-            search1=self.search1,
-            search2=self.search2,
-            searches=self.searches,
             type=self.type,
             entry_id=self.entry_id,
         )
 
 
-class DateStatisticCriterion(DBBASE):
+class CommonStatisticCriterion(BaseStatisticCriterion):
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'common'}
+    id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
+    search1 = Column(String(255), default="")
+    search2 = Column(String(255), default="")
+
+    def __json__(self, request):
+        res = BaseStatisticCriterion.__json__(self, request)
+        res.update(dict(
+            search1=self.search1,
+            search2=self.search2,
+        ))
+        return res
+
+
+class OptListStatisticCriterion(BaseStatisticCriterion):
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'optlist'}
+    id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
+    searches = Column(JsonEncodedList())
+
+    def __json__(self, request):
+        res = BaseStatisticCriterion.__json__(self, request)
+        res.update(dict(
+            searches=self.searches,
+        ))
+        return res
+
+
+class DateStatisticCriterion(BaseStatisticCriterion):
     """
     Statistic criterion for dates
     :param str key: The key allows us to match the column we will build a query
@@ -165,26 +207,15 @@ class DateStatisticCriterion(DBBASE):
     will use
     """
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    key = Column(String(255))
-    method = Column(String(25))
+    __mapper_args__ = {'polymorphic_identity': 'date'}
+    id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
     search1 = Column(Date(), default="")
     search2 = Column(Date(), default="")
-    type = Column(String(10), default='date')
-    entry_id = Column(ForeignKey('statistic_entry.id'))
-    entry = relationship(
-        "StatisticEntry",
-        backref=backref("datecriteria"),
-    )
 
     def __json__(self, request):
-        return dict(
-            id=str(self.id),
-            value=str(self.id),
-            key=self.key,
-            method=self.method,
+        res = BaseStatisticCriterion.__json__(self, request)
+        res.update(dict(
             search1=self.search1,
             search2=self.search2,
-            type=self.type,
-            entry_id=self.entry_id,
-        )
+        ))
+        return res

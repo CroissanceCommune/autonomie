@@ -888,14 +888,16 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
       "print": "print"
     }
   });
-  var setupModule = function(data){
+
+  Expense.on('start', function(){
     /*
      * Initialize the module's datas
      */
+    var data = Expense.datas;
+    Expense.router = new router();
     _.extend(AppOptions, data['options']);
     Expense.expense = new ExpenseSheet(data['expense']);
     Expense.bookmarks = new BookMarksCollection(AppOptions['bookmarks']);
-
     Expense.router.controller.index();
 
     // Setup the event listening
@@ -905,12 +907,13 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
       text += formatAmount(total);
       $('#total').html(text);
     });
-  };
-
-  Expense.addInitializer(function(options){
-    Expense.router = new router();
-    var ajax_call = initLoad(AppOptions['loadurl']);
-    ajax_call.then(setupModule);
   });
+});
 
+$(function(){
+  var ajax_call = initLoad(AppOptions['loadurl']);
+  ajax_call.then(function(datas){
+    AutonomieApp.module('Expense').datas = datas;
+    AutonomieApp.start();
+  });
 });

@@ -8,41 +8,147 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+
+
+/*
+ *
+ * 1- page stats : sheet + list of entries + add button
+ *
+ * 2- entry form : entry + criteria + add button
+ *
+ * 3- criterion form : criterion
+ *
+ * on entry modify :
+ *  load criteria
+ *  create collection
+ *
+ *  show layout
+ *  show list
+ *  add button behaviour
+ *
+ * on criterion modify
+ *
+ *
+ */
 var AppOptions = {};
+var pp = Popup.extend({
+  el:'#popup_container'
+});
 
 AutonomieApp.addRegions({
   sheet: "#sheet",
-  entries: '#entrylist'
+  entries: '#entrylist',
+  entry_edit: "#entry_edit",
+  popup: pp
 });
 
-
 AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, $, _){
-  // On lance le module si besoin depuis le code un peu plus bas
-  this.startWithParent = false;
-
+  var EntryFormLayout = Marionette.LayoutView.extend({
+    template: "full_entry_form",
+    events: {
+      'click button.close': "closeView"
+    },
+    ui: {
+      title: 'h4'
+    },
+    regions: {
+      list: '#criteria',
+      form: '#criterion-form'
+    },
+    closeView: function(){
+      this.destroy();
+      AutonomieApp.router.navigate("index", {trigger: true});
+    },
+    focus: function(){
+      $('html, body').animate(
+      {scrollTop: this.ui.title.offset().top}, 2000);
+    }
+  });
   var SheetModel = Backbone.Model.extend({
-    root_url: "/statistics",
+    validation:{
+      title: {
+        required:true,
+        msg:"est requis"
+      }
+    }
+  });
+  var EntryModel = Backbone.Model.extend({
+    defaults: {criterion: []},
     validation:{
       title: {
         required:true,
         msg:"est requis"
       }
     },
-    url: function(){
-      return this.root_url + "/" + this.id + "?action=edit";
-    }
-  });
-  var EntryModel = Backbone.Model.extend({});
+    csv_url: function(){
+      return this.url() + "?format=csv";
+    }  });
   var EntryCollection = Backbone.Collection.extend({
     model: EntryModel
   });
-  var EntryView = Marionette.ItemView.extend({
+  var EntryView = BaseTableLineView.extend({
     template: "entry",
-    tagName: "tr"
+    tagName: "tr",
+    events: {
+      'click a.remove':'_remove'
+    },
+    templateHelpers: function(){
+      return {csv_url: this.model.csv_url()};
+    },
+    modelEvents:{
+      "change:title": "render"
+    },
+    _remove: function(id){
+      var confirmed = confirm("Êtes vous certain de vouloir supprimer cet élément ?");
+      if (confirmed){
+        var _model = this.model;
+        this.highlight({
+          callback: function(){
+            _model.destroy({
+                success: function(model, response) {
+                  Statistic.router.navigate("index", {trigger: true});
+                  displayServerSuccess("L'élément a bien été supprimé");
+                }
+             });
+           }
+          });
+      }
+    }
   });
   var EntryListView = Marionette.CompositeView.extend({
     childView: EntryView,
     template: "entry_list",
+    childViewContainer: 'tbody'
+  });
+  var EntryFormView = BaseFormView.extend({
+    template: "entry_form",
+    ui: {
+      form: "form"
+    },
+    focus: function(){
+      this.ui.form.find('input').first().focus();
+    },
+    closeView: function(result){
+      if (!_.isUndefined(result)){
+        if (!_.isUndefined(result.id)){
+          this.destroy();
+          Statistic.router.navigate("entries/" + result.id + "/edit" ,
+          {trigger: true});
+          return;
+        }
+      }
+      this.destroy();
+      AutonomieApp.router.navigate("index", {trigger: true});
+      return;
+    }
+  });
+  var CriterionView = Marionette.ItemView.extend({
+    template: "criterion",
+    tagName: 'tr'
+  });
+  var CriteriaListView = Marionette.CompositeView.extend({
+    childView: CriterionView,
+    template: "criterion_list",
     childViewContainer: 'tbody'
   });
   var SheetView = Marionette.ItemView.extend({
@@ -55,9 +161,6 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       "click button.edit": "toggleForm",
       "click button.submit": "changeTitle",
       "submit form": "changeTitle"
-    },
-    initialize: function(args){
-      // Bind to change event
     },
     formDatas: function(){
       return this.ui.form.serializeObject();
@@ -89,36 +192,59 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     initialized:false,
     index: function(){
       this.initialize();
+      App.popup.empty();
+      App.entry_edit.empty();
     },
     initialize: function(){
       if (! this.initialized){
         this.sheet_view = new SheetView({model: Statistic.sheet});
         App.sheet.show(this.sheet_view);
-        console.log(Statistic.entries);
         this.entry_list_view = new EntryListView(
           {collection: Statistic.entries}
         );
         App.entries.show(this.entry_list_view);
       }
+    },
+    entry_add: function(){
+      this.initialize();
+      var model = new EntryModel({});
+      var entry_form = new EntryFormView({
+        model: model, destCollection: Statistic.entries
+      });
+      App.popup.show(entry_form);
+    },
+    entry_edit: function(id){
+      this.initialize();
+      var model = Statistic.entries.get(id);
+      var entry_form = new EntryFormLayout({
+        model: model,
+        destCollection: Statistic.entries
+      });
+      var criteria = model.criteria;
+      var criteria_collection = new Backbone.Collection(criteria);
+      var criteria_list = new CriteriaListView({collection: criteria_collection});
+      App.entry_edit.show(entry_form);
+      entry_form.focus();
+      entry_form.getRegion('list').show(criteria_list);
     }
-
   };
   router = Backbone.Marionette.AppRouter.extend({
     controller: controller,
     appRoutes: {
-      "index": "index"
+      "index": "index",
+      "entries/:id/edit": "entry_edit",
+      "entries/add": "entry_add"
     }
   });
-  Statistic.initModule = function(){
+  Statistic.on('start', function(){
     var data = Statistic.datas;
     Statistic.router = new router();
     Statistic.sheet = new SheetModel(data['sheet']);
-    console.log(data['entries']);
+    Statistic.sheet.url = AppOptions['sheet_edit_url'];
     Statistic.entries = new EntryCollection(data['entries']);
-    console.log(Statistic.entries);
+    Statistic.entries.url = AppOptions['entry_root_url'];
     Statistic.router.controller.index();
-
-  };
+  });
 });
 
 
@@ -128,11 +254,9 @@ function StatisticPageInit(options){
     // page statistic
     var module = AutonomieApp.module('Statistic');
     // Quand on start on lance initModule en callback de la requête jquery
-    module.on('start', module.initModule);
-
     var options_load = initLoad(AppOptions['loadurl']).then(
       function(data){
-        _.extend(AppOptions, data['options']);
+        _.extend(AppOptions, data);
       }
     );
     var sheet_load = initLoad(AppOptions['contexturl']);
@@ -141,7 +265,7 @@ function StatisticPageInit(options){
     });
     $.when(options_load, sheet_load).then(
       function(datas){
-        module.start();
+        AutonomieApp.start();
       }
     );
   }
@@ -177,5 +301,7 @@ function StatisticsPageInit(options){
   }
 }
 
-AutonomieApp.addInitializer(StatisticPageInit);
-AutonomieApp.addInitializer(StatisticsPageInit);
+$(function(){
+  StatisticPageInit();
+  StatisticsPageInit();
+});

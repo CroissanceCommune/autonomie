@@ -1,6 +1,14 @@
 <td>
 {{ title }}
 </td>
-<td>
-# TODO url vers csv, edit
+<td class='action'>
+    <a class='btn btn-default btn-sm' href='#entries/{{id}}/edit' title="Modifier cette entrée">
+        Modifier
+    </a>
+    <a class='btn btn-default btn-sm' href='{{ csv_url }}' title='Exporter les éléments correspondant à cette entrée statistiques'>
+        Exporter
+    </a>
+    <a class='btn btn-default btn-sm remove' title='Supprimer cette entrée'>
+        Supprimer
+    </a>
 </td>

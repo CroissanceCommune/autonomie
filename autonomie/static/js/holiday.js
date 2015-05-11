@@ -247,33 +247,20 @@ AutonomieApp.module("Holiday", function(Holiday, AutonomieApp,  Backbone, Marion
       "edit/:id": "edit"
     }
   });
-  Holiday.addInitializer(function(options){
-    /*
-     *  Application initialization
-     *  options : data provided by the server on setup ajax call
-     *
-     *  options should provide : a holidays objects list and a user_id param
-     */
+  Holiday.on('start', function(){
+    var options = Holiday.datas;
     Holiday.router = new router();
-    if (AppOptions['loadurl'] !== undefined){
-      $.ajax({
-        url: AppOptions['loadurl'],
-        dataType: 'json',
-        async: false,
-        mimeType: "textPlain",
-        data: {},
-        cache: false,
-        success: function(options) {
-          Holiday.holidays = new HolidaysCollection(options['holidays']);
-          Holiday.holidays.url = "/user/" + options['user_id'] + "/holidays";
-          Holiday.router.controller.index();
-        },
-        error: function(){
-          alert("Une erreur a été rencontrée, contactez votre administrateur.");
-        }
-      });
-    }else{
-      alert("Une erreur a été rencontrée, contactez votre administrateur.");
-    }
+    Holiday.holidays = new HolidaysCollection(options['holidays']);
+    Holiday.holidays.url = "/user/" + options['user_id'] + "/holidays";
+    Holiday.router.controller.index();
   });
+});
+$(function(){
+  if (AppOptions['loadurl'] !== undefined){
+    var ajax_call = initLoad(AppOptions['loadurl']);
+    ajax_call.then(function(datas){
+      AutonomieApp.module('Holiday').datas = datas;
+      AutonomieApp.start();
+    });
+  }
 });

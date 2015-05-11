@@ -33,7 +33,6 @@ var AutonomieApp = new Backbone.Marionette.Application();
 
 var controller = {
   appindex: function(){
-    console.log("appindex");
   }
 };
 
@@ -49,15 +48,8 @@ AutonomieApp.on("start", function(){
    *""" Launche the history (controller and router stuff)
    */
   AutonomieApp.router = new MainRouter();
-  if (Backbone.history){
-    Backbone.history.start();
-  }
+  Backbone.history.start();
 });
-
-$(function(){
-  AutonomieApp.start();
-});
-
 
 // Provide a default table item view
 var BaseTableLineView = Backbone.Marionette.ItemView.extend({
@@ -109,7 +101,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
    */
   events: {
     'click button[name=submit]':'onFormSubmit',
-    'click button[name=cancel]':'destroy'
+    'click button[name=cancel]':'closeView'
   },
   initialize: function(options){
     // In case of add forms, we need to pass a dest collection that will be
@@ -121,6 +113,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
       // A model was passed on view creation
       this.listenTo(this.model, 'change', this.render, this);
     }
+    _.bindAll(this, ['closeView']);
   },
   setDatePicker: function(formName, tag, altFieldName, today){
     /*
@@ -165,6 +158,13 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     return this.ui.form.serializeObject();
 
   },
+  closeView:function (result){
+    /*
+     * Default close view behaviour
+     */
+    this.destroy();
+    AutonomieApp.router.navigate("index", {trigger: true});
+  },
   addSubmit: function(){
     /*
      * Called when adding an element
@@ -176,21 +176,21 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     if (! this.model.isValid() ){
       return false;
     }
-
     // We now add the item to the dest collection
     var this_ = this;
     this.destCollection.create(
       this.model.toJSON(),
       {
-        success:function(){
+        success:function(result){
           displayServerSuccess("Vos données ont bien été sauvegardées");
-          this_.destroy();
+          this_.closeView(result);
         },
         error: function(){
           displayServerError("Une erreur a été rencontrée lors de la " +
             "sauvegarde de vos données");
         },
-        sort:true
+        sort:true,
+        wait: true
       }
     );
     return true;
@@ -206,37 +206,25 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
       this.formDatas(),
       {
         success:function(){
-          // On adding an element :
-          //  * the collection is sorted
-          //  * the html output is placed at the good place in the table
-          //
-          // Here we force our element to be re-rendered (if the date changed)
-          // This way the element is also highlighted
-          //  Here we comment this specific point it doesn't work as expected
-          //
-//          collection.remove(this_.model);
-//          collection.add(this_.model);
-
           displayServerSuccess("Vos données ont bien été sauvegardées");
-          // When closing it's as we called return (next code is not called)
-          this_.destroy();
+          this_.closeView;
         },
         error:function(model, xhr, options){
           displayServerError("Une erreur a été rencontrée lors de la " +
               "sauvegarde de vos données");
-        }
+        },
+        wait: true
       }
     );
 
   },
   onFormSubmit: function(e){
-    console.log(this.model);
     Backbone.Validation.bind(this);
     e.preventDefault();
     var this_ = this;
 
 
-    if (this.model.isNew()){
+    if (! this.model.get('id')){
       // Adding an element
       this.addSubmit();
     } else {

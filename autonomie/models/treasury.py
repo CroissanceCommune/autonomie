@@ -196,7 +196,7 @@ class ExpenseSheet(Node):
     month = Column(Integer)
     year = Column(Integer)
     company_id = Column(Integer, ForeignKey("company.id", ondelete="cascade"))
-    user_id = Column(Integer, ForeignKey("accounts.id", ondelete="cascade"))
+    user_id = Column(Integer, ForeignKey("accounts.id"))
     status = Column(String(10), default='draft')
     status_user_id = Column(Integer, ForeignKey("accounts.id"))
     status_date = Column(

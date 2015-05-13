@@ -184,8 +184,8 @@ AutonomieApp.module("Holiday", function(Holiday, AutonomieApp,  Backbone, Marion
        * Launched when the form is added to the dom
        * Make some js calls
        */
-      this.setDatePicker("holidayForm", this.ui.start_date, "start_date");
-      this.setDatePicker("holidayForm", this.ui.end_date, "end_date");
+      this.setDatePicker("#holidayForm", this.ui.start_date, "start_date");
+      this.setDatePicker("#holidayForm", this.ui.end_date, "end_date");
       this.ui.start_date.focus();
     }
   });

@@ -588,7 +588,7 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
   ////////////////////////////////////////
 
   var BaseExpenseFormView = BaseFormView.extend({
-    formname: null,
+    formselector: null,
     templateHelpers: function(){
       /*
        * Add datas to the template context
@@ -606,27 +606,15 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
           }
         };
     },
-    updateSelectOptions: function(options, val){
-      /*
-       * Add the selected attr to the option with value 'val'
-       */
-      _.each(options, function(option){
-        delete option['selected'];
-        if (val == option['value']){
-          option['selected'] = 'true';
-        }
-      });
-      return options;
-    },
     onShow: function(){
        //Called when added to the DOM by the région
-      this.setDatePicker(this.formname, this.ui.date, "date", AppOptions['today']);
+      this.setDatePicker(this.forname, this.ui.date, "date", AppOptions['today']);
     },
     onRender: function(){
       // Called when rendered (the first time the setDatePicker doesn't work
       // because the datas is rendered but not added to the DOM, that's why the
       // call is also made in onShow)
-      this.setDatePicker(this.formname, this.ui.date, "date", AppOptions['today']);
+      this.setDatePicker(this.formselector, this.ui.date, "date", AppOptions['today']);
       if (!_.isUndefined(this.ui.bookmarks)){
         this.setBookMarkBehaviour();
       }
@@ -684,7 +672,7 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
 
   var ExpenseFormView = BaseExpenseFormView.extend({
     template: "expenseForm",
-    formname: "expenseForm",
+    formselector: "#expenseForm",
     ui:{
       form:"#expenseForm",
       date:"#expenseForm input[name=altdate]",
@@ -704,7 +692,7 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
 
   var ExpenseKmFormView = BaseExpenseFormView.extend({
     template: "expenseKmForm",
-    formname: "expenseKmForm",
+    formselector: "#expenseKmForm",
     ui:{
       form:"#expenseKmForm",
       date:"#expenseKmForm input[name=altdate]"

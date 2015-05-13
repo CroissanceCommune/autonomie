@@ -29,6 +29,62 @@ Backbone.Marionette.Renderer.render = function(template_name, data){
   return template_obj(data);
 };
 
+
+var LazyLoadedOptions = Backbone.Marionette.Object.extend({
+  /*
+   * Allow lazy loading of options
+   *
+   * var options = new LazyLoadedOptions({
+   *      url: 'myurl',
+   *      values: {'preloadedoptions'},
+   *      keywork: 'mycustomkey'
+   *  });
+   * options.load('option1'); // Load the key from the server passing {mycustomkey: 'option1'}
+   *
+   * options.load('option1'); // Returns the previously sended request
+   */
+  initialize: function(options){
+    this.options = options.values || {};
+    this.url = options.url;
+    this.keyword = options.keyword || 'key';
+  },
+  load: function(key){
+    var result;
+    var cached_value = this.options[key];
+
+    if (_.isUndefined(cached_value)){
+      var this_ = this;
+      var raw_datas = {};
+      raw_datas[this.keyword] = key;
+      var datas = JSON.stringify(raw_datas);
+      this.locked = true;
+      result = $.ajax({
+          url: this.url,
+          data: datas,
+          contentType:'application/json',
+          dataType: 'json',
+          method: 'POST',
+          success: function(result){
+            // We store the result in the cache
+            this_.options[key] = result.options;
+          },
+          error: function(result){
+            alert("'Une erreur est survenue au chargement d'une clé'. " +
+            "Contacter un administrateur");
+          }
+        });
+    } else {
+      // On renvoie une "promise" un truc sur lequel on peut caller des
+      // callbacks comme sur une requête ajax
+      var def = $.Deferred();
+      result = def.done(function(){return cached_value;});
+      def.resolve();
+    }
+    return result;
+  }
+});
+
+
 var AutonomieApp = new Backbone.Marionette.Application();
 
 var controller = {
@@ -101,7 +157,8 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
    */
   events: {
     'click button[name=submit]':'onFormSubmit',
-    'click button[name=cancel]':'closeView'
+    'click button[name=cancel]':'closeView',
+    'submit form': 'onFormSubmit'
   },
   initialize: function(options){
     // In case of add forms, we need to pass a dest collection that will be
@@ -115,11 +172,11 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     }
     _.bindAll(this, ['closeView']);
   },
-  setDatePicker: function(formName, tag, altFieldName, today){
+  setDatePicker: function(formSelector, tag, altFieldName, today){
     /*
      * Set datefields as a jquery datepicker
      */
-    var altField = "#" + formName + " input[name=" + altFieldName + "]";
+    var altField = formSelector + " input[name=" + altFieldName + "]";
     tag.datepicker({
       altField: altField,
       altFormat:"yy-mm-dd",
@@ -195,7 +252,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     );
     return true;
   },
-  editSubmit: function(){
+  editSubmit: function(result){
     /*
      * Called on element edition
      */
@@ -207,7 +264,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
       {
         success:function(){
           displayServerSuccess("Vos données ont bien été sauvegardées");
-          this_.closeView;
+          this_.closeView(result);
         },
         error:function(model, xhr, options){
           displayServerError("Une erreur a été rencontrée lors de la " +
@@ -219,8 +276,8 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
 
   },
   onFormSubmit: function(e){
-    Backbone.Validation.bind(this);
     e.preventDefault();
+    Backbone.Validation.bind(this);
     var this_ = this;
 
 
@@ -233,6 +290,21 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     }
     Backbone.Validation.unbind(this);
     return true;
+  },
+  updateSelectOptions: function(options, val){
+    /*
+     * Add the selected attr to the option with value 'val'
+     */
+    if (!_.isArray(val)){
+      val = [val];
+    }
+    _.each(options, function(option){
+      delete option['selected'];
+      if (_.contains(val, option['value'])){
+        option['selected'] = 'true';
+      }
+    });
+    return options;
   }
 });
 

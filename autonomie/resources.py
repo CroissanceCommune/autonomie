@@ -40,6 +40,7 @@ from js.jqueryui import bootstrap as jqueryui_bootstrap_theme
 from js.jquery_timepicker_addon import timepicker_js
 from js.jquery_form import jquery_form
 from js.jquery_qunit import jquery_qunit
+from js.select2 import select2
 
 lib_autonomie = Library("fanstatic", "static")
 
@@ -210,7 +211,11 @@ event_list_js = get_module_resource('event_list')
 job_js = get_module_resource("job", tmpl=True)
 
 expense_js = get_module_resource("expense", tmpl=True)
-statistics_js = get_module_resource('statistics', tmpl=True)
+statistics_js = get_module_resource(
+    'statistics',
+    tmpl=True,
+    extra_depends=[select2]
+)
 holiday_js = get_module_resource("holiday", tmpl=True)
 admin_option_js = get_module_resource("admin_option")
 commercial_js = get_module_resource("commercial")

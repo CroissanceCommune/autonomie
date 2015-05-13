@@ -109,9 +109,9 @@ def get_cid(request):
         cid = request.user.companies[0].id
     # The requests context provide a get_company_id utility that allows to
     # retrieve the concerned company
-    elif hasattr(request, "context") and hasattr(request.context,
-                                                "get_company_id"):
-        cid = request.context.get_company_id()
+    elif hasattr(request, "context"):
+        if hasattr(request.context, "get_company_id"):
+            cid = request.context.get_company_id()
     return cid
 
 
@@ -179,15 +179,20 @@ def get_company_menu(request, cid, css=None):
     docs.add_item(u"Trésorerie", icon="fa fa-bank", href=href)
 
     href = request.route_path("incomestatement", id=cid)
-    docs.add_item(u"Compte de résultat", icon="fa fa-eur",
-         href=href)
+    docs.add_item(
+        u"Compte de résultat",
+        icon="fa fa-eur",
+        href=href
+    )
 
     href = request.route_path("salarysheet", id=cid)
-    docs.add_item(u"Bulletin de salaire", icon="fa fa-file-text-o",
-         href=href)
+    docs.add_item(
+        u"Bulletin de salaire",
+        icon="fa fa-file-text-o",
+        href=href
+    )
 
     menu.add(docs)
-
 
     href = request.route_path("company", id=cid)
     menu.add_item(u"Paramètres", icon="fa fa-cogs", href=href)
@@ -247,8 +252,18 @@ def get_admin_menus(request):
 
     menu.add(accompagnement)
 
+    gestion_sociale = DropDown(label=u"Gestion sociale")
     href = request.route_path('userdatas')
-    menu.add_item(u"Gestion sociale", href=href, icon="fa fa-users")
+    gestion_sociale.add_item(u"Consulter", href=href, icon="fa fa-users")
+
+    href = request.route_path('statistics')
+    gestion_sociale.add_item(
+        u"Statistiques",
+        href=href,
+        icon="fa fa-line-chart",
+    )
+
+    menu.add(gestion_sociale)
 
     href = request.route_path("holidays")
     menu.add_item(u"Congés", icon="fa fa-space-shuttle", href=href)
@@ -260,18 +275,26 @@ def company_choice(request, companies, cid):
         Add the company choose menu
     """
     if request.context.__name__ == 'company':
-        options = ((request.current_route_path(id=company.id),
-                company.name) for company in companies)
+        options = (
+            (request.current_route_path(id=company.id),
+             company.name) for company in companies
+        )
         default = request.current_route_path(id=cid)
     else:
-        options = ((request.route_path("company", id=company.id),
-                company.name) for company in companies)
+        options = (
+            (request.route_path("company", id=company.id),
+             company.name) for company in companies
+        )
         default = request.route_path("company", id=cid)
-    html_attrs = {'class': 'pull-left company-search',
-                    'id': "company-select-menu"}
+    html_attrs = {
+        'class': 'pull-left company-search',
+        'id': "company-select-menu",
+    }
     html_code = HTML.li(
-            tags.select("companies", default, options, **html_attrs))
+        tags.select("companies", default, options, **html_attrs)
+    )
     return HtmlItem(html=html_code)
+
 
 def get_usermenu(request):
     """
@@ -358,4 +381,3 @@ def includeme(config):
     """
     config.add_panel(menu_panel, 'menu', renderer='panels/menu.mako')
     config.add_panel(submenu_panel, 'submenu', renderer='panels/menu.mako')
-

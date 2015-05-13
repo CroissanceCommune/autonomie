@@ -30,6 +30,7 @@ Models related to statistics
 A sheet groups a number of statistics entries.
 Each entry is compound of a list of criterions.
 """
+import colander
 from datetime import datetime
 
 from sqlalchemy import (
@@ -58,6 +59,7 @@ from autonomie.models.types import (
     # PersistentACLMixin,
 )
 from autonomie import forms
+from autonomie.utils import ascii
 
 
 class StatisticSheet(DBBASE):  # , PersistentACLMixin):
@@ -96,7 +98,7 @@ class StatisticEntry(DBBASE):  # , PersistentACLMixin):
     _acl = Column(
         MutableList.as_mutable(ACLType),
     )
-    sheet_id = Column(ForeignKey('statistic_sheet.id'))
+    sheet_id = Column(ForeignKey('statistic_sheet.id', ondelete='cascade'))
     sheet = relationship(
         "StatisticSheet",
         backref=backref("entries"),
@@ -104,9 +106,7 @@ class StatisticEntry(DBBASE):  # , PersistentACLMixin):
 
     @property
     def criteria(self):
-        result = [criterion for criterion in self.simplecriteria]
-        for criterion in self.datecriteria:
-            result.append(criterion)
+        result = [criterion for criterion in self.criteria]
         return result
 
     def __json__(self, request):
@@ -128,7 +128,7 @@ class BaseStatisticCriterion(DBBASE):
     :param str search2: The second value we search on (in case of range search)
     :param str searches: The list of value we will query on (in case of 'oneof'
     search)
-    :param str type: string/number/opt_rel/date says us which query generator we
+    :param str type: string/number/optrel/date says us which query generator we
     will use
     """
     __table_args__ = default_table_args
@@ -147,10 +147,10 @@ class BaseStatisticCriterion(DBBASE):
         info={'colanderalchemy': forms.EXCLUDED},
         nullable=False,
     )
-    entry_id = Column(ForeignKey('statistic_entry.id'))
+    entry_id = Column(ForeignKey('statistic_entry.id', ondelete='cascade'))
     entry = relationship(
         "StatisticEntry",
-        backref=backref("simplecriteria"),
+        backref=backref("criteria"),
     )
 
     def __json__(self, request):
@@ -180,11 +180,33 @@ class CommonStatisticCriterion(BaseStatisticCriterion):
         return res
 
 
+def list_of_integers_validator(node, value):
+    """
+    Colander Validator ensuring we've got a list of integers
+    """
+    if not isinstance(value, list):
+        raise colander.Invalid(node, u"Doit être une liste")
+    for val in value:
+        if not ascii.isint(val):
+            raise colander.Invalid(node, u"Ne doit contenir que des nombres")
+
+
 class OptListStatisticCriterion(BaseStatisticCriterion):
+    """
+    An Statistic criterion pointing to options ids stored in another table
+    """
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'optlist'}
     id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
-    searches = Column(JsonEncodedList())
+    searches = Column(
+        JsonEncodedList(),
+        info={
+            'colanderalchemy': {
+                'typ': colander.List(),
+                'validator': list_of_integers_validator,
+            }
+        }
+    )
 
     def __json__(self, request):
         res = BaseStatisticCriterion.__json__(self, request)
@@ -203,7 +225,7 @@ class DateStatisticCriterion(BaseStatisticCriterion):
     :param str method: The search method (eq, lte, gt ...)
     :param str search1: The first value we search on
     :param str search2: The second value we search on (in case of range search)
-    :param str type: string/number/opt_rel/date says us which query generator we
+    :param str type: string/number/optrel/date says us which query generator we
     will use
     """
     __table_args__ = default_table_args

@@ -85,15 +85,14 @@ MANAGER_PRIMARY_GROUP = 2
 CONTRACTOR_PRIMARY_GROUP = 3
 
 
-ROLES= {
-    'admin': {'id': ADMIN_PRIMARY_GROUP, 'label': u"Administrateur",},
+ROLES = {
+    'admin': {'id': ADMIN_PRIMARY_GROUP, 'label': u"Administrateur", },
     'manager': {
         'id': MANAGER_PRIMARY_GROUP,
         'label': u"Membre de l'équipe d'appui"
     },
     'contractor': {'id': CONTRACTOR_PRIMARY_GROUP, 'label': u"Entrepreneur"},
 }
-
 
 
 # We need to store this datas here (before we find a solution to place a
@@ -135,9 +134,9 @@ CIVILITE_OPTIONS = (
 STATUS_OPTIONS = (
     ('single', u"Célibataire", ),
     ('maried', u'Marié(e)', ),
-#    ('divorced', u"Divorcé(e)", ),
+    #  ('divorced', u"Divorcé(e)", ),
     ('pacsed', u"Pacsé(e)", ),
-#    ('widow', u"Veuf(ve)", ),
+    #  ('widow', u"Veuf(ve)", ),
     ('isolated', u"Parent isolé", ),
     ("free_union", u"Union libre", ),
 )
@@ -183,7 +182,9 @@ class Group(DBBASE):
             res = DBSESSION.query(cls).get(name_or_id)
             if res is None:
                 # We try with the id
-                res = DBSESSION.query(cls).filter(cls.name==name_or_id).one()
+                res = DBSESSION.query(cls).filter(
+                    cls.name == name_or_id
+                ).one()
 
         return res
 
@@ -221,13 +222,13 @@ class User(DBBASE, PersistentACLMixin):
 
     primary_group = Column(
         Integer,
-        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         default=3,
     )
 
     active = Column(
         String(1),
-        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         default='Y'
     )
 
@@ -246,12 +247,13 @@ class User(DBBASE, PersistentACLMixin):
     pwd = Column(
         "password",
         String(100),
-        info={'colanderalchemy':
-              {
-                  'title': u'Mot de passe',
-                  'widget': deform.widget.CheckedPasswordWidget(),
-              },
-              'export': EXCLUDED
+        info={
+            'colanderalchemy':
+            {
+                'title': u'Mot de passe',
+                'widget': deform.widget.CheckedPasswordWidget(),
+            },
+            'export': EXCLUDED,
         },
         nullable=False,
     )
@@ -417,6 +419,10 @@ class User(DBBASE, PersistentACLMixin):
             lastname=self.lastname,
             firstname=self.firstname,
         )
+
+    @property
+    def label(self):
+        return u"{0} {1}".format(self.lastname, self.firstname)
 
 
 def get_user_by_roles(roles):
@@ -660,9 +666,9 @@ class UserDatasSocialDocTypes(DBBASE):
         backref=backref(
             'doctypes_registrations',
             cascade='all, delete-orphan',
-            info={'colanderalchemy': EXCLUDED},
+            info={'colanderalchemy': EXCLUDED, "export": EXCLUDED},
         ),
-        info={'colanderalchemy': EXCLUDED},
+        info={'colanderalchemy': EXCLUDED, "export": EXCLUDED},
     )
 
     doctype = relationship(
@@ -760,7 +766,7 @@ class UserDatas(Node):
                       }
                   ),
               },
-              'export': {'exclude': True},
+              #'export': {'exclude': True},
              },
     )
 

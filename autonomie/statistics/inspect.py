@@ -22,6 +22,13 @@
 
 import logging
 from collections import OrderedDict
+from sqlalchemy import (
+    Date,
+    DateTime,
+    Float,
+    Integer,
+    Numeric,
+)
 from sqlalchemy.orm import (
     RelationshipProperty,
 )
@@ -39,8 +46,29 @@ class Column(dict):
         return dict(
             label=self.get('label'),
             name=self.get('name'),
+            key=self.get('key'),
             type=self.get('type', 'string'),
         )
+
+
+def get_data_type(prop):
+    """
+    Returns the type of datas
+
+    :param obj prop: The column object returned by the sqlalchemy model
+    inspection
+    :returns: A string representing the type of the column
+    """
+    type_ = 'string'
+    sqla_column = prop.columns[0]
+
+    column_type = getattr(sqla_column.type, 'impl', sqla_column.type)
+
+    if isinstance(column_type, (Date, DateTime,)):
+        type_ = 'date'
+    elif isinstance(column_type, (Integer, Numeric, Float,)):
+        type_ = 'number'
+    return type_
 
 
 class StatisticInspector(BaseSqlaInspector):
@@ -102,6 +130,8 @@ class StatisticInspector(BaseSqlaInspector):
             colanderalchemy_infos = info_dict.get('colanderalchemy', {})
 
             import_dict = info_dict.get(self.config_key, {})
+            if import_dict.get('exclude'):
+                continue
 
             ui_label = colanderalchemy_infos.get('title', prop.key)
             datas = Column({
@@ -143,7 +173,8 @@ class StatisticInspector(BaseSqlaInspector):
                         res[new_key]['rel_type'] = 'onetomany'
                         # On a besoin de la classe pour les outerjoin et
                         res[new_key]['join_class'] = prop.class_attribute
-                        result.update(res)
+                        res[new_key]['key'] = new_key
+                    result.update(res)
 
                 else:
                     # On doit avoir directement les ids des options (objets
@@ -153,11 +184,15 @@ class StatisticInspector(BaseSqlaInspector):
                     # On utilisera la colonne avec l'id
                     todrop.append("%s_id" % prop.key)
                     datas['rel_type'] = 'manytoone'
+                    datas['type'] = 'optrel'
                     # On a besoin de la classe liée pour la génération du form
                     # (récupérer les options disponibles)
-                    datas['related_class'] = prop.class_attribute
+                    datas['related_class'] = prop.mapper.class_
+                    datas['key'] = datas['name']
                     result[datas['name']] = datas
             else:
+                datas['type'] = get_data_type(prop)
+                datas['key'] = datas['name']
                 result[datas['name']] = datas
 
         for id_key in todrop:
@@ -166,7 +201,7 @@ class StatisticInspector(BaseSqlaInspector):
                 rel_key = id_key[:-3]
                 if rel_key in result:
                     result[rel_key]['label'] = ui_label
-                result[rel_key]['column'] = result[id_key]['column']
+                    result[rel_key]['column'] = result[id_key]['column']
                 result.pop(id_key)
         return result
 

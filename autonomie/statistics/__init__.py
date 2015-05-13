@@ -12,18 +12,43 @@ par l'inspection
 
 On doit pouvoir générer des query :
     1-
-    db().query(distinct(models.user.UserDatas.id)).filter(models.user.UserDatas.coordonnees_lastname.startswith('tje')).count()
+    db().query(
+        distinct(models.user.UserDatas.id)
+    ).filter(
+        models.user.UserDatas.coordonnees_lastname.startswith('tje')
+    ).count()
 
     2- Des relations M2o
     Les objets remotes existent déjà, c'est forcément par l'id qu'on match
-    db().query(distinct(models.user.UserDatas.id)).filter(models.user.UserDatas.parcours_status_id.in_((1,2,3))).count()
+
+    db().query(
+        distinct(models.user.UserDatas.id)
+    ).filter(
+        models.user.UserDatas.parcours_status_id.in_((1,2,3))
+    ).count()
 
     3- Des relations o2M
     On doit passer par les attributs des objets remotes pour filtrer
     filtre sur un attribut cible :
-    db().query(distinct(models.user.UserDatas.id)).outerjoin(models.user.UserDatas.parcours_date_diagnostic).filter(models.user.DateDiagnosticDatas.date<datetime.datetime.now()).count()
+
+    db().query(
+        distinct(models.user.UserDatas.id)
+    ).outerjoin(
+        models.user.UserDatas.parcours_date_diagnostic
+    ).filter(
+        models.user.DateDiagnosticDatas.date<datetime.datetime.now()
+    ).count()
+
+
     filtre sur deux attributs cibles :
-    db().query(distinct(models.user.UserDatas.id), models.user.UserDatas).outerjoin(models.user.UserDatas.statut_external_activity).filter(models.user.ExternalActivityDatas.brut_salary>100).filter(models.user.ExternalActivityDatas.hours<8).count()
+
+    db().query(
+        distinct(models.user.UserDatas.id), models.user.UserDatas
+        ).outerjoin(
+        models.user.UserDatas.statut_external_activity
+        ).filter(
+        models.user.ExternalActivityDatas.brut_salary>100
+        ).filter(models.user.ExternalActivityDatas.hours<8).count()
 """
 from sqlalchemy import (
     not_,
@@ -35,7 +60,7 @@ from sqlalchemy import (
 from autonomie.models.base import DBSESSION
 
 
-class StatSheet(object):
+class SheetQueryFactory(object):
     """
     Statistics sheet
 
@@ -62,11 +87,23 @@ class StatSheet(object):
 
         self.entries = []
         for entry in self.sheet.entries:
-            self.entries.append(StatEntry(self.model, entry, self.inspector))
+            self.entries.append(
+                EntryQueryFactory(
+                    self.model,
+                    entry,
+                    self.inspector,
+                )
+            )
 
+    @property
     def headers(self):
-        return u"Libellé", u"Nombre"
+        return (
+            {'name': u'label', 'label': u"Libellé"},
+            {'name': u'description', 'label': u'Description'},
+            {'name': u'count', 'label': u"Nombre"},
+        )
 
+    @property
     def rows(self):
         """
         Return the rows of our sheet output
@@ -78,7 +115,7 @@ class StatSheet(object):
         return result
 
 
-class StatEntry(object):
+class EntryQueryFactory(object):
     """
     Statistic entry
 
@@ -86,6 +123,10 @@ class StatEntry(object):
         a label
         a description
         a list of criteria
+
+    :param obj model: The Statentry model instance
+    :param obj entry_model: The model on which to generate statistics
+    :param obj inspector: The model inspector
     """
     model = None
     related_joins = None
@@ -146,7 +187,11 @@ class StatEntry(object):
         """
         Returns the datas expected for statistics rendering
         """
-        return self.entry.title, self.query().count()
+        return {
+            "label": self.entry.title,
+            "count": self.query().count(),
+            "description": self.entry.description,
+        }
 
 
 def get_stat_criterion(model, criterion_model, inspector):
@@ -154,17 +199,17 @@ def get_stat_criterion(model, criterion_model, inspector):
     Return the appropriate criterion class
     """
     if criterion_model.type == 'string':
-        factory = StrStatCriterion
+        factory = StrCriterionQueryFactory
     elif criterion_model.type == 'number':
-        factory = NumericStatCriterion
-    elif criterion_model.type == 'opt_rel':
-        factory = OptRelStatCriterion
+        factory = NumericCriterionQueryFactory
+    elif criterion_model.type == 'optrel':
+        factory = OptRelCriterionQueryFactory
     elif criterion_model.type == 'date':
-        factory = DateStatCriterion
+        factory = DateCriterionQueryFactory
     return factory(model, criterion_model, inspector)
 
 
-class StatCriterion(object):
+class CriterionQueryFactory(object):
     """
     Statistic criterion
 
@@ -178,16 +223,11 @@ class StatCriterion(object):
     model = None
     key = None
     search1 = None
-    search2 = None
-    searches = []
     type = 'str'
 
     def __init__(self, model, criterion_model, inspector):
         self.model = model
         self.criterion_model = criterion_model
-        self.search1 = criterion_model.search1
-        self.search2 = criterion_model.search2
-        self.searches = criterion_model.searches
 
         self.key = criterion_model.key
         self.method = criterion_model.method
@@ -229,10 +269,15 @@ class StatCriterion(object):
             return attr != self.search1
 
 
-class StrStatCriterion(StatCriterion):
+class StrCriterionQueryFactory(CriterionQueryFactory):
     """
     Statistic criterion related to strings
     """
+    def __init__(self, model, criterion_model, inspector):
+        CriterionQueryFactory.__init__(self, model, criterion_model, inspector)
+        self.search1 = criterion_model.search1
+        self.search2 = criterion_model.search2
+
     def filter_has(self, attr):
         """ contains """
         if self.search1:
@@ -258,11 +303,13 @@ class StrStatCriterion(StatCriterion):
             return not_(f)
 
 
-class OptRelStatCriterion(StatCriterion):
+class OptRelCriterionQueryFactory(CriterionQueryFactory):
     """
     Statistic criterion related to related options
     """
-    searches = []
+    def __init__(self, model, criterion_model, inspector):
+        CriterionQueryFactory.__init__(self, model, criterion_model, inspector)
+        self.searches = criterion_model.searches
 
     def filter_ioo(self, attr):
         """ is one of """
@@ -275,10 +322,15 @@ class OptRelStatCriterion(StatCriterion):
             return not_(attr.in_(self.searches))
 
 
-class NumericStatCriterion(StatCriterion):
+class NumericCriterionQueryFactory(CriterionQueryFactory):
     """
     Statistic criterion for filtering numeric datas
     """
+    def __init__(self, model, criterion_model, inspector):
+        CriterionQueryFactory.__init__(self, model, criterion_model, inspector)
+        self.search1 = criterion_model.search1
+        self.search2 = criterion_model.search2
+
     def filter_lte(self, attr):
         if self.search1:
             return attr <= self.search1
@@ -308,10 +360,15 @@ class NumericStatCriterion(StatCriterion):
             return or_(attr <= self.search1, attr >= self.search2)
 
 
-class DateStatCriterion(StatCriterion):
+class DateCriterionQueryFactory(CriterionQueryFactory):
     """
     Statistic criterion related to Dates
     """
+    def __init__(self, model, criterion_model, inspector):
+        CriterionQueryFactory.__init__(self, model, criterion_model, inspector)
+        self.search1 = criterion_model.search1
+        self.search2 = criterion_model.search2
+
     def filter_dr(self, attr):
         # TODO
         pass

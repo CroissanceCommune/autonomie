@@ -1,0 +1,15 @@
+<form >
+    <div class="form-group">
+    <label  for='type_id'>Champs de gestion socialeType de frais</label>
+    <div class='controls'>
+    <select>
+    {{#columns}}
+    <option data-type='{{type}}' value='{{key}}'>{{label}}</option>
+    {{/columns}}
+    </select>
+    <span class='help-block'>Le champ sur lequel ce critère statistique va porter</span>
+    </div>
+    </div>
+    <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+    <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+</form>

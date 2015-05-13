@@ -1,0 +1,27 @@
+<div class='well'>
+<form name='criterion'>
+<button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+    <input type='hidden' name='type' value='{{ type }}' />
+    <input type='hidden' name='key' value='{{key}}' />
+    <fieldset><legend>{{ label }}</legend>
+    <div class='row'>
+    <div class='form-group col-sm-4'>
+        <label for="method">Compter les éléments</label>
+        <select name='method'>
+            {{#method_options }}
+            <option value='{{value}}' {{#selected}}selected{{/selected}}>{{label}}</option>
+            {{/method_options }}
+        </select>
+    </div>
+    <div class="form-group col-sm-4">
+        <label  for='search1'>Valeur</label>
+        <input class="form-control" name="search1" type="text" value="{{search1}}"/>
+    </div>
+    </div>
+    </fieldset>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+        <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+    </div>
+</form>
+</div>

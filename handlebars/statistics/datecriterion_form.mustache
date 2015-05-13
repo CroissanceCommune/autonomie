@@ -1,0 +1,31 @@
+<form name='criterion'>
+<button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+    <input type='hidden' name='type' value='date' />
+    <input type='hidden' name='key' value='{{key}}' />
+    <fieldset><legend>{{ label }}</legend>
+    <div class='row'>
+    <div class='form-group col-sm-4'>
+        <label for="method">Compter les éléments</label>
+        <select name='method'>
+            {{#method_options }}
+            <option value='{{value}}' {{#selected}}selected{{/selected}}>{{label}}</option>
+            {{/method_options }}
+        </select>
+    </div>
+    <div class="form-group col-sm-4">
+        <label  for='altdate1'>Date 1</label>
+        <input class="form-control" name="altdate1" type="text" autocomplete="off">
+        <input class="form-control" name="search1" type="hidden">
+    </div>
+    <div class="form-group col-sm-4">
+        <label  for='altdate'>Date 2</label>
+        <input class="form-control" name="altdate2" type="text" autocomplete="off">
+        <input class="form-control" name="search2" type="hidden">
+    </div>
+    </div>
+    </fieldset>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+        <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+    </div>
+</form>

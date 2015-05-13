@@ -57,8 +57,9 @@ class Node(DBBASE, PersistentACLMixin):
     __tablename__ = 'node'
     __table_args__ = default_table_args
     __mapper_args__ = {
-            'polymorphic_on': 'type_',
-            'polymorphic_identity':'nodes'}
+        'polymorphic_on': 'type_',
+        'polymorphic_identity': 'nodes',
+    }
     id = Column(
         Integer,
         primary_key=True,
@@ -73,13 +74,21 @@ class Node(DBBASE, PersistentACLMixin):
 
     created_at = Column(
         DateTime(),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Créé(e) le",
+            }
+        },
         default=datetime.now(),
     )
 
     updated_at = Column(
         DateTime(),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Mis(e) à jour le",
+            }
+        },
         default=datetime.now(),
         onupdate=datetime.now()
     )

@@ -28,6 +28,7 @@ from pyramid.httpexceptions import (
     HTTPClientError,
 )
 from colanderalchemy import SQLAlchemySchemaNode
+from sqla_inspect import csv
 
 from autonomie.statistics import inspect
 
@@ -40,21 +41,44 @@ from autonomie.models.statistics import (
     OptListStatisticCriterion,
     DateStatisticCriterion,
 )
-from autonomie.utils import rest
+from autonomie.statistics import (
+    widgets,
+    EntryQueryFactory,
+    SheetQueryFactory,
+)
+from autonomie.utils import (
+    rest,
+    ascii,
+)
 from autonomie.views import (
     BaseView,
     DisableView,
+    BaseCsvView,
 )
+from autonomie.export.utils import write_file_to_request
 
 
 CRITERION_MODELS = {
     "date": DateStatisticCriterion,
-    "num": CommonStatisticCriterion,
-    "opt_rel": OptListStatisticCriterion,
+    "number": CommonStatisticCriterion,
+    "optrel": OptListStatisticCriterion,
     "string": CommonStatisticCriterion
 }
 
 logger = logging.getLogger(__name__)
+
+
+def get_inspector(model=UserDatas):
+    """
+    Return a statistic inspector for the given model
+    """
+    return inspect.StatisticInspector(
+        model,
+        excludes=(
+            'parent_id', 'children', 'type_', '_acl', 'id', 'parent',
+
+        ),
+    )
 
 
 class StatisticSheetList(BaseView):
@@ -124,11 +148,15 @@ def statistic_sheet_view(context, request):
     )
 
 
+def convert_duple_to_dict(duple_list):
+    return [{'value': option[0], 'label': option[1]} for option in duple_list]
+
+
 def statistic_form_options(context, request):
     """
     Returns datas used to build the statistic form page
     """
-    inspector = inspect.StatisticInspector(UserDatas)
+    inspector = get_inspector()
 
     return dict(
         columns=inspector.get_json_columns(),
@@ -141,7 +169,33 @@ def statistic_form_options(context, request):
             'statistic_entries',
             id=context.id,
         ),
+        optrel_options=load_optrel(inspector),
+        methods={
+            'date': convert_duple_to_dict(widgets.DATE_OPTIONS),
+            'number': convert_duple_to_dict(widgets.NUMERIC_OPTIONS),
+            'string': convert_duple_to_dict(widgets.STRING_OPTIONS),
+            'optrel': convert_duple_to_dict(widgets.OPT_REL_OPTIONS),
+        }
     )
+
+
+def load_optrel(inspector):
+    """
+    Return the opt rel options
+    """
+    res = {}
+    for key, column in inspector.columns.items():
+        if column['type'] == 'optrel':
+            rel_class = column['related_class']
+            res[key] = [
+                {
+                    'label': option.label,
+                    'id': option.id,
+                    'value': str(option.id),
+                }
+                for option in rel_class.query()
+            ]
+    return res
 
 
 class StatisticDisableView(DisableView):
@@ -269,13 +323,29 @@ class RestStatisticCriterion(BaseView):
         model = CRITERION_MODELS.get(model_type)
         return SQLAlchemySchemaNode(
             model,
-            excludes=('type_', 'type'),
+            excludes=('type_', 'id'),
         )
 
     def collection_get(self):
         return self.context.criteria
 
-    def post(self):
+    def pre_format(self, values):
+        """
+        Since when serializing a multi select on the client side, we get a list
+        OR a string, we need to enforce getting a string
+        """
+        if 'searches' in values:
+            searches = values.get('searches')
+            if not hasattr(searches, '__iter__'):
+                values['searches'] = [searches]
+        return values
+
+    def _submit_datas(self, edit=False):
+        """
+        Handle datas submission for add/edit
+
+        :param bool edit: is it an edition call ?
+        """
         submitted = self.request.json_body
         logger.debug(u"Submitting %s" % submitted)
 
@@ -283,6 +353,7 @@ class RestStatisticCriterion(BaseView):
         schema = self.schema(model_type)
 
         try:
+            submitted = self.pre_format(submitted)
             attributes = schema.deserialize(submitted)
         except colander.Invalid, err:
             logger.exception("  - Erreur")
@@ -290,34 +361,37 @@ class RestStatisticCriterion(BaseView):
             raise rest.RestError(err.asdict(), 400)
 
         logger.debug(attributes)
-        criterion = self.schema.objectify(attributes)
-        criterion.entry = self.context
-        self.request.dbsession.add(criterion)
-        self.request.dbsession.flush()
+
+        if edit:
+            criterion = schema.objectify(attributes, self.context)
+            criterion = schema.objectify(attributes, self.context)
+            criterion.type = model_type
+            self.request.dbsession.merge(criterion)
+        else:
+            criterion = schema.objectify(attributes)
+            criterion.entry = self.context
+            self.request.dbsession.add(criterion)
+            self.request.dbsession.flush()
         logger.debug(criterion)
         return criterion
 
+    def post(self):
+        """
+        Add criterion view
+        """
+        return self._submit_datas(edit=False)
+
     def get(self):
+        """
+        Get single criteria view
+        """
         return self.context
 
     def put(self):
-        submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
-
-        model_type = submitted['type']
-        schema = self.schema(model_type)
-
-        try:
-            attributes = schema.deserialize(submitted)
-        except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
-            raise rest.RestError(err.asdict(), 400)
-
-        logger.debug(attributes)
-        criterion = self.schema.objectify(attributes, self.context)
-        self.request.dbsession.merge(criterion)
-        return criterion
+        """
+        edit criterion view
+        """
+        return self._submit_datas(edit=True)
 
     def delete(self):
         """
@@ -325,6 +399,56 @@ class RestStatisticCriterion(BaseView):
         """
         self.request.dbsession.delete(self.context)
         return {}
+
+
+class CsvEntryView(BaseCsvView):
+    """
+    The view used to stream a the items matching a statistic entry
+    """
+    model = UserDatas
+
+    def query(self):
+        inspector = get_inspector()
+        query_factory = EntryQueryFactory(UserDatas, self.context, inspector)
+        query = query_factory.query()
+        return query
+
+    @property
+    def filename(self):
+        filename = "{0}.csv".format(ascii.force_ascii(self.context.title))
+        return filename
+
+    def _stream_rows(self, query):
+        """
+        Return a generator with the rows we expect in our output,
+        we remove the id (used to ensure that the count is ok)
+        """
+        for id, item in query.all():
+            yield item
+
+
+class CsvSheetView(BaseView):
+    """
+    Return a csv sheet as a csv response
+    """
+    @property
+    def filename(self):
+        return u"{0}.csv".format(ascii.force_ascii(self.context.title))
+
+    def __call__(self):
+        query_factory = SheetQueryFactory(
+            UserDatas,
+            self.context,
+            get_inspector()
+        )
+
+        writer = csv.CsvExporter()
+        writer.set_headers(query_factory.headers)
+        for row in query_factory.rows:
+            writer.add_row(row)
+
+        write_file_to_request(self.request, self.filename, writer.render())
+        return self.request.response
 
 
 def includeme(config):
@@ -438,12 +562,12 @@ def includeme(config):
             xhr=True,
         )
 
-    for attr in ('post', 'collection_get'):
+    for attr, method in (('post', 'post'), ('collection_get', 'get')):
         config.add_view(
             RestStatisticEntry,
             attr=attr,
             route_name='statistic_entries',
-            request_method=attr.upper(),
+            request_method=method.upper(),
             permission='manage',
             renderer='json',
             xhr=True,
@@ -452,8 +576,23 @@ def includeme(config):
             RestStatisticCriterion,
             attr=attr,
             route_name='statistic_criteria',
-            request_method=attr.upper(),
+            request_method=method.upper(),
             permission='manage',
             renderer='json',
             xhr=True,
         )
+
+    # Csv export views
+    config.add_view(
+        CsvEntryView,
+        route_name='statistic_entry',
+        permission='manage',
+        request_param="format=csv",
+    )
+
+    config.add_view(
+        CsvSheetView,
+        route_name='statistic',
+        permission='manage',
+        request_param="format=csv",
+    )

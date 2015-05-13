@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Setting 'o' password for everyone"
 if [ "$1" == '-f' ]
 then
     echo "Forcing"

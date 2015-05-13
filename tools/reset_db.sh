@@ -1,5 +1,5 @@
 #!/bin/bash
-
+echo "Resetting db"
 if [ "$1" == '-f' ]
 then
     echo "Forcing"

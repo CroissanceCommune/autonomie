@@ -318,3 +318,8 @@ input[name=altdate], input[name=date]{
   max-width: 100%;
   height: auto;
 }
+/* Affichage d'un select2 */
+.form-control.select2-container {
+  height: auto !important;
+  padding: 0;
+}

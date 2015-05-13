@@ -130,15 +130,17 @@ class BaseListClass(BaseView):
         the sort_columns dict, maybe overriden to provide a custom sort
         method
         """
-        sort_column_key = appstruct['sort']
-        sort_column = self.sort_columns[sort_column_key]
+        if appstruct:
+            sort_column_key = appstruct['sort']
+            sort_column = self.sort_columns[sort_column_key]
 
-        sort_direction = appstruct['direction']
-        if sort_direction == 'asc':
-            func = asc
-        else:
-            func = desc
-        return query.order_by(func(sort_column))
+            sort_direction = appstruct['direction']
+            if sort_direction == 'asc':
+                func = asc
+            else:
+                func = desc
+            query = query.order_by(func(sort_column))
+        return query
 
     def _collect_appstruct(self):
         """

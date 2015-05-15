@@ -48,7 +48,6 @@ from sqlalchemy.dialects.mysql.base import LONGBLOB
 from autonomie.models.base import (
     default_table_args,
     DBBASE,
-    DBSESSION,
 )
 from autonomie.models.types import PersistentACLMixin
 from autonomie.models.node import Node
@@ -137,9 +136,9 @@ def check_if_mail_sent(filedatas, company_id):
     :param int company_id: The id of a company
     """
     query = MailHistory.query()
-    query = query.filter(MailHistory.company_id==company_id)
+    query = query.filter(MailHistory.company_id == company_id)
     md5sum = hashlib.md5(filedatas).hexdigest()
-    query = query.filter(MailHistory.md5sum==md5sum)
+    query = query.filter(MailHistory.md5sum == md5sum)
     return query.first() is not None
 
 
@@ -168,7 +167,7 @@ class TemplatingHistory(DBBASE, PersistentACLMixin):
     created_at = Column(
         DateTime(),
         default=datetime.now(),
-        info={'colanderalchemy': {'title': u"Généré le"}},
+        info={'colanderalchemy': {'title': u"Date de génération"}},
     )
     user_id = Column(
         ForeignKey('accounts.id'),
@@ -206,8 +205,11 @@ class TemplatingHistory(DBBASE, PersistentACLMixin):
             info={
                 'colanderalchemy': EXCLUDED,
                 'export': {
-                    'label': u"Documents générés",
-                    'py3o': EXCLUDED,
+                    'exclude': True,
+                    'stats': {
+                        'label': u"Génération de documents - ",
+                        'exclude': False
+                    },
                 },
             }
         ),

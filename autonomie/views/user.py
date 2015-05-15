@@ -27,6 +27,7 @@
 """
 import logging
 import colander
+import peppercorn
 import deform
 from traceback import print_exc
 
@@ -739,6 +740,7 @@ def userdata_doctype_view(userdata_model, request):
     if 'submit' in request.params:
         schema = get_doctypes_form_schema(userdata_model)[0]
         appstruct = request.POST.items()
+        appstruct = peppercorn.parse(appstruct)
         try:
             appstruct = schema.deserialize(appstruct)
         except colander.Invalid, exc:
@@ -748,7 +750,7 @@ def userdata_doctype_view(userdata_model, request):
         else:
             node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)
             for data in appstruct.values():
-                model = schema.objectify(data)
+                model = node_schema.objectify(data)
                 request.dbsession.merge(model)
             request.session.flash(
                 u"Les informations saisies ont bien été enregistrées"

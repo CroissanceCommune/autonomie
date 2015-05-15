@@ -64,14 +64,14 @@ OPT_REL_OPTIONS = (
 
 NUMERIC_OPTIONS = (
     ('', '- Tous -', ),
+    ("lt", u"Est inférieur(e) à", ),
+    ("gt", u"Est supérieur(e) à", ),
     ("lte", u"Est inférieur(e) ou égal(e)", ),
     ("gte", u"Est supérieur(e) ou égal(e)", ),
-    ("bw", u"Fait partie de l'intervalle", ),
+    ("bw", u"Fait partie de l'intervalle (limite inclue)", ),
     ("nbw", u"Ne fait pas partie de l'intervalle"),
     ("eq", u"Est égal(e) à",),
     ("neq", u"N'est pas égal(e) à", ),
-    ("lt", u"Est inférieur(e) à", ),
-    ("gt", u"Est supérieur(e) à", ),
     ("nll", u"N'est pas renseigné(e)", ),
     ("nnll", u"Est renseigné(e)", ),
 )
@@ -87,6 +87,7 @@ DATE_OPTIONS = (
     ("nll", u"N'est pas renseigné(e)", ),
     ("nnll", u"Est renseigné(e)", ),
 )
+
 
 
 def get_options_field(options):

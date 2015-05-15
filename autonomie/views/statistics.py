@@ -58,6 +58,7 @@ from autonomie.utils import (
 from autonomie.views import (
     BaseView,
     DisableView,
+    DuplicateView,
     BaseCsvView,
 )
 from autonomie.export.utils import write_file_to_request
@@ -211,6 +212,15 @@ class StatisticDisableView(DisableView):
     redirect_route = "statistics"
 
 
+class StatisticDuplicateView(DuplicateView):
+    """
+    Sheet Duplication view
+    """
+    message = u"La feuille de statistique a bien été dupliquée, vous pouvez \
+la modifier <a href='{0}'>Ici</a>"
+    route_name = "statistic"
+
+
 class RestStatisticSheet(BaseView):
     """
     Json rest api for statistic sheet handling
@@ -269,11 +279,9 @@ class RestStatisticEntry(BaseView):
         """
         return self.context.entries
 
-    def post(self):
+    def _submit_datas(self, edit=False):
         """
-        Entry add view
-
-        context is the parent sheet
+        Handle datas submission for add/edit
         """
         submitted = self.request.json_body
         logger.debug(u"Submitting %s" % submitted)
@@ -286,12 +294,25 @@ class RestStatisticEntry(BaseView):
             raise rest.RestError(err.asdict(), 400)
 
         logger.debug(attributes)
-        entry = self.schema.objectify(attributes)
-        entry.sheet = self.context
-        self.request.dbsession.add(entry)
-        self.request.dbsession.flush()
+        if edit:
+            entry = self.schema.objectify(attributes, self.context)
+            entry = self.request.dbsession.merge(entry)
+        else:
+            entry = self.schema.objectify(attributes)
+            entry.sheet = self.context
+            self.request.dbsession.add(entry)
+            # We need an id => flush
+            self.request.dbsession.flush()
         logger.debug(entry)
         return entry
+
+    def post(self):
+        """
+        Entry add view
+
+        context is the parent sheet
+        """
+        return self._submit_datas(edit=False)
 
     def put(self):
         """
@@ -299,20 +320,7 @@ class RestStatisticEntry(BaseView):
 
         context is the current entry
         """
-        submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
-
-        try:
-            attributes = self.schema.deserialize(submitted)
-        except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
-            raise rest.RestError(err.asdict(), 400)
-
-        logger.debug(attributes)
-        entry = self.schema.objectify(attributes, self.context)
-        entry = self.request.dbsession.merge(entry)
-        return entry
+        return self._submit_datas(edit=True)
 
     def delete(self):
         """
@@ -334,6 +342,10 @@ class RestStatisticCriterion(BaseView):
         )
 
     def collection_get(self):
+        """
+        Return the list of criteria
+        context is the current entry
+        """
         return self.context.criteria
 
     def pre_format(self, values):
@@ -535,6 +547,13 @@ def includeme(config):
         StatisticDisableView,
         route_name="statistic",
         request_param="action=disable",
+        permission='manage',
+    )
+
+    config.add_view(
+        StatisticDuplicateView,
+        route_name="statistic",
+        request_param="action=duplicate",
         permission='manage',
     )
 

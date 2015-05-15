@@ -459,21 +459,73 @@ class DisableView(BaseView):
         disabled_msg = u"Has been disabled"
         redirect_route = u"The route name"
     """
-    enable_msg = ""
-    disable_msg = ""
-    redirect_route = ""
+    enable_msg = None
+    disable_msg = None
+    redirect_route = None
 
     @property
     def redirect(self):
+        if self.redirect_route is None:
+            raise Exception(u"Set a redirect_route attribute for redirection")
         return self.request.route_path(self.redirect_route)
 
     def __call__(self):
         if self.context.active:
+            if self.enable_msg is None:
+                raise Exception("Add a disable_msg attribute")
             self.context.active = False
             self.request.dbsession.merge(self.context)
             self.request.session.flash(self.disable_msg)
         else:
+            if self.enable_msg is None:
+                raise Exception("Add a enable_msg attribute")
             self.context.active = True
             self.request.dbsession.merge(self.context)
             self.request.session.flash(self.enable_msg)
         return HTTPFound(self.redirect)
+
+
+class DuplicateView(BaseView):
+    """
+    Base Duplication view
+
+    calls the duplicate method on the view's context
+    flash a link to the duplicated item
+    redirect to the redirect route
+
+    :attr str route_name: The route_name used to generate the link to the
+    duplication view (implement _link to override default generation)
+
+    :attr str collection_route_name: optionnal collection route name to which
+    redirect (default set to route_name + 's'), implement a _redirect method to
+    override the redirection mechanism
+
+    :attr str message: The duplication message, take a single formatting value
+    (the link to the new item)
+    """
+    message = None
+    route_name = None
+    collection_route_name = None
+
+    def _link(self, item):
+        if self.route_name is None:
+            raise Exception("Set a route_name attribute for link generation")
+        return self.request.route_path(self.route_name, id=item.id)
+
+    def _message(self, item):
+        if self.message is None:
+            raise Exception("Set a message attribute for flashed message \
+generation")
+        return self.message.format(self._link(item))
+
+    def _redirect(self):
+        redirect_route = self.collection_route_name or self.route_name + 's'
+        return HTTPFound(self.request.route_path(redirect_route))
+
+    def __call__(self):
+        item = self.context.duplicate()
+        self.request.dbsession.add(item)
+        # We need an id
+        self.request.dbsession.flush()
+        self.request.session.flash(self._message(item))
+        return self._redirect()

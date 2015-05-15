@@ -40,11 +40,16 @@ from autonomie.models.statistics import (
     CommonStatisticCriterion,
     OptListStatisticCriterion,
     DateStatisticCriterion,
+    BoolStatisticCriterion,
 )
 from autonomie.statistics import (
-    widgets,
     EntryQueryFactory,
     SheetQueryFactory,
+    STRING_OPTIONS,
+    BOOL_OPTIONS,
+    NUMERIC_OPTIONS,
+    OPTREL_OPTIONS,
+    DATE_OPTIONS,
 )
 from autonomie.utils import (
     rest,
@@ -60,6 +65,7 @@ from autonomie.export.utils import write_file_to_request
 
 CRITERION_MODELS = {
     "date": DateStatisticCriterion,
+    "bool": BoolStatisticCriterion,
     "number": CommonStatisticCriterion,
     "optrel": OptListStatisticCriterion,
     "string": CommonStatisticCriterion
@@ -171,10 +177,11 @@ def statistic_form_options(context, request):
         ),
         optrel_options=load_optrel(inspector),
         methods={
-            'date': convert_duple_to_dict(widgets.DATE_OPTIONS),
-            'number': convert_duple_to_dict(widgets.NUMERIC_OPTIONS),
-            'string': convert_duple_to_dict(widgets.STRING_OPTIONS),
-            'optrel': convert_duple_to_dict(widgets.OPT_REL_OPTIONS),
+            'date': convert_duple_to_dict(DATE_OPTIONS),
+            'number': convert_duple_to_dict(NUMERIC_OPTIONS),
+            'string': convert_duple_to_dict(STRING_OPTIONS),
+            'optrel': convert_duple_to_dict(OPTREL_OPTIONS),
+            'bool': convert_duple_to_dict(BOOL_OPTIONS),
         }
     )
 

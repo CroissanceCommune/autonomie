@@ -31,6 +31,8 @@ A sheet groups a number of statistics entries.
 Each entry is compound of a list of criterions.
 """
 import colander
+import string
+import random
 from datetime import datetime
 
 from sqlalchemy import (
@@ -89,6 +91,21 @@ class StatisticSheet(DBBASE):  # , PersistentACLMixin):
             active=self.active,
         )
 
+    def duplicate(self):
+        new_sheet = StatisticSheet(
+            title=u"{0} {1}".format(
+                self.title,
+                ''.join(
+                    random.choice(
+                        string.ascii_uppercase + string.digits
+                    ) for _ in range(5)
+                )
+            )
+        )
+        for entry in self.entries:
+            new_sheet.entries.append(entry.duplicate())
+        return new_sheet
+
 
 class StatisticEntry(DBBASE):  # , PersistentACLMixin):
     __table_args__ = default_table_args
@@ -104,17 +121,21 @@ class StatisticEntry(DBBASE):  # , PersistentACLMixin):
         backref=backref("entries"),
     )
 
-    @property
-    def criteria(self):
-        result = [criterion for criterion in self.criteria]
-        return result
-
     def __json__(self, request):
         return dict(
             id=self.id,
             title=self.title,
             description=self.description,
         )
+
+    def duplicate(self):
+        entry = StatisticEntry(
+            title=self.title,
+            description=self.description
+        )
+        for criterion in self.criteria:
+            entry.criteria.append(criterion.duplicate())
+        return entry
 
 
 class BaseStatisticCriterion(DBBASE):
@@ -169,6 +190,13 @@ class BoolStatisticCriterion(BaseStatisticCriterion):
     __mapper_args__ = {'polymorphic_identity': 'bool'}
     id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
 
+    def duplicate(self):
+        return BoolStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+        )
+
 
 class CommonStatisticCriterion(BaseStatisticCriterion):
     __table_args__ = default_table_args
@@ -184,6 +212,15 @@ class CommonStatisticCriterion(BaseStatisticCriterion):
             search2=self.search2,
         ))
         return res
+
+    def duplicate(self):
+        return CommonStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+            search1=self.search1,
+            search2=self.search2,
+        )
 
 
 def list_of_integers_validator(node, value):
@@ -221,6 +258,14 @@ class OptListStatisticCriterion(BaseStatisticCriterion):
         ))
         return res
 
+    def duplicate(self):
+        return OptListStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+            searches=self.searches,
+        )
+
 
 class DateStatisticCriterion(BaseStatisticCriterion):
     """
@@ -247,3 +292,12 @@ class DateStatisticCriterion(BaseStatisticCriterion):
             search2=self.search2,
         ))
         return res
+
+    def duplicate(self):
+        return DateStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+            search1=self.search1,
+            search2=self.search2,
+        )

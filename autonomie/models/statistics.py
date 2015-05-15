@@ -164,6 +164,12 @@ class BaseStatisticCriterion(DBBASE):
         )
 
 
+class BoolStatisticCriterion(BaseStatisticCriterion):
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'bool'}
+    id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
+
+
 class CommonStatisticCriterion(BaseStatisticCriterion):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'common'}

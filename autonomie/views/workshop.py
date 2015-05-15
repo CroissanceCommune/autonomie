@@ -677,7 +677,7 @@ def includeme(config):
     )
 
     config.add_view(
-        workshop_duplicate_view,
+        WorkShopDuplicateView,
         route_name='workshop',
         permission='manage',
         request_param='action=duplicate',

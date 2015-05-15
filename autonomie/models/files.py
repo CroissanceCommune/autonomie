@@ -153,6 +153,10 @@ class Template(File):
     id = Column(ForeignKey('file.id'), primary_key=True)
     active = Column(Boolean(), default=True)
 
+    @property
+    def label(self):
+        return self.name
+
 
 class TemplatingHistory(DBBASE, PersistentACLMixin):
     """
@@ -161,12 +165,39 @@ class TemplatingHistory(DBBASE, PersistentACLMixin):
     __tablename__ = "template_history"
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime(), default=datetime.now())
-    user_id = Column(ForeignKey('accounts.id'))
-    userdatas_id = Column(ForeignKey('user_datas.id'))
-    template_id = Column(ForeignKey('templates.id'))
+    created_at = Column(
+        DateTime(),
+        default=datetime.now(),
+        info={'colanderalchemy': {'title': u"Généré le"}},
+    )
+    user_id = Column(
+        ForeignKey('accounts.id'),
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": EXCLUDED,
+        },
+    )
+    userdatas_id = Column(
+        ForeignKey('user_datas.id'),
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": EXCLUDED,
+        },
+    )
+    template_id = Column(
+        ForeignKey('templates.id'),
+        info={
+            'colanderalchemy': {'title': u"Type de document"}
+        }
+    )
 
-    user = relationship("User")
+    user = relationship(
+        "User",
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": EXCLUDED,
+        },
+    )
     userdatas = relationship(
         "UserDatas",
         backref=backref(
@@ -174,8 +205,15 @@ class TemplatingHistory(DBBASE, PersistentACLMixin):
             cascade='all, delete-orphan',
             info={
                 'colanderalchemy': EXCLUDED,
-                "export": EXCLUDED,
-            },
-        )
+                'export': {
+                    'label': u"Documents générés",
+                    'py3o': EXCLUDED,
+                },
+            }
+        ),
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": EXCLUDED,
+        },
     )
     template = relationship("Template")

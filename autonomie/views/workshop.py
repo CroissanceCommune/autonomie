@@ -61,6 +61,7 @@ from autonomie.views import (
     BaseCsvView,
     BaseXlsView,
     BaseFormView,
+    DuplicateView,
 )
 from autonomie.forms import(
     merge_session_with_post,
@@ -559,21 +560,13 @@ def workshop_delete_view(workshop, request):
     return HTTPFound(url)
 
 
-def workshop_duplicate_view(workshop, request):
+class WorkShopDuplicateView(DuplicateView):
     """
-    workshop duplication view
-    :param obj workshop: The workshop to duplicate
-    :param obj request: The request object
+    Workshop duplication view
     """
-    new_workshop = workshop.duplicate()
-    new_workshop = request.dbsession.merge(new_workshop)
-    request.dbsession.flush()
-    request.session.flash(
-        u"L'atelier a bien été dupliqué, vous pouvez le modifier ici \
-<a href='{0}'>Ici</a>.".format(
-    request.route_path("workshop", id=new_workshop.id))
-    )
-    return HTTPFound(request.route_path('workshops'))
+    message = u"L'atelier a bien été dupliqué, vous pouvez le modifier ici \
+<a href='{0}'>Ici</a>."
+    route_name = "workshop"
 
 
 def populate_actionmenu(request):

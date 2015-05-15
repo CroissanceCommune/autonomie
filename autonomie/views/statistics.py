@@ -54,6 +54,7 @@ from autonomie.statistics import (
 from autonomie.utils import (
     rest,
     ascii,
+    widgets,
 )
 from autonomie.views import (
     BaseView,
@@ -148,6 +149,15 @@ def statistic_sheet_view(context, request):
         _query=dict(action='options'),
     )
     contexturl = request.current_route_path()
+
+    request.actionmenu.add(
+        widgets.ViewLink(
+            u"Retour à la liste",
+            "manage",
+            path="statistics",
+        )
+    )
+
     return dict(
         title=u"Feuille de statistiques",
         loadurl=loadurl,

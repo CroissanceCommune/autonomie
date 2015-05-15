@@ -28,6 +28,7 @@ from sqlalchemy import (
     Float,
     Integer,
     Numeric,
+    Boolean,
 )
 from sqlalchemy.orm import (
     RelationshipProperty,
@@ -68,6 +69,8 @@ def get_data_type(prop):
         type_ = 'date'
     elif isinstance(column_type, (Integer, Numeric, Float,)):
         type_ = 'number'
+    elif isinstance(column_type, Boolean):
+        type_ = 'bool'
     return type_
 
 
@@ -88,7 +91,7 @@ class StatisticInspector(BaseSqlaInspector):
         Should we exclude relationships (usefull for limiting recursive
         inspection)
     """
-    config_key = 'export'
+    config_key = 'stats'
 
     def __init__(self, model, excludes=(), exclude_relationships=False):
         BaseSqlaInspector.__init__(self, model)
@@ -129,9 +132,15 @@ class StatisticInspector(BaseSqlaInspector):
             info_dict = self.get_info_field(prop)
             colanderalchemy_infos = info_dict.get('colanderalchemy', {})
 
-            import_dict = info_dict.get(self.config_key, {})
-            if import_dict.get('exclude'):
-                continue
+            export_infos = info_dict.get('export', {}).copy()
+            stats_infos = export_infos.get(self.config_key, {}).copy()
+
+            if export_infos.get('exclude', False):
+                if stats_infos.get('exclude', True):
+                    continue
+
+            infos = export_infos
+            infos.update(stats_infos)
 
             ui_label = colanderalchemy_infos.get('title', prop.key)
             datas = Column({
@@ -140,7 +149,7 @@ class StatisticInspector(BaseSqlaInspector):
                 'prop': prop,
                 'column': prop.class_attribute,
             })
-            datas.update(import_dict)
+            datas.update(infos)
 
             if isinstance(prop, RelationshipProperty):
 

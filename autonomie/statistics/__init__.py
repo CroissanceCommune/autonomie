@@ -50,6 +50,7 @@ On doit pouvoir générer des query :
         models.user.ExternalActivityDatas.brut_salary>100
         ).filter(models.user.ExternalActivityDatas.hours<8).count()
 """
+import datetime
 from sqlalchemy import (
     not_,
     distinct,
@@ -58,6 +59,64 @@ from sqlalchemy import (
 )
 
 from autonomie.models.base import DBSESSION
+
+
+STRING_OPTIONS = (
+    ("has", u"Contient", ),
+    ("sw", u"Commence par", ),
+    ("ew", u"Se termine par", ),
+    ("nhas", u"Ne contient pas", ),
+    ("neq", u"N'est pas égal(e) à", ),
+    ("eq", u"Est égal(e) à", ),
+    ("nll", u"N'est pas renseigné(e)", ),
+    ("nnll", u"Est renseigné(e)", ),
+)
+
+
+BOOL_OPTIONS = (
+    ('true', u"Est coché(e)", ),
+    ('false', u"N'est pas coché(e)", ),
+)
+
+
+OPTREL_OPTIONS = (
+    ("ioo", u"Fait partie de", ),
+    ("nioo", u"Ne fait pas partie de", ),
+    ("nll", u"N'est pas renseigné(e)", ),
+    ("nnll", u"Est renseigné(e)", ),
+)
+
+
+NUMERIC_OPTIONS = (
+    ("lte", u"Est inférieur(e) ou égal(e)", ),
+    ("gte", u"Est supérieur(e) ou égal(e)", ),
+    ("bw", u"Fait partie de l'intervalle", ),
+    ("nbw", u"Ne fait pas partie de l'intervalle"),
+    ("eq", u"Est égal(e) à",),
+    ("neq", u"N'est pas égal(e) à", ),
+    ("lt", u"Est inférieur(e) à", ),
+    ("gt", u"Est supérieur(e) à", ),
+    ("nll", u"N'est pas renseigné(e)", ),
+    ("nnll", u"Est renseigné(e)", ),
+)
+
+
+DATE_OPTIONS = (
+    ('dr', u"Dans l'intervalle", ),
+    ('this_year', u"Depuis le début de l'année", ),
+    ('this_month', u"Ce mois-ci", ),
+    ("previous_year", u"L'année dernière", ),
+    ("previous_month", u"Le mois dernier", ),
+    ("nll", u"N'est pas renseigné(e)", ),
+    ("nnll", u"Est renseigné(e)", ),
+)
+
+
+class MissingDatasError(Exception):
+    """
+    Custom exception raised when some datas is missing for filtering
+    """
+    pass
 
 
 class SheetQueryFactory(object):
@@ -206,6 +265,8 @@ def get_stat_criterion(model, criterion_model, inspector):
         factory = OptRelCriterionQueryFactory
     elif criterion_model.type == 'date':
         factory = DateCriterionQueryFactory
+    elif criterion_model.type == 'bool':
+        factory = BoolCriterionQueryFactory
     return factory(model, criterion_model, inspector)
 
 
@@ -224,6 +285,8 @@ class CriterionQueryFactory(object):
     key = None
     search1 = None
     type = 'str'
+    # 0 can't be a none value since it can be a valid one (0 children)
+    none_values = (None, '')
 
     def __init__(self, model, criterion_model, inspector):
         self.model = model
@@ -249,14 +312,13 @@ class CriterionQueryFactory(object):
                 result = filter_method(self.column)
         return result
 
-    # FIXME : maybe one of the none values ('', 0 ...)
     def filter_nll(self, attr):
         """ null """
-        return attr == None
+        return attr.in_(self.none_values)
 
     def filter_nnll(self, attr):
         """ not null """
-        return attr != None
+        return not_(attr.in_(self.none_values))
 
     def filter_eq(self, attr):
         """ equal """
@@ -301,6 +363,14 @@ class StrCriterionQueryFactory(CriterionQueryFactory):
         f = self.filter_has(attr)
         if f is not None:
             return not_(f)
+
+
+class BoolCriterionQueryFactory(CriterionQueryFactory):
+    def filter_true(self, attr):
+        return attr == True
+
+    def filter_false(self, attr):
+        return attr == False
 
 
 class OptRelCriterionQueryFactory(CriterionQueryFactory):
@@ -370,16 +440,65 @@ class DateCriterionQueryFactory(CriterionQueryFactory):
         self.search2 = criterion_model.search2
 
     def filter_dr(self, attr):
-        # TODO
-        pass
+        if self.search1 and self.search2:
+            return and_(
+                attr >= self.search1,
+                attr <= self.search2,
+            )
+        raise MissingDatasError(
+            u"Il manque des informations pour générer la requête statistique",
+            key=self.key,
+            method=self.method,
+        )
 
-#   80 DATE_OPTIONS = (
-#   81     ('', '- Tous -', ),
-#   82     ('dr', u"Dans l'intervalle", ),
-#   83     ('this_year', u"Depuis le début de l'année", ),
-#   84     ('this_month', u"Ce mois-ci", ),
-#   85     ("previous_year", u"L'année dernière", ),
-#   86     ("previous_month", u"Le mois dernier", ),
-#   87     ("nll", u"N'est pas renseigné(e)", ),
-#   88     ("nnll", u"Est renseigné(e)", ),
-#   89 )
+    def filter_this_year(self, attr):
+        """
+        This year
+        """
+        current_year = datetime.date.today().year
+        first_day = datetime.date(current_year, 1, 1)
+        return attr >= first_day
+
+    def filter_previous_year(self, attr):
+        """
+        Last year
+        """
+        previous_year = datetime.date.today().year - 1
+        first_day = datetime.date(previous_year, 1, 1)
+        last_day = datetime.date(previous_year, 12, 31)
+        return and_(
+            attr >= first_day,
+            attr <= last_day,
+        )
+
+    def filter_this_month(self, attr):
+        """
+        This month
+        """
+        today = datetime.date.today()
+        first_day = datetime.date(today.year, today.month, 1)
+        return attr >= first_day
+
+    def get_first_day_of_previous_month(self, today, nb_months=1):
+        """
+        Return the first day of this month - nb_months
+        Handle year switch
+
+        :param int nb_months: the number of months to go back
+        """
+        month = today.month - 1 - nb_months
+        year = today.year + month / 12
+        month = month % 12 + 1
+        return datetime.date(year, month, 1)
+
+    def filter_previous_month(self, attr):
+        """
+        Last month
+        """
+        today = datetime.date.today()
+        first_day = self.get_first_day_of_previous_month(today)
+        last_day = datetime.date(today.year, today.month, 1)
+        return and_(
+            attr >= first_day,
+            attr < last_day
+        )

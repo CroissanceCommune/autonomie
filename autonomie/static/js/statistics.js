@@ -30,7 +30,17 @@
  *
  *
  */
+
+/*
+ *
+ *  TODOLIST :
+ *
+ *  - popup redirect on criterion add ... :
+ *      solution : ajoute une région popup au layout
+ */
+
 var AppOptions = {};
+
 var pp = Popup.extend({
   el:'#popup_container'
 });
@@ -43,35 +53,93 @@ AutonomieApp.addRegions({
 });
 
 AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, $, _){
+
   var EntryFormLayout = Marionette.LayoutView.extend({
     template: "full_entry_form",
     events: {
-      'click button.close': "closeView"
+      'click #entry_list_header button.close': "closeView",
+      'click #entry_list_header button.edit': "toggleForm",
+      "click #entry_edit_form button[name=submit]": "changeDatas",
+      "submit form": "changeDatas",
+      "click #entry_edit_form button[name=cancel]": "toggleForm"
+    },
+    modelEvents: {
+      change: "updateDatas"
     },
     ui: {
-      title: 'h4'
+      title: '#entry_list_header h4 span',
+      form: '#entry_edit_form',
+      description: "#entry_list_header span.help-block"
     },
     regions: {
       list: '#criteria',
       form: '#criterion-form'
     },
     closeView: function(){
-      this.destroy();
-      AutonomieApp.router.navigate("index", {trigger: true});
+      console.log("Closing the layout");
+      var this_ = this;
+      this.$el.slideUp(400, function(){
+        this_.destroy();
+        AutonomieApp.router.navigate("index", {trigger: true});
+      });
     },
     focus: function(){
       $('html, body').animate(
-      {scrollTop: this.ui.title.offset().top}, 2000);
+      {scrollTop: this.ui.title.offset().top}, 650);
+    },
+    formDatas: function(){
+      return this.ui.form.serializeObject();
+    },
+    toggleForm: function(){
+      this.ui.form.toggle();
+    },
+    updateDatas: function(){
+      this.ui.title.html(this.model.get('title'));
+      this.ui.description.html(this.model.get('description'));
+    },
+    changeDatas: function(event){
+      Backbone.Validation.bind(this);
+      event.preventDefault();
+      var this_ = this;
+      this.model.save(
+        this.formDatas(),
+        {
+          success: function(){
+            displayServerSuccess("Vos données ont été sauvegardées");
+            this_.toggleForm();
+          },
+          error:function(model, xhr, options){
+            displayServerError("Une erreur a été rencontrée lors de la " +
+                "sauvegarde de vos données");
+          },
+          wait: true
+        }
+      );
+      Backbone.Validation.unbind(this);
+      return true;
+    },
+    templateHelpers: function(){
+      return {csv_url: this.model.csv_url()};
     }
   });
+
   var SheetModel = Backbone.Model.extend({
     validation:{
       title: {
         required:true,
         msg:"est requis"
       }
+    },
+    csv_url: function(){
+      var param_index = this.url.indexOf('?');
+      var root_url = this.url;
+      if (param_index > 0){
+        root_url = this.url.substring(0, param_index);
+      }
+      return root_url + "?format=csv";
     }
   });
+
   var EntryModel = Backbone.Model.extend({
     defaults: {criterion: []},
     validation:{
@@ -82,10 +150,40 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     csv_url: function(){
       return this.url() + "?format=csv";
-    }  });
+    },
+    criteria_url: function(){
+      return this.url() + "/criteria";
+    }
+  });
+
   var EntryCollection = Backbone.Collection.extend({
     model: EntryModel
   });
+
+  var CriterionModel = Backbone.Model.extend({
+    initialize: function(options){
+      if (this.get('type') == 'date'){
+        this.setDateAttributes(options);
+      }
+    },
+    setDateAttributes: function(options){
+      if ((options['altdate1'] === undefined)&&(options['search1']!==undefined)){
+        this.set('altdate1', formatPaymentDate(options['search1']));
+      }
+      if ((options['altdate2'] === undefined)&&(options['search2']!==undefined)){
+        this.set('altdate2', formatPaymentDate(options['search2']));
+      }
+    }
+  });
+
+  var CriteriaCollection = Backbone.Collection.extend({
+    model: CriterionModel,
+    initialize: function(options){
+      this.url = options.url;
+      this.entry_id = options.entry_id;
+    }
+  });
+
   var EntryView = BaseTableLineView.extend({
     template: "entry",
     tagName: "tr",
@@ -106,7 +204,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
           callback: function(){
             _model.destroy({
                 success: function(model, response) {
-                  Statistic.router.navigate("index", {trigger: true});
+                  this_.destroy();
                   displayServerSuccess("L'élément a bien été supprimé");
                 }
              });
@@ -115,11 +213,25 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       }
     }
   });
+
   var EntryListView = Marionette.CompositeView.extend({
     childView: EntryView,
     template: "entry_list",
-    childViewContainer: 'tbody'
+    childViewContainer: 'tbody',
+    fadeIn: function(){
+      if (! this.$el.is(':visible')) {
+        console.log("Is no visible : slidedown");
+        this.$el.slideDown();
+      }
+    },
+    fadeOut: function(){
+      if (this.$el.is(':visible')) {
+        console.log("Is visible : slideup");
+        this.$el.slideUp();
+      }
+    }
   });
+
   var EntryFormView = BaseFormView.extend({
     template: "entry_form",
     ui: {
@@ -142,15 +254,137 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       return;
     }
   });
-  var CriterionView = Marionette.ItemView.extend({
-    template: "criterion",
-    tagName: 'tr'
+
+  var CriterionTypeSelectView = Marionette.ItemView.extend({
+    /*
+     * View for criterion type selection
+     */
+    initialize: function(options){
+      this.add_url = options.add_url;
+    },
+    template: 'criterion_type_select',
+    templateHelpers: function(){
+      return {columns: _.values(AppOptions.columns)};
+    },
+    ui: {
+      select: 'select'
+    },
+    events: {
+      'click button[name=submit]':'onFormSubmit',
+      'click button[name=cancel]':'closeView'
+    },
+    onFormSubmit: function(event){
+      event.preventDefault();
+      var selected = this.ui.select.children('option:selected');
+      var key = selected.val();
+      Statistic.router.navigate(this.add_url + key, {trigger: true});
+      this.closeView();
+    },
+    closeView: function(){
+      this.destroy();
+    }
   });
+
+  var getLabels = function(options, ids){
+      /*
+       * Get the labels of a list options matching and ids list
+       */
+      var selected = _.filter(
+        options,
+        function(option){
+          return _.contains(ids, option.value);
+        }
+      );
+      console.log(selected);
+      return _.pluck(selected, 'label');
+  };
+
+  var CriterionView = BaseTableLineView.extend({
+    template: "criterion",
+    tagName: 'tr',
+    modelEvents:{
+      "change": "render"
+    },
+    events: {
+      'click a.remove':'_remove'
+    },
+    _remove: function(id){
+      var confirmed = confirm("Êtes vous certain de vouloir supprimer cet élément ?");
+      var this_ = this;
+      if (confirmed){
+        var _model = this.model;
+        this.highlight({
+          callback: function(){
+            _model.destroy({
+                success: function(model, response) {
+                  this_.destroy();
+                  displayServerSuccess("L'élément a bien été supprimé");
+                }
+             });
+           }
+          });
+      }
+    },
+    templateHelpers: function(){
+      var result = {title: AppOptions.columns[this.model.get('key')].label};
+
+      var type = this.model.get('type');
+      var labels;
+      if(type == 'date'){
+        labels = [this.model.get('altdate1'), this.model.get('altdate2')];
+      } else if (type == 'optrel') {
+        var key = this.model.get('key');
+        var optrel_options = AppOptions.optrel_options[key];
+        labels = getLabels(optrel_options, this.model.get('searches'));
+      } else if (type == 'bool') {
+        labels = [];
+      }
+      else {
+        labels = [this.model.get('search1'), this.model.get('search2')];
+      }
+      result.label = labels.join(' - ');
+
+      if (result.label === ' - '){
+        result.label = '';
+      }else if (result.label.indexOf('- ', result.label.length - 2) != -1){
+        result.label = result.label.substring(0, result.label.length - 2);
+      }
+
+      var type_methods = AppOptions.methods[type];
+      var model_method = this.model.get('method');
+      var method = _.find(type_methods,
+        function(method){ return method.value==model_method;}
+      );
+      if (!_.isUndefined(method)){
+        result.method_label = method.label;
+      } else {
+        result.method_label = "Erreur";
+      }
+      result.edit_url = "entries/" +
+        this.model.collection.entry_id +
+        "/criteria/" +
+        this.model.get('id') +
+        "/edit";
+      return result;
+    }
+  });
+
   var CriteriaListView = Marionette.CompositeView.extend({
     childView: CriterionView,
     template: "criterion_list",
-    childViewContainer: 'tbody'
+    childViewContainer: 'tbody',
+    events: {
+      "click a.add": "dialogCriterionType"
+    },
+    dialogCriterionType: function(){
+      var add_url = "entries/" + this.collection.entry_id + "/criteria/add/";
+      var criterion_type_select = new CriterionTypeSelectView(
+        {add_url: add_url}
+      );
+      App.popup.show(criterion_type_select);
+    }
   });
+
   var SheetView = Marionette.ItemView.extend({
     model: SheetModel,
     template: "sheet_form",
@@ -186,23 +420,111 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       Backbone.Validation.unbind(this);
       this.render();
       return true;
+    },
+    templateHelpers: function(){
+      return {csv_url: this.model.csv_url()};
     }
   });
+  var BaseCriterionFormView = BaseFormView.extend({
+    formselector: "form[name=criterion]",
+    events:{
+      'click button.close': "closeView",
+      'click button[name=submit]':'onFormSubmit',
+      'click button[name=cancel]':'closeView',
+      'submit form': 'onFormSubmit'
+    },
+    ui:{
+      "form": "form[name=criterion]"
+    },
+    templateHelpers: function(){
+      var type = this.model.get('type');
+      var method_options = AppOptions.methods[type];
+      var method = this.model.get('method');
+      method_options = this.updateSelectOptions(method_options, method);
+      return {
+        label: AppOptions.columns[this.model.get('key')].label,
+        method_options: method_options
+      };
+    },
+    closeView: function(){
+      Statistic.router.navigate("entries/" + this.destCollection.entry_id + "/edit" ,
+      {trigger: true});
+      this.destroy();
+      return;
+    }
+  });
+  var DateCriterionFormView = BaseCriterionFormView.extend({
+    template: "datecriterion_form",
+    ui:{
+      "form": "form[name=criterion]",
+      "search1": "input[name=altdate1]",
+      "search2": "input[name=altdate2]"
+    },
+    onShow: function(){
+       //Called when added to the DOM by the région
+      this.setDatePicker(this.formselector, this.ui.search1, "search1");
+      this.setDatePicker(this.formselector, this.ui.search2, "search2");
+    },
+    onRender: function(){
+      // Called when rendered (the first time the setDatePicker doesn't work
+      // because the datas is rendered but not added to the DOM, that's why the
+      // call is also made in onShow)
+      this.setDatePicker(this.formselector, this.ui.search1, "search1");
+      this.setDatePicker(this.formselector, this.ui.search2, "search2");
+    }
+  });
+
+  var StringCriterionView = BaseCriterionFormView.extend({
+    template: "stringcriterion_form"
+  });
+
+  var BoolCriterionView = BaseCriterionFormView.extend({
+    template: "boolcriterion_form"
+  });
+
+  var NumberCriterionView = BaseCriterionFormView.extend({
+    template: "numbercriterion_form"
+  });
+
+  var OptRelCriterionForm = BaseCriterionFormView.extend({
+    template: "optrelcriterion_form",
+    ui:{
+      "form": "form[name=criterion]",
+      "select": "form[name=criterion] select"
+    },
+    templateHelpers: function(){
+      var result = BaseCriterionFormView.prototype.templateHelpers.call(this);
+      var searches = this.model.get('searches');
+      optrel_options = this.updateSelectOptions(this.optrel_options, searches);
+      result.optrel_options = optrel_options;
+      return result;
+    },
+    onShow: function(){
+      this.ui.select.select2();
+    },
+    onRender: function(){
+      this.ui.select.select2();
+    }
+  });
+
   var controller = {
     initialized:false,
     index: function(){
       this.initialize();
       App.popup.empty();
       App.entry_edit.empty();
+      this.entry_list_view.fadeIn();
     },
     initialize: function(){
       if (! this.initialized){
+        console.log("Was not initialized");
         this.sheet_view = new SheetView({model: Statistic.sheet});
         App.sheet.show(this.sheet_view);
         this.entry_list_view = new EntryListView(
           {collection: Statistic.entries}
         );
         App.entries.show(this.entry_list_view);
+        this.initialized = true;
       }
     },
     entry_add: function(){
@@ -215,17 +537,80 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     entry_edit: function(id){
       this.initialize();
-      var model = Statistic.entries.get(id);
-      var entry_form = new EntryFormLayout({
-        model: model,
+      var entry_model = Statistic.entries.get(id);
+      if (_.isUndefined(entry_model)){
+        Statistic.router.navigate('index', {trigger: true});
+        return false;
+      }
+      this.entry_list_view.fadeOut();
+      this.current_entry = entry_model;
+      this.entry_form = new EntryFormLayout({
+        model: entry_model,
         destCollection: Statistic.entries
       });
-      var criteria = model.criteria;
-      var criteria_collection = new Backbone.Collection(criteria);
-      var criteria_list = new CriteriaListView({collection: criteria_collection});
-      App.entry_edit.show(entry_form);
-      entry_form.focus();
-      entry_form.getRegion('list').show(criteria_list);
+      App.entry_edit.show(this.entry_form);
+
+      var criteria_root_url = entry_model.criteria_url();
+
+      this.criteria_collection = new CriteriaCollection(
+        {url: criteria_root_url, entry_id: entry_model.id }
+      );
+      var this_ = this;
+      return this.criteria_collection.fetch({
+        success: function(){
+          var criteria_list = new CriteriaListView({
+            collection: this_.criteria_collection
+          });
+          this_.entry_form.getRegion('list').show(criteria_list);
+        }
+      });
+    },
+    _buildCriterionForm: function(model){
+      var criterionForm;
+      var this_ = this;
+      if (model.get('type') == 'date'){
+        criterionForm = new DateCriterionFormView(
+          {model: model, destCollection: this.criteria_collection}
+        );
+        this.entry_form.getRegion('form').show(criterionForm);
+      } else if (model.get('type') == 'string'){
+        criterionForm = new StringCriterionView(
+          {model: model, destCollection: this.criteria_collection}
+        );
+        this.entry_form.getRegion('form').show(criterionForm);
+      } else if (model.get('type') == 'number'){
+        criterionForm = new NumberCriterionView(
+          {model: model, destCollection: this.criteria_collection}
+        );
+        this.entry_form.getRegion('form').show(criterionForm);
+      } else if (model.get('type') == 'optrel'){
+        criterionForm = new OptRelCriterionForm(
+          {
+            model: model,
+            destCollection: this.criteria_collection}
+        );
+        criterionForm.optrel_options = AppOptions.optrel_options[model.get('key')];
+        this.entry_form.getRegion('form').show(criterionForm);
+      } else if (model.get('type') == 'bool'){
+        criterionForm = new BoolCriterionView(
+          {model: model, destCollection: this.criteria_collection}
+        );
+        this.entry_form.getRegion('form').show(criterionForm);
+      }
+    },
+    criteria_add: function(entry_id, key){
+      this.entry_edit(entry_id);
+      var option = AppOptions.columns[key];
+
+      var model = new CriterionModel({key: key, type:option.type});
+      this._buildCriterionForm(model);
+    },
+    criteria_edit: function(entry_id, criterion_id){
+      var this_ = this;
+      this.entry_edit(entry_id).then(function(){
+        var model = this_.criteria_collection.get(criterion_id);
+        this_._buildCriterionForm(model);
+      });
     }
   };
   router = Backbone.Marionette.AppRouter.extend({
@@ -233,7 +618,9 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     appRoutes: {
       "index": "index",
       "entries/:id/edit": "entry_edit",
-      "entries/add": "entry_add"
+      "entries/add": "entry_add",
+      "entries/:id/criteria/add/:key": "criteria_add",
+      "entries/:id/criteria/:cid/edit": "criteria_edit"
     }
   });
   Statistic.on('start', function(){

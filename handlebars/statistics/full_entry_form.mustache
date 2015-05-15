@@ -1,7 +1,37 @@
-<div class='form'>
-    <button type="button" class="close"><span aria-hidden="true">&times;</span></button>
-    <h4>{{ title }}</h4>
-    <span class='help-block'>{{description}}</span>
+<div class='form well'>
+    <div id='entry_list_header'>
+        <button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+        <h4>
+            <span>{{ title }}</span>
+            <button class='btn btn-default btn-xs edit' style='font-size:9px' title="Éditer le titre de l'entrée statistique">
+            <i class="glyphicon glyphicon-pencil" style="vertical-align:middle"> </i>
+            </button>
+        </h4>
+        <span class='help-block'>{{description}}</span>
+        <a class='btn btn-default btn-sm' href='{{ csv_url }}' title='Exporter les éléments correspondant à cette entrée statistiques'>
+            Exporter
+        </a>
+        <form id='entry_edit_form' style='display:none' class='well'>
+            <fieldset><legend>Édition</legend>
+            <div class='row'>
+            <div class="form-group col-xs-6">
+                <label class='control-label' for="title">Intitulé de l'entrée statistique <b class='required'>*</b></label>
+                <input type="text" name='title' class="form-control" id="title" placeholder="Titre" value='{{title}}'>
+                <span class='help-block'>
+                    Sera utilisé dans le fichier de sortie
+                </span>
+            </div>
+            <div class="form-group col-xs-6">
+                <label class='control-label' for="title">Description de l'entrée statistique</label>
+                <textarea name='description' class="form-control" id="title" placeholder="Description">{{description}}</textarea>
+            </div>
+            </div>
+            </fieldset>
+            <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+            <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+        </form>
+
+    </div>
+    <div id='criterion-form'></div>
     <div id='criteria'></div>
-    <div id='criterion_form'></div>
 </div>

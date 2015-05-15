@@ -1,8 +1,11 @@
 <td>
-{{ title }}
+{{ title }} ({{ method_label }}  : {{ label }})
 </td>
 <td class='action'>
-    <a class='btn btn-default btn-sm' href='#entries/{{id}}/edit' title="Modifier cette entrée">
+    <a class='btn btn-default btn-sm' href='#{{ edit_url }}' title="Modifier cette entrée">
         Modifier
+    </a>
+    <a class='btn btn-default btn-sm remove' title='Supprimer cette entrée'>
+        Supprimer
     </a>
 </td>

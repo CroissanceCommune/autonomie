@@ -651,22 +651,49 @@ class UserDatasSocialDocTypes(DBBASE):
     userdatas_id = Column(
         ForeignKey('user_datas.id'),
         primary_key=True,
-        info={'colanderalchemy': get_hidden_field_conf() },
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        },
     )
 
     doctype_id = Column(
         ForeignKey('social_doc_type_option.id'),
         primary_key=True,
-        info={'colanderalchemy': get_hidden_field_conf()},
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {
+                'exclude': True,
+                'stats': {'exclude': False, 'label': u"Type de documents"},
+            }
+        },
     )
 
-    status = Column(Boolean(), default=False)
+    status = Column(
+        Boolean(),
+        default=False,
+        info={
+            'export': {
+                'exclude': True,
+                'stats': {'exclude': False, 'label': u"A été fourni ?"},
+            }
+        },
+    )
     userdatas = relationship(
         'UserDatas',
         backref=backref(
             'doctypes_registrations',
             cascade='all, delete-orphan',
-            info={'colanderalchemy': EXCLUDED, "export": EXCLUDED},
+            info={
+                'colanderalchemy': EXCLUDED,
+                "export": {
+                    'exclude': True,
+                    'stats': {
+                        'exclude': False,
+                        'label': u"Documents sociaux - ",
+                    }
+                }
+            },
         ),
         info={'colanderalchemy': EXCLUDED, "export": EXCLUDED},
     )
@@ -678,7 +705,15 @@ class UserDatasSocialDocTypes(DBBASE):
             cascade='all, delete-orphan',
             info={'colanderalchemy': EXCLUDED},
         ),
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            "export": {
+                'exclude': True,
+                'stats': {
+                    'exclude': False,
+                }
+            }
+        },
     )
 
 

@@ -63,6 +63,8 @@
                 ${table_btn(url, u"Voir/Modifier", u"Voir cette feuille", icon=u"pencil")}
                 <% url = request.route_path('statistic', id=sheet.id, _query=dict(action='edit')) %>
                 ${table_btn(url, u"Modifier", u"Éditer cette feuille", icon=u"pencil")}
+                <% url = request.route_path('statistic', id=sheet.id, _query=dict(action='duplicate')) %>
+                ${table_btn(url, u"Dupliquer", u"Dupliquer cette feuille", icon=u"tags")}
                 <% url = request.route_path('statistic', id=sheet.id, _query=dict(action='disable')) %>
                 <% label = sheet.active and u"Désactiver" or u"Activer" %>
                 ${table_btn(url, label, u"Ce modèle est-il toujours utilisé ?", icon=u"remove")}

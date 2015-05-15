@@ -30,7 +30,9 @@
     <div class='col-xs-12' id='entrylist'>
     </div>
 </div>
-<div id='entry_edit'></div>
+<div class='row'>
+    <div id='entry_edit' class='col-xs-8 col-xs-offset-2' ></div>
+</div>
 <div id='messageboxes'></div>
 <div id='popup_container'></div>
 </%block>

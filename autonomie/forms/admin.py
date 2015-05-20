@@ -48,6 +48,9 @@ log = logging.getLogger(__name__)
 HEADER_RESIZER = ImageResizer(4, 1)
 
 
+TEMPLATES_URL = 'autonomie:deform_templates/'
+
+
 def get_deferred_upload_widget(filename, filters=None):
     @colander.deferred
     def deferred_upload_widget(node, kw):
@@ -63,11 +66,11 @@ def get_deferred_upload_widget(filename, filters=None):
         store_path = os.path.join(root_path, "main")
 
         return forms.get_fileupload_widget(
-                store_url,
-                store_path,
-                request.session,
-                default_filename=filename,
-                filters=filters)
+            store_url,
+            store_path,
+            request.session,
+            default_filename=filename,
+            filters=filters)
 
     return deferred_upload_widget
 
@@ -197,6 +200,7 @@ class Product(colander.MappingSchema):
 class ProductSequence(colander.SequenceSchema):
     product = Product(title=u"Compte produit")
 
+
 class TvaItem(colander.MappingSchema):
     """
         Allows Tva configuration
@@ -279,6 +283,7 @@ class PaymentModeSequence(colander.SequenceSchema):
     """
     label = colander.SchemaNode(colander.String(), title=u"Libellé")
 
+
 class PaymentModeConfig(colander.MappingSchema):
     """
         Main configuration form model
@@ -294,6 +299,7 @@ class WorkUnitSequence(colander.SequenceSchema):
         Single work untit configuration scheme
     """
     label = colander.SchemaNode(colander.String(), title=u"Libellé")
+
 
 class WorkUnitConfig(colander.MappingSchema):
     """
@@ -434,7 +440,12 @@ class ActivityTypesSeqConfig(colander.SequenceSchema):
     """
         The sequence Schema associated with the ActivityTypeConfig
     """
-    activity_type = ActivityTypeConfig(title=u"Nature du rendez-vous")
+    activity_type = ActivityTypeConfig(
+        title=u"Nature du rendez-vous",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 class ActivityModeConfig(colander.MappingSchema):
@@ -449,7 +460,12 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
     """
     Sequence schema for activity modes configuration
     """
-    activity_mode = ActivityModeConfig(title=u"Mode d'entretien")
+    activity_mode = ActivityModeConfig(
+        title=u"Mode d'entretien",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 class ActionConfig(colander.MappingSchema):
@@ -457,12 +473,18 @@ class ActionConfig(colander.MappingSchema):
     label = colander.SchemaNode(
         colander.String(),
         title=u"Intitulé",
+        description=u"Titre dans la sortie pdf",
         validator=colander.Length(max=100)
         )
 
 
 class ActivitySubActionSeq(colander.SequenceSchema):
-    subaction = ActionConfig(title=u"")
+    subaction = ActionConfig(
+        title=u"",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 class ActivityActionConfig(colander.Schema):
@@ -470,57 +492,91 @@ class ActivityActionConfig(colander.Schema):
     label = colander.SchemaNode(
         colander.String(),
         title=u"Intitulé",
+        description=u"Titre dans la sortie pdf",
         validator=colander.Length(max=255)
     )
-    children = ActivitySubActionSeq(title=u"Sous action")
+    children = ActivitySubActionSeq(
+        title=u"Sous action",
+    )
 
 
 class ActivityActionSeq(colander.SequenceSchema):
-    action = ActivityActionConfig(title=u"Action")
+    action = ActivityActionConfig(
+        title=u"Action",
+    )
+
+
+class WorkshopInfo3(colander.MappingSchema):
+    id = forms.id_node()
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Sous-titre 2",
+        description=u"Sous-titre 2 dans la sortie pdf",
+        validator=colander.Length(max=100)
+    )
 
 
 class WorkshopInfo3Seq(colander.SequenceSchema):
-    child = ActionConfig(title=u"Sous-action 2")
+    child = WorkshopInfo3(
+        title=u"Sous-titre 2",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 class WorkshopInfo2(colander.Schema):
     id = forms.id_node()
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Intitulé",
+        title=u"Sous-titre",
+        description=u"Sous-titre dans la sortie pdf",
         validator=colander.Length(max=255)
     )
     children = WorkshopInfo3Seq(
         title=u"",
         widget=deform.widget.SequenceWidget(
-            add_subitem_text_template=u"Ajouter une sous-action 2",
+            add_subitem_text_template=u"Ajouter un sous-titre 2",
             orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
 
 
 class WorkshopInfo2Seq(colander.SequenceSchema):
-    child = WorkshopInfo2(title=u"Sous-action 1")
+    child = WorkshopInfo2(
+        title=u"Sous-titre",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 class WorkshopInfo1(colander.Schema):
     id = forms.id_node()
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Intitulé",
+        title=u"Titre",
+        description=u"Titre dans la sortie pdf",
         validator=colander.Length(max=255)
     )
     children = WorkshopInfo2Seq(
         title=u'',
         widget=deform.widget.SequenceWidget(
-           add_subitem_text_template=u"Ajouter une sous-action 1",
+            add_subitem_text_template=u"Ajouter un sous-titre",
             orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
 
 
 class WorkshopInfo1Seq(colander.SequenceSchema):
-    actions = WorkshopInfo1(title=u'Action')
+    actions = WorkshopInfo1(
+        title=u'Action',
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 def get_file_dl_node(title, additionnal_description=""):
@@ -540,9 +596,9 @@ def get_file_dl_node(title, additionnal_description=""):
     )
 
 
-class PdfConfig(colander.MappingSchema):
+class ActivityConfigSchema(colander.Schema):
     """
-    Mapping schema for activity pdf output configuration
+    The schema for activity types configuration
     """
     header_img = get_file_dl_node(title=u'En-tête des sortie PDF')
     footer_img = get_file_dl_node(
@@ -553,13 +609,6 @@ class PdfConfig(colander.MappingSchema):
         title=u"Texte du pied de page des sorties PDF",
         missing=u"",
     )
-
-
-class ActivityConfigSchema(colander.Schema):
-    """
-    The schema for activity types configuration
-    """
-    pdf = PdfConfig(title=u"Rendez-vous")
     types = ActivityTypesSeqConfig(
         title=u"Configuration des natures de rendez-vous"
     )
@@ -567,26 +616,28 @@ class ActivityConfigSchema(colander.Schema):
         title=u"Configuration des modes d'entretien"
     )
     actions = ActivityActionSeq(
-        title=u"Configuration des intitulés des actions",
-        description=u"Utilisez comme titres dans les sorties PDF",
+        title=u"Configuration des titres disponibles pour la sortie PDF",
     )
 
 
-class WorkshopConfigSchema(colander.MappingSchema):
-    pdf = PdfConfig(title=u"Ateliers")
+class WorkshopConfigSchema(colander.Schema):
+    header_img = get_file_dl_node(title=u'En-tête des sortie PDF')
+    footer_img = get_file_dl_node(
+        u'Image du pied de page des sorties PDF',
+        u"Vient se placer au-dessus du texte du pied de page",
+    )
+    footer = forms.textarea_node(
+        title=u"Texte du pied de page des sorties PDF",
+        missing=u"",
+    )
     actions = WorkshopInfo1Seq(
-        title=u"Configuration des intitulés des actions",
-        description=u"Utilisez comme titres dans les sorties PDF",
+        title=u"Configuration des titres disponibles pour la sortie PDF",
+        widget=deform.widget.SequenceWidget(
+            add_subitem_text_template=u"Ajouter une action",
+            orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
+        )
     )
-
-
-class AccompagnementConfigSchema(colander.Schema):
-    activity = ActivityConfigSchema(
-        title=u"Configuration du module Rendez-vous"
-    )
-    workshop = WorkshopConfigSchema(title=u"Configuration du module Atelier")
-
-
 
 
 class CaeConfig(colander.MappingSchema):
@@ -604,160 +655,165 @@ class SageExportConfig(colander.MappingSchema):
 
 
 def build_cae_config_schema():
-    fields =(
-    (
-        'code_journal',
-        u"Code journal ventes",
-        u"Le code du journal dans Sage",
-    ),
-    (
-        'numero_analytique',
-        u"Numéro analytique de la CAE",
-        "",
-    ),
+    fields = (
+        (
+            'code_journal',
+            u"Code journal ventes",
+            u"Le code du journal dans Sage",
+        ),
+        (
+            'numero_analytique',
+            u"Numéro analytique de la CAE",
+            "",
+        ),
 
-    (
-        'compte_cg_contribution',
-        u"Compte CG contribution",
-        u"Compte CG correspondant à la contribution des entrepreneurs à la CAE"
-    ),
-    (
-        'compte_rrr',
-        u"Compte RRR",
-        u"Compte Rabais, Remises et Ristournes",
-    ),
-    (
-        'compte_frais_annexes',
-        u"Compte de frais annexes",
-        '',
-    ),
-    (
-        'compte_cg_banque',
-        u"Compte banque de l'entrepreneur",
-        "",
-    ),
+        (
+            'compte_cg_contribution',
+            u"Compte CG contribution",
+            u"Compte CG correspondant à la contribution des entrepreneurs à \
+la CAE"
+        ),
+        (
+            'compte_rrr',
+            u"Compte RRR",
+            u"Compte Rabais, Remises et Ristournes",
+        ),
+        (
+            'compte_frais_annexes',
+            u"Compte de frais annexes",
+            '',
+        ),
+        (
+            'compte_cg_banque',
+            u"Compte banque de l'entrepreneur",
+            "",
+        ),
 
-    (
-        'compte_cg_assurance',
-        u"Compte de charge assurance",
-        u"Requis pour le module d'écritures Assurance",
-    ),
-    (
-        'compte_cgscop',
-        u"Compte de charge CG Scop",
-        u"Requis pour le module d'écritures CGSCOP",
-    ),
-    (
-        'compte_cg_debiteur',
-        u"Compte de contrepartie pour CG Scop et Assurance",
-        u"Requis pour le module d'écritures CGSCOP",
-    ),
-    (
-        'compte_cg_organic',
-        u"Compte de charge Organic",
-        u"Compte CG pour la contribution à l'Organic (requis pour le module \
-d'écritures Contribution Organic)",
-    ),
-    (
-        'compte_cg_debiteur_organic',
-        u"Compte de contrepartie Organic",
-        u"Compte CG de débiteur pour la contribution à l'Organic (requis pour \
-le module d'écritures Contribution Organic)",
-    ),
-    (
-        'compte_rg_interne',
-        u"Compte RG Interne",
-        u"Requis pour les écritures RG Interne",
-    ),
-    (
-        'compte_rg_externe',
-        u"Compte RG Externe",
-        u"Requis pour le module d'écriture RG Client",
-    ),
-    (
-        'compte_cg_tva_rrr',
-        u"Compte CG de TVA spécifique aux RRR",
-        u"Facultatif, les remises apparaitront dans les écritures si cette \
-valeur et le code tva sont renseignés.",
-    ),
-    (
-        'code_tva_rrr',
-        u"Code de TVA spécifique aux RRR",
-        u"Facultatif, les remises apparaitront dans les écritures si cette \
-valeur et le compte CG sont renseignés.",
-    ),
+        (
+            'compte_cg_assurance',
+            u"Compte de charge assurance",
+            u"Requis pour le module d'écritures Assurance",
+        ),
+        (
+            'compte_cgscop',
+            u"Compte de charge CG Scop",
+            u"Requis pour le module d'écritures CGSCOP",
+        ),
+        (
+            'compte_cg_debiteur',
+            u"Compte de contrepartie pour CG Scop et Assurance",
+            u"Requis pour le module d'écritures CGSCOP",
+        ),
+        (
+            'compte_cg_organic',
+            u"Compte de charge Organic",
+            u"Compte CG pour la contribution à l'Organic (requis pour le module \
+    d'écritures Contribution Organic)",
+        ),
+        (
+            'compte_cg_debiteur_organic',
+            u"Compte de contrepartie Organic",
+            u"Compte CG de débiteur pour la contribution à l'Organic (requis pour \
+    le module d'écritures Contribution Organic)",
+        ),
+        (
+            'compte_rg_interne',
+            u"Compte RG Interne",
+            u"Requis pour les écritures RG Interne",
+        ),
+        (
+            'compte_rg_externe',
+            u"Compte RG Externe",
+            u"Requis pour le module d'écriture RG Client",
+        ),
+        (
+            'compte_cg_tva_rrr',
+            u"Compte CG de TVA spécifique aux RRR",
+            u"Facultatif, les remises apparaitront dans les écritures si cette \
+    valeur et le code tva sont renseignés.",
+        ),
+        (
+            'code_tva_rrr',
+            u"Code de TVA spécifique aux RRR",
+            u"Facultatif, les remises apparaitront dans les écritures si cette \
+    valeur et le compte CG sont renseignés.",
+        ),
 
 
-    (
-        "contribution_cae",
-        u"Pourcentage de la contribution",
-        u"Valeur par défaut de la contribution (nombre entre 0 et 100). \
-        Elle peut être individualisée sur les pages entreprises",
-    ),
-    (
-        "taux_assurance",
-        u"Taux d'assurance",
-        u"(nombre entre 0 et 100) Requis pour le module d'écritures Assurance",
-    ),
-    (
-        "taux_cgscop",
-        u"Taux CGSCOP",
-        u"(nombre entre 0 et 100) Requis pour le module d'écritures CGSCOP",
-    ),
-    (
-        "taux_contribution_organic",
-        u"Taux de Contribution à l'Organic",
-        u"(nombre entre 0 et 100) Requis pour le module d'écritures \
-Contribution Organic",
-    ),
-    (
-        "taux_rg_interne",
-        u"Taux RG Interne",
-        u"(nombre entre 0 et 100) Requis pour les écritures RG Interne",
-    ),
-    (
-        "taux_rg_client",
-        u"Taux RG Client",
-        u"(nombre entre 0 et 100) Requis pour le module d'écriture RG Client",
-    ),
+        (
+            "contribution_cae",
+            u"Pourcentage de la contribution",
+            u"Valeur par défaut de la contribution (nombre entre 0 et 100). \
+            Elle peut être individualisée sur les pages entreprises",
+        ),
+        (
+            "taux_assurance",
+            u"Taux d'assurance",
+            u"(nombre entre 0 et 100) Requis pour le module d'écritures \
+Assurance",
+        ),
+        (
+            "taux_cgscop",
+            u"Taux CGSCOP",
+            u"(nombre entre 0 et 100) Requis pour le module d'écritures CGSCOP",
+        ),
+        (
+            "taux_contribution_organic",
+            u"Taux de Contribution à l'Organic",
+            u"(nombre entre 0 et 100) Requis pour le module d'écritures \
+    Contribution Organic",
+        ),
+        (
+            "taux_rg_interne",
+            u"Taux RG Interne",
+            u"(nombre entre 0 et 100) Requis pour les écritures RG Interne",
+        ),
+        (
+            "taux_rg_client",
+            u"Taux RG Client",
+            u"(nombre entre 0 et 100) Requis pour le module d'écriture RG \
+Client",
+        ),
     )
     schema = CaeConfig().clone()
     for key, title, description in fields:
         schema.add(
             colander.SchemaNode(
-            colander.String(),
-            title=title,
-            description=description,
-            missing=u"",
-            name=key))
-
+                colander.String(),
+                title=title,
+                description=description,
+                missing=u"",
+                name=key
+            )
+        )
 
     export_modules = (
-            (
-                "sage_contribution",
-                u"Module contribution",
-                u"",),
-            (
-                'sage_assurance',
-                u"Module assurance",
-                u"",),
-            (
-                'sage_cgscop',
-                u"Module CGSCOP",
-                u"",),
-            (
-                'sage_organic',
-                u"Module Contribution organic",
-                u"",),
-            (
-                'sage_rginterne',
-                u"Module RG Interne",
-                u"",),
-            (
-                'sage_rgclient',
-                u"Module RG Client",
-                u"",),
-            )
+        (
+            "sage_contribution",
+            u"Module contribution",
+            u"",),
+        (
+            'sage_assurance',
+            u"Module assurance",
+            u"",),
+        (
+            'sage_cgscop',
+            u"Module CGSCOP",
+            u"",),
+        (
+            'sage_organic',
+            u"Module Contribution organic",
+            u"",),
+        (
+            'sage_rginterne',
+            u"Module RG Interne",
+            u"",),
+        (
+            'sage_rgclient',
+            u"Module RG Client",
+            u"",
+        ),
+    )
     export_schema = SageExportConfig(
         title=u"Activation des modules d'export Sage",
         name='sage_export').clone()
@@ -776,7 +832,10 @@ Contribution Organic",
         export_schema.add(
             colander.SchemaNode(
                 colander.String(),
-                widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
+                widget=deform.widget.CheckboxWidget(
+                    true_val="1",
+                    false_val="0",
+                ),
                 title=title,
                 description=description,
                 name=key)

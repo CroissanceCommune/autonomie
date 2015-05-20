@@ -85,7 +85,8 @@ from autonomie.forms.admin import (
     PaymentModeConfig,
     WorkUnitConfig,
     ExpenseTypesConfig,
-    AccompagnementConfigSchema,
+    WorkshopConfigSchema,
+    ActivityConfigSchema,
     CAECONFIG,
     get_config_appstruct,
     get_config_dbdatas,
@@ -554,21 +555,31 @@ ont été configurés"
         return HTTPFound(self.request.route_path("admin_expense"))
 
 
-class AdminActivities(BaseFormView):
+class BaseAdminActivities(BaseFormView):
     """
         Activity types config
     """
     title = u"Configuration du module accompagnement"
     validation_msg = u"Le module a bien été configuré"
-    schema = AccompagnementConfigSchema(title=u"")
     buttons = (submit_btn,)
+
+    def populate_actionmenu(self, request):
+        """
+            Add a back to index link
+        """
+        add_link_to_menu(
+            request,
+            u"Revenir en arrière",
+            path="admin_activity",
+            title=u"Revenir à la page précédente",
+        )
 
     def _add_pdf_img_to_appstruct(self, data_type, appstruct):
         for file_type in ("header_img", "footer_img"):
             file_name = "%s_%s.png" % (data_type, file_type)
             file_model = ConfigFiles.get(file_name)
             if file_model is not None:
-                appstruct["pdf"][file_type] = {
+                appstruct[file_type] = {
                     'uid': file_model.id,
                     'filename': file_model.name,
                     'preview_url': self.request.route_url(
@@ -587,44 +598,6 @@ class AdminActivities(BaseFormView):
                 )
             appstruct.append(action_appstruct)
         return appstruct
-
-    def before(self, form):
-        """
-            Add appstruct to the current form object
-        """
-        query = ActivityType.query()
-        types = query.filter_by(active=True)
-
-        modes = ActivityMode.query()
-
-        query = ActivityAction.query()
-        query = query.filter_by(parent_id=None)
-        actions = query.filter_by(active=True)
-
-        activity_appstruct = {
-            'pdf': {'footer': self.request.config.get("activity_footer", "")},
-            'types': [type_.appstruct() for type_ in types],
-            'modes': [mode.appstruct() for mode in modes],
-            'actions': self._recursive_action_appstruct(actions)
-        }
-        self._add_pdf_img_to_appstruct('activity', activity_appstruct)
-
-        query = WorkshopAction.query()
-        query = query.filter_by(parent_id=None)
-        actions = query.filter_by(active=True)
-
-        workshop_appstruct = {
-            'pdf': {'footer': self.request.config.get("workshop_footer", "")},
-            'actions': self._recursive_action_appstruct(actions)
-        }
-
-        form.set_appstruct(
-            {
-                "activity": activity_appstruct,
-                'workshop': workshop_appstruct
-            }
-        )
-        populate_actionmenu(self.request)
 
     def get_edited_elements(self, appstruct, key=None):
         """
@@ -749,7 +722,7 @@ class AdminActivities(BaseFormView):
         configuration
         :param str data_type: activity/workshop
         """
-        pdf_appstruct = appstruct['pdf']
+        pdf_appstruct = appstruct
         for file_type in ("header_img", "footer_img"):
             file_datas = pdf_appstruct.get(file_type)
             if file_datas:
@@ -761,26 +734,87 @@ class AdminActivities(BaseFormView):
             pdf_appstruct.get('footer', '')
         )
 
-    def submit_success(self, appstruct):
+
+class AdminActivities(BaseAdminActivities):
+    """
+    Activities Admin view
+    """
+    title = u"Configuration du module de Rendez-vous"
+    schema = ActivityConfigSchema(title=u"")
+
+    def before(self, form):
+        query = ActivityType.query()
+        types = query.filter_by(active=True)
+
+        modes = ActivityMode.query()
+
+        query = ActivityAction.query()
+        query = query.filter_by(parent_id=None)
+        actions = query.filter_by(active=True)
+
+        activity_appstruct = {
+            'footer': self.request.config.get("activity_footer", ""),
+            'types': [type_.appstruct() for type_ in types],
+            'modes': [mode.appstruct() for mode in modes],
+            'actions': self._recursive_action_appstruct(actions)
+        }
+        self._add_pdf_img_to_appstruct('activity', activity_appstruct)
+        form.set_appstruct(activity_appstruct)
+        self.populate_actionmenu(self.request)
+
+    def submit_success(self, activity_appstruct):
         """
             Handle successfull expense configuration
         """
-        activity_appstruct = appstruct.get('activity')
-        workshop_appstruct = appstruct.get('workshop')
-
         self.store_pdf_conf(activity_appstruct, 'activity')
-        self.store_pdf_conf(workshop_appstruct, 'workshop')
         # We delete the elements that are no longer in the appstruct
         self.disable_types(activity_appstruct)
         self.disable_actions(activity_appstruct, ActivityAction)
-        self.disable_actions(workshop_appstruct, WorkshopAction)
         new_modes = self.delete_modes(activity_appstruct)
         self.dbsession.flush()
 
         self.add_types(activity_appstruct)
         self.add_actions(activity_appstruct, "actions", ActivityAction)
-        self.add_actions(workshop_appstruct, "actions", WorkshopAction)
         self.add_modes(new_modes)
+
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path("admin_activity"))
+
+
+class AdminWorkshop(BaseAdminActivities):
+    """
+    Workshops administration views
+    """
+    title = u"Administration du module Atelier"
+    schema = WorkshopConfigSchema(title=u"")
+
+    def before(self, form):
+        """
+            Add appstruct to the current form object
+        """
+        query = WorkshopAction.query()
+        query = query.filter_by(parent_id=None)
+        actions = query.filter_by(active=True)
+
+        workshop_appstruct = {
+            'footer': self.request.config.get("workshop_footer", ""),
+            'actions': self._recursive_action_appstruct(actions)
+        }
+
+        form.set_appstruct(workshop_appstruct)
+        self.populate_actionmenu(self.request)
+
+    def submit_success(self, workshop_appstruct):
+        """
+            Handle successfull expense configuration
+        """
+
+        self.store_pdf_conf(workshop_appstruct, 'workshop')
+        # We delete the elements that are no longer in the appstruct
+        self.disable_actions(workshop_appstruct, WorkshopAction)
+        self.dbsession.flush()
+
+        self.add_actions(workshop_appstruct, "actions", WorkshopAction)
 
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_activity"))
@@ -1078,6 +1112,17 @@ def console_view(request):
     return dict(title=u"Console de supervision")
 
 
+def admin_accompagnement_index_view(request):
+    for label, route in (
+        (u"Configuration du module Rendez-vous", "admin_activities"),
+        (u"Configuration du module Atelier", "admin_workshop",),
+    ):
+        request.actionmenu.add(
+            ViewLink(label, path=route, title=label)
+        )
+    return dict(title=u"Administration du module accompagnement")
+
+
 def includeme(config):
     """
         Add module's views
@@ -1090,6 +1135,8 @@ def includeme(config):
     config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_expense", "admin/expense")
     config.add_route("admin_activity", "admin/activity")
+    config.add_route("admin_activities", "admin/activities")
+    config.add_route("admin_workshop", "admin/workshop")
     config.add_route("admin_cae", "admin/cae")
 
     config.add_view(
@@ -1148,8 +1195,22 @@ def includeme(config):
     )
 
     config.add_view(
-        AdminActivities,
+        admin_accompagnement_index_view,
         route_name='admin_activity',
+        renderer="admin/index.mako",
+        permission='admin',
+    )
+
+    config.add_view(
+        AdminActivities,
+        route_name='admin_activities',
+        renderer="admin/main.mako",
+        permission='admin',
+    )
+
+    config.add_view(
+        AdminWorkshop,
+        route_name='admin_workshop',
         renderer="admin/main.mako",
         permission='admin',
     )

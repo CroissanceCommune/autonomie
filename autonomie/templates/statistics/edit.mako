@@ -31,7 +31,7 @@
     </div>
 </div>
 <div class='row'>
-    <div id='entry_edit' class='col-xs-8 col-xs-offset-2' ></div>
+    <div id='entry_edit' class='col-xs-10 col-xs-offset-1' ></div>
 </div>
 <div id='messageboxes'></div>
 <div id='popup_container'></div>

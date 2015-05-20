@@ -36,9 +36,9 @@ templates['criterion.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"ma
     + escapeExpression(((helper = (helper = helpers.method_label || (depth0 != null ? depth0.method_label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"method_label","hash":{},"data":data}) : helper)))
     + "  : "
     + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))
-    + ")\n</td>\n<td class='action'>\n    <a class='btn btn-default btn-sm' href='#"
+    + ")\n</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm' href='#"
     + escapeExpression(((helper = (helper = helpers.edit_url || (depth0 != null ? depth0.edit_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"edit_url","hash":{},"data":data}) : helper)))
-    + "' title=\"Modifier cette entrée\">\n        Modifier\n    </a>\n    <a class='btn btn-default btn-sm remove' title='Supprimer cette entrée'>\n        Supprimer\n    </a>\n</td>\n";
+    + "' title=\"Modifier cette entrée\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            Modifier\n        </a>\n        <a class='btn btn-danger btn-default btn-sm remove' title='Supprimer cette entrée'>\n            <i class='glyphicon glyphicon-trash'></i>\n            Supprimer\n        </a>\n    </div>\n</td>\n";
 },"useData":true});
 templates['criterion_type_select.mustache'] = template({"1":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -94,11 +94,11 @@ templates['entry.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "<td>\n"
     + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-    + "\n</td>\n<td class='action'>\n    <a class='btn btn-default btn-sm' href='#entries/"
+    + "\n</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm' href='#entries/"
     + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
-    + "/edit' title=\"Modifier cette entrée\">\n        Modifier\n    </a>\n    <a class='btn btn-default btn-sm' href='"
+    + "/edit' title=\"Modifier cette entrée\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            Modifier\n        </a>\n        <a class='btn btn-default btn-sm' href='"
     + escapeExpression(((helper = (helper = helpers.csv_url || (depth0 != null ? depth0.csv_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"csv_url","hash":{},"data":data}) : helper)))
-    + "' title='Exporter les éléments correspondant à cette entrée statistiques'>\n        Exporter\n    </a>\n    <a class='btn btn-default btn-sm remove' title='Supprimer cette entrée'>\n        Supprimer\n    </a>\n</td>\n";
+    + "' title='Exporter les éléments correspondant à cette entrée statistiques'>\n            <i class='glyphicon glyphicon-export'></i>\n            Exporter\n        </a>\n        <a class='btn btn-default btn-danger btn-sm remove' title='Supprimer cette entrée'>\n            <i class='glyphicon glyphicon-trash'></i>\n            Supprimer\n        </a>\n    </div>\n</td>\n";
 },"useData":true});
 templates['full_entry_form.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -108,7 +108,7 @@ templates['full_entry_form.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1
     + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
     + "</span>\n        <a class='btn btn-default btn-sm' href='"
     + escapeExpression(((helper = (helper = helpers.csv_url || (depth0 != null ? depth0.csv_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"csv_url","hash":{},"data":data}) : helper)))
-    + "' title='Exporter les éléments correspondant à cette entrée statistiques'>\n            Exporter\n        </a>\n        <form id='entry_edit_form' style='display:none' class='well'>\n            <fieldset><legend>Édition</legend>\n            <div class='row'>\n            <div class=\"form-group col-xs-6\">\n                <label class='control-label' for=\"title\">Intitulé de l'entrée statistique <b class='required'>*</b></label>\n                <input type=\"text\" name='title' class=\"form-control\" id=\"title\" placeholder=\"Titre\" value='"
+    + "' title='Exporter les éléments correspondant à cette entrée statistiques'>\n            <i class='glyphicon glyphicon-export'></i>\n            Exporter\n        </a>\n        <form id='entry_edit_form' style='display:none' class='well'>\n            <fieldset><legend>Édition</legend>\n            <div class='row'>\n            <div class=\"form-group col-xs-6\">\n                <label class='control-label' for=\"title\">Intitulé de l'entrée statistique <b class='required'>*</b></label>\n                <input type=\"text\" name='title' class=\"form-control\" id=\"title\" placeholder=\"Titre\" value='"
     + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
     + "'>\n                <span class='help-block'>\n                    Sera utilisé dans le fichier de sortie\n                </span>\n            </div>\n            <div class=\"form-group col-xs-6\">\n                <label class='control-label' for=\"title\">Description de l'entrée statistique</label>\n                <textarea name='description' class=\"form-control\" id=\"title\" placeholder=\"Description\">"
     + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
@@ -179,7 +179,7 @@ templates['sheet_form.mustache'] = template({"1":function(depth0,helpers,partial
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "<a class='btn btn-default btn-sm' href='"
     + escapeExpression(((helper = (helper = helpers.csv_url || (depth0 != null ? depth0.csv_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"csv_url","hash":{},"data":data}) : helper)))
-    + "' title='Générer la feuille de statistiques'>\n    Générer la sortie csv pour cette feuille de statistiques\n</a>\n";
+    + "' title='Générer la feuille de statistiques'>\n    <i class='glyphicon glyphicon-file'></i>\n    Générer la sortie csv pour cette feuille de statistiques\n</a>\n";
 },"5":function(depth0,helpers,partials,data) {
   return "    style='display:none'\n";
   },"7":function(depth0,helpers,partials,data) {

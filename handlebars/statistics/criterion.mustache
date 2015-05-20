@@ -2,10 +2,14 @@
 {{ title }} ({{ method_label }}  : {{ label }})
 </td>
 <td class='action'>
-    <a class='btn btn-default btn-sm' href='#{{ edit_url }}' title="Modifier cette entrée">
-        Modifier
-    </a>
-    <a class='btn btn-default btn-sm remove' title='Supprimer cette entrée'>
-        Supprimer
-    </a>
+    <div class="btn-group">
+        <a class='btn btn-success btn-default btn-sm' href='#{{ edit_url }}' title="Modifier cette entrée">
+            <i class='glyphicon glyphicon-pencil'></i>
+            Modifier
+        </a>
+        <a class='btn btn-danger btn-default btn-sm remove' title='Supprimer cette entrée'>
+            <i class='glyphicon glyphicon-trash'></i>
+            Supprimer
+        </a>
+    </div>
 </td>

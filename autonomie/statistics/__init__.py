@@ -62,42 +62,42 @@ from autonomie.models.base import DBSESSION
 
 
 STRING_OPTIONS = (
-    ("has", u"Contient", ),
-    ("sw", u"Commence par", ),
-    ("ew", u"Se termine par", ),
-    ("nhas", u"Ne contient pas", ),
-    ("neq", u"N'est pas égal(e) à", ),
-    ("eq", u"Est égal(e) à", ),
-    ("nll", u"N'est pas renseigné(e)", ),
-    ("nnll", u"Est renseigné(e)", ),
+    ("has", u"Contenant", ),
+    ("sw", u"Commençant par", ),
+    ("ew", u"Se terminant par", ),
+    ("nhas", u"Ne contenant pas", ),
+    ("neq", u"N'étant pas égal(e) à", ),
+    ("eq", u"Étant égal(e) à", ),
+    ("nll", u"N'étant pas renseigné(e)", ),
+    ("nnll", u"Étant renseigné(e)", ),
 )
 
 
 BOOL_OPTIONS = (
-    ('true', u"Est coché(e)", ),
-    ('false', u"N'est pas coché(e)", ),
+    ('true', u"Étant coché(e)", ),
+    ('false', u"N'étant pas coché(e)", ),
 )
 
 
 OPTREL_OPTIONS = (
-    ("ioo", u"Fait partie de", ),
-    ("nioo", u"Ne fait pas partie de", ),
-    ("nll", u"N'est pas renseigné(e)", ),
-    ("nnll", u"Est renseigné(e)", ),
+    ("ioo", u"Faisant partie de", ),
+    ("nioo", u"Ne faisant pas partie de", ),
+    ("nll", u"N'étant pas renseigné(e)", ),
+    ("nnll", u"Étant renseigné(e)", ),
 )
 
 
 NUMERIC_OPTIONS = (
-    ("lte", u"Est inférieur(e) ou égal(e)", ),
-    ("gte", u"Est supérieur(e) ou égal(e)", ),
-    ("bw", u"Fait partie de l'intervalle", ),
-    ("nbw", u"Ne fait pas partie de l'intervalle"),
-    ("eq", u"Est égal(e) à",),
-    ("neq", u"N'est pas égal(e) à", ),
-    ("lt", u"Est inférieur(e) à", ),
-    ("gt", u"Est supérieur(e) à", ),
-    ("nll", u"N'est pas renseigné(e)", ),
-    ("nnll", u"Est renseigné(e)", ),
+    ("lte", u"Étant inférieur(e) ou égal(e)", ),
+    ("gte", u"Étant supérieur(e) ou égal(e)", ),
+    ("bw", u"Faisant partie de l'intervalle", ),
+    ("nbw", u"Ne faisant pas partie de l'intervalle"),
+    ("eq", u"Étant égal(e) à",),
+    ("neq", u"N'étant pas égal(e) à", ),
+    ("lt", u"Étant inférieur(e) à", ),
+    ("gt", u"Étant supérieur(e) à", ),
+    ("nll", u"N'étant pas renseigné(e)", ),
+    ("nnll", u"Étant renseigné(e)", ),
 )
 
 
@@ -107,8 +107,8 @@ DATE_OPTIONS = (
     ('this_month', u"Ce mois-ci", ),
     ("previous_year", u"L'année dernière", ),
     ("previous_month", u"Le mois dernier", ),
-    ("nll", u"N'est pas renseigné(e)", ),
-    ("nnll", u"Est renseigné(e)", ),
+    ("nll", u"N'étant pas renseigné(e)", ),
+    ("nnll", u"Étant renseigné(e)", ),
 )
 
 

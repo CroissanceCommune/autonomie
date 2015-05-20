@@ -2,13 +2,18 @@
 {{ title }}
 </td>
 <td class='action'>
-    <a class='btn btn-default btn-sm' href='#entries/{{id}}/edit' title="Modifier cette entrée">
-        Modifier
-    </a>
-    <a class='btn btn-default btn-sm' href='{{ csv_url }}' title='Exporter les éléments correspondant à cette entrée statistiques'>
-        Exporter
-    </a>
-    <a class='btn btn-default btn-sm remove' title='Supprimer cette entrée'>
-        Supprimer
-    </a>
+    <div class="btn-group">
+        <a class='btn btn-success btn-default btn-sm' href='#entries/{{id}}/edit' title="Modifier cette entrée">
+            <i class='glyphicon glyphicon-pencil'></i>
+            Modifier
+        </a>
+        <a class='btn btn-default btn-sm' href='{{ csv_url }}' title='Exporter les éléments correspondant à cette entrée statistiques'>
+            <i class='glyphicon glyphicon-export'></i>
+            Exporter
+        </a>
+        <a class='btn btn-default btn-danger btn-sm remove' title='Supprimer cette entrée'>
+            <i class='glyphicon glyphicon-trash'></i>
+            Supprimer
+        </a>
+    </div>
 </td>

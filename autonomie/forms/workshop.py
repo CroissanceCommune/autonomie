@@ -134,17 +134,22 @@ class Workshop(colander.MappingSchema):
     info1_id = colander.SchemaNode(
         colander.Integer(),
         widget=deferred_info1,
-        title=u"Intitulé de l'action financée 1"
+        title=u"Intitulé de l'action financée 1",
+        description=u"Utilisée comme titre dans la sortie PDF",
     )
     info2_id = colander.SchemaNode(
         colander.Integer(),
         widget=deferred_info2,
-        title=u"Intitulé de l'action financée 2"
+        title=u"Intitulé de l'action financée 2",
+        description=u"Utilisée comme sous-titre dans la sortie PDF",
+        missing=colander.drop,
     )
     info3_id = colander.SchemaNode(
         colander.Integer(),
         widget=deferred_info3,
-        title=u"Intitulé de l'action financée 3"
+        title=u"Intitulé de l'action financée 3",
+        description=u"Utilisée comme second sous-titre dans la sortie PDF",
+        missing=colander.drop,
     )
     participants = activity.ParticipantsSequence(
         title=u"Participants",

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# * Copyright (C) 2012-2013 Croissance Commune
+# * Copyright (C) 2012-2015 Croissance Commune
 # * Authors:
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-#       * Pettier Gabriel;
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #
 # This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -20,30 +19,4 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
-#
 
-"""
-    Regouping all models imports is necessary
-    to allow the metadata.create_all function to work well
-"""
-from base import DBBASE
-from base import DBSESSION
-
-import activity
-import company
-import config
-import customer
-import holiday
-import project
-import treasury
-import tva
-import user
-import task
-import workshop
-import job
-import statistics
-import competence
-__author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"
-__copyright__ = "Copyright 2012-2013, Croissance Commune"
-__license__ = "GPL"
-__version__ = "3.0"

@@ -53,9 +53,6 @@ from autonomie.models.activity import (
     ActivityAction,
 )
 from autonomie.models.workshop import WorkshopAction
-from autonomie.utils.ascii import (
-    camel_case_to_name,
-)
 from autonomie.models.company import (
     Company,
     CompanyActivity,
@@ -91,7 +88,7 @@ from autonomie.forms.admin import (
     get_config_appstruct,
     get_config_dbdatas,
     merge_config_datas,
-    get_sequence_model_admin,
+    CompetenceConfigSchema,
 )
 from autonomie.forms.files import get_template_upload_schema
 from autonomie.utils.widgets import ViewLink
@@ -102,6 +99,7 @@ from autonomie.views import (
     BaseView,
     DisableView,
 )
+from autonomie.views.admin.tools import get_model_admin_view
 from autonomie.forms import (
     merge_session_with_post,
 )
@@ -148,7 +146,7 @@ factures"
     request.actionmenu.add(
         ViewLink(
             u"Configuration des conditions de paiement",
-            path="payment_conditions",
+            path="admin_payment_conditions",
             title=u"Configuration des conditions de paiement"
         )
     )
@@ -177,7 +175,7 @@ dans les formulaires"
     request.actionmenu.add(
         ViewLink(
             u"Configuration du module accompagnement",
-            path="admin_activity",
+            path="admin_accompagnement",
             title=u"Configuration des types d'activité du module \
 accompagnement"
         )
@@ -192,7 +190,7 @@ accompagnement"
     request.actionmenu.add(
         ViewLink(
             u"Configuration des domaines d'activité des entreprises",
-            path="company_activity",
+            path="admin_company_activity",
             title=u"Configuration des domaines d'activité des entreprises"
         )
     )
@@ -570,7 +568,7 @@ class BaseAdminActivities(BaseFormView):
         add_link_to_menu(
             request,
             u"Revenir en arrière",
-            path="admin_activity",
+            path="admin_accompagnement",
             title=u"Revenir à la page précédente",
         )
 
@@ -778,7 +776,9 @@ class AdminActivities(BaseAdminActivities):
         self.add_modes(new_modes)
 
         self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path("admin_activity"))
+        return HTTPFound(
+            self.request.route_path("admin_accompagnement")
+        )
 
 
 class AdminWorkshop(BaseAdminActivities):
@@ -817,7 +817,9 @@ class AdminWorkshop(BaseAdminActivities):
         self.add_actions(workshop_appstruct, "actions", WorkshopAction)
 
         self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path("admin_activity"))
+        return HTTPFound(
+            self.request.route_path("admin_accompagnement")
+        )
 
 
 class AdminCae(BaseFormView):
@@ -871,142 +873,6 @@ class AdminCae(BaseFormView):
         self.dbsession.flush()
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_cae"))
-
-
-class AdminOption(BaseFormView):
-    """
-    Main view for option configuration
-    It allows to configure a set of models
-
-        factory
-
-            The model we are manipulating.
-
-        disable
-
-            If the model has an "active" column, it can be used to
-            enable/disable elements
-
-        validation_msg
-
-            The message shown to the end user on successfull validation
-
-        redirect_path
-
-            The route we're redirecting to after successfull validation
-    """
-    title = u""
-    validation_msg = u""
-    factory = None
-    redirect_path = 'admin_index'
-    disable = True
-    _schema = None
-    js_resources = []
-
-    @property
-    def schema(self):
-        if self._schema is None:
-            self._schema = get_sequence_model_admin(
-                self.factory,
-                self.title,
-            )
-        return self._schema
-
-    @schema.setter
-    def schema(self, value):
-        self._schema = value
-
-    def before(self, form):
-        """
-        Populate the form with existing elements
-        """
-        if not hasattr(self.js_resources, '__iter__'):
-            self.js_resources = (self.js_resources,)
-
-        for js_resource in self.js_resources:
-            js_resource.need()
-
-        appstruct = {'datas': [
-            elem.appstruct() for elem in self.factory.query()
-        ]}
-        form.set_appstruct(appstruct)
-        self.populate_actionmenu()
-
-    def populate_actionmenu(self):
-        self.request.actionmenu.add(
-            ViewLink(u"Retour", path=self.redirect_path)
-        )
-
-    def _get_edited_elements(self, appstruct):
-        """
-        Return the elements that are edited (already have an id)
-        """
-        return dict(
-            (data['id'], data)
-            for data in appstruct.get('datas', {})
-            if 'id' in data
-        )
-
-    def _disable_or_remove_elements(self, appstruct):
-        """
-        Disable existing elements that are no more in the results
-        """
-        edited = self._get_edited_elements(appstruct)
-
-        for element in self.factory.query():
-            if element.id not in edited.keys():
-                if self.disable:
-                    element.active = False
-                    self.dbsession.merge(element)
-                else:
-                    self.dbsession.delete(element)
-
-    def _add_or_edit(self, index, datas):
-        """
-        Add or edit an element of the given factory
-        """
-        node_schema = self.schema.children[0].children[0]
-        element = node_schema.objectify(datas)
-        element.order = index
-        if element.id is not None:
-            element = self.dbsession.merge(element)
-        else:
-            self.dbsession.add(element)
-        return element
-
-    def submit_success(self, appstruct):
-        """
-        Handle successfull submission
-        """
-        self._disable_or_remove_elements(appstruct)
-
-        for index, datas in enumerate(appstruct.get('datas', [])):
-            self._add_or_edit(index, datas)
-
-        self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path(self.redirect_path))
-
-
-def get_model_view(model, js_requirements=[], r_path="admin_userdatas"):
-    """
-    Return a view object and a route_name for administrating a sequence of
-    models instances (like options)
-    """
-    infos = model.__colanderalchemy_config__
-    view_title = infos.get('title', u'Titre inconnu')
-
-    class MyView(AdminOption):
-        title = view_title
-        validation_msg = infos.get('validation_msg', u'')
-        factory = model
-        schema = get_sequence_model_admin(model, u"")
-        redirect_path = r_path
-        js_resources = js_requirements
-    return (
-        MyView,
-        camel_case_to_name(model.__name__),
-        '/admin/main.mako',
-    )
 
 
 class TemplateUploadView(FileUploadView):
@@ -1066,12 +932,25 @@ class TemplateList(BaseView):
         return dict(templates=templates, title=self.title)
 
 
+class AdminCompetence(BaseFormView):
+    """
+    Compentence administration view
+    """
+    title = u"Administration des compétences"
+    validation_msg = u"Les informations ont bien été enregistrées"
+    schema = CompetenceConfigSchema(title=u"")
+    buttons = (submit_btn, )
+
+    def before(self, form):
+        pass
+
+
 def get_all_userdatas_views():
     """
     Return view_class, route_name for all option configuration views in the
     userdatas module
     """
-    yield get_model_view(
+    yield get_model_admin_view(
         CaeSituationOption,
         js_requirements=admin_option_js,
     )
@@ -1089,7 +968,7 @@ def get_all_userdatas_views():
         SocialDocTypeOption,
         TypeSortieOption,
     ):
-        yield get_model_view(model)
+        yield get_model_admin_view(model)
     yield TemplateList, 'templates', '/admin/templates.mako'
 
 
@@ -1114,8 +993,10 @@ def console_view(request):
 
 def admin_accompagnement_index_view(request):
     for label, route in (
-        (u"Configuration du module Rendez-vous", "admin_activities"),
+        (u"Retour", "admin_index",),
+        (u"Configuration du module Rendez-vous", "admin_activity"),
         (u"Configuration du module Atelier", "admin_workshop",),
+        (u"Configuration du module Compétences", "admin_competences",),
     ):
         request.actionmenu.add(
             ViewLink(label, path=route, title=label)
@@ -1134,8 +1015,8 @@ def includeme(config):
     config.add_route("admin_paymentmode", "admin/paymentmode")
     config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_expense", "admin/expense")
+    config.add_route("admin_accompagnement", "admin/accompagnement")
     config.add_route("admin_activity", "admin/activity")
-    config.add_route("admin_activities", "admin/activities")
     config.add_route("admin_workshop", "admin/workshop")
     config.add_route("admin_cae", "admin/cae")
 
@@ -1168,7 +1049,7 @@ def includeme(config):
     )
 
     for model in (PaymentConditions, CompanyActivity):
-        view, route_name, tmpl = get_model_view(
+        view, route_name, tmpl = get_model_admin_view(
             model,
             r_path="admin_index",
         )
@@ -1196,14 +1077,14 @@ def includeme(config):
 
     config.add_view(
         admin_accompagnement_index_view,
-        route_name='admin_activity',
+        route_name='admin_accompagnement',
         renderer="admin/index.mako",
         permission='admin',
     )
 
     config.add_view(
         AdminActivities,
-        route_name='admin_activities',
+        route_name='admin_activity',
         renderer="admin/main.mako",
         permission='admin',
     )

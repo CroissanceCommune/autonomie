@@ -50,7 +50,6 @@ from autonomie.utils.session import get_session_factory
 
 AUTONOMIE_MODULES = (
     "autonomie.views.activity",
-    "autonomie.views.admin",
     "autonomie.views.auth",
     "autonomie.views.cancelinvoice",
     "autonomie.views.commercial",
@@ -85,6 +84,11 @@ AUTONOMIE_MODULES = (
     "autonomie.events.tasks",
     "autonomie.events.expense",
     )
+
+AUTONOMIE_ADMIN_MODULES = (
+    "autonomie.views.admin.main",
+    "autonomie.views.admin.competence",
+)
 
 
 def add_static_views(config, settings):
@@ -157,6 +161,8 @@ def base_configure(config, dbsession, **settings):
     add_static_views(config, settings)
 
     for module in AUTONOMIE_MODULES:
+        config.include(module)
+    for module in AUTONOMIE_ADMIN_MODULES:
         config.include(module)
 
     customize_renderers(config)

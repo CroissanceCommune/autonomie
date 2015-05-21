@@ -34,6 +34,9 @@ import deform
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.config import Config
+from autonomie.models.competence import (
+    Scale,
+)
 from autonomie import forms
 from autonomie.forms import files
 from autonomie.forms.validators import validate_image_mime
@@ -198,7 +201,12 @@ class Product(colander.MappingSchema):
 
 
 class ProductSequence(colander.SequenceSchema):
-    product = Product(title=u"Compte produit")
+    product = Product(
+        title=u"Compte produit",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 class TvaItem(colander.MappingSchema):
@@ -228,18 +236,31 @@ class TvaItem(colander.MappingSchema):
         widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"))
     products = ProductSequence(
         title=u"",
-        widget=deform.widget.SequenceWidget(orderable=False))
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            orderable=False,
+        ),
+    )
 
 
 class TvaSequence(colander.SequenceSchema):
-    tva = TvaItem(title=u"Taux de Tva")
+    tva = TvaItem(
+        title=u"Taux de Tva",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
 
 
 class TvaConfig(colander.MappingSchema):
     tvas = TvaSequence(
         title=u"",
         missing=u'',
-        widget=deform.widget.SequenceWidget(orderable=True))
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            orderable=True,
+        ),
+    )
 
 
 TVA_UNIQUE_VALUE_MSG = u"Veillez à utiliser des valeurs différentes pour les \
@@ -281,7 +302,10 @@ class PaymentModeSequence(colander.SequenceSchema):
     """
         Single payment mode configuration scheme
     """
-    label = colander.SchemaNode(colander.String(), title=u"Libellé")
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé",
+    )
 
 
 class PaymentModeConfig(colander.MappingSchema):
@@ -291,14 +315,21 @@ class PaymentModeConfig(colander.MappingSchema):
     paymentmodes = PaymentModeSequence(
         title=u"",
         missing=u"",
-        widget=deform.widget.SequenceWidget(orderable=True))
+        widget=deform.widget.SequenceWidget(
+            orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
+        )
+    )
 
 
 class WorkUnitSequence(colander.SequenceSchema):
     """
         Single work untit configuration scheme
     """
-    label = colander.SchemaNode(colander.String(), title=u"Libellé")
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé"
+    )
 
 
 class WorkUnitConfig(colander.MappingSchema):
@@ -308,7 +339,11 @@ class WorkUnitConfig(colander.MappingSchema):
     workunits = WorkUnitSequence(
         title=u"",
         missing=u"",
-        widget=deform.widget.SequenceWidget(orderable=True))
+        widget=deform.widget.SequenceWidget(
+            orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
+        )
+    )
 
 
 class ExpenseConfig(colander.MappingSchema):
@@ -384,21 +419,36 @@ class ExpensesConfig(colander.SequenceSchema):
     """
         The sequence Schema associated with the ExpenseConfig
     """
-    expense = ExpenseConfig(title=u"")
+    expense = ExpenseConfig(
+        title=u"",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        ),
+    )
 
 
 class ExpensesKmConfig(colander.SequenceSchema):
     """
         The sequence Schema associated with the ExpenseKmConfig
     """
-    expense = ExpenseKmConfig(title=u"")
+    expense = ExpenseKmConfig(
+        title=u"",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        ),
+    )
 
 
 class ExpensesTelConfig(colander.SequenceSchema):
     """
         The sequence Schema associated with the ExpenseTelConfig
     """
-    expense = ExpenseTelConfig(title=u"")
+    expense = ExpenseTelConfig(
+        title=u"",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        ),
+    )
 
 
 class ExpenseTypesConfig(colander.MappingSchema):
@@ -418,9 +468,27 @@ entrepreneurs",
         description=u"Le compte général pour les notes de frais",
         missing="",
         )
-    expenses = ExpensesConfig(title=u'Dépenses')
-    expenseskm = ExpensesKmConfig(title=u"Frais kilométriques")
-    expensestel = ExpensesTelConfig(title=u"Frais téléphoniques")
+    expenses = ExpensesConfig(
+        title=u'Dépenses',
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            add_subitem_text_template=u"Ajouter une dépense",
+        )
+    )
+    expenseskm = ExpensesKmConfig(
+        title=u"Frais kilométriques",
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            add_subitem_text_template=u"Ajouter des frais kilométriques",
+        )
+    )
+    expensestel = ExpensesTelConfig(
+        title=u"Frais téléphoniques",
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            add_subitem_text_template=u"Ajouter des frais téléphoniques",
+        )
+    )
 
 
 class ActivityTypeConfig(colander.MappingSchema):
@@ -472,8 +540,8 @@ class ActionConfig(colander.MappingSchema):
     id = forms.id_node()
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Intitulé",
-        description=u"Titre dans la sortie pdf",
+        title=u"Sous-titre",
+        description=u"Sous-titre dans la sortie pdf",
         validator=colander.Length(max=100)
         )
 
@@ -491,18 +559,25 @@ class ActivityActionConfig(colander.Schema):
     id = forms.id_node()
     label = colander.SchemaNode(
         colander.String(),
-        title=u"Intitulé",
+        title=u"Titre",
         description=u"Titre dans la sortie pdf",
         validator=colander.Length(max=255)
     )
     children = ActivitySubActionSeq(
-        title=u"Sous action",
+        title=u"",
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            add_subitem_text_template=u"Ajouter un sous-titre",
+        )
     )
 
 
 class ActivityActionSeq(colander.SequenceSchema):
     action = ActivityActionConfig(
-        title=u"Action",
+        title=u"Titre",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
     )
 
 
@@ -572,7 +647,7 @@ class WorkshopInfo1(colander.Schema):
 
 class WorkshopInfo1Seq(colander.SequenceSchema):
     actions = WorkshopInfo1(
-        title=u'Action',
+        title=u'Titre',
         widget=deform.widget.MappingWidget(
             template=TEMPLATES_URL + "clean_mapping.pt",
         )
@@ -610,13 +685,28 @@ class ActivityConfigSchema(colander.Schema):
         missing=u"",
     )
     types = ActivityTypesSeqConfig(
-        title=u"Configuration des natures de rendez-vous"
+        title=u"Configuration des natures de rendez-vous",
+        widget=deform.widget.SequenceWidget(
+            add_subitem_text_template=u"Ajouter une nature de rendez-vous ",
+            orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
+        )
     )
     modes = ActivityModesSeqConfig(
-        title=u"Configuration des modes d'entretien"
+        title=u"Configuration des modes d'entretien",
+        widget=deform.widget.SequenceWidget(
+            add_subitem_text_template=u"Ajouter un mode d'entretien",
+            orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
+        )
     )
     actions = ActivityActionSeq(
         title=u"Configuration des titres disponibles pour la sortie PDF",
+        widget=deform.widget.SequenceWidget(
+            add_subitem_text_template=u"Ajouter un titre",
+            orderable=True,
+            template=TEMPLATES_URL + "clean_sequence.pt",
+        )
     )
 
 
@@ -633,7 +723,7 @@ class WorkshopConfigSchema(colander.Schema):
     actions = WorkshopInfo1Seq(
         title=u"Configuration des titres disponibles pour la sortie PDF",
         widget=deform.widget.SequenceWidget(
-            add_subitem_text_template=u"Ajouter une action",
+            add_subitem_text_template=u"Ajouter une titre",
             orderable=True,
             template=TEMPLATES_URL + "clean_sequence.pt",
         )
@@ -995,7 +1085,12 @@ def get_sequence_model_admin(model, title=u""):
 
             The SQLAlchemy model to configure
     """
-    node_schema = SQLAlchemySchemaNode(model)
+    node_schema = SQLAlchemySchemaNode(
+        model,
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
     node_schema.name = 'data'
 
     schema = colander.SchemaNode(colander.Mapping())
@@ -1006,9 +1101,120 @@ def get_sequence_model_admin(model, title=u""):
             widget=deform.widget.SequenceWidget(
                 min_len=1,
                 orderable=True,
+                template=TEMPLATES_URL + "clean_sequence.pt",
             ),
             title=title,
             name='datas')
     )
     return schema
 
+
+class SubCompetenceConfigSchema(colander.MappingSchema):
+    id = forms.id_node()
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé",
+    )
+
+
+class SubCompetencesConfigSchema(colander.SequenceSchema):
+    subcompetence = SubCompetenceConfigSchema(
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
+
+
+class CompetenceRequirement(colander.MappingSchema):
+    deadline_id = forms.id_node()
+    deadline_label = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget(readonly=True),
+        title=u"Pour l'échéance",
+        missing=colander.drop,
+    )
+    scale_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Niveau requis",
+        description=u"Sera mis en évidence dans l'interface",
+        widget=forms.get_deferred_select(Scale)
+    )
+
+
+class CompetenceRequirementSeq(colander.SequenceSchema):
+    requirement = CompetenceRequirement(
+        title=u'',
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + 'clean_mapping.pt'
+        )
+    )
+
+
+@colander.deferred
+def deferred_seq_widget(nodex, kw):
+    elements = kw['deadlines']
+    return deform.widget.SequenceWidget(
+        add_subitem_text_template=u"-",
+        template=TEMPLATES_URL + "clean_sequence.pt",
+        min_len=len(elements),
+        max_len=len(elements),
+    )
+
+
+@colander.deferred
+def deferred_deadlines_default(node, kw):
+    """
+    Return the defaults to ensure there is a requirement for each configured
+    deadline
+    """
+    return [
+        {
+            'deadline_label': deadline.label,
+            'deadline_id': deadline.id,
+        }
+        for deadline in kw['deadlines']
+    ]
+
+
+class CompetenceConfigSchema(colander.MappingSchema):
+    id = forms.id_node()
+    label = colander.SchemaNode(
+        colander.String(),
+        title=u"Libellé",
+    )
+    requirements = CompetenceRequirementSeq(
+        title=u"Niveaux requis par échéance",
+        widget=deferred_seq_widget,
+        default=deferred_deadlines_default,
+    )
+    children = SubCompetencesConfigSchema(
+        title=u"Sous-compétences",
+        widget=deform.widget.SequenceWidget(
+            add_subitem_text_template=u"Ajouter une sous-compétence",
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            orderable=True,
+        )
+    )
+
+
+class CompetencesConfigSchema(colander.SequenceSchema):
+    competence = CompetenceConfigSchema(
+        title=u"",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + "clean_mapping.pt",
+        )
+    )
+
+
+class CompetenceGridSchema(colander.Schema):
+    competences = CompetencesConfigSchema(
+        title=u"",
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + "clean_sequence.pt",
+            add_subitem_text_template=u"Ajouter une compétence"
+        )
+    )
+
+
+def get_competence_grid_schema(deadlines):
+    pass

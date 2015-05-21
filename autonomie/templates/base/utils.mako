@@ -176,7 +176,7 @@ path = request.current_route_path(_query=get_args)
         %if icon:
             <i class='glyphicon glyphicon-${icon}'></i>
         %endif
-        <span class="visible-lg hidden-sm" style="display:inline">
+        <span class="visible-lg-inline-block hidden-sm" style="display:inline">
             ${label}
         </span>
     </a>

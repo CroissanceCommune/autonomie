@@ -45,7 +45,7 @@
             <i class='glyphicon glyphicon-${elem.icon}'></i>
         % endif
       % endif
-      <span class="visible-lg hidden-sm" style="display:inline">
+      <span class="visible-lg-display-block hidden-sm" style="display:inline">
       ${elem.label}
       </span>
     </a>

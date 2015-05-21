@@ -35,11 +35,11 @@
 % if userdata.__name__ == 'userdatas':
     <div class="row well">
     % if user is not None:
-        <div class='col-xs-10'>
+        <div class='col-xs-8'>
             Ces données sont associées à un compte utilisateur
         </div>
     % endif
-    <div class="col-xs-2">
+    <div class="col-xs-4">
         % if user is not None:
             <% url = request.route_path("user", id=userdata.user_id) %>
             ${table_btn(url,

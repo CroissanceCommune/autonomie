@@ -31,8 +31,8 @@
          class="deformProto"
          tal:attributes="prototype prototype"/>
 
-    <div class="clean-panel-heading">${title}</div>
-    <div class="clean-panel-body">
+    <div class="clean-panel-heading"></div>
+    <div class="clean-panel-body" style="padding-left: 50px">
 
       <div class="deformSeqContainer"
            id="${oid}-orderable">
@@ -52,7 +52,7 @@
 
     <div class="clean-panel-footer">
       <a href="#"
-         class="btn deformSeqAdd"
+         class="btn btn-default btn-small deformSeqAdd"
          id="${field.oid}-seqAdd"
          onclick="javascript: return deform.appendSequenceItem(this);">
         <small id="${field.oid}-addtext">${add_subitem_text}</small>

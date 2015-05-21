@@ -114,7 +114,6 @@ exists : {0}".format(key))
     return result
 
 
-#TODO : provide quotechar and delimiter customization
 class CsvFileUploadSchema(colander.Schema):
     """
     Csv import first step schema

@@ -110,11 +110,3 @@
 </table>
 ${pager(records)}
 </%block>
-<%block name='footerjs'>
-$('#customer-select').chosen({allow_single_deselect: true});
-$('#customer-select').change(function(){$(this).closest('form').submit()});
-$('#year-select').chosen({allow_single_deselect: true});
-$('#year-select').change(function(){$(this).closest('form').submit()});
-$('#status-select').chosen({allow_single_deselect: true});
-$('#status-select').change(function(){$(this).closest('form').submit()});
-</%block>

@@ -26,7 +26,6 @@
     All Authentication views
 """
 import colander
-import deform
 import logging
 
 from pyramid.httpexceptions import HTTPFound
@@ -77,11 +76,11 @@ def forbidden_view(request):
     if login:
         log.warn(u"An access has been forbidden to '{0}'".format(login))
         bootstrap.need()
-        return_datas = {"title": u"Accès refusé",}
+        return_datas = {"title": u"Accès refusé", }
 
     else:
         log.debug(u"An access has been forbidden to an unauthenticated user")
-        #redirecting to the login page with the current path as param
+        # redirecting to the login page with the current path as param
         loc = request.route_url('login', _query=(('nextpage', request.path),))
         if request.is_xhr:
             return_datas = dict(redirect=loc)
@@ -232,16 +231,13 @@ class LoginView(BaseView):
         """
         Return the result to send on successfull authentication
         """
-        print("#######################################")
         if self.request.is_xhr:
-            print(self.request.is_xhr)
             result = Apiv1Resp(self.request)
         else:
-            print(False)
-            result = HTTPFound(location=self.get_next_page())
-
-        print(result)
-
+            result = HTTPFound(
+                location=self.get_next_page(),
+                headers=self.request.response.headers,
+            )
         return result
 
     def __call__(self):
@@ -267,6 +263,8 @@ class LoginView(BaseView):
                 remember(self.request, login)
                 remember_me = datas.get('remember_me', False)
                 if remember_me:
+                    print(self.request.session._headers)
+                    print(dir(self.request.session._headers))
                     log.info("  * The user wants to be remembered")
                     longtimeout = get_longtimeout()
                     self.request.response.set_cookie(
@@ -288,8 +286,10 @@ def logout_view(request):
     """
     loc = request.route_url('index')
     headers = forget(request)
+    print(headers)
+    request.response.delete_cookie("remember_me")
+    print(headers)
     response = HTTPFound(location=loc, headers=headers)
-    response.delete_cookie("remember_me")
     return response
 
 

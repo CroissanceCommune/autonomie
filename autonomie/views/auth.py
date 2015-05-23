@@ -285,11 +285,9 @@ def logout_view(request):
         The logout view
     """
     loc = request.route_url('index')
-    headers = forget(request)
-    print(headers)
+    forget(request)
     request.response.delete_cookie("remember_me")
-    print(headers)
-    response = HTTPFound(location=loc, headers=headers)
+    response = HTTPFound(location=loc, headers=request.response.headers)
     return response
 
 

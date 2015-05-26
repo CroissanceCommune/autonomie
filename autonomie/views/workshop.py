@@ -139,12 +139,14 @@ class WorkshopAddView(BaseFormView):
         timeslots_datas.sort(key=lambda val: val['start_time'])
 
         appstruct['datetime'] = timeslots_datas[0]['start_time']
-        appstruct['timeslots'] = [models.Timeslot(**data) \
-            for data in timeslots_datas]
+        appstruct['timeslots'] = [
+            models.Timeslot(**data) for data in timeslots_datas
+        ]
 
         participants_ids = set(appstruct.pop('participants', []))
-        appstruct['participants'] = [user.User.get(id_) \
-            for id_ in participants_ids]
+        appstruct['participants'] = [
+            user.User.get(id_) for id_ in participants_ids
+        ]
 
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
@@ -245,10 +247,10 @@ qui n'appartient pas au contexte courant !!!!")
         appstruct['timeslots'] = self._get_timeslots(appstruct)
         appstruct['datetime'] = appstruct['timeslots'][0].start_time
 
-
         participants_ids = set(appstruct.pop('participants', []))
-        appstruct['participants'] = [user.User.get(id_) \
-            for id_ in participants_ids]
+        appstruct['participants'] = [
+            user.User.get(id_) for id_ in participants_ids
+        ]
 
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
@@ -326,7 +328,7 @@ class WorkshopListTools(object):
         if participant_id is not None:
             query = query.filter(
                 models.Workshop.attendances.any(
-                    Attendance.account_id==participant_id
+                    Attendance.account_id == participant_id
                 )
             )
         return query
@@ -345,10 +347,11 @@ class WorkshopListTools(object):
         if date is not None:
             query = query.filter(
                 models.Workshop.timeslots.any(
-                    func.date(models.Timeslot.start_time)==date
+                    func.date(models.Timeslot.start_time) == date
                 )
             )
         return query
+
 
 class WorkshopListView(WorkshopListTools, BaseListView):
     """
@@ -395,7 +398,7 @@ def stream_workshop_entries_for_export(query):
 
             if attended:
                 yield {
-                    "label" : workshop.name,
+                    "label": workshop.name,
                     "participant": format_account(participant),
                     "leaders": '\n'.join(workshop.leaders),
                     "duration": duration,
@@ -441,6 +444,7 @@ class CompanyWorkshopListView(WorkshopListView):
     View for listing company's workshops
     """
     schema = get_list_schema(company=True)
+
     def filter_participant(self, query, appstruct):
         company = self.context
         employees_id = [u.id for u in company.employees]
@@ -520,10 +524,10 @@ def workshop_view(workshop, request):
     """
     if has_permission('manage', workshop, request):
         url = request.route_path(
-                'workshop',
-                id=workshop.id,
-                _query=dict(action='edit'),
-                )
+            'workshop',
+            id=workshop.id,
+            _query=dict(action='edit'),
+        )
         return HTTPFound(url)
     populate_actionmenu(request)
 
@@ -597,19 +601,19 @@ def includeme(config):
         'workshop',
         "/workshops/{id:\d+}",
         traverse='/workshops/{id}',
-        )
+    )
 
     config.add_route(
         'workshop.pdf',
         "/workshops/{id:\d+}.pdf",
         traverse='/workshops/{id}',
-        )
+    )
 
     config.add_route(
         'timeslot.pdf',
         "/timeslots/{id:\d+}.pdf",
         traverse='/timeslots/{id}',
-        )
+    )
 
     config.add_route('workshops', "/workshops")
     config.add_route('workshops.csv', "/workshops.csv")
@@ -634,14 +638,14 @@ def includeme(config):
         WorkshopListView,
         route_name='workshops',
         permission='manage',
-        renderer="/workshops.mako",
+        renderer="/accompagnement/workshops.mako",
         )
 
     config.add_view(
         CompanyWorkshopListView,
         route_name='company_workshops',
         permission='view',
-        renderer="/workshops.mako",
+        renderer="/accompagnement/workshops.mako",
     )
 
     config.add_view(
@@ -649,7 +653,7 @@ def includeme(config):
         route_name='workshop',
         permission='manage',
         request_param='action=edit',
-        renderer="/workshop_edit.mako",
+        renderer="/accompagnement/workshop_edit.mako",
     )
 
     config.add_view(
@@ -657,16 +661,6 @@ def includeme(config):
         route_name='workshop',
         permission='manage',
         request_param='action=record',
-    )
-
-    config.add_view(
-        timeslot_pdf_view,
-        route_name='timeslot.pdf',
-    )
-
-    config.add_view(
-        workshop_pdf_view,
-        route_name='workshop.pdf',
     )
 
     config.add_view(
@@ -687,7 +681,7 @@ def includeme(config):
         workshop_view,
         route_name='workshop',
         permission='view',
-        renderer='/workshop_view.mako',
+        renderer='/accompagnement/workshop_view.mako',
     )
 
     config.add_view(
@@ -700,4 +694,14 @@ def includeme(config):
         WorkshopXlsView,
         route_name='workshops.xls',
         permission='manage',
+    )
+
+    config.add_view(
+        timeslot_pdf_view,
+        route_name='timeslot.pdf',
+    )
+
+    config.add_view(
+        workshop_pdf_view,
+        route_name='workshop.pdf',
     )

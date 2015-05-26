@@ -611,104 +611,105 @@ def includeme(config):
     Add view to the pyramid registry
     """
     config.add_route(
-            'activity',
-            "/activities/{id:\d+}",
-            traverse='/activities/{id}',
-            )
+        'activity',
+        "/activities/{id:\d+}",
+        traverse='/activities/{id}',
+    )
     config.add_route(
-            'activity.pdf',
-            "/activities/{id:\d+}.pdf",
-            traverse='/activities/{id}',
-            )
+        'activity.pdf',
+        "/activities/{id:\d+}.pdf",
+        traverse='/activities/{id}',
+    )
     config.add_route(
-            'activity.html',
-            "/activities/{id:\d+}.html",
-            traverse='/activities/{id}',
-            )
+        'activity.html',
+        "/activities/{id:\d+}.html",
+        traverse='/activities/{id}',
+    )
     config.add_route('activities', "/activities")
     config.add_route(
-            'company_activities',
-            "/company/{id}/activities",
-            traverse="/companies/{id}")
+        'company_activities',
+        "/company/{id}/activities",
+        traverse="/companies/{id}",
+    )
 
     config.add_view(
-            NewActivityView,
-            route_name='activities',
-            permission='manage',
-            request_param='action=new',
-            renderer="/base/formpage.mako",
-            )
+        NewActivityView,
+        route_name='activities',
+        permission='manage',
+        request_param='action=new',
+        renderer="/base/formpage.mako",
+    )
 
     config.add_view(
-            NewActivityAjaxView,
-            route_name='activities',
-            permission='manage',
-            request_param='action=new',
-            xhr=True,
-            renderer="/base/formajax.mako",
-            )
+        NewActivityAjaxView,
+        route_name='activities',
+        permission='manage',
+        request_param='action=new',
+        xhr=True,
+        renderer="/base/formajax.mako",
+    )
 
     config.add_view(
-            ActivityList,
-            route_name='activities',
-            permission='manage',
-            renderer="/activities.mako",
-            )
+        ActivityList,
+        route_name='activities',
+        permission='manage',
+        renderer="/accompagnement/activities.mako",
+    )
 
     config.add_view(
-            ActivityListContractor,
-            route_name='company_activities',
-            permission='edit',
-            renderer="/activities.mako",
-            )
+        ActivityListContractor,
+        route_name='company_activities',
+        permission='edit',
+        renderer="/accompagnement/activities.mako",
+    )
 
     config.add_view(
-            activity_view_only_view,
-            route_name='activity',
-            permission='view',
-            renderer="/activity.mako",
-            )
+        activity_view_only_view,
+        route_name='activity',
+        permission='view',
+        renderer="/accompagnement/activity.mako",
+    )
 
     config.add_view(
-            activity_pdf_view,
-            route_name='activity.pdf',
-            permission='view',
-            )
+        activity_pdf_view,
+        route_name='activity.pdf',
+        permission='view',
+    )
 
     config.add_view(
-            activity_html_view,
-            route_name='activity.html',
-            permission='view',
-            renderer='/activity_pdf.mako',
-            )
+        activity_html_view,
+        route_name='activity.html',
+        permission='view',
+        renderer='/accompagnement/activity_pdf.mako',
+    )
 
     config.add_view(
-            activity_delete_view,
-            route_name='activity',
-            permission='manage',
-            request_param='action=delete',
-            )
+        activity_delete_view,
+        route_name='activity',
+        permission='manage',
+        request_param='action=delete',
+    )
 
     config.add_view(
-            ActivityEditView,
-            route_name='activity',
-            permission='manage',
-            request_param='action=edit',
-            renderer="/activity_edit.mako",
-            )
+        ActivityEditView,
+        route_name='activity',
+        permission='manage',
+        request_param='action=edit',
+        renderer="/accompagnement/activity_edit.mako",
+    )
 
     config.add_view(
-            ActivityRecordView,
-            route_name='activity',
-            permission='manage',
-            request_param='action=record',
-            renderer="/base/formajax.mako",
-            )
+        ActivityRecordView,
+        route_name='activity',
+        permission='manage',
+        request_param='action=record',
+        renderer="/base/formajax.mako",
+    )
 
     config.add_view(
-            FileUploadView,
-            route_name="activity",
-            renderer='base/formpage.mako',
-            permission='manage',
-            request_param='action=attach_file',
-            )
+        FileUploadView,
+        route_name="activity",
+        renderer='/base/formpage.mako',
+        permission='manage',
+        request_param='action=attach_file',
+    )

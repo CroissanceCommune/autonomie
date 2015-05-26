@@ -480,10 +480,10 @@ def user_node(roles=None, **kw):
     """
     widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
-            colander.Integer(),
-            widget=get_deferred_user_choice(roles, widget_options),
-            **kw
-            )
+        colander.Integer(),
+        widget=get_deferred_user_choice(roles, widget_options),
+        **kw
+    )
 
 
 class ZoneOption(ConfigurableOption):

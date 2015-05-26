@@ -35,7 +35,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.config import Config
 from autonomie.models.competence import (
-    Scale,
+    CompetenceScale,
 )
 from autonomie import forms
 from autonomie.forms import files
@@ -1137,7 +1137,7 @@ class CompetenceRequirement(colander.MappingSchema):
         colander.Integer(),
         title=u"Niveau requis",
         description=u"Sera mis en évidence dans l'interface",
-        widget=forms.get_deferred_select(Scale)
+        widget=forms.get_deferred_select(CompetenceScale)
     )
 
 
@@ -1214,7 +1214,3 @@ class CompetenceGridSchema(colander.Schema):
             add_subitem_text_template=u"Ajouter une compétence"
         )
     )
-
-
-def get_competence_grid_schema(deadlines):
-    pass

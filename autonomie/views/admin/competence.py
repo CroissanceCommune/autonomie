@@ -22,10 +22,10 @@
 import logging
 from pyramid.httpexceptions import HTTPFound
 from autonomie.models.competence import (
-    Scale,
-    Deadline,
-    Requirement,
-    Competence,
+    CompetenceScale,
+    CompetenceDeadline,
+    CompetenceRequirement,
+    CompetenceOption,
 )
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.admin import (
@@ -50,15 +50,16 @@ class AdminCompetences(BaseFormView):
     buttons = (submit_btn, )
 
     def before(self, form):
-        if Scale.query().count() == 0 or Deadline.query().count() == 0:
+        if CompetenceScale.query().count() == 0 or \
+                CompetenceDeadline.query().count() == 0:
             self.session.flash(
-                u"Les barêmes doivent être configurer avant la grille de \
-compétences."
+                u"Les barêmes et les échéances doivent être configurer avant \
+la grille de compétences."
             )
             raise HTTPFound(self.request.route_path("admin_scales"))
 
         appstruct = {'competences': []}
-        for competence in Competence.query().filter_by(parent_id=None):
+        for competence in CompetenceOption.query().filter_by(parent_id=None):
             c_appstruct = {
                 'label': competence.label,
                 'id': competence.id,
@@ -71,7 +72,7 @@ compétences."
             # On utilise un dict pour permettre d'identifier les éléments entre
             # les deux boucles for
             req_appstruct = {}
-            for deadline in Deadline.query():
+            for deadline in CompetenceDeadline.query():
                 req_appstruct[deadline.id] = {
                     'deadline_id': deadline.id,
                     'deadline_label': deadline.label,
@@ -111,7 +112,7 @@ compétences."
     def get_bind_data(self):
         return {
             'request': self.request,
-            'deadlines': Deadline.query().all()
+            'deadlines': CompetenceDeadline.query().all()
         }
 
     def get_competence(self, appstruct):
@@ -120,24 +121,24 @@ compétences."
         if id_ is not None:
             # on stocke l'id des éléments qu'on retrouve
             self.current_ids.append(id_)
-            model = Competence.get(id_)
+            model = CompetenceOption.get(id_)
             model.label = label
         else:
-            model = Competence(label=label)
+            model = CompetenceOption(label=label)
         return model
 
     def get_requirement(self, appstruct, competence_id):
         scale_id = appstruct['scale_id']
         deadline_id = appstruct['deadline_id']
 
-        req = Requirement.query().filter(
-            Requirement.deadline_id == deadline_id
+        req = CompetenceRequirement.query().filter(
+            CompetenceRequirement.deadline_id == deadline_id
         ).filter(
-            Requirement.competence_id == competence_id
+            CompetenceRequirement.competence_id == competence_id
         ).first()
 
         if req is None:
-            req = Requirement(
+            req = CompetenceRequirement(
                 competence_id=competence_id,
             )
         req.scale_id = scale_id
@@ -174,8 +175,8 @@ compétences."
         logger.debug(self.current_ids)
 
         # On désactive les éléments qui ne servent plus
-        for competence in Competence.query(active=True).filter(
-            Competence.id.notin_(self.current_ids)
+        for competence in CompetenceOption.query(active=True).filter(
+            CompetenceOption.id.notin_(self.current_ids)
         ):
             competence.active = False
             self.dbsession.merge(competence)
@@ -215,7 +216,7 @@ def includeme(config):
         permission="admin",
     )
 
-    for model in (Scale, Deadline):
+    for model in (CompetenceScale, CompetenceDeadline):
         view, route_name, tmpl = get_model_admin_view(
             model,
             r_path='admin_competences',

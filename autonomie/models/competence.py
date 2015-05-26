@@ -45,7 +45,7 @@ from autonomie.models.options import (
 )
 
 
-class Deadline(ConfigurableOption):
+class CompetenceDeadline(ConfigurableOption):
     __colanderalchemy_config__ = {
         'title': u"Échéances",
         'validation_msg': u"Les échéances ont bien été configurées",
@@ -53,7 +53,7 @@ class Deadline(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
-class Scale(ConfigurableOption):
+class CompetenceScale(ConfigurableOption):
     __colanderalchemy_config__ = {
         'title': u"Barêmes",
         'validation_msg': u"Les barêmes ont bien été configurés",
@@ -71,7 +71,7 @@ les graphiques",
     )
 
 
-class Requirement(DBBASE):
+class CompetenceRequirement(DBBASE):
     """
     Relationship table used to store the requirements for competences
     """
@@ -93,7 +93,7 @@ class Requirement(DBBASE):
     deadline = association_proxy('_deadline', 'label')
 
 
-class Competence(DBBASE):
+class CompetenceOption(DBBASE):
     """
     A competence model (both for the main one and the sub-competences)
 

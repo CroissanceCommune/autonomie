@@ -845,7 +845,7 @@ class UserDatas(Node):
             'colanderalchemy': {
                 'title': u'Civilité',
                 'section': u"Coordonnées",
-                'widget': get_select(CIVILITE_OPTIONS),
+                'widget': get_select(CIVILITE_OPTIONS, mandatory=False),
             },
             'export': {
                 'formatter': lambda val: dict(CIVILITE_OPTIONS).get(val),
@@ -1085,8 +1085,7 @@ class UserDatas(Node):
             'colanderalchemy': {
                 'title': u'Situation de famille',
                 'section': u'Coordonnées',
-                'widget': get_select(STATUS_OPTIONS),
-                'validator': get_select_validator(STATUS_OPTIONS),
+                'widget': get_select(STATUS_OPTIONS, mandatory=False),
             },
             'export': {
                 'formatter': lambda val: dict(STATUS_OPTIONS).get(val),
@@ -1101,7 +1100,10 @@ class UserDatas(Node):
             'colanderalchemy':{
                 'title': u"Nombre d'enfants",
                 'section': u'Coordonnées',
-                'widget': get_select(zip(range(20), range(20))),
+                'widget': get_select(
+                    zip(range(20), range(20)),
+                    mandatory=False
+                ),
             }
         }
     )
@@ -1379,7 +1381,7 @@ class UserDatas(Node):
             {
                 'title': u'Type de contrat',
                 'section': u'Parcours',
-                'widget': get_select(CONTRACT_OPTIONS)
+                'widget': get_select(CONTRACT_OPTIONS, mandatory=False)
             },
             'export': {
                 'formatter': lambda val: dict(CONTRACT_OPTIONS).get(val),

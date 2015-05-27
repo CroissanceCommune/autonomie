@@ -402,6 +402,8 @@ def get_select(values, multi=False, mandatory=True):
             options as expected by the deform select widget (a sequence of
             2-uples: (id, label))
     """
+    if not isinstance(values, list):
+        values = list(values)
     if not mandatory:
         values.insert(0, ('', ''))
     return deform.widget.SelectWidget(values=values, multi=False)

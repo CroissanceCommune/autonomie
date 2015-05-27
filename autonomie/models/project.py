@@ -166,19 +166,19 @@ not a a project itself or a company")
     return projects
 
 
-@colander.deferred
-def deferred_project_code_validator(node, kw):
-    request = kw['request']
-    projects = get_projects_from_request(request)
-
-    def unique_pcode(node, code):
-        if code.upper() in [project.code.upper() for project in projects]:
-            raise colander.Invalid(
-                node,
-                u"Ce code est déjà utilisé pour identifier un autre projet"
-            )
-
-    return colander.All(colander.Length(min=4, max=4), unique_pcode)
+#@colander.deferred
+#def deferred_project_code_validator(node, kw):
+#    request = kw['request']
+#    projects = get_projects_from_request(request)
+#
+#    def unique_pcode(node, code):
+#        if code.upper() in [project.code.upper() for project in projects]:
+#            raise colander.Invalid(
+#                node,
+#                u"Ce code est déjà utilisé pour identifier un autre projet"
+#            )
+#
+#    return colander.All(colander.Length(min=4, max=4), unique_pcode)
 
 
 class Project(Node):
@@ -203,7 +203,7 @@ class Project(Node):
             'colanderalchemy': {
                 'title': u"Code",
                 'widget': deform.widget.TextInputWidget(mask='****'),
-                'validator': deferred_project_code_validator,
+                'validator': colander.Length(min=4, max=4),
             },
         },
         nullable=False,

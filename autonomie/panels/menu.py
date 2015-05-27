@@ -164,7 +164,7 @@ def get_company_menu(request, cid, css=None):
     )
 
     href = request.route_path("company_expenses", id=cid)
-    gestion.add_item(u"Notes de frais", icon="fa fa-credit-card", href=href)
+    gestion.add_item(u"Notes de dépense", icon="fa fa-credit-card", href=href)
 
     href = request.route_path("company_activities", id=cid)
     gestion.add_item(u"Rendez-vous", icon="fa fa-calendar", href=href)
@@ -249,6 +249,9 @@ def get_admin_menus(request):
 
     href = request.route_path('workshops')
     accompagnement.add_item(u"Ateliers", href=href, icon="fa fa-slideshare")
+
+    href = request.route_path('competences')
+    accompagnement.add_item(u"Compétences", href=href, icon="fa fa-star")
 
     menu.add(accompagnement)
 

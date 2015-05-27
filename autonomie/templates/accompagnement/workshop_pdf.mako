@@ -119,9 +119,7 @@ if request.config.has_key('workshop_footer'):
                                         -
                                     % endif
                                     ${c.name}
-                                    % if c.activities:
-                                        <small>(${','.join([activity.label for activity in c.activities])})</small>
-                                    % endif
+                                    (${c.goal})
                                 % endfor
                             </td>
                             % for timeslot in timeslots:

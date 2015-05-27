@@ -586,7 +586,7 @@ def activity_pdf_view(context, request):
     date = context.datetime.strftime("%e_%m_%Y")
     filename = u"rdv_{0}_{1}.pdf".format(date, context.id)
 
-    template = u"autonomie:templates/activity_pdf.mako"
+    template = u"autonomie:templates/accompagnement/activity_pdf.mako"
     datas = dict(activity=context)
     html_str = render_html(request, template, datas)
 

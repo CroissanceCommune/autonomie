@@ -478,7 +478,7 @@ def timeslots_pdf_output(timeslots, workshop, request):
     date = workshop.datetime.strftime("%e_%m_%Y")
     filename = u"atelier_{0}_{1}.pdf".format(date, workshop.id)
 
-    template = u"autonomie:templates/workshop_pdf.mako"
+    template = u"autonomie:templates/accompagnement/workshop_pdf.mako"
     rendering_datas = dict(
         timeslots=timeslots,
         workshop=workshop,

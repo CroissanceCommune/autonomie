@@ -38,6 +38,9 @@
 <%block name='information'>
 <strong>Facture N°</strong>${request.config.get('invoiceprefix')}${task.official_number}<br />
 <strong>Libellé : </strong>${task.number}<br />
+% if task.estimation is not None:
+    <strong>Cette facture est associée au devis : </strong>${task.estimation.number}<br />
+% endif
 <strong>Objet : </strong>${format_text(task.description)}<br />
 % if config.has_key('coop_invoiceheader'):
     ${format_text(config['coop_invoiceheader'])}

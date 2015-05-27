@@ -33,7 +33,6 @@ import deform_extensions
 from autonomie.utils.fileupload import FileTempStore
 
 
-
 TEMPLATES_PATH = "autonomie:deform_templates/"
 EXCLUDED = {'exclude': True}
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
@@ -145,7 +144,7 @@ def textarea_node(**kw):
         plugins = [
             "lists",
             "searchreplace visualblocks fullscreen",
-            "contextmenu paste"
+            #"contextmenu paste"
         ]
         menubar = False
         if admin_field:

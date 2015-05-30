@@ -1808,7 +1808,10 @@ class DateDiagnosticDatas(DBBASE):
             "title": u'Date du diagnostic',
         }
     )
-    userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
+    userdatas_id = Column(
+        ForeignKey("user_datas.id"),
+        info={'colanderalchemy': EXCLUDED}
+    )
 
 
 class DateConventionCAPEDatas(DBBASE):
@@ -1824,7 +1827,10 @@ class DateConventionCAPEDatas(DBBASE):
             "title": u'Date de la convention',
         }
     )
-    userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
+    userdatas_id = Column(
+        ForeignKey("user_datas.id"),
+        info={'colanderalchemy': EXCLUDED}
+    )
 
 
 class DateDPAEDatas(DBBASE):

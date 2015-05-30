@@ -427,8 +427,11 @@ class BaseFormView(FormView):
         We add a token here for forms that are collapsed by default to keep them
         open if there is an error
         """
+        log.exception(e)
         # On loggue l'erreur colander d'origine
         log.exception(e.error)
+        print(e)
+        print(e.error)
         return dict(form=e.render(), formerror=True)
 
 

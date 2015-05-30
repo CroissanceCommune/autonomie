@@ -103,6 +103,7 @@
                         <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
                             Editer
                         </button>
+                        <br />
                         <button class="btn btn-primary" data-toggle='collapse' data-target='#next_activity_form_container'>
                             Programmer un nouveau rendez-vous
                         </button>

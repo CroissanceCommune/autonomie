@@ -24,17 +24,9 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.models.competence import (
     CompetenceScale,
     CompetenceDeadline,
-    CompetenceRequirement,
     CompetenceOption,
 )
 from autonomie.utils.widgets import ViewLink
-from autonomie.forms.admin import (
-    CompetenceGridSchema,
-)
-from autonomie.views import (
-    submit_btn,
-    BaseFormView,
-)
 from autonomie.views.admin.tools import (
     get_model_admin_view,
 )
@@ -43,159 +35,35 @@ from autonomie.views.admin.tools import (
 logger = logging.getLogger(__name__)
 
 
-class AdminCompetences(BaseFormView):
-    title = u"Administration des barêmes"
-    validation_msg = u"Les barêmes ont bien été enregistrées"
-    schema = CompetenceGridSchema(title=u"")
-    buttons = (submit_btn, )
+(
+    main_admin_class,
+    COMPETENCE_OPTION_ROUTE,
+    COMPETENCE_OPTION_TMPL,
+) = get_model_admin_view(
+    CompetenceOption,
+    r_path='admin_competences',
+)
 
+
+class AdminCompetenceOption(main_admin_class):
     def before(self, form):
-        if CompetenceScale.query().count() == 0 or \
-                CompetenceDeadline.query().count() == 0:
+        if CompetenceScale.query().count() == 0:
             self.session.flash(
-                u"Les barêmes et les échéances doivent être configurer avant \
+                u"Les barêmes doivent être configurer avant \
 la grille de compétences."
             )
-            raise HTTPFound(self.request.route_path("admin_scales"))
-
-        appstruct = {'competences': []}
-        for competence in CompetenceOption.query().filter_by(parent_id=None):
-            c_appstruct = {
-                'label': competence.label,
-                'id': competence.id,
-                'children': [],
-                'requirements': [],
-            }
-
-            # On doit peupler l'appstruct avec les deadlines ajoutées entre
-            # temps.
-            # On utilise un dict pour permettre d'identifier les éléments entre
-            # les deux boucles for
-            req_appstruct = {}
-            for deadline in CompetenceDeadline.query():
-                req_appstruct[deadline.id] = {
-                    'deadline_id': deadline.id,
-                    'deadline_label': deadline.label,
-                }
-
-            # On update avec les pré-requis déjà configurés
-            for rqt in competence.requirements:
-                req_appstruct[rqt._deadline.id] = {
-                    'deadline_id': rqt._deadline.id,
-                    'deadline_label': rqt._deadline.label,
-                    'scale_id': rqt._scale.id
-                }
-            # Seul les valeurs nous intéresse
-            c_appstruct['requirements'] = req_appstruct.values()
-
-            for child in competence.children:
-                c_appstruct['children'].append(
-                    {
-                        'id': child.id,
-                        'label': child.label,
-                    }
-                )
-            appstruct['competences'].append(c_appstruct)
-
-        logger.debug(appstruct)
-
-        form.set_appstruct(appstruct)
-
-        self.request.actionmenu.add(
-            ViewLink(
-                u"Retour",
-                path="admin_competences",
-                title=u"Retour à la page précédente"
-            )
-        )
-
-    def get_bind_data(self):
-        return {
-            'request': self.request,
-            'deadlines': CompetenceDeadline.query().all()
-        }
-
-    def get_competence(self, appstruct):
-        id_ = appstruct.get('id')
-        label = appstruct['label']
-        if id_ is not None:
-            # on stocke l'id des éléments qu'on retrouve
-            self.current_ids.append(id_)
-            model = CompetenceOption.get(id_)
-            model.label = label
-        else:
-            model = CompetenceOption(label=label)
-        return model
-
-    def get_requirement(self, appstruct, competence_id):
-        scale_id = appstruct['scale_id']
-        deadline_id = appstruct['deadline_id']
-
-        req = CompetenceRequirement.query().filter(
-            CompetenceRequirement.deadline_id == deadline_id
-        ).filter(
-            CompetenceRequirement.competence_id == competence_id
-        ).first()
-
-        if req is None:
-            req = CompetenceRequirement(
-                competence_id=competence_id,
-            )
-        req.scale_id = scale_id
-        req.deadline_id = deadline_id
-        return req
-
-    def submit_success(self, appstruct):
-        self.current_ids = []
-        logger.info("Successfull submission")
-        logger.debug(appstruct)
-
-        for competence in appstruct['competences']:
-            children = competence.pop('children', [])
-            sub_competences = []
-            for child in children:
-                sub_competences.append(
-                    self.get_competence(child)
-                )
-
-            instance = self.get_competence(competence)
-            instance.children = sub_competences
-            for requirement in competence['requirements']:
-                instance.requirements.append(
-                    self.get_requirement(requirement, instance.id)
-                )
-            if instance.id is not None:
-                instance = self.dbsession.merge(instance)
-            else:
-                self.dbsession.add(instance)
-                self.dbsession.flush()
-                # on stocke l'id des éléments qu'on vient d'insérer
-                self.current_ids.append(instance.id)
-
-        logger.debug(self.current_ids)
-
-        # On désactive les éléments qui ne servent plus
-        for competence in CompetenceOption.query(active=True).filter(
-            CompetenceOption.id.notin_(self.current_ids)
-        ):
-            competence.active = False
-            self.dbsession.merge(competence)
-
-        return HTTPFound(
-            self.request.route_path(
-                "admin_competences"
-            )
-        )
+            raise HTTPFound(self.request.route_path("admin_competence_scale"))
+        main_admin_class.before(self, form)
 
 
 def admin_competence_index_view(request):
     for label, route in (
         (u"Retour", "admin_accompagnement",),
-        (u"Configuration des barêmes", "admin_scale",),
-        (u"Configuration des échéances", "admin_deadline",),
+        (u"Configuration des barêmes", "admin_competence_scale",),
+        (u"Configuration des échéances", "admin_competence_deadline",),
         (
             u"Configuration de la grille de compétences",
-            "admin_competence_grid",
+            "admin_competence_option",
         ),
     ):
         request.actionmenu.add(
@@ -229,10 +97,21 @@ def includeme(config):
             permission="admin",
         )
 
-    config.add_route("admin_competence_grid", "admin/competences/grid")
-    config.add_view(
-        AdminCompetences,
-        route_name="admin_competence_grid",
-        renderer="admin/main.mako",
-        permission="admin",
+    config.add_route(
+        COMPETENCE_OPTION_ROUTE,
+        "admin/competences/" + COMPETENCE_OPTION_ROUTE,
     )
+    config.add_view(
+        AdminCompetenceOption,
+        route_name=COMPETENCE_OPTION_ROUTE,
+        renderer=COMPETENCE_OPTION_TMPL,
+        permission='admin',
+    )
+
+#    config.add_route("admin_competence_grid", "admin/competences/grid")
+#    config.add_view(
+#        AdminCompetences,
+#        route_name="admin_competence_grid",
+#        renderer="admin/main.mako",
+#        permission="admin",
+#    )

@@ -30,7 +30,7 @@
 <%block name='content'>
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
-        % if not message is UNDEFINED:
+        % if not message is UNDEFINED and message:
             <div class='alert alert-info'>
                 ${format_text(message)}
             </div>

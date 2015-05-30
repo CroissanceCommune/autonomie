@@ -22,6 +22,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 
+<%namespace file="/base/utils.mako" import="format_text"/>
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name="css" >
 <link href="${request.static_url('autonomie:static/css/admin.css')}" rel="stylesheet"  type="text/css" />
@@ -29,6 +30,11 @@
 <%block name='content'>
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
+        % if not message is UNDEFINED:
+            <div class='alert alert-info'>
+                ${format_text(message)}
+            </div>
+        % endif
         ${form|n}
     </div>
 </div>

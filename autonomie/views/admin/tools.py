@@ -56,6 +56,7 @@ class AdminOption(BaseFormView):
             The route we're redirecting to after successfull validation
     """
     title = u""
+    add_template_vars = ('message',)
     validation_msg = u""
     factory = None
     redirect_path = 'admin_index'
@@ -75,6 +76,14 @@ class AdminOption(BaseFormView):
     @schema.setter
     def schema(self, value):
         self._schema = value
+
+    @property
+    def message(self):
+        """
+        Return an optionnal message to help to configure datas
+        """
+        calchemy_dict = getattr(self.factory, '__colanderalchemy_config__', {})
+        return calchemy_dict.get('help_msg', '')
 
     def before(self, form):
         """

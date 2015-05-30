@@ -1099,13 +1099,20 @@ def get_sequence_model_admin(model, title=u""):
             colander.Sequence(),
             node_schema,
             widget=deform.widget.SequenceWidget(
-                min_len=1,
                 orderable=True,
                 template=TEMPLATES_URL + "clean_sequence.pt",
             ),
             title=title,
             name='datas')
     )
+    def dictify(models):
+        return {'datas': [node_schema.dictify(model) for model in models]}
+
+    def objectify(datas):
+        return [node_schema.objectify(data) for data in datas]
+
+    schema.dictify = dictify
+    schema.objectify = objectify
     return schema
 
 

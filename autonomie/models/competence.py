@@ -25,18 +25,22 @@ Models related to competence evaluation
 from sqlalchemy import (
     Column,
     Integer,
-    String,
-    Boolean,
     ForeignKey,
+    Text,
+    Float,
 )
 from sqlalchemy.orm import (
     relationship,
     backref,
 )
-from sqlalchemy.ext.associationproxy import association_proxy
 from autonomie.models.base import (
     DBBASE,
+    DBSESSION,
     default_table_args,
+)
+from autonomie.forms import (
+    EXCLUDED,
+    get_deferred_select,
 )
 
 from autonomie.models.options import (
@@ -47,23 +51,27 @@ from autonomie.models.options import (
 
 class CompetenceDeadline(ConfigurableOption):
     __colanderalchemy_config__ = {
-        'title': u"Échéances",
+        'title': u"une échéance",
         'validation_msg': u"Les échéances ont bien été configurées",
+        "help_msg": u"Configurer les échéances à laquelle les compétences des \
+entrepreneurs seront évaluées",
     }
     id = get_id_foreignkey_col('configurable_option.id')
 
 
 class CompetenceScale(ConfigurableOption):
     __colanderalchemy_config__ = {
-        'title': u"Barêmes",
+        'title': u"un niveau à l'échelle d'évaluation",
         'validation_msg': u"Les barêmes ont bien été configurés",
+        "help_msg": u"Configurer les échelles d'évaluation des compétences. \
+<br />Dans la grille de compétence, chaque valeur correspondra à une colonne.",
     }
     id = get_id_foreignkey_col('configurable_option.id')
     value = Column(
-        Integer,
+        Float(),
         info={
             'colanderalchemy': {
-                'title': u"Valeur",
+                'title': u"Valeur numérique",
                 'description': u"Valeurs utilisées comme unité dans \
 les graphiques",
             }
@@ -71,48 +79,172 @@ les graphiques",
     )
 
 
-class CompetenceRequirement(DBBASE):
-    """
-    Relationship table used to store the requirements for competences
-    """
-    __table_args__ = default_table_args
-    competence_id = Column(ForeignKey('competence.id'), primary_key=True)
-    scale_id = Column(ForeignKey('scale.id'))
-    deadline_id = Column(ForeignKey('deadline.id'), primary_key=True)
-
-    competence = relationship(
-        'Competence',
-        backref=backref(
-            'requirements',
-            cascade='all, delete-orphan',
-        ),
-    )
-    _scale = relationship('Scale')
-    _deadline = relationship('Deadline')
-    scale = association_proxy('_scale', 'label')
-    deadline = association_proxy('_deadline', 'label')
-
-
-class CompetenceOption(DBBASE):
+class CompetenceOption(ConfigurableOption):
     """
     A competence model (both for the main one and the sub-competences)
 
     :param int required_id: The id of the bareme element needed
     """
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    label = Column(String(255))
-    active = Column(Boolean(), default=True)
-    parent_id = Column(ForeignKey("competence.id"))
-    children = relationship(
-        "Competence",
-        primaryjoin="Competence.id==Competence.parent_id",
-        backref=backref("parent", remote_side=[id]),
-        cascade="all",
+    __colanderalchemy_config__ = {
+        "title": u"une compétence",
+        "validation_msg": u"La grille de compétences a bien été configurées",
+        "help_msg": u"Définissez des compétences, celles-ci sont \
+composées: <ul><li>D'un libellé</li><li>D'un niveau de référence</li>\
+<li>D'un ensemble de sous-compétences (définies par un libellé)</li></ul>"
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+    requirement = Column(
+        Float(),
+        default=0,
+        info={
+            'colanderalchemy': {
+                "title": u"Niveau de référence pour cette compétence",
+                "widget": get_deferred_select(
+                    CompetenceScale,
+                    mandatory=True,
+                    keys=('value', 'label'),
+                )
+            }
+        }
     )
 
     @classmethod
-    def query(cls, active=True):
-        query = super(Competence, cls).query()
+    def query(cls, active=True, *args):
+        query = super(CompetenceOption, cls).query(*args)
         query = query.filter_by(active=active)
         return query
+
+
+class SubCompetenceOption(ConfigurableOption):
+    __table_args__ = default_table_args
+    id = get_id_foreignkey_col('configurable_option.id')
+    parent_id = Column(
+        ForeignKey("competence_option.id"),
+        info={
+            'colanderalchemy': EXCLUDED
+        }
+    )
+    parent = relationship(
+        "CompetenceOption",
+        primaryjoin="CompetenceOption.id==SubCompetenceOption.parent_id",
+        backref=backref(
+            "children",
+            info={
+                'colanderalchemy': {
+                    'title': u"Sous-compétence",
+                },
+            }
+        ),
+        cascade="all",
+        info={
+            'colanderalchemy': EXCLUDED
+        }
+    )
+
+
+class CompetenceGrid(DBBASE):
+    """
+    The competences grid
+    """
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+
+    deadline_id = Column(ForeignKey("competence_deadline.id"))
+    deadline = relationship("CompetenceDeadline")
+
+    contractor_id = Column(ForeignKey("accounts.id"))
+    contractor = relationship(
+        "User",
+        backref=backref(
+            "competence_grids",
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+        ),
+    )
+
+    def get_item(self, competence_option_id):
+        """
+        Return the item that is used to register evaluation for the given
+        competence_option
+
+        :param int competence_option_id: The id of a competence_option object
+        """
+        query = CompetenceGridItem.query()
+        query = query.filter_by(
+            option_id=competence_option_id,
+            grid_id=self.id,
+        )
+        item = query.first()
+        if item is None:
+            item = CompetenceGridItem(
+                option_id=competence_option_id,
+                grid_id=self.id,
+            )
+            DBSESSION().add(item)
+        return item
+
+
+class CompetenceGridItem(DBBASE):
+    """
+    An item of the grid compound of two text boxes
+
+    represented by a table
+    """
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+
+    comments = Column(Text(), default='')
+    progress = Column(Text(), default='')
+
+    option_id = Column(ForeignKey("competence_option.id"))
+    option = relationship("CompetenceOption")
+
+    grid_id = Column(ForeignKey("competence_grid.id"))
+    grid = relationship(
+        "CompetenceGrid",
+        backref=backref(
+            "competences"
+        ),
+    )
+
+    def get_subitem(self, competence_option_id):
+        """
+        Return a sub competence item used for the evaluation of the give
+        competence option
+
+        :param int competence_option_id: The id of the competence option item
+        """
+        query = CompetenceGridSubItem.query()
+        query = query.filter_by(
+            option_id=competence_option_id,
+            item_id=self.id,
+        )
+        item = query.first()
+        if item is None:
+            item = CompetenceGridSubItem(
+                option_id=competence_option_id,
+                item_id=self.id,
+            )
+            DBSESSION().add(item)
+        return item
+
+
+class CompetenceGridSubItem(DBBASE):
+    """
+    A subcompetence represented by a table line
+    """
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+
+    evaluation = Column(Float(), default=0)
+
+    option_id = Column(ForeignKey("competence_option.id"))
+    option = relationship("CompetenceOption")
+
+    item_id = Column(ForeignKey("competence_grid_item.id"))
+    item = relationship(
+        "CompetenceGridItem",
+        backref=backref(
+            "subitems"
+        ),
+    )

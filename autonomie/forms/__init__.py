@@ -364,7 +364,8 @@ def get_deferred_select_validator(model):
     return deferred_validator
 
 
-def get_deferred_select(model, multi=False, mandatory=False):
+def get_deferred_select(model, multi=False, mandatory=False,
+                        keys=('id', 'label')):
     """
     Return a deferred select widget based on the given model
 
@@ -380,13 +381,19 @@ def get_deferred_select(model, multi=False, mandatory=False):
 
             Is it a mandatory entry, if not, we insert a void value
             default: False
+
+        keys
+
+            a 2-uple describing the (value, label) of the select's options
     """
     @colander.deferred
     def deferred_widget(binding_datas, request):
         """
         The deferred function that will be fired on schema binding
         """
-        values = [(m.id, m.label) for m in model.query()]
+        key1, key2 = keys
+
+        values = [(getattr(m, key1), getattr(m, key2)) for m in model.query()]
         if not mandatory:
             values.insert(0, ('', ''))
         return deform.widget.SelectWidget(values=values, multi=multi)

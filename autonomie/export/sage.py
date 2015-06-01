@@ -29,6 +29,9 @@ from autonomie.views.render_api import format_amount
 from sqla_inspect.csv import CsvExporter
 
 
+SAGE_COMPATIBLE_ENCODING = 'cp1252'
+
+
 class SageCsvWriter(CsvExporter):
     """
         Write Sage csv files
@@ -40,7 +43,7 @@ class SageCsvWriter(CsvExporter):
     headers = ()
 
     def __init__(self):
-        super(SageCsvWriter, self).__init__()
+        CsvExporter.__init__(self, encoding=SAGE_COMPATIBLE_ENCODING)
 
     @staticmethod
     def format_debit(debit):
@@ -66,7 +69,7 @@ class SageInvoiceCsvWriter(SageCsvWriter):
     Add the handling of the invoice prefix in invoice number formatting
     """
     headers = (
-        {'name': 'num_facture', 'label': "Numéro de pièce",},
+        {'name': 'num_facture', 'label': "Numéro de pièce", },
         {'name': 'code_journal', 'label': "Code Journal"},
         {'name': 'date', 'label': "Date de pièce"},
         {'name': 'compte_cg', 'label': "N° compte général"},
@@ -99,16 +102,16 @@ class SageExpenseCsvWriter(SageCsvWriter):
     Expense CsvWriter
     """
     headers = (
-        {'name':'num_feuille', 'label': "Numéro de pièce",},
-        {'name':'code_journal', 'label': "Code Journal"},
-        {'name':'date', 'label': "Date de pièce"},
-        {'name':'compte_cg', 'label': "N° compte général"},
-        {'name':'num_feuille', 'label': "Numéro de note de frais",},
-        {'name':'compte_tiers', 'label': "Numéro de compte tiers"},
-        {'name':'code_tva', 'label': "Code taxe"},
-        {'name':'libelle', 'label': "Libellé d'écriture"},
-        {'name':'debit', 'label': "Montant débit"},
-        {'name':'credit', 'label': "Montant crédit"},
-        {'name':'type_', 'label': "Type de ligne"},
-        {'name':'num_analytique', 'label': "Numéro analytique"},
+        {'name': 'num_feuille', 'label': "Numéro de pièce"},
+        {'name': 'code_journal', 'label': "Code Journal"},
+        {'name': 'date', 'label': "Date de pièce"},
+        {'name': 'compte_cg', 'label': "N° compte général"},
+        {'name': 'num_feuille', 'label': "Numéro de note de frais"},
+        {'name': 'compte_tiers', 'label': "Numéro de compte tiers"},
+        {'name': 'code_tva', 'label': "Code taxe"},
+        {'name': 'libelle', 'label': "Libellé d'écriture"},
+        {'name': 'debit', 'label': "Montant débit"},
+        {'name': 'credit', 'label': "Montant crédit"},
+        {'name': 'type_', 'label': "Type de ligne"},
+        {'name': 'num_analytique', 'label': "Numéro analytique"},
     )

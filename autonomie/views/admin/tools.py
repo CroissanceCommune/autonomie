@@ -95,9 +95,7 @@ class AdminOption(BaseFormView):
         for js_resource in self.js_resources:
             js_resource.need()
 
-        appstruct = {'datas': [
-            elem.appstruct() for elem in self.factory.query()
-        ]}
+        appstruct = self.schema.dictify(self.factory.query().all())
         form.set_appstruct(appstruct)
         self.populate_actionmenu()
 

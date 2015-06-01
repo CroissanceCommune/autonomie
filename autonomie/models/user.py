@@ -849,6 +849,7 @@ class UserDatas(Node):
             },
             'export': {
                 'formatter': lambda val: dict(CIVILITE_OPTIONS).get(val),
+                'stats': {'options': CIVILITE_OPTIONS},
             }
         },
         default=CIVILITE_OPTIONS[0][0],
@@ -1014,7 +1015,8 @@ class UserDatas(Node):
                 'section': u'Coordonnées',
                 'widget': get_select(SEX_OPTIONS),
                 'validator': get_select_validator(SEX_OPTIONS),
-            }
+            },
+            'export': {'stats': {'options': SEX_OPTIONS}},
         }
     )
 
@@ -1090,6 +1092,7 @@ class UserDatas(Node):
             },
             'export': {
                 'formatter': lambda val: dict(STATUS_OPTIONS).get(val),
+                'stats': {'options': STATUS_OPTIONS},
             }
         }
     )
@@ -1383,6 +1386,7 @@ class UserDatas(Node):
             },
             'export': {
                 'formatter': lambda val: dict(CONTRACT_OPTIONS).get(val),
+                'stats': {'options': CONTRACT_OPTIONS},
             }
         }
     )
@@ -1701,7 +1705,8 @@ class ExternalActivityDatas(DBBASE):
               {
                   'title': u"Type de contrat",
                   'widget': get_select(CONTRACT_OPTIONS),
-              }
+              },
+              'export': {'stats': {'options': CONTRACT_OPTIONS}},
              }
                  )
     hours = Column(

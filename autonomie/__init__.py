@@ -55,6 +55,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.commercial",
     "autonomie.views.company",
     "autonomie.views.company_invoice",
+    "autonomie.views.competence",
     "autonomie.views.csv_import",
     "autonomie.views.customer",
     "autonomie.views.estimation",
@@ -77,13 +78,19 @@ AUTONOMIE_MODULES = (
     "autonomie.views.treasury_files",
     "autonomie.views.user",
     "autonomie.views.workshop",
+)
+
+AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.menu",
     "autonomie.panels.task",
     "autonomie.panels.company",
     "autonomie.panels.invoicetable",
+)
+
+AUTONOMIE_EVENT_MODULES = (
     "autonomie.events.tasks",
     "autonomie.events.expense",
-    )
+)
 
 AUTONOMIE_ADMIN_MODULES = (
     "autonomie.views.admin.main",
@@ -162,6 +169,13 @@ def base_configure(config, dbsession, **settings):
 
     for module in AUTONOMIE_MODULES:
         config.include(module)
+
+    for module in AUTONOMIE_PANELS_MODULES:
+        config.include(module)
+
+    for module in AUTONOMIE_EVENT_MODULES:
+        config.include(module)
+
     for module in AUTONOMIE_ADMIN_MODULES:
         config.include(module)
 

@@ -263,6 +263,8 @@ def get_stat_criterion(model, criterion_model, inspector):
         factory = NumericCriterionQueryFactory
     elif criterion_model.type == 'optrel':
         factory = OptRelCriterionQueryFactory
+    elif criterion_model.type == 'static_opt':
+        factory = OptRelCriterionQueryFactory
     elif criterion_model.type == 'date':
         factory = DateCriterionQueryFactory
     elif criterion_model.type == 'bool':

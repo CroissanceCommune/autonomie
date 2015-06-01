@@ -61,7 +61,6 @@ from autonomie.models.types import (
     # PersistentACLMixin,
 )
 from autonomie import forms
-from autonomie.utils import ascii
 
 
 class StatisticSheet(DBBASE):  # , PersistentACLMixin):
@@ -229,9 +228,6 @@ def list_of_integers_validator(node, value):
     """
     if not isinstance(value, list):
         raise colander.Invalid(node, u"Doit être une liste")
-    for val in value:
-        if not ascii.isint(val):
-            raise colander.Invalid(node, u"Ne doit contenir que des nombres")
 
 
 class OptListStatisticCriterion(BaseStatisticCriterion):

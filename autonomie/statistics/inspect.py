@@ -147,11 +147,15 @@ class StatisticInspector(BaseSqlaInspector):
             infos.update(stats_infos)
 
             ui_label = colanderalchemy_infos.get('title', prop.key)
+            section = colanderalchemy_infos.get('section', '')
+            if section:
+                ui_label = u"{0} : {1}".format(section, ui_label)
             datas = Column({
                 'name': prop.key,
                 'label': ui_label,
                 'prop': prop,
                 'column': prop.class_attribute,
+                'section': section,
             })
             datas.update(infos)
 

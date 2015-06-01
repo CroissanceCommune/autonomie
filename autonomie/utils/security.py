@@ -38,6 +38,7 @@ from sqlalchemy.orm import undefer_group
 from autonomie.models.config import ConfigFiles
 from autonomie.models.activity import Activity
 from autonomie.models.company import Company
+from autonomie.models.competence import CompetenceGrid
 from autonomie.models.customer import Customer
 from autonomie.models.files import (
     File,
@@ -108,6 +109,7 @@ class RootFactory(dict):
             ("activities", "activity", Activity, ),
             ('cancelinvoices', 'cancelinvoice', CancelInvoice, ),
             ('companies', 'company', Company, ),
+            ('competences', 'competence', CompetenceGrid, ),
             ('customers', 'customer', Customer, ),
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),

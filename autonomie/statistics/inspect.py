@@ -52,7 +52,7 @@ class Column(dict):
         )
 
 
-def get_data_type(prop):
+def get_data_type(datas):
     """
     Returns the type of datas
 
@@ -61,6 +61,10 @@ def get_data_type(prop):
     :returns: A string representing the type of the column
     """
     type_ = 'string'
+    if 'options' in datas:
+        return "static_opt"
+
+    prop = datas['prop']
     sqla_column = prop.columns[0]
 
     column_type = getattr(sqla_column.type, 'impl', sqla_column.type)
@@ -200,7 +204,7 @@ class StatisticInspector(BaseSqlaInspector):
                     datas['key'] = datas['name']
                     result[datas['name']] = datas
             else:
-                datas['type'] = get_data_type(prop)
+                datas['type'] = get_data_type(datas)
                 datas['key'] = datas['name']
                 result[datas['name']] = datas
 

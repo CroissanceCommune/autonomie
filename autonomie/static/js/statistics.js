@@ -326,12 +326,18 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
 
       var type = this.model.get('type');
       var labels;
+      var key;
+      var options;
       if(type == 'date'){
         labels = [this.model.get('altdate1'), this.model.get('altdate2')];
       } else if (type == 'optrel') {
-        var key = this.model.get('key');
-        var optrel_options = AppOptions.optrel_options[key];
-        labels = getLabels(optrel_options, this.model.get('searches'));
+        key = this.model.get('key');
+        options = AppOptions.optrel_options[key];
+        labels = getLabels(options, this.model.get('searches'));
+      } else if( type == 'static_opt') {
+        key = this.model.get('key');
+        options = AppOptions.static_opt_options[key];
+        labels = getLabels(options, this.model.get('searches'));
       } else if (type == 'bool') {
         labels = [];
       }
@@ -434,6 +440,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     templateHelpers: function(){
       var type = this.model.get('type');
+      var key = this.model.get('key');
       var method_options = AppOptions.methods[type];
       var method = this.model.get('method');
       method_options = this.updateSelectOptions(method_options, method);
@@ -585,6 +592,14 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
             destCollection: this.criteria_collection}
         );
         criterionForm.optrel_options = AppOptions.optrel_options[model.get('key')];
+        this.entry_form.getRegion('form').show(criterionForm);
+      } else if (model.get('type') == 'static_opt'){
+        criterionForm = new OptRelCriterionForm(
+          {
+            model: model,
+            destCollection: this.criteria_collection}
+        );
+        criterionForm.optrel_options = AppOptions.static_opt_options[model.get('key')];
         this.entry_form.getRegion('form').show(criterionForm);
       } else if (model.get('type') == 'bool'){
         criterionForm = new BoolCriterionView(

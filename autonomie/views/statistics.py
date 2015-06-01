@@ -70,6 +70,7 @@ CRITERION_MODELS = {
     "bool": BoolStatisticCriterion,
     "number": CommonStatisticCriterion,
     "optrel": OptListStatisticCriterion,
+    "static_opt": OptListStatisticCriterion,
     "string": CommonStatisticCriterion
 }
 
@@ -187,11 +188,13 @@ def statistic_form_options(context, request):
             id=context.id,
         ),
         optrel_options=load_optrel(inspector),
+        static_opt_options=load_static_options(inspector),
         methods={
             'date': convert_duple_to_dict(DATE_OPTIONS),
             'number': convert_duple_to_dict(NUMERIC_OPTIONS),
             'string': convert_duple_to_dict(STRING_OPTIONS),
             'optrel': convert_duple_to_dict(OPTREL_OPTIONS),
+            'static_opt': convert_duple_to_dict(OPTREL_OPTIONS),
             'bool': convert_duple_to_dict(BOOL_OPTIONS),
         }
     )
@@ -212,6 +215,24 @@ def load_optrel(inspector):
                     'value': str(option.id),
                 }
                 for option in rel_class.query()
+            ]
+    return res
+
+
+def load_static_options(inspector):
+    """
+    Return the options for static selectable elements
+    """
+    res = {}
+    for key, column in inspector.columns.items():
+        if column['type'] == 'static_opt' and 'options' in column:
+            # It's a string column
+            res[key] = [
+                {
+                    'label': option[1],
+                    'value': option[0],
+                }
+                for option in column['options']
             ]
     return res
 

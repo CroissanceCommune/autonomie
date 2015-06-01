@@ -76,7 +76,6 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       form: '#criterion-form'
     },
     closeView: function(){
-      console.log("Closing the layout");
       var this_ = this;
       this.$el.slideUp(400, function(){
         this_.destroy();
@@ -220,13 +219,11 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     childViewContainer: 'tbody',
     fadeIn: function(){
       if (! this.$el.is(':visible')) {
-        console.log("Is no visible : slidedown");
         this.$el.slideDown();
       }
     },
     fadeOut: function(){
       if (this.$el.is(':visible')) {
-        console.log("Is visible : slideup");
         this.$el.slideUp();
       }
     }
@@ -295,7 +292,6 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
           return _.contains(ids, option.value);
         }
       );
-      console.log(selected);
       return _.pluck(selected, 'label');
   };
 
@@ -517,7 +513,6 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     initialize: function(){
       if (! this.initialized){
-        console.log("Was not initialized");
         this.sheet_view = new SheetView({model: Statistic.sheet});
         App.sheet.show(this.sheet_view);
         this.entry_list_view = new EntryListView(
@@ -663,12 +658,13 @@ function StatisticsPageInit(options){
     var form_container = $('#form-container');
     var sheet_form = Handlebars.templates['sheet_form.mustache']();
     form_container.html(sheet_form);
+    var form = form_container.find('form');
     var input = form_container.find('input');
-    var submit_button = form_container.find('button.submit');
     $('button.btn-add').on('click', function(){
       form_container.fadeIn();
     });
-    submit_button.on("click", function(event){
+    form.off('submit');
+    form.on("submit", function(event){
       event.preventDefault();
       var title = input.val();
       if (title.length === 0){
@@ -681,6 +677,7 @@ function StatisticsPageInit(options){
           dataType: 'json',
           data: {title: title},
           success: function(result){
+            window.location.href = window.location.href;
           }
         });
       }

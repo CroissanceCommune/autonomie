@@ -949,6 +949,10 @@ class SageExpenseBase(BaseSageBookEntryFactory):
         return u"ndf{0}{1}".format(self.expense.month, self.expense.year)
 
     @property
+    def num_autonomie(self):
+        return unicode(self.expense.id)
+
+    @property
     def libelle(self):
         return u"{0}/frais {1} {2}".format(
             render_api.format_account(self.expense.user, reverse=False),

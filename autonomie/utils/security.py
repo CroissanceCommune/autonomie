@@ -38,7 +38,11 @@ from sqlalchemy.orm import undefer_group
 from autonomie.models.config import ConfigFiles
 from autonomie.models.activity import Activity
 from autonomie.models.company import Company
-from autonomie.models.competence import CompetenceGrid
+from autonomie.models.competence import (
+    CompetenceGrid,
+    CompetenceGridItem,
+    CompetenceGridSubItem,
+)
 from autonomie.models.customer import Customer
 from autonomie.models.files import (
     File,
@@ -110,6 +114,9 @@ class RootFactory(dict):
             ('cancelinvoices', 'cancelinvoice', CancelInvoice, ),
             ('companies', 'company', Company, ),
             ('competences', 'competence', CompetenceGrid, ),
+            ('competence_items', 'competence_item', CompetenceGridItem, ),
+            ('competence_subitems', 'competence_subitem',
+             CompetenceGridSubItem, ),
             ('customers', 'customer', Customer, ),
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),
@@ -392,6 +399,30 @@ def get_file_acl(self):
         return []
 
 
+def get_competence_acl(self):
+    """
+    Return acls for the Competence Grids objects
+    """
+    acls = DEFAULT_PERM[:]
+    for right in ('view', 'edit'):
+        acls.append((Allow, u'%s' % self.contractor.login, right))
+    return acls
+
+
+def get_competence_item_acl(self):
+    acls = DEFAULT_PERM[:]
+    for right in ('view', 'edit'):
+        acls.append((Allow, u'%s' % self.grid.contractor.login, right))
+    return acls
+
+
+def get_competence_subitem_acl(self):
+    acls = DEFAULT_PERM[:]
+    for right in ('view', 'edit'):
+        acls.append((Allow, u'%s' % self.item.grid.contractor.login, right))
+    return acls
+
+
 def set_models_acls():
     """
     Add acls to the db objects used as context
@@ -403,6 +434,9 @@ def set_models_acls():
     BaseExpenseLine.__default_acl__ = property(get_expense_acl)
     CancelInvoice.__default_acl__ = property(get_invoice_acl)
     Company.__default_acl__ = property(get_company_acl)
+    CompetenceGrid.__acl__ = property(get_competence_acl)
+    CompetenceGridItem.__acl__ = property(get_competence_item_acl)
+    CompetenceGridSubItem.__acl__ = property(get_competence_subitem_acl)
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'), ]
     Customer.__default_acl__ = property(get_customer_acls)
     Estimation.__default_acl__ = property(get_estimation_acl)

@@ -26,8 +26,13 @@ Competence evaluation module
 2- Fill the displayed grid
 3- Display a printable version
 """
+import logging
+import colander
 from pyramid.httpexceptions import HTTPFound
 
+from autonomie.models.user import (
+    get_users_options,
+)
 from autonomie.models.competence import (
     CompetenceDeadline,
     CompetenceScale,
@@ -36,8 +41,14 @@ from autonomie.models.competence import (
     CompetenceGridItem,
     CompetenceGridSubItem,
 )
+from autonomie.resources import competence_js
 from autonomie.forms.competence import CompetenceGridQuerySchema
-from autonomie.views import BaseFormView
+from autonomie.views import (
+    BaseView,
+)
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_competence_grid(request, contractor_id, deadline_id):
@@ -49,42 +60,63 @@ def get_competence_grid(request, contractor_id, deadline_id):
         contractor_id=contractor_id,
         deadline_id=deadline_id,
     )
+
     grid = query.first()
+    options = CompetenceOption.query()
+
     if grid is None:
         grid = CompetenceGrid(
             contractor_id=contractor_id,
             deadline_id=deadline_id,
         )
-        options = CompetenceOption.query(
-            True,
-            "id"
-        ).filter_by(parent_id=None)
-        request.dbsession().add(grid)
 
-    # We ensure there is an record instance for each competence option
+        request.dbsession.add(grid)
+
     for option in options:
-        grid_item = grid.get_item(option.id)
-        for child in option.children:
-            grid_item.get_subitem(child.id)
+        grid.ensure_item(option)
 
     return grid
 
 
-class CompetencesIndexView(BaseFormView):
+def competence_index_view(request):
     """
-    Index view used to switch from one competence to another
+    Index view to go to a competence grid
     """
-    title = u"Évaluation des compétences"
-    schema = CompetenceGridQuerySchema
+    competence_js.need()
+    user_options = get_users_options(roles=['contractor'])
+    deadlines = CompetenceDeadline.query().all()
+    if 'deadline' in request.POST or 'reference' in request.POST:
+        logger.debug(request.POST)
+        schema = CompetenceGridQuerySchema.bind(request=request)
+        try:
+            appstruct = schema.deserialize(request.POST)
+        except colander.Invalid:
+            logger.exception(u"Erreur dans le routage de la page de \
+compétences : POSSIBLE BREAK IN ATTEMPT")
+        else:
+            # On récupère l'id du user pour l'évaluation
+            contractor_id = appstruct['contractor_id']
 
-    def submit_success(self, appstruct):
-        deadline_id = appstruct['deadline_id']
-        contractor_id = appstruct['contractor_id']
+            # On redirige vers la page appropriée
+            if 'deadline' in appstruct:
+                deadline_id = appstruct['deadline']
+                grid = get_competence_grid(
+                    request,
+                    contractor_id,
+                    deadline_id
+                )
+                url = request.route_path("competence_grid", id=grid.id)
+                return HTTPFound(url)
 
-        grid = get_competence_grid(self.request, contractor_id, deadline_id)
+            else:
+                # TODO: Build the view for the radar
+                pass
 
-        url = self.request.route_path("competence_grid", id=grid.id)
-        return HTTPFound(url)
+    return {
+        'title': u'Évaluation des compétences',
+        'user_options': user_options,
+        'deadlines': deadlines,
+    }
 
 
 def competence_grid_view(context, request):
@@ -93,11 +125,61 @@ def competence_grid_view(context, request):
     """
     # loadurl : The url to load the options
     # context_url : The url to load datas about the context in json format
-    return dict(
-        title=u"Évaluation des compétences de {0} pour la période {1}".format(
-            context.contractor.label, context.deadline.label
-        )
+    competence_js.need()
+    loadurl = request.route_path(
+        'competence_grid',
+        id=context.id,
+        _query=dict(action='options'),
     )
+    contexturl = request.current_route_path()
+
+    title = u"Évaluation des compétences de {0} pour la période {1}".format(
+        context.contractor.label, context.deadline.label
+    )
+
+    return {
+        'title': title,
+        "loadurl": loadurl,
+        "contexturl": contexturl
+    }
+
+
+def competence_form_options(context, request):
+    """
+    Returns datas used to build the competence form page
+    """
+    return dict(
+        grid=context,
+        grid_edit_url=request.route_path(
+            'competence_grid',
+            id=context.id,
+            _query=dict(action='edit')
+        ),
+        entry_root_url=request.route_path(
+            'competence_grid_items',
+            id=context.id,
+        ),
+        deadlines=CompetenceDeadline.query().all(),
+        scales=CompetenceScale.query().all(),
+    )
+
+
+class RestCompetenceGrid(BaseView):
+    """
+    Json api for competence grid handling
+    """
+
+    def get(self):
+        return {
+            'grid': self.context,
+            'competences': self.context.items,
+        }
+
+
+class RestCompetenceGridItem(BaseView):
+    """
+    """
+    pass
 
 
 def includeme(config):
@@ -111,8 +193,32 @@ def includeme(config):
         traverse='/competences/{id}',
     )
 
+    config.add_route(
+        'competence_grid_items',
+        '/competences/{id}/items',
+        traverse='/competences/{id}',
+    )
+
+    config.add_route(
+        'competence_grid_item',
+        '/competences/{id}/items/{iid:\d+}',
+        traverse='/competence_items/{iid}',
+    )
+
+    config.add_route(
+        'competence_grid_subitems',
+        '/competences/{id}/items/{iid:\d+}/subitems',
+        traverse='/competence_items/{iid}',
+    )
+
+    config.add_route(
+        'competence_grid_subitem',
+        '/competences/{id}/items/{iid:\d+}/subitems/{sid:\d+}',
+        traverse='/competence_subitems/{sid}',
+    )
+
     config.add_view(
-        CompetencesIndexView,
+        competence_index_view,
         route_name='competences',
         renderer='/accompagnement/competences.mako',
         permission='edit',
@@ -121,5 +227,25 @@ def includeme(config):
         competence_grid_view,
         route_name='competence_grid',
         renderer='/accompagnement/competence.mako',
+        permission='edit',
+    )
+    for attr in ('get', ):
+        config.add_view(
+            RestCompetenceGrid,
+            attr=attr,
+            route_name='competence_grid',
+            renderer='json',
+            permission='edit',
+            xhr=True,
+            request_method=attr.upper(),
+        )
+
+    config.add_view(
+        competence_form_options,
+        route_name='competence_grid',
+        renderer='json',
+        xhr=True,
+        request_method='GET',
+        request_param="action=options",
         permission='edit',
     )

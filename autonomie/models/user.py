@@ -265,7 +265,7 @@ class User(DBBASE, PersistentACLMixin):
             "employees",
             info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         ),
-        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
     )
     _groups = relationship(
         "Group",
@@ -274,7 +274,7 @@ class User(DBBASE, PersistentACLMixin):
             "users",
             info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         ),
-        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
     )
     groups = association_proxy(
         "_groups",
@@ -295,7 +295,7 @@ class User(DBBASE, PersistentACLMixin):
 
     session_datas = Column(
         JsonEncodedDict,
-        info={'colanderalchemy':EXCLUDED, 'export': EXCLUDED},
+        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
         default=None,
     )
 
@@ -382,9 +382,9 @@ class User(DBBASE, PersistentACLMixin):
         """
         query = cls.query(only_active=False)
         if user_id:
-            query = query.filter(not_(cls.id==user_id))
+            query = query.filter(not_(cls.id == user_id))
 
-        result = query.filter(cls.login==login).first()
+        result = query.filter(cls.login == login).first()
         if result is not None:
             return False
         else:
@@ -457,6 +457,7 @@ def get_deferred_user_choice(roles=None, widget_options=None):
     """
     widget_options = widget_options or {}
     default_option = widget_options.pop("default_option", None)
+
     @colander.deferred
     def user_select(node, kw):
         """
@@ -733,8 +734,9 @@ class UserDatas(Node):
         ForeignKey('node.id'),
         primary_key=True,
         info={
-            'colanderalchemy': {'exclude': True,
-                                'title': u"Identifiant Autonomie"
+            'colanderalchemy': {
+                'exclude': True,
+                'title': u"Identifiant Autonomie"
             },
         }
     )
@@ -790,19 +792,19 @@ class UserDatas(Node):
 
     situation_follower_id = Column(
         ForeignKey('accounts.id'),
-        info={'colanderalchemy':
-              {
-                  'title': u'Accompagnateur',
-                  'section': u'Synthèse',
-                  'widget': get_deferred_user_choice(
-                      roles=['admin', 'manager'],
-                      widget_options={
-                          'default_option': ('', ''),
-                      }
-                  ),
-              },
-              #'export': {'exclude': True},
-             },
+        info={
+            'colanderalchemy':{
+                'title': u'Accompagnateur',
+                'section': u'Synthèse',
+                'widget': get_deferred_user_choice(
+                    roles=['admin', 'manager'],
+                    widget_options={
+                        'default_option': ('', ''),
+                    }
+                ),
+            },
+            # 'export': {'exclude': True},
+        },
     )
 
     situation_follower = relationship(
@@ -845,7 +847,7 @@ class UserDatas(Node):
             'colanderalchemy': {
                 'title': u'Civilité',
                 'section': u"Coordonnées",
-                'widget': get_select(CIVILITE_OPTIONS, mandatory=False),
+                'widget': get_select(CIVILITE_OPTIONS),
             },
             'export': {
                 'formatter': lambda val: dict(CIVILITE_OPTIONS).get(val),
@@ -1087,7 +1089,8 @@ class UserDatas(Node):
             'colanderalchemy': {
                 'title': u'Situation de famille',
                 'section': u'Coordonnées',
-                'widget': get_select(STATUS_OPTIONS, mandatory=False),
+                'widget': get_select(STATUS_OPTIONS),
+                'validator': get_select_validator(STATUS_OPTIONS),
             },
             'export': {
                 'formatter': lambda val: dict(STATUS_OPTIONS).get(val),
@@ -1100,13 +1103,10 @@ class UserDatas(Node):
         Integer(),
         default=0,
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 'title': u"Nombre d'enfants",
                 'section': u'Coordonnées',
-                'widget': get_select(
-                    zip(range(20), range(20)),
-                    mandatory=False
-                ),
+                'widget': get_select(zip(range(20), range(20))),
             }
         }
     )
@@ -1132,7 +1132,7 @@ class UserDatas(Node):
     coordonnees_emergency_name = Column(
         String(50),
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 'title': u"Contact urgent : Nom",
                 'section': u'Coordonnées',
             }
@@ -1142,7 +1142,7 @@ class UserDatas(Node):
     coordonnees_emergency_phone = Column(
         String(14),
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 'title': u'Contact urgent : Téléphone',
                 'section': u'Coordonnées',
             }
@@ -1152,7 +1152,7 @@ class UserDatas(Node):
     coordonnees_identifiant_interne = Column(
         String(20),
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 'title': u'Identifiant interne',
                 'description': u"Identifiant interne propre à la CAE \
 (facultatif)",
@@ -1160,7 +1160,6 @@ class UserDatas(Node):
             }
         }
     )
-
 
     # STATUT
     statut_social_status_id = Column(
@@ -1351,7 +1350,7 @@ class UserDatas(Node):
         "DateConventionCAPEDatas",
         cascade='all, delete-orphan',
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 "title": u"Date convention CAPE",
                 'section': u'Parcours',
             },
@@ -1366,7 +1365,7 @@ class UserDatas(Node):
         "DateDPAEDatas",
         cascade='all, delete-orphan',
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 "title": u"Date DPAE",
                 'section': u'Parcours',
             },
@@ -1384,7 +1383,7 @@ class UserDatas(Node):
             {
                 'title': u'Type de contrat',
                 'section': u'Parcours',
-                'widget': get_select(CONTRACT_OPTIONS, mandatory=False)
+                'widget': get_select(CONTRACT_OPTIONS)
             },
             'export': {
                 'formatter': lambda val: dict(CONTRACT_OPTIONS).get(val),
@@ -1473,7 +1472,6 @@ class UserDatas(Node):
             }
         }
     )
-
 
     parcours_salary_letters = Column(
         String(100),
@@ -1591,7 +1589,6 @@ class UserDatas(Node):
         },
     )
 
-
     @property
     def age(self):
         birthday = self.coordonnees_birthday
@@ -1612,7 +1609,7 @@ class UserDatas(Node):
             login = self.coordonnees_email1
             index = 0
             # Fix #165: check login on account generation
-            while User.query().filter(User.login==login).count() > 0:
+            while User.query().filter(User.login == login).count() > 0:
                 login = u"{0}_{1}".format(index, login)
                 index += 1
 
@@ -1638,7 +1635,7 @@ class UserDatas(Node):
             for data in self.activity_companydatas:
                 # Try to retrieve an existing company (and avoid duplicates)
                 company = Company.query().filter(
-                    Company.name==data.name
+                    Company.name == data.name
                 ).first()
                 if company is None:
                     company = Company(
@@ -1656,7 +1653,7 @@ class UserDatas(Node):
 
 # One to one test relationship
 
-#class ExtendedUserDatas(DBBASE):
+# class ExtendedUserDatas(DBBASE):
 #    """
 #    Datas extension
 #    """
@@ -1702,39 +1699,40 @@ class ExternalActivityDatas(DBBASE):
         'colanderalchemy': get_hidden_field_conf()
         }
     )
-    type = Column(String(50),
-        info={'colanderalchemy':
-              {
-                  'title': u"Type de contrat",
-                  'widget': get_select(CONTRACT_OPTIONS),
-              },
-              'export': {'stats': {'options': CONTRACT_OPTIONS}},
-             }
-                 )
+    type = Column(
+        String(50),
+        info={
+            'colanderalchemy': {
+                'title': u"Type de contrat",
+                'widget': get_select(CONTRACT_OPTIONS),
+            },
+            'export': {'stats': {'options': CONTRACT_OPTIONS}},
+        }
+    )
     hours = Column(
         Float(),
-        info={'colanderalchemy':
-              {
-                  'title': u"Nombre d'heures",
-              }
-             }
+        info={
+            'colanderalchemy': {
+                'title': u"Nombre d'heures",
+            }
+        }
     )
     brut_salary = Column(
         Float(),
-        info={'colanderalchemy':
-              {
-                  'title': u'Salaire brut',
-              }
-             }
+        info={
+            'colanderalchemy': {
+                'title': u'Salaire brut',
+            }
+        }
     )
     employer_visited = Column(
         Boolean(),
         default=False,
-        info={'colanderalchemy':
-              {
-                  'title': u'Visite autre employeur',
-              }
-             }
+        info={
+            'colanderalchemy': {
+                'title': u'Visite autre employeur',
+            }
+        }
     )
     userdatas_id = Column(
         ForeignKey('user_datas.id'),
@@ -1797,7 +1795,10 @@ class CompanyDatas(DBBASE):
             'export': {'related_key': 'label'},
         }
     )
-    userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
+    userdatas_id = Column(
+        ForeignKey("user_datas.id"),
+        info={'colanderalchemy': EXCLUDED}
+    )
 
 
 class DateDiagnosticDatas(DBBASE):
@@ -1908,12 +1909,38 @@ listen(UserDatas, "before_update", salary_compute, propagate=True)
 
 
 # Registering event handlers to keep datas synchronized
-def sync(key):
+def sync_user_to_userdatas(key):
     def handler(target, value, oldvalue, initiator):
         if target.userdatas is not None:
             log.debug(u"Updating the {0} with {1}".format(key, value))
             setattr(target.userdatas, key, value)
     return handler
 
-listen(User.firstname, 'set', sync('coordonnees_firstname'))
-listen(User.lastname, 'set', sync('coordonnees_lastname'))
+
+def sync_userdatas_to_user(key):
+    def handler(target, value, oldvalue, initiator):
+        raise Exception()
+        if target.user is not None:
+            log.debug(u"Updating the {0} with {1}".format(key, value))
+            setattr(target.user, key, value)
+    return handler
+
+listen(User.firstname, 'set', sync_user_to_userdatas('coordonnees_firstname'))
+listen(User.lastname, 'set', sync_user_to_userdatas('coordonnees_lastname'))
+listen(User.email, 'set', sync_user_to_userdatas('coordonnees_email1'))
+
+#listen(
+#    UserDatas.coordonnees_firstname,
+#    'set',
+#    sync_userdatas_to_user('firstname')
+#)
+#listen(
+#    UserDatas.coordonnees_lastname,
+#    'set',
+#    sync_userdatas_to_user('lastname')
+#)
+#listen(
+#    UserDatas.coordonnees_email1,
+#    'set',
+#    sync_userdatas_to_user('email')
+#)

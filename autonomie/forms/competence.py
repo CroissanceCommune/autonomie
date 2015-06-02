@@ -23,28 +23,34 @@ import colander
 
 from autonomie.models.user import user_node
 from autonomie.models.competence import CompetenceDeadline
-from autonomie import forms
 
 
-def remove_manager_fields(schema, kw):
-    """
-    Remove the manager specific fields if the user is a contractor
-    """
-    if kw['request'].user.is_contractor():
-        del schema['contractor_id']
+def restrict_user_id(form, kw):
+    current_user = kw['request'].user
+    if current_user.is_contractor():
+        form['contractor_id'].validator = colander.OneOf((current_user.id,))
+
+@colander.deferred
+def deferred_deadline_id_validator(node, kw):
+    return colander.OneOf(
+        [c[0] for c in CompetenceDeadline.query('id').all()]
+    )
 
 
 class _CompetenceGridQuerySchema(colander.Schema):
-    contractor_id = user_node(title=u"* L'entrepreneur")
-    deadline_id = colander.SchemaNode(
+    contractor_id = user_node(roles=['contractor'])
+    deadline = colander.SchemaNode(
         colander.Integer(),
-        title=u"* à l'échéance",
-        description=u"L'échéance pour laquelle vous voulez saisir les \
-compétences de l'entrepreneur",
-        widget=forms.get_deferred_select(CompetenceDeadline)
+        validator=deferred_deadline_id_validator,
+        missing=None,
+    )
+    sheet = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf(('radar',)),
+        missing=None,
     )
 
 
 CompetenceGridQuerySchema = _CompetenceGridQuerySchema(
-    after_bind=remove_manager_fields
+    after_bind=restrict_user_id
 )

@@ -216,6 +216,11 @@ statistics_js = get_module_resource(
     tmpl=True,
     extra_depends=[select2]
 )
+competence_js = get_module_resource(
+    'competence',
+    tmpl=True,
+    extra_depends=[select2]
+)
 holiday_js = get_module_resource("holiday", tmpl=True)
 admin_option_js = get_module_resource("admin_option")
 commercial_js = get_module_resource("commercial")

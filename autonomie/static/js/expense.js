@@ -877,6 +877,13 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     }
   });
 
+  var updateTotal = function(){
+      var text = "Total des frais professionnels à payer : ";
+      var total = Expense.expense.lines.total() +  Expense.expense.kmlines.total();
+      text += formatAmount(total);
+      $('#total').html(text);
+  };
+
   Expense.on('start', function(){
     /*
      * Initialize the module's datas
@@ -889,12 +896,8 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     Expense.router.controller.index();
 
     // Setup the event listening
-    AutonomieApp.vent.on("expense.totalchanged", function(){
-      var text = "Total des frais professionnels à payer : ";
-      var total = Expense.expense.lines.total() +  Expense.expense.kmlines.total();
-      text += formatAmount(total);
-      $('#total').html(text);
-    });
+    AutonomieApp.vent.on("expense.totalchanged", updateTotal);
+    updateTotal();
   });
 });
 

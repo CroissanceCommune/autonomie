@@ -35,7 +35,6 @@ from sqlalchemy.orm import (
 )
 from autonomie.models.base import (
     DBBASE,
-    DBSESSION,
     default_table_args,
 )
 from autonomie.forms import (
@@ -58,6 +57,12 @@ entrepreneurs seront évaluées",
     }
     id = get_id_foreignkey_col('configurable_option.id')
 
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            label=self.label,
+        )
+
 
 class CompetenceScale(ConfigurableOption):
     __colanderalchemy_config__ = {
@@ -77,6 +82,13 @@ les graphiques",
             }
         }
     )
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            value=self.value,
+            label=self.label,
+        )
 
 
 class CompetenceOption(ConfigurableOption):
@@ -115,8 +127,16 @@ composées: <ul><li>D'un libellé</li><li>D'un niveau de référence</li>\
         query = query.filter_by(active=active)
         return query
 
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            label=self.label,
+            requirement=self.requirement,
+            children=[child.__json__(request) for child in self.children],
+        )
 
-class SubCompetenceOption(ConfigurableOption):
+
+class CompetenceSubOption(ConfigurableOption):
     __table_args__ = default_table_args
     id = get_id_foreignkey_col('configurable_option.id')
     parent_id = Column(
@@ -127,7 +147,7 @@ class SubCompetenceOption(ConfigurableOption):
     )
     parent = relationship(
         "CompetenceOption",
-        primaryjoin="CompetenceOption.id==SubCompetenceOption.parent_id",
+        primaryjoin="CompetenceOption.id==CompetenceSubOption.parent_id",
         backref=backref(
             "children",
             info={
@@ -141,6 +161,13 @@ class SubCompetenceOption(ConfigurableOption):
             'colanderalchemy': EXCLUDED
         }
     )
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            label=self.label,
+            parent_id=self.parent_id,
+        )
 
 
 class CompetenceGrid(DBBASE):
@@ -162,26 +189,34 @@ class CompetenceGrid(DBBASE):
         ),
     )
 
-    def get_item(self, competence_option_id):
+    def ensure_item(self, competence_option):
         """
         Return the item that is used to register evaluation for the given
         competence_option
 
-        :param int competence_option_id: The id of a competence_option object
+        :param obj competence_option: The competence_option object
         """
         query = CompetenceGridItem.query()
         query = query.filter_by(
-            option_id=competence_option_id,
+            option_id=competence_option.id,
             grid_id=self.id,
         )
         item = query.first()
         if item is None:
-            item = CompetenceGridItem(
-                option_id=competence_option_id,
-                grid_id=self.id,
-            )
-            DBSESSION().add(item)
+            item = CompetenceGridItem(option_id=competence_option.id)
+            self.items.append(item)
+        for suboption in competence_option.children:
+            item.ensure_subitem(suboption)
+
         return item
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            deadline_id=self.deadline_id,
+            contractor_id=self.contractor_id,
+            items=[item.__json__(request) for item in self.items]
+        )
 
 
 class CompetenceGridItem(DBBASE):
@@ -203,29 +238,40 @@ class CompetenceGridItem(DBBASE):
     grid = relationship(
         "CompetenceGrid",
         backref=backref(
-            "competences"
+            "items"
         ),
     )
 
-    def get_subitem(self, competence_option_id):
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            comments=self.comments,
+            progress=self.progress,
+            option_id=self.option_id,
+            grid_id=self.grid_id,
+            subitems=[subitem.__json__(request) for subitem in self.subitems],
+        )
+
+    def get_subitem(self, competence_option):
         """
         Return a sub competence item used for the evaluation of the give
         competence option
 
-        :param int competence_option_id: The id of the competence option item
+        :param obj competence_option: The competence_option object
         """
         query = CompetenceGridSubItem.query()
         query = query.filter_by(
-            option_id=competence_option_id,
+            option_id=competence_option.id,
             item_id=self.id,
         )
         item = query.first()
         if item is None:
-            item = CompetenceGridSubItem(
-                option_id=competence_option_id,
-                item_id=self.id,
+            self.subitems.append(
+                CompetenceGridSubItem(
+                    option_id=competence_option.id,
+                    item_id=self.id,
+                )
             )
-            DBSESSION().add(item)
         return item
 
 
@@ -238,8 +284,8 @@ class CompetenceGridSubItem(DBBASE):
 
     evaluation = Column(Float(), default=0)
 
-    option_id = Column(ForeignKey("competence_option.id"))
-    option = relationship("CompetenceOption")
+    option_id = Column(ForeignKey("competence_sub_option.id"))
+    option = relationship("CompetenceSubOption")
 
     item_id = Column(ForeignKey("competence_grid_item.id"))
     item = relationship(
@@ -248,3 +294,11 @@ class CompetenceGridSubItem(DBBASE):
             "subitems"
         ),
     )
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            evaluation=self.evaluation,
+            option_id=self.option_id,
+            item_id=self.item_id,
+        )

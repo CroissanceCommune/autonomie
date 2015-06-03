@@ -25,16 +25,18 @@
 <div class='row'>
     <div class='col-sm-8 col-sm-offset-2'>
         <form method='POST' enctype="multipart/form-data" accept-charset="utf-8">
-            <div class="form-group">
-                <label for="contractor_id">Entrepreneur à évaluer</label>
-                % if not request.user.is_contractor():
-                    <select name='contractor_id' class='form-control'>
-                        % for id, label in user_options:
-                            <option value='${id}'>${label}</option>
-                        % endfor
-                    </select>
-                % endif
-            </div>
+            % if not request.user.is_contractor():
+                <div class="form-group">
+                    <label for="contractor_id">Entrepreneur à évaluer</label>
+                        <select name='contractor_id' class='form-control'>
+                            % for id, label in user_options:
+                                <option value='${id}'>${label}</option>
+                            % endfor
+                        </select>
+                </div>
+            % else:
+                <input type="hidden" name='contractor_id' value="${request.user.id}" />
+            % endif
             <div class='row'>
                 <div class='col-sm-5'>
                     <div class="form-group">

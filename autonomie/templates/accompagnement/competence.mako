@@ -22,6 +22,16 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
+<div class='row'>
+    <div class='col-xs-3' id='itemslist'>
+    </div>
+    <div class='col-xs-9' id='itemcontainer'>
+        <div class='alert alert-info' style="margin: 30px 150px">
+            <h4>Sélectionner une compétence dans la liste à gauche</h4>
+        </div>
+    </div>
+</div>
+<div id='messageboxes'></div>
 </%block>
 <%block name="footerjs">
 AppOptions = {};

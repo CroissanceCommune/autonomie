@@ -30,6 +30,9 @@ import logging
 import colander
 from pyramid.httpexceptions import HTTPFound
 
+from colanderalchemy import SQLAlchemySchemaNode
+
+from autonomie.utils import rest
 from autonomie.models.user import (
     get_users_options,
 )
@@ -133,7 +136,7 @@ def competence_grid_view(context, request):
     )
     contexturl = request.current_route_path()
 
-    title = u"Évaluation des compétences de {0} pour la période {1}".format(
+    title = u"Évaluation des compétences de {0} pour la période \"{1}\"".format(
         context.contractor.label, context.deadline.label
     )
 
@@ -155,7 +158,7 @@ def competence_form_options(context, request):
             id=context.id,
             _query=dict(action='edit')
         ),
-        entry_root_url=request.route_path(
+        item_root_url=request.route_path(
             'competence_grid_items',
             id=context.id,
         ),
@@ -172,14 +175,92 @@ class RestCompetenceGrid(BaseView):
     def get(self):
         return {
             'grid': self.context,
-            'competences': self.context.items,
+            'items': self.context.items,
         }
 
 
 class RestCompetenceGridItem(BaseView):
     """
+    Rest view for Item handling
+
+    Provides :
+
+        * get collection
+        * edit element
     """
-    pass
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(
+            CompetenceGridItem,
+            includes=('progress', 'comments', 'id')
+        )
+
+    def collection_get(self):
+        """
+        Return list of items for a given grid
+        context is a grid
+        """
+        return self.context.items
+
+    def put(self):
+        submitted = self.request.json_body
+        logger.debug(u"Submitting %s" % submitted)
+        schema = self.schema
+
+        try:
+            attributes = schema.deserialize(submitted)
+        except colander.Invalid, err:
+            logger.exception("  - Erreur")
+            logger.exception(submitted)
+            raise rest.RestError(err.asdict(), 400)
+
+        logger.debug(attributes)
+
+        item = schema.objectify(attributes, self.context)
+        item = self.request.dbsession.merge(item)
+        return item
+
+
+class RestCompetenceGridSubItem(BaseView):
+    """
+    Rest view for Sub item handling:
+
+    Provides:
+
+        * get collection
+        * edit element
+    """
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(
+            CompetenceGridSubItem,
+            includes=('evaluation', 'id')
+        )
+
+    def collection_get(self):
+        """
+        Return list of subitems for a given item
+        context is an item
+        """
+        return self.context.subitems
+
+    def put(self):
+        submitted = self.request.json_body
+        logger.debug(u"Submitting %s" % submitted)
+        schema = self.schema
+
+        try:
+            attributes = schema.deserialize(submitted)
+        except colander.Invalid, err:
+            logger.exception("  - Erreur")
+            logger.exception(submitted)
+            raise rest.RestError(err.asdict(), 400)
+
+        logger.debug(attributes)
+
+        subitem = schema.objectify(attributes, self.context)
+        subitem = self.request.dbsession.merge(subitem)
+        return subitem
 
 
 def includeme(config):
@@ -221,31 +302,60 @@ def includeme(config):
         competence_index_view,
         route_name='competences',
         renderer='/accompagnement/competences.mako',
-        permission='edit',
+        permission='view',
     )
+
     config.add_view(
         competence_grid_view,
         route_name='competence_grid',
         renderer='/accompagnement/competence.mako',
-        permission='edit',
+        permission="edit",
     )
-    for attr in ('get', ):
-        config.add_view(
-            RestCompetenceGrid,
-            attr=attr,
-            route_name='competence_grid',
-            renderer='json',
-            permission='edit',
-            xhr=True,
-            request_method=attr.upper(),
-        )
+    import functools
+    add_json_view = functools.partial(
+        config.add_view,
+        renderer='json',
+        permission='edit',
+        xhr=True,
+    )
+    add_json_view(
+        RestCompetenceGrid,
+        attr="get",
+        route_name='competence_grid',
+        request_method="GET",
+    )
 
-    config.add_view(
+    add_json_view(
+        RestCompetenceGridItem,
+        attr="collection_get",
+        route_name='competence_grid_items',
+        request_method="GET",
+    )
+
+    add_json_view(
+        RestCompetenceGridSubItem,
+        attr="collection_get",
+        route_name='competence_grid_subitems',
+        request_method="GET",
+    )
+
+    add_json_view(
+        RestCompetenceGridItem,
+        attr="put",
+        route_name='competence_grid_item',
+        request_method="PUT",
+    )
+
+    add_json_view(
+        RestCompetenceGridSubItem,
+        attr="put",
+        route_name='competence_grid_subitem',
+        request_method="PUT",
+    )
+
+    add_json_view(
         competence_form_options,
         route_name='competence_grid',
-        renderer='json',
-        xhr=True,
         request_method='GET',
         request_param="action=options",
-        permission='edit',
     )

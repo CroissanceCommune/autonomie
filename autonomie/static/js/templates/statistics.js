@@ -88,7 +88,7 @@ templates['entry_form.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"m
     + "</textarea>\n    </div>\n    <button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n    <button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n</form>\n";
 },"useData":true});
 templates['entry_list.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  return "<h4>Entrées statistiques\n<a class='btn btn-primary' style='font-size: 10px' href='#entries/add'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<table class=\"table table-bordered table-condensed table-striped\">\n    <thead>\n        <th class='col-xs-9'>Intitulé</th>\n        <th class='col-xs-3 actions'>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n";
+  return "<h4>Entrées statistiques\n<a class='btn btn-primary' style='font-size: 10px' href='#entries/add'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<div class=\"panel panel-default\">\n    <table class=\"table table-bordered table-condensed table-striped\">\n        <thead>\n            <th class='col-xs-9'>Intitulé</th>\n            <th class='col-xs-3 actions'>Actions</th>\n        </thead>\n        <tbody>\n        </tbody>\n    </table>\n</div>\n";
   },"useData":true});
 templates['entry.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;

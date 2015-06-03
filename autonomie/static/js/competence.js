@@ -192,7 +192,7 @@ AutonomieApp.module('Competence', function(Competence, App, Backbone, Marionette
       return value / this.collection.models.length;
     },
     templateHelpers: function(){
-      var average_level = this.getAverageLevel();
+      var average_level = this.getAverageLevel().toFixed(3);
       var is_ok_average = average_level >= this.model.get('requirement');
       return {
         average_level: average_level,

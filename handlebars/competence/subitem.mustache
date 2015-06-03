@@ -1,0 +1,11 @@
+<td>{{label}}</td>
+{{#scales}}
+<td>
+    <input
+        type="radio"
+        name="subitem_{{ ../id }}"
+        {{#is_selected}}checked{{/is_selected}}
+        value="{{ value }}">
+    </input>
+</td>
+{{/scales}}

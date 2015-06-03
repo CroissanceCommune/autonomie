@@ -1,0 +1,33 @@
+<h3>Évaluation de la compétence : {{label}}</h3>
+<h4>Pour l'échéance : {{ deadline_label }}</h4>
+<form id="item_form">
+<div class="panel panel-default">
+    <table class="table table-bordered table-striped table-rounded">
+        <thead>
+            <th>Sous-Compétence</th>
+            {{#scales}}
+            <th {{#is_reference}}style="background-color: #baff87"{{/is_reference}}>
+                {{ label }} ({{value}}) {{#is_reference}}<span class='help-block'>Niveau de référence</span>{{/is_reference}}
+            </th>
+            {{/scales}}
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div class='panel-footer text-center' style='background-color: {{#if is_ok_average}}#baff87{{else}}#c43c35;color:#fff;{{/if}}'>
+        <b>Évaluation : {{ average_level }}</b>
+    </div>
+</div>
+<div class='form-group'>
+    <label for="comments">Argumentaires pour cette échéance</label>
+    <textarea name='comments' class='form-control'>
+    {{ comments }}
+    </textarea>
+</div>
+<div class='form-group'>
+    <label for="comments">Axes de progrès pour cette échéance</label>
+    <textarea name='progress' class='form-control'>
+    {{ progress }}
+    </textarea>
+</div>
+</form>

@@ -224,4 +224,28 @@ $(function(){
   setClickableRow();
   setPopUp('login_form', "Authentification");
 });
-
+function highlight_error(jquery_tag, callback){
+  /*
+   * Display a main error message and highlight a jquery tag in red
+   * Optionnaly launch a callback
+   */
+  displayServerError("Une erreur a été rencontrée lors de la " +
+    "sauvegarde de vos données");
+  return highlight(jquery_tag, "#F9AAAA", callback);
+}
+function highlight_success(jquery_tag, callback){
+  /*
+   * Display a main success message and highlight a jquery tag in green
+   * Optionnaly launch a callback
+   */
+  displayServerSuccess("Vos données ont bien été sauvegardées");
+  return highlight(jquery_tag, "#ceff99", callback);
+}
+function highlight(jquery_tag, color, callback){
+  jquery_tag.css("backgroundColor", "#fff");
+  console.log(jquery_tag);
+  console.log(color);
+  return jquery_tag.effect('highlight', {color: color}, 1500,
+    function(){if (callback !== undefined){ callback();} }
+  );
+}

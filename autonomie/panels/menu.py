@@ -315,6 +315,9 @@ def get_usermenu(request):
         href = request.route_path('mydocuments')
         menu.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
 
+        href = request.route_path('competences')
+        menu.add_item(u"Mes compétences", icon="fa fa-bar-chart", href=href)
+
     href = request.route_path("logout")
     menu.add_item(u"Déconnexion", icon="fa fa-close", href=href)
     return menu

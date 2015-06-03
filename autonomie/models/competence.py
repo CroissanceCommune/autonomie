@@ -215,6 +215,7 @@ class CompetenceGrid(DBBASE):
             id=self.id,
             deadline_id=self.deadline_id,
             contractor_id=self.contractor_id,
+            deadline_label=self.deadline.label,
             items=[item.__json__(request) for item in self.items]
         )
 
@@ -248,11 +249,13 @@ class CompetenceGridItem(DBBASE):
             comments=self.comments,
             progress=self.progress,
             option_id=self.option_id,
+            label=self.option.label,
+            requirement=self.option.requirement,
             grid_id=self.grid_id,
             subitems=[subitem.__json__(request) for subitem in self.subitems],
         )
 
-    def get_subitem(self, competence_option):
+    def ensure_subitem(self, competence_option):
         """
         Return a sub competence item used for the evaluation of the give
         competence option
@@ -282,7 +285,7 @@ class CompetenceGridSubItem(DBBASE):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
 
-    evaluation = Column(Float(), default=0)
+    evaluation = Column(Float(), default=None)
 
     option_id = Column(ForeignKey("competence_sub_option.id"))
     option = relationship("CompetenceSubOption")
@@ -300,5 +303,6 @@ class CompetenceGridSubItem(DBBASE):
             id=self.id,
             evaluation=self.evaluation,
             option_id=self.option_id,
+            label=self.option.label,
             item_id=self.item_id,
         )

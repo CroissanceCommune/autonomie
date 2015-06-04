@@ -26,9 +26,13 @@ from autonomie.models.competence import (
     CompetenceDeadline,
     CompetenceOption,
 )
+from autonomie.models.config import ConfigFiles
 from autonomie.utils.widgets import ViewLink
+from autonomie.forms.admin import CompetencePrintConfigSchema
+from autonomie.views import BaseFormView
 from autonomie.views.admin.tools import (
     get_model_admin_view,
+    add_link_to_menu,
 )
 
 
@@ -56,6 +60,49 @@ la grille de compétences."
         main_admin_class.before(self, form)
 
 
+class AdminCompetencePrintOutput(BaseFormView):
+    title = u"Configuration de la sortie imprimable"
+    validation_msg = u"Vos données ont bien été enregistrées"
+    schema = CompetencePrintConfigSchema(title=u"")
+
+    def before(self, form):
+        print(form)
+        appstruct = {}
+
+        file_name = u"competence_header.png"
+        file_model = ConfigFiles.get(file_name)
+        if file_model is not None:
+            appstruct['header_png'] = {
+                'uid': file_model.id,
+                'filename': file_model.name,
+                'preview_url': self.request.route_url(
+                    'public',
+                    name=file_name,
+                )
+            }
+        form.set_appstruct(appstruct)
+        self.populate_actionmenu()
+
+
+    def populate_actionmenu(self):
+        """
+            Add a back to index link
+        """
+        add_link_to_menu(
+            self.request,
+            u"Revenir en arrière",
+            path="admin_competences",
+            title=u"Revenir à la page précédente",
+        )
+
+    def submit_success(self, appstruct):
+        file_datas = appstruct.get('header_png')
+
+        if file_datas:
+            file_name = "competence_header.png"
+            ConfigFiles.set(file_name, file_datas)
+
+
 def admin_competence_index_view(request):
     for label, route in (
         (u"Retour", "admin_accompagnement",),
@@ -65,6 +112,10 @@ def admin_competence_index_view(request):
             u"Configuration de la grille de compétences",
             "admin_competence_option",
         ),
+        (
+            u"Configuration de la sortie imprimable",
+            'admin_competence_print',
+         )
     ):
         request.actionmenu.add(
             ViewLink(label, path=route, title=label)
@@ -77,11 +128,18 @@ def includeme(config):
     Include views and routes
     """
     config.add_route("admin_competences", "admin/competences")
+    config.add_route("admin_competence_print", "admin/competences/print")
     config.add_view(
         admin_competence_index_view,
         route_name="admin_competences",
         renderer="admin/index.mako",
         permission="admin",
+    )
+    config.add_view(
+        AdminCompetencePrintOutput,
+        route_name="admin_competence_print",
+        renderer="admin/main.mako",
+        permission='admin',
     )
 
     for model in (CompetenceScale, CompetenceDeadline):

@@ -88,7 +88,6 @@ from autonomie.forms.admin import (
     get_config_appstruct,
     get_config_dbdatas,
     merge_config_datas,
-    CompetenceConfigSchema,
 )
 from autonomie.forms.files import get_template_upload_schema
 from autonomie.utils.widgets import ViewLink
@@ -99,7 +98,10 @@ from autonomie.views import (
     BaseView,
     DisableView,
 )
-from autonomie.views.admin.tools import get_model_admin_view
+from autonomie.views.admin.tools import (
+    get_model_admin_view,
+    add_link_to_menu,
+)
 from autonomie.forms import (
     merge_session_with_post,
 )
@@ -229,16 +231,6 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
             )
         return dict(title=title)
     return myview
-
-
-def add_link_to_menu(request, label, path, title):
-    request.actionmenu.add(
-        ViewLink(
-            label,
-            path=path,
-            title=title,
-        )
-    )
 
 
 def populate_actionmenu(request):
@@ -930,19 +922,6 @@ class TemplateList(BaseView):
             .order_by(desc(files.Template.active))\
             .all()
         return dict(templates=templates, title=self.title)
-
-
-class AdminCompetence(BaseFormView):
-    """
-    Compentence administration view
-    """
-    title = u"Administration des compétences"
-    validation_msg = u"Les informations ont bien été enregistrées"
-    schema = CompetenceConfigSchema(title=u"")
-    buttons = (submit_btn, )
-
-    def before(self, form):
-        pass
 
 
 def get_all_userdatas_views():

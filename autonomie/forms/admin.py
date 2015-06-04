@@ -1183,41 +1183,5 @@ def deferred_deadlines_default(node, kw):
     ]
 
 
-class CompetenceConfigSchema(colander.MappingSchema):
-    id = forms.id_node()
-    label = colander.SchemaNode(
-        colander.String(),
-        title=u"Libellé",
-    )
-    requirements = CompetenceRequirementSeq(
-        title=u"Niveaux requis par échéance",
-        widget=deferred_seq_widget,
-        default=deferred_deadlines_default,
-    )
-    children = SubCompetencesConfigSchema(
-        title=u"Sous-compétences",
-        widget=deform.widget.SequenceWidget(
-            add_subitem_text_template=u"Ajouter une sous-compétence",
-            template=TEMPLATES_URL + "clean_sequence.pt",
-            orderable=True,
-        )
-    )
-
-
-class CompetencesConfigSchema(colander.SequenceSchema):
-    competence = CompetenceConfigSchema(
-        title=u"",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
-    )
-
-
-class CompetenceGridSchema(colander.Schema):
-    competences = CompetencesConfigSchema(
-        title=u"",
-        widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + "clean_sequence.pt",
-            add_subitem_text_template=u"Ajouter une compétence"
-        )
-    )
+class CompetencePrintConfigSchema(colander.Schema):
+    header_img = get_file_dl_node(title=u'En-tête de la sortie imprimable')

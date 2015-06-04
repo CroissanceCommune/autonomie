@@ -174,3 +174,13 @@ def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
         u"admin_%s" % camel_case_to_name(model.__name__),
         '/admin/main.mako',
     )
+
+
+def add_link_to_menu(request, label, path, title):
+    request.actionmenu.add(
+        ViewLink(
+            label,
+            path=path,
+            title=title,
+        )
+    )

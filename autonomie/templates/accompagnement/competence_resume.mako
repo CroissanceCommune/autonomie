@@ -23,6 +23,9 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="autonomie:templates/base/utils.mako" import="format_text" />
 <%block name="content">
+<a class='btn btn-default pull-right hidden-print' href='#print' onclick="window.print()">
+    <i class='glyphicon glyphicon-print'></i>Imprimer
+</a>
 <div class='row' style="margin-bottom: 40px">
     <div class="col-xs-12">
         <h1 class='text-center'>${title}</h1>
@@ -54,13 +57,6 @@
 </div>
 <div class='row'>
     <div class='col-xs-8 col-offset-xs-2' id='radar' style='page-break-after:always;'>
-    </div>
-    <div class='col-xs-2'>
-        <div class='text-right'>
-            <a class='btn btn-default' href='#print' onclick="window.print()">
-                <i class='glyphicon glyphicon-print'></i>Imprimer
-            </a>
-        </div>
     </div>
 </div>
 <div class='row'>

@@ -181,6 +181,14 @@ def competence_radar_chart_view(context, request):
 
     :param obj context: a user model
     """
+    request.actionmenu.add(
+        widgets.ViewLink(
+            u"Revenir au formulaire",
+            "view",
+            path="competence_grid",
+            id=context.id
+        )
+    )
     competence_radar_js.need()
     loadurl = request.route_path(
         'competence_grid',

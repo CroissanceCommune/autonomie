@@ -246,3 +246,14 @@ fileupload_js = get_resource(
     "js/fileupload.js",
     depends=[main_group],
 )
+
+# Chart tools
+d3_js = get_resource("js/vendors/d3.v3.js", minified="js/vendors/d3.v3.min.js")
+radar_chart_js = get_resource("js/vendors/radar-chart.js", depends=[d3_js])
+radar_chart_css = get_resource(
+    "css/radar-chart.css",
+    minified="css/radar-chart.min.css"
+)
+competence_radar_js = get_module_resource(
+    "competence_radar", extra_depends=(radar_chart_js, radar_chart_css,)
+)

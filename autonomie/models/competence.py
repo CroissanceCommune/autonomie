@@ -22,12 +22,14 @@
 """
 Models related to competence evaluation
 """
+import datetime
 from sqlalchemy import (
     Column,
     Integer,
     ForeignKey,
     Text,
     Float,
+    Date,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -135,6 +137,13 @@ composées: <ul><li>D'un libellé</li><li>D'un niveau de référence</li>\
             children=[child.__json__(request) for child in self.children],
         )
 
+    @classmethod
+    def __radar_datas__(cls):
+        result = []
+        for option in cls.query():
+            result.append({'axis': option.label, 'value': option.requirement})
+        return result
+
 
 class CompetenceSubOption(ConfigurableOption):
     __table_args__ = default_table_args
@@ -179,6 +188,26 @@ class CompetenceGrid(DBBASE):
 
     deadline_id = Column(ForeignKey("competence_deadline.id"))
     deadline = relationship("CompetenceDeadline")
+    created_at = Column(
+        Date(),
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Créé(e) le",
+            }
+        },
+        default=datetime.date.today(),
+    )
+
+    updated_at = Column(
+        Date(),
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Mis(e) à jour le",
+            }
+        },
+        default=datetime.date.today(),
+        onupdate=datetime.date.today()
+    )
 
     contractor_id = Column(ForeignKey("accounts.id"))
     contractor = relationship(
@@ -219,6 +248,9 @@ class CompetenceGrid(DBBASE):
             items=[item.__json__(request) for item in self.items]
         )
 
+    def __radar_datas__(self):
+        return [item.__radar_datas__() for item in self.items]
+
 
 class CompetenceGridItem(DBBASE):
     """
@@ -229,7 +261,6 @@ class CompetenceGridItem(DBBASE):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
 
-    comments = Column(Text(), default='')
     progress = Column(Text(), default='')
 
     option_id = Column(ForeignKey("competence_option.id"))
@@ -246,14 +277,26 @@ class CompetenceGridItem(DBBASE):
     def __json__(self, request):
         return dict(
             id=self.id,
-            comments=self.comments,
             progress=self.progress,
             option_id=self.option_id,
             label=self.option.label,
             requirement=self.option.requirement,
             grid_id=self.grid_id,
             subitems=[subitem.__json__(request) for subitem in self.subitems],
+            average=self.average,
         )
+
+    @property
+    def average(self):
+        """
+        Return the average evaluation for this item
+        """
+        values = [subitem.evaluation for subitem in self.subitems
+                  if subitem.evaluation is not None]
+        if not values:
+            values = [0.0]
+        sum_of_values = sum(values)
+        return sum_of_values / float(len(values))
 
     def ensure_subitem(self, competence_option):
         """
@@ -277,6 +320,9 @@ class CompetenceGridItem(DBBASE):
             )
         return item
 
+    def __radar_datas__(self):
+        return {'axis': self.option.label, 'value': self.average}
+
 
 class CompetenceGridSubItem(DBBASE):
     """
@@ -289,6 +335,8 @@ class CompetenceGridSubItem(DBBASE):
 
     option_id = Column(ForeignKey("competence_sub_option.id"))
     option = relationship("CompetenceSubOption")
+
+    comments = Column(Text(), default='')
 
     item_id = Column(ForeignKey("competence_grid_item.id"))
     item = relationship(
@@ -305,4 +353,22 @@ class CompetenceGridSubItem(DBBASE):
             option_id=self.option_id,
             label=self.option.label,
             item_id=self.item_id,
+            comments=self.comments,
         )
+
+    @property
+    def scale(self):
+        """
+        Returns the scale matching the current evaluation value Since scales can
+        be changed, we get the first scale that is <= evaluation
+        """
+        scales = CompetenceScale.query()
+        if self.evaluation is None:
+            result = scales.first()
+        else:
+            result = scales.filter(
+                CompetenceScale.value <= self.evaluation
+            ).all()[-1]
+        if result is None:  # No scale is lower than evaluation
+            result = scales.first()
+        return result

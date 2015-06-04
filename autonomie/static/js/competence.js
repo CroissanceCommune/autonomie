@@ -71,12 +71,19 @@ AutonomieApp.module('Competence', function(Competence, App, Backbone, Marionette
     tagName: "tr",
     className: "",
     events: {
-      "change input[type=radio]": "toggleScale"
+      "change input[type=radio]": "toggleScale",
+      "blur textarea": 'saveComment'
     },
     toggleScale: function(event){
+      this.saveValue(event, 'evaluation');
+    },
+    saveComment: function(event){
+      this.saveValue(event, 'comments');
+    },
+    saveValue: function(event, key){
       var tag = $(event.target);
       var row = this.$el.find('td');
-      this.model.set('evaluation', tag.val());
+      this.model.set(key, tag.val());
       this.model.save(null, {
         success: function(){
           highlight_success(row);

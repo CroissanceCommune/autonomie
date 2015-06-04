@@ -31,14 +31,12 @@ templates['item_form.mustache'] = template({"1":function(depth0,helpers,partials
   stack1 = ((helper = (helper = helpers.scales || (depth0 != null ? depth0.scales : depth0)) != null ? helper : helperMissing),(options={"name":"scales","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.scales) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </thead>\n        <tbody>\n        </tbody>\n    </table>\n    <div class='panel-footer text-center' style='background-color: ";
+  buffer += "            <th>Argumentation/preuves</th>\n        </thead>\n        <tbody>\n        </tbody>\n    </table>\n    <div class='panel-footer text-center' style='background-color: ";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_ok_average : depth0), {"name":"if","hash":{},"fn":this.program(6, data),"inverse":this.program(8, data),"data":data});
   if (stack1 != null) { buffer += stack1; }
   return buffer + "'>\n        <b>Évaluation : "
     + escapeExpression(((helper = (helper = helpers.average_level || (depth0 != null ? depth0.average_level : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"average_level","hash":{},"data":data}) : helper)))
-    + "</b>\n    </div>\n</div>\n<div class='form-group'>\n    <label for=\"comments\">Argumentaires pour cette échéance</label>\n    <textarea name='comments' class='form-control'>"
-    + escapeExpression(((helper = (helper = helpers.comments || (depth0 != null ? depth0.comments : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"comments","hash":{},"data":data}) : helper)))
-    + "</textarea>\n</div>\n<div class='form-group'>\n    <label for=\"comments\">Axes de progrès pour cette échéance</label>\n    <textarea name='progress' class='form-control'>"
+    + "</b>\n    </div>\n</div>\n<div class='form-group'>\n    <label for=\"comments\">Axes de progrès pour cette échéance</label>\n    <textarea name='progress' class='form-control'>"
     + escapeExpression(((helper = (helper = helpers.progress || (depth0 != null ? depth0.progress : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"progress","hash":{},"data":data}) : helper)))
     + "</textarea>\n</div>\n<button type='button' class='btn btn-primary'>OK</button>\n</form>\n";
 },"useData":true});
@@ -72,6 +70,8 @@ templates['subitem.mustache'] = template({"1":function(depth0,helpers,partials,d
   stack1 = ((helper = (helper = helpers.scales || (depth0 != null ? depth0.scales : depth0)) != null ? helper : helperMissing),(options={"name":"scales","hash":{},"fn":this.program(1, data, depths),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.scales) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  return buffer;
+  return buffer + "<td>\n<div class='form-group'>\n    <textarea name='comments' class='form-control'>"
+    + escapeExpression(((helper = (helper = helpers.comments || (depth0 != null ? depth0.comments : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"comments","hash":{},"data":data}) : helper)))
+    + "</textarea>\n</div>\n</td>\n";
 },"useData":true,"useDepths":true});
 })();

@@ -38,7 +38,7 @@
                 <input type="hidden" name='contractor_id' value="${request.user.id}" />
             % endif
             <div class='row'>
-                <div class='col-sm-5'>
+                <div class='col-sm-6 col-sm-offset-3'>
                     <div class="form-group">
                         <div>
                             <b>Choisissez une échéance</b>
@@ -54,20 +54,6 @@
                                 </button>
                             % endfor
                         </div>
-                    </div>
-                </div>
-                <div class='col-sm-2'>
-                    OU
-                </div>
-                <div class='col-sm-5'>
-                    <div class="form-group">
-                        <button
-                            class='btn btn-success'
-                            type='submit'
-                            name='sheet'
-                            value='radar'>
-                            Voir l'évaluation globale
-                        </button>
                     </div>
                 </div>
             </div>

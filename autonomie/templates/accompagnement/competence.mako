@@ -22,6 +22,11 @@
 </%doc>
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
+<a class='pull-right btn btn-default'
+    href="${request.route_path('competence_grid', id=request.context.id, _query={'action': 'radar'})}"
+    >
+    Voir le profil de compétences entrepreneuriales
+</a>
 <div class='row'>
     <div class='col-xs-3' id='itemslist'>
     </div>

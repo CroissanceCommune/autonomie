@@ -28,11 +28,13 @@ Competence evaluation module
 """
 import logging
 import colander
+import functools
 from pyramid.httpexceptions import HTTPFound
+from sqlalchemy import func
 
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.utils import rest
+from autonomie.utils import rest, widgets
 from autonomie.models.user import (
     get_users_options,
 )
@@ -44,7 +46,10 @@ from autonomie.models.competence import (
     CompetenceGridItem,
     CompetenceGridSubItem,
 )
-from autonomie.resources import competence_js
+from autonomie.resources import (
+    competence_js,
+    competence_radar_js,
+)
 from autonomie.forms.competence import CompetenceGridQuerySchema
 from autonomie.views import (
     BaseView,
@@ -88,7 +93,7 @@ def competence_index_view(request):
     competence_js.need()
     user_options = get_users_options(roles=['contractor'])
     deadlines = CompetenceDeadline.query().all()
-    if 'deadline' in request.POST or 'reference' in request.POST:
+    if 'deadline' in request.POST or 'sheet' in request.POST:
         logger.debug(request.POST)
         schema = CompetenceGridQuerySchema.bind(request=request)
         try:
@@ -99,21 +104,17 @@ compétences : POSSIBLE BREAK IN ATTEMPT")
         else:
             # On récupère l'id du user pour l'évaluation
             contractor_id = appstruct['contractor_id']
+            # L'id de la période d'évaluation
+            deadline_id = appstruct['deadline']
 
             # On redirige vers la page appropriée
-            if 'deadline' in appstruct:
-                deadline_id = appstruct['deadline']
-                grid = get_competence_grid(
-                    request,
-                    contractor_id,
-                    deadline_id
-                )
-                url = request.route_path("competence_grid", id=grid.id)
-                return HTTPFound(url)
-
-            else:
-                # TODO: Build the view for the radar
-                pass
+            grid = get_competence_grid(
+                request,
+                contractor_id,
+                deadline_id
+            )
+            url = request.route_path("competence_grid", id=grid.id)
+            return HTTPFound(url)
 
     return {
         'title': u'Évaluation des compétences',
@@ -126,14 +127,21 @@ def competence_grid_view(context, request):
     """
     The competence grid base view
     """
-    # loadurl : The url to load the options
-    # context_url : The url to load datas about the context in json format
+    request.actionmenu.add(
+        widgets.ViewLink(
+            u"Page précédente",
+            "view",
+            path="competences",
+        )
+    )
     competence_js.need()
+    # loadurl : The url to load the options
     loadurl = request.route_path(
         'competence_grid',
         id=context.id,
         _query=dict(action='options'),
     )
+    # contexturl : The url to load datas about the context in json format
     contexturl = request.current_route_path()
 
     title = u"Évaluation des compétences de {0} pour la période \"{1}\"".format(
@@ -167,6 +175,73 @@ def competence_form_options(context, request):
     )
 
 
+def competence_radar_chart_view(context, request):
+    """
+    Competence radar chart view
+
+    :param obj context: a user model
+    """
+    competence_radar_js.need()
+    loadurl = request.route_path(
+        'competence_grid',
+        id=context.id,
+        _query=dict(action='radar'),
+    )
+    title = u"Profil des compétences entrepreneuriale  \
+{0}".format(context.deadline.label)
+
+    grids = []
+    # On récupère les grilles de compétences précédent la courant
+    deadlines = CompetenceDeadline.query()
+    deadlines = deadlines.filter(
+        CompetenceDeadline.order <= context.deadline.order
+    ).all()
+    scales = CompetenceScale.query().all()
+    for deadline in deadlines:
+        grid = get_competence_grid(request, context.contractor_id, deadline.id)
+        grids.append(grid)
+
+    return dict(
+        title=title,
+        loadurl=loadurl,
+        grids=grids,
+        deadlines=deadlines,
+        scales=scales,
+    )
+
+
+def competence_radar_chart_datas(context, request):
+    """
+    Return the datas used to show a radar / spider chart of a user's
+    competences
+    context : CompetenceGrid
+    """
+    datas = []
+    legend = []
+
+    deadlines = CompetenceDeadline.query()
+    deadlines = deadlines.filter(
+        CompetenceDeadline.order <= context.deadline.order
+    )
+    for deadline in deadlines:
+        grid = get_competence_grid(request, context.contractor_id, deadline.id)
+        datas.append(grid.__radar_datas__())
+        legend.append(u"Profil {0}".format(deadline.label))
+
+    datas.append(CompetenceOption.__radar_datas__())
+    legend.append(u"Profil référence")
+
+    config = {}
+    config['levels'] = CompetenceScale.query().count()
+    max_value = request.dbsession.query(
+        func.max(CompetenceScale.value)
+    ).all()[0][0]
+
+    config['maxValue'] = max_value
+
+    return {'datas': datas, 'legend': legend, "config": config}
+
+
 class RestCompetenceGrid(BaseView):
     """
     Json api for competence grid handling
@@ -192,7 +267,7 @@ class RestCompetenceGridItem(BaseView):
     def schema(self):
         return SQLAlchemySchemaNode(
             CompetenceGridItem,
-            includes=('progress', 'comments', 'id')
+            includes=('progress', 'id')
         )
 
     def collection_get(self):
@@ -234,7 +309,7 @@ class RestCompetenceGridSubItem(BaseView):
     def schema(self):
         return SQLAlchemySchemaNode(
             CompetenceGridSubItem,
-            includes=('evaluation', 'id')
+            includes=('evaluation', 'id', 'comments',)
         )
 
     def collection_get(self):
@@ -311,7 +386,14 @@ def includeme(config):
         renderer='/accompagnement/competence.mako',
         permission="edit",
     )
-    import functools
+    config.add_view(
+        competence_radar_chart_view,
+        route_name='competence_grid',
+        renderer='/accompagnement/competence_resume.mako',
+        permission="edit",
+        request_param="action=radar",
+    )
+
     add_json_view = functools.partial(
         config.add_view,
         renderer='json',
@@ -358,4 +440,9 @@ def includeme(config):
         route_name='competence_grid',
         request_method='GET',
         request_param="action=options",
+    )
+    add_json_view(
+        competence_radar_chart_datas,
+        route_name='competence_grid',
+        request_param="action=radar",
     )

@@ -30,6 +30,7 @@ def restrict_user_id(form, kw):
     if current_user.is_contractor():
         form['contractor_id'].validator = colander.OneOf((current_user.id,))
 
+
 @colander.deferred
 def deferred_deadline_id_validator(node, kw):
     return colander.OneOf(
@@ -42,12 +43,7 @@ class _CompetenceGridQuerySchema(colander.Schema):
     deadline = colander.SchemaNode(
         colander.Integer(),
         validator=deferred_deadline_id_validator,
-        missing=None,
-    )
-    sheet = colander.SchemaNode(
-        colander.String(),
-        validator=colander.OneOf(('radar',)),
-        missing=None,
+        missing=colander.drop,
     )
 
 

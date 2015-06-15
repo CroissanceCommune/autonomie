@@ -26,6 +26,11 @@
 <a class='btn btn-default pull-right hidden-print' href='#print' onclick="window.print()">
     <i class='glyphicon glyphicon-print'></i>Imprimer
 </a>
+<div class='row'>
+    <div class='col-xs-12'>
+        <img src="/public/competence_header.png" />
+    </div>
+</div>
 <div class='row' style="margin-bottom: 40px">
     <div class="col-xs-12">
         <h1 class='text-center'>${title}</h1>

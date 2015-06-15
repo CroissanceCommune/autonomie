@@ -41,13 +41,15 @@ from autonomie.utils.date import (
 
 ALLOWED_HTML_TAGS = bleach.ALLOWED_TAGS + [
     'font', 'br', 'p', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'hr', 'img',
-    'div', 'pre',
+    'div', 'pre', 'sup', 'u', 'strike', 'sub',
 ]
 ALLOWED_HTML_ATTRS = deepcopy(bleach.ALLOWED_ATTRIBUTES)
 ALLOWED_HTML_ATTRS['font'] = ['color']
 ALLOWED_HTML_ATTRS['*'] = ['class', 'style']
 ALLOWED_HTML_ATTRS['img'] = ['src', 'width', 'height', 'alt']
-ALLOWED_CSS_STYLES = ['color', 'text-align', 'font-weight', 'font-family']
+ALLOWED_CSS_STYLES = [
+    'color', 'text-align', 'font-weight', 'font-family', 'text-decoration',
+]
 
 DEF_STATUS = u"Statut inconnu"
 STATUS = dict((

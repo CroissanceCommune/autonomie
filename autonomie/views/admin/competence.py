@@ -66,13 +66,12 @@ class AdminCompetencePrintOutput(BaseFormView):
     schema = CompetencePrintConfigSchema(title=u"")
 
     def before(self, form):
-        print(form)
         appstruct = {}
 
         file_name = u"competence_header.png"
         file_model = ConfigFiles.get(file_name)
         if file_model is not None:
-            appstruct['header_png'] = {
+            appstruct['header_img'] = {
                 'uid': file_model.id,
                 'filename': file_model.name,
                 'preview_url': self.request.route_url(
@@ -96,7 +95,7 @@ class AdminCompetencePrintOutput(BaseFormView):
         )
 
     def submit_success(self, appstruct):
-        file_datas = appstruct.get('header_png')
+        file_datas = appstruct.get('header_img')
 
         if file_datas:
             file_name = "competence_header.png"

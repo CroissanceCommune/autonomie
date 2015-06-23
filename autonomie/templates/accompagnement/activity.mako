@@ -28,6 +28,7 @@
 <%block name="content">
 <a class='btn btn-default pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>PDF</a>
 <div class='row'>
+    <div class='col-xs-12'>
                 <% items = (\
                 (u'Conseiller(s)', ','.join([api.format_account(conseiller) for conseiller in activity.conseillers])), \
                     (u'Horaire', api.format_datetime(activity.datetime)), \
@@ -57,6 +58,6 @@
             <h3>${label}</h3>
             ${format_text(getattr(activity, attr))}
         % endfor
-
+    </div>
 </div>
 </%block>

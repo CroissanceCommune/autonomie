@@ -43,13 +43,14 @@ from webhelpers import paginate
 from sqla_inspect.csv import SqlaCsvExporter
 from sqla_inspect.excel import SqlaXlsExporter
 from autonomie.export.utils import write_file_to_request
+from autonomie.utils import rest
 
 
 submit_btn = Button(name="submit", type="submit", title=u"Valider")
 cancel_btn = Button(name="cancel", type="submit", title=u"Annuler")
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BaseView(object):
@@ -159,8 +160,8 @@ class BaseListClass(BaseView):
             except colander.Invalid as e:
                 # If values are not valid, we want the default ones to be
                 # provided see the schema definition
-                log.error("CURRENT SEARCH VALUES ARE NOT VALID")
-                log.error(e)
+                logger.error("CURRENT SEARCH VALUES ARE NOT VALID")
+                logger.error(e)
                 appstruct = schema.deserialize({})
         return schema, appstruct
 
@@ -427,9 +428,9 @@ class BaseFormView(FormView):
         We add a token here for forms that are collapsed by default to keep them
         open if there is an error
         """
-        log.exception(e)
-        # On loggue l'erreur colander d'origine
-        log.exception(e.error)
+        logger.exception(e)
+        # On loggergue l'erreur colander d'origine
+        logger.exception(e.error)
         print(e)
         print(e.error)
         return dict(form=e.render(), formerror=True)
@@ -532,3 +533,110 @@ generation")
         self.request.dbsession.flush()
         self.request.session.flash(self._message(item))
         return self._redirect()
+
+
+class BaseRestView(BaseView):
+    """
+    A base rest view
+
+    provides the base structure for a rest view for sqlalchemy model access
+
+    it handles :
+
+        get
+        delete
+        put
+        post requests
+
+    thanks to the colanderalchemy tools, we dynamically build the resulting
+    model
+
+    Following datas should be provided :
+
+        * Attributes
+
+            schema
+
+                A colanderalchemy schema, it can be provided through a property
+                or a simple attribute. For on the fly schema handling, you can
+                also override the get_schema method that returns self.schema by
+                default
+
+    The following could be provided
+
+        Methods
+
+            get_schema
+
+                See above comment
+
+            pre_format
+
+                Preformat submitted values before passing them to the form
+                schema
+
+            post_format
+
+                PostFormat the generated (or modified) model and launch some
+                custom action
+
+    """
+    schema = None
+
+    def get_schema(self, submitted):
+        return self.schema
+
+    def get(self):
+        return self.context
+
+    def pre_format(self, datas):
+        """
+        Allows to apply pre-formatting to the submitted datas
+        """
+        return datas
+
+    def post_format(self, entry):
+        """
+        Allos to apply post formatting to the model before flushing it
+        """
+        return entry
+
+    def _submit_datas(self, edit=False):
+        submitted = self.request.json_body
+        logger.debug(u"Submitting %s" % submitted)
+        schema = self.get_schema(submitted)
+
+        try:
+            submitted = self.pre_format(submitted)
+            attributes = schema.deserialize(submitted)
+        except colander.Invalid, err:
+            logger.exception("  - Erreur")
+            logger.exception(submitted)
+            raise rest.RestError(err.asdict(), 400)
+
+        logger.debug(attributes)
+        if edit:
+            entry = schema.objectify(attributes, self.context)
+            entry = self.post_format(entry)
+            entry = self.request.dbsession.merge(entry)
+        else:
+            entry = schema.objectify(attributes)
+            entry = self.post_format(entry)
+            self.request.dbsession.add(entry)
+            # We need an id => flush
+            self.request.dbsession.flush()
+        logger.debug(entry)
+        return entry
+
+    def post(self):
+        return self._submit_datas(edit=False)
+
+    def put(self):
+        return self._submit_datas(edit=True)
+
+    def delete(self):
+        """
+        Delete the given entry
+        """
+        self.request.dbsession.delete(self.context)
+        return {}

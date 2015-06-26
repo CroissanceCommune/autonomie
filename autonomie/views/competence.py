@@ -34,7 +34,7 @@ from sqlalchemy import func
 
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.utils import rest, widgets
+from autonomie.utils import widgets
 from autonomie.models.user import (
     get_users_options,
 )
@@ -53,6 +53,7 @@ from autonomie.resources import (
 from autonomie.forms.competence import CompetenceGridQuerySchema
 from autonomie.views import (
     BaseView,
+    BaseRestView,
 )
 
 
@@ -262,7 +263,7 @@ class RestCompetenceGrid(BaseView):
         }
 
 
-class RestCompetenceGridItem(BaseView):
+class RestCompetenceGridItem(BaseRestView):
     """
     Rest view for Item handling
 
@@ -285,26 +286,8 @@ class RestCompetenceGridItem(BaseView):
         """
         return self.context.items
 
-    def put(self):
-        submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
-        schema = self.schema
 
-        try:
-            attributes = schema.deserialize(submitted)
-        except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
-            raise rest.RestError(err.asdict(), 400)
-
-        logger.debug(attributes)
-
-        item = schema.objectify(attributes, self.context)
-        item = self.request.dbsession.merge(item)
-        return item
-
-
-class RestCompetenceGridSubItem(BaseView):
+class RestCompetenceGridSubItem(BaseRestView):
     """
     Rest view for Sub item handling:
 
@@ -326,24 +309,6 @@ class RestCompetenceGridSubItem(BaseView):
         context is an item
         """
         return self.context.subitems
-
-    def put(self):
-        submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
-        schema = self.schema
-
-        try:
-            attributes = schema.deserialize(submitted)
-        except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
-            raise rest.RestError(err.asdict(), 400)
-
-        logger.debug(attributes)
-
-        subitem = schema.objectify(attributes, self.context)
-        subitem = self.request.dbsession.merge(subitem)
-        return subitem
 
 
 def includeme(config):

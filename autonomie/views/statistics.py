@@ -52,7 +52,6 @@ from autonomie.statistics import (
     DATE_OPTIONS,
 )
 from autonomie.utils import (
-    rest,
     ascii,
     widgets,
 )
@@ -61,6 +60,7 @@ from autonomie.views import (
     DisableView,
     DuplicateView,
     BaseCsvView,
+    BaseRestView,
 )
 from autonomie.export.utils import write_file_to_request
 
@@ -252,7 +252,7 @@ la modifier <a href='{0}'>Ici</a>"
     route_name = "statistic"
 
 
-class RestStatisticSheet(BaseView):
+class RestStatisticSheet(BaseRestView):
     """
     Json rest api for statistic sheet handling
     """
@@ -270,23 +270,8 @@ class RestStatisticSheet(BaseView):
             'entries': self.context.entries
         }
 
-    def put(self):
-        submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
 
-        try:
-            attributes = self.schema.deserialize(submitted)
-        except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
-            raise rest.RestError(err.asdict(), 400)
-        logger.debug(attributes)
-        sheet = self.schema.objectify(attributes, self.context)
-        sheet = self.request.dbsession.merge(sheet)
-        return sheet
-
-
-class RestStatisticEntry(BaseView):
+class RestStatisticEntry(BaseRestView):
     """
     Json rest api for statistic entries handling
     """
@@ -297,12 +282,6 @@ class RestStatisticEntry(BaseView):
             includes=('title', 'description',),
         )
 
-    def get(self):
-        """
-        Return the entry matching the context
-        """
-        return self.context
-
     def collection_get(self):
         """
         Return the list of entries
@@ -310,62 +289,18 @@ class RestStatisticEntry(BaseView):
         """
         return self.context.entries
 
-    def _submit_datas(self, edit=False):
-        """
-        Handle datas submission for add/edit
-        """
-        submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
-
-        try:
-            attributes = self.schema.deserialize(submitted)
-        except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
-            raise rest.RestError(err.asdict(), 400)
-
-        logger.debug(attributes)
-        if edit:
-            entry = self.schema.objectify(attributes, self.context)
-            entry = self.request.dbsession.merge(entry)
-        else:
-            entry = self.schema.objectify(attributes)
-            entry.sheet = self.context
-            self.request.dbsession.add(entry)
-            # We need an id => flush
-            self.request.dbsession.flush()
-        logger.debug(entry)
+    def post_format(self, entry):
+        entry.sheet = self.context
         return entry
 
-    def post(self):
-        """
-        Entry add view
 
-        context is the parent sheet
-        """
-        return self._submit_datas(edit=False)
-
-    def put(self):
-        """
-        edit a given entry
-
-        context is the current entry
-        """
-        return self._submit_datas(edit=True)
-
-    def delete(self):
-        """
-        Delete the given entry
-        """
-        self.request.dbsession.delete(self.context)
-        return {}
-
-
-class RestStatisticCriterion(BaseView):
+class RestStatisticCriterion(BaseRestView):
     """
     Api rest pour la gestion des critères statistiques
     """
-    def schema(self, model_type):
+    def get_schema(self, submitted):
+        model_type = submitted['type']
+
         model = CRITERION_MODELS.get(model_type)
         return SQLAlchemySchemaNode(
             model,
@@ -390,65 +325,13 @@ class RestStatisticCriterion(BaseView):
                 values['searches'] = [searches]
         return values
 
-    def _submit_datas(self, edit=False):
+    def post_format(self, criterion):
         """
-        Handle datas submission for add/edit
-
-        :param bool edit: is it an edition call ?
+        We hard-set the model_type
         """
-        submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
-
-        model_type = submitted['type']
-        schema = self.schema(model_type)
-
-        try:
-            submitted = self.pre_format(submitted)
-            attributes = schema.deserialize(submitted)
-        except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
-            raise rest.RestError(err.asdict(), 400)
-
-        logger.debug(attributes)
-
-        if edit:
-            criterion = schema.objectify(attributes, self.context)
-            criterion = schema.objectify(attributes, self.context)
-            criterion.type = model_type
-            self.request.dbsession.merge(criterion)
-        else:
-            criterion = schema.objectify(attributes)
+        if self.context.__name__ == 'statistic_entry':
             criterion.entry = self.context
-            self.request.dbsession.add(criterion)
-            self.request.dbsession.flush()
-        logger.debug(criterion)
         return criterion
-
-    def post(self):
-        """
-        Add criterion view
-        """
-        return self._submit_datas(edit=False)
-
-    def get(self):
-        """
-        Get single criteria view
-        """
-        return self.context
-
-    def put(self):
-        """
-        edit criterion view
-        """
-        return self._submit_datas(edit=True)
-
-    def delete(self):
-        """
-        Delete the given entry
-        """
-        self.request.dbsession.delete(self.context)
-        return {}
 
 
 class CsvEntryView(BaseCsvView):

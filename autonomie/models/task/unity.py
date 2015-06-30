@@ -32,6 +32,7 @@ from sqlalchemy import Integer
 from autonomie.models.base import default_table_args
 from autonomie.models.base import DBBASE
 
+
 class WorkUnit(DBBASE):
     """
         Work unit, used to build the price list
@@ -41,3 +42,5 @@ class WorkUnit(DBBASE):
     id = Column(Integer, primary_key=True)
     label = Column(String(100))
 
+    def __json__(self, request):
+        return dict(id=self.id, label=self.label, value=self.label)

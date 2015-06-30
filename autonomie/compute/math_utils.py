@@ -125,3 +125,16 @@ def convert_to_int(value, default=None):
             raise err
     return val
 
+
+def convert_to_float(value, default=None):
+    """
+    Try to convert the given value object to a float
+    """
+    try:
+        val = float(value)
+    except ValueError as err:
+        if default:
+            val = default
+        else:
+            raise err
+    return val

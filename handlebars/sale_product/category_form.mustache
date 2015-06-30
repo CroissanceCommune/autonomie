@@ -1,0 +1,28 @@
+{{#if title}}
+<h3>
+    <span>
+        {{ title }}
+    </span>
+    <button class='btn btn-default btn-xs edit' style='font-size:9px' title="Éditer le titre de la catégorie">
+    <i class="glyphicon glyphicon-pencil" style="vertical-align:middle"> </i>
+    </button>
+</h3>
+{{/if}}
+<form class="form"
+{{#if title}}
+    style='display:none'
+{{/if}}
+>
+  <div class="form-group">
+    <label class='control-label' for="title">Titre de la catégorie</label>
+    <input type="text" name='title' class="form-control" id="title" placeholder="Titre" value='{{title}}'>
+  </div>
+    <button type="submit" class="btn btn-primary submit">
+    {{#if title}}
+        Modifier
+    {{ else }}
+        Ajouter
+    {{/if}}
+    </button>
+</form>
+

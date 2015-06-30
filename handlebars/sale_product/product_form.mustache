@@ -1,0 +1,45 @@
+<form>
+    <div class="form-group">
+        <label for='label'>Nom du produit *</label>
+        <input class="form-control" type='text' name='label' value='{{ label }}'/>
+        <span class='help-block'>Requis, utilisé lors de la sélection des produits dans l'interface d'édition de devis/factures</span>
+    </div>
+    <div class="form-group">
+        <label for='ref'>Référence</label>
+        <input class="form-control" type='text' name='ref' value='{{ ref }}'/>
+    </div>
+    <div class="form-group">
+         <label for='description'>Description</label>
+         <textarea name='description' class='form-control'>{{ description }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for='value'>Valeur</label>
+        <input class="form-control" type='number' step='any' min='0' name='value' value='{{ value }}'/>
+    </div>
+    <div class="form-group">
+        <label for='unity'>Unité</label>
+        <select name='unity' class='form-control'>
+        <option value=''></option>
+        {{#unity_options }}
+            <option value='{{value}}' {{#selected}}selected{{/selected}}>
+                {{label}}
+            </option>
+        {{/unity_options }}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for='tva'>Tva</label>
+        <select name='tva' class='form-control'>
+        <option value=''></option>
+        {{#tva_options }}
+            <option value='{{ value }}' {{#selected}}selected{{/selected}}>
+                {{ name }}
+            </option>
+        {{/tva_options }}
+        </select>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+        <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+    </div>
+</form>

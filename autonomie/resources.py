@@ -221,6 +221,7 @@ competence_js = get_module_resource(
     tmpl=True,
     extra_depends=[select2]
 )
+sale_product_js = get_module_resource('sale_product', tmpl=True)
 holiday_js = get_module_resource("holiday", tmpl=True)
 admin_option_js = get_module_resource("admin_option")
 commercial_js = get_module_resource("commercial")

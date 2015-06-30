@@ -68,6 +68,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.json",
     "autonomie.views.manage",
     "autonomie.views.payment",
+    "autonomie.views.sale_product",
     "autonomie.views.project",
     "autonomie.views.sage",
     "autonomie.views.static",

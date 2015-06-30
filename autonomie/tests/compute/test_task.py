@@ -24,18 +24,27 @@
 
 from autonomie.compute.task import (
     LineCompute,
+    GroupCompute,
     TaskCompute,
     EstimationCompute,
     InvoiceCompute,
-    reverse_tva,
     compute_tva
 )
 from autonomie.compute import math_utils
 
 TASK = {"expenses":1500, "expenses_ht":1000}
-LINES = [{'cost':10025, 'tva':1960, 'quantity':1.25},
-         {'cost':7500,  'tva':1960, 'quantity':3},
-         {'cost':-5200, 'tva':1960, 'quantity':1}]
+LINES = [
+    [
+        {'cost':10025, 'tva':1960, 'quantity':1.25},
+        {'cost':7500,  'tva':1960, 'quantity':3},
+        {'cost':-5200, 'tva':1960, 'quantity':1}
+    ],
+    [
+        {'cost':10025, 'tva':1960, 'quantity':1.25},
+        {'cost':7500,  'tva':1960, 'quantity':3},
+        {'cost':-5200, 'tva':1960, 'quantity':1}
+    ],
+]
 DISCOUNTS = [{'amount':2000, 'tva':1960}]
 
 # Values:
@@ -52,8 +61,8 @@ from autonomie.tests.base import Dummy
 TASK_LINES_TOTAL_HT = (12531.25, 22500, -5200)
 TASK_LINES_TVAS = (2456.125, 4410, -1019.2)
 
-LINES_TOTAL_HT = sum(TASK_LINES_TOTAL_HT)
-LINES_TOTAL_TVAS = sum(TASK_LINES_TVAS)
+LINES_TOTAL_HT = sum(TASK_LINES_TOTAL_HT) * 2
+LINES_TOTAL_TVAS = sum(TASK_LINES_TVAS) * 2
 EXPENSE_TVA = 196
 
 DISCOUNT_TOTAL_HT = sum([d['amount']for d in DISCOUNTS])
@@ -74,6 +83,13 @@ class DummyLine(Dummy, LineCompute):
     pass
 
 
+class DummyGroup(Dummy, GroupCompute):
+    """
+    dummy line group model
+    """
+    pass
+
+
 class DummyTask(Dummy, TaskCompute):
     """
         Dummy task model
@@ -90,22 +106,33 @@ class DummyEstimation(Dummy, EstimationCompute):
     pass
 
 
-def get_lines(datas=LINES):
+def get_lines(datas):
     lines = []
     for line in datas:
         lines.append(DummyLine(**line))
     return lines
 
+
+def get_groups():
+    groups = []
+    for group in LINES:
+        g = DummyGroup(lines=[])
+        g.lines = get_lines(group)
+        groups.append(g)
+    return groups
+
+
 def get_task(factory=DummyTask):
     t = factory(**TASK)
-    t.lines = get_lines()
+    t.line_groups = get_groups()
     t.discounts = get_lines(DISCOUNTS)
     return t
+
 
 class TestTaskCompute():
     def test_lines_total_ht(self):
         task = get_task()
-        assert task.lines_total_ht() == LINES_TOTAL_HT
+        assert task.groups_total_ht() == LINES_TOTAL_HT
 
     def test_discounts_total_ht(self):
         task = get_task()
@@ -117,8 +144,12 @@ class TestTaskCompute():
 
     def test_get_tvas(self):
         task = TaskCompute()
-        task.lines = [DummyLine(cost=35000, quantity=1, tva=1960),
-                      DummyLine(cost=40000, quantity=1, tva=550)]
+        task.line_groups = [DummyGroup(
+            lines=[
+                DummyLine(cost=35000, quantity=1, tva=1960),
+                DummyLine(cost=40000, quantity=1, tva=550)
+            ]
+        )]
         task.discounts = [DummyLine(amount=1200, tva=550),
                           DummyLine(amount=15000, tva=1960)]
         tvas = task.get_tvas()
@@ -135,7 +166,9 @@ class TestTaskCompute():
 
     def test_total_ttc(self):
         task = TaskCompute()
-        task.lines = [DummyLine(cost=1030, quantity=1.25, tva=1960)]
+        task.line_groups = [DummyGroup(
+            lines=[DummyLine(cost=1030, quantity=1.25, tva=1960)]
+        )]
         # cf ticket #501
         # line total : 12.875
         # tva : 2.5235 -> 2.52
@@ -149,15 +182,18 @@ class TestTaskCompute():
 
     def test_no_tva(self):
         line = DummyLine(cost=3500, tva=-100)
-        task = DummyTask(lines=[line])
+        group = DummyGroup(lines=[line])
+        task = DummyTask(line_groups=[group])
         assert task.no_tva()
 
         line = DummyLine(cost=3500, tva=0)
-        task = DummyTask(lines=[line])
+        group = DummyGroup(lines=[line])
+        task = DummyTask(line_groups=[group])
         assert not task.no_tva()
 
         line = DummyLine(cost=3500, tva=100)
-        task.lines.append(line)
+        group = DummyGroup(lines=[line])
+        task = DummyTask(line_groups=[group])
         assert not task.no_tva()
 
 
@@ -166,7 +202,9 @@ class TestInvoiceCompute():
         task = DummyInvoice()
         task.expenses = 0
         task.payments = [Dummy(amount=1500), Dummy(amount=1000)]
-        task.lines =  [DummyLine(cost=6000, quantity=1, tva=0)]
+        task.line_groups =  [DummyGroup(
+            lines=[DummyLine(cost=6000, quantity=1, tva=0)]
+        )]
         task.discounts = []
         return task
 
@@ -185,9 +223,11 @@ class TestEstimationCompute():
         task.expenses_ht = 20
         task.deposit = 20
         task.manualDeliverables = 0
-        task.lines = [DummyLine(cost=5000, quantity=1, tva=1960),
+        task.line_groups = [DummyGroup(
+            lines=[DummyLine(cost=5000, quantity=1, tva=1960),
                       DummyLine(cost=5000, quantity=1, tva=1960),
                       DummyLine(cost=1000, quantity=1, tva=500)]
+        )]
         task.discounts = []
         task.payment_lines = [Dummy(amount=4000),
                               Dummy(amount=6000),
@@ -266,7 +306,7 @@ class TestEstimationCompute():
 
 class TestLineCompute():
     def test_line_compute(self):
-        for index, line_obj in enumerate(get_lines()):
+        for index, line_obj in enumerate(get_lines(LINES[0])):
             assert line_obj.total_ht() == TASK_LINES_TOTAL_HT[index]
             assert line_obj.total() == TASK_LINES_TOTAL_HT[index] +\
                     TASK_LINES_TVAS[index]

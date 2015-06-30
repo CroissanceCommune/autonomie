@@ -24,67 +24,61 @@
 import unittest
 import datetime
 
-from autonomie.models.task import (InvoiceLine, CancelInvoiceLine,
-                                        EstimationLine, PaymentLine)
+from autonomie.models.task import (
+    TaskLine,
+    TaskLineGroup,
+    PaymentLine,
+)
 
 
-LINE = {'description':u'text1', 'cost':10025, 'tva':1960,
-          'unity':'DAY', 'quantity':1.25, 'rowIndex':1}
+LINE = {
+    'description': u'text1',
+    'cost': 10025,
+    'tva': 1960,
+    'unity': 'DAY',
+    'quantity': 1.25,
+    'order': 1
+}
 
-PAYMENT_LINE = {'description':u"Début",
-                "paymentDate":datetime.date(2012, 12, 12),
-                "amount":1000,
-                "rowIndex":1}
+PAYMENT_LINE = {
+    'description': u"Début",
+    "paymentDate": datetime.date(2012, 12, 12),
+    "amount": 1000,
+    "rowIndex": 1
+}
 
-class TestEstimationLine(unittest.TestCase):
+
+class TestTaskLine(unittest.TestCase):
     def test_duplicate_line(self):
-        line = EstimationLine(**LINE)
+        line = TaskLine(**LINE)
         dline = line.duplicate()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
+        for i in ('order', 'cost', 'tva', "description", "quantity", "unity"):
             self.assertEqual(getattr(dline, i), getattr(line, i))
 
-    def test_gen_invoiceline(self):
-        line = EstimationLine(**LINE)
-        iline = line.gen_invoice_line()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
+    def test_gen_cancelinvoiceline(self):
+        line = TaskLine(**LINE)
+        iline = line.gen_cancelinvoice_line()
+        for i in ('order', 'tva', "description", "quantity", "unity"):
             self.assertEqual(getattr(line, i), getattr(iline, i))
+        self.assertEqual(line.cost, -1 * iline.cost)
 
     def test_total(self):
-        i = EstimationLine(cost=1.25, quantity=1.25, tva=1960)
+        i = TaskLine(cost=1.25, quantity=1.25, tva=1960)
         self.assertEqual(i.total_ht(), 1.5625)
         self.assertEqual(i.total(), 1.86875)
 
-class TestInvoiceLine(unittest.TestCase):
-    def test_duplicate_line(self):
-        line = InvoiceLine(**LINE)
-        dline = line.duplicate()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
-            self.assertEqual(getattr(dline, i), getattr(line, i))
 
+class TestTaskLineGroup(unittest.TestCase):
+    def test_duplicate(self):
+        g = TaskLineGroup(title="oo", description="")
+        g.lines = [TaskLine(**LINE), TaskLine(**LINE)]
+        res = g.duplicate()
 
-    def test_gen_cancelinvoice_line(self):
-        line = InvoiceLine(**LINE)
-        cline = line.gen_cancelinvoice_line()
-        for i in ('rowIndex', "description", 'tva', "quantity", "unity"):
-            self.assertEqual(getattr(cline, i), getattr(line, i))
-        self.assertEqual(cline.cost, -1 * line.cost)
+        for i in ('order', 'tva', "description", "quantity", "unity"):
+            self.assertEqual(getattr(g.lines[0], i), getattr(res.lines[0], i))
 
-    def test_total(self):
-        i = InvoiceLine(cost=1.25, quantity=1.25, tva=1960)
-        self.assertEqual(i.total_ht(), 1.5625)
-        self.assertEqual(i.total(), 1.86875)
+        self.assertEqual(g.total_ht(), res.total_ht())
 
-class TestCancelInvoiceLine(unittest.TestCase):
-    def test_duplicate_line(self):
-        line = CancelInvoiceLine(**LINE)
-        dline = line.duplicate()
-        for i in ('rowIndex', 'cost', 'tva', "description", "quantity", "unity"):
-            self.assertEqual(getattr(dline, i), getattr(line, i))
-
-    def test_total(self):
-        i = CancelInvoiceLine(cost=1.25, quantity=1.25, tva=1960)
-        self.assertEqual(i.total_ht(), 1.5625)
-        self.assertEqual(i.total(), 1.86875)
 
 class TestPaymentLine(unittest.TestCase):
     def test_duplicate(self):
@@ -94,4 +88,3 @@ class TestPaymentLine(unittest.TestCase):
             self.assertEqual(getattr(line, i), getattr(dline, i))
         today = datetime.date.today()
         self.assertEqual(dline.paymentDate, today)
-

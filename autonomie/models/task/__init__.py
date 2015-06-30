@@ -25,18 +25,26 @@
 """
     The task package entry
 """
-from .invoice import Invoice
-from .invoice import CancelInvoice
-from .invoice import InvoiceLine
-from .invoice import CancelInvoiceLine
-#from .invoice import ManualInvoice
-from .invoice import Payment
-from .estimation import Estimation
-from .estimation import EstimationLine
-from .estimation import PaymentLine
-from .task import Task
-from .task import DiscountLine
-from .task import TaskStatus
+from .invoice import (
+    Invoice,
+    CancelInvoice,
+    InvoiceLine,
+    CancelInvoiceLine,
+    Payment,
+)
+from .estimation import (
+    Estimation,
+    EstimationLine,
+    PaymentLine,
+)
+from .task import (
+    Task,
+    DiscountLine,
+    TaskLine,
+    TaskLineGroup,
+    TaskStatus,
+)
+
 from .unity import WorkUnit
 from .options import PaymentConditions
 __author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"

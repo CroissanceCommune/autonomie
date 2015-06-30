@@ -27,7 +27,6 @@
 """
 import datetime
 import logging
-import colander
 import deform
 
 from zope.interface import implementer
@@ -48,7 +47,6 @@ from sqlalchemy.orm import (
     relationship,
     deferred,
     backref,
-    validates,
 )
 # Aye : ici on a du double dans la bdd, en attendant une éventuelle
 # migration des données, on dépend entièrement de mysql
@@ -60,7 +58,6 @@ from autonomie.models.types import (
     PersistentACLMixin,
 )
 from autonomie.models.utils import get_current_timestamp
-from autonomie.exception import Forbidden
 from autonomie.models.base import (
     DBSESSION,
     DBBASE,
@@ -77,7 +74,10 @@ from .interfaces import (
     IInvoice,
     IPaidTask,
 )
-from .task import Task
+from .task import (
+    Task,
+    TaskLine,
+)
 from .states import DEFAULT_STATE_MACHINES
 
 log = logging.getLogger(__name__)
@@ -285,39 +285,40 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.phase = self.phase
         cancelinvoice.customer_id = self.customer_id
 
-        for line in self.lines:
-            cancelinvoice.lines.append(
-                line.gen_cancelinvoice_line()
+        cancelinvoice.line_groups = []
+        for group in self.line_groups:
+            cancelinvoice.line_groups.append(
+                group.gen_cancelinvoice_group()
             )
-        rowindex = self.get_next_row_index()
+        order = self.get_next_row_index()
 
         for discount in self.discounts:
-            discount_line = CancelInvoiceLine(
+            discount_line = TaskLine(
                 cost=discount.amount,
                 tva=discount.tva,
                 quantity=1,
                 description=discount.description,
-                rowIndex=rowindex,
+                order=order,
                 unity='NONE',
             )
-            rowindex += 1
-            cancelinvoice.lines.append(discount_line)
+            order += 1
+            cancelinvoice.default_line_group.lines.append(discount_line)
 
         for index, payment in enumerate(self.payments):
-            paid_line = CancelInvoiceLine(
+            paid_line = TaskLine(
                 cost=payment.amount,
                 tva=0,
                 quantity=1,
                 description=u"Paiement {0}".format(index + 1),
-                rowIndex=rowindex,
+                order=order,
                 unity='NONE',
             )
-            rowindex += 1
-            cancelinvoice.lines.append(paid_line)
+            order += 1
+            cancelinvoice.default_line_group.lines.append(paid_line)
         return cancelinvoice
 
     def get_next_row_index(self):
-        return len(self.lines) + 1
+        return len(self.default_line_group.lines) + 1
 
     def valid_callback(self):
         """
@@ -385,8 +386,10 @@ class Invoice(Task, InvoiceCompute):
         invoice.expenses_ht = self.expenses_ht
         invoice.financial_year = date.year
 
-        for line in self.lines:
-            invoice.lines.append(line.duplicate())
+        invoice.line_groups = []
+        for group in self.line_groups:
+            invoice.line_groups.append(group.duplicate())
+
         for line in self.discounts:
             invoice.discounts.append(line.duplicate())
         return invoice

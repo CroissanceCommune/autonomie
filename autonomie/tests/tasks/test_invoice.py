@@ -26,8 +26,12 @@ import datetime
 import pytest
 from pyramid import testing
 from mock import MagicMock
-from autonomie.models.task import (CancelInvoice,
-                                    Invoice, InvoiceLine, DiscountLine)
+from autonomie.models.task import (
+    CancelInvoice,
+    Invoice,
+    TaskLine,
+    DiscountLine,
+)
 from autonomie.models.user import User
 from autonomie.models.customer import Customer
 from autonomie.models.project import Phase, Project
@@ -37,13 +41,13 @@ LINES = [{'description':u'text1',
            'tva':1960,
           'unity':'DAY',
           'quantity':1.25,
-          'rowIndex':1},
+          'order':1},
          {'description':u'text2',
           'cost':7500,
            'tva':1960,
           'unity':'month',
           'quantity':3,
-          'rowIndex':2}]
+          'order':2}]
 
 DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 
@@ -60,7 +64,7 @@ INVOICE = dict( name=u"Facture 2",
 def invoice():
     inv = Invoice(**INVOICE)
     for line in LINES:
-        inv.lines.append(InvoiceLine(**line))
+        inv.default_line_group.lines.append(TaskLine(**line))
     for discount in DISCOUNTS:
         inv.discounts.append(DiscountLine(**discount))
     return inv
@@ -134,8 +138,8 @@ def test_gen_cancelinvoice_payment(dbsession, invoice):
     invoice.statusPersonAccount = user
     invoice.record_payment(mode="c", amount=1500)
     cinv = invoice.gen_cancelinvoice(user)
-    assert len(cinv.lines) ==  len(invoice.lines) + len(invoice.discounts) + 1
-    assert cinv.lines[-1].cost == 1500
+    assert len(cinv.default_line_group.lines) ==  len(invoice.default_line_group.lines) + len(invoice.discounts) + 1
+    assert cinv.default_line_group.lines[-1].cost == 1500
 
 def test_duplicate_invoice(dbsession, invoice):
     user = dbsession.query(User).first()
@@ -150,7 +154,7 @@ def test_duplicate_invoice(dbsession, invoice):
     invoice.address = customer.address
 
     newinvoice = invoice.duplicate(user, project, phase, customer)
-    assert len(invoice.lines) == len(newinvoice.lines)
+    assert len(invoice.default_line_group.lines) == len(newinvoice.default_line_group.lines)
     assert len(invoice.discounts) == len(newinvoice.discounts)
     assert invoice.project == newinvoice.project
     assert newinvoice.statusPersonAccount == user

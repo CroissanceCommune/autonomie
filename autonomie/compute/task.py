@@ -69,7 +69,7 @@ class TaskCompute(object):
         A.total()
     """
     # Should have a total_ht and a tva method
-    lines = []
+    line_groups = []
     # Should have a total_ht and a tva method
     discounts = []
     expenses = 0
@@ -80,11 +80,11 @@ class TaskCompute(object):
     def floor(self, amount):
         return math_utils.floor(amount, self.round_floor)
 
-    def lines_total_ht(self):
+    def groups_total_ht(self):
         """
             compute the sum of the task lines total
         """
-        return sum(line.total_ht() for line in self.lines)
+        return sum(group.total_ht() for group in self.line_groups)
 
     def discount_total_ht(self):
         """
@@ -97,9 +97,9 @@ class TaskCompute(object):
             compute the HT amount
         """
         expenses_ht = self.expenses_ht or 0
-        total_ht = self.lines_total_ht() - \
-                self.discount_total_ht() + \
-                expenses_ht
+        total_ht = self.groups_total_ht() - \
+            self.discount_total_ht() + \
+            expenses_ht
         return self.floor(total_ht)
 
     def get_tvas(self):
@@ -108,16 +108,20 @@ class TaskCompute(object):
             {1960:450.56, 700:45}
         """
         ret_dict = {}
-        for line in self.lines:
-            val = ret_dict.get(line.tva, 0)
-            val += line.tva_amount()
-            ret_dict[line.tva] = val
+        for group in self.line_groups:
+            for key, value in group.get_tvas().items():
+                val = ret_dict.get(key, 0)
+                val += value
+                ret_dict[key] = val
+
         for discount in self.discounts:
             val = ret_dict.get(discount.tva, 0)
             val -= discount.tva_amount()
             ret_dict[discount.tva] = val
+
         expense = self.get_expense_ht()
         tva_amount = expense.tva_amount()
+
         if tva_amount > 0:
             val = ret_dict.get(expense.tva, 0)
             val += expense.tva_amount()
@@ -254,7 +258,10 @@ class EstimationCompute(TaskCompute):
             for each tva value
         """
         ret_dict = {}
-        ret_dict = self.add_ht_by_tva(ret_dict, self.lines)
+        lines = []
+        for group in self.line_groups:
+            lines.extend(group.lines)
+        ret_dict = self.add_ht_by_tva(ret_dict, lines)
         ret_dict = self.add_ht_by_tva(ret_dict, self.discounts, operator.sub)
         expense = self.get_expense_ht()
         ret_dict = self.add_ht_by_tva(ret_dict, [expense])
@@ -402,6 +409,42 @@ class EstimationCompute(TaskCompute):
                     line = LineCompute(tva=tva, cost=total_ht)
                     result += line.total()
         return result
+
+
+class GroupCompute(object):
+    """
+    Computing tool for group objects
+    """
+    def get_tvas(self):
+        """
+            return a dict with the tvas amounts stored by tva
+            {1960:450.56, 700:45}
+        """
+        ret_dict = {}
+        for line in self.lines:
+            val = ret_dict.get(line.tva, 0)
+            val += line.tva_amount()
+            ret_dict[line.tva] = val
+        return ret_dict
+
+    def tva_amount(self):
+        """
+        Returns the TVA total for this group
+        """
+        return sum(tva for tva in self.get_tvas().values())
+
+    def total_ht(self):
+        """
+        Returns the ht total for this group
+        """
+        return sum(line.total_ht() for line in self.lines)
+
+    def total_ttc(self):
+        """
+        Returns the TTC total for this group
+        """
+        return self.total_ht() + self.tva_amount()
+
 
 class LineCompute(object):
     """

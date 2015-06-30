@@ -29,7 +29,7 @@ from autonomie.models.task import (
     Estimation,
     DiscountLine,
     PaymentLine,
-    EstimationLine,
+    TaskLine,
 )
 
 from autonomie.models.customer import Customer
@@ -55,13 +55,13 @@ LINES = [{'description':u'text1',
            'tva':1960,
           'unity':'DAY',
           'quantity':1.25,
-          'rowIndex':1},
+          'order':1},
          {'description':u'text2',
           'cost':7500,
            'tva':1960,
           'unity':'month',
           'quantity':3,
-          'rowIndex':2}]
+          'order':2}]
 
 DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 PAYMENT_LINES = [{'description':u"Début",
@@ -112,7 +112,7 @@ EST_SOLD = EST_TOTAL - EST_DEPOSIT - PAYMENTSSUM
 def estimation():
     est = Estimation(**ESTIMATION)
     for line in LINES:
-        est.lines.append(EstimationLine(**line))
+        est.add_line(TaskLine(**line))
     for line in DISCOUNTS:
         est.discounts.append(DiscountLine(**line))
     for line in PAYMENT_LINES:
@@ -153,7 +153,7 @@ def test_duplicate_estimation(dbsession, estimation):
     assert newestimation.number.startswith("P001_C001_D2_")
     assert newestimation.phase
     assert phase
-    assert len(estimation.lines) == len(newestimation.lines)
+    assert len(estimation.default_line_group.lines) == len(newestimation.default_line_group.lines)
     assert len(estimation.payment_lines) == len(newestimation.payment_lines)
     assert len(estimation.discounts) == len(newestimation.discounts)
 

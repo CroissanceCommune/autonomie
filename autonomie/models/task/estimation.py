@@ -47,7 +47,6 @@ from sqlalchemy.orm import (
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
 
-from autonomie import forms
 from autonomie.models.types import (
     CustomDateType,
     CustomDateType2,
@@ -73,6 +72,7 @@ from .invoice import (
 from .task import (
     Task,
     DiscountLine,
+    TaskLine,
 )
 from .states import DEFAULT_STATE_MACHINES
 
@@ -160,8 +160,9 @@ class Estimation(Task, EstimationCompute):
         estimation.expenses = self.expenses
         estimation.expenses_ht = self.expenses_ht
         estimation.paymentDisplay = self.paymentDisplay
-        for line in self.lines:
-            estimation.lines.append(line.duplicate())
+        estimation.line_groups = []
+        for group in self.line_groups:
+            estimation.line_groups.append(group.duplicate())
         for line in self.payment_lines:
             estimation.payment_lines.append(line.duplicate())
         for line in self.discounts:
@@ -172,7 +173,7 @@ class Estimation(Task, EstimationCompute):
         """
             Return an account invoiceline
         """
-        return InvoiceLine(cost=amount, description=description, tva=tva)
+        return TaskLine(cost=amount, description=description, tva=tva)
 
     def _make_deposit(self, invoice):
         """
@@ -187,8 +188,8 @@ class Estimation(Task, EstimationCompute):
         for tva, amount in self.deposit_amounts().items():
             description = u"Facture d'acompte"
             line = self._account_invoiceline(amount, description, tva)
-            invoice.lines.append(line)
-        return invoice, [line.duplicate() for line in invoice.lines]
+            invoice.default_line_group.lines.append(line)
+        return invoice, [l.duplicate() for l in invoice.lines]
 
     def _make_intermediary(self, invoice, paymentline, amounts):
         """
@@ -202,23 +203,24 @@ class Estimation(Task, EstimationCompute):
         for tva, amount in amounts.items():
             description = paymentline.description
             line = self._account_invoiceline(amount, description, tva)
-            invoice.lines.append(line)
-        return invoice, [line.duplicate() for line in invoice.lines]
+            invoice.default_line_group.lines.append(line)
+        return invoice, [l.duplicate() for l in invoice.lines]
 
     def _sold_invoice_lines(self, account_lines):
         """
             return the lines that will appear in the sold invoice
         """
-        sold_lines = []
-        for line in self.lines:
-            sold_lines.append(line.gen_invoice_line())
-        rowIndex = len(self.lines)
+        sold_groups = []
+        for group in self.line_groups:
+            sold_groups.append(group.duplicate())
+        order = len(self.line_groups)
         for line in account_lines:
-            rowIndex = rowIndex + 1
+            order = order + 1
             line.cost = -1 * line.cost
-            line.rowIndex = rowIndex
-            sold_lines.append(line)
-        return sold_lines
+            line.order = order
+            # On ajoute les lignes au groupe créé par défaut
+            sold_groups[0].lines.append(line)
+        return sold_groups
 
     def _make_sold(self, invoice, paymentline, paid_lines, is_sold):
         """
@@ -232,8 +234,8 @@ class Estimation(Task, EstimationCompute):
         invoice.display_units = self.display_units
         invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
-        for line in self._sold_invoice_lines(paid_lines):
-            invoice.lines.append(line)
+        for group in self._sold_invoice_lines(paid_lines):
+            invoice.line_groups.append(group)
         for line in self.discounts:
             invoice.discounts.append(line.duplicate())
         return invoice
@@ -253,9 +255,9 @@ class Estimation(Task, EstimationCompute):
         inv.estimation = self
 
         # Common args
-        inv.payment_conditions=self.payment_conditions
-        inv.description=self.description
-        inv.course=self.course
+        inv.payment_conditions = self.payment_conditions
+        inv.description = self.description
+        inv.course = self.course
         inv.address = self.address
         inv.CAEStatus = "draft"
         inv.set_sequence_number(seq_number)
@@ -331,8 +333,8 @@ class Estimation(Task, EstimationCompute):
             Add a line to the current task
         """
         if line is None:
-            line = EstimationLine(**kwargs)
-        self.lines.append(line)
+            line = TaskLine(**kwargs)
+        self.default_line_group.lines.append(line)
 
     def add_discount(self, line=None, **kwargs):
         """
@@ -354,7 +356,7 @@ class Estimation(Task, EstimationCompute):
         """
             Set the lines
         """
-        self.lines = lines
+        self.default_line_group.lines = lines
 
     def set_discounts(self, lines):
         """
@@ -380,7 +382,7 @@ class Estimation(Task, EstimationCompute):
                 manual_deliverables=self.manualDeliverables,
                 course=self.course,
                 payment_display=self.paymentDisplay,
-                lines=[line.__json__(request) for line in self.lines],
+                groups=[group.__json__(request) for group in self.line_groups],
                 payments=[line.__json__(request) for line in self.payment_lines]
             )
         )
@@ -479,17 +481,23 @@ class PaymentLine(DBBASE):
     paymentDate = Column(CustomDateType2)
     task = relationship(
         "Estimation",
-        backref=backref('payment_lines', order_by='PaymentLine.rowIndex',
-            cascade="all, delete-orphan"))
+        backref=backref(
+            'payment_lines',
+            order_by='PaymentLine.rowIndex',
+            cascade="all, delete-orphan"
+        )
+    )
 
     def duplicate(self):
         """
             duplicate a paymentline
         """
-        return PaymentLine(rowIndex=self.rowIndex,
-                             amount=self.amount,
-                             description=self.description,
-                             paymentDate=datetime.date.today())
+        return PaymentLine(
+            rowIndex=self.rowIndex,
+            amount=self.amount,
+            description=self.description,
+            paymentDate=datetime.date.today()
+        )
 
     def __repr__(self):
         return u"<PaymentLine id:{s.id} task_id:{s.task_id} amount:{s.amount}\

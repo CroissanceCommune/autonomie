@@ -38,6 +38,7 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Boolean,
+    Float,
 )
 from sqlalchemy.event import listen
 
@@ -63,7 +64,10 @@ from autonomie.models.tva import Tva
 
 from .interfaces import ITask
 from .states import DEFAULT_STATE_MACHINES
-from autonomie.compute.task import LineCompute
+from autonomie.compute.task import (
+    LineCompute,
+    GroupCompute,
+)
 from autonomie.models.node import Node
 
 log = logging.getLogger(__name__)
@@ -71,6 +75,7 @@ log = logging.getLogger(__name__)
 
 ALL_STATES = ('draft', 'wait', 'valid', 'invalid', 'geninv',
               'aboest', 'gencinv', 'resulted', 'paid', )
+
 
 @implementer(ITask)
 class Task(Node):
@@ -335,11 +340,18 @@ class Task(Node):
     state_machine = DEFAULT_STATE_MACHINES['base']
 
     def __init__(self, **kwargs):
-        if not 'CAEStatus' in kwargs:
+        if 'CAEStatus' not in kwargs:
             self.CAEStatus = self.state_machine.default_state
 
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+        # We add a default task line group
+        self.line_groups.append(TaskLineGroup(order=0))
+
+    @property
+    def default_line_group(self):
+        return self.line_groups[0]
 
     def __json__(self, request):
         """
@@ -513,7 +525,7 @@ class DiscountLine(DBBASE, LineCompute):
 
     def __repr__(self):
         return u"<DiscountLine amount : {s.amount} tva:{s.tva} id:{s.id}>"\
-                .format(s=self)
+            .format(s=self)
 
     def get_tva(self):
         return Tva.query(include_inactive=True).filter(Tva.value == self.tva)
@@ -559,12 +571,156 @@ class TaskStatus(DBBASE):
             },
         )
     )
+
     def __json__(self, request):
         result = dict(date=self.statusDate)
         result['code'] = self.statusCode
         if self.statusPersonAccount is not None:
             result['account'] = self.statusPersonAccount.__json__(request)
         return result
+
+
+class TaskLineGroup(DBBASE, GroupCompute):
+    """
+    Group of lines
+    """
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
+    )
+    task_id = Column(
+        Integer,
+        ForeignKey('task.id', ondelete="cascade"),
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    task = relationship(
+        "Task",
+        primaryjoin="TaskLineGroup.task_id==Task.id",
+        backref=backref(
+            "line_groups",
+            order_by='TaskLineGroup.order',
+            cascade="all, delete-orphan",
+            info={'colanderalchemy': {'title': u"Unités d'oeuvre"}}
+        ),
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    description = Column(Text(), default="")
+    title = Column(String(255), default="")
+    order = Column(Integer, default=1)
+
+    def __json__(self, request):
+        return dict(
+            title=self.title,
+            description=self.description,
+            task_id=self.task_id,
+            order=self.order,
+            lines=[line.__json__(self, request) for line in self.lines]
+        )
+
+    def duplicate(self):
+        group = TaskLineGroup(
+            title=self.title,
+            description=self.description,
+            task_id=self.task_id,
+            lines=[line.duplicate() for line in self.lines],
+        )
+        return group
+
+    def gen_cancelinvoice_group(self):
+        res = self.duplicate()
+        for line in res.lines:
+            line.cost = -1 * line.cost
+        return res
+
+
+class TaskLine(DBBASE, LineCompute):
+    """
+        Estimation/Invoice/CancelInvoice lines
+    """
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
+    )
+    group_id = Column(
+        Integer,
+        ForeignKey('task_line_group.id', ondelete="cascade"),
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    group = relationship(
+        TaskLineGroup,
+        primaryjoin="TaskLine.group_id==TaskLineGroup.id",
+        backref=backref(
+            "lines",
+            order_by='TaskLine.order',
+            cascade="all, delete-orphan",
+            info={'colanderalchemy': {'title': u"Prestations"}}
+        )
+    )
+    order = Column(Integer, default=1,)
+    description = Column(
+        Text,
+        info={
+            'colanderalchemy': {
+                'widget': deform.widget.RichTextWidget(
+                    options={
+                        'language': "fr_FR",
+                        'content_css': "/fanstatic/fanstatic/css/richtext.css",
+                    },
+                )
+            }
+        },
+    )
+    cost = Column(Integer, default=0,)
+    tva = Column(Integer, nullable=False, default=196)
+    quantity = Column(Float(), default=1)
+    unity = Column(String(100),)
+    product_id = Column(
+        Integer,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    product = relationship(
+        "Product",
+        primaryjoin="Product.id==TaskLine.product_id",
+        uselist=False,
+        foreign_keys=product_id,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+
+    def duplicate(self):
+        """
+            duplicate a line
+        """
+        newone = TaskLine()
+        newone.order = self.order
+        newone.cost = self.cost
+        newone.tva = self.tva
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        newone.product_id = self.product_id
+        return newone
+
+    def gen_cancelinvoice_line(self):
+        """
+            Return a cancel invoice line duplicating this one
+        """
+        newone = TaskLine()
+        newone.order = self.order
+        newone.cost = -1 * self.cost
+        newone.tva = self.tva
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        newone.product_id = self.product_id
+        return newone
+
+    def __repr__(self):
+        return u"<TaskLine id:{s.id} task_id:{s.group.task_id} cost:{s.cost} \
+ quantity:{s.quantity} tva:{s.tva}>".format(s=self)
 
 
 def _cache_amounts(mapper, connection, target):

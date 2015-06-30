@@ -35,6 +35,10 @@ var Popup = Backbone.Marionette.Region.extend({
     _.bindAll(this, "closeModal", "reset", "onShow", "getEl", 'onEmpty');
     Backbone.Marionette.Region.prototype.constructor.apply(this, arguments);
   },
+  closefunc: function(){
+    // By default, we redirect to the index
+    AutonomieApp.router.navigate("index", {trigger: true});
+  },
   getEl: function(selector){
     var $el = $(selector);
     return $el;
@@ -83,9 +87,7 @@ var Popup = Backbone.Marionette.Region.extend({
           "ui-corner-all ui-button-icon-only");
         closeBtn.html('<span class="ui-button-icon-primary ui-icon ' +
         'ui-icon-closethick"></span><span class="ui-button-text">Close</span>');
-        closeBtn.on("click.redirect", function(){
-          AutonomieApp.router.navigate("index", {trigger: true});
-        });
+        closeBtn.on("click.redirect", this_.closefunc);
       }
     });
     this.$el.dialog('open');

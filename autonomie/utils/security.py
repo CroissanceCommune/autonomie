@@ -79,6 +79,10 @@ from autonomie.models.statistics import (
     StatisticEntry,
     BaseStatisticCriterion,
 )
+from autonomie.models.sale_product import (
+    SaleProduct,
+    SaleProductCategory,
+)
 
 log = logging.getLogger(__name__)
 
@@ -127,6 +131,8 @@ class RootFactory(dict):
             ('payments', 'payment', Payment, ),
             ('phases', 'phase', Phase, ),
             ('projects', 'project', Project, ),
+            ('sale_categories', 'sale_category', SaleProductCategory, ),
+            ('sale_products', 'sale_product', SaleProduct, ),
             ('statistics', 'statistic', StatisticSheet,),
             ('statistic_entries', 'statistic_entry', StatisticEntry,),
             ('statistic_criteria', 'statistic_criterion',
@@ -399,6 +405,13 @@ def get_file_acl(self):
         return []
 
 
+def get_product_acls(self):
+    """
+    Return the acls for a product : A product's acls is given by its category
+    """
+    return get_customer_acls(self.category)
+
+
 def get_competence_acl(self):
     """
     Return acls for the Competence Grids objects
@@ -447,6 +460,8 @@ def set_models_acls():
     Payment.__default_acl__ = property(get_base_acl)
     Phase.__acl__ = property(get_phase_acls)
     Project.__default_acl__ = property(get_project_acls)
+    SaleProductCategory.__acl__ = property(get_customer_acls)
+    SaleProduct.__acl__ = property(get_product_acls)
     StatisticSheet.__acl__ = property(get_base_acl)
     StatisticEntry.__acl__ = property(get_base_acl)
     BaseStatisticCriterion.__acl__ = property(get_base_acl)

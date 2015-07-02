@@ -37,7 +37,7 @@ pyramid==1.5.4
 pyramid-beaker==0.7
 pyramid-chameleon==0.3
 pyramid-deform==0.2
-pyramid-layout==0.7
+pyramid-layout==1.0
 pyramid-mailer==0.10
 pyramid-mako==1.0.2
 pyramid-tm==0.5

@@ -398,105 +398,6 @@ class Invoice(Task, InvoiceCompute):
         return u"<Invoice id:{s.id}>".format(s=self)
 
 
-class InvoiceLine(DBBASE, LineCompute):
-    """
-        Invoice lines
-    """
-    __tablename__ = 'invoice_line'
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
-    )
-    task_id = Column(
-        Integer,
-        ForeignKey('invoice.id', ondelete="cascade"),
-        info={'colanderalchemy': forms.EXCLUDED}
-    )
-    rowIndex = Column(Integer, default=1,)
-    description = Column(
-        Text,
-        info={'colanderalchemy': {
-            'widget': deform.widget.RichTextWidget(
-                options={
-                    'language': "fr_FR",
-                    'content_css': "/fanstatic/fanstatic/css/richtext.css",
-                },
-            )
-        }},
-    )
-    cost = Column(Integer, default=0,)
-    tva = Column(
-        Integer,
-        nullable=False,
-        default=196,
-    )
-    quantity = Column(
-        DOUBLE,
-        default=1,
-    )
-    creationDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp,
-            info={'colanderalchemy': forms.EXCLUDED},
-        )
-    )
-    updateDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp,
-            onupdate=get_current_timestamp,
-            info={'colanderalchemy': forms.EXCLUDED}
-        )
-    )
-    unity = Column(String(100),)
-    product_id = Column(
-        Integer,
-        info={'colanderalchemy': forms.EXCLUDED}
-    )
-    product = relationship(
-        "Product",
-        primaryjoin="Product.id==InvoiceLine.product_id",
-        uselist=False,
-        foreign_keys=product_id,
-        info={'colanderalchemy': forms.EXCLUDED}
-    )
-
-    def duplicate(self):
-        """
-            duplicate a line
-        """
-        newone = InvoiceLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = self.cost
-        newone.tva = self.tva
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.unity = self.unity
-        newone.product_id = self.product_id
-        return newone
-
-    def gen_cancelinvoice_line(self):
-        """
-            Return a cancel invoice line duplicating this one
-        """
-        newone = CancelInvoiceLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = -1 * self.cost
-        newone.tva = self.tva
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.unity = self.unity
-        newone.product_id = self.product_id
-        return newone
-
-    def __repr__(self):
-        return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
- quantity:{s.quantity} tva:{s.tva}>".format(s=self)
-
-
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
     """
@@ -612,6 +513,156 @@ class CancelInvoice(Task, TaskCompute):
         self.taskDate = datetime.date.today()
 
 
+class Payment(DBBASE, PersistentACLMixin):
+    """
+        Payment entry
+    """
+    __tablename__ = 'payment'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    mode = Column(String(50))
+    amount = Column(Integer)
+    date = Column(DateTime, default=datetime.datetime.now)
+    task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
+
+    def get_amount(self):
+        return self.amount
+
+    def __repr__(self):
+        return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
+ mode:{s.mode} date:{s.date}".format(s=self)
+
+
+class PaymentMode(DBBASE):
+    """
+        Payment mode entry
+    """
+    __tablename__ = "paymentmode"
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(String(120))
+
+
+# Usefull queries
+def get_invoice_years():
+    """
+        Return a cached query for the years we have invoices configured
+    """
+    @cache_region("long_term", "taskyears")
+    def taskyears():
+        """
+            return the distinct financial years available in the database
+        """
+        query = DBSESSION().query(distinct(Invoice.financial_year))
+        query = query.order_by(Invoice.financial_year)
+        years = [year[0] for year in query]
+        current = datetime.date.today().year
+        if current not in years:
+            years.append(current)
+        return years
+    return taskyears()
+
+
+#DEPRECATED MODELS, Tables and models should be fired in version 3.1
+class InvoiceLine(DBBASE, LineCompute):
+    """
+        Invoice lines
+    """
+    __tablename__ = 'invoice_line'
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
+    )
+    task_id = Column(
+        Integer,
+        ForeignKey('invoice.id', ondelete="cascade"),
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    rowIndex = Column(Integer, default=1,)
+    description = Column(
+        Text,
+        info={'colanderalchemy': {
+            'widget': deform.widget.RichTextWidget(
+                options={
+                    'language': "fr_FR",
+                    'content_css': "/fanstatic/fanstatic/css/richtext.css",
+                },
+            )
+        }},
+    )
+    cost = Column(Integer, default=0,)
+    tva = Column(
+        Integer,
+        nullable=False,
+        default=196,
+    )
+    quantity = Column(
+        DOUBLE,
+        default=1,
+    )
+    creationDate = deferred(
+        Column(
+            CustomDateType,
+            default=get_current_timestamp,
+            info={'colanderalchemy': forms.EXCLUDED},
+        )
+    )
+    updateDate = deferred(
+        Column(
+            CustomDateType,
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp,
+            info={'colanderalchemy': forms.EXCLUDED}
+        )
+    )
+    unity = Column(String(100),)
+    product_id = Column(
+        Integer,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    product = relationship(
+        "Product",
+        primaryjoin="Product.id==InvoiceLine.product_id",
+        uselist=False,
+        foreign_keys=product_id,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+
+    def duplicate(self):
+        """
+            duplicate a line
+        """
+        newone = InvoiceLine()
+        newone.rowIndex = self.rowIndex
+        newone.cost = self.cost
+        newone.tva = self.tva
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        newone.product_id = self.product_id
+        return newone
+
+    def gen_cancelinvoice_line(self):
+        """
+            Return a cancel invoice line duplicating this one
+        """
+        newone = CancelInvoiceLine()
+        newone.rowIndex = self.rowIndex
+        newone.cost = -1 * self.cost
+        newone.tva = self.tva
+        newone.description = self.description
+        newone.quantity = self.quantity
+        newone.unity = self.unity
+        newone.product_id = self.product_id
+        return newone
+
+    def __repr__(self):
+        return u"<InvoiceLine id:{s.id} task_id:{s.task_id} cost:{s.cost} \
+ quantity:{s.quantity} tva:{s.tva}>".format(s=self)
+
+
 class CancelInvoiceLine(DBBASE, LineCompute):
     """
         CancelInvoice lines
@@ -674,51 +725,3 @@ class CancelInvoiceLine(DBBASE, LineCompute):
 cost:{s.cost} quantity:{s.quantity} tva:{s.tva}".format(s=self)
 
 
-class Payment(DBBASE, PersistentACLMixin):
-    """
-        Payment entry
-    """
-    __tablename__ = 'payment'
-    __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    mode = Column(String(50))
-    amount = Column(Integer)
-    date = Column(DateTime, default=datetime.datetime.now)
-    task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
-
-    def get_amount(self):
-        return self.amount
-
-    def __repr__(self):
-        return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
- mode:{s.mode} date:{s.date}".format(s=self)
-
-
-class PaymentMode(DBBASE):
-    """
-        Payment mode entry
-    """
-    __tablename__ = "paymentmode"
-    __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    label = Column(String(120))
-
-
-# Usefull queries
-def get_invoice_years():
-    """
-        Return a cached query for the years we have invoices configured
-    """
-    @cache_region("long_term", "taskyears")
-    def taskyears():
-        """
-            return the distinct financial years available in the database
-        """
-        query = DBSESSION().query(distinct(Invoice.financial_year))
-        query = query.order_by(Invoice.financial_year)
-        years = [year[0] for year in query]
-        current = datetime.date.today().year
-        if current not in years:
-            years.append(current)
-        return years
-    return taskyears()

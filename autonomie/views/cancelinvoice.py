@@ -36,9 +36,9 @@ from autonomie.forms.task import (
     get_cancel_invoice_appstruct,
     get_cancel_invoice_dbdatas,
 )
-from autonomie.models.task.invoice import (
+from autonomie.models.task import (
     CancelInvoice,
-    CancelInvoiceLine,
+    TaskLine,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -59,7 +59,7 @@ from autonomie.views.taskaction import (
     task_pdf_view,
     task_html_view,
     make_task_delete_view,
- )
+)
 
 log = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ def add_lines_to_cancelinvoice(task, appstruct):
     """
     task.default_line_group.lines = []
     for line in appstruct['lines']:
-        task.default_line_group.lines.append(CancelInvoiceLine(**line))
+        task.default_line_group.lines.append(TaskLine(**line))
     return task
 
 
@@ -100,8 +100,8 @@ class CancelInvoiceAdd(TaskFormView):
         appstruct = get_cancel_invoice_dbdatas(appstruct)
 
         # Since the call to get_next_cancelinvoice_number commits the current
-        # transaction, it needs to be called before creating our cancelinvoice, to
-        # avoid missing arguments errors
+        # transaction, it needs to be called before creating our cancelinvoice,
+        # to avoid missing arguments errors
         snumber = self.context.get_next_cancelinvoice_number()
 
         cinvoice = CancelInvoice()
@@ -160,9 +160,13 @@ class CancelInvoiceEdit(TaskFormView):
 
     def before(self, form):
         if not context_is_editable(self.request, self.context):
-            raise HTTPFound(self.request.route_path("cancelinvoice",
-                                id=self.context.id,
-                                _query=dict(view='html')))
+            raise HTTPFound(
+                self.request.route_path(
+                    "cancelinvoice",
+                    id=self.context.id,
+                    _query=dict(view='html')
+                )
+            )
 
         super(CancelInvoiceEdit, self).before(form)
         populate_actionmenu(self.request)
@@ -217,8 +221,10 @@ class CancelInvoiceStatus(TaskStatusView):
 
     def post_set_products_process(self, task, status, cancelinvoice):
         self.request.dbsession.merge(cancelinvoice)
-        log.debug(u"Configuring products for cancelinvoice post-step :{0}"\
-.format(cancelinvoice.id))
+        log.debug(
+            u"Configuring products for cancelinvoice post-step :{0}"
+            .format(cancelinvoice.id)
+        )
         msg = u"Les codes produits ont bien été configurés"
         self.request.session.flash(msg)
 
@@ -245,15 +251,21 @@ class CancelInvoiceStatus(TaskStatusView):
     def post_set_financial_year_process(self, task, status, params):
         cancelinvoice = params
         cancelinvoice = self.request.dbsession.merge(cancelinvoice)
-        log.debug(u"Set financial year of the cancelinvoice :{0}"\
-                .format(cancelinvoice.id))
+        log.debug(
+            u"Set financial year of the cancelinvoice :{0}"
+            .format(cancelinvoice.id)
+        )
         msg = u"L'année comptable de référence a bien été modifiée"
         self.request.session.flash(msg)
 
     def post_valid_process(self, task, status, params):
         msg = u"L'avoir porte le numéro <b>{0}</b>"
-        self.session.flash(msg.format(
-            self.request.config.get('invoiceprefix','') + task.official_number))
+        self.session.flash(
+            msg.format(
+                self.request.config.get('invoiceprefix', '') +
+                task.official_number
+            )
+        )
 
 
 def set_financial_year(request):
@@ -264,8 +276,10 @@ def set_financial_year(request):
         ret_dict = CancelInvoiceStatus(request)()
     except ValidationFailure, err:
         log.exception(u"Financial year set error")
-        ret_dict = dict(form=err.render(),
-                title=u"Année comptable de référence")
+        ret_dict = dict(
+            form=err.render(),
+            title=u"Année comptable de référence"
+        )
     return ret_dict
 
 
@@ -277,8 +291,10 @@ def set_products(request):
         ret_dict = CancelInvoiceStatus(request)()
     except ValidationFailure, err:
         log.exception(u"Error setting products")
-        ret_dict = dict(form=err.render(),
-                title=u"Année comptable de référence")
+        ret_dict = dict(
+            form=err.render(),
+            title=u"Année comptable de référence",
+        )
     return ret_dict
 
 
@@ -287,20 +303,24 @@ class AdminCancelInvoice(BaseEditView):
 
 
 def includeme(config):
-    config.add_route('project_cancelinvoices',
-                    '/projects/{id:\d+}/cancelinvoices',
-                    traverse='/projects/{id}')
-    config.add_route('cancelinvoice',
-                    '/cancelinvoice/{id:\d+}',
-                    traverse='/cancelinvoices/{id}')
-    delete_msg = u"L'avoir {task.number} a bien été supprimé."
+    config.add_route(
+        'project_cancelinvoices',
+        '/projects/{id:\d+}/cancelinvoices',
+        traverse='/projects/{id}'
+    )
+
+    config.add_route(
+        'cancelinvoice',
+        '/cancelinvoice/{id:\d+}',
+        traverse='/cancelinvoices/{id}'
+    )
 
     config.add_view(
         task_pdf_view,
         route_name='cancelinvoice',
         request_param='view=pdf',
         permission='view',
-        )
+    )
 
     config.add_view(
         task_html_view,
@@ -308,44 +328,60 @@ def includeme(config):
         renderer='tasks/view_only.mako',
         permission='view',
         request_param='view=html',
-        )
-
-    config.add_view(CancelInvoiceStatus,
-                    route_name='cancelinvoice',
-                    request_param='action=status',
-                    permission='edit')
-    config.add_view(CancelInvoiceAdd,
-                    route_name="project_cancelinvoices",
-                    renderer="tasks/edit.mako",
-                    permission="edit")
-    config.add_view(CancelInvoiceEdit,
-                    route_name='cancelinvoice',
-                    renderer="tasks/edit.mako",
-                    permission='edit')
-
-    config.add_view(make_task_delete_view(delete_msg),
-                    route_name='cancelinvoice',
-                    request_param='action=delete',
-                    permission='edit')
-
-    config.add_view(set_financial_year,
-                    route_name="cancelinvoice",
-                    request_param='action=set_financial_year',
-                    permission="view",
-                    renderer='base/formpage.mako')
-    config.add_view(set_products,
-                    route_name="cancelinvoice",
-                    request_param='action=set_products',
-                    permission="view",
-                    renderer='base/formpage.mako')
+    )
 
     config.add_view(
-            FileUploadView,
-            route_name="cancelinvoice",
-            renderer='base/formpage.mako',
-            permission='edit',
-            request_param='action=attach_file',
-            )
+        CancelInvoiceStatus,
+        route_name='cancelinvoice',
+        request_param='action=status',
+        permission='edit',
+    )
+
+    config.add_view(
+        CancelInvoiceAdd,
+        route_name="project_cancelinvoices",
+        renderer="tasks/edit.mako",
+        permission="edit",
+    )
+
+    config.add_view(
+        CancelInvoiceEdit,
+        route_name='cancelinvoice',
+        renderer="tasks/edit.mako",
+        permission='edit',
+    )
+
+    delete_msg = u"L'avoir {task.number} a bien été supprimé."
+    config.add_view(
+        make_task_delete_view(delete_msg),
+        route_name='cancelinvoice',
+        request_param='action=delete',
+        permission='edit',
+    )
+
+    config.add_view(
+        set_financial_year,
+        route_name="cancelinvoice",
+        request_param='action=set_financial_year',
+        permission="view",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        set_products,
+        route_name="cancelinvoice",
+        request_param='action=set_products',
+        permission="view",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        FileUploadView,
+        route_name="cancelinvoice",
+        renderer='base/formpage.mako',
+        permission='edit',
+        request_param='action=attach_file',
+    )
 
     config.add_view(
         AdminCancelInvoice,

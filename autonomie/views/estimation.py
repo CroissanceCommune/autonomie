@@ -34,10 +34,11 @@ from sqlalchemy import extract
 from beaker.cache import cache_region
 
 from autonomie.exception import Forbidden
-from autonomie.models.task import Task
-from autonomie.models.task.estimation import (
+from autonomie.models.task import (
+    Task,
+    TaskLine,
+    # TaskLineGroup,
     Estimation,
-    EstimationLine,
     PaymentLine,
 )
 from autonomie.models.task.task import DiscountLine
@@ -82,7 +83,7 @@ def add_lines_to_estimation(task, appstruct):
     for line in appstruct['payment_lines']:
         task.payment_lines.append(PaymentLine(**line))
     for line in appstruct['lines']:
-        task.default_line_group.lines.append(EstimationLine(**line))
+        task.default_line_group.lines.append(TaskLine(**line))
     for line in appstruct.get('discounts', []):
         task.discounts.append(DiscountLine(**line))
     return task
@@ -119,7 +120,10 @@ class EstimationAdd(TaskFormView):
         estimation = Estimation()
         estimation.project = self.context
         estimation.owner = self.request.user
-        estimation = merge_session_with_post(estimation, appstruct["estimation"])
+        estimation = merge_session_with_post(
+            estimation,
+            appstruct["estimation"]
+        )
         estimation.set_sequence_number(snumber)
         estimation.set_number()
         estimation.set_name()
@@ -166,15 +170,19 @@ class EstimationEdit(TaskFormView):
                 'lines': [line.appstruct()
                           for line in self.context.default_line_group.lines],
                 'discounts': [line.appstruct()
-                          for line in self.context.discounts],
+                              for line in self.context.discounts],
                 'payment_lines': [line.appstruct()
-                          for line in self.context.payment_lines]}
+                                  for line in self.context.payment_lines]}
 
     def before(self, form):
         if not context_is_editable(self.request, self.context):
-            raise HTTPFound(self.request.route_path("estimation",
-                                id=self.context.id,
-                                _query=dict(view='html')))
+            raise HTTPFound(
+                self.request.route_path(
+                    "estimation",
+                    id=self.context.id,
+                    _query=dict(view='html')
+                )
+            )
 
         super(EstimationEdit, self).before(form)
         populate_actionmenu(self.request)
@@ -196,7 +204,10 @@ class EstimationEdit(TaskFormView):
         # avoid missing arguments errors
 
         estimation = self.context
-        estimation = merge_session_with_post(estimation, appstruct["estimation"])
+        estimation = merge_session_with_post(
+            estimation,
+            appstruct["estimation"]
+        )
         try:
             estimation = self.set_task_status(estimation)
             # Line handling
@@ -302,16 +313,16 @@ class EstimationList(BaseListView):
     title = u""
     schema = get_list_schema()
     sort_columns = dict(
-            taskDate=Estimation.taskDate,
-            customer=Customer.name,
-            )
+        taskDate=Estimation.taskDate,
+        customer=Customer.name,
+    )
     default_sort = 'taskDate'
     default_direction = 'desc'
 
     def query(self):
         query = Estimation.query().join(Task.project).join(Task.customer)
         company_id = self.request.context.id
-        query = query.filter(Project.company_id==company_id)
+        query = query.filter(Project.company_id == company_id)
         return query
 
     def filter_year(self, query, appstruct):
@@ -319,7 +330,7 @@ class EstimationList(BaseListView):
             filter estimations by year
         """
         year = appstruct['year']
-        query = query.filter(extract('year', Estimation.taskDate)==year)
+        query = query.filter(extract('year', Estimation.taskDate) == year)
         return query
 
     def filter_customer(self, query, appstruct):
@@ -328,7 +339,7 @@ class EstimationList(BaseListView):
         """
         customer_id = appstruct['customer_id']
         if customer_id != -1:
-            query = query.filter(Estimation.customer_id==customer_id)
+            query = query.filter(Estimation.customer_id == customer_id)
         return query
 
     def filter_status(self, query, appstruct):
@@ -345,60 +356,85 @@ class EstimationList(BaseListView):
 
 
 def includeme(config):
-    config.add_route('project_estimations',
-                    '/projects/{id:\d+}/estimations',
-                    traverse='/projects/{id}')
-    config.add_route('estimation',
-                     '/estimations/{id:\d+}',
-                      traverse='/estimations/{id}')
-    config.add_route("estimations",
-                    "/company/{id:\d+}/estimations",
-                    traverse="/companies/{id}")
-
-    config.add_view(task_pdf_view,
-                    route_name='estimation',
-                    request_param='view=pdf',
-                    permission='view')
-
-    config.add_view(task_html_view,
-                    route_name='estimation',
-                    renderer='tasks/view_only.mako',
-                    request_param='view=html',
-                    permission='view')
-
-    delete_msg = u"Le devis {task.number} a bien été supprimé."
-    config.add_view(make_task_delete_view(delete_msg),
-                    route_name='estimation',
-                    request_param='action=delete',
-                    permission='edit')
-    config.add_view(EstimationAdd,
-                    route_name="project_estimations",
-                    renderer='tasks/edit.mako',
-                    permission='edit')
-    config.add_view(EstimationEdit,
-                    route_name='estimation',
-                    renderer='tasks/edit.mako',
-                    permission='edit')
-    config.add_view(duplicate,
-                    route_name="estimation",
-                    request_param='action=duplicate',
-                    permission="view",
-                    renderer='base/formpage.mako')
-
-    config.add_view(EstimationStatus,
-                    route_name="estimation",
-                    request_param='action=status',
-                    permission="edit")
-
-    config.add_view(EstimationList,
-            route_name="estimations",
-            renderer="estimations.mako",
-            permission="edit")
+    config.add_route(
+        'project_estimations',
+        '/projects/{id:\d+}/estimations',
+        traverse='/projects/{id}',
+    )
+    config.add_route(
+        'estimation',
+        '/estimations/{id:\d+}',
+        traverse='/estimations/{id}'
+    )
+    config.add_route(
+        "estimations",
+        "/company/{id:\d+}/estimations",
+        traverse="/companies/{id}"
+    )
 
     config.add_view(
-            FileUploadView,
-            route_name="estimation",
-            renderer='base/formpage.mako',
-            permission='edit',
-            request_param='action=attach_file',
-            )
+        task_pdf_view,
+        route_name='estimation',
+        request_param='view=pdf',
+        permission='view',
+    )
+
+    config.add_view(
+        task_html_view,
+        route_name='estimation',
+        renderer='tasks/view_only.mako',
+        request_param='view=html',
+        permission='view',
+    )
+
+    delete_msg = u"Le devis {task.number} a bien été supprimé."
+    config.add_view(
+        make_task_delete_view(delete_msg),
+        route_name='estimation',
+        request_param='action=delete',
+        permission='edit',
+    )
+
+    config.add_view(
+        EstimationAdd,
+        route_name="project_estimations",
+        renderer='tasks/edit.mako',
+        permission='edit',
+    )
+
+    config.add_view(
+        EstimationEdit,
+        route_name='estimation',
+        renderer='tasks/edit.mako',
+        permission='edit',
+    )
+
+    config.add_view(
+        duplicate,
+        route_name="estimation",
+        request_param='action=duplicate',
+        permission="view",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        EstimationStatus,
+        route_name="estimation",
+        request_param='action=status',
+        permission="edit",
+    )
+
+    config.add_view(
+        EstimationList,
+        route_name="estimations",
+        renderer="estimations.mako",
+        permission="edit",
+    )
+
+    config.add_view(
+        FileUploadView,
+        route_name="estimation",
+        renderer='base/formpage.mako',
+        permission='edit',
+        request_param='action=attach_file',
+    )

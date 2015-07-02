@@ -32,11 +32,11 @@ from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.exception import Forbidden
-from autonomie.models.task.invoice import (
+from autonomie.models.task import (
+    TaskLine,
+    DiscountLine,
     Invoice,
-    InvoiceLine,
 )
-from autonomie.models.task.task import DiscountLine
 from autonomie.forms.task import (
     get_invoice_schema,
     get_invoice_appstruct,
@@ -75,10 +75,11 @@ def add_lines_to_invoice(task, appstruct):
     task.default_line_group.lines = []
     task.discounts = []
     for line in appstruct['lines']:
-        task.default_line_group.lines.append(InvoiceLine(**line))
+        task.default_line_group.lines.append(TaskLine(**line))
     for line in appstruct.get('discounts', []):
         task.discounts.append(DiscountLine(**line))
     return task
+
 
 class InvoiceAdd(TaskFormView):
     """
@@ -126,8 +127,13 @@ class InvoiceAdd(TaskFormView):
             self.session.flash(u"La facture a bien été ajoutée.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
-        return HTTPFound(self.request.route_path("project",
-                                                 id=self.context.id))
+        return HTTPFound(
+            self.request.route_path(
+                "project",
+                id=self.context.id
+            )
+        )
+
 
 class InvoiceEdit(TaskFormView):
     """
@@ -163,9 +169,13 @@ class InvoiceEdit(TaskFormView):
 
     def before(self, form):
         if not context_is_editable(self.request, self.context):
-            raise HTTPFound(self.request.route_path("invoice",
-                                id=self.context.id,
-                                _query=dict(view='html')))
+            raise HTTPFound(
+                self.request.route_path(
+                    "invoice",
+                    id=self.context.id,
+                    _query=dict(view='html')
+                )
+            )
 
         super(InvoiceEdit, self).before(form)
         populate_actionmenu(self.request)
@@ -329,8 +339,10 @@ def set_financial_year(request):
         ret_dict = InvoiceStatus(request)()
     except ValidationFailure, err:
         log.exception(u"Financial year set error")
-        ret_dict = dict(form=err.render(),
-                title=u"Année comptable de référence")
+        ret_dict = dict(
+            form=err.render(),
+            title=u"Année comptable de référence",
+        )
     return ret_dict
 
 
@@ -342,8 +354,10 @@ def set_products(request):
         ret_dict = InvoiceStatus(request)()
     except ValidationFailure, err:
         log.exception(u"Error setting products")
-        ret_dict = dict(form=err.render(),
-                title=u"Année comptable de référence")
+        ret_dict = dict(
+            form=err.render(),
+            title=u"Année comptable de référence",
+        )
     return ret_dict
 
 
@@ -357,12 +371,17 @@ class AdminInvoice(BaseEditView):
 
 
 def includeme(config):
-    config.add_route('project_invoices',
-                     '/projects/{id:\d+}/invoices',
-                     traverse='/projects/{id}')
-    config.add_route('invoice',
-                     '/invoices/{id:\d+}',
-                     traverse='/invoices/{id}')
+    config.add_route(
+        'project_invoices',
+        '/projects/{id:\d+}/invoices',
+        traverse='/projects/{id}'
+    )
+
+    config.add_route(
+        'invoice',
+        '/invoices/{id:\d+}',
+        traverse='/invoices/{id}',
+    )
 
     delete_msg = u"La facture {task.number} a bien été supprimée."
     config.add_view(
@@ -370,60 +389,83 @@ def includeme(config):
         route_name='invoice',
         request_param='view=pdf',
         permission='view',
-        )
+    )
+
     config.add_view(
         task_html_view,
         route_name='invoice',
         renderer='tasks/view_only.mako',
         permission='view',
         request_param='view=html',
-        )
-
-    config.add_view(make_task_delete_view(delete_msg),
-                    route_name='invoice',
-                    request_param='action=delete',
-                    permission='edit')
-    config.add_view(InvoiceStatus,
-                    route_name='invoice',
-                    request_param='action=status',
-                    permission='edit')
-    config.add_view(register_payment,
-                    route_name="invoice",
-                    request_param='action=payment',
-                    permission="manage",
-                    renderer='base/formpage.mako')
-    config.add_view(duplicate,
-                    route_name="invoice",
-                    request_param='action=duplicate',
-                    permission="view",
-                    renderer='base/formpage.mako')
-    config.add_view(set_financial_year,
-                    route_name="invoice",
-                    request_param='action=set_financial_year',
-                    permission="view",
-                    renderer='base/formpage.mako')
-    config.add_view(set_products,
-                    route_name="invoice",
-                    request_param='action=set_products',
-                    permission="view",
-                    renderer='base/formpage.mako')
-
-    config.add_view(InvoiceAdd,
-                    route_name="project_invoices",
-                    renderer='tasks/edit.mako',
-                    permission='edit')
-    config.add_view(InvoiceEdit,
-                    route_name="invoice",
-                    renderer='tasks/edit.mako',
-                    permission='edit')
+    )
 
     config.add_view(
-            FileUploadView,
-            route_name="invoice",
-            renderer='base/formpage.mako',
-            permission='edit',
-            request_param='action=attach_file',
-            )
+        make_task_delete_view(delete_msg),
+        route_name='invoice',
+        request_param='action=delete',
+        permission='edit',
+    )
+
+    config.add_view(
+        InvoiceStatus,
+        route_name='invoice',
+        request_param='action=status',
+        permission='edit'
+    )
+
+    config.add_view(
+        register_payment,
+        route_name="invoice",
+        request_param='action=payment',
+        permission="manage",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        duplicate,
+        route_name="invoice",
+        request_param='action=duplicate',
+        permission="view",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        set_financial_year,
+        route_name="invoice",
+        request_param='action=set_financial_year',
+        permission="view",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        set_products,
+        route_name="invoice",
+        request_param='action=set_products',
+        permission="view",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        InvoiceAdd,
+        route_name="project_invoices",
+        renderer='tasks/edit.mako',
+        permission='edit',
+    )
+
+    config.add_view(
+        InvoiceEdit,
+        route_name="invoice",
+        renderer='tasks/edit.mako',
+        permission='edit',
+    )
+
+    config.add_view(
+        FileUploadView,
+        route_name="invoice",
+        renderer='base/formpage.mako',
+        permission='edit',
+        request_param='action=attach_file',
+    )
 
     config.add_view(
         AdminInvoice,

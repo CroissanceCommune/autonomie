@@ -1097,6 +1097,7 @@ class TaskLinesMatch(SequenceWrapper):
     sequence_name = 'lines'
     fields = ('description', 'cost', 'quantity', 'unity', 'tva', 'product_id')
     dbtype = 'lines'
+    sort_key = 'order'
 
 
 class PaymentLinesMatch(SequenceWrapper):

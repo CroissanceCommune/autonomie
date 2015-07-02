@@ -232,10 +232,17 @@ class CancelInvoiceStatus(TaskStatusView):
         """
         Launched after a cancelinvoice has been validated
         """
-        log.debug(u"+ checking if the associated invoice is resulted")
+        log.debug(u"+ post_valid_process : checking if the associated invoice is resulted")
         invoice = task.invoice
         invoice = invoice.check_resulted(user_id=self.request.user.id)
         self.request.dbsession.merge(invoice)
+        msg = u"L'avoir porte le numéro <b>{0}</b>"
+        self.session.flash(
+            msg.format(
+                self.request.config.get('invoiceprefix', '') +
+                task.official_number
+            )
+        )
 
     def pre_set_financial_year_process(self, task, status, params):
         """
@@ -257,15 +264,6 @@ class CancelInvoiceStatus(TaskStatusView):
         )
         msg = u"L'année comptable de référence a bien été modifiée"
         self.request.session.flash(msg)
-
-    def post_valid_process(self, task, status, params):
-        msg = u"L'avoir porte le numéro <b>{0}</b>"
-        self.session.flash(
-            msg.format(
-                self.request.config.get('invoiceprefix', '') +
-                task.official_number
-            )
-        )
 
 
 def set_financial_year(request):

@@ -41,44 +41,85 @@
         <%block name='information'>
         </%block>
     </div>
+    <% num_cols = 2 %>
     %if task.display_units == 1:
         <% colspan = 3 %>
+        <% num_cols += 2 %>
     %else:
         <% colspan = 1 %>
     % endif
+    % if multiple_tvas:
+        <% num_cols += 1 %>
+    % endif
     <div class='row'>
-        <table class="lines col-xs-12">
-            <thead>
-                <tr>
-                    <th class="description">Intitulé des postes</th>
-                    %if task.display_units == 1:
-                        <th class="quantity">P.U.</th>
-                        <th class="unity">Qté</th>
+        <% groups = task.get_groups() %>
+        % for group in groups:
+            <table class="lines col-xs-12">
+                <thead>
+                    % if group.title != '':
+                        <tr>
+                            <td colspan="${num_cols}"><h3>${group.title}</h3></td>
+                        </tr>
                     % endif
-                    <th class="price">Prix</th>
-                    % if multiple_tvas:
-                        <th class='tva'>Tva</th>
+                    % if group.description != "":
+                        <tr class='group-description'>
+                        <th colspan="${num_cols}">
+                            ${format_text(group.description)}
+                        </th>
+                    </tr>
                     % endif
-                </tr>
-            </thead>
-            <tbody>
-                % for line in task.lines:
                     <tr>
-                        <td class="description">${format_text(line.description, False)}</td>
+                        <th class="description">Intitulé des postes</th>
                         %if task.display_units == 1:
-                            <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€</td>
-                            <td class="unity">${api.format_quantity(line.quantity)} ${line.unity}</td>
+                            <th class="quantity">P.U.</th>
+                            <th class="unity">Qté</th>
                         % endif
-                        <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
+                        <th class="price">Prix</th>
                         % if multiple_tvas:
-                            <td class='tva'>
-                                % if line.tva>=0:
-                                    ${api.format_amount(line.tva)|n}&nbsp;%
-                                % endif
-                            </td>
+                            <th class='tva'>Tva</th>
                         % endif
                     </tr>
-                % endfor
+                </thead>
+                <tbody>
+                    % for line in group.lines:
+                        <tr>
+                            <td class="description">${format_text(line.description, False)}</td>
+                            %if task.display_units == 1:
+                                <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€</td>
+                                <td class="unity">${api.format_quantity(line.quantity)} ${line.unity}</td>
+                            % endif
+                            <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
+                            % if multiple_tvas:
+                                <td class='tva'>
+                                    % if line.tva>=0:
+                                        ${api.format_amount(line.tva)|n}&nbsp;%
+                                    % endif
+                                </td>
+                            % endif
+                        </tr>
+                    % endfor
+                    % if len(groups) > 1:
+                        <tr>
+                            <td colspan='${colspan}' class='rightalign'>
+                                Sous-total HT
+                            </td>
+                            <td class='price'>
+                                ${api.format_amount(group.total_ht(), trim=False)|n}&nbsp;€
+                            </td>
+                            % if multiple_tvas:
+                                <td></td>
+                            % endif
+                        </tr>
+                    % endif
+                % if len(groups) > 1:
+                        </tbody>
+                    </table>
+                % endif
+        % endfor
+        % if len(groups) > 1:
+            <table class='lines col-xs-12'>
+            <tbody>
+        % endif
                 % if task.expenses_ht > 0:
                     <tr>
                         <td class='description' colspan='${colspan}'>
@@ -99,7 +140,7 @@
                         Total HT
                     </td>
                     <td class='price'>
-                        ${api.format_amount(task.lines_total_ht() + task.expenses_ht, trim=False)|n}&nbsp;€
+                        ${api.format_amount(task.groups_total_ht() + task.expenses_ht, trim=False)|n}&nbsp;€
                     </td>
                     % if multiple_tvas:
                         <td></td>

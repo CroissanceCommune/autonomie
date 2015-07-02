@@ -34,6 +34,12 @@ html{
   padding-top:3px;
   font-size:12px;
 }
+.lines thead tr.group-description{
+  background-color:#fff;
+}
+.lines thead tr.group-description th{
+  font-weight: normal;
+}
 .lines td, .lines th{
   padding-top:3px;
   padding:3px;

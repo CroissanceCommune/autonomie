@@ -199,6 +199,12 @@ def includeme(config):
         route_name='sale_category',
         request_method="PUT"
     )
+    add_json_view(
+        RestCategories,
+        attr='delete',
+        route_name='sale_category',
+        request_method="DELETE"
+    )
 
     add_json_view(
         RestProducts,

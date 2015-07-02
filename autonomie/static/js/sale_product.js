@@ -108,7 +108,8 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     },
     events: {
       "click button.edit": "showForm",
-      'submit form': 'onFormSubmit'
+      'submit form': 'onFormSubmit',
+      'click button.remove':'_remove'
     },
     showForm: function(){
       console.log("Showform");
@@ -117,6 +118,20 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     },
     updateDatas: function(){
       this.ui.title.html(this.model.get('title'));
+    },
+    _remove: function(id){
+      var this_ = this;
+      var confirmed = confirm("Êtes vous certain de vouloir supprimer cet catégorie (les produits seront également supprimés) ?");
+      if (confirmed){
+        var _model = this.model;
+        _model.destroy({
+          success: function(model, response) {
+            this_.destroy();
+            AutonomieApp.router.navigate("index", {trigger: true});
+            displayServerSuccess("L'élément a bien été supprimé");
+            }
+        });
+      }
     },
     closeView: function(){
       this.ui.form.hide();
@@ -217,6 +232,8 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     initialized:false,
     index: function(){
       this.initialize();
+      App.container.empty();
+      App.popup.empty();
     },
     initialize: function(){
       if (! this.initialized){

@@ -4,7 +4,7 @@ templates['category_form.mustache'] = template({"1":function(depth0,helpers,part
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "<h3>\n    <span>\n        "
     + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-    + "\n    </span>\n    <button class='btn btn-default btn-xs edit' style='font-size:9px' title=\"Éditer le titre de la catégorie\">\n    <i class=\"glyphicon glyphicon-pencil\" style=\"vertical-align:middle\"> </i>\n    </button>\n</h3>\n";
+    + "\n    </span>\n    <div class=\"btn-group\" role=\"group\" aria-label=\"\">\n        <button\n            class='btn btn-default btn-xs edit'\n            style=\"font-size:14px;\"\n            title=\"Éditer le titre de la catégorie\">\n        <i class=\"glyphicon glyphicon-pencil\" style=\"vertical-align:middle\"> </i>\n        </button>\n        <button\n            class='btn btn-danger btn-xs remove'\n            title=\"Supprimer cette catégorie (et tous les produits qu'elle contient)\"\n            style=\"font-size:14px;\"\n            >\n            <i class=\"glyphicon glyphicon-trash danger\" style=\"vertical-align:middle\"> </i>\n        </button>\n    </div>\n</h3>\n";
 },"3":function(depth0,helpers,partials,data) {
   return "    style='display:none'\n";
   },"5":function(depth0,helpers,partials,data) {

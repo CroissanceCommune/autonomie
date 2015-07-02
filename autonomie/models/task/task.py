@@ -457,6 +457,19 @@ class Task(Node):
     def __repr__(self):
         return u"<Task status:{s.CAEStatus} id:{s.id}>".format(s=self)
 
+    def get_groups(self):
+        return [group for group in self.line_groups if group.lines]
+
+    @property
+    def all_lines(self):
+        """
+        Returns a list with all task lines of the current task
+        """
+        result = []
+        for group in self.line_groups:
+            result.extend(group.lines)
+        return result
+
 
 class DiscountLine(DBBASE, LineCompute):
     """

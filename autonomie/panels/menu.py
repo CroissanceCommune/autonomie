@@ -194,8 +194,16 @@ def get_company_menu(request, cid, css=None):
 
     menu.add(docs)
 
+    params = DropDown(label=u"Paramètres")
+
     href = request.route_path("company", id=cid)
-    menu.add_item(u"Paramètres", icon="fa fa-cogs", href=href)
+    params.add_item(u"Paramètres", icon="fa fa-cogs", href=href)
+
+    href = request.route_path("sale_categories", id=cid)
+    params.add_item(u"Catalogue produits", icon="fa fa-book", href=href)
+
+    menu.add(params)
+
     return menu
 
 

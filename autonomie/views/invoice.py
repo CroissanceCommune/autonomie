@@ -72,10 +72,10 @@ def add_lines_to_invoice(task, appstruct):
         Add the lines to the current invoice
     """
     # Needed for edition only
-    task.lines = []
+    task.default_line_group.lines = []
     task.discounts = []
     for line in appstruct['lines']:
-        task.lines.append(InvoiceLine(**line))
+        task.default_line_group.lines.append(InvoiceLine(**line))
     for line in appstruct.get('discounts', []):
         task.discounts.append(DiscountLine(**line))
     return task
@@ -157,7 +157,7 @@ class InvoiceEdit(TaskFormView):
         """
         return {'invoice': self.context.appstruct(),
                 'lines': [line.appstruct()
-                          for line in self.context.lines],
+                          for line in self.context.default_line_group.lines],
                 'discounts': [line.appstruct()
                               for line in self.context.discounts]}
 

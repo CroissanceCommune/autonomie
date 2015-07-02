@@ -68,9 +68,9 @@ def add_lines_to_cancelinvoice(task, appstruct):
     """
         Add the lines to the current cancelinvoice
     """
-    task.lines = []
+    task.default_line_group.lines = []
     for line in appstruct['lines']:
-        task.lines.append(CancelInvoiceLine(**line))
+        task.default_line_group.lines.append(CancelInvoiceLine(**line))
     return task
 
 
@@ -154,7 +154,7 @@ class CancelInvoiceEdit(TaskFormView):
         """
         return {'cancelinvoice': self.context.appstruct(),
                 'lines': [line.appstruct()
-                          for line in self.context.lines],
+                          for line in self.context.default_line_group.lines],
                 'discounts': [line.appstruct()
                               for line in self.context.discounts]}
 

@@ -76,13 +76,13 @@ def add_lines_to_estimation(task, appstruct):
     """
         Add the lines to the current estimation
     """
-    task.lines = []
+    task.default_line_group.lines = []
     task.discounts = []
     task.payment_lines = []
     for line in appstruct['payment_lines']:
         task.payment_lines.append(PaymentLine(**line))
     for line in appstruct['lines']:
-        task.lines.append(EstimationLine(**line))
+        task.default_line_group.lines.append(EstimationLine(**line))
     for line in appstruct.get('discounts', []):
         task.discounts.append(DiscountLine(**line))
     return task
@@ -164,7 +164,7 @@ class EstimationEdit(TaskFormView):
         """
         return {'estimation': self.context.appstruct(),
                 'lines': [line.appstruct()
-                          for line in self.context.lines],
+                          for line in self.context.default_line_group.lines],
                 'discounts': [line.appstruct()
                           for line in self.context.discounts],
                 'payment_lines': [line.appstruct()

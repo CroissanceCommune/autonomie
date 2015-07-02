@@ -389,6 +389,61 @@ class Estimation(Task, EstimationCompute):
         return result
 
 
+class PaymentLine(DBBASE):
+    """
+        payments lines
+    """
+    __tablename__ = 'estimation_payment'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True, nullable=False)
+    task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
+    rowIndex = Column(Integer)
+    description = Column(Text)
+    amount = Column(Integer)
+    creationDate = deferred(
+        Column(
+            CustomDateType,
+            default=get_current_timestamp))
+    updateDate = deferred(
+        Column(
+            CustomDateType,
+            default=get_current_timestamp,
+            onupdate=get_current_timestamp))
+    paymentDate = Column(CustomDateType2)
+    task = relationship(
+        "Estimation",
+        backref=backref(
+            'payment_lines',
+            order_by='PaymentLine.rowIndex',
+            cascade="all, delete-orphan"
+        )
+    )
+
+    def duplicate(self):
+        """
+            duplicate a paymentline
+        """
+        return PaymentLine(
+            rowIndex=self.rowIndex,
+            amount=self.amount,
+            description=self.description,
+            paymentDate=datetime.date.today()
+        )
+
+    def __repr__(self):
+        return u"<PaymentLine id:{s.id} task_id:{s.task_id} amount:{s.amount}\
+ date:{s.paymentDate}".format(s=self)
+
+    def __json__(self, request):
+        return dict(
+            index=self.rowIndex,
+            description=self.description,
+            cost=self.amount,
+            date=self.paymentDate,
+        )
+
+
+# OLD TABLES SHOULD BE REMOVED IN VERSION 3.1
 class EstimationLine(DBBASE, LineCompute):
     """
         Estimation lines
@@ -455,58 +510,4 @@ class EstimationLine(DBBASE, LineCompute):
             quantity=self.quantity,
             tva=self.tva,
             unity=self.unity,
-        )
-
-
-class PaymentLine(DBBASE):
-    """
-        payments lines
-    """
-    __tablename__ = 'estimation_payment'
-    __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, nullable=False)
-    task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
-    rowIndex = Column(Integer)
-    description = Column(Text)
-    amount = Column(Integer)
-    creationDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp))
-    updateDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp,
-            onupdate=get_current_timestamp))
-    paymentDate = Column(CustomDateType2)
-    task = relationship(
-        "Estimation",
-        backref=backref(
-            'payment_lines',
-            order_by='PaymentLine.rowIndex',
-            cascade="all, delete-orphan"
-        )
-    )
-
-    def duplicate(self):
-        """
-            duplicate a paymentline
-        """
-        return PaymentLine(
-            rowIndex=self.rowIndex,
-            amount=self.amount,
-            description=self.description,
-            paymentDate=datetime.date.today()
-        )
-
-    def __repr__(self):
-        return u"<PaymentLine id:{s.id} task_id:{s.task_id} amount:{s.amount}\
- date:{s.paymentDate}".format(s=self)
-
-    def __json__(self, request):
-        return dict(
-            index=self.rowIndex,
-            description=self.description,
-            cost=self.amount,
-            date=self.paymentDate,
         )

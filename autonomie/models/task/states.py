@@ -133,7 +133,7 @@ def set_products(task, **kw):
         line_id = line.pop('id')
         product_id = line.get('product_id')
         if line_id is not None and product_id is not None:
-            for line_ in task.lines:
+            for line_ in task.all_lines:
                 if line_.id == line_id:
                     line_.product_id = product_id
                 else:

@@ -199,7 +199,7 @@ templates['sheet_form.mustache'] = template({"1":function(depth0,helpers,partial
   if (stack1 != null) { buffer += stack1; }
   buffer += ">\n  <div class=\"form-group\">\n    <label class='control-label' for=\"title\">Intitulé de la feuille de statistique</label>\n    <input type=\"text\" name='title' class=\"form-control\" id=\"title\" placeholder=\"Titre\" value='"
     + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-    + "'>\n  </div>\n    <button type=\"button\" class=\"btn btn-primary submit\">\n";
+    + "'>\n  </div>\n    <button class=\"btn btn-primary submit\" type=\"submit\">\n";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.program(9, data),"data":data});
   if (stack1 != null) { buffer += stack1; }
   return buffer + "    </button>\n</form>\n";

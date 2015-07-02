@@ -368,6 +368,9 @@ class Task(Node):
             address=self.address,
             payment_conditions=self.payment_conditions,
             description=self.description,
+            groups=[
+                group.__json__(request) for group in self.get_groups()
+            ],
             status_history=[
                 status.__json__(request) for status in self.statuses
             ],
@@ -504,7 +507,7 @@ class DiscountLine(DBBASE, LineCompute):
 
     def __json__(self, request):
         return dict(
-            descriptin=self.description,
+            description=self.description,
             amount=self.amount,
             tva=self.tva,
         )
@@ -629,7 +632,7 @@ class TaskLineGroup(DBBASE, GroupCompute):
             description=self.description,
             task_id=self.task_id,
             order=self.order,
-            lines=[line.__json__(self, request) for line in self.lines]
+            lines=[line.__json__(request) for line in self.lines]
         )
 
     def duplicate(self):
@@ -734,6 +737,19 @@ class TaskLine(DBBASE, LineCompute):
     def __repr__(self):
         return u"<TaskLine id:{s.id} task_id:{s.group.task_id} cost:{s.cost} \
  quantity:{s.quantity} tva:{s.tva}>".format(s=self)
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            order=self.order,
+            cost=self.cost,
+            tva=self.tva,
+            description=self.description,
+            quantity=self.quantity,
+            unity=self.unity,
+            product_id=self.product_id,
+            group_id=self.group_id,
+        )
 
 
 def _cache_amounts(mapper, connection, target):

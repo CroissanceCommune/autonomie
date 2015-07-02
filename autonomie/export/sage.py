@@ -103,7 +103,6 @@ class SageExpenseCsvWriter(SageCsvWriter):
     """
     headers = (
         {'name': 'num_feuille', 'label': "Numéro de pièce"},
-        {'name': 'num_autonomie', 'label': "Identifiant ERP"},
         {'name': 'code_journal', 'label': "Code Journal"},
         {'name': 'date', 'label': "Date de pièce"},
         {'name': 'compte_cg', 'label': "N° compte général"},
@@ -115,4 +114,5 @@ class SageExpenseCsvWriter(SageCsvWriter):
         {'name': 'credit', 'label': "Montant crédit"},
         {'name': 'type_', 'label': "Type de ligne"},
         {'name': 'num_analytique', 'label': "Numéro analytique"},
+        {'name': 'num_autonomie', 'label': "Identifiant ERP"},
     )

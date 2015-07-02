@@ -89,8 +89,12 @@ def get_set_products_form(request, counter=None):
         id=request.context.id,
         _query=dict(action='set_products')
     )
-    valid_btn = Button(name='submit', value="set_products", type='submit',
-                        title=u"Valider")
+    valid_btn = Button(
+        name='submit',
+        value="set_products",
+        type='submit',
+        title=u"Valider"
+    )
     form = Form(schema=schema, buttons=(valid_btn,), action=action,
                 counter=counter)
     return form
@@ -344,8 +348,12 @@ brouillon"
             Return the form for configuring the products for each lines
         """
         form = get_set_products_form(self.request, self.formcounter)
-        form.set_appstruct({'lines':[line.appstruct() \
-                for line in self.context.lines]})
+        form.set_appstruct(
+            {
+                'lines':[line.appstruct() \
+                         for line in self.context.all_lines]
+            }
+        )
         self.formcounter = form.counter
         return form
 

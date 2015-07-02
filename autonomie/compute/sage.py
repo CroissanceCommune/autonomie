@@ -921,6 +921,7 @@ class SageExpenseBase(BaseSageBookEntryFactory):
         'libelle',
         'num_feuille',
         'type_',
+        'num_autonomie',
     )
     variable_columns = (
         'compte_cg',

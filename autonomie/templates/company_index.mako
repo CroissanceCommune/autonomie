@@ -96,12 +96,12 @@
 <div class='row'>
     <div class='col-md-6'>
         <div class='well tasklist' style="margin-top:10px" id='tasklist_container'>
-            ${request.layout_manager.render_panel('company_tasks')}
+            ${panel('company_tasks')}
         </div>
     </div>
     <div class='col-md-6'>
         <div class='well tasklist' style="margin-top:10px" id='event_container'>
-            ${request.layout_manager.render_panel('company_events')}
+            ${panel('company_events')}
         </div>
     </div>
 </div>

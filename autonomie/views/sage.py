@@ -265,7 +265,7 @@ class SageInvoiceExportPage(BaseView):
         prefix = self.request.config.get('invoiceprefix', '')
         for invoice in invoices:
             official_number = "%s%s" % (prefix, invoice.official_number)
-            for line in invoice.lines:
+            for line in invoice.all_lines:
                 if not self.check_invoice_line(line):
                     invoice_url = self.request.route_path('invoice',
                             id=invoice.id)

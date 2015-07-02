@@ -113,7 +113,7 @@ class SageInvoice(object):
         """
             populate the object with the content of our lines
         """
-        for line in self.invoice.lines:
+        for line in self.invoice.all_lines:
             product_model = line.product
             if product_model is None:
                 raise MissingData(u"No product found for this invoice line")

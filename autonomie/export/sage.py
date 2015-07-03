@@ -114,5 +114,5 @@ class SageExpenseCsvWriter(SageCsvWriter):
         {'name': 'credit', 'label': "Montant crédit"},
         {'name': 'type_', 'label': "Type de ligne"},
         {'name': 'num_analytique', 'label': "Numéro analytique"},
-        {'name': 'num_autonomie', 'label': "Identifiant ERP"},
+        {'name': 'num_autonomie', 'label': "Référence"},
     )

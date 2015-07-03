@@ -263,7 +263,7 @@
                 </thead>
                 <tbody>
                     % for company in user.companies:
-                        <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
+                        <% url = request.route_path('company', id=company.id) %>
                         <% onclick = "document.location='{url}'".format(url=url) %>
                         % if not company.enabled():
                             <tr class="danger">
@@ -292,7 +292,9 @@
                                     % endfor
                                 </ul>
                             </td>
-                            <td>
+                            <td class='actions'>
+                                ${table_btn(url, u"Voir", u"Modifier l'entreprise", icon='glyphicon glyphicon-search')}
+                                <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
                                 ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
                                 % if company.enabled():
                                     <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>

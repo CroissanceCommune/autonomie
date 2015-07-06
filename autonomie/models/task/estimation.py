@@ -380,10 +380,13 @@ class Estimation(Task, EstimationCompute):
                 deposit=self.deposit,
                 exclusions=self.exclusions,
                 manual_deliverables=self.manualDeliverables,
+                manualDeliverables=self.manualDeliverables,
                 course=self.course,
                 payment_display=self.paymentDisplay,
-                groups=[group.__json__(request) for group in self.line_groups],
-                payments=[line.__json__(request) for line in self.payment_lines]
+                payment_lines=[
+                    line.__json__(request)
+                    for line in self.payment_lines
+                ]
             )
         )
         return result
@@ -436,6 +439,7 @@ class PaymentLine(DBBASE):
 
     def __json__(self, request):
         return dict(
+            rowIndex=self.rowIndex,
             index=self.rowIndex,
             description=self.description,
             cost=self.amount,

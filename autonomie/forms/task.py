@@ -979,190 +979,105 @@ class SetProductsSchema(colander.MappingSchema):
         title=u'')
 
 
-#  Mapper tools used to move from dbdatas format to an appstruct fitting the
-#  form schema.
 #  Dans le formulaire de création de devis par exemple, on trouve
 #  aussi bien des TaskLine que des Estimation ou des DiscountLine et leur
 #  configuration est imbriquée. On a donc besoin de faire un mapping d'un
 #  dictionnaire contenant les modèles {'estimation':..., 'tasklines':...}
 #  vers un dictionnaire correspondant au formulaire en place.
+TASK_MATCHING_MAP = (
+    ('name', 'common'),
+    ('phase_id', 'common'),
+    ('taskDate', 'common'),
+    ('financial_year', 'common'),
+    ('description', 'common'),
+    ('customer_id', 'common'),
+    ('address', 'common'),
+    ('course', 'common'),
+    ('display_units', 'common'),
+    ('expenses_ht', 'lines'),
+    ('exclusions', 'notes'),
+    ('payment_conditions', 'payments'),
+    ('statusComment', 'communication'),
+    ('paymentDisplay', 'payments'),
+)
 
 
-class MappingWrapper:
+def dbdatas_to_appstruct(dbdatas, matching_map=TASK_MATCHING_MAP):
     """
-        Allows moving from one dict to another
-        allowing to map databases models and colander Mapping schemas
-        when db datas are dispatched through different mapping schemas
-        @param matching_map: matching_map as (
-                                  (field, colanderschemaname,multi_boolean),
-                                                                ...)
-        @param dbtype: internal dbtype name (like 'estimation', 'task' ...)
-                        corresponding to a database table
+    convert db dict fashionned datas to the appropriate sections
+    to fit the form schema
     """
-    matching_map = None
-    dbtype = None
-
-    def toschema(self, dbdatas, appstruct):
-        """
-            convert db dict fashionned datas to the appropriate sections
-            to fit the EstimationSchema
-        """
-        for field, section in self.matching_map:
-            value = dbdatas.get(self.dbtype, {}).get(field)
-            if value is not None:
-                appstruct.setdefault(section, {})[field] = value
-        return appstruct
-
-    def todb(self, appstruct, dbdatas):
-        """
-            convert colander deserialized datas to database dbdatas
-        """
-        for field, section in self.matching_map:
-            value = appstruct.get(section, {}).get(field, None)
-            if value is not None or colander.null:
-                dbdatas.setdefault(self.dbtype, {})[field] = value
-        return dbdatas
+    appstruct = {}
+    for field, section in matching_map:
+        value = dbdatas.get(field)
+        if value is not None:
+            appstruct.setdefault(section, {})[field] = value
+    return appstruct
 
 
-class SequenceWrapper:
+def appstruct_to_dbdatas(appstruct, matching_map=TASK_MATCHING_MAP):
     """
-        Maps the db models with colander Sequence Schemas
+    convert colander deserialized datas to database dbdatas
     """
-    mapping_name = ''
-    sequence_name = ''
-    dbtype = ''
-    fields = None
-    sort_key = 'rowIndex'
-
-    def toschema(self, dbdatas, appstruct):
-        """
-            Build schema expected datas from list of elements
-        """
-        lineslist = dbdatas.get(self.dbtype, [])
-        if self.sort_key:
-            lines = sorted(lineslist,
-                           key=lambda line: int(line[self.sort_key]))
-        else:
-            lines = lineslist
-        for line in lines:
-            appstruct.setdefault(self.mapping_name, {})
-            appstruct[self.mapping_name].setdefault(
-                self.sequence_name, []).append(
-                    dict((key, value)
-                         for key, value in line.items()
-                         if key in self.fields)
-                )
-        return appstruct
-
-    def todb(self, appstruct, dbdatas):
-        """
-            convert colander deserialized datas to database dbdatas
-        """
-        all_ = appstruct.get(self.mapping_name, {}).get(self.sequence_name, [])
-        for index, line in enumerate(all_):
-            dbdatas.setdefault(self.dbtype, [])
-            if self.sort_key:
-                line[self.sort_key] = index + 1
-            dbdatas[self.dbtype].append(line)
-        return dbdatas
+    dbdatas = {'task':{}}
+    task_datas = dbdatas['task']
+    for field, section in matching_map:
+        value = appstruct.get(section, {}).get(field, None)
+        if value is not None or colander.null:
+            task_datas[field] = value
+    return dbdatas
 
 
-class InvoiceMatch(MappingWrapper):
-    matching_map = (
-        #task attrs
-        ('name', 'common'),
-        ('phase_id', 'common'),
-        ('taskDate', 'common'),
-        ('financial_year', 'common'),
-        ('description', 'common'),
-        #both estimation and invoice attrs
-        ('customer_id', 'common'),
-        ('address', 'common'),
-        ('course', 'common'),
-        ('display_units', 'common'),
-#        ('expenses', 'lines'),
-        ('expenses_ht', 'lines'),
-        ('payment_conditions', 'payments'),
-        ('statusComment', 'communication'),
-    )
-    dbtype = 'invoice'
+def get_lines_block_appstruct(appstruct, dbdatas):
+    """
+    Return the appstruct relatd to the task lines block of the the Task Schema
+
+    the task lines block groups :
+        task lines
+        task lines groups
+        discount lines
+
+    :param dbdatas: Datas coming from the database in dict format
+    """
+    appstruct.setdefault('lines', {})
+
+    for key in ('lines', 'groups', "discounts"):
+        if key in dbdatas:
+            appstruct['lines'][key] = dbdatas[key]
+
+    return appstruct
 
 
-class EstimationMatch(MappingWrapper):
-    matching_map = (
-        ('name', 'common'),
-        ('phase_id', 'common'),
-        ('taskDate', 'common'),
-        ('description', 'common'),
-        ('customer_id', 'common'),
-        ('address', 'common'),
-        ('course', 'common'),
-        ('display_units', 'common'),
-#        ('expenses', 'lines'),
-        ('expenses_ht', 'lines'),
-        ('exclusions', 'notes'),
-        ('payment_conditions', 'payments'),
+def add_order_to_lines(appstruct):
+    """
+    add the order of the different lines coming from a submitted form
+    """
+    lines = appstruct.get('lines', [])
+    for index, line in enumerate(lines):
+        line['order'] = index + 1
 
-        # estimation only attrs
-        ('paymentDisplay', 'payments'),
-        ('deposit', 'payments'),
-        ('statusComment', 'communication'),
-    )
-    dbtype = 'estimation'
+    for index, group in enumerate(appstruct.get('groups', [])):
+        group['order'] = index + 1
+        for jindex, line in enumerate(group.get('lines', [])):
+            line['order'] = jindex + 1
 
+    payment_lines = appstruct.get('payments', {}).get('payment_lines', [])
+    for index, line in enumerate(payment_lines):
+        lines['rowIndex'] = index +1
 
-class CancelInvoiceMatch(MappingWrapper):
-    matching_map = (
-        #task attrs
-        ('name', 'common'),
-        ('phase_id', 'common'),
-        ('taskDate', 'common'),
-        ('financial_year', 'common'),
-        ('description', 'common'),
-        ('customer_id', 'common'),
-        ('address', 'common'),
-        ('display_units', 'common'),
-#        ('expenses', 'lines'),
-        ('expenses_ht', 'lines'),
-        ('payment_conditions', 'payments'),
-        ('statusComment', 'communication'),
-    )
-    dbtype = 'cancelinvoice'
-
-
-class TaskLinesMatch(SequenceWrapper):
-    mapping_name = 'lines'
-    sequence_name = 'lines'
-    fields = ('description', 'cost', 'quantity', 'unity', 'tva', 'product_id')
-    dbtype = 'lines'
-    sort_key = 'order'
-
-
-class PaymentLinesMatch(SequenceWrapper):
-    mapping_name = 'payments'
-    sequence_name = 'payment_lines'
-    fields = ('description', 'paymentDate', 'amount', 'tva')
-    dbtype = "payment_lines"
-
-
-class DiscountLinesMatch(SequenceWrapper):
-    mapping_name = 'lines'
-    sequence_name = 'discounts'
-    fields = ('description', 'amount', 'tva')
-    dbtype = "discounts"
-    sort_key = None
+    return appstruct
 
 
 def get_estimation_appstruct(dbdatas):
     """
         return EstimationSchema-compatible appstruct
     """
-    appstruct = {}
-    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
-                                                        DiscountLinesMatch):
-        appstruct = matchobj().toschema(dbdatas, appstruct)
+    appstruct = dbdatas_to_appstruct(dbdatas)
 
-    appstruct['lines']['groups'] = dbdatas['groups']
+    if "payment_lines" in dbdatas:
+        appstruct.setdefault('payments', {})['payment_lines'] = \
+            dbdatas['payment_lines']
+    appstruct = get_lines_block_appstruct(appstruct, dbdatas)
     appstruct = set_payment_times(appstruct, dbdatas)
     return appstruct
 
@@ -1171,15 +1086,13 @@ def get_estimation_dbdatas(appstruct):
     """
         return dict with db compatible datas
     """
-    dbdatas = {}
-    for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
-                                                      DiscountLinesMatch):
-        dbdatas = matchobj().todb(appstruct, dbdatas)
+    dbdatas = appstruct_to_dbdatas(appstruct)
 
+    add_order_to_lines(appstruct)
+    dbdatas['lines'] = appstruct['lines']['lines']
     dbdatas['groups'] = appstruct['lines']['groups']
-    for index, group in enumerate(dbdatas['group']):
-        group['order'] = index + 1
-
+    dbdatas['discounts'] = appstruct['lines']['discounts']
+    dbdatas['payment_lines'] = appstruct['payments']['payment_lines']
     dbdatas = set_manualDeliverables(appstruct, dbdatas)
     return dbdatas
 
@@ -1188,9 +1101,8 @@ def get_invoice_appstruct(dbdatas):
     """
         return InvoiceSchema compatible appstruct
     """
-    appstruct = {}
-    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscountLinesMatch):
-        appstruct = matchobj().toschema(dbdatas, appstruct)
+    appstruct = dbdatas_to_appstruct(dbdatas)
+    appstruct = get_lines_block_appstruct(appstruct, dbdatas)
     return appstruct
 
 
@@ -1198,9 +1110,12 @@ def get_invoice_dbdatas(appstruct):
     """
         return dict with db compatible datas
     """
-    dbdatas = {}
-    for matchobj in (InvoiceMatch, TaskLinesMatch, DiscountLinesMatch):
-        dbdatas = matchobj().todb(appstruct, dbdatas)
+    dbdatas = appstruct_to_dbdatas(appstruct)
+
+    add_order_to_lines(appstruct)
+    dbdatas['lines'] = appstruct['lines']['lines']
+    dbdatas['groups'] = appstruct['lines']['groups']
+    dbdatas['discounts'] = appstruct['lines']['discounts']
     return dbdatas
 
 
@@ -1208,9 +1123,8 @@ def get_cancel_invoice_appstruct(dbdatas):
     """
         return cancel invoice schema compatible appstruct
     """
-    appstruct = {}
-    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
-        appstruct = matchobj().toschema(dbdatas, appstruct)
+    appstruct = dbdatas_to_appstruct(dbdatas)
+    appstruct = get_lines_block_appstruct(appstruct, dbdatas)
     return appstruct
 
 
@@ -1218,9 +1132,11 @@ def get_cancel_invoice_dbdatas(appstruct):
     """
         return dict with db compatible datas
     """
-    dbdatas = {}
-    for matchobj in (CancelInvoiceMatch, TaskLinesMatch):
-        dbdatas = matchobj().todb(appstruct, dbdatas)
+    dbdatas = appstruct_to_dbdatas(appstruct)
+
+    add_order_to_lines(appstruct)
+    dbdatas['lines'] = appstruct['lines']['lines']
+    dbdatas['groups'] = appstruct['lines']['groups']
     return dbdatas
 
 
@@ -1228,11 +1144,13 @@ def set_manualDeliverables(appstruct, dbdatas):
     """
         Hack the dbdatas to set the manualDeliverables value
     """
-    if dbdatas['estimation']:
-        if appstruct.get('payments', {}).get('payment_times') == -1:
-            dbdatas['estimation']['manualDeliverables'] = 1
-        else:
-            dbdatas['estimation']['manualDeliverables'] = 0
+    dbdatas['manualDeliverables'] = 0
+
+    # dans l'interface payment_times == -1 correspond à Configuration Manuelle
+    # des paiements
+    payment_times = appstruct.get('payments', {}).get('payment_times')
+    if payment_times == -1:
+        dbdatas['task']['manualDeliverables'] = 1
     return dbdatas
 
 
@@ -1240,7 +1158,9 @@ def set_payment_times(appstruct, dbdatas):
     """
         Hack the appstruct to set the payment_times value
     """
-    if dbdatas.get('estimation', {}).get('manualDeliverables') == 1:
+    if dbdatas.get('manualDeliverables') == 1:
+        # dans l'interface payment_times == -1 correspond à Configuration
+        # Manuelle des paiements
         appstruct.setdefault('payments', {})['payment_times'] = -1
     else:
         appstruct.setdefault('payments', {})['payment_times'] = max(1,

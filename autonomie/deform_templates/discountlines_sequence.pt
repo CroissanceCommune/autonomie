@@ -34,7 +34,7 @@
       id="discount-header"
       class='linesblockheader row'
       >
-      <div class="col-md-11 hidden-xs hidden-sm">
+      <div class="col-md-12 hidden-xs hidden-sm">
           <div class='col-md-4'>Remise</div>
           <div class='col-md-1'>Montant</div>
           <div class='col-md-2 col-md-offset-3'>TVA</div>

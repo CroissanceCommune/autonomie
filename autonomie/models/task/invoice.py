@@ -397,6 +397,20 @@ class Invoice(Task, InvoiceCompute):
     def __repr__(self):
         return u"<Invoice id:{s.id}>".format(s=self)
 
+    def __json__(self, request):
+        datas = Task.__json__(self, request)
+
+        datas.update(
+            dict(
+                deposit=self.deposit,
+                course=self.course,
+                financial_year=self.financial_year,
+                exported=self.exported,
+                estimation_id=self.estimation_id,
+            )
+        )
+        return datas
+
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
@@ -511,6 +525,21 @@ class CancelInvoice(Task, TaskCompute):
         """
         self.official_number = get_next_official_number()
         self.taskDate = datetime.date.today()
+
+    def __repr__(self):
+        return u"<CancelInvoice id:{s.id}>".format(s=self)
+
+    def __json__(self, request):
+        datas = Task.__json__(self, request)
+
+        datas.update(
+            dict(
+                invoice_id=self.invoice_id,
+                financial_year=self.financial_year,
+                exported=self.exported,
+            )
+        )
+        return datas
 
 
 class Payment(DBBASE, PersistentACLMixin):

@@ -37,7 +37,7 @@ from autonomie.exception import Forbidden
 from autonomie.models.task import (
     Task,
     TaskLine,
-    # TaskLineGroup,
+    TaskLineGroup,
     Estimation,
     PaymentLine,
 )
@@ -78,14 +78,26 @@ def add_lines_to_estimation(task, appstruct):
         Add the lines to the current estimation
     """
     task.default_line_group.lines = []
+    task.line_groups = [task.default_line_group]
     task.discounts = []
     task.payment_lines = []
+
     for line in appstruct['payment_lines']:
         task.payment_lines.append(PaymentLine(**line))
+
+    for group in appstruct['groups']:
+        lines = group.pop('lines', [])
+        group = TaskLineGroup(**group)
+        for line in lines:
+            group.lines.append(TaskLine(**line))
+        task.line_groups.append(group)
+
     for line in appstruct['lines']:
         task.default_line_group.lines.append(TaskLine(**line))
+
     for line in appstruct.get('discounts', []):
         task.discounts.append(DiscountLine(**line))
+
     return task
 
 
@@ -122,7 +134,7 @@ class EstimationAdd(TaskFormView):
         estimation.owner = self.request.user
         estimation = merge_session_with_post(
             estimation,
-            appstruct["estimation"]
+            appstruct['task']
         )
         estimation.set_sequence_number(snumber)
         estimation.set_number()
@@ -162,18 +174,6 @@ class EstimationEdit(TaskFormView):
     def title(self):
         return u"Édition du devis {task.number}".format(task=self.context)
 
-    def get_dbdatas_as_dict(self):
-        """
-            Returns dbdatas as a dict of dict
-        """
-        return {'estimation': self.context.appstruct(),
-                'lines': [line.appstruct()
-                          for line in self.context.default_line_group.lines],
-                'discounts': [line.appstruct()
-                              for line in self.context.discounts],
-                'payment_lines': [line.appstruct()
-                                  for line in self.context.payment_lines]}
-
     def before(self, form):
         if not context_is_editable(self.request, self.context):
             raise HTTPFound(
@@ -191,7 +191,7 @@ class EstimationEdit(TaskFormView):
         """
             Return the current edited context as a colander data model
         """
-        dbdatas = self.get_dbdatas_as_dict()
+        dbdatas = self.context.__json__(self.request)
         # Get colander's schema compatible datas
         return get_estimation_appstruct(dbdatas)
 
@@ -206,7 +206,7 @@ class EstimationEdit(TaskFormView):
         estimation = self.context
         estimation = merge_session_with_post(
             estimation,
-            appstruct["estimation"]
+            appstruct['task']
         )
         try:
             estimation = self.set_task_status(estimation)

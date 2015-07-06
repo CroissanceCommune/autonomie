@@ -13,35 +13,26 @@
      class="deformSeq"
      id="${oid}">
 
+  <style>
+    body.dragging, body.dragging * {
+      cursor: move !important;
+    }
+
+    .dragged {
+      position: absolute;
+      opacity: 0.5;
+      z-index: 2000;
+    }
+  </style>
+
+  <!-- sequence -->
   <input type="hidden" name="__start__"
          value="${field.name}:sequence"
          class="deformProto"
          tal:attributes="prototype prototype"/>
 
-  <!-- Custom datas insertion -->
-
-    <div class='row linesblockheader'>
-      <div class="col-md-11 hidden-sm hidden-xs">
-        <tal:if tal:condition="field.schema.is_admin and field.schema.doctype is not 'estimation'">
-        <div class='col-md-3'>Prestation</div>
-        <div class='col-md-1'>Prix/unité</div>
-        <div class='col-md-1'>Quantité</div>
-        <div class='col-md-2'>Unité</div>
-        <div class='col-md-1'>TVA</div>
-        <div class='col-md-2'>Code produit</div>
-        </tal:if>
-        <tal:if tal:condition="not field.schema.is_admin or field.schema.doctype is 'estimation'">
-            <div class='col-md-4'>Prestation</div>
-            <div class='col-md-1'>Prix/unité</div>
-            <div class='col-md-1'>Quantité</div>
-            <div class='col-md-2'>Unité</div>
-            <div class='col-md-2'>TVA</div>
-        </tal:if>
-        <div class='col-md-1'>Total HT</div>
-      </div>
-    </div>
-  <!-- end custom -->
-    <div class="deformSeqContainer" id="${oid}-orderable">
+      <div class="deformSeqContainer"
+           id="${oid}-orderable">
         <div tal:define="subfields [ x[1] for x in subfields ]"
              tal:repeat="subfield subfields"
              tal:replace="structure subfield.render_template(item_tmpl,
@@ -52,16 +43,16 @@
                  max_len max_len;
                  now_len now_len;
                  orderable orderable;"></span>
-    </div>
-  <!-- Custom datas insertion -->
+      </div>
+
+
     <div class="col-md-offset-10">
       <a href="#"
-         class="btn btn-info"
+         class="btn btn-info deformSeqAdd"
          id="${field.oid}-seqAdd"
-         onclick="javascript: return addTaskLine(this); ">
-         <small id="${field.oid}-addtext">${add_subitem_text}</small>
+         onclick="javascript: return deform.appendSequenceItem(this);">
+        <small id="${field.oid}-addtext">${add_subitem_text}</small>
       </a>
-  <!-- end custom -->
 
       <script type="text/javascript">
        deform.addCallback(
@@ -79,17 +70,6 @@
                containerSelector: "#${oid}-orderable",
                itemSelector: ".deformSeqItem",
                placeholder: '<span class="glyphicon glyphicon-arrow-right placeholder"></span>',
-               start: function(e, ui){
-                $(this).find('textarea.tinymce').each(function(){
-                    tinyMCE.execCommand( 'mceRemoveEditor', false, $(this).attr('id') );
-                    $(this).height("15px");
-                });
-               },
-               stop: function(e, ui){
-                $(this).find('textarea.tinymce').each(function(){
-                    tinyMCE.execCommand( 'mceAddEditor', false, $(this).attr('id') );
-                });
-               },
                onDragStart: function ($item, container, _super) {
                  var offset = $item.offset(),
                  pointer = container.rootGroup.pointer
@@ -113,6 +93,6 @@
     </div>
     <hr/>
 
-    <input type="hidden" name="__end__" value="${field.name}:sequence"/>
+      <input type="hidden" name="__end__" value="${field.name}:sequence"/>
       <!-- /sequence -->
 </div>

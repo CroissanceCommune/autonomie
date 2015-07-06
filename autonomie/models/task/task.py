@@ -368,8 +368,13 @@ class Task(Node):
             address=self.address,
             payment_conditions=self.payment_conditions,
             description=self.description,
+            lines=[
+                line.__json__(request)
+                for line in self.default_line_group.lines
+            ],
             groups=[
                 group.__json__(request) for group in self.get_groups()
+                if group.id != self.default_line_group.id
             ],
             status_history=[
                 status.__json__(request) for status in self.statuses

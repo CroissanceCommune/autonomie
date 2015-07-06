@@ -79,7 +79,7 @@ templates['payment.mustache'] = template({"1":function(depth0,helpers,partials,d
     + escapeExpression(((helper = (helper = helpers.amount_error || (depth0 != null ? depth0.amount_error : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"amount_error","hash":{},"data":data}) : helper)))
     + "\n        </span>\n";
 },"18":function(depth0,helpers,partials,data) {
-  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <div class='col-md-2 form-group col-md-offset2 paymentamount ";
+  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <div class='col-md-2 form-group col-md-offset-2 paymentamount ";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.amount_error : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
   buffer += "'>\n        <input class='input-sm' type='text' name=\"amount\" id=\"amount_"

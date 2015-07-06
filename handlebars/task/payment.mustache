@@ -32,7 +32,7 @@
         {{/if}}
     </div>
     {{else}}
-    <div class='col-md-2 form-group col-md-offset2 paymentamount {{#if amount_error}}has-error{{/if}}'>
+    <div class='col-md-2 form-group col-md-offset-2 paymentamount {{#if amount_error}}has-error{{/if}}'>
         <input class='input-sm' type='text' name="amount" id="amount_{{ id }}" value="{{#if amount}}{{{ amount }}}{{else}}0,00 €{{/if}}"></input>
         <button class='btn btn-info pull-right' type="button" onclick='addPaymentRow({readonly:false, description:"Paiement"}, "#paymentline_{{ id }}");'>
             +

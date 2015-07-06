@@ -86,27 +86,28 @@ from .custom_types import (
 
 log = logging.getLogger(__name__)
 DAYS = (
-        ('NONE', '-'),
-        ('HOUR', u'Heure(s)'),
-        ('DAY', u'Jour(s)'),
-        ('WEEK', u'Semaine(s)'),
-        ('MONTH', u'Mois'),
-        ('FEUIL', u'Feuillet(s)'),
-        ('PACK', u'Forfait'),
-        )
+    ('NONE', '-'),
+    ('HOUR', u'Heure(s)'),
+    ('DAY', u'Jour(s)'),
+    ('WEEK', u'Semaine(s)'),
+    ('MONTH', u'Mois'),
+    ('FEUIL', u'Feuillet(s)'),
+    ('PACK', u'Forfait'),
+)
 
 
 TASKTYPES_LABELS = {
     'invoice': u'Facture',
     u'estimation': u'Devis',
     'cancelinvoice': u'Avoir',
-    }
+}
 
 
 PAYMENTDISPLAYCHOICES = (
-        ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
-        ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
-        ('ALL', u"Le détail des paiements apparaît dans le PDF",),)
+    ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
+    ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
+    ('ALL', u"Le détail des paiements apparaît dans le PDF",),
+)
 
 
 TEMPLATES_URL = 'autonomie:deform_templates/'
@@ -499,6 +500,32 @@ class DiscountLines(colander.SequenceSchema):
     )
 
 
+class TaskLineGroupMapping(colander.MappingSchema):
+    title = colander.SchemaNode(colander.String(), title=u"Titre de l'ouvrage")
+    description = forms.textarea_node(
+        title=u"Description",
+        missing=u'',
+        richwidget=False,
+        richtext_options={"height": "100px"},
+    )
+    lines = TaskLines(
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + 'tasklines_sequence.pt',
+            add_subitem_text_template=u"Ajouter une prestation",
+        ),
+        title=u'',
+    )
+
+
+class TaskLineGroupSeq(colander.SequenceSchema):
+    groups = TaskLineGroupMapping(
+        title=u"Ouvrage",
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + 'groupline_mapping.pt',
+        ),
+    )
+
+
 class TaskLinesBlock(colander.MappingSchema):
     """
         Fieldset containing the "Détail de la prestation" block
@@ -508,10 +535,16 @@ class TaskLinesBlock(colander.MappingSchema):
         widget=deform.widget.SequenceWidget(
             template=TEMPLATES_URL + 'tasklines_sequence.pt',
             orderable=True,
-            min_len=1,
-            add_subitem_text_template=u"Ajouter une ligne",
+            add_subitem_text_template=u"Ajouter une prestation",
         ),
         title=u'',
+    )
+    groups = TaskLineGroupSeq(
+        widget=deform.widget.SequenceWidget(
+            template=TEMPLATES_URL + 'grouplines_sequence.pt',
+            add_subitem_text_template=u"Ajouter un ouvrage",
+        ),
+        title=u"",
     )
     discounts = DiscountLines(
         widget=deform.widget.SequenceWidget(
@@ -627,21 +660,25 @@ class TaskSchema(colander.MappingSchema):
 
 def remove_admin_fields(schema, kw):
     doctype = schema['lines']['lines'].doctype
-    if kw['request'].user.is_contractor():
-        # Non admin users doesn't edit products
-        if doctype != 'estimation':
-            del schema['lines']['lines']['taskline']['product_id']
-        schema['lines']['lines'].is_admin = False
-        schema['lines']['lines']['taskline']['description'].css_class = 'col-md-4'
-        schema['lines']['lines']['taskline']['tva'].css_class = 'col-md-2'
-    else:
-        schema['lines']['lines'].is_admin = True
-        if doctype != 'estimation':
-            schema['lines']['lines']['taskline']['description'].css_class = 'col-md-3'
-            schema['lines']['lines']['taskline']['tva'].css_class = 'col-md-1'
+    lines = schema['lines']['lines']
+    glines = schema['lines']['groups']['groups']['lines']
+    glines.doctype = doctype
+    for schema_node in (lines, glines):
+        if kw['request'].user.is_contractor():
+            # Non admin users doesn't edit products
+            if doctype != 'estimation':
+                del schema_node['taskline']['product_id']
+            schema_node.is_admin = False
+            schema_node['taskline']['description'].css_class = 'col-md-4'
+            schema_node['taskline']['tva'].css_class = 'col-md-2'
         else:
-            schema['lines']['lines']['taskline']['description'].css_class = 'col-md-4'
-            schema['lines']['lines']['taskline']['tva'].css_class = 'col-md-2'
+            schema_node.is_admin = True
+            if doctype != 'estimation':
+                schema_node['taskline']['description'].css_class = 'col-md-3'
+                schema_node['taskline']['tva'].css_class = 'col-md-1'
+            else:
+                schema_node['taskline']['description'].css_class = 'col-md-4'
+                schema_node['taskline']['tva'].css_class = 'col-md-2'
 
 
 TASKSCHEMA = TaskSchema(after_bind=remove_admin_fields)
@@ -752,6 +789,7 @@ def get_estimation_schema():
                           name='communication')
     )
     del schema['lines']['lines']['taskline']['product_id']
+    del schema['lines']['groups']['groups']['lines']['taskline']['product_id']
     return schema
 
 
@@ -1123,6 +1161,8 @@ def get_estimation_appstruct(dbdatas):
     for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
                                                         DiscountLinesMatch):
         appstruct = matchobj().toschema(dbdatas, appstruct)
+
+    appstruct['lines']['groups'] = dbdatas['groups']
     appstruct = set_payment_times(appstruct, dbdatas)
     return appstruct
 
@@ -1135,6 +1175,11 @@ def get_estimation_dbdatas(appstruct):
     for matchobj in (EstimationMatch, TaskLinesMatch, PaymentLinesMatch,
                                                       DiscountLinesMatch):
         dbdatas = matchobj().todb(appstruct, dbdatas)
+
+    dbdatas['groups'] = appstruct['lines']['groups']
+    for index, group in enumerate(dbdatas['group']):
+        group['order'] = index + 1
+
     dbdatas = set_manualDeliverables(appstruct, dbdatas)
     return dbdatas
 

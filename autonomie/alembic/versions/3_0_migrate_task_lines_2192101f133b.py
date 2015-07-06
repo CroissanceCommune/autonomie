@@ -30,7 +30,7 @@ def upgrade():
     for task in Task.query():
         if task.type_ not in ('estimation', 'invoice', 'cancelinvoice'):
             continue
-        group = TaskLineGroup(task_id=task.id)
+        group = TaskLineGroup(task_id=task.id, order=0)
 
         for line in task.lines:
 

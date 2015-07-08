@@ -38,6 +38,9 @@ from autonomie.utils.rest import (
     RestJsonRepr,
     RestError,
 )
+from autonomie.utils.ascii import (
+    force_ascii,
+)
 from autonomie.utils import date
 
 
@@ -87,6 +90,12 @@ def test_filesizeformat():
     assert(filesizeformat(1024, 1) == "1.0ko")
     assert(filesizeformat(1024*1024, 0) == "1Mo")
     assert(filesizeformat(1024*1024, 1) == "1.0Mo")
+
+
+def test_force_ascii():
+    assert force_ascii("éco") == u"eco"
+    assert force_ascii(5) == "5"
+    assert force_ascii(u"éco") == "eco"
 
 
 class DummyModel(dict):

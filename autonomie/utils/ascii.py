@@ -37,7 +37,10 @@ def force_ascii(value):
         éko=>ko
     """
     if not isinstance(value, unicode):
-        value = unicode(value)
+        if isinstance(value, str):
+            value = force_unicode(value)
+        else:
+            value = unicode(value)
     value = unidecode(value)
     return value
 

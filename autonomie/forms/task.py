@@ -511,7 +511,7 @@ class TaskLineGroupMapping(colander.MappingSchema):
     lines = TaskLines(
         widget=deform.widget.SequenceWidget(
             template=TEMPLATES_URL + 'tasklines_sequence.pt',
-            add_subitem_text_template=u"Ajouter une prestation",
+            add_subitem_text_template=u"Ajouter une prestation à cet ouvrage",
         ),
         title=u'',
     )

@@ -35,9 +35,11 @@ var Selectors = {
   amount: "input[name=amount]",
   default_tva: 'input[name=default_tva]',
   taskline: ".taskline",
+  group_taskline: ".linegroup .taskline",
   discountline: ".discountline",
   discount_headers: "#discount-header",
   tasklines_ht: "#tasklines_ht .input",
+  linegroup_ht: ".linegroupamount",
   tvalist: "#tvalist",
   total_ht: "#total_ht .input",
   total_ttc: "#total_ttc .input",
@@ -63,6 +65,11 @@ var Row = Backbone.Model.extend({
     this.ht = this.HT();
     this.tva_amount = this.TVAPart();
     this.ttc = this.TTC();
+    if (this.row.parents('.linegroup').length > 0){
+      this.linegroup = this.row.parents('.linegroup');
+    } else {
+      this.linegroup = null;
+    }
   },
   HT:function(){
     return 0;
@@ -220,6 +227,17 @@ var RowCollection = Backbone.Collection.extend({
       }
     });
     return hts;
+  },
+  HT_per_group: function(group_obj){
+    var ht = 0;
+    this.each(function(item){
+      if (item.linegroup !== null){
+        if (item.linegroup.is(group_obj)){
+          ht += item.ht;
+        }
+      }
+    });
+    return ht;
   }
 });
 
@@ -258,6 +276,15 @@ function computeTotal(){
   var collection = getCollection();
   var tasklines_ht = collection.HT("task");
   var total_ht = collection.HT();
+
+  var linegroups = $('.linegroup');
+
+  _.each(linegroups, function(item){
+    var linegroup = $(item);
+    var linetotal = collection.HT_per_group(linegroup);
+    var display_total = formatAmount(linetotal, false);
+    linegroup.find('.grouplinetotal .input').empty().html(display_total);
+  });
 
   var total_ttc = collection.TTC();
   var tvas = collection.Tvas();

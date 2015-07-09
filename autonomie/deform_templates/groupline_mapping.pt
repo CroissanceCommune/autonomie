@@ -3,7 +3,7 @@
                      errormsg errormsg|field.errormsg;
                      item_template item_template|field.widget.item_template"
          i18n:domain="deform">
-  <div class="panel panel-info" title="${description}">
+  <div class="panel panel-info linegroup" title="${description}">
     <div class="panel-heading">${title}</div>
     <div class="panel-body">
       <div tal:condition="errormsg"
@@ -22,5 +22,16 @@
       </div>
       ${field.end_mapping()}
     </div>
+    <!-- Custom datas insertion -->
+    <div class='panel-footer'>
+      <div class='row grouplinetotal col-md-offset-9'>
+      <div class="col-md-6 text-right">
+        <label>Total HT</label>
+      </div>
+      <div class='col-md-6'>
+        <div class='input'></div>
+      </div>
+    </div>
   </div>
+  <!-- end custom -->
 </tal:def>

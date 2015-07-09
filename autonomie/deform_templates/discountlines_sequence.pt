@@ -56,7 +56,7 @@
     </div>
   <!-- Custom datas insertion (js code)-->
     <div class="col-md-offset-9">
-      <a href="#"
+      <a
          class="btn btn-info"
          id="${field.oid}-seqAdd"
          onclick='javascript: discount.popup(this);'>

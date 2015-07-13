@@ -69,7 +69,8 @@ class TaskCompute(object):
         A.total()
     """
     # Should have a total_ht and a tva method
-    line_groups = []
+    line_groups = ()
+    all_lines = ()
     # Should have a total_ht and a tva method
     discounts = []
     expenses = 0

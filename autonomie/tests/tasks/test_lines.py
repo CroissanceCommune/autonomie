@@ -44,7 +44,7 @@ PAYMENT_LINE = {
     'description': u"Début",
     "paymentDate": datetime.date(2012, 12, 12),
     "amount": 1000,
-    "rowIndex": 1
+    "order": 1
 }
 
 
@@ -84,7 +84,7 @@ class TestPaymentLine(unittest.TestCase):
     def test_duplicate(self):
         line = PaymentLine(**PAYMENT_LINE)
         dline = line.duplicate()
-        for i in ('rowIndex', 'description', 'amount'):
+        for i in ('order', 'description', 'amount'):
             self.assertEqual(getattr(line, i), getattr(dline, i))
         today = datetime.date.today()
         self.assertEqual(dline.paymentDate, today)

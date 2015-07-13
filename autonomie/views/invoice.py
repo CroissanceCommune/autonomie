@@ -34,6 +34,7 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.exception import Forbidden
 from autonomie.models.task import (
     TaskLine,
+    TaskLineGroup,
     DiscountLine,
     Invoice,
 )
@@ -73,11 +74,21 @@ def add_lines_to_invoice(task, appstruct):
     """
     # Needed for edition only
     task.default_line_group.lines = []
+    task.line_groups = [task.default_line_group]
     task.discounts = []
+
+    for group in appstruct['groups']:
+        lines = group.pop('lines', [])
+        group = TaskLineGroup(**group)
+        for line in lines:
+            group.lines.append(TaskLine(**line))
+        task.line_groups.append(group)
     for line in appstruct['lines']:
         task.default_line_group.lines.append(TaskLine(**line))
+
     for line in appstruct.get('discounts', []):
         task.discounts.append(DiscountLine(**line))
+
     return task
 
 
@@ -114,7 +125,10 @@ class InvoiceAdd(TaskFormView):
         invoice = Invoice()
         invoice.project = self.context
         invoice.owner = self.request.user
-        invoice = merge_session_with_post(invoice, appstruct["invoice"])
+        invoice = merge_session_with_post(
+            invoice,
+            appstruct["task"]
+        )
         invoice.set_sequence_number(snumber)
         invoice.set_number()
         invoice.set_name()
@@ -157,16 +171,6 @@ class InvoiceEdit(TaskFormView):
     def title(self):
         return u"Édition de la facture {task.number}".format(task=self.context)
 
-    def get_dbdatas_as_dict(self):
-        """
-            Returns dbdatas as a dict of dict
-        """
-        return {'invoice': self.context.appstruct(),
-                'lines': [line.appstruct()
-                          for line in self.context.default_line_group.lines],
-                'discounts': [line.appstruct()
-                              for line in self.context.discounts]}
-
     def before(self, form):
         if not context_is_editable(self.request, self.context):
             raise HTTPFound(
@@ -184,7 +188,7 @@ class InvoiceEdit(TaskFormView):
         """
             Return the current edited context as a colander data model
         """
-        dbdatas = self.get_dbdatas_as_dict()
+        dbdatas = self.context.__json__(self.request)
         # Get colander's schema compatible datas
         return get_invoice_appstruct(dbdatas)
 
@@ -197,7 +201,10 @@ class InvoiceEdit(TaskFormView):
         # avoid missing arguments errors
 
         invoice = self.context
-        invoice = merge_session_with_post(invoice, appstruct["invoice"])
+        invoice = merge_session_with_post(
+            invoice,
+            appstruct["task"]
+        )
         try:
             invoice = self.set_task_status(invoice)
             # Line handling

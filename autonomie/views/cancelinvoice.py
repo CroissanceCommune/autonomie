@@ -39,6 +39,7 @@ from autonomie.forms.task import (
 from autonomie.models.task import (
     CancelInvoice,
     TaskLine,
+    TaskLineGroup,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -51,15 +52,16 @@ from autonomie.views import (
 from autonomie.exception import Forbidden
 from autonomie.views.taskaction import (
     TaskFormView,
+    get_set_financial_year_form,
+    get_set_products_form,
     context_is_editable,
     TaskStatusView,
     populate_actionmenu,
-    get_set_financial_year_form,
-    get_set_products_form,
     task_pdf_view,
     task_html_view,
     make_task_delete_view,
 )
+
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +71,14 @@ def add_lines_to_cancelinvoice(task, appstruct):
         Add the lines to the current cancelinvoice
     """
     task.default_line_group.lines = []
+    task.line_groups = [task.default_line_group]
+    for group in appstruct['groups']:
+        lines = group.pop('lines', [])
+        group = TaskLineGroup(**group)
+        for line in lines:
+            group.lines.append(TaskLine(**line))
+        task.line_groups.append(group)
+
     for line in appstruct['lines']:
         task.default_line_group.lines.append(TaskLine(**line))
     return task
@@ -107,7 +117,10 @@ class CancelInvoiceAdd(TaskFormView):
         cinvoice = CancelInvoice()
         cinvoice.project = self.context
         cinvoice.owner = self.request.user
-        cinvoice = merge_session_with_post(cinvoice, appstruct["cancelinvoice"])
+        cinvoice = merge_session_with_post(
+            cinvoice,
+            appstruct["task"]
+        )
         cinvoice.set_sequence_number(snumber)
         cinvoice.set_number()
         cinvoice.set_name()
@@ -122,8 +135,12 @@ class CancelInvoiceAdd(TaskFormView):
             self.session.flash(u"L'avoir a bien été ajoutée.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
-        return HTTPFound(self.request.route_path("project",
-                                                 id=self.context.id))
+        return HTTPFound(
+            self.request.route_path(
+                "project",
+                id=self.context.id
+            )
+        )
 
 
 class CancelInvoiceEdit(TaskFormView):
@@ -148,16 +165,6 @@ class CancelInvoiceEdit(TaskFormView):
     def title(self):
         return u"Édition de l'avoir {task.number}".format(task=self.context)
 
-    def get_dbdatas_as_dict(self):
-        """
-            Returns dbdatas as a dict of dict
-        """
-        return {'cancelinvoice': self.context.appstruct(),
-                'lines': [line.appstruct()
-                          for line in self.context.default_line_group.lines],
-                'discounts': [line.appstruct()
-                              for line in self.context.discounts]}
-
     def before(self, form):
         if not context_is_editable(self.request, self.context):
             raise HTTPFound(
@@ -175,7 +182,7 @@ class CancelInvoiceEdit(TaskFormView):
         """
             Return the current edited context as a colander data model
         """
-        dbdatas = self.get_dbdatas_as_dict()
+        dbdatas = self.context.__json__(self.request)
         # Get colander's schema compatible datas
         return get_cancel_invoice_appstruct(dbdatas)
 
@@ -188,7 +195,10 @@ class CancelInvoiceEdit(TaskFormView):
         # to avoid missing arguments errors
 
         cinvoice = self.context
-        cinvoice = merge_session_with_post(cinvoice, appstruct["cancelinvoice"])
+        cinvoice = merge_session_with_post(
+            cinvoice,
+            appstruct["task"]
+        )
         try:
             cinvoice = self.set_task_status(cinvoice)
             cinvoice.invoice.check_resulted(user_id=self.request.user.id)

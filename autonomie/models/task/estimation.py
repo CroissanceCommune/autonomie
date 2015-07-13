@@ -400,7 +400,7 @@ class PaymentLine(DBBASE):
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True, nullable=False)
     task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
-    rowIndex = Column(Integer)
+    order = Column(Integer)
     description = Column(Text)
     amount = Column(Integer)
     creationDate = deferred(
@@ -417,7 +417,7 @@ class PaymentLine(DBBASE):
         "Estimation",
         backref=backref(
             'payment_lines',
-            order_by='PaymentLine.rowIndex',
+            order_by='PaymentLine.order',
             cascade="all, delete-orphan"
         )
     )
@@ -427,7 +427,7 @@ class PaymentLine(DBBASE):
             duplicate a paymentline
         """
         return PaymentLine(
-            rowIndex=self.rowIndex,
+            order=self.order,
             amount=self.amount,
             description=self.description,
             paymentDate=datetime.date.today()
@@ -439,8 +439,8 @@ class PaymentLine(DBBASE):
 
     def __json__(self, request):
         return dict(
-            rowIndex=self.rowIndex,
-            index=self.rowIndex,
+            order=self.order,
+            index=self.order,
             description=self.description,
             cost=self.amount,
             date=self.paymentDate,

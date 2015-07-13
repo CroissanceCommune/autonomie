@@ -50,6 +50,13 @@ def upgrade():
             if index % 100 == 0:
                 session.flush()
 
+    op.alter_column(
+        table_name='estimation_payment',
+        column_name='rowIndex',
+        new_column_name='order',
+        type_=sa.Integer,
+    )
+
 
 def downgrade():
     pass

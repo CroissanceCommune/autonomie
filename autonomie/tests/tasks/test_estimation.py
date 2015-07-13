@@ -67,14 +67,14 @@ DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 PAYMENT_LINES = [{'description':u"Début",
                   "paymentDate":datetime.date(2012, 12, 12),
                   "amount":1000,
-                  "rowIndex":1},
+                  "order":1},
                  {'description':u"Milieu",
                   "paymentDate":datetime.date(2012, 12, 13),
-                  "amount":1000, "rowIndex":2},
+                  "amount":1000, "order":2},
                  {'description':u"Fin",
                   "paymentDate":datetime.date(2012, 12, 14),
                   "amount":150,
-                  "rowIndex":3}]
+                  "order":3}]
 
 # Values:
 #         the money values are represented *100

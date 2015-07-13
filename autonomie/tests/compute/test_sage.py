@@ -27,6 +27,7 @@ from mock import MagicMock
 
 from autonomie.compute.task import (
     LineCompute,
+    GroupCompute,
     TaskCompute,
     InvoiceCompute,
 )
@@ -58,6 +59,10 @@ class DummyLine(Dummy, LineCompute):
     tva_object = None
     def get_tva(self):
         return self.tva_object
+
+
+class DummyGroup(Dummy, GroupCompute):
+    pass
 
 
 class DummyInvoice(Dummy, InvoiceCompute):
@@ -140,6 +145,8 @@ def invoice(def_tva, tva):
         tva_object=tva,
     )
 
+    group = DummyGroup(lines=(line1, line2, line3,))
+
     company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
     customer = Dummy(name="customer", compte_tiers="CUSTOMER", compte_cg='CG_CUSTOMER')
     invoice = TaskCompute()
@@ -149,7 +156,8 @@ def invoice(def_tva, tva):
     invoice.customer = customer
     invoice.company = company
     invoice.official_number = "INV_001"
-    invoice.lines = [line1, line2, line3]
+    invoice.line_groups = [group]
+    invoice.all_lines = group.lines
     invoice.expenses_ht = 10000
     invoice.expenses = 10000
     return invoice

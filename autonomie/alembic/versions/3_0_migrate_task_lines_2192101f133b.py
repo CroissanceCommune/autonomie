@@ -15,7 +15,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    from autonomie.models.task.task import (
+    from autonomie.models.task import (
         TaskLine,
         TaskLineGroup,
         Task,
@@ -30,7 +30,12 @@ def upgrade():
     session = DBSESSION()
 
     index = 0
-    for task in Task.query().with_polymorphic([Invoice, CancelInvoice, Estimation]):
+    query = Task.query()
+    query = query.with_polymorphic([Invoice, CancelInvoice, Estimation])
+    query = query.filter(
+        Task.type_.in_(['invoice', 'estimation', 'cancelinvoice'])
+    )
+    for task in query:
         group = TaskLineGroup(task_id=task.id, order=0)
 
         for line in task.lines:

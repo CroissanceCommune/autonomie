@@ -24,229 +24,272 @@
 import pytest
 import colander
 import deform
-from copy import deepcopy
 from mock import MagicMock
 
-from autonomie.forms.task import deferred_total_validator
-from autonomie.forms.task import deferred_payment_mode_validator
 
-DBDATAS = dict(
-    estimation=dict(
-        name=u"Nom du devis",
-        course="0",
-        display_units="1",
-        expenses_ht=150,
-        deposit=20,
-        exclusions="Ne sera pas fait selon la règle",
-        paymentDisplay="ALL",
-        payment_conditions="Payer à l'heure",
-        phase_id=485,
-        taskDate="10-12-2012",
-        description="Devis pour le customer test",
-        manualDeliverables=1,
-        statusComment=u"Aucun commentaire",
-        customer_id=15,
-        address="address"),
-    invoice=dict(
-        name=u"Nom de la facture",
-        course="0",
-        display_units="1",
-        expenses_ht=150,
-        payment_conditions="Payer à l'heure",
-        phase_id=415,
-        taskDate="15-12-2012",
-        financial_year=2012,
-        description="Facture pour le customer test",
-        statusComment=u"Aucun commentaire",
-        customer_id=15,
-        address="address"
-        ),
-    lines=[
-        {'description':'text1',
-        'cost':10000,
-        'unity':'days',
-        'quantity':12,
-        'tva':1960,
-        'rowIndex':1},
-        {'description':'text2',
-        'cost':20000,
-        'unity':'month',
-        'quantity':12,
-        'tva':700,
-        'rowIndex':2},
-        ],
-    discounts=[
-        {'description':'remise1', 'amount':1000, 'tva':1960},
-        {'description':'remise2', 'amount':1000, 'tva':700},
-    ],
-    payment_lines=[
-        {'description':"Début", "paymentDate":"12-12-2012",
-                                "amount":15000, "rowIndex":1},
-        {'description':"Milieu", "paymentDate":"13-12-2012",
-                                "amount":15000, "rowIndex":2},
-        {'description':"Fin", "paymentDate":"14-12-2012",
-                                "amount":150, "rowIndex":3},
-        ]
-                )
-DATAS = {'common': dict(
+from autonomie.forms.task import (
+    deferred_total_validator,
+    dbdatas_to_appstruct,
+    get_lines_block_appstruct,
+    appstruct_to_dbdatas,
+    add_order_to_lines,
+    set_manualDeliverables,
+    set_payment_times,
+    deferred_payment_mode_validator,
+    TASK_MATCHING_MAP,
+)
+
+
+EST_DBDATAS = dict(
     name=u"Nom du devis",
+    course="0",
+    display_units="1",
+    expenses_ht=150,
+    deposit=20,
+    exclusions="Ne sera pas fait selon la règle",
+    paymentDisplay="ALL",
+    payment_conditions="Payer à l'heure",
     phase_id=485,
-    customer_id=15,
-    address="address",
     taskDate="10-12-2012",
     description="Devis pour le customer test",
+    manualDeliverables=1,
+    statusComment=u"Aucun commentaire",
+    customer_id=15,
+    address="address",
+)
+
+INV_DBDATAS = dict(
+    name=u"Nom de la facture",
     course="0",
-    display_units="1",),
+    display_units="1",
+    expenses_ht=150,
+    payment_conditions="Payer à l'heure",
+    phase_id=415,
+    taskDate="15-12-2012",
+    financial_year=2012,
+    description="Facture pour le customer test",
+    statusComment=u"Aucun commentaire",
+    customer_id=15,
+    address="address"
+)
+
+LINES_DBDATAS = dict(
+    lines=[
+        {
+            'description': 'text1',
+            'cost': 10000,
+            'unity': 'days',
+            'quantity': 12,
+            'tva': 1960,
+            'order': 1},
+        {
+            'description': 'text2',
+            'cost': 20000,
+            'unity': 'month',
+            'quantity': 12,
+            'tva': 700,
+            'order': 2},
+        ],
+    groups=[
+        {
+            'description': u'description',
+            'title': u'Title',
+            'lines': [
+                {
+                    'description': 'text1',
+                    'cost': 10000,
+                    'unity': 'days',
+                    'quantity': 12,
+                    'tva': 1960,
+                    'order': 1
+                },
+            ]
+        }
+    ],
+    discounts=[
+        {'description': 'remise1', 'amount': 1000, 'tva': 1960},
+        {'description': 'remise2', 'amount': 1000, 'tva': 700},
+    ],
+    payment_lines=[
+        {'description': "Début", "paymentDate": "12-12-2012",
+         "amount": 15000, "order": 1},
+        {'description': "Milieu", "paymentDate": "13-12-2012",
+         "amount": 15000, "order": 2},
+        {'description': "Fin", "paymentDate": "14-12-2012",
+         "amount": 150, "order": 3},
+        ]
+)
+DATAS = {
+    'common': dict(
+        name=u"Nom du devis",
+        phase_id=485,
+        customer_id=15,
+        address="address",
+        taskDate="10-12-2012",
+        description="Devis pour le customer test",
+        course="0",
+        display_units="1",
+    ),
     'lines': dict(
         expenses_ht=150,
         lines=[
-    {'description':'text1', 'cost':10000, 'unity':'days', 'quantity':12, 'tva':1960},
-    {'description':'text2', 'cost':20000, 'unity':'month', 'quantity':12, 'tva':700},
+            {
+                'description': 'text1',
+                'cost': 10000,
+                'unity': 'days',
+                'quantity': 12,
+                'tva': 1960
+            },
+            {
+                'description': 'text2',
+                'cost': 20000,
+                'unity': 'month',
+                'quantity': 12,
+                'tva': 700
+            },
+        ],
+        groups=[
+            {
+                'description': u'description',
+                'title': u'Title',
+                'lines': [
+                    {
+                        'description': 'text1',
+                        'cost': 10000,
+                        'unity': 'days',
+                        'quantity': 12,
+                        'tva': 1960,
+                    },
+                ]
+            }
         ],
         discounts=[
-    {'description':'remise1', 'amount':1000, 'tva':1960},
-    {'description':'remise2', 'amount':1000, 'tva':700},
-        ],),
-    'notes':dict(exclusions="Ne sera pas fait selon la règle"),
-    'payments':dict(
+            {
+                'description': 'remise1',
+                'amount': 1000,
+                'tva': 1960,
+            },
+            {
+                'description': 'remise2',
+                'amount': 1000,
+                'tva': 700,
+            },
+        ],
+    ),
+    'notes': dict(exclusions="Ne sera pas fait selon la règle"),
+    'payments': dict(
         paymentDisplay='ALL',
         deposit=20,
         payment_times=-1,
         payment_lines=[
-    {'description':"Début", "paymentDate":"12-12-2012", "amount":15000},
-    {'description':"Milieu", "paymentDate":"13-12-2012","amount":15000},
-    {'description':"Fin", "paymentDate":"14-12-2012","amount":150},
-    ],
+            {
+                'description': "Début",
+                "paymentDate": "12-12-2012",
+                "amount": 15000,
+            },
+            {
+                'description': "Milieu",
+                "paymentDate": "13-12-2012",
+                "amount": 15000,
+            },
+            {
+                'description': "Fin",
+                "paymentDate": "14-12-2012",
+                "amount": 150,
+            },
+        ],
         payment_conditions="Payer à l'heure",
     ),
-    "communication":dict(statusComment=u"Aucun commentaire"),
-                    }
-INV_DATAS = {'common': dict(
-    name=u"Nom de la facture",
-    phase_id=415,
-    customer_id=15,
-    address="address",
-    taskDate="15-12-2012",
-    financial_year=2012,
-    description="Facture pour le customer test",
-    course="0",
-    display_units="1",),
-    'lines':dict(
-        expenses_ht=150,
-        lines=[
-            {'description':'text1',
-             'cost':10000,
-             'unity':'days',
-             'quantity':12,
-             'tva':1960},
-            {'description':'text2',
-             'cost':20000,
-             'unity':'month',
-             'quantity':12,
-             'tva':700},
-            ],
-        discounts=[
-            {'description':'remise1',
-             'amount':1000,
-             'tva':1960},
-            {'description':'remise2',
-             'amount':1000,
-             'tva':700},
-    ],),
-    'payments':dict(payment_conditions="Payer à l'heure"),
-    "communication":dict(statusComment=u"Aucun commentaire"),
-    }
+    "communication": dict(
+        statusComment=u"Aucun commentaire"
+    ),
+}
 
 
+def test_dbdatas_to_appstruct():
+    for dbdatas in (EST_DBDATAS, INV_DBDATAS,):
+        result = dbdatas_to_appstruct(dbdatas)
+        for field, group in TASK_MATCHING_MAP:
+            if field in dbdatas:
+                assert dbdatas[field] == result[group][field]
 
-class TestMatchTools:
-    def test_estimation_dbdatas_to_appstruct(self):
-        from autonomie.forms.task import EstimationMatch
-        e = EstimationMatch()
-        result = e.toschema(DBDATAS, {})
-        for field, group in e.matching_map:
-            assert DBDATAS['estimation'][field] == result[group][field]
 
-    def test_estimationlines_dbdatas_to_appstruct(self):
-        from autonomie.forms.task import TaskLinesMatch
-        e = TaskLinesMatch()
-        result = e.toschema(DBDATAS, {})
-        from copy import deepcopy
-        lines = deepcopy(DBDATAS['lines'])
-        lines = sorted(lines, key=lambda row:int(row['rowIndex']))
-        for line in lines:
-            del(line['rowIndex'])
-        for i, line in enumerate(lines):
-            assert result['lines']['lines'][i] == line
+def test_get_lines_block_appstruct():
+    result = get_lines_block_appstruct({}, LINES_DBDATAS)
+    for key in ('lines', 'groups', "discounts"):
+        assert key in result['lines']
+        assert result['lines'][key] == LINES_DBDATAS.get(key)
 
-    def test_discountlines_dbdatas_to_appstruct(self):
-        from autonomie.forms.task import DiscountLinesMatch
-        d = DiscountLinesMatch()
-        result = d.toschema(DBDATAS, {})
-        from copy import deepcopy
-        lines = deepcopy(DBDATAS['discounts'])
-        for i, line in enumerate(lines):
-            assert result['lines']['discounts'][i] == line
 
-    def test_paymentlines_dbdatas_to_appstruct(self):
-        from autonomie.forms.task import PaymentLinesMatch
-        p = PaymentLinesMatch()
-        result = p.toschema(DBDATAS, {})
-        lines = deepcopy(DBDATAS['payment_lines'])
-        lines = sorted(lines, key=lambda row:int(row['rowIndex']))
-        for line in lines:
-            del(line['rowIndex'])
-        for i,line in enumerate(lines):
-            assert result['payments']['payment_lines'][i] == line
+def test_appstruct_to_dbdatas():
+    result = appstruct_to_dbdatas(DATAS)
+    for key, group in TASK_MATCHING_MAP:
+        if group in DATAS:
+            if key in DATAS[group]:
+                assert DATAS[group][key] == result['task'][key]
 
-    def test_invoice_dbdatas_to_appstruct(self):
-        from autonomie.forms.task import InvoiceMatch
-        e = InvoiceMatch()
-        result = e.toschema(DBDATAS, {})
-        for field, group in e.matching_map:
-            assert DBDATAS['invoice'][field] == result[group][field]
+    datas = {'common': {'address': colander.null}}
+    result = appstruct_to_dbdatas(datas)
+    assert 'address' not in result['task']
 
-    def test_appstruct_to_estimationdbdatas(self):
-        from autonomie.forms.task import EstimationMatch
-        datas_ = deepcopy(DATAS)
-        e = EstimationMatch()
-        result = e.todb(datas_, {})
-        dbdatas_ = deepcopy(DBDATAS)
-        del(dbdatas_['estimation']['manualDeliverables'])
-        assert result['estimation'] == dbdatas_['estimation']
+    datas = {'common': {'address': None}}
+    result = appstruct_to_dbdatas(datas)
+    assert 'address' not in result['task']
 
-    def test_appstruct_to_estimationlinesdbdatas(self):
-        from autonomie.forms.task import TaskLinesMatch
-        datas_ = deepcopy(DATAS)
-        e = TaskLinesMatch()
-        result = e.todb(datas_, {})
-        assert result['lines'] == DBDATAS['lines']
 
-    def test_appstruct_to_discountlines_dbdatas(self):
-        from autonomie.forms.task import DiscountLinesMatch
-        datas_ = deepcopy(DATAS)
-        d = DiscountLinesMatch()
-        result = d.todb(datas_, {})
-        assert result['discounts'] == DBDATAS['discounts']
+def test_add_order_to_lines():
+    lines = [{'id': 2}, {'id': 1}]
+    appstruct = dict(lines=lines)
+    res = add_order_to_lines(appstruct)
+    assert res['lines'][0]['id'] == 2
+    assert res['lines'][0]['order'] == 1
 
-    def test_appstruct_to_paymentlinesdbdatas(self):
-        from autonomie.forms.task import PaymentLinesMatch
-        p = PaymentLinesMatch()
-        datas_ = deepcopy(DATAS)
-        result = p.todb(datas_, {})
-        assert result['payment_lines'] == DBDATAS['payment_lines']
+    groups = [
+        {
+            'gid': 2,
+            'lines': [{'id': 2}, {'id': 1}],
+        },
+        {
+            'gid': 1,
+            'lines': [{'id': 3}, {'id': 4}],
+        },
+    ]
+    appstruct = dict(groups=groups)
+    res = add_order_to_lines(appstruct)
+    assert res['groups'][1]['gid'] == 1
+    assert res['groups'][1]['order'] == 2
+    assert res['groups'][1]['lines'][0] == {'id': 3, 'order': 1}
 
-    def test_appstruct_to_invoicedbdatas(self):
-        from autonomie.forms.task import InvoiceMatch
-        e = InvoiceMatch()
-        datas_ = deepcopy(INV_DATAS)
-        result = e.todb(datas_, {})
-        assert result['invoice'] == DBDATAS['invoice']
+    payment_lines = [{'id': 2}, {'id': 1}, {'id': 3}]
+    appstruct = dict(payments={'payment_lines': payment_lines})
+    res = add_order_to_lines(appstruct)
+    assert res['payments']['payment_lines'][0]['id'] == 2
+    assert res['payments']['payment_lines'][0]['order'] == 1
+    assert res['payments']['payment_lines'][2]['order'] == 3
+
+
+def test_set_manualDeliverables():
+    appstruct = {'payments': {'payment_times': 5}}
+    res = set_manualDeliverables(appstruct, {})
+    assert res['task']['manualDeliverables'] == 0
+    appstruct = {'payments': {'payment_times': -1}}
+    res = set_manualDeliverables(appstruct, {})
+    assert res['task']['manualDeliverables'] == 1
+
+
+def test_set_payment_times():
+    dbdatas = {'manualDeliverables': 0, 'payment_lines': range(5)}
+    res = set_payment_times({}, dbdatas)
+    assert res['payments']['payment_times'] == 5
+    dbdatas = {'manualDeliverables': 1}
+    res = set_payment_times({}, dbdatas)
+    assert res['payments']['payment_times'] == -1
+
 
 class TestTaskForms:
     def task(self):
-        return MagicMock(topay=lambda :7940, __name__='invoice',
-                project=self.project())
+        return MagicMock(topay=lambda: 7940, __name__='invoice',
+                         project=self.project())
 
     def project(self):
         return MagicMock(customers=self.customers(), id=1, __name__='project')
@@ -269,7 +312,8 @@ class TestTaskForms:
 
     def test_total_validator(self):
         c = colander.SchemaNode(colander.Integer())
-        validator = deferred_total_validator("nutt", {'request':self.request()})
+        validator = deferred_total_validator("nutt",
+                                             {'request': self.request()})
         with pytest.raises(colander.Invalid):
             validator(c, 7941)
         validator(c, 0)
@@ -277,13 +321,14 @@ class TestTaskForms:
 
     def test_mode_validator(self, dbsession):
         c = colander.SchemaNode(colander.String())
-        validator = deferred_payment_mode_validator("nutt", {'request':self.request()})
+        validator = deferred_payment_mode_validator("nutt",
+                                                    {'request': self.request()})
         with pytest.raises(colander.Invalid):
             validator(c, u'pièce en chocolat')
 
     def test_customer_validator(self):
         from autonomie.forms.task import deferred_customer_validator
-        func = deferred_customer_validator("nutt", {'request':self.request()})
+        func = deferred_customer_validator("nutt", {'request': self.request()})
         with pytest.raises(colander.Invalid):
             func("nutt", 0)
         with pytest.raises(colander.Invalid):

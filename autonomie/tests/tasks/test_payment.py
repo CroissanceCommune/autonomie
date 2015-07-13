@@ -27,7 +27,7 @@ import pytest
 
 from autonomie.models.task.states import record_payment
 from autonomie.models.task import Payment
-from autonomie.models.task import Invoice, InvoiceLine
+from autonomie.models.task import Invoice, TaskLineGroup, TaskLine
 
 INVOICE = dict( name=u"Facture 2",
                 sequence_number=2,
@@ -38,7 +38,7 @@ INVOICE = dict( name=u"Facture 2",
                 expenses_ht=0)
 
 LINE = {'description':u'text1', 'cost':10000, 'tva':1960,
-              'unity':'DAY', 'quantity':1, 'rowIndex':1}
+              'unity':'DAY', 'quantity':1, 'order':1}
 
 PAYMENTS = [
             {'amount':1500, 'mode':'CHEQUE'},
@@ -48,7 +48,7 @@ PAYMENTS = [
 @pytest.fixture
 def invoice():
     inv = Invoice(**INVOICE)
-    inv.lines = [InvoiceLine(**LINE)]
+    inv.line_groups = [TaskLineGroup(lines=[TaskLine(**LINE)])]
     for i in PAYMENTS:
         inv.payments.append(Payment(**i))
     return inv

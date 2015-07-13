@@ -34,7 +34,7 @@ from autonomie.models.config import (
         Config,
         )
 
-#from autonomie.views.admin import (
+#from autonomie.views.admin.main import (
 #    AdminWorkUnit,
 #    AdminExpense,
 #    AdminCae,
@@ -43,7 +43,7 @@ from autonomie.models.config import (
 
 
 def test_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin import AdminMain
+    from autonomie.views.admin.main import AdminMain
     config.add_route('admin_main', '/')
     appstruct = {"site":{'welcome':'testvalue'},
                     "document":{'footertitle':'testvalue2'}}
@@ -54,7 +54,7 @@ def test_success(config, get_csrf_request_with_db, dbsession):
 
 
 def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin import AdminTva
+    from autonomie.views.admin.main import AdminTva
     config.add_route('admin_tva', '/')
 
     appstruct = {'tvas':[
@@ -72,7 +72,7 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
 
 
 def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin import AdminPaymentMode
+    from autonomie.views.admin.main import AdminPaymentMode
     config.add_route('admin_paymentmode', '/')
     appstruct = {'paymentmodes':[u"Chèque", u"Expèce"]}
     view = AdminPaymentMode(get_csrf_request_with_db())
@@ -84,7 +84,7 @@ def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):
 
 
 def test_workunit_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin import AdminWorkUnit
+    from autonomie.views.admin.main import AdminWorkUnit
     config.add_route('admin_workunit', '/')
     appstruct = {'workunits':[u"Jours", u"Semaines"]}
     view = AdminWorkUnit(get_csrf_request_with_db())
@@ -100,7 +100,7 @@ class DummyForm(object):
         self.appstruct = appstruct
 
 def test_expense_config_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin import AdminExpense
+    from autonomie.views.admin.main import AdminExpense
     config.add_route('admin_expense', '/')
     appstruct = {
             "code_journal": "JOURNAL01",
@@ -138,7 +138,7 @@ def test_expense_config_success(config, dbsession, get_csrf_request_with_db):
     assert form.appstruct['expensestel'][0]['contribution'] == True
 
 def test_success_id_preservation(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin import AdminExpense
+    from autonomie.views.admin.main import AdminExpense
     config.add_route('admin_expense', '/')
     appstruct = {'expenses':[
         {'label':u"Restauration", "code":u"0001", "id":None}],
@@ -158,7 +158,7 @@ def test_success_id_preservation(config, dbsession, get_csrf_request_with_db):
 
 
 def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin import AdminCae
+    from autonomie.views.admin.main import AdminCae
     config.add_route("admin_cae", "/")
     appstruct = {'compte_cg_contribution':"00000668",
             'compte_rrr':"000009558"}
@@ -169,7 +169,7 @@ def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
         assert config[key] == value
 
 def test_admin_activities_get_edited_elements(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin import AdminActivities
+    from autonomie.views.admin.main import AdminActivities
     obj = AdminActivities(get_csrf_request_with_db())
     datas = {'tests':
         [

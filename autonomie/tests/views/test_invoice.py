@@ -32,22 +32,33 @@ from autonomie.models.project import Project
 
 TODAY = datetime.date.today()
 
-APPSTRUCT = {'common': dict(phase_id=1,
-                        customer_id=1,
-                        address="address",
-                        taskDate=TODAY,
-                        description="Facture pour le customer test",
-                        course="0",
-                        display_units="1",),
-        'lines':dict(expenses=2000,
-                     lines=[{'description':'text1', 'cost':10000,
-                        'unity':'days', 'quantity':12, 'tva':1960}],
-                     discounts=[{'description':'remise1', 'amount':1000,
-                         'tva':1960}],),
-        'payments':dict(payment_conditions="Payer à l'heure"),
-        "communication":dict(statusComment=u"Aucun commentaire"),
-        "submit":"draft"
-        }
+APPSTRUCT = {
+    'common': dict(
+        phase_id=1,
+        customer_id=1,
+        address="address",
+        taskDate=TODAY,
+        description="Facture pour le customer test",
+        course="0",
+        display_units="1",
+    ),
+    'lines':dict(
+        expenses=2000,
+        lines=[
+            {
+                'description':'text1',
+                'cost':10000,
+                'unity':'days',
+                'quantity':12,
+                'tva':1960,
+            }
+        ],
+        discounts=[{'description': 'remise1', 'amount':1000, 'tva':1960}],
+    ),
+    'payments': dict(payment_conditions="Payer à l'heure"),
+    "communication": dict(statusComment=u"Aucun commentaire"),
+    "submit":"draft"
+}
 
 @pytest.fixture
 def project(content):

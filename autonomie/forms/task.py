@@ -394,7 +394,7 @@ def deferred_phases_widget(node, kw):
 
 @colander.deferred
 def deferred_default_payment_condition(node, kw):
-    entry = PaymentConditions.query().filter_by(
+    entry = PaymentConditions.query().filter(
         PaymentConditions.default == True #  noqa
     ).first()
     if entry is not None:

@@ -168,7 +168,7 @@ def build_customer_values(customers):
     """
     options = [build_customer_value()]
     options.extend([build_customer_value(customer)
-                            for customer in customers])
+                    for customer in customers])
     return options
 
 
@@ -197,6 +197,7 @@ def deferred_customer_validator(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
     customer_ids = [customer.id for customer in customers]
+
     def customer_oneof(value):
         if value in ("0", 0):
             return u"Veuillez choisir un client"
@@ -212,8 +213,8 @@ def get_tasktype_from_request(request):
         # Matches estimation and estimations
         if route_name in [predicate, "project_%ss" % (predicate,)]:
             return predicate
-    raise Exception(u"You shouldn't have come here with the current route %s"\
-% route_name)
+    raise Exception(u"You shouldn't have come here with the current route %s"
+                    % route_name)
 
 
 @colander.deferred
@@ -246,13 +247,13 @@ def get_product_choices():
     """
         Return data structure for product code select widget options
     """
-    return [(p.id, u"{0} ({1})".format(p.name, p.compte_cg),)\
+    return [(p.id, u"{0} ({1})".format(p.name, p.compte_cg),)
             for p in Product.query()]
 
 
 def get_unities():
-    unities =  ["",]
-    unities.extend([workunit.label  for workunit in WorkUnit.query()])
+    unities = ["", ]
+    unities.extend([workunit.label for workunit in WorkUnit.query()])
     return unities
 
 
@@ -358,6 +359,7 @@ def get_phases_from_request(request):
         phases = request.context.project.phases
     return phases
 
+
 @colander.deferred
 def deferred_default_name(node, kw):
     """
@@ -392,8 +394,8 @@ def deferred_phases_widget(node, kw):
 
 @colander.deferred
 def deferred_default_payment_condition(node, kw):
-    entry = PaymentConditions.query().filter(
-        PaymentConditions.default==True
+    entry = PaymentConditions.query().filter_by(
+        PaymentConditions.default == True #  noqa
     ).first()
     if entry is not None:
         return entry.label
@@ -593,7 +595,7 @@ class TaskConfiguration(colander.MappingSchema):
         )
     address = forms.textarea_node(
         title=u"Nom et adresse du client",
-        widget_options={'rows':4}
+        widget_options={'rows': 4}
     )
     phase_id = colander.SchemaNode(
         colander.String(),
@@ -700,11 +702,7 @@ class EstimationPaymentLines(colander.SequenceSchema):
     """
         Sequence of payment lines
     """
-    line = EstimationPaymentLine(
-        widget=deform.widget.MappingWidget()
-#            template=TEMPLATES_URL + 'paymentline_mapping.mako',
-#            item_template=TEMPLATES_URL + 'paymentline_mapping_item.mako')
-    )
+    line = EstimationPaymentLine(widget=deform.widget.MappingWidget())
 
 
 class EstimationPayments(colander.MappingSchema):
@@ -723,8 +721,10 @@ class EstimationPayments(colander.MappingSchema):
         colander.Integer(),
         title=u"Paiement en ",
         default=1,
-        widget=deform.widget.SelectWidget(values=get_payment_times(),
-                                     css_class='col-md-2')
+        widget=deform.widget.SelectWidget(
+            values=get_payment_times(),
+            css_class='col-md-2'
+        )
     )
     paymentDisplay = colander.SchemaNode(
         colander.String(),
@@ -764,9 +764,10 @@ class InvoicePayments(colander.MappingSchema):
         missing=colander.drop,
     )
 
-    payment_conditions = forms.textarea_node(title="",
+    payment_conditions = forms.textarea_node(
+        title="",
         default=deferred_default_payment_condition,
-)
+    )
 
 
 def get_estimation_schema():
@@ -793,10 +794,13 @@ def get_estimation_schema():
     return schema
 
 
-FINANCIAL_YEAR = colander.SchemaNode(colander.Integer(),
-        name="financial_year", title=u"Année comptable de référence",
-        widget=deferred_financial_year_widget,
-        default=deferred_default_year)
+FINANCIAL_YEAR = colander.SchemaNode(
+    colander.Integer(),
+    name="financial_year",
+    title=u"Année comptable de référence",
+    widget=deferred_financial_year_widget,
+    default=deferred_default_year,
+)
 
 
 def get_invoice_schema():
@@ -910,21 +914,26 @@ class PaymentSchema(colander.MappingSchema):
         colander schema for payment recording
     """
     come_from = forms.come_from_node()
-    amount = colander.SchemaNode(AmountType(),
+    amount = colander.SchemaNode(
+        AmountType(),
         title=u"Montant",
         validator=deferred_total_validator,
-        default=deferred_amount_default)
-    mode = colander.SchemaNode(colander.String(),
+        default=deferred_amount_default,
+    )
+    mode = colander.SchemaNode(
+        colander.String(),
         title=u"Mode de paiement",
         widget=deferred_payment_mode_widget,
-        validator=deferred_payment_mode_validator)
+        validator=deferred_payment_mode_validator,
+    )
     resulted = colander.SchemaNode(
         colander.Boolean(),
         title=u"Soldé",
         description="""Indique que le document est soldé (
 ne recevra plus de paiement), si le montant indiqué correspond au
 montant de la facture celle-ci est soldée automatiquement""",
-        default=False)
+        default=False,
+    )
 
 
 class FinancialYearSchema(colander.MappingSchema):
@@ -939,27 +948,31 @@ class ProductTaskLine(colander.MappingSchema):
         A single estimation line
     """
     id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deform.widget.HiddenWidget(),
-            missing=u"",
-            css_class="span0")
+        colander.Integer(),
+        widget=deform.widget.HiddenWidget(),
+        missing=u"",
+        css_class="span0"
+    )
     description = colander.SchemaNode(
         colander.String(),
         widget=DisabledInput(),
-         missing=u'',
-         css_class='col-md-3')
+        missing=u'',
+        css_class='col-md-3',
+    )
     tva = colander.SchemaNode(
         AmountType(),
         widget=DisabledInput(),
         css_class='col-md-1',
-        title=u'TVA')
+        title=u'TVA',
+    )
     product_id = colander.SchemaNode(
-            colander.Integer(),
-            widget=deferred_product_widget,
-            validator=deferred_product_validator,
-            missing="",
-            css_class="col-md-2",
-            title=u"Code produit")
+        colander.Integer(),
+        widget=deferred_product_widget,
+        validator=deferred_product_validator,
+        missing="",
+        css_class="col-md-2",
+        title=u"Code produit",
+    )
 
 
 class ProductTaskLines(colander.SequenceSchema):
@@ -1019,11 +1032,11 @@ def appstruct_to_dbdatas(appstruct, matching_map=TASK_MATCHING_MAP):
     """
     convert colander deserialized datas to database dbdatas
     """
-    dbdatas = {'task':{}}
+    dbdatas = {'task': {}}
     task_datas = dbdatas['task']
     for field, section in matching_map:
         value = appstruct.get(section, {}).get(field, None)
-        if value is not None or colander.null:
+        if value not in (None, colander.null):
             task_datas[field] = value
     return dbdatas
 
@@ -1052,7 +1065,9 @@ def add_order_to_lines(appstruct):
     """
     add the order of the different lines coming from a submitted form
     """
+    print(appstruct)
     lines = appstruct.get('lines', [])
+    print(lines)
     for index, line in enumerate(lines):
         line['order'] = index + 1
 
@@ -1063,7 +1078,7 @@ def add_order_to_lines(appstruct):
 
     payment_lines = appstruct.get('payments', {}).get('payment_lines', [])
     for index, line in enumerate(payment_lines):
-        lines['rowIndex'] = index +1
+        line['order'] = index + 1
 
     return appstruct
 
@@ -1144,7 +1159,9 @@ def set_manualDeliverables(appstruct, dbdatas):
     """
         Hack the dbdatas to set the manualDeliverables value
     """
-    dbdatas['manualDeliverables'] = 0
+    # On s'assure que la clé task existe et on set le manualDeliverables par
+    # défaut
+    dbdatas.setdefault('task', {})['manualDeliverables'] = 0
 
     # dans l'interface payment_times == -1 correspond à Configuration Manuelle
     # des paiements
@@ -1163,8 +1180,7 @@ def set_payment_times(appstruct, dbdatas):
         # Manuelle des paiements
         appstruct.setdefault('payments', {})['payment_times'] = -1
     else:
-        appstruct.setdefault('payments', {})['payment_times'] = max(1,
-                                        len(dbdatas.get('payment_lines')))
+        appstruct.setdefault(
+            'payments', {}
+        )['payment_times'] = max(1, len(dbdatas.get('payment_lines')))
     return appstruct
-
-

@@ -478,12 +478,6 @@ class Task(Node):
             result.extend(group.lines)
         return result
 
-    @classmethod
-    def query(cls, *args):
-        return super(Task, cls).query(*args).filter(
-            Task.type_ != 'manualinvoice'
-        )
-
 
 class DiscountLine(DBBASE, LineCompute):
     """

@@ -18,7 +18,10 @@ def upgrade():
     from autonomie.models.task.task import (
         TaskLine,
         TaskLineGroup,
-        Task
+        Task,
+        Estimation,
+        CancelInvoice,
+        Invoice,
     )
     from autonomie.models.base import (
         DBSESSION,
@@ -27,9 +30,7 @@ def upgrade():
     session = DBSESSION()
 
     index = 0
-    for task in Task.query():
-        if task.type_ not in ('estimation', 'invoice', 'cancelinvoice'):
-            continue
+    for task in Task.query().with_polymorphic([Invoice, CancelInvoice, Estimation]):
         group = TaskLineGroup(task_id=task.id, order=0)
 
         for line in task.lines:

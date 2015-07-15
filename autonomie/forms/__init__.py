@@ -82,20 +82,21 @@ def today_node(**kw):
     """
     Return a schema node for date selection, defaulted to today
     """
-    if not "default" in kw:
+    if "default" not in kw:
         kw['default'] = deferred_today
     widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
-            colander.Date(),
-            widget=get_date_input(**widget_options),
-            **kw)
+        colander.Date(),
+        widget=get_date_input(**widget_options),
+        **kw
+    )
 
 
 def now_node(**kw):
     """
     Return a schema node for time selection, defaulted to "now"
     """
-    if not "default" in kw:
+    if "default" not in kw:
         kw['default'] = deferred_now
     return colander.SchemaNode(
         colander.DateTime(default_tzinfo=None),
@@ -107,13 +108,13 @@ def come_from_node(**kw):
     """
     Return a form node for storing the come_from page url
     """
-    if not "missing" in kw:
+    if "missing" not in kw:
         kw["missing"] = ""
     return colander.SchemaNode(
-            colander.String(),
-            widget=deform.widget.HiddenWidget(),
-            **kw
-            )
+        colander.String(),
+        widget=deform.widget.HiddenWidget(),
+        **kw
+    )
 
 
 def textarea_node(**kw):
@@ -144,7 +145,7 @@ def textarea_node(**kw):
         plugins = [
             "lists",
             "searchreplace visualblocks fullscreen",
-            #"contextmenu paste"
+            # "contextmenu paste"
         ]
         menubar = False
         if admin_field:
@@ -168,10 +169,10 @@ def textarea_node(**kw):
         widget_options.setdefault("rows", 4)
         wid = deform.widget.TextAreaWidget(**widget_options)
     return colander.SchemaNode(
-            colander.String(),
-            widget=wid,
-            **kw
-            )
+        colander.String(),
+        widget=wid,
+        **kw
+    )
 
 
 @colander.deferred
@@ -190,8 +191,10 @@ def get_year_select_deferred(query_func, default_val=None):
         values = zip(years, years)
         if default_val is not None:
             values.insert(0, default_val)
-        return deform.widget.SelectWidget(values=values,
-                    css_class='input-small')
+        return deform.widget.SelectWidget(
+            values=values,
+            css_class='input-small',
+        )
     return deferred_widget
 
 
@@ -222,7 +225,7 @@ def default_month(node, kw):
 
 
 def get_month_options():
-    return [(index, calendar.month_name[index].decode('utf8')) \
+    return [(index, calendar.month_name[index].decode('utf8'))
             for index in range(1, 13)]
 
 
@@ -234,8 +237,7 @@ def get_month_select_widget(widget_options):
     default_val = widget_options.get('default_val')
     if default_val is not None:
         options.insert(0, default_val)
-    return deform.widget.SelectWidget(values=options,
-                    css_class='input-small')
+    return deform.widget.SelectWidget(values=options, css_class='input-small')
 
 
 def month_select_node(**kw):
@@ -247,13 +249,13 @@ def month_select_node(**kw):
     missing = kw.pop('missing', default_month)
     widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
-            colander.Integer(),
-            widget=get_month_select_widget(widget_options),
-            default=default,
-            missing=missing,
-            title=title,
-            **kw
-            )
+        colander.Integer(),
+        widget=get_month_select_widget(widget_options),
+        default=default,
+        missing=missing,
+        title=title,
+        **kw
+    )
 
 
 def mail_validator():
@@ -287,20 +289,22 @@ def id_node():
         )
 
 
-def get_fileupload_widget(store_url, store_path, session, \
-        default_filename=None, filters=None):
+def get_fileupload_widget(store_url, store_path, session,
+                          default_filename=None, filters=None):
     """
         return a file upload widget
     """
     tmpstore = FileTempStore(
-            session,
-            store_path,
-            store_url,
-            default_filename=default_filename,
-            filters=filters,
-            )
-    return deform.widget.FileUploadWidget(tmpstore,
-                template=TEMPLATES_PATH + "fileupload.pt")
+        session,
+        store_path,
+        store_url,
+        default_filename=default_filename,
+        filters=filters,
+    )
+    return deform.widget.FileUploadWidget(
+        tmpstore,
+        template=TEMPLATES_PATH + "fileupload.pt"
+    )
 
 
 def flatten_appstruct(appstruct):
@@ -342,8 +346,8 @@ def get_hidden_field_conf():
     Return the model's info conf to get a colanderalchemy hidden widget
     """
     return {
-            'widget': deform.widget.HiddenWidget(),
-            'missing': None
+        'widget': deform.widget.HiddenWidget(),
+        'missing': None
     }
 
 
@@ -430,10 +434,71 @@ def get_select_validator(options):
 
 
 positive_validator = colander.Range(
-            min=0,
-            min_err=u"Doit être positif",
-        )
+    min=0,
+    min_err=u"Doit être positif",
+)
 negative_validator = colander.Range(
-            max=0,
-            min_err=u"Doit être négatif",
+    max=0,
+    min_err=u"Doit être négatif",
+)
+
+
+class CustomSchemaNode(colander.SchemaNode):
+    """
+    Using colanderalchemy, it generates a schema regarding a given model, for
+    relationships, it provides a schema for adding related datas.  We want to
+    be able to configure relationships to existing datas (for example to
+    configurable options)
+
+    This SchemaNode subclass provides the methods expected in colanderalchemy
+    for serialization/deserialization, it allows us to insert custom schemanode
+    in colanderalchemy SQLAlchemySchemaNode
+    """
+    def dictify(self, instance):
+        """
+        Return the datas needed to fill the form
+        """
+        return instance.id
+
+    def objectify(self, id):
+        """
+        Return the related object that have been configured
+        """
+        from autonomie.models.base import DBSESSION
+        print("Objectify !!!")
+        print(id)
+        print (DBSESSION().query(self.model).get(id))
+        return DBSESSION().query(self.model).get(id)
+
+
+def get_sequence_child_item(model, label_attr='title', filter_out=()):
+    """
+    Return the schema node to be used for sequence of related elements
+    configuration
+
+    Usefull in a many to many or one to many relationships.
+    Needed to be able to configure a sequence of relations to existing objects
+
+    e.g:
+
+        ICPE_codes = relationship(
+            "ICPECode",
+            secondary=ICPE_CODE_ASSOCIATION_TABLE,
+            info={
+                'colanderalchemy':{
+                    'title': _(u"Code(s) ICPE"),
+                    'children': forms.get_sequence_child_item(model)
+                }
+            },
+            backref="company_info",
         )
+    """
+    return [
+        CustomSchemaNode(
+            colander.Integer(),
+            name='id',
+            widget=get_deferred_select(model),
+            missing=colander.drop,
+            model=model,
+        )
+    ]

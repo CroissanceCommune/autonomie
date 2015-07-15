@@ -96,11 +96,13 @@ def initialize_sql(engine):
     if not engine.table_names():
         fetch_head()
 
-    print("Setting the metadatas")
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.debug("Setting the metadatas")
     DBBASE.metadata.create_all(engine)
     from transaction import commit
     commit()
 
-    print("Populating the config")
+    logger.debug("Populating the config")
     populate_config(DBSESSION())
     return DBSESSION

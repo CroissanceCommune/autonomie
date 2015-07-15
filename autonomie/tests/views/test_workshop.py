@@ -36,12 +36,20 @@ import pytest
 
 
 @pytest.fixture
-def workshop_model(dbsession):
+def workshop_action(dbsession):
+    a = workshop.WorkshopAction(label=u"Info 1")
+    dbsession.add(a)
+    dbsession.flush()
+    return a
+
+
+@pytest.fixture
+def workshop_model(dbsession, workshop_action):
     appstruct = {
         'name': 'Workshop',
         'leaders': ['user1', 'user2'],
         'datetime': date.today(),
-        'info1': 'Header1',
+        'info1_id': workshop_action.id,
     }
     w = workshop.Workshop(**appstruct)
 
@@ -57,11 +65,12 @@ def workshop_model(dbsession):
     dbsession.flush()
     return w
 
+
 def get_one():
     return workshop.Workshop.query().first()
 
 
-def test_add_view(config, get_csrf_request_with_db):
+def test_add_view(config, get_csrf_request_with_db, workshop_action):
     config.add_route('toto', '/toto')
     config.add_route('workshop', '/workshop/{id}')
 
@@ -71,7 +80,7 @@ def test_add_view(config, get_csrf_request_with_db):
     appstruct = {
         'come_from': "/toto",
         'name': 'test',
-        'info1': 'header',
+        'info1_id': workshop_action.id,
         'timeslots': [{
             'name': 'timeslot',
             'start_time': start,
@@ -79,15 +88,16 @@ def test_add_view(config, get_csrf_request_with_db):
         }]
     }
     view = WorkshopAddView(get_csrf_request_with_db())
-    result = view.submit_success(appstruct)
+    view.submit_success(appstruct)
     a = get_one()
 
-    assert a.info1 == 'header'
+    assert a.info1.label == 'Info 1'
     assert a.timeslots[0].start_time == start
     assert a.timeslots[0].end_time == stop
 
 
-def test_edit_view(workshop_model, config, get_csrf_request_with_db):
+def test_edit_view(workshop_model, config, get_csrf_request_with_db,
+                   workshop_action):
     req = get_csrf_request_with_db()
     req.context = workshop_model
     timeslot_id = req.context.timeslots[0].id
@@ -97,7 +107,7 @@ def test_edit_view(workshop_model, config, get_csrf_request_with_db):
     config.add_route('workshop', '/workshop/{id}')
     appstruct = {
         'come_from': '',
-        'info2': 'subheader',
+        'info2_id': workshop_action.id,
         'timeslots': [
             {
                 'name': u'Matinéee',
@@ -114,17 +124,19 @@ def test_edit_view(workshop_model, config, get_csrf_request_with_db):
         ]
     }
     view = WorkshopEditView(req)
-    result = view.submit_success(appstruct)
+    view.submit_success(appstruct)
     a = get_one()
 
     assert a.timeslots[0].name == u'Matinéee'
     assert a.timeslots[0].start_time == datetime(2014, 06, 12, 8)
 
     assert a.timeslots[1].name == u'timeslot'
-    assert a.info2 == 'subheader'
+    assert a.info2.label == 'Info 1'
+    assert a.info1.label == 'Info 1'
 
 
-def test_workshop_view_only_view(workshop_model, config, get_csrf_request_with_db):
+def test_workshop_view_only_view(workshop_model, config,
+                                 get_csrf_request_with_db):
     config.add_route('workshop', '/workshop/{id}')
     request = get_csrf_request_with_db()
     request.user = user.User.query().first()
@@ -134,6 +146,7 @@ def test_workshop_view_only_view(workshop_model, config, get_csrf_request_with_d
         id=workshop_model.id
     )
 
+
 def test_workshop_delete_view(workshop_model, config, get_csrf_request_with_db):
     config.add_route('workshops', '/workshops')
     request = get_csrf_request_with_db()
@@ -141,7 +154,7 @@ def test_workshop_delete_view(workshop_model, config, get_csrf_request_with_db):
     result = workshop_delete_view(workshop_model, request)
     assert result.status == '302 Found'
     assert result.location == '/workshops'
-    assert get_one() == None
+    assert get_one() is None
 
 #    def test_timeslot_pdf_view(config, get_csrf_request_with_db):
 #        config.add_subscriber(add_api, BeforeRender)

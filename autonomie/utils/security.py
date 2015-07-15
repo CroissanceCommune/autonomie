@@ -81,6 +81,7 @@ from autonomie.models.statistics import (
 )
 from autonomie.models.sale_product import (
     SaleProduct,
+    SaleProductGroup,
     SaleProductCategory,
 )
 
@@ -133,6 +134,7 @@ class RootFactory(dict):
             ('projects', 'project', Project, ),
             ('sale_categories', 'sale_category', SaleProductCategory, ),
             ('sale_products', 'sale_product', SaleProduct, ),
+            ('sale_product_groups', 'sale_product_group', SaleProductGroup, ),
             ('statistics', 'statistic', StatisticSheet,),
             ('statistic_entries', 'statistic_entry', StatisticEntry,),
             ('statistic_criteria', 'statistic_criterion',
@@ -462,6 +464,7 @@ def set_models_acls():
     Project.__default_acl__ = property(get_project_acls)
     SaleProductCategory.__acl__ = property(get_customer_acls)
     SaleProduct.__acl__ = property(get_product_acls)
+    SaleProductGroup.__acl__ = property(get_product_acls)
     StatisticSheet.__acl__ = property(get_base_acl)
     StatisticEntry.__acl__ = property(get_base_acl)
     BaseStatisticCriterion.__acl__ = property(get_base_acl)

@@ -32,6 +32,7 @@ from autonomie.models.task import WorkUnit
 from autonomie.models.sale_product import (
     SaleProductCategory,
     SaleProduct,
+    SaleProductGroup,
 )
 from autonomie.compute.math_utils import convert_to_float
 from autonomie.resources import sale_product_js
@@ -54,13 +55,21 @@ def company_products_view(context, request):
         id=context.id,
         _query=dict(action='options'),
     )
+    # Url utilisée pour charger l'ensemble des produits de l'entreprise (les
+    # autres vues ne les renvoient que par catégorie)
+    all_products_url = request.route_path(
+        "sale_categories",
+        id=context.id,
+        _query=dict(action='products'),
+    )
     contexturl = request.current_route_path()
     title = u"Configuration des produits"
 
     return {
         "title": title,
         "loadurl": loadurl,
-        "contexturl": contexturl
+        "contexturl": contexturl,
+        "all_products_url": all_products_url,
     }
 
 
@@ -77,15 +86,26 @@ def company_products_options_ajax_view(context, request):
     )
 
 
+def company_products_ajax_view(context, request):
+    """
+    Returns the products of the current company
+
+    :param obj context: The context : The company object
+    :param obj request: the Pyramid's request object
+    """
+    all_products = []
+    for category in context.products:
+        all_products.extend(category.products)
+    return dict(products=all_products)
+
+
 class RestCategories(BaseRestView):
     """
     Json api for SaleProductCategory
     """
     # Context is the company
     def collection_get(self):
-        categories = SaleProductCategory.query().filter(
-            SaleProductCategory != None
-        )
+        categories = SaleProductCategory.query()
         categories = categories.filter_by(company_id=self.context.id)
         return {'categories': categories.all()}
 
@@ -126,7 +146,40 @@ class RestProducts(BaseRestView):
     def schema(self):
         return SQLAlchemySchemaNode(
             SaleProduct,
-            excludes=('id'),
+            excludes=('id',),
+        )
+
+
+class RestProductGroups(BaseRestView):
+    """
+    JSON rest api for product group configuration
+    """
+    # Context is the category
+    def collection_get(self):
+        return self.context.product_groups
+
+    def pre_format(self, appstruct):
+        """
+        """
+        # Since when serializing a multi select on the client side, we get a
+        # list OR a string, we need to handle both cases
+        if 'products' in appstruct:
+            product_ids = appstruct.get('products')
+            if not hasattr(product_ids, '__iter__'):
+                product_ids = [product_ids]
+
+            appstruct['products'] = product_ids
+
+        if self.context.__name__ == 'sale_category':
+            appstruct['category_id'] = self.context.id
+        return appstruct
+
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(
+            SaleProductGroup,
+            # id passe par l'url
+            excludes=('id', ),
         )
 
 
@@ -148,18 +201,32 @@ def includeme(config):
         traverse="/sale_categories/{cid}",
     )
 
-    url += "/products"
+    product_url = url + "/products"
     config.add_route(
         "sale_products",
-        url,
+        product_url,
         traverse="/sale_categories/{cid}",
     )
 
-    url += "/{pid:\d+}"
+    product_url += "/{pid:\d+}"
     config.add_route(
         "sale_product",
-        url,
+        product_url,
         traverse="/sale_products/{pid}",
+    )
+
+    group_url = url + "/groups"
+    config.add_route(
+        "sale_product_groups",
+        group_url,
+        traverse="/sale_categories/{cid}",
+    )
+
+    group_url += "/{gid:\d+}"
+    config.add_route(
+        "sale_product_group",
+        group_url,
+        traverse="/sale_product_groups/{gid}",
     )
 
     config.add_view(
@@ -168,6 +235,7 @@ def includeme(config):
         permission="edit",
         renderer="/sale/products.mako",
     )
+
     add_json_view = functools.partial(
         config.add_view,
         renderer='json',
@@ -179,6 +247,12 @@ def includeme(config):
         company_products_options_ajax_view,
         route_name="sale_categories",
         request_param='action=options',
+    )
+
+    add_json_view(
+        company_products_ajax_view,
+        route_name="sale_categories",
+        request_param='action=products',
     )
 
     add_json_view(
@@ -229,4 +303,41 @@ def includeme(config):
         attr='put',
         route_name='sale_product',
         request_method="PUT"
+    )
+    add_json_view(
+        RestProducts,
+        attr='delete',
+        route_name='sale_product',
+        request_method="DELETE"
+    )
+
+    add_json_view(
+        RestProductGroups,
+        attr='collection_get',
+        route_name='sale_product_groups',
+        request_method="GET",
+    )
+    add_json_view(
+        RestProductGroups,
+        attr='post',
+        route_name='sale_product_groups',
+        request_method="POST"
+    )
+    add_json_view(
+        RestProductGroups,
+        attr='get',
+        route_name='sale_product_group',
+        request_method="GET",
+    )
+    add_json_view(
+        RestProductGroups,
+        attr='put',
+        route_name='sale_product_group',
+        request_method="PUT"
+    )
+    add_json_view(
+        RestProductGroups,
+        attr='delete',
+        route_name='sale_product_group',
+        request_method="DELETE"
     )

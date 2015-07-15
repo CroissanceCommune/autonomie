@@ -96,7 +96,7 @@ ${form|n}
                     <div class="controls">
                         <div class="input-group">
                             <!-- Important : ici le span et l'input sont sur la même ligne (les espaces font bugger le rendu -->
-                            <input type="text" name="discount_temp_percent" class="col-md-2" style="z-index:2500;"><span class="input-group-addon">%</span>
+                            <input type="text" name="discount_temp_percent" class='form-control'><span class="input-group-addon">%</span>
                         </div>
                     </div>
                 </div>

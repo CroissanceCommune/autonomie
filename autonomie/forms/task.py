@@ -545,6 +545,7 @@ class TaskLinesBlock(colander.MappingSchema):
         widget=deform.widget.SequenceWidget(
             template=TEMPLATES_URL + 'grouplines_sequence.pt',
             add_subitem_text_template=u"Ajouter un ouvrage",
+            item_template=TEMPLATES_URL + 'grouplines_sequence_item.pt',
         ),
         title=u"",
     )

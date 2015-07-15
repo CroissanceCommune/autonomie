@@ -53,58 +53,72 @@
         </dl>
 ${form|n}
     <div style="display:none;" id='discount_popup'>
-        <form id="discount_temp" class="">
+        <form id="discount_temp">
             <div class="form-group">
-                <div class="controls">
-            <select id="discount_type_select">
-                <option value="value" selected="true">En montant fixe</option>
-                <option value="percent">En pourcentage</option>
-            </select>
-             </div>
-         </div>
+                <select id="discount_type_select" class='form-control'>
+                    <option value="value" selected="true">En montant fixe</option>
+                    <option value="percent">En pourcentage</option>
+                </select>
+            </div>
             <div class="form-group">
-                <label class='control-label' for="discount_temp_description">Description</label>
-                <div class="controls">
-                    <textarea name="discount_temp_description" rows="2"></textarea>
-                </div>
+                <label for="discount_temp_description">Description</label>
+                <textarea
+                    class='form-control'
+                    name="discount_temp_description"
+                    rows="2">
+                </textarea>
             </div>
             <div id='value_configuration'>
                 <div class="form-group">
-                    <label class='control-label' for="discount_temp_value">Montant</label>
-                    <div class="controls">
-                        <input type="text" name="discount_temp_value">
+                    <label for="discount_temp_value">Montant</label>
+                    <div class="input-group">
+                        <input type="text" class='form-control' name="discount_temp_value">
+                        <span class="input-group-addon">€</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class='control-label' for="discount_temp_tva">Tva</label>
-                    <div class="controls">
-                        <select name="discount_temp_tva" >
-                            % for tva in tvas:
-                                <option value="${tva.value}"
-                                % if tva.default == 1:
-                                    selected="on"
-                                % endif
-                                >${tva.name}</option>
-                            % endfor
-                        </select>
-                    </div>
+                    <label for="discount_temp_tva">Tva</label>
+                    <select
+                        name="discount_temp_tva"
+                        class='form-control'
+                        >
+                        % for tva in tvas:
+                            <option value="${tva.value}"
+                            % if tva.default == 1:
+                                selected="on"
+                            % endif
+                            >${tva.name}</option>
+                        % endfor
+                    </select>
                 </div>
             </div>
             <div id='percent_configuration' style='display:none'>
                 <div class="form-group">
-                    <label class='control-label' for="discount_temp_percent">Pourcentage</label>
-                    <div class="controls">
-                        <div class="input-group">
-                            <!-- Important : ici le span et l'input sont sur la même ligne (les espaces font bugger le rendu -->
-                            <input type="text" name="discount_temp_percent" class='form-control'><span class="input-group-addon">%</span>
-                        </div>
+                    <label for="discount_temp_percent">Pourcentage</label>
+                    <div class="input-group">
+                        <input type="text" name="discount_temp_percent" class='form-control'>
+                        <span class="input-group-addon">%</span>
                     </div>
                 </div>
             </div>
         </form>
-        <div class='form-actions'>
-            <button  class='btn btn-primary' type='button' onclick="discount.validate()">Valider</button>
-            <button  class='btn btn-primary' type='button' onclick="discount.close()">Annuler</button>
+        <div class='form-group'>
+            <div class="text-right">
+                <button
+                    class='btn btn-success'
+                    type='button'
+                    onclick="discount.validate()"
+                    >
+                    Valider
+                </button>
+                <button
+                    class='btn btn-danger'
+                    type='button'
+                    onclick="discount.close()"
+                    >
+                    Annuler
+                </button>
+            </div>
         </div>
     </div>
     <script type='text/javascript'>

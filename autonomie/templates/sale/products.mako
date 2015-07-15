@@ -26,7 +26,7 @@
     <div class='col-xs-2' id='category_list'>
     </div>
     <div class='col-xs-9 col-xs-offset-1' id='product_container'>
-            <div class='alert alert-info' style="margin: 30px 150px">
+            <div class='alert alert-info' style="margin: 30px 150px 30px 50px">
                 % if not request.context.products:
                     Le catalogue produit permet de configurer des produits et des ouvrages en les rangeant par catégories.
                     <br />

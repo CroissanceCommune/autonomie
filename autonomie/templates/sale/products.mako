@@ -39,7 +39,7 @@
                     <ul>
                         <li>1 - Ajouter une catégorie</li>
                         <li>2 - Ajouter des produits</li>
-                        <li>3 - Ajouter des ouvrages</li>
+                        <li>3 - Ajouter des ouvrages (groupe de produits)</li>
                     </ul>
                     <br />
                     <a class="btn btn-success" href="#categories/add" title="Ajouter une catégorie">Commencer par ajouter une catégorie</a>

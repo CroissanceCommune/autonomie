@@ -238,11 +238,11 @@ def test_appstruct_to_dbdatas():
 
 
 def test_add_order_to_lines():
-    lines = [{'id': 2}, {'id': 1}]
+    lines = {'lines': [{'id': 2}, {'id': 1}]}
     appstruct = dict(lines=lines)
     res = add_order_to_lines(appstruct)
-    assert res['lines'][0]['id'] == 2
-    assert res['lines'][0]['order'] == 1
+    assert res['lines']['lines'][0]['id'] == 2
+    assert res['lines']['lines'][0]['order'] == 1
 
     groups = [
         {
@@ -254,11 +254,11 @@ def test_add_order_to_lines():
             'lines': [{'id': 3}, {'id': 4}],
         },
     ]
-    appstruct = dict(groups=groups)
+    appstruct = {'lines': dict(groups=groups)}
     res = add_order_to_lines(appstruct)
-    assert res['groups'][1]['gid'] == 1
-    assert res['groups'][1]['order'] == 2
-    assert res['groups'][1]['lines'][0] == {'id': 3, 'order': 1}
+    assert res['lines']['groups'][1]['gid'] == 1
+    assert res['lines']['groups'][1]['order'] == 2
+    assert res['lines']['groups'][1]['lines'][0] == {'id': 3, 'order': 1}
 
     payment_lines = [{'id': 2}, {'id': 1}, {'id': 3}]
     appstruct = dict(payments={'payment_lines': payment_lines})

@@ -1066,13 +1066,14 @@ def add_order_to_lines(appstruct):
     """
     add the order of the different lines coming from a submitted form
     """
-    print(appstruct)
-    lines = appstruct.get('lines', [])
-    print(lines)
+    tasklines = appstruct.get('lines', {})
+
+    lines = tasklines.get('lines', [])
     for index, line in enumerate(lines):
         line['order'] = index + 1
 
-    for index, group in enumerate(appstruct.get('groups', [])):
+    groups = tasklines.get('groups', [])
+    for index, group in enumerate(groups):
         group['order'] = index + 1
         for jindex, line in enumerate(group.get('lines', [])):
             line['order'] = jindex + 1

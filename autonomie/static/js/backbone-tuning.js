@@ -109,6 +109,7 @@ AutonomieApp.on("start", function(){
 
 // Provide a default table item view
 var BaseTableLineView = Backbone.Marionette.ItemView.extend({
+  tagName: "tr",
   highlight: function( options ){
     /*
      * Ok highlight
@@ -171,6 +172,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
       this.listenTo(this.model, 'change', this.render, this);
     }
     _.bindAll(this, ['closeView']);
+    this.init_options = options;
   },
   setDatePicker: function(formSelector, tag, altFieldName, today){
     /*
@@ -291,16 +293,23 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     Backbone.Validation.unbind(this);
     return true;
   },
-  updateSelectOptions: function(options, val){
+  updateSelectOptions: function(options, val, key){
     /*
      * Add the selected attr to the option with value 'val'
+     *
+     * :param list options: list of js objects
+     * :param list val: list of values or single value
+     * :param str key: the key used to identifiy items ('value' by default)
      */
     if (!_.isArray(val)){
       val = [val];
     }
+    if (_.isUndefined(key)){
+      key = 'value';
+    }
     _.each(options, function(option){
       delete option['selected'];
-      if (_.contains(val, option['value'])){
+      if (_.contains(val, option[key])){
         option['selected'] = 'true';
       }
     });

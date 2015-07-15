@@ -1,45 +1,66 @@
 <form>
-    <div class="form-group">
-        <label for='label'>Nom du produit *</label>
-        <input class="form-control" type='text' name='label' value='{{ label }}'/>
-        <span class='help-block'>Requis, utilisé lors de la sélection des produits dans l'interface d'édition de devis/factures</span>
+    <div class='row'>
+        <div class='col-md-6'>
+            <fieldset>
+                <legend>Informations relatives au catalogue</legend>
+                <div class="form-group">
+                    <label for='label'>Nom du produit *</label>
+                    <input class="form-control" type='text' name='label' value='{{ label }}'/>
+                </div>
+                <div class="form-group">
+                    <label for='ref'>Référence</label>
+                    <input class="form-control" type='text' name='ref' value='{{ ref }}'/>
+                </div>
+            </fieldset>
+        </div>
+        <div class='col-md-6'>
+            <fieldset>
+                <legend>Informations utilisées lors de l'insertion dans les devis/factures</legend>
+                <div class="alert alert-info">
+                    Lors de l'insertion du produit dans un devis ou une
+                    facture, les champs ci-dessous seront utilisés pour
+                    pré-remplir les données dans le document.  Ces champs sont
+                    facultatifs.
+                </div>
+                <div class="form-group">
+                     <label for='description'>Description</label>
+                     <textarea name='description' class='form-control'>{{ description }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='value'>Valeur</label>
+                    <input class="form-control" type='number' step='any' min='0' name='value' value='{{ value }}'/>
+                </div>
+                <div class="form-group">
+                    <label for='unity'>Unité</label>
+                    <select name='unity' class='form-control'>
+                    <option value=''></option>
+                    {{#unity_options }}
+                        <option value='{{value}}' {{#selected}}selected{{/selected}}>
+                            {{label}}
+                        </option>
+                    {{/unity_options }}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for='tva'>Tva</label>
+                    <select name='tva' class='form-control'>
+                    <option value=''></option>
+                    {{#tva_options }}
+                        <option value='{{ value }}' {{#selected}}selected{{/selected}}>
+                            {{ name }}
+                        </option>
+                    {{/tva_options }}
+                    </select>
+                </div>
+            </fieldset>
+        </div>
     </div>
-    <div class="form-group">
-        <label for='ref'>Référence</label>
-        <input class="form-control" type='text' name='ref' value='{{ ref }}'/>
-    </div>
-    <div class="form-group">
-         <label for='description'>Description</label>
-         <textarea name='description' class='form-control'>{{ description }}</textarea>
-    </div>
-    <div class="form-group">
-        <label for='value'>Valeur</label>
-        <input class="form-control" type='number' step='any' min='0' name='value' value='{{ value }}'/>
-    </div>
-    <div class="form-group">
-        <label for='unity'>Unité</label>
-        <select name='unity' class='form-control'>
-        <option value=''></option>
-        {{#unity_options }}
-            <option value='{{value}}' {{#selected}}selected{{/selected}}>
-                {{label}}
-            </option>
-        {{/unity_options }}
-        </select>
-    </div>
-    <div class="form-group">
-        <label for='tva'>Tva</label>
-        <select name='tva' class='form-control'>
-        <option value=''></option>
-        {{#tva_options }}
-            <option value='{{ value }}' {{#selected}}selected{{/selected}}>
-                {{ name }}
-            </option>
-        {{/tva_options }}
-        </select>
-    </div>
-    <div class="form-actions">
-        <button type="submit" class="btn btn-success" name='submit'>Valider</button>
-        <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+    <div class='row'>
+        <div class='col-md-6 col-md-offset-6'>
+            <div class="form-actions text-right">
+                <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+                <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+            </div>
+        </div>
     </div>
 </form>

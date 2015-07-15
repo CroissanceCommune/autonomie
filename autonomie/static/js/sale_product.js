@@ -31,6 +31,9 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     },
     products_url: function(){
       return this.url() + "/products";
+    },
+    groups_url: function(){
+      return this.url() + "/groups";
     }
   });
 
@@ -61,6 +64,24 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     }
   });
 
+  var ProductGroupModel = Backbone.Model.extend({
+    validation: {
+      label: {
+        required: true,
+        msg: "est requis"
+      }
+    }
+  });
+
+  var ProductGroupCollection = Backbone.Collection.extend({
+    model: ProductGroupModel,
+    comparator: "label",
+    initialize: function(options){
+      this.url = options.url;
+      this.category_id = options.category_id;
+    }
+  });
+
   var CategoryView = Marionette.ItemView.extend({
     template: "category",
     tagName: "li",
@@ -73,7 +94,16 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
   var CategoryListView = Marionette.CompositeView.extend({
     childView: CategoryView,
     template: "category_list",
-    childViewContainer: "ul"
+    childViewContainer: "ul",
+    set_active: function(category){
+      this.children.each(function(view){
+        if (view.model.cid == category.cid){
+          view.$el.addClass('active');
+        }else{
+          view.$el.removeClass('active');
+        }
+      });
+    }
   });
 
   var CategoryAddFormView = BaseFormView.extend({
@@ -87,17 +117,8 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     template: "main_layout",
     regions: {
       title: '#category-title',
-      list: '#product-list'
-    },
-    events: {
-      'click button.close': "closeView"
-    },
-    closeView: function(){
-      var this_ = this;
-      this.$el.slideUp(400, function(){
-        this_.destroy();
-        AutonomieApp.router.navigate("index", {trigger: true});
-      });
+      products: '#product-list',
+      groups: "#group-list"
     }
   });
 
@@ -121,14 +142,15 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     },
     _remove: function(id){
       var this_ = this;
-      var confirmed = confirm("Êtes vous certain de vouloir supprimer cet catégorie (les produits seront également supprimés) ?");
+      var confirmed = confirm("Êtes vous certain de vouloir supprimer cette catégorie (les produits et ouvrages seront également supprimés) ?");
       if (confirmed){
         var _model = this.model;
         _model.destroy({
           success: function(model, response) {
-            this_.destroy();
-            AutonomieApp.router.navigate("index", {trigger: true});
-            displayServerSuccess("L'élément a bien été supprimé");
+              this_.destroy();
+              Product.router.navigate("index", {trigger: true});
+              Product.router.controller.index();
+              displayServerSuccess("L'élément a bien été supprimé");
             }
         });
       }
@@ -137,6 +159,11 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       this.ui.form.hide();
     }
   });
+
+  var NoChildrenView = Marionette.ItemView.extend({
+    template: "product_empty"
+  });
+
 
   var ProductView = BaseTableLineView.extend({
     template: "product",
@@ -185,6 +212,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
   var ProductListView = Marionette.CompositeView.extend({
     childView: ProductView,
     template: "product_list",
+    emptyView: NoChildrenView,
     childViewContainer: "tbody",
     events: {
       "click a.add": "showAddForm"
@@ -212,7 +240,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
         }
       }
       this.destroy();
-      AutonomieApp.router.navigate("index", {trigger: true});
+      Product.router.navigate("index", {trigger: true});
       return;
     },
     templateHelpers: function(){
@@ -228,12 +256,100 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     }
   });
 
+  var ProductGroupFormView = BaseFormView.extend({
+    template: "product_group_form",
+    ui:{
+      "form": "form",
+      "select": "form[name=product_group] select[name=products]"
+    },
+    focus: function(){
+      this.ui.form.find('input').first().focus();
+    },
+    closeView: function(result){
+      if (!_.isUndefined(result)){
+        if (!_.isUndefined(result.id)){
+          this.destroy();
+          Product.router.navigate("categories/" + result.get('category_id'),
+          {trigger: true});
+          return;
+        }
+      }
+      this.destroy();
+      return;
+    },
+    templateHelpers: function(){
+      var ids = _.pluck(this.model.get('products'), 'id');
+      console.log(ids);
+      var product_options = this.updateSelectOptions(
+        this.init_options.products, ids, 'id');
+      console.log(product_options);
+      return {
+        product_options: product_options
+      };
+    },
+    onShow: function(){
+      console.log(this.ui.select);
+      this.ui.select.select2();
+    },
+    onRender: function(){
+      console.log(this.ui.select);
+      this.ui.select.select2();
+    }
+  });
+
+  var ProductGroupView = BaseTableLineView.extend({
+    template: "product_group",
+    events: {
+      'click a.remove':'_remove',
+      'click a.edit': 'showEditionForm'
+    },
+    modelEvents: {
+      "change": "render"
+    },
+    _remove: function(id){
+      var this_ = this;
+      var confirmed = confirm("Êtes vous certain de vouloir supprimer cet élément ?");
+      if (confirmed){
+        var _model = this.model;
+        this.highlight({
+          callback: function(){
+            _model.destroy({
+                success: function(model, response) {
+                  this_.destroy();
+                  displayServerSuccess("L'élément a bien été supprimé");
+                }
+             });
+           }
+          });
+      }
+    },
+    showEditionForm: function(){
+      controller.product_group_edit(this.model);
+    }
+  });
+
+  var ProductGroupListView = Marionette.CompositeView.extend({
+    childView: ProductGroupView,
+    template: "product_group_list",
+    childViewContainer: "tbody",
+    emptyView: NoChildrenView,
+    events: {
+      "click a.add": "showAddForm"
+    },
+    showAddForm: function(){
+      controller.add_product_group();
+    }
+  });
+
   var controller = {
     initialized:false,
     index: function(){
       this.initialize();
       App.container.empty();
       App.popup.empty();
+      if (Product.categories.length === 1){
+        this.category_edit(Product.categories.models[0].id);
+      }
     },
     initialize: function(){
       if (! this.initialized){
@@ -254,12 +370,12 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       App.container.show(this.category_add_view);
     },
     category_edit: function(id){
-      console.log("category_edition");
       var category = Product.categories.get(id);
       if (_.isUndefined(category)){
         Product.router.navigate('index', {trigger: true});
         return false;
       }
+      this.category_list_view.set_active(category);
       this.current_category = category;
       this.main_layout = new MainLayoutView();
       App.container.show(this.main_layout);
@@ -272,17 +388,34 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       this.product_collection = new ProductCollection(
          {url: category.products_url(), category_id: category.id}
       );
+
       var this_ = this;
-      return this.product_collection.fetch(
+      this.product_collection.fetch(
         {
           success: function(){
             var product_list_view = new ProductListView({
               collection: this_.product_collection
             });
-            this_.main_layout.getRegion('list').show(product_list_view);
+            this_.main_layout.getRegion('products').show(product_list_view);
           }
         }
       );
+
+      this.product_group_collection = new ProductGroupCollection(
+        {url: category.groups_url(), category_id: category.id}
+      );
+      this.product_group_collection.fetch(
+        {
+          success: function(){
+            var product_group_list_view = new ProductGroupListView({
+              collection: this_.product_group_collection
+            });
+            this_.main_layout.getRegion('groups').show(
+              product_group_list_view);
+          }
+        }
+      );
+      return true;
     },
     add_product: function(){
       var product = new ProductModel({});
@@ -297,6 +430,37 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       });
       App.popup.show(edit_form);
       return true;
+    },
+    add_product_group: function(){
+      var this_ = this;
+      var product_group = new ProductGroupModel({});
+      // We load all products, not only those from the current category
+      var load_all_products = initLoad(AppOptions['all_products_url']);
+      load_all_products.then(
+        function(result){
+          var add_form = new ProductGroupFormView({
+            model: product_group,
+            destCollection: this_.product_group_collection,
+            products: result.products
+          });
+          App.popup.show(add_form);
+        }
+      );
+    },
+    product_group_edit: function(product_group){
+      var this_ = this;
+      // We load all products, not only those from the current category
+      var load_all_products = initLoad(AppOptions['all_products_url']);
+      load_all_products.then(
+        function(result){
+          var add_form = new ProductGroupFormView({
+            model: product_group,
+            destCollection: this_.product_group_collection,
+            products: result.products
+          });
+          App.popup.show(add_form);
+        }
+      );
     }
   };
 

@@ -23,23 +23,33 @@
 <%inherit file="/base.mako"></%inherit>
 <%block name="content">
 <div class='row'>
-    <div class='col-xs-3' id='category_list'>
+    <div class='col-xs-2' id='category_list'>
     </div>
-    <div class='col-xs-9' id='product_container'>
+    <div class='col-xs-9 col-xs-offset-1' id='product_container'>
             <div class='alert alert-info' style="margin: 30px 150px">
                 % if not request.context.products:
+                    Le catalogue produit permet de configurer des produits et des ouvrages en les rangeant par catégories.
+                    <br />
+                    Lors de l'insertion de ces éléments dans un devis ou une
+                    facture, les champs configurés seront utilisés pour
+                    pré-remplir le document.
+                    <br />
+                    <br />
                     <h4>Configuration du catalogue produit</h4>
                     <ul>
-                        <li>1 - Ajouter une catégorie de produits</li>
+                        <li>1 - Ajouter une catégorie</li>
                         <li>2 - Ajouter des produits</li>
                         <li>3 - Ajouter des ouvrages</li>
                     </ul>
+                    <br />
+                    <a class="btn btn-success" href="#categories/add" title="Ajouter une catégorie">Commencer par ajouter une catégorie</a>
                     % else:
                         <h4>Sélectionner une catégorie dans la liste à gauche</h4>
                 % endif
             </div>
     </div>
 </div>
+<div id='messageboxes'></div>
 <div id='popup_container'>
 </div>
 </%block>
@@ -47,4 +57,5 @@
 AppOptions = {};
 AppOptions['loadurl'] = "${loadurl}";
 AppOptions['contexturl'] = "${contexturl}";
+AppOptions['all_products_url'] = "${all_products_url}";
 </%block>

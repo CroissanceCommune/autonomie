@@ -41,14 +41,22 @@ from autonomie.models.base import (
 from autonomie import forms
 
 
-#PRODUCT_GROUP = Table(
-#    'product_group_rel',
-#    DBBASE.metadata,
-#    Column("product_id", Integer, ForeignKey('sale_product.id')),
-#    Column("product_group_id", Integer, ForeignKey('product_group.id')),
-#    mysql_charset=default_table_args['mysql_charset'],
-#    mysql_engine=default_table_args['mysql_engine'],
-#)
+PRODUCT_TO_GROUP_REL_TABLE = Table(
+    "product_product_group_rel",
+    DBBASE.metadata,
+    Column(
+        "sale_product_id",
+        Integer,
+        ForeignKey('sale_product.id', ondelete='cascade')
+    ),
+    Column(
+        "sale_product_group_id",
+        Integer,
+        ForeignKey('sale_product_group.id', ondelete='cascade')
+    ),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
 
 
 class SaleProductCategory(DBBASE):
@@ -65,14 +73,6 @@ class SaleProductCategory(DBBASE):
         }
     )
     description = Column(Text(), default="")
-    parent_id = Column(ForeignKey('sale_product_category.id'))
-    children = relationship(
-        "SaleProductCategory",
-        primaryjoin="SaleProductCategory.id==SaleProductCategory.parent_id",
-        backref=backref("parent", remote_side=[id]),
-        cascade="all",
-        info={'colanderalchemy': forms.EXCLUDED},
-    )
     company_id = Column(
         ForeignKey('company.id'),
         info={
@@ -98,10 +98,11 @@ class SaleProductCategory(DBBASE):
             id=self.id,
             title=self.title,
             description=self.description,
-            parent_id=self.parent_id,
             company_id=self.company_id,
-            product_groups=[item.__json__(request) for item in self.children],
-            products=[item.__json__(request) for item in self.products],
+            product_groups=[item.__json__(request)
+                            for item in self.product_groups],
+            products=[item.__json__(request)
+                      for item in self.products],
         )
 
 
@@ -138,5 +139,52 @@ class SaleProduct(DBBASE):
             tva=self.tva,
             value=self.value,
             unity=self.unity,
+            category_id=self.category_id,
+            category=self.category.title,
+        )
+
+
+class SaleProductGroup(DBBASE):
+    """
+    A product group model
+    """
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(String(255), nullable=False)
+    ref = Column(String(100), nullable=True)
+
+    title = Column(String(255), default="")
+    description = Column(Text(), default='')
+
+    products = relationship(
+        "SaleProduct",
+        secondary=PRODUCT_TO_GROUP_REL_TABLE,
+        info={
+            'colanderalchemy': {
+                # Permet de sélectionner des éléments existants au lieu
+                # d'insérer des nouveaux à chaque fois
+                'children': forms.get_sequence_child_item(SaleProduct),
+            }
+        }
+    )
+
+    category_id = Column(ForeignKey('sale_product_category.id'))
+    category = relationship(
+        SaleProductCategory,
+        backref=backref('product_groups'),
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
+
+    def __json__(self, request):
+        """
+        Json repr of our model
+        """
+        return dict(
+            id=self.id,
+            label=self.label,
+            ref=self.ref,
+            title=self.title,
+            description=self.description,
+            products=[product.__json__(request) for product in self.products],
             category_id=self.category_id,
         )

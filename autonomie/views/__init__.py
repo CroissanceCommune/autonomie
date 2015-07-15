@@ -50,11 +50,10 @@ submit_btn = Button(name="submit", type="submit", title=u"Valider")
 cancel_btn = Button(name="cancel", type="submit", title=u"Annuler")
 
 
-logger = logging.getLogger(__name__)
-
-
 class BaseView(object):
     def __init__(self, context, request=None):
+        self.logger = logging.getLogger("autonomie.views.__init__")
+
         if request is None:
             # Needed for manually called views
             self.request = context
@@ -160,8 +159,8 @@ class BaseListClass(BaseView):
             except colander.Invalid as e:
                 # If values are not valid, we want the default ones to be
                 # provided see the schema definition
-                logger.error("CURRENT SEARCH VALUES ARE NOT VALID")
-                logger.error(e)
+                self.logger.error("CURRENT SEARCH VALUES ARE NOT VALID")
+                self.logger.error(e)
                 appstruct = schema.deserialize({})
         return schema, appstruct
 
@@ -377,7 +376,7 @@ class BaseFormView(FormView):
         self.context = request.context
         self.dbsession = self.request.dbsession
         self.session = self.request.session
-        self.logger = logging.getLogger("form_admin")
+        self.logger = logging.getLogger("autonomie.views.__init__")
         if has_permission('manage', request.context, request):
             tinymce.need()
 
@@ -428,9 +427,9 @@ class BaseFormView(FormView):
         We add a token here for forms that are collapsed by default to keep them
         open if there is an error
         """
-        logger.exception(e)
+        self.logger.exception(e)
         # On loggergue l'erreur colander d'origine
-        logger.exception(e.error)
+        self.logger.exception(e.error)
         print(e)
         print(e.error)
         return dict(form=e.render(), formerror=True)
@@ -603,18 +602,18 @@ class BaseRestView(BaseView):
 
     def _submit_datas(self, edit=False):
         submitted = self.request.json_body
-        logger.debug(u"Submitting %s" % submitted)
+        self.logger.debug(u"Submitting %s" % submitted)
         schema = self.get_schema(submitted)
 
         try:
             submitted = self.pre_format(submitted)
             attributes = schema.deserialize(submitted)
         except colander.Invalid, err:
-            logger.exception("  - Erreur")
-            logger.exception(submitted)
+            self.logger.exception("  - Erreur")
+            self.logger.exception(submitted)
             raise rest.RestError(err.asdict(), 400)
 
-        logger.debug(attributes)
+        self.logger.debug(attributes)
         if edit:
             entry = schema.objectify(attributes, self.context)
             entry = self.post_format(entry)
@@ -625,18 +624,21 @@ class BaseRestView(BaseView):
             self.request.dbsession.add(entry)
             # We need an id => flush
             self.request.dbsession.flush()
-        logger.debug(entry)
+        self.logger.debug(entry)
         return entry
 
     def post(self):
+        self.logger.info("POST request")
         return self._submit_datas(edit=False)
 
     def put(self):
+        self.logger.info("PUT request")
         return self._submit_datas(edit=True)
 
     def delete(self):
         """
         Delete the given entry
         """
+        self.logger.info("DELETE request")
         self.request.dbsession.delete(self.context)
         return {}

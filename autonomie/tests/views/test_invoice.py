@@ -53,6 +53,21 @@ APPSTRUCT = {
                 'tva':1960,
             }
         ],
+        groups=[
+            {
+                'title': u'Titre',
+                'description': 'description',
+                'lines':[
+                    {
+                        'description':'text2',
+                        'cost':10000,
+                        'unity':'days',
+                        'quantity':10,
+                        'tva': 20000,
+                    }
+                ],
+            }
+        ],
         discounts=[{'description': 'remise1', 'amount':1000, 'tva':1960}],
     ),
     'payments': dict(payment_conditions="Payer à l'heure"),
@@ -100,7 +115,10 @@ def getone():
 
 def test_add_invoice(invoice):
     assert invoice.phase_id == 1
-    assert len(invoice.lines) == 1
+    assert len(invoice.default_line_group.lines) == 1
+    assert len(invoice.all_lines) == 2
+    assert len(invoice.line_groups) == 2
+    assert invoice.line_groups[1].lines[0].description == "text2"
     assert len(invoice.discounts) == 1
     assert invoice.description == "Facture pour le customer test"
 

@@ -29,6 +29,7 @@ from sqlalchemy import (
     Text,
     Table,
     String,
+    Float,
 )
 from sqlalchemy.orm import (
     relationship,

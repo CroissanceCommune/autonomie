@@ -53,6 +53,13 @@
          onclick="javascript: return deform.appendSequenceItem(this);">
         <small id="${field.oid}-addtext">${add_subitem_text}</small>
       </a>
+      <a href="#"
+         class="btn btn-info deformSeqAdd"
+         id="${field.oid}-seqAdd"
+         onclick="javascript: return catalog.popup('groups', this);">
+        <small id="${field.oid}-addtext">Ajouter un ouvrage depuis le catalogue</small>
+      </a>
+      <div id='test_container' style="display:none"></div>
 
       <script type="text/javascript">
        deform.addCallback(

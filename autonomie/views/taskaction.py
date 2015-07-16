@@ -74,7 +74,7 @@ from autonomie.views.files import get_add_file_link
 
 DOCUMENT_TYPES = ('estimation', 'invoice', 'cancelinvoice')
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_set_products_form(request, counter=None):
@@ -399,11 +399,11 @@ brouillon"
         self.formcounter = counter
         btns = []
         actions = self.get_next_actions()
-        log.debug(u"   + Available actions :")
+        logger.debug(u"   + Available actions :")
         for action in actions:
-            log.debug(u"    * {0}".format(action.name))
+            logger.debug(u"    * {0}".format(action.name))
             if action.allowed(self.context, self.request):
-                log.debug(u"     -> is allowed for the current user")
+                logger.debug(u"     -> is allowed for the current user")
                 if hasattr(self, "_%s_btn" % action.name):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.extend(func())
@@ -566,14 +566,14 @@ class StatusView(BaseView):
         if "submit" in self.request.params:
             try:
                 status = self._get_status()
-                log.debug(u"New status : %s "%status)
+                logger.debug(u"New status : %s "%status)
                 item, status = self.set_status(item, status)
                 item = self.request.dbsession.merge(item)
                 self.notify(item, status)
                 self.session.flash(self.valid_msg)
-                log.debug(u" + The status has been set to {0}".format(status))
+                logger.debug(u" + The status has been set to {0}".format(status))
             except Forbidden, e:
-                log.exception(u" !! Unauthorized action by : {0}"\
+                logger.exception(u" !! Unauthorized action by : {0}"\
                         .format(self.request.user.login))
                 self.session.pop_flash("")
                 self.session.flash(e.message, queue='error')
@@ -593,15 +593,15 @@ class TaskStatusView(StatusView):
         form = get_duplicate_form(self.request)
         # if an error is raised here, it will be cached a level higher
         appstruct = form.validate(params.items())
-        log.debug(u" * Form has been validated")
+        logger.debug(u" * Form has been validated")
         customer_id = appstruct.get('customer')
         customer = Customer.get(customer_id)
         project_id = appstruct.get('project')
         project = Project.get(project_id)
         phase_id = appstruct.get('phase')
         phase = Phase.get(phase_id)
-        log.debug(u" * Phase : %s" % phase)
-        log.debug(u" * Project : %s" % project)
+        logger.debug(u" * Phase : %s" % phase)
+        logger.debug(u" * Project : %s" % project)
         appstruct['phase'] = phase
         appstruct['project'] = project
         appstruct['customer'] = customer
@@ -614,7 +614,7 @@ class TaskStatusView(StatusView):
         """
         form = get_edit_metadata_form(self.request)
         appstruct = form.validate(params.items())
-        log.debug(u" * Form has been validated")
+        logger.debug(u" * Form has been validated")
         return appstruct
 
     def post_edit_metadata_process(self, task, status, params):
@@ -654,8 +654,32 @@ class TaskFormView(BaseFormView):
         return self.request.route_path("taskoptions.json")
 
     @property
+    def load_catalog_url(self):
+        return self.request.route_path(
+            "sale_categories",
+            id=self.buttonmaker.company.id,
+            _query=dict(action='jstree')
+        )
+
+    @property
     def tvas(self):
         return Tva.query().all()
+
+    def _more_template_vars(self):
+        """
+        Add template vars to the response dict
+        List the attributes configured in the add_template_vars attribute
+        and add them
+        """
+        result = BaseFormView._more_template_vars(self)
+        result['title'] = self.title
+        result['company'] = self.company
+        result['tvas'] = self.tvas
+        result['load_options_url'] = self.load_options_url
+        result['load_catalog_url'] = self.load_catalog_url
+        logger.debug("Template vars")
+        logger.debug(result)
+        return result
 
 
 def html(request, tasks=None, bulk=False):
@@ -756,15 +780,15 @@ def make_task_delete_view(valid_msg):
         task = request.context
         user = request.user
         project = task.project
-        log.info(u"# {user.login} deletes {s.__name__} {s.number}".format(
+        logger.info(u"# {user.login} deletes {s.__name__} {s.number}".format(
                     user=user, s=task))
         try:
             task.set_status("delete", request, request.user.id)
         except Forbidden, err:
-            log.exception(u"Forbidden operation")
+            logger.exception(u"Forbidden operation")
             request.session.flash(err.message, queue="error")
         except:
-            log.exception(u"Unknown error")
+            logger.exception(u"Unknown error")
             request.session.flash(u"Une erreur inconnue s'est produite",
                     queue="error")
         else:

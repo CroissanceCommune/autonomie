@@ -110,9 +110,6 @@ class EstimationAdd(TaskFormView):
     schema = get_estimation_schema()
     buttons = (submit_btn,)
     model = Estimation
-    add_template_vars = (
-        'title', 'company', 'tvas', 'load_options_url', 'edit'
-    )
 
     @property
     def company(self):
@@ -161,9 +158,7 @@ class EstimationEdit(TaskFormView):
     buttons = (submit_btn,)
     model = Estimation
     edit = True
-    add_template_vars = (
-        'title', 'company', 'tvas', 'load_options_url', 'edit'
-    )
+    add_template_vars = ('edit', )
 
     @property
     def company(self):

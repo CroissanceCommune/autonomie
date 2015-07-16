@@ -100,9 +100,7 @@ class InvoiceAdd(TaskFormView):
     schema = get_invoice_schema()
     buttons = (submit_btn,)
     model = Invoice
-    add_template_vars = (
-        'title', 'company', 'tvas', 'load_options_url', 'edit',
-    )
+    add_template_vars = ('edit', )
 
     @property
     def company(self):
@@ -158,9 +156,7 @@ class InvoiceEdit(TaskFormView):
     buttons = (submit_btn,)
     model = Invoice
     edit = True
-    add_template_vars = (
-        'title', 'company', 'tvas', 'load_options_url', 'edit',
-    )
+    add_template_vars = ('edit', )
 
     @property
     def company(self):

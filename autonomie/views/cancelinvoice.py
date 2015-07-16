@@ -92,9 +92,7 @@ class CancelInvoiceAdd(TaskFormView):
     schema = get_cancel_invoice_schema()
     buttons = (submit_btn,)
     model = CancelInvoice
-    add_template_vars = (
-        'title', 'company', 'tvas', 'load_options_url', 'edit',
-    )
+    add_template_vars = ('edit', )
 
     @property
     def company(self):
@@ -152,9 +150,7 @@ class CancelInvoiceEdit(TaskFormView):
     buttons = (submit_btn,)
     model = CancelInvoice
     edit = True
-    add_template_vars = (
-        'title', 'company', 'tvas', 'load_options_url', 'edit',
-    )
+    add_template_vars = ('edit', )
 
     @property
     def company(self):
@@ -242,7 +238,8 @@ class CancelInvoiceStatus(TaskStatusView):
         """
         Launched after a cancelinvoice has been validated
         """
-        log.debug(u"+ post_valid_process : checking if the associated invoice is resulted")
+        log.debug(u"+ post_valid_process : checking if the associated invoice \
+is resulted")
         invoice = task.invoice
         invoice = invoice.check_resulted(user_id=self.request.user.id)
         self.request.dbsession.merge(invoice)

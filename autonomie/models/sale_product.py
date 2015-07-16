@@ -117,7 +117,7 @@ class SaleProduct(DBBASE):
     ref = Column(String(100), nullable=True)
     description = Column(Text(), default='')
     tva = Column(Integer, default=0)
-    value = Column(Integer, default=0)
+    value = Column(Float(), default=0)
     unity = Column(String(100), default='')
 
     category_id = Column(ForeignKey('sale_product_category.id'))

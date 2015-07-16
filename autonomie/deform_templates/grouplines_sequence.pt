@@ -47,18 +47,20 @@
 
 
     <div class="col-md-offset-9">
-      <a href="#"
+      <button
+        type='button'
          class="btn btn-info deformSeqAdd"
          id="${field.oid}-seqAdd"
          onclick="javascript: return deform.appendSequenceItem(this);">
         <small id="${field.oid}-addtext">${add_subitem_text}</small>
-      </a>
-      <a href="#"
+      </button>
+      <button
+        type='button'
          class="btn btn-info deformSeqAdd"
          id="${field.oid}-seqAdd"
-         onclick="javascript: return catalog.popup('groups', this);">
+         onclick="javascript: return catalog.popup('sale_product_group', this);">
         <small id="${field.oid}-addtext">Ajouter un ouvrage depuis le catalogue</small>
-      </a>
+      </button>
       <div id='test_container' style="display:none"></div>
 
       <script type="text/javascript">

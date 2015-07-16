@@ -55,12 +55,20 @@
     </div>
   <!-- Custom datas insertion -->
     <div class="col-md-offset-9">
-      <a href="#"
+      <button
+        type='button'
          class="btn btn-info"
          id="${field.oid}-seqAdd"
          onclick="javascript: return addTaskLine(this); ">
          <small id="${field.oid}-addtext">${add_subitem_text}</small>
-      </a>
+      </button>
+      <button
+        type='button'
+         class="btn btn-info"
+         id="${field.oid}-seqAdd"
+         onclick="javascript: return catalog.popup('sale_product', this);">
+         <small id="${field.oid}-addtext">Ajouter un produit depuis le catalogue</small>
+      </button>
   <!-- end custom -->
 
       <script type="text/javascript">

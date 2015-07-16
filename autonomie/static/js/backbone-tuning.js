@@ -264,7 +264,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
     this.model.save(
       this.formDatas(),
       {
-        success:function(){
+        success:function(result){
           displayServerSuccess("Vos données ont bien été sauvegardées");
           this_.closeView(result);
         },

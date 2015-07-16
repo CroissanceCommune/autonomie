@@ -285,3 +285,35 @@ function ajax_request(url, data, options){
   var ajax_args = _.extend(default_options, args);
   return $.ajax(ajax_args);
 }
+function loadUI(ui_object){
+  /*
+   * loadUI elements : the UI object is global and is used as a cache
+   * on page load, it replaces string selectors by jquery object avoiding to
+   * access too many times the DOM
+   *
+   * :param object ui_object: a js object with key value pairs :
+   *    * value: a jquery selector (ex : #id-de-ma-div)
+   *
+   *
+   * If you want to use this : create a js object (can be global)
+   * var UI = {select_nom: "#select-nom"}
+   *
+   * This way :
+   *  * you can have a jquery objects cache
+   *  * you can easily retrieve your objects selectors on a single place in
+   *  your js file
+   */
+  // Pour chaque clé dans l'objet UI on remplace la valeur par l'objet jquery
+  // correspondant
+  var key;
+  for (key in ui_object){
+    var selector = ui_object[key];
+    if (!_.isString(selector)){
+      // On a un objet jquery (on reload) qui peut avoir été récupéré avant un
+      // rafraichissement du DOM, on ne veut donc pas cet élément de DOM là,
+      // mais son clone que l'on récupère en utilisant le même selector
+      selector = selector.selector;
+    }
+    ui_object[key] = $(selector);
+  }
+}

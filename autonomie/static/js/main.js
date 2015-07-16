@@ -249,3 +249,33 @@ function highlight(jquery_tag, color, callback){
     function(){if (callback !== undefined){ callback();} }
   );
 }
+
+function ajax_request(url, data, options){
+  /*
+   * Returns a deferred ajax request
+   *
+   * :param url: the url
+   * :param data: the datas to send as an object
+   * :param options: an object with other jquery ajax options
+   *
+   *   ex:
+   *    var ajax_call = ajax_request(url, {mesdonnées});
+   *    ajax_call.then(function(response){
+   *      custom code
+   *    });
+   */
+  var default_options = {
+    url: url,
+    data: data,
+    dataType: 'json',
+    mimeType: "textPlain",
+    cache: false,
+    type: 'POST',
+    error: function(){
+      alert("Une erreur a été rencontrée, contactez votre administrateur.");
+    }
+  };
+  var args = options || {};
+  var ajax_args = _.extend(default_options, args);
+  return $.ajax(ajax_args);
+}

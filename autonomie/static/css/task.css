@@ -11,3 +11,6 @@
 .panel-heading{
   font-weight: bold;
 }
+/* Only checkboxes on leaf nodes */
+.jstree-open > .jstree-anchor > .jstree-checkbox,
+.jstree-closed > .jstree-anchor > .jstree-checkbox { display:none; }

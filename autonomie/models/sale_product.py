@@ -82,7 +82,7 @@ class SaleProductCategory(DBBASE):
     company = relationship(
         "Company",
         backref=backref(
-            'products',
+            'sale_catalog',
             order_by="SaleProductCategory.title",
         ),
         info={

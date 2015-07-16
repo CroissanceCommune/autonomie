@@ -94,9 +94,42 @@ def company_products_ajax_view(context, request):
     :param obj request: the Pyramid's request object
     """
     all_products = []
-    for category in context.products:
+    for category in context.sale_catalog:
         all_products.extend(category.products)
     return dict(products=all_products)
+
+
+def company_products_jstree_ajax_view(context, request):
+    """
+    Returns the catalog of products (stored by category) in the format expected
+    by jstree
+
+    :param obj context: The context : The company object
+    :param obj request: the Pyramid's request object
+    """
+    requested_type = request.params.get('type', 'products')
+    result = []
+    for category in context.sale_catalog:
+        children = []
+        category_datas = {
+            "text": category.title,
+            "children": children
+        }
+        if requested_type == 'groups':
+            child_models = category.product_groups
+            child_type = "group"
+        else:
+            child_models = category.products
+            child_type = "product"
+
+        for child in child_models:
+            text = child.label
+            if child.ref:
+                text += u" ({0})".format(child.ref)
+
+            children.append({"text": text, "type": child_type})
+        result.append(category_datas)
+    return result
 
 
 class RestCategories(BaseRestView):
@@ -247,6 +280,12 @@ def includeme(config):
         company_products_options_ajax_view,
         route_name="sale_categories",
         request_param='action=options',
+    )
+
+    add_json_view(
+        company_products_jstree_ajax_view,
+        route_name="sale_categories",
+        request_param='action=jstree',
     )
 
     add_json_view(

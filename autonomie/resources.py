@@ -100,6 +100,15 @@ def get_main_group():
 main_group = get_main_group()
 
 
+jstree_js = get_resource(
+    "js/vendors/jstree.js",
+    minified="js/vendors/jstree.min.js",
+    depends=[main_group]
+)
+jstree_css = get_resource("css/jstree_themes/default/style.min.css")
+jstree = Group([jstree_js, jstree_css])
+
+
 def get_module_group():
     """
     Return main libraries used in custom modules (backbone marionette and
@@ -191,7 +200,7 @@ def get_module_resource(module, tmpl=False, extra_depends=()):
 
 
 duplicate = get_module_resource("duplicate")
-discount = get_module_resource("discount")
+discount = get_module_resource("discount", extra_depends=[jstree])
 address = get_module_resource("address")
 tva = get_module_resource("tva")
 

@@ -42,6 +42,11 @@ from autonomie.views import BaseRestView
 logger = logging.getLogger(__name__)
 
 
+NO_GROUP_MESSAGE = u"""<h5>Aucun {label} n'a été configuré dans le catalogue.
+</h5><a class='btn btn-default' href='{url}' title='Configurer le catalogue'
+target='_blank'>Ajouter des {label}s</a>"""
+
+
 def company_products_view(context, request):
     """
     The view for company products configuration
@@ -107,28 +112,57 @@ def company_products_jstree_ajax_view(context, request):
     :param obj context: The context : The company object
     :param obj request: the Pyramid's request object
     """
-    requested_type = request.params.get('type', 'products')
-    result = []
+    void = True
+    item_type = request.params.get('type', 'sale_product')
+
+    if item_type == 'sale_product_group':
+        category_child_attr = 'product_groups'
+        label = u"ouvrage"
+    elif item_type == 'sale_product':
+        category_child_attr = 'products'
+        label = u"produit"
+    else:
+        # Si on arrive ici c'est que quelqu'un joue au petit malin
+        return dict(void_message=u"Erreur")
+
+    jstree = []
     for category in context.sale_catalog:
         children = []
         category_datas = {
             "text": category.title,
             "children": children
         }
-        if requested_type == 'groups':
-            child_models = category.product_groups
-            child_type = "group"
-        else:
-            child_models = category.products
-            child_type = "product"
 
-        for child in child_models:
+        for child in getattr(category, category_child_attr):
+            void = False
             text = child.label
             if child.ref:
                 text += u" ({0})".format(child.ref)
 
-            children.append({"text": text, "type": child_type})
-        result.append(category_datas)
+            children.append(
+                {
+                    "text": text,
+                    "type": item_type,
+                    "url": request.route_path(
+                        item_type,
+                        id=context.id,
+                        cid=category.id,
+                        pid=child.id,
+                    )
+                })
+        jstree.append(category_datas)
+
+    if void:
+        message = NO_GROUP_MESSAGE.format(
+            label=label,
+            url=request.route_path('sale_categories', id=context.id)
+        )
+        result = dict(void_message=message)
+    else:
+        # We open the first node
+        jstree[0]['state'] = {'opened': True}
+        result = dict(jstree=jstree)
+
     return result
 
 
@@ -255,11 +289,11 @@ def includeme(config):
         traverse="/sale_categories/{cid}",
     )
 
-    group_url += "/{gid:\d+}"
+    group_url += "/{pid:\d+}"
     config.add_route(
         "sale_product_group",
         group_url,
-        traverse="/sale_product_groups/{gid}",
+        traverse="/sale_product_groups/{pid}",
     )
 
     config.add_view(

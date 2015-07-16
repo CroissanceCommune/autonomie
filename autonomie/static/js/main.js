@@ -112,13 +112,20 @@ function setAuthCheckBeforeSubmit(form){
 }
 
 
-function setPopUp(id, title){
+function setPopUp(element, title){
   /*
-   * Make the div with id `id` becomes a dialog with title `title`
+   * Make the div with element `element` becomes a dialog with title `title`
    */
+  var isjquery = element instanceof jQuery;
+  if (! isjquery){
+    if (_.indexOf(element, '#') !== 0){
+      element = '#' + element;
+    }
+    element = $(element);
+  }
   var window_height = $(window).height();
   var window_width = $(window).width();
-  $("#" + id).dialog({
+  $(element).dialog({
       autoOpen: false,
       height:"auto",
       width: "auto",
@@ -144,7 +151,6 @@ function setPopUp(id, title){
 
         // We need to set the left attr
         var padding = (window_width - dialog_width) / 2.0;
-        console.log("Setting the padding to %spx", padding);
         dialog.css('left', padding + 'px');
 
         // Fix dialog height if content is too big for the current window

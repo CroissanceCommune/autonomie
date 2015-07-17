@@ -13,6 +13,30 @@ AutonomieApp.addRegions({
   popup: pp
 });
 
+function initTiny(){
+   /*
+    * globally initialize TinyMCE
+    * An editor can be added through
+    *
+    *    tinyMCE.execCommand('mceAddEditor', false, 'my_id_without_#');
+    */
+    tinyMCE.init({
+      body_class: 'form-control',
+      theme_advanced_toolbar_location: "top",
+      theme_advanced_toolbar_align: "left",
+      content_css: "/fanstatic/fanstatic/css/richtext.css",
+      language: "fr_FR",
+      plugins: ["lists", "searchreplace visualblocks fullscreen"],
+      theme_advanced_resizing: true,
+      height: "100px", width: 0,
+      theme: "modern",
+      strict_loading_mode: true,
+      mode: "none",
+      skin: "lightgray",
+      menubar: false
+    });
+}
+
 AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _){
 
   var CategoryModel = Backbone.Model.extend({
@@ -38,7 +62,8 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
   });
 
   var CategoryCollection = Backbone.Collection.extend({
-    model: CategoryModel
+    model: CategoryModel,
+    comparator: "title"
   });
 
   var ProductModel = Backbone.Model.extend({
@@ -231,17 +256,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       this.ui.form.find('input').first().focus();
     },
     closeView: function(result){
-      if (!_.isUndefined(result)){
-        if (!_.isUndefined(result.id)){
-          this.destroy();
-          Product.router.navigate("categories/" + result.get('category_id'),
-          {trigger: true});
-          return;
-        }
-      }
       this.destroy();
-      Product.router.navigate("index", {trigger: true});
-      return;
     },
     templateHelpers: function(){
       var tva = this.model.get('tva');
@@ -253,50 +268,19 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
         tva_options: tva_options,
         unity_options: unity_options
       };
-    }
-  });
-
-  var ProductGroupFormView = BaseFormView.extend({
-    template: "product_group_form",
-    ui:{
-      "form": "form",
-      "select": "form[name=product_group] select[name=products]"
     },
-    focus: function(){
-      this.ui.form.find('input').first().focus();
-    },
-    closeView: function(result){
-      if (!_.isUndefined(result)){
-        if (!_.isUndefined(result.id)){
-          this.destroy();
-          Product.router.navigate("categories/" + result.get('category_id'),
-          {trigger: true});
-          return;
-        }
-      }
-      this.destroy();
-      return;
-    },
-    templateHelpers: function(){
-      var ids = _.pluck(this.model.get('products'), 'id');
-      console.log(ids);
-      var product_options = this.updateSelectOptions(
-        this.init_options.products, ids, 'id');
-      console.log(product_options);
-      return {
-        product_options: product_options
-      };
+    onBeforeFormSubmit: function(){
+      tinyMCE.triggerSave();
     },
     onShow: function(){
-      console.log(this.ui.select);
-      this.ui.select.select2();
-    },
-    onRender: function(){
-      console.log(this.ui.select);
-      this.ui.select.select2();
+      // On détruit l'éditeur tinymce pour pouvoir en recréer un
+      if (_.has(tinyMCE.editors, 'tiny_description') ){
+        delete tinyMCE.editors.tiny_description;
+      }
+      tinyMCE.execCommand('mceAddEditor', false, 'tiny_description');
     }
   });
-
+  /* PRODUCT GROUP VIEWS */
   var ProductGroupView = BaseTableLineView.extend({
     template: "product_group",
     events: {
@@ -338,6 +322,36 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     },
     showAddForm: function(){
       controller.add_product_group();
+    }
+  });
+
+  var ProductGroupFormView = BaseFormView.extend({
+    template: "product_group_form",
+    ui:{
+      "form": "form",
+      "select": "form[name=product_group] select[name=products]"
+    },
+    focus: function(){
+      this.ui.form.find('input').first().focus();
+    },
+    closeView: function(result){
+      this.destroy();
+    },
+    templateHelpers: function(){
+      var ids = _.pluck(this.model.get('products'), 'id');
+      console.log(ids);
+      var product_options = this.updateSelectOptions(
+        this.init_options.products, ids, 'id');
+      console.log(product_options);
+      return {
+        product_options: product_options
+      };
+    },
+    onShow: function(){
+      this.ui.select.select2();
+    },
+    onRender: function(){
+      this.ui.select.select2();
     }
   });
 
@@ -506,4 +520,5 @@ function ProductPageInit(options){
 }
 $(function(){
   ProductPageInit();
+  initTiny();
 });

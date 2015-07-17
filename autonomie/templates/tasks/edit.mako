@@ -121,6 +121,26 @@ ${form|n}
             </div>
         </div>
     </div>
+    <div id='catalog_popup'>
+        <div class='tree-container' style='min-height: 250px;'>
+        </div>
+        <div class='form-group'>
+            <div class="text-right">
+                <button
+                    class='btn btn-success'
+                    type='button'
+                    >
+                    Insérer les éléments sélectionnés
+                </button>
+                <button
+                    class='btn btn-danger'
+                    type='button'
+                    >
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
     <script type='text/javascript'>
         $(function(){
             setPopUp('discount_popup', "Remise");
@@ -130,6 +150,7 @@ ${form|n}
 <%block name="footerjs">
 AppOptions = {};
 AppOptions['loadurl'] = "${load_options_url}";
+AppOptions['load_catalog_url'] = "${load_catalog_url}";
 % if request.user.is_contractor():
     AppOptions['manager'] = false;
 % else:

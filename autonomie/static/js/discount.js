@@ -227,3 +227,149 @@ var discount = {
     $(Facade).trigger('totalchange', line);
   }
 };
+
+var catalog = {
+  ui: {
+    el: "#catalog_popup",
+    tree: "#catalog_popup .tree-container",
+    valid_btn: "#catalog_popup button.btn-success",
+    cancel_btn: "#catalog_popup button.btn-danger"
+  },
+  popup: function(type, add_button){
+    this.currentType = type;
+    this.add_button = add_button;
+    this.show(type);
+    return false;
+  },
+  show: function(type){
+    /*
+     * Build the js tree of our catalog for the given type
+     */
+    this.ui.tree.jstree('destroy');
+    var url = AppOptions['load_catalog_url'];
+    var load_catalog = ajax_request(url, {type: this.currentType});
+    load_catalog.then(this.buildJsTree);
+  },
+  buildJsTree: function(result){
+    /*
+     * Build the jstree object
+     */
+    if (_.has(result, "void_message")){
+      console.log("Showing the void message");
+      this.ui.tree.html(result.void_message);
+      this.ui.valid_btn.attr('disabled', true);
+    } else {
+      this.ui.tree.jstree({
+        plugins: ["checkbox", 'types'],
+        types: {
+          "default": {icon: "glyphicon glyphicon-triangle-right"},
+          product: {icon: "glyphicon glyphicon-file"},
+          group: {icon: "glyphicon glyphicon-book"}
+        },
+        core: { data: result.jstree}
+      });
+      this.setValidOnclick();
+    }
+    this.setCancelOnClick();
+    this.ui.el.dialog('open');
+  },
+  getLastSeqItem: function(add_button){
+    /* Returns the last sequence item added to the sequence managed by
+     * the add button
+     *
+     * :param add_button: The Add button
+     */
+    var seq = $(add_button).closest('.deformSeq');
+    var seq_container = seq.children('.deformSeqContainer').first();
+    var item = seq_container.children('.deformSeqItem').last();
+    return item;
+  },
+  getLineAddButton: function(group_add_button){
+    var seq = $(group_add_button).closest('.deformSeq');
+    var button = seq.find('button.taskline-add').first();
+    return button;
+  },
+  addProductLine: function(node_datas, add_button){
+    /*
+     * Add a product line to the add_button provided as argument
+     *
+     * :param node_datas: The datas describing the configured product
+     * :param add_button: The add line button (default this.add_button)
+     */
+    add_button = add_button || this.add_button;
+    deform.appendSequenceItem(add_button);
+    var line = this.getLastSeqItem(add_button);
+    console.log(line);
+    var textarea = line.children().find("textarea");
+    console.log(textarea);
+    textarea.val(node_datas.description);
+    tinyMCE.get(textarea.attr('id')).setContent(node_datas.description);
+    line.children().find("input[name=cost]").val(node_datas.value);
+    line.children().find("input[name=quantity]").val(1);
+    line.children().find("select[name=tva]").val(node_datas.tva);
+    line.children().find("select[name=unity]").val(node_datas.unity);
+    setTaskLinesBehaviours();
+    fireAmountChange();
+  },
+  addProductGroup: function(node_datas){
+    deform.appendSequenceItem(this.add_button);
+    var group = this.getLastSeqItem(this.add_button);
+    console.log(group);
+    group.children().find("input[name=title]").first().val(node_datas.title);
+    group.children().find("textarea").first().val(node_datas.description);
+
+    var add_line_button = this.getLineAddButton(this.add_button);
+    var this_ = this;
+    _.each(node_datas.products, function(product){
+      this_.addProductLine(product, add_line_button);
+    });
+  },
+  addNode: function(node_datas){
+    console.log(node_datas);
+    if (this.currentType == 'sale_product'){
+      this.addProductLine(node_datas);
+    }else{
+      this.addProductGroup(node_datas);
+    }
+  },
+  insertSelectedElements: function(){
+    var this_ = this;
+    _.each(this.ui.tree.jstree('get_selected', true), function(node){
+      if (_.has(node.original, 'url')){
+        var ajax_load = ajax_request(node.original.url, {}, {type: 'GET'});
+        ajax_load.then(this_.addNode);
+      }else{
+        console.log("This one is a category");
+      }
+    });
+  },
+  close:function(){
+    this.ui.el.dialog('close');
+  },
+  setValidOnclick: function(){
+    /*
+     * Set the onclick behaviour for the success button
+     */
+    this.ui.valid_btn.attr('disabled', false);
+    this.ui.valid_btn.off('click.catalog');
+    this.ui.valid_btn.on('click.catalog', this.insertSelectedElements);
+  },
+  setCancelOnClick: function(){
+    /*
+     * Set the onclick behaviour for the cancel button
+     */
+    this.ui.cancel_btn.off('click.catalog');
+    this.ui.cancel_btn.on('click.catalog', this.close);
+  },
+  init: function(){
+    loadUI(this.ui);
+    setPopUp(this.ui.el, "Catalogue produit");
+
+    // Ensure this is the catalog object
+    _.bindAll(this, "buildJsTree", "insertSelectedElements", "close",
+    "addNode", "addProductLine");
+  }
+};
+$(function(){
+  catalog.init();
+});

@@ -41,6 +41,7 @@ from js.jquery_timepicker_addon import timepicker_js
 from js.jquery_form import jquery_form
 from js.jquery_qunit import jquery_qunit
 from js.select2 import select2
+from js.tinymce import tinymce
 
 lib_autonomie = Library("fanstatic", "static")
 
@@ -239,7 +240,7 @@ competence_js = get_module_resource(
 sale_product_js = get_module_resource(
     'sale_product',
     tmpl=True,
-    extra_depends=[select2]
+    extra_depends=[select2, tinymce]
 )
 holiday_js = get_module_resource("holiday", tmpl=True)
 admin_option_js = get_module_resource("admin_option")

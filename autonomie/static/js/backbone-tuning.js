@@ -279,6 +279,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
   },
   onFormSubmit: function(e){
     e.preventDefault();
+    this.triggerMethod('before:form:submit');
     Backbone.Validation.bind(this);
     var this_ = this;
 

@@ -133,7 +133,8 @@ def company_products_jstree_ajax_view(context, request):
             "children": children
         }
 
-        for child in getattr(category, category_child_attr):
+        children_models = getattr(category, category_child_attr)
+        for child in children_models:
             void = False
             text = child.label
             if child.ref:
@@ -150,7 +151,8 @@ def company_products_jstree_ajax_view(context, request):
                         pid=child.id,
                     )
                 })
-        jstree.append(category_datas)
+        if children_models:
+            jstree.append(category_datas)
 
     if void:
         message = NO_GROUP_MESSAGE.format(

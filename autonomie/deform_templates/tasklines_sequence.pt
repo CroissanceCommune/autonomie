@@ -76,6 +76,12 @@
        deform.addCallback(
          field_oid,
          function(oid) {
+           oid_node = $('#'+ oid);
+           deform.processSequenceButtons(oid_node, ${min_len},
+                                         ${max_len}, ${now_len},
+                                         ${orderable});
+           }
+         );
          <tal:block condition="orderable">
              $( "#" + field_oid + "-orderable" ).sortable({
                handle: ".deformOrderbutton, .panel-heading",
@@ -89,6 +95,7 @@
                     var height = $(this).prev().height();
                     tinyMCE.execCommand( 'mceRemoveEditor', false, $(this).attr('id') );
                     $(this).height(height);
+                    tinyMCE.triggerSave();
                 });
                },
                stop: function(e, ui){
@@ -115,12 +122,6 @@
                  }
                });
          </tal:block>
-           oid_node = $('#'+ oid);
-           deform.processSequenceButtons(oid_node, ${min_len},
-                                         ${max_len}, ${now_len},
-                                         ${orderable});
-           }
-         );
       </script>
     </div>
     <hr/>

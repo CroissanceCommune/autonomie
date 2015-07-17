@@ -44,8 +44,6 @@ from js.select2 import select2
 
 lib_autonomie = Library("fanstatic", "static")
 
-# ui_dialog.depends.add(bootstrap_js)
-
 
 def get_resource(filepath, minified=None, depends=None):
     """
@@ -57,6 +55,14 @@ def get_resource(filepath, minified=None, depends=None):
         minified=minified,
         depends=depends,
     )
+
+
+# ui_dialog.depends.add(bootstrap_js)
+# To fix https://github.com/Pylons/deform/issues/276
+# https://github.com/Pylons/deform/issues/275 (only in the case of task forms
+# because we use custom templates)
+# We use a custom deform js
+custom_deform_js = get_resource("js/custom_deform.js")
 
 
 def get_main_group():

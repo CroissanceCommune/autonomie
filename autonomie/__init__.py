@@ -42,9 +42,6 @@ from autonomie.models.initialize import initialize_sql
 from autonomie.models.config import get_config
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
-from autonomie.utils.renderer import (
-    customize_renderers,
-)
 from autonomie.utils.session import get_session_factory
 
 
@@ -180,6 +177,9 @@ def base_configure(config, dbsession, **settings):
     for module in AUTONOMIE_ADMIN_MODULES:
         config.include(module)
 
+    from autonomie.utils.renderer import (
+        customize_renderers,
+    )
     customize_renderers(config)
     return config
 

@@ -57,7 +57,7 @@
     <div class="col-md-offset-9">
       <button
         type='button'
-         class="btn btn-info"
+         class="btn btn-info taskline-add"
          id="${field.oid}-seqAdd"
          onclick="javascript: return addTaskLine(this); ">
          <small id="${field.oid}-addtext">${add_subitem_text}</small>
@@ -72,25 +72,23 @@
   <!-- end custom -->
 
       <script type="text/javascript">
+       var field_oid = "${field.oid}";
        deform.addCallback(
-         '${field.oid}',
+         field_oid,
          function(oid) {
-           oid_node = $('#'+ oid);
-           deform.processSequenceButtons(oid_node, ${min_len},
-                                         ${max_len}, ${now_len},
-                                         ${orderable});
-           }
-         )
          <tal:block condition="orderable">
-             $( "#${oid}-orderable" ).sortable({
+             $( "#" + field_oid + "-orderable" ).sortable({
                handle: ".deformOrderbutton, .panel-heading",
-               containerSelector: "#${oid}-orderable",
+               containerSelector: "#" + field_oid + "-orderable",
                itemSelector: ".deformSeqItem",
                placeholder: '<span class="glyphicon glyphicon-arrow-right placeholder"></span>',
                start: function(e, ui){
                 $(this).find('textarea.tinymce').each(function(){
+                    // On retrouve la hauteur l'instance de tinymce (qui est
+                    // juste avant le textarea)
+                    var height = $(this).prev().height();
                     tinyMCE.execCommand( 'mceRemoveEditor', false, $(this).attr('id') );
-                    $(this).height("15px");
+                    $(this).height(height);
                 });
                },
                stop: function(e, ui){
@@ -117,6 +115,12 @@
                  }
                });
          </tal:block>
+           oid_node = $('#'+ oid);
+           deform.processSequenceButtons(oid_node, ${min_len},
+                                         ${max_len}, ${now_len},
+                                         ${orderable});
+           }
+         );
       </script>
     </div>
     <hr/>

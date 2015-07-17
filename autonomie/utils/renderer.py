@@ -39,7 +39,7 @@ from pyramid.renderers import JSON
 from pyramid.threadlocal import get_current_request
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CustomRenderer(ZPTRendererFactory):
@@ -128,6 +128,14 @@ def set_export_blacklist():
     BLACKLISTED_KEYS = ('_acl', 'password', 'parent_id', 'parent', 'type_')
 
 
+def set_custom_deform_js():
+    from js import deform
+    from autonomie.resources import custom_deform_js
+    logger.debug(u"Overriding the default deform_js resource")
+    deform.deform_js = custom_deform_js
+    deform.resource_mapping['deform'] = [custom_deform_js]
+
+
 def customize_renderers(config):
     """
     Customize the different renderers
@@ -139,3 +147,4 @@ def customize_renderers(config):
     # Exporters
     set_export_formatters()
     set_export_blacklist()
+    set_custom_deform_js()

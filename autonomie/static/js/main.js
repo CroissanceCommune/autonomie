@@ -248,9 +248,8 @@ function highlight_success(jquery_tag, callback){
   return highlight(jquery_tag, "#ceff99", callback);
 }
 function highlight(jquery_tag, color, callback){
+  color = color || "#ceff99";
   jquery_tag.css("backgroundColor", "#fff");
-  console.log(jquery_tag);
-  console.log(color);
   return jquery_tag.effect('highlight', {color: color}, 1500,
     function(){if (callback !== undefined){ callback();} }
   );

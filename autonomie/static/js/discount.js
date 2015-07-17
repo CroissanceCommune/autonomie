@@ -213,7 +213,6 @@ var discount = {
     return false;
   },
   add_line:function(description, value, tva){
-    console.log("add a line : %s %s %s", description, value, tva);
     deform.appendSequenceItem(this.container);
     var line = $('.discountline').last();
     var textarea = line.children().find("textarea");
@@ -255,7 +254,6 @@ var catalog = {
      * Build the jstree object
      */
     if (_.has(result, "void_message")){
-      console.log("Showing the void message");
       this.ui.tree.html(result.void_message);
       this.ui.valid_btn.attr('disabled', true);
     } else {
@@ -284,10 +282,16 @@ var catalog = {
     var item = seq_container.children('.deformSeqItem').last();
     return item;
   },
-  getLineAddButton: function(group_add_button){
-    var seq = $(group_add_button).closest('.deformSeq');
-    var button = seq.find('button.taskline-add').first();
-    return button;
+  scrollToElement: function(element){
+    $('html, body').animate({
+      scrollTop: element.offset().top
+    }, 500);
+  },
+  getLineAddButton: function(group){
+    /*
+     * Returns the add line button nested in the given group
+     */
+    return group.find('button.taskline-add').first();
   },
   addProductLine: function(node_datas, add_button){
     /*
@@ -299,9 +303,7 @@ var catalog = {
     add_button = add_button || this.add_button;
     deform.appendSequenceItem(add_button);
     var line = this.getLastSeqItem(add_button);
-    console.log(line);
     var textarea = line.children().find("textarea");
-    console.log(textarea);
     textarea.val(node_datas.description);
     tinyMCE.get(textarea.attr('id')).setContent(node_datas.description);
     line.children().find("input[name=cost]").val(node_datas.value);
@@ -310,22 +312,24 @@ var catalog = {
     line.children().find("select[name=unity]").val(node_datas.unity);
     setTaskLinesBehaviours();
     fireAmountChange();
+    highlight(line);
+    return line;
   },
   addProductGroup: function(node_datas){
     deform.appendSequenceItem(this.add_button);
     var group = this.getLastSeqItem(this.add_button);
-    console.log(group);
     group.children().find("input[name=title]").first().val(node_datas.title);
     group.children().find("textarea").first().val(node_datas.description);
 
-    var add_line_button = this.getLineAddButton(this.add_button);
+    var add_line_button = this.getLineAddButton(group);
     var this_ = this;
     _.each(node_datas.products, function(product){
       this_.addProductLine(product, add_line_button);
     });
+    this.scrollToElement(group);
+    return group;
   },
   addNode: function(node_datas){
-    console.log(node_datas);
     if (this.currentType == 'sale_product'){
       this.addProductLine(node_datas);
     }else{
@@ -334,14 +338,17 @@ var catalog = {
   },
   insertSelectedElements: function(){
     var this_ = this;
+    var ajax_reqs = [];
     _.each(this.ui.tree.jstree('get_selected', true), function(node){
       if (_.has(node.original, 'url')){
         var ajax_load = ajax_request(node.original.url, {}, {type: 'GET'});
         ajax_load.then(this_.addNode);
-      }else{
-        console.log("This one is a category");
+        ajax_reqs.push(ajax_load);
       }
     });
+    // To pass an array of values to any function that normally expects them to
+    // be separate parameters, use Function.apply
+    $.when.apply($, ajax_reqs).then(this.close);
   },
   close:function(){
     this.ui.el.dialog('close');

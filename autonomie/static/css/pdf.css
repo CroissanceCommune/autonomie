@@ -37,8 +37,11 @@ html{
 .lines thead tr.group-description{
   background-color:#fff;
 }
-.lines thead tr.group-description th{
+.group-description td{
   font-weight: normal;
+  text-align: left;
+  font-size: 0.23cm;
+  line-height: 0.23cm;
 }
 .lines td, .lines th{
   padding-top:3px;

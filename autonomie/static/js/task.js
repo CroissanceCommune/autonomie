@@ -787,6 +787,14 @@ function initialize(){
       payment_condition_handler.change();
     }
   );
+  $('#deform').on('submit', function(){
+    showLoader();
+    $(this).on('submit', function(){
+      alert('Vous ne pouvez valider deux fois le même formulaire. Actualisez la page.');
+      return false;
+    });
+    return true;
+  });
 }
 $(function(){
   initialize();

@@ -316,3 +316,10 @@ function loadUI(ui_object){
     ui_object[key] = $(selector);
   }
 }
+
+function showLoader(){
+  /*
+   * Shows a loader in the given tag
+   */
+  $('#loading-box').show();
+}

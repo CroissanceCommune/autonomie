@@ -323,3 +323,19 @@ input[name=altdate], input[name=date]{
   height: auto !important;
   padding: 0;
 }
+/* Affichage d'un loader */
+#loading-box{
+  position: fixed;
+  top: 0px;
+  left:0px;
+  display: none;
+  z-index: 1500;
+  opacity: 0.5;
+  background-color: #81f2ff;
+  font-size: 280px;
+  text-shadow:  2px 2px 2px rgba(0,0,0,0.5);
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}

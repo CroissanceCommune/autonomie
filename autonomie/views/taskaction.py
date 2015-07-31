@@ -627,6 +627,8 @@ class TaskFormView(BaseFormView):
     model = None
     # Tag to know if it's an edition or an add view
     edit = False
+    use_csrf_token = True
+
     def __init__(self, request):
         task.need()
         super(TaskFormView, self).__init__(request)

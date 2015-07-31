@@ -32,7 +32,10 @@ import itertools
 
 from deform import Form
 from deform import Button
-from pyramid_deform import FormView
+from pyramid_deform import (
+    FormView,
+    CSRFSchema,
+)
 from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 from js.tinymce import tinymce
@@ -370,6 +373,7 @@ class BaseFormView(FormView):
     title = None
     add_template_vars = ()
     buttons = (submit_btn,)
+    use_csrf_token = False
 
     def __init__(self, request):
         FormView.__init__(self, request)
@@ -377,10 +381,15 @@ class BaseFormView(FormView):
         self.dbsession = self.request.dbsession
         self.session = self.request.session
         self.logger = logging.getLogger("autonomie.views.__init__")
+        self.logger.info(u"CSRF TOKEN ? : {0}".format(
+            self.session.get_csrf_token())
+        )
         if has_permission('manage', request.context, request):
             tinymce.need()
 
     def __call__(self):
+        if self.use_csrf_token and 'csrf_token' not in self.schema:
+            self.schema.children.append(CSRFSchema()['csrf_token'])
         try:
             result = FormView.__call__(self)
         except colander.Invalid, exc:

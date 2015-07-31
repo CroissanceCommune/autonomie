@@ -646,7 +646,7 @@ valideront votre document (n'apparaît pas dans le PDF)",
     )
 
 
-class TaskSchema(colander.MappingSchema):
+class TaskSchema(colander.Schema):
     """
         colander base Schema for task edition
     """

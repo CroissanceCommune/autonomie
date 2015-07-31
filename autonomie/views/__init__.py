@@ -381,9 +381,6 @@ class BaseFormView(FormView):
         self.dbsession = self.request.dbsession
         self.session = self.request.session
         self.logger = logging.getLogger("autonomie.views.__init__")
-        self.logger.info(u"CSRF TOKEN ? : {0}".format(
-            self.session.get_csrf_token())
-        )
         if has_permission('manage', request.context, request):
             tinymce.need()
 

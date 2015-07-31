@@ -86,7 +86,7 @@ html{
   padding-bottom:4px;
   margin-bottom:12px;
 }
-#footer{
+.pdf_footer{
   background-color:#efefef;
   color:#000;
   text-align:center;

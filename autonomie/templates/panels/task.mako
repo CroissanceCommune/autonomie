@@ -221,11 +221,21 @@
 
 </div>
     ## end of content
-<div class='row' id='footer'>
+    <div class='row pdf_footer' id='commonfooter'>
+        ## The common footer
     % if config.has_key('coop_pdffootertitle'):
         <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
     %endif
-    % if hasattr(task, "course") and task.course == 1 and config.has_key('coop_pdffootercourse'):
+    % if config.has_key('coop_pdffootertext'):
+        ${format_text(config.get('coop_pdffootertext'))}
+    % endif
+</div>
+<div class='row pdf_footer' id='coursefooter'>
+    ## The footer specific to courses (contains the additionnal text infos)
+    % if config.has_key('coop_pdffootertitle'):
+        <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
+    %endif
+    % if config.has_key('coop_pdffootercourse'):
         ${format_text(config.get('coop_pdffootercourse'))}<br />
     % endif
     % if config.has_key('coop_pdffootertext'):

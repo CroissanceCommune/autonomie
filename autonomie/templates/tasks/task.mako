@@ -35,42 +35,69 @@
         <meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW,ALL">
         <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
         <% task = tasks[0] %>
-        <style>
             % if task.type_ == 'estimation':
                 <% watermark = 'watermark_estimation.jpg' %>
             % else:
                 <% watermark = 'watermark_invoice.jpg' %>
             % endif
+
+            <%
+course_footer_height = common_footer_height = 0
+if request.config.has_key('coop_pdffootertext'):
+    common_footer_height = len(config.get('coop_pdffootertext').splitlines())
+if request.config.has_key('coop_pdffootercourse'):
+    course_footer_height = common_footer_height + len(config.get('coop_pdffootercourse').splitlines())
+course_footer_height *= 0.8
+common_footer_height *= 0.8
+%>
+<% start_with_course = tasks[0].course == 1 %>
+
+        <style>
             @page {
                 size: a4 portrait;
                 % if not task.has_been_validated() and not task.is_cancelled():
                     background-image: url("${request.static_url('autonomie:static/{0}'.format(watermark), _app_url='')}");
                 % endif
-                border: 1pt solid green;
                 @frame content_frame {
                     margin: 1cm;
-                    % if hasattr(task, "course") and task.course == 1 and request.config.has_key('coop_pdffootercourse'):
-                        margin-bottom: 3.8cm;
-                    %else:
-                        margin-bottom: 2.8cm;
-                    % endif
-                    ##                    border: 1pt solid blue;
+                    margin-bottom: 2.8cm;
                     border: 0pt solid white;
                 }
-                @frame footer_frame {
-                    -pdf-frame-content: footer;
+                @frame footer {
+                    % if start_with_course:
+                        -pdf-frame-content: coursefooter;
+                        height: ${course_footer_height}cm;
+                    %else:
+                        -pdf-frame-content: commonfooter;
+                        height: ${common_footer_height}cm;
+                    % endif
                     bottom: 0cm;
                     margin-left: 1cm;
                     margin-right: 1cm;
-                    <%
-if request.config.has_key('coop_pdffootertext'):
-    height = len(config.get('coop_pdffootertext').splitlines())
-if request.config.has_key('coop_pdffootercourse') and hasattr(task, "course"):
-    height += len(config.get('coop_pdffootercourse').splitlines())
-height *= 0.8
-%>
-                    height: ${height}cm;
-                    ## border: 1pt solid red;
+                    border: 0pt solid white;
+                }
+            }
+            @page alternate {
+                size: a4 portrait;
+                % if not task.has_been_validated() and not task.is_cancelled():
+                    background-image: url("${request.static_url('autonomie:static/{0}'.format(watermark), _app_url='')}");
+                % endif
+                @frame content_frame {
+                    margin: 1cm;
+                    margin-bottom: 3.8cm;
+                    border: 0pt solid white;
+                }
+                @frame footer {
+                    % if start_with_course:
+                        -pdf-frame-content: commonfooter;
+                        height: ${common_footer_height}cm;
+                    %else:
+                        -pdf-frame-content: coursefooter;
+                        height: ${course_footer_height}cm;
+                    % endif
+                    bottom: 0cm;
+                    margin-left: 1cm;
+                    margin-right: 1cm;
                     border: 0pt solid white;
                 }
             }
@@ -78,9 +105,22 @@ height *= 0.8
     </head>
     <body>
         % for task in tasks:
+
             ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task, bulk=bulk)}
             % if not loop.last:
-                <pdf:nextpage />
+                % if tasks[loop.index +1].course and not start_with_course:
+                    <pdf:nexttemplate name="alternate"/>
+                    <pdf:nextpage />
+                    <h1>ALTERNATE TEMPLATE</h1>
+                % elif not tasks[loop.index +1].course and start_with_course:
+                    <pdf:nexttemplate name="alternate"/>
+                    <pdf:nextpage />
+                    <h1>ALTERNATE TEMPLATE</h1>
+                %else:
+                    <pdf:nexttemplate loop.index=0 />
+                    <pdf:nextpage />
+                    <h1>COMMON TEMPLATE</h1>
+                % endif
             % endif
         % endfor
     </body>

@@ -641,6 +641,7 @@ class TaskFormView(BaseFormView):
 
     def set_task_status(self, task):
         # self.request.POST is a locked dict, we need a non locked one
+        logger.info(u"Set task status")
         params = dict(self.request.POST)
         status = params['submit']
         task.set_status(status, self.request, self.request.user.id, **params)
@@ -679,8 +680,6 @@ class TaskFormView(BaseFormView):
         result['tvas'] = self.tvas
         result['load_options_url'] = self.load_options_url
         result['load_catalog_url'] = self.load_catalog_url
-        logger.debug("Template vars")
-        logger.debug(result)
         return result
 
 

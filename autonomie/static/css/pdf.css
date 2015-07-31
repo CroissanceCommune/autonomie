@@ -16,9 +16,10 @@ html{
 }
 .addressblock{
   position:relative;
-  padding-left:500px;
+  padding-left: 9.3cm;  /* + margin 1cm */
+  width: 9cm;
   padding-top:1cm;
-  font-size: 0.4cm;
+  font-size: 0.3cm;
 }
 .informationblock{
   -pdf-keep-with-next:false;

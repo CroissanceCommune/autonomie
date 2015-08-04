@@ -29,6 +29,7 @@
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='css'>
     <link href="${request.static_url('autonomie:static/css/pdf.css', _app_url='')}" rel="stylesheet"  type="text/css" />
+    <link href="${request.static_url('autonomie:static/css/task_html.css', _app_url='')}" rel="stylesheet"  type="text/css" />
 </%block>
 <%block name='content'>
 <div class='col-md-10 col-md-offset-1' style='overflow:hidden'>

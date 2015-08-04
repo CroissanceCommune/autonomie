@@ -27,8 +27,8 @@
 </%doc>
 <%inherit file="/panels/task.mako" />
 <%namespace file="/base/utils.mako" import="format_text" />
-<%def name="table(title, datas)">
-    <div class="title">
+<%def name="table(title, datas, css='')">
+    <div class="title ${css}">
         ${title}
     </div>
     <div class='content'>
@@ -106,16 +106,18 @@
                 % endif
             </tbody>
         </table>
-</div>
+    </div>
 %else:
     %if task.payment_conditions:
         ${table(u"Conditions de paiement", task.payment_conditions)}
     % endif
 % endif
 % if config.has_key('coop_estimationfooter'):
-    ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
+    <div class='row keep_with_next'>
+        ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
+    </div>
 %endif
-<table>
+<table style='width:100%; margin-bottom: 5px;'>
     <thead>
         <th style="width:65%">
         </th>
@@ -143,5 +145,4 @@
         </tr>
     </tbody>
 </table>
-</div>
 </%block>

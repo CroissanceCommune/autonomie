@@ -26,6 +26,9 @@ html{
   padding-top:20px;
   padding-bottom:20px;
 }
+.keep_with_next{
+  -pdf-keep-with-next: true;
+}
 .lines{
   border:1px solid #cdcdcd;
   margin-bottom:33px;

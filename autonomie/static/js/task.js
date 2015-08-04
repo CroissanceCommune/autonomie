@@ -668,6 +668,15 @@ function setDiscountLinesBehaviours(){
   s = Selectors.discountline + " " + Selectors.tva;
   $(s).off('change');
   $(s).on('change', fireAmountChange);
+
+  s = $(Selectors.discountline + " " + Selectors.deform_close);
+  s = $(s);
+  s.removeAttr('onclick');
+  s.off('click.removeit');
+  s.on("click.removeit", function(){
+    deform.removeSequenceItem(this);
+    computeTotal();
+  });
 }
 function toggleDiscountHeader(){
   /*

@@ -16,3 +16,12 @@
   padding-top: 10px;
   font-size: 14px;
 }
+.lines .tva{
+  width: 5%;
+}
+.lines .quantity, .lines .unity{
+  width: 10%;
+}
+.lines .price{
+  width: 15%;
+}

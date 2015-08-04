@@ -48,26 +48,25 @@ html{
   line-height: 0.23cm;
 }
 .lines td, .lines th{
-  padding-top:3px;
-  padding:3px;
+  padding: 2px 3px;
 }
 .lines .price{
   text-align:right;
-  width:30%;
+  width:4cm;
   background-color:#f6f6f6;
 }
 .lines .tva{
   text-align:right;
-  width:12%;
-  font-size:9px;
+  width: 2cm;
+  font-size: 9px;
 }
 .lines .quantity{
   text-align:center;
-  width:20%;
+  width: 3cm;
 }
 .lines .unity{
   text-align:center;
-  width:30%;
+  width: 3cm;
 }
 .lines .rightalign{
   text-align:right;

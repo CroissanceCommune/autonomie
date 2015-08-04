@@ -71,8 +71,8 @@
                     <tr>
                         <th class="description">Intitulé des postes</th>
                         %if task.display_units == 1:
-                            <th class="quantity">P.U.</th>
-                            <th class="unity">Qté</th>
+                            <th class="unity">P.U.</th>
+                            <th class="quantity">Qté</th>
                         % endif
                         <th class="price">Prix</th>
                         % if multiple_tvas:
@@ -85,8 +85,8 @@
                         <tr>
                             <td class="description">${format_text(line.description, False)}</td>
                             %if task.display_units == 1:
-                                <td class="quantity">${api.format_amount(line.cost)|n}&nbsp;€</td>
-                                <td class="unity">${api.format_quantity(line.quantity)} ${line.unity}</td>
+                                <td class="unity">${api.format_amount(line.cost)|n}&nbsp;€</td>
+                                <td class="quantity">${api.format_quantity(line.quantity)} ${line.unity}</td>
                             % endif
                             <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
                             % if multiple_tvas:
@@ -220,8 +220,15 @@
     </%block>
 
 </div>
-    ## end of content
-    <div class='row pdf_footer' id='commonfooter'>
+## end of content
+    <div
+        class='row pdf_footer'
+        id='commonfooter'
+        ## In view_only only mode we switch footers by css, in pdf mode, we use frames (see templates/tasks/task.mako)
+        % if not bulk and task.course == 1:
+            style="display:none"
+        % endif
+        >
         ## The common footer
     % if config.has_key('coop_pdffootertitle'):
         <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
@@ -230,7 +237,14 @@
         ${format_text(config.get('coop_pdffootertext'))}
     % endif
 </div>
-<div class='row pdf_footer' id='coursefooter'>
+<div
+    class='row pdf_footer'
+    id='coursefooter'
+    ## In view_only only mode we switch footers by css, in pdf mode, we use frames (see templates/tasks/task.mako)
+    % if not bulk and task.course != 1:
+            style="display:none"
+        % endif
+    >
     ## The footer specific to courses (contains the additionnal text infos)
     % if config.has_key('coop_pdffootertitle'):
         <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
@@ -241,6 +255,9 @@
     % if config.has_key('coop_pdffootertext'):
         ${format_text(config.get('coop_pdffootertext'))}
     % endif
+</div>
+<div id='page-number'>
+    Page <pdf:pagenumber/>/<pdf:pagecount/>
 </div>
 % if bulk is UNDEFINED or not bulk:
 <pdf:nextpage />

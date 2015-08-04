@@ -60,7 +60,8 @@ common_footer_height *= 0.8
                 % endif
                 @frame content_frame {
                     margin: 1cm;
-                    margin-bottom: 2.8cm;
+                    margin-top: 1.5cm;
+                    margin-bottom: 3.3cm;
                     border: 0pt solid white;
                 }
                 @frame footer {
@@ -71,10 +72,18 @@ common_footer_height *= 0.8
                         -pdf-frame-content: commonfooter;
                         height: ${common_footer_height}cm;
                     % endif
-                    bottom: 0cm;
+                    bottom: 0.5cm;
                     margin-left: 1cm;
                     margin-right: 1cm;
                     border: 0pt solid white;
+                }
+                @frame paging{
+                    -pdf-frame-content: page-number;
+                    bottom: 0cm;
+                    height: 0.5cm;
+                    font-size: 0.3cm;
+                    left: 19cm;
+
                 }
             }
             @page alternate {
@@ -99,6 +108,13 @@ common_footer_height *= 0.8
                     margin-left: 1cm;
                     margin-right: 1cm;
                     border: 0pt solid white;
+                }
+                @frame paging{
+                    -pdf-frame-content: page-number;
+                    position: relative;
+                    height: 0.5cm;
+                    top: 1cm;
+                    left: 19cm;
                 }
             }
         </style>

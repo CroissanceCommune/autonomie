@@ -121,6 +121,9 @@ def get_doctypes_form_schema(userdatas_model):
     """
     registrations = userdatas_model.doctypes_registrations
     node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)
+    node_schema.widget = deform.widget.MappingWidget(
+        template="autonomie:deform_templates/clean_mapping.pt"
+    )
 
     appstruct = {}
     form_schema = colander.Schema()
@@ -608,9 +611,10 @@ class UserDatasEdit(UserDatasAdd):
             form_schema,
             buttons=(submit_btn,),
             action=action,
-            counter=self.counter
+            counter=self.counter,
+            css_class='form-inline',
         )
-        form.widget = TableFormWidget()
+        form.widget = TableFormWidget(cols=1)
         form.set_appstruct(appstruct)
         return form
 

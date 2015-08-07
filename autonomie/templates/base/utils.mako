@@ -222,15 +222,20 @@ path = request.current_route_path(_query=get_args)
             % endif
         </dl>
 </%def>
-<%def name="format_filelist(parent_node)">
+<%def name="format_filelist(parent_node, delete=False)">
  % if parent_node is not None:
       % for child in parent_node.children:
           % if loop.first:
-              <ul>
+              <ul class='list-unstyled'>
           % endif
               % if child.type_ == 'file':
                   <li>
                   <a href="${request.route_path('file', id=child.id)}">${child.label}</a>
+                    % if delete:
+                        <a class='btn btn-small btn-danger' href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}">
+                          <i class='glyphicon glyphicon-trash'></i>
+                      </a>
+                    % endif
                   </li>
               % endif
           % if loop.last:

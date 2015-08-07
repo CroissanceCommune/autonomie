@@ -647,7 +647,7 @@ class UserDatasSocialDocTypes(DBBASE):
     __tablename__ = 'userdatas_socialdocs'
     __table_args__ = default_table_args
     __colanderalchemy_config__ = {
-        'css': "well text-center",
+        'css': "text-right",
     }
     userdatas_id = Column(
         ForeignKey('user_datas.id'),

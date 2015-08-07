@@ -28,6 +28,7 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
+<%namespace file="/base/utils.mako" import="format_filetable" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%block name="content">
 <% userdata = request.context %>
@@ -154,17 +155,18 @@
     </div>
     % if doctypes_form is not UNDEFINED:
     <div class='tab-pane row' id='tab2'>
-        <div class='col-md-8'>
+        <div class='col-md-3 text-right'>
             ${doctypes_form.render()|n}
         </div>
-        <div class='col-md-4'>
+        <div class='col-md-9'>
             <h3>Liste des documents déposés dans Autonomie</h3>
             <a class='btn btn-success'
                 href="${request.route_path('userdata', id=userdata.id, _query=dict(action='attach_file'))}"
                 title="Déposer un document scanné dans autonomie">
                 Déposer un document
             </a>
-            ${format_filelist(userdata)}
+            ## ${format_filelist(userdata, delete=True)}
+            ${format_filetable(userdata.children)}
         </div>
     </div>
     % endif

@@ -1162,16 +1162,11 @@ def mydocuments_view(context, request):
         documents = query.filter(
             File.parent_id==request.user.userdatas.id
         ).all()
-        query = TemplatingHistory.query()
-        generated_docs = query.filter(
-            TemplatingHistory.userdatas_id==request.user.userdatas.id,
-        ).all()
     else:
         documents = []
     return dict(
         title=u"Mes documents",
         documents=documents,
-        generated_docs=generated_docs,
     )
 
 

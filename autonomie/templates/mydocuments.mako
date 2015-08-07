@@ -32,41 +32,6 @@
         </span>
         <h3>Documents déposés dans Autonomie</h3>
         ${format_filetable(documents)}
-        <h3>Documents sociaux téléchargeables</h3>
-        <table class="table table-striped table-bordered table-hover">
-            <thead>
-                <th>Description</th>
-                <th>Nom du fichier</th>
-                <th>Déposé le</th>
-                <th class="actions">Actions</th>
-            </thead>
-            <tbody>
-                <% loaded = [] %>
-                % for document in generated_docs:
-                    % if not document.template_id in loaded:
-                        <% url = request.route_path( \
-                        'userdata', \
-                        id=document.userdatas_id, \
-                        _query=dict(template_id=document.template_id, \
-                        action="py3o")) %>
-                        <tr>
-                            <td>${document.template.description}</td>
-                            <td>${document.template.name}</td>
-                          <td>
-                              ${api.format_date(document.created_at)}
-                          </td>
-                            <td class="actions">
-                                ${table_btn(url,
-                               u"Télécharger",
-                               u"Télécharger ce document",
-                               icon="download-alt")}
-                            </td>
-                        </tr>
-                        <% loaded.append(document.template_id) %>
-                    % endif
-                % endfor
-            </tbody>
-        </table>
     </div>
 </div>
 </%block>

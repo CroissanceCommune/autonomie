@@ -25,6 +25,8 @@
 """
     User related views
 """
+import os
+import datetime
 import logging
 import colander
 import peppercorn
@@ -657,13 +659,42 @@ def record_compilation(context, request, template):
     """
     Record the compilation of a template to be able to build an history
     """
-    if isinstance(context, UserDatas):
-        history = files.TemplatingHistory(
-            user_id=request.user.id,
-            userdatas_id=context.id,
-            template_id=template.id)
-        log.debug(u"Storing an history object")
-        request.dbsession.add(history)
+    history = files.TemplatingHistory(
+        user_id=request.user.id,
+        userdatas_id=context.id,
+        template_id=template.id)
+    log.debug(u"Storing an history object")
+    request.dbsession.add(history)
+
+
+def get_filename(template_name):
+    """
+    Return the filename to use to store
+    """
+    now = datetime.datetime.now()
+    name = os.path.splitext(template_name)[0]
+    return u"{0}_{1}.odt".format(name, now.strftime('%d-%m-%Y-%Hh-%M'))
+
+
+def store_compiled_file(context, request, output, template_name):
+    """
+    Stores the compiled datas in the user's environment
+
+    :param context: The context of the
+    """
+    log.debug(u"Storing the compiled file")
+    name = get_filename(template_name)
+    output.seek(0)
+    datas = output.getvalue()
+    file_obj = File(
+        name=name,
+        data=datas,
+        mimetype="application/vnd.oasis.opendocument.text",
+        size=len(datas),
+        parent_id=context.id
+    )
+    request.dbsession.add(file_obj)
+    return file_obj
 
 
 def delete_templating_history_view(context, request):
@@ -704,6 +735,7 @@ def py3o_view(context, request):
                     output,
                 )
                 record_compilation(context, request, template)
+                store_compiled_file(context, request, output, template.name)
                 return request.response
             except Exception, err:
                 print_exc()

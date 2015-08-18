@@ -389,9 +389,21 @@ def submenu_panel(context, request):
     return {"submenu": submenu}
 
 
+def admin_nav_panel(context, request, menus):
+    """
+    A panel to render the navigation inside the administration interface
+    """
+    return dict(menus=menus)
+
+
 def includeme(config):
     """
         Pyramid's inclusion mechanism
     """
-    config.add_panel(menu_panel, 'menu', renderer='panels/menu.mako')
-    config.add_panel(submenu_panel, 'submenu', renderer='panels/menu.mako')
+    config.add_panel(menu_panel, 'menu', renderer='/panels/menu.mako')
+    config.add_panel(submenu_panel, 'submenu', renderer='/panels/menu.mako')
+    config.add_panel(
+        admin_nav_panel,
+        'admin_nav',
+        renderer='/panels/admin_nav.mako',
+    )

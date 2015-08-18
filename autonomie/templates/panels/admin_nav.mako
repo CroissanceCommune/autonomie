@@ -26,9 +26,7 @@ Admin menu panel
 <%def name="render_item(elem)">
     <li>
     <a title='${elem.get("title")}' href="${request.route_path(elem.get('path'))}">
-        % if elem.get('icon'):
-        <i class='${elem['icon']}'></i>
-        % endif
+        <i class="${elem.get('icon') or 'fa fa-cogs'}"></i>
         ${elem.get('label', "")} <span class='help-block'>${elem.get('title', '')}</span>
     </a>
     </li>

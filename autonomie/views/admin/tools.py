@@ -27,13 +27,22 @@ from autonomie.forms.admin import (
 from autonomie.utils.ascii import (
     camel_case_to_name,
 )
-from autonomie.utils.widgets import ViewLink
 from autonomie.views import (
     BaseFormView,
 )
 
 
-class AdminOption(BaseFormView):
+class BaseAdminFormView(BaseFormView):
+    add_template_vars = ('menus',)
+    redirect_path = "admin_index"
+
+    @property
+    def menus(self):
+        return [dict(label=u"Retour", path=self.redirect_path,
+                     icon="fa fa-step-backward")]
+
+
+class AdminOption(BaseAdminFormView):
     """
     Main view for option configuration
     It allows to configure a set of models
@@ -56,10 +65,9 @@ class AdminOption(BaseFormView):
             The route we're redirecting to after successfull validation
     """
     title = u""
-    add_template_vars = ('message',)
+    add_template_vars = ('message', 'menus',)
     validation_msg = u""
     factory = None
-    redirect_path = 'admin_index'
     disable = True
     _schema = None
     js_resources = []
@@ -97,12 +105,6 @@ class AdminOption(BaseFormView):
 
         appstruct = self.schema.dictify(self.factory.query().all())
         form.set_appstruct(appstruct)
-        self.populate_actionmenu()
-
-    def populate_actionmenu(self):
-        self.request.actionmenu.add(
-            ViewLink(u"Retour", path=self.redirect_path)
-        )
 
     def _get_edited_elements(self, appstruct):
         """
@@ -173,14 +175,4 @@ def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
         MyView,
         u"admin_%s" % camel_case_to_name(model.__name__),
         '/admin/main.mako',
-    )
-
-
-def add_link_to_menu(request, label, path, title):
-    request.actionmenu.add(
-        ViewLink(
-            label,
-            path=path,
-            title=title,
-        )
     )

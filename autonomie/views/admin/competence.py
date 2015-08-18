@@ -27,12 +27,10 @@ from autonomie.models.competence import (
     CompetenceOption,
 )
 from autonomie.models.config import ConfigFiles
-from autonomie.utils.widgets import ViewLink
 from autonomie.forms.admin import CompetencePrintConfigSchema
-from autonomie.views import BaseFormView
 from autonomie.views.admin.tools import (
     get_model_admin_view,
-    add_link_to_menu,
+    BaseAdminFormView,
 )
 
 
@@ -50,6 +48,8 @@ logger = logging.getLogger(__name__)
 
 
 class AdminCompetenceOption(main_admin_class):
+    redirect_path = "admin_competences"
+
     def before(self, form):
         if CompetenceScale.query().count() == 0:
             self.session.flash(
@@ -60,10 +60,11 @@ la grille de compétences."
         main_admin_class.before(self, form)
 
 
-class AdminCompetencePrintOutput(BaseFormView):
+class AdminCompetencePrintOutput(BaseAdminFormView):
     title = u"Configuration de la sortie imprimable"
     validation_msg = u"Vos données ont bien été enregistrées"
     schema = CompetencePrintConfigSchema(title=u"")
+    redirect_path = "admin_competences",
 
     def before(self, form):
         appstruct = {}
@@ -80,19 +81,6 @@ class AdminCompetencePrintOutput(BaseFormView):
                 )
             }
         form.set_appstruct(appstruct)
-        self.populate_actionmenu()
-
-
-    def populate_actionmenu(self):
-        """
-            Add a back to index link
-        """
-        add_link_to_menu(
-            self.request,
-            u"Revenir en arrière",
-            path="admin_competences",
-            title=u"Revenir à la page précédente",
-        )
 
     def submit_success(self, appstruct):
         file_datas = appstruct.get('header_img')
@@ -103,23 +91,22 @@ class AdminCompetencePrintOutput(BaseFormView):
 
 
 def admin_competence_index_view(request):
-    for label, route in (
-        (u"Retour", "admin_accompagnement",),
-        (u"Configuration des barêmes", "admin_competence_scale",),
-        (u"Configuration des échéances", "admin_competence_deadline",),
+    menus = []
+    for label, route, icon in (
+        (u"Retour", "admin_accompagnement", "fa fa-step-backward"),
+        (u"Configuration des barêmes", "admin_competence_scale", ""),
+        (u"Configuration des échéances", "admin_competence_deadline", ""),
         (
             u"Configuration de la grille de compétences",
-            "admin_competence_option",
+            "admin_competence_option", ""
         ),
         (
             u"Configuration de la sortie imprimable",
-            'admin_competence_print',
-         )
-    ):
-        request.actionmenu.add(
-            ViewLink(label, path=route, title=label)
+            'admin_competence_print', ""
         )
-    return dict(title=u"Configuration du module Compétences")
+    ):
+        menus.append(dict(label=label, path=route, icon=icon))
+    return dict(title=u"Configuration du module Compétences", menus=menus)
 
 
 def includeme(config):

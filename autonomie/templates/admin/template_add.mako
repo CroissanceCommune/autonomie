@@ -20,7 +20,7 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
     <h3 class='text-center'>Ajouter</h3>
     <hr>

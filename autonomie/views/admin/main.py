@@ -90,17 +90,15 @@ from autonomie.forms.admin import (
     merge_config_datas,
 )
 from autonomie.forms.files import get_template_upload_schema
-from autonomie.utils.widgets import ViewLink
 from js.tinymce import tinymce
 from autonomie.views import (
     submit_btn,
-    BaseFormView,
     BaseView,
     DisableView,
 )
 from autonomie.views.admin.tools import (
     get_model_admin_view,
-    add_link_to_menu,
+    BaseAdminFormView,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -123,80 +121,86 @@ def index(request):
     """
         Return datas for the index view
     """
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration générale",
+    menus = []
+    menus.append(
+        dict(
+            label=u"Configuration générale",
             path='admin_main',
-            title=u"Configuration générale de votre installation d'autonomie"
+            title=u"Message d'accueil, logos, entête et pieds de page des \
+devis, factures / avoir)"
         )
     )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration comptable des produits et TVA collectés",
+    menus.append(
+        dict(
+            label=u"Configuration comptable des produits et TVA collectés",
             path='admin_tva',
-            title=u"Configuration des taux de TVA proposés dans les devis et \
-factures"
+            title=u"Taux de TVA, codes produit et codes analytiques associés"
         )
     )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration des modes de paiement",
+    menus.append(
+        dict(
+            label=u"Configuration comptable du module ventes",
+            path="admin_cae",
+            title=u"Comptes analytiques de la CAE spécifiques"
+        )
+    )
+    menus.append(
+        dict(
+            label=u"Configuration comptable des encaissements",
+            path="admin_payments",
+            title=u"Configuration des différents comptes analytiques liés \
+aux encaissements"
+        )
+    )
+    menus.append(
+        dict(
+            label=u"Configuration comptable des notes de frais",
+            path="admin_expense",
+            title=u"Type de frais et comptes analytiques"
+        )
+    )
+    menus.append(
+        dict(
+            label=u"Configuration des modes de paiement",
             path="admin_paymentmode",
             title=u"Configuration des modes de paiement des factures"
         )
     )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration des conditions de paiement",
+    menus.append(
+        dict(
+            label=u"Configuration des conditions de paiement",
             path="admin_payment_conditions",
-            title=u"Configuration des conditions de paiement"
+            title=u"Conditions de paiement prédéfinies à l'échelle de la CAE"
         )
     )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration des unités de prestation",
+    menus.append(
+        dict(
+            label=u"Configuration des unités de prestation",
             path="admin_workunit",
-            title=u"Configuration des unités de prestation proposées \
-dans les formulaires"
+            title=u"Unités de prestation des devis/factures/avoirs"
         )
     )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration des notes de frais",
-            path="admin_expense",
-            title=u"Configuration des types de notes de frais"
-        )
-    )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration comptable du module ventes",
-            path="admin_cae",
-            title=u"Configuration des différents comptes analytiques de la CAE"
-        )
-    )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration du module accompagnement",
+    menus.append(
+        dict(
+            label=u"Configuration du module accompagnement",
             path="admin_accompagnement",
-            title=u"Configuration des types d'activité du module \
-accompagnement"
+            title=u"Ateliers, Rendez-vous, Compétences"
         )
     )
-    request.actionmenu.add(
-        ViewLink(
-            u"Administration de la gestion sociale",
+    menus.append(
+        dict(
+            label=u"Configuration de la gestion sociale",
             path='admin_userdatas',
-            title=u"Configuration des types pour la gestion sociale",
+            title=u"Typologie des données, modèles de documents",
         )
     )
-    request.actionmenu.add(
-        ViewLink(
-            u"Configuration des domaines d'activité des entreprises",
+    menus.append(
+        dict(
+            label=u"Configuration des domaines d'activité des entreprises",
             path="admin_company_activity",
-            title=u"Configuration des domaines d'activité des entreprises"
         )
     )
-    return dict(title=u"Administration du site")
+    return dict(title=u"Administration du site", menus=menus)
 
 
 def make_enter_point_view(parent_route, views_to_link_to, title=u""):
@@ -215,41 +219,19 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
         """
         The dinamycally built view
         """
-        request.actionmenu.add(
-            ViewLink(
-                u"Retour",
-                path=parent_route
-            )
-        )
+        menus = []
+        menus.append(dict(label=u"Retour", path=parent_route,
+                          icon="fa fa-step-backward"))
         for view, route_name, tmpl in views_to_link_to:
-            request.actionmenu.add(
-                ViewLink(
-                    view.title,
-                    path=route_name,
-                    title=view.title,
-                )
-            )
-        return dict(title=title)
+            menus.append(dict(label=view.title, path=route_name,))
+        return dict(title=title, menus=menus)
     return myview
 
 
-def populate_actionmenu(request):
-    """
-        Add a back to index link
-    """
-    add_link_to_menu(
-        request,
-        u"Revenir à l'index",
-        path="admin_index",
-        title=u"Revenir à l'index de l'administration",
-    )
-
-
-class AdminMain(BaseFormView):
+class AdminMain(BaseAdminFormView):
     """
         Main configuration view
     """
-    add_template_vars = ('title',)
     title = u"Configuration générale"
     validation_msg = u"La configuration a bien été modifiée"
     schema = MainConfig()
@@ -263,7 +245,6 @@ class AdminMain(BaseFormView):
         logo = ConfigFiles.get('logo.png')
         appstruct = get_config_appstruct(self.request, config_dict, logo)
         form.set_appstruct(appstruct)
-        populate_actionmenu(self.request)
         tinymce.need()
 
     def submit_success(self, appstruct):
@@ -288,7 +269,7 @@ class AdminMain(BaseFormView):
         return HTTPFound(self.request.route_path("admin_main"))
 
 
-class AdminTva(BaseFormView):
+class AdminTva(BaseAdminFormView):
     """
         Tva administration view
         Set tvas used in invoices, estimations and cancelinvoices
@@ -311,7 +292,6 @@ class AdminTva(BaseFormView):
             appstruct.append(struct)
 
         form.set_appstruct({'tvas': appstruct})
-        populate_actionmenu(self.request)
         log.debug("AdminTva struct: %s", appstruct)
 
     @staticmethod
@@ -378,7 +358,7 @@ class AdminTva(BaseFormView):
         return HTTPFound(self.request.route_path("admin_tva"))
 
 
-class AdminPaymentMode(BaseFormView):
+class AdminPaymentMode(BaseAdminFormView):
     """
         Payment Mode administration view
         Allows to set different payment mode
@@ -394,7 +374,6 @@ class AdminPaymentMode(BaseFormView):
         """
         appstruct = [mode.label for mode in PaymentMode.query()]
         form.set_appstruct({'paymentmodes': appstruct})
-        populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
         """
@@ -409,7 +388,7 @@ class AdminPaymentMode(BaseFormView):
         return HTTPFound(self.request.route_path("admin_paymentmode"))
 
 
-class AdminWorkUnit(BaseFormView):
+class AdminWorkUnit(BaseAdminFormView):
     """
         Work Unit administration view
         Allows to configure custom unities
@@ -425,7 +404,6 @@ class AdminWorkUnit(BaseFormView):
         """
         appstruct = [mode.label for mode in WorkUnit.query()]
         form.set_appstruct({'workunits': appstruct})
-        populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
         """
@@ -440,7 +418,7 @@ class AdminWorkUnit(BaseFormView):
         return HTTPFound(self.request.route_path("admin_workunit"))
 
 
-class AdminExpense(BaseFormView):
+class AdminExpense(BaseAdminFormView):
     """
         Expense administration view
         Allows to configure expense types and codes
@@ -473,7 +451,6 @@ ont été configurés"
             appstruct[key] = [e.appstruct() for e in query]
 
         form.set_appstruct(appstruct)
-        populate_actionmenu(self.request)
 
     def get_all_ids(self, appstruct):
         """
@@ -545,24 +522,13 @@ ont été configurés"
         return HTTPFound(self.request.route_path("admin_expense"))
 
 
-class BaseAdminActivities(BaseFormView):
+class BaseAdminActivities(BaseAdminFormView):
     """
         Activity types config
     """
     title = u"Configuration du module accompagnement"
     validation_msg = u"Le module a bien été configuré"
     buttons = (submit_btn,)
-
-    def populate_actionmenu(self, request):
-        """
-            Add a back to index link
-        """
-        add_link_to_menu(
-            request,
-            u"Revenir en arrière",
-            path="admin_accompagnement",
-            title=u"Revenir à la page précédente",
-        )
 
     def _add_pdf_img_to_appstruct(self, data_type, appstruct):
         for file_type in ("header_img", "footer_img"):
@@ -731,6 +697,7 @@ class AdminActivities(BaseAdminActivities):
     """
     title = u"Configuration du module de Rendez-vous"
     schema = ActivityConfigSchema(title=u"")
+    redirect_path = "admin_accompagnement"
 
     def before(self, form):
         query = ActivityType.query()
@@ -750,7 +717,6 @@ class AdminActivities(BaseAdminActivities):
         }
         self._add_pdf_img_to_appstruct('activity', activity_appstruct)
         form.set_appstruct(activity_appstruct)
-        self.populate_actionmenu(self.request)
 
     def submit_success(self, activity_appstruct):
         """
@@ -779,6 +745,7 @@ class AdminWorkshop(BaseAdminActivities):
     """
     title = u"Administration du module Atelier"
     schema = WorkshopConfigSchema(title=u"")
+    redirect_path = "admin_accompagnement"
 
     def before(self, form):
         """
@@ -794,7 +761,6 @@ class AdminWorkshop(BaseAdminActivities):
         }
 
         form.set_appstruct(workshop_appstruct)
-        self.populate_actionmenu(self.request)
 
     def submit_success(self, workshop_appstruct):
         """
@@ -814,7 +780,7 @@ class AdminWorkshop(BaseAdminActivities):
         )
 
 
-class AdminCae(BaseFormView):
+class AdminCae(BaseAdminFormView):
     """
         Cae information configuration
     """
@@ -835,7 +801,6 @@ class AdminCae(BaseFormView):
                 appstruct[key] = value
 
         form.set_appstruct(appstruct)
-        populate_actionmenu(self.request)
 
     def submit_success(self, appstruct):
         """
@@ -872,6 +837,12 @@ class TemplateUploadView(FileUploadView):
     factory = files.Template
     schema = get_template_upload_schema()
     valid_msg = UPLOAD_OK_MSG
+    add_template_vars = ('title', 'menus')
+
+    @property
+    def menus(self):
+        return [dict(label=u'Retour', path='templates',
+                     icon="fa fa-step-backward")]
 
     def before(self, form):
         come_from = self.request.referrer
@@ -881,11 +852,6 @@ class TemplateUploadView(FileUploadView):
             'come_from': come_from
         }
         form.set_appstruct(appstruct)
-        add_link_to_menu(
-            self.request,
-            u"Revenir à la liste",
-            "templates",
-            "")
 
 
 class TemplateEditView(FileEditView):
@@ -893,15 +859,15 @@ class TemplateEditView(FileEditView):
     factory = files.Template
     schema = get_template_upload_schema()
     valid_msg = EDIT_OK_MSG
+    add_template_vars = ('title', 'menus')
+
+    @property
+    def menus(self):
+        return [dict(label=u'Retour', path='templates',
+                     icon="fa fa-step-backward")]
 
     def before(self, form):
         FileEditView.before(self, form)
-        add_link_to_menu(
-            self.request,
-            u"Revenir à la liste",
-            "templates",
-            "",
-        )
 
 
 class TemplateList(BaseView):
@@ -911,17 +877,13 @@ class TemplateList(BaseView):
     title = u"Modèles de documents"
 
     def __call__(self):
-        add_link_to_menu(
-            self.request,
-            u"Retour",
-            path="admin_userdatas",
-            title=u"Retour à l'administration de la gestion sociale"
-        )
+        menus = [dict(label=u"Retour", path="admin_userdatas",
+                      icon="fa fa-step-backward")]
 
         templates = files.Template.query()\
             .order_by(desc(files.Template.active))\
             .all()
-        return dict(templates=templates, title=self.title)
+        return dict(templates=templates, title=self.title, menus=menus)
 
 
 def get_all_userdatas_views():
@@ -960,27 +922,29 @@ class TemplateDisableView(DisableView):
 def console_view(request):
     """
     """
+    menus = []
     for label, route in (
         (u"Historique mail salaire", 'mailhistory',),
         (u"Tâches celery", 'jobs',),
     ):
-        request.actionmenu.add(
-            ViewLink(label, path=route, title=label)
+        menus.append(
+            dict(label=label, path=route, title=label)
         )
-    return dict(title=u"Console de supervision")
+    return dict(title=u"Console de supervision", menus=menus)
 
 
 def admin_accompagnement_index_view(request):
-    for label, route in (
-        (u"Retour", "admin_index",),
-        (u"Configuration du module Rendez-vous", "admin_activity"),
-        (u"Configuration du module Atelier", "admin_workshop",),
-        (u"Configuration du module Compétences", "admin_competences",),
+    menus = []
+    for label, route, icon in (
+        (u"Retour", "admin_index", "fa fa-step-backward"),
+        (u"Configuration du module Rendez-vous", "admin_activity", ''),
+        (u"Configuration du module Atelier", "admin_workshop", ''),
+        (u"Configuration du module Compétences", "admin_competences", ''),
     ):
-        request.actionmenu.add(
-            ViewLink(label, path=route, title=label)
+        menus.append(
+            dict(label=label, path=route, icon=icon)
         )
-    return dict(title=u"Administration du module accompagnement")
+    return dict(title=u"Administration du module accompagnement", menus=menus)
 
 
 def includeme(config):
@@ -992,12 +956,20 @@ def includeme(config):
     config.add_route("admin_main", "/admin/main")
     config.add_route("admin_tva", "/admin/tva")
     config.add_route("admin_paymentmode", "admin/paymentmode")
+    config.add_route("admin_payments", "admin/payments")
     config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_expense", "admin/expense")
     config.add_route("admin_accompagnement", "admin/accompagnement")
     config.add_route("admin_activity", "admin/activity")
     config.add_route("admin_workshop", "admin/workshop")
     config.add_route("admin_cae", "admin/cae")
+    config.add_route("admin_userdatas", "admin/userdatas")
+    config.add_route("admin_console", "admin_console/")
+    config.add_route(
+        'template',
+        'admin/templates/{id}',
+        traverse="templates/{id}",
+    )
 
     config.add_view(
         index,
@@ -1082,9 +1054,6 @@ def includeme(config):
         permission="admin",
     )
 
-    # User Datas view configuration
-    config.add_route("admin_userdatas", "admin/userdatas")
-
     all_option_views = list(get_all_userdatas_views())
     for view, route_name, tmpl in all_option_views:
         config.add_route(route_name, "admin/" + route_name)
@@ -1094,12 +1063,6 @@ def includeme(config):
             renderer=tmpl,
             permission="admin",
         )
-
-    config.add_route(
-        'template',
-        'admin/templates/{id}',
-        traverse="templates/{id}",
-    )
 
     config.add_view(
         TemplateDisableView,
@@ -1142,7 +1105,6 @@ def includeme(config):
     )
 
     # Hidden console view
-    config.add_route("admin_console", "admin_console/")
     config.add_view(
         console_view,
         route_name="admin_console",

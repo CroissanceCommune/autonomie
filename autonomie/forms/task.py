@@ -916,6 +916,7 @@ class PaymentSchema(colander.MappingSchema):
         colander schema for payment recording
     """
     come_from = forms.come_from_node()
+    date = forms.today_node()
     amount = colander.SchemaNode(
         AmountType(),
         title=u"Montant",

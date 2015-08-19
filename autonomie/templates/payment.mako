@@ -27,5 +27,12 @@
     <dt>Date</dt><dd>${api.format_date(request.context.date)}</dd>
     <dt>Mode de paiement</dt><dd>${request.context.mode}</dd>
     <dt>Montant</dt><dd>${api.format_amount(request.context.amount)|n}&nbsp;&euro;</dd>
+    <dt>Banque</dt><dd>
+        % if request.context.bank:
+            ${request.context.bank.label} (${request.context.bank.code})
+        % else:
+            Non renseignée
+        % endif
+        </dd>
 </dl>
 </%block>

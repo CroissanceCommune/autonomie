@@ -68,10 +68,11 @@ from deform_extensions import (
     GridMappingWidget,
 )
 from autonomie import forms
-from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import (
     WorkUnit,
     PaymentConditions,
+    PaymentMode,
+    BankAccount,
 )
 from autonomie.models.tva import (
     Tva,
@@ -928,6 +929,13 @@ class PaymentSchema(colander.MappingSchema):
         title=u"Mode de paiement",
         widget=deferred_payment_mode_widget,
         validator=deferred_payment_mode_validator,
+    )
+    bank_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Banque",
+        missing=colander.drop,
+        widget=forms.get_deferred_select(BankAccount),
+        default=forms.get_deferred_default(BankAccount),
     )
     resulted = colander.SchemaNode(
         colander.Boolean(),

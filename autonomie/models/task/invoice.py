@@ -334,12 +334,17 @@ class Invoice(Task, InvoiceCompute):
         self.official_number = get_next_official_number()
         self.taskDate = datetime.date.today()
 
-    def record_payment(self, mode, amount, resulted=False):
+    def record_payment(self, **kw):
         """
         Record a payment for the current invoice
         """
-        log.info(u"Amount : {0}".format(amount))
-        payment = Payment(mode=mode, amount=amount)
+        resulted = kw.pop('resulted', False)
+
+        payment = Payment()
+        for key, value in kw.iteritems():
+            if key in ('mode', 'amount', 'date', 'bank_id', 'task_id'):
+                setattr(payment, key, value)
+        log.info(u"Amount : {0}".format(payment.amount))
         self.payments.append(payment)
         return self.check_resulted(force_resulted=resulted)
 
@@ -563,6 +568,15 @@ class Payment(DBBASE, PersistentACLMixin):
     amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
     task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
+    bank_id = Column(ForeignKey('bank_account.id'))
+    bank = relationship(
+        "BankAccount",
+        backref=backref(
+            'payments',
+            order_by="Payment.date",
+            info={'colanderalchemy': {'exclude': True}},
+        ),
+    )
 
     def get_amount(self):
         return self.amount

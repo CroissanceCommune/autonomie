@@ -36,6 +36,7 @@ log = logging.getLogger(__name__)
 
 MANAGER_PERMS = "manage"
 
+
 class TaskStates(StateMachine):
     """
         Task statemachine
@@ -60,9 +61,7 @@ def record_payment(task, **kw):
     """
     log.info(u"Recording a payment for {0}".format(task))
     if "mode" in kw and "amount" in kw:
-        return task.record_payment(kw['mode'],
-                                   kw['amount'],
-                                   kw.get('resulted'))
+        return task.record_payment(**kw)
     else:
         raise Forbidden()
 
@@ -125,6 +124,7 @@ def set_financial_year(task, **kw):
     task.financial_year = kw['financial_year']
     return task
 
+
 def set_products(task, **kw):
     """
         Set the products to the lines of the current task
@@ -137,8 +137,10 @@ def set_products(task, **kw):
                 if line_.id == line_id:
                     line_.product_id = product_id
                 else:
-                    log.warning(u"Unknow line number in form validation : {0}"\
-                            .format(line_id))
+                    log.warning(
+                        u"Unknow line number in form validation : {0}"
+                        .format(line_id)
+                    )
         else:
             log.warning(u"No line id was passed at form validation")
     return task
@@ -200,16 +202,17 @@ def get_inv_state():
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', "valid.invoice", valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
-    aboinv = ('aboinv', MANAGER_PERMS,)
     paid = ('paid', MANAGER_PERMS, record_payment,)
     gencinv = ('gencinv', None, gen_cancelinvoice, False,)
     delete = ('delete', None, None, False,)
     mdelete = ('delete', MANAGER_PERMS, None, False,)
     resulted = ('resulted', MANAGER_PERMS,)
-    financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
-            False,)
-    products = ("set_products", MANAGER_PERMS, set_products,
-            False,)
+    financial_year = (
+        'set_financial_year', MANAGER_PERMS, set_financial_year, False,
+    )
+    products = (
+        "set_products", MANAGER_PERMS, set_products, False,
+    )
     result = {}
     result['draft'] = ('draft', wait, delete, valid,)
     result['invalid'] = ('draft', wait, delete, )
@@ -222,12 +225,18 @@ def get_inv_state():
         delete,
         financial_year,
         edit_metadata,)
-    result['valid'] = (paid, resulted, gencinv, duplicate, mdelete,
-            edit_metadata, financial_year, products,)
-    result['paid'] = (paid, resulted, gencinv, duplicate, financial_year,
-            edit_metadata, products, )
-    result['resulted'] = (gencinv, duplicate, financial_year, edit_metadata,
-            products,)
+    result['valid'] = (
+        paid, resulted, gencinv, duplicate, mdelete,
+        edit_metadata, financial_year, products,
+    )
+    result['paid'] = (
+        paid, resulted, gencinv, duplicate, financial_year,
+        edit_metadata, products,
+    )
+    result['resulted'] = (
+        gencinv, duplicate, financial_year, edit_metadata,
+        products,
+    )
     result['aboinv'] = (delete, edit_metadata)
     return result
 
@@ -243,12 +252,14 @@ def get_cinv_state():
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
-    financial_year = ('set_financial_year', MANAGER_PERMS, set_financial_year,
-                        False,)
-    products = ("set_products", MANAGER_PERMS, set_products,
-            False,)
+    financial_year = (
+        'set_financial_year', MANAGER_PERMS, set_financial_year, False,
+    )
+    products = (
+        "set_products", MANAGER_PERMS, set_products, False,
+    )
     result = {}
-    result['draft'] = ('wait', 'delete', valid )
+    result['draft'] = ('wait', 'delete', valid, )
     result['wait'] = (
         "draft",
         valid,
@@ -262,15 +273,18 @@ def get_cinv_state():
     result['valid'] = (financial_year, edit_metadata, products, )
     return result
 
+
 def get_maninv_state():
     """
         Return the states for manual invoices
     """
     return dict(valid=('resulted',))
 
+
 DEFAULT_STATE_MACHINES = {
-        "base": TaskStates('draft', get_base_state()),
-        "estimation": TaskStates('draft', get_est_state()),
-        "invoice": TaskStates('draft', get_inv_state()),
-        "cancelinvoice": TaskStates('draft', get_cinv_state()),
-        "manualinvoice":TaskStates("valid", get_maninv_state())}
+    "base": TaskStates('draft', get_base_state()),
+    "estimation": TaskStates('draft', get_est_state()),
+    "invoice": TaskStates('draft', get_inv_state()),
+    "cancelinvoice": TaskStates('draft', get_cinv_state()),
+    "manualinvoice": TaskStates("valid", get_maninv_state())
+}

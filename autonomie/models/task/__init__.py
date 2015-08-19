@@ -31,6 +31,8 @@ from .invoice import (
     InvoiceLine,
     CancelInvoiceLine,
     Payment,
+    PaymentMode,
+    BankAccount,
 )
 from .estimation import (
     Estimation,

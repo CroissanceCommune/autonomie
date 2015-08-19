@@ -69,6 +69,10 @@ from autonomie.compute.task import (
     LineCompute,
     InvoiceCompute,
 )
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
 from .interfaces import (
     IMoneyTask,
     IInvoice,
@@ -104,7 +108,7 @@ class Invoice(Task, InvoiceCompute):
     """
     __tablename__ = 'invoice'
     __table_args__ = default_table_args
-    __mapper_args__ = {'polymorphic_identity': 'invoice',}
+    __mapper_args__ = {'polymorphic_identity': 'invoice', }
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
@@ -127,7 +131,6 @@ class Invoice(Task, InvoiceCompute):
         ForeignKey('estimation.id'),
         info={'colanderalchemy': {'exclude': True}},
     )
-
 
     estimation = relationship(
         "Estimation",
@@ -255,10 +258,14 @@ class Invoice(Task, InvoiceCompute):
             taskdate is a string (YYYYMMDD)
         """
         current_year = datetime.date.today().year
-        return DBSESSION().query(func.max(Invoice.official_number)).filter(
-                Invoice.taskDate.between(current_year * 10000,
-                                         (current_year + 1) * 10000
-                                    ))
+        return DBSESSION().query(
+            func.max(Invoice.official_number)
+        ).filter(
+            Invoice.taskDate.between(
+                current_year * 10000,
+                (current_year + 1) * 10000
+            )
+        )
 
     def gen_cancelinvoice(self, user):
         """
@@ -438,10 +445,10 @@ class CancelInvoice(Task, TaskCompute):
             "cancelinvoice",
             uselist=False,
             cascade='all, delete-orphan',
-            info={'colanderalchemy': forms.EXCLUDED,}
+            info={'colanderalchemy': forms.EXCLUDED, }
         ),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id",
-        info={'colanderalchemy': forms.EXCLUDED,}
+        info={'colanderalchemy': forms.EXCLUDED, }
     )
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
@@ -492,8 +499,11 @@ class CancelInvoice(Task, TaskCompute):
             ManualInvoice table
         """
         current_year = datetime.date.today().year
-        return DBSESSION().query(func.max(CancelInvoice.official_number)).filter(
-                    func.year(CancelInvoice.taskDate) == current_year)
+        return DBSESSION().query(
+            func.max(CancelInvoice.official_number)
+        ).filter(
+            func.year(CancelInvoice.taskDate) == current_year
+        )
 
     def is_tolate(self):
         """
@@ -572,6 +582,30 @@ class PaymentMode(DBBASE):
     label = Column(String(120))
 
 
+class BankAccount(ConfigurableOption):
+    """
+    Bank accounts used for payment registry
+    """
+    __colanderalchemy_config__ = {
+        "title": u"Comptes banques",
+        'validation_msg': u"Les comptes banques ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+    code = Column(
+        String(120),
+        info={
+            "colanderalchemy": {'title': u"Compte associé"}
+        }
+    )
+    default = Column(
+        Boolean(),
+        default=False,
+        info={
+            "colanderalchemy": {'title': u"Utiliser ce compte par défaut"}
+        }
+    )
+
+
 # Usefull queries
 def get_invoice_years():
     """
@@ -592,7 +626,7 @@ def get_invoice_years():
     return taskyears()
 
 
-#DEPRECATED MODELS, Tables and models should be fired in version 3.1
+# DEPRECATED MODELS, Tables and models should be fired in version 3.1
 class InvoiceLine(DBBASE, LineCompute):
     """
         Invoice lines
@@ -699,7 +733,10 @@ class CancelInvoiceLine(DBBASE, LineCompute):
     __tablename__ = 'cancelinvoice_line'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey('cancelinvoice.id', ondelete="cascade"))
+    task_id = Column(
+        Integer,
+        ForeignKey('cancelinvoice.id', ondelete="cascade")
+    )
     created_at = Column(
         DateTime,
         default=datetime.datetime.now)
@@ -725,13 +762,16 @@ class CancelInvoiceLine(DBBASE, LineCompute):
     quantity = Column(DOUBLE, default=1)
     unity = Column(String(100), default=None)
     product_id = Column(Integer)
-    product = relationship("Product",
-            primaryjoin="Product.id==CancelInvoiceLine.product_id",
-            uselist=False,
-            foreign_keys=product_id)
+    product = relationship(
+        "Product",
+        primaryjoin="Product.id==CancelInvoiceLine.product_id",
+        uselist=False,
+        foreign_keys=product_id,
+    )
     task = relationship(
         "CancelInvoice",
-        backref=backref("lines",
+        backref=backref(
+            "lines",
             order_by='CancelInvoiceLine.rowIndex',
             cascade="all, delete-orphan"))
 
@@ -752,5 +792,3 @@ class CancelInvoiceLine(DBBASE, LineCompute):
     def __repr__(self):
         return u"<CancelInvoiceLine id:{s.id} task_id:{s.task_id} \
 cost:{s.cost} quantity:{s.quantity} tva:{s.tva}".format(s=self)
-
-

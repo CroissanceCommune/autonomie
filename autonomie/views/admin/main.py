@@ -29,6 +29,7 @@
     - logo upload
 """
 import logging
+import functools
 
 from sqlalchemy import desc
 from pyramid.httpexceptions import HTTPFound
@@ -40,8 +41,11 @@ from autonomie.models.tva import (
     Tva,
     Product,
 )
-from autonomie.models.task.invoice import PaymentMode
-from autonomie.models.task import WorkUnit
+from autonomie.models.task import (
+    WorkUnit,
+    PaymentMode,
+    BankAccount,
+)
 from autonomie.models.treasury import (
     ExpenseType,
     ExpenseKmType,
@@ -947,6 +951,89 @@ def admin_accompagnement_index_view(request):
     return dict(title=u"Administration du module accompagnement", menus=menus)
 
 
+def include_payments_views(config):
+    """
+    Add views for payments configuration
+    """
+    view_config = view, route_name, tmpl = get_model_admin_view(
+        BankAccount,
+        r_path="admin_payments",
+    )
+    config.add_route(route_name, "admin/" + route_name)
+    config.add_admin_view(
+        view,
+        route_name=route_name,
+        renderer=tmpl,
+    )
+
+    config.add_admin_view(
+        make_enter_point_view(
+            "admin_index",
+            (view_config, ),
+            u"Configuration comptables du module encaissements",
+        ),
+        route_name='admin_payments'
+    )
+
+
+def include_userdatas_views(config):
+    """
+    Include views related to userdatas configuration
+    """
+    all_option_views = list(get_all_userdatas_views())
+    for view, route_name, tmpl in all_option_views:
+        config.add_route(route_name, "admin/" + route_name)
+        config.add_admin_view(
+            view,
+            route_name=route_name,
+            renderer=tmpl,
+        )
+
+    config.add_admin_view(
+        TemplateDisableView,
+        route_name='template',
+        request_param='action=disable',
+    )
+
+    config.add_admin_view(
+        file_dl_view,
+        route_name='template',
+    )
+
+    config.add_admin_view(
+        TemplateEditView,
+        route_name='template',
+        renderer='admin/template_edit.mako',
+        request_param='action=edit',
+    )
+
+    config.add_admin_view(
+        TemplateUploadView,
+        route_name='templates',
+        renderer='admin/template_add.mako',
+        request_param='action=new',
+    )
+
+    config.add_admin_view(
+        make_enter_point_view(
+            'admin_index',
+            all_option_views,
+            u"Administration de la gestion sociale"
+        ),
+        route_name="admin_userdatas",
+    )
+
+
+def include_pyramid_sacrud(config):
+    config.include('pyramid_sacrud')
+    from autonomie.models import user
+    settings = config.registry.settings
+    settings['pyramid_sacrud.models'] = (
+        (u'Comptes utilisateurs', [user.Group, user.User]),
+        (u'Gestion sociale', [user.ZoneOption]),
+    )
+
+
 def includeme(config):
     """
         Add module's views
@@ -971,32 +1058,30 @@ def includeme(config):
         traverse="templates/{id}",
     )
 
-    config.add_view(
+    config.add_admin_view = functools.partial(
+        config.add_view,
+        permission='admin',
+        renderer="admin/main.mako",
+    )
+
+    config.add_admin_view(
         index,
         route_name='admin_index',
-        renderer='admin/index.mako',
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         AdminMain,
         route_name="admin_main",
-        renderer="admin/main.mako",
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         AdminTva,
         route_name='admin_tva',
-        renderer="admin/main.mako",
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         AdminPaymentMode,
         route_name='admin_paymentmode',
-        renderer="admin/main.mako",
-        permission='admin',
     )
 
     for model in (PaymentConditions, CompanyActivity):
@@ -1005,109 +1090,46 @@ def includeme(config):
             r_path="admin_index",
         )
         config.add_route(route_name, "admin/" + route_name)
-        config.add_view(
+        config.add_admin_view(
             view,
             route_name=route_name,
             renderer=tmpl,
-            permission="admin",
         )
 
-    config.add_view(
+    include_payments_views(config)
+    include_userdatas_views(config)
+
+    config.add_admin_view(
         AdminWorkUnit,
         route_name='admin_workunit',
-        renderer="admin/main.mako",
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         AdminExpense,
         route_name='admin_expense',
-        renderer="admin/main.mako",
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         admin_accompagnement_index_view,
         route_name='admin_accompagnement',
-        renderer="admin/index.mako",
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         AdminActivities,
         route_name='admin_activity',
-        renderer="admin/main.mako",
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         AdminWorkshop,
         route_name='admin_workshop',
-        renderer="admin/main.mako",
-        permission='admin',
     )
 
-    config.add_view(
+    config.add_admin_view(
         AdminCae,
         route_name='admin_cae',
-        renderer="admin/main.mako",
-        permission="admin",
     )
-
-    all_option_views = list(get_all_userdatas_views())
-    for view, route_name, tmpl in all_option_views:
-        config.add_route(route_name, "admin/" + route_name)
-        config.add_view(
-            view,
-            route_name=route_name,
-            renderer=tmpl,
-            permission="admin",
-        )
-
-    config.add_view(
-        TemplateDisableView,
-        route_name='template',
-        request_param='action=disable',
-        permission='admin',
-    )
-
-    config.add_view(
-        file_dl_view,
-        route_name='template',
-        permission='admin',
-    )
-
-    config.add_view(
-        TemplateEditView,
-        route_name='template',
-        renderer='admin/template_edit.mako',
-        request_param='action=edit',
-        permission='admin',
-    )
-
-    config.add_view(
-        TemplateUploadView,
-        route_name='templates',
-        renderer='admin/template_add.mako',
-        request_param='action=new',
-        permission='admin',
-    )
-
-    config.add_view(
-        make_enter_point_view(
-            'admin_index',
-            all_option_views,
-            u"Administration de la gestion sociale"
-        ),
-        route_name="admin_userdatas",
-        renderer='admin/index.mako',
-        permission="admin",
-    )
-
     # Hidden console view
-    config.add_view(
+    config.add_admin_view(
         console_view,
         route_name="admin_console",
-        renderer="admin/index.mako",
-        permission="admin",
     )

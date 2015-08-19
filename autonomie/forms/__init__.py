@@ -404,6 +404,35 @@ def get_deferred_select(model, multi=False, mandatory=False,
     return deferred_widget
 
 
+def get_deferred_default(model, default_key='default', id_key='id'):
+    """
+    Return a deferred for default model selection
+
+        model
+
+            Option model having at least an id and a default attribute
+
+        default_key
+
+            A boolean attr defining which element is the default one
+
+        id_key
+
+            The default value attr
+    """
+    @colander.deferred
+    def deferred_default(binding_datas, request):
+        """
+        The deferred function that will be fired on schema binding
+        """
+        default = model.query().filter(getattr(model, default_key)).first()
+        if default is not None:
+            return getattr(default, id_key)
+        else:
+            return colander.null
+    return deferred_default
+
+
 def get_select(values, multi=False, mandatory=True):
     """
     Return a select widget with the provided options

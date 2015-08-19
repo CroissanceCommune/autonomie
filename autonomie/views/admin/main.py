@@ -88,7 +88,6 @@ from autonomie.forms.admin import (
     ExpenseTypesConfig,
     WorkshopConfigSchema,
     ActivityConfigSchema,
-    CAECONFIG,
     get_config_appstruct,
     get_config_dbdatas,
     merge_config_datas,
@@ -103,6 +102,8 @@ from autonomie.views import (
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseAdminFormView,
+    BaseConfigView,
+    get_config_schema,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -151,7 +152,7 @@ devis, factures / avoir)"
     menus.append(
         dict(
             label=u"Configuration comptable des encaissements",
-            path="admin_payments",
+            path="admin_receipts",
             title=u"Configuration des différents comptes analytiques liés \
 aux encaissements"
         )
@@ -784,56 +785,43 @@ class AdminWorkshop(BaseAdminActivities):
         )
 
 
-class AdminCae(BaseAdminFormView):
+class AdminCae(BaseConfigView):
     """
         Cae information configuration
     """
     title = u"Configuration comptable du module ventes"
     validation_msg = u"Les informations ont bien été enregistrées"
-    schema = CAECONFIG
-    buttons = (submit_btn, )
-
-    def before(self, form):
-        """
-            Add the appstruct to the form
-        """
-        appstruct = {}
-        for key, value in self.request.config.items():
-            if key.startswith('sage'):
-                appstruct.setdefault('sage_export', {})[key] = value
-            else:
-                appstruct[key] = value
-
-        form.set_appstruct(appstruct)
-
-    def submit_success(self, appstruct):
-        """
-            Insert config informations into database
-        """
-        # la table config étant un stockage clé valeur
-        # le merge_session_with_post ne peut être utilisé
-        dbdatas = Config.query().all()
-
-        log.debug(u"Cae configuration submission")
-        log.debug(appstruct)
-
-        new_dbdatas = merge_config_datas(dbdatas, appstruct)
-        for dbdata in new_dbdatas:
-            log.debug(dbdata.name)
-            if dbdata in dbdatas:
-                self.dbsession.merge(dbdata)
-            else:
-                self.dbsession.add(dbdata)
-            # If we set the contribution_cae value, we want it to be the default
-            # for every company that has no contribution value set
-            if dbdata.name == 'contribution_cae':
-                for comp in Company.query():
-                    if comp.contribution is None:
-                        comp.contribution = dbdata.value
-                        self.dbsession.merge(comp)
-        self.dbsession.flush()
-        self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path("admin_cae"))
+    keys = (
+        'code_journal',
+        'numero_analytique',
+        'compte_cg_contribution',
+        'compte_rrr',
+        'compte_frais_annexes',
+        'compte_cg_banque',
+        'compte_cg_assurance',
+        'compte_cgscop',
+        'compte_cg_debiteur',
+        'compte_cg_organic',
+        'compte_cg_debiteur_organic',
+        'compte_rg_interne',
+        'compte_rg_externe',
+        'compte_cg_tva_rrr',
+        'code_tva_rrr',
+        "contribution_cae",
+        "taux_assurance",
+        "taux_cgscop",
+        "taux_contribution_organic",
+        "taux_rg_interne",
+        "taux_rg_client",
+        'sage_facturation_not_used',
+        "sage_contribution",
+        'sage_assurance',
+        'sage_cgscop',
+        'sage_organic',
+        'sage_rginterne',
+        'sage_rgclient',
+    )
+    schema = get_config_schema(keys)
 
 
 class TemplateUploadView(FileUploadView):
@@ -951,28 +939,45 @@ def admin_accompagnement_index_view(request):
     return dict(title=u"Administration du module accompagnement", menus=menus)
 
 
-def include_payments_views(config):
+class MainReceiptsConfig(BaseConfigView):
+    title = u"Informations générales"
+    keys = ('receipts_code_journal', )
+    schema = get_config_schema(keys)
+    validation_msg = u"L'export comptable des encaissement a bien été \
+configuré"
+    redirect_path = "admin_receipts"
+
+
+def include_receipts_views(config):
     """
     Add views for payments configuration
     """
-    view_config = view, route_name, tmpl = get_model_admin_view(
-        BankAccount,
-        r_path="admin_payments",
-    )
-    config.add_route(route_name, "admin/" + route_name)
-    config.add_admin_view(
-        view,
-        route_name=route_name,
-        renderer=tmpl,
-    )
+    config.add_route("admin_receipts", "admin/receipts")
+
+    all_views = [
+        (
+            MainReceiptsConfig,
+            "admin_main_receipts",
+            "/admin/main.mako",
+        ),
+        get_model_admin_view(BankAccount, r_path="admin_receipts"),
+    ]
+
+    for view, route_name, tmpl in all_views:
+        config.add_route(route_name, "admin/" + route_name)
+        config.add_admin_view(
+            view,
+            route_name=route_name,
+            renderer=tmpl,
+        )
 
     config.add_admin_view(
         make_enter_point_view(
             "admin_index",
-            (view_config, ),
+            all_views,
             u"Configuration comptables du module encaissements",
         ),
-        route_name='admin_payments'
+        route_name='admin_receipts'
     )
 
 
@@ -1043,7 +1048,6 @@ def includeme(config):
     config.add_route("admin_main", "/admin/main")
     config.add_route("admin_tva", "/admin/tva")
     config.add_route("admin_paymentmode", "admin/paymentmode")
-    config.add_route("admin_payments", "admin/payments")
     config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_expense", "admin/expense")
     config.add_route("admin_accompagnement", "admin/accompagnement")
@@ -1096,7 +1100,7 @@ def includeme(config):
             renderer=tmpl,
         )
 
-    include_payments_views(config)
+    include_receipts_views(config)
     include_userdatas_views(config)
 
     config.add_admin_view(

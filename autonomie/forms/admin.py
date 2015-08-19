@@ -54,6 +54,151 @@ HEADER_RESIZER = ImageResizer(4, 1)
 TEMPLATES_URL = 'autonomie:deform_templates/'
 
 
+CONFIGURATION_KEYS = {
+    'receipts_code_journal': {
+        "title": u"Code journal encaissements",
+        "description": u"Le code journal pour l'export des encaissements \
+vers votre logiciel de comptabilité",
+    },
+    'receipts_active_tva_module': {
+        "title": u"Activer le module TVA pour les encaissements",
+        "description": u"Paiement de la TVA sur encaissement",
+        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0')
+    },
+    'code_journal': {
+        'title': u"Code journal ventes",
+        'description': u"Le code du journal dans votre logiciel de \
+comptabilité",
+    },
+    'numero_analytique': {
+        'title': u"Numéro analytique de la CAE",
+    },
+    'compte_cg_contribution': {
+        'title': u"Compte CG contribution",
+        'description': u"Compte CG correspondant à la contribution des \
+entrepreneurs à la CAE",
+    },
+    'compte_rrr': {
+        "title": u"Compte RRR",
+        "description": u"Compte Rabais, Remises et Ristournes",
+    },
+    "compte_frais_annexes": {
+        "title": u"Compte de frais annexes",
+    },
+    "compte_cg_banque": {
+        "title": u"Compte banque de l'entrepreneur",
+    },
+    "compte_cg_assurance": {
+        "title": u"Compte de charge assurance",
+        "description": u"Requis pour le module d'écritures Assurance",
+    },
+    "compte_cgscop": {
+        "title": u"Compte de charge CG Scop",
+        "description": u"Requis pour le module d'écritures CGSCOP"
+    },
+    'compte_cg_debiteur': {
+        "title": u"Compte de contrepartie pour CG Scop et Assurance",
+        "description": u"Requis pour le module d'écritures CGSCOP"
+    },
+    "compte_cg_organic": {
+        "title": u"Compte de charge Organic",
+        "description": u"Compte CG pour la contribution à l'Organic (requis \
+pour le module d'écritures Contribution Organic)",
+    },
+    "compte_cg_debiteur_organic": {
+        "title": u"Compte de contrepartie Organic",
+        "description": u"Compte CG de débiteur pour la contribution à \
+l'Organic  (requis pour le module d'écritures Contribution Organic)",
+    },
+    'compte_rg_interne': {
+        "title": u"Compte RG Interne",
+        "description": u"Requis pour les écritures RG Interne"
+    },
+    'compte_rg_externe': {
+        "title": u"Compte RG Externe",
+        "description": u"Requis pour le module d'écriture RG Client"
+    },
+    'compte_cg_tva_rrr': {
+        "title": u"Compte CG de TVA spécifique aux RRR",
+        "description": u"Facultatif, les remises apparaitront dans les \
+écritures si cette valeur et le code tva sont renseignés."
+    },
+    'code_tva_rrr': {
+        "title": u"Code de TVA spécifique aux RRR",
+        "description": u"Facultatif, les remises apparaitront dans les \
+écritures si cette valeur et le compte CG sont renseignés."
+    },
+    'contribution_cae': {
+        "title": u"Pourcentage de la contribution",
+        "description": u"Valeur par défaut de la contribution (nombre entre \
+0 et 100). Elle peut être individualisée sur les pages entreprises.",
+    },
+    'taux_assurance': {
+        "title": u"Taux d'assurance",
+        "description": u"(nombre entre 0 et 100) Requis pour le module \
+d'écritures Assurance",
+    },
+    'taux_cgscop': {
+        "title": u"Taux CGSCOP",
+        "description": u"(nombre entre 0 et 100) Requis pour le module \
+d'écritures CGSCOP",
+    },
+    'taux_contribution_organic': {
+        "title": u"Taux de Contribution à l'Organic",
+        "description": "(nombre entre 0 et 100) Requis pour le module \
+d'écritures Contribution Organic",
+    },
+    'taux_rg_interne': {
+        "title": u"Taux RG Interne",
+        "description": u"(nombre entre 0 et 100) Requis pour les écritures \
+RG Interne",
+    },
+    'taux_rg_client': {
+        "title": u"Taux RG Client",
+        "description": u"(nombre entre 0 et 100) Requis pour le module \
+d'écriture RG Client",
+    },
+    'sage_contribution': {
+        "title": u"Module contribution",
+        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
+        "section": u"Activation des modules d'export Sage",
+    },
+    'sage_assurance': {
+        "title": u"Module assurance",
+        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
+        "section": u"Activation des modules d'export Sage",
+    },
+    'sage_cgscop': {
+        "title": u"Module CGSCOP",
+        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
+        "section": u"Activation des modules d'export Sage",
+    },
+    'sage_organic': {
+        "title": u"Module Contribution organic",
+        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
+        "section": u"Activation des modules d'export Sage",
+    },
+    'sage_rginterne': {
+        "title": u"Module RG Interne",
+        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
+        "section": u"Activation des modules d'export Sage",
+    },
+    'sage_rgclient': {
+        "title": u"Module RG Client",
+        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
+        "section": u"Activation des modules d'export Sage",
+    },
+    'sage_facturation_not_used': {
+        "title": u"Module facturation",
+        "description": u"Activé par défaut",
+        "widget": deform.widget.CheckboxWidget(
+            template='autonomie:deform_templates/checkbox_readonly.pt'
+        ),
+        "section": u"Activation des modules d'export Sage",
+    },
+}
+
+
 def get_deferred_upload_widget(filename, filters=None):
     @colander.deferred
     def deferred_upload_widget(node, kw):
@@ -76,6 +221,71 @@ def get_deferred_upload_widget(filename, filters=None):
             filters=filters)
 
     return deferred_upload_widget
+
+
+def get_config_key_schemanode(key, ui_conf):
+    """
+    Returns a schema node to configure the config 'key'
+    This key should appear in the dict here above CONFIGURATION_KEYS
+    """
+    return colander.SchemaNode(
+        colander.String(),
+        title=ui_conf['title'],
+        description=ui_conf.get('description'),
+        missing=u"",
+        name=key,
+        widget=ui_conf.get('widget'),
+    )
+
+
+def get_config_schema(keys):
+    """
+    Returns a schema to configure the given keys
+    """
+    schema = colander.Schema()
+    mappings = {}
+    for key in keys:
+        ui_conf = CONFIGURATION_KEYS[key]
+        node = get_config_key_schemanode(key, ui_conf)
+
+        if "section" in ui_conf:  # This element should be shown in a mapping
+            section_name = ui_conf['section']
+            if section_name not in mappings:
+                mappings[section_name] = mapping = colander.Schema(
+                    title=section_name,
+                    name=section_name,
+                )
+            else:
+                mapping = mappings[section_name]
+            mapping.add(node)
+        else:
+            schema.add(node)
+
+    for mapping in mappings.values():
+        schema.add(mapping)
+    return schema
+
+
+def build_config_appstruct(request, keys):
+    """
+    Build the configuration appstruct regarding the config keys we want to edit
+
+    :param obj request: The pyramid request object (with a config attribute)
+    :param list keys: the keys we want to edit
+    :returns: A dict storing the configuration values adapted to a schema
+    generated by get_config_schema
+    """
+    appstruct = {}
+    for key in keys:
+        value = request.config.get(key, "")
+        if value:
+            ui_conf = CONFIGURATION_KEYS[key]
+
+            if "section" in ui_conf:
+                appstruct.setdefault(ui_conf['section'], {})[key] = value
+            else:
+                appstruct[key] = value
+    return appstruct
 
 
 class EstimationConfig(colander.MappingSchema):
@@ -744,219 +954,28 @@ class SageExportConfig(colander.MappingSchema):
     pass
 
 
-def build_cae_config_schema():
-    fields = (
-        (
-            'code_journal',
-            u"Code journal ventes",
-            u"Le code du journal dans Sage",
-        ),
-        (
-            'numero_analytique',
-            u"Numéro analytique de la CAE",
-            "",
-        ),
-
-        (
-            'compte_cg_contribution',
-            u"Compte CG contribution",
-            u"Compte CG correspondant à la contribution des entrepreneurs à \
-la CAE"
-        ),
-        (
-            'compte_rrr',
-            u"Compte RRR",
-            u"Compte Rabais, Remises et Ristournes",
-        ),
-        (
-            'compte_frais_annexes',
-            u"Compte de frais annexes",
-            '',
-        ),
-        (
-            'compte_cg_banque',
-            u"Compte banque de l'entrepreneur",
-            "",
-        ),
-
-        (
-            'compte_cg_assurance',
-            u"Compte de charge assurance",
-            u"Requis pour le module d'écritures Assurance",
-        ),
-        (
-            'compte_cgscop',
-            u"Compte de charge CG Scop",
-            u"Requis pour le module d'écritures CGSCOP",
-        ),
-        (
-            'compte_cg_debiteur',
-            u"Compte de contrepartie pour CG Scop et Assurance",
-            u"Requis pour le module d'écritures CGSCOP",
-        ),
-        (
-            'compte_cg_organic',
-            u"Compte de charge Organic",
-            u"Compte CG pour la contribution à l'Organic (requis pour le module \
-    d'écritures Contribution Organic)",
-        ),
-        (
-            'compte_cg_debiteur_organic',
-            u"Compte de contrepartie Organic",
-            u"Compte CG de débiteur pour la contribution à l'Organic (requis pour \
-    le module d'écritures Contribution Organic)",
-        ),
-        (
-            'compte_rg_interne',
-            u"Compte RG Interne",
-            u"Requis pour les écritures RG Interne",
-        ),
-        (
-            'compte_rg_externe',
-            u"Compte RG Externe",
-            u"Requis pour le module d'écriture RG Client",
-        ),
-        (
-            'compte_cg_tva_rrr',
-            u"Compte CG de TVA spécifique aux RRR",
-            u"Facultatif, les remises apparaitront dans les écritures si cette \
-    valeur et le code tva sont renseignés.",
-        ),
-        (
-            'code_tva_rrr',
-            u"Code de TVA spécifique aux RRR",
-            u"Facultatif, les remises apparaitront dans les écritures si cette \
-    valeur et le compte CG sont renseignés.",
-        ),
-
-
-        (
-            "contribution_cae",
-            u"Pourcentage de la contribution",
-            u"Valeur par défaut de la contribution (nombre entre 0 et 100). \
-            Elle peut être individualisée sur les pages entreprises",
-        ),
-        (
-            "taux_assurance",
-            u"Taux d'assurance",
-            u"(nombre entre 0 et 100) Requis pour le module d'écritures \
-Assurance",
-        ),
-        (
-            "taux_cgscop",
-            u"Taux CGSCOP",
-            u"(nombre entre 0 et 100) Requis pour le module d'écritures CGSCOP",
-        ),
-        (
-            "taux_contribution_organic",
-            u"Taux de Contribution à l'Organic",
-            u"(nombre entre 0 et 100) Requis pour le module d'écritures \
-    Contribution Organic",
-        ),
-        (
-            "taux_rg_interne",
-            u"Taux RG Interne",
-            u"(nombre entre 0 et 100) Requis pour les écritures RG Interne",
-        ),
-        (
-            "taux_rg_client",
-            u"Taux RG Client",
-            u"(nombre entre 0 et 100) Requis pour le module d'écriture RG \
-Client",
-        ),
-    )
-    schema = CaeConfig().clone()
-    for key, title, description in fields:
-        schema.add(
-            colander.SchemaNode(
-                colander.String(),
-                title=title,
-                description=description,
-                missing=u"",
-                name=key
-            )
-        )
-
-    export_modules = (
-        (
-            "sage_contribution",
-            u"Module contribution",
-            u"",),
-        (
-            'sage_assurance',
-            u"Module assurance",
-            u"",),
-        (
-            'sage_cgscop',
-            u"Module CGSCOP",
-            u"",),
-        (
-            'sage_organic',
-            u"Module Contribution organic",
-            u"",),
-        (
-            'sage_rginterne',
-            u"Module RG Interne",
-            u"",),
-        (
-            'sage_rgclient',
-            u"Module RG Client",
-            u"",
-        ),
-    )
-    export_schema = SageExportConfig(
-        title=u"Activation des modules d'export Sage",
-        name='sage_export').clone()
-    export_schema.add(
-        colander.SchemaNode(
-            colander.String(),
-            widget=deform.widget.CheckboxWidget(
-                template='autonomie:deform_templates/checkbox_readonly.pt',
-                ),
-            title=u"Module facturation",
-            description=u"activé par défaut",
-            name="sage_facturation_not_used",
-            )
-        )
-    for key, title, description in export_modules:
-        export_schema.add(
-            colander.SchemaNode(
-                colander.String(),
-                widget=deform.widget.CheckboxWidget(
-                    true_val="1",
-                    false_val="0",
-                ),
-                title=title,
-                description=description,
-                name=key)
-        )
-    schema.add(export_schema)
-
-    return schema
-
-
-CAECONFIG = build_cae_config_schema()
-
-
 def get_config_appstruct(request, config_dict, logo):
     """
         transform Config datas to ConfigSchema compatible appstruct
     """
     appstruct = {
         'site':     {'welcome': ''},
-        'document': {'estimation':  {
-                                    'header': '',
-                                    'footer': '',
-                                    },
-                     'invoice':     {
-                                    'prefix': '',
-                                    'header': '',
-                                    'payment': '',
-                                     'late': ''},
-                     'footertitle': '',
-                     'footercourse': '',
-                     'footercontent': '',
-                     'cgv': ''},
+        'document': {
+            'estimation': {
+                'header': '',
+                'footer': '',
+            },
+            'invoice': {
+                'prefix': '',
+                'header': '',
+                'payment': '',
+                'late': ''
+            },
+            'footertitle': '',
+            'footercourse': '',
+            'footercontent': '',
+            'cgv': '',
+        },
         "attached_filetypes": {}
     }
     if logo is not None:
@@ -1001,8 +1020,8 @@ def get_config_appstruct(request, config_dict, logo):
     )
 
     appstruct["attached_filetypes"]['types'] = json.loads(
-            config_dict.get('attached_filetypes', "[]")
-            )
+        config_dict.get('attached_filetypes', "[]")
+    )
     return appstruct
 
 
@@ -1021,32 +1040,45 @@ def get_config_dbdatas(appstruct):
         Returns dict with db compatible datas
     """
     dbdatas = {}
-    dbdatas['coop_pdffootertitle'] = appstruct.get('document', {}).get(
-                                                             'footertitle')
-    dbdatas['coop_pdffootercourse'] = appstruct.get('document', {}).get(
-                                                             'footercourse')
-    dbdatas['coop_pdffootertext'] = appstruct.get('document', {}).get(
-                                                             'footercontent')
-    dbdatas['coop_cgv'] = appstruct.get('document', {}).get('cgv')
+    dbdatas['coop_pdffootertitle'] = appstruct.get(
+        'document', {}).get(
+            'footertitle'
+        )
+    dbdatas['coop_pdffootercourse'] = appstruct.get(
+        'document', {}).get(
+            'footercourse')
+    dbdatas['coop_pdffootertext'] = appstruct.get(
+        'document', {}).get(
+            'footercontent')
+    dbdatas['coop_cgv'] = appstruct.get(
+        'document', {}).get('cgv')
 
-    dbdatas['coop_estimationheader'] = appstruct.get('document', {}).get(
-                                           'estimation', {}).get('header')
-    dbdatas['coop_estimationfooter'] = appstruct.get('document', {}).get(
-                                                'estimation', {}).get('footer')
+    dbdatas['coop_estimationheader'] = appstruct.get(
+        'document', {}).get(
+            'estimation', {}).get('header')
+    dbdatas['coop_estimationfooter'] = appstruct.get(
+        'document', {}).get(
+            'estimation', {}).get('footer')
 
-    dbdatas['invoiceprefix'] = appstruct.get('document', {})\
-            .get('invoice', {})\
-            .get('prefix')
-    dbdatas['coop_invoiceheader'] = appstruct.get('document', {}).get(
-                                           'invoice', {}).get('header')
-    dbdatas['coop_invoicepayment'] = appstruct.get('document', {}).get(
-                                                'invoice', {}).get('payment')
-    dbdatas['coop_invoicelate'] = appstruct.get('document', {}).get(
-                                                'invoice', {}).get('late')
-    dbdatas['welcome'] = appstruct.get('site', {}).get('welcome')
+    dbdatas['invoiceprefix'] = appstruct.get(
+        'document', {})\
+        .get('invoice', {})\
+        .get('prefix')
+    dbdatas['coop_invoiceheader'] = appstruct.get(
+        'document', {}).get(
+            'invoice', {}).get('header')
+    dbdatas['coop_invoicepayment'] = appstruct.get(
+        'document', {}).get(
+            'invoice', {}).get('payment')
+    dbdatas['coop_invoicelate'] = appstruct.get(
+        'document', {}).get(
+            'invoice', {}).get('late')
+    dbdatas['welcome'] = appstruct.get('site', {}).get(
+        'welcome')
 
     dbdatas['attached_filetypes'] = json.dumps(
-            appstruct.get('attached_filetypes', {}).get('types',  []))
+        appstruct.get('attached_filetypes', {}).get('types',  [])
+    )
     return dbdatas
 
 
@@ -1105,6 +1137,7 @@ def get_sequence_model_admin(model, title=u""):
             title=title,
             name='datas')
     )
+
     def dictify(models):
         return {'datas': [node_schema.dictify(model) for model in models]}
 

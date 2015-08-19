@@ -19,10 +19,16 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
+import logging
+
 from pyramid.httpexceptions import HTTPFound
 
+from autonomie.models.config import Config
+from autonomie.forms import flatten_appstruct
 from autonomie.forms.admin import (
     get_sequence_model_admin,
+    get_config_schema,
+    build_config_appstruct,
 )
 from autonomie.utils.ascii import (
     camel_case_to_name,
@@ -30,6 +36,7 @@ from autonomie.utils.ascii import (
 from autonomie.views import (
     BaseFormView,
 )
+logger = logging.getLogger(__name__)
 
 
 class BaseAdminFormView(BaseFormView):
@@ -40,6 +47,41 @@ class BaseAdminFormView(BaseFormView):
     def menus(self):
         return [dict(label=u"Retour", path=self.redirect_path,
                      icon="fa fa-step-backward")]
+
+
+class BaseConfigView(BaseAdminFormView):
+    """
+    Base view for configuring elements in the config key-value table
+    """
+    keys = ()
+    validation_msg = u""
+    schema = None
+
+    def before(self, form):
+        appstruct = build_config_appstruct(self.request, self.keys)
+        form.set_appstruct(appstruct)
+
+    def submit_success(self, appstruct):
+        """
+        Handle successfull configuration
+        """
+        appstruct = flatten_appstruct(appstruct)
+        for key in self.keys:
+
+            value = appstruct.pop(key, None)
+            if value is None:
+                continue
+
+            cfg_obj = Config.get(key) or Config(name=key)
+            cfg_obj.value = value
+
+            self.dbsession.add(cfg_obj)
+
+            logger.debug(u" # Setting configuration")
+            logger.debug(u"{0} : {1}".format(key, value))
+
+        self.request.session.flash(self.validation_msg)
+        return HTTPFound(self.request.route_path(self.redirect_path))
 
 
 class AdminOption(BaseAdminFormView):

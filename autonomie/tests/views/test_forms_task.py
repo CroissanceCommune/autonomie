@@ -307,6 +307,10 @@ class TestTaskForms:
         form = deform.Form(schema)
         ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'),
                      (u'__formid__', u'deform'), (u'amount', u'79.4'),
+                     (u"__start__", "date:mapping"),
+                     (u'date', '2015-08-07'),
+                     (u"__end__", "date:mapping"),
+                     ('bank_id', ''),
                      (u'mode', u'par chèque'), (u'submit', u'paid')]
         form.validate(ok_values)
 

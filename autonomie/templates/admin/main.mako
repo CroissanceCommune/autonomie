@@ -35,7 +35,9 @@
                 ${format_text(message)}
             </div>
         % endif
-        ${form|n}
+        % if not form is UNDEFINED:
+            ${form|n}
+        % endif
     </div>
 </div>
 </%block>

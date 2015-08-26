@@ -218,4 +218,11 @@ class TemplatingHistory(DBBASE, PersistentACLMixin):
             "export": EXCLUDED,
         },
     )
-    template = relationship("Template")
+    template = relationship(
+        "Template",
+        backref=backref(
+            "templated",
+            cascade='all, delete-orphan',
+            info={'export': {'exclude': True}, },
+        )
+    )

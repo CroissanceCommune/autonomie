@@ -84,6 +84,7 @@ from autonomie.forms.user import (
 from autonomie.views import (
     BaseListView,
     BaseXlsView,
+    BaseCsvView,
     submit_btn,
     cancel_btn,
     BaseFormView,
@@ -838,6 +839,17 @@ class UserDatasXlsView(UserDatasListClass, BaseXlsView):
         return "gestion_social.xls"
 
 
+class UserDatasCsvView(UserDatasListClass, BaseCsvView):
+    """
+        Userdatas excel view
+    """
+    model = UserDatas
+
+    @property
+    def filename(self):
+        return "gestion_social.csv"
+
+
 def user_view(request):
     """
         Return user view only datas
@@ -1166,6 +1178,12 @@ def includeme(config):
         "userdatas.xls",
         "/userdatas.xls",
     )
+
+    config.add_route(
+        "userdatas.csv",
+        "/userdatas.csv",
+    )
+
     config.add_route(
         "templatinghistory",
         "/py3ostory/{id}",
@@ -1304,6 +1322,12 @@ def includeme(config):
     config.add_view(
         UserDatasXlsView,
         route_name="userdatas.xls",
+        permission="manage",
+    )
+
+    config.add_view(
+        UserDatasCsvView,
+        route_name="userdatas.csv",
         permission="manage",
     )
 

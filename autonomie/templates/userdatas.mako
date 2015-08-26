@@ -44,7 +44,12 @@
 args = request.GET
 url = request.route_path('userdatas.xls', _query=args)
 %>
-<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='glyphicon glyphicon-file'></i>Exporter</a>
+<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='fa fa-file-excel-o'></i>&nbsp;Excel</a>
+    <%
+args = request.GET
+url = request.route_path('userdatas.csv', _query=args)
+%>
+<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste au format csv"><i class='fa fa-file'></i>&nbsp;CSV</a>
     </li>
 </ul>
 </%block>

@@ -98,6 +98,7 @@ from autonomie.views import (
     submit_btn,
     BaseView,
     DisableView,
+    DeleteView,
 )
 from autonomie.views.admin.tools import (
     get_model_admin_view,
@@ -911,6 +912,11 @@ class TemplateDisableView(DisableView):
     redirect_route = "templates"
 
 
+class TemplateDeleteView(DeleteView):
+    delete_msg = u"Le modèle a bien été supprimé"
+    redirect_route = "templates"
+
+
 def console_view(request):
     """
     """
@@ -998,6 +1004,12 @@ def include_userdatas_views(config):
         TemplateDisableView,
         route_name='template',
         request_param='action=disable',
+    )
+
+    config.add_admin_view(
+        TemplateDeleteView,
+        route_name='template',
+        request_param='action=delete',
     )
 
     config.add_admin_view(

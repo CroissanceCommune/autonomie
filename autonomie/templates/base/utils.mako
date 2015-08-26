@@ -174,7 +174,11 @@ path = request.current_route_path(_query=get_args)
             <span>${api.clean_html(icotext)|n}</span>
         % endif
         %if icon:
-            <i class='glyphicon glyphicon-${icon}'></i>
+            % if not icon.startswith('glyph'):
+                <i class='glyphicon glyphicon-${icon}'></i>
+            % else:
+                <i class='${icon}'></i>
+            % endif
         %endif
         <span class="visible-lg-inline-block hidden-sm" style="display:inline">
             ${label}

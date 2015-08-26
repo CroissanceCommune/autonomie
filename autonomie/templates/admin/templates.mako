@@ -62,6 +62,17 @@
                 <% url = request.route_path('template', id=template.id, _query=dict(action='disable')) %>
                 <% label = template.active and u"Désactiver" or u"Activer" %>
                 ${table_btn(url, label, u"Ce modèle doit-il être visible dans Autonomie ?", icon=u"remove")}
+                % if not template.active:
+                    <% url = request.route_path('template', id=template.id, _query=dict(action='delete')) %>
+                    <% label = u"Supprimer" %>
+                    ${table_btn(
+                        url,
+                        label,
+                        u"Suppression définitive de ce modèle",
+                        icon=u"trash",
+                        onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');",
+                        css_class="btn-danger")}
+                % endif
             </td>
         </tr>
     % endfor

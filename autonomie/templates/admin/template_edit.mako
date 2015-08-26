@@ -33,6 +33,11 @@
             <dt></dt>
             <dd><a class='' href="${request.route_path('file', id=request.context.id, _query=dict(action='download'))}">Télécharger le fichier</a></dd>
         </dl>
+        <a href="${request.route_path('template', id=request.context.id, _query=dict(action='delete'))}"
+           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');"
+           >
+           <i class='glyphicon glyphicon-trash'></i>Supprimer
+       </a>
     </div>
 </div>
 <h3 class='text-center'>Éditer</h3>

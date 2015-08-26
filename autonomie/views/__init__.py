@@ -494,6 +494,30 @@ class DisableView(BaseView):
         return HTTPFound(self.redirect)
 
 
+class DeleteView(BaseView):
+    """
+    main deletion view
+
+    class MyDeleteView(DeleteView):
+        delete_msg = u"L'élément a bien été supprimé"
+        redirect_route = "templates"
+
+    """
+    delete_msg = u"L'élément a bien été supprimé"
+    redirect_route = None
+
+    @property
+    def redirect(self):
+        if self.redirect_route is None:
+            raise Exception(u"Set a redirect_route attribute for redirection")
+        return self.request.route_path(self.redirect_route)
+
+    def __call__(self):
+        self.request.dbsession.delete(self.context)
+        self.request.session.flash(self.delete_msg)
+        return HTTPFound(self.redirect)
+
+
 class DuplicateView(BaseView):
     """
     Base Duplication view

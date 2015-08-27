@@ -205,7 +205,6 @@ def get_inv_state():
     paid = ('paid', MANAGER_PERMS, record_payment,)
     gencinv = ('gencinv', None, gen_cancelinvoice, False,)
     delete = ('delete', None, None, False,)
-    mdelete = ('delete', MANAGER_PERMS, None, False,)
     resulted = ('resulted', MANAGER_PERMS,)
     financial_year = (
         'set_financial_year', MANAGER_PERMS, set_financial_year, False,
@@ -226,7 +225,7 @@ def get_inv_state():
         financial_year,
         edit_metadata,)
     result['valid'] = (
-        paid, resulted, gencinv, duplicate, mdelete,
+        paid, resulted, gencinv, duplicate,
         edit_metadata, financial_year, products,
     )
     result['paid'] = (

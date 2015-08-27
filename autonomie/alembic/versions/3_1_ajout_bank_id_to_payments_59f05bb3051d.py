@@ -1,7 +1,7 @@
 """3.1 : Ajout bank_id to payments
 
 Revision ID: 59f05bb3051d
-Revises: 2192101f133b
+Revises: 54de05a93319
 Create Date: 2015-08-19 13:09:12.384701
 
 """

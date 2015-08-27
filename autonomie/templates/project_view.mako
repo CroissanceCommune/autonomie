@@ -52,7 +52,7 @@
             ${table_btn(\
             del_url,\
             u"Supprimer", \
-            u"Supprimer le devis", \
+            u"Supprimer le document", \
             icon="glyphicon glyphicon-trash", \
             onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');",\
             css_class="btn-danger")}

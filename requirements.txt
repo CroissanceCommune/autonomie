@@ -60,6 +60,6 @@ zope.sqlalchemy==0.7.1
 celery==3.1.17
 pyramid-celery==2.0.0
 redis==2.10.3
-sqla_inspect==0.1.7
+sqla_inspect==0.1.8
 Unidecode==0.04.17
 deform_extensions==0.2

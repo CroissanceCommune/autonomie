@@ -744,7 +744,7 @@ class TaskLine(DBBASE, LineCompute):
  quantity:{s.quantity} tva:{s.tva}>".format(s=self)
 
     def __json__(self, request):
-        return dict(
+        result = dict(
             id=self.id,
             order=self.order,
             cost=self.cost,
@@ -752,9 +752,11 @@ class TaskLine(DBBASE, LineCompute):
             description=self.description,
             quantity=self.quantity,
             unity=self.unity,
-            product_id=self.product_id,
             group_id=self.group_id,
         )
+        if self.product_id is not None:
+            result['product_id'] = self.product_id
+        return result
 
 
 def _cache_amounts(mapper, connection, target):

@@ -114,11 +114,12 @@ class Invoice(Task, InvoiceCompute):
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
-    # Common with only estimations
+    # seems it's not used anymore
     deposit = deferred(
         Column(Integer, nullable=False, default=0),
         group='edit',
     )
+    # Common with only estimations
     course = deferred(
         Column(Integer, nullable=False, default=0),
         group='edit'

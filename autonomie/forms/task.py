@@ -85,7 +85,7 @@ from .custom_types import (
 )
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 DAYS = (
     ('NONE', '-'),
     ('HOUR', u'Heure(s)'),
@@ -1105,7 +1105,8 @@ def get_estimation_appstruct(dbdatas):
         appstruct.setdefault('payments', {})['payment_lines'] = \
             dbdatas['payment_lines']
     appstruct = get_lines_block_appstruct(appstruct, dbdatas)
-    appstruct = set_payment_times(appstruct, dbdatas)
+    appstruct = add_payment_block_appstruct(appstruct, dbdatas)
+    appstruct = add_notes_block_appstruct(appstruct, dbdatas)
     return appstruct
 
 
@@ -1114,6 +1115,11 @@ def get_estimation_dbdatas(appstruct):
         return dict with db compatible datas
     """
     dbdatas = appstruct_to_dbdatas(appstruct)
+
+    # Estimation specific keys
+    for key in ('paymentDisplay', 'deposit', ):
+        dbdatas['task'][key] = appstruct['payments'][key]
+    dbdatas.update(appstruct['notes'])
 
     add_order_to_lines(appstruct)
     dbdatas['lines'] = appstruct['lines']['lines']
@@ -1183,9 +1189,9 @@ def set_manualDeliverables(appstruct, dbdatas):
     return dbdatas
 
 
-def set_payment_times(appstruct, dbdatas):
+def add_payment_block_appstruct(appstruct, dbdatas):
     """
-        Hack the appstruct to set the payment_times value
+        Hack the appstruct to set the payment informations values
     """
     if dbdatas.get('manualDeliverables') == 1:
         # dans l'interface payment_times == -1 correspond à Configuration
@@ -1195,4 +1201,17 @@ def set_payment_times(appstruct, dbdatas):
         appstruct.setdefault(
             'payments', {}
         )['payment_times'] = max(1, len(dbdatas.get('payment_lines')))
+
+    appstruct['payments']['paymentDisplay'] = dbdatas['paymentDisplay']
+    appstruct['payments']['deposit'] = dbdatas['deposit']
+    return appstruct
+
+
+def add_notes_block_appstruct(appstruct, dbdatas):
+    """
+    Fill the notes block
+    """
+    appstruct.setdefault(
+        'notes', {
+        })['exclusions'] = dbdatas.get('exclusions', '')
     return appstruct

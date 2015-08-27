@@ -50,7 +50,7 @@ if request.config.has_key('coop_pdffootercourse'):
 course_footer_height *= 0.8
 common_footer_height *= 0.8
 %>
-<% start_with_course = tasks[0].course == 1 %>
+<% start_with_course = getattr(tasks[0], 'course', 0) == 1 %>
 
         <style>
             @page {
@@ -124,18 +124,15 @@ common_footer_height *= 0.8
 
             ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task, bulk=bulk)}
             % if not loop.last:
-                % if tasks[loop.index +1].course and not start_with_course:
+                % if getattr(tasks[loop.index +1], 'course', 0) and not start_with_course:
                     <pdf:nexttemplate name="alternate"/>
                     <pdf:nextpage />
-                    <h1>ALTERNATE TEMPLATE</h1>
-                % elif not tasks[loop.index +1].course and start_with_course:
+                % elif not getattr(tasks[loop.index +1], 'course', 0) and start_with_course:
                     <pdf:nexttemplate name="alternate"/>
                     <pdf:nextpage />
-                    <h1>ALTERNATE TEMPLATE</h1>
                 %else:
                     <pdf:nexttemplate loop.index=0 />
                     <pdf:nextpage />
-                    <h1>COMMON TEMPLATE</h1>
                 % endif
             % endif
         % endfor

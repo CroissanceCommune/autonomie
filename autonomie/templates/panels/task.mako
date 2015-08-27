@@ -225,7 +225,7 @@
         class='row pdf_footer'
         id='commonfooter'
         ## In view_only only mode we switch footers by css, in pdf mode, we use frames (see templates/tasks/task.mako)
-        % if not bulk and task.course == 1:
+        % if not bulk and getattr(task, 'course', 0) == 1:
             style="display:none"
         % endif
         >
@@ -241,7 +241,7 @@
     class='row pdf_footer'
     id='coursefooter'
     ## In view_only only mode we switch footers by css, in pdf mode, we use frames (see templates/tasks/task.mako)
-    % if not bulk and task.course != 1:
+    % if not bulk and getattr('task', 'course', 0) != 1:
             style="display:none"
         % endif
     >

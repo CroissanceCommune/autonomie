@@ -52,6 +52,7 @@ from autonomie.views import (
     submit_btn,
     BaseListView,
 )
+from autonomie.views.render_api import format_account
 from autonomie.forms.company import (
     COMPANYSCHEMA,
     CompanySchema,
@@ -154,7 +155,7 @@ ENABLE_ERR_MSG = u"Erreur à l'activation de l'entreprise {0}."
 DISABLE_ERR_MSG = u"Erreur à la désactivation de l'entreprise {0}."
 
 
-def company_toggle_active(request, company, msg, err_msg, action):
+def company_toggle_active(request, company, action):
     """
     Toggle compay enabled/disabled
     """
@@ -162,14 +163,22 @@ def company_toggle_active(request, company, msg, err_msg, action):
         company = request.context
 
     try:
-        getattr(company, action)()
-        request.dbsession.merge(company)
-        message = msg.format(company.name)
-        log.info(message)
-        request.session.flash(message)
-        request.session.flash(message)
+        if action == 'disable' and company.enabled():
+            company.disable()
+            message = DISABLE_MSG.format(company.name)
+            log.info(message)
+            request.session.flash(message)
+        elif action == 'enable' and not company.enabled():
+            company.enable()
+            request.dbsession.merge(company)
+            message = ENABLE_MSG.format(company.name)
+            log.info(message)
+            request.session.flash(message)
     except:
-        err_message = err_msg.format(company.name)
+        if action == "disable":
+            err_message = DISABLE_ERR_MSG.format(company.name)
+        else:
+            err_message = ENABLE_ERR_MSG.format(company.name)
         log.exception(err_message)
         request.session.flash(err_message, "error")
 
@@ -186,20 +195,16 @@ def company_disable(request, company=None):
     """
     Disable a company
     """
-    msg = DISABLE_MSG
-    err_msg = DISABLE_ERR_MSG
     action = "disable"
-    return company_toggle_active(request, company, msg, err_msg, action)
+    return company_toggle_active(request, company, action)
 
 
 def company_enable(request, company=None):
     """
     Ensable a company
     """
-    msg = ENABLE_MSG
-    err_msg = ENABLE_ERR_MSG
     action = "enable"
-    return company_toggle_active(request, company, msg, err_msg, action)
+    return company_toggle_active(request, company, action)
 
 
 class CompanyList(BaseListView):
@@ -401,6 +406,31 @@ def make_panel_wrapper_view(panel_name):
     return myview
 
 
+def company_remove_employee_view(context, request):
+    """
+    Enlève un employé de l'entreprise courante
+    """
+    uid = request.params.get('uid')
+    if not uid:
+        request.session.flash('Missing uid parameter', 'error')
+    user = User.get(uid)
+    if not user:
+        request.session.flash('User not found', 'error')
+
+    if user in context.employees:
+        context.employees = [
+            employee for employee in context.employees if employee != user
+        ]
+        request.session.flash(
+            u"L'utilisateur {0} ne fait plus partie de l'entreprise {1}".format(
+                format_account(user), context.name)
+        )
+    url = request.referer
+    if url is None:
+        url = request.route_path('company', id=context.id)
+    return HTTPFound(url)
+
+
 def includeme(config):
     """
         Add all company related views
@@ -458,6 +488,12 @@ def includeme(config):
         route_name='company',
         request_param='action=disable',
         permission="edit",
+    )
+    config.add_view(
+        company_remove_employee_view,
+        route_name="company",
+        request_param='action=remove',
+        permission="manage",
     )
     # same panel as html view
     for panel, request_param in (

@@ -174,7 +174,7 @@ path = request.current_route_path(_query=get_args)
             <span>${api.clean_html(icotext)|n}</span>
         % endif
         %if icon:
-            % if not icon.startswith('glyph'):
+            % if not icon.startswith('glyph') and not icon.startswith('fa'):
                 <i class='glyphicon glyphicon-${icon}'></i>
             % else:
                 <i class='${icon}'></i>

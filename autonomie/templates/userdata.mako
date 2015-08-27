@@ -41,30 +41,6 @@
         </div>
     % endif
     <div class="col-xs-4">
-        % if user is not None:
-            <% url = request.route_path("user", id=userdata.user_id) %>
-            ${table_btn(url,
-            u"Voir",
-            u"Voir le compte associé à cette entrée de gestion sociale",
-            icon="search",
-            )}
-
-            % if user.enabled():
-                <% disable_url = request.route_path('user', \
-                    id=userdata.user_id, \
-                    _query=dict(action='disable')) %>
-                <% disable_msg = u'Êtes vous sûr de vouloir désactiver le compte de cet utilisateur ?' %>
-
-                ${table_btn(disable_url, \
-                u"Désactiver le compte", \
-                u"Désactiver le compte associé à cette entrée de gestion sociale", \
-                onclick="return confirm('%s');" % disable_msg, \
-                icon="book",
-                css_class="btn-warning", \
-                )}
-            % endif
-        % endif
-
         % if user is not None and not user.enabled() or user is None:
             <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
             <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?' %>
@@ -72,7 +48,7 @@
                 <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
             % endif
             ${table_btn(del_url,
-            u"Supprimer les données",
+            u"Supprimer les données de gestion sociale",
             u"Supprimer ces données de gestion sociale",
             onclick="return confirm('%s');" % del_msg,
             icon="trash",
@@ -156,15 +132,28 @@
     % if doctypes_form is not UNDEFINED:
     <div class='tab-pane row' id='tab2'>
         <div class='col-md-3 text-right'>
+            <h4>Documents sociaux fournis</h4>
+            <div class='alert alert-info'>
+                <i class='fa fa-question-circle fa-2x'></i>
+                Cochez les documents sociaux fournis par l'entrepreneur
+            </div>
             ${doctypes_form.render()|n}
         </div>
         <div class='col-md-9'>
-            <h3>Liste des documents déposés dans Autonomie</h3>
-            <a class='btn btn-success'
+            <h4>Liste des documents disponibles</h4>
+            <div class='alert alert-info'>
+                <i class='fa fa-question-circle fa-2x'></i>
+                Cette liste présente l'ensemble des documents déposés dans Autonomie ainsi que l'ensemble des documents générés depuis l'onglet Génération de documents.<br />
+                Ces documents sont visibles par l'entrepreneur.
+                <br />
+                <br />
+                <a class='btn btn-success'
                 href="${request.route_path('userdata', id=userdata.id, _query=dict(action='attach_file'))}"
-                title="Déposer un document scanné dans autonomie">
+                title="Déposer un document dans autonomie">
+                <i class="glyphicon glyphicon-plus"></i>
                 Déposer un document
             </a>
+            </div>
             ## ${format_filelist(userdata, delete=True)}
             ${format_filetable(userdata.children)}
         </div>
@@ -172,13 +161,52 @@
     % endif
     % if account_form is not UNDEFINED and account_form is not None:
         <div class='tab-pane row' id='tab3'>
+            <div class=''>
+                <%doc>
+            <% url = request.route_path("user", id=userdata.user_id) %>
+            ${table_btn(url,
+            u"Voir",
+            u"Voir le compte associé à cette entrée de gestion sociale",
+            icon="search",
+            )}
+        </%doc>
+
+            % if user.enabled():
+                <% disable_url = request.route_path('user', \
+                    id=userdata.user_id, \
+                    _query=dict(action='disable')) %>
+                <% disable_msg = u'Êtes vous sûr de vouloir désactiver le compte de cet utilisateur ?' %>
+
+                ${table_btn(disable_url, \
+                u"Désactiver le compte", \
+                u"Désactiver le compte associé à cette entrée de gestion sociale", \
+                onclick="return confirm('%s');" % disable_msg, \
+                icon="book",
+                css_class="btn-warning", \
+                )}
+            % else:
+                <% enable_url = request.route_path('user', \
+                id=userdata.user_id, \
+                _query=dict(action='enable')) %>
+
+                ${table_btn(enable_url, \
+                u"Ré-activer le compte de cet entrepreneur",
+                u"Ré-activer ce compte utilisateur",
+                icon="book",
+                css_class="btn-success", \
+                )}
+            % endif
+        </div>
+            <br />
+            <hr>
+            <br />
             ${account_form.render()|n}
         </div>
     % endif
     % if doctemplates is not UNDEFINED:
     <div class='tab-pane row' id='tab4'>
         <div class='row'>
-            <div class='col-md-6'>
+            <div class='col-md-10'>
             <ul class="nav nav-pills nav-stacked">
         % for doctemplate in doctemplates:
             <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
@@ -190,19 +218,22 @@
                 </li>
         % endfor
             </ul>
-        % if doctemplates == []:
-            <div class='well'>
-            <i class='fa fa-question-circle fa-2x'></i>
-            Vous devez déposer des modèles de document dans Autonomie pour pouvoir accéder à cet outil.
-                <br />
-            % if request.user.is_admin():
-                <a href="${request.route_path('templates')}">Déposer de nouveau modèle de document</a>
-            % else:
-                Veuillez vous addresser à un administrateur.
+            <div class='alert alert-info'>
+            % if doctemplates == []:
+                <i class='fa fa-question-circle fa-2x'></i>
+                Vous devez déposer des modèles de document dans Autonomie pour pouvoir accéder à cet outil.
+                    <br />
             % endif
-        </div>
-        % endif
+            % if request.user.is_admin():
+                <a class='btn btn-success'
+                    href="${request.route_path('templates')}">
+                <i class="glyphicon glyphicon-plus"></i>
+                    Déposer de nouveau modèle de document
+                </a>
+            % endif
             </div>
+            </div>
+            <%doc>
             <div class='col-md-6'>
                 <h3>Historique des documents générés depuis Autonomie</h3>
                 <span class='help-block'>
@@ -241,21 +272,12 @@
                     </tbody>
                 </table>
             </div>
+            </%doc>
         </div>
     </div>
     % endif
     % if user is not None:
         <div class='tab-pane row' id='tab5'>
-            <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}"
-                class='btn btn-info'>
-                <i class="glyphicon glyphicon-plus"></i>
-                Associer à une nouvelle entreprise
-            </a>
-            <a href="${request.route_path('userdata', id=userdata.id, _query=dict(action='associate'))}"
-                class='btn btn-info'>
-                <i class="glyphicon glyphicon-link"></i>
-                Associer à une entreprise existante
-            </a>
             <table class="table table-striped table-condensed table-hover">
                 <thead>
                     <th>Nom</th>
@@ -285,10 +307,10 @@
                             </td>
                             <td onclick="${onclick}" class="rowlink">
                                 <ul>
-                                    % for user in company.employees:
+                                    % for employee in company.employees:
                                         <li>
-                                            <a href="${request.route_path('user', id=user.id)}">
-                                                ${api.format_account(user)}
+                                        <a href="${request.route_path('user', id=employee.id)}">
+                                            ${api.format_account(employee)}
                                             </a>
                                         </li>
                                     % endfor
@@ -298,12 +320,28 @@
                                 ${table_btn(url, u"Voir", u"Modifier l'entreprise", icon='glyphicon glyphicon-search')}
                                 <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
                                 ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
+
+                                % if len(company.employees) > 1:
+                                    <% url = request.route_path('company', id=company.id, _query=dict(action="remove", uid=user.id)) %>
+                                    <% msg = u"{0} n\\'aura plus accès aux données de l\\'entreprise {1}. Êtes-vous sûr de vouloir continuer ?".format(api.format_account(user), company.name) %>
+
+                                    ${table_btn(url, \
+                                    u"Enlever",
+                                    u"Enlever cet utilisateur de cette entreprise",
+                                    onclick="return confirm('%s');" % msg,
+                                    icon="link",
+                                    css_class="btn-warning")}
+
+                                % endif
+
                                 % if company.enabled():
                                     <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
+                                    <% msg = u"Cette entreprise n\\'apparaîtra plus dans les listings de factures. Êtes-vous sûr de vouloir continuer ?" %>
                                     ${table_btn(url, \
                                     u"Désactiver", \
                                     u"désactiver l'entreprise", \
                                     icon='glyphicon glyphicon-book', \
+                                    onclick="return confirm('%s');" % msg,
                                     css_class="btn-danger")}
                                 % else:
                                     <% url = request.route_path('company', id=company.id, _query=dict(action="enable")) %>
@@ -318,6 +356,16 @@
                     % endfor
                 </tbody>
             </table>
+            <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}"
+                class='btn btn-info'>
+                <i class="glyphicon glyphicon-plus"></i>
+                Associer à une nouvelle entreprise
+            </a>
+            <a href="${request.route_path('userdata', id=userdata.id, _query=dict(action='associate'))}"
+                class='btn btn-info'>
+                <i class="glyphicon glyphicon-link"></i>
+                Associer à une entreprise existante
+            </a>
         </div>
     % endif
 </div>

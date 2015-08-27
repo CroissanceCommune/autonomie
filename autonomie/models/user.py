@@ -793,7 +793,7 @@ class UserDatas(Node):
     situation_follower_id = Column(
         ForeignKey('accounts.id'),
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 'title': u'Accompagnateur',
                 'section': u'Synthèse',
                 'widget': get_deferred_user_choice(
@@ -1605,24 +1605,27 @@ class UserDatas(Node):
         Generate a user account for the given model
         """
         from autonomie.utils.ascii import gen_random_string
-        if self.situation_situation.is_integration and self.user_id is None:
-            login = self.coordonnees_email1
-            index = 0
-            # Fix #165: check login on account generation
-            while User.query().filter(User.login == login).count() > 0:
-                login = u"{0}_{1}".format(index, login)
-                index += 1
+        if self.situation_situation.is_integration:
+            if self.user_id is None:
+                login = self.coordonnees_email1
+                index = 0
+                # Fix #165: check login on account generation
+                while User.query().filter(User.login == login).count() > 0:
+                    login = u"{0}_{1}".format(index, login)
+                    index += 1
 
-            password = gen_random_string(6)
-            user = User(
-                login=login,
-                firstname=self.coordonnees_firstname,
-                lastname=self.coordonnees_lastname,
-                email=self.coordonnees_email1,
-            )
-            user.set_password(password)
-            self.user = user
-            return user, login, password
+                password = gen_random_string(6)
+                user = User(
+                    login=login,
+                    firstname=self.coordonnees_firstname,
+                    lastname=self.coordonnees_lastname,
+                    email=self.coordonnees_email1,
+                )
+                user.set_password(password)
+                self.user = user
+                return user, login, password
+            else:
+                return self.user, self.user.login, None
         return None, None, None
 
     def gen_companies(self):
@@ -1631,23 +1634,26 @@ class UserDatas(Node):
         """
         from autonomie.models.company import Company
         companies = []
-        if self.situation_situation.is_integration and self.user_id is None:
-            for data in self.activity_companydatas:
-                # Try to retrieve an existing company (and avoid duplicates)
-                company = Company.query().filter(
-                    Company.name == data.name
-                ).first()
-                if company is None:
-                    company = Company(
-                        name=data.name,
-                        goal=data.title,
-                        email=self.coordonnees_email1,
-                        phone=self.coordonnees_tel,
-                        mobile=self.coordonnees_mobile,
-                    )
-                    if data.activity is not None:
-                        company.activities.append(data.activity)
-                companies.append(company)
+        if self.situation_situation.is_integration:
+            if self.user_id is None:
+                for data in self.activity_companydatas:
+                    # Try to retrieve an existing company (and avoid duplicates)
+                    company = Company.query().filter(
+                        Company.name == data.name
+                    ).first()
+                    if company is None:
+                        company = Company(
+                            name=data.name,
+                            goal=data.title,
+                            email=self.coordonnees_email1,
+                            phone=self.coordonnees_tel,
+                            mobile=self.coordonnees_mobile,
+                        )
+                        if data.activity is not None:
+                            company.activities.append(data.activity)
+                    companies.append(company)
+            else:
+                pass
         return companies
 
 
@@ -1925,22 +1931,7 @@ def sync_userdatas_to_user(key):
             setattr(target.user, key, value)
     return handler
 
+
 listen(User.firstname, 'set', sync_user_to_userdatas('coordonnees_firstname'))
 listen(User.lastname, 'set', sync_user_to_userdatas('coordonnees_lastname'))
 listen(User.email, 'set', sync_user_to_userdatas('coordonnees_email1'))
-
-#listen(
-#    UserDatas.coordonnees_firstname,
-#    'set',
-#    sync_userdatas_to_user('firstname')
-#)
-#listen(
-#    UserDatas.coordonnees_lastname,
-#    'set',
-#    sync_userdatas_to_user('lastname')
-#)
-#listen(
-#    UserDatas.coordonnees_email1,
-#    'set',
-#    sync_userdatas_to_user('email')
-#)

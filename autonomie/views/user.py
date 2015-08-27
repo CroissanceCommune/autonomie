@@ -31,7 +31,6 @@ import logging
 import colander
 import peppercorn
 import deform
-from traceback import print_exc
 
 from colanderalchemy import SQLAlchemySchemaNode
 from js.deform import auto_need
@@ -56,7 +55,6 @@ from autonomie.models.user import (
 )
 from autonomie.models.files import (
     File,
-    TemplatingHistory,
 )
 from autonomie.models.company import (
     Company,
@@ -157,8 +155,8 @@ class PermanentUserAddView(BaseFormView):
             Return a company object, create a new one if needed
         """
         query = Company.query()
-        company = query.filter(Company.name==name).first()
-        #avoid creating duplicate companies
+        company = query.filter(Company.name == name).first()
+        # avoid creating duplicate companies
         if company is None:
             company = self._add_company(name, user)
         return company
@@ -318,11 +316,13 @@ class UserList(BaseListView):
         search = appstruct['search']
         if search:
             query = query.filter(
-            or_(User.lastname.like("%" + search + "%"),
-                User.firstname.like("%" + search + "%"),
-                User.companies.any(Company.name.like("%" + search + "%")),
-                User.companies.any(Company.goal.like("%" + search + "%"))
-                ))
+                or_(
+                    User.lastname.like("%" + search + "%"),
+                    User.firstname.like("%" + search + "%"),
+                    User.companies.any(Company.name.like("%" + search + "%")),
+                    User.companies.any(Company.goal.like("%" + search + "%"))
+                )
+            )
 
         return query
 
@@ -405,7 +405,7 @@ class UserAccountView(BaseFormView):
             Called on submission success -> changing password
         """
         log.info(u"# User {0} has changed his password #".format(
-                        self.request.user.login))
+            self.request.user.login))
         new_pass = appstruct['pwd']
         self.request.user.set_password(new_pass)
         self.dbsession.merge(self.request.user)
@@ -434,7 +434,7 @@ class UserAccountEditView(BaseFormView):
 
 class UserDatasAdd(BaseFormView):
     title = u"Gestion sociale"
-    schema = get_userdatas_schema() #SQLAlchemySchemaNode(UserDatas)
+    schema = get_userdatas_schema()
     validation_msg = u"Les informations sociales ont bien été enregistrées"
     form_options = (('formid', "userdatas_edit"),)
     buttons = (submit_btn, cancel_btn,)
@@ -458,8 +458,8 @@ class UserDatasAdd(BaseFormView):
             if lastname and confirmation == '0':
                 query = UserDatas.query().filter(
                     or_(
-                        UserDatas.coordonnees_lastname==lastname,
-                        UserDatas.coordonnees_email1==email,
+                        UserDatas.coordonnees_lastname == lastname,
+                        UserDatas.coordonnees_email1 == email,
                     )
                 )
                 query_count = query.count()
@@ -480,7 +480,7 @@ déjà été créées : <ul>".format(query_count)
                     msg += u"</ul>"
                     form = self._get_form()
                     form.action = self.request.current_route_path(
-                        _query={'action': 'new', 'confirmation':'1'}
+                        _query={'action': 'new', 'confirmation': '1'}
                     )
                     form.set_appstruct(appstruct)
                     datas = dict(
@@ -491,34 +491,52 @@ déjà été créées : <ul>".format(query_count)
                     datas.update(self._more_template_vars())
                     return datas
 
-
             model = self.schema.objectify(appstruct)
 
         model = self.dbsession.merge(model)
         self.dbsession.flush()
 
-        user, login, password = model.gen_user_account()
-
-        companies = model.gen_companies()
-        if companies:
-            msg = u"Les activités associées ont été ajoutées"
-            self.request.session.flash(msg)
-            user.companies = companies
-
-        model = self.dbsession.merge(model)
-        self.dbsession.flush()
-
-        if user is not None:
-            url = self.request.route_path('user', id=user.id)
-
-            msg = u"Un compte a été créé : \
-login : {0}, \
-mot de passe : {1}".format(login, password, url)
-
-            self.request.session.flash(msg)
+        self.post_integration(model)
 
         self.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path('userdata', id=model.id))
+
+    def post_integration(self, model):
+        """
+        Handle actions after a user is integrated
+        """
+        user, login, password = model.gen_user_account()
+        if user is None:
+            return False
+
+        # A new user has been added
+        if password is not None:
+            companies = model.gen_companies()
+            if companies:
+                msg = u"Les activités associées ont été ajoutées"
+                self.request.session.flash(msg)
+                user.companies = companies
+
+            url = self.request.route_path('user', id=user.id)
+
+            msg = u"Un compte a été créé : \
+    login : {0}, \
+    mot de passe : {1}".format(login, password, url)
+
+            self.request.session.flash(msg)
+        else:
+            user.enable()
+            msg = u"Le compte : login : {0} a été réactivé avec le même \
+mot de passe".format(user.login)
+            self.request.session.flash(msg)
+            for company in user.companies:
+                company.enable()
+                msg = u"L'entreprise {0} a été réactivée".format(company.name)
+                self.request.session.flash(msg)
+
+        model = self.dbsession.merge(model)
+        self.dbsession.flush()
+        return True
 
     def cancel_success(self, appstruct):
         return HTTPFound(self.request.route_path('userdatas'))
@@ -583,7 +601,7 @@ class UserDatasEdit(UserDatasAdd):
             )
             form = deform.Form(
                 schema,
-                buttons = (submit_btn,),
+                buttons=(submit_btn,),
                 action=action,
                 counter=self.counter,
             )
@@ -622,7 +640,7 @@ class UserDatasEdit(UserDatasAdd):
     @property
     def doctemplates(self):
         templates = files.Template.query()
-        templates = templates.filter(files.Template.active==True)
+        templates = templates.filter(files.Template.active == True)
         return templates.all()
 
 
@@ -646,7 +664,7 @@ class CompanyAssociationView(BaseFormView):
 
     def submit_success(self, appstruct):
         for name in appstruct.get('companies', []):
-            company = Company.query().filter(Company.name==name).first()
+            company = Company.query().filter(Company.name == name).first()
             if company is not None:
                 self.context.user.companies.append(company)
                 self.request.dbsession.merge(self.context.user)
@@ -657,7 +675,6 @@ class CompanyAssociationView(BaseFormView):
             _anchor="tab5"
         )
         return HTTPFound(url)
-
 
 
 def record_compilation(context, request, template):
@@ -714,6 +731,7 @@ def delete_templating_history_view(context, request):
         )
     )
 
+
 def py3o_view(context, request):
     """
     py3o view :
@@ -742,12 +760,13 @@ def py3o_view(context, request):
                 record_compilation(context, request, template)
                 store_compiled_file(context, request, output, template.name)
                 return request.response
-            except Exception, err:
-                print_exc()
+            except Exception:
                 log.exception(
-u"Une erreur est survenue à la compilation du template %s avec un contexte \
-de type %s et d'id %s" % (template.id, context.__class__, context.id)
-                             )
+                    u"Une erreur est survenue à la compilation du template \
+%s avec un contexte de type %s et d'id %s" % (
+                                    template.id, context.__class__, context.id
+                                        )
+                )
                 request.session.flash(
                     u"Erreur à la compilation du modèle, merci de contacter \
 votre administrateur",
@@ -780,7 +799,7 @@ def userdata_doctype_view(userdata_model, request):
         appstruct = peppercorn.parse(appstruct)
         try:
             appstruct = schema.deserialize(appstruct)
-        except colander.Invalid, exc:
+        except colander.Invalid:
             log.exception(
                 "Error while validating doctype registration"
             )
@@ -906,6 +925,9 @@ def user_delete(account, request):
         for company in account.companies:
             if len(company.employees) == 1:
                 company.disable()
+                message = u"L'entreprise {0} a été désactivée".format(
+                    company.name
+                )
                 request.dbsession.merge(company)
 
         log.debug(u"Deleting account : {0}".format(format_account(account)))
@@ -976,7 +998,11 @@ def user_enable(request):
             err_msg = u"Erreur à l'activation du compte de '{0}'".\
                     format(format_account(account))
             request.session.flash(err_msg, 'error')
-    return HTTPFound(request.route_path("users"))
+
+    url = request.referer
+    if url is None:
+        url = request.route_path("users")
+    return HTTPFound(url)
 
 
 class UserDisable(BaseFormView):
@@ -1099,7 +1125,7 @@ def get_edit_btn(user):
     """
         Return a link for user edition
     """
-    if user.is_contractor():
+    if getattr(user, 'userdatas') is not None:
         return ViewLink(
             u"Modifier",
             "manage",
@@ -1172,7 +1198,7 @@ def mydocuments_view(context, request):
     if request.user.userdatas is not None:
         query = File.query()
         documents = query.filter(
-            File.parent_id==request.user.userdatas.id
+            File.parent_id == request.user.userdatas.id
         ).all()
     else:
         documents = []

@@ -443,7 +443,7 @@ class PaymentLine(DBBASE):
             index=self.order,
             description=self.description,
             cost=self.amount,
-            date=self.paymentDate,
+            paymentDate=self.paymentDate,
         )
 
 

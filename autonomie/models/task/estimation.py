@@ -382,7 +382,7 @@ class Estimation(Task, EstimationCompute):
                 manual_deliverables=self.manualDeliverables,
                 manualDeliverables=self.manualDeliverables,
                 course=self.course,
-                payment_display=self.paymentDisplay,
+                paymentDisplay=self.paymentDisplay,
                 payment_lines=[
                     line.__json__(request)
                     for line in self.payment_lines

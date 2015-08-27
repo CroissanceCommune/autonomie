@@ -1,4 +1,4 @@
-"""2.9 : Migrate task lines
+"""3.0 : Migrate task lines
 
 Revision ID: 2192101f133b
 Revises: 465776bbb019

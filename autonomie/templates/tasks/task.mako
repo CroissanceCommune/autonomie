@@ -79,13 +79,15 @@ common_footer_height *= 0.8
                     margin-right: 1cm;
                     border: 0pt solid white;
                 }
-                @frame paging{
-                    -pdf-frame-content: page-number;
-                    bottom: 0cm;
-                    height: 0.5cm;
-                    font-size: 0.3cm;
-                    left: 19cm;
-                }
+                % if task.has_been_validated() or task.is_cancelled():
+                    @frame paging{
+                        -pdf-frame-content: page-number;
+                        bottom: 0cm;
+                        height: 0.5cm;
+                        font-size: 0.3cm;
+                        left: 19cm;
+                    }
+                % endif
             }
             @page alternate {
                 % if not task.has_been_validated() and not task.is_cancelled():
@@ -113,13 +115,15 @@ common_footer_height *= 0.8
                     margin-right: 1cm;
                     border: 0pt solid white;
                 }
-                @frame paging{
-                    -pdf-frame-content: page-number;
-                    position: relative;
-                    height: 0.5cm;
-                    top: 1cm;
-                    left: 19cm;
-                }
+                % if task.has_been_validated() or task.is_cancelled():
+                    @frame paging{
+                        -pdf-frame-content: page-number;
+                        bottom: 0cm;
+                        height: 0.5cm;
+                        font-size: 0.3cm;
+                        left: 19cm;
+                    }
+                % endif
             }
         </style>
     </head>

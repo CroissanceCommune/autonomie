@@ -54,14 +54,16 @@ common_footer_height *= 0.8
 
         <style>
             @page {
-                size: a4 portrait;
                 % if not task.has_been_validated() and not task.is_cancelled():
                     background-image: url("${request.static_url('autonomie:static/{0}'.format(watermark), _app_url='')}");
                 % endif
                 @frame content_frame {
                     margin: 1cm;
-                    margin-top: 1.5cm;
-                    margin-bottom: 3.3cm;
+                    % if start_with_course:
+                        margin-bottom: ${course_footer_height + 0.5}cm;
+                    % else:
+                        margin-bottom: ${common_footer_height + 0.5}cm;
+                    % endif
                     border: 0pt solid white;
                 }
                 @frame footer {
@@ -83,17 +85,19 @@ common_footer_height *= 0.8
                     height: 0.5cm;
                     font-size: 0.3cm;
                     left: 19cm;
-
                 }
             }
             @page alternate {
-                size: a4 portrait;
                 % if not task.has_been_validated() and not task.is_cancelled():
                     background-image: url("${request.static_url('autonomie:static/{0}'.format(watermark), _app_url='')}");
                 % endif
                 @frame content_frame {
                     margin: 1cm;
-                    margin-bottom: 3.8cm;
+                    % if start_with_course:
+                        margin-bottom: ${common_footer_height + 0.5}cm;
+                    % else:
+                        margin-bottom: ${course_footer_height + 0.5}cm;
+                    % endif
                     border: 0pt solid white;
                 }
                 @frame footer {

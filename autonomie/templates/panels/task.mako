@@ -256,9 +256,11 @@
         ${format_text(config.get('coop_pdffootertext'))}
     % endif
 </div>
+% if task.has_been_validated() or task.is_cancelled():
 <div id='page-number'>
     Page <pdf:pagenumber/>/<pdf:pagecount/>
 </div>
+% endif
 % if bulk is UNDEFINED or not bulk:
     % if config.has_key('coop_cgv') or company.cgv:
     <pdf:nextpage />

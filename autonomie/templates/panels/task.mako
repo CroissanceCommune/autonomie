@@ -260,16 +260,18 @@
     Page <pdf:pagenumber/>/<pdf:pagecount/>
 </div>
 % if bulk is UNDEFINED or not bulk:
-<pdf:nextpage />
-    % if config.has_key('coop_cgv'):
-        <div id="cgv">
-            ${format_text(config['coop_cgv'], False)}
-        </div>
-    % endif
-    % if company.cgv:
-        <pdf:nextpage />
-        <div>
-            ${format_text(company.cgv, False)}
-        </div>
+    % if config.has_key('coop_cgv') or company.cgv:
+    <pdf:nextpage />
+        % if config.has_key('coop_cgv'):
+            <div id="cgv">
+                ${format_text(config['coop_cgv'], False)}
+            </div>
+        % endif
+        % if company.cgv:
+            <pdf:nextpage />
+            <div>
+                ${format_text(company.cgv, False)}
+            </div>
+        % endif
     % endif
 % endif

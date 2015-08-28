@@ -241,9 +241,9 @@
     class='row pdf_footer'
     id='coursefooter'
     ## In view_only only mode we switch footers by css, in pdf mode, we use frames (see templates/tasks/task.mako)
-    % if not bulk and getattr('task', 'course', 0) != 1:
-            style="display:none"
-        % endif
+    % if not bulk and getattr(task, 'course', 0) != 1:
+        style="display:none"
+    % endif
     >
     ## The footer specific to courses (contains the additionnal text infos)
     % if config.has_key('coop_pdffootertitle'):

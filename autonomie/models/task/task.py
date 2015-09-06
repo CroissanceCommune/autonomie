@@ -382,6 +382,7 @@ class Task(Node):
             discounts=[
                 discount.__json__(request) for discount in self.discounts
             ],
+            statusComment=self.statusComment,
         )
 
     def set_status(self, status, request, user_id, **kw):

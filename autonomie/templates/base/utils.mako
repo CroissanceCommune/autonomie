@@ -273,6 +273,16 @@ path = request.current_route_path(_query=get_args)
                       u"Télécharger",
                       u"Télécharger ce document",
                       icon="download-alt")}
+                      % if api.has_permission('delete', child):
+                          <% message = u"Ce fichier sera supprimer de la base de gestion sociale. Êtes-vous sûr de vouloir continuer ?" %>
+                          ${table_btn(request.route_path('file', id=child.id, _query=dict(action='delete')),
+                                u"Supprimer",
+                                u"Supprimer ce document",
+                                onclick=u"return confirm('%s')" % message,
+                                icon="trash",
+                                css_class='btn-danger')}
+                      % endif
+
                   </td>
               </tr>
             % endfor

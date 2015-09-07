@@ -698,18 +698,19 @@ def get_filename(template_name):
     return u"{0}_{1}.odt".format(name, now.strftime('%d-%m-%Y-%Hh-%M'))
 
 
-def store_compiled_file(context, request, output, template_name):
+def store_compiled_file(context, request, output, template):
     """
     Stores the compiled datas in the user's environment
 
     :param context: The context of the
     """
     log.debug(u"Storing the compiled file")
-    name = get_filename(template_name)
+    name = get_filename(template.name)
     output.seek(0)
     datas = output.getvalue()
     file_obj = File(
         name=name,
+        description=template.description,
         data=datas,
         mimetype="application/vnd.oasis.opendocument.text",
         size=len(datas),
@@ -758,7 +759,7 @@ def py3o_view(context, request):
                     output,
                 )
                 record_compilation(context, request, template)
-                store_compiled_file(context, request, output, template.name)
+                store_compiled_file(context, request, output, template)
                 return request.response
             except Exception:
                 log.exception(

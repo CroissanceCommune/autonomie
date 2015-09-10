@@ -28,7 +28,9 @@ function find_closest_link_in_parents(tag){
 $(function(){
   var input = get_integre_input();
   input.attr('disabled', true);
-  // We look for the closest a link : the mapping delete button
-  var remove_tag =  find_closest_link_in_parents(input.parent().parent());
-  remove_tag.remove();
+  if (input.length > 0){
+    // We look for the closest a link : the mapping delete button
+    var remove_tag =  find_closest_link_in_parents(input.parent().parent());
+    remove_tag.remove();
+  }
 });

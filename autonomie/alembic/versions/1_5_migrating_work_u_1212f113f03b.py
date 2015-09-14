@@ -13,11 +13,6 @@ down_revision = '1f07ae132ac8'
 from alembic import op
 import sqlalchemy as sa
 
-from autonomie.models import DBSESSION
-from autonomie.models.task import WorkUnit
-from autonomie.models.task.estimation import EstimationLine
-from autonomie.models.task.invoice import InvoiceLine
-from autonomie.models.task.invoice import CancelInvoiceLine
 
 UNITIES = dict(NONE="",
                HOUR=u"heure(s)",
@@ -41,6 +36,11 @@ def translate_inverse(unity):
         return u"NONE"
 
 def upgrade():
+    from autonomie.models.task import WorkUnit
+    from autonomie.models.task.estimation import EstimationLine
+    from autonomie.models.task.invoice import InvoiceLine
+    from autonomie.models.task.invoice import CancelInvoiceLine
+    from autonomie.models import DBSESSION
     # Adding some characters to the Lines
     for table in "estimation_line", "invoice_line", "cancelinvoice_line":
         op.alter_column(table, "unity", type_=sa.String(100))
@@ -54,6 +54,11 @@ def upgrade():
             DBSESSION().merge(line)
 
 def downgrade():
+    from autonomie.models.task import WorkUnit
+    from autonomie.models.task.estimation import EstimationLine
+    from autonomie.models.task.invoice import InvoiceLine
+    from autonomie.models.task.invoice import CancelInvoiceLine
+    from autonomie.models import DBSESSION
     for factory in (EstimationLine, InvoiceLine, CancelInvoiceLine):
         for line in factory.query():
             line.unity = translate_inverse(line.unity)

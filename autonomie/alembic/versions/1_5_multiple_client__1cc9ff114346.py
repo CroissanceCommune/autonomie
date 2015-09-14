@@ -12,13 +12,6 @@ down_revision = '70853b55768c'
 
 from alembic import op
 import sqlalchemy as sa
-from autonomie.models import DBSESSION
-from autonomie.models.project import Project
-from autonomie.models.task import EstimationLine
-from autonomie.models.task import PaymentLine
-from autonomie.models.task import InvoiceLine
-from autonomie.models.task import TaskStatus
-from autonomie.models.task import CancelInvoiceLine
 
 
 TABLENAMES = ('estimation', 'invoice', 'cancelinvoice')
@@ -27,6 +20,8 @@ def migrate_projects_to_multiple_clients():
     """
         move project's client to the manytomany relationship
     """
+    from autonomie.models import DBSESSION
+    from autonomie.models.project import Project
     from autonomie.models.client import Client
     for proj in DBSESSION().query(Project):
         try:
@@ -42,6 +37,7 @@ def purge_line_type(factory):
     """
         Supprimer les lignes orphelines pour le type factory
     """
+    from autonomie.models import DBSESSION
     for line in factory.query():
         if line.task is None:
             DBSESSION().delete(line)
@@ -51,6 +47,11 @@ def purge_document_lines():
     """
         Purge the different line types
     """
+    from autonomie.models.task import EstimationLine
+    from autonomie.models.task import PaymentLine
+    from autonomie.models.task import InvoiceLine
+    from autonomie.models.task import TaskStatus
+    from autonomie.models.task import CancelInvoiceLine
     for i in (EstimationLine, PaymentLine, InvoiceLine, CancelInvoiceLine, TaskStatus):
         purge_line_type(i)
 

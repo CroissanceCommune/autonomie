@@ -53,7 +53,11 @@ PRODUCT_TO_GROUP_REL_TABLE = Table(
     Column(
         "sale_product_group_id",
         Integer,
-        ForeignKey('sale_product_group.id', ondelete='cascade')
+        ForeignKey(
+            'sale_product_group.id',
+            ondelete='cascade',
+            name="fk_product_to_group_rel_group_id"
+        )
     ),
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine'],

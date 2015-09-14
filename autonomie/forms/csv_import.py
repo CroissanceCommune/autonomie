@@ -42,10 +42,30 @@ from autonomie import forms
 
 
 IMPORTATION_TYPE_OPTIONS = (
-    (u"insert", u"Insérer de nouvelles données",),
-    (u"update", u"Mise à jour : Compléter des données existantes (les données \
-déjà saisies seront conservées)"),
-    (u"override", u"Mise à jour : Mettre à jour les données existantes"),
+    (
+        u"only_update",
+        u"Mise à jour seulement : Compléter des données existantes \
+(aucune nouvelle entrée ne sera créée)",
+    ),
+    (
+        u"only_override",
+        u"Mise à jour seulement : Mettre à jour les données existantes \
+(aucune nouvelle entrée ne sera créée)",
+    ),
+    (
+        u"update",
+        u"Mise à jour : Compléter des données existantes \
+(si de nouvelles entrées sont rencontrées, elles seront créées dans la base)"
+    ),
+    (
+        u"override",
+        u"Mise à jour : Mettre à jour les données existantes \
+(si de nouvelles entrées sont rencontrées, elles seront ajoutées dans la base)"
+    ),
+    (
+        u"insert",
+        u"Insérer de nouvelles données",
+    ),
 )
 
 
@@ -232,8 +252,8 @@ class AssociationSchema(colander.MappingSchema):
         description=u"Définit la politique d'insertion d'informations dans la \
 base de données.",
         widget=deform.widget.RadioChoiceWidget(values=IMPORTATION_TYPE_OPTIONS),
-        default=u"insert",
-        missing=u"insert",
+        default=u"only_update",
+        missing=u"only_update",
     )
     id_key = colander.SchemaNode(
         colander.String(),

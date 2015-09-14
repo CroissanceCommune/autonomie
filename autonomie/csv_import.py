@@ -90,13 +90,15 @@ MODELS_CONFIGURATION = {
 }
 
 
-log = logging.getLogger(__name__)
-logger = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 MISSING_KEY_ERROR = u"Erreur : Le champ {0} ({1}) est requis mais n'a pas été \
 configuré à l'étape 2"
 MULTIPLE_ENTRY_ERROR = u"Pour une même valeur clé ({0}), plusieurs entrées \
 ont été détectées, nous ne sommes pas en mesure de mettre à jour ces données."
+NO_ENTRY_FOUND_ERROR = u"Aucune entrée n'a pu être retrouvée pour la clé {0} \
+avec la valeur {1}"
+NO_ID_KEY_ERROR = u"Une entrée n'a pas de valeur pour la clé {0}."
 UNFILLED_VALUES = ('', None, 0)
 
 BOOLEAN_FALSE = ('0', 'false', 'non', '', 'False')
@@ -158,11 +160,13 @@ def format_input_value(value, sqla_column_dict, force_rel_creation=False):
             # We query the database to get the corresponding element filtering
             # on the configured related_key
             res = class_.query().filter(
-                getattr(class_, related_key)==value
+                getattr(class_, related_key) == value
             ).first()
             if res is None and force_rel_creation:
                 if value is not None and value.strip():
-                    print("Creating a new element : %s %s"%(related_key, value))
+                    logger.debug("Creating a new element : %s %s" % (
+                        related_key, value)
+                    )
                     creation_dict = {related_key: value}
                     res = class_(**creation_dict)
         else:
@@ -170,7 +174,7 @@ def format_input_value(value, sqla_column_dict, force_rel_creation=False):
             # the related_key as instanciation attribute
             related_key = sqla_column_dict['related_key']
             class_ = prop.mapper.class_
-            if sqla_column_dict.has_key('formatter'):
+            if 'formatter' in sqla_column_dict:
                 value = sqla_column_dict['formatter'](value)
             args = {related_key: value}
             res = [class_(**args)]
@@ -180,7 +184,7 @@ def format_input_value(value, sqla_column_dict, force_rel_creation=False):
         column = prop.columns[0]
         column_type = getattr(column.type, 'impl', column.type)
 
-        if sqla_column_dict.has_key('formatter'):
+        if 'formatter' in sqla_column_dict:
             res = sqla_column_dict['formatter'](value)
 
         elif isinstance(column_type, Boolean):
@@ -238,9 +242,10 @@ class CsvImportAssociator(BaseSqlaInspector):
 
                 if prop.uselist:
                     # A one to many relationship
-                    if not datas.has_key('related_key'):
-                        print("Missing infos about a relationship %s" % \
-                              prop.key)
+                    if 'related_key' not in datas:
+                        logger.debug(
+                            "Missing infos about a relationship %s" % prop.key
+                        )
                         continue
                     datas['rel_type'] = 'onetomany'
                 else:
@@ -321,10 +326,10 @@ class CsvImportAssociator(BaseSqlaInspector):
                 if column.get('mandatory'):
                     if column['name'] not in values:
                         raise MissingMandatoryArgument(
-                           MISSING_KEY_ERROR.format(
-                               column['label'],
-                               column['name']
-                           )
+                            MISSING_KEY_ERROR.format(
+                                column['label'],
+                                column['name']
+                            )
                         )
 
     def set_association_dict(self, association_dict):
@@ -387,10 +392,10 @@ def get_csv_reader(
         quotechar=DEFAULT_QUOTECHAR,
     ):
     return csv.DictReader(
-            csv_buffer,
-            delimiter=str(delimiter),
-            quotechar=str(quotechar),
-        )
+        csv_buffer,
+        delimiter=str(delimiter),
+        quotechar=str(quotechar),
+    )
 
 def get_csv_importer(
         dbsession,
@@ -445,6 +450,10 @@ class CsvImporter(object):
               object
             * override: we override the datas if an id keys matches an existing
               object
+            * only_update: we update the fields if an id key matches an existing
+              object and don't insert new entries
+            * only_override: we override the datas if an id keys matches an
+              existing object and don't insert new entries
 
     :param int id_key: The id key to be used (by default, we use the model's id
         to identify duplicate entries, else, we can use an external id
@@ -461,13 +470,14 @@ class CsvImporter(object):
     """
     delimiter = ';'
     quotechar = '"'
+
     def __init__(
             self,
             dbsession,
             factory,
             csv_buffer,
             association_handler,
-            action="insert",
+            action="only_update",
             id_key="id",
             force_rel_creation=False,
             default_values=None,
@@ -485,7 +495,8 @@ class CsvImporter(object):
         self.new_count = 0
         self.update_count = 0
 
-        if action not in ("insert", "update", "override"):
+        if action not in ("insert", "update", "override", "only_update",
+                          "only_override"):
             raise KeyError(
 u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             )
@@ -551,7 +562,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             self.dbsession.flush()
         return model, False
 
-    def _update(self, args, override=False, persist=True):
+    def _update(self, args, override=False, persist=True, insert=True):
         """
         Update an element in the database or insert one if no id is provided
 
@@ -561,10 +572,20 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         :returns: a tuple (model, updated_token) where updated_token is a
         boolean saying if it's an update
         """
+        logger.debug(u"Launching update")
+        logger.debug(u"Args : %s" % args)
+        logger.debug(u"Insert ? : %s" % insert)
         identification_value = args.pop(self.id_key, None)
         updated = False
+
         if identification_value in UNFILLED_VALUES:
             # No identification value is provided
+            if not insert:
+                raise MultipleInstanceFound(
+                    NO_ID_KEY_ERROR.format(
+                        self.id_key,
+                    )
+                )
             model, updated = self._insert(args)
 
         else:
@@ -573,7 +594,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             try:
 
                 model = self.factory.query().filter(
-                    identification_column==identification_value
+                    identification_column == identification_value
                 ).one()
 
                 for key, value in self.default_init_values.items():
@@ -594,6 +615,13 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                 updated = True
 
             except sqlalchemy_exc.NoResultFound:
+                if not insert:
+                    raise MultipleInstanceFound(
+                        NO_ENTRY_FOUND_ERROR.format(
+                            self.id_key,
+                            identification_value
+                        )
+                    )
                 # We first restore the poped identification column (if it's not
                 # the id key: id key should not be set but email can be used as
                 # identification key and should be set for new entries)
@@ -602,11 +630,20 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                 model, updated = self._insert(args)
 
             except sqlalchemy_exc.MultipleResultsFound:
-                raise MultipleInstanceFound(MULTIPLE_ENTRY_ERROR.format(
-                    identification_value
-                ))
+                raise MultipleInstanceFound(
+                    MULTIPLE_ENTRY_ERROR.format(identification_value)
+                )
 
         return model, updated
+
+    def _only_update(self, args, persist=True):
+        """
+        Update an element completing its attributes
+        :param dict args: The args used to update the model
+        :returns: a tuple (model, updated_token) where updated_token is a
+        boolean saying if it's an update
+        """
+        return self._update(args, override=False, persist=persist, insert=False)
 
     def _override(self, args, persist=True):
         """
@@ -619,12 +656,23 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         """
         return self._update(args, override=True, persist=persist)
 
+    def _only_override(self, args, persist=True):
+        """
+        Update an element overriding attributes with the newly provided values
+
+        :param dict args: The args used to update the model
+        :returns: a tuple (model, updated_token) where updated_token is a
+        boolean saying if it's an update
+        """
+        return self._update(args, override=True, persist=persist, insert=False)
+
     def import_line(self, line, persist=True):
         """
         Import one line of a csv file
         :returns: a duple with the newly_created model (or None) and a
             message
         """
+        print(u"Importing a line !!!")
         message = None
         args, unhandled_columns = self.association_handler.collect_args(
             line,
@@ -632,6 +680,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         )
 
         function = getattr(self, "_{0}".format(self.action))
+        logger.debug(u"The function we use : %s" % function)
         # Here we should handle edition
         try:
             model, updated = function(args, persist=persist)

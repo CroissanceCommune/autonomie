@@ -114,7 +114,7 @@ def async_import_datas(
     :param str csv_filepath: The absolute path to the csv file
     :param str id_key: The model attribute used to handle updates
     :param str action: The name of the action we want to run
-        (insert/update/override)
+        (insert/update/override/only_update/only_override)
     :param bool force_rel_creation: Force the creation of configurable related
     elements
     :param default_values: default_values used to initialize new objects

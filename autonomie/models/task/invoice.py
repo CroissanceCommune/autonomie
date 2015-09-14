@@ -567,7 +567,9 @@ class Payment(DBBASE, PersistentACLMixin):
     id = Column(Integer, primary_key=True)
     mode = Column(String(50))
     amount = Column(Integer)
+    remittance_amount = Column(Integer)
     date = Column(DateTime, default=datetime.datetime.now)
+    exported = Column(Boolean(), default=False)
     task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
     bank_id = Column(ForeignKey('bank_account.id'))
     bank = relationship(

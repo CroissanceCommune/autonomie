@@ -1589,6 +1589,13 @@ class UserDatas(Node):
         },
     )
 
+    def __unicode__(self):
+        return u"<Userdatas : {0} {1} {2}>".format(
+            self.id,
+            self.coordonnees_lastname,
+            self.coordonnees_firstname
+        )
+
     @property
     def age(self):
         birthday = self.coordonnees_birthday

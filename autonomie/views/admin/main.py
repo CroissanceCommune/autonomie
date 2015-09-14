@@ -58,7 +58,6 @@ from autonomie.models.activity import (
 )
 from autonomie.models.workshop import WorkshopAction
 from autonomie.models.company import (
-    Company,
     CompanyActivity,
 )
 from autonomie.models.user import (
@@ -147,7 +146,8 @@ devis, factures / avoir)"
         dict(
             label=u"Configuration comptable du module ventes",
             path="admin_cae",
-            title=u"Comptes analytiques de la CAE spécifiques"
+            title=u"Configuration des différents comptes analytiques liés \
+au module vente"
         )
     )
     menus.append(
@@ -160,9 +160,10 @@ aux encaissements"
     )
     menus.append(
         dict(
-            label=u"Configuration comptable des notes de frais",
+            label=u"Configuration comptable des notes de frais/dépenses",
             path="admin_expense",
-            title=u"Type de frais et comptes analytiques"
+            title=u"Configuration des types de frais/dépenses et des \
+différents comptes analytiques liés au module notes de frais/dépenses"
         )
     )
     menus.append(

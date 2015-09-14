@@ -67,7 +67,6 @@ from .interfaces import (
 )
 from .invoice import (
     Invoice,
-    InvoiceLine,
 )
 from .task import (
     Task,
@@ -444,74 +443,4 @@ class PaymentLine(DBBASE):
             description=self.description,
             cost=self.amount,
             paymentDate=self.paymentDate,
-        )
-
-
-# OLD TABLES SHOULD BE REMOVED IN VERSION 3.1
-class EstimationLine(DBBASE, LineCompute):
-    """
-        Estimation lines
-    """
-    __tablename__ = 'estimation_line'
-    __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
-    rowIndex = Column(Integer)
-    description = Column(Text)
-    cost = Column(Integer, default=0)
-    quantity = Column(DOUBLE, default=1)
-    tva = Column(Integer, nullable=False, default=196)
-    creationDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp))
-    updateDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp,
-            onupdate=get_current_timestamp))
-    unity = Column(String(100))
-    task = relationship(
-        "Estimation",
-        backref=backref("lines", order_by='EstimationLine.rowIndex',
-                        cascade="all, delete-orphan"))
-
-    def duplicate(self):
-        """
-            duplicate a line
-        """
-        newone = EstimationLine()
-        newone.rowIndex = self.rowIndex
-        newone.cost = self.cost
-        newone.description = self.description
-        newone.quantity = self.quantity
-        newone.tva = self.tva
-        newone.unity = self.unity
-        return newone
-
-    def gen_invoice_line(self):
-        """
-            return the equivalent InvoiceLine
-        """
-        line = InvoiceLine()
-        line.rowIndex = self.rowIndex
-        line.cost = self.cost
-        line.description = self.description
-        line.quantity = self.quantity
-        line.tva = self.tva
-        line.unity = self.unity
-        return line
-
-    def __repr__(self):
-        return u"<EstimationLine id:{s.id} task_id:{s.task_id} cost:{s.cost}\
- quantity:{s.quantity} tva:{s.tva}".format(s=self)
-
-    def __json__(self, request):
-        return dict(
-            index=self.rowIndex,
-            description=self.description,
-            cost=self.cost,
-            quantity=self.quantity,
-            tva=self.tva,
-            unity=self.unity,
         )

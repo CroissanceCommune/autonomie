@@ -78,85 +78,98 @@ comptabilité",
         'description': u"Compte CG correspondant à la contribution des \
 entrepreneurs à la CAE",
     },
-    'compte_rrr': {
-        "title": u"Compte RRR",
-        "description": u"Compte Rabais, Remises et Ristournes",
-    },
     "compte_frais_annexes": {
         "title": u"Compte de frais annexes",
     },
     "compte_cg_banque": {
         "title": u"Compte banque de l'entrepreneur",
     },
+    'compte_rrr': {
+        "title": u"Compte RRR",
+        "description": u"Compte Rabais, Remises et Ristournes",
+        "section": u"Module RRR"
+    },
+    'compte_cg_tva_rrr': {
+        "title": u"Compte CG de TVA spécifique aux RRR",
+        "description": u"",
+        "section": u"Module RRR"
+    },
+    'code_tva_rrr': {
+        "title": u"Code de TVA spécifique aux RRR",
+        "description": u"",
+        "section": u"Module RRR"
+    },
     "compte_cg_assurance": {
         "title": u"Compte de charge assurance",
-        "description": u"Requis pour le module d'écritures Assurance",
+        "description": u"",
+        "section": u"Module Assurance",
     },
     "compte_cgscop": {
         "title": u"Compte de charge CG Scop",
-        "description": u"Requis pour le module d'écritures CGSCOP"
+        "description": u"",
+        "section": u"Module CGSCOP",
     },
     'compte_cg_debiteur': {
-        "title": u"Compte de contrepartie pour CG Scop et Assurance",
-        "description": u"Requis pour le module d'écritures CGSCOP"
+        "title": u"Compte de contrepartie CGSCOP",
+        "description": u"",
+        "section": u"Module CGSCOP",
     },
     "compte_cg_organic": {
         "title": u"Compte de charge Organic",
-        "description": u"Compte CG pour la contribution à l'Organic (requis \
-pour le module d'écritures Contribution Organic)",
+        "description": u"Compte CG pour la contribution à l'Organic",
+        "section": u"Module Contribution à l'Organic",
     },
     "compte_cg_debiteur_organic": {
         "title": u"Compte de contrepartie Organic",
         "description": u"Compte CG de débiteur pour la contribution à \
-l'Organic  (requis pour le module d'écritures Contribution Organic)",
+l'Organic",
+        "section": u"Module Contribution à l'Organic",
     },
     'compte_rg_interne': {
         "title": u"Compte RG Interne",
-        "description": u"Requis pour les écritures RG Interne"
+        "description": u"",
+        "section": u"Module RG Interne",
     },
     'compte_rg_externe': {
         "title": u"Compte RG Externe",
-        "description": u"Requis pour le module d'écriture RG Client"
-    },
-    'compte_cg_tva_rrr': {
-        "title": u"Compte CG de TVA spécifique aux RRR",
-        "description": u"Facultatif, les remises apparaitront dans les \
-écritures si cette valeur et le code tva sont renseignés."
-    },
-    'code_tva_rrr': {
-        "title": u"Code de TVA spécifique aux RRR",
-        "description": u"Facultatif, les remises apparaitront dans les \
-écritures si cette valeur et le compte CG sont renseignés."
+        "description": u"",
+        "section": u"Module RG Externe",
     },
     'contribution_cae': {
         "title": u"Pourcentage de la contribution",
         "description": u"Valeur par défaut de la contribution (nombre entre \
 0 et 100). Elle peut être individualisée sur les pages entreprises.",
+        "section": u"Module Contribution",
     },
     'taux_assurance': {
         "title": u"Taux d'assurance",
         "description": u"(nombre entre 0 et 100) Requis pour le module \
 d'écritures Assurance",
+        "section": u"Module Assurance",
     },
     'taux_cgscop': {
         "title": u"Taux CGSCOP",
         "description": u"(nombre entre 0 et 100) Requis pour le module \
 d'écritures CGSCOP",
+        "section": u"Module CGSCOP",
     },
     'taux_contribution_organic': {
         "title": u"Taux de Contribution à l'Organic",
         "description": "(nombre entre 0 et 100) Requis pour le module \
 d'écritures Contribution Organic",
+        "section": u"Module Contribution à l'Organic",
     },
     'taux_rg_interne': {
         "title": u"Taux RG Interne",
         "description": u"(nombre entre 0 et 100) Requis pour les écritures \
 RG Interne",
+        "section": u"Module RG Interne",
     },
     'taux_rg_client': {
         "title": u"Taux RG Client",
         "description": u"(nombre entre 0 et 100) Requis pour le module \
 d'écriture RG Client",
+        "section": u"Module RG Client",
     },
     'sage_contribution': {
         "title": u"Module contribution",

@@ -143,5 +143,4 @@ $(function(){
       }
     }
   );
-  get_select_customer().change();
 });

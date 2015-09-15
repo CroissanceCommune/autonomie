@@ -184,6 +184,15 @@ def base_configure(config, dbsession, **settings):
     return config
 
 
+def version():
+    """
+    Return Autonomie's version number (as defined in setup.py)
+    """
+    import pkg_resources
+    version = pkg_resources.require(__name__)[0].version
+    return version
+
+
 __author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"
 __copyright__ = "Copyright 2012-2013, Croissance Commune"
 __license__ = "GPL"

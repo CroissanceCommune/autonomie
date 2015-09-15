@@ -27,6 +27,7 @@ command line scripts for autonomie
 """
 import os
 import pkg_resources
+import logging
 
 from pyramid.threadlocal import get_current_registry
 from zope.sqlalchemy import mark_changed
@@ -35,7 +36,6 @@ from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic.environment import EnvironmentContext
 from alembic.util import load_python_file
-from alembic.util import rev_id
 from alembic import autogenerate as autogen
 
 from autonomie.models import DBSESSION
@@ -43,6 +43,9 @@ from autonomie.scripts.utils import command
 
 SCRIPT_DIR = pkg_resources.resource_filename('autonomie', 'alembic')
 DEFAULT_LOCATION = 'autonomie:alembic'
+
+
+logger = logging.getLogger('alembic.autonomie')
 
 
 class ScriptDirectoryWithDefaultEnvPy(ScriptDirectory):
@@ -91,7 +94,7 @@ class PackageEnvironment(object):
             fn=fn,
             version_table=self.version_table,
             **kw
-            ):
+        ):
             self.script_dir.run_env()
 
     def _make_config(self, sql_url=None):
@@ -101,10 +104,17 @@ class PackageEnvironment(object):
         cfg = Config()
         cfg.set_main_option("script_location", self.location)
         settings = get_current_registry().settings
+        print(settings)
         if sql_url is None:
             cfg.set_main_option("sqlalchemy.url", settings['sqlalchemy.url'])
         else:
             cfg.set_main_option("sqlalchemy.url", sql_url)
+        from autonomie import version
+        autonomie_version = version().replace('.', '_')
+        cfg.set_main_option(
+            'file_template',
+            autonomie_version + "_%%(slug)s_%%(rev)s"
+        )
         return cfg
 
     def _make_script_dir(self, alembic_cfg):
@@ -123,13 +133,14 @@ def upgrade(sql_url=None):
     pkg_env = PackageEnvironment(DEFAULT_LOCATION, sql_url)
 
     revision = pkg_env.script_dir.get_current_head()
-    print(u'Upgrading {0}:'.format(pkg_env.location))
+    logger.info(u'Upgrading {0}:'.format(pkg_env.location))
 
     def upgrade_func(rev, context):
+        rev = rev[0]
         if rev == revision:
-            print(u'  - already up to date.')
+            logger.info(u'Already up to date.')
             return []
-        print(u'  - upgrading from {0} to {1}...'.format(
+        logger.info(u'Upgrading from {0} to {1}...'.format(
             rev, revision))
         return context.script._upgrade_revs(revision, rev)
 
@@ -149,13 +160,13 @@ def downgrade(revision):
     """
     pkg_env = PackageEnvironment(DEFAULT_LOCATION)
 
-    print(u'Downgrading {0} to {1}:'.format(pkg_env.location, revision))
+    logger.info(u'Downgrading {0} to {1}:'.format(pkg_env.location, revision))
 
     def downgrade_func(rev, context):
         if rev == revision:
-            print(u'  - already reached.')
+            logger.info(u'  - already reached.')
             return []
-        print(u'  - downgrading from {0} to {1}...'.format(
+        logger.info(u'  - downgrading from {0} to {1}...'.format(
             rev, revision))
         return context.script._downgrade_revs(revision, rev)
 
@@ -199,12 +210,7 @@ def fetch(revision=None):
         fetch a revision without migrating
     """
     def do_stamp(rev, context, revision=revision):
-        current = context._current_rev()
-        if revision is None:
-            revision = context.script.get_current_head()
-        elif revision == 'None':
-            revision = None
-        context._update_current_rev(current, revision)
+        context.stamp(context.script, revision)
         mark_changed(DBSESSION())
         return []
     PackageEnvironment(DEFAULT_LOCATION).run_env(do_stamp)
@@ -218,16 +224,40 @@ def fetch_head():
 
 
 def revision(message):
-    template_args = {}
-    imports = set()
+    command_args = dict(
+        message=message,
+        autogenerate=True,
+        sql=False,
+        head='head',
+        splice=False,
+        branch_label=None,
+        version_path=None,
+        rev_id=None,
+        depends_on=None,
+    )
+    env = PackageEnvironment(DEFAULT_LOCATION)
+
+    revision_context = autogen.RevisionContext(
+        env.config,
+        env.script_dir,
+        command_args,
+    )
 
     def get_rev(rev, context):
-        autogen._produce_migration_diffs(context, template_args, imports)
+        # autogen._produce_migration_diffs(context, template_args, imports)
+        revision_context.run_autogenerate(rev, context)
         return []
 
-    env = PackageEnvironment(DEFAULT_LOCATION)
-    env.run_env(get_rev)
-    env.script_dir.generate_revision(rev_id(), message, **template_args)
+    env.run_env(
+        get_rev,
+        as_sql=False,
+        revision_context=revision_context,
+        template_args=revision_context.template_args,
+    )
+    scripts = [
+        script for script in revision_context.generate_scripts()
+    ]
+    return scripts
 
 
 def migrate():

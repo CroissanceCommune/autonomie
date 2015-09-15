@@ -35,6 +35,14 @@ from pkg_resources import resource_filename
 
 from deform.template import ZPTRendererFactory
 
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    Integer,
+    Float,
+)
+
 from pyramid.renderers import JSON
 from pyramid.threadlocal import get_current_request
 
@@ -87,11 +95,13 @@ def set_json_renderer(config):
         Customize json renderer to allow datetime rendering
     """
     json_renderer = JSON()
+
     def toisoformat(obj, request):
         return obj.isoformat()
+
     json_renderer.add_adapter(datetime.datetime, toisoformat)
     json_renderer.add_adapter(datetime.date, toisoformat)
-    json_renderer.add_adapter(colander._null, lambda _, r:"null")
+    json_renderer.add_adapter(colander._null, lambda _, r: "null")
 
     def decimal_to_num(obj, request):
         return float(obj)
@@ -107,17 +117,11 @@ def set_export_formatters():
     Globally set export formatters in the sqla_inspect registry
     """
     from sqla_inspect.export import FORMATTERS_REGISTRY
-    from sqlalchemy import (
-        Boolean,
-        Date,
-        DateTime,
-        Integer,
-        Float,
-    )
     from autonomie.views import render_api
     from autonomie.export.utils import format_boolean
-    FORMATTERS_REGISTRY.add_formatter(Date, render_api.format_date)
-    FORMATTERS_REGISTRY.add_formatter(DateTime, render_api.format_datetime)
+
+#    FORMATTERS_REGISTRY.add_formatter(Date, render_api.format_date)
+#    FORMATTERS_REGISTRY.add_formatter(DateTime, render_api.format_datetime)
     FORMATTERS_REGISTRY.add_formatter(Boolean, format_boolean)
     FORMATTERS_REGISTRY.add_formatter(Float, render_api.format_quantity)
     FORMATTERS_REGISTRY.add_formatter(Integer, render_api.format_quantity)
@@ -130,6 +134,16 @@ def set_export_blacklist():
     from sqla_inspect.export import BLACKLISTED_KEYS
 
     BLACKLISTED_KEYS = ('_acl', 'password', 'parent_id', 'parent', 'type_')
+
+
+def set_xls_formats():
+    """
+    Globally set the xls formats by datatype
+    """
+    from sqla_inspect.excel import FORMAT_REGISTRY
+
+    FORMAT_REGISTRY.add_item(Date, "dd/mm/yyyy")
+    FORMAT_REGISTRY.add_item(DateTime, "dd/mm/yyyy hh:mm")
 
 
 def set_custom_deform_js():
@@ -151,4 +165,5 @@ def customize_renderers(config):
     # Exporters
     set_export_formatters()
     set_export_blacklist()
+    set_xls_formats()
     set_custom_deform_js()

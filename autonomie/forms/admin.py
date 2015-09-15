@@ -453,6 +453,12 @@ class TvaItem(colander.MappingSchema):
         colander.String(),
         missing="",
         title=u"Code de Tva")
+    compte_a_payer = colander.SchemaNode(
+        colander.String(),
+        missing="",
+        title=u"Compte de Tva à payer",
+        description=u"Utilisé dans les exports comptables des encaissements",
+    )
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",

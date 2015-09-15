@@ -17,9 +17,19 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('payment', sa.Column('bank_id', sa.Integer(), nullable=True))
     op.add_column('payment', sa.Column('exported', sa.Boolean(), default=False))
+    op.add_column('payment', sa.Column(
+        'tva_id',
+        sa.Integer(),
+        sa.ForeignKey('tva.id'),
+        nullable=True,
+    ))
     op.add_column(
         'payment',
         sa.Column('remittance_amount', sa.Integer(), nullable=True)
+    )
+    op.add_column(
+        'tva',
+        sa.Column('compte_a_payer', sa.String(125), default='')
     )
     from autonomie.models.base import DBSESSION
     from autonomie.models.task import Payment

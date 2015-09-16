@@ -25,7 +25,6 @@
 """
     Handle the states of the objects
 """
-from pyramid.security import has_permission
 from autonomie.exception import Forbidden
 
 
@@ -39,8 +38,15 @@ class State(object):
         :param status_attr: The attribute storing the model's status
         :param userid_attr: The attribute storing the status person's id
     """
-    def __init__(self, name, permission=None, callback=None, model_state=True,
-            status_attr="status", userid_attr="user_id"):
+    def __init__(
+        self,
+        name,
+        permission=None,
+        callback=None,
+        model_state=True,
+        status_attr="status",
+        userid_attr="user_id"
+    ):
         self.name = name
         if permission is None:
             permission = ["edit"]
@@ -79,7 +85,8 @@ class State(object):
 
     def __repr__(self):
         return "< State %s allowed for %s (ModelState : %s)>" % (
-                self.name, self.permissions, self.model_state,)
+            self.name, self.permissions, self.model_state,
+        )
 
 
 class StateMachine(object):
@@ -89,6 +96,7 @@ class StateMachine(object):
     """
     status_attr = "status"
     userid_attr = "user_id"
+
     def __init__(self, default_state='draft', transition_dict=None):
         self.default_state = default_state
         self.transitions = dict()
@@ -110,8 +118,14 @@ class StateMachine(object):
         """
             adds a transition to the state machine
         """
-        state_obj = State(next_, perm, callback, cae, self.status_attr,
-                                                    self.userid_attr)
+        state_obj = State(
+            next_,
+            perm,
+            callback,
+            cae,
+            self.status_attr,
+            self.userid_attr,
+        )
         self.transitions.setdefault(state, []).append(state_obj)
 
     def process(self, model, request, user_id, new_state, **kw):
@@ -122,9 +136,13 @@ class StateMachine(object):
 
         state_obj = self.get_transition(state, new_state)
         if state_obj is None:
-            raise Forbidden()
+            raise Forbidden(
+                u"No state object could be retrieved for %s" % new_state
+            )
         elif not state_obj.allowed(model, request):
-            raise Forbidden()
+            raise Forbidden(
+                u"Current user is not allowed to set the %s state" % new_state
+            )
         else:
             return state_obj.process(model, user_id=user_id, **kw)
 

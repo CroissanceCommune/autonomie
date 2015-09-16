@@ -494,9 +494,6 @@ class CustomSchemaNode(colander.SchemaNode):
         Return the related object that have been configured
         """
         from autonomie.models.base import DBSESSION
-        print("Objectify !!!")
-        print(id)
-        print (DBSESSION().query(self.model).get(id))
         return DBSESSION().query(self.model).get(id)
 
 

@@ -56,14 +56,13 @@ def valid_callback(task, **kw):
 
 def record_payment(task, **kw):
     """
-        record a payment for the given task
-        expecting a paymendMode to be passed throught kw
+    record a payment for the given task
     """
     log.info(u"Recording a payment for {0}".format(task))
     if "mode" in kw and "amount" in kw:
         return task.record_payment(**kw)
     else:
-        raise Forbidden()
+        raise Forbidden(u"Missing mandatory arguments")
 
 
 def duplicate_task(task, **kw):
@@ -76,7 +75,7 @@ def duplicate_task(task, **kw):
     if project is not None and phase is not None and customer is not None:
         return task.duplicate(kw['user'], project, phase, customer)
     else:
-        raise Forbidden()
+        raise Forbidden(u"Missing mandatory arguments")
 
 
 def edit_metadata_task(task, **kw):
@@ -174,11 +173,25 @@ def get_est_state():
     geninv = ('geninv', None, gen_invoices,)
     delete = ('delete', None, None, False,)
     result = {}
-    result['draft'] = ('draft', wait, 'delete', valid, edit_metadata)
-    result['invalid'] = ('draft', wait, 'delete', edit_metadata)
-    result['wait'] = ('draft', manager_wait, valid, invalid, duplicate,
-                      'delete', edit_metadata)
-    result['valid'] = ('aboest', geninv, duplicate, 'delete', edit_metadata)
+
+    result['draft'] = ('draft', wait, delete, valid, duplicate,)
+    result['invalid'] = result['draft']
+
+    result['wait'] = (
+        'draft',
+        manager_wait,
+        valid,
+        invalid,
+        duplicate,
+        'delete',
+        edit_metadata,
+    )
+    result['valid'] = (
+        'aboest',
+        geninv,
+        duplicate,
+        delete,
+        edit_metadata, )
     result['aboest'] = (delete, edit_metadata)
     result['geninv'] = (duplicate, edit_metadata, geninv)
     return result
@@ -197,7 +210,6 @@ def get_inv_state():
     """
     wait = ('wait', 'wait.invoice')
     manager_wait = ('wait', MANAGER_PERMS,)
-
     duplicate = ('duplicate', 'view', duplicate_task, False,)
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', "valid.invoice", valid_callback,)
@@ -212,9 +224,12 @@ def get_inv_state():
     products = (
         "set_products", MANAGER_PERMS, set_products, False,
     )
+
     result = {}
-    result['draft'] = ('draft', wait, delete, valid,)
-    result['invalid'] = ('draft', wait, delete, )
+
+    result['draft'] = ('draft', wait, delete, valid, duplicate)
+    result['invalid'] = result['draft']
+
     result['wait'] = (
         "draft",
         manager_wait,
@@ -224,18 +239,27 @@ def get_inv_state():
         delete,
         financial_year,
         edit_metadata,)
+
     result['valid'] = (
-        paid, resulted, gencinv, duplicate,
-        edit_metadata, financial_year, products,
+        paid,
+        resulted,
+        gencinv,
+        duplicate,
+        edit_metadata,
+        financial_year,
+        products,
     )
+
     result['paid'] = (
         paid, resulted, gencinv, duplicate, financial_year,
         edit_metadata, products,
     )
+
     result['resulted'] = (
         gencinv, duplicate, financial_year, edit_metadata,
         products,
     )
+
     result['aboinv'] = (delete, edit_metadata)
     return result
 
@@ -248,6 +272,7 @@ def get_cinv_state():
         valid
         invalid
     """
+    delete = ('delete', None, None, False,)
     edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
     valid = ('valid', MANAGER_PERMS, valid_callback,)
     invalid = ('invalid', MANAGER_PERMS,)
@@ -258,17 +283,19 @@ def get_cinv_state():
         "set_products", MANAGER_PERMS, set_products, False,
     )
     result = {}
-    result['draft'] = ('wait', 'delete', valid, )
+    result['draft'] = ('wait', delete, valid, )
+    result['invalid'] = result['draft']
+
     result['wait'] = (
         "draft",
         valid,
         invalid,
-        'delete',
+        delete,
         financial_year,
         edit_metadata,
         products,
     )
-    result['invalid'] = ('draft', 'wait', edit_metadata, products, )
+
     result['valid'] = (financial_year, edit_metadata, products, )
     return result
 

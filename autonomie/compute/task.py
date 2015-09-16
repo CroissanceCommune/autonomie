@@ -182,6 +182,45 @@ class TaskCompute(object):
                 break
         return ret
 
+    @staticmethod
+    def add_ht_by_tva(ret_dict, lines, operation=operator.add):
+        """
+            Add ht sums by tva to ret_dict for the given lines
+        """
+        for line in lines:
+            val = ret_dict.get(line.tva, 0)
+            ht_amount = operation(val, line.total_ht())
+            ret_dict[line.tva] = ht_amount
+        return ret_dict
+
+    def tva_ht_parts(self):
+        """
+            Return a dict with the HT amounts stored by corresponding tva value
+            dict(tva=ht_tva_part,)
+            for each tva value
+        """
+        ret_dict = {}
+        lines = []
+        for group in self.line_groups:
+            lines.extend(group.lines)
+        ret_dict = self.add_ht_by_tva(ret_dict, lines)
+        ret_dict = self.add_ht_by_tva(ret_dict, self.discounts, operator.sub)
+        expense = self.get_expense_ht()
+        ret_dict = self.add_ht_by_tva(ret_dict, [expense])
+        return ret_dict
+
+    def tva_ttc_parts(self):
+        """
+        Return a dict with TTC amounts stored by corresponding tva
+        """
+        ret_dict = {}
+        ht_parts = self.tva_ht_parts()
+        tva_parts = self.get_tvas()
+
+        for tva_value, amount in ht_parts.iteritems():
+            ret_dict[tva_value] = amount + tva_parts.get(tva_value, 0)
+        return ret_dict
+
 
 class InvoiceCompute(TaskCompute):
     """
@@ -241,39 +280,12 @@ class EstimationCompute(TaskCompute):
         tvas = self.get_tvas().keys()
         return tvas[0]
 
-    @staticmethod
-    def add_ht_by_tva(ret_dict, lines, operation=operator.add):
-        """
-            Add ht sums by tva to ret_dict for the given lines
-        """
-        for line in lines:
-            val = ret_dict.get(line.tva, 0)
-            ht_amount = operation(val, line.total_ht())
-            ret_dict[line.tva] = ht_amount
-        return ret_dict
-
-    def tva_parts(self):
-        """
-            Return a list of tuples
-                dict(tva=(ht, tva_part,))
-            for each tva value
-        """
-        ret_dict = {}
-        lines = []
-        for group in self.line_groups:
-            lines.extend(group.lines)
-        ret_dict = self.add_ht_by_tva(ret_dict, lines)
-        ret_dict = self.add_ht_by_tva(ret_dict, self.discounts, operator.sub)
-        expense = self.get_expense_ht()
-        ret_dict = self.add_ht_by_tva(ret_dict, [expense])
-        return ret_dict
-
     def deposit_amounts(self):
         """
             Return the lines of the deposit for the different amount of tvas
         """
         ret_dict = {}
-        for tva, total_ht in self.tva_parts().items():
+        for tva, total_ht in self.tva_ht_parts().items():
             ret_dict[tva] = self.floor(total_ht * int(self.deposit) / 100.0)
         return ret_dict
 
@@ -301,7 +313,7 @@ class EstimationCompute(TaskCompute):
             (when the user has selected 3 time-payment)
         """
         ret_dict = {}
-        totals = self.tva_parts()
+        totals = self.tva_ht_parts()
         deposits = self.deposit_amounts()
         # num_parts set the number of equal parts
         num_parts = self.get_nb_payment_lines()
@@ -326,7 +338,7 @@ class EstimationCompute(TaskCompute):
         # forme de part HT + TVA au regard des différentes tva configurées dans
         # le devis
         ret_data = []
-        parts = self.tva_parts()
+        parts = self.tva_ht_parts()
         # On enlève déjà ce qui est inclu dans l'accompte
         for tva, ht_amount in self.deposit_amounts().items():
             parts[tva] -= ht_amount

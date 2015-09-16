@@ -262,6 +262,40 @@ class InvoiceCompute(TaskCompute):
         result = self.total() - self.paid()
         return result
 
+    def tva_paid_parts(self):
+        """
+        return the amounts already paid by tva
+        """
+        result = {}
+        for payment in self.payments:
+            result.setdefault(payment.tva.value, 0)
+            result[payment.tva.value] += payment.amount
+
+        return result
+
+    def tva_cancelinvoice_parts(self):
+        """
+        Returns the amounts already paid through cancelinvoices by tva
+        """
+        result = {}
+        if self.cancelinvoice is not None and self.cancelinvoice.is_valid():
+            result = self.cancelinvoice.tva_ttc_parts()
+        return result
+
+    def topay_by_tvas(self):
+        """
+        Returns the amount to pay by tva part
+        """
+        result = {}
+        paid_parts = self.tva_paid_parts()
+        cancelinvoice_tva_parts = self.tva_cancelinvoice_parts()
+        for tva_value, amount in self.tva_ttc_parts().items():
+            val = amount
+            val = val - paid_parts.get(tva_value, 0)
+            val = val + cancelinvoice_tva_parts.get(tva_value, 0)
+            result[tva_value] = val
+        return result
+
 
 class EstimationCompute(TaskCompute):
     """

@@ -948,7 +948,7 @@ def admin_accompagnement_index_view(request):
 
 class MainReceiptsConfig(BaseConfigView):
     title = u"Informations générales"
-    keys = ('receipts_code_journal', )
+    keys = ('receipts_code_journal', 'receipts_active_tva_module')
     schema = get_config_schema(keys)
     validation_msg = u"L'export comptable des encaissement a bien été \
 configuré"

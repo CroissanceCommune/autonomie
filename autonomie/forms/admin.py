@@ -62,7 +62,8 @@ vers votre logiciel de comptabilité",
     },
     'receipts_active_tva_module': {
         "title": u"Activer le module TVA pour les encaissements",
-        "description": u"Paiement de la TVA sur encaissement",
+        "description": u"Inclue les écritures pour le paiement de la TVA \
+sur encaissement",
         "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0')
     },
     'code_journal': {

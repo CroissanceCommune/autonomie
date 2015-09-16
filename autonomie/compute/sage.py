@@ -30,12 +30,13 @@ import datetime
 
 from autonomie.models.tva import Tva
 from autonomie.compute.math_utils import (
-        floor,
-        percentage,
-        )
+    floor,
+    percentage,
+)
 from autonomie.views import render_api
 
 log = logging.getLogger(__name__)
+
 
 def format_sage_date(date_object):
     """
@@ -51,6 +52,7 @@ class MissingData(Exception):
         that this model doesn't exist anymore, we raise this exception.
     """
     pass
+
 
 def double_lines(method):
     """
@@ -118,10 +120,10 @@ class SageInvoice(object):
             if product_model is None:
                 raise MissingData(u"No product found for this invoice line")
             prod = self.get_product(
-                    line.product.compte_cg,
-                    line.product.tva.compte_cg,
-                    line.product.tva.code,
-                    )
+                line.product.compte_cg,
+                line.product.tva.compte_cg,
+                line.product.tva.code,
+            )
             prod['tva'] = prod.get('tva', 0) + line.tva_amount()
             prod['ht'] = prod.get('ht', 0) + line.total_ht()
 
@@ -137,10 +139,10 @@ class SageInvoice(object):
         if compte_cg_tva:
             for line in self.invoice.discounts:
                 prod = self.get_product(
-                        self.config.get('compte_rrr'),
-                        compte_cg_tva,
-                        code_tva,
-                        )
+                    self.config.get('compte_rrr'),
+                    compte_cg_tva,
+                    code_tva,
+                )
                 prod['tva'] = prod.get('tva', 0) + line.tva_amount()
                 prod['ht'] = prod.get('ht', 0) + line.total_ht()
 
@@ -154,10 +156,10 @@ class SageInvoice(object):
                 self.expense_tva_code = self.default_tva.code
 
             prod = self.get_product(
-                        self.config.get("compte_frais_annexes"),
-                        self.expense_tva_compte_cg,
-                        self.expense_tva_code
-                        )
+                self.config.get("compte_frais_annexes"),
+                self.expense_tva_compte_cg,
+                self.expense_tva_code
+            )
             ht_expense = self.invoice.get_expense_ht()
             ttc_expense = self.invoice.expenses_amount()
             prod['tva'] = ht_expense.tva_amount()
@@ -207,8 +209,9 @@ class BaseSageBookEntryFactory(object):
         try:
             part = float(self.config[self._part_key])
         except ValueError:
-            raise MissingData(u"The Taux {0} should be a float"\
-                    .format(self._part_key))
+            raise MissingData(
+                u"The Taux {0} should be a float".format(self._part_key)
+            )
         return part
 
     def get_contribution(self):
@@ -234,13 +237,14 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
         Base Sage Export module
     """
     static_columns = (
-                      'code_journal',
-                      'date',
-                      'num_facture',
-                      'libelle',
-                      'type_',
-                        )
-    variable_columns = ('compte_cg', 'num_analytique', 'compte_tiers',
+        'code_journal',
+        'date',
+        'num_facture',
+        'libelle',
+        'type_',
+    )
+    variable_columns = (
+        'compte_cg', 'num_analytique', 'compte_tiers',
         'code_tva', 'echeance', 'debit', 'credit')
     _part_key = ''
 
@@ -326,9 +330,9 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             Return the value of the libelle column
         """
         return u"{0} {1}".format(
-                self.invoice.customer.name,
-                self.company.name,
-                )
+            self.invoice.customer.name,
+            self.company.name,
+        )
 
     @property
     def num_analytique(self):
@@ -345,11 +349,11 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=product['compte_cg_produit'],
-                num_analytique=self.num_analytique,
-                code_tva=product['code_tva'],
-                credit=product['ht']
-                )
+            compte_cg=product['compte_cg_produit'],
+            num_analytique=self.num_analytique,
+            code_tva=product['code_tva'],
+            credit=product['ht']
+        )
         return entry
 
     @double_lines
@@ -359,11 +363,11 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=product['compte_cg_tva'],
-                num_analytique=self.num_analytique,
-                code_tva=product['code_tva'],
-                credit=product['tva']
-                )
+            compte_cg=product['compte_cg_tva'],
+            num_analytique=self.num_analytique,
+            code_tva=product['code_tva'],
+            credit=product['tva']
+        )
         return entry
 
     @double_lines
@@ -374,12 +378,12 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
         entry = self.get_base_entry()
         echeance = self.invoice.taskDate + datetime.timedelta(days=30)
         entry.update(
-                compte_cg=self.invoice.customer.compte_cg,
-                num_analytique=self.num_analytique,
-                compte_tiers=self.invoice.customer.compte_tiers,
-                echeance=format_sage_date(echeance),
-                debit=product['ht'] + product['tva']
-                )
+            compte_cg=self.invoice.customer.compte_cg,
+            num_analytique=self.num_analytique,
+            compte_tiers=self.invoice.customer.compte_tiers,
+            echeance=format_sage_date(echeance),
+            debit=product['ht'] + product['tva']
+        )
         return entry
 
     @staticmethod
@@ -388,7 +392,6 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             Test whether the tva of the given product has a positive value
         """
         return product['tva'] != 0
-
 
     def yield_entries(self):
         """
@@ -406,12 +409,13 @@ class SageContribution(BaseInvoiceBookEntryFactory):
         The contribution module
     """
     _part_key = "contribution_cae"
+
     @property
     def libelle(self):
         return u"{0} {1}".format(
-                self.invoice.customer.name,
-                self.company.name,
-                )
+            self.invoice.customer.name,
+            self.company.name,
+        )
 
     def get_amount(self, product):
         """
@@ -427,10 +431,10 @@ class SageContribution(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_contribution'],
-                num_analytique=self.company.code_compta,
-                debit=self.get_amount(product)
-                )
+            compte_cg=self.config['compte_cg_contribution'],
+            num_analytique=self.company.code_compta,
+            debit=self.get_amount(product)
+        )
         return entry
 
     @double_lines
@@ -440,10 +444,10 @@ class SageContribution(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.company.code_compta,
-                credit=self.get_amount(product)
-                )
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.company.code_compta,
+            credit=self.get_amount(product)
+        )
         return entry
 
     @double_lines
@@ -453,9 +457,10 @@ class SageContribution(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.config['numero_analytique'],
-                debit=self.get_amount(product))
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.config['numero_analytique'],
+            debit=self.get_amount(product)
+        )
         return entry
 
     @double_lines
@@ -465,9 +470,10 @@ class SageContribution(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_contribution'],
-                num_analytique=self.config['numero_analytique'],
-                credit=self.get_amount(product))
+            compte_cg=self.config['compte_cg_contribution'],
+            num_analytique=self.config['numero_analytique'],
+            credit=self.get_amount(product)
+        )
         return entry
 
     def yield_entries(self):
@@ -486,12 +492,13 @@ class SageAssurance(BaseInvoiceBookEntryFactory):
         The assurance module
     """
     _part_key = 'taux_assurance'
+
     @property
     def libelle(self):
         return u"{0} {1}".format(
-                self.invoice.customer.name,
-                self.company.name,
-                )
+            self.invoice.customer.name,
+            self.company.name,
+        )
 
     def get_amount(self):
         """
@@ -507,10 +514,10 @@ class SageAssurance(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_assurance'],
-                num_analytique=self.company.code_compta,
-                debit=self.get_amount(),
-                )
+            compte_cg=self.config['compte_cg_assurance'],
+            num_analytique=self.company.code_compta,
+            debit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -520,9 +527,10 @@ class SageAssurance(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.company.code_compta,
-                credit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.company.code_compta,
+            credit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -532,9 +540,10 @@ class SageAssurance(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.config['numero_analytique'],
-                debit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.config['numero_analytique'],
+            debit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -544,9 +553,10 @@ class SageAssurance(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_assurance'],
-                num_analytique=self.config['numero_analytique'],
-                credit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_assurance'],
+            num_analytique=self.config['numero_analytique'],
+            credit=self.get_amount(),
+        )
         return entry
 
     def yield_entries(self):
@@ -559,18 +569,18 @@ class SageAssurance(BaseInvoiceBookEntryFactory):
         yield self.credit_cae()
 
 
-
 class SageCGScop(BaseInvoiceBookEntryFactory):
     """
         The cgscop module
     """
     _part_key = "taux_cgscop"
+
     @property
     def libelle(self):
         return u"{0} {1}".format(
-                self.invoice.customer.name,
-                self.company.name,
-                )
+            self.invoice.customer.name,
+            self.company.name,
+        )
 
     def get_amount(self):
         """
@@ -586,10 +596,10 @@ class SageCGScop(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cgscop'],
-                num_analytique=self.company.code_compta,
-                debit=self.get_amount(),
-                )
+            compte_cg=self.config['compte_cgscop'],
+            num_analytique=self.company.code_compta,
+            debit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -599,9 +609,10 @@ class SageCGScop(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.company.code_compta,
-                credit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.company.code_compta,
+            credit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -611,9 +622,10 @@ class SageCGScop(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.config['numero_analytique'],
-                debit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.config['numero_analytique'],
+            debit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -623,9 +635,10 @@ class SageCGScop(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_debiteur'],
-                num_analytique=self.config['numero_analytique'],
-                credit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_debiteur'],
+            num_analytique=self.config['numero_analytique'],
+            credit=self.get_amount(),
+        )
         return entry
 
     def yield_entries(self):
@@ -643,12 +656,13 @@ class SageContributionOrganic(BaseInvoiceBookEntryFactory):
         The Organic contribution is due for CAE with a large CA
     """
     _part_key = "taux_contribution_organic"
+
     @property
     def libelle(self):
         return u"Contribution Organic {0} {1}".format(
-                self.invoice.customer.name,
-                self.company.name,
-                )
+            self.invoice.customer.name,
+            self.company.name,
+        )
 
     def get_contribution(self):
         return self.get_part()
@@ -667,10 +681,10 @@ class SageContributionOrganic(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_organic'],
-                num_analytique=self.company.code_compta,
-                debit=self.get_amount(),
-                )
+            compte_cg=self.config['compte_cg_organic'],
+            num_analytique=self.company.code_compta,
+            debit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -680,9 +694,10 @@ class SageContributionOrganic(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.company.code_compta,
-                credit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.company.code_compta,
+            credit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -692,9 +707,10 @@ class SageContributionOrganic(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.config['numero_analytique'],
-                debit=self.get_amount(),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.config['numero_analytique'],
+            debit=self.get_amount(),
+        )
         return entry
 
     @double_lines
@@ -725,12 +741,13 @@ class SageRGInterne(BaseInvoiceBookEntryFactory):
         The RGINterne module
     """
     _part_key = "taux_rg_interne"
+
     @property
     def libelle(self):
         return u"RG COOP {0} {1}".format(
-                self.invoice.customer.name,
-                self.company.name,
-                )
+            self.invoice.customer.name,
+            self.company.name,
+        )
 
     def get_amount(self, product):
         """
@@ -747,10 +764,10 @@ class SageRGInterne(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_rg_interne'],
-                num_analytique=self.company.code_compta,
-                debit=self.get_amount(product),
-                )
+            compte_cg=self.config['compte_rg_interne'],
+            num_analytique=self.company.code_compta,
+            debit=self.get_amount(product),
+        )
         return entry
 
     @double_lines
@@ -760,9 +777,10 @@ class SageRGInterne(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.company.code_compta,
-                credit=self.get_amount(product),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.company.code_compta,
+            credit=self.get_amount(product),
+        )
         return entry
 
     @double_lines
@@ -772,9 +790,10 @@ class SageRGInterne(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_cg_banque'],
-                num_analytique=self.config['numero_analytique'],
-                debit=self.get_amount(product),)
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.config['numero_analytique'],
+            debit=self.get_amount(product),
+        )
         return entry
 
     @double_lines
@@ -784,9 +803,10 @@ class SageRGInterne(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_rg_interne'],
-                num_analytique=self.config['numero_analytique'],
-                credit=self.get_amount(product),)
+            compte_cg=self.config['compte_rg_interne'],
+            num_analytique=self.config['numero_analytique'],
+            credit=self.get_amount(product),
+        )
         return entry
 
     def yield_entries(self):
@@ -805,12 +825,13 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
         The Rg client module
     """
     _part_key = "taux_rg_client"
+
     @property
     def libelle(self):
         return u"RG {0} {1}".format(
-                self.invoice.customer.name,
-                self.company.name,
-                )
+            self.invoice.customer.name,
+            self.company.name,
+        )
 
     def get_amount(self, product):
         """
@@ -834,11 +855,11 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.config['compte_rg_externe'],
-                num_analytique=self.company.code_compta,
-                debit=self.get_amount(product),
-                echeance=self.get_echeance(),
-                )
+            compte_cg=self.config['compte_rg_externe'],
+            num_analytique=self.company.code_compta,
+            debit=self.get_amount(product),
+            echeance=self.get_echeance(),
+        )
         return entry
 
     @double_lines
@@ -848,12 +869,12 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
         """
         entry = self.get_base_entry()
         entry.update(
-                compte_cg=self.invoice.customer.compte_cg,
-                num_analytique=self.company.code_compta,
-                credit=self.get_amount(product),
-                compte_tiers=self.invoice.customer.compte_tiers,
-                echeance=self.get_echeance(),
-                )
+            compte_cg=self.invoice.customer.compte_cg,
+            num_analytique=self.company.code_compta,
+            credit=self.get_amount(product),
+            compte_tiers=self.invoice.customer.compte_tiers,
+            echeance=self.get_echeance(),
+        )
         return entry
 
     def yield_entries(self):
@@ -1111,7 +1132,7 @@ class ExpenseExport(object):
     """
         Export an expense to a Sage
     """
-    _default_modules = ( SageExpenseMain, )
+    _default_modules = (SageExpenseMain, )
 
     def __init__(self, config):
         self.config = config

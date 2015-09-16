@@ -58,25 +58,21 @@
     TOTAL
 """
 import logging
-import datetime
 
 import colander
 import deform
 
+from pyramid.security import has_permission
 from deform_extensions import (
-    DisabledInput,
     GridMappingWidget,
 )
 from autonomie import forms
 from autonomie.models.task import (
     WorkUnit,
     PaymentConditions,
-    PaymentMode,
-    BankAccount,
 )
 from autonomie.models.tva import (
     Tva,
-    Product,
 )
 from .custom_types import (
     QuantityType,
@@ -142,14 +138,6 @@ def get_payment_times():
     for i in range(1, 12):
         payment_times.append((i, '%d fois' % i))
     return payment_times
-
-
-@colander.deferred
-def deferred_default_year(node, kw):
-    """
-        Return the current year
-    """
-    return datetime.date.today().year
 
 
 def build_customer_value(customer=None):
@@ -244,14 +232,6 @@ def get_tva_choices():
     return [(unicode(tva.value), tva.name)for tva in Tva.query()]
 
 
-def get_product_choices():
-    """
-        Return data structure for product code select widget options
-    """
-    return [(p.id, u"{0} ({1})".format(p.name, p.compte_cg),)
-            for p in Product.query()]
-
-
 def get_unities():
     unities = ["", ]
     unities.extend([workunit.label for workunit in WorkUnit.query()])
@@ -272,7 +252,7 @@ def _is_in(datas):
 
 @colander.deferred
 def deferred_unity_validator(node, kw):
-    return colander.Function(_is_in(get_unities()))
+    return colander.OneOf(get_unities())
 
 
 @colander.deferred
@@ -282,37 +262,12 @@ def deferred_tva_validator(node, kw):
 
 
 @colander.deferred
-def deferred_product_validator(node, kw):
-    options = [option[0] for option in get_product_choices()]
-    return colander.Function(_is_in(options))
-
-
-@colander.deferred
-def deferred_financial_year_widget(node, kw):
-    request = kw['request']
-    if request.user.is_admin() or request.user.is_manager():
-        return deform.widget.TextInputWidget(mask='9999')
-    else:
-        return deform.widget.HiddenWidget()
-
-
-@colander.deferred
 def deferred_tvas_widget(node, kw):
     """
         return a tva widget
     """
     tvas = get_tva_choices()
     wid = deform.widget.SelectWidget(values=tvas)
-    return wid
-
-
-@colander.deferred
-def deferred_product_widget(node, kw):
-    """
-        return a widget for product selection
-    """
-    products = get_product_choices()
-    wid = deform.widget.SelectWidget(values=products)
     return wid
 
 
@@ -440,14 +395,6 @@ class TaskLine(colander.MappingSchema):
         validator=deferred_tva_validator,
         css_class='col-md-1',
         title=u'TVA')
-    product_id = colander.SchemaNode(
-        colander.Integer(),
-        title=u"Code produit",
-        widget=deferred_product_widget,
-        validator=deferred_product_validator,
-        missing="",
-        css_class="col-md-2",
-    )
 
 
 class DiscountLine(colander.MappingSchema):
@@ -661,15 +608,19 @@ class TaskSchema(colander.Schema):
             item_template=TEMPLATES_URL + 'taskdetails_mapping_item.pt'
         )
     )
+    communication = TaskCommunication(title=u"Communication Entrepreneur/CAE")
 
 
 def remove_admin_fields(schema, kw):
+    request = kw['request']
+    context = request.context
+
     doctype = schema['lines']['lines'].doctype
     lines = schema['lines']['lines']
     glines = schema['lines']['groups']['groups']['lines']
     glines.doctype = doctype
     for schema_node in (lines, glines):
-        if kw['request'].user.is_contractor():
+        if not has_permission("task.admin", context, request):
             # Non admin users doesn't edit products
             if doctype != 'estimation':
                 del schema_node['taskline']['product_id']
@@ -756,23 +707,6 @@ class EstimationPayments(colander.MappingSchema):
     )
 
 
-class InvoicePayments(colander.MappingSchema):
-    """
-        Conditions de paiement de la facture
-    """
-    payment_conditions_select = colander.SchemaNode(
-        colander.String(),
-        widget=forms.get_deferred_select(PaymentConditions),
-        title=u"",
-        missing=colander.drop,
-    )
-
-    payment_conditions = forms.textarea_node(
-        title="",
-        default=deferred_default_payment_condition,
-    )
-
-
 def get_estimation_schema():
     """
         Return the schema for estimation add/edit
@@ -780,227 +714,21 @@ def get_estimation_schema():
     schema = TASKSCHEMA.clone()
     schema['lines']['lines'].doctype = "estimation"
     tmpl = 'autonomie:deform_templates/paymentdetails_item.pt'
-    schema.add(TaskNotes(title=u"Notes", name="notes"))
-    schema.add(
-        EstimationPayments(title=u'Conditions de paiement',
-                           widget=deform.widget.MappingWidget(
-                               item_template=tmpl
-                           ),
-                           name='payments')
+    schema.add_before(
+        'communication',
+        TaskNotes(title=u"Notes", name="notes"),
     )
-    schema.add(
-        TaskCommunication(title=u'Communication Entrepreneur/CAE',
-                          name='communication')
-    )
-    del schema['lines']['lines']['taskline']['product_id']
-    del schema['lines']['groups']['groups']['lines']['taskline']['product_id']
-    return schema
-
-
-FINANCIAL_YEAR = colander.SchemaNode(
-    colander.Integer(),
-    name="financial_year",
-    title=u"Année comptable de référence",
-    widget=deferred_financial_year_widget,
-    default=deferred_default_year,
-)
-
-
-def get_invoice_schema():
-    """
-        Return the schema for invoice add/edit
-    """
-    schema = TASKSCHEMA.clone()
-    schema['lines']['lines'].doctype = "invoice"
-    title = u"Phase où insérer la facture"
-    schema['common']['phase_id'].title = title
-    # Ref #689
-    schema['common'].add_before('description', FINANCIAL_YEAR)
-    title = u"Date de la facture"
-    schema['common']['taskDate'].title = title
-    title = u"Objet de la facture"
-    schema['common']['description'].title = title
-    title = u"Conditions de paiement"
-    schema.add(InvoicePayments(title=title, name='payments'))
-    schema.add(
-        TaskCommunication(title=u'Communication Entrepreneur/CAE',
-                          name='communication')
+    schema.add_before(
+        'communication',
+        EstimationPayments(
+            title=u'Conditions de paiement',
+            widget=deform.widget.MappingWidget(
+                item_template=tmpl
+            ),
+            name='payments',
+        )
     )
     return schema
-
-
-def get_cancel_invoice_schema():
-    """
-        return the cancel invoice form schema
-    """
-    schema = TASKSCHEMA.clone()
-    schema['lines']['lines'].doctype = "taskschema"
-    title = u"Phase où insérer l'avoir"
-    schema['common']['phase_id'].title = title
-    # Ref #689
-    schema['common'].add_before('description', FINANCIAL_YEAR)
-    title = u"Date de l'avoir"
-    schema['common']['taskDate'].title = title
-    title = u"Objet de l'avoir"
-    schema['common']['description'].title = title
-    del schema['common']['course']
-    title = u"Conditions de remboursement"
-    del schema['lines']['discounts']
-    payments = InvoicePayments(title=title, name='payments').clone()
-    payments['payment_conditions'].title = title
-    payments['payment_conditions'].description = u""
-    payments['payment_conditions'].missing = u""
-
-    schema['lines']['expenses_ht'].validator = forms.negative_validator
-
-    schema.add(payments)
-    schema.add(
-        TaskCommunication(title=u'Communication Entrepreneur/CAE',
-                          name='communication')
-    )
-    return schema
-
-
-def get_amount_topay(kw):
-    """
-    Retrieve the amount to be paid regarding the context
-    """
-    context = kw['request'].context
-    if context.__name__ == 'invoice':
-        task = context
-        topay = task.topay()
-    else:
-        task = context.task
-        topay = task.topay()
-        topay += context.amount
-    return topay
-
-
-@colander.deferred
-def deferred_amount_default(node, kw):
-    """
-        default value for the payment amount
-    """
-    return get_amount_topay(kw)
-
-
-@colander.deferred
-def deferred_total_validator(node, kw):
-    """
-        validate the amount to keep the sum under the total
-    """
-    topay = get_amount_topay(kw)
-    max_msg = u"Le montant ne doit pas dépasser %s (total ttc - somme \
-des paiements + montant d'un éventuel avoir)" % (topay / 100.0)
-    min_msg = u"Le montant doit être positif"
-    return colander.Range(
-        min=0, max=topay, min_err=min_msg, max_err=max_msg,
-    )
-
-
-@colander.deferred
-def deferred_payment_mode_widget(node, kw):
-    """
-        dynamically retrieves the payment modes
-    """
-    modes = [(mode.label, mode.label) for mode in PaymentMode.query()]
-    return deform.widget.SelectWidget(values=modes)
-
-
-@colander.deferred
-def deferred_payment_mode_validator(node, kw):
-    return colander.OneOf([mode.label for mode in PaymentMode.query()])
-
-
-class PaymentSchema(colander.MappingSchema):
-    """
-        colander schema for payment recording
-    """
-    come_from = forms.come_from_node()
-    date = forms.today_node()
-    amount = colander.SchemaNode(
-        AmountType(),
-        title=u"Montant",
-        validator=deferred_total_validator,
-        default=deferred_amount_default,
-    )
-    mode = colander.SchemaNode(
-        colander.String(),
-        title=u"Mode de paiement",
-        widget=deferred_payment_mode_widget,
-        validator=deferred_payment_mode_validator,
-    )
-    bank_id = colander.SchemaNode(
-        colander.Integer(),
-        title=u"Banque",
-        missing=colander.drop,
-        widget=forms.get_deferred_select(BankAccount),
-        default=forms.get_deferred_default(BankAccount),
-    )
-    resulted = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Soldé",
-        description="""Indique que le document est soldé (
-ne recevra plus de paiement), si le montant indiqué correspond au
-montant de la facture celle-ci est soldée automatiquement""",
-        default=False,
-    )
-
-
-class FinancialYearSchema(colander.MappingSchema):
-    """
-        colander Schema for financial year setting
-    """
-    financial_year = FINANCIAL_YEAR
-
-
-class ProductTaskLine(colander.MappingSchema):
-    """
-        A single estimation line
-    """
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=deform.widget.HiddenWidget(),
-        missing=u"",
-        css_class="span0"
-    )
-    description = colander.SchemaNode(
-        colander.String(),
-        widget=DisabledInput(),
-        missing=u'',
-        css_class='col-md-3',
-    )
-    tva = colander.SchemaNode(
-        AmountType(),
-        widget=DisabledInput(),
-        css_class='col-md-1',
-        title=u'TVA',
-    )
-    product_id = colander.SchemaNode(
-        colander.Integer(),
-        widget=deferred_product_widget,
-        validator=deferred_product_validator,
-        missing="",
-        css_class="col-md-2",
-        title=u"Code produit",
-    )
-
-
-class ProductTaskLines(colander.SequenceSchema):
-    taskline = ProductTaskLine(missing="", title=u"")
-
-
-class SetProductsSchema(colander.MappingSchema):
-    """
-        Form schema used to configure Products
-    """
-    lines = ProductTaskLines(
-        widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + 'product_tasklines.pt',
-            item_template=TEMPLATES_URL + 'product_tasklines_item.pt',
-            min_len=1),
-        missing="",
-        title=u'')
 
 
 #  Dans le formulaire de création de devis par exemple, on trouve

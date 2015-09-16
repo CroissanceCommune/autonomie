@@ -29,7 +29,11 @@ import logging
 
 from colanderalchemy import SQLAlchemySchemaNode
 from deform import ValidationFailure
+from deform import Button
+from deform import Form
+
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import has_permission
 
 from autonomie.exception import Forbidden
 from autonomie.models.task import (
@@ -38,13 +42,24 @@ from autonomie.models.task import (
     DiscountLine,
     Invoice,
 )
-from autonomie.forms.task import (
+from autonomie.utils.widgets import (
+    Submit,
+    PopUp,
+)
+from autonomie.forms.invoices import (
     get_invoice_schema,
+)
+from autonomie.forms.task import (
     get_invoice_appstruct,
     get_invoice_dbdatas,
 )
 from autonomie.forms import (
     merge_session_with_post,
+)
+from autonomie.forms.invoices import (
+    FinancialYearSchema,
+    get_payment_schema,
+    SetProductsSchema,
 )
 from autonomie.views import (
     submit_btn,
@@ -53,19 +68,92 @@ from autonomie.views import (
 from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
     TaskFormView,
-    get_paid_form,
-    get_set_financial_year_form,
-    get_set_products_form,
+    TaskFormActions,
     context_is_editable,
     TaskStatusView,
     populate_actionmenu,
     task_pdf_view,
-    task_html_view,
+    get_task_html_view,
     make_task_delete_view,
+    context_is_task,
 )
 
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
+
+
+def get_paid_form(request, counter=None):
+    """
+        Return a payment form
+    """
+    valid_btn = Button(
+        name='submit',
+        value="paid",
+        type='submit',
+        title=u"Valider",
+    )
+    schema = get_payment_schema(request).bind(request=request)
+    action = request.route_path(
+        "invoice",
+        id=request.context.id,
+        _query=dict(action='payment')
+    )
+    form = Form(
+        schema=schema,
+        buttons=(valid_btn,),
+        action=action,
+        counter=counter,
+    )
+    return form
+
+
+def get_set_products_form(request, counter=None):
+    """
+        Return a form used to set products reference to :
+            * invoice lines
+            * cancelinvoice lines
+    """
+    schema = SetProductsSchema().bind(request=request)
+    action = request.route_path(
+        request.context.__name__,
+        id=request.context.id,
+        _query=dict(action='set_products')
+    )
+    valid_btn = Button(
+        name='submit',
+        value="set_products",
+        type='submit',
+        title=u"Valider"
+    )
+    form = Form(schema=schema, buttons=(valid_btn,), action=action,
+                counter=counter)
+    return form
+
+
+def get_set_financial_year_form(request, counter=None):
+    """
+        Return the form to set the financial year of an
+        invoice or a cancelinvoice
+    """
+    schema = FinancialYearSchema().bind(request=request)
+    action = request.route_path(
+        request.context.__name__,
+        id=request.context.id,
+        _query=dict(action='set_financial_year'),
+    )
+    valid_btn = Button(
+        name='submit',
+        value="set_financial_year",
+        type='submit',
+        title=u"Valider",
+    )
+    form = Form(
+        schema=schema,
+        buttons=(valid_btn,),
+        action=action,
+        counter=counter,
+    )
+    return form
 
 
 def add_lines_to_invoice(task, appstruct):
@@ -92,6 +180,107 @@ def add_lines_to_invoice(task, appstruct):
     return task
 
 
+class InvoiceFormActions(TaskFormActions):
+    """
+    The form actions class specific to invoices
+    """
+
+    def _set_financial_year_form(self):
+        """
+            Return the form for setting the financial year of a document
+        """
+        form = get_set_financial_year_form(self.request, self.formcounter)
+        form.set_appstruct(
+            {'financial_year': self.context.financial_year}
+        )
+        self.formcounter = form.counter
+        return form
+
+    def _set_financial_year_btn(self):
+        """
+            Return the button for the popup with the financial year set form
+            of the current document
+        """
+        if context_is_task(self.context):
+            title = u"Année comptable de référence"
+            form = self._set_financial_year_form()
+            popup = PopUp(
+                "set_financial_year_form_container",
+                title,
+                form.render(),
+            )
+            self.request.popups[popup.name] = popup
+            yield popup.open_btn(css='btn btn-primary')
+
+    def _set_products_form(self):
+        """
+            Return the form for configuring the products for each lines
+        """
+        form = get_set_products_form(self.request, self.formcounter)
+        form.set_appstruct(
+            {
+                'lines': [
+                    line.appstruct() for line in self.context.all_lines
+                ]
+            }
+        )
+        self.formcounter = form.counter
+        return form
+
+    def _set_products_btn(self):
+        """
+            Popup fire button
+        """
+        title = u"Configuration des produits"
+        form = self._set_products_form()
+        popup = PopUp("set_products_form", title, form.render())
+        self.request.popups[popup.name] = popup
+        yield popup.open_btn(css='btn btn-primary')
+
+    def _paid_form(self):
+        """
+            return the form for payment registration
+        """
+        form = get_paid_form(self.request, self.formcounter)
+        self.formcounter = form.counter
+        return form
+
+    def _paid_btn(self):
+        """
+            Return a button to set a paid btn and a select to choose
+            the payment mode
+        """
+
+        if has_permission("manage", self.context, self.request):
+            form = self._paid_form()
+            title = u"Notifier un paiement"
+            popup = PopUp("paidform", title, form.render())
+            self.request.popups[popup.name] = popup
+            yield popup.open_btn(css='btn btn-primary')
+
+    def _aboinv_btn(self):
+        """
+            Return a button to abort an invoice
+        """
+        yield Submit(
+            u"Annuler cette facture",
+            value="aboinv",
+            request=self.request,
+            confirm=u"Êtes-vous sûr de vouloir annuler cette facture ?"
+        )
+
+    def _gencinv_btn(self):
+        """
+            Return a button for generating a cancelinvoice
+        """
+        if self.request.context.topay() != 0:
+            yield Submit(
+                u"Générer un avoir",
+                value="gencinv",
+                request=self.request,
+            )
+
+
 class InvoiceAdd(TaskFormView):
     """
         Invoice Add view
@@ -101,6 +290,7 @@ class InvoiceAdd(TaskFormView):
     buttons = (submit_btn,)
     model = Invoice
     add_template_vars = ('edit', )
+    form_actions_factory = InvoiceFormActions
 
     @property
     def company(self):
@@ -157,6 +347,7 @@ class InvoiceEdit(TaskFormView):
     model = Invoice
     edit = True
     add_template_vars = ('edit', )
+    form_actions_factory = InvoiceFormActions
 
     @property
     def company(self):
@@ -214,7 +405,7 @@ class InvoiceEdit(TaskFormView):
                                                  id=self.context.project.id))
 
 
-class InvoiceStatus(TaskStatusView):
+class CommonInvoiceStatusView(TaskStatusView):
     """
         Handle the invoice status processing
         Is called when the status btn from the html view or
@@ -237,19 +428,72 @@ class InvoiceStatus(TaskStatusView):
         log.debug(appstruct)
         return appstruct
 
-    def post_set_products_process(self, task, status, params):
+    def post_set_products_process(self, task, status, invoice):
         log.debug(u"+ Setting products for an invoice (post-step)")
-        invoice = params
         invoice = self.request.dbsession.merge(invoice)
-        log.debug(u"Configuring prodicts for invoice :{0}".format(invoice.id))
+        log.debug(
+            u"Configuring products for {context.__name__} :{context.id}".
+            format(context=invoice)
+        )
         msg = u"Les codes produits ont bien été configurés"
-        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
         self.request.session.flash(msg)
 
     def pre_gencinv_process(self, task, status, params):
         params = dict(params.items())
         params['user'] = self.request.user
         return params
+
+    def pre_set_financial_year_process(self, task, status, params):
+        """
+            Handle form validation before setting the financial year of
+            the current task
+        """
+        form = get_set_financial_year_form(self.request)
+        # if an error is raised here, it will be cached a level higher
+        appstruct = form.validate(params.items())
+        log.debug(u" * Form has been validated")
+        return appstruct
+
+    def post_set_financial_year_process(self, task, status, params):
+        invoice = params
+        invoice = self.request.dbsession.merge(invoice)
+        log.debug(u"Set financial year of the invoice :{0}".format(invoice.id))
+        msg = u"L'année comptable de référence a bien été modifiée"
+        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
+        self.request.session.flash(msg)
+
+
+class InvoiceStatusView(CommonInvoiceStatusView):
+    def pre_paid_process(self, task, status, params):
+        """
+            Validate a payment form's data
+        """
+        form = get_paid_form(self.request)
+        # We don't try except on the data validation, since this is done in the
+        # original wrapping call (see register_payment)
+        appstruct = form.validate(params.items())
+
+        if 'amount' in appstruct:
+            # si on a une seule tva : remittance_amount = amount
+            appstruct['remittance_amount'] = appstruct['amount']
+        elif 'tvas' in appstruct:
+            # si on a plusieurs tva :
+            for tva_payment in appstruct['tvas']:
+                remittance_amount = appstruct['remittance_amount']
+                tva_payment['remittance_amount'] = remittance_amount
+                tva_payment['date'] = appstruct['date']
+                tva_payment['mode'] = appstruct['mode']
+                tva_payment['bank_id'] = appstruct.get('bank_id')
+        else:
+            raise Exception(u"On a rien à faire ici")
+
+        logger.debug(u"In pre paid process")
+        logger.debug(u"Returning : {0}".format(appstruct))
+        return appstruct
+
+    def post_valid_process(self, task, status, params):
+        msg = u"La facture porte le numéro <b>{0}</b>"
+        self.session.flash(msg.format(task.official_number))
 
     def post_gencinv_process(self, task, status, params):
         cancelinvoice = params
@@ -273,39 +517,6 @@ class InvoiceStatus(TaskStatusView):
         msg = msg.format(self.request.route_path("invoice", id=id_))
         self.request.session.flash(msg)
 
-    def pre_set_financial_year_process(self, task, status, params):
-        """
-            Handle form validation before setting the financial year of
-            the current task
-        """
-        form = get_set_financial_year_form(self.request)
-        # if an error is raised here, it will be cached a level higher
-        appstruct = form.validate(params.items())
-        log.debug(u" * Form has been validated")
-        return appstruct
-
-    def post_set_financial_year_process(self, task, status, params):
-        invoice = params
-        invoice = self.request.dbsession.merge(invoice)
-        log.debug(u"Set financial year of the invoice :{0}".format(invoice.id))
-        msg = u"L'année comptable de référence a bien été modifiée"
-        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
-        self.request.session.flash(msg)
-
-    def pre_paid_process(self, task, status, params):
-        """
-            Validate a payment form's data
-        """
-        form = get_paid_form(self.request)
-        # We don't try except on the data validation, since this is done in the
-        # original wrapping call (see register_payment)
-        appstruct = form.validate(params.items())
-        return appstruct
-
-    def post_valid_process(self, task, status, params):
-        msg = u"La facture porte le numéro <b>{0}</b>"
-        self.session.flash(msg.format(task.official_number))
-
 
 def register_payment(request):
     """
@@ -313,7 +524,7 @@ def register_payment(request):
     """
     log.info(u"'{0}' is registering a payment".format(request.user.login))
     try:
-        ret_dict = InvoiceStatus(request)()
+        ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"An error has been detected")
         ret_dict = dict(form=err.render(),
@@ -326,7 +537,7 @@ def duplicate(request):
         duplicate an invoice
     """
     try:
-        ret_dict = InvoiceStatus(request)()
+        ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Duplication error")
         ret_dict = dict(form=err.render(),
@@ -339,7 +550,7 @@ def set_financial_year(request):
         Set the financial year of a document
     """
     try:
-        ret_dict = InvoiceStatus(request)()
+        ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Financial year set error")
         ret_dict = dict(
@@ -354,7 +565,7 @@ def set_products(request):
         Set products in a document
     """
     try:
-        ret_dict = InvoiceStatus(request)()
+        ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Error setting products")
         ret_dict = dict(
@@ -395,7 +606,7 @@ def includeme(config):
     )
 
     config.add_view(
-        task_html_view,
+        get_task_html_view(InvoiceFormActions),
         route_name='invoice',
         renderer='tasks/view_only.mako',
         permission='view',
@@ -410,7 +621,7 @@ def includeme(config):
     )
 
     config.add_view(
-        InvoiceStatus,
+        InvoiceStatusView,
         route_name='invoice',
         request_param='action=status',
         permission='edit'

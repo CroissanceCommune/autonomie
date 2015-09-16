@@ -26,7 +26,7 @@
     Estimation views
 """
 import logging
-from deform import ValidationFailure
+import deform
 
 from pyramid.httpexceptions import HTTPFound
 
@@ -44,6 +44,9 @@ from autonomie.models.task import (
 from autonomie.models.task.task import DiscountLine
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
+from autonomie.utils.widgets import (
+    Submit,
+)
 from autonomie.forms.task import (
     get_estimation_schema,
     get_estimation_appstruct,
@@ -62,11 +65,12 @@ from autonomie.views import (
 from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
     TaskStatusView,
+    TaskFormActions,
     TaskFormView,
     context_is_editable,
     populate_actionmenu,
     task_pdf_view,
-    task_html_view,
+    get_task_html_view,
     make_task_delete_view,
 )
 
@@ -101,6 +105,41 @@ def add_lines_to_estimation(task, appstruct):
     return task
 
 
+class EstimationFormActions(TaskFormActions):
+    """
+    estimation specific form actions buttons and forms
+    """
+    def _aboest_btn(self):
+        """
+            Return a button to abort an estimation
+        """
+        yield Submit(u"Indiquer sans suite",
+                     title=u"Indiquer que le devis n'aura pas de suite",
+                     value="aboest",
+                     request=self.request)
+
+    def _geninv_btn(self):
+        """
+            Return a button for invoice generation
+        """
+        if not self.context.invoices:
+            yield Submit(
+                u"Générer les factures",
+                title=u"Générer les factures correspondantes au devis",
+                value="geninv",
+                request=self.request,
+            )
+        else:
+            yield Submit(
+                u"Re-générer les factures",
+                title=u"Re-générer les factures correspondantes au devis",
+                value="geninv",
+                request=self.request,
+                confirm=u"Êtes-vous sûr de vouloir re-générer des factures \
+pour ce devis ?"
+            )
+
+
 class EstimationAdd(TaskFormView):
     """
         Estimation add view
@@ -110,6 +149,7 @@ class EstimationAdd(TaskFormView):
     schema = get_estimation_schema()
     buttons = (submit_btn,)
     model = Estimation
+    form_actions_factory = EstimationFormActions
 
     @property
     def company(self):
@@ -159,6 +199,7 @@ class EstimationEdit(TaskFormView):
     model = Estimation
     edit = True
     add_template_vars = ('edit', )
+    form_actions_factory = EstimationFormActions
 
     @property
     def company(self):
@@ -269,7 +310,7 @@ def duplicate(request):
     """
     try:
         ret_dict = EstimationStatus(request)()
-    except ValidationFailure, err:
+    except deform.ValidationFailure, err:
         log.exception(u"Duplication error")
         ret_dict = dict(form=err.render(),
                         title=u"Duplication d'un document")
@@ -375,7 +416,7 @@ def includeme(config):
     )
 
     config.add_view(
-        task_html_view,
+        get_task_html_view(),
         route_name='estimation',
         renderer='tasks/view_only.mako',
         request_param='view=html',

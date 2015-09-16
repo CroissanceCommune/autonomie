@@ -31,8 +31,10 @@ from colanderalchemy import SQLAlchemySchemaNode
 from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.forms.task import (
+from autonomie.forms.invoices import (
     get_cancel_invoice_schema,
+)
+from autonomie.forms.task import (
     get_cancel_invoice_appstruct,
     get_cancel_invoice_dbdatas,
 )
@@ -50,15 +52,16 @@ from autonomie.views import (
     BaseEditView,
 )
 from autonomie.exception import Forbidden
+from autonomie.views.invoice import (
+    InvoiceFormActions,
+    CommonInvoiceStatusView,
+)
 from autonomie.views.taskaction import (
     TaskFormView,
-    get_set_financial_year_form,
-    get_set_products_form,
     context_is_editable,
-    TaskStatusView,
     populate_actionmenu,
     task_pdf_view,
-    task_html_view,
+    get_task_html_view,
     make_task_delete_view,
 )
 
@@ -93,6 +96,7 @@ class CancelInvoiceAdd(TaskFormView):
     buttons = (submit_btn,)
     model = CancelInvoice
     add_template_vars = ('edit', )
+    form_actions_factory = InvoiceFormActions
 
     @property
     def company(self):
@@ -151,6 +155,7 @@ class CancelInvoiceEdit(TaskFormView):
     model = CancelInvoice
     edit = True
     add_template_vars = ('edit', )
+    form_actions_factory = InvoiceFormActions
 
     @property
     def company(self):
@@ -210,30 +215,10 @@ class CancelInvoiceEdit(TaskFormView):
                                                  id=self.context.project.id))
 
 
-class CancelInvoiceStatus(TaskStatusView):
-
-    def redirect(self):
-        project_id = self.request.context.project.id
-        return HTTPFound(self.request.route_path('project', id=project_id))
-
-    def pre_set_products_process(self, task, status, params):
-        """
-            Pre processed method for product configuration
-        """
-        log.debug(u"+ Setting products for an invoice (pre-step)")
-        form = get_set_products_form(self.request)
-        appstruct = form.validate(params.items())
-        return appstruct
-
-    def post_set_products_process(self, task, status, cancelinvoice):
-        self.request.dbsession.merge(cancelinvoice)
-        log.debug(
-            u"Configuring products for cancelinvoice post-step :{0}"
-            .format(cancelinvoice.id)
-        )
-        msg = u"Les codes produits ont bien été configurés"
-        self.request.session.flash(msg)
-
+class CancelInvoiceStatusView(CommonInvoiceStatusView):
+    """
+    Cancelinvoice specific status view
+    """
     def post_valid_process(self, task, status, cancelinvoice):
         """
         Launched after a cancelinvoice has been validated
@@ -251,34 +236,13 @@ is resulted")
             )
         )
 
-    def pre_set_financial_year_process(self, task, status, params):
-        """
-            Handle form validation before setting the financial year of
-            the current task
-        """
-        form = get_set_financial_year_form(self.request)
-        # if an error is raised here, it will be cached a level higher
-        appstruct = form.validate(params.items())
-        log.debug(u" * Form has been validated")
-        return appstruct
-
-    def post_set_financial_year_process(self, task, status, params):
-        cancelinvoice = params
-        cancelinvoice = self.request.dbsession.merge(cancelinvoice)
-        log.debug(
-            u"Set financial year of the cancelinvoice :{0}"
-            .format(cancelinvoice.id)
-        )
-        msg = u"L'année comptable de référence a bien été modifiée"
-        self.request.session.flash(msg)
-
 
 def set_financial_year(request):
     """
         Set the financial year of a document
     """
     try:
-        ret_dict = CancelInvoiceStatus(request)()
+        ret_dict = CancelInvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Financial year set error")
         ret_dict = dict(
@@ -293,7 +257,7 @@ def set_products(request):
         Set products in a document
     """
     try:
-        ret_dict = CancelInvoiceStatus(request)()
+        ret_dict = CancelInvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Error setting products")
         ret_dict = dict(
@@ -328,7 +292,7 @@ def includeme(config):
     )
 
     config.add_view(
-        task_html_view,
+        get_task_html_view(InvoiceFormActions),
         route_name='cancelinvoice',
         renderer='tasks/view_only.mako',
         permission='view',
@@ -336,7 +300,7 @@ def includeme(config):
     )
 
     config.add_view(
-        CancelInvoiceStatus,
+        CancelInvoiceStatusView,
         route_name='cancelinvoice',
         request_param='action=status',
         permission='edit',

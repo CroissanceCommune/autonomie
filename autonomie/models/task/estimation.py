@@ -261,7 +261,7 @@ class Estimation(Task, EstimationCompute):
         inv.address = self.address
         inv.CAEStatus = "draft"
         inv.set_sequence_number(seq_number)
-        invoice.line_groups = []
+        inv.line_groups = []
         return inv
 
     def gen_invoices(self, user):

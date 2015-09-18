@@ -141,6 +141,7 @@ function setPopUp(element, title){
         //$(this).css('height','auto');
         // Get the content width
         var content_width = $(this).width();
+        console.log("The dialog content width is %s", content_width);
         var window_width = $(window).width();
         var window_ratio = window_width * 0.8;
 

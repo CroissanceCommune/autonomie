@@ -339,3 +339,7 @@ input[name=altdate], input[name=date]{
   width: 100%;
   height: 100%;
 }
+/* Jstree */
+.jstree{
+  display: inline-block;
+}

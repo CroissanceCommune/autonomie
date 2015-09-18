@@ -230,6 +230,7 @@ var discount = {
 var catalog = {
   ui: {
     el: "#catalog_popup",
+    search_input: "#catalog_popup input",
     tree: "#catalog_popup .tree-container",
     valid_btn: "#catalog_popup button.btn-success",
     cancel_btn: "#catalog_popup button.btn-danger"
@@ -255,21 +256,43 @@ var catalog = {
      */
     if (_.has(result, "void_message")){
       this.ui.tree.html(result.void_message);
-      this.ui.valid_btn.attr('disabled', true);
+      this.ui.valid_btn.prop('disabled', true);
+      this.ui.search_input.prop('disabled', true);
+      this.setCancelOnClick();
+      this.ui.el.dialog('open');
     } else {
+      this.ui.search_input.prop('disabled', false);
+      this.ui.valid_btn.prop('disabled', false);
       this.ui.tree.jstree({
-        plugins: ["checkbox", 'types'],
+        plugins: ["checkbox", 'types', "search"],
         types: {
           "default": {icon: "glyphicon glyphicon-triangle-right"},
           product: {icon: "glyphicon glyphicon-file"},
           group: {icon: "glyphicon glyphicon-book"}
         },
+        search: {
+          case_insensitive: true,
+          show_only_matches: true
+        },
         core: { data: result.jstree}
       });
-      this.setValidOnclick();
+      this.ui.tree.on('ready.jstree', this.afterJstreeLoaded);
     }
-    this.setCancelOnClick();
-    this.ui.el.dialog('open');
+  },
+  afterJstreeLoaded: function(e, data){
+    console.log("AfterJstreeLoaded");
+      this.setCancelOnClick();
+      this.ui.el.dialog('open');
+      this.setValidOnclick();
+      this.setSearchBheaviour();
+  },
+  setSearchBheaviour: function(){
+    var this_ = this;
+    this.ui.search_input.off("keyup");
+    this.ui.search_input.on("keyup", function() {
+      var searchString = $(this).val();
+      this_.ui.tree.jstree('search', searchString);
+    });
   },
   getLastSeqItem: function(add_button){
     /* Returns the last sequence item added to the sequence managed by
@@ -374,7 +397,7 @@ var catalog = {
 
     // Ensure this is the catalog object
     _.bindAll(this, "buildJsTree", "insertSelectedElements", "close",
-    "addNode", "addProductLine");
+    "addNode", "addProductLine", "setSearchBheaviour", "afterJstreeLoaded");
   }
 };
 $(function(){

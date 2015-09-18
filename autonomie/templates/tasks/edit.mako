@@ -122,6 +122,7 @@ ${form|n}
         </div>
     </div>
     <div id='catalog_popup'>
+        <input class='form-control' type="text" name="catalog_search" placeholder="Nom ou référence"></input>
         <div class='tree-container' style='min-height: 250px;'>
         </div>
         <div class='form-group'>

@@ -330,7 +330,6 @@ brouillon"
                     btns.extend(func())
         btns.extend(self._cancel_btn())
         btns.extend(self._pdf_btn())
-        logger.debug(btns)
         return btns
 
 
@@ -599,7 +598,7 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         if request.context.__name__ == 'invoice':
             label = u"Facture"
         elif request.context.__name__ == 'estimation':
-            label = u"Estimation"
+            label = u"Devis"
         elif request.context.__name__ == 'cancelinvoice':
             label = u"Avoir"
         else:

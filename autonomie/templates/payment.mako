@@ -29,7 +29,7 @@
     <dt>Montant</dt><dd>${api.format_amount(request.context.amount)|n}&nbsp;&euro;</dd>
     <dt>Banque</dt><dd>
         % if request.context.bank:
-            ${request.context.bank.label} (${request.context.bank.code})
+            ${request.context.bank.label} (${request.context.bank.compte_cg})
         % else:
             Non renseignée
         % endif

@@ -233,6 +233,8 @@ class Estimation(Task, EstimationCompute):
         invoice.display_units = self.display_units
         invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
+        # On supprimer le default_task_line group car insère ceux du devis
+        invoice.line_groups = []
         for group in self._sold_invoice_lines(paid_lines):
             invoice.line_groups.append(group)
         for line in self.discounts:

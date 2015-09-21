@@ -241,6 +241,14 @@ def get_admin_menus(request):
             icon="fa fa-credit-card",
             href=href
         )
+
+        href = request.route_path("sage_payment_export")
+        treasury.add_item(
+            u"Export des encaissements",
+            icon="fa fa-bank",
+            href=href
+        )
+
         href = request.route_path("admin_treasury_all")
         treasury.add_item(
             u"Bulletins de salaire",

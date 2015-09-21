@@ -280,11 +280,16 @@ def test_set_manualDeliverables():
 
 
 def test_set_payment_times():
-    dbdatas = {'manualDeliverables': 0, 'payment_lines': range(5)}
+    dbdatas = {
+        'manualDeliverables': 0,
+        'payment_lines': range(5),
+        'paymentDisplay': 1,
+        'deposit': 0,
+    }
 
     res = add_payment_block_appstruct({}, dbdatas)
     assert res['payments']['payment_times'] == 5
-    dbdatas = {'manualDeliverables': 1}
+    dbdatas['manualDeliverables'] = 1
     res = add_payment_block_appstruct({}, dbdatas)
     assert res['payments']['payment_times'] == -1
 
@@ -305,7 +310,7 @@ class TestTaskForms:
         return MagicMock(context=task)
 
     def test_paymentform_schema_ok(self, dbsession):
-        from autonomie.forms.task import PaymentSchema
+        from autonomie.forms.invoices import PaymentSchema
         schema = PaymentSchema().bind(request=self.request())
         form = deform.Form(schema)
         ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'),

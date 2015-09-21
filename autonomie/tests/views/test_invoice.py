@@ -127,8 +127,8 @@ def test_change_status(invoice, get_csrf_request_with_db):
     request.context = invoice
     request.matched_route = "invoice"
 
-    from autonomie.views.invoice import InvoiceStatus
-    view = InvoiceStatus(request)
+    from autonomie.views.invoice import InvoiceStatusView
+    view = InvoiceStatusView(request)
     view()
     invoice = getone()
     assert invoice.CAEStatus == "wait"

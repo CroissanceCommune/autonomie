@@ -279,10 +279,9 @@ class TestStatusChange:
             )
 
         task = get_task(factory=CancelInvoice)
-        status = "draft"
-        self._allowed_state_change(
-            config,
-                task, status, ('delete',))
+        request = testing.DummyRequest()
+        task.CAEStatus = 'draft'
+        task.set_status("delete", request, 'test')
 
         status = "valid"
         self._forbidden_state_change(

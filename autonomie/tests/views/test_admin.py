@@ -159,7 +159,7 @@ def test_success_id_preservation(config, dbsession, get_csrf_request_with_db):
 
 def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
     from autonomie.views.admin.main import AdminCae
-    config.add_route("admin_cae", "/")
+    config.add_route("admin_index", "/")
     appstruct = {'compte_cg_contribution':"00000668",
             'compte_rrr':"000009558"}
     view = AdminCae(get_csrf_request_with_db())

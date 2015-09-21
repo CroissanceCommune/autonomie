@@ -133,9 +133,24 @@
                     <% url = request.route_path('payment', id=payment.id) %>
                     <li>
                         <a href="${url}">
-                            ${api.format_amount(payment.amount)|n}&nbsp;€
-                            le ${api.format_date(payment.date)}
-                            (${api.format_paymentmode(payment.mode)})
+                            % if payment.amount != payment.remittance_amount:
+                                Remise de ${api.format_amount(payment.remittance_amount)|n}&nbsp;€
+                                le ${api.format_date(payment.date)} (${api.format_paymentmode(payment.mode)}
+                                % if payment.bank:
+                                    ${payment.bank.label}
+                                % endif
+                                ):
+                                ${api.format_amount(payment.amount)|n}&nbsp;€
+                                (${payment.tva.name})
+                            % else:
+                                ${api.format_amount(payment.amount)|n}&nbsp;€
+                                le ${api.format_date(payment.date)}
+                                (${api.format_paymentmode(payment.mode)}
+                                % if payment.bank:
+                                    &nbsp;${payment.bank.label}
+                                % endif
+                                )
+                            % endif
                         </a>
                     </li>
                 % endfor

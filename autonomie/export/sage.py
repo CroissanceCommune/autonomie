@@ -116,3 +116,22 @@ class SageExpenseCsvWriter(SageCsvWriter):
         {'name': 'num_analytique', 'label': "Numéro analytique"},
         {'name': 'num_autonomie', 'label': "Référence"},
     )
+
+
+class SagePaymentCsvWriter(SageCsvWriter):
+    """
+    Payment csv writer
+    """
+    headers = (
+        {'name': 'reference', 'label': "Référence"},
+        {'name': 'code_journal', 'label': "Code Journal"},
+        {'name': 'date', 'label': "Date de pièce"},
+        {'name': 'compte_cg', 'label': "N° compte général"},
+        {'name': 'mode', "label": "Mode de règlement"},
+        {'name': 'compte_tiers', 'label': "Numéro de compte tiers"},
+        {'name': 'code_taxe', 'label': "Code taxe"},
+        {'name': 'libelle', 'label': "Libellé d'écriture"},
+        {'name': 'debit', 'label': "Montant débit"},
+        {'name': 'credit', 'label': "Montant crédit"},
+        {'name': 'type_', 'label': "Type de ligne"},
+    )

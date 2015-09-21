@@ -60,7 +60,6 @@ from autonomie.models.base import (
 )
 from autonomie import forms
 from autonomie.models.user import get_deferred_user_choice
-from autonomie.models.tva import Tva
 
 from .interfaces import ITask
 from .states import DEFAULT_STATE_MACHINES
@@ -548,9 +547,6 @@ class DiscountLine(DBBASE, LineCompute):
     def __repr__(self):
         return u"<DiscountLine amount : {s.amount} tva:{s.tva} id:{s.id}>"\
             .format(s=self)
-
-    def get_tva(self):
-        return Tva.query(include_inactive=True).filter(Tva.value == self.tva)
 
 
 class TaskStatus(DBBASE):

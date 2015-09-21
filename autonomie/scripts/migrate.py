@@ -104,7 +104,6 @@ class PackageEnvironment(object):
         cfg = Config()
         cfg.set_main_option("script_location", self.location)
         settings = get_current_registry().settings
-        print(settings)
         if sql_url is None:
             cfg.set_main_option("sqlalchemy.url", settings['sqlalchemy.url'])
         else:

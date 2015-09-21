@@ -121,6 +121,12 @@ class Invoice(Task, InvoiceCompute):
     financial_year = deferred(Column(Integer, default=0), group='edit')
     exported = deferred(Column(Boolean(), default=False), group="edit")
 
+    # invoice specific
+    payment_exported = deferred(
+        Column(Boolean(), default=False),
+        group="edit"
+    )
+
     estimation_id = Column(
         ForeignKey('estimation.id'),
         info={'colanderalchemy': {'exclude': True}},

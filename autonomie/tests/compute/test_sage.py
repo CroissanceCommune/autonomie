@@ -43,6 +43,8 @@ from autonomie.compute.sage import (
     SageRGClient,
     InvoiceExport,
     SageExpenseMain,
+    SagePaymentMain,
+    SagePaymentTva,
 )
 
 
@@ -94,6 +96,8 @@ def get_config():
         'contribution_cae': "10",
         'compte_cg_ndf': "CGNDF",
         'code_journal_ndf':"JOURNALNDF",
+        'receipts_active_tva_module': True,
+        'receipts_code_journal': "JOURNAL_RECEIPTS",
     }
 
 @pytest.fixture
@@ -103,7 +107,20 @@ def def_tva():
         value=1960,
         default=0,
         compte_cg="TVA0001",
+        compte_a_payer="TVAAPAYER0001",
         code='CTVA0001'
+    )
+
+
+@pytest.fixture
+def tva_sans_code():
+    return MagicMock(
+        name="tva_sans_code",
+        value=1960,
+        default=0,
+        compte_cg="TVA0001",
+        compte_a_payer="TVAAPAYER0001",
+        code=None,
     )
 
 
@@ -196,6 +213,20 @@ def sageinvoice_discount(def_tva, invoice_discount):
         config=get_config(),
         default_tva=def_tva
     )
+
+
+@pytest.fixture
+def payment(invoice, def_tva):
+    p = Dummy(
+        remittance_amount=10000,
+        amount=10000,
+        mode=u"chèque",
+        date=datetime.date.today(),
+        tva=def_tva,
+        bank=Dummy(compte_cg=u"COMPTE_CG_BANK"),
+        invoice=invoice,
+    )
+    return p
 
 
 def prepare(discount=False):
@@ -643,6 +674,66 @@ class TestSageExport():
         for fact in sage_factories:
             assert True in [isinstance(module, fact)
                 for module in exporter.modules]
+
+
+@pytest.mark.payment
+class TestSagePaymentMain():
+    def get_factory(self, payment):
+        factory = SagePaymentMain(get_config())
+        factory.set_payment(payment)
+        return factory
+
+    def test_base_entry(self, payment):
+        today = datetime.date.today()
+        factory = self.get_factory(payment)
+        assert factory.reference == "INV_001/100,00"
+        assert factory.code_journal == "JOURNAL_RECEIPTS"
+        assert factory.date == today.strftime("%d%m%y")
+        assert factory.mode == u"chèque"
+        assert factory.montant_remise == u"100,00"
+        assert factory.libelle == u"company / Rgt customer"
+
+    def test_credit_client(self, payment):
+        factory = self.get_factory(payment)
+        g_entry, entry = factory.credit_client(10000)
+        assert entry['compte_cg'] == 'CG_CUSTOMER'
+        assert entry['compte_tiers'] == 'CUSTOMER'
+        assert entry['credit'] == 10000
+
+    def test_debit_banque(self, payment):
+        factory = self.get_factory(payment)
+        g_entry, entry = factory.debit_banque(10000)
+        assert entry['compte_cg'] == "COMPTE_CG_BANK"
+        assert entry['debit'] == 10000
+
+
+@pytest.mark.payment
+class TestSagePaymentTva():
+    def get_factory(self, payment):
+        factory = SagePaymentTva(get_config())
+        factory.set_payment(payment)
+        return factory
+
+    def test_credit_tva(self, payment, tva_sans_code):
+        factory = self.get_factory(payment)
+        g_entry, entry = factory.credit_tva(10000)
+        assert entry['credit'] == 10000
+        assert entry['compte_cg'] == 'TVA0001'
+        assert entry['code_taxe'] == 'CTVA0001'
+
+        payment.tva = tva_sans_code
+        factory = self.get_factory(payment)
+        g_entry, entry = factory.credit_tva(10000)
+        assert 'code_taxe' not in entry
+
+
+    def test_debit_tva(self, payment):
+        factory = self.get_factory(payment)
+        g_entry, entry = factory.debit_tva(10000)
+        assert entry['debit'] == 10000
+        assert entry['compte_cg'] == 'TVAAPAYER0001'
+        assert entry['code_taxe'] == 'CTVA0001'
+
 
 
 @pytest.mark.expense

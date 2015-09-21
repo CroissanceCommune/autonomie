@@ -33,6 +33,9 @@ from autonomie.compute.math_utils import (
     floor,
     percentage,
 )
+from autonomie.compute.task import (
+    reverse_tva,
+)
 from autonomie.views import render_api
 
 log = logging.getLogger(__name__)
@@ -66,7 +69,7 @@ def double_lines(method):
         analytic_entry = method(self, *args)
         general_entry = analytic_entry.copy()
         general_entry['type_'] = 'G'
-        general_entry.pop('num_analytique')
+        general_entry.pop('num_analytique', None)
         return general_entry, analytic_entry
     return wrapped_method
 
@@ -932,6 +935,190 @@ class InvoiceExport(object):
         result = []
         for invoice in invoicelist:
             result.extend(list(self.get_invoice_book_entries(invoice)))
+        return result
+
+
+class SagePaymentBase(BaseSageBookEntryFactory):
+    static_columns = (
+        'reference',
+        'code_journal',
+        'date',
+        'mode',
+        'montant_remise',
+        'libelle'
+    )
+
+    variable_columns = (
+        'compte_cg',
+        'compte_tiers',
+        'code_taxe',
+        'debit',
+        'credit',
+    )
+
+    def set_payment(self, payment):
+        self.invoice = payment.invoice
+        self.payment = payment
+        self.company = self.invoice.company
+        self.customer = self.invoice.customer
+
+    @property
+    def reference(self):
+        return u"{0}/{1}".format(
+            self.invoice.official_number,
+            render_api.format_amount(
+                self.payment.remittance_amount,
+                grouping=False
+            ),
+        )
+
+    @property
+    def code_journal(self):
+        return self.config['receipts_code_journal']
+
+    @property
+    def date(self):
+        return format_sage_date(self.payment.date)
+
+    @property
+    def mode(self):
+        return self.payment.mode
+
+    @property
+    def montant_remise(self):
+        return render_api.format_amount(
+            self.payment.remittance_amount,
+            grouping=False,
+        )
+
+    @property
+    def libelle(self):
+        return u"{0} / Rgt {1}".format(
+            self.company.name,
+            self.invoice.customer.name,
+        )
+
+
+class SagePaymentMain(SagePaymentBase):
+    """
+    Main module for payment export
+    """
+
+    @double_lines
+    def credit_client(self, val):
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.customer.compte_cg,
+            compte_tiers=self.customer.compte_tiers,
+            credit=val,
+        )
+        return entry
+
+    @double_lines
+    def debit_banque(self, val):
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.payment.bank.compte_cg,
+            debit=val,
+        )
+        return entry
+
+    def yield_entries(self):
+        yield self.credit_client(self.payment.amount)
+        yield self.debit_banque(self.payment.amount)
+
+
+class SagePaymentTva(SagePaymentBase):
+    """
+    Optionnal Tva module
+    """
+    def get_amount(self):
+        """
+        Returns the reversed tva amount
+        """
+        tva_amount = self.payment.tva.value
+        tva_value = reverse_tva(
+            self.payment.amount,
+            tva_amount) * tva_amount
+        return tva_value
+
+    @double_lines
+    def credit_tva(self, total):
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.payment.tva.compte_cg,
+            credit=total,
+        )
+        if self.payment.tva.code:
+            entry.update(
+                code_taxe=self.payment.tva.code,
+            )
+        return entry
+
+    @double_lines
+    def debit_tva(self, total):
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.payment.tva.compte_a_payer,
+            debit=total,
+        )
+        if self.payment.tva.code:
+            entry.update(
+                code_taxe=self.payment.tva.code,
+            )
+        return entry
+
+    def yield_entries(self):
+        """
+        Yield all the entries for the current payment
+        """
+        total = self.get_amount()
+        yield self.credit_tva(total)
+        yield self.debit_tva(total)
+
+
+class PaymentExport(object):
+    _default_modules = (SagePaymentMain,)
+    _available_modules = {
+        "receipts_active_tva_module": SagePaymentTva,
+    }
+
+    def __init__(self, config):
+        self.config = config
+        self.modules = []
+        for module in self._default_modules:
+            self.modules.append(module(self.config))
+        for config_key, module in self._available_modules.items():
+            if self.config.get(config_key) == '1':
+                self.modules.append(module(self.config))
+
+    def get_invoice_entries(self, invoice):
+        """
+        Return the receipts entries for the given invoice
+        """
+        result = []
+        for payment in invoice.payments:
+            result.extend(list(self.get_receipt_entries(payment)))
+        return result
+
+    def get_receipt_entries(self, payment):
+        """
+        Return the receipts entries for the given payment
+        """
+        for module in self.modules:
+            module.set_payment(payment)
+            for entry in module.yield_entries():
+                gen_line, analytic_line = entry
+                yield gen_line
+                yield analytic_line
+
+    def get_invoices_entries(self, invoicelist):
+        """
+        Return the receipts entries for the given invoicelist
+        """
+        result = []
+        for invoice in invoicelist:
+            result.extend(list(self.get_invoice_entries(invoice)))
         return result
 
 

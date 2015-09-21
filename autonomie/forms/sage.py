@@ -62,9 +62,7 @@ class PeriodSchema(colander.MappingSchema):
     exported = EXPORTEDFIELD
 
 
-periodSchema = PeriodSchema(
-        title=u"Exporter les factures sur une période donnée",
-        validator=date_validator)
+periodSchema = PeriodSchema(validator=date_validator)
 
 
 class InvoiceNumberSchema(colander.MappingSchema):

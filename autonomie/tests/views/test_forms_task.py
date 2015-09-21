@@ -28,15 +28,17 @@ from mock import MagicMock
 
 
 from autonomie.forms.task import (
-    deferred_total_validator,
     dbdatas_to_appstruct,
     get_lines_block_appstruct,
     appstruct_to_dbdatas,
     add_order_to_lines,
     set_manualDeliverables,
-    set_payment_times,
-    deferred_payment_mode_validator,
+    add_payment_block_appstruct,
     TASK_MATCHING_MAP,
+)
+from autonomie.forms.invoices import (
+    deferred_total_validator,
+    deferred_payment_mode_validator,
 )
 
 
@@ -279,10 +281,11 @@ def test_set_manualDeliverables():
 
 def test_set_payment_times():
     dbdatas = {'manualDeliverables': 0, 'payment_lines': range(5)}
-    res = set_payment_times({}, dbdatas)
+
+    res = add_payment_block_appstruct({}, dbdatas)
     assert res['payments']['payment_times'] == 5
     dbdatas = {'manualDeliverables': 1}
-    res = set_payment_times({}, dbdatas)
+    res = add_payment_block_appstruct({}, dbdatas)
     assert res['payments']['payment_times'] == -1
 
 

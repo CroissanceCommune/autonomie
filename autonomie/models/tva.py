@@ -40,6 +40,7 @@ from sqlalchemy.orm import (
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
 
+
 class Tva(DBBASE):
     """
         `id` int(2) NOT NULL auto_increment,
@@ -62,12 +63,19 @@ class Tva(DBBASE):
     def query(cls, include_inactive=False):
         q = super(Tva, cls).query()
         if not include_inactive:
-            q = q.filter(Tva.active==True)
+            q = q.filter(Tva.active == True)
         return q.order_by('value')
 
     @classmethod
+    def by_value(cls, value):
+        """
+        Returns the Tva matching this value
+        """
+        return super(Tva, cls).query().filter(cls.value == value).one()
+
+    @classmethod
     def get_default(cls):
-        return super(Tva, cls).query().filter(cls.default==1).first()
+        return super(Tva, cls).query().filter(cls.default == 1).first()
 
     def __json__(self, request):
         return dict(
@@ -77,6 +85,7 @@ class Tva(DBBASE):
             default=self.default == 1,
             products=[product.__json__(request) for product in self.products],
         )
+
 
 class Product(DBBASE):
     __tablename__ = 'product'
@@ -93,14 +102,14 @@ class Product(DBBASE):
 
     def __json__(self, request):
         return dict(
-                id=self.id,
-                name=self.name,
-                compte_cg=self.compte_cg
-                )
+            id=self.id,
+            name=self.name,
+            compte_cg=self.compte_cg
+        )
 
     @classmethod
     def query(cls, include_inactive=False):
         q = super(Product, cls).query()
         if not include_inactive:
-            q.filter(Product.active==True)
+            q.filter(Product.active == True)
         return q.order_by('name')

@@ -39,7 +39,6 @@ from sqlalchemy import (
     String,
     ForeignKey,
     DateTime,
-    Text,
     func,
     distinct,
 )
@@ -48,16 +47,11 @@ from sqlalchemy.orm import (
     deferred,
     backref,
 )
-# Aye : ici on a du double dans la bdd, en attendant une éventuelle
-# migration des données, on dépend entièrement de mysql
-from sqlalchemy.dialects.mysql import DOUBLE
 
 from autonomie import forms
 from autonomie.models.types import (
-    CustomDateType,
     PersistentACLMixin,
 )
-from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBSESSION,
     DBBASE,
@@ -66,7 +60,6 @@ from autonomie.models.base import (
 
 from autonomie.compute.task import (
     TaskCompute,
-    LineCompute,
     InvoiceCompute,
 )
 from autonomie.models.options import (
@@ -336,8 +329,7 @@ class Invoice(Task, InvoiceCompute):
 
         payment = Payment()
         for key, value in kw.iteritems():
-            if key in ('mode', 'amount', 'date', 'bank_id', 'task_id'):
-                setattr(payment, key, value)
+            setattr(payment, key, value)
         log.info(u"Amount : {0}".format(payment.amount))
         self.payments.append(payment)
         return self.check_resulted(force_resulted=resulted)
@@ -574,6 +566,18 @@ class Payment(DBBASE, PersistentACLMixin):
             info={'colanderalchemy': {'exclude': True}},
         ),
     )
+    tva = relationship(
+        "Tva",
+        backref=backref(
+            'payments',
+            order_by="Payment.date",
+            info={'colanderalchemy': {'exclude': True}},
+        ),
+    )
+
+    @property
+    def invoice(self):
+        return self.task
 
     def get_amount(self):
         return self.amount
@@ -602,10 +606,10 @@ class BankAccount(ConfigurableOption):
         'validation_msg': u"Les comptes banques ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')
-    code = Column(
+    compte_cg = Column(
         String(120),
         info={
-            "colanderalchemy": {'title': u"Compte associé"}
+            "colanderalchemy": {'title': u"Compte CG Banque"}
         }
     )
     default = Column(

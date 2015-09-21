@@ -36,6 +36,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
 from autonomie.exception import Forbidden
+from autonomie.models.tva import Tva
 from autonomie.models.task import (
     TaskLine,
     TaskLineGroup,
@@ -93,6 +94,7 @@ def get_paid_form(request, counter=None):
         title=u"Valider",
     )
     schema = get_payment_schema(request).bind(request=request)
+    logger.debug(schema)
     action = request.route_path(
         "invoice",
         id=request.context.id,
@@ -242,6 +244,12 @@ class InvoiceFormActions(TaskFormActions):
             return the form for payment registration
         """
         form = get_paid_form(self.request, self.formcounter)
+        appstruct = []
+        for tva_value, value in self.context.topay_by_tvas().items():
+            tva = Tva.by_value(tva_value)
+            appstruct.append({'tva_id': tva.id, 'amount': value})
+            form.set_appstruct({'tvas': appstruct})
+
         self.formcounter = form.counter
         return form
 
@@ -470,12 +478,19 @@ class InvoiceStatusView(CommonInvoiceStatusView):
         """
         form = get_paid_form(self.request)
         # We don't try except on the data validation, since this is done in the
-        # original wrapping call (see register_payment)
+        # original wrapping call (see taskaction set_status)
         appstruct = form.validate(params.items())
 
         if 'amount' in appstruct:
             # si on a une seule tva : remittance_amount = amount
             appstruct['remittance_amount'] = appstruct['amount']
+            # Les lignes de facture ne conservent pas le lien avec les objets
+            # Tva, ici on en a une seule, on récupère l'objet et on le set sur
+            # le amount
+            appstruct['tva_id'] = Tva.by_value(
+                self.context.get_tvas().keys()[0]
+            )
+
         elif 'tvas' in appstruct:
             # si on a plusieurs tva :
             for tva_payment in appstruct['tvas']:
@@ -484,6 +499,7 @@ class InvoiceStatusView(CommonInvoiceStatusView):
                 tva_payment['date'] = appstruct['date']
                 tva_payment['mode'] = appstruct['mode']
                 tva_payment['bank_id'] = appstruct.get('bank_id')
+                tva_payment['resulted'] = appstruct.get('resulted', False)
         else:
             raise Exception(u"On a rien à faire ici")
 
@@ -527,6 +543,7 @@ def register_payment(request):
         ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"An error has been detected")
+        log.error(err.error)
         ret_dict = dict(form=err.render(),
                         title=u"Enregistrement d'un paiement")
     return ret_dict
@@ -540,6 +557,7 @@ def duplicate(request):
         ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Duplication error")
+        log.error(err.error)
         ret_dict = dict(form=err.render(),
                         title=u"Duplication d'un document")
     return ret_dict
@@ -553,6 +571,7 @@ def set_financial_year(request):
         ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Financial year set error")
+        log.error(err.error)
         ret_dict = dict(
             form=err.render(),
             title=u"Année comptable de référence",
@@ -568,6 +587,7 @@ def set_products(request):
         ret_dict = InvoiceStatusView(request)()
     except ValidationFailure, err:
         log.exception(u"Error setting products")
+        log.error(err.error)
         ret_dict = dict(
             form=err.render(),
             title=u"Année comptable de référence",

@@ -556,10 +556,31 @@ class Payment(DBBASE, PersistentACLMixin):
     __tablename__ = 'payment'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
+    created_at = Column(
+        DateTime(),
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Créé(e) le",
+            }
+        },
+        default=datetime.datetime.now,
+    )
+
+    updated_at = Column(
+        DateTime(),
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Mis(e) à jour le",
+            }
+        },
+        default=datetime.datetime.now,
+        onupdate=datetime.datetime.now
+    )
+
     mode = Column(String(50))
     amount = Column(Integer)
     remittance_amount = Column(Integer)
-    date = Column(DateTime, default=datetime.datetime.now)
+    date = Column(DateTime(), default=datetime.datetime.now)
     exported = Column(Boolean(), default=False)
     task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
     bank_id = Column(ForeignKey('bank_account.id'))

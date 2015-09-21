@@ -69,13 +69,13 @@ class StatisticSheet(DBBASE):  # , PersistentACLMixin):
     created_at = Column(
         DateTime(),
         info={'colanderalchemy': forms.EXCLUDED},
-        default=datetime.now(),
+        default=datetime.now,
     )
     updated_at = Column(
         DateTime(),
         info={'colanderalchemy': forms.EXCLUDED},
-        default=datetime.now(),
-        onupdate=datetime.now()
+        default=datetime.now,
+        onupdate=datetime.now,
     )
     title = Column(String(255))
     active = Column(Boolean(), default=True)

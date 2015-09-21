@@ -195,7 +195,7 @@ class CompetenceGrid(DBBASE):
                 'exclude': True, 'title': u"Créé(e) le",
             }
         },
-        default=datetime.date.today(),
+        default=datetime.date.today,
     )
 
     updated_at = Column(
@@ -205,8 +205,8 @@ class CompetenceGrid(DBBASE):
                 'exclude': True, 'title': u"Mis(e) à jour le",
             }
         },
-        default=datetime.date.today(),
-        onupdate=datetime.date.today()
+        default=datetime.date.today,
+        onupdate=datetime.date.today
     )
 
     contractor_id = Column(ForeignKey("accounts.id"))

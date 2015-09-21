@@ -97,7 +97,7 @@ class MailHistory(DBBASE):
     id = Column(Integer, primary_key=True)
     send_at = Column(
         DateTime(),
-        default=datetime.now(),
+        default=datetime.now,
     )
 
     filepath = Column(String(255))
@@ -166,7 +166,7 @@ class TemplatingHistory(DBBASE, PersistentACLMixin):
     id = Column(Integer, primary_key=True)
     created_at = Column(
         DateTime(),
-        default=datetime.now(),
+        default=datetime.now,
         info={'colanderalchemy': {'title': u"Date de génération"}},
     )
     user_id = Column(

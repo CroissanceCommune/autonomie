@@ -297,7 +297,7 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
             with_polymorphic='*')
     id = Column(Integer, primary_key=True)
     type = Column(String(30), nullable=False)
-    date = Column(Date(), default=date.today())
+    date = Column(Date(), default=date.today)
     description = Column(String(255))
     category = Column(Enum('1', '2'), default='1')
     valid = Column(Boolean(), default=True)
@@ -441,7 +441,7 @@ class Communication(DBBASE):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("accounts.id"))
     content = Column(Text)
-    date = Column(Date(), default=date.today(), onupdate=date.today())
+    date = Column(Date(), default=date.today, onupdate=date.today)
     expense_sheet_id = Column(Integer, ForeignKey("expense_sheet.id"))
 
     expense_sheet = relationship(

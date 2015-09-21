@@ -79,7 +79,7 @@ class Node(DBBASE, PersistentACLMixin):
                 'exclude': True, 'title': u"Créé(e) le",
             }
         },
-        default=datetime.now(),
+        default=datetime.now,
     )
 
     updated_at = Column(
@@ -89,8 +89,8 @@ class Node(DBBASE, PersistentACLMixin):
                 'exclude': True, 'title': u"Mis(e) à jour le",
             }
         },
-        default=datetime.now(),
-        onupdate=datetime.now()
+        default=datetime.now,
+        onupdate=datetime.now
     )
 
     parent_id = Column(

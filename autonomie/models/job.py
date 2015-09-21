@@ -71,12 +71,12 @@ class Job(DBBASE, PersistentACLMixin):
     )
     created_at = Column(
         DateTime(),
-        default=datetime.now(),
+        default=datetime.now,
     )
     updated_at = Column(
         DateTime(),
-        default=datetime.now(),
-        onupdate=datetime.now()
+        default=datetime.now,
+        onupdate=datetime.now
     )
     type_ = Column(
         'type_',

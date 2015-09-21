@@ -1153,6 +1153,7 @@ def get_sequence_model_admin(model, title=u""):
             widget=deform.widget.SequenceWidget(
                 orderable=True,
                 template=TEMPLATES_URL + "clean_sequence.pt",
+                min_len=1,
             ),
             title=title,
             name='datas')

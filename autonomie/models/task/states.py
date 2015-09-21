@@ -54,15 +54,19 @@ def valid_callback(task, **kw):
     return task
 
 
-def record_payment(task, **kw):
+def record_payment(invoice, **kw):
     """
     record a payment for the given task
     """
-    log.info(u"Recording a payment for {0}".format(task))
-    if "mode" in kw and "amount" in kw:
-        return task.record_payment(**kw)
+    log.info(u"Recording a payment for {0}".format(invoice))
+    if "amount" in kw:
+        invoice.record_payment(**kw)
+    elif "tvas" in kw:
+        for payment in kw['tvas']:
+            invoice.record_payment(**payment)
     else:
         raise Forbidden(u"Missing mandatory arguments")
+    return invoice
 
 
 def duplicate_task(task, **kw):

@@ -43,10 +43,6 @@ from sqlalchemy.orm import (
     deferred,
     backref,
 )
-# Aye : ici on a du double dans la bdd, en attendant une éventuelle
-# migration des données, on dépend entièrement de mysql
-from sqlalchemy.dialects.mysql import DOUBLE
-
 from autonomie.models.types import (
     CustomDateType,
     CustomDateType2,
@@ -59,7 +55,6 @@ from autonomie.models.base import (
 
 from autonomie.compute.task import (
     EstimationCompute,
-    LineCompute,
 )
 from .interfaces import (
     IValidatedTask,
@@ -188,7 +183,8 @@ class Estimation(Task, EstimationCompute):
             description = u"Facture d'acompte"
             line = self._account_invoiceline(amount, description, tva)
             invoice.default_line_group.lines.append(line)
-        return invoice, [l.duplicate() for l in invoice.lines]
+        return invoice, [l.duplicate()
+                         for l in invoice.default_line_group.lines]
 
     def _make_intermediary(self, invoice, paymentline, amounts):
         """
@@ -203,7 +199,8 @@ class Estimation(Task, EstimationCompute):
             description = paymentline.description
             line = self._account_invoiceline(amount, description, tva)
             invoice.default_line_group.lines.append(line)
-        return invoice, [l.duplicate() for l in invoice.lines]
+        return invoice, [l.duplicate()
+                         for l in invoice.default_line_group.lines]
 
     def _sold_invoice_lines(self, account_lines):
         """

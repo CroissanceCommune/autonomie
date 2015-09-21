@@ -416,7 +416,7 @@ def includeme(config):
     )
 
     config.add_view(
-        get_task_html_view(),
+        get_task_html_view(EstimationFormActions),
         route_name='estimation',
         renderer='tasks/view_only.mako',
         request_param='view=html',

@@ -264,10 +264,7 @@ def deferred_bank_widget(node, kw):
     Renvoie le widget pour la sélection d'une banque
     """
     options = [(bank.id, bank.label) for bank in BankAccount.query()]
-    if len(options) > 1:
-        widget = forms.get_select(options)
-    else:
-        widget = deform.widget.HiddenWidget()
+    widget = forms.get_select(options)
     return widget
 
 
@@ -344,8 +341,6 @@ def deferred_remittance_amount_validation(node, kw):
     """
     Validate that the remittance amount is equal to the sum of the tva parts
     """
-    invoice = kw['request'].context
-
     def validate_sum_of_tvapayments(values):
         """
         Validate the sum of the tva payments is equal to the remittance_amount
@@ -375,7 +370,7 @@ class MultiplePaymentSchema(colander.MappingSchema):
         validator=deferred_total_validator,
         default=deferred_amount_default,
     )
-    date = forms.today_node()
+    date = forms.today_node(title=u"Date de la remise")
     mode = colander.SchemaNode(
         colander.String(),
         title=u"Mode de paiement",

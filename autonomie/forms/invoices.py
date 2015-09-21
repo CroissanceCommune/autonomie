@@ -334,6 +334,7 @@ def deferred_amount_by_tva_validation(node, kw):
         if amount > tva_parts[tva.value]:
             return u"Le montant de l'encaissement doit être inférieur à la \
 part de cette Tva dans la facture"
+        return True
 
     return colander.Function(validate_amount_by_tva)
 
@@ -354,6 +355,7 @@ def deferred_remittance_amount_validation(node, kw):
         if tva_sum != remittance_amount:
             return u"Le montant de la remise doit correspondre à la somme \
 des encaissements correspondant"
+        return True
 
     return colander.Function(validate_sum_of_tvapayments)
 

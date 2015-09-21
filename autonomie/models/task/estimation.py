@@ -189,7 +189,8 @@ class Estimation(Task, EstimationCompute):
             description = u"Facture d'acompte"
             line = self._account_invoiceline(amount, description, tva)
             invoice.default_line_group.lines.append(line)
-        return invoice, [l.duplicate() for l in invoice.lines]
+        return invoice, [l.duplicate()
+                         for l in invoice.default_line_group.lines]
 
     def _make_intermediary(self, invoice, paymentline, amounts):
         """
@@ -204,7 +205,8 @@ class Estimation(Task, EstimationCompute):
             description = paymentline.description
             line = self._account_invoiceline(amount, description, tva)
             invoice.default_line_group.lines.append(line)
-        return invoice, [l.duplicate() for l in invoice.lines]
+        return invoice, [l.duplicate()
+                         for l in invoice.default_line_group.lines]
 
     def _sold_invoice_lines(self, account_lines):
         """

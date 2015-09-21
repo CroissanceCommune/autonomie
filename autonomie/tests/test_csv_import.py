@@ -110,7 +110,8 @@ def test_import_line(dbsession, csv_datas, association_handler):
         dbsession,
         UserDatas,
         get_buffer(),
-        association_handler
+        association_handler,
+        action="update",
     )
     res, msg = importer.import_line(line.copy())
 
@@ -131,7 +132,8 @@ def test_import_line(dbsession, csv_datas, association_handler):
             dbsession,
             UserDatas,
             get_buffer(),
-            association_handler
+            association_handler,
+            action="insert",
         )
 
 

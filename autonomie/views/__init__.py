@@ -288,7 +288,10 @@ class BaseCsvView(BaseListClass):
             yield item
 
     def _init_writer(self):
-        return self.writer(self.model)
+        writer = self.writer(self.model)
+        if hasattr(self, 'sheet_title'):
+            writer.title = self.sheet_title
+        return writer
 
     def _build_return_value(self, schema, appstruct, query):
         """

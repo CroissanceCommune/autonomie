@@ -1202,7 +1202,17 @@ class UserDatas(Node):
                 'title': u'Activité externe',
                 'section': u'Statut',
             },
-        }
+        },
+        backref=backref(
+            'userdatas',
+            info={
+                'export': {
+                    'related_key': u"export_label",
+                    "keep_key": True,
+                    "label": u"Porteur de projet",
+                }
+            }
+        )
     )
 
     statut_end_rights_date = Column(
@@ -1258,6 +1268,16 @@ class UserDatas(Node):
     activity_companydatas = relationship(
         "CompanyDatas",
         cascade="all, delete-orphan",
+        backref=backref(
+            'userdatas',
+            info={
+                'export': {
+                    'related_key': u"export_label",
+                    "keep_key": True,
+                    "label": u"Porteur de projet",
+                }
+            }
+        ),
         info={
             'colanderalchemy':
             {
@@ -1312,6 +1332,16 @@ class UserDatas(Node):
     parcours_date_diagnostic = relationship(
         "DateDiagnosticDatas",
         cascade="all, delete-orphan",
+        backref=backref(
+            'userdatas',
+            info={
+                'export': {
+                    'related_key': u"export_label",
+                    "keep_key": True,
+                    "label": u"Porteur de projet",
+                }
+            }
+        ),
         info={
             'colanderalchemy':
             {
@@ -1349,6 +1379,16 @@ class UserDatas(Node):
     parcours_convention_cape = relationship(
         "DateConventionCAPEDatas",
         cascade='all, delete-orphan',
+        backref=backref(
+            'userdatas',
+            info={
+                'export': {
+                    'related_key': u"export_label",
+                    "keep_key": True,
+                    "label": u"Porteur de projet",
+                }
+            }
+        ),
         info={
             'colanderalchemy': {
                 "title": u"Date convention CAPE",
@@ -1364,6 +1404,16 @@ class UserDatas(Node):
     parcours_dpae = relationship(
         "DateDPAEDatas",
         cascade='all, delete-orphan',
+        backref=backref(
+            'userdatas',
+            info={
+                'export': {
+                    'related_key': u"export_label",
+                    "keep_key": True,
+                    "label": u"Porteur de projet",
+                }
+            }
+        ),
         info={
             'colanderalchemy': {
                 "title": u"Date DPAE",
@@ -1589,6 +1639,13 @@ class UserDatas(Node):
         },
     )
 
+    @property
+    def export_label(self):
+        return u"{0} {1}".format(
+            self.coordonnees_lastname,
+            self.coordonnees_firstname,
+        )
+
     def __unicode__(self):
         return u"<Userdatas : {0} {1} {2}>".format(
             self.id,
@@ -1708,8 +1765,12 @@ class ExternalActivityDatas(DBBASE):
     """
     __tablename__ = 'external_activity_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info={
-        'colanderalchemy': get_hidden_field_conf()
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
         }
     )
     type = Column(
@@ -1749,16 +1810,23 @@ class ExternalActivityDatas(DBBASE):
     )
     userdatas_id = Column(
         ForeignKey('user_datas.id'),
-        info={'colanderalchemy': EXCLUDED},
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'label': u"Identifiant Autonomie", }
+        },
     )
 
 
 class CompanyDatas(DBBASE):
     __tablename__ = 'company_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info={
-        'colanderalchemy': get_hidden_field_conf()
-    }
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        }
     )
     title = Column(
         String(250),
@@ -1810,16 +1878,23 @@ class CompanyDatas(DBBASE):
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
-        info={'colanderalchemy': EXCLUDED}
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'label': u"Identifiant Autonomie", }
+        }
     )
 
 
 class DateDiagnosticDatas(DBBASE):
     __tablename__ = 'date_diagnostic_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info={
-        'colanderalchemy': get_hidden_field_conf()
-    }
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        }
     )
     date = Column(
         Date(),
@@ -1829,16 +1904,23 @@ class DateDiagnosticDatas(DBBASE):
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
-        info={'colanderalchemy': EXCLUDED}
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'label': u"Identifiant Autonomie", }
+        }
     )
 
 
 class DateConventionCAPEDatas(DBBASE):
     __tablename__ = 'date_convention_cape_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info={
-        'colanderalchemy': get_hidden_field_conf(),
-    }
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        }
     )
     date = Column(
         Date(),
@@ -1848,16 +1930,23 @@ class DateConventionCAPEDatas(DBBASE):
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
-        info={'colanderalchemy': EXCLUDED}
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'label': u"Identifiant Autonomie", }
+        }
     )
 
 
 class DateDPAEDatas(DBBASE):
     __tablename__ = 'date_dpae_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info={
-        'colanderalchemy': get_hidden_field_conf(),
-    }
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        }
     )
     date = Column(
         Date(),
@@ -1867,7 +1956,10 @@ class DateDPAEDatas(DBBASE):
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
-        info={'colanderalchemy': EXCLUDED}
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'label': u"Identifiant autonomie", }
+        }
     )
 
 

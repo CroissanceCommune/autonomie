@@ -909,6 +909,7 @@ class UserDatasXlsView(UserDatasListClass, BaseXlsView):
     """
         Userdatas excel view
     """
+    sheet_title = u"Gestion sociale"
     model = UserDatas
 
     @property

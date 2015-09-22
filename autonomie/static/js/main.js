@@ -33,21 +33,6 @@ function showLoginDialog(login_form_html){
   }
 }
 
-// Important point : handle redirection by json dict for ajax calls
-// Expects a redirect value to be returned with the 302 code
-$(document).ready(
-    function() {
-      $('body').ajaxComplete(
-        function( data, xhr, settings ) {
-          json_resp = jQuery.parseJSON( xhr.responseText );
-          if ( json_resp.redirect ){
-            window.location.href = json_resp.redirect;
-          }
-        }
-      );
-    }
-);
-
 function checkLogin(callback){
   /*
    * Check That the current user is logged in
@@ -218,19 +203,6 @@ function submitForm(form_selector, name){
     btn_object.click();
   }
 }
-$(function(){
-  var hash = window.location.hash;
-  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
-
-  $('.nav-tabs a').click(function (e) {
-    $(this).tab('show');
-    var scrollmem = $('body').scrollTop();
-    window.location.hash = this.hash;
-    $('html,body').scrollTop(scrollmem);
-  });
-  setClickableRow();
-  setPopUp('login_form', "Authentification");
-});
 function highlight_error(jquery_tag, callback){
   /*
    * Display a main error message and highlight a jquery tag in red
@@ -324,3 +296,57 @@ function showLoader(){
    */
   $('#loading-box').show();
 }
+
+
+// Important point : handle redirection by json dict for ajax calls
+// Expects a redirect value to be returned with the 302 code
+function setupJsonRedirect() {
+  $('body').ajaxComplete(
+    function( data, xhr, settings ) {
+      json_resp = jQuery.parseJSON( xhr.responseText );
+      if ( json_resp.redirect ){
+        window.location.href = json_resp.redirect;
+      }
+    }
+  );
+}
+
+function cleanTinyMceEditors(){
+  var editors = [];
+  for (var i=0; i < tinyMCE.editors.length; i++){
+    var editor = tinyMCE.editors[i];
+    if ($("#" + editor.id).length === 0){
+      try{
+        i = i-1;
+        delete tinyMCE.remove(editor);
+      } catch (e){}
+    }
+  }
+  tinyMCE.triggerSave();
+}
+
+function setupTinyMceHack(){
+  if (typeof(tinyMCE) != 'undefined'){
+    $('form').on('submit.hack', function(event){
+      cleanTinyMceEditors(event, this);
+    });
+  }
+}
+
+function setupMainBehaviours(){
+  var hash = window.location.hash;
+  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+  $('.nav-tabs a').click(function (e) {
+    $(this).tab('show');
+    var scrollmem = $('body').scrollTop();
+    window.location.hash = this.hash;
+    $('html,body').scrollTop(scrollmem);
+  });
+  setClickableRow();
+  setPopUp('login_form', "Authentification");
+  setupJsonRedirect();
+  setupTinyMceHack();
+}
+
+$(setupMainBehaviours);

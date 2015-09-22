@@ -42,6 +42,7 @@ from sqlalchemy import (
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.decorator import reify
+from genshi.template.eval import UndefinedError
 
 from autonomie.models import files
 from autonomie.models.base import DBSESSION
@@ -733,6 +734,19 @@ def delete_templating_history_view(context, request):
     )
 
 
+def get_key_from_genshi_error(err):
+    """
+    Genshi raises an UndefinedError, but doesn't store the key name in the
+    Exception object
+    We get the missing key from the resulting message
+    """
+    msg = err.message
+    if " not defined" in msg:
+        return msg.split(" not defined")[0]
+    else:
+        return msg
+
+
 def py3o_view(context, request):
     """
     py3o view :
@@ -761,6 +775,13 @@ def py3o_view(context, request):
                 record_compilation(context, request, template)
                 store_compiled_file(context, request, output, template)
                 return request.response
+            except UndefinedError, err:
+                key = get_key_from_genshi_error(err)
+                msg = u"""Erreur à la compilation du modèle la clé {0}
+n'est pas définie""".format(key)
+                log.exception(msg)
+
+                request.session.flash(msg, "error")
             except Exception:
                 log.exception(
                     u"Une erreur est survenue à la compilation du template \
@@ -935,7 +956,7 @@ def user_delete(account, request):
         request.dbsession.delete(account)
         request.dbsession.flush()
         message = u"Le compte '{0}' a bien été supprimé".format(
-                                        format_account(account))
+            format_account(account))
         request.session.flash(message)
     except:
         log.exception(u"Erreur à la suppression du compte")

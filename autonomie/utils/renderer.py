@@ -131,9 +131,17 @@ def set_export_blacklist():
     """
     Globally set an export blacklist
     """
+    print("Setting blacklisted keys")
     from sqla_inspect.export import BLACKLISTED_KEYS
 
-    BLACKLISTED_KEYS = ('_acl', 'password', 'parent_id', 'parent', 'type_')
+    BLACKLISTED_KEYS.extend([
+        '_acl',
+        'password',
+        'parent_id',
+        'parent',
+        'type_',
+        'children',
+    ])
 
 
 def set_xls_formats():

@@ -21,14 +21,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+import math
 from autonomie.compute.task import (
     LineCompute,
     GroupCompute,
     TaskCompute,
     EstimationCompute,
     InvoiceCompute,
-    compute_tva
 )
 from autonomie.compute import math_utils
 

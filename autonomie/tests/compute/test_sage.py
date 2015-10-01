@@ -116,7 +116,7 @@ def def_tva():
 def tva_sans_code():
     return MagicMock(
         name="tva_sans_code",
-        value=1960,
+        value=2000,
         default=0,
         compte_cg="TVA0001",
         compte_a_payer="TVAAPAYER0001",
@@ -713,6 +713,14 @@ class TestSagePaymentTva():
         factory = SagePaymentTva(get_config())
         factory.set_payment(payment)
         return factory
+
+    def test_get_amount(self, payment, tva_sans_code):
+        payment.tva = tva_sans_code
+        factory = self.get_factory(payment)
+        amount = factory.get_amount()
+        # ttc = 10000 tva = 0.2
+        # le résultat est *100
+        assert amount == 1667
 
     def test_credit_tva(self, payment, tva_sans_code):
         factory = self.get_factory(payment)

@@ -568,6 +568,11 @@ function setPaymentRowsToEditable(){
       }
       $(this).replaceWith(getAmountInput(args));
     });
+    $('#paymentcontainer .paymentline').each(function(){
+      $(this).find('input[name=amount]').blur(function(){
+        $(Facade).trigger('paymentlinechange');
+      });
+    });
   }else{
     setPaymentRows();
   }
@@ -614,7 +619,6 @@ function fireAmountChange(){
   /*
    * Fire an amount change on the line containing the current form_element
    */
-  console.log("Amount changed");
   var input_tag = $(this);
   var row = $(this).parent().parent().parent();
   $(Facade).trigger("linechange", row);

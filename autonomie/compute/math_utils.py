@@ -138,3 +138,28 @@ def convert_to_float(value, default=None):
         else:
             raise err
     return val
+
+
+# TVA related functions
+def reverse_tva(total_ttc, tva):
+    """
+    Compute total_ht from total_ttc
+    :param float total_ttc: ttc value in float format (real ttc value)
+    :param integer tva: the tva value in integer format (10*4)
+
+    :returns: the value in integer format
+    """
+    # tva_value = tva * 10 000
+    tva_dividor = max(int(tva), 0) + 10000.0
+    # ttc value should be converted to an 'amount' object
+    total_ttc = amount(total_ttc)
+
+    result = math.ceil(total_ttc * 100 / tva_dividor)
+    return result
+
+
+def compute_tva(total_ht, tva):
+    """
+        Compute the tva for the given ht total
+    """
+    return float(total_ht) * (max(int(tva), 0) / 10000.0)

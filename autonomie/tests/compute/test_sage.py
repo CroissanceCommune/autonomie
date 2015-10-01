@@ -726,7 +726,7 @@ class TestSagePaymentTva():
         factory = self.get_factory(payment)
         g_entry, entry = factory.credit_tva(10000)
         assert entry['credit'] == 10000
-        assert entry['compte_cg'] == 'TVA0001'
+        assert entry['compte_cg'] == 'TVAAPAYER0001'
         assert entry['code_taxe'] == 'CTVA0001'
 
         payment.tva = tva_sans_code
@@ -739,7 +739,7 @@ class TestSagePaymentTva():
         factory = self.get_factory(payment)
         g_entry, entry = factory.debit_tva(10000)
         assert entry['debit'] == 10000
-        assert entry['compte_cg'] == 'TVAAPAYER0001'
+        assert entry['compte_cg'] == 'TVA0001'
         assert entry['code_taxe'] == 'CTVA0001'
 
 

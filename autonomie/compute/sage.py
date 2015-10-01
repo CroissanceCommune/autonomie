@@ -43,7 +43,6 @@ from autonomie.models.tva import Tva
 from autonomie.compute.math_utils import (
     floor,
     percentage,
-    dec_round,
     reverse_tva,
     compute_tva,
 )
@@ -1283,7 +1282,7 @@ class SagePaymentTva(SagePaymentBase):
     def credit_tva(self, total):
         entry = self.get_base_entry()
         entry.update(
-            compte_cg=self.payment.tva.compte_cg,
+            compte_cg=self.payment.tva.compte_a_payer,
             credit=total,
         )
         if self.payment.tva.code:
@@ -1296,7 +1295,7 @@ class SagePaymentTva(SagePaymentBase):
     def debit_tva(self, total):
         entry = self.get_base_entry()
         entry.update(
-            compte_cg=self.payment.tva.compte_a_payer,
+            compte_cg=self.payment.tva.compte_cg,
             debit=total,
         )
         if self.payment.tva.code:

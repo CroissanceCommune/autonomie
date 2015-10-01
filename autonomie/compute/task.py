@@ -47,20 +47,6 @@ def get_default_tva():
         return 1960
 
 
-def reverse_tva(total_ttc, tva):
-    """
-        Compute total_ht from total_ttc
-    """
-    return math.ceil(float(total_ttc) * 10000.0 / (max(int(tva), 0) + 10000.0))
-
-
-def compute_tva(total_ht, tva):
-    """
-        Compute the tva for the given ht total
-    """
-    return float(total_ht) * (max(int(tva), 0) / 10000.0)
-
-
 class TaskCompute(object):
     """
         class A(TaskCompute):
@@ -382,7 +368,7 @@ class EstimationCompute(TaskCompute):
             payment_lines = {}
 
             for tva, total_ht in parts.items():
-                payment_ht = reverse_tva(payment_ttc, tva)
+                payment_ht = math_utils.reverse_tva(payment_ttc, tva)
                 if total_ht >= payment_ht:
                     # Le total ht de cette tranche de tva est suffisant pour
                     # recouvrir notre paiement
@@ -399,7 +385,10 @@ class EstimationCompute(TaskCompute):
                     payment_lines[tva] = parts.pop(tva)
                     # On enlève la part qu'on a récupéré dans cette tranche de
                     # tva du total de notre paiement
-                    payment_ttc -= total_ht + compute_tva(total_ht, tva)
+                    payment_ttc -= total_ht + math_utils.compute_tva(
+                        total_ht,
+                        tva,
+                    )
 
         # Ce qui reste c'est donc pour notre facture de solde
         sold = parts
@@ -520,7 +509,7 @@ class LineCompute(object):
             compute the tva amount of a line
         """
         totalht = self.total_ht()
-        return compute_tva(totalht, self.tva)
+        return math_utils.compute_tva(totalht, self.tva)
 
     def total(self):
         """

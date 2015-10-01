@@ -441,5 +441,6 @@ class PaymentLine(DBBASE):
             index=self.order,
             description=self.description,
             cost=self.amount,
+            amount=self.amount,
             paymentDate=self.paymentDate,
         )

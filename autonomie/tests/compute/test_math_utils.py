@@ -24,12 +24,14 @@
 import unittest
 
 from autonomie.compute.math_utils import (
-        floor,
-        amount,
-        percent,
-        percentage,
-        convert_to_int,
-        )
+    floor,
+    amount,
+    percent,
+    percentage,
+    convert_to_int,
+    reverse_tva,
+    compute_tva,
+)
 
 
 class TestMathUtils(unittest.TestCase):
@@ -53,7 +55,7 @@ class TestMathUtils(unittest.TestCase):
     def test_percent(self):
         self.assertEqual(percent(30, 10), 300.0)
         self.assertEqual(percent(1, 3), 33.33)
-        self.assertRaises(ZeroDivisionError, percent, 1,0)
+        self.assertRaises(ZeroDivisionError, percent, 1, 0)
         self.assertEqual(percent(1, 0, 5), 5)
 
     def test_percentage(self):
@@ -66,3 +68,14 @@ class TestMathUtils(unittest.TestCase):
         self.assertEqual(convert_to_int('25'), 25)
         self.assertEqual(convert_to_int('NOOK', 25), 25)
         self.assertRaises(ValueError, convert_to_int, 'NOOK')
+
+
+def test_compute_tva():
+    assert compute_tva(10000, 2000) == 2000
+
+
+def test_reverse_tva():
+    total_ttc = 1100.0
+    tva = 10 * 100
+    result = 1000
+    assert reverse_tva(total_ttc, tva) == result

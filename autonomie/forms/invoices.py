@@ -273,9 +273,14 @@ class PaymentSchema(colander.MappingSchema):
         colander schema for payment recording
     """
     come_from = forms.come_from_node()
+    remittance_amount = colander.SchemaNode(
+        AmountType(),
+        title=u"Montant de la remise en banque",
+        default=deferred_amount_default,
+    )
     amount = colander.SchemaNode(
         AmountType(),
-        title=u"Montant",
+        title=u"Montant de l'encaissement",
         validator=deferred_total_validator,
         default=deferred_amount_default,
     )
@@ -337,7 +342,7 @@ part de cette Tva dans la facture"
 
 
 @colander.deferred
-def deferred_remittance_amount_validation(node, kw):
+def deferred_payment_amount_validation(node, kw):
     """
     Validate that the remittance amount is equal to the sum of the tva parts
     """
@@ -346,9 +351,9 @@ def deferred_remittance_amount_validation(node, kw):
         Validate the sum of the tva payments is equal to the remittance_amount
         """
         tva_sum = sum([tvap['amount'] for tvap in values['tvas']])
-        remittance_amount = values['remittance_amount']
+        remittance_amount = values['payment_amount']
         if tva_sum != remittance_amount:
-            return u"Le montant de la remise doit correspondre à la somme \
+            return u"Le montant du paiement doit correspondre à la somme \
 des encaissements correspondant"
         return True
 
@@ -366,7 +371,15 @@ class MultiplePaymentSchema(colander.MappingSchema):
     come_from = forms.come_from_node()
     remittance_amount = colander.SchemaNode(
         AmountType(),
-        title=u"Montant de la remise",
+        title=u"Montant de la remise en banque",
+        default=deferred_amount_default,
+    )
+    payment_amount = colander.SchemaNode(
+        AmountType(),
+        title=u"Montant du paiement",
+        description=u"Ce champ permet de contrôler que la somme des \
+encaissements saisis dans ce formulaire correspondent bien au montant du \
+paiement.",
         validator=deferred_total_validator,
         default=deferred_amount_default,
     )
@@ -409,7 +422,7 @@ def get_payment_schema(request):
         return PaymentSchema()
     else:
         schema = MultiplePaymentSchema(
-            validator=deferred_remittance_amount_validation
+            validator=deferred_payment_amount_validation
         )
         schema['tvas'].widget = deform.widget.SequenceWidget(
             min_len=1,

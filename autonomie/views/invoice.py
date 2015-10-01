@@ -482,8 +482,6 @@ class InvoiceStatusView(CommonInvoiceStatusView):
         appstruct = form.validate(params.items())
 
         if 'amount' in appstruct:
-            # si on a une seule tva : remittance_amount = amount
-            appstruct['remittance_amount'] = appstruct['amount']
             # Les lignes de facture ne conservent pas le lien avec les objets
             # Tva, ici on en a une seule, on récupère l'objet et on le set sur
             # le amount
@@ -492,6 +490,8 @@ class InvoiceStatusView(CommonInvoiceStatusView):
             ).id
 
         elif 'tvas' in appstruct:
+            # Ce champ ne servait que pour tester las somme des valeurs saisies
+            appstruct.pop('payment_amount')
             # si on a plusieurs tva :
             for tva_payment in appstruct['tvas']:
                 remittance_amount = appstruct['remittance_amount']

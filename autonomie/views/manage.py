@@ -70,8 +70,9 @@ def manage(request):
         item.url = request.route_path(item.type_, id=item.id)
 
     expenses = ExpenseSheet.query()\
-            .filter(ExpenseSheet.status == 'wait')\
-            .order_by(ExpenseSheet.month).all()
+        .filter(ExpenseSheet.status == 'wait')\
+        .order_by(ExpenseSheet.month)\
+        .order_by(ExpenseSheet.status_date).all()
     for expense in expenses:
         expense.url = request.route_path("expensesheet", id=expense.id)
 

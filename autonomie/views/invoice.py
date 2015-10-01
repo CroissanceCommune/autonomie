@@ -489,7 +489,7 @@ class InvoiceStatusView(CommonInvoiceStatusView):
             # le amount
             appstruct['tva_id'] = Tva.by_value(
                 self.context.get_tvas().keys()[0]
-            )
+            ).id
 
         elif 'tvas' in appstruct:
             # si on a plusieurs tva :

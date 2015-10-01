@@ -43,9 +43,9 @@ from autonomie.models.tva import Tva
 from autonomie.compute.math_utils import (
     floor,
     percentage,
-)
-from autonomie.compute.task import (
+    dec_round,
     reverse_tva,
+    compute_tva,
 )
 from autonomie.views import render_api
 
@@ -1275,10 +1275,9 @@ class SagePaymentTva(SagePaymentBase):
         Returns the reversed tva amount
         """
         tva_amount = self.payment.tva.value
-        tva_value = reverse_tva(
-            self.payment.amount,
-            tva_amount) * tva_amount
-        return tva_value
+        ht_value = reverse_tva(self.payment.amount, tva_amount)
+        tva_value = compute_tva(ht_value, tva_amount)
+        return floor(tva_value)
 
     @double_lines
     def credit_tva(self, total):

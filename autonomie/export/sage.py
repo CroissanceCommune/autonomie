@@ -134,4 +134,5 @@ class SagePaymentCsvWriter(SageCsvWriter):
         {'name': 'debit', 'label': "Montant débit"},
         {'name': 'credit', 'label': "Montant crédit"},
         {'name': 'type_', 'label': "Type de ligne"},
+        {'name': 'num_analytique', 'label': "Numéro analytique"},
     )

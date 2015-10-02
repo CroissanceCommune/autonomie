@@ -1183,6 +1183,7 @@ class SagePaymentBase(BaseSageBookEntryFactory):
         'montant_remise',
         'libelle',
         'type_',
+        "num_analytique",
     )
 
     variable_columns = (
@@ -1234,6 +1235,14 @@ class SagePaymentBase(BaseSageBookEntryFactory):
             self.company.name,
             self.invoice.customer.name,
         )
+
+    @property
+    def num_analytique(self):
+        """
+            Return the analytic number common to all entries in the current
+            export module
+        """
+        return self.company.code_compta
 
 
 class SagePaymentMain(SagePaymentBase):
@@ -1309,8 +1318,9 @@ class SagePaymentTva(SagePaymentBase):
         Yield all the entries for the current payment
         """
         total = self.get_amount()
-        yield self.credit_tva(total)
-        yield self.debit_tva(total)
+        if total > 0:
+            yield self.credit_tva(total)
+            yield self.debit_tva(total)
 
 
 class PaymentExport(object):

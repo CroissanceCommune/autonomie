@@ -254,8 +254,13 @@ class InvoiceCompute(TaskCompute):
         """
         result = {}
         for payment in self.payments:
-            result.setdefault(payment.tva.value, 0)
-            result[payment.tva.value] += payment.amount
+            if payment.tva is not None:
+                key = payment.tva.value
+            else:
+                key = self.tva_ht_parts().keys()[0]
+
+            result.setdefault(key, 0)
+            result[key] += payment.amount
 
         return result
 

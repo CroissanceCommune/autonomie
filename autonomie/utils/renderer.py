@@ -120,8 +120,12 @@ def set_export_formatters():
     from autonomie.views import render_api
     from autonomie.export.utils import format_boolean
 
-#    FORMATTERS_REGISTRY.add_formatter(Date, render_api.format_date)
-#    FORMATTERS_REGISTRY.add_formatter(DateTime, render_api.format_datetime)
+    FORMATTERS_REGISTRY.add_formatter(
+        Date, render_api.format_date, 'py3o'
+    )
+    FORMATTERS_REGISTRY.add_formatter(
+        DateTime, render_api.format_datetime, 'py3o'
+    )
     FORMATTERS_REGISTRY.add_formatter(Boolean, format_boolean)
     FORMATTERS_REGISTRY.add_formatter(Float, render_api.format_quantity)
     FORMATTERS_REGISTRY.add_formatter(Integer, render_api.format_quantity)

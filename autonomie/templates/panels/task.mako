@@ -41,19 +41,19 @@
         <%block name='information'>
         </%block>
     </div>
-    <% num_cols = 2 %>
-    %if task.display_units == 1:
-        <% colspan = 3 %>
-        <% num_cols += 2 %>
-    %else:
-        <% colspan = 1 %>
-    % endif
-    % if multiple_tvas:
-        <% num_cols += 1 %>
-    % endif
     <div class='row'>
         <% groups = task.get_groups() %>
         % for group in groups:
+            <% num_cols = 2 %>
+            %if task.display_units == 1:
+                <% colspan = 3 %>
+                <% num_cols += 2 %>
+            %else:
+                <% colspan = 1 %>
+            % endif
+            % if multiple_tvas and (group.display_details or group.title == ''):
+                <% num_cols += 1 %>
+            % endif
             <table class="lines col-xs-12">
                 <thead>
                     % if group.title != '':

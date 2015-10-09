@@ -123,6 +123,7 @@ class SaleProduct(DBBASE):
     description = Column(Text(), default='')
     tva = Column(Integer, default=0)
     value = Column(Float(), default=0)
+    quantity = Column(Float(), default=1)
     unity = Column(String(100), default='')
 
     category_id = Column(ForeignKey('sale_product_category.id'))
@@ -143,6 +144,7 @@ class SaleProduct(DBBASE):
             description=self.description,
             tva=self.tva,
             value=self.value,
+            quantity=self.quantity,
             unity=self.unity,
             category_id=self.category_id,
             category=self.category.title,

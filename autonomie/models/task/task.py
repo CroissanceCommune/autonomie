@@ -608,6 +608,11 @@ class TaskLineGroup(DBBASE, GroupCompute):
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
     )
+    quantity = Column(Float(), default=1)
+    display_details = Column(
+        Boolean(),
+        default=False,
+    )
     task_id = Column(
         Integer,
         ForeignKey('task.id', ondelete="cascade"),
@@ -634,6 +639,8 @@ class TaskLineGroup(DBBASE, GroupCompute):
             description=self.description,
             task_id=self.task_id,
             order=self.order,
+            quantity=self.quantity,
+            display_details=self.display_details,
             lines=[line.__json__(request) for line in self.lines]
         )
 
@@ -642,6 +649,9 @@ class TaskLineGroup(DBBASE, GroupCompute):
             title=self.title,
             description=self.description,
             task_id=self.task_id,
+            quantity=self.quantity,
+            order=self.order,
+            display_details=self.display_details,
             lines=[line.duplicate() for line in self.lines],
         )
         return group
@@ -695,6 +705,7 @@ class TaskLine(DBBASE, LineCompute):
     cost = Column(Integer, default=0,)
     tva = Column(Integer, nullable=False, default=196)
     quantity = Column(Float(), default=1)
+    group_quantity = Column(Float(), default=0)
     unity = Column(String(100),)
     product_id = Column(
         Integer,
@@ -718,6 +729,7 @@ class TaskLine(DBBASE, LineCompute):
         newone.tva = self.tva
         newone.description = self.description
         newone.quantity = self.quantity
+        newone.group_quantity = self.group_quantity
         newone.unity = self.unity
         newone.product_id = self.product_id
         return newone
@@ -732,6 +744,7 @@ class TaskLine(DBBASE, LineCompute):
         newone.tva = self.tva
         newone.description = self.description
         newone.quantity = self.quantity
+        newone.group_quantity = self.group_quantity
         newone.unity = self.unity
         newone.product_id = self.product_id
         return newone
@@ -748,6 +761,7 @@ class TaskLine(DBBASE, LineCompute):
             tva=self.tva,
             description=self.description,
             quantity=self.quantity,
+            group_quantity=self.group_quantity,
             unity=self.unity,
             group_id=self.group_id,
         )

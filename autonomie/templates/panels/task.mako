@@ -75,7 +75,7 @@
                             <th class="quantity">Qté</th>
                         % endif
                         <th class="price">Prix</th>
-                        % if multiple_tvas:
+                        % if multiple_tvas and (group.display_details or group.title == ''):
                             <th class='tva'>Tva</th>
                         % endif
                     </tr>
@@ -107,13 +107,6 @@
                                 <td class="quantity">${api.format_quantity(group.quantity)}</td>
                             % endif
                             <td class="price">${api.format_amount(group.total_ht(), trim=False)|n}&nbsp;€</td>
-                            % if multiple_tvas:
-                                <td class='tva'>
-                                    % if line.tva>=0:
-                                        ${api.format_amount(group.tva_amount())|n}&nbsp;%
-                                    % endif
-                                </td>
-                            % endif
                         </tr>
                     % endif
                     % if len(groups) > 1:

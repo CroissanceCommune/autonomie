@@ -44,6 +44,8 @@
     <div class='row'>
         <% groups = task.get_groups() %>
         % for group in groups:
+            <% display_tvas_column = multiple_tvas and (group.display_details or (len(groups) == 1 and group.title == ''))%>
+
             <% num_cols = 2 %>
             %if task.display_units == 1:
                 <% colspan = 3 %>
@@ -51,7 +53,7 @@
             %else:
                 <% colspan = 1 %>
             % endif
-            % if multiple_tvas and (group.display_details or group.title == ''):
+            % if display_tvas_column:
                 <% num_cols += 1 %>
             % endif
             <table class="lines col-xs-12">
@@ -75,7 +77,7 @@
                             <th class="quantity">Qté</th>
                         % endif
                         <th class="price">Prix</th>
-                        % if multiple_tvas and (group.display_details or group.title == ''):
+                        % if display_tvas_column:
                             <th class='tva'>Tva</th>
                         % endif
                     </tr>
@@ -90,7 +92,7 @@
                                 <td class="quantity">${api.format_quantity(line.quantity)} ${line.unity}</td>
                             % endif
                             <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
-                            % if multiple_tvas:
+                            % if display_tvas_column:
                                 <td class='tva'>
                                     % if line.tva>=0:
                                         ${api.format_amount(line.tva)|n}&nbsp;%
@@ -117,7 +119,7 @@
                             <td class='price'>
                                 ${api.format_amount(group.total_ht(), trim=False)|n}&nbsp;€
                             </td>
-                            % if multiple_tvas:
+                            % if display_tvas_column:
                                 <td></td>
                             % endif
                         </tr>
@@ -131,6 +133,8 @@
             <table class='lines col-xs-12'>
             <tbody>
         % endif
+        <% display_tvas_column = multiple_tvas and len(groups) == 1 and group.title == '' %>
+
                 % if task.expenses_ht > 0:
                     <tr>
                         <td class='description' colspan='${colspan}'>
@@ -139,7 +143,7 @@
                         <td class="price">
                             ${api.format_amount(task.expenses_ht)|n}&nbsp;€
                         </td>
-                        % if multiple_tvas:
+                        % if display_tvas_column:
                             <td class='tva'>
                                 ${api.format_amount(task.expenses_tva)|n}&nbsp;%
                             </td>
@@ -153,7 +157,7 @@
                     <td class='price'>
                         ${api.format_amount(task.groups_total_ht() + task.expenses_ht, trim=False)|n}&nbsp;€
                     </td>
-                    % if multiple_tvas:
+                    % if display_tvas_column:
                         <td></td>
                     % endif
                 </tr>
@@ -166,7 +170,7 @@
                             <td class='price'>
                                 ${api.format_amount(discount.amount)|n}&nbsp;€
                             </td>
-                            % if multiple_tvas:
+                            % if display_tvas_column:
                                 <td class='tva'>
                                     ${api.format_amount(discount.tva)|n}&nbsp;%
                                 </td>
@@ -180,7 +184,7 @@
                         <td class='price'>
                             ${api.format_amount(task.total_ht())|n}&nbsp;€
                         </td>
-                        % if multiple_tvas:
+                        % if display_tvas_column:
                             <td></td>
                         % endif
                     </tr>

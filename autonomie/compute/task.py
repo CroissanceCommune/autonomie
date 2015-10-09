@@ -27,7 +27,6 @@
     Used to compute invoice, estimation or cancelinvoice totals
 """
 import operator
-import math
 from autonomie.models.tva import Tva
 from autonomie.compute import math_utils
 
@@ -485,6 +484,13 @@ class GroupCompute(object):
         Returns the TTC total for this group
         """
         return self.total_ht() + self.tva_amount()
+
+    def unity_cost(self):
+        """
+        Returns the value of one unity
+        """
+        # 5 : voir avec D giacometti pour où sont définies ces valeurs
+        return math_utils.round(self.total_ht() / self.quantity, 5)
 
 
 class LineCompute(object):

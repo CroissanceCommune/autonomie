@@ -71,6 +71,16 @@ def dec_round(dec, precision, round_floor=False):
     return dec.quantize(precision, method)
 
 
+def round(float_, precision, round_floor=False):
+    """
+    Return a float object rounded to precision
+    :param int precision: the number of decimals we want after the comma
+    :param bool round_floor: Should the data be floor rounded ?
+    """
+    dec = Decimal(float_)
+    return float(dec_round(dec, precision, round_floor))
+
+
 def amount(value, precision=2):
     """
         Convert a float value as an integer amount to store it in a database

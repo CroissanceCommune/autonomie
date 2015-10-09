@@ -21,7 +21,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-import math
 from autonomie.compute.task import (
     LineCompute,
     GroupCompute,
@@ -315,3 +314,13 @@ class TestLineCompute():
             assert line_obj.total_ht() == DISCOUNTS[index]['amount']
             assert line_obj.total() == DISCOUNTS[index]['amount'] \
                     + DISCOUNT_TVAS[index]
+
+
+class TestGroupCompute():
+    def test_unity_cost(self):
+        group = DummyGroup()
+        def total_ht():
+            return 10
+        group.total_ht = total_ht
+        group.quantity = 3.0
+        assert group.unity_cost() == 3.33333

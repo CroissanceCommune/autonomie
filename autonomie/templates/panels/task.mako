@@ -61,12 +61,12 @@
                             <td colspan="${num_cols}"><h3>${group.title}</h3></td>
                         </tr>
                     % endif
-                    % if group.description != "":
+                    % if group.description != "" and (group.display_details or group.title == ''):
                         <tr class='group-description'>
                             <td colspan="${num_cols}">
                                 ${format_text(group.description)}
                             </td>
-                    </tr>
+                        </tr>
                     % endif
                     <tr>
                         <th class="description">Intitulé des postes</th>
@@ -81,6 +81,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    % if group.display_details or group.title == '':
                     % for line in group.lines:
                         <tr>
                             <td class="description">${format_text(line.description, False)}</td>
@@ -98,6 +99,23 @@
                             % endif
                         </tr>
                     % endfor
+                    % else:
+                        <tr>
+                            <td class="description">${format_text(group.description, False)}</td>
+                            % if task.display_units == 1:
+                                <td class="unity">${api.format_amount(group.unity_cost(), trim=False)|n}&nbsp;€</td>
+                                <td class="quantity">${api.format_quantity(group.quantity)}</td>
+                            % endif
+                            <td class="price">${api.format_amount(group.total_ht(), trim=False)|n}&nbsp;€</td>
+                            % if multiple_tvas:
+                                <td class='tva'>
+                                    % if line.tva>=0:
+                                        ${api.format_amount(group.tva_amount())|n}&nbsp;%
+                                    % endif
+                                </td>
+                            % endif
+                        </tr>
+                    % endif
                     % if len(groups) > 1:
                         <tr>
                             <td colspan='${colspan}' class='rightalign'>

@@ -330,7 +330,8 @@ var catalog = {
     textarea.val(node_datas.description);
     tinyMCE.get(textarea.attr('id')).setContent(node_datas.description);
     line.children().find("input[name=cost]").val(node_datas.value);
-    line.children().find("input[name=quantity]").val(1);
+    line.children().find("input[name=group_quantity]").val(node_datas.quantity);
+    line.children().find("input[name=quantity]").val(node_datas.quantity);
     line.children().find("select[name=tva]").val(node_datas.tva);
     line.children().find("select[name=unity]").val(node_datas.unity);
     setTaskLinesBehaviours();
@@ -350,6 +351,7 @@ var catalog = {
       this_.addProductLine(product, add_line_button);
     });
     this.scrollToElement(group);
+    setTaskLineGroupBehaviour(group);
     return group;
   },
   addNode: function(node_datas){

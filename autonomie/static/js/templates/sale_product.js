@@ -73,6 +73,8 @@ templates['product_form.mustache'] = template({"1":function(depth0,helpers,parti
     + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
     + "</textarea>\n                </div>\n                <div class=\"form-group\">\n                    <label for='value'>Valeur</label>\n                    <input class=\"form-control\" type='number' step='any' min='0' name='value' value='"
     + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
+    + "'/>\n                </div>\n                <div class=\"form-group\">\n                    <label for='quantity'>Quantité unitaire</label>\n                    <input class=\"form-control\" type='number' step='any' min='0' name='quantity' value='"
+    + escapeExpression(((helper = (helper = helpers.quantity || (depth0 != null ? depth0.quantity : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"quantity","hash":{},"data":data}) : helper)))
     + "'/>\n                </div>\n                <div class=\"form-group\">\n                    <label for='unity'>Unité</label>\n                    <select name='unity' class='form-control'>\n                    <option value=''></option>\n";
   stack1 = ((helper = (helper = helpers.unity_options || (depth0 != null ? depth0.unity_options : depth0)) != null ? helper : helperMissing),(options={"name":"unity_options","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.unity_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
@@ -131,7 +133,7 @@ templates['product_group.mustache'] = template({"1":function(depth0,helpers,part
     + "</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm edit' title=\"Modifier cet ouvrage\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Modifier\n            </span>\n        </a>\n        <a class='btn btn-danger btn-default btn-sm remove' title='Supprimer cet ouvrage'>\n            <i class='glyphicon glyphicon-trash'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Supprimer\n            </span>\n        </a>\n    </div>\n</td>\n";
 },"useData":true});
 templates['product_list.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  return "<h4>Liste des produits\n<a class='btn btn-default add' style='font-size: 14px'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<table class=\"table table-bordered table-condensed table-striped\">\n    <thead>\n        <th class='col-xs-5'>Intitulé (Réf)</th>\n        <th class='col-xs-3'>Prix Unitaire x Unité</th>\n        <th class='col-xs-1'>Tva</th>\n        <th class='col-xs-3 actions'>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n\n";
+  return "<h4>Liste des produits\n<a class='btn btn-default add' style='font-size: 14px'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<table class=\"table table-bordered table-condensed table-striped\">\n    <thead>\n        <th class='col-xs-5'>Intitulé (Réf)</th>\n        <th class='col-xs-3'>Prix Unitaire x Unité x Quantité</th>\n        <th class='col-xs-1'>Tva</th>\n        <th class='col-xs-3 actions'>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n\n";
   },"useData":true});
 templates['product.mustache'] = template({"1":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -140,7 +142,11 @@ templates['product.mustache'] = template({"1":function(depth0,helpers,partials,d
     + " )";
 },"3":function(depth0,helpers,partials,data) {
   return "x";
-  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+  },"5":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+  return "x "
+    + escapeExpression(((helper = (helper = helpers.quantity || (depth0 != null ? depth0.quantity : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"quantity","hash":{},"data":data}) : helper)));
+},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<td>"
     + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))
     + " ";
@@ -151,9 +157,12 @@ templates['product.mustache'] = template({"1":function(depth0,helpers,partials,d
     + " ";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.unity : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
-  return buffer + " "
+  buffer += " "
     + escapeExpression(((helper = (helper = helpers.unity || (depth0 != null ? depth0.unity : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"unity","hash":{},"data":data}) : helper)))
-    + "</td>\n<td>"
+    + " ";
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.quantity : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
+  if (stack1 != null) { buffer += stack1; }
+  return buffer + " </td>\n<td>"
     + escapeExpression(((helper = (helper = helpers.tva_label || (depth0 != null ? depth0.tva_label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"tva_label","hash":{},"data":data}) : helper)))
     + "</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm edit' title=\"Modifier ce produit\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Modifier\n            </span>\n        </a>\n        <a class='btn btn-danger btn-default btn-sm remove' title='Supprimer ce produit'>\n            <i class='glyphicon glyphicon-trash'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Supprimer\n            </span>\n        </a>\n    </div>\n</td>\n";
 },"useData":true});

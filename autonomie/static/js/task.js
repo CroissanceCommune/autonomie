@@ -728,6 +728,61 @@ var payment_condition_handler = {
   }
 };
 
+function updateGroupQuantity(){
+  /*
+   * update the quantity of each line in a taskline group
+   * only if the line has a group_quantity input
+   */
+  var $quantity = $(this);
+  var group_quantity = $quantity.val();
+  var $linegroup = $quantity.closest(".linegroup");
+
+  $linegroup.children().find('.taskline').each(function(index, line){
+    var $line = $(line);
+    var quantity = $line.find("input[name=group_quantity]").val();
+    quantity = transformToCents(quantity);
+    if (quantity > 0){
+      var line_quantity = quantity * group_quantity;
+      $line.find("input[name=quantity]").val(quantity * group_quantity);
+    }
+    $(Facade).trigger('linechange', line);
+    $(Facade).trigger("totalchange", line);
+  });
+}
+function setTaskLineGroupsBehaviour(){
+  /*
+   * Set the behaviour on all task lines groups
+   * If they are inherited from a the catalog, we keep the quantity definition
+   * behaviour
+   */
+  var $groups = $('.linegroup');
+  $groups.each(function(index, elem){
+    setTaskLineGroupBehaviour($(elem));
+  }
+  );
+}
+
+function setTaskLineGroupBehaviour(jquery_tag){
+  /*
+   * Set the behaviours on task lines group : quantity update on quantity
+   * change
+   */
+  var $quantity_tag = jquery_tag.find('input[name=quantity]').first();
+  // Only if we've got lines in the linegroup with non null values for
+  // group_quantity
+  var gquantities = jquery_tag.find(
+      'input[name=group_quantity]').filter("[value!='0.0']");
+  if (gquantities.length > 0){
+    $quantity_tag.off('keyup input');
+    $quantity_tag.on('keyup input', updateGroupQuantity);
+  } else {
+    // Set a type of hidden for the group quantity tag
+    $quantity_tag.attr('type', 'hidden');
+    // Hide the label tag
+    $quantity.parent().find('label').hide();
+  }
+}
+
 function initialize(){
   /*
    *  Initialize the document edition UI
@@ -736,6 +791,7 @@ function initialize(){
   if (AppOptions['edit']){
     fetchFormContext();
   }
+  setTaskLineGroupsBehaviour();
   setTaskLinesBehaviours();
   setDiscountLinesBehaviours();
   setExpenseBehaviour();

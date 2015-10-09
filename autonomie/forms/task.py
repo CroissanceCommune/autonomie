@@ -375,6 +375,11 @@ class TaskLine(colander.MappingSchema):
         title=u"Prix/unité",
         widget=deform.widget.TextInputWidget(),
         css_class='col-md-1')
+    group_quantity = colander.SchemaNode(
+        colander.Float(),
+        widget=deform.widget.HiddenWidget(),
+        default=0
+    )
     quantity = colander.SchemaNode(
         QuantityType(),
         title=u"Quantité",
@@ -457,6 +462,24 @@ class TaskLineGroupMapping(colander.MappingSchema):
         missing=u'',
         richwidget=False,
         richtext_options={"height": "100px"},
+    )
+    display_details = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Afficher les détails de l'ouvrage",
+        description=u"Les prestations composant l'ouvrage doivent-elles être \
+affichées dans la sortie PDF ?",
+        default=False,
+        missing=False,
+    )
+    quantity = colander.SchemaNode(
+        colander.Float(),
+        title=u"Quantité",
+        description=u"Les prestations de cet ouvrage issues du catalogue \
+produit verront leur quantité augmenté en conséquence",
+        widget=deform.widget.TextInputWidget(
+            template=TEMPLATES_URL + 'number_input.pt',
+        ),
+        default=1,
     )
     lines = TaskLines(
         widget=deform.widget.SequenceWidget(

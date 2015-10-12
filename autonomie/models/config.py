@@ -27,20 +27,22 @@
     Autonomie's welcome message
     Documents footers, headers ...
 """
-
 from sqlalchemy import (
     Column,
     Text,
     Integer,
     String,
+    event,
 )
-from sqlalchemy.dialects.mysql.base import LONGBLOB
-from sqlalchemy.orm import (
-    deferred,
+
+from depot.fields.sqlalchemy import (
+    UploadedFileField,
+    _SQLAMutationTracker,
 )
 
 from autonomie.models.base import DBBASE, DBSESSION
 from autonomie.models.base import default_table_args
+from autonomie.utils.filedepot import _to_fieldstorage
 
 
 class ConfigFiles(DBBASE):
@@ -52,7 +54,7 @@ class ConfigFiles(DBBASE):
     id = Column(Integer, primary_key=True)
     key = Column(String(100), unique=True)
     name = Column(String(100))
-    data = deferred(Column(LONGBLOB()))
+    data = Column(UploadedFileField)
     mimetype = Column(String(100))
     size = Column(Integer)
 
@@ -61,7 +63,7 @@ class ConfigFiles(DBBASE):
         Method making our file object compatible with the common file rendering
         utility
         """
-        return self.data
+        return self.data.file.read()
 
     @property
     def label(self):
@@ -93,6 +95,37 @@ class ConfigFiles(DBBASE):
         else:
             DBSESSION().add(instance)
 
+    @classmethod
+    def __declare_last__(cls):
+        # Unconfigure the event set in _SQLAMutationTracker, we have _save_data
+        mapper = cls._sa_class_manager.mapper
+        args = (mapper.attrs['data'], 'set', _SQLAMutationTracker._field_set)
+        if event.contains(*args):
+            event.remove(*args)
+
+        # Declaring the event on the class attribute instead of mapper property
+        # enables proper registration on its subclasses
+        event.listen(cls.data, 'set', cls._set_data, retval=True)
+
+    @classmethod
+    def _set_data(cls, target, value, oldvalue, initiator):
+        if isinstance(value, bytes):
+            value = _to_fieldstorage(fp=StringIO(value),
+                                     filename=target.filename,
+                                     mimetype=target.mimetype,
+                                     size=len(value))
+
+        newvalue = _SQLAMutationTracker._field_set(
+            target, value, oldvalue, initiator)
+
+        if newvalue is None:
+            return
+        target.filename = newvalue.filename
+        target.mimetype = newvalue.content_type
+        target.size = newvalue.file.content_length
+
+        return newvalue
+
 
 class Config(DBBASE):
     """
@@ -104,18 +137,20 @@ class Config(DBBASE):
     """
     __tablename__ = 'config'
     __table_args__ = default_table_args
-    app = Column("config_app",
-            String(50),
-            primary_key=True,
-            default='autonomie')
+    app = Column(
+        "config_app",
+        String(50),
+        primary_key=True,
+        default='autonomie',
+    )
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
 
     @classmethod
     def get(cls, keyname, default=None):
         query = super(Config, cls).query()
-        query = query.filter(Config.app=='autonomie')
-        query = query.filter(Config.name==keyname)
+        query = query.filter(Config.app == 'autonomie')
+        query = query.filter(Config.name == keyname)
         result = query.first()
         if default and result is None:
             result = default
@@ -124,7 +159,7 @@ class Config(DBBASE):
     @classmethod
     def query(cls):
         query = super(Config, cls).query()
-        return query.filter(Config.app=='autonomie')
+        return query.filter(Config.app == 'autonomie')
 
     @classmethod
     def set(cls, key, value):

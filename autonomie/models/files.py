@@ -26,8 +26,10 @@
 """
 import hashlib
 import os
-from datetime import datetime
+import cgi
+
 from cStringIO import StringIO
+from datetime import datetime
 from sqlalchemy import (
     Integer,
     Column,
@@ -35,15 +37,18 @@ from sqlalchemy import (
     DateTime,
     String,
     Boolean,
+    event,
 )
 
 from sqlalchemy.orm import (
-    deferred,
     relationship,
     backref,
 )
 
-from sqlalchemy.dialects.mysql.base import LONGBLOB
+from depot.fields.sqlalchemy import (
+    UploadedFileField,
+    _SQLAMutationTracker,
+)
 
 from autonomie.models.base import (
     default_table_args,
@@ -51,6 +56,7 @@ from autonomie.models.base import (
 )
 from autonomie.models.types import PersistentACLMixin
 from autonomie.models.node import Node
+from autonomie.utils.filedepot import _to_fieldstorage
 from autonomie.forms import EXCLUDED
 
 
@@ -63,7 +69,7 @@ class File(Node):
     __mapper_args__ = {'polymorphic_identity': 'file'}
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     description = Column(String(100), default="")
-    data = deferred(Column(LONGBLOB()))
+    data = Column(UploadedFileField)
     mimetype = Column(String(100))
     size = Column(Integer)
 
@@ -72,7 +78,7 @@ class File(Node):
         Method making our file object compatible with the common file rendering
         utility
         """
-        return self.data
+        return self.data.file.read()
 
     @property
     def label(self):
@@ -83,9 +89,38 @@ class File(Node):
 
     @property
     def data_obj(self):
-        res = StringIO()
-        res.write(self.data)
-        return res
+        return StringIO(self.data.file.read())
+
+    @classmethod
+    def __declare_last__(cls):
+        # Unconfigure the event set in _SQLAMutationTracker, we have _save_data
+        mapper = cls._sa_class_manager.mapper
+        args = (mapper.attrs['data'], 'set', _SQLAMutationTracker._field_set)
+        if event.contains(*args):
+            event.remove(*args)
+
+        # Declaring the event on the class attribute instead of mapper property
+        # enables proper registration on its subclasses
+        event.listen(cls.data, 'set', cls._set_data, retval=True)
+
+    @classmethod
+    def _set_data(cls, target, value, oldvalue, initiator):
+        if isinstance(value, bytes):
+            value = _to_fieldstorage(fp=StringIO(value),
+                                     filename=target.filename,
+                                     mimetype=target.mimetype,
+                                     size=len(value))
+
+        newvalue = _SQLAMutationTracker._field_set(
+            target, value, oldvalue, initiator)
+
+        if newvalue is None:
+            return
+        target.filename = newvalue.filename
+        target.mimetype = newvalue.content_type
+        target.size = newvalue.file.content_length
+
+        return newvalue
 
 
 class MailHistory(DBBASE):
@@ -155,6 +190,18 @@ class Template(File):
     @property
     def label(self):
         return self.name
+
+    @classmethod
+    def __declare_last__(cls):
+        # Unconfigure the event set in _SQLAMutationTracker, we have _save_data
+        mapper = cls._sa_class_manager.mapper
+        args = (mapper.attrs['data'], 'set', _SQLAMutationTracker._field_set)
+        if event.contains(*args):
+            event.remove(*args)
+
+        # Declaring the event on the class attribute instead of mapper property
+        # enables proper registration on its subclasses
+        event.listen(cls.data, 'set', cls._set_data, retval=True)
 
 
 class TemplatingHistory(DBBASE, PersistentACLMixin):

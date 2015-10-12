@@ -712,7 +712,7 @@ def store_compiled_file(context, request, output, template):
     file_obj = File(
         name=name,
         description=template.description,
-        data=datas,
+        data=output,
         mimetype="application/vnd.oasis.opendocument.text",
         size=len(datas),
         parent_id=context.id
@@ -755,6 +755,7 @@ def py3o_view(context, request):
         context for templating
     """
     log.debug(u"Asking for a template compilation")
+    print(context)
     doctemplate_id = request.GET.get('template_id')
 
     if doctemplate_id:
@@ -804,7 +805,13 @@ votre administrateur",
             u"Les données fournies en paramètres sont invalides",
             "error"
         )
-    return HTTPFound(request.route_path(context.type_, id=context.id))
+    return HTTPFound(
+        request.route_path(
+            context.type_,
+            id=context.id,
+            _anchor='tab4',
+        ),
+    )
 
 
 def userdata_doctype_view(userdata_model, request):

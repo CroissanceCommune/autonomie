@@ -55,7 +55,7 @@ UPLOAD_OK_MSG = u"Le fichier a bien été adjoint au document"
 EDIT_OK_MSG = u"Le fichier a bien été adjoint au document"
 
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 
 NODE_TYPE_LABEL = {
@@ -135,6 +135,7 @@ class FileUploadView(BaseFormView):
         file_object = self.factory()
         forms.merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
+        self.request.dbsession.flush()
         self.request.session.flash(self.valid_msg)
 
     def submit_success(self, appstruct):

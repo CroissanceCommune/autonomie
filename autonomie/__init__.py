@@ -181,6 +181,10 @@ def base_configure(config, dbsession, **settings):
         customize_renderers,
     )
     customize_renderers(config)
+    from autonomie.utils.filedepot import (
+        configure_filedepot,
+    )
+    configure_filedepot(settings)
     return config
 
 

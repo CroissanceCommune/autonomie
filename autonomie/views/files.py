@@ -135,6 +135,7 @@ class FileUploadView(BaseFormView):
         file_object = self.factory()
         forms.merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
+        self.request.dbsession.flush()
         self.request.session.flash(self.valid_msg)
 
     def submit_success(self, appstruct):

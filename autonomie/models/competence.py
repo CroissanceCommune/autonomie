@@ -23,6 +23,8 @@
 Models related to competence evaluation
 """
 import datetime
+import deform
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -42,6 +44,7 @@ from autonomie.models.base import (
 from autonomie.forms import (
     EXCLUDED,
     get_deferred_select,
+    get_hidden_field_conf,
 )
 
 from autonomie.models.options import (
@@ -102,25 +105,17 @@ class CompetenceOption(ConfigurableOption):
     __table_args__ = default_table_args
     __colanderalchemy_config__ = {
         "title": u"une compétence",
-        "validation_msg": u"La grille de compétences a bien été configurées",
+        "validation_msg": u"La grille de compétences a bien été configurée",
         "help_msg": u"Définissez des compétences, celles-ci sont \
-composées: <ul><li>D'un libellé</li><li>D'un niveau de référence</li>\
-<li>D'un ensemble de sous-compétences (définies par un libellé)</li></ul>"
+composées: <ul><li>D'un libellé</li>\
+<li>D'un ensemble de sous-compétences</li></ul>"
     }
     id = get_id_foreignkey_col('configurable_option.id')
+    # To be removed in 3.2
     requirement = Column(
         Float(),
         default=0,
-        info={
-            'colanderalchemy': {
-                "title": u"Niveau de référence pour cette compétence",
-                "widget": get_deferred_select(
-                    CompetenceScale,
-                    mandatory=True,
-                    keys=('value', 'label'),
-                )
-            }
-        }
+        info={'colanderalchemy': {"exclude": True}}
     )
 
     @classmethod
@@ -133,20 +128,32 @@ composées: <ul><li>D'un libellé</li><li>D'un niveau de référence</li>\
         return dict(
             id=self.id,
             label=self.label,
-            requirement=self.requirement,
+            requirements=[req.__json__(request) for req in self.requirement],
             children=[child.__json__(request) for child in self.children],
         )
 
     @classmethod
-    def __radar_datas__(cls):
+    def __radar_datas__(cls, deadline_id):
         result = []
         for option in cls.query():
-            result.append({'axis': option.label, 'value': option.requirement})
+            result.append(
+                {
+                    'axis': option.label,
+                    'value': option.get_requirement(deadline_id)
+                }
+            )
         return result
+
+    def get_requirement(self, deadline_id):
+        for req in self.requirements:
+            if req.deadline_id == deadline_id:
+                return req.requirement
+        return 0
 
 
 class CompetenceSubOption(ConfigurableOption):
     __table_args__ = default_table_args
+    __colanderalchemy_config__ = {"title": u"Sous-compétence"}
     id = get_id_foreignkey_col('configurable_option.id')
     parent_id = Column(
         ForeignKey("competence_option.id"),
@@ -161,7 +168,12 @@ class CompetenceSubOption(ConfigurableOption):
             "children",
             info={
                 'colanderalchemy': {
-                    'title': u"Sous-compétence",
+                    'title': u"Sous-compétences associées",
+                    "widget": deform.widget.SequenceWidget(
+                        add_subitem_text_template=u"Ajouter une \
+sous-compétence",
+                        min_len=1,
+                    )
                 },
             }
         ),
@@ -176,6 +188,74 @@ class CompetenceSubOption(ConfigurableOption):
             id=self.id,
             label=self.label,
             parent_id=self.parent_id,
+        )
+
+
+class CompetenceRequirement(DBBASE):
+    __colanderalchemy_config__ = {
+        "title": u"un niveau de référence",
+        "validation_msg": u"Les niveaux de référence de la grille de \
+compétences ont bien été configurés",
+        "help_msg": u"Pour chaque compétence, définissez les niveaux de \
+référence à chaque échéance."
+    }
+    competence_id = Column(
+        ForeignKey('competence_option.id'),
+        primary_key=True,
+        info={'colanderalchemy': get_hidden_field_conf()},
+    )
+    deadline_id = Column(
+        ForeignKey('competence_deadline.id'), primary_key=True,
+        info={'colanderalchemy': get_hidden_field_conf()},
+    )
+    requirement = Column(
+        Float(),
+        default=0,
+        info={
+            'colanderalchemy': {
+                "title": u"Niveau de référence",
+                "widget": get_deferred_select(
+                    CompetenceScale,
+                    mandatory=True,
+                    keys=('value', 'label'),
+                )
+            }
+        }
+    )
+
+    competence = relationship(
+        'CompetenceOption',
+        backref=backref(
+            'requirements',
+            info={
+                'colanderalchemy': {
+                    "title": u"Niveaux de référence pour cette compétence",
+                },
+            }
+        ),
+        info={
+            'colanderalchemy': {"exclude": True},
+        }
+    )
+    deadline = relationship(
+        "CompetenceDeadline",
+        backref=backref(
+            'requirements',
+            info={
+                'colanderalchemy': {"exclude": True},
+            }
+        ),
+        info={
+            'colanderalchemy': {"exclude": True},
+        }
+    )
+
+    def __json__(self, request):
+        return dict(
+            deadline_id=self.deadline_id,
+            competence_id=self.competence_id,
+            reqirement=self.requirement,
+            deadline_label=self.deadline.label,
         )
 
 
@@ -280,7 +360,7 @@ class CompetenceGridItem(DBBASE):
             progress=self.progress,
             option_id=self.option_id,
             label=self.option.label,
-            requirement=self.option.requirement,
+            requirement=self.option.get_requirement(self.grid.deadline_id),
             grid_id=self.grid_id,
             subitems=[subitem.__json__(request) for subitem in self.subitems],
             average=self.average,

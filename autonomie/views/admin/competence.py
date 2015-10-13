@@ -25,9 +25,13 @@ from autonomie.models.competence import (
     CompetenceScale,
     CompetenceDeadline,
     CompetenceOption,
+    CompetenceRequirement,
 )
 from autonomie.models.config import ConfigFiles
-from autonomie.forms.admin import CompetencePrintConfigSchema
+from autonomie.forms.admin import (
+    CompetencePrintConfigSchema,
+    get_sequence_model_admin,
+)
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseAdminFormView,
@@ -45,10 +49,52 @@ logger = logging.getLogger(__name__)
     CompetenceOption,
     r_path='admin_competences',
 )
+(
+    req_admin_class,
+    COMPETENCE_REQ_ROUTE,
+    COMPETENCE_REQ_TMPL,
+) = get_model_admin_view(
+    CompetenceRequirement,
+    r_path='admin_competences',
+)
+
+
+def get_requirement_admin_schema():
+    schema = get_sequence_model_admin(
+        CompetenceOption,
+        excludes=('children',),
+    )
+    import colander
+    from deform_extensions import DisabledInput
+    schema['datas']['data']['requirements']['requirements'].add_before(
+        'requirement',
+        colander.SchemaNode(
+            colander.String(),
+            widget=DisabledInput(),
+            name='deadline_label',
+            title=u"Échéance",
+        )
+    )
+    return schema
 
 
 class AdminCompetenceOption(main_admin_class):
+    """
+    competence and subcompetence configuration
+    """
     redirect_path = "admin_competences"
+    _schema = get_sequence_model_admin(
+        CompetenceOption,
+        excludes=('requirements',),
+    )
+
+
+class AdminCompetenceRequirement(req_admin_class):
+    """
+    Requirements configuration
+    """
+    redirect_path = "admin_competences"
+    _schema = get_requirement_admin_schema()
 
     def before(self, form):
         if CompetenceScale.query().count() == 0:
@@ -57,7 +103,50 @@ class AdminCompetenceOption(main_admin_class):
 la grille de compétences."
             )
             raise HTTPFound(self.request.route_path("admin_competence_scale"))
-        main_admin_class.before(self, form)
+        if CompetenceOption.query().count() == 0:
+            self.session.flash(
+                u"La grille de compétence doit être configurée avant les \
+barêmes"
+            )
+            raise HTTPFound(self.request.route_path("admin_competence_option"))
+        req_admin_class.before(self, form)
+
+    def get_appstruct(self):
+        """
+        Return the appstruct for competence requirements configuration
+        """
+        options = CompetenceOption.query().all()
+        appstruct = []
+        for option in options:
+            opt_appstruct = {
+                "id": option.id,
+                "label": option.label,
+                "requirements": []
+            }
+            for deadline in CompetenceDeadline.query():
+                opt_appstruct['requirements'].append(
+                    {
+                        'deadline_id': deadline.id,
+                        "deadline_label": deadline.label,
+                        'requirement': option.get_requirement(deadline.id)
+                    }
+                )
+            appstruct.append(opt_appstruct)
+        return {'datas': appstruct}
+
+    def _disable_or_remove_elements(self, appstruct):
+        pass
+
+    def _add_or_edit(self, index, datas):
+        comp_id = datas['id']
+
+        for req in datas['requirements']:
+            comp_req = CompetenceRequirement(
+                competence_id=comp_id,
+                requirement=req['requirement'],
+                deadline_id=req['deadline_id'],
+            )
+            self.dbsession.merge(comp_req)
 
 
 class AdminCompetencePrintOutput(BaseAdminFormView):
@@ -99,6 +188,10 @@ def admin_competence_index_view(request):
         (
             u"Configuration de la grille de compétences",
             "admin_competence_option", ""
+        ),
+        (
+            u"Configuration des niveux de référence de la grille de compétences",
+            "admin_competence_requirement", ""
         ),
         (
             u"Configuration de la sortie imprimable",
@@ -149,6 +242,17 @@ def includeme(config):
         AdminCompetenceOption,
         route_name=COMPETENCE_OPTION_ROUTE,
         renderer=COMPETENCE_OPTION_TMPL,
+        permission='admin',
+    )
+
+    config.add_route(
+        COMPETENCE_REQ_ROUTE,
+        "admin/competences/" + COMPETENCE_REQ_ROUTE,
+    )
+    config.add_view(
+        AdminCompetenceRequirement,
+        route_name=COMPETENCE_REQ_ROUTE,
+        renderer=COMPETENCE_REQ_TMPL,
         permission='admin',
     )
 

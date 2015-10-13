@@ -1,7 +1,7 @@
-"""3.1 : ajout_quantity_product
+"""3.2 : ajout_quantity_product
 
 Revision ID: 39c70a8da291
-Revises: 59f05bb3051d
+Revises: bdb7dd32c2c
 Create Date: 2015-10-01 12:18:41.393913
 
 """

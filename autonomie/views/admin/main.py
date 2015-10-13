@@ -90,6 +90,7 @@ from autonomie.forms.admin import (
     get_config_appstruct,
     get_config_dbdatas,
     merge_config_datas,
+    get_config_schema,
 )
 from autonomie.forms.files import get_template_upload_schema
 from js.tinymce import tinymce
@@ -103,7 +104,6 @@ from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseAdminFormView,
     BaseConfigView,
-    get_config_schema,
 )
 from autonomie.forms import (
     merge_session_with_post,

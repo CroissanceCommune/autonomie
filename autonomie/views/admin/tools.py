@@ -27,7 +27,6 @@ from autonomie.models.config import Config
 from autonomie.forms import flatten_appstruct
 from autonomie.forms.admin import (
     get_sequence_model_admin,
-    get_config_schema,
     build_config_appstruct,
 )
 from autonomie.utils.ascii import (
@@ -145,8 +144,10 @@ class AdminOption(BaseAdminFormView):
         for js_resource in self.js_resources:
             js_resource.need()
 
-        appstruct = self.schema.dictify(self.factory.query().all())
-        form.set_appstruct(appstruct)
+        form.set_appstruct(self.get_appstruct())
+
+    def get_appstruct(self):
+        return self.schema.dictify(self.factory.query().all())
 
     def _get_edited_elements(self, appstruct):
         """
@@ -210,7 +211,7 @@ def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
         title = view_title
         validation_msg = infos.get('validation_msg', u'')
         factory = model
-        schema = get_sequence_model_admin(model, u"")
+        _schema = get_sequence_model_admin(model, u"")
         redirect_path = r_path
         js_resources = js_requirements
     return (

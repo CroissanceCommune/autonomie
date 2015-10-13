@@ -57,6 +57,7 @@ class ConfigurableOption(DBBASE):
     label = Column(
         String(100),
         info={'colanderalchemy': {'title': u'Libellé'}},
+        nullable=False,
     )
     active = Column(
         Boolean(),

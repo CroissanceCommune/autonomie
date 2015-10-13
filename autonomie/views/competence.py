@@ -196,7 +196,7 @@ def competence_radar_chart_view(context, request):
         id=context.id,
         _query=dict(action='radar'),
     )
-    title = u"Profil des compétences entrepreneuriale  \
+    title = u"Profil des compétences entrepreneuriales  \
 {0}".format(context.deadline.label)
 
     grids = []
@@ -237,8 +237,8 @@ def competence_radar_chart_datas(context, request):
         datas.append(grid.__radar_datas__())
         legend.append(u"Profil {0}".format(deadline.label))
 
-    datas.append(CompetenceOption.__radar_datas__())
-    legend.append(u"Profil référence")
+    datas.append(CompetenceOption.__radar_datas__(context.deadline_id))
+    legend.append(u"Profil de référence")
 
     config = {}
     config['levels'] = CompetenceScale.query().count()

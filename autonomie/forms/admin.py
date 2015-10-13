@@ -1129,7 +1129,7 @@ def merge_config_datas(dbdatas, appstruct):
     return dbdatas
 
 
-def get_sequence_model_admin(model, title=u""):
+def get_sequence_model_admin(model, title=u"", excludes=()):
     """
     Return a schema for configuring sequence of models
 
@@ -1141,7 +1141,8 @@ def get_sequence_model_admin(model, title=u""):
         model,
         widget=deform.widget.MappingWidget(
             template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        ),
+        excludes=excludes,
     )
     node_schema.name = 'data'
 

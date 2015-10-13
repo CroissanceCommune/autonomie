@@ -37,7 +37,7 @@ function addLegend(legend_options, config){
   legend = legend.attr("class", "legend");
   legend = legend.attr("height", 100);
   legend = legend.attr("width", 200);
-  legend = legend.attr('transform', 'translate(90,20)');
+  legend = legend.attr('transform', 'translate(120,20)');
 
   legend.selectAll('rect').
     data(legend_options).

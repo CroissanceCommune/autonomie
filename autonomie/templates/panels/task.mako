@@ -262,18 +262,16 @@
 </div>
 % endif
 % if bulk is UNDEFINED or not bulk:
-    % if config.has_key('coop_cgv') or company.cgv:
-    <pdf:nextpage />
-        % if config.has_key('coop_cgv'):
-            <div id="cgv">
-                ${format_text(config['coop_cgv'], False)}
-            </div>
-        % endif
-        % if company.cgv:
-            <pdf:nextpage />
-            <div>
-                ${format_text(company.cgv, False)}
-            </div>
-        % endif
+    % if config.has_key('coop_cgv') and config['coop_cgv']:
+        <pdf:nextpage />
+        <div id="cgv">
+            ${format_text(config['coop_cgv'], False)}
+        </div>
+    % endif
+    % if company.cgv:
+        <pdf:nextpage />
+        <div>
+            ${format_text(company.cgv, False)}
+        </div>
     % endif
 % endif

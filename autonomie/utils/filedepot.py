@@ -24,6 +24,7 @@ Configuration de filedepot
 """
 import cgi
 import logging
+from autonomie.export.utils import detect_file_headers
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ def configure_filedepot(settings):
         DepotManager.configure(name, {'depot.storage_path': path})
 
 
-def _to_fieldstorage(fp, filename, mimetype, size, **_kwds):
+def _to_fieldstorage(fp, filename, size, **_kwds):
     """ Build a :class:`cgi.FieldStorage` instance.
 
     Deform's :class:`FileUploadWidget` returns a dict, but
@@ -57,6 +58,6 @@ def _to_fieldstorage(fp, filename, mimetype, size, **_kwds):
     f = cgi.FieldStorage()
     f.file = fp
     f.filename = filename
-    f.type = mimetype
+    f.type = detect_file_headers(filename)
     f.length = size
     return f

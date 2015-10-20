@@ -27,6 +27,7 @@
     Autonomie's welcome message
     Documents footers, headers ...
 """
+from cStringIO import StringIO
 from sqlalchemy import (
     Column,
     Text,
@@ -42,6 +43,7 @@ from depot.fields.sqlalchemy import (
 
 from autonomie.models.base import DBBASE, DBSESSION
 from autonomie.models.base import default_table_args
+from autonomie.export.utils import detect_file_headers
 from autonomie.utils.filedepot import _to_fieldstorage
 
 
@@ -77,7 +79,7 @@ class ConfigFiles(DBBASE):
         """
         Override the default get method to get by key and not by id
         """
-        return cls.query().filter(cls.key==key).first()
+        return cls.query().filter(cls.key == key).first()
 
     @classmethod
     def set(cls, key, appstruct):
@@ -112,7 +114,6 @@ class ConfigFiles(DBBASE):
         if isinstance(value, bytes):
             value = _to_fieldstorage(fp=StringIO(value),
                                      filename=target.filename,
-                                     mimetype=target.mimetype,
                                      size=len(value))
 
         newvalue = _SQLAMutationTracker._field_set(
@@ -121,7 +122,7 @@ class ConfigFiles(DBBASE):
         if newvalue is None:
             return
         target.filename = newvalue.filename
-        target.mimetype = newvalue.content_type
+        target.mimetype = detect_file_headers(newvalue.filename)
         target.size = newvalue.file.content_length
 
         return newvalue

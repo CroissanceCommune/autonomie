@@ -57,6 +57,7 @@ from autonomie.models.base import (
 from autonomie.models.types import PersistentACLMixin
 from autonomie.models.node import Node
 from autonomie.utils.filedepot import _to_fieldstorage
+from autonomie.export.utils import detect_file_headers
 from autonomie.forms import EXCLUDED
 
 
@@ -108,7 +109,6 @@ class File(Node):
         if isinstance(value, bytes):
             value = _to_fieldstorage(fp=StringIO(value),
                                      filename=target.filename,
-                                     mimetype=target.mimetype,
                                      size=len(value))
 
         newvalue = _SQLAMutationTracker._field_set(
@@ -117,7 +117,7 @@ class File(Node):
         if newvalue is None:
             return
         target.filename = newvalue.filename
-        target.mimetype = newvalue.content_type
+        target.mimetype = detect_file_headers(newvalue.filename)
         target.size = newvalue.file.content_length
 
         return newvalue

@@ -191,7 +191,8 @@ class TaskCompute(object):
         ret_dict = self.add_ht_by_tva(ret_dict, lines)
         ret_dict = self.add_ht_by_tva(ret_dict, self.discounts, operator.sub)
         expense = self.get_expense_ht()
-        ret_dict = self.add_ht_by_tva(ret_dict, [expense])
+        if expense.cost > 0:
+            ret_dict = self.add_ht_by_tva(ret_dict, [expense])
         return ret_dict
 
     def tva_ttc_parts(self):

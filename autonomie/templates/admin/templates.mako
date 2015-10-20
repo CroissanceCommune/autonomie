@@ -33,7 +33,7 @@
         Ajouter
     </a>
     </div>
-    <div class="alert alert-danger">
+    <div class="alert alert-warning">
         <i class='fa fa-warning'></i>
         Les modèles de document doivent être au format odt pour pouvoir être utilisés par Autonomie
     </div>
@@ -56,7 +56,7 @@
             <td>${api.format_date(template.updated_at)}</td>
             <td style="text-align:right">
                 <% url = request.route_path('template', id=template.id) %>
-                ${table_btn(url, u"Voir", u"Voir ce modèle", icon=u"pencil")}
+                ${table_btn(url, u"Télécharger", u"Télécharger le fichier odt", icon=u"pencil")}
                 <% url = request.route_path('template', id=template.id, _query=dict(action='edit')) %>
                 ${table_btn(url, u"Modifier", u"Éditer ce modèle", icon=u"pencil")}
                 <% url = request.route_path('template', id=template.id, _query=dict(action='disable')) %>

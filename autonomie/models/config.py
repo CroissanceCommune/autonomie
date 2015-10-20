@@ -27,7 +27,11 @@
     Autonomie's welcome message
     Documents footers, headers ...
 """
+<<<<<<< HEAD
 
+=======
+from cStringIO import StringIO
+>>>>>>> 84a83b4... Fix mimetype registration
 from sqlalchemy import (
     Column,
     Text,
@@ -41,6 +45,8 @@ from sqlalchemy.orm import (
 
 from autonomie.models.base import DBBASE, DBSESSION
 from autonomie.models.base import default_table_args
+from autonomie.export.utils import detect_file_headers
+from autonomie.utils.filedepot import _to_fieldstorage
 
 
 class ConfigFiles(DBBASE):
@@ -75,7 +81,7 @@ class ConfigFiles(DBBASE):
         """
         Override the default get method to get by key and not by id
         """
-        return cls.query().filter(cls.key==key).first()
+        return cls.query().filter(cls.key == key).first()
 
     @classmethod
     def set(cls, key, appstruct):
@@ -92,6 +98,36 @@ class ConfigFiles(DBBASE):
             DBSESSION().merge(instance)
         else:
             DBSESSION().add(instance)
+
+    @classmethod
+    def __declare_last__(cls):
+        # Unconfigure the event set in _SQLAMutationTracker, we have _save_data
+        mapper = cls._sa_class_manager.mapper
+        args = (mapper.attrs['data'], 'set', _SQLAMutationTracker._field_set)
+        if event.contains(*args):
+            event.remove(*args)
+
+        # Declaring the event on the class attribute instead of mapper property
+        # enables proper registration on its subclasses
+        event.listen(cls.data, 'set', cls._set_data, retval=True)
+
+    @classmethod
+    def _set_data(cls, target, value, oldvalue, initiator):
+        if isinstance(value, bytes):
+            value = _to_fieldstorage(fp=StringIO(value),
+                                     filename=target.filename,
+                                     size=len(value))
+
+        newvalue = _SQLAMutationTracker._field_set(
+            target, value, oldvalue, initiator)
+
+        if newvalue is None:
+            return
+        target.filename = newvalue.filename
+        target.mimetype = detect_file_headers(newvalue.filename)
+        target.size = newvalue.file.content_length
+
+        return newvalue
 
 
 class Config(DBBASE):

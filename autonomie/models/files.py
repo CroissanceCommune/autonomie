@@ -51,6 +51,8 @@ from autonomie.models.base import (
 )
 from autonomie.models.types import PersistentACLMixin
 from autonomie.models.node import Node
+from autonomie.utils.filedepot import _to_fieldstorage
+from autonomie.export.utils import detect_file_headers
 from autonomie.forms import EXCLUDED
 
 
@@ -83,9 +85,37 @@ class File(Node):
 
     @property
     def data_obj(self):
-        res = StringIO()
-        res.write(self.data)
-        return res
+        return StringIO(self.data.file.read())
+
+    @classmethod
+    def __declare_last__(cls):
+        # Unconfigure the event set in _SQLAMutationTracker, we have _save_data
+        mapper = cls._sa_class_manager.mapper
+        args = (mapper.attrs['data'], 'set', _SQLAMutationTracker._field_set)
+        if event.contains(*args):
+            event.remove(*args)
+
+        # Declaring the event on the class attribute instead of mapper property
+        # enables proper registration on its subclasses
+        event.listen(cls.data, 'set', cls._set_data, retval=True)
+
+    @classmethod
+    def _set_data(cls, target, value, oldvalue, initiator):
+        if isinstance(value, bytes):
+            value = _to_fieldstorage(fp=StringIO(value),
+                                     filename=target.filename,
+                                     size=len(value))
+
+        newvalue = _SQLAMutationTracker._field_set(
+            target, value, oldvalue, initiator)
+
+        if newvalue is None:
+            return
+        target.filename = newvalue.filename
+        target.mimetype = detect_file_headers(newvalue.filename)
+        target.size = newvalue.file.content_length
+
+        return newvalue
 
 
 class MailHistory(DBBASE):

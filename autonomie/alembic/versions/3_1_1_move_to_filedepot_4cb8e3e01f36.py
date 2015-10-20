@@ -1,4 +1,4 @@
-"""3.1 : move to filedepot
+"""3.1.1 : move to filedepot
 
 Revision ID: 4cb8e3e01f36
 Revises: 39c70a8da291
@@ -8,7 +8,7 @@ Create Date: 2015-10-10 10:05:44.476390
 
 # revision identifiers, used by Alembic.
 revision = '4cb8e3e01f36'
-down_revision = '39c70a8da291'
+down_revision = 'bdb7dd32c2c'
 
 import sys
 import time
@@ -18,6 +18,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
+    now = time.time()
     logger = logging.getLogger('autonomie')
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
@@ -65,7 +66,6 @@ def upgrade():
     count = session.query(files.c.id).count()
 
     logger.debug(u"   + Moving the files on disk")
-    now = time.time()
     while True:
         start = window_size * window_idx
         if start >= count:
@@ -108,9 +108,9 @@ def upgrade():
 
     op.drop_column('config_files', 'data')
     op.add_column('config_files', sa.Column('data', sa.Unicode(4096)))
-    files.c.data.type = sa.Unicode(4096)
-    update = config_files.update().where(files.c.id == bindparam('nodeid')).\
-        values({files.c.data: bindparam('depot_datas')})
+    config_files.c.data.type = sa.Unicode(4096)
+    update = config_files.update().where(config_files.c.id == bindparam('nodeid')).\
+        values({config_files.c.data: bindparam('depot_datas')})
 
     session.execute(update, processed_config_files)
 

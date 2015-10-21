@@ -63,3 +63,4 @@ redis==2.10.3
 sqla_inspect==0.2.0
 Unidecode==0.04.17
 deform_extensions==0.2
+filedepot==0.1.2

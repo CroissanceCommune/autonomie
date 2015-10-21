@@ -27,11 +27,6 @@ def upgrade():
 
     from autonomie.models.base import DBSESSION, METADATA
 
-    try:
-        op.add_column("file", sa.Column('depot', sa.Unicode(4096)))
-    except:
-        pass
-
     session = DBSESSION()
 
     def process(thing, store):

@@ -112,6 +112,9 @@ class TaskCompute(object):
             val = ret_dict.get(expense.tva, 0)
             val += expense.tva_amount()
             ret_dict[expense.tva] = val
+
+        for key in ret_dict:
+            ret_dict[key] = self.floor(ret_dict[key])
         return ret_dict
 
     def tva_amount(self):

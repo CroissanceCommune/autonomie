@@ -5,7 +5,7 @@ Autonomie
 .. image::
     https://secure.travis-ci.org/CroissanceCommune/autonomie.png?branch=master
    :target: http://travis-ci.org/#!/CroissanceCommune/autonomie
-      :alt: Travis-ci: continuous integration status.
+   :alt: Travis-ci: continuous integration status.
 
 
 Un progiciel de gestion pour CAE -Coopérative d'activité et d'emploi.

@@ -36,11 +36,12 @@ def configure_filedepot(settings):
     """
     try:
         path = settings['autonomie.depot_path']
-    except KeyError:
+    except KeyError, err:
         logger.exception(
             u" !!!! You forgot to configure filedepot with an \
 'autonomie.depot_path' setting"
         )
+        raise err
 
     from depot.manager import DepotManager
     name = "local"

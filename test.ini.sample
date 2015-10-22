@@ -29,6 +29,7 @@ mako.directories = autonomie:templates
 mako.imports = from markupsafe import escape_silent
 mako.default_filters = escape_silent
 autonomie.ftpdir=%(here)s/autonomie/tests/datas/
+autonomie.depot_path=%(here)s/tests/datas/
 
 [pipeline:main]
 pipeline =

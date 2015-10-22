@@ -55,7 +55,7 @@ UPLOAD_OK_MSG = u"Le fichier a bien été adjoint au document"
 EDIT_OK_MSG = u"Le fichier a bien été adjoint au document"
 
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 
 NODE_TYPE_LABEL = {

@@ -27,20 +27,18 @@
     Autonomie's welcome message
     Documents footers, headers ...
 """
-<<<<<<< HEAD
-
-=======
 from cStringIO import StringIO
->>>>>>> 84a83b4... Fix mimetype registration
 from sqlalchemy import (
     Column,
     Text,
     Integer,
     String,
+    event,
 )
-from sqlalchemy.dialects.mysql.base import LONGBLOB
-from sqlalchemy.orm import (
-    deferred,
+
+from depot.fields.sqlalchemy import (
+    UploadedFileField,
+    _SQLAMutationTracker,
 )
 
 from autonomie.models.base import DBBASE, DBSESSION
@@ -58,7 +56,7 @@ class ConfigFiles(DBBASE):
     id = Column(Integer, primary_key=True)
     key = Column(String(100), unique=True)
     name = Column(String(100))
-    data = deferred(Column(LONGBLOB()))
+    data = Column(UploadedFileField)
     mimetype = Column(String(100))
     size = Column(Integer)
 
@@ -67,7 +65,7 @@ class ConfigFiles(DBBASE):
         Method making our file object compatible with the common file rendering
         utility
         """
-        return self.data
+        return self.data.file.read()
 
     @property
     def label(self):
@@ -140,18 +138,20 @@ class Config(DBBASE):
     """
     __tablename__ = 'config'
     __table_args__ = default_table_args
-    app = Column("config_app",
-            String(50),
-            primary_key=True,
-            default='autonomie')
+    app = Column(
+        "config_app",
+        String(50),
+        primary_key=True,
+        default='autonomie',
+    )
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
 
     @classmethod
     def get(cls, keyname, default=None):
         query = super(Config, cls).query()
-        query = query.filter(Config.app=='autonomie')
-        query = query.filter(Config.name==keyname)
+        query = query.filter(Config.app == 'autonomie')
+        query = query.filter(Config.name == keyname)
         result = query.first()
         if default and result is None:
             result = default
@@ -160,7 +160,7 @@ class Config(DBBASE):
     @classmethod
     def query(cls):
         query = super(Config, cls).query()
-        return query.filter(Config.app=='autonomie')
+        return query.filter(Config.app == 'autonomie')
 
     @classmethod
     def set(cls, key, value):

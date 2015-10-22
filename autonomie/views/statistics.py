@@ -210,7 +210,7 @@ def load_optrel(inspector):
             rel_class = column['related_class']
             res[key] = [
                 {
-                    'label': option.label,
+                    'label': getattr(option, 'label', u'Inconnu'),
                     'id': option.id,
                     'value': str(option.id),
                 }

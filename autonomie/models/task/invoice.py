@@ -434,7 +434,6 @@ class CancelInvoice(Task, TaskCompute):
         "Invoice",
         backref=backref(
             "cancelinvoices",
-            cascade='all, delete-orphan',
             info={'colanderalchemy': forms.EXCLUDED, }
         ),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id",

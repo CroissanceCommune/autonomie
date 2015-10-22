@@ -71,12 +71,17 @@
                 </p>
                 </li>
             % endif
-            % if hasattr(task, 'cancelinvoice') and task.cancelinvoice:
-                <li>
-                <p>
-                    L'avoir : <a href="${request.route_path('cancelinvoice', id=task.cancelinvoice.id)}">${task.cancelinvoice.number}</a> a été généré depuis cette facture.
-                </p>
-                </li>
+            % if hasattr(task, 'cancelinvoices') and task.cancelinvoices:
+                % for cancelinvoice in task.cancelinvoices:
+                    <li>
+                        <p>
+                            L'avoir : \
+                            <a href="${request.route_path('cancelinvoice', id=cancelinvoice.id)}">
+                                ${cancelinvoice.number}
+                            </a> a été généré depuis cette facture.
+                        </p>
+                    </li>
+                % endfor
             % endif
             % if task.exported:
                 <li>

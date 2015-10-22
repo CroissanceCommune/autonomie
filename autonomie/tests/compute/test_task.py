@@ -96,8 +96,13 @@ class DummyTask(Dummy, TaskCompute):
 
 
 class DummyInvoice(Dummy, InvoiceCompute):
-    cancelinvoice = None
+    cancelinvoices = []
     pass
+
+
+class DummyCancelInvoice(Dummy, TaskCompute):
+    def is_valid(self):
+        return True
 
 
 class DummyEstimation(Dummy, EstimationCompute):
@@ -154,6 +159,19 @@ class TestTaskCompute():
         assert tvas.keys() == [1960, 550]
         assert tvas[1960] == 3920
         assert tvas[550] == 2134
+
+    def test_multiple_tvas(self):
+        task = TaskCompute()
+        task.line_groups = [DummyGroup(
+            lines=[
+                DummyLine(cost=10004, quantity=1, tva=1000),
+                DummyLine(cost=5002, quantity=1, tva=2000),
+            ]
+        )]
+        # Ref https://github.com/CroissanceCommune/autonomie/issues/305
+        tvas = task.get_tvas()
+        assert tvas[1000] == 1000
+        assert task.tva_amount() == 2000
 
     def test_tva_amount(self):
         # cf #501
@@ -213,6 +231,20 @@ class TestInvoiceCompute():
     def test_topay(self):
         task = self.getOne()
         assert task.topay() == 3500
+
+    def test_topay_with_cancelinvoice(self):
+        task = self.getOne()
+        cinv1 = DummyCancelInvoice()
+        cinv1.line_groups = [DummyGroup(
+            lines=[DummyLine(cost=-500, quantity=1, tva=0)]
+        )]
+        cinv2 = DummyCancelInvoice()
+        cinv2.line_groups = [DummyGroup(
+            lines=[DummyLine(cost=-600, quantity=1, tva=0)]
+        )]
+        task.cancelinvoices = [cinv1, cinv2]
+        assert task.cancelinvoice_amount() == 1100
+        assert task.topay() == 2400
 
 
 class TestEstimationCompute():

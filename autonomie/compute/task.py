@@ -218,7 +218,7 @@ class InvoiceCompute(TaskCompute):
     """
     # Should have an amount attribute
     payments = []
-    cancelinvoice = None
+    cancelinvoice = []
 
     def payments_sum(self):
         """
@@ -228,12 +228,13 @@ class InvoiceCompute(TaskCompute):
 
     def cancelinvoice_amount(self):
         """
-        Return the amount covered by th associated cancelinvoice
+        Return the amount covered by th associated cancelinvoices
         """
         result = 0
-        if self.cancelinvoice is not None and self.cancelinvoice.is_valid():
-            # cancelinvoice total is negative
-            result = -1 * self.cancelinvoice.total()
+        for cancelinvoice in self.cancelinvoices:
+            if cancelinvoice.is_valid():
+                # cancelinvoice total is negative
+                result += -1 * cancelinvoice.total()
         return result
 
     def paid(self):
@@ -246,7 +247,8 @@ class InvoiceCompute(TaskCompute):
         """
         Return the amount that still need to be paid
 
-        Compute the sum of the payments and what's part of a valid cancelinvoice
+        Compute the sum of the payments and what's part of a valid
+        cancelinvoice
         """
         result = self.total() - self.paid()
         return result
@@ -272,8 +274,14 @@ class InvoiceCompute(TaskCompute):
         Returns the amounts already paid through cancelinvoices by tva
         """
         result = {}
-        if self.cancelinvoice is not None and self.cancelinvoice.is_valid():
-            result = self.cancelinvoice.tva_ttc_parts()
+        for cancelinvoice in self.cancelinvoices:
+            if cancelinvoice.is_valid():
+                ttc_parts = cancelinvoice.tva_ttc_parts()
+                for key, value in ttc_parts.items():
+                    if key in result:
+                        result[key] += value
+                    else:
+                        result[key] = value
         return result
 
     def topay_by_tvas(self):

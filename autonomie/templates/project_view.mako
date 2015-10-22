@@ -101,7 +101,7 @@
     <% view_url = request.route_path(task.type_, id=task.id) %>
 <tr>
     <td>
-        % if task.cancelinvoice or task.estimation:
+        % if task.cancelinvoices or task.estimation:
             <div
                 style="background-color:${task.color};\
                 width:10px;">

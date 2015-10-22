@@ -433,8 +433,7 @@ class CancelInvoice(Task, TaskCompute):
     invoice = relationship(
         "Invoice",
         backref=backref(
-            "cancelinvoice",
-            uselist=False,
+            "cancelinvoices",
             cascade='all, delete-orphan',
             info={'colanderalchemy': forms.EXCLUDED, }
         ),

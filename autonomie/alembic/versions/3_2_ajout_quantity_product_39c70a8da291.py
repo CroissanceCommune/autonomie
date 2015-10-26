@@ -36,6 +36,9 @@ def upgrade():
         op.execute("update %s set quantity=1" % table)
 
     op.execute("update task_line set group_quantity=0")
+    from autonomie.models.base import DBSESSION
+    from zope.sqlalchemy import mark_changed
+    mark_changed(DBSESSION())
 
 
 def downgrade():

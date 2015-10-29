@@ -33,6 +33,7 @@ from autonomie.models.sale_product import (
     SaleProductCategory,
     SaleProduct,
     SaleProductGroup,
+    SaleProductGroupRel,
 )
 from autonomie.compute.math_utils import convert_to_float
 from autonomie.resources import sale_product_js
@@ -229,27 +230,45 @@ class RestProductGroups(BaseRestView):
 
     def pre_format(self, appstruct):
         """
+        format the datas sent by the client to fit the schema
         """
-        # Since when serializing a multi select on the client side, we get a
-        # list OR a string, we need to handle both cases
+        # La configuration des produits a une structure différente de celle qui
+        # est attendu par notre schéma de formulaire
+        appstruct['products_rel'] = []
         if 'products' in appstruct:
-            product_ids = appstruct.get('products')
-            if not hasattr(product_ids, '__iter__'):
-                product_ids = [product_ids]
+            products = appstruct.pop('products')
+            for product in products:
+                new_app = {
+                    'quantity': product.get('quantity'),
+                    'sale_product_id': product.get('id'),
+                }
+                if self.context.__name__ == 'sale_product_group':
+                    new_app['sale_product_group_id'] = self.context.id
 
-            appstruct['products'] = product_ids
+                appstruct['products_rel'].append(new_app)
 
         if self.context.__name__ == 'sale_category':
             appstruct['category_id'] = self.context.id
+
+        print(appstruct)
+
         return appstruct
 
-    @property
-    def schema(self):
-        return SQLAlchemySchemaNode(
+    def get_schema(self, submitted):
+        """
+        Custom get_schema method
+
+        Allows the objectify method to work also for the products_rel
+        relationship
+        """
+        schema = SQLAlchemySchemaNode(
             SaleProductGroup,
             # id passe par l'url
             excludes=('id', ),
         )
+        product_rel_schemanode = schema['products_rel'].children[0]
+        product_rel_schemanode.objectify = SaleProductGroupRel.find_or_create
+        return schema
 
 
 def includeme(config):

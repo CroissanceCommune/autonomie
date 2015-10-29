@@ -275,7 +275,9 @@ class PaymentSchema(colander.MappingSchema):
     come_from = forms.come_from_node()
     remittance_amount = colander.SchemaNode(
         AmountType(),
-        title=u"Montant de la remise en banque",
+        title=u"Numéro de la remise en banque",
+        description=u"Ce champ est un indicateur NUMÉRIQUE permettant de \
+retrouver la remise en banque à laquelle cet encaissement est associé",
         default=deferred_amount_default,
     )
     amount = colander.SchemaNode(

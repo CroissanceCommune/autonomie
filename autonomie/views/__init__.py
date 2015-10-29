@@ -157,7 +157,6 @@ class BaseListClass(BaseView):
         if self.schema is not None:
             schema = self.schema.bind(**self._get_bind_params())
             try:
-                print(self.request.GET)
                 appstruct = schema.deserialize(self.request.GET)
             except colander.Invalid as e:
                 # If values are not valid, we want the default ones to be
@@ -288,7 +287,6 @@ class BaseCsvView(BaseListClass):
             yield item
 
     def _init_writer(self):
-        print("Initiliazing the writer")
         writer = self.writer(self.model)
         if hasattr(self, 'sheet_title'):
             writer.worksheet.title = self.sheet_title

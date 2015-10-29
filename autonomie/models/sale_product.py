@@ -27,7 +27,6 @@ from sqlalchemy import (
     Integer,
     ForeignKey,
     Text,
-    Table,
     String,
     Float,
 )
@@ -35,33 +34,12 @@ from sqlalchemy.orm import (
     relationship,
     backref,
 )
+from sqlalchemy.ext.associationproxy import association_proxy
 from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
 from autonomie import forms
-
-
-PRODUCT_TO_GROUP_REL_TABLE = Table(
-    "product_product_group_rel",
-    DBBASE.metadata,
-    Column(
-        "sale_product_id",
-        Integer,
-        ForeignKey('sale_product.id', ondelete='cascade')
-    ),
-    Column(
-        "sale_product_group_id",
-        Integer,
-        ForeignKey(
-            'sale_product_group.id',
-            ondelete='cascade',
-            name="fk_product_to_group_rel_group_id"
-        )
-    ),
-    mysql_charset=default_table_args['mysql_charset'],
-    mysql_engine=default_table_args['mysql_engine'],
-)
 
 
 class SaleProductCategory(DBBASE):
@@ -123,7 +101,6 @@ class SaleProduct(DBBASE):
     description = Column(Text(), default='')
     tva = Column(Integer, default=0)
     value = Column(Float(), default=0)
-    quantity = Column(Float(), default=1)
     unity = Column(String(100), default='')
 
     category_id = Column(ForeignKey('sale_product_category.id'))
@@ -144,7 +121,6 @@ class SaleProduct(DBBASE):
             description=self.description,
             tva=self.tva,
             value=self.value,
-            quantity=self.quantity,
             unity=self.unity,
             category_id=self.category_id,
             category=self.category.title,
@@ -163,17 +139,11 @@ class SaleProductGroup(DBBASE):
     title = Column(String(255), default="")
     description = Column(Text(), default='')
 
-    products = relationship(
-        "SaleProduct",
-        secondary=PRODUCT_TO_GROUP_REL_TABLE,
-        info={
-            'colanderalchemy': {
-                # Permet de sélectionner des éléments existants au lieu
-                # d'insérer des nouveaux à chaque fois
-                'children': forms.get_sequence_child_item(SaleProduct),
-            }
-        }
+    products_rel = relationship(
+        "SaleProductGroupRel",
+        cascade='all, delete-orphan',
     )
+    products = association_proxy("products_rel", "products")
 
     category_id = Column(ForeignKey('sale_product_category.id'))
     category = relationship(
@@ -192,6 +162,93 @@ class SaleProductGroup(DBBASE):
             ref=self.ref,
             title=self.title,
             description=self.description,
-            products=[product.__json__(request) for product in self.products],
+            products=[product.__json__(request)
+                      for product in self.products_rel],
             category_id=self.category_id,
         )
+
+
+class SaleProductGroupRel(DBBASE):
+    """
+    The table used to configure the relationship between products and products
+    groups
+    """
+    __table_args__ = default_table_args
+    __tablename__ = 'product_product_group_rel'
+    sale_product_id = Column(
+        Integer,
+        ForeignKey('sale_product.id'),
+        primary_key=True,
+        info={
+            'colanderalchemy': {
+                'validator': forms.get_deferred_select_validator(SaleProduct)
+            }
+        }
+    )
+    sale_product_group_id = Column(
+        Integer,
+        ForeignKey(
+            'sale_product_group.id',
+            name="fk_product_to_group_rel_group_id"
+        ),
+        primary_key=True,
+        info={'colanderalchemy': {'missing': forms.colander.drop}}
+    )
+    sale_product = relationship(
+        "SaleProduct",
+        backref=backref(
+            "group_association",
+            cascade='all, delete-orphan',
+        ),
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    quantity = Column(
+        "quantity",
+        Float(),
+        default=1,
+        info={'colanderalchemy': {'validator': forms.positive_validator}}
+    )
+
+    # The initialization method called by the association_proxy
+    def __init__(self, product=None, product_id=None, quantity=None, **kwargs):
+        if product is not None:
+            self.sale_product = product
+            if hasattr(product, 'quantity'):
+                self.quantity = product.quantity
+        if product_id is not None:
+            self.sale_product_id = product_id
+        if quantity is not None:
+            self.quantity = quantity
+
+    def __json__(self, request):
+        res = self.sale_product.__json__(request)
+        res['quantity'] = self.quantity
+        return res
+
+    @classmethod
+    def find_or_create(cls, datas):
+        """
+        Method used to add/edit a relationship association
+
+        Should be set as the objectify method if you used colanderalchemy to
+        generate a formschema on the on of the related classes
+        """
+        rel_element = None
+
+        if 'sale_product_group_id' in datas and "sale_product_id" in datas:
+            # In case of edition, we try to retrieve the
+            # group-product association object
+            rel_element = SaleProductGroupRel.query().filter_by(
+                sale_product_id=datas['sale_product_id'],
+                sale_product_group_id=datas['sale_product_group_id']
+            ).first()
+
+        # We're not editing a relationship -> create a new one
+        if rel_element is None:
+            rel_element = SaleProductGroupRel()
+
+        # Set the attributes on the relationship object
+        for key, value in datas.items():
+            setattr(rel_element, key, value)
+
+        return rel_element

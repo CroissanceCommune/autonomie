@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     op.add_column(
-        "sale_product",
+        "product_product_group_rel",
         sa.Column('quantity', sa.Float(), default=1)
     )
     op.add_column(
@@ -32,8 +32,15 @@ def upgrade():
         sa.Column('group_quantity', sa.Float(), default=0)
     )
 
-    for table in ("sale_product", "task_line_group"):
+    for table in ("product_product_group_rel", "task_line_group"):
         op.execute("update %s set quantity=1" % table)
+
+    # On ajoute une primary_key sur cette table (elle passe maintenant par
+    # l'orm)
+    op.execute("SET FOREIGN_KEY_CHECKS=0;\
+ALTER TABLE product_product_group_rel ADD PRIMARY KEY \
+(`sale_product_group_id`, `sale_product_id`);\
+SET FOREIGN_KEY_CHECKS=1")
 
     op.execute("update task_line set group_quantity=0")
     from autonomie.models.base import DBSESSION
@@ -42,7 +49,7 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_column("sale_product", "quantity")
+    op.drop_column("product_product_group_rel", "quantity")
     op.drop_column("task_line_group", "quantity")
     op.drop_column("task_line_group", "display_details")
     op.drop_column("task_line", "group_quantity")

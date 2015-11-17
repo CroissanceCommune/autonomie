@@ -415,9 +415,6 @@ class TestSageFacturation(BaseBookEntryTest):
         method = "credit_tva"
         self._test_product_book_entry(sageinvoice, method, res)
 
-        # Ref bug #30
-
-
     def test_debit_ttc(self, sageinvoice):
         method = "debit_ttc"
         res = {'libelle': 'customer company',
@@ -427,6 +424,58 @@ class TestSageFacturation(BaseBookEntryTest):
             'debit': 23920,
             'echeance': '040313'}
         self._test_product_book_entry(sageinvoice, method, res)
+
+    def test_discount_ht(self, sageinvoice_discount):
+        # REF #307 : https://github.com/CroissanceCommune/autonomie/issues/307
+        method = "credit_totalht"
+        res = {
+            'libelle': "customer company",
+            'compte_cg': 'CG_RRR',
+            'num_analytique': 'COMP_CG',
+            'code_tva': 'CODE_TVA_RRR',
+            'debit': 20000,
+        }
+        self._test_product_book_entry(
+            sageinvoice_discount,
+            method,
+            res,
+            'CG_RRR',
+        )
+
+    def test_discount_tva(self, sageinvoice_discount):
+        # REF #307 : https://github.com/CroissanceCommune/autonomie/issues/307
+        res = {
+            'libelle': 'customer company',
+            'compte_cg': 'CG_TVA_RRR',
+            'num_analytique': 'COMP_CG',
+            'code_tva': 'CODE_TVA_RRR',
+            'debit': 1960 + 700 ,
+        }
+        method = "credit_tva"
+        self._test_product_book_entry(
+            sageinvoice_discount,
+            method,
+            res,
+            'CG_RRR',
+        )
+
+    def test_discount_ttc(self, sageinvoice_discount):
+        # REF #307 : https://github.com/CroissanceCommune/autonomie/issues/307
+        method = "debit_ttc"
+        res = {
+            'libelle': 'customer company',
+            'compte_cg': 'CG_CUSTOMER',
+            'num_analytique': 'COMP_CG',
+            'compte_tiers': 'CUSTOMER',
+            'credit': 20000 + 1960 + 700,
+            'echeance': '040313',
+        }
+        self._test_product_book_entry(
+            sageinvoice_discount,
+            method,
+            res,
+            'CG_RRR',
+        )
 
 
 class TestSageContribution(BaseBookEntryTest):

@@ -365,8 +365,14 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             compte_cg=product['compte_cg_produit'],
             num_analytique=self.num_analytique,
             code_tva=product['code_tva'],
-            credit=product['ht']
         )
+
+        # Hack to handle discount lines inversion
+        if product['compte_cg_produit'] == self.config.get('compte_rrr'):
+            entry['debit'] = product['ht']
+        else:
+            entry['credit'] = product['ht']
+
         return entry
 
     @double_lines
@@ -379,8 +385,13 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             compte_cg=product['compte_cg_tva'],
             num_analytique=self.num_analytique,
             code_tva=product['code_tva'],
-            credit=product['tva']
         )
+
+        if product['compte_cg_produit'] == self.config.get('compte_rrr'):
+            entry['debit'] = product['tva']
+        else:
+            entry['credit'] = product['tva']
+
         return entry
 
     @double_lines
@@ -395,8 +406,13 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             num_analytique=self.num_analytique,
             compte_tiers=self.invoice.customer.compte_tiers,
             echeance=format_sage_date(echeance),
-            debit=product['ht'] + product['tva']
         )
+
+        if product['compte_cg_produit'] == self.config.get('compte_rrr'):
+            entry['credit'] = product['ht'] + product['tva']
+        else:
+            entry['debit'] = product['ht'] + product['tva']
+
         return entry
 
     @staticmethod

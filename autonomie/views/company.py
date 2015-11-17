@@ -62,6 +62,7 @@ from autonomie.forms.company import (
 
 log = logging.getLogger(__name__)
 
+
 def company_index(request):
     """
         index page for the company shows latest news :
@@ -69,12 +70,13 @@ def company_index(request):
             - To be relaunched bill
     """
     company = request.context
-    ret_val = dict(title=company.name.title(),
-                company=company)
+    ret_val = dict(
+        title=company.name.title(),
+        company=company,
+    )
     all_invoices = []
     for project in company.projects:
         all_invoices.extend(project.invoices)
-
 
     # recovering elapsed invoices for warning
     elapsed_invoices = [invoice
@@ -252,8 +254,8 @@ def fetch_activities_objects(appstruct):
     activities = appstruct.pop('activities', None)
     if activities:
         return [
-            CompanyActivity.get(activity_id) \
-                for activity_id in activities
+            CompanyActivity.get(activity_id)
+            for activity_id in activities
         ]
     return []
 
@@ -314,7 +316,9 @@ class CompanyEdit(BaseFormView):
             prepopulate the form and the actionmenu
         """
         appstruct = self.request.context.appstruct()
-        appstruct['activities'] = [a.id for a in self.request.context.activities]
+        appstruct['activities'] = [
+            a.id for a in self.request.context.activities
+        ]
 
         for filetype in ('logo', 'header'):
             # On récupère un éventuel id de fichier
@@ -362,6 +366,8 @@ def populate_actionmenu(request, company=None):
             request.actionmenu.add(get_edit_btn(company.id))
             if not company.enabled():
                 request.actionmenu.add(get_enable_btn(company.id))
+            else:
+                request.actionmenu.add(get_disable_btn(company.id))
 
 
 def get_list_view_btn():
@@ -382,16 +388,41 @@ def get_edit_btn(company_id):
     """
         Return a link to the edition form
     """
-    return ViewLink(u"Modifier", "edit", path="company", id=company_id,
-                                            _query=dict(action="edit"))
+    return ViewLink(
+        u"Modifier",
+        "edit",
+        path="company",
+        id=company_id,
+        _query=dict(action="edit"),
+    )
 
 
 def get_enable_btn(company_id):
     """
-        Return a link to the edition form
+        Return a link to enable a company
     """
-    return ViewLink(u"Activer", "edit", path="company", id=company_id,
-                                            _query=dict(action="enable"))
+    return ViewLink(
+        u"Activer",
+        "edit",
+        path="company",
+        id=company_id,
+        _query=dict(action="enable")
+    )
+
+
+def get_disable_btn(company_id):
+    """
+        Return a link to disable a company
+    """
+    return ViewLink(
+        u"Désactiver",
+        "edit",
+        path="company",
+        id=company_id,
+        confirm=u'Êtes-vous sûr de vouloir désactiver cette entreprise \
+(les comptes des employés resteront actifs) ?',
+        _query=dict(action="disable")
+    )
 
 
 def make_panel_wrapper_view(panel_name):
@@ -402,7 +433,7 @@ def make_panel_wrapper_view(panel_name):
         """
             Return a panel name for our panel wrapper
         """
-        return {'panel_name': panel_name }
+        return {'panel_name': panel_name}
     return myview
 
 

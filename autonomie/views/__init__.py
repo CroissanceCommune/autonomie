@@ -632,6 +632,12 @@ class BaseRestView(BaseView):
         """
         return entry
 
+    def get_editted_element(self, attributes):
+        """
+        Returns the element we edit
+        """
+        return self.context
+
     def _submit_datas(self, edit=False):
         submitted = self.request.json_body
         self.logger.debug(u"Submitting %s" % submitted)
@@ -647,7 +653,8 @@ class BaseRestView(BaseView):
 
         self.logger.debug(attributes)
         if edit:
-            entry = schema.objectify(attributes, self.context)
+            editted = self.get_editted_element(attributes)
+            entry = schema.objectify(attributes, editted)
             entry = self.post_format(entry)
             entry = self.request.dbsession.merge(entry)
         else:

@@ -197,6 +197,29 @@ class RestCategories(BaseRestView):
         )
 
 
+class RestProductGroupItems(BaseRestView):
+    """
+    Json API to add relationship objects between sale_products and
+    sale_product_groups
+    """
+    def pre_format(self, appstruct):
+        return {
+            "sale_product_group_id": self.context.id,
+            "sale_product_id": appstruct['product_id'],
+            "quantity": appstruct['quantity']
+        }
+
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(SaleProductGroupRel,)
+
+    def get_editted_element(self, attributes):
+        return SaleProductGroupRel.query().filter_by(
+            sale_product_id=attributes['sale_product_id'],
+            sale_product_group_id=attributes['sale_product_group_id']
+        ).first()
+
+
 class RestProducts(BaseRestView):
     """
     Json api for products configuration
@@ -211,6 +234,10 @@ class RestProducts(BaseRestView):
         if self.context.__name__ == 'sale_category':
             appstruct['category_id'] = self.context.id
         return appstruct
+
+    def post(self):
+        self.logger.info("POST request")
+        return self._submit_datas(edit=True)
 
     @property
     def schema(self):
@@ -232,25 +259,23 @@ class RestProductGroups(BaseRestView):
         """
         format the datas sent by the client to fit the schema
         """
-        # La configuration des produits a une structure différente de celle qui
-        # est attendu par notre schéma de formulaire
-        appstruct['products_rel'] = []
-        if 'products' in appstruct:
-            products = appstruct.pop('products')
-            for product in products:
-                new_app = {
-                    'quantity': product.get('quantity'),
-                    'sale_product_id': product.get('id'),
-                }
-                if self.context.__name__ == 'sale_product_group':
-                    new_app['sale_product_group_id'] = self.context.id
-
-                appstruct['products_rel'].append(new_app)
+#        # La configuration des produits a une structure différente de celle qui
+#        # est attendu par notre schéma de formulaire
+#        appstruct['products_rel'] = []
+#        if 'products' in appstruct:
+#            products = appstruct.pop('products')
+#            for product in products:
+#                new_app = {
+#                    'quantity': product.get('quantity'),
+#                    'sale_product_id': product.get('id'),
+#                }
+#                if self.context.__name__ == 'sale_product_group':
+#                    new_app['sale_product_group_id'] = self.context.id
+#
+#                appstruct['products_rel'].append(new_app)
 
         if self.context.__name__ == 'sale_category':
             appstruct['category_id'] = self.context.id
-
-        print(appstruct)
 
         return appstruct
 
@@ -314,6 +339,13 @@ def includeme(config):
     config.add_route(
         "sale_product_group",
         group_url,
+        traverse="/sale_product_groups/{pid}",
+    )
+
+    group_items_url = group_url + "/items"
+    config.add_route(
+        "sale_product_group_items",
+        group_items_url,
         traverse="/sale_product_groups/{pid}",
     )
 
@@ -434,4 +466,16 @@ def includeme(config):
         attr='delete',
         route_name='sale_product_group',
         request_method="DELETE"
+    )
+    add_json_view(
+        RestProductGroupItems,
+        attr='post',
+        route_name='sale_product_group_items',
+        request_method="POST"
+    )
+    add_json_view(
+        RestProductGroupItems,
+        attr='put',
+        route_name='sale_product_group_items',
+        request_method="PUT"
     )

@@ -223,6 +223,7 @@ class SaleProductGroupRel(DBBASE):
     def __json__(self, request):
         res = self.sale_product.__json__(request)
         res['quantity'] = self.quantity
+        res['product_id'] = self.sale_product_id
         return res
 
     @classmethod

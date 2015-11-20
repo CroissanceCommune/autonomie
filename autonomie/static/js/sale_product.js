@@ -83,25 +83,63 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
   var ProductCollection = Backbone.Collection.extend({
     model: ProductModel,
     comparator: "label",
-    initialize: function(options){
+    initialize: function(models, options){
       this.url = options.url;
       this.category_id = options.category_id;
     }
   });
 
   var ProductGroupModel = Backbone.Model.extend({
+    defaults: {
+      'products': []
+    },
     validation: {
       label: {
         required: true,
         msg: "est requis"
       }
+    },
+    addProduct: function(id, quantity) {
+      var products = this.get('products');
+      products.push({id: id, quantity: quantity});
+    },
+    item_url: function(){
+      return this.url() + "/items";
+    }
+  });
+  var ProductGroupItemModel = Backbone.Model.extend({
+    /* M2M relationship objects between a group and a product with quantity */
+    defaults: {
+      'quantity': 1
+    },
+    validation: {
+      quantity: {required: true, msg: 'est requise'}
+    },
+    url: function(){
+      return this.collection.url;
+    }
+  });
+  var ProductGroupItemCollection = Backbone.Collection.extend({
+    /* Collection of products composing a group <-> M2M relationship objects */
+    model: ProductGroupItemModel,
+    initialize: function(models, options){
+      this.url = options.url;
+      this.product_group = options.product_group;
+    },
+    setDatas: function(options){
+      var this_ = this;
+      _.each(options.products, function(datas){
+        var model = new ProductGroupItemModel(datas);
+        model.set({sale_product_group_id: this_.product_group.get('id')});
+        this_.add(model);
+      });
     }
   });
 
   var ProductGroupCollection = Backbone.Collection.extend({
     model: ProductGroupModel,
     comparator: "label",
-    initialize: function(options){
+    initialize: function(models, options){
       this.url = options.url;
       this.category_id = options.category_id;
     }
@@ -158,8 +196,6 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       'click button.remove':'_remove'
     },
     showForm: function(){
-      console.log("Showform");
-      console.log(this.ui);
       this.ui.form.toggle();
     },
     updateDatas: function(){
@@ -256,6 +292,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       this.ui.form.find('input').first().focus();
     },
     closeView: function(result){
+      console.log("Closing the view");
       this.destroy();
     },
     templateHelpers: function(){
@@ -285,6 +322,54 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     template: "product_group",
     events: {
       'click a.remove':'_remove',
+      'click a.products': 'showItemList',
+      'click a.edit': 'showEditionForm'
+    },
+    modelEvents: {
+      "change": "render"
+    },
+    _remove: function(id){
+      var this_ = this;
+      var confirmed = confirm("Êtes vous certain de vouloir supprimer cet élément ?");
+      if (confirmed){
+        var _model = this.model;
+        this.highlight({
+          callback: function(){
+            _model.destroy({
+                success: function(model, response) {
+                  this_.destroy();
+                  displayServerSuccess("L'élément a bien été supprimé");
+                }
+             });
+           }
+          });
+      }
+    },
+    showItemList: function(){
+      controller.product_group_item_list(this.model);
+    },
+    showEditionForm: function(){
+      controller.product_group_edit(this.model);
+    }
+  });
+
+  var ProductGroupListView = Marionette.CompositeView.extend({
+    childView: ProductGroupView,
+    template: "product_group_list",
+    childViewContainer: "tbody",
+    emptyView: NoChildrenView,
+    events: {
+      "click a.add": "showAddForm"
+    },
+    showAddForm: function(){
+      controller.add_product_group();
+    }
+  });
+
+  var ProductGroupItemView = BaseTableLineView.extend({
+    template: "product_group_item",
+    events: {
+      'click a.remove':'_remove',
       'click a.edit': 'showEditionForm'
     },
     modelEvents: {
@@ -308,47 +393,126 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       }
     },
     showEditionForm: function(){
-      controller.product_group_edit(this.model);
+      controller.product_group_item_edit(this.model);
     }
   });
 
-  var ProductGroupListView = Marionette.CompositeView.extend({
-    childView: ProductGroupView,
-    template: "product_group_list",
+  var ProductGroupItemsView = Marionette.CompositeView.extend({
+    childView: ProductGroupItemView,
+    template: "product_group_item_list",
     childViewContainer: "tbody",
     emptyView: NoChildrenView,
     events: {
+      'click button.close': "closeView",
       "click a.add": "showAddForm"
     },
+    closeView: function(result){
+      var this_ = this;
+      this.$el.slideUp(400, function(){
+        Backbone.history.loadUrl(Backbone.history.fragment);
+        this_.destroy();
+      });
+    },
     showAddForm: function(){
-      controller.add_product_group();
+      controller.add_product_group_item(this.options.product_group);
     }
+
   });
 
   var ProductGroupFormView = BaseFormView.extend({
     template: "product_group_form",
+    events: {
+      'click button.close': "closeView",
+      'click button[name=submit]':'onFormSubmit',
+      'click button[name=cancel]':'closeView',
+      'submit form': 'onFormSubmit'
+    },
     ui:{
-      "form": "form",
-      "select": "form[name=product_group] select[name=products]"
+      "form": "form"
+    },
+    toggleForm: function(){
+      this.ui.form.toggle();
     },
     focus: function(){
       this.ui.form.find('input').first().focus();
     },
     closeView: function(result){
-      this.destroy();
+      var this_ = this;
+      this.$el.slideUp(400, function(){
+        Backbone.history.loadUrl(Backbone.history.fragment);
+        this_.destroy();
+      });
     },
     templateHelpers: function(){
-      var ids = _.pluck(this.model.get('products'), 'id');
-      console.log(ids);
-      var product_options = this.updateSelectOptions(
-        this.init_options.products, ids, 'id');
-      console.log(product_options);
+      var title = "Ajout d'un ouvrage";
+      if (! _.isUndefined(this.model.get('label'))){
+        title = "Édition de l'ouvrage " + this.model.get('label');
+      }
       return {
-        product_options: product_options
+        form_title: title
       };
+    }
+  });
+
+  var ProductGroupItemFormView = BaseFormView.extend({
+    template: "product_group_item_form",
+    events: {
+      'click button.close': "closeView",
+      'click button[name=submit]':'onFormSubmit',
+      'click button[name=cancel]':'closeView',
+      'submit form': 'onFormSubmit'
     },
-    onShow: function(){
-      this.ui.select.select2();
+    ui:{
+      "form": "form",
+      "select": "select[name=product_id]"
+    },
+    focus: function(){
+      this.ui.form.find('input').first().focus();
+    },
+    closeView: function(result){
+      var this_ = this;
+      this.$el.slideUp(400, function(){
+        // Backbone.history.loadUrl(Backbone.history.fragment);
+        this_.destroy();
+        controller.product_group_item_list(this_.destCollection.product_group);
+      });
+    },
+    filter_options: function(item){
+      /*
+       * Filter values to avoid configuration of duplicate relationships
+       * (sale_product_id/sale_product_group_id is used as mysql key)
+       */
+      // In edition mode, we allow the current item to be selected
+      if (this.init_options.action === 'edit'){
+        if (this.model.get('product_id') === item.id){
+          return true;
+        }
+      }
+      // else all products that are already associated to this group are
+      // poped
+      var index = _.indexOf(
+        this.init_options.actual_product_ids,
+        item.id);
+      if (index !== -1){
+        return false;
+      }
+      return true;
+    },
+    templateHelpers: function(){
+      /*
+       * Provide the available products for the group product item
+       * add/edit form tmpl
+       */
+      _.bindAll(this, "filter_options");
+      var options = this.init_options.products;
+
+      options = _.filter(options, this.filter_options);
+
+      var selected = this.model.get('product_id');
+      if (! _.isUndefined(selected)){
+        this.updateSelectOptions(options, selected, 'id');
+      }
+      return {product_options: options};
     },
     onRender: function(){
       this.ui.select.select2();
@@ -374,7 +538,6 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       }
     },
     category_add: function(){
-      console.log("category_add");
       var model = new CategoryModel({});
 
       this.category_add_view = new CategoryAddFormView({
@@ -400,7 +563,8 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       this.main_layout.getRegion('title').show(category_title_view);
 
       this.product_collection = new ProductCollection(
-         {url: category.products_url(), category_id: category.id}
+        [],
+        {url: category.products_url(), category_id: category.id}
       );
 
       var this_ = this;
@@ -416,6 +580,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       );
 
       this.product_group_collection = new ProductGroupCollection(
+        [],
         {url: category.groups_url(), category_id: category.id}
       );
       this.product_group_collection.fetch(
@@ -448,31 +613,83 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     add_product_group: function(){
       var this_ = this;
       var product_group = new ProductGroupModel({});
-      // We load all products, not only those from the current category
+      var add_form = new ProductGroupFormView({
+        model: product_group,
+        destCollection: this_.product_group_collection
+      });
+      App.popup.show(add_form);
+    },
+    product_group_edit: function(product_group){
+      var this_ = this;
+      var edit_form = new ProductGroupFormView({
+        model: product_group,
+        destCollection: this_.product_group_collection
+      });
+      App.popup.show(edit_form);
+    },
+    product_group_item_list: function(product_group){
+      var this_ = this;
+      this.product_group_item_collection = new ProductGroupItemCollection(
+        [],
+        {
+          url: product_group.item_url(),
+          product_group: product_group
+        });
+      product_group.fetch(
+        {
+          success: function(product_group, reponse, options){
+            this_.product_group_item_collection.setDatas(
+              {
+                products: product_group.get('products')
+              });
+            var group_product_list_view = new ProductGroupItemsView({
+              collection: this_.product_group_item_collection,
+              product_group: product_group
+            });
+            App.container.show(group_product_list_view);
+          }
+        }
+      );
+    },
+    add_product_group_item: function(product_group){
+      var this_ = this;
+      var product_group_item = new ProductGroupItemModel({
+        sale_product_group_id: product_group.get('id')
+      });
+      // We load all products for the form, not only those from the current
+      // category
       var load_all_products = initLoad(AppOptions['all_products_url']);
       load_all_products.then(
         function(result){
-          var add_form = new ProductGroupFormView({
-            model: product_group,
-            destCollection: this_.product_group_collection,
+          var add_form = new ProductGroupItemFormView({
+            model: product_group_item,
+            destCollection: this_.product_group_item_collection,
+            action: "add",
+            actual_product_ids: _.pluck(
+                product_group.get('products'),
+                'id'),
             products: result.products
           });
           App.popup.show(add_form);
         }
       );
     },
-    product_group_edit: function(product_group){
+    product_group_item_edit: function(product_group_item){
       var this_ = this;
-      // We load all products, not only those from the current category
       var load_all_products = initLoad(AppOptions['all_products_url']);
+      var product_group = this.product_group_collection.get(product_group_item.get('sale_product_group_id'));
       load_all_products.then(
         function(result){
-          var add_form = new ProductGroupFormView({
-            model: product_group,
-            destCollection: this_.product_group_collection,
-            products: result.products
+          var edit_form = new ProductGroupItemFormView({
+            model: product_group_item,
+            destCollection: this_.product_group_item_collection,
+            action: "edit",
+            products: result.products,
+            actual_product_ids: _.pluck(
+                product_group.get('products'),
+                'id')
           });
-          App.popup.show(add_form);
+          App.popup.show(edit_form);
         }
       );
     }

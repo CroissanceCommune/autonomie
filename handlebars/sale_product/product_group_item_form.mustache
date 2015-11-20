@@ -1,0 +1,29 @@
+<form>
+<div class='row'>
+    <div class='col-md-12'>
+        <fieldset>
+            <legend>Configuration des produits composant l'ouvrage</legend>
+            <div class="form-group">
+                <label for='searches'>Produit</label>
+                <select name='product_id' class='form-control'>
+                    {{#product_options }}
+                    <option value='{{id}}' {{#selected}}selected{{/selected}}>{{ label }} {{ ref }}</option>
+                    {{/product_options }}
+                </select>
+            </div>
+            <div class='form-group'>
+                <label for='quantity'>Quantité unitaire</label>
+                <input class='form-control' name='quantity' value='{{ quantity }}' type='number' step='any' min='0' ></input>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<div class='row'>
+    <div class='col-md-6 col-md-offset-6'>
+        <div class="form-actions text-right">
+            <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+            <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+        </div>
+    </div>
+</div>
+</form>

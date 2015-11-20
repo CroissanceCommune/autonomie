@@ -1,52 +1,44 @@
-<form name='product_group'>
-    <div class='row'>
-        <div class='col-md-6'>
-            <fieldset>
-                <legend>Informations relatives au catalogue</legend>
-                <div class="form-group">
-                    <label for='label'>Nom de l'ouvrage *</label>
-                    <input class="form-control" type='text' name='label' value='{{ label }}'/>
-                </div>
-                <div class="form-group">
-                    <label for='ref'>Référence</label>
-                    <input class="form-control" type='text' name='ref' value='{{ ref }}'/>
-                </div>
-            </fieldset>
-        </div>
-        <div class='col-md-6'>
-            <fieldset>
-                <legend>Informations utilisées lors de l'insertion dans les devis/factures</legend>
-                <div class='alert alert-info'>
-                    Lors de l'insertion de l'ouvrage dans un devis ou une
-                    facture, les champs ci-dessous seront utilisés pour
-                    pré-remplir les données dans le document.
-                    Ces champs sont facultatifs
-                </div>
-                <div class="form-group">
-                    <label for='title'>Titre</label>
-                    <input class="form-control" type='text' name='title' value='{{ title }}'/>
-                </div>
-                <div class="form-group">
-                     <label for='description'>Description</label>
-                     <textarea name='description' class='form-control'>{{ description }}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for='searches'>Produits composant cet ouvrage</label>
-                    <select multiple name='products' class='form-control'>
-                        {{#product_options }}
-                        <option value='{{id}}' {{#selected}}selected{{/selected}}>{{ label }} {{ ref }}</option>
-                        {{/product_options }}
-                    </select>
-                </div>
-            </fieldset>
-        </div>
-    </div>
-    <div class='row'>
-        <div class='col-md-6 col-md-offset-6'>
-            <div class="form-actions text-right">
-                <button type="submit" class="btn btn-success" name='submit'>Valider</button>
-                <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+    <form name='product_group'>
+        <div class='row'>
+            <div class='col-md-6'>
+                <fieldset>
+                    <legend>Informations relatives au catalogue</legend>
+                    <div class="form-group">
+                        <label for='label'>Nom de l'ouvrage *</label>
+                        <input class="form-control" type='text' name='label' value='{{ label }}'/>
+                    </div>
+                    <div class="form-group">
+                        <label for='ref'>Référence</label>
+                        <input class="form-control" type='text' name='ref' value='{{ ref }}'/>
+                    </div>
+                </fieldset>
+            </div>
+            <div class='col-md-6'>
+                <fieldset>
+                    <legend>Informations utilisées lors de l'insertion dans les devis/factures</legend>
+                    <div class='alert alert-info'>
+                        Lors de l'insertion de l'ouvrage dans un devis ou une
+                        facture, les champs ci-dessous seront utilisés pour
+                        pré-remplir les données dans le document.
+                        Ces champs sont facultatifs
+                    </div>
+                    <div class="form-group">
+                        <label for='title'>Titre</label>
+                        <input class="form-control" type='text' name='title' value='{{ title }}'/>
+                    </div>
+                    <div class="form-group">
+                         <label for='description'>Description</label>
+                         <textarea name='description' class='form-control'>{{ description }}</textarea>
+                    </div>
+                </fieldset>
             </div>
         </div>
-    </div>
-</form>
+        <div class='row'>
+            <div class='col-md-6 col-md-offset-6'>
+                <div class="form-actions text-right">
+                    <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+                    <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </form>

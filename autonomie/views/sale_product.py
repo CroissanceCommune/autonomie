@@ -232,21 +232,6 @@ class RestProductGroups(BaseRestView):
         """
         format the datas sent by the client to fit the schema
         """
-#        # La configuration des produits a une structure différente de celle qui
-#        # est attendu par notre schéma de formulaire
-#        appstruct['products_rel'] = []
-#        if 'products' in appstruct:
-#            products = appstruct.pop('products')
-#            for product in products:
-#                new_app = {
-#                    'quantity': product.get('quantity'),
-#                    'sale_product_id': product.get('id'),
-#                }
-#                if self.context.__name__ == 'sale_product_group':
-#                    new_app['sale_product_group_id'] = self.context.id
-#
-#                appstruct['products_rel'].append(new_app)
-
         if self.context.__name__ == 'sale_category':
             appstruct['category_id'] = self.context.id
 
@@ -256,16 +241,13 @@ class RestProductGroups(BaseRestView):
         """
         Custom get_schema method
 
-        Allows the objectify method to work also for the products_rel
-        relationship
+        Allows the objectify method
         """
         schema = SQLAlchemySchemaNode(
             SaleProductGroup,
             # id passe par l'url
-            excludes=('id', ),
+            excludes=('id', 'products', 'products_rel'),
         )
-        product_rel_schemanode = schema['products_rel'].children[0]
-        product_rel_schemanode.objectify = SaleProductGroupRel.find_or_create
         return schema
 
 

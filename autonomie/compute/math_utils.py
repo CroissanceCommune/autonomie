@@ -143,7 +143,7 @@ def convert_to_float(value, default=None):
     try:
         val = float(value)
     except ValueError as err:
-        if default:
+        if default is not None:
             val = default
         else:
             raise err

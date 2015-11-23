@@ -475,10 +475,7 @@ affichées dans la sortie PDF ?",
         colander.Float(),
         title=u"Quantité",
         description=u"Les prestations de cet ouvrage issues du catalogue \
-produit verront leur quantité augmenté en conséquence",
-        widget=deform.widget.TextInputWidget(
-            template=TEMPLATES_URL + 'number_input.pt',
-        ),
+produit verront leur quantité augmentée en conséquence",
         default=1,
     )
     lines = TaskLines(

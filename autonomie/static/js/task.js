@@ -734,7 +734,7 @@ function updateGroupQuantity(){
    * only if the line has a group_quantity input
    */
   var $quantity = $(this);
-  var group_quantity = $quantity.val();
+  var group_quantity = transformToCents($quantity.val());
   var $linegroup = $quantity.closest(".linegroup");
 
   $linegroup.children().find('.taskline').each(function(index, line){

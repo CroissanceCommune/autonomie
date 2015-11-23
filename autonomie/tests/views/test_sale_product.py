@@ -23,6 +23,7 @@ import pytest
 from autonomie.models.sale_product import (
     SaleProduct,
     SaleProductGroup,
+    SaleProductGroupRel,
     SaleProductCategory,
 )
 from autonomie.models.company import Company
@@ -73,12 +74,23 @@ def sale_product_group(dbsession, sale_product, sale_product_category):
         label=u"Groupe",
         description=u"Nouveau groupe",
         title=u"Groupe",
-        products=[sale_product]
     )
     g.__name__ = 'sale_product_group'
     dbsession.add(g)
     dbsession.flush()
     return g
+
+
+@pytest.fixture
+def sale_product_group_with_item(dbsession, sale_product_group, sale_product):
+    rel = SaleProductGroupRel(
+        quantity=1.524,
+        product_id=sale_product.id,
+    )
+    rel.sale_product_group_id = sale_product_group.id
+    dbsession.add(rel)
+    dbsession.flush()
+    return sale_product_group
 
 
 def test_add_category(company, get_csrf_request_with_db):
@@ -171,7 +183,6 @@ def test_add_product_group(sale_product_category, sale_product,
         'ref': u"OUV",
         'title': u"Mur intérieur",
         'description': u'Mur isolation enduit à la chaux',
-        'products': [{'quantity': 1.524, 'id': sale_product.id}]
     }
     request = get_csrf_request_with_db()
     request.context = sale_product_category
@@ -179,33 +190,55 @@ def test_add_product_group(sale_product_category, sale_product,
     view = RestProductGroups(request)
     view.post()
     group = sale_product_category.product_groups[-1]
-    product_group_appstruct.pop('products', None)
-    product_group_appstruct.pop('products_rel', None)
     for key, value in product_group_appstruct.items():
         assert getattr(group, key) == value
-    assert group.products_rel[-1].sale_product_id == sale_product.id
-    assert group.products_rel[-1].quantity == 1.524
 
 
 def test_edit_product_group(sale_product_category, sale_product,
-                            sale_product_group, get_csrf_request_with_db):
+                            sale_product_group_with_item,
+                            get_csrf_request_with_db):
     from autonomie.views.sale_product import RestProductGroups
     product_group_appstruct = {
         'label': u"Ouvrage Nouveau label",
         'title': u"Nouveau titre",
-        'products': [
-            {
-                'quantity': 1.254,
-                'id': sale_product.id,
-            },
-        ]
+        "description": sale_product_group_with_item.description,
     }
     request = get_csrf_request_with_db()
-    request.context = sale_product_group
+    request.context = sale_product_group_with_item
     request.json_body = product_group_appstruct
     view = RestProductGroups(request)
     view.put()
-    assert sale_product_group.label == u"Ouvrage Nouveau label"
-    assert sale_product_group.title == u"Nouveau titre"
-    assert len(sale_product_group.products_rel) == 1
-    assert sale_product_group.products_rel[-1].quantity == 1.254
+    assert sale_product_group_with_item.ref == "GROU"
+    assert sale_product_group_with_item.label == u"Ouvrage Nouveau label"
+    assert sale_product_group_with_item.title == u"Nouveau titre"
+
+
+def test_add_product_group_rel(sale_product_category, sale_product,
+                               sale_product_group, get_csrf_request_with_db):
+    from autonomie.views.sale_product import RestProductGroupItems
+    appstruct = {'quantity': 1.524, 'product_id': sale_product.id}
+
+    request = get_csrf_request_with_db()
+    request.context = sale_product_group
+    request.json_body = appstruct
+    view = RestProductGroupItems(request)
+    view.post()
+    group = sale_product_category.product_groups[-1]
+    assert group.products_rel[-1].sale_product_id == sale_product.id
+    assert group.products_rel[-1].quantity == 1.524
+
+
+def test_edit_product_group_rel(sale_product_category, sale_product,
+                                sale_product_group_with_item,
+                                get_csrf_request_with_db):
+    from autonomie.views.sale_product import RestProductGroupItems
+    appstruct = {'quantity': 2.548, 'product_id': sale_product.id}
+
+    request = get_csrf_request_with_db()
+    request.context = sale_product_group_with_item
+    request.json_body = appstruct
+    view = RestProductGroupItems(request)
+    view.put()
+    group = sale_product_category.product_groups[-1]
+    assert group.products_rel[-1].sale_product_id == sale_product.id
+    assert group.products_rel[-1].quantity == 2.548

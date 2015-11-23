@@ -197,29 +197,6 @@ class RestCategories(BaseRestView):
         )
 
 
-class RestProductGroupItems(BaseRestView):
-    """
-    Json API to add relationship objects between sale_products and
-    sale_product_groups
-    """
-    def pre_format(self, appstruct):
-        return {
-            "sale_product_group_id": self.context.id,
-            "sale_product_id": appstruct['product_id'],
-            "quantity": appstruct['quantity']
-        }
-
-    @property
-    def schema(self):
-        return SQLAlchemySchemaNode(SaleProductGroupRel,)
-
-    def get_editted_element(self, attributes):
-        return SaleProductGroupRel.query().filter_by(
-            sale_product_id=attributes['sale_product_id'],
-            sale_product_group_id=attributes['sale_product_group_id']
-        ).first()
-
-
 class RestProducts(BaseRestView):
     """
     Json api for products configuration
@@ -234,10 +211,6 @@ class RestProducts(BaseRestView):
         if self.context.__name__ == 'sale_category':
             appstruct['category_id'] = self.context.id
         return appstruct
-
-    def post(self):
-        self.logger.info("POST request")
-        return self._submit_datas(edit=True)
 
     @property
     def schema(self):
@@ -294,6 +267,39 @@ class RestProductGroups(BaseRestView):
         product_rel_schemanode = schema['products_rel'].children[0]
         product_rel_schemanode.objectify = SaleProductGroupRel.find_or_create
         return schema
+
+
+class RestProductGroupItems(BaseRestView):
+    """
+    Json API to add relationship objects between sale_products and
+    sale_product_groups
+    """
+    def pre_format(self, appstruct):
+        """
+        Pre format the form appstruct to fit what the colander form schema
+        expects
+        """
+        return {
+            "sale_product_group_id": self.context.id,
+            "sale_product_id": appstruct['product_id'],
+            "quantity": appstruct['quantity']
+        }
+
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(SaleProductGroupRel,)
+
+    def get_editted_element(self, attributes):
+        """
+        Here we return the element we want to edit
+        default is the context, but here we are editing relationships
+
+        :param attributes: The deserialized form datas
+        """
+        return SaleProductGroupRel.query().filter_by(
+            sale_product_id=attributes['sale_product_id'],
+            sale_product_group_id=attributes['sale_product_group_id']
+        ).first()
 
 
 def includeme(config):

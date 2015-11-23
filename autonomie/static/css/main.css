@@ -343,3 +343,8 @@ input[name=altdate], input[name=date]{
 .jstree{
   display: inline-block;
 }
+/* Custom close button class */
+.large-close{
+  font-size: 40px;
+  opacity: 0.4;
+}

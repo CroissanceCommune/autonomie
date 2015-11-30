@@ -12,7 +12,7 @@ html{
   font-size: 11px;
 }
 .description{
-  line-height: 12px;
+  line-height: 1px;
 }
 .addressblock{
   position:relative;
@@ -122,4 +122,7 @@ p{
 li{
   margin: 0px;
   padding: 0px;
+}
+div{
+  margin: 0px;
 }

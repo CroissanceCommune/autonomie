@@ -237,18 +237,13 @@ class RestProductGroups(BaseRestView):
 
         return appstruct
 
-    def get_schema(self, submitted):
-        """
-        Custom get_schema method
-
-        Allows the objectify method
-        """
-        schema = SQLAlchemySchemaNode(
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(
             SaleProductGroup,
             # id passe par l'url
             excludes=('id', 'products', 'products_rel'),
         )
-        return schema
 
 
 class RestProductGroupItems(BaseRestView):

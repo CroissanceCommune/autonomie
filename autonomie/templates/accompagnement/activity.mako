@@ -27,6 +27,7 @@
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
 <a class='btn btn-default pull-right' href='${request.route_path("activity.pdf", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>PDF</a>
+<div class="activity-view">
 <div class='row'>
     <div class='col-xs-12'>
                 <% items = (\
@@ -59,5 +60,6 @@
             ${format_text(getattr(activity, attr))}
         % endfor
     </div>
+</div>
 </div>
 </%block>

@@ -25,6 +25,7 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
+<div class="activity-view">
 <% activity = request.context %>
 <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
 % if activity.status != 'planned':
@@ -132,6 +133,7 @@
 <div class='row'>
     <div class="col-md-4">
     </div>
+</div>
 </div>
 </%block>
 <%block name="footerjs">

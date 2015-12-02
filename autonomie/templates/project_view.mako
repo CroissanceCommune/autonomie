@@ -28,6 +28,7 @@
 <%namespace file="base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='content'>
+<div class="project-view">
 <%def name="action_cell(task, view_url)">
     <% pdf_url = request.route_path(\
         task.type_,
@@ -275,11 +276,15 @@ else:
                         <div class='panel-body'>
         % endif
 
-        <h3 class='pull-left' style="padding-right:10px;">Devis</h3>
-        <a class='btn btn-default' href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'>
-            <span class='ui-icon ui-icon-plusthick'></span>Nouveau devis
-        </a>
-
+        <div class='header'>
+            <h3 class='pull-left'>Devis</h3>
+            <a
+                class='btn btn-primary btn-small'
+                href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'
+                >
+                <span class='fa fa-plus'></span>&nbsp;Nouveau devis
+            </a>
+        </div>
         % if  phase.estimations:
             <table class='table table-striped table-condensed'>
                 <thead>
@@ -293,25 +298,21 @@ else:
                 %endfor
             </table>
         % else:
-            <div style='clear:both'>Aucun devis n'a été créé
-                % if len(project.phases) > 1:
-                dans cette phase
-            % endif
-            </div>
+            <div class="alert alert-warning" style='clear:both'>Aucun devis n'a été créé</div>
         %endif
-
-        <h3 class='pull-left'
-            style='padding-right:10px;font-weight:100;'>
-            Facture(s)
-        </h3>
-        <a class='btn btn-default'
-            href='${request.route_path(\
-            "project_invoices", \
-            id=project.id, \
-            _query=dict(phase=phase.id))}'>
-            <span class='ui-icon ui-icon-plusthick'></span>
-            Nouvelle facture
-        </a>
+        <hr />
+        <div class='header'>
+            <h3 class='pull-left'>
+                Facture(s), Avoir(s)
+            </h3>
+            <a class='btn btn-primary btn-small'
+                href='${request.route_path(\
+                "project_invoices", \
+                id=project.id, \
+                _query=dict(phase=phase.id))}'>
+                <span class='fa fa-plus'></span>&nbsp;Nouvelle facture
+            </a>
+        </div>
         %if phase.invoices:
             <table class='table table-striped table-condensed'>
                 <thead>
@@ -329,11 +330,7 @@ else:
                 % endfor
             </table>
         % else:
-            <div style='clear:both'>Aucune facture n'a été créée
-                %if len(project.phases) > 1:
-                    dans cette phase
-                %endif
-            </div>
+            <div class="alert alert-warning" style='clear:both'>Aucune facture n'a été créée</div>
         % endif
         </div>
         </div>
@@ -343,6 +340,7 @@ else:
     %if not project.phases:
         <strong>Aucune phase n'a été créée dans ce projet</strong>
     %endif
+</div>
 </div>
 </%block>
 <%block name="footerjs">

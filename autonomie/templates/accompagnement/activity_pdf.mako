@@ -90,13 +90,11 @@ else:
             )
         %>
         % for label, attr in options:
-            <br />
-            <div class='text12' ><b>${label}</b></div>
-            <hr />
-            ${api.clean_html(getattr(activity, attr))|n}
+            <div class='text12 activity-title' >${label}</div>
+            <div class="activity-content">
+                ${api.clean_html(getattr(activity, attr))|n}
+            </div>
         % endfor
-        <br />
-        <br />
         <br />
         <br />
         <table>

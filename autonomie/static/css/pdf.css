@@ -130,3 +130,12 @@ text-transform: uppercase;
 .description p{
   margin: 2px 0px;
 }
+.activity-title{
+  border-bottom: 0.01cm solid #cdcdcd;
+  margin: 7px 0px 7px 0px;
+  padding-bottom: 3px;
+  font-weight: 500;
+}
+.activity-content{
+  padding-left: 0.5cm;
+}

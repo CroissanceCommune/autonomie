@@ -223,17 +223,48 @@ def month_name(index):
     return result
 
 
+void_tags = ('<br />', '<br/>', )
+tags_to_check = (('<p>', '</p>'), ('<div>', '</div>'),)
+
+
+def remove_tag(text, tag):
+    return text[0:-1*len(tag)].strip()
+
+def clean_linebreaks(text):
+    """
+    Remove linebreaks at the end of the text
+    """
+    text = text.strip()
+    for tag in void_tags:
+        if text.endswith(tag):
+            text = remove_tag(text, tag)
+            return clean_linebreaks(text)
+
+    # On checke les chaînes vides (genre <p>   </p>)
+    for tag, close_tag in tags_to_check:
+        # si on a </p> et que le strip de ce qui précède se termine pas <p> ...
+        if text.endswith(close_tag):
+            prec_text = remove_tag(text, close_tag)
+            if prec_text.endswith(tag):
+                text = remove_tag(prec_text, tag)
+                return clean_linebreaks(text)
+    return text
+
+
 def clean_html(text):
     """
         Return a sanitized version of an html code keeping essential html tags
         and allowing only a few attributes
     """
+    text = text.strip()
+    text = clean_linebreaks(text)
     return bleach.clean(
-            text,
-            tags=ALLOWED_HTML_TAGS,
-            attributes=ALLOWED_HTML_ATTRS,
-            styles=ALLOWED_CSS_STYLES,
-            )
+        text,
+        tags=ALLOWED_HTML_TAGS,
+        attributes=ALLOWED_HTML_ATTRS,
+        styles=ALLOWED_CSS_STYLES,
+        strip=True,
+    )
 
 
 def human_readable_filesize(size):

@@ -56,7 +56,7 @@
             % if display_tvas_column:
                 <% num_cols += 1 %>
             % endif
-            <table class="lines col-xs-12">
+            <table class="lines col-xs-12 table table-stripped">
                 <thead>
                     % if group.title != '':
                         <tr>
@@ -130,7 +130,7 @@
                 % endif
         % endfor
         % if len(groups) > 1:
-            <table class='lines col-xs-12'>
+            <table class='lines col-xs-12 table table-stripped'>
             <tbody>
         % endif
         <% display_tvas_column = multiple_tvas and len(groups) == 1 and group.title == '' %>

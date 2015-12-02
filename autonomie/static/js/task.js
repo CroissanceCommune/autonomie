@@ -633,6 +633,11 @@ function addTaskLine(link_dom_element){
   setTaskLinesBehaviours();
   return false;
 }
+function addTaskLineGroup(link_dom_element){
+  deform.appendSequenceItem(link_dom_element);
+  setTaskLineGroupsBehaviour();
+  return false;
+}
 function setTaskLinesBehaviours(){
   /*
    * Set the field behaviours on page load
@@ -779,7 +784,7 @@ function setTaskLineGroupBehaviour(jquery_tag){
     // Set a type of hidden for the group quantity tag
     $quantity_tag.attr('type', 'hidden');
     // Hide the label tag
-    $quantity.parent().find('label').hide();
+    $quantity_tag.parent().find('label,.help-block').hide();
   }
 }
 

@@ -51,7 +51,7 @@
         type='button'
          class="btn btn-info deformSeqAdd"
          id="${field.oid}-seqAdd"
-         onclick="javascript: return deform.appendSequenceItem(this);">
+         onclick="javascript: return addTaskLineGroup(this);">
         <small id="${field.oid}-addtext">${add_subitem_text}</small>
       </button>
       <button

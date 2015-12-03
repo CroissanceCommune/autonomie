@@ -162,15 +162,6 @@
     % if account_form is not UNDEFINED and account_form is not None:
         <div class='tab-pane row' id='tab3'>
             <div class=''>
-                <%doc>
-            <% url = request.route_path("user", id=userdata.user_id) %>
-            ${table_btn(url,
-            u"Voir",
-            u"Voir le compte associé à cette entrée de gestion sociale",
-            icon="search",
-            )}
-        </%doc>
-
             % if user.enabled():
                 <% disable_url = request.route_path('user', \
                     id=userdata.user_id, \
@@ -200,7 +191,9 @@
             <br />
             <hr>
             <br />
-            ${account_form.render()|n}
+            <div class='medium-form-container'>
+                ${account_form.render()|n}
+            </div>
         </div>
     % endif
     % if doctemplates is not UNDEFINED:

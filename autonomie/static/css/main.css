@@ -40,6 +40,9 @@ td.actions, th.actions{
 form.authentication-form input[type=text], form.authentication-form input[type=password]{
   width: 100%;
 }
+input[type=password]{
+  margin-bottom: 4px;
+}
 .authentication-form .form-actions{
   padding: 20px 0 20px 0;
 }
@@ -76,6 +79,11 @@ form.authentication-form input[type=text], form.authentication-form input[type=p
 }
 .deform .errorMsgLbl{
   background-color:transparent;
+}
+/* Class used to set a max width to forms */
+.medium-form-container{
+  max-width: 600px;
+  margin: auto;
 }
 #actionmenu{
   padding-left:5%;

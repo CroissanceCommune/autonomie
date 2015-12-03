@@ -34,7 +34,7 @@
         (estimations, u"Devis en attente",), \
         (invoices, u"Factures et Avoirs en attente",), \
         ):
-    <div class="panel panel-default">
+    <div class="panel panel-info">
         <div class="panel-heading">
             ${table_title}
         </div>
@@ -67,7 +67,7 @@
         </table>
     </div>
 % endfor
-<div class="panel panel-default">
+<div class="panel panel-info">
     <div class="panel-heading">Mes Activités / Rendez-vous à venir</div>
     <table class="table table-striped table-condensed table-hover">
         <thead>
@@ -115,7 +115,7 @@
 </div>
 </div>
 <div class='col-md-6'>
-    <div class="panel panel-default">
+    <div class="panel panel-info">
         <div class="panel-heading">
             Les feuilles de notes de frais en attente
         </div>

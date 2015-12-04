@@ -234,6 +234,10 @@ def clean_linebreaks(text):
     """
     Remove linebreaks at the end of the text
     """
+    if not hasattr(text, 'strip'):
+        # We can't handle this one
+        return text
+
     text = text.strip()
     for tag in void_tags:
         if text.endswith(tag):
@@ -256,7 +260,6 @@ def clean_html(text):
         Return a sanitized version of an html code keeping essential html tags
         and allowing only a few attributes
     """
-    text = text.strip()
     text = clean_linebreaks(text)
     return bleach.clean(
         text,

@@ -586,7 +586,7 @@ class ExpenseConfig(colander.MappingSchema):
         title=u"Actif",
         default=True,
         description=u"En décochant cette entrée, elle n'apparaîtra plus dans \
-l'interface, mais restera associée aux notes de frais existantes."
+l'interface, mais restera associée aux notes de dépense existantes."
     )
 
     label = colander.SchemaNode(
@@ -614,7 +614,7 @@ l'interface, mais restera associée aux notes de frais existantes."
     contribution = colander.SchemaNode(
         colander.Boolean(),
         title=u"Contribution",
-        description=u"Ce type de frais est-il intégré dans la contribution \
+        description=u"Ce type de dépense est-il intégré dans la contribution \
 à la CAE ?",
         )
 
@@ -641,7 +641,7 @@ class ExpenseTelConfig(ExpenseConfig):
         colander.Boolean(),
         title=u"Créer une entrée par défaut ?",
         description=u"Une ligne sera automatiquement ajoutée à la feuille \
-de notes de frais",
+de notes de dépense",
         default=True)
 
 
@@ -688,14 +688,14 @@ class ExpenseTypesConfig(colander.MappingSchema):
     code_journal = colander.SchemaNode(
         colander.String(),
         title=u"Code journal utilisés pour notes de dépenses",
-        description=u"Le code journal pour les notes de frais",
+        description=u"Le code journal pour les notes de dépense",
         missing="",
     )
     compte_cg = colander.SchemaNode(
         colander.String(),
         title=u"Compte de tiers (classe 4) pour dépenses dues aux \
 entrepreneurs",
-        description=u"Le compte général pour les notes de frais",
+        description=u"Le compte général pour les notes de dépense",
         missing="",
         )
     expenses = ExpensesConfig(
@@ -709,14 +709,14 @@ entrepreneurs",
         title=u"Frais kilométriques",
         widget=deform.widget.SequenceWidget(
             template=TEMPLATES_URL + "clean_sequence.pt",
-            add_subitem_text_template=u"Ajouter des frais kilométriques",
+            add_subitem_text_template=u"Ajouter des dépenses kilométriques",
         )
     )
     expensestel = ExpensesTelConfig(
         title=u"Frais téléphoniques",
         widget=deform.widget.SequenceWidget(
             template=TEMPLATES_URL + "clean_sequence.pt",
-            add_subitem_text_template=u"Ajouter des frais téléphoniques",
+            add_subitem_text_template=u"Ajouter des dépenses téléphoniques",
         )
     )
 

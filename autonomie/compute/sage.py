@@ -101,7 +101,7 @@ class SageInvoice(object):
         Pour chaque ligne de remise:
             créer produit ou ajouter au produit existant
 
-        Si frais HT ou frais TTC:
+        Si dépense HT ou dépense TTC:
             créer produit
     """
     expense_tva_compte_cg = None

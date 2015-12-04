@@ -42,7 +42,7 @@ from autonomie import forms
 
 
 STATUS_OPTIONS = (
-    ("all", u"Toutes les notes de frais", ),
+    ("all", u"Toutes les notes de dépense", ),
     ("valid", u'Validées', ),
     ("resulted", u'Payées', ),
     ("wait", u'En attente de validation', ),
@@ -68,7 +68,7 @@ class ExpenseStatusSchema(colander.MappingSchema):
             widget=deform.widget.TextAreaWidget(cols=80, rows=2),
                                     title=u"Communication avec la CAE",
             description=u"Message à destination des membres de la CAE qui \
-valideront votre feuille de notes de frais",
+valideront votre feuille de notes de dépense",
             missing=u"",
             default=u"")
 

@@ -117,7 +117,7 @@
 <div class='col-md-6'>
     <div class="panel panel-info">
         <div class="panel-heading">
-            Les feuilles de notes de frais en attente
+            Les feuilles de notes de dépense en attente
         </div>
         <table class="table table-striped table-condensed table-hover">
             <thead>

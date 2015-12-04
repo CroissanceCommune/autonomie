@@ -51,7 +51,7 @@
         % for user, expenses in values:
         <table class="table table-condensed table-bordered">
             <caption>
-                <b>Feuille de notes de frais de ${api.format_account(user)}</b>
+                <b>Feuille de notes de dépense de ${api.format_account(user)}</b>
                 ${user_buttons[user.id].render(request)|n}
             </caption>
         <thead>
@@ -66,8 +66,8 @@
                     <td>${api.format_expense_status(expense)}</td>
                     <td>${api.format_amount(expense.total, trim=True)|n}</td>
                     <td style='text-align:right'>
-                        ${table_btn(request.route_path('expensesheet', id=expense.id), u"Voir", u"Voir cette note de frais", 'search')}
-                        ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de frais au format xslx", "file")}
+                        ${table_btn(request.route_path('expensesheet', id=expense.id), u"Voir", u"Voir cette note de dépense", 'search')}
+                        ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de dépense au format xslx", "file")}
                     </td>
                 </tr>
             % endfor

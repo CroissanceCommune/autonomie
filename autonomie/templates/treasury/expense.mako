@@ -55,11 +55,11 @@ ${period_form.render()|n}
     <div class="well hidden-print">
         <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
 % if request.context.status == 'resulted':
-        Cette note de frais a été payée.
+        Cette note de dépense a été payée.
 % elif request.context.status == 'valid':
-        Cette note de frais a été validée, elle est en attente de paiement.
+        Cette note de dépense a été validée, elle est en attente de paiement.
 % elif request.context.status == 'wait':
-        Cette note de frais est en attente de validation
+        Cette note de dépense est en attente de validation
 % endif
         <p>
             <small>
@@ -69,7 +69,7 @@ ${period_form.render()|n}
 % if request.user.is_admin():
     <p>
     <small>
-        L'identifiant de cette notes de frais est : ${ request.context.id }
+        L'identifiant de cette notes de dépense est : ${ request.context.id }
     </small>
 </p>
 <p>

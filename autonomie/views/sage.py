@@ -76,9 +76,9 @@ log = logging.getLogger(__name__)
 
 
 EXPENSE_CONFIG_ERROR_MSG = u"Veuillez vous assurer que tous les éléments de \
-configuration nécessaire à l'export des notes de frais ont \
+configuration nécessaire à l'export des notes de dépense ont \
 bien été fournis : <br /><a href='{0}' target='_blank'>Configuration des \
-notes de frais</a> <br/><a href='{1}' target='_blank'>Configuration \
+notes de dépense</a> <br/><a href='{1}' target='_blank'>Configuration \
 comptables du module vente</a>"
 
 EXPORT_BTN = Button(name="submit", type="submit", title=u"Exporter")
@@ -143,7 +143,7 @@ def get_expense_form(request):
     """
     Return a form for expense export
     """
-    schema = ExpenseSchema(title=u"Exporter les notes de frais")
+    schema = ExpenseSchema(title=u"Exporter les notes de dépense")
     schema = schema.bind(request=request)
     return Form(
         schema=schema,
@@ -157,7 +157,7 @@ def get_expense_id_form(counter):
     Return a form for expense export by id
     :param counter: the iterator used to insert various forms in the same page
     """
-    schema = ExpenseIdSchema(title=u"Exporter une notes de frais depuis \
+    schema = ExpenseIdSchema(title=u"Exporter une notes de dépense depuis \
 un identifiant")
     return Form(
         schema=schema,
@@ -443,7 +443,7 @@ class SageExpenseExportPage(BaseView):
     """
     Sage Expense export views
     """
-    title = u"Export des notes de frais au format CSV pour Sage"
+    title = u"Export des notes de dépense au format CSV pour Sage"
     config_keys = ('compte_cg_ndf', 'code_journal_ndf',)
     contribution_config_keys = (
         'compte_cg_contribution', 'contribution_cae', 'numero_analytique',
@@ -533,14 +533,14 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
         """
         count = expenses.count()
         if count == 0:
-            title = u"Il n'y a aucune note de frais à exporter"
+            title = u"Il n'y a aucune note de dépense à exporter"
             res = {
                 'title': title,
                 'errors': [""]
             }
             return res
 
-        title = u"Vous vous apprêtez à exporter {0} notes de frais".format(
+        title = u"Vous vous apprêtez à exporter {0} notes de dépense".format(
                 count)
 
         errors = []
@@ -554,7 +554,7 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
             company = expense.company
             error = self.check_company(company)
             if error is not None:
-                errors.append(u"La note de frais de {0} n'est pas exportable\
+                errors.append(u"La note de dépense de {0} n'est pas exportable\
 <br />{1}".format(format_account(expense.user), error))
 
         res = {'title': title, 'errors': errors}

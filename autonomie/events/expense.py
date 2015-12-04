@@ -47,7 +47,7 @@ EVENTS = {
 MAIL_TMPL = u"""
 Bonjour {owner},
 
-La note de frais de {owner} pour la période {date} a été {status_verb}.
+La note de dépense de {owner} pour la période {date} a été {status_verb}.
 
 Vous pouvez la consulter ici :
 {addr}
@@ -96,7 +96,7 @@ class StatusChanged(object):
         """
             return the subject of the email
         """
-        subject = u"Notes de frais de {0} : {1}".format(
+        subject = u"Notes de dépense de {0} : {1}".format(
                 format_account(self.expense.user),
                 format_expense_status(self.expense),
                 )

@@ -355,12 +355,12 @@ def company_expenses_view(request):
     """
         View that lists the expenseSheets related to the current company
     """
-    title = u"Accès aux notes de frais des employés de {0}"\
+    title = u"Accès aux notes de dépense des employés de {0}"\
             .format(request.context.name)
     if not expense_configured():
         return dict(
             title=title,
-            conf_msg=u"La déclaration des notes de frais n'est pas encore \
+            conf_msg=u"La déclaration des notes de dépense n'est pas encore \
 accessible."
         )
 
@@ -460,7 +460,7 @@ class ExpenseSheetView(BaseFormView):
         """
             Return the title of the page
         """
-        return u"Notes de frais de {0} pour la période de {1} {2}"\
+        return u"Notes de dépense de {0} pour la période de {1} {2}"\
             .format(
                 format_account(self.request.context.user),
                 month_name(self.month),
@@ -493,7 +493,7 @@ class ExpenseSheetView(BaseFormView):
             name="reset",
             request=self.request,
             confirm=u"Êtes-vous sûr de vouloir réinitialiser \
-cette feuille de notes de frais (toutes les modifications apportées seront \
+cette feuille de notes de dépense (toutes les modifications apportées seront \
 perdues) ?")
 
     def _wait_btn(self):
@@ -622,11 +622,11 @@ perdues) ?")
         log.debug(u"Resetting the expense")
         if self.request.context.status == 'draft':
             self.dbsession.delete(self.request.context)
-            self.session.flash(u"Votre feuille de notes de frais de {0} {1} a \
+            self.session.flash(u"Votre feuille de notes de dépense de {0} {1} a \
 bien été réinitialisée".format(month_name(self.month), self.year))
         else:
             self.session.flash(u"Vous n'êtes pas autorisé à réinitialiser \
-cette feuille de notes de frais")
+cette feuille de notes de dépense")
         cid = self.request.context.company_id
         uid = self.request.context.user_id
         url = self.request.route_url(
@@ -941,7 +941,7 @@ class RestBookMarks(BaseView):
 
 
 class ExpenseList(BaseListView):
-    title = u"Liste des notes de frais de la CAE"
+    title = u"Liste des notes de dépense de la CAE"
     schema = get_list_schema()
     sort_columns = dict(month=ExpenseSheet.month)
     default_sort = 'month'

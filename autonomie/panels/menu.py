@@ -221,7 +221,7 @@ def get_admin_menus(request):
     href = request.route_path("invoices")
     documents.add_item(u"Factures", icon="fa fa-file", href=href)
     href = request.route_path('expenses')
-    documents.add_item(u'Notes de frais', icon='fa fa-file-o', href=href)
+    documents.add_item(u'Notes de dépense', icon='fa fa-file-o', href=href)
 
     menu.add(documents)
 
@@ -237,7 +237,7 @@ def get_admin_menus(request):
 
         href = request.route_path("sage_expense_export")
         treasury.add_item(
-            u"Export des notes de frais",
+            u"Export des notes de dépense",
             icon="fa fa-credit-card",
             href=href
         )

@@ -132,6 +132,7 @@ class StaticColumn(Column):
     A static column object representing static datas representation
     """
     static = True
+
     def __init__(
         self,
         label,
@@ -155,9 +156,9 @@ class StaticColumn(Column):
         return val
 
 
-
 class TypedColumn(Column):
     static = False
+
     def __init__(
         self,
         type_object,
@@ -214,7 +215,7 @@ EXPENSEKM_COLUMNS = [
         last_letter='J',
     ),
     StaticColumn(
-        formatter= integer_to_amount,
+        formatter=integer_to_amount,
         key='km',
         label=u'Nombre de kms',
         letter='K',
@@ -289,7 +290,7 @@ class XlsExpense(XlsWriter):
                     types.append(type_.id)
                     yield TypedColumn(
                         type_,
-                        label="%s (ce type de frais n'existe plus)" % (
+                        label="%s (ce type de dépense n'existe plus)" % (
                             type_.label
                         )
                     )
@@ -323,8 +324,8 @@ class XlsExpense(XlsWriter):
             kmtype_code = None
 
         commontypes = ExpenseType.query()\
-                .filter(ExpenseType.type=="expense")\
-                .filter(ExpenseType.active==True)
+            .filter(ExpenseType.type == "expense")\
+            .filter(ExpenseType.active == True)
         for type_ in commontypes:
             # Here's a hack to allow to group km fee types and displacement fees
             if kmtype_code is not None and \
@@ -393,8 +394,7 @@ class XlsExpense(XlsWriter):
         """
             write the period in the header
         """
-        period = "01/{0}/{1}".format(self.model.month,
-                self.model.year)
+        period = "01/{0}/{1}".format(self.model.month, self.model.year)
         cell = self.get_merged_cells('A', 'D')
         cell.value = u"Période de la demande"
         cell = self.get_merged_cells('E', 'J')
@@ -447,12 +447,12 @@ class XlsExpense(XlsWriter):
         :return: a value if the the given line is form the type of column ''
         """
         val = ""
-        # Première passe, on essaye de retrouver le type de frais par id
+        # Première passe, on essaye de retrouver le type de dépense par id
         if by_id:
             if column.id == line.type_object.id:
                 val = column.get_val(line)
 
-        # Deuxième passe, on essaye de retrouver le type de frais par code
+        # Deuxième passe, on essaye de retrouver le type de dépense par code
         else:
             if column.code == line.type_object.code:
                 val = column.get_val(line)
@@ -500,8 +500,8 @@ class XlsExpense(XlsWriter):
                     # chaque type de données
 
                     # Première passe on essaye de remplir les colonnes pour la
-                    # ligne de frais données en fonction de l'id du type de
-                    # frais associé
+                    # ligne de dépense données en fonction de l'id du type de
+                    # dépense associé
                     value = self.get_cell_val(line, column, by_id=True)
                     if value:
                         got_value = True
@@ -511,7 +511,7 @@ class XlsExpense(XlsWriter):
                     cell.style = column.style
 
             # Deuxième passe, on a rempli aucune case pour cette ligne on va
-            # essayer de remplir les colonnes en recherchant le type de frais
+            # essayer de remplir les colonnes en recherchant le type de dépense
             # par code
             if not got_value:
                 for column in columns:
@@ -573,9 +573,9 @@ class XlsExpense(XlsWriter):
         write expenses tables for the given category
         """
         lines = [line for line in self.model.lines
-                            if line.category == category]
+                 if line.category == category]
         kmlines = [lin for lin in self.model.kmlines
-                            if lin.category == category]
+                   if lin.category == category]
         lines.extend(kmlines)
         self.write_table(self.columns, lines)
         self.index += 2
@@ -596,8 +596,8 @@ class XlsExpense(XlsWriter):
         """
         write the internal expense table to the current worksheet
         """
-        txt = u"FRAIS (frais direct de fonctionnement, < à 30% du salaire \
-brut par mois)"
+        txt = u"FRAIS (dépenses directes liées au fonctionnement, \
+< à 30% du salaire brut par mois)"
         cell = self.write_full_line(txt)
         self.set_color(cell, Color.Crimson)
         self.write_expense_table('1')
@@ -606,7 +606,7 @@ brut par mois)"
         """
         write the activity expense table to the current worksheet
         """
-        txt = u"ACHATS (frais concernant directement votre l'activite aupres \
+        txt = u"ACHATS (dépenses concernant directement l'activité auprès \
 de vos clients)"
         cell = self.write_full_line(txt)
         self.set_color(cell, Color.Crimson)
@@ -617,7 +617,7 @@ de vos clients)"
             write the final total
         """
         cell = self.get_merged_cells('A', 'D')
-        cell.value = u"Total des frais professionnel à payer"
+        cell.value = u"Total des dépenses professionnelles à payer"
         cell.style = LARGE_FOOTER_CELL
         cell = self.get_merged_cells('E', 'E')
         cell.value = integer_to_amount(self.model.total)
@@ -650,7 +650,7 @@ de vos clients)"
         cell.style = TITLE_STYLE
 
         # index has already been increased
-        row_dim = self.worksheet.row_dimensions.get(self.index -1 )
+        row_dim = self.worksheet.row_dimensions.get(self.index - 1)
         row_dim.height = 30
         self.index += 2
 
@@ -660,14 +660,13 @@ de vos clients)"
         """
             Return the current excel export as a String buffer (StringIO)
         """
-        cell = self.write_full_line(u"Feuille de notes de frais")
+        cell = self.write_full_line(u"Feuille de notes de dépense")
 
         cell.style = TITLE_STYLE
         # index has already been increased
-        row_dim = self.worksheet.row_dimensions.get(self.index -1 )
+        row_dim = self.worksheet.row_dimensions.get(self.index - 1)
         row_dim.height = 30
         self.index += 2
-
 
         self.write_code()
         self.write_user()

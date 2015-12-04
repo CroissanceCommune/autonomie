@@ -36,7 +36,7 @@ Admin expenses list view
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>
-                <td>Notes de frais validées</td>
+                <td>Notes de dépense validées</td>
             </tr>
             <tr>
                 <td class='green_tr'><br /></td>
@@ -44,7 +44,7 @@ Admin expenses list view
             </tr>
             <tr>
                 <td class='orange_tr'><br /></td>
-                <td>Notes de frais en attente de validation</td>
+                <td>Notes de dépense en attente de validation</td>
             </tr>
         </table>
     </div>
@@ -88,7 +88,7 @@ else:
                 </td>
                 <td>
                     <% url = request.route_path('expensesheet', id=expense.id) %>
-                    ${table_btn(url, u'Modifier', u"Voir la note de frais", icon="pencil" )}
+                    ${table_btn(url, u'Modifier', u"Voir la note de dépense", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
                     ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="file" )}
                 </td>

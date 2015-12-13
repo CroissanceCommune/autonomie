@@ -202,6 +202,12 @@ class EntryQueryFactory(object):
                 get_stat_criterion(self.model, criterion, inspector)
             )
 
+        self.composites = []
+        for composite in self.entry.composite_criteria:
+            self.composites.append(
+                get_composite_criterion(self.model, composite, inspector)
+            )
+
     def query(self):
         """
         Returns the main query used to find objects
@@ -240,6 +246,20 @@ class EntryQueryFactory(object):
                         already_added.append(criterion.key)
 
                 query = query.filter(filter_)
+
+        # Même algo que pour les critères simples mais avec un outerjoin un poil
+        # plus complexe
+        for composite in self.composites:
+            filter_ = composite.gen_filter()
+
+            if filter_ is not None:
+                for key, join_class in composite.get_keys_and_join_classes():
+                    if join_class is not None:
+                        if key not in already_added:
+                            query = query.outerjoin(join_class)
+                            already_added.append(criterion.key)
+            query = query.filter(filter_)
+
         return query
 
     def render_row(self):
@@ -270,6 +290,17 @@ def get_stat_criterion(model, criterion_model, inspector):
     elif criterion_model.type == 'bool':
         factory = BoolCriterionQueryFactory
     return factory(model, criterion_model, inspector)
+
+
+def get_composite_criterion(model, composite, inspector):
+    """
+    Return the appropriate composite criterion class
+    """
+    if composite.type == 'or':
+        factory = OrCriterionQueryFactory
+    else:
+        factory = AndCriterionQueryFactory
+    return factory(model, composite, inspector)
 
 
 class CriterionQueryFactory(object):
@@ -504,3 +535,36 @@ class DateCriterionQueryFactory(CriterionQueryFactory):
             attr >= first_day,
             attr < last_day
         )
+
+
+class OrCriterionQueryFactory(object):
+    comp_func = or_
+
+    def __init__(self, model, composite, inspector):
+        self.model = model
+        self.composite_model = composite
+        self.criteria = []
+        for criterion in composite.criteria:
+            self.criteria.append(
+                get_stat_criterion(model, criterion, inspector)
+            )
+
+    def gen_filter(self):
+        filters = []
+        for criterion in self.criteria:
+            filters.append(criterion.gen_filter())
+        return self.comp_func(*filters)
+
+    def get_keys_and_join_classes(self):
+        for criterion in self.criteria:
+            if hasattr(criterion, 'get_keys_and_join_classes'):
+                # It's a composite subcriterion
+                for key, value in criterion.get_keys_and_join_classes():
+                    yield key, value
+            else:
+                # it's a simple criterion
+                yield criterion.key, criterion.get_join_class()
+
+
+class AndCriterionQueryFactory(OrCriterionQueryFactory):
+    comp_func = and_

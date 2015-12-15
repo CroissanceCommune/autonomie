@@ -24,7 +24,7 @@
 """
     Form schemas for commercial handling
 """
-
+import datetime
 import colander
 from deform import widget
 
@@ -32,8 +32,17 @@ from autonomie.models.task import invoice
 from autonomie import forms
 from .custom_types import AmountType
 
+
+def get_years():
+    years = invoice.get_invoice_years()
+    next_year = datetime.date.today().year + 1
+    if next_year not in years:
+        years.append(next_year)
+    return years
+
+
 class CommercialFormSchema(colander.MappingSchema):
-    year = forms.year_select_node(query_func=invoice.get_invoice_years)
+    year = forms.year_select_node(query_func=get_years)
 
 
 class CommercialSetFormSchema(colander.MappingSchema):

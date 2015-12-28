@@ -140,7 +140,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
   });
 
   var EntryModel = Backbone.Model.extend({
-    defaults: {criterion: []},
+    defaults: {criteria: []},
     validation:{
       title: {
         required:true,
@@ -160,6 +160,16 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
   });
 
   var CriterionModel = Backbone.Model.extend({
+    defaults: {
+      criteria: []
+    },
+    validation: {
+      criteria: function(value){
+        if (value.length === 0){
+          return "Sélectionnez au moins une entrée";
+        }
+      }
+    },
     initialize: function(options){
       if (this.get('type') == 'date'){
         this.setDateAttributes(options);
@@ -534,7 +544,6 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     templateHelpers: function(){
       var type = this.model.get('type');
       var criteria_options = [];
-      console.log(this.destCollection);
       _.each(this.destCollection.models, function(model){
         if (model.get('type') != 'or'){
           criteria_options.push(
@@ -549,7 +558,10 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       _.each(this.model.get('criteria'), function(datas){
         var model = new CriterionModel(datas);
         criteria_options.push(
-          {value: model.get('id'), label: model.get_full_label(AppOptions), selected: true}
+          {
+            value: model.get('id'),
+            label: model.get_full_label(AppOptions),
+            selected: true}
         );
       });
       return {
@@ -563,6 +575,13 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     onRender: function(){
       this.ui.select.select2();
+    },
+    formDatas: function(){
+      var result = this.ui.form.serializeObject();
+      if (!('criteria' in result)){
+        result['criteria'] = [];
+      }
+      return result;
     }
   });
 

@@ -1,14 +1,14 @@
 """3.2 : ajout_quantity_product
 
 Revision ID: 39c70a8da291
-Revises: bdb7dd32c2c
+Revises: 480d66cbb4c4
 Create Date: 2015-10-01 12:18:41.393913
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '39c70a8da291'
-down_revision = '4cb8e3e01f36'
+down_revision = '480d66cbb4c4'
 
 from alembic import op
 import sqlalchemy as sa

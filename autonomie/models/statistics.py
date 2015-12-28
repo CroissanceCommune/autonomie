@@ -172,6 +172,25 @@ class BaseStatisticCriterion(DBBASE):
         "StatisticEntry",
         backref=backref("criteria"),
     )
+    parent_id = Column(
+        ForeignKey('base_statistic_criterion.id'),
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
+
+    criteria = relationship(
+        'BaseStatisticCriterion',
+        primaryjoin='BaseStatisticCriterion.id==\
+BaseStatisticCriterion.parent_id',
+        backref=backref(
+            'parent',
+            remote_side=[id],
+            info={
+                'colanderalchemy': forms.EXCLUDED,
+            },
+        ),
+        cascade='all',
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
 
     def __json__(self, request):
         return dict(
@@ -181,7 +200,37 @@ class BaseStatisticCriterion(DBBASE):
             method=self.method,
             type=self.type,
             entry_id=self.entry_id,
+            parent_id=self.parent_id,
+            criteria=[
+                criterion.__json__(request) for criterion in self.criteria
+                if not criterion.has_parent()
+            ],  # We only return top level criteria
         )
+
+    def has_parent(self, request):
+        """
+        Return True if the current criterion has a parent one
+        """
+        return self.parent_id is not None
+
+
+class OrStatisticCriterion(BaseStatisticCriterion):
+    """
+    Composite criterion grouping other criteria in an or_ clause
+    """
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'or'}
+    id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
+
+
+class AndStatisticCriterion(BaseStatisticCriterion):
+    """
+    Composite criterion grouping other criteria in an or_ clause
+    """
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'and'}
+    id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
+    label = Column(String(255), default='')
 
 
 class BoolStatisticCriterion(BaseStatisticCriterion):
@@ -193,7 +242,6 @@ class BoolStatisticCriterion(BaseStatisticCriterion):
         return BoolStatisticCriterion(
             key=self.key,
             method=self.method,
-            type=self.type,
         )
 
 
@@ -216,7 +264,6 @@ class CommonStatisticCriterion(BaseStatisticCriterion):
         return CommonStatisticCriterion(
             key=self.key,
             method=self.method,
-            type=self.type,
             search1=self.search1,
             search2=self.search2,
         )
@@ -258,7 +305,6 @@ class OptListStatisticCriterion(BaseStatisticCriterion):
         return OptListStatisticCriterion(
             key=self.key,
             method=self.method,
-            type=self.type,
             searches=self.searches,
         )
 
@@ -293,7 +339,6 @@ class DateStatisticCriterion(BaseStatisticCriterion):
         return DateStatisticCriterion(
             key=self.key,
             method=self.method,
-            type=self.type,
             search1=self.search1,
             search2=self.search2,
         )

@@ -26,17 +26,13 @@ templates['boolcriterion_form.mustache'] = template({"1":function(depth0,helpers
   return buffer + "        </select>\n    </div>\n    </div>\n    </fieldset>\n    <div class=\"form-actions\">\n        <button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n        <button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n    </div>\n</form>\n</div>\n";
 },"useData":true});
 templates['criterion_list.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  return "<h4>Critères composant notre entrée statistique\n<a class='btn btn-primary add' style='font-size: 10px'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<table class=\"table table-bordered table-condensed table-striped\">\n    <thead>\n        <th class='col-xs-9'>Intitulé</th>\n        <th class='col-xs-3 actions'>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n";
+  return "<h4>Critères composant notre entrée statistique\n<a class='btn btn-primary add' style='font-size: 10px'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n<a class='btn btn-primary add-or' style='font-size: 10px'>Ajouter une clause 'OU' <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<table class=\"table table-bordered table-condensed table-striped\">\n    <thead>\n        <th class='col-xs-9'>Intitulé</th>\n        <th class='col-xs-3 actions'>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n";
   },"useData":true});
 templates['criterion.mustache'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "<td>\n"
-    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-    + " ("
-    + escapeExpression(((helper = (helper = helpers.method_label || (depth0 != null ? depth0.method_label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"method_label","hash":{},"data":data}) : helper)))
-    + "  : "
-    + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))
-    + ")\n</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm' href='#"
+    + escapeExpression(((helper = (helper = helpers.model_label || (depth0 != null ? depth0.model_label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"model_label","hash":{},"data":data}) : helper)))
+    + "\n</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm' href='#"
     + escapeExpression(((helper = (helper = helpers.edit_url || (depth0 != null ? depth0.edit_url : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"edit_url","hash":{},"data":data}) : helper)))
     + "' title=\"Modifier cette entrée\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Modifier\n            </span>\n        </a>\n        <a class='btn btn-danger btn-default btn-sm remove' title='Supprimer cette entrée'>\n            <i class='glyphicon glyphicon-trash'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Supprimer\n            </span>\n        </a>\n    </div>\n</td>\n";
 },"useData":true});
@@ -171,6 +167,29 @@ templates['optrelcriterion_form.mustache'] = template({"1":function(depth0,helpe
   if (!helpers.optrel_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
   return buffer + "            </select>\n        </div>\n    </div>\n    </fieldset>\n    <div class=\"form-actions\">\n        <button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n        <button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n    </div>\n</form>\n\n";
+},"useData":true});
+templates['orcriterion_form.mustache'] = template({"1":function(depth0,helpers,partials,data) {
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "                    <option value='"
+    + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
+    + "' ";
+  stack1 = ((helper = (helper = helpers.selected || (depth0 != null ? depth0.selected : depth0)) != null ? helper : helperMissing),(options={"name":"selected","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
+  if (!helpers.selected) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if (stack1 != null) { buffer += stack1; }
+  return buffer + ">"
+    + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))
+    + "</option>\n";
+},"2":function(depth0,helpers,partials,data) {
+  return "selected";
+  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<form name='criterion'>\n    <button type=\"button\" class=\"close\"><span aria-hidden=\"true\">&times;</span></button>\n    <input type='hidden' name='type' value='"
+    + escapeExpression(((helper = (helper = helpers.type || (depth0 != null ? depth0.type : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"type","hash":{},"data":data}) : helper)))
+    + "' />\n    <fieldset>\n        <legend>\n            "
+    + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))
+    + "\n        </legend>\n        <div class='alert alert-info'>\n            <ul>\n            <li>1- Configurer vos critères</li>\n            <li>2- Créer une clause 'OU'</li>\n            <li>3- Sélectionner les critères à utiliser dans la clause 'OU'</li>\n            </ul>\n        </div>\n        <div class='row'>\n            <div class=\"form-group col-sm-6\">\n                <label for=\"criteria\">Combiner les critères</label>\n                <select multiple name='criteria' class='form-control'>\n";
+  stack1 = ((helper = (helper = helpers.criteria_options || (depth0 != null ? depth0.criteria_options : depth0)) != null ? helper : helperMissing),(options={"name":"criteria_options","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
+  if (!helpers.criteria_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if (stack1 != null) { buffer += stack1; }
+  return buffer + "                </select>\n            </div>\n        </div>\n        <div class=\"form-actions\">\n            <button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n            <button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n        </div>\n    </fieldset>\n</form>\n";
 },"useData":true});
 templates['sheet_form.mustache'] = template({"1":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;

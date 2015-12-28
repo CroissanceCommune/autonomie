@@ -203,11 +203,11 @@ BaseStatisticCriterion.parent_id',
             parent_id=self.parent_id,
             criteria=[
                 criterion.__json__(request) for criterion in self.criteria
-                if not criterion.has_parent()
-            ],  # We only return top level criteria
+                if criterion.parent_id == self.id
+            ],  # We return the children criteria
         )
 
-    def has_parent(self, request):
+    def has_parent(self, request=None):
         """
         Return True if the current criterion has a parent one
         """

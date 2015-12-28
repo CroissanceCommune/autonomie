@@ -536,19 +536,22 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       var criteria_options = [];
       console.log(this.destCollection);
       _.each(this.destCollection.models, function(model){
-        console.log(model);
+        if (model.get('type') != 'or'){
           criteria_options.push(
-          {
-            value: model.get('id'),
-            label: model.get_full_label(AppOptions)
-          }
+            {
+              value: model.get('id'),
+              label: model.get_full_label(AppOptions)
+            }
           );
         }
+        }
       );
-      console.log(criteria_options);
-      criteria_options = this.updateSelectOptions(
-        criteria_options, this.model.get('criteria'));
-      console.log(criteria_options);
+      _.each(this.model.get('criteria'), function(datas){
+        var model = new CriterionModel(datas);
+        criteria_options.push(
+          {value: model.get('id'), label: model.get_full_label(AppOptions), selected: true}
+        );
+      });
       return {
         type: type,
         label: "Configuration d'une clause 'OU'",

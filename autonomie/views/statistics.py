@@ -41,6 +41,8 @@ from autonomie.models.statistics import (
     OptListStatisticCriterion,
     DateStatisticCriterion,
     BoolStatisticCriterion,
+    AndStatisticCriterion,
+    OrStatisticCriterion,
 )
 from autonomie.statistics import (
     EntryQueryFactory,
@@ -71,7 +73,9 @@ CRITERION_MODELS = {
     "number": CommonStatisticCriterion,
     "optrel": OptListStatisticCriterion,
     "static_opt": OptListStatisticCriterion,
-    "string": CommonStatisticCriterion
+    "string": CommonStatisticCriterion,
+    "or": OrStatisticCriterion,
+    "and": AndStatisticCriterion,
 }
 
 logger = logging.getLogger(__name__)
@@ -113,8 +117,6 @@ def statistic_sheet_add_edit_view(context, request):
     """
     View for adding editing statistics sheets
     """
-    logger.info("Here we are")
-    logger.info(request.POST)
     if 'title' in request.POST:
         schema = SQLAlchemySchemaNode(StatisticSheet, includes=('title',))
 
@@ -290,7 +292,8 @@ class RestStatisticEntry(BaseRestView):
         return self.context.entries
 
     def post_format(self, entry):
-        entry.sheet = self.context
+        if entry.sheet_id is None:
+            entry.sheet = self.context
         return entry
 
 

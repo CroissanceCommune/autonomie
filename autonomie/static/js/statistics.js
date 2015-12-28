@@ -172,6 +172,54 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       if ((options['altdate2'] === undefined)&&(options['search2']!==undefined)){
         this.set('altdate2', formatPaymentDate(options['search2']));
       }
+    },
+    get_full_label: function(app_options){
+      if (this.get('type') == 'or'){
+        return "Clause OU";
+      }
+      var title = app_options.columns[this.get('key')].label;
+      var type = this.get('type');
+      var labels;
+      var key;
+      var options;
+      var label;
+      if(type == 'date'){
+        labels = [this.get('altdate1'), this.get('altdate2')];
+      } else if (type == 'optrel') {
+        key = this.get('key');
+        options = app_options.optrel_options[key];
+        labels = getLabels(options, this.get('searches'));
+      } else if( type == 'static_opt') {
+        key = this.get('key');
+        options = app_options.static_opt_options[key];
+        labels = getLabels(options, this.get('searches'));
+      } else if (type == 'bool') {
+        labels = [];
+      }
+      else {
+        labels = [this.get('search1'), this.get('search2')];
+      }
+      label = labels.join(' - ');
+
+      if (label === ' - '){
+        label = '';
+      }else if (label.indexOf('- ', label.length - 2) != -1){
+        label = label.substring(0, label.length - 2);
+      }
+
+      var type_methods = app_options.methods[type];
+      var model_method = this.get('method');
+      var method_label;
+      var method = _.find(type_methods,
+        function(method){ return method.value==model_method;}
+      );
+      if (!_.isUndefined(method)){
+        method_label = method.label;
+      } else {
+        method_label = "Erreur";
+      }
+
+      return title + " (" + label + " : " + method_label + ")";
     }
   });
 
@@ -322,46 +370,8 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       }
     },
     templateHelpers: function(){
-      var result = {title: AppOptions.columns[this.model.get('key')].label};
+      var result = {model_label: this.model.get_full_label(AppOptions)};
 
-      var type = this.model.get('type');
-      var labels;
-      var key;
-      var options;
-      if(type == 'date'){
-        labels = [this.model.get('altdate1'), this.model.get('altdate2')];
-      } else if (type == 'optrel') {
-        key = this.model.get('key');
-        options = AppOptions.optrel_options[key];
-        labels = getLabels(options, this.model.get('searches'));
-      } else if( type == 'static_opt') {
-        key = this.model.get('key');
-        options = AppOptions.static_opt_options[key];
-        labels = getLabels(options, this.model.get('searches'));
-      } else if (type == 'bool') {
-        labels = [];
-      }
-      else {
-        labels = [this.model.get('search1'), this.model.get('search2')];
-      }
-      result.label = labels.join(' - ');
-
-      if (result.label === ' - '){
-        result.label = '';
-      }else if (result.label.indexOf('- ', result.label.length - 2) != -1){
-        result.label = result.label.substring(0, result.label.length - 2);
-      }
-
-      var type_methods = AppOptions.methods[type];
-      var model_method = this.model.get('method');
-      var method = _.find(type_methods,
-        function(method){ return method.value==model_method;}
-      );
-      if (!_.isUndefined(method)){
-        result.method_label = method.label;
-      } else {
-        result.method_label = "Erreur";
-      }
       result.edit_url = "entries/" +
         this.model.collection.entry_id +
         "/criteria/" +
@@ -376,7 +386,8 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     template: "criterion_list",
     childViewContainer: 'tbody',
     events: {
-      "click a.add": "dialogCriterionType"
+      "click a.add": "dialogCriterionType",
+      "click a.add-or": "addOrCriterion"
     },
     dialogCriterionType: function(){
       var add_url = "entries/" + this.collection.entry_id + "/criteria/add/";
@@ -384,6 +395,10 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         {add_url: add_url}
       );
       App.popup.show(criterion_type_select);
+    },
+    addOrCriterion: function(){
+      var url = "entries/" + this.collection.entry_id + "/orcriteria/add";
+      Statistic.router.navigate(url, {trigger: true});
     }
   });
 
@@ -510,6 +525,44 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     }
   });
 
+  var OrCriterionForm = BaseCriterionFormView.extend({
+    template: "orcriterion_form",
+    ui:{
+      "form": "form[name=criterion]",
+      "select": "form[name=criterion] select"
+    },
+    templateHelpers: function(){
+      var type = this.model.get('type');
+      var criteria_options = [];
+      console.log(this.destCollection);
+      _.each(this.destCollection.models, function(model){
+        console.log(model);
+          criteria_options.push(
+          {
+            value: model.get('id'),
+            label: model.get_full_label(AppOptions)
+          }
+          );
+        }
+      );
+      console.log(criteria_options);
+      criteria_options = this.updateSelectOptions(
+        criteria_options, this.model.get('criteria'));
+      console.log(criteria_options);
+      return {
+        type: type,
+        label: "Configuration d'une clause 'OU'",
+        criteria_options: criteria_options
+        };
+    },
+    onShow: function(){
+      this.ui.select.select2();
+    },
+    onRender: function(){
+      this.ui.select.select2();
+    }
+  });
+
   var controller = {
     initialized:false,
     index: function(){
@@ -574,17 +627,14 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         criterionForm = new DateCriterionFormView(
           {model: model, destCollection: this.criteria_collection}
         );
-        this.entry_form.getRegion('form').show(criterionForm);
       } else if (model.get('type') == 'string'){
         criterionForm = new StringCriterionView(
           {model: model, destCollection: this.criteria_collection}
         );
-        this.entry_form.getRegion('form').show(criterionForm);
       } else if (model.get('type') == 'number'){
         criterionForm = new NumberCriterionView(
           {model: model, destCollection: this.criteria_collection}
         );
-        this.entry_form.getRegion('form').show(criterionForm);
       } else if (model.get('type') == 'optrel'){
         criterionForm = new OptRelCriterionForm(
           {
@@ -592,7 +642,6 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
             destCollection: this.criteria_collection}
         );
         criterionForm.optrel_options = AppOptions.optrel_options[model.get('key')];
-        this.entry_form.getRegion('form').show(criterionForm);
       } else if (model.get('type') == 'static_opt'){
         criterionForm = new OptRelCriterionForm(
           {
@@ -600,22 +649,42 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
             destCollection: this.criteria_collection}
         );
         criterionForm.optrel_options = AppOptions.static_opt_options[model.get('key')];
-        this.entry_form.getRegion('form').show(criterionForm);
       } else if (model.get('type') == 'bool'){
         criterionForm = new BoolCriterionView(
           {model: model, destCollection: this.criteria_collection}
         );
-        this.entry_form.getRegion('form').show(criterionForm);
+      } else if (model.get('type') == 'or'){
+        console.log(this.criteria_collection.models);
+        criterionForm = this.criterionForm = new OrCriterionForm(
+          {model: model, destCollection: this.criteria_collection}
+        );
       }
+      this.entry_form.getRegion('form').show(criterionForm);
     },
     criteria_add: function(entry_id, key){
-      this.entry_edit(entry_id);
-      var option = AppOptions.columns[key];
+      var this_ = this;
+      this.entry_edit(entry_id).then(function(){
+        var option = AppOptions.columns[key];
 
-      var model = new CriterionModel({key: key, type:option.type});
-      this._buildCriterionForm(model);
+        var model = new CriterionModel({key: key, type:option.type});
+        this_._buildCriterionForm(model);
+      });
     },
     criteria_edit: function(entry_id, criterion_id){
+      var this_ = this;
+      this.entry_edit(entry_id).then(function(){
+        var model = this_.criteria_collection.get(criterion_id);
+        this_._buildCriterionForm(model);
+      });
+    },
+    criteria_or_add: function(entry_id){
+      var this_ = this;
+      this.entry_edit(entry_id).then(function(){
+        var model = new CriterionModel({key: "", type:"or"});
+        this_._buildCriterionForm(model);
+      });
+    },
+    criteria_or_edit: function(entry_id, criterion_id){
       var this_ = this;
       this.entry_edit(entry_id).then(function(){
         var model = this_.criteria_collection.get(criterion_id);
@@ -629,6 +698,8 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       "index": "index",
       "entries/:id/edit": "entry_edit",
       "entries/add": "entry_add",
+      "entries/:id/orcriteria/add": "criteria_or_add",
+      "entries/:id/orcriteria/edit": "criteria_or_edit",
       "entries/:id/criteria/add/:key": "criteria_add",
       "entries/:id/criteria/:cid/edit": "criteria_edit"
     }

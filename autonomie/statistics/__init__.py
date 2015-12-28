@@ -198,15 +198,11 @@ class EntryQueryFactory(object):
 
         self.criteria = []
         for criterion in self.entry.criteria:
-            self.criteria.append(
-                get_stat_criterion(self.model, criterion, inspector)
-            )
-
-        self.composites = []
-        for composite in self.entry.composite_criteria:
-            self.composites.append(
-                get_composite_criterion(self.model, composite, inspector)
-            )
+            if not criterion.has_parent():
+                self.criteria.append(
+                    get_stat_criterion(self.model, criterion, inspector)
+                )
+        self.already_joined = []
 
     def query(self):
         """
@@ -227,39 +223,44 @@ class EntryQueryFactory(object):
 
         # NOTE: on ne gère pas les alias (les joins sur deux tables identiques
         # pour deux relations différentes)
-        already_added = []
         for criterion in self.criteria:
             # On génère le filtre
             filter_ = criterion.gen_filter()
 
             # si il n'y a pas de filtres ...
             if filter_ is not None:
-                # On récupère l'objet lié
-                join_class = criterion.get_join_class()
-                # Si il y a un outerjoin à faire (le critère se fait sur un
-                # attribut de l'objet lié)
-                if join_class is not None:
-                    # on ne va pas outerjoiné deux fois la classe pour le même
-                    # critère
-                    if criterion.key not in already_added:
-                        query = query.outerjoin(join_class)
-                        already_added.append(criterion.key)
-
+                self.join(query, criterion)
                 query = query.filter(filter_)
 
-        # Même algo que pour les critères simples mais avec un outerjoin un poil
-        # plus complexe
-        for composite in self.composites:
-            filter_ = composite.gen_filter()
+        return query
 
-            if filter_ is not None:
-                for key, join_class in composite.get_keys_and_join_classes():
-                    if join_class is not None:
-                        if key not in already_added:
-                            query = query.outerjoin(join_class)
-                            already_added.append(criterion.key)
-            query = query.filter(filter_)
+    def join(self, query, criterion):
+        """
+        add outerjoin calls to the query regarding the stat criterion
+        """
+        if hasattr(criterion, "get_join_class"):
+            # critère 'simple'
+            # On récupère l'objet lié
+            join_class = criterion.get_join_class()
+            query = self.add_join_to_query(query, criterion.key, join_class)
+        else:
+            # Critère composé
+            for key, join_class in criterion.get_keys_and_join_classes():
+                query = self.add_join_to_query(query, key, join_class)
+        return query
 
+    def add_join_to_query(self, query, key, join_class):
+        """
+        Add an outerjoin to a query if it's not already in
+        """
+        # Si il y a un outerjoin à faire (le critère se fait sur un
+        # attribut de l'objet lié)
+        if join_class is not None:
+            # on ne va pas outerjoiné deux fois la classe pour le même
+            # critère
+            if key not in self.already_joined:
+                query = query.outerjoin(join_class)
+                self.already_joined.append(key)
         return query
 
     def render_row(self):
@@ -289,18 +290,11 @@ def get_stat_criterion(model, criterion_model, inspector):
         factory = DateCriterionQueryFactory
     elif criterion_model.type == 'bool':
         factory = BoolCriterionQueryFactory
-    return factory(model, criterion_model, inspector)
-
-
-def get_composite_criterion(model, composite, inspector):
-    """
-    Return the appropriate composite criterion class
-    """
-    if composite.type == 'or':
+    elif criterion_model.type == 'or':
         factory = OrCriterionQueryFactory
-    else:
+    elif criterion_model.type == 'and':
         factory = AndCriterionQueryFactory
-    return factory(model, composite, inspector)
+    return factory(model, criterion_model, inspector)
 
 
 class CriterionQueryFactory(object):

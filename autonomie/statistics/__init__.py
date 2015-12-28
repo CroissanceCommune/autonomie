@@ -532,7 +532,6 @@ class DateCriterionQueryFactory(CriterionQueryFactory):
 
 
 class OrCriterionQueryFactory(object):
-    comp_func = or_
 
     def __init__(self, model, composite, inspector):
         self.model = model
@@ -547,7 +546,7 @@ class OrCriterionQueryFactory(object):
         filters = []
         for criterion in self.criteria:
             filters.append(criterion.gen_filter())
-        return self.comp_func(*filters)
+        return or_(*filters)
 
     def get_keys_and_join_classes(self):
         for criterion in self.criteria:
@@ -561,4 +560,11 @@ class OrCriterionQueryFactory(object):
 
 
 class AndCriterionQueryFactory(OrCriterionQueryFactory):
-    comp_func = and_
+    def gen_filter(self):
+        # NOTE : this method cannot be factorized easily since sqla is doing
+        # strange object attachment when the and_ and or_ function are used in a
+        # query
+        filters = []
+        for criterion in self.criteria:
+            filters.append(criterion.gen_filter())
+        return and_(*filters)

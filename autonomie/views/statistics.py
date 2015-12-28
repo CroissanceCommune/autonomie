@@ -37,6 +37,7 @@ from autonomie.models.user import UserDatas
 from autonomie.models.statistics import (
     StatisticSheet,
     StatisticEntry,
+    BaseStatisticCriterion,
     CommonStatisticCriterion,
     OptListStatisticCriterion,
     DateStatisticCriterion,
@@ -57,6 +58,7 @@ from autonomie.utils import (
     ascii,
     widgets,
 )
+from autonomie import forms
 from autonomie.views import (
     BaseView,
     DisableView,
@@ -305,23 +307,39 @@ class RestStatisticCriterion(BaseRestView):
         model_type = submitted['type']
 
         model = CRITERION_MODELS.get(model_type)
-        return SQLAlchemySchemaNode(
+
+        schema = SQLAlchemySchemaNode(
             model,
             excludes=('type_', 'id'),
         )
+        if model_type == 'or':
+            schema['criteria'] = colander.SchemaNode(
+                colander.Sequence(),
+                forms.get_sequence_child_item(BaseStatisticCriterion)[0],
+                name='criteria',
+                missing=colander.drop,
+            )
+        return schema
 
     def collection_get(self):
         """
-        Return the list of criteria
+        Return the list of top level criteria (not those combined in Or or And
+        clauses
         context is the current entry
         """
-        return self.context.criteria
+        return [criterion for criterion in self.context.criteria
+                if not criterion.has_parent()]  # only top level
 
     def pre_format(self, values):
         """
         Since when serializing a multi select on the client side, we get a list
         OR a string, we need to enforce getting a string
         """
+        if "criteria" in values:
+            criteria_ids = values['criteria']
+            if not hasattr(criteria_ids, '__iter__'):
+                values['criteria'] = [criteria_ids]
+
         if 'searches' in values:
             searches = values.get('searches')
             if not hasattr(searches, '__iter__'):
@@ -334,6 +352,7 @@ class RestStatisticCriterion(BaseRestView):
         """
         if self.context.__name__ == 'statistic_entry':
             criterion.entry = self.context
+
         return criterion
 
 

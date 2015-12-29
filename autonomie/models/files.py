@@ -26,7 +26,6 @@
 """
 import hashlib
 import os
-import cgi
 
 from cStringIO import StringIO
 from datetime import datetime
@@ -53,6 +52,7 @@ from depot.fields.sqlalchemy import (
 from autonomie.models.base import (
     default_table_args,
     DBBASE,
+    DBSESSION,
 )
 from autonomie.models.types import PersistentACLMixin
 from autonomie.models.node import Node
@@ -202,6 +202,10 @@ class Template(File):
         # Declaring the event on the class attribute instead of mapper property
         # enables proper registration on its subclasses
         event.listen(cls.data, 'set', cls._set_data, retval=True)
+
+    @classmethod
+    def query(cls,):
+        return DBSESSION().query(cls).order_by(cls.created_at)
 
 
 class TemplatingHistory(DBBASE, PersistentACLMixin):

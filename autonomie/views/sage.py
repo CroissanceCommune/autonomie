@@ -357,7 +357,6 @@ target='_blank'>Voir l'entreprise</a>"""
         """
         exporter = InvoiceExport(self.request.config)
         writer = SageInvoiceCsvWriter()
-        writer.set_prefix(self.request.config.get('invoice_prefix', ''))
         writer.set_datas(exporter.get_book_entries(invoices))
         write_file_to_request(
             self.request,

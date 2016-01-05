@@ -228,13 +228,8 @@ is resulted")
         invoice = task.invoice
         invoice = invoice.check_resulted(user_id=self.request.user.id)
         self.request.dbsession.merge(invoice)
-        msg = u"L'avoir porte le numéro <b>{0}</b>"
-        self.session.flash(
-            msg.format(
-                self.request.config.get('invoiceprefix', '') +
-                task.official_number
-            )
-        )
+        msg = u"L'avoir porte le numéro <b>{0}{1}</b>"
+        self.session.flash(msg.format(task.prefix, task.official_number))
 
 
 def set_financial_year(request):

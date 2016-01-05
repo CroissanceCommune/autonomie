@@ -193,7 +193,10 @@ class InvoiceFormActions(TaskFormActions):
         """
         form = get_set_financial_year_form(self.request, self.formcounter)
         form.set_appstruct(
-            {'financial_year': self.context.financial_year}
+            {
+                'financial_year': self.context.financial_year,
+                'prefix': self.context.prefix,
+            }
         )
         self.formcounter = form.counter
         return form
@@ -465,8 +468,9 @@ class CommonInvoiceStatusView(TaskStatusView):
     def post_set_financial_year_process(self, task, status, params):
         invoice = params
         invoice = self.request.dbsession.merge(invoice)
-        log.debug(u"Set financial year of the invoice :{0}".format(invoice.id))
-        msg = u"L'année comptable de référence a bien été modifiée"
+        log.debug(u"Set financial year and prefix of the invoice :{0}".format(
+            invoice.id))
+        msg = u"Le document a bien été modifié"
         msg = msg.format(self.request.route_path("invoice", id=invoice.id))
         self.request.session.flash(msg)
 

@@ -112,7 +112,7 @@ TEMPLATES_URL = 'autonomie:deform_templates/'
 
 MAIN_INFOS_GRID = (
     (('name', 6), ('phase_id', 6),),
-    (('taskDate', 6), ('financial_year', 6),),
+    (('taskDate', 6), ('financial_year', 3), ('prefix', 3), ),
     (('customer_id', 6), ('address', 6),),
     (('description', 12),),
     (('course', 12),),
@@ -761,6 +761,7 @@ TASK_MATCHING_MAP = (
     ('phase_id', 'common'),
     ('taskDate', 'common'),
     ('financial_year', 'common'),
+    ('prefix', 'common'),
     ('description', 'common'),
     ('customer_id', 'common'),
     ('address', 'common'),

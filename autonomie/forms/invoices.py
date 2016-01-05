@@ -28,6 +28,7 @@
 import colander
 import deform
 import deform_extensions
+from pyramid.security import has_permission
 
 from autonomie.models import company
 from autonomie.models.task import invoice
@@ -86,10 +87,25 @@ def deferred_product_widget(node, kw):
 @colander.deferred
 def deferred_financial_year_widget(node, kw):
     request = kw['request']
-    if request.user.is_admin() or request.user.is_manager():
+    if has_permission('manage', request.context, request):
         return deform.widget.TextInputWidget(mask='9999')
     else:
         return deform.widget.HiddenWidget()
+
+
+@colander.deferred
+def deferred_prefix_widget(node, kw):
+    request = kw['request']
+    if has_permission('manage', request.context, request):
+        return deform.widget.TextInputWidget()
+    else:
+        return deform.widget.HiddenWidget()
+
+
+@colander.deferred
+def deferred_default_prefix(node, kw):
+    request = kw['request']
+    return request.config.get('invoiceprefix', '')
 
 
 FINANCIAL_YEAR = colander.SchemaNode(
@@ -99,6 +115,16 @@ FINANCIAL_YEAR = colander.SchemaNode(
     widget=deferred_financial_year_widget,
 
     default=forms.default_year,
+)
+
+
+PREFIX = colander.SchemaNode(
+    colander.String(),
+    name="prefix",
+    title=u"Préfixe du numéro de facture",
+    widget=deferred_prefix_widget,
+    default=deferred_default_prefix,
+    missing="",
 )
 
 
@@ -130,6 +156,7 @@ def get_invoice_schema():
     schema['common']['phase_id'].title = title
     # Ref #689
     schema['common'].add_before('description', FINANCIAL_YEAR)
+    schema['common'].add_before('description', PREFIX)
 
     title = u"Date de la facture"
     schema['common']['taskDate'].title = title
@@ -171,6 +198,7 @@ def get_cancel_invoice_schema():
     schema['common']['phase_id'].title = title
     # Ref #689
     schema['common'].add_before('description', FINANCIAL_YEAR)
+    schema['common'].add_before('description', PREFIX)
 
     title = u"Date de l'avoir"
     schema['common']['taskDate'].title = title
@@ -439,6 +467,7 @@ class FinancialYearSchema(colander.MappingSchema):
         colander Schema for financial year setting
     """
     financial_year = FINANCIAL_YEAR
+    prefix = PREFIX
 
 
 class ProductTaskLine(colander.MappingSchema):

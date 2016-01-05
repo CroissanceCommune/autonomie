@@ -235,6 +235,15 @@ class Task(Node):
         ),
         group='edit',
     )
+    prefix = Column(
+        String(15),
+        default='',
+        info={
+            "colanderalchemy": {
+                'title': u"Préfixe du numéro de document",
+            }
+        }
+    )
 
     # Relationships
     statusPersonAccount = relationship(
@@ -367,6 +376,7 @@ class Task(Node):
             address=self.address,
             payment_conditions=self.payment_conditions,
             description=self.description,
+            prefix=self.prefix,
             lines=[
                 line.__json__(request)
                 for line in self.default_line_group.lines

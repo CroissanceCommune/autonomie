@@ -89,7 +89,7 @@ else:
         %endif
             </td>
             <td>
-                ${request.config.get('invoiceprefix')}${document.official_number}
+                ${document.prefix}${document.official_number}
             </td>
             % if is_admin_view:
             <td>

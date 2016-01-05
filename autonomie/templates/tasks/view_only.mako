@@ -47,7 +47,7 @@
                 % else:
                     Vous ne pouvez plus modifier ce document car il a déjà été validé.
                     % if hasattr(task, 'official_number'):
-                        Il porte le numéro <b>${request.config.get('invoiceprefix')}${task.official_number}</b>.
+                        Il porte le numéro <b>${task.prefix}${task.official_number}</b>.
                     % endif
                 % endif
             </p>
@@ -112,7 +112,7 @@
                 <li>
                 <p>
                     Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">
-                        ${request.config.get('invoiceprefix')}${task.invoice.official_number}
+                        ${task.invoice.prefix}${task.invoice.official_number}
                     </a>
                 </p>
                 </li>

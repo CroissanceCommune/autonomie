@@ -272,6 +272,7 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.expenses_ht = -1 * self.expenses_ht
         cancelinvoice.financial_year = self.financial_year
+        cancelinvoice.prefix = self.prefix
         cancelinvoice.display_units = self.display_units
         cancelinvoice.statusPersonAccount = user
         cancelinvoice.project = self.project

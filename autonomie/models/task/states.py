@@ -124,7 +124,10 @@ def set_financial_year(task, **kw):
     """
         Set the financial year of the current task
     """
-    task.financial_year = kw['financial_year']
+    if 'financial_year' in kw:
+        task.financial_year = kw['financial_year']
+    if 'prefix' in kw:
+        task.prefix = kw['prefix']
     return task
 
 

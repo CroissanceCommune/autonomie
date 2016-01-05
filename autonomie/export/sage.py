@@ -84,18 +84,6 @@ class SageInvoiceCsvWriter(SageCsvWriter):
         {'name': 'num_analytique', 'label': "Numéro analytique"},
     )
 
-    def set_prefix(self, prefix):
-        """
-        Set the prefix of the current CAE
-        """
-        self.prefix = prefix
-
-    def format_num_facture(self, number):
-        """
-            format the invoice official Number to add a prefix
-        """
-        return "%s%s" % (self.prefix, number)
-
 
 class SageExpenseCsvWriter(SageCsvWriter):
     """

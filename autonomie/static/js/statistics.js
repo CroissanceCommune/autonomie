@@ -165,8 +165,10 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     validation: {
       criteria: function(value){
-        if (value.length === 0){
-          return "Sélectionnez au moins une entrée";
+        if (this.get('type') == 'or'){
+          if (value.length === 0){
+            return "Sélectionnez au moins une entrée";
+          }
         }
       }
     },
@@ -556,13 +558,15 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         }
       );
       _.each(this.model.get('criteria'), function(datas){
-        var model = new CriterionModel(datas);
-        criteria_options.push(
-          {
-            value: model.get('id'),
-            label: model.get_full_label(AppOptions),
-            selected: true}
-        );
+        if (_.isObject(datas)){
+          var model = new CriterionModel(datas);
+          criteria_options.push(
+            {
+              value: model.get('id'),
+              label: model.get_full_label(AppOptions),
+              selected: true}
+          );
+        }
       });
       return {
         type: type,
@@ -676,7 +680,6 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
           {model: model, destCollection: this.criteria_collection}
         );
       } else if (model.get('type') == 'or'){
-        console.log(this.criteria_collection.models);
         criterionForm = this.criterionForm = new OrCriterionForm(
           {model: model, destCollection: this.criteria_collection}
         );

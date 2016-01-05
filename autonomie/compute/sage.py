@@ -292,7 +292,10 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
         """
             Return the invoice number
         """
-        return self.invoice.official_number
+        return u"{0}{1}".format(
+            self.invoice.prefix,
+            self.invoice.official_number,
+        )
 
     @property
     def libelle(self):

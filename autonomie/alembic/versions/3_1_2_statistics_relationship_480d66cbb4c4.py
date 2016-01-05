@@ -1,4 +1,4 @@
-"""3.2 : statistics relationship
+"""3.1.2 : statistics relationship
 
 Revision ID: 480d66cbb4c4
 Revises: 4cb8e3e01f36
@@ -23,6 +23,19 @@ def upgrade():
             sa.ForeignKey("base_statistic_criterion.id"),
         )
     )
+    op.add_column(
+        "task",
+        sa.Column(
+            "prefix",
+            sa.String(15),
+            default="",
+        )
+    )
+
+    from autonomie.models.config import get_config
+    prefix = get_config().get('invoiceprefix', '')
+    if prefix:
+        op.execute("Update task set prefix='%s'" % (prefix,))
 
 
 def downgrade():

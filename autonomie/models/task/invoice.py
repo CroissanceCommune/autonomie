@@ -80,18 +80,42 @@ from .states import DEFAULT_STATE_MACHINES
 log = logging.getLogger(__name__)
 
 
-def get_next_official_number():
+def get_next_official_number(year=None):
     """
-        Return the next available official number
+    Return the next available official number
+
+    :param int year: The year we'd like to query a number for
     """
-    a = Invoice.get_official_number().first()[0]
-    c = CancelInvoice.get_official_number().first()[0]
-    if not a:
-        a = 0
-    if not c:
-        c = 0
-    next_ = max(a, c) + 1
-    return int(next_)
+    next_ = 1
+    if year is None:
+        year = datetime.date.today().year
+    query = DBSESSION().query(func.max(Task.official_number))
+    # Task date has a silly format : 20150205
+    # we check dates with year * 10000 : 20150000
+    year = year * 10000
+    next_year = (year + 1) * 10000
+    query = query.filter(Task.taskDate.between(year, next_year))
+    last = query.first()[0]
+    if last:
+        next_ = last + 1
+    return next_
+
+
+def translate_invoices(invoicequery, from_point):
+    """
+    Translate invoice numbers to 'from_point'
+
+    :param iter invoicequery: An iterable
+    :param int from_point: from_point
+
+    The first invoice will get from_point as official_number
+    """
+    for invoice in invoicequery:
+        invoice.official_number = from_point
+        from_point += 1
+        DBSESSION().merge(invoice)
+
+    return from_point
 
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)

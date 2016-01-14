@@ -36,6 +36,8 @@ from js.jquery_timepicker_addon import timepicker_fr
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from sqlalchemy.orm import aliased
+from sqlalchemy import func
+from sqla_inspect import excel
 
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.pdf import (
@@ -65,6 +67,7 @@ from autonomie.forms.activity import (
     RecordActivitySchema,
     get_list_schema,
     )
+from autonomie.export.utils import write_file_to_request
 from autonomie.views import render_api
 
 log = logging.getLogger(__name__)
@@ -528,6 +531,17 @@ class ActivityList(BaseListView):
 
         return query
 
+    def filter_year(self, query, appstruct):
+        """
+        filter the query and restrict it to the given year
+        """
+        year = appstruct.get('year')
+        if year is not None:
+            query = query.filter(
+                func.extract('YEAR', Activity.datetime) == year
+            )
+        return query
+
 
 class ActivityListContractor(ActivityList):
     """
@@ -545,8 +559,73 @@ class ActivityListContractor(ActivityList):
         query = query.filter(
             Activity.attendances.any(Attendance.account_id.in_(participants_ids))
         )
-        log.debug(query)
         return query
+
+
+class ActivityReportXlsView(ActivityList):
+    """
+    Xls reporting of the activity datas
+    Provide a custom export of activities in an xls file
+    """
+    writer = excel.XlsExporter
+
+    def _init_writer(self):
+        writer = self.writer()
+        writer.headers = (
+            {'label': u'Entrepreneur', 'name': 'name'},
+            {'label': u'Date', 'name': 'date'},
+            {'label': u'Titre', 'name': 'title'},
+            {'label': u'Durée', 'name': 'duration'},
+            {'label': u'Conseiller(s)', 'name': 'conseillers'},
+        )
+        return writer
+
+    @property
+    def filename(self):
+        return "activities.xls"
+
+    def _format_datas_for_export(self, query):
+        """
+        Returns datas in order to be able to easily use them in a for loop
+        """
+        participants = {}
+        for activity in query:
+            for participant in activity.participants:
+                participants.setdefault(
+                    render_api.format_account(participant), []
+                ).append(activity)
+        return participants
+
+    def _activity_title(self, activity):
+        """
+        Format en activity title
+        """
+        return u"{0}".format(activity.type_object.label)
+
+    def _build_return_value(self, schema, appstruct, query):
+        writer = self._init_writer()
+        datas = self._format_datas_for_export(query)
+        for name, activities in datas.items():
+            writer.add_row({
+                'name': name,
+                'date': '',
+                'title': '',
+                'duration': '',
+                'conseillers': ''
+            })
+            for activity in activities:
+                writer.add_row({
+                    'name': '',
+                    'date': activity.datetime,
+                    'title': self._activity_title(activity),
+                    'duration': activity.duration,
+                    'conseillers': ','.join([
+                        render_api.format_account(conseiller)
+                        for conseiller in activity.conseillers])
+                })
+
+        write_file_to_request(self.request, self.filename, writer.render())
+        return self.request.response
 
 
 def activity_view_only_view(context, request):
@@ -626,6 +705,7 @@ def includeme(config):
         traverse='/activities/{id}',
     )
     config.add_route('activities', "/activities")
+    config.add_route('activities.xls', "/activities.xls")
     config.add_route(
         'company_activities',
         "/company/{id}/activities",
@@ -654,6 +734,12 @@ def includeme(config):
         route_name='activities',
         permission='manage',
         renderer="/accompagnement/activities.mako",
+    )
+
+    config.add_view(
+        ActivityReportXlsView,
+        route_name='activities.xls',
+        permission='manage',
     )
 
     config.add_view(

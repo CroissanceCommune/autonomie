@@ -39,6 +39,7 @@ from autonomie.models.activity import (
 )
 from autonomie.models import user
 from autonomie.models import company
+from autonomie.models.task.invoice import get_invoice_years
 
 from autonomie import forms
 from autonomie.forms import lists
@@ -313,6 +314,9 @@ def get_list_schema(is_admin=False):
             }
             )
         )
+    year = forms.year_select_node(get_invoice_years)
+    year.name = 'year'
+    schema.insert(0, year)
 
     del schema['search']
     return schema

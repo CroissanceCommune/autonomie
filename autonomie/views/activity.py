@@ -36,6 +36,7 @@ from js.jquery_timepicker_addon import timepicker_fr
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from sqlalchemy.orm import aliased
+from sqlalchemy import asc
 from sqlalchemy import func
 from sqla_inspect import excel
 
@@ -610,6 +611,9 @@ class ActivityReportXlsView(ActivityList):
         Format en activity title
         """
         return u"{0}".format(activity.type_object.label)
+
+    def _sort(self, query, appstruct):
+        return query.order_by(asc(Activity.datetime))
 
     def _build_return_value(self, schema, appstruct, query):
         writer = self._init_writer()

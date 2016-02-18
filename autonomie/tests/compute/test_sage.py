@@ -478,6 +478,7 @@ class TestSageFacturation(BaseBookEntryTest):
         )
 
 
+
 class TestSageContribution(BaseBookEntryTest):
     factory = SageContribution
 
@@ -512,6 +513,66 @@ class TestSageContribution(BaseBookEntryTest):
             'num_analytique': 'NUM_ANA',
             'credit':2000}
         self._test_product_book_entry(sageinvoice, method, res)
+
+    def test_discount_line_inversion_debit_entr(self, sageinvoice_discount):
+        # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
+        # Débit et crédit vont dans le sens inverse pour les remises (logique)
+        method = "debit_entreprise"
+        res = {'libelle': 'customer company',
+            'compte_cg': 'BANK_CG',
+            'num_analytique': 'COMP_CG',
+            'debit': 2000}
+        self._test_product_book_entry(
+            sageinvoice_discount,
+            method,
+            res,
+            'CG_RRR',
+        )
+
+    def test_discount_line_inversion_credit_entr(self, sageinvoice_discount):
+        # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
+        # Débit et crédit vont dans le sens inverse pour les remises (logique)
+        method = "credit_entreprise"
+        res = {'libelle': 'customer company',
+            'compte_cg': 'CG_CONTRIB',
+            'num_analytique': 'COMP_CG',
+            'credit':2000}
+        self._test_product_book_entry(
+            sageinvoice_discount,
+            method,
+            res,
+            'CG_RRR',
+        )
+
+    def test_discount_line_inversion_debit_cae(self, sageinvoice_discount):
+        # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
+        # Débit et crédit vont dans le sens inverse pour les remises (logique)
+        method = "debit_cae"
+        res = {'libelle': 'customer company',
+            'compte_cg': 'CG_CONTRIB',
+            'num_analytique': 'NUM_ANA',
+            'debit':2000}
+        self._test_product_book_entry(
+            sageinvoice_discount,
+            method,
+            res,
+            'CG_RRR',
+        )
+
+    def test_discount_line_inversion_credit_cae(self, sageinvoice_discount):
+        # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
+        # Débit et crédit vont dans le sens inverse pour les remises (logique)
+        method = "credit_cae"
+        res = {'libelle': 'customer company',
+            'compte_cg': 'BANK_CG',
+            'num_analytique': 'NUM_ANA',
+            'credit':2000}
+        self._test_product_book_entry(
+            sageinvoice_discount,
+            method,
+            res,
+            'CG_RRR',
+        )
 
 
 class TestSageAssurance(BaseBookEntryTest):

@@ -462,8 +462,13 @@ class SageContribution(BaseInvoiceBookEntryFactory):
             Debit entreprise book entry
         """
         entry = self.get_base_entry()
+        # Hack to handle discount lines inversion
+        if product['compte_cg_produit'] == self.config.get('compte_rrr'):
+            compte_cg = self.config['compte_cg_banque']
+        else:
+            compte_cg = self.config['compte_cg_contribution']
         entry.update(
-            compte_cg=self.config['compte_cg_contribution'],
+            compte_cg=compte_cg,
             num_analytique=self.company.code_compta,
             debit=self.get_amount(product)
         )
@@ -475,8 +480,13 @@ class SageContribution(BaseInvoiceBookEntryFactory):
             Credit Entreprise book entry
         """
         entry = self.get_base_entry()
+        # Hack to handle discount lines inversion
+        if product['compte_cg_produit'] == self.config.get('compte_rrr'):
+            compte_cg = self.config['compte_cg_contribution']
+        else:
+            compte_cg = self.config['compte_cg_banque']
         entry.update(
-            compte_cg=self.config['compte_cg_banque'],
+            compte_cg=compte_cg,
             num_analytique=self.company.code_compta,
             credit=self.get_amount(product)
         )
@@ -488,8 +498,15 @@ class SageContribution(BaseInvoiceBookEntryFactory):
             Debit CAE book entry
         """
         entry = self.get_base_entry()
+
+        # Hack to handle discount lines inversion
+        if product['compte_cg_produit'] == self.config.get('compte_rrr'):
+            compte_cg = self.config['compte_cg_contribution']
+        else:
+            compte_cg = self.config['compte_cg_banque']
+
         entry.update(
-            compte_cg=self.config['compte_cg_banque'],
+            compte_cg=compte_cg,
             num_analytique=self.config['numero_analytique'],
             debit=self.get_amount(product)
         )
@@ -501,8 +518,15 @@ class SageContribution(BaseInvoiceBookEntryFactory):
             Credit CAE book entry
         """
         entry = self.get_base_entry()
+
+        # Hack to handle discount lines inversion
+        if product['compte_cg_produit'] == self.config.get('compte_rrr'):
+            compte_cg = self.config['compte_cg_banque']
+        else:
+            compte_cg = self.config['compte_cg_contribution']
+
         entry.update(
-            compte_cg=self.config['compte_cg_contribution'],
+            compte_cg=compte_cg,
             num_analytique=self.config['numero_analytique'],
             credit=self.get_amount(product)
         )

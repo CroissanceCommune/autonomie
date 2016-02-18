@@ -229,7 +229,7 @@ class EntryQueryFactory(object):
 
             # si il n'y a pas de filtres ...
             if filter_ is not None:
-                self.join(query, criterion)
+                query = self.join(query, criterion)
                 query = query.filter(filter_)
 
         return query

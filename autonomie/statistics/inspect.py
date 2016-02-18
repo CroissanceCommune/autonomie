@@ -142,6 +142,8 @@ class StatisticInspector(BaseSqlaInspector):
             if export_infos.get('exclude', False):
                 if stats_infos.get('exclude', True):
                     continue
+            elif stats_infos.get('exclude', False):
+                continue
 
             infos = export_infos
             infos.update(stats_infos)

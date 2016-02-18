@@ -1210,6 +1210,7 @@ class UserDatas(Node):
                     'related_key': u"export_label",
                     "keep_key": True,
                     "label": u"Porteur de projet",
+                    "stats": EXCLUDED,
                 }
             }
         )
@@ -1275,6 +1276,7 @@ class UserDatas(Node):
                     'related_key': u"export_label",
                     "keep_key": True,
                     "label": u"Porteur de projet",
+                    "stats": EXCLUDED,
                 }
             }
         ),
@@ -1339,6 +1341,7 @@ class UserDatas(Node):
                     'related_key': u"export_label",
                     "keep_key": True,
                     "label": u"Porteur de projet",
+                    "stats": EXCLUDED,
                 }
             }
         ),
@@ -1386,6 +1389,7 @@ class UserDatas(Node):
                     'related_key': u"export_label",
                     "keep_key": True,
                     "label": u"Porteur de projet",
+                    "stats": EXCLUDED,
                 }
             }
         ),
@@ -1411,6 +1415,7 @@ class UserDatas(Node):
                     'related_key': u"export_label",
                     "keep_key": True,
                     "label": u"Porteur de projet",
+                    "stats": EXCLUDED,
                 }
             }
         ),
@@ -1812,7 +1817,10 @@ class ExternalActivityDatas(DBBASE):
         ForeignKey('user_datas.id'),
         info={
             'colanderalchemy': EXCLUDED,
-            'export': {'label': u"Identifiant Autonomie", }
+            'export': {
+                'label': u"Identifiant Autonomie",
+                'stats': EXCLUDED,
+            }
         },
     )
 
@@ -1880,7 +1888,10 @@ class CompanyDatas(DBBASE):
         ForeignKey("user_datas.id"),
         info={
             'colanderalchemy': EXCLUDED,
-            'export': {'label': u"Identifiant Autonomie", }
+            'export': {
+                'label': u"Identifiant Autonomie",
+                'stats': EXCLUDED,
+            }
         }
     )
 
@@ -1899,14 +1910,19 @@ class DateDiagnosticDatas(DBBASE):
     date = Column(
         Date(),
         info={
-            "title": u'Date du diagnostic',
+            'colanderalchemy': {
+                "title": u'Date du diagnostic',
+            }
         }
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
         info={
             'colanderalchemy': EXCLUDED,
-            'export': {'label': u"Identifiant Autonomie", }
+            'export': {
+                'label': u"Identifiant Autonomie",
+                'stats': EXCLUDED,
+            }
         }
     )
 
@@ -1925,14 +1941,19 @@ class DateConventionCAPEDatas(DBBASE):
     date = Column(
         Date(),
         info={
-            "title": u'Date de la convention',
+            "colanderalchemy": {
+                "title": u'Date de la convention',
+            }
         }
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
         info={
             'colanderalchemy': EXCLUDED,
-            'export': {'label': u"Identifiant Autonomie", }
+            'export': {
+                'label': u"Identifiant Autonomie",
+                'stats': EXCLUDED,
+            }
         }
     )
 
@@ -1951,14 +1972,19 @@ class DateDPAEDatas(DBBASE):
     date = Column(
         Date(),
         info={
-            "title": u'Date de la DPAE',
+            'colanderalchemy': {
+                "title": u'Date de la DPAE',
+            }
         }
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
         info={
             'colanderalchemy': EXCLUDED,
-            'export': {'label': u"Identifiant autonomie", }
+            'export': {
+                'label': u"Identifiant autonomie",
+                'stats': EXCLUDED,
+            }
         }
     )
 

@@ -362,6 +362,7 @@ class WorkshopListView(WorkshopListTools, BaseListView):
 
 class WorkshopCsvWriter(CsvExporter):
     headers = (
+        {'name': 'date', 'label': 'Date'},
         {'name': 'label', 'label': "Intitulé"},
         {'name': 'participant', 'label': "Participant"},
         {'name': 'leaders', 'label': "Formateur(s)"},
@@ -371,6 +372,7 @@ class WorkshopCsvWriter(CsvExporter):
 
 class WorkshopXlsWriter(XlsExporter):
     headers = (
+        {'name': 'date', 'label': 'Date'},
         {'name': 'label', 'label': "Intitulé"},
         {'name': 'participant', 'label': "Participant"},
         {'name': 'leaders', 'label': "Formateur(s)"},
@@ -401,6 +403,7 @@ def stream_workshop_entries_for_export(query):
 
             if attended:
                 yield {
+                    "date": workshop.timeslots[0].start_time.date(),
                     "label": workshop.name,
                     "participant": format_account(participant),
                     "leaders": '\n'.join(workshop.leaders),

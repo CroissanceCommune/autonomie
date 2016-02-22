@@ -38,6 +38,12 @@ from webhelpers.html.builder import HTML
 from sqlalchemy import (
     or_,
     distinct,
+    func,
+    desc
+)
+from sqlalchemy.sql.expression import label
+from sqlalchemy.orm import (
+    RelationshipProperty,
 )
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
@@ -97,7 +103,7 @@ from autonomie.views.files import (
     FileUploadView,
 )
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 DOCTYPE_VALIDATION_BTN = deform.Button(
@@ -167,7 +173,7 @@ class PermanentUserAddView(BaseFormView):
             Add a company 'name' in the database
             ( set its goal by default )
         """
-        log.info(u"Adding company : %s" % name)
+        logger.info(u"Adding company : %s" % name)
         company = Company()
         company.name = name
         company.goal = u"Entreprise de {0}".format(
@@ -221,10 +227,10 @@ class PermanentUserAddView(BaseFormView):
 
         if self.context.__name__ == 'user':
             user_model = self.schema.objectify(appstruct, self.context)
-            log.info(u"Edit user : {0}" .format(format_account(user_model)))
+            logger.info(u"Edit user : {0}" .format(format_account(user_model)))
         else:
             user_model = self.schema.objectify(appstruct)
-            log.info(u"Add user : {0}" .format(format_account(user_model)))
+            logger.info(u"Add user : {0}" .format(format_account(user_model)))
 
         if password is not None:
             user_model.set_password(password)
@@ -305,7 +311,7 @@ class UserList(BaseListView):
         """
             Return the main query for our list view
         """
-        log.debug("Queryiing")
+        logger.debug("Queryiing")
         query = DBSESSION().query(distinct(User.id), User)
         return query.outerjoin(User.companies)
 
@@ -313,7 +319,7 @@ class UserList(BaseListView):
         """
             filter the query with the provided search argument
         """
-        log.debug("Filtering name")
+        logger.debug("Filtering name")
         search = appstruct['search']
         if search:
             query = query.filter(
@@ -331,8 +337,8 @@ class UserList(BaseListView):
         """
         filter the query with company activities
         """
-        log.debug("Filtering by activity id")
-        log.debug(appstruct)
+        logger.debug("Filtering by activity id")
+        logger.debug(appstruct)
         activity_id = appstruct.get('activity_id')
         if activity_id:
             query = query.filter(
@@ -342,7 +348,7 @@ class UserList(BaseListView):
                     )
                 )
             )
-            log.debug(query)
+            logger.debug(query)
         return query
 
     def filter_disabled(self, query, appstruct):
@@ -405,7 +411,7 @@ class UserAccountView(BaseFormView):
         """
             Called on submission success -> changing password
         """
-        log.info(u"# User {0} has changed his password #".format(
+        logger.info(u"# User {0} has changed his password #".format(
             self.request.user.login))
         new_pass = appstruct['pwd']
         self.request.user.set_password(new_pass)
@@ -686,7 +692,7 @@ def record_compilation(context, request, template):
         user_id=request.user.id,
         userdatas_id=context.id,
         template_id=template.id)
-    log.debug(u"Storing an history object")
+    logger.debug(u"Storing an history object")
     request.dbsession.add(history)
 
 
@@ -705,7 +711,7 @@ def store_compiled_file(context, request, output, template):
 
     :param context: The context of the
     """
-    log.debug(u"Storing the compiled file")
+    logger.debug(u"Storing the compiled file")
     name = get_filename(template.name)
     output.seek(0)
     datas = output.getvalue()
@@ -754,14 +760,16 @@ def py3o_view(context, request):
         compile the template provided as argument using the current view
         context for templating
     """
-    log.debug(u"Asking for a template compilation")
+    logger.debug(u"Asking for a template compilation")
     print(context)
     doctemplate_id = request.GET.get('template_id')
 
     if doctemplate_id:
         template = files.Template.get(doctemplate_id)
         if template:
-            log.debug(" + Templating (%s, %s)" % (template.name, template.id))
+            logger.debug(
+                " + Templating (%s, %s)" % (template.name, template.id)
+            )
             try:
                 output = py3o.compile_template(
                     context,
@@ -780,15 +788,17 @@ def py3o_view(context, request):
                 key = get_key_from_genshi_error(err)
                 msg = u"""Erreur à la compilation du modèle la clé {0}
 n'est pas définie""".format(key)
-                log.exception(msg)
+                logger.exception(msg)
 
                 request.session.flash(msg, "error")
             except Exception:
-                log.exception(
+                logger.exception(
                     u"Une erreur est survenue à la compilation du template \
 %s avec un contexte de type %s et d'id %s" % (
-                                    template.id, context.__class__, context.id
-                                        )
+                        template.id,
+                        context.__class__,
+                        context.id,
+                    )
                 )
                 request.session.flash(
                     u"Erreur à la compilation du modèle, merci de contacter \
@@ -829,7 +839,7 @@ def userdata_doctype_view(userdata_model, request):
         try:
             appstruct = schema.deserialize(appstruct)
         except colander.Invalid:
-            log.exception(
+            logger.exception(
                 "Error while validating doctype registration"
             )
         else:
@@ -864,11 +874,11 @@ class UserDatasListClass(object):
         """
         Filter the general situation of the project
         """
-        log.debug("APPSTRUCT : %s" % appstruct)
+        logger.debug("APPSTRUCT : %s" % appstruct)
         situation = appstruct.get('situation_situation')
         if situation is not None:
             query = query.filter(
-                UserDatas.situation_situation_id==situation
+                UserDatas.situation_situation_id == situation
             )
         return query
 
@@ -900,7 +910,7 @@ class UserDatasListClass(object):
 
         if follower_id not in (None, -1):
             query = query.filter(
-                UserDatas.situation_follower_id==follower_id
+                UserDatas.situation_follower_id == follower_id
             )
         return query
 
@@ -910,6 +920,56 @@ class UserDatasListView(UserDatasListClass, BaseListView):
     The userdatas listing view
     """
     pass
+
+
+def add_custom_headers_to_writer(writer, query):
+    """
+    Add column headers in the form "label 1",  "label 2" ... to be able to
+    insert the o2m related elements to a main model's table export (allow to
+    have 3 dimensionnal datas in a 2d array)
+
+    E.g : Userdatas objects have got a o2m relationship on DateDatas objects
+
+    Here we would add date 1, date 2... columns regarding the max number of
+    configured datas (if a userdatas has 5 dates, we will have 5 columns)
+    We fill the column with the value of an attribute of the DateDatas model
+    (that is handled by sqla_inspect thanks to the couple index + related_key
+    configuration)
+
+    The name of the attribute is configured using the "flatten" key in the
+    relationship's export configuration
+    """
+    new_headers = []
+    for header in writer.headers:
+        if isinstance(header['__col__'], RelationshipProperty):
+            if header['__col__'].uselist:
+                class_ = header['__col__'].mapper.class_
+                # On compte le nombre maximum d'objet lié que l'on rencontre
+                # dans la base
+                count = DBSESSION().query(
+                    label("nb", func.count(class_.id))
+                ).group_by(class_.userdatas_id).order_by(
+                    desc("nb")).first()[0]
+
+                # Pour les relations O2M qui ont un attribut flatten de
+                # configuré, On rajoute des colonnes "date 1" "date 2" dans
+                # notre sheet principale
+                for index in range(0, count):
+                    if 'flatten' in header:
+                        new_header = {
+                            '__col__': header['__col__'],
+                            'label': u"%s %s" % (
+                                header['label'],
+                                index + 1),
+                            'key': header['key'],
+                            'name': u"%s_%s" % (header['name'], index + 1),
+                            'related_key': header['flatten'],
+                            'index': index
+                        }
+                        new_headers.append(new_header)
+
+    writer.headers.extend(new_headers)
+    return writer
 
 
 class UserDatasXlsView(UserDatasListClass, BaseXlsView):
@@ -923,6 +983,18 @@ class UserDatasXlsView(UserDatasListClass, BaseXlsView):
     def filename(self):
         return "gestion_social.xls"
 
+    def _build_return_value(self, schema, appstruct, query):
+        """
+        Return the streamed file object
+        """
+        writer = self._init_writer()
+        writer = add_custom_headers_to_writer(writer, query)
+        for item in self._stream_rows(query):
+            writer.add_row(item)
+
+        write_file_to_request(self.request, self.filename, writer.render())
+        return self.request.response
+
 
 class UserDatasCsvView(UserDatasListClass, BaseCsvView):
     """
@@ -933,6 +1005,18 @@ class UserDatasCsvView(UserDatasListClass, BaseCsvView):
     @property
     def filename(self):
         return "gestion_social.csv"
+
+    def _build_return_value(self, schema, appstruct, query):
+        """
+        Return the streamed file object
+        """
+        writer = self._init_writer()
+        writer = add_custom_headers_to_writer(writer, query)
+        for item in self._stream_rows(query):
+            writer.add_row(item)
+
+        write_file_to_request(self.request, self.filename, writer.render())
+        return self.request.response
 
 
 def user_view(request):
@@ -960,16 +1044,17 @@ def user_delete(account, request):
                 )
                 request.dbsession.merge(company)
 
-        log.debug(u"Deleting account : {0}".format(format_account(account)))
+        logger.debug(u"Deleting account : {0}".format(format_account(account)))
         request.dbsession.delete(account)
         request.dbsession.flush()
         message = u"Le compte '{0}' a bien été supprimé".format(
             format_account(account))
         request.session.flash(message)
     except:
-        log.exception(u"Erreur à la suppression du compte")
+        logger.exception(u"Erreur à la suppression du compte")
         err_msg = u"Erreur à la suppression du compte de '{0}'".format(
-                                            format_account(account))
+            format_account(account)
+        )
         request.session.flash(err_msg, 'error')
     return HTTPFound(request.route_path("users"))
 
@@ -979,29 +1064,32 @@ def userdatas_delete(userdatas, request):
     delete a user account and its userdatas
     """
     if userdatas.user is not None:
-        log.debug(u"Suppression des données  et du compte de : {0}".format(
+        logger.debug(u"Suppression des données  et du compte de : {0}".format(
             format_account(userdatas)
         ))
         # Suppression du compte utilisateur (la cascade va entrainer la
         # suppression des données associées)
         user_delete(userdatas.user, request)
         message = u"Les données de '{0}' ont bien été effacées".format(
-                                        format_account(userdatas))
+            format_account(userdatas)
+        )
         request.session.flash(message)
     else:
         try:
-            log.debug(u"Suppression des données de : {0}".format(
+            logger.debug(u"Suppression des données de : {0}".format(
                 format_account(userdatas)
             ))
             request.dbsession.delete(userdatas)
             request.dbsession.flush()
             message = u"Les données de '{0}' ont bien été effacées".format(
-                                            format_account(userdatas))
+                format_account(userdatas)
+            )
             request.session.flash(message)
         except:
-            log.exception(u"Erreur à la suppression des données")
+            logger.exception(u"Erreur à la suppression des données")
             err_msg = u"Erreur à la suppression des données de '{0}'".format(
-                                                format_account(userdatas))
+                format_account(userdatas)
+            )
             request.session.flash(err_msg, 'error')
     return HTTPFound(request.route_path('userdatas'))
 
@@ -1015,18 +1103,21 @@ def user_enable(request):
         try:
             account.enable()
             request.dbsession.merge(account)
-            log.info(u"The user {0} has been enabled".\
-                    format(format_account(account)))
-            message = u"L'utilisateur {0} a été (ré)activé.".\
-                    format(format_account(account))
+            logger.info(u"The user {0} has been enabled".format(
+                format_account(account))
+            )
+            message = u"L'utilisateur {0} a été (ré)activé.".format(
+                format_account(account)
+            )
             request.session.flash(message)
             if len(account.companies) == 1:
                 company = account.companies[0]
                 company_enable(request, company=company)
         except:
-            log.exception(u"Erreur à l'activation du compte")
-            err_msg = u"Erreur à l'activation du compte de '{0}'".\
-                    format(format_account(account))
+            logger.exception(u"Erreur à l'activation du compte")
+            err_msg = u"Erreur à l'activation du compte de '{0}'".format(
+                format_account(account)
+            )
             request.session.flash(err_msg, 'error')
 
     url = request.referer
@@ -1088,8 +1179,8 @@ class UserDisable(BaseFormView):
         if user.enabled():
             user.disable()
             self.dbsession.merge(user)
-            log.info(u"The user {0} has been disabled".format(
-                         format_account(user))
+            logger.info(u"The user {0} has been disabled".format(
+                format_account(user))
             )
             message = u"L'utilisateur {0} a été désactivé.".format(
                 format_account(user)
@@ -1103,7 +1194,7 @@ class UserDisable(BaseFormView):
         for company in self.request.context.companies:
             company.disable()
             self.dbsession.merge(company)
-            log.info(
+            logger.info(
                 u"The company {0} has been disabled".format(company.name)
             )
             message = u"L'entreprise '{0}' a bien été désactivée.".format(
@@ -1174,16 +1265,26 @@ def get_edit_btn(user):
 
 
 def get_enable_btn(user_id):
-    return ViewLink(u"Activer", "manage", path="user", id=user_id,
-                                        _query=dict(action="enable"))
+    return ViewLink(
+        u"Activer",
+        "manage",
+        path="user",
+        id=user_id,
+        _query=dict(action="enable")
+    )
 
 
 def get_disable_btn(user_id):
     """
         Return the button used to disable an account
     """
-    return ViewLink(u"Désactiver", "manage", path="user", id=user_id,
-                                        _query=dict(action="disable"))
+    return ViewLink(
+        u"Désactiver",
+        "manage",
+        path="user",
+        id=user_id,
+        _query=dict(action="disable")
+    )
 
 
 def get_add_contractor_btn():
@@ -1216,8 +1317,14 @@ def get_del_btn(user_id):
     """
     message = u"Êtes-vous sûr de vouloir supprimer ce compte ? \
 Cette action n'est pas réversible."
-    return ViewLink(u"Supprimer", "manage", confirm=message, path="user",
-                                     id=user_id, _query=dict(action="delete"))
+    return ViewLink(
+        u"Supprimer",
+        "manage",
+        confirm=message,
+        path="user",
+        id=user_id,
+        _query=dict(action="delete")
+    )
 
 
 def mydocuments_view(context, request):

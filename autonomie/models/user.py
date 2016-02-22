@@ -1354,8 +1354,10 @@ class UserDatas(Node):
             'import': {
                 "related_key": "date",
                 "formatter": str_to_date
+            },
+            'export': {
+                'flatten': 'date',
             }
-
         }
     )
 
@@ -1402,6 +1404,9 @@ class UserDatas(Node):
                 'related_key': 'date',
                 "formatter": str_to_date
             },
+            'export': {
+                'flatten': 'date',
+            }
         }
     )
 
@@ -1428,6 +1433,9 @@ class UserDatas(Node):
                 'related_key': 'date',
                 "formatter": str_to_date
             },
+            'export': {
+                'flatten': 'date',
+            }
         }
     )
 

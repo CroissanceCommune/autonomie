@@ -45,6 +45,7 @@ from webhelpers import paginate
 
 from sqla_inspect.csv import SqlaCsvExporter
 from sqla_inspect.excel import SqlaXlsExporter
+from sqla_inspect.ods import SqlaOdsExporter
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils import rest
 
@@ -287,9 +288,11 @@ class BaseCsvView(BaseListClass):
             yield item
 
     def _init_writer(self):
+        self.logger.debug(u"# Initializing a writer %s" % self.writer)
+        self.logger.debug(u" + For the model : %s" % self.model)
         writer = self.writer(self.model)
-        if hasattr(self, 'sheet_title'):
-            writer.worksheet.title = self.sheet_title
+        if hasattr(self, 'sheet_title') and hasattr(writer, 'set_title'):
+            writer.set_title(self.sheet_title)
         return writer
 
     def _build_return_value(self, schema, appstruct, query):
@@ -297,15 +300,20 @@ class BaseCsvView(BaseListClass):
         Return the streamed file object
         """
         writer = self._init_writer()
+        self.logger.debug(u" + Streaming rows")
         for item in self._stream_rows(query):
             writer.add_row(item)
-
+        self.logger.debug(u" + Writing the file to the request")
         write_file_to_request(self.request, self.filename, writer.render())
         return self.request.response
 
 
 class BaseXlsView(BaseCsvView):
     writer = SqlaXlsExporter
+
+
+class BaseOdsView(BaseCsvView):
+    writer = SqlaOdsExporter
 
 
 class BaseFormView(FormView):

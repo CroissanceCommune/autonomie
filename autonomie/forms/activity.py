@@ -45,8 +45,11 @@ from autonomie import forms
 from autonomie.forms import lists
 
 
+TEMPLATES_PATH = "autonomie:deform_templates/"
+
+
 def get_activity_types():
-    return ActivityType.query().filter(ActivityType.active==True)
+    return ActivityType.query().filter(ActivityType.active == True)
 
 
 def get_activity_modes():
@@ -55,12 +58,12 @@ def get_activity_modes():
 
 def get_actions():
     query = ActivityAction.query()
-    query = query.filter(ActivityAction.active==True)
-    return query.filter(ActivityAction.parent_id==None)
+    query = query.filter(ActivityAction.active == True)
+    return query.filter(ActivityAction.parent_id == None)
 
 
 def get_subaction_options():
-    options = [("", "Sélectionner une sous-action"),]
+    options = [("", "Sélectionner une sous-action"), ]
     for action in get_actions():
         gr_options = [(unicode(a.id), a.label) for a in action.children]
         group = deform.widget.OptGroup(action.label, *gr_options)
@@ -87,7 +90,7 @@ def deferred_select_mode(node, kw):
 
 @colander.deferred
 def deferred_select_action(node, kw):
-    options = [("", u"Sélectionner une action"),]
+    options = [("", u"Sélectionner une action"), ]
     options.extend([(unicode(a.id), a.label) for a in get_actions()])
     return deform.widget.SelectWidget(values=options)
 
@@ -186,10 +189,10 @@ class NewActivitySchema(CreateActivitySchema):
         to start it directly
     """
     now = colander.SchemaNode(
-            colander.Boolean(),
-            title=u"Démarrer le rendez-vous immédiatement",
-            default=False,
-            )
+        colander.Boolean(),
+        title=u"Démarrer le rendez-vous immédiatement",
+        default=False,
+    )
 
 
 class Attendance(colander.MappingSchema):
@@ -226,39 +229,39 @@ class RecordActivitySchema(colander.Schema):
     attendances = Attendances(
         title=u'Présence',
         widget=deform.widget.SequenceWidget(
-            template='autonomie:deform_templates/fixed_len_sequence.pt',
-            item_template='autonomie:deform_templates/fixed_len_sequence_item.pt')
+            template=TEMPLATES_PATH + 'fixed_len_sequence.pt',
+            item_template=TEMPLATES_PATH + 'fixed_len_sequence_item.pt')
     )
 
     objectifs = forms.textarea_node(
         title=u"Objectifs du rendez-vous",
         richwidget=True,
         missing='',
-        )
+    )
 
     point = forms.textarea_node(
         title=u"Points abordés",
         richwidget=True,
         missing='',
-        )
+    )
 
     action = forms.textarea_node(
         title=u"Plan d'action et préconisations",
         richwidget=True,
         missing='',
-        )
+    )
 
     documents = forms.textarea_node(
         title=u"Documents produits",
         richwidget=True,
         missing='',
-        )
+    )
 
     notes = forms.textarea_node(
         title=u"Notes",
         richwidget=True,
         missing="",
-        )
+    )
 
     duration = colander.SchemaNode(
         colander.Integer(),
@@ -272,6 +275,28 @@ class RecordActivitySchema(colander.Schema):
 
 def get_list_schema(is_admin=False):
     schema = lists.BaseListsSchema().clone()
+
+    schema.insert(
+        0,
+        forms.today_node(
+            name="date_range_end",
+            default=colander.null,
+            missing=colander.drop,
+            description=u"Et le",
+            widget_options={'css_class': 'input-medium search-query'},
+        )
+    )
+
+    schema.insert(
+        0,
+        forms.today_node(
+            name="date_range_start",
+            default=colander.null,
+            missing=colander.drop,
+            description=u"Entre le",
+            widget_options={'css_class': 'input-medium search-query'},
+        )
+    )
 
     schema.insert(0, colander.SchemaNode(
         colander.Integer(),
@@ -293,7 +318,6 @@ def get_list_schema(is_admin=False):
         widget=deform.widget.SelectWidget(values=ATTENDANCE_STATUS_SEARCH),
         validator=colander.OneOf([s[0] for s in ATTENDANCE_STATUS_SEARCH]),
         missing=colander.drop))
-
 
     if is_admin:
         schema.insert(0, user.user_node(

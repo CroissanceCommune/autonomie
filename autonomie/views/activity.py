@@ -557,7 +557,6 @@ class ActivityList(BaseListView):
                 func.date(Activity.datetime) <= date_range_end
             )
 
-
         if year is not None and date_range_start is None and \
                 date_range_end is None:
             query = query.filter(
@@ -615,12 +614,17 @@ class ActivityReportXlsView(ActivityList):
         Returns datas in order to be able to easily use them in a for loop
         """
         participants = {}
+        conseillers = {}
         for activity in query:
             for participant in activity.participants:
                 participants.setdefault(
                     render_api.format_account(participant), []
                 ).append(activity)
-        return participants
+            for conseiller in activity.conseillers:
+                conseillers.setdefault(
+                    render_api.format_account(conseiller), []
+                ).append(activity)
+        return participants, conseillers
 
     def _activity_title(self, activity):
         """
@@ -631,10 +635,25 @@ class ActivityReportXlsView(ActivityList):
     def _sort(self, query, appstruct):
         return query.order_by(asc(Activity.datetime))
 
+    def _init_next_sheet(self, writer):
+        """
+        Initialise une nouvelle feuille dans notre feuille de calcul
+        """
+        sheet = writer.book.create_sheet(title=u"Par conseiller")
+        sheet_writer = excel.XlsExporter(worksheet=sheet)
+        sheet_writer.headers = (
+            {'label': u'Entrepreneur', 'name': 'name'},
+            {'label': u'Date', 'name': 'date'},
+            {'label': u'Titre', 'name': 'title'},
+            {'label': u'Durée', 'name': 'duration'},
+            {'label': u'Participant(s)', 'name': 'participants'},
+        )
+        return sheet_writer
+
     def _build_return_value(self, schema, appstruct, query):
         writer = self._init_writer()
-        datas = self._format_datas_for_export(query)
-        for name, activities in datas.items():
+        participants, conseillers = self._format_datas_for_export(query)
+        for name, activities in participants.items():
             writer.add_row({
                 'name': name,
                 'date': '',
@@ -653,6 +672,31 @@ class ActivityReportXlsView(ActivityList):
                         for conseiller in activity.conseillers])
                 })
 
+        sheet_writer = self._init_next_sheet(writer)
+        for name, activities in conseillers.items():
+            print("Adding a row")
+            sheet_writer.add_row({
+                'name': name,
+                'date': '',
+                'title': '',
+                'duration': '',
+                'participants': ''
+            })
+            for activity in activities:
+                print(u"Adding a row")
+                sheet_writer.add_row({
+                    'name': '',
+                    'date': activity.datetime,
+                    'title': self._activity_title(activity),
+                    'duration': activity.duration,
+                    'participants': ','.join([
+                        render_api.format_account(user)
+                        for user in activity.participants])
+                })
+
+        if hasattr(sheet_writer, '_populate'):
+            sheet_writer._populate()
+
         write_file_to_request(self.request, self.filename, writer.render())
         return self.request.response
 
@@ -663,6 +707,21 @@ class ActivityReportOdsView(ActivityReportXlsView):
     @property
     def filename(self):
         return "activities.ods"
+
+    def _init_next_sheet(self, writer):
+        """
+        Initialise une nouvelle feuille dans notre feuille de calcul
+        """
+        sheet_writer = ods.OdsExporter(title=u"Par conseiller")
+        sheet_writer.headers = (
+            {'label': u'Entrepreneur', 'name': 'name'},
+            {'label': u'Date', 'name': 'date'},
+            {'label': u'Titre', 'name': 'title'},
+            {'label': u'Durée', 'name': 'duration'},
+            {'label': u'Participant(s)', 'name': 'participants'},
+        )
+        writer.add_sheet(sheet_writer)
+        return sheet_writer
 
 
 def activity_view_only_view(context, request):

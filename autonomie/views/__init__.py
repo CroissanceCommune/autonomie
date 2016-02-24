@@ -158,14 +158,18 @@ class BaseListClass(BaseView):
         if self.schema is not None:
             schema = self.schema.bind(**self._get_bind_params())
             try:
-                print(self.request.GET)
-                appstruct = schema.deserialize(self.request.GET)
+                submitted = self.request.GET.items()
+                self.logger.debug(submitted)
+                form = Form(schema)
+                appstruct = form.validate(submitted)
+                self.logger.debug(appstruct)
             except colander.Invalid as e:
                 # If values are not valid, we want the default ones to be
                 # provided see the schema definition
                 self.logger.error("CURRENT SEARCH VALUES ARE NOT VALID")
                 self.logger.error(e)
                 appstruct = schema.deserialize({})
+
         return schema, appstruct
 
     def __call__(self):

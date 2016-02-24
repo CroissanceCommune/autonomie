@@ -295,7 +295,7 @@ class BaseCsvView(BaseListClass):
     def _init_writer(self):
         self.logger.debug(u"# Initializing a writer %s" % self.writer)
         self.logger.debug(u" + For the model : %s" % self.model)
-        writer = self.writer(self.model)
+        writer = self.writer(model=self.model)
         if hasattr(self, 'sheet_title') and hasattr(writer, 'set_title'):
             writer.set_title(self.sheet_title)
         return writer

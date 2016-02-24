@@ -182,7 +182,7 @@ class EstimationAdd(TaskFormView):
             estimation = add_lines_to_estimation(estimation, appstruct)
             self.dbsession.add(estimation)
             self.dbsession.flush()
-            self.session.flash(u"Le devis a bien été ajoutée.")
+            self.session.flash(u"Le devis a bien été ajouté.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
         return HTTPFound(self.request.route_path("project",

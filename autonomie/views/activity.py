@@ -43,9 +43,9 @@ from sqla_inspect import ods
 
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.pdf import (
-        render_html,
-        write_pdf,
-        )
+    render_html,
+    write_pdf,
+)
 from autonomie.views import (
     BaseListView,
     BaseFormView,
@@ -110,10 +110,11 @@ def handle_rel_in_appstruct(appstruct):
 
     :param dict appstruct: The submitted dict
     """
-    for (key, model) in (('participants', user.User),
-                         ('conseillers', user.User),
-                         ('companies', company.Company),
-                        ):
+    for (key, model) in (
+        ('participants', user.User),
+        ('conseillers', user.User),
+        ('companies', company.Company),
+    ):
         ids = set(appstruct.pop(key, []))
         if ids:
             datas = model.query().filter(model.id.in_(ids)).all()
@@ -180,12 +181,12 @@ def _get_next_activity_form_options(request, counter=None):
     submit_url = _next_activity_url(request)
     if counter is None:
         # To be sure we haven't id problems
-        counter=itertools.count(start=100)
+        counter = itertools.count(start=100)
     return dict(
-            counter=counter,
-            formid="next_activity_form",
-            action=submit_url,
-            )
+        counter=counter,
+        formid="next_activity_form",
+        action=submit_url,
+    )
 
 
 def _get_next_activity_form(request, counter):
@@ -193,11 +194,11 @@ def _get_next_activity_form(request, counter):
     Return the form used to configure the next activity
     """
     form = deform.Form(
-            schema=CreateActivitySchema().bind(request=request),
-            use_ajax=True,
-            buttons=(NEW_ACTIVITY_BUTTON,),
-            **_get_next_activity_form_options(request, counter)
-            )
+        schema=CreateActivitySchema().bind(request=request),
+        use_ajax=True,
+        buttons=(NEW_ACTIVITY_BUTTON,),
+        **_get_next_activity_form_options(request, counter)
+    )
     return form
 
 
@@ -215,10 +216,10 @@ def _get_appstruct_from_activity(activity):
     appstruct['companies'] = [c.id for c in companies]
     appstruct['attendances'] = [
         {
-        'event_id': att.event_id,
-        'account_id': att.account_id,
-        'username': render_api.format_account(att.user),
-        'status': att.status,
+            'event_id': att.event_id,
+            'account_id': att.account_id,
+            'username': render_api.format_account(att.user),
+            'status': att.status,
         } for att in activity.attendances]
     return appstruct
 
@@ -228,12 +229,12 @@ def populate_actionmenu(request):
         link = ViewLink(u"Liste des rendez-vous", "manage", path="activities")
         request.actionmenu.add(link)
         link = ViewLink(
-                u"Attacher un fichier",
-                "manage",
-                path="activity",
-                id=request.context.id,
-                _query=dict(action="attach_file")
-                )
+            u"Attacher un fichier",
+            "manage",
+            path="activity",
+            id=request.context.id,
+            _query=dict(action="attach_file")
+        )
         request.actionmenu.add(link)
     else:
         # On doit rediriger l'utilisateur vers la liste des activités de son
@@ -241,11 +242,11 @@ def populate_actionmenu(request):
         # donc le premier id d'entreprise qu'on trouve (c'est pas génial, mais
         # ça a le mérite de marcher)
         link = ViewLink(
-                u"Liste des rendez-vous",
-                "view",
-                path="company_activities",
-                id=request.user.companies[0].id
-                )
+            u"Liste des rendez-vous",
+            "view",
+            path="company_activities",
+            id=request.user.companies[0].id
+        )
         request.actionmenu.add(link)
 
 
@@ -281,10 +282,10 @@ class NewActivityView(BaseFormView):
         activity = new_activity(self.request, appstruct)
 
         activity_url = self.request.route_path(
-                        "activity",
-                        id=activity.id,
-                        _query=dict(action="edit")
-                        )
+            "activity",
+            id=activity.id,
+            _query=dict(action="edit")
+        )
 
         if now or not come_from:
             redirect = activity_url
@@ -314,16 +315,16 @@ class NewActivityAjaxView(BaseFormView):
     def submit_success(self, appstruct):
         activity = new_activity(self.request, appstruct)
         activity_url = self.request.route_path(
-                        "activity",
-                        id=activity.id,
-                        _query=dict(action="edit")
-                        )
+            "activity",
+            id=activity.id,
+            _query=dict(action="edit")
+        )
         form = self._get_form()
         form.set_appstruct(_get_appstruct_from_activity(activity))
         return dict(
-                message=ACTIVITY_SUCCESS_MSG.format(activity_url),
-                form=form.render()
-                )
+            message=ACTIVITY_SUCCESS_MSG.format(activity_url),
+            form=form.render()
+        )
 
 
 class ActivityEditView(BaseFormView):
@@ -333,10 +334,11 @@ class ActivityEditView(BaseFormView):
         recording
         program new activity
     """
-    add_template_vars = ('title',
+    add_template_vars = (
+        'title',
         'next_activity_form',
         'record_form',
-        )
+    )
 
     schema = CreateActivitySchema()
 
@@ -346,8 +348,10 @@ class ActivityEditView(BaseFormView):
         Dynamic page title
         """
         participants = self.request.context.participants
-        participants_list = [render_api.format_account(account)
-            for account in participants]
+        participants_list = [
+            render_api.format_account(account)
+            for account in participants
+        ]
         return u"Accompagnement de {0}".format(", ".join(participants_list))
 
     @property
@@ -475,9 +479,9 @@ class ActivityList(BaseListView):
     title = u"Rendez-vous"
     schema = get_list_schema(is_admin=True)
     sort_columns = dict(
-            datetime=Activity.datetime,
-            conseiller=user.User.lastname,
-            )
+        datetime=Activity.datetime,
+        conseiller=user.User.lastname,
+    )
     default_sort = 'datetime'
     default_direction = 'desc'
 
@@ -498,7 +502,7 @@ class ActivityList(BaseListView):
         conseiller_id = self._get_conseiller_id(appstruct)
         if conseiller_id is not None:
             query = query.filter(
-                Activity.conseillers.any(user.User.id==conseiller_id)
+                Activity.conseillers.any(user.User.id == conseiller_id)
             )
         return query
 
@@ -507,7 +511,9 @@ class ActivityList(BaseListView):
 
         if participant_id is not None:
             query = query.filter(
-                Activity.attendances.any(Attendance.account_id==participant_id)
+                Activity.attendances.any(
+                    Attendance.account_id == participant_id
+                )
                 )
         return query
 
@@ -515,7 +521,7 @@ class ActivityList(BaseListView):
         status = appstruct.get("user_status")
         if status is not None:
             query = query.filter(
-                Activity.attendances.any(Attendance.status==status)
+                Activity.attendances.any(Attendance.status == status)
             )
         return query
 
@@ -565,6 +571,7 @@ class ActivityListContractor(ActivityList):
     Activity list but for contractors
     """
     schema = get_list_schema(is_admin=False)
+
     def _get_conseiller_id(self, appstruct):
         return None
 
@@ -574,7 +581,9 @@ class ActivityListContractor(ActivityList):
         participants_ids = [u.id for u in company.employees]
         log.info(participants_ids)
         query = query.filter(
-            Activity.attendances.any(Attendance.account_id.in_(participants_ids))
+            Activity.attendances.any(
+                Attendance.account_id.in_(participants_ids)
+            )
         )
         return query
 
@@ -662,14 +671,14 @@ def activity_view_only_view(context, request):
     """
     if has_permission('manage', context, request):
         url = request.route_path(
-                'activity',
-                id=context.id,
-                _query=dict(action='edit'),
-                )
+            'activity',
+            id=context.id,
+            _query=dict(action='edit'),
+        )
         return HTTPFound(url)
     title = u"Rendez-vous du %s" % (
-            render_api.format_datetime(request.context.datetime),
-            )
+        render_api.format_datetime(request.context.datetime),
+    )
     populate_actionmenu(request)
     return dict(title=title, activity=request.context)
 
@@ -690,6 +699,8 @@ def activity_pdf_view(context, request):
     """
     Return a pdf output of the current activity
     """
+    from autonomie.resources import pdf_css
+    pdf_css.need()
     date = context.datetime.strftime("%e_%m_%Y")
     filename = u"rdv_{0}_{1}.pdf".format(date, context.id)
 

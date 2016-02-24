@@ -589,6 +589,8 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         """
         The task html view
         """
+        from autonomie.resources import task_html_pdf_css
+        task_html_pdf_css.need()
         # If the task is editable, we go the edit page
         if context_is_editable(request, request.context):
             return HTTPFound(request.route_path(request.context.__name__,
@@ -624,6 +626,8 @@ def task_pdf_view(request):
     """
         Returns a pdf rendering of the current task
     """
+    from autonomie.resources import pdf_css
+    pdf_css.need()
     filename = u"{0}.pdf".format(request.context.number)
 
     html_string = html(request)

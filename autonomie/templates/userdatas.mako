@@ -38,20 +38,48 @@
         </a>
         </li>
     % endif
-    <li> ${form|n} </li>
-    <li class='pull-right'>
-    <%
-args = request.GET
-url = request.route_path('userdatas.xls', _query=args)
-%>
-<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='fa fa-file-excel-o'></i>&nbsp;Excel</a>
-    <%
-args = request.GET
-url = request.route_path('userdatas.csv', _query=args)
-%>
-<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste au format csv"><i class='fa fa-file'></i>&nbsp;CSV</a>
-    </li>
 </ul>
+<div class='row'>
+    <div class='col-md-8'>
+        <div class='row'>
+            ${form|n}
+        </div>
+    </div>
+    <div class='col-md-4'>
+        <div class='well well-sm pull-right btn-group' role='group'>
+            <%
+        args = request.GET
+        url = request.route_path('userdatas.xls', _query=args)
+        %>
+        <a
+            class='btn btn-default'
+            href='${url}'
+            title="Exporter les éléments de la liste au format xls">
+            <i class='fa fa-file-excel-o'></i>&nbsp;Excel
+        </a>
+            <%
+        args = request.GET
+        url = request.route_path('userdatas.ods', _query=args)
+        %>
+        <a
+            class='btn btn-default'
+            href='${url}'
+            title="Exporter les éléments de la liste au format ods">
+            <i class='fa fa-file'></i>&nbsp;ODS
+        </a>
+            <%
+        args = request.GET
+        url = request.route_path('userdatas.csv', _query=args)
+        %>
+        <a
+            class='btn btn-default'
+            href='${url}'
+            title="Exporter les éléments de la liste au format csv">
+            <i class='fa fa-file'></i>&nbsp;CSV
+        </a>
+        </div>
+    </div>
+</div>
 </%block>
 <%block name="content">
 <table class="table table-condensed table-hover">

@@ -37,7 +37,7 @@
 args = request.GET
 url = request.route_path('customers.csv', id=request.context.id, _query=args)
 %>
-<a class='btn btn-default pull-right' href='${url}' ><i class='glyphicon glyphicon-file'></i>Export</a>
+<a class='btn btn-default pull-right' href='${url}' title="Export au formt csv"><i class='fa fa-file'></i>CSV</a>
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>

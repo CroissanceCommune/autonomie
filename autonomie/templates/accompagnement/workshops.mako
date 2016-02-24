@@ -33,20 +33,43 @@
         </a>
     %endif
     </li>
-    <li>
-    ${form|n}
-    </li>
-    <li class='pull-right'>
-    <%
-## We build the link with the current search arguments
-args = request.GET
-url = request.route_path('workshops.xls', _query=args)
-%>
-<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='glyphicon glyphicon-file'></i>Excel</a>
-<% url = request.route_path('workshops.csv', _query=args) %>
-<a class='btn btn-default pull-right' href='${url}' title="Exporter les éléments de la liste"><i class='glyphicon glyphicon-file'></i>Csv</a>
-    </li>
 </ul>
+<div class="row">
+    <div class="col-md-8">
+        <div class="row">
+            ${form|n}
+        </div>
+    </div>
+    <div class='col-md-4'>
+        <div class='well well-sm pull-right btn-group'>
+        <%
+            ## We build the link with the current search arguments
+            args = request.GET
+            url = request.route_path('workshops.xls', _query=args)
+            %>
+            <a
+                class='btn btn-default'
+                href='${url}'
+                title="Exporter les éléments de la liste">
+                <i class='fa fa-file-excel-o'></i>&nbsp;Excel
+            </a>
+            <% url = request.route_path('workshops.ods', _query=args) %>
+            <a
+                class='btn btn-default'
+                href='${url}'
+                title="Exporter les éléments de la liste">
+                <i class='fa fa-file'></i>&nbsp;ODS
+            </a>
+            <% url = request.route_path('workshops.csv', _query=args) %>
+            <a
+                class='btn btn-default'
+                href='${url}'
+                title="Exporter les éléments de la liste">
+                <i class='fa fa-file'></i>&nbsp;CSV
+            </a>
+        </div>
+    </div>
+</div>
 </%block>
 <%block name="content">
 <% is_admin_view = request.context .__name__ != 'company' %>

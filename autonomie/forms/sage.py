@@ -104,7 +104,7 @@ class ExpenseIdSchema(colander.MappingSchema):
             colander.Integer(),
             missing=0,
             title=u"Identifiant",
-            description=u"Identifiant de la feuille de notes de frais \
+            description=u"Identifiant de la feuille de notes de dépense \
 (voir sur la page associée)")
     exported = EXPORTEDFIELD
 

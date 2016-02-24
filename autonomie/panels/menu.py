@@ -327,7 +327,7 @@ def get_usermenu(request):
     menu.add_item(u"Mes congés", icon="fa fa-space-shuttle", href=href)
 
     # C'est un entrepreneur
-    if request.user.userdatas is not None:
+    if request.user.has_userdatas():
         href = request.route_path('mydocuments')
         menu.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
 
@@ -343,6 +343,7 @@ def menu_panel(context, request):
     """
         Top menu panel
     """
+    log.debug(u"Entering the menu panel")
     # If we've no user in the current request, we don't return anything
     if not getattr(request, 'user'):
         return {}
@@ -352,8 +353,11 @@ def menu_panel(context, request):
         return {}
 
     cid = get_cid(request)
+    log.debug(u"Got the cid")
+    log.debug(u"Check the user's status")
     if request.user.is_admin() or request.user.is_manager():
         menu = get_admin_menus(request)
+        log.debug(u"Add admin menu")
     elif cid:
         menu = get_company_menu(request, cid)
         companies = get_companies(request)
@@ -366,6 +370,7 @@ def menu_panel(context, request):
 
     href = request.route_path("users")
     menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
+    log.debug(u"Retrive the usermenu")
     ret_dict = {'menu': menu, "usermenu": get_usermenu(request)}
     return ret_dict
 

@@ -48,6 +48,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import (
     relationship,
     backref,
+    deferred,
 )
 from sqlalchemy.event import listen
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -201,11 +202,14 @@ class User(DBBASE, PersistentACLMixin):
         info={'colanderalchemy': EXCLUDED},
     )
 
-    login = Column(
-        String(64, collation="utf8_bin"),
-        unique=True,
-        nullable=False,
-        info={'colanderalchemy': {'title': u'Identifiant'}}
+    login = deferred(
+        Column(
+            String(64, collation="utf8_bin"),
+            unique=True,
+            nullable=False,
+            info={'colanderalchemy': {'title': u'Identifiant'}}
+        ),
+        group='edit',
     )
 
     lastname = Column(
@@ -220,42 +224,54 @@ class User(DBBASE, PersistentACLMixin):
         nullable=False,
     )
 
-    primary_group = Column(
-        Integer,
-        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
-        default=3,
+    primary_group = deferred(
+        Column(
+            Integer,
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+            default=3,
+        ),
+        group='edit',
     )
 
-    active = Column(
-        String(1),
-        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
-        default='Y'
+    active = deferred(
+        Column(
+            String(1),
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+            default='Y'
+        ),
+        group='edit',
     )
 
-    email = Column(
-        String(100),
-        info={
-            'colanderalchemy': {
-                'title': u"Adresse e-mail",
-                'section': u'Coordonnées',
-                'validator': mail_validator(),
-            }
-        },
-        nullable=False,
-    )
-
-    pwd = Column(
-        "password",
-        String(100),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Mot de passe',
-                'widget': deform.widget.CheckedPasswordWidget(),
+    email = deferred(
+        Column(
+            String(100),
+            info={
+                'colanderalchemy': {
+                    'title': u"Adresse e-mail",
+                    'section': u'Coordonnées',
+                    'validator': mail_validator(),
+                }
             },
-            'export': EXCLUDED,
-        },
-        nullable=False,
+            nullable=False,
+        ),
+        group='edit',
+    )
+
+    pwd = deferred(
+        Column(
+            "password",
+            String(100),
+            info={
+                'colanderalchemy':
+                {
+                    'title': u'Mot de passe',
+                    'widget': deform.widget.CheckedPasswordWidget(),
+                },
+                'export': EXCLUDED,
+            },
+            nullable=False,
+        ),
+        group='edit',
     )
 
     companies = relationship(
@@ -282,21 +298,27 @@ class User(DBBASE, PersistentACLMixin):
         creator=Group._find_one
     )
 
-    compte_tiers = Column(
-        String(30),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Compte tiers pour note de dépense',
-            }
-        },
-        default="",
+    compte_tiers = deferred(
+        Column(
+            String(30),
+            info={
+                'colanderalchemy':
+                {
+                    'title': u'Compte tiers pour note de dépense',
+                }
+            },
+            default="",
+        ),
+        group="edit",
     )
 
-    session_datas = Column(
-        JsonEncodedDict,
-        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
-        default=None,
+    session_datas = deferred(
+        Column(
+            JsonEncodedDict,
+            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+            default=None,
+        ),
+        group="edit"
     )
 
     @staticmethod
@@ -351,6 +373,15 @@ class User(DBBASE, PersistentACLMixin):
             return True if the user is a contractor
         """
         return self.primary_group == CONTRACTOR_PRIMARY_GROUP
+
+    def has_userdatas(self):
+        """
+        Return True if the current object has userdatas associated to it
+        """
+        query = DBSESSION().query(UserDatas.id)
+        query = query.filter(UserDatas.user_id == self.id)
+        count = query.count()
+        return count > 1
 
     @classmethod
     def query(cls, ordered=True, only_active=True):

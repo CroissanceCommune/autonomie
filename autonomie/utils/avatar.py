@@ -28,6 +28,8 @@
 import logging
 from pyramid.security import unauthenticated_userid
 
+from sqlalchemy.orm import undefer_group
+
 from autonomie.models.user import User
 
 log = logging.getLogger(__name__)
@@ -56,5 +58,7 @@ def get_avatar(request):
     login = unauthenticated_userid(request)
     if login is not None:
         log.info("  + Returning the user")
-        user = request.dbsession.query(User).filter_by(login=login).first()
+        query = request.dbsession.query(User).options(undefer_group('edit'))
+        user = query.filter_by(login=login).first()
+
         return user

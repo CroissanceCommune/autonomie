@@ -70,7 +70,6 @@ AUTONOMIE_MODULES = (
     "autonomie.views.sage",
     "autonomie.views.static",
     "autonomie.views.statistics",
-    "autonomie.views.subscribers",
     "autonomie.views.taskaction",
     "autonomie.views.tests",
     "autonomie.views.treasury_files",
@@ -88,6 +87,10 @@ AUTONOMIE_PANELS_MODULES = (
 AUTONOMIE_EVENT_MODULES = (
     "autonomie.events.tasks",
     "autonomie.events.expense",
+)
+AUTONOMIE_REQUEST_SUBSCRIBERS = (
+    "autonomie.subscribers.new_request",
+    "autonomie.subscribers.before_render",
 )
 
 AUTONOMIE_ADMIN_MODULES = (
@@ -164,6 +167,9 @@ def base_configure(config, dbsession, **settings):
     config.set_request_property(lambda _: get_config(), 'config')
 
     add_static_views(config, settings)
+
+    for module in AUTONOMIE_REQUEST_SUBSCRIBERS:
+        config.include(module)
 
     for module in AUTONOMIE_MODULES:
         config.include(module)

@@ -313,7 +313,7 @@ class WorkshopListTools(object):
     """
     Tools for listing workshops
     """
-    title = u"Ateliers"
+    title = u"Liste des ateliers"
     schema = get_list_schema()
     sort_columns = dict(datetime=models.Workshop.datetime)
     default_sort = 'datetime'
@@ -400,6 +400,9 @@ class WorkshopOdsWriter(OdsExporter):
 
 
 def stream_workshop_entries_for_export(query):
+    """
+    Stream workshop datas for csv export
+    """
     for workshop in query.all():
 
         hours = sum(t.duration[0] for t in workshop.timeslots)

@@ -160,10 +160,10 @@ aux encaissements"
     )
     menus.append(
         dict(
-            label=u"Configuration comptable des notes de frais/dépenses",
+            label=u"Configuration comptable des notes de dépense",
             path="admin_expense",
-            title=u"Configuration des types de frais/dépenses et des \
-différents comptes analytiques liés au module notes de frais/dépenses"
+            title=u"Configuration des types de dépense et des \
+différents comptes analytiques liés au module notes de dépense"
         )
     )
     menus.append(
@@ -430,8 +430,8 @@ class AdminExpense(BaseAdminFormView):
         Expense administration view
         Allows to configure expense types and codes
     """
-    title = u"Configuration des notes de frais"
-    validation_msg = u"Les différents paramètres des notes de frais \
+    title = u"Configuration des notes de dépense"
+    validation_msg = u"Les différents paramètres des notes de dépense \
 ont été configurés"
     schema = ExpenseTypesConfig()
     buttons = (submit_btn,)

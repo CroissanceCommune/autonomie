@@ -77,7 +77,7 @@ c1 = aliased(Customer)
 c2 = aliased(Customer)
 
 
-#Here we do some multiple function stuff to allow caching to work
+# Here we do some multiple function stuff to allow caching to work
 # Beaker caching is done through signature (dbsession is changing each time, so
 # it won't cache if it's an argument of the cached function
 def get_taskdates(dbsession):
@@ -121,7 +121,7 @@ class GlobalInvoicesList(BaseListView):
     """
         Used as base for company invoices listing
     """
-    title = u""
+    title = u"Liste des factures de la CAE"
     add_template_vars = (u'title', u'pdf_export_btn', 'is_admin',)
     schema = get_list_schema(is_admin=True)
     sort_columns = dict(
@@ -160,7 +160,7 @@ class GlobalInvoicesList(BaseListView):
 
         if self.request.context == 'company':
             company_id = self.request.context.id
-            query = query.filter(Project.company_id==company_id)
+            query = query.filter(Project.company_id == company_id)
         return query
 
     def _get_company_id(self, appstruct):
@@ -169,7 +169,7 @@ class GlobalInvoicesList(BaseListView):
     def filter_company(self, query, appstruct):
         company_id = self._get_company_id(appstruct)
         if company_id is not None:
-            query = query.filter(Project.company_id==company_id)
+            query = query.filter(Project.company_id == company_id)
         return query
 
     def filter_official_number(self, query, appstruct):
@@ -191,7 +191,7 @@ class GlobalInvoicesList(BaseListView):
     def filter_customer(self, query, appstruct):
         customer_id = appstruct['customer_id']
         if customer_id != -1:
-            query = query.filter(Task.customer_id==customer_id)
+            query = query.filter(Task.customer_id == customer_id)
         return query
 
     def filter_taskDate(self, query, appstruct):
@@ -221,11 +221,11 @@ class GlobalInvoicesList(BaseListView):
             or_(
                 and_(
                     Task.CAEStatus.in_(inv_paid),
-                    Task.type_=='invoice'
+                    Task.type_ == 'invoice'
                 ),
                 and_(
                     Task.CAEStatus.in_(cinv_valid),
-                    Task.type_=='cancelinvoice',
+                    Task.type_ == 'cancelinvoice',
                 ),
             )
         )
@@ -235,7 +235,7 @@ class GlobalInvoicesList(BaseListView):
         return query.filter(
             Task.CAEStatus.in_(inv_notpaid)
         ).filter(
-            Task.type_=='invoice'
+            Task.type_ == 'invoice'
         )
 
     def _filter_valid(self, query):
@@ -245,15 +245,14 @@ class GlobalInvoicesList(BaseListView):
             or_(
                 and_(
                     Task.CAEStatus.in_(inv_validated),
-                    Task.type_=='invoice'
+                    Task.type_ == 'invoice'
                 ),
                 and_(
                     Task.CAEStatus.in_(cinv_valid),
-                    Task.type_=='cancelinvoice'
+                    Task.type_ == 'cancelinvoice'
                 ),
             )
         )
-
 
 
 class CompanyInvoicesList(GlobalInvoicesList):
@@ -273,9 +272,9 @@ def get_invoice_pdf_export_form(request):
     """
     schema = pdfexportSchema.bind(request=request)
     action = request.route_path(
-                "invoices",
-                _query=dict(action="export_pdf"),
-                )
+        "invoices",
+        _query=dict(action="export_pdf"),
+    )
     query_form = Form(schema, buttons=(submit_btn,), action=action)
     return query_form
 
@@ -330,9 +329,11 @@ def invoices_pdf_view(request):
             # Getting the html output
             html_string = html(request, documents, bulk=True)
 
-            filename = u"factures_{0}_{1}_{2}.pdf".format(year,
-                        start_number,
-                        end_number)
+            filename = u"factures_{0}_{1}_{2}.pdf".format(
+                year,
+                start_number,
+                end_number,
+            )
 
             try:
                 # Placing the pdf datas in the request
@@ -347,37 +348,46 @@ votre administrateur si le problème persiste.", queue="error")
         else:
             # There were no documents to export, we send a message to the end
             # user
-            request.session.flash(u"Aucune facture n'a pu être retrouvée",
-                    queue="error")
+            request.session.flash(
+                u"Aucune facture n'a pu être retrouvée",
+                queue="error"
+            )
     gotolist_btn = ViewLink(u"Liste des factures", "edit", path="invoices")
     request.actionmenu.add(gotolist_btn)
     return dict(
-                title=u"Export massif de factures au format PDF",
-                form=query_form.render(),
-                )
+        title=u"Export massif de factures au format PDF",
+        form=query_form.render(),
+    )
 
 
 def includeme(config):
     # Company invoices view
-    config.add_route('company_invoices',
-                     '/company/{id:\d+}/invoices',
-                     traverse='/companies/{id}')
+    config.add_route(
+        'company_invoices',
+        '/company/{id:\d+}/invoices',
+        traverse='/companies/{id}',
+    )
     # Global invoices view
-    config.add_route("invoices",
-                    "/invoices")
+    config.add_route("invoices", "/invoices")
 
-    config.add_view(CompanyInvoicesList,
-                    route_name='company_invoices',
-                    renderer='invoices.mako',
-                    permission='edit')
-    config.add_view(GlobalInvoicesList,
-                    route_name="invoices",
-                    renderer="invoices.mako",
-                    permission="manage")
     config.add_view(
-            invoices_pdf_view,
-            route_name="invoices",
-            request_param='action=export_pdf',
-            renderer="/base/formpage.mako",
-            permission="manage",
-            )
+        CompanyInvoicesList,
+        route_name='company_invoices',
+        renderer='invoices.mako',
+        permission='edit'
+    )
+
+    config.add_view(
+        GlobalInvoicesList,
+        route_name="invoices",
+        renderer="invoices.mako",
+        permission="manage"
+    )
+
+    config.add_view(
+        invoices_pdf_view,
+        route_name="invoices",
+        request_param='action=export_pdf',
+        renderer="/base/formpage.mako",
+        permission="manage",
+    )

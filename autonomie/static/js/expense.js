@@ -822,7 +822,7 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
         date: AppOptions['today']
         });
       var expensetel_form = new ExpenseTelFormView({
-        title:'Ajouter des frais téléphoniques',
+        title:'Ajouter des dépenses téléphoniques',
         destCollection:Expense.expense.lines,
         model: model
       });
@@ -878,7 +878,7 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
   });
 
   var updateTotal = function(){
-      var text = "Total des frais professionnels à payer : ";
+      var text = "Total des dépenses professionnelles à payer : ";
       var total = Expense.expense.lines.total() +  Expense.expense.kmlines.total();
       text += formatAmount(total);
       $('#total').html(text);

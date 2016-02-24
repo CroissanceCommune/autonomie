@@ -54,11 +54,11 @@ templates['expenseForm.mustache'] = template({"1":function(depth0,helpers,partia
   var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, escapeExpression=this.escapeExpression, buffer = "<form id='expenseForm' class='form ' action='#' onsubmit='return false;'>\n\n";
   stack1 = helpers.unless.call(depth0, (depth0 != null ? depth0.id : depth0), {"name":"unless","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
-  buffer += "\n<div class=\"form-group\">\n<label  for='category'>Catégorie de frais</label>\n";
+  buffer += "\n<div class=\"form-group\">\n<label  for='category'>Catégorie de dépense</label>\n";
   stack1 = ((helper = (helper = helpers.category_options || (depth0 != null ? depth0.category_options : depth0)) != null ? helper : helperMissing),(options={"name":"category_options","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.category_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "</div>\n\n\n<div class=\"form-group\">\n<label  for='type_id'>Type de frais</label>\n<div class='controls'>\n<select class=form-control' name='type_id'>\n";
+  buffer += "</div>\n\n\n<div class=\"form-group\">\n<label  for='type_id'>Type de dépense</label>\n<div class='controls'>\n<select class=form-control' name='type_id'>\n";
   stack1 = ((helper = (helper = helpers.type_options || (depth0 != null ? depth0.type_options : depth0)) != null ? helper : helperMissing),(options={"name":"type_options","hash":{},"fn":this.program(8, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.type_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -93,7 +93,7 @@ templates['expenseKmForm.mustache'] = template({"1":function(depth0,helpers,part
     + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))
     + "\n</label>\n</div>\n";
 },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, escapeExpression=this.escapeExpression, buffer = "<form id='expenseKmForm' class='form' action='#' onsubmit='return false;'>\n\n<div class=\"form-group\">\n<label for='category'>Catégorie de frais</label>\n";
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, escapeExpression=this.escapeExpression, buffer = "<form id='expenseKmForm' class='form' action='#' onsubmit='return false;'>\n\n<div class=\"form-group\">\n<label for='category'>Catégorie de dépense</label>\n";
   stack1 = ((helper = (helper = helpers.category_options || (depth0 != null ? depth0.category_options : depth0)) != null ? helper : helperMissing),(options={"name":"category_options","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.category_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -109,7 +109,7 @@ templates['expenseKmForm.mustache'] = template({"1":function(depth0,helpers,part
     + escapeExpression(((helper = (helper = helpers.km || (depth0 != null ? depth0.km : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"km","hash":{},"data":data}) : helper)))
     + "' /><span class=\"input-group-addon\">Km</span>\n</div>\n</div>\n\n<div class='form-group'>\n<label  for='description'>Description</label>\n<input type='text' class='form-control' name='description' value='"
     + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
-    + "' />\n<span class=\"help-block\"> Le cas échéant, indiquer la prestation liée à ces frais</span>\n</div>\n\n<div class=\"form-actions\">\n<button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n<button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n</div>\n</form>\n";
+    + "' />\n<span class=\"help-block\"> Le cas échéant, indiquer la prestation liée à ces dépenses</span>\n</div>\n\n<div class=\"form-actions\">\n<button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n<button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n</div>\n</form>\n";
 },"useData":true});
 templates['expenseKmList.mustache'] = template({"1":function(depth0,helpers,partials,data) {
   return "            <div>\n                <a href=\"#kmlines/add/1\" class='btn btn-info visible-desktop hidden-tablet' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
@@ -174,7 +174,7 @@ templates['expenseKm.mustache'] = template({"1":function(depth0,helpers,partials
   return buffer;
 },"useData":true});
 templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partials,data) {
-  return "            <div>\n            <a href=\"#lines/add/1\" class='btn btn-info' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            <a href=\"#tel/add\" class='btn btn-info' title=\"Ajouter une lignei de frais téléphonique\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des frais téléphoniques</a>\n            </div>\n";
+  return "            <div>\n            <a href=\"#lines/add/1\" class='btn btn-info' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            <a href=\"#tel/add\" class='btn btn-info' title=\"Ajouter une ligne de dépense téléphonique\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des dépenses téléphoniques</a>\n            </div>\n";
   },"3":function(depth0,helpers,partials,data) {
   return "            <th class=\"hidden-print\">Actions</th>\n";
   },"5":function(depth0,helpers,partials,data) {
@@ -186,7 +186,7 @@ templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partia
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </div>\n    </div>\n    <table class=\"opa table table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type de frais</th>\n            <th>Description</th>\n            <th>Montant HT</th>\n            <th>Tva</th>\n            <th>Total</th>\n";
+  buffer += "        </div>\n    </div>\n    <table class=\"opa table table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type de dépense</th>\n            <th>Description</th>\n            <th>Montant HT</th>\n            <th>Tva</th>\n            <th>Total</th>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -198,7 +198,7 @@ templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partia
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </div>\n    </div>\n    <table class=\"opa table table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type de frais</th>\n            <th>Description</th>\n            <th>Montant HT</th>\n            <th>Tva</th>\n            <th>Total</th>\n";
+  buffer += "        </div>\n    </div>\n    <table class=\"opa table table-bordered table-condensed\">\n        <thead>\n            <th>Date</th>\n            <th>Type de dépense</th>\n            <th>Description</th>\n            <th>Montant HT</th>\n            <th>Tva</th>\n            <th>Total</th>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -264,7 +264,7 @@ templates['expenseTelForm.mustache'] = template({"1":function(depth0,helpers,par
 },"2":function(depth0,helpers,partials,data) {
   return "selected='true'";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, escapeExpression=this.escapeExpression, buffer = "<form id='expenseTelForm' class='form ' action='#' onsubmit='return false;'>\n\n<div class=\"form-group\">\n<label class=\"control-label\" for='type_id'>Type de frais</label>\n<div class='controls'>\n<select class='input-xlarge' name='type_id'>\n";
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, escapeExpression=this.escapeExpression, buffer = "<form id='expenseTelForm' class='form ' action='#' onsubmit='return false;'>\n\n<div class=\"form-group\">\n<label class=\"control-label\" for='type_id'>Type de dépense</label>\n<div class='controls'>\n<select class='input-xlarge' name='type_id'>\n";
   stack1 = ((helper = (helper = helpers.type_options || (depth0 != null ? depth0.type_options : depth0)) != null ? helper : helperMissing),(options={"name":"type_options","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.type_options) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }

@@ -207,15 +207,15 @@ def expense_options(request):
 
     options['categories'] = [
         {
-            'value':'1',
+            'value': '1',
             "label": u"Frais",
-            'description':u"Frais liés au fonctionnement de l'entreprise"
+            'description': u"Frais liés au fonctionnement de l'entreprise"
         },
         {
-            'value':'2',
+            'value': '2',
             "label": u"Achats",
-            'description':u"Frais concernant directement votre activité auprès \
-de vos clients"
+            'description': u"Frais concernant directement votre activité \
+auprès de vos clients"
         }]
 
     options['bookmarks'] = get_bookmarks(request)
@@ -287,10 +287,10 @@ def _get_expense_sheet(year, month, cid, uid):
         Return the expense sheet for the given 4-uple
     """
     return ExpenseSheet.query()\
-                .filter(ExpenseSheet.year==year)\
-                .filter(ExpenseSheet.month==month)\
-                .filter(ExpenseSheet.company_id==cid)\
-                .filter(ExpenseSheet.user_id==uid).first()
+        .filter(ExpenseSheet.year == year)\
+        .filter(ExpenseSheet.month == month)\
+        .filter(ExpenseSheet.company_id == cid)\
+        .filter(ExpenseSheet.user_id == uid).first()
 
 
 def get_new_expense_sheet(year, month, cid, uid):
@@ -304,11 +304,15 @@ def get_new_expense_sheet(year, month, cid, uid):
     expense.company_id = cid
     expense.user_id = uid
     query = ExpenseTelType.query()
-    query = query.filter(ExpenseTelType.active==True)
-    teltypes = query.filter(ExpenseTelType.initialize==True)
+    query = query.filter(ExpenseTelType.active == True)
+    teltypes = query.filter(ExpenseTelType.initialize == True)
     for type_ in teltypes:
-        line = ExpenseLine(type_id=type_.id, ht=0, tva=0,
-                description=type_.label)
+        line = ExpenseLine(
+            type_id=type_.id,
+            ht=0,
+            tva=0,
+            description=type_.label
+        )
         expense.lines.append(line)
     return expense
 
@@ -351,12 +355,14 @@ def company_expenses_view(request):
     """
         View that lists the expenseSheets related to the current company
     """
-    title = u"Accès aux notes de frais des employés de {0}"\
+    title = u"Accès aux notes de dépense des employés de {0}"\
             .format(request.context.name)
     if not expense_configured():
-        return dict(title=title,
-            conf_msg=u"La déclaration des notes de frais n'est pas encore \
-accessible.")
+        return dict(
+            title=title,
+            conf_msg=u"La déclaration des notes de dépense n'est pas encore \
+accessible."
+        )
 
     expense_sheets = get_expensesheet_by_year(request.context)
     user_buttons = {}
@@ -369,10 +375,12 @@ accessible.")
         popup = PopUp("user_expense_{0}".format(uid), u"Créer", form.render())
         request.popups[popup.name] = popup
         user_buttons[user.id] = popup.open_btn(css="btn btn-default")
-    return dict(title=title,
-            expense_sheets=expense_sheets,
-            user_buttons=user_buttons,
-            current_year=datetime.date.today().year)
+    return dict(
+        title=title,
+        expense_sheets=expense_sheets,
+        user_buttons=user_buttons,
+        current_year=datetime.date.today().year
+    )
 
 
 def get_expense_sheet(request, year, month, cid, uid):
@@ -452,10 +460,12 @@ class ExpenseSheetView(BaseFormView):
         """
             Return the title of the page
         """
-        return u"Notes de frais de {0} pour la période de {1} {2}"\
-                .format(format_account(self.request.context.user),
-                        month_name(self.month),
-                        self.year)
+        return u"Notes de dépense de {0} pour la période de {1} {2}"\
+            .format(
+                format_account(self.request.context.user),
+                month_name(self.month),
+                self.year,
+            )
 
     @property
     def buttons(self):
@@ -477,10 +487,13 @@ class ExpenseSheetView(BaseFormView):
         """
             Return a reset button
         """
-        return Submit(u"Réinitialiser", "reset", name="reset",
-                        request=self.request,
-                        confirm=u"Êtes-vous sûr de vouloir réinitialiser \
-cette feuille de notes de frais (toutes les modifications apportées seront \
+        return Submit(
+            u"Réinitialiser",
+            "reset",
+            name="reset",
+            request=self.request,
+            confirm=u"Êtes-vous sûr de vouloir réinitialiser \
+cette feuille de notes de dépense (toutes les modifications apportées seront \
 perdues) ?")
 
     def _wait_btn(self):
@@ -519,8 +532,10 @@ perdues) ?")
         """
             Returns a json representation of the current expense sheet
         """
-        return self.request.route_path("expensejson",
-                id=self.request.context.id)
+        return self.request.route_path(
+            "expensejson",
+            id=self.request.context.id,
+        )
 
     def before(self, form):
         """
@@ -530,8 +545,12 @@ perdues) ?")
         # Here we override the form counter to avoid field ids conflict
         form.counter = self.period_form.counter
         form.set_appstruct(self.request.context.appstruct())
-        btn = ViewLink(u"Revenir à la liste", "view", path="company_expenses",
-                id=self.request.context.company.id)
+        btn = ViewLink(
+            u"Revenir à la liste",
+            "view",
+            path="company_expenses",
+            id=self.request.context.company.id
+        )
         self.request.actionmenu.add(btn)
         btn = get_add_file_link(
             self.request,
@@ -549,7 +568,7 @@ perdues) ?")
 
         # Comment is now stored in a specific table
         comment = None
-        if appstruct.has_key("comment"):
+        if "comment" in appstruct:
             comment = appstruct.pop('comment')
 
         # here we merge all our parameters with the current expensesheet
@@ -567,7 +586,6 @@ perdues) ?")
                 ))
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
-
 
         return HTTPFound(
             self.request.route_url(
@@ -588,7 +606,6 @@ perdues) ?")
                                     expense_sheet_id=self.request.context.id)
             self.dbsession.add(comment)
 
-
     def set_expense_status(self, expense):
         """
             Handle expense submission
@@ -605,15 +622,19 @@ perdues) ?")
         log.debug(u"Resetting the expense")
         if self.request.context.status == 'draft':
             self.dbsession.delete(self.request.context)
-            self.session.flash(u"Votre feuille de notes de frais de {0} {1} a \
+            self.session.flash(u"Votre feuille de notes de dépense de {0} {1} a \
 bien été réinitialisée".format(month_name(self.month), self.year))
         else:
             self.session.flash(u"Vous n'êtes pas autorisé à réinitialiser \
-cette feuille de notes de frais")
+cette feuille de notes de dépense")
         cid = self.request.context.company_id
         uid = self.request.context.user_id
-        url = self.request.route_url("user_expenses", id=cid, uid=uid,
-                _query=dict(year=self.year, month=self.month))
+        url = self.request.route_url(
+            "user_expenses",
+            id=cid,
+            uid=uid,
+            _query=dict(year=self.year, month=self.month)
+        )
         return HTTPFound(url)
 
 
@@ -725,7 +746,6 @@ class RestExpenseKmLine(RestExpenseLine):
     model_wrapper = ExpenseKmLineJson
 
 
-
 class Expensev1(BaseView):
     """
         Rest api for expense line add
@@ -835,7 +855,7 @@ class Expensev1(BaseView):
     def delete(self):
         line = self.getOne()
         self.request.dbsession.delete(line)
-        return Apiv1Resp({'message':u"Successfully deleted"})
+        return Apiv1Resp({'message': u"Successfully deleted"})
 
 
 def expense_optionsv1(request):
@@ -851,8 +871,12 @@ def excel_filename(request):
         return an excel filename based on the request context
     """
     exp = request.context
-    return u"ndf_{0}_{1}_{2}_{3}.xlsx".format(exp.year, exp.month,
-            exp.user.lastname, exp.user.firstname)
+    return u"ndf_{0}_{1}_{2}_{3}.xlsx".format(
+        exp.year,
+        exp.month,
+        exp.user.lastname,
+        exp.user.firstname,
+    )
 
 
 class RestBookMarks(BaseView):
@@ -917,7 +941,7 @@ class RestBookMarks(BaseView):
 
 
 class ExpenseList(BaseListView):
-    title = u"Notes de frais"
+    title = u"Liste des notes de dépense de la CAE"
     schema = get_list_schema()
     sort_columns = dict(month=ExpenseSheet.month)
     default_sort = 'month'
@@ -929,31 +953,31 @@ class ExpenseList(BaseListView):
     def filter_search(self, query, appstruct):
         search = appstruct['search']
         if search:
-            query = query.filter(ExpenseSheet.id==search)
+            query = query.filter(ExpenseSheet.id == search)
         return query
 
     def filter_year(self, query, appstruct):
         year = appstruct['year']
         if year and year != -1:
-            query = query.filter(ExpenseSheet.year==year)
+            query = query.filter(ExpenseSheet.year == year)
         return query
 
     def filter_month(self, query, appstruct):
         month = appstruct['month']
         if month and month != -1:
-            query = query.filter(ExpenseSheet.month==month)
+            query = query.filter(ExpenseSheet.month == month)
         return query
 
     def filter_owner(self, query, appstruct):
         user_id = appstruct['owner_id']
         if user_id and user_id != -1:
-            query = query.filter(ExpenseSheet.user_id==user_id)
+            query = query.filter(ExpenseSheet.user_id == user_id)
         return query
 
     def filter_status(self, query, appstruct):
         status = appstruct['status']
         if status != 'all':
-            query = query.filter(ExpenseSheet.status==status)
+            query = query.filter(ExpenseSheet.status == status)
         else:
             interesting_status = [i[0] for i in STATUS_OPTIONS]
             query = query.filter(ExpenseSheet.status.in_(interesting_status))
@@ -969,13 +993,17 @@ def includeme(config):
 
     config.add_route("expenses", "/expenses")
 
-    config.add_route("company_expenses",
-            "/company/{id}/expenses",
-            traverse=traverse)
+    config.add_route(
+        "company_expenses",
+        "/company/{id}/expenses",
+        traverse=traverse,
+    )
 
-    config.add_route("user_expenses",
-            "/company/{id}/{uid}/expenses",
-            traverse=traverse)
+    config.add_route(
+        "user_expenses",
+        "/company/{id}/{uid}/expenses",
+        traverse=traverse,
+    )
 
     traverse = "/expenses/{id}"
 
@@ -984,51 +1012,79 @@ def includeme(config):
         "/expenses/{id:\d+}",
         traverse=traverse
     )
-    config.add_route("expensejson",
-            "/expenses/{id:\d+}.json",
-            traverse=traverse)
-    config.add_route("expensexlsx",
-            "/expenses/{id:\d+}.xlsx",
-            traverse=traverse)
-    config.add_route("expenselines",
-            "/expenses/{id:\d+}/lines",
-            traverse=traverse)
-    config.add_route("expenseline",
-            "/expenses/{id:\d+}/lines/{lid}",
-            traverse=traverse)
-    config.add_route("expensekmlines",
-            "/expenses/{id:\d+}/kmlines",
-            traverse=traverse)
-    config.add_route("expensekmline",
-            "/expenses/{id:\d+}/kmlines/{lid}",
-            traverse=traverse)
+
+    config.add_route(
+        "expensejson",
+        "/expenses/{id:\d+}.json",
+        traverse=traverse,
+    )
+
+    config.add_route(
+        "expensexlsx",
+        "/expenses/{id:\d+}.xlsx",
+        traverse=traverse,
+    )
+
+    config.add_route(
+        "expenselines",
+        "/expenses/{id:\d+}/lines",
+        traverse=traverse,
+    )
+
+    config.add_route(
+        "expenseline",
+        "/expenses/{id:\d+}/lines/{lid}",
+        traverse=traverse,
+    )
+
+    config.add_route(
+        "expensekmlines",
+        "/expenses/{id:\d+}/kmlines",
+        traverse=traverse,
+    )
+
+    config.add_route(
+        "expensekmline",
+        "/expenses/{id:\d+}/kmlines/{lid}",
+        traverse=traverse,
+    )
 
     config.add_route("bookmark", "/bookmarks/{id:\d+}")
     config.add_route("bookmarks", "/bookmarks")
 
-    #views
-    config.add_view(ExpenseList,
+    # views
+    config.add_view(
+        ExpenseList,
         route_name="expenses",
         permission="admin",
-        renderer="treasury/admin_expenses.mako")
+        renderer="treasury/admin_expenses.mako",
+    )
 
-    config.add_view(company_expenses_view,
+    config.add_view(
+        company_expenses_view,
         route_name="company_expenses",
         renderer="treasury/expenses.mako",
-        permission="edit")
+        permission="edit",
+    )
 
-    config.add_view(expenses_access_view,
+    config.add_view(
+        expenses_access_view,
         route_name="user_expenses",
-        permission="edit")
+        permission="edit",
+    )
 
-    config.add_view(ExpenseSheetView,
+    config.add_view(
+        ExpenseSheetView,
         route_name="expensesheet",
-        renderer="treasury/expense.mako")
+        renderer="treasury/expense.mako",
+    )
 
-    config.add_view(expensesheet_json_view,
+    config.add_view(
+        expensesheet_json_view,
         route_name="expensejson",
         xhr=True,
-        renderer="json")
+        renderer="json",
+    )
 
     # Xls export
     config.add_view(
@@ -1049,11 +1105,13 @@ def includeme(config):
     # View rights are sufficient to access those views
     add_rest_views(config, "bookmark", RestBookMarks, edit_rights='view')
 
-
     # V1 Rest Api
     config.add_route("expenselinev1s", "/api/v1/expenses")
-    config.add_route("expenselinev1", "/api/v1/expenses/{id}",
-            traverse='expenselines/{id}')
+    config.add_route(
+        "expenselinev1",
+        "/api/v1/expenses/{id}",
+        traverse='expenselines/{id}',
+    )
     config.add_route("expenseoptionsv1", "/api/v1/expenseoptions")
 
     add_rest_views(config, "expenselinev1", Expensev1)

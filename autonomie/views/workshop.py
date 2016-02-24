@@ -49,6 +49,7 @@ from autonomie.utils.pdf import (
 )
 from sqla_inspect.csv import CsvExporter
 from sqla_inspect.excel import XlsExporter
+from sqla_inspect.ods import OdsExporter
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.workshop import (
     Workshop as WorkshopSchema,
@@ -59,7 +60,6 @@ from autonomie.forms.workshop import (
 from autonomie.views import (
     BaseListView,
     BaseCsvView,
-    BaseXlsView,
     BaseFormView,
     DuplicateView,
 )
@@ -344,12 +344,21 @@ class WorkshopListTools(object):
 
     def filter_date(self, query, appstruct):
         date = appstruct.get('date')
+        year = appstruct.get('year')
         if date is not None:
             query = query.filter(
                 models.Workshop.timeslots.any(
                     func.date(models.Timeslot.start_time) == date
                 )
             )
+        # Only filter by year if no date filter is set
+        elif year is not None:
+            query = query.filter(
+                models.Workshop.timeslots.any(
+                    func.extract('YEAR', models.Timeslot.start_time) == year
+                )
+            )
+
         return query
 
 
@@ -371,6 +380,16 @@ class WorkshopCsvWriter(CsvExporter):
 
 
 class WorkshopXlsWriter(XlsExporter):
+    headers = (
+        {'name': 'date', 'label': 'Date'},
+        {'name': 'label', 'label': "Intitulé"},
+        {'name': 'participant', 'label': "Participant"},
+        {'name': 'leaders', 'label': "Formateur(s)"},
+        {'name': 'duration', 'label': "Durée"},
+    )
+
+
+class WorkshopOdsWriter(OdsExporter):
     headers = (
         {'name': 'date', 'label': 'Date'},
         {'name': 'label', 'label': "Intitulé"},
@@ -428,7 +447,7 @@ class WorkshopCsvView(WorkshopListTools, BaseCsvView):
         return stream_workshop_entries_for_export(query)
 
 
-class WorkshopXlsView(WorkshopListTools, BaseXlsView):
+class WorkshopXlsView(WorkshopCsvView):
     """
     Workshop excel export view
     """
@@ -438,11 +457,13 @@ class WorkshopXlsView(WorkshopListTools, BaseXlsView):
     def filename(self):
         return "ateliers.xls"
 
-    def _init_writer(self):
-        return self.writer()
 
-    def _stream_rows(self, query):
-        return stream_workshop_entries_for_export(query)
+class WorkshopOdsView(WorkshopCsvView):
+    writer = WorkshopOdsWriter
+
+    @property
+    def filename(self):
+        return "ateliers.ods"
 
 
 class CompanyWorkshopListView(WorkshopListView):
@@ -624,6 +645,7 @@ def includeme(config):
     config.add_route('workshops', "/workshops")
     config.add_route('workshops.csv', "/workshops.csv")
     config.add_route('workshops.xls', "/workshops.xls")
+    config.add_route('workshops.ods', "/workshops.ods")
 
     config.add_route(
         'company_workshops',
@@ -699,6 +721,12 @@ def includeme(config):
     config.add_view(
         WorkshopXlsView,
         route_name='workshops.xls',
+        permission='manage',
+    )
+
+    config.add_view(
+        WorkshopOdsView,
+        route_name='workshops.ods',
         permission='manage',
     )
 

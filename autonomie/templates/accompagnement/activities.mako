@@ -82,12 +82,6 @@
 
 </%block>
 <%block name="content">
-<%
-## We build the link with the current search arguments
-args = request.GET
-url = request.route_path('activities.xls', _query=args)
-%>
-<a class='btn btn-default pull-right' href='${url}' ><i class='glyphicon glyphicon-file'></i>Export</a>
 <table class="table table-condensed table-hover">
     <thead>
         <tr>

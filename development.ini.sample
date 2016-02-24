@@ -171,7 +171,7 @@ formatter = sqlfile
 format = %(message)s
 
 [formatter_generic]
-format = %(ip)s - %(asctime)-15s %(levelname)-5.5s %(message)s ([%(name)s])
+format = %(ip)s - %(asctime)-15s %(levelname)-5.5s %(message)s ([%(name)s.%(funcName)s:%(lineno)d])
 # End logging configuration
 #Alembic conf
 [alembic]

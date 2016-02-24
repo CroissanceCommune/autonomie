@@ -125,6 +125,10 @@ def main(global_config, **settings):
     dbsession = initialize_sql(engine)
 
     config = base_configure(config, dbsession, **settings)
+    from autonomie.utils.filedepot import (
+        configure_filedepot,
+    )
+    configure_filedepot(settings)
     config.configure_celery(global_config['__file__'])
 
     return config.make_wsgi_app()
@@ -187,10 +191,6 @@ def base_configure(config, dbsession, **settings):
         customize_renderers,
     )
     customize_renderers(config)
-    from autonomie.utils.filedepot import (
-        configure_filedepot,
-    )
-    configure_filedepot(settings)
     return config
 
 

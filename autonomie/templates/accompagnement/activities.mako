@@ -41,6 +41,28 @@
     </div>
 </div>
         <div class='col-md-4'>
+            <div class='well well-sm pull-right btn-group' role='group'>
+            <%
+        args = request.GET
+        url = request.route_path('activities.xls', _query=args)
+        %>
+        <a
+            class='btn btn-default'
+            href='${url}'
+            title="Exporter les éléments de la liste au format xls">
+            <i class='fa fa-file-excel-o'></i>&nbsp;Excel
+        </a>
+            <%
+        args = request.GET
+        url = request.route_path('activities.ods', _query=args)
+        %>
+        <a
+            class='btn btn-default'
+            href='${url}'
+            title="Exporter les éléments de la liste au format ods">
+            <i class='fa fa-file'></i>&nbsp;ODS
+        </a>
+        </div>
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>

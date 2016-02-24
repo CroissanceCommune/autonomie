@@ -11,9 +11,6 @@
 html{
   font-size: 11px;
 }
-.description{
-  line-height: 12px;
-}
 .addressblock{
   position:relative;
   padding-left: 9.3cm;  /* + margin 1cm */
@@ -29,26 +26,31 @@ html{
 .keep_with_next{
   -pdf-keep-with-next: true;
 }
+/* Task line and line groups */
+.lines td, .lines th{
+  padding: 2px;
+  vertical-align: middle;
+}
 .lines{
-  border:1px solid #cdcdcd;
+  border: 0.01cm solid #cdcdcd;
   margin-bottom:33px;
 }
 .lines thead tr{
   background-color:#f6f6f6;
-  padding-top:3px;
   font-size:12px;
 }
 .lines thead tr.group-description{
   background-color:#fff;
 }
+.lines h3{
+  font-size: 13px;
+  font-weight: 400;
+  padding: 4px 0px;
+}
 .group-description td{
   font-weight: normal;
   text-align: left;
-  font-size: 0.23cm;
-  line-height: 0.23cm;
-}
-.lines td, .lines th{
-  padding: 2px 3px;
+  font-size: 11px;
 }
 .lines .price{
   text-align:right;
@@ -78,13 +80,13 @@ html{
   background-color:#f6f6f6;
   font-weight:bold;
   font-size:11px;
-  border:1px solid #cdcdcd;
+  border: 0.01cm solid #cdcdcd;
   -pdf-keep-with-next:true;
 }
 .content{
   font-size:9px;
   padding:3px;
-  border:1px solid #cdcdcd;
+  border: 0.01cm solid #cdcdcd;
   padding-bottom:4px;
   margin-bottom:12px;
 }
@@ -115,14 +117,25 @@ font-size: 14px;
 .upper{
 text-transform: uppercase;
 }
-p{
-  margin: 2px;
-  padding: 2px 0px;
+.description ul{
+  margin-bottom: 3px;
 }
-li{
+.description li, .description p, .description div{
   margin: 0px;
   padding: 0px;
+  font-size: 11px;
+  line-height: 1.2;
+  vertical-align: middle;
 }
-div{
-  margin: 0px;
+.description p{
+  margin: 2px 0px;
+}
+.activity-title{
+  border-bottom: 0.01cm solid #cdcdcd;
+  margin: 7px 0px 7px 0px;
+  padding-bottom: 3px;
+  font-weight: 500;
+}
+.activity-content{
+  padding-left: 0.5cm;
 }

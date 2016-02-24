@@ -40,6 +40,9 @@ td.actions, th.actions{
 form.authentication-form input[type=text], form.authentication-form input[type=password]{
   width: 100%;
 }
+input[type=password]{
+  margin-bottom: 4px;
+}
 .authentication-form .form-actions{
   padding: 20px 0 20px 0;
 }
@@ -76,6 +79,11 @@ form.authentication-form input[type=text], form.authentication-form input[type=p
 }
 .deform .errorMsgLbl{
   background-color:transparent;
+}
+/* Class used to set a max width to forms */
+.medium-form-container{
+  max-width: 600px;
+  margin: auto;
 }
 #actionmenu{
   padding-left:5%;
@@ -342,4 +350,37 @@ input[name=altdate], input[name=date]{
 /* Jstree */
 .jstree{
   display: inline-block;
+}
+/* Custom close button class */
+.large-close{
+  font-size: 40px;
+  opacity: 0.4;
+}
+/* Project view */
+.project-view .header{
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+.project-view .header h3{
+  padding-right: 10px;
+  font-weight:100;
+  margin: 10px 0px 5px 0px;
+}
+.project-view .header a{
+  margin-top: 5px;
+}
+/* Rendez-vous */
+.activity-view #edition_form, .activity-view #next_activity_form_container{
+  background-color: #fff;
+  padding: 10px 15px;
+}
+.activity-view p{
+  margin-bottom: 2px;
+}
+.activity-view h3{
+  border-bottom: 1px solid #dcdcdc;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
 }

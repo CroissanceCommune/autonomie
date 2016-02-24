@@ -25,15 +25,15 @@
 <div class='row'>
     <div class='col-md-12'>
         <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
-            Modifier les données relatives à l'atelier
+            <i class="fa fa-pencil"></i> Modifier les données relatives à l'atelier
         </button>
         <a class='btn btn-default'
             href='${request.route_path("workshop", id=request.context.id, _query=dict(action="duplicate"))}' >
-            <i class='glyphicon glyphicon-duplicate'></i>
+            <i class='fa fa-copy'></i>
             Dupliquer cet atelier
         </a>
         <a class='btn btn-default' href='${request.route_path("workshop.pdf", id=request.context.id)}' >
-            <i class='glyphicon glyphicon-file'></i>
+            <i class='fa fa-download'></i>
             Télécharger la feuille d'émargement globale
         </a>
         <div
@@ -84,7 +84,7 @@
 </p>
 <div>
     <a class='btn btn-default' href='${request.route_path("timeslot.pdf", id=timeslot.id)}' >
-        <i class='glyphicon glyphicon-file'></i>
+        <i class='fa fa-download'></i>
         Télécharger la feuille d'émargement pour cette tranche horaire
     </a>
 </div>

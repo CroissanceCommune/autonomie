@@ -39,6 +39,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import asc
 from sqlalchemy import func
 from sqla_inspect import excel
+from sqla_inspect import ods
 
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.pdf import (
@@ -67,7 +68,7 @@ from autonomie.forms.activity import (
     NewActivitySchema,
     RecordActivitySchema,
     get_list_schema,
-    )
+)
 from autonomie.export.utils import write_file_to_request
 from autonomie.views import render_api
 
@@ -532,12 +533,27 @@ class ActivityList(BaseListView):
 
         return query
 
-    def filter_year(self, query, appstruct):
+    def filter_date(self, query, appstruct):
         """
         filter the query and restrict it to the given year
         """
         year = appstruct.get('year')
-        if year is not None:
+        date_range_start = appstruct.get('date_range_start')
+        date_range_end = appstruct.get('date_range_end')
+
+        if date_range_start is not None:
+            query = query.filter(
+                func.date(Activity.datetime) >= date_range_start
+            )
+
+        if date_range_end is not None:
+            query = query.filter(
+                func.date(Activity.datetime) <= date_range_end
+            )
+
+
+        if year is not None and date_range_start is None and \
+                date_range_end is None:
             query = query.filter(
                 func.extract('YEAR', Activity.datetime) == year
             )
@@ -632,6 +648,14 @@ class ActivityReportXlsView(ActivityList):
         return self.request.response
 
 
+class ActivityReportOdsView(ActivityReportXlsView):
+    writer = ods.OdsExporter
+
+    @property
+    def filename(self):
+        return "activities.ods"
+
+
 def activity_view_only_view(context, request):
     """
     Single Activity view-only view
@@ -710,6 +734,7 @@ def includeme(config):
     )
     config.add_route('activities', "/activities")
     config.add_route('activities.xls', "/activities.xls")
+    config.add_route('activities.ods', "/activities.ods")
     config.add_route(
         'company_activities',
         "/company/{id}/activities",
@@ -743,6 +768,12 @@ def includeme(config):
     config.add_view(
         ActivityReportXlsView,
         route_name='activities.xls',
+        permission='manage',
+    )
+
+    config.add_view(
+        ActivityReportOdsView,
+        route_name='activities.ods',
         permission='manage',
     )
 

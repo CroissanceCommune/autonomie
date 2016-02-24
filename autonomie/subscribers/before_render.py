@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# * Copyright (C) 2012-2013 Croissance Commune
+# * Copyright (C) 2012-2015 Croissance Commune
 # * Authors:
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-#       * Pettier Gabriel;
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #
 # This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -20,21 +19,19 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
-#
-
 """
-    Subscribers
-    Add menus to the returned datas before rendering
-    Add a translation stuff to the templating context
+    Before Render Subscribers
+
+        + Add tools used in templating
+
+        + Require the main_js js ressource
+
 """
 import logging
 
 from pyramid.events import BeforeRender
-from pyramid.events import NewRequest
 from pyramid.threadlocal import get_current_request
 
-from autonomie.i18n import translate
-from autonomie.utils.widgets import ActionMenu
 from autonomie.resources import main_group
 from autonomie.views.render_api import Api
 
@@ -63,40 +60,6 @@ def add_api(event):
         event['api'] = api
 
 
-def get_req_uri(request):
-    """
-        Return the requested uri
-    """
-    return request.path_url + request.query_string
-
-
-def log_request(event):
-    """
-        Log each request
-    """
-    request = event.request
-    method = request.method
-    req_uri = get_req_uri(request)
-    http_version = request.http_version
-    referer = request.referer
-    user_agent = request.user_agent
-    log.info(u"####################  NEW REQUEST COMING #################")
-    log.info(event.request)
-    log.info(u"The current session")
-    log.info(event.request.session)
-
-
-def add_request_attributes(event):
-    """
-        Add usefull tools to the request object
-        that may be used inside the views
-    """
-    request = event.request
-    request.translate = translate
-    request.actionmenu = ActionMenu()
-    request.popups = {}
-
-
 def add_main_js(event):
     """
         Add the main required javascript dependency
@@ -110,6 +73,3 @@ def includeme(config):
     """
     for before in (add_translation, add_api, add_main_js):
         config.add_subscriber(before, BeforeRender)
-
-    for new_req in (log_request, add_request_attributes):
-        config.add_subscriber(new_req, NewRequest)

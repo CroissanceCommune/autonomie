@@ -51,13 +51,17 @@ LINES = [{'description':u'text1',
 
 DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 
-INVOICE = dict( name=u"Facture 2",
-                sequence_number=2,
-                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
-                description=u"Description de la facture",
-                _number=u"invoicenumber",
-                expenses=0,
-                expenses_ht=0)
+INVOICE = dict(
+    name=u"Facture 2",
+    sequence_number=2,
+    taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+    description=u"Description de la facture",
+    _number=u"invoicenumber",
+    expenses=0,
+    expenses_ht=0,
+    prefix="prefix",
+    financial_year=2015,
+)
 
 
 @pytest.fixture
@@ -129,6 +133,8 @@ def test_gen_cancelinvoice(dbsession, invoice):
     assert cinv.total_ht() == -1 * invoice.total_ht()
     today = datetime.date.today()
     assert cinv.taskDate == today
+    assert cinv.prefix == invoice.prefix
+    assert cinv.financial_year == invoice.financial_year
 
 def test_gen_cancelinvoice_payment(dbsession, invoice):
     user = User.query().first()

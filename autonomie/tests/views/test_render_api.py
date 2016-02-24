@@ -45,3 +45,19 @@ class TestIt(unittest.TestCase):
                                                          u"LASTNAME ")
         self.assertEqual(render_api.format_name(u"Firstname", None),
                                                         u" Firstname")
+
+    def test_remove_tag(self):
+        self.assertEqual(
+            render_api.remove_tag("<test><br />", "<br />"),
+            "<test>",
+        )
+
+    def test_clean_linebreaks(self):
+        self.assertEqual(
+            render_api.clean_linebreaks("""
+                             <p>TEst</p>
+                             <p>    </p>
+                             <br /> <div></div>
+                             """),
+            """<p>TEst</p>"""
+        )

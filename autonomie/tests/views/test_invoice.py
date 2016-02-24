@@ -41,6 +41,8 @@ APPSTRUCT = {
         description="Facture pour le customer test",
         course="0",
         display_units="1",
+        financial_year=2015,
+        prefix="F2015_",
     ),
     'lines':dict(
         expenses=2000,
@@ -93,7 +95,6 @@ def user(content):
 
 @pytest.fixture
 def invoice(config, get_csrf_request_with_db, project, user):
-    print(Invoice.query().all())
     assert len(Invoice.query().all()) == 0
     from autonomie.views.invoice import InvoiceAdd
     config.add_route('project', '/')
@@ -121,6 +122,8 @@ def test_add_invoice(invoice):
     assert invoice.line_groups[1].lines[0].description == "text2"
     assert len(invoice.discounts) == 1
     assert invoice.description == "Facture pour le customer test"
+    assert invoice.financial_year == 2015
+    assert invoice.prefix == "F2015_"
 
 def test_change_status(invoice, get_csrf_request_with_db):
     request = get_csrf_request_with_db(post={'submit':'wait'})

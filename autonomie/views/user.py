@@ -49,6 +49,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.decorator import reify
 from genshi.template.eval import UndefinedError
+from sqla_inspect.ods import SqlaOdsExporter
 
 from autonomie.models import files
 from autonomie.models.base import DBSESSION
@@ -91,6 +92,7 @@ from autonomie.forms.user import (
 from autonomie.views import (
     BaseListView,
     BaseXlsView,
+    BaseOdsView,
     BaseCsvView,
     submit_btn,
     cancel_btn,
@@ -996,6 +998,16 @@ class UserDatasXlsView(UserDatasListClass, BaseXlsView):
         return self.request.response
 
 
+class UserDatasOdsView(UserDatasXlsView):
+    writer = SqlaOdsExporter
+    sheet_title = u"Gestion sociale"
+    model = UserDatas
+
+    @property
+    def filename(self):
+        return "gestion_social.ods"
+
+
 class UserDatasCsvView(UserDatasListClass, BaseCsvView):
     """
         Userdatas excel view
@@ -1379,6 +1391,11 @@ def includeme(config):
     )
 
     config.add_route(
+        "userdatas.ods",
+        "/userdatas.ods",
+    )
+
+    config.add_route(
         "templatinghistory",
         "/py3ostory/{id}",
         traverse="/templatinghistory/{id}"
@@ -1516,6 +1533,12 @@ def includeme(config):
     config.add_view(
         UserDatasXlsView,
         route_name="userdatas.xls",
+        permission="manage",
+    )
+
+    config.add_view(
+        UserDatasOdsView,
+        route_name="userdatas.ods",
         permission="manage",
     )
 

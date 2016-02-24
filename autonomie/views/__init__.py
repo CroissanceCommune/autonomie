@@ -630,6 +630,24 @@ class BaseRestView(BaseView):
     def get_schema(self, submitted):
         return self.schema
 
+    def filter_edition_schema(self, schema, submitted):
+        """
+        filter the schema in case of edition removing all keys not present in
+        the submitted datas (allow to edit only one field)
+
+        :param dict submitted: the raw submitted datas
+        :param obj schema: the schema we're going to use
+        """
+        # In edition, we only keep edited fields
+        submitted_keys = submitted.keys()
+        toremove = [
+            node for node in schema if node.name not in submitted_keys
+        ]
+        for node in toremove:
+            del schema[node.name]
+
+        return schema
+
     def get(self):
         return self.context
 
@@ -645,13 +663,22 @@ class BaseRestView(BaseView):
         """
         return entry
 
+    def get_editted_element(self, attributes):
+        """
+        Returns the element we edit
+        """
+        return self.context
+
     def _submit_datas(self, edit=False):
         submitted = self.request.json_body
         self.logger.debug(u"Submitting %s" % submitted)
+        submitted = self.pre_format(submitted)
         schema = self.get_schema(submitted)
 
+        if edit:
+            schema = self.filter_edition_schema(schema, submitted)
+
         try:
-            submitted = self.pre_format(submitted)
             attributes = schema.deserialize(submitted)
         except colander.Invalid, err:
             self.logger.exception("  - Erreur")
@@ -660,7 +687,8 @@ class BaseRestView(BaseView):
 
         self.logger.debug(attributes)
         if edit:
-            entry = schema.objectify(attributes, self.context)
+            editted = self.get_editted_element(attributes)
+            entry = schema.objectify(attributes, editted)
             entry = self.post_format(entry)
             entry = self.request.dbsession.merge(entry)
         else:

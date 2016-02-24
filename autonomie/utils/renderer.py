@@ -135,7 +135,6 @@ def set_export_blacklist():
     """
     Globally set an export blacklist
     """
-    print("Setting blacklisted keys")
     from sqla_inspect.export import BLACKLISTED_KEYS
 
     BLACKLISTED_KEYS.extend([
@@ -161,7 +160,6 @@ def set_xls_formats():
 def set_custom_deform_js():
     from js import deform
     from autonomie.resources import custom_deform_js
-    logger.debug(u"Overriding the default deform_js resource")
     deform.deform_js = custom_deform_js
     deform.resource_mapping['deform'] = [custom_deform_js]
 
@@ -170,6 +168,7 @@ def customize_renderers(config):
     """
     Customize the different renderers
     """
+    logger.debug(u"Setting renderers related hacks")
     # Json
     set_json_renderer(config)
     # deform

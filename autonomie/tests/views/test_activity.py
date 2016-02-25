@@ -28,7 +28,7 @@ from autonomie.models.activity import (
     Activity,
 )
 from pyramid.events import BeforeRender
-from autonomie.views.subscribers import add_api
+from autonomie.subscribers.before_render import add_api
 
 
 def add_type(dbsession, label):

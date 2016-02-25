@@ -2,6 +2,7 @@
 *.pyc
 .*.swp
 *.egg-info
+*.eggs
 mako_compiled_templates
 *.log
 data

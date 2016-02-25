@@ -39,10 +39,10 @@
                 </div>
                 <table class='table table-stripped'>
                     <thead>
-                        <th class="visible-lg">Numéro</th>
-                        <th>Client</th>
-                        <th>Total</th>
-                        <th class="visible-lg"></th>
+                        <th class="col-xs-2 visible-lg">Numéro</th>
+                        <th class='col-xs-4'>Client</th>
+                        <th class="col-xs-3">Total</th>
+                        <th class="visible-lg col-xs-3">Actions</th>
                     </thead>
                     <tbody>
                         % for invoice in elapsed_invoices[:5]:
@@ -59,12 +59,19 @@
                                     ${api.format_amount(invoice.total())|n}&nbsp;€
                                 </td>
                                 <td class="visible-lg" style="text-align:right">
+                                    <div class='btn-group'>
                                     ${table_btn(\
                                     request.route_path("invoice", id=invoice.id), \
-                                    u"Voir", \
+                                    u"", \
                                     u"Voir ce document", \
                                     icon=u"search")\
                                     }
+                                    ${table_btn(
+                                    request.route_path("invoice", id=invoice.id, _query=dict(view='pdf')),
+                                        u"",
+                                        u"Télécharger ce document au format pdf",
+                                        icon=u"fa fa-file-pdf-o")}
+                                    </div>
                                 </td>
                             </tr>
                         % endfor

@@ -243,7 +243,6 @@ sale_product_js = get_module_resource(
     extra_depends=[select2, tinymce]
 )
 holiday_js = get_module_resource("holiday", tmpl=True)
-admin_option_js = get_module_resource("admin_option")
 commercial_js = get_module_resource("commercial")
 
 pdf_css = get_resource('css/pdf.css', depends=[main_group])

@@ -76,7 +76,6 @@ from autonomie.models.user import (
     TypeSortieOption,
 )
 from autonomie.models.task import PaymentConditions
-from autonomie.resources import admin_option_js
 
 from autonomie.models import files
 from autonomie.forms.admin import (
@@ -885,11 +884,8 @@ def get_all_userdatas_views():
     Return view_class, route_name for all option configuration views in the
     userdatas module
     """
-    yield get_model_admin_view(
-        CaeSituationOption,
-        js_requirements=admin_option_js,
-    )
     for model in (
+        CaeSituationOption,
         ZoneOption,
         ZoneQualificationOption,
         StudyLevelOption,

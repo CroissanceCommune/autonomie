@@ -633,7 +633,13 @@ class CaeSituationOption(ConfigurableOption):
     is_integration = Column(
         Boolean(),
         default=False,
-        info={'colanderalchemy': get_hidden_field_conf()},
+        info={
+            'colanderalchemy': {
+                'title': u'Donne droit à un compte Autonomie',
+                'description': u"Si un porteur de projet a ce statut, \
+un compte Autonomie lui sera automatiquement associé"
+            }
+        },
     )
 
 

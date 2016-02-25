@@ -172,14 +172,18 @@ def current_years():
     return result
 
 
-def digit_subdirs(path):
+def digit_subdirs(path, maxnumber=None):
     """
     Return subdirectories of path which names are composed of digits
     """
     for name in os.listdir(path):
         spath = os.path.join(path, name)
         if os.path.isdir(spath) and name.isdigit():
-            yield name, spath
+            if maxnumber is not None:
+                if int(name) <= maxnumber:
+                    yield name, spath
+            else:
+                yield name, spath
 
 
 def list_files(path, prefix='___'):
@@ -327,7 +331,7 @@ class DisplayDirectoryView(BaseView):
                 os.path.isdir(self.root_directory):
             for year, year_path in digit_subdirs(self.root_directory):
                 result_dict[year] = {}
-                for month, month_path in digit_subdirs(year_path):
+                for month, month_path in digit_subdirs(year_path, 12):
                     result_dict[year][month] = list_files(
                         month_path,
                         prefix,
@@ -413,7 +417,7 @@ class AdminTreasuryView(BaseView):
             type_dir = os.path.join(self.root_directory, type_)
             for year, year_dir in digit_subdirs(type_dir):
                 result[year] = {}
-                for month, month_dir in digit_subdirs(year_dir):
+                for month, month_dir in digit_subdirs(year_dir, 12):
                     if month in result[year]:
                         continue
 

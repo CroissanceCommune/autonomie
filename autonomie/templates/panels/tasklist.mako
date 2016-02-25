@@ -43,19 +43,17 @@ Afficher <select id='number_of_tasks'>
 éléments à la fois
 <table class='table table-stripped tasklist'>
     <thead>
-        <th class="visible-lg">
+        <th class="visible-lg col-xs-4">
             Nom du document
         </th>
-        <th>
-            Projet
-        </th>
-        <th>
+        <th class='col-xs-3'>
             Client
         </th>
-        <th class="visible-lg">
+        <th class="visible-lg col-xs-3">
             Dernière modification
         </th>
-        <th class="visible-lg">
+        <th class="visible-lg col-xs-2 text-right">
+            Actions
         </th>
     </thead>
     <tbody>
@@ -66,15 +64,19 @@ Afficher <select id='number_of_tasks'>
                 <td class="visible-lg rowlink" onclick="${onclick}">
                     ${task.name}
                 </td>
-                <td  onclick="${onclick}" class="rowlink" >
-                    ${format_project(task.project, False)}
-                </td>
                 <td onclick="${onclick}" class="rowlink">
                     ${format_customer(task.customer, False)}
                 </td>
-                <td class="visible-lg rowlink">${api.format_status(task)}</td>
+                <td class="visible-lg rowlink">${api.format_status(task, full=False)}</td>
                 <td class="visible-lg" style="text-align:right">
-                    ${table_btn(request.route_path(task.type_, id=task.id), u"Voir", u"Voir ce document", icon=u"search")}
+                    <div class='btn-group'>
+                    ${table_btn(request.route_path(task.type_, id=task.id), u"", u"Voir ce document", icon=u"search")}
+                    ${table_btn(
+                        request.route_path(task.type_, id=task.id, _query=dict(view='pdf')),
+                        u"",
+                        u"Télécharger ce document au format pdf",
+                        icon=u"fa fa-file-pdf-o")}
+                    </div>
                 </td>
             </tr>
         % endfor

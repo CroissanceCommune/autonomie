@@ -21,7 +21,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 """
-    Events used while handling expenses
+Events used while handling expenses :
+    Send email
 
 """
 import logging

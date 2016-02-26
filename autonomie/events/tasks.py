@@ -23,7 +23,7 @@
 #
 
 """
-    Mail sending tools
+Handle task (invoice/estimation) related events
 """
 import logging
 

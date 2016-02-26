@@ -23,10 +23,8 @@
 #
 
 """
-    Specific exception
+    Autonomie specific exception
 """
-
-
 class Forbidden(Exception):
     """
         Forbidden exception, used to raise a forbidden action error

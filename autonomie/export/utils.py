@@ -23,7 +23,9 @@
 #
 
 """
-    Export utilities
+Export utilities:
+
+    * Tools to build file responses (pdf, xls ...)
 """
 from autonomie.utils.ascii import (
         force_ascii,
@@ -73,5 +75,3 @@ def format_boolean(value):
     Format a boolean value
     """
     return "Y" and value or "N"
-
-

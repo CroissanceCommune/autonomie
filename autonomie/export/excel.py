@@ -23,7 +23,7 @@
 #
 
 """
-    Data export module
+Tools used to export datas in xls format
 """
 
 import itertools

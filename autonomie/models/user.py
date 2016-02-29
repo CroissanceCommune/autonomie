@@ -381,7 +381,7 @@ class User(DBBASE, PersistentACLMixin):
         query = DBSESSION().query(UserDatas.id)
         query = query.filter(UserDatas.user_id == self.id)
         count = query.count()
-        return count > 1
+        return count >= 1
 
     @classmethod
     def query(cls, ordered=True, only_active=True):

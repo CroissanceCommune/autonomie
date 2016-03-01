@@ -83,7 +83,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    % if group.title == '':
                     % for line in group.lines:
                         <tr>
                             <td class="description">${format_text(line.description, False)}</td>
@@ -101,12 +100,6 @@
                             % endif
                         </tr>
                     % endfor
-                    % else:
-                        <tr>
-                            <td class="description">${format_text(group.description, False)}</td>
-                            <td class="price">${api.format_amount(group.total_ht(), trim=False)|n}&nbsp;€</td>
-                        </tr>
-                    % endif
                     % if len(groups) > 1:
                         <tr>
                             <td colspan='${colspan}' class='rightalign'>

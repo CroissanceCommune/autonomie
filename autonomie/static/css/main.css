@@ -357,11 +357,15 @@ input[name=altdate], input[name=date]{
   opacity: 0.4;
 }
 /* Project view */
+.project-view .panel-body{
+  padding: 0;
+}
 .project-view .header{
   border-bottom: 1px solid #eee;
   margin-bottom: 15px;
   padding-bottom: 10px;
   padding-top: 10px;
+  background-color: #FFFFCC;
 }
 .project-view .header h3{
   padding-right: 10px;

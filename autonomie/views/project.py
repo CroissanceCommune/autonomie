@@ -235,7 +235,7 @@ class ProjectsList(BaseListView):
         btns.append(
             ItemActionLink(
                 u"Voir",
-                "view",
+                "view_project",
                 css='btn btn-default btn-sm',
                 path="project",
                 icon="search"
@@ -243,7 +243,7 @@ class ProjectsList(BaseListView):
         btns.append(
             ItemActionLink(
                 u"Devis",
-                "edit",
+                "add_estimation",
                 css="btn btn-default btn-sm",
                 title=u"Nouveau devis",
                 path="project_estimations",
@@ -252,7 +252,7 @@ class ProjectsList(BaseListView):
         btns.append(
             ItemActionLink(
                 u"Facture",
-                "edit",
+                "add_invoice",
                 css="btn btn-default btn-sm",
                 title=u"Nouvelle facture",
                 path="project_invoices",
@@ -263,7 +263,7 @@ class ProjectsList(BaseListView):
             btns.append(
                 ItemActionLink(
                     u"Archiver",
-                    "edit",
+                    "edit_project",
                     css="btn btn-default btn-sm",
                     confirm=u'Êtes-vous sûr de vouloir archiver ce projet ?',
                     path="project",
@@ -276,7 +276,7 @@ class ProjectsList(BaseListView):
             btns.append(
                 ItemActionLink(
                     u"Désarchiver",
-                    "edit",
+                    "edit_project",
                     css="btn btn-default btn-sm",
                     path="project",
                     title=u"Désarchiver le projet",
@@ -286,7 +286,7 @@ class ProjectsList(BaseListView):
             )
             del_link = ItemActionLink(
                 u"Supprimer",
-                "edit",
+                "edit_project",
                 css="btn btn-danger",
                 confirm=u'Êtes-vous sûr de vouloir supprimer ce projet ?',
                 path="project",
@@ -477,29 +477,34 @@ def populate_actionmenu(request, project=None):
     request.actionmenu.add(get_list_view_btn(company_id))
     if project is not None:
         request.actionmenu.add(get_view_btn(project.id))
-        if has_permission("edit", project, request):
-            request.actionmenu.add(get_edit_btn(project.id))
-            request.actionmenu.add(get_detail_btn())
-            request.actionmenu.add(get_phase_btn(project.id))
-            request.actionmenu.add(get_add_file_link(request))
+        request.actionmenu.add(get_edit_btn(project.id))
+        request.actionmenu.add(get_detail_btn())
+        request.actionmenu.add(get_phase_btn(project.id))
+        request.actionmenu.add(get_add_file_link(request))
 
 
 def get_list_view_btn(cid):
     return ViewLink(
         u"Liste des projets",
-        "edit",
+        "list_projects",
         path="company_projects",
         id=cid,
     )
 
 
 def get_view_btn(id_):
-    return ViewLink(u"Voir", path="project", id=id_)
+    return ViewLink(
+        u"Voir",
+        "view_project",
+        path="project",
+        id=id_
+    )
 
 
 def get_edit_btn(id_):
     return ViewLink(
         u"Modifier",
+        "edit_project",
         path="project",
         id=id_,
         _query=dict(action="edit"),
@@ -507,12 +512,16 @@ def get_edit_btn(id_):
 
 
 def get_detail_btn():
-    return ToggleLink(u"Afficher les détails", target="project-description")
+    return ToggleLink(
+        u"Afficher les détails",
+        'view_project',
+        target="project-description")
 
 
 def get_phase_btn(id_):
     return ViewLink(
         u"Ajouter une phase (sous-dossier)",
+        'add_phase',
         path="project",
         id=id_,
         _query=dict(action="addphase"),
@@ -540,58 +549,58 @@ def includeme(config):
         route_name='company_projects',
         renderer='project.mako',
         request_method='POST',
-        permission='edit',
+        permission='list_projects',
     )
     config.add_view(
         ProjectAdd,
         route_name='company_projects',
         renderer='project.mako',
         request_param='action=add',
-        permission='edit',
+        permission='add_project',
     )
     config.add_view(
         ProjectEdit,
         route_name='project',
         renderer='project.mako',
         request_param='action=edit',
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         project_view,
         route_name='project',
         renderer='project_view.mako',
-        permission='view',
+        permission='view_project',
     )
     config.add_view(
         project_delete,
         route_name="project",
         request_param="action=delete",
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         project_archive,
         route_name="project",
         request_param="action=archive",
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         PhaseAddFormView,
         route_name="project",
         request_param="action=addphase",
         renderer="base/formpage.mako",
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         PhaseEditFormView,
         route_name="phase",
         renderer="base/formpage.mako",
-        permission='edit',
+        permission='edit_phase',
     )
     config.add_view(
         phase_delete_view,
         route_name="phase",
         renderer="base/formpage.mako",
-        permission='edit',
+        permission='edit_phase',
         request_param="action=delete",
     )
     config.add_view(
@@ -599,12 +608,12 @@ def includeme(config):
         route_name='company_projects',
         renderer='company_projects.mako',
         request_method='GET',
-        permission='edit',
+        permission='list_projects',
     )
     config.add_view(
         FileUploadView,
         route_name="project",
         renderer='base/formpage.mako',
-        permission='edit',
+        permission='edit_project',
         request_param='action=attach_file',
     )

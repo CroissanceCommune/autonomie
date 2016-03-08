@@ -23,8 +23,17 @@
 #
 
 """
-    Views for the company handling
-    Entry point for the main users
+    Views related to the Company model
+
+    Permissions :
+        admin_company : disable/enable add/remove employees
+        view_company : view all informations concerning the company
+        edit_company : edit company options
+
+    A - Des permissions à définir sur l'ensemble de l'application
+    B - Des groupes génériques qui rassemblent des permissions
+    C - Des permissions spécifiques à certains users
+    D - Des permissions par objets
 """
 
 import logging
@@ -98,7 +107,7 @@ def company_view(request):
     link_list.append(
         ViewLink(
             u"Voir les clients",
-            "manage",
+            "view_company",
             path="company_customers",
             id=company.id,
             icon='arrow-right'
@@ -108,7 +117,7 @@ def company_view(request):
     link_list.append(
         ViewLink(
             u"Voir les projets",
-            "manage",
+            "view_company",
             path="company_projects",
             id=company.id,
             icon='arrow-right'
@@ -118,7 +127,7 @@ def company_view(request):
     link_list.append(
         ViewLink(
             u"Voir les factures",
-            "manage",
+            "view_company",
             path="company_invoices",
             id=company.id,
             icon='arrow-right'
@@ -128,7 +137,7 @@ def company_view(request):
     link_list.append(
         ViewLink(
             u"Liste des rendez-vous",
-            "manage",
+            "view_company",
             path="company_activities",
             id=company.id,
             icon='arrow-right'
@@ -362,7 +371,7 @@ def populate_actionmenu(request, company=None):
     request.actionmenu.add(get_list_view_btn())
     if company is not None:
         request.actionmenu.add(get_view_btn(company.id))
-        if has_permission('edit', request.context, request):
+        if has_permission('edit_company', request.context, request):
             request.actionmenu.add(get_edit_btn(company.id))
             if not company.enabled():
                 request.actionmenu.add(get_enable_btn(company.id))
@@ -374,14 +383,14 @@ def get_list_view_btn():
     """
         Return a link to the CAE's directory
     """
-    return ViewLink(u"Annuaire", "view", path="users")
+    return ViewLink(u"Annuaire", "visit", path="users")
 
 
 def get_view_btn(company_id):
     """
         Return a link to the view page
     """
-    return ViewLink(u"Voir", "view", path="company", id=company_id)
+    return ViewLink(u"Voir", "visit", path="company", id=company_id)
 
 
 def get_edit_btn(company_id):
@@ -390,7 +399,7 @@ def get_edit_btn(company_id):
     """
     return ViewLink(
         u"Modifier",
-        "edit",
+        "edit_company",
         path="company",
         id=company_id,
         _query=dict(action="edit"),
@@ -403,7 +412,7 @@ def get_enable_btn(company_id):
     """
     return ViewLink(
         u"Activer",
-        "edit",
+        "admin_company",
         path="company",
         id=company_id,
         _query=dict(action="enable")
@@ -416,7 +425,7 @@ def get_disable_btn(company_id):
     """
     return ViewLink(
         u"Désactiver",
-        "edit",
+        "admin_company",
         path="company",
         id=company_id,
         confirm=u'Êtes-vous sûr de vouloir désactiver cette entreprise \
@@ -462,9 +471,9 @@ def company_remove_employee_view(context, request):
     return HTTPFound(url)
 
 
-def includeme(config):
+def add_routes(config):
     """
-        Add all company related views
+    Configure routes for this module
     """
     config.add_route(
         'companies',
@@ -475,56 +484,64 @@ def includeme(config):
         '/companies/{id:\d+}',
         traverse='/companies/{id}'
     )
+    return config
+
+
+def includeme(config):
+    """
+        Add all company related views
+    """
+    config = add_routes(config)
     config.add_view(
         CompanyList,
         route_name='companies',
         renderer='companies.mako',
-        permission='manage',
+        permission='admin_companies',
     )
     config.add_view(
         CompanyAdd,
         route_name='companies',
         renderer="base/formpage.mako",
         request_param="action=add",
-        permission="manage",
+        permission="admin_companies",
     )
     config.add_view(
         company_index,
         route_name='company',
         renderer='company_index.mako',
         request_param='action=index',
-        permission='edit',
+        permission='view_company',
     )
     config.add_view(
         company_view,
         route_name='company',
         renderer='company.mako',
-        permission="view",
+        permission="visit",
     )
     config.add_view(
         CompanyEdit,
         route_name='company',
         renderer='base/formpage.mako',
         request_param='action=edit',
-        permission="edit",
+        permission="edit_company",
     )
     config.add_view(
         company_enable,
         route_name='company',
         request_param='action=enable',
-        permission="edit",
+        permission="admin_company",
     )
     config.add_view(
         company_disable,
         route_name='company',
         request_param='action=disable',
-        permission="edit",
+        permission="admin_company",
     )
     config.add_view(
         company_remove_employee_view,
         route_name="company",
         request_param='action=remove',
-        permission="manage",
+        permission="admin_company",
     )
     # same panel as html view
     for panel, request_param in (
@@ -536,5 +553,5 @@ def includeme(config):
             route_name='company',
             renderer="panel_wrapper.mako",
             request_param=request_param,
-            permission="edit",
+            permission="view_company",
         )

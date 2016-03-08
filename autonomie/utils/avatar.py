@@ -42,12 +42,11 @@ def get_groups(login, request):
     user = request.user
     if user is None:
         return []
-    elif user.is_admin():
-        return ['group:admin']
-    elif user.is_manager():
-        return ['group:manager']
-    else:
-        return ['group:entrepreneur']
+    res = []
+    for group in user.groups:
+        res.append('group:{0}'.format(group))
+
+    return res
 
 
 def get_avatar(request):

@@ -240,8 +240,6 @@ class TaskFormActions(object):
         label = u"Enregistrer comme brouillon"
         if context_is_task(self.context):
             if self.context.is_waiting():
-                if not self.request.user.is_contractor():
-                    return
                 label = u"Annuler la mise en validation et repasser en \
 brouillon"
         yield Submit(

@@ -35,7 +35,11 @@
                 </div>
                 <div class='col-md-10'>
             <dl class="dl-horizontal">
-                % for label, value in ((u'Identifiant', user.login), (u"Nom", user.lastname), (u"Prénom", user.firstname)):
+                % if api.has_permission('view_user'):
+                    <dt>Identifiant</dt>
+                    <dd>${user.login}</dd>
+                % endif
+                % for label, value in ((u"Nom", user.lastname), (u"Prénom", user.firstname)):
                     %if value:
                         <dt>${label}</dt>
                         <dd>${value}</dd>

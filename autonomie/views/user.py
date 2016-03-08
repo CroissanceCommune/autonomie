@@ -46,7 +46,6 @@ from sqlalchemy.orm import (
     RelationshipProperty,
 )
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 from pyramid.decorator import reify
 from genshi.template.eval import UndefinedError
 from sqla_inspect.ods import SqlaOdsExporter
@@ -92,7 +91,6 @@ from autonomie.forms.user import (
 from autonomie.views import (
     BaseListView,
     BaseXlsView,
-    BaseOdsView,
     BaseCsvView,
     submit_btn,
     cancel_btn,
@@ -368,7 +366,7 @@ class UserList(BaseListView):
         """
         populate_actionmenu(self.request)
 
-        if has_permission("add", self.context, self.request):
+        if self.request.has_permission("add_user", self.context):
             form = get_user_form(self.request)
             popup = PopUp("add", u'Ajouter un permanent', form.render())
             self.request.popups = {popup.name: popup}
@@ -376,7 +374,7 @@ class UserList(BaseListView):
 
         self.request.actionmenu.add(get_add_contractor_btn())
 
-        if has_permission("manage", self.context, self.request):
+        if self.request.has_permission("admin_users", self.context):
             self.request.actionmenu.add(self._get_disabled_btn(appstruct))
 
         self.request.actionmenu.add(get_userdatas_link_btn())
@@ -419,7 +417,9 @@ class UserAccountView(BaseFormView):
         self.request.user.set_password(new_pass)
         self.dbsession.merge(self.request.user)
         self.request.session.flash(u"Votre mot de passe a bien été modifié")
-        return HTTPFound(self.request.route_path('account'))
+        return HTTPFound(
+            self.request.route_path('account', id=self.request.user.id)
+        )
 
 
 class UserAccountEditView(BaseFormView):
@@ -437,7 +437,7 @@ class UserAccountEditView(BaseFormView):
         self.dbsession.merge(model)
         self.request.session.flash(self.msg)
         return HTTPFound(
-            self.request.route_path('account')
+            self.request.route_path('account', id=model.id),
         )
 
 
@@ -664,7 +664,7 @@ class CompanyAssociationView(BaseFormView):
         self.request.actionmenu.add(
             ViewLink(
                 "Retour",
-                "manage",
+                "admin_userdatas",
                 path="userdata",
                 id=self.context.id,
                 _anchor="tab5"
@@ -1224,7 +1224,7 @@ def populate_actionmenu(request, user=None):
     request.actionmenu.add(get_list_view_btn())
     if user:
         request.actionmenu.add(get_view_btn(user.id))
-        if has_permission('edit', request.context, request):
+        if request.has_permission('admin_user', request.context):
             request.actionmenu.add(get_edit_btn(user))
             if user.enabled():
                 request.actionmenu.add(get_disable_btn(user.id))
@@ -1237,21 +1237,30 @@ def get_list_view_btn():
     """
         Return a link to the user list
     """
-    return ViewLink(u"Annuaire", "view", path="users")
+    return ViewLink(u"Annuaire", "visit", path="users")
 
 
 def get_userdatas_list_btn():
     """
     Return a link to the user datas list
     """
-    return ViewLink(u"Annuaire 'Gestion sociale'", "manage", path="userdatas")
+    return ViewLink(
+        u"Annuaire 'Gestion sociale'",
+        "admin_userdatas",
+        path="userdatas",
+    )
 
 
 def get_view_btn(user_id):
     """
         Return a link for user view
     """
-    return ViewLink(u"Voir", "view", path="user", id=user_id)
+    return ViewLink(
+        u"Voir",
+        "visit",
+        path="user",
+        id=user_id,
+    )
 
 
 def get_edit_btn(user):
@@ -1261,7 +1270,7 @@ def get_edit_btn(user):
     if getattr(user, 'userdatas') is not None:
         return ViewLink(
             u"Modifier",
-            "manage",
+            "admin_userdatas",
             path="userdata",
             id=user.userdatas.id,
             _anchor='form3',
@@ -1269,7 +1278,7 @@ def get_edit_btn(user):
     else:
         return ViewLink(
             u"Modifier",
-            "manage",
+            "edit_user",
             path="user",
             id=user.id,
             _query=dict(action="edit_permanent"),
@@ -1279,7 +1288,7 @@ def get_edit_btn(user):
 def get_enable_btn(user_id):
     return ViewLink(
         u"Activer",
-        "manage",
+        "edit_user",
         path="user",
         id=user_id,
         _query=dict(action="enable")
@@ -1292,7 +1301,7 @@ def get_disable_btn(user_id):
     """
     return ViewLink(
         u"Désactiver",
-        "manage",
+        "edit_user",
         path="user",
         id=user_id,
         _query=dict(action="disable")
@@ -1306,7 +1315,7 @@ def get_add_contractor_btn():
     """
     return ViewLink(
         u"Ajouter un entrepreneur",
-        "add",
+        "admin_userdatas",
         path="userdatas",
         _query=dict(action='new'),
     )
@@ -1318,7 +1327,7 @@ def get_userdatas_link_btn():
     """
     return ViewLink(
         u"Annuaire gestion sociale",
-        "manage",
+        "admin_userdatas",
         path="userdatas",
     )
 
@@ -1331,7 +1340,7 @@ def get_del_btn(user_id):
 Cette action n'est pas réversible."
     return ViewLink(
         u"Supprimer",
-        "manage",
+        "admin_userdatas",
         confirm=message,
         path="user",
         id=user_id,
@@ -1344,10 +1353,10 @@ def mydocuments_view(context, request):
     View callable collecting datas for showing the social docs associated to the
     current user's account
     """
-    if request.user.userdatas is not None:
+    if context.userdatas is not None:
         query = File.query()
         documents = query.filter(
-            File.parent_id == request.user.userdatas.id
+            File.parent_id == context.userdatas.id
         ).all()
     else:
         documents = []
@@ -1357,9 +1366,9 @@ def mydocuments_view(context, request):
     )
 
 
-def includeme(config):
+def add_routes(config):
     """
-        Declare all the routes and views related to this model
+    Add module related routes
     """
     config.add_route("users", "/users")
 
@@ -1397,31 +1406,41 @@ def includeme(config):
 
     config.add_route(
         "templatinghistory",
-        "/py3ostory/{id}",
+        "/py3ostory/{id:\d+}",
         traverse="/templatinghistory/{id}"
     )
 
-    config.add_view(
-        delete_templating_history_view,
-        route_name="templatinghistory",
-        request_param="action=delete",
-        permission="manage",
+    config.add_route(
+        'account',
+        '/account/{id:\d+}',
+        traverse="/users/{id}",
     )
 
-    config.add_route('account', '/account')
+    config.add_route(
+        "mydocuments",
+        "/mydocuments/{id:\d+}",
+        traverse="/users/{id}",
+    )
+
+
+def includeme(config):
+    """
+        Declare all the routes and views related to this model
+    """
+    add_routes(config)
 
     config.add_view(
         UserList,
         route_name='users',
         renderer='users.mako',
-        permission='view'
+        permission='visit'
     )
 
     config.add_view(
         user_view,
         route_name='user',
         renderer='user.mako',
-        permission='view',
+        permission='visit',
     )
 
     config.add_view(
@@ -1429,7 +1448,7 @@ def includeme(config):
         route_name='users',
         renderer='base/formpage.mako',
         request_method='POST',
-        permission='add',
+        permission='add_user',
     )
 
     config.add_view(
@@ -1437,7 +1456,7 @@ def includeme(config):
         route_name='user',
         renderer='base/formpage.mako',
         request_param='action=edit_permanent',
-        permission='manage',
+        permission='edit_user',
     )
 
     config.add_view(
@@ -1445,37 +1464,7 @@ def includeme(config):
         route_name='user',
         renderer='base/formpage.mako',
         request_param='action=edit',
-        permission='manage',
-    )
-
-    config.add_view(
-        UserAccountEditView,
-        route_name='user',
-        renderer='base/formpage.mako',
-        request_param='action=accountedit',
-        permission='edit',
-    )
-
-    config.add_view(
-        UserDatasAdd,
-        route_name='userdatas',
-        request_param='action=new',
-        renderer='/userdata.mako',
-        permission='manage',
-    )
-
-    config.add_view(
-        UserDatasEdit,
-        route_name='userdata',
-        renderer='/userdata.mako',
-        permission='manage'
-    )
-
-    config.add_view(
-        userdata_doctype_view,
-        route_name='userdata',
-        request_param='action=doctype',
-        permission='manage',
+        permission='edit_user',
     )
 
     config.add_view(
@@ -1483,7 +1472,7 @@ def includeme(config):
         route_name='user',
         renderer='base/formpage.mako',
         request_param='action=disable',
-        permission='edit',
+        permission='admin_user',
     )
 
     config.add_view(
@@ -1491,21 +1480,98 @@ def includeme(config):
         route_name='user',
         renderer='base/formpage.mako',
         request_param='action=enable',
-        permission='edit'
+        permission='admin_user'
+    )
+
+    config.add_view(
+        UserAccountView,
+        route_name='account',
+        renderer='account.mako',
+        permission='edit_user'
+    )
+
+    config.add_view(
+        UserAccountEditView,
+        route_name='user',
+        renderer='base/formpage.mako',
+        request_param='action=accountedit',
+        permission='edit_user',
     )
 
     config.add_view(
         user_delete,
         route_name='user',
         request_param='action=delete',
-        permission='manage'
+        permission='admin_user'
+    )
+
+    # Userdatas specific view
+    config.add_view(
+        UserDatasListView,
+        route_name="userdatas",
+        renderer="userdatas.mako",
+        permission="admin_userdatas",
+    )
+
+    config.add_view(
+        UserDatasXlsView,
+        route_name="userdatas.xls",
+        permission="admin_userdatas",
+    )
+
+    config.add_view(
+        UserDatasOdsView,
+        route_name="userdatas.ods",
+        permission="admin_userdatas",
+    )
+
+    config.add_view(
+        UserDatasCsvView,
+        route_name="userdatas.csv",
+        permission="admin_userdatas",
+    )
+
+    config.add_view(
+        UserDatasAdd,
+        route_name='userdatas',
+        request_param='action=new',
+        renderer='/userdata.mako',
+        permission='admin_userdatas',
+    )
+
+    config.add_view(
+        UserDatasEdit,
+        route_name='userdata',
+        renderer='/userdata.mako',
+        permission='admin_userdatas'
     )
 
     config.add_view(
         userdatas_delete,
         route_name='userdata',
         request_param='action=delete',
-        permission='manage'
+        permission='admin_userdatas'
+    )
+
+    config.add_view(
+        userdata_doctype_view,
+        route_name='userdata',
+        request_param='action=doctype',
+        permission='admin_userdatas',
+    )
+
+    config.add_view(
+        py3o_view,
+        route_name="userdata",
+        request_param="action=py3o",
+        permission="admin_userdatas",
+    )
+
+    config.add_view(
+        delete_templating_history_view,
+        route_name="templatinghistory",
+        request_param="action=delete",
+        permission="admin_userdatas",
     )
 
     config.add_view(
@@ -1513,62 +1579,20 @@ def includeme(config):
         route_name='userdata',
         request_param='action=associate',
         renderer="base/formpage.mako",
-        permission='manage'
+        permission='admin_userdatas'
     )
 
-    config.add_view(
-        UserAccountView,
-        route_name='account',
-        renderer='account.mako',
-        permission='view'
-    )
-
-    config.add_view(
-        UserDatasListView,
-        route_name="userdatas",
-        renderer="userdatas.mako",
-        permission="manage",
-    )
-
-    config.add_view(
-        UserDatasXlsView,
-        route_name="userdatas.xls",
-        permission="manage",
-    )
-
-    config.add_view(
-        UserDatasOdsView,
-        route_name="userdatas.ods",
-        permission="manage",
-    )
-
-    config.add_view(
-        UserDatasCsvView,
-        route_name="userdatas.csv",
-        permission="manage",
-    )
-
-    config.add_view(
-        py3o_view,
-        route_name="userdata",
-        request_param="action=py3o",
-        permission="view",
-    )
     config.add_view(
         FileUploadView,
         route_name="userdata",
         renderer='base/formpage.mako',
-        permission='manage',
+        permission='admin_userdatas',
         request_param='action=attach_file',
     )
     # Add the social documents display view
-    config.add_route(
-        "mydocuments",
-        "/mydocuments",
-    )
     config.add_view(
         mydocuments_view,
         route_name="mydocuments",
         renderer="mydocuments.mako",
-        permission="view",
+        permission="view_user",
     )

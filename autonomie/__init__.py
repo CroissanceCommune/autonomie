@@ -131,6 +131,10 @@ def main(global_config, **settings):
     configure_filedepot(settings)
     config.configure_celery(global_config['__file__'])
 
+    config.commit()
+    for i in config.introspector.get_category('permissions'):
+        print(i['introspectable'].discriminator)
+
     return config.make_wsgi_app()
 
 

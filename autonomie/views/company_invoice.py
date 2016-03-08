@@ -374,7 +374,7 @@ def includeme(config):
         CompanyInvoicesList,
         route_name='company_invoices',
         renderer='invoices.mako',
-        permission='edit'
+        permission='list_invoices'
     )
 
     config.add_view(

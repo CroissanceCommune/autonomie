@@ -27,6 +27,7 @@ import colander
 from deform import widget
 from autonomie import forms
 
+
 def get_customers_from_request(request):
     project = request.context.project
     company = project.company
@@ -57,8 +58,8 @@ def deferred_default_customer(node, kw):
 
 def get_project_options(request):
     customer = get_current_customer_from_request(request)
-    return [(pro.id, u"%s (%s)" % (pro.name, pro.code)) \
-                                for pro in customer.projects]
+    return [(pro.id, u"%s (%s)" % (pro.name, pro.code))
+            for pro in customer.projects]
 
 
 @colander.deferred
@@ -178,7 +179,7 @@ def remove_some_fields(schema, kw):
     if len(request.context.project.phases) == 1:
         del(schema['phase_id'])
 
-    if request.user.is_contractor():
+    if request.has_permission('admin_task', request.context):
         del(schema['taskDate'])
 
     return schema

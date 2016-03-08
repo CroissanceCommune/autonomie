@@ -152,7 +152,7 @@ ${form|n}
 AppOptions = {};
 AppOptions['loadurl'] = "${load_options_url}";
 AppOptions['load_catalog_url'] = "${load_catalog_url}";
-% if request.user.is_contractor():
+% if api.has_permission('admin_treasury', request.context):
     AppOptions['manager'] = false;
 % else:
     AppOptions['manager'] = true;

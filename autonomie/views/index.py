@@ -47,11 +47,15 @@ def index(request):
                                             _query=dict(action='index')))
     else:
         for company in companies:
-            company.url = request.route_path("company", id=company.id,
-                                            _query=dict(action='index'))
+            company.url = request.route_path(
+                "company",
+                id=company.id,
+                _query=dict(action='index')
+            )
         return dict(
-                    title=u"Bienvenue dans Autonomie",
-                    companies=user.companies)
+            title=u"Bienvenue dans Autonomie",
+            companies=user.companies
+        )
 
 
 def includeme(config):
@@ -59,4 +63,9 @@ def includeme(config):
         Adding the index view on module inclusion
     """
     config.add_route("index", "/")
-    config.add_view(index, route_name='index', renderer='index.mako')
+    config.add_view(
+        index,
+        route_name='index',
+        renderer='index.mako',
+        permission='view'
+    )

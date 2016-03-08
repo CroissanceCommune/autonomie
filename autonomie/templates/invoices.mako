@@ -30,7 +30,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    % if is_admin:
+    % if api.has_permission('admin_treasury', request.context):
         ${pdf_export_btn.render(request)|n}
     % endif
     </li>

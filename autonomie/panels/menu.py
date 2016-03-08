@@ -320,7 +320,7 @@ def get_usermenu(request):
         Return the user menu (My account, holidays ...)
     """
     menu = Menu()
-    href = request.route_path('account')
+    href = request.route_path('account', id=request.user.id)
     menu.add_item(u"Mon compte", icon='fa fa-cog', href=href)
 
     href = request.route_path('user_holidays', id=request.user.id)
@@ -328,7 +328,7 @@ def get_usermenu(request):
 
     # C'est un entrepreneur
     if request.user.has_userdatas():
-        href = request.route_path('mydocuments')
+        href = request.route_path('mydocuments', id=request.user.id)
         menu.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
 
         href = request.route_path('competences')
@@ -348,16 +348,13 @@ def menu_panel(context, request):
     if not getattr(request, 'user'):
         return {}
 
-    # If we don't have view perm, go on, there is nothing to do
-    if not has_permission("view", request.context, request):
-        return {}
+#    # If we don't have view perm, go on, there is nothing to do
+#    if not has_permission("view", request.context, request):
+#        return {}
 
     cid = get_cid(request)
-    log.debug(u"Got the cid")
-    log.debug(u"Check the user's status")
     if request.user.is_admin() or request.user.is_manager():
         menu = get_admin_menus(request)
-        log.debug(u"Add admin menu")
     elif cid:
         menu = get_company_menu(request, cid)
         companies = get_companies(request)
@@ -382,9 +379,9 @@ def submenu_panel(context, request):
     # If we've no user in the current request, we don't return anything
     if not getattr(request, 'user'):
         return {}
-    # If we don't have view perm, go on, there is nothing to do
-    if not has_permission("view", request.context, request):
-        return {}
+#    # If we don't have view perm, go on, there is nothing to do
+#    if not has_permission("view", request.context, request):
+#        return {}
 
     # There are no submenus for non admins
     if not request.user.is_admin() and not request.user.is_manager():
@@ -413,8 +410,16 @@ def includeme(config):
     """
         Pyramid's inclusion mechanism
     """
-    config.add_panel(menu_panel, 'menu', renderer='/panels/menu.mako')
-    config.add_panel(submenu_panel, 'submenu', renderer='/panels/menu.mako')
+    config.add_panel(
+        menu_panel,
+        'menu',
+        renderer='/panels/menu.mako',
+    )
+    config.add_panel(
+        submenu_panel,
+        'submenu',
+        renderer='/panels/menu.mako',
+    )
     config.add_panel(
         admin_nav_panel,
         'admin_nav',

@@ -53,7 +53,7 @@ def deferred_edit_adminonly_widget(node, kw):
         return a deferred adminonly edit widget
     """
     request = kw['request']
-    if request.user.is_contractor():
+    if request.has_permission('admin_company', request.context):
         return deform_extensions.DisabledInput()
     else:
         return deform.widget.TextInputWidget()
@@ -89,7 +89,8 @@ def remove_admin_fields(schema, kw):
     """
         Remove admin only fields from the company schema
     """
-    if kw['request'].user.is_contractor():
+    request = kw['request']
+    if not request.has_permission("admin_treasury", request.context):
         del schema['RIB']
         del schema['IBAN']
         del schema['code_compta']
@@ -126,9 +127,10 @@ class CompanySchema(colander.MappingSchema):
     """
     user_id = forms.id_node()
     name = colander.SchemaNode(
-            colander.String(),
-            widget=deferred_edit_adminonly_widget,
-            title=u'Nom')
+        colander.String(),
+        widget=deferred_edit_adminonly_widget,
+        title=u'Nom'
+    )
 
     goal = colander.SchemaNode(
             colander.String(),

@@ -156,8 +156,6 @@ class ViewLink(Widget, PermWidget):
         """
         request = self.request or request
         cur_path = request.current_route_path()
-        if 'action' in request.GET:
-            cur_path += "?action=%s" % request.GET['action']
         return urllib.unquote(cur_path) == self.url(request)
 
 

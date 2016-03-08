@@ -892,5 +892,5 @@ def includeme(config):
             page_obj,
             route_name=route,
             renderer="admin/sage_export.mako",
-            permission="admin"
+            permission="admin_treasury"
         )

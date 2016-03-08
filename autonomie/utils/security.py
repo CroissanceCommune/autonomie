@@ -85,13 +85,14 @@ from autonomie.models.sale_product import (
     SaleProductCategory,
 )
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 DEFAULT_PERM = [
-    (Allow, "group:admin", ALL_PERMISSIONS,),
+    (Allow, "group:admin", ALL_PERMISSIONS, ),
     (Deny, "group:manager", ('admin', )),
-    (Allow, "group:manager", ALL_PERMISSIONS,),
+    (Allow, "group:manager", ALL_PERMISSIONS, ),
+    (Allow, "group:contractor", ('visit',), ),
 ]
 
 
@@ -240,11 +241,19 @@ def get_company_acl(self):
         Compute the company's acls
     """
     acl = DEFAULT_PERM[:]
-    acl.append((Allow, Authenticated, 'view',))
     acl.extend(
         [(Allow,
           u"%s" % user.login,
-          ("view", "edit", "add"))
+          (
+              "view_company",
+              "edit_company",
+              "list_customers",
+              "add_customers",
+              "list_invoices",
+              "list_projects",
+              "add_project",
+              "view_files",
+          ))
          for user in self.employees]
     )
     return acl
@@ -255,12 +264,20 @@ def get_user_acl(self):
         Get acls for user account edition
     """
     acl = DEFAULT_PERM[:]
-    acl.append(
-        (Allow,
-         u"%s" % self.login,
-         ("view", "edit", "add"))
-    )
-    acl.append((Allow, Authenticated, ('view')))
+    if self.enabled():
+        acl.append(
+            (
+                Allow,
+                self.login,
+                (
+                    "view_user",
+                    "edit_user",
+                    'list_holidays',
+                    'add_holiday',
+                )
+            )
+        )
+        acl.append((Allow, Authenticated, ('visit')))
     return acl
 
 
@@ -312,7 +329,7 @@ def get_customer_acls(self):
     acl = DEFAULT_PERM[:]
     for user in self.company.employees:
         acl.append(
-            (Allow, user.login, ('view', 'edit', 'add'))
+            (Allow, user.login, ('view_customer', 'edit_customer',))
         )
     return acl
 
@@ -331,7 +348,21 @@ def get_project_acls(self):
     acl = DEFAULT_PERM[:]
     for user in self.company.employees:
         acl.append(
-            (Allow, user.login, ('view', 'edit', 'add'))
+            (
+                Allow,
+                user.login,
+                (
+                    'view_project',
+                    'edit_project',
+                    'add_project',
+                    'edit_phase',
+                    'add_phase',
+                    'add_estimation',
+                    'add_invoice',
+                    'list_estimations',
+                    'list_invoices',
+                )
+            )
         )
         if "estimation_validation" in user.groups:
             # The user can validate its estimations

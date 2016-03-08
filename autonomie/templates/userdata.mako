@@ -217,7 +217,7 @@
                 Vous devez déposer des modèles de document dans Autonomie pour pouvoir accéder à cet outil.
                     <br />
             % endif
-            % if request.user.is_admin():
+            % if api.has_permission('admin', request.context):
                 <a class='btn btn-success'
                     href="${request.route_path('templates')}">
                 <i class="glyphicon glyphicon-plus"></i>

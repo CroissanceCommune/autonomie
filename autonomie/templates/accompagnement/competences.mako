@@ -25,7 +25,7 @@
 <div class='row'>
     <div class='col-sm-8 col-sm-offset-2'>
         <form method='POST' enctype="multipart/form-data" accept-charset="utf-8">
-            % if not request.user.is_contractor():
+            % if api.has_permission('admin_competences', request.context):
                 <div class="form-group">
                     <label for="contractor_id">Entrepreneur à évaluer</label>
                         <select name='contractor_id' class='form-control'>

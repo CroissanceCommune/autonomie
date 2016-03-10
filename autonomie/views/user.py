@@ -414,7 +414,7 @@ class UserAccountView(BaseFormView):
         logger.info(u"# User {0} has changed his password #".format(
             self.context.login))
         new_pass = appstruct['pwd']
-        self.request.user.set_password(new_pass)
+        self.context.set_password(new_pass)
         self.dbsession.merge(self.context)
         self.request.session.flash(u"Votre mot de passe a bien été modifié")
         return HTTPFound(

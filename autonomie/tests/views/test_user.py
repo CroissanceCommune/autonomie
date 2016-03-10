@@ -27,7 +27,7 @@ from autonomie.tests.base import (
 )
 from autonomie.models.user import User
 
-PWD = "Tést$!Pass"
+PWD = u"Tést$!Pass"
 COMPANIES = ['company 1', 'company 2']
 
 APPSTRUCT = {
@@ -35,7 +35,7 @@ APPSTRUCT = {
     "lastname": u'lastname__\xe9\xe9',
     "firstname": u'firstname__éé',
     "email": u"Test@example.com",
-    'pwd': "Tést$!Pass",
+    'pwd': u"Tést$!Pass",
     'companies':COMPANIES,
 }
 
@@ -49,7 +49,8 @@ def user(config, get_csrf_request_with_db):
     request.context = Dummy(__name__='root')
     view = PermanentUserAddView(request)
     view.submit_success(appstruct)
-    return getone()
+    user = getone()
+    return user
 
 def getone():
     return User.query().filter(User.login==APPSTRUCT['login']).first()
@@ -59,10 +60,10 @@ def test_myaccount_success(config, get_csrf_request_with_db, user):
     from autonomie.views.user import UserAccountView
     config.add_route('account', '/account')
     req = get_csrf_request_with_db()
-    req.user = user
+    req.context = user
     view = UserAccountView(req)
     view.submit_success({'pwd':u"Né^PAs$$ù"})
-    assert req.user.auth(u"Né^PAs$$ù")
+    assert user.auth(u"Né^PAs$$ù")
 
 
 def test_delete(config, dbsession, get_csrf_request_with_db, user):

@@ -148,6 +148,7 @@ def get_company_menu(request, cid, css=None):
     href = request.route_path("company_projects", id=cid)
     menu.add_item(u"Projets", icon="fa fa-folder-open-o", href=href)
 
+    # Gestion
     gestion = DropDown(label=u"Gestion")
 
     href = request.route_path("company_invoices", id=cid)
@@ -166,15 +167,11 @@ def get_company_menu(request, cid, css=None):
     href = request.route_path("company_expenses", id=cid)
     gestion.add_item(u"Notes de dépense", icon="fa fa-credit-card", href=href)
 
-    href = request.route_path("company_activities", id=cid)
-    gestion.add_item(u"Rendez-vous", icon="fa fa-calendar", href=href)
-
-    href = request.route_path("company_workshops", id=cid)
-    gestion.add_item(u"Ateliers", icon="fa fa-slideshare", href=href)
-
     menu.add(gestion)
 
+    # Docs
     docs = DropDown(label=u"Documents")
+
     href = request.route_path("treasury", id=cid)
     docs.add_item(u"Trésorerie", icon="fa fa-bank", href=href)
 
@@ -192,8 +189,28 @@ def get_company_menu(request, cid, css=None):
         href=href
     )
 
+    # C'est un entrepreneur
+    if request.user.has_userdatas():
+        href = request.route_path('mydocuments', id=request.user.id)
+        docs.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
+
     menu.add(docs)
 
+    # Accompagnement
+    accompagnement = DropDown(label=u"Accompagnement")
+
+    href = request.route_path("company_activities", id=cid)
+    accompagnement.add_item(u"Rendez-vous", icon="fa fa-calendar", href=href)
+
+    href = request.route_path("company_workshops", id=cid)
+    accompagnement.add_item(u"Ateliers", icon="fa fa-slideshare", href=href)
+
+    href = request.route_path('competences')
+    accompagnement.add_item(u"Compétences", href=href, icon="fa fa-star")
+
+    menu.add(accompagnement)
+
+    # Params
     params = DropDown(label=u"Paramètres")
 
     href = request.route_path("company", id=cid)
@@ -320,19 +337,11 @@ def get_usermenu(request):
         Return the user menu (My account, holidays ...)
     """
     menu = Menu()
-    href = request.route_path('account')
+    href = request.route_path('account', id=request.user.id)
     menu.add_item(u"Mon compte", icon='fa fa-cog', href=href)
 
     href = request.route_path('user_holidays', id=request.user.id)
     menu.add_item(u"Mes congés", icon="fa fa-space-shuttle", href=href)
-
-    # C'est un entrepreneur
-    if request.user.has_userdatas():
-        href = request.route_path('mydocuments')
-        menu.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
-
-        href = request.route_path('competences')
-        menu.add_item(u"Mes compétences", icon="fa fa-bar-chart", href=href)
 
     href = request.route_path("logout")
     menu.add_item(u"Déconnexion", icon="fa fa-close", href=href)

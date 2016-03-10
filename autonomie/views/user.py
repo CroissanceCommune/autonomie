@@ -406,7 +406,7 @@ class UserAccountView(BaseFormView):
         """
             Called before view execution
         """
-        appstruct = {'login': self.request.user.login}
+        appstruct = {'login': self.context.login}
         form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
@@ -414,12 +414,14 @@ class UserAccountView(BaseFormView):
             Called on submission success -> changing password
         """
         logger.info(u"# User {0} has changed his password #".format(
-            self.request.user.login))
+            self.context.login))
         new_pass = appstruct['pwd']
         self.request.user.set_password(new_pass)
-        self.dbsession.merge(self.request.user)
+        self.dbsession.merge(self.context)
         self.request.session.flash(u"Votre mot de passe a bien été modifié")
-        return HTTPFound(self.request.route_path('account'))
+        return HTTPFound(
+            self.request.route_path('account', id=self.context.id)
+        )
 
 
 class UserAccountEditView(BaseFormView):
@@ -437,7 +439,7 @@ class UserAccountEditView(BaseFormView):
         self.dbsession.merge(model)
         self.request.session.flash(self.msg)
         return HTTPFound(
-            self.request.route_path('account')
+            self.request.route_path('account', id=self.context.id)
         )
 
 
@@ -1357,9 +1359,9 @@ def mydocuments_view(context, request):
     )
 
 
-def includeme(config):
+def add_routes(config):
     """
-        Declare all the routes and views related to this model
+    Add module related routes
     """
     config.add_route("users", "/users")
 
@@ -1401,14 +1403,31 @@ def includeme(config):
         traverse="/templatinghistory/{id}"
     )
 
+    config.add_route(
+        'account',
+        '/account/{id:\d+}',
+        traverse="/users/{id}",
+    )
+
+    config.add_route(
+        "mydocuments",
+        "/mydocuments/{id:\d+}",
+        traverse="/users/{id}",
+     )
+
+
+
+def includeme(config):
+    """
+        Declare all the routes and views related to this model
+    """
+    add_routes(config)
     config.add_view(
         delete_templating_history_view,
         route_name="templatinghistory",
         request_param="action=delete",
         permission="manage",
     )
-
-    config.add_route('account', '/account')
 
     config.add_view(
         UserList,
@@ -1520,7 +1539,7 @@ def includeme(config):
         UserAccountView,
         route_name='account',
         renderer='account.mako',
-        permission='view'
+        permission='edit'
     )
 
     config.add_view(
@@ -1562,10 +1581,6 @@ def includeme(config):
         request_param='action=attach_file',
     )
     # Add the social documents display view
-    config.add_route(
-        "mydocuments",
-        "/mydocuments",
-    )
     config.add_view(
         mydocuments_view,
         route_name="mydocuments",

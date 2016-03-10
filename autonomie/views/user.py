@@ -404,7 +404,7 @@ class UserAccountView(BaseFormView):
         """
             Called before view execution
         """
-        appstruct = {'login': self.request.user.login}
+        appstruct = {'login': self.context.login}
         form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
@@ -412,13 +412,13 @@ class UserAccountView(BaseFormView):
             Called on submission success -> changing password
         """
         logger.info(u"# User {0} has changed his password #".format(
-            self.request.user.login))
+            self.context.login))
         new_pass = appstruct['pwd']
         self.request.user.set_password(new_pass)
-        self.dbsession.merge(self.request.user)
+        self.dbsession.merge(self.context)
         self.request.session.flash(u"Votre mot de passe a bien été modifié")
         return HTTPFound(
-            self.request.route_path('account', id=self.request.user.id)
+            self.request.route_path('account', id=self.context.id)
         )
 
 
@@ -1428,7 +1428,6 @@ def includeme(config):
         Declare all the routes and views related to this model
     """
     add_routes(config)
-
     config.add_view(
         UserList,
         route_name='users',

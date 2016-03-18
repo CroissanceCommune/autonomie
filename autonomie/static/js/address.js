@@ -49,7 +49,7 @@ var address_handler = {
   },
   selected: function() {
     var customer_id = this.getEl().children('option:selected').val();
-    if (customer_id !== '0'){
+    if (customer_id !== ''){
       return this.get(customer_id);
     }else{
       return null;

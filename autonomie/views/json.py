@@ -26,6 +26,7 @@
     Json API views
 """
 
+
 def json_model_view(request):
     """
         Return a json representation of a model
@@ -45,7 +46,7 @@ def includeme(config):
             renderer='json',
             request_method='GET',
             xhr=True,
-            permission='edit'
+            permission='view_%s' % route_name
         )
 
     config.add_view(

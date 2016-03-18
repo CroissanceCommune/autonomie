@@ -41,15 +41,13 @@ class State(object):
     def __init__(
         self,
         name,
-        permission=None,
+        permission,
         callback=None,
         model_state=True,
         status_attr="status",
         userid_attr="user_id"
     ):
         self.name = name
-        if permission is None:
-            permission = ["edit"]
         if not hasattr(permission, "__iter__"):
             permission = [permission]
         self.permissions = permission
@@ -114,7 +112,7 @@ class StateMachine(object):
                     new_state = [new_state]
                 self.add_transition(state, *new_state)
 
-    def add_transition(self, state, next_, perm=None, callback=None, cae=True):
+    def add_transition(self, state, next_, perm, callback=None, cae=True):
         """
             adds a transition to the state machine
         """

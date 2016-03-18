@@ -29,7 +29,6 @@
 """
 import logging
 
-from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPFound
 
@@ -133,17 +132,17 @@ def context_is_task(context):
     return context.__name__ in DOCUMENT_TYPES
 
 
-def context_is_editable(request, context):
+def context_is_editable(request):
     """
        Return True if the current task can be edited by the current user
     """
-    if not context_is_task(context):
+    if not context_is_task(request.context):
         return True
-    elif context.is_editable():
+    elif request.context.is_editable():
         return True
-    elif has_permission('manage', context, request):
+    elif request.has_permission('validate._%s' % request.context.__name__):
         # MAnager has the right to manage waiting task
-        if context.is_waiting():
+        if request.context.is_waiting():
             return True
     return False
 
@@ -207,26 +206,22 @@ class TaskFormActions(object):
         """
             Return a cancel btn returning the user to the project view
         """
-        if self.request.context.__name__ in DOCUMENT_TYPES:
-            project_id = self.request.context.project.id
-        else:
-            project_id = self.request.context.id
+        project = self.get_project()
         yield ViewLink(
             u"Revenir en arrière",
-            "view",
             path="project",
             css="btn btn-primary",
             request=self.request,
-            id=project_id,
+            id=project.id,
         )
 
     def _pdf_btn(self):
         """
             Return a PDF view btn only if the context is a document
         """
-        if self.request.context.__name__ in DOCUMENT_TYPES:
+        if context_is_task(self.request.context):
             yield ViewLink(u"Voir le PDF",
-                           "view",
+                           "view_%s" % (self.request.context.__name__),
                            path=self.request.context.__name__,
                            css="btn btn-primary",
                            request=self.request,
@@ -590,9 +585,13 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         from autonomie.resources import task_html_pdf_css
         task_html_pdf_css.need()
         # If the task is editable, we go the edit page
-        if context_is_editable(request, request.context):
-            return HTTPFound(request.route_path(request.context.__name__,
-                                                id=request.context.id))
+        if context_is_editable(request):
+            return HTTPFound(
+                request.route_path(
+                    request.context.__name__,
+                    id=request.context.id
+                )
+            )
 
         # Get the label for the given task
         if request.context.__name__ == 'invoice':

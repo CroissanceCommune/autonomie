@@ -33,7 +33,6 @@ from deform import Button
 from deform import Form
 
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 
 from autonomie.exception import Forbidden
 from autonomie.models.tva import Tva
@@ -262,7 +261,7 @@ class InvoiceFormActions(TaskFormActions):
             the payment mode
         """
 
-        if has_permission("manage", self.context, self.request):
+        if self.request.has_permission("add_payment"):
             form = self._paid_form()
             title = u"Notifier un paiement"
             popup = PopUp("paidform", title, form.render())
@@ -370,7 +369,7 @@ class InvoiceEdit(TaskFormView):
         return u"Édition de la facture {task.number}".format(task=self.context)
 
     def before(self, form):
-        if not context_is_editable(self.request, self.context):
+        if not context_is_editable(self.request):
             raise HTTPFound(
                 self.request.route_path(
                     "invoice",
@@ -608,7 +607,10 @@ class AdminInvoice(BaseEditView):
     schema = SQLAlchemySchemaNode(Invoice)
 
 
-def includeme(config):
+def add_routes(config):
+    """
+    add module related routes
+    """
     config.add_route(
         'project_invoices',
         '/projects/{id:\d+}/invoices',
@@ -621,49 +623,44 @@ def includeme(config):
         traverse='/invoices/{id}',
     )
 
+
+def includeme(config):
+    add_routes(config)
+
+    config.add_view(
+        InvoiceAdd,
+        route_name="project_invoices",
+        renderer='tasks/edit.mako',
+        permission='add_invoice',
+    )
+
+    config.add_view(
+        InvoiceEdit,
+        route_name="invoice",
+        renderer='tasks/edit.mako',
+        permission='edit_invoice',
+    )
+
     delete_msg = u"La facture {task.number} a bien été supprimée."
-    config.add_view(
-        task_pdf_view,
-        route_name='invoice',
-        request_param='view=pdf',
-        permission='view',
-    )
-
-    config.add_view(
-        get_task_html_view(InvoiceFormActions),
-        route_name='invoice',
-        renderer='tasks/view_only.mako',
-        permission='view',
-        request_param='view=html',
-    )
-
     config.add_view(
         make_task_delete_view(delete_msg),
         route_name='invoice',
         request_param='action=delete',
-        permission='edit',
+        permission='delete_invoice',
     )
 
     config.add_view(
         InvoiceStatusView,
         route_name='invoice',
         request_param='action=status',
-        permission='edit'
-    )
-
-    config.add_view(
-        register_payment,
-        route_name="invoice",
-        request_param='action=payment',
-        permission="manage",
-        renderer='base/formpage.mako',
+        permission='edit_invoice'
     )
 
     config.add_view(
         duplicate,
         route_name="invoice",
         request_param='action=duplicate',
-        permission="view",
+        permission="edit_invoice",
         renderer='base/formpage.mako',
     )
 
@@ -671,7 +668,7 @@ def includeme(config):
         set_financial_year,
         route_name="invoice",
         request_param='action=set_financial_year',
-        permission="view",
+        permission="admin_treasury",
         renderer='base/formpage.mako',
     )
 
@@ -679,29 +676,23 @@ def includeme(config):
         set_products,
         route_name="invoice",
         request_param='action=set_products',
-        permission="view",
+        permission="admin_treasury",
         renderer='base/formpage.mako',
     )
 
     config.add_view(
-        InvoiceAdd,
-        route_name="project_invoices",
-        renderer='tasks/edit.mako',
-        permission='edit',
-    )
-
-    config.add_view(
-        InvoiceEdit,
+        register_payment,
         route_name="invoice",
-        renderer='tasks/edit.mako',
-        permission='edit',
+        request_param='action=payment',
+        permission="add_payment",
+        renderer='base/formpage.mako',
     )
 
     config.add_view(
         FileUploadView,
         route_name="invoice",
         renderer='base/formpage.mako',
-        permission='edit',
+        permission='edit_invoice',
         request_param='action=attach_file',
     )
 
@@ -711,4 +702,19 @@ def includeme(config):
         renderer="base/formpage.mako",
         permission="admin",
         request_param="token=admin",
+    )
+
+    config.add_view(
+        task_pdf_view,
+        route_name='invoice',
+        request_param='view=pdf',
+        permission='view_invoice',
+    )
+
+    config.add_view(
+        get_task_html_view(InvoiceFormActions),
+        route_name='invoice',
+        renderer='tasks/view_only.mako',
+        permission='view_invoice',
+        request_param='view=html',
     )

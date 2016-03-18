@@ -179,7 +179,7 @@ def remove_some_fields(schema, kw):
     if len(request.context.project.phases) == 1:
         del(schema['phase_id'])
 
-    if request.has_permission('admin_task', request.context):
+    if not request.has_permission('admin_task'):
         del(schema['taskDate'])
 
     return schema

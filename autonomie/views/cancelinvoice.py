@@ -167,7 +167,7 @@ class CancelInvoiceEdit(TaskFormView):
         return u"Édition de l'avoir {task.number}".format(task=self.context)
 
     def before(self, form):
-        if not context_is_editable(self.request, self.context):
+        if not context_is_editable(self.request):
             raise HTTPFound(
                 self.request.route_path(
                     "cancelinvoice",
@@ -266,7 +266,10 @@ class AdminCancelInvoice(BaseEditView):
     schema = SQLAlchemySchemaNode(CancelInvoice)
 
 
-def includeme(config):
+def add_routes(config):
+    """
+    Add module related routes
+    """
     config.add_route(
         'project_cancelinvoices',
         '/projects/{id:\d+}/cancelinvoices',
@@ -279,72 +282,29 @@ def includeme(config):
         traverse='/cancelinvoices/{id}'
     )
 
-    config.add_view(
-        task_pdf_view,
-        route_name='cancelinvoice',
-        request_param='view=pdf',
-        permission='view',
-    )
 
-    config.add_view(
-        get_task_html_view(InvoiceFormActions),
-        route_name='cancelinvoice',
-        renderer='tasks/view_only.mako',
-        permission='view',
-        request_param='view=html',
-    )
-
-    config.add_view(
-        CancelInvoiceStatusView,
-        route_name='cancelinvoice',
-        request_param='action=status',
-        permission='edit',
-    )
+def includeme(config):
+    add_routes(config)
 
     config.add_view(
         CancelInvoiceAdd,
         route_name="project_cancelinvoices",
         renderer="tasks/edit.mako",
-        permission="edit",
+        permission="add_cancelinvoice",
     )
 
     config.add_view(
         CancelInvoiceEdit,
         route_name='cancelinvoice',
         renderer="tasks/edit.mako",
-        permission='edit',
+        permission='edit_cancelinvoice',
     )
 
-    delete_msg = u"L'avoir {task.number} a bien été supprimé."
     config.add_view(
-        make_task_delete_view(delete_msg),
+        CancelInvoiceStatusView,
         route_name='cancelinvoice',
-        request_param='action=delete',
-        permission='edit',
-    )
-
-    config.add_view(
-        set_financial_year,
-        route_name="cancelinvoice",
-        request_param='action=set_financial_year',
-        permission="view",
-        renderer='base/formpage.mako',
-    )
-
-    config.add_view(
-        set_products,
-        route_name="cancelinvoice",
-        request_param='action=set_products',
-        permission="view",
-        renderer='base/formpage.mako',
-    )
-
-    config.add_view(
-        FileUploadView,
-        route_name="cancelinvoice",
-        renderer='base/formpage.mako',
-        permission='edit',
-        request_param='action=attach_file',
+        request_param='action=status',
+        permission='edit_cancelinvoice',
     )
 
     config.add_view(
@@ -353,4 +313,51 @@ def includeme(config):
         renderer="base/formpage.mako",
         permission="admin",
         request_param="token=admin",
+    )
+
+    delete_msg = u"L'avoir {task.number} a bien été supprimé."
+    config.add_view(
+        make_task_delete_view(delete_msg),
+        route_name='cancelinvoice',
+        request_param='action=delete',
+        permission='delete_invoice',
+    )
+
+    config.add_view(
+        set_financial_year,
+        route_name="cancelinvoice",
+        request_param='action=set_financial_year',
+        permission="admin_treasury",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        set_products,
+        route_name="cancelinvoice",
+        request_param='action=set_products',
+        permission="admin_treasury",
+        renderer='base/formpage.mako',
+    )
+
+    config.add_view(
+        FileUploadView,
+        route_name="cancelinvoice",
+        renderer='base/formpage.mako',
+        permission='edit_cancelinvoice',
+        request_param='action=attach_file',
+    )
+
+    config.add_view(
+        task_pdf_view,
+        route_name='cancelinvoice',
+        request_param='view=pdf',
+        permission='view_cancelinvoice',
+    )
+
+    config.add_view(
+        get_task_html_view(InvoiceFormActions),
+        route_name='cancelinvoice',
+        renderer='tasks/view_only.mako',
+        permission='view_cancelinvoice',
+        request_param='view=html',
     )

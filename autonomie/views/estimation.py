@@ -211,7 +211,7 @@ class EstimationEdit(TaskFormView):
         return u"Édition du devis {task.number}".format(task=self.context)
 
     def before(self, form):
-        if not context_is_editable(self.request, self.context):
+        if not context_is_editable(self.request):
             raise HTTPFound(
                 self.request.route_path(
                     "estimation",
@@ -391,7 +391,10 @@ class EstimationList(BaseListView):
         return query
 
 
-def includeme(config):
+def add_routes(config):
+    """
+    Add module's specific routes
+    """
     config.add_route(
         'project_estimations',
         '/projects/{id:\d+}/estimations',
@@ -408,19 +411,29 @@ def includeme(config):
         traverse="/companies/{id}"
     )
 
+
+def includeme(config):
+    add_routes(config)
+
     config.add_view(
-        task_pdf_view,
-        route_name='estimation',
-        request_param='view=pdf',
-        permission='view',
+        EstimationAdd,
+        route_name="project_estimations",
+        renderer='tasks/edit.mako',
+        permission='add_estimation',
     )
 
     config.add_view(
-        get_task_html_view(EstimationFormActions),
+        EstimationEdit,
         route_name='estimation',
-        renderer='tasks/view_only.mako',
-        request_param='view=html',
-        permission='view',
+        renderer='tasks/edit.mako',
+        permission='edit_estimation',
+    )
+
+    config.add_view(
+        EstimationList,
+        route_name="estimations",
+        renderer="estimations.mako",
+        permission="list_estimations",
     )
 
     delete_msg = u"Le devis {task.number} a bien été supprimé."
@@ -428,28 +441,14 @@ def includeme(config):
         make_task_delete_view(delete_msg),
         route_name='estimation',
         request_param='action=delete',
-        permission='edit',
-    )
-
-    config.add_view(
-        EstimationAdd,
-        route_name="project_estimations",
-        renderer='tasks/edit.mako',
-        permission='edit',
-    )
-
-    config.add_view(
-        EstimationEdit,
-        route_name='estimation',
-        renderer='tasks/edit.mako',
-        permission='edit',
+        permission='delete_estimation',
     )
 
     config.add_view(
         duplicate,
         route_name="estimation",
         request_param='action=duplicate',
-        permission="view",
+        permission="edit_estimation",
         renderer='base/formpage.mako',
     )
 
@@ -457,20 +456,28 @@ def includeme(config):
         EstimationStatus,
         route_name="estimation",
         request_param='action=status',
-        permission="edit",
+        permission="edit_estimation",
     )
 
     config.add_view(
-        EstimationList,
-        route_name="estimations",
-        renderer="estimations.mako",
-        permission="edit",
+        task_pdf_view,
+        route_name='estimation',
+        request_param='view=pdf',
+        permission='view_estimation',
+    )
+
+    config.add_view(
+        get_task_html_view(EstimationFormActions),
+        route_name='estimation',
+        renderer='tasks/view_only.mako',
+        request_param='view=html',
+        permission='view_estimation',
     )
 
     config.add_view(
         FileUploadView,
         route_name="estimation",
         renderer='base/formpage.mako',
-        permission='edit',
+        permission='edit_estimation',
         request_param='action=attach_file',
     )

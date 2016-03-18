@@ -77,7 +77,7 @@
                 <div class='panel-heading'>
                     <h3>${option.label}</h3>
                 </div>
-                    <table class='table table-stripped table-condensed table-bordered'>
+                    <table class='table table-striped table-condensed table-bordered'>
                     <thead>
                         <tr>
                             <th style='width: 30%'></th>
@@ -121,7 +121,7 @@
                                         <td style='min-width:15px'>
                                             % if grid_subitem.scale.id == scale.id:
                                                 <div class='text-center'
-                                                style="background-color: #545454;with:100%;height:100%;"
+                                                    style="with:100%;height:100%;"
                                             >
                                             <i class='fa fa-check'></i>
                                             % endif
@@ -145,7 +145,7 @@
 <div class='row'>
     <div class='col-xs-12'>
         <h2 class='text-center'>Axe de progrès identifiés</h2>
-        <table class='table table-stripped table-condensed table-bordered'>
+        <table class='table table-striped table-condensed table-bordered'>
             <thead>
                 <th>Compétences</th>
                 <th>Axe de progrès</th>

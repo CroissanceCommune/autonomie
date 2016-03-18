@@ -35,7 +35,8 @@
                         </select>
                 </div>
             % else:
-                <input type="hidden" name='contractor_id' value="${request.user.id}" />
+                <div><b>Mes compétences</b></div>
+                <input type="hidden" name='contractor_id' value="${request.context.id}" />
             % endif
             <div class='row'>
                 <div class='col-sm-6 col-sm-offset-3'>

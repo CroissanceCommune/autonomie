@@ -28,7 +28,6 @@ Competence evaluation module
 """
 import logging
 import colander
-import functools
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import func
 
@@ -50,7 +49,9 @@ from autonomie.resources import (
     competence_js,
     competence_radar_js,
 )
-from autonomie.forms.competence import CompetenceGridQuerySchema
+from autonomie.forms.competence import (
+    CompetenceGridQuerySchema
+)
 from autonomie.views import (
     BaseView,
     BaseRestView,
@@ -87,35 +88,63 @@ def get_competence_grid(request, contractor_id, deadline_id):
     return grid
 
 
-def competence_index_view(request):
+def redirect_to_competence_grid(request, appstruct):
     """
-    Index view to go to a competence grid
+    Redirect to the appropriate competence grid
     """
-    competence_js.need()
-    user_options = get_users_options(roles=['contractor'])
-    deadlines = CompetenceDeadline.query().all()
-    if 'deadline' in request.POST or 'sheet' in request.POST:
-        logger.debug(request.POST)
-        schema = CompetenceGridQuerySchema.bind(request=request)
-        try:
-            appstruct = schema.deserialize(request.POST)
-        except colander.Invalid:
+    # On récupère l'id du user pour l'évaluation
+    contractor_id = appstruct['contractor_id']
+    # L'id de la période d'évaluation
+    deadline_id = appstruct['deadline']
+    # On redirige vers la page appropriée
+    grid = get_competence_grid(
+        request,
+        contractor_id,
+        deadline_id
+    )
+    url = request.route_path("competence_grid", id=grid.id)
+    return HTTPFound(url)
+
+
+def validate_competence_grid_query(request):
+    """
+    Validate datas posted to access a competence grid
+
+    :param obj request: The pyramid request
+    """
+    schema = CompetenceGridQuerySchema.bind(request=request)
+    try:
+        appstruct = schema.deserialize(request.POST)
+    except colander.Invalid:
             logger.exception(u"Erreur dans le routage de la page de \
 compétences : POSSIBLE BREAK IN ATTEMPT")
-        else:
-            # On récupère l'id du user pour l'évaluation
-            contractor_id = appstruct['contractor_id']
-            # L'id de la période d'évaluation
-            deadline_id = appstruct['deadline']
+    else:
+        return appstruct
+    return None
 
-            # On redirige vers la page appropriée
-            grid = get_competence_grid(
-                request,
-                contractor_id,
-                deadline_id
-            )
-            url = request.route_path("competence_grid", id=grid.id)
-            return HTTPFound(url)
+
+def competence_index_view(context, request):
+    """
+    Index view to go to a competence grid
+
+    Both admin and user view
+
+    :param obj request: The pyramid request
+    """
+    competence_js.need()
+    # Don't return list of users to the template if we come here through the
+    # user menu
+    if not request.has_permission('admin_competences'):
+        user_options = []
+    else:
+        user_options = get_users_options(roles=['contractor'])
+
+    deadlines = CompetenceDeadline.query().all()
+    if 'deadline' in request.POST:
+        logger.debug(request.POST)
+        appstruct = validate_competence_grid_query(request)
+        if appstruct is not None:
+            return redirect_to_competence_grid(request, appstruct)
 
     return {
         'title': u'Évaluation des compétences',
@@ -131,7 +160,7 @@ def competence_grid_view(context, request):
     request.actionmenu.add(
         widgets.ViewLink(
             u"Page précédente",
-            "view",
+            "admin_competences",
             path="competences",
         )
     )
@@ -185,7 +214,7 @@ def competence_radar_chart_view(context, request):
     request.actionmenu.add(
         widgets.ViewLink(
             u"Revenir au formulaire",
-            "view",
+            "view_competence",
             path="competence_grid",
             id=context.id
         )
@@ -311,11 +340,16 @@ class RestCompetenceGridSubItem(BaseRestView):
         return self.context.subitems
 
 
-def includeme(config):
+def add_routes(config):
     """
-    Pyramid's inclusion mechanism
+    Add module related routes
     """
     config.add_route('competences', '/competences')
+    config.add_route(
+        'user_competences',
+        '/users/{id}/competences/',
+        traverse='/users/{id}',
+    )
     config.add_route(
         'competence_grid',
         '/competences/{id}',
@@ -346,38 +380,53 @@ def includeme(config):
         traverse='/competence_subitems/{sid}',
     )
 
+
+def includeme(config):
+    """
+    Pyramid's inclusion mechanism
+    """
+    def add_json_view(obj, **kw):
+        kw['renderer'] = 'json'
+        kw['xhr'] = True
+        kw.setdefault('permission', 'edit_competence')
+        config.add_view(obj, **kw)
+
+    add_routes(config)
+    # Same view for user and admin but with different routes and permissions
     config.add_view(
         competence_index_view,
         route_name='competences',
         renderer='/accompagnement/competences.mako',
-        permission='view',
+        permission='admin_competences',
+    )
+
+    config.add_view(
+        competence_index_view,
+        route_name='user_competences',
+        renderer='/accompagnement/competences.mako',
+        permission='list_competences',
     )
 
     config.add_view(
         competence_grid_view,
         route_name='competence_grid',
         renderer='/accompagnement/competence.mako',
-        permission="edit",
+        permission="edit_competence",
     )
     config.add_view(
         competence_radar_chart_view,
         route_name='competence_grid',
         renderer='/accompagnement/competence_resume.mako',
-        permission="edit",
+        permission="view_competence",
         request_param="action=radar",
     )
 
-    add_json_view = functools.partial(
-        config.add_view,
-        renderer='json',
-        permission='edit',
-        xhr=True,
-    )
     add_json_view(
         RestCompetenceGrid,
         attr="get",
         route_name='competence_grid',
         request_method="GET",
+        permission='view_competence',
     )
 
     add_json_view(
@@ -385,6 +434,7 @@ def includeme(config):
         attr="collection_get",
         route_name='competence_grid_items',
         request_method="GET",
+        permission='view_competence',
     )
 
     add_json_view(
@@ -392,6 +442,7 @@ def includeme(config):
         attr="collection_get",
         route_name='competence_grid_subitems',
         request_method="GET",
+        permission='view_competence',
     )
 
     add_json_view(
@@ -413,9 +464,11 @@ def includeme(config):
         route_name='competence_grid',
         request_method='GET',
         request_param="action=options",
+        permission='view_competence',
     )
     add_json_view(
         competence_radar_chart_datas,
         route_name='competence_grid',
         request_param="action=radar",
+        permission='view_competence',
     )

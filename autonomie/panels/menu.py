@@ -205,7 +205,7 @@ def get_company_menu(request, cid, css=None):
     href = request.route_path("company_workshops", id=cid)
     accompagnement.add_item(u"Ateliers", icon="fa fa-slideshare", href=href)
 
-    href = request.route_path('competences')
+    href = request.route_path('user_competences', id=request.user.id)
     accompagnement.add_item(u"Compétences", href=href, icon="fa fa-star")
 
     menu.add(accompagnement)
@@ -364,6 +364,7 @@ def menu_panel(context, request):
     cid = get_cid(request)
     if request.user.is_admin() or request.user.is_manager():
         menu = get_admin_menus(request)
+
     elif cid:
         menu = get_company_menu(request, cid)
         companies = get_companies(request)

@@ -403,6 +403,10 @@ class CompetenceGridItem(DBBASE):
     def __radar_datas__(self):
         return {'axis': self.option.label, 'value': self.average}
 
+    @property
+    def contractor(self):
+        return self.grid.contractor
+
 
 class CompetenceGridSubItem(DBBASE):
     """
@@ -452,3 +456,7 @@ class CompetenceGridSubItem(DBBASE):
         if result is None:  # No scale is lower than evaluation
             result = scales.first()
         return result
+
+    @property
+    def contractor(self):
+        return self.item.grid.contractor

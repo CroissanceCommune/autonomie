@@ -316,9 +316,14 @@ def compute_turnover_percent(index, projections, turnovers):
 
 
 def includeme(config):
-    config.add_route("commercial_handling", "/company/{id:\d+}/commercial",
-                        traverse='/companies/{id}')
-    config.add_view(DisplayCommercialHandling,
-                    route_name="commercial_handling",
-                    renderer="treasury/commercial.mako",
-                    permission="edit")
+    config.add_route(
+        "commercial_handling",
+        "/company/{id:\d+}/commercial",
+        traverse='/companies/{id}',
+    )
+    config.add_view(
+        DisplayCommercialHandling,
+        route_name="commercial_handling",
+        renderer="treasury/commercial.mako",
+        permission="edit_commercial_handling",
+    )

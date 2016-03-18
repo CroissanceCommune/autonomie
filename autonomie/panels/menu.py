@@ -100,18 +100,26 @@ class DropDown(Menu):
     __type__ = "dropdown"
 
 
-def get_cid(request):
+def get_cid(request, submenu=False):
     """
         Extract the current company id from the request, if there is one
+
+    :param obj request: the pyramid request
+    :param bool submenu: Do we ask this for the submenu ?
     """
     cid = None
-    if len(request.user.companies) == 1 and request.user.is_contractor():
+    if len(request.user.companies) == 1 and not submenu:
         cid = request.user.companies[0].id
-    # The requests context provide a get_company_id utility that allows to
+
+    # The current context provide a get_company_id utility that allows to
     # retrieve the concerned company
     elif hasattr(request, "context"):
         if hasattr(request.context, "get_company_id"):
             cid = request.context.get_company_id()
+
+    else:
+        return request.user.companies[0].id
+
     return cid
 
 
@@ -120,7 +128,7 @@ def get_companies(request):
         Retrieve the companies the current user has access to
     """
     companies = []
-    if request.user.is_admin() or request.user.is_manager():
+    if request.has_permission('manage'):
         companies = Company.query().all()
     else:
         companies = request.user.companies
@@ -242,7 +250,7 @@ def get_admin_menus(request):
 
     menu.add(documents)
 
-    if has_permission("admin", request.context, request):
+    if has_permission("admin_treasury", request.context, request):
         treasury = DropDown(label=u"Comptabilité")
 
         href = request.route_path("sage_invoice_export")
@@ -357,12 +365,12 @@ def menu_panel(context, request):
     if not getattr(request, 'user'):
         return {}
 
-#    # If we don't have view perm, go on, there is nothing to do
-#    if not has_permission("view", request.context, request):
-#        return {}
+    usermenu = get_usermenu(request)
 
+    menu = None
     cid = get_cid(request)
-    if request.user.is_admin() or request.user.is_manager():
+
+    if request.has_permission('manage'):
         menu = get_admin_menus(request)
 
     elif cid:
@@ -372,14 +380,14 @@ def menu_panel(context, request):
         # provide a usefull dropdown menu
         if len(companies) > 1:
             menu.insert(company_choice(request, companies, cid))
-    else:
-        return {"usermenu": get_usermenu(request)}
 
     href = request.route_path("users")
     menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
-    log.debug(u"Retrive the usermenu")
-    ret_dict = {'menu': menu, "usermenu": get_usermenu(request)}
-    return ret_dict
+
+    return {
+        'menu': None,
+        'usermenu': usermenu,
+    }
 
 
 def submenu_panel(context, request):
@@ -389,17 +397,15 @@ def submenu_panel(context, request):
     # If we've no user in the current request, we don't return anything
     if not getattr(request, 'user'):
         return {}
-#    # If we don't have view perm, go on, there is nothing to do
-#    if not has_permission("view", request.context, request):
-#        return {}
 
     # There are no submenus for non admins
-    if not request.user.is_admin() and not request.user.is_manager():
+    if not request.has_permission('manage'):
         return {}
 
     cid = get_cid(request)
     if not cid:
         return {}
+
     submenu = get_company_menu(request, cid, "nav-pills")
     if submenu:
         companies = get_companies(request)

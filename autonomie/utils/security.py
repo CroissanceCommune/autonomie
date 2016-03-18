@@ -249,11 +249,13 @@ def get_company_acl(self):
                 "edit_company",
                 "list_customers",
                 "add_customers",
+                'list_estimations',
                 "list_invoices",
                 "list_projects",
                 "add_project",
                 "view_files",
                 "list_activities",
+                "edit_commercial_handling",
             )
         )for user in self.employees]
     )
@@ -275,6 +277,7 @@ def get_user_acl(self):
                     "edit_user",
                     'list_holidays',
                     'add_holiday',
+                    'list_competences',
                 )
             )
         )
@@ -282,26 +285,17 @@ def get_user_acl(self):
     return acl
 
 
-def get_task_acl(self):
-    """
-        return the acls of the current task object
-    """
-    acl = DEFAULT_PERM[:]
-    acl.extend(
-        [(Allow,
-          u"%s" % user.login,
-          ("view", "edit", "add"))
-         for user in self.project.company.employees]
-    )
-    return acl
-
-
 def get_estimation_acl(self):
     """
     Return the acls for estimations
     """
-    acls = get_task_acl(self)
+    acls = DEFAULT_PERM[:]
     for user in self.project.company.employees:
+        acls.append((
+            Allow,
+            user.login,
+            ('view_estimation', 'edit_estimation', 'delete_estimation')
+        ))
         if "estimation_validation" in user.groups:
             acls.append((Allow, user.login, ("valid.estimation")))
         else:
@@ -314,8 +308,31 @@ def get_invoice_acl(self):
     """
     Return the acls for invoices
     """
-    acls = get_task_acl(self)
+    acls = DEFAULT_PERM[:]
     for user in self.project.company.employees:
+        acls.append((
+            Allow,
+            user.login,
+            ('view_invoice', 'edit_invoice', 'delete_invoice')
+        ))
+        if "invoice_validation" in user.groups:
+            acls.append((Allow, user.login, ("valid.invoice")))
+        else:
+            acls.append((Allow, user.login, ("wait.invoice")))
+    return acls
+
+
+def get_cancelinvoice_acl(self):
+    """
+    Return the acls for cancelinvoices
+    """
+    acls = DEFAULT_PERM[:]
+    for user in self.project.company.employees:
+        acls.append((
+            Allow,
+            user.login,
+            ('view_cancelinvoice', 'edit_cancelinvoice', 'delete_cancelinvoice')
+        ))
         if "invoice_validation" in user.groups:
             acls.append((Allow, user.login, ("valid.invoice")))
         else:
@@ -451,22 +468,17 @@ def get_competence_acl(self):
     Return acls for the Competence Grids objects
     """
     acls = DEFAULT_PERM[:]
-    for right in ('view', 'edit'):
-        acls.append((Allow, u'%s' % self.contractor.login, right))
-    return acls
-
-
-def get_competence_item_acl(self):
-    acls = DEFAULT_PERM[:]
-    for right in ('view', 'edit'):
-        acls.append((Allow, u'%s' % self.grid.contractor.login, right))
-    return acls
-
-
-def get_competence_subitem_acl(self):
-    acls = DEFAULT_PERM[:]
-    for right in ('view', 'edit'):
-        acls.append((Allow, u'%s' % self.item.grid.contractor.login, right))
+    login = self.contractor.login
+    acls.append(
+        (
+            Allow,
+            u'%s' % login,
+            (
+                "view_competence",
+                "edit_competence"
+            )
+        )
+    )
     return acls
 
 
@@ -479,11 +491,11 @@ def set_models_acls():
     """
     Activity.__default_acl__ = property(get_activity_acl)
     BaseExpenseLine.__default_acl__ = property(get_expense_acl)
-    CancelInvoice.__default_acl__ = property(get_invoice_acl)
+    CancelInvoice.__default_acl__ = property(get_cancelinvoice_acl)
     Company.__default_acl__ = property(get_company_acl)
     CompetenceGrid.__acl__ = property(get_competence_acl)
-    CompetenceGridItem.__acl__ = property(get_competence_item_acl)
-    CompetenceGridSubItem.__acl__ = property(get_competence_subitem_acl)
+    CompetenceGridItem.__acl__ = property(get_competence_acl)
+    CompetenceGridSubItem.__acl__ = property(get_competence_acl)
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'), ]
     Customer.__default_acl__ = property(get_customer_acls)
     Estimation.__default_acl__ = property(get_estimation_acl)

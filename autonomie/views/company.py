@@ -42,7 +42,6 @@ from webhelpers.html.builder import HTML
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 
 from autonomie.models.company import (
     Company,
@@ -371,7 +370,7 @@ def populate_actionmenu(request, company=None):
     request.actionmenu.add(get_list_view_btn())
     if company is not None:
         request.actionmenu.add(get_view_btn(company.id))
-        if has_permission('edit_company', request.context, request):
+        if request.has_permission('edit_company'):
             request.actionmenu.add(get_edit_btn(company.id))
             if not company.enabled():
                 request.actionmenu.add(get_enable_btn(company.id))

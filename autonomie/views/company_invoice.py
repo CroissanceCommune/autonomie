@@ -352,7 +352,11 @@ votre administrateur si le problème persiste.", queue="error")
                 u"Aucune facture n'a pu être retrouvée",
                 queue="error"
             )
-    gotolist_btn = ViewLink(u"Liste des factures", "edit", path="invoices")
+    gotolist_btn = ViewLink(
+        u"Liste des factures",
+        "admin_invoices",
+        path="invoices"
+    )
     request.actionmenu.add(gotolist_btn)
     return dict(
         title=u"Export massif de factures au format PDF",
@@ -360,7 +364,10 @@ votre administrateur si le problème persiste.", queue="error")
     )
 
 
-def includeme(config):
+def add_routes(config):
+    """
+    Add module's related route
+    """
     # Company invoices view
     config.add_route(
         'company_invoices',
@@ -370,6 +377,9 @@ def includeme(config):
     # Global invoices view
     config.add_route("invoices", "/invoices")
 
+
+def includeme(config):
+    add_routes(config)
     config.add_view(
         CompanyInvoicesList,
         route_name='company_invoices',
@@ -381,7 +391,7 @@ def includeme(config):
         GlobalInvoicesList,
         route_name="invoices",
         renderer="invoices.mako",
-        permission="manage"
+        permission="admin_invoices"
     )
 
     config.add_view(
@@ -389,5 +399,5 @@ def includeme(config):
         route_name="invoices",
         request_param='action=export_pdf',
         renderer="/base/formpage.mako",
-        permission="manage",
+        permission="admin_invoices",
     )

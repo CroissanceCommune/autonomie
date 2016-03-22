@@ -35,7 +35,7 @@
                 </div>
                 <div class='col-md-10'>
             <dl class="dl-horizontal">
-                % if api.has_permission('view_user'):
+                % if request.has_permission('view_user'):
                     <dt>Identifiant</dt>
                     <dd>${user.login}</dd>
                 % endif
@@ -46,7 +46,7 @@
                     % endif
                 % endfor
                 <dt>E-mail</dt><dd>${format_mail(user.email)}</dd>
-                % if api.has_permission('manage') and request.context.userdatas is not None:
+                % if request.has_permission('view_userdatas') and request.context.userdatas is not None:
                     <dt>Informations sociales</dt>
                     <dd>
                         <a href="${request.route_path('userdata', id=request.context.userdatas.id)}">Voir</a>

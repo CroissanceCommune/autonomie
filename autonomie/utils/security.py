@@ -255,7 +255,7 @@ def get_company_acl(self):
                 "view_company",
                 "edit_company",
                 "list_customers",
-                "add_customers",
+                "add_customer",
                 'list_estimations',
                 "list_invoices",
                 "list_projects",

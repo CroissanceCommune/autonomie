@@ -39,7 +39,6 @@ from deform import Form
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 
 from autonomie.models.base import DBSESSION
 from autonomie.models.project import (
@@ -203,7 +202,7 @@ class ProjectsList(BaseListView):
 
     def populate_actionmenu(self, appstruct):
         populate_actionmenu(self.request)
-        if has_permission('add', self.request.context, self.request):
+        if self.request.has_permission('add_project'):
             form = get_project_form(self.request)
             popup = PopUp('add', u"Ajouter un projet", form.render())
             self.request.popups = {popup.name: popup}

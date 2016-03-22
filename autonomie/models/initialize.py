@@ -35,6 +35,10 @@ from autonomie.scripts.migrate import fetch_head
 GROUPS = (
     ('estimation_validation', u"Peut valider ses propres devis", ),
     ('invoice_validation', u"Peut valider ses propres factures", ),
+    (
+        "payment_admin",
+        u"Peut saisir/modifier/supprimer les paiements de ses factures",
+    ),
     ('manager', u"Est membre de l'équipe d'appui", ),
     ('admin', u"Administre l'application", ),
     ('contractor', u'Entrepreneur de la coopérative',),

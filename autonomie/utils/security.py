@@ -89,7 +89,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_PERM = [
     (Allow, "group:admin", ALL_PERMISSIONS, ),
-    (Deny, "group:manager", ('admin', )),
+    (Deny, "group:manager", ('admin',)),
     (Allow, "group:manager", ALL_PERMISSIONS, ),
     (Allow, "group:contractor", ('visit',), ),
 ]
@@ -197,7 +197,13 @@ def get_base_acl(self):
         return the base acls
     """
     acl = DEFAULT_PERM[:]
-    acl.append((Allow, Authenticated, 'view',))
+    acl.append(
+        (
+            Allow,
+            Authenticated,
+            'view',
+        )
+    )
     return acl
 
 
@@ -336,12 +342,17 @@ def get_invoice_acl(self):
                 'delete_invoice',
                 'view_file',
                 'add_file',
+                'view_payment',
             )
         ))
         if "invoice_validation" in user.groups:
-            acls.append((Allow, user.login, ("valid.invoice")))
+            acls.append((Allow, user.login, ("valid.invoice",)))
         else:
-            acls.append((Allow, user.login, ("wait.invoice")))
+            acls.append((Allow, user.login, ("wait.invoice",)))
+
+        if "payment_validation" in user.groups:
+            acls.append((Allow, user.login, ("add_payment",)))
+
     return acls
 
 
@@ -351,22 +362,33 @@ def get_cancelinvoice_acl(self):
     """
     acls = DEFAULT_PERM[:]
     for user in self.project.company.employees:
-        acls.append((
-            Allow,
-            user.login,
-            (
-                'view_cancelinvoice',
-                'edit_cancelinvoice',
-                'delete_cancelinvoice',
-                'view_file',
-                'add_file',
-            )
-        ))
+        rights = (
+            'view_cancelinvoice',
+            'edit_cancelinvoice',
+            'delete_cancelinvoice',
+            'view_file',
+            'add_file',
+        )
         if "invoice_validation" in user.groups:
-            acls.append((Allow, user.login, ("valid.invoice")))
+            rights += ("valid.cancelinvoice",)
         else:
-            acls.append((Allow, user.login, ("wait.invoice")))
+            rights += ("wait.cancelinvoice",)
+        acls.append((Allow, user.login, rights))
     return acls
+
+
+def get_payment_acl(self):
+    """
+    Compute the acls for a Payment object
+    """
+    acl = DEFAULT_PERM[:]
+    for user in self.task.company.employees:
+        rights = ('view_payment',)
+        if "payment_admin" in user.groups:
+            rights += ('edit_payment',)
+        acl.append((Allow, user.login, rights,))
+
+    return acl
 
 
 def get_customer_acls(self):
@@ -519,7 +541,7 @@ def set_models_acls():
     File.__default_acl__ = property(get_file_acl)
     Invoice.__default_acl__ = property(get_invoice_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]
-    Payment.__default_acl__ = property(get_base_acl)
+    Payment.__default_acl__ = property(get_payment_acl)
     Phase.__acl__ = property(get_phase_acls)
     Project.__default_acl__ = property(get_project_acls)
     SaleProductCategory.__acl__ = property(get_customer_acls)

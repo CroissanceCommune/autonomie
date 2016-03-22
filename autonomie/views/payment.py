@@ -18,7 +18,6 @@ Views related to payments edition
 import logging
 
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.invoices import (
@@ -39,8 +38,8 @@ def payment_view(context, request):
     Simple payment view
     """
     populate_actionmenu(request)
-    return dict(title=u"Paiement pour la facture {0}"\
-            .format(context.task.official_number))
+    return dict(title=u"Paiement pour la facture {0}"
+                .format(context.task.official_number))
 
 
 class PaymentEdit(BaseFormView):
@@ -89,29 +88,27 @@ def populate_actionmenu(request):
     """
     link = ViewLink(
         u"Voir la facture",
-        "view",
         path="invoice",
         id=request.context.task.id,
-        )
+    )
     request.actionmenu.add(link)
-    if has_permission('manage', request.context, request):
-        link = ViewLink(
-                u"Modifier",
-                "manage",
-                path="payment",
-                id=request.context.id,
-                _query=dict(action="edit")
-                )
-        request.actionmenu.add(link)
-        link = ViewLink(
-                u"Supprimer",
-                "manage",
-                path="payment",
-                confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
-                id=request.context.id,
-                _query=dict(action="delete")
-                )
-        request.actionmenu.add(link)
+    link = ViewLink(
+        u"Modifier",
+        "edit_payment",
+        path="payment",
+        id=request.context.id,
+        _query=dict(action="edit")
+    )
+    request.actionmenu.add(link)
+    link = ViewLink(
+        u"Supprimer",
+        "edit_payment",
+        path="payment",
+        confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
+        id=request.context.id,
+        _query=dict(action="delete")
+    )
+    request.actionmenu.add(link)
 
 
 def payment_delete(context, request):
@@ -132,23 +129,26 @@ def payment_delete(context, request):
 def includeme(config):
     config.add_route(
         "payment",
-        "/payment/{id:\d+}",
+        "/payments/{id:\d+}",
         traverse="/payments/{id}",
-        )
+    )
 
-    config.add_view(payment_view,
+    config.add_view(
+        payment_view,
         route_name="payment",
-        permission="view",
+        permission="view_payment",
         renderer="/payment.mako",
-        )
-    config.add_view(PaymentEdit,
+    )
+    config.add_view(
+        PaymentEdit,
         route_name="payment",
-        permission="manage",
+        permission="edit_payment",
         request_param='action=edit',
         renderer="/base/formpage.mako",
-        )
-    config.add_view(payment_delete,
+    )
+    config.add_view(
+        payment_delete,
         route_name="payment",
-        permission="manage",
+        permission="edit_payment",
         request_param="action=delete",
-        )
+    )

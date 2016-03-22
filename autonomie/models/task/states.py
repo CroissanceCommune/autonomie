@@ -163,7 +163,7 @@ def get_est_state():
     """
     draft = ('draft', ('edit_estimation', 'add_estimation'))
     wait = ('wait', 'wait.estimation')
-    manager_wait = ('wait', MANAGER_PERMS,)
+    manager_wait = ('wait', 'admin_estimation',)
     duplicate = ('duplicate', 'edit_estimation', duplicate_task, False,)
     edit_metadata = (
         "edit_metadata",
@@ -172,7 +172,7 @@ def get_est_state():
         False,
     )
     valid = ('valid', 'valid.estimation', set_date,)
-    invalid = ('invalid', MANAGER_PERMS,)
+    invalid = ('invalid', 'admin_estimation',)
     geninv = ('geninv', "edit_estimation", gen_invoices,)
     delete = ('delete', "edit_estimation", None, False,)
     aboest = ('aboest', 'edit_estimation', )
@@ -214,7 +214,7 @@ def get_inv_state():
     """
     draft = ('draft', ('edit_invoice', 'add_invoice'))
     wait = ('wait', 'wait.invoice')
-    manager_wait = ('wait', MANAGER_PERMS,)
+    manager_wait = ('wait', 'admin_invoice',)
     duplicate = (
         'duplicate',
         ('edit_invoice', 'add_invoice'),
@@ -228,8 +228,8 @@ def get_inv_state():
         False,
     )
     valid = ('valid', "valid.invoice", valid_callback,)
-    invalid = ('invalid', MANAGER_PERMS,)
-    paid = ('paid', MANAGER_PERMS, record_payment,)
+    invalid = ('invalid', "admin_invoice",)
+    paid = ('paid', "add_payment", record_payment,)
     gencinv = (
         'gencinv',
         'edit_invoice',
@@ -237,12 +237,12 @@ def get_inv_state():
         False,
     )
     delete = ('delete', 'edit_invoice', None, False,)
-    resulted = ('resulted', MANAGER_PERMS,)
+    resulted = ('resulted', "add_payment",)
     financial_year = (
-        'set_financial_year', MANAGER_PERMS, set_financial_year, False,
+        'set_financial_year', "admin_invoice", set_financial_year, False,
     )
     products = (
-        "set_products", MANAGER_PERMS, set_products, False,
+        "set_products", "admin_invoice", set_products, False,
     )
 
     result = {}
@@ -301,13 +301,13 @@ def get_cinv_state():
         edit_metadata_task,
         False,
     )
-    valid = ('valid', MANAGER_PERMS, valid_callback,)
-    invalid = ('invalid', MANAGER_PERMS,)
+    valid = ('valid', "admin_invoice", valid_callback,)
+    invalid = ('invalid', "admin_invoice",)
     financial_year = (
-        'set_financial_year', MANAGER_PERMS, set_financial_year, False,
+        'set_financial_year', "admin_invoice", set_financial_year, False,
     )
     products = (
-        "set_products", MANAGER_PERMS, set_products, False,
+        "set_products", "admin_invoice", set_products, False,
     )
     result = {}
     result['draft'] = (wait, delete, valid, )

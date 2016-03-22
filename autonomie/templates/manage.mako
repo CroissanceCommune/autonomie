@@ -30,10 +30,11 @@
 <br />
 <div class='row'>
     <div class='col-md-6'>
-        % for dataset, table_title in (\
-        (estimations, u"Devis en attente",), \
-        (invoices, u"Factures et Avoirs en attente",), \
+        % for dataset, table_title, perm in (\
+            (estimations, u"Devis en attente", "valid.estimation"), \
+            (invoices, u"Factures et Avoirs en attente", "valid.invoice"), \
         ):
+        % if request.has_permission(perm):
     <div class="panel panel-info">
         <div class="panel-heading">
             ${table_title}
@@ -66,6 +67,7 @@
             </tbody>
         </table>
     </div>
+    % endif
 % endfor
 <div class="panel panel-info">
     <div class="panel-heading">Mes Activités / Rendez-vous à venir</div>
@@ -114,6 +116,7 @@
     </table>
 </div>
 </div>
+% if request.has_permission('admin_expense'):
 <div class='col-md-6'>
     <div class="panel panel-info">
         <div class="panel-heading">
@@ -149,4 +152,5 @@
     </div>
 </div>
 </div>
+% endif
 </%block>

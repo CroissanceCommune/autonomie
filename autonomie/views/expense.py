@@ -931,7 +931,7 @@ def includeme(config):
     config.add_view(
         ExpenseList,
         route_name="expenses",
-        permission="admin_treasury",
+        permission="admin_expense",
         renderer="treasury/admin_expenses.mako",
     )
 

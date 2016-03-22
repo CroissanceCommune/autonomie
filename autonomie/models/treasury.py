@@ -56,7 +56,7 @@ from autonomie.models.types import PersistentACLMixin
 from autonomie.models.statemachine import StateMachine
 from autonomie.models.node import Node
 
-MANAGER_PERMS = "manage"
+MANAGER_PERMS = "admin_expense"
 
 
 class TurnoverProjection(DBBASE):

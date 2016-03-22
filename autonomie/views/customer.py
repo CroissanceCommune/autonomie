@@ -139,12 +139,19 @@ class CustomersListView(CustomersListTools, BaseListView):
             return the show archived button
         """
         archived = appstruct['archived']
+        args = self.request.GET.copy()
+
+        args.pop('archived', None)
+
         if not archived:
-            url = self.request.current_route_path(_query=dict(archived="true"))
-            link = HTML.a(u"Afficher les clients archivés",  href=url)
+            msg = u"Afficher les clients archivés"
+            args['archived'] = 'true'
         else:
-            url = self.request.current_route_path(_query=dict(archived="false"))
-            link = HTML.a(u"Afficher les clients actifs", href=url)
+            msg = u"Afficher les clients actifs"
+
+        url = self.request.current_route_path(_query=args)
+        link = HTML.a(msg, href=url)
+
         return StaticWidget(link)
 
     @property

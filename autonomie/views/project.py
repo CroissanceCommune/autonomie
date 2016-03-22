@@ -215,12 +215,16 @@ class ProjectsList(BaseListView):
             return the show archived button
         """
         archived = appstruct['archived']
+        args = self.request.GET.copy()
+        args.pop('archived', None)
         if not archived:
-            url = self.request.current_route_path(_query=dict(archived="true"))
-            link = HTML.a(u"Afficher les projets archivés",  href=url)
+            args['archived'] = 'true'
+            msg = u"Afficher les projets archivés"
         else:
-            url = self.request.current_route_path(_query=dict(archived="false"))
-            link = HTML.a(u"Afficher les projets actifs", href=url)
+            msg = u"Afficher les projets actifs"
+
+        url = self.request.current_route_path(_query=args)
+        link = HTML.a(msg, href=url)
         return StaticWidget(link)
 
     @property

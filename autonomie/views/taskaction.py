@@ -553,7 +553,11 @@ def get_project_redirect_btn(request, id_):
     """
         Button for "go back to project" link
     """
-    return ViewLink(u"Revenir au projet", "edit", path="project", id=id_)
+    return ViewLink(
+        u"Revenir au projet",
+        path="project",
+        id=id_
+    )
 
 
 def populate_actionmenu(request):

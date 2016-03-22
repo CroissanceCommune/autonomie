@@ -177,11 +177,11 @@ class EstimationAdd(TaskFormView):
         estimation.set_number()
         estimation.set_name()
         try:
-            estimation = self.set_task_status(estimation)
             # Line handling
             estimation = add_lines_to_estimation(estimation, appstruct)
             self.dbsession.add(estimation)
             self.dbsession.flush()
+            estimation = self.set_task_status(estimation)
             self.session.flash(u"Le devis a bien été ajouté.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')

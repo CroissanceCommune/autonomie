@@ -98,7 +98,7 @@
     <tbody>
         % for activity in records:
             <% url = request.route_path('activity', id=activity.id) %>
-            % if api.has_permission('view', activity):
+            % if request.has_permission('view_activity', activity):
                 <% onclick = "document.location='{url}'".format(url=url) %>
             % else :
                 <% onclick = u"alert(\"Vous n'avez pas accès aux données de ce rendez-vous\");" %>
@@ -138,7 +138,7 @@ elif activity.status == 'closed':
                     ${activity.mode}
                 </td>
                 <td class="actions">
-                    % if api.has_permission('edit', activity):
+                    % if api.has_permission('edit_activity', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, \
                         u"Voir/éditer", \

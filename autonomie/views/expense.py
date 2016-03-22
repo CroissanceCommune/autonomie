@@ -31,7 +31,6 @@ import datetime
 import traceback
 
 from deform import Form
-from pyramid.security import has_permission
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPTemporaryRedirect,
@@ -49,7 +48,6 @@ from autonomie.forms.expense import (
     STATUS_OPTIONS
 )
 from autonomie.models.treasury import (
-    BaseExpenseLine,
     ExpenseType,
     ExpenseTelType,
     ExpenseKmType,
@@ -61,7 +59,6 @@ from autonomie.models.treasury import (
 )
 from autonomie.events.expense import StatusChanged
 from autonomie.utils.rest import (
-    Apiv1Resp,
     RestError,
     RestJsonRepr,
     add_rest_views,
@@ -96,7 +93,7 @@ from autonomie.views.files import (
 )
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BookMarkHandler(object):
@@ -473,11 +470,11 @@ class ExpenseSheetView(BaseFormView):
             Return the buttons used for form submission
         """
         btns = []
-        log.debug(u"   + Available actions :")
+        logger.debug(u"   + Available actions :")
         for action in self.request.context.get_next_actions():
-            log.debug(u"    * {0}".format(action.name))
+            logger.debug(u"    * {0}".format(action.name))
             if action.allowed(self.request.context, self.request):
-                log.debug(u"     -> is allowed for the current user")
+                logger.debug(u"     -> is allowed for the current user")
                 if hasattr(self, "_%s_btn" % action.name):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.append(func())
@@ -525,7 +522,7 @@ perdues) ?")
         """
             return True if the current context is editable by the current user
         """
-        return has_permission("edit", self.request.context, self.request)
+        return self.request.has_permission("edit_expense")
 
     @property
     def loadurl(self):
@@ -547,7 +544,7 @@ perdues) ?")
         form.set_appstruct(self.request.context.appstruct())
         btn = ViewLink(
             u"Revenir à la liste",
-            "view",
+            "view_espense",
             path="company_expenses",
             id=self.request.context.company.id
         )
@@ -564,7 +561,7 @@ perdues) ?")
             Handle submission of the expense page, only on state change
             validation
         """
-        log.debug("Submitting expense sheet status form")
+        logger.debug("Submitting expense sheet status form")
 
         # Comment is now stored in a specific table
         comment = None
@@ -576,6 +573,7 @@ perdues) ?")
 
         # We modifiy the expense status
         try:
+            logger.exception(u"Trying !!!")
             expense, status = self.set_expense_status(self.request.context)
             self._store_communication(comment)
             self.request.registry.notify(StatusChanged(
@@ -585,6 +583,7 @@ perdues) ?")
                 comment,
                 ))
         except Forbidden, err:
+            logger.exception(u"An access has been forbidden")
             self.request.session.flash(err.message, queue='error')
 
         return HTTPFound(
@@ -612,6 +611,7 @@ perdues) ?")
         """
         params = dict(self.request.POST)
         status = params['submit']
+        logger.debug(u"Setting a new status : %s" % status)
         expense.set_status(status, self.request, self.request.user.id, **params)
         return expense, status
 
@@ -619,7 +619,7 @@ perdues) ?")
         """
             Reset an expense
         """
-        log.debug(u"Resetting the expense")
+        logger.debug(u"Resetting the expense")
         if self.request.context.status == 'draft':
             self.dbsession.delete(self.request.context)
             self.session.flash(u"Votre feuille de notes de dépense de {0} {1} a \
@@ -678,21 +678,21 @@ class RestExpenseLine(BaseView):
         """
             Rest get method : return a line
         """
-        log.debug("In the get method")
+        logger.debug("In the get method")
         return self.model_wrapper(self.getOne())
 
     def post(self):
         """
             Rest post method : add a line
         """
-        log.debug("In the post method")
+        logger.debug("In the post method")
         appstruct = self.request.json_body
         try:
             appstruct = self.schema.deserialize(appstruct)
         except colander.Invalid, err:
             traceback.print_exc()
-            log.exception("  - Erreur")
-            log.exception(appstruct)
+            logger.exception("  - Erreur")
+            logger.exception(appstruct)
             raise RestError(err.asdict(), 400)
         line = self.factory(**appstruct)
 
@@ -705,7 +705,7 @@ class RestExpenseLine(BaseView):
         """
             Rest delete method : delete a line
         """
-        log.debug("In the delete method")
+        logger.debug("In the delete method")
         line = self.getOne()
         self.request.dbsession.delete(line)
         return dict(status="success")
@@ -714,15 +714,15 @@ class RestExpenseLine(BaseView):
         """
             Rest put method : update a line
         """
-        log.debug("In the put method")
+        logger.debug("In the put method")
         line = self.getOne()
         appstruct = self.request.json_body
         try:
             appstruct = self.schema.deserialize(appstruct)
         except colander.Invalid, err:
             traceback.print_exc()
-            log.exception("  - Erreur")
-            log.exception(appstruct)
+            logger.exception("  - Erreur")
+            logger.exception(appstruct)
             raise RestError(err.asdict(), 400)
         line = merge_session_with_post(line, appstruct)
         self.request.dbsession.merge(line)
@@ -744,126 +744,6 @@ class RestExpenseKmLine(RestExpenseLine):
     factory = ExpenseKmLine
     key = "kmlines"
     model_wrapper = ExpenseKmLineJson
-
-
-class Expensev1(BaseView):
-    """
-        Rest api for expense line add
-        Here we manage dynamically the targetted expense sheet regarding the
-        date of the given expense.
-        An expense is included in the month it has been edited
-    """
-    _schema = ExpenseLineSchema()
-    _schema_km = ExpenseKmLineSchema()
-    factory = ExpenseLine
-    factory_km = ExpenseKmLine
-    model_wrapper = ExpenseLineJson
-    model_wrapper_km = ExpenseKmLineJson
-
-    def schema(self, appstruct):
-        """
-            Returns the appropriate schema used to validate input datas
-        """
-        if self.is_kmline(appstruct):
-            return self._schema_km.bind()
-        else:
-            return self._schema.bind()
-
-    def makeOne(self, appstruct):
-        """
-            Make a model using the appropriate factory
-        """
-        if self.is_kmline(appstruct):
-            return self.factory_km(**appstruct)
-        else:
-            return self.factory(**appstruct)
-
-    def wrap(self, model):
-        """
-            Wrap the model with appropriate json formatter
-        """
-        if hasattr(model, 'start'):
-            return self.model_wrapper_km(model)
-        else:
-            return self.model_wrapper(model)
-
-    def get_sheet(self, appstruct):
-        """
-            Return the sheet related to the given appstruct
-        """
-        uid = self.request.user.id
-        # TODO : les utilisateurs avec plusieurs entreprises
-        if len(self.request.user.companies) != 1:
-            traceback.print_exc()
-            log.exception("  - Erreur")
-            raise RestError({}, 403)
-        cid = self.request.user.companies[0].id
-        date = appstruct['date']
-        sheet = get_expense_sheet(self.request, date.year, date.month, cid, uid)
-        if sheet.status not in ('draft', 'invalid',):
-            traceback.print_exc()
-            log.exception("  - Erreur")
-            raise RestError({}, 403)
-        return sheet
-
-    def is_kmline(self, appstruct):
-        """
-            return True if the current edited line is a km line
-        """
-        return 'start' in appstruct.keys()
-
-    def getOne(self):
-        id_ = self.request.matchdict.get('id')
-        line = BaseExpenseLine.get(id_)
-        if line is not None:
-            return line
-        traceback.print_exc()
-        log.exception("  - Erreur")
-        raise RestError({}, 404)
-
-    def get(self):
-        return Apiv1Resp(self.wrap(self.getOne()))
-
-    def addOne(self, edit=False):
-        appstruct = self.request.json_body
-        schema = self.schema(appstruct)
-        try:
-            appstruct = schema.deserialize(appstruct)
-        except colander.Invalid, err:
-            traceback.print_exc()
-            log.exception("  - Erreur")
-            raise RestError(err.asdict(), 400)
-        # Here an error is raised if the next steps are forbidden
-        sheet = self.get_sheet(appstruct)
-        if edit:
-            line = self.getOne()
-            line = merge_session_with_post(line, appstruct)
-            self.request.dbsession.merge(line)
-        else:
-            line = self.makeOne(appstruct)
-            line.sheet = sheet
-            self.request.dbsession.add(line)
-        self.request.dbsession.flush()
-        return Apiv1Resp(self.wrap(line))
-
-    def post(self):
-        return self.addOne()
-
-    def put(self):
-        return self.addOne(edit=True)
-
-    def delete(self):
-        line = self.getOne()
-        self.request.dbsession.delete(line)
-        return Apiv1Resp({'message': u"Successfully deleted"})
-
-
-def expense_optionsv1(request):
-    """
-    Return the options for expense edition (type of expenses, associated
-    datas)
-    """
-    return dict(status='success', result=expense_options(request))
 
 
 def excel_filename(request):
@@ -899,15 +779,15 @@ class RestBookMarks(BaseView):
         """
             Rest POST method : add
         """
-        log.debug(u"In the bookmark edition")
+        logger.debug(u"In the bookmark edition")
 
         appstruct = self.request.json_body
         try:
             bookmark = self.schema.deserialize(appstruct)
         except colander.Invalid, err:
             traceback.print_exc()
-            log.exception("  - Error in posting bookmark")
-            log.exception(appstruct)
+            logger.exception("  - Error in posting bookmark")
+            logger.exception(appstruct)
             raise RestError(err.asdict(), 400)
 
         handler = BookMarkHandler(self.request)
@@ -924,7 +804,7 @@ class RestBookMarks(BaseView):
         """
             Removes a bookmark
         """
-        log.debug(u"In the bookmark deletion view")
+        logger.debug(u"In the bookmark deletion view")
 
         handler = BookMarkHandler(self.request)
 
@@ -984,21 +864,20 @@ class ExpenseList(BaseListView):
         return query
 
 
-def includeme(config):
+def add_routes(config):
     """
-        Declare all the routes and views related to this module
+    Add module's related routes
     """
-    # Routes
-    traverse = '/companies/{id}'
-
     config.add_route("expenses", "/expenses")
+    config.add_route("bookmark", "/bookmarks/{id:\d+}")
+    config.add_route("bookmarks", "/bookmarks")
 
+    traverse = '/companies/{id}'
     config.add_route(
         "company_expenses",
         "/company/{id}/expenses",
         traverse=traverse,
     )
-
     config.add_route(
         "user_expenses",
         "/company/{id}/{uid}/expenses",
@@ -1006,57 +885,53 @@ def includeme(config):
     )
 
     traverse = "/expenses/{id}"
-
     config.add_route(
         "expensesheet",
         "/expenses/{id:\d+}",
         traverse=traverse
     )
-
     config.add_route(
         "expensejson",
         "/expenses/{id:\d+}.json",
         traverse=traverse,
     )
-
     config.add_route(
         "expensexlsx",
         "/expenses/{id:\d+}.xlsx",
         traverse=traverse,
     )
-
     config.add_route(
         "expenselines",
         "/expenses/{id:\d+}/lines",
         traverse=traverse,
     )
-
     config.add_route(
         "expenseline",
         "/expenses/{id:\d+}/lines/{lid}",
         traverse=traverse,
     )
-
     config.add_route(
         "expensekmlines",
         "/expenses/{id:\d+}/kmlines",
         traverse=traverse,
     )
-
     config.add_route(
         "expensekmline",
         "/expenses/{id:\d+}/kmlines/{lid}",
         traverse=traverse,
     )
 
-    config.add_route("bookmark", "/bookmarks/{id:\d+}")
-    config.add_route("bookmarks", "/bookmarks")
 
-    # views
+def includeme(config):
+    """
+        Declare all the routes and views related to this module
+    """
+    add_routes(config)
+
     config.add_view(
         ExpenseList,
         route_name="expenses",
-        permission="admin",
+        permission="admin_treasury",
         renderer="treasury/admin_expenses.mako",
     )
 
@@ -1064,19 +939,20 @@ def includeme(config):
         company_expenses_view,
         route_name="company_expenses",
         renderer="treasury/expenses.mako",
-        permission="edit",
+        permission="list_expenses",
     )
 
     config.add_view(
         expenses_access_view,
         route_name="user_expenses",
-        permission="edit",
+        permission="add_expense",
     )
 
     config.add_view(
         ExpenseSheetView,
         route_name="expensesheet",
         renderer="treasury/expense.mako",
+        permission="view_expense",
     )
 
     config.add_view(
@@ -1084,47 +960,53 @@ def includeme(config):
         route_name="expensejson",
         xhr=True,
         renderer="json",
+        permission="view_expense",
     )
 
     # Xls export
     config.add_view(
         make_excel_view(excel_filename, XlsExpense),
-        route_name="expensexlsx"
+        route_name="expensexlsx",
+        permission="view_expense",
     )
-
-    # Rest interface
-    redirect_to_expense = make_redirect_view("expensesheet")
-    add_rest_views(config, "expenseline", RestExpenseLine)
-    config.add_view(redirect_to_expense, route_name="expenseline")
-    config.add_view(redirect_to_expense, route_name="expenselines")
-    add_rest_views(config, "expensekmline", RestExpenseKmLine)
-    config.add_view(redirect_to_expense, route_name="expensekmline")
-    config.add_view(redirect_to_expense, route_name="expensekmlines")
-
-    # Since the edition of bookmarks is done directly on the current user model
-    # View rights are sufficient to access those views
-    add_rest_views(config, "bookmark", RestBookMarks, edit_rights='view')
-
-    # V1 Rest Api
-    config.add_route("expenselinev1s", "/api/v1/expenses")
-    config.add_route(
-        "expenselinev1",
-        "/api/v1/expenses/{id}",
-        traverse='expenselines/{id}',
-    )
-    config.add_route("expenseoptionsv1", "/api/v1/expenseoptions")
-
-    add_rest_views(config, "expenselinev1", Expensev1)
-    config.add_view(
-        expense_optionsv1,
-        route_name="expenseoptionsv1",
-        renderer="json"
-    )
-
+    # File attachment
     config.add_view(
         FileUploadView,
         route_name="expensesheet",
         renderer='base/formpage.mako',
         permission='view',
         request_param='action=attach_file',
+    )
+
+    # Rest interface
+    redirect_to_expense = make_redirect_view("expensesheet")
+    add_rest_views(
+        config,
+        "expenseline",
+        RestExpenseLine,
+        view_rights="view_expense",
+        add_rights="edit_expense",
+        edit_rights="edit_expense",
+    )
+    config.add_view(redirect_to_expense, route_name="expenseline")
+    config.add_view(redirect_to_expense, route_name="expenselines")
+
+    add_rest_views(
+        config,
+        "expensekmline",
+        RestExpenseKmLine,
+        view_rights="view_expense",
+        add_rights="edit_expense",
+        edit_rights="edit_expense",
+    )
+    config.add_view(redirect_to_expense, route_name="expensekmline")
+    config.add_view(redirect_to_expense, route_name="expensekmlines")
+
+    add_rest_views(
+        config,
+        "bookmark",
+        RestBookMarks,
+        view_rights="list_expenses",
+        add_rights="add_expense",
+        edit_rights='add_expense',
     )

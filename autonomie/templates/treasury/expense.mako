@@ -66,7 +66,7 @@ ${period_form.render()|n}
                 ${api.format_expense_status(request.context)}<br />
             </small>
         </p>
-% if has_permission('admin_treasury', request.context):
+% if request.has_permission('admin_treasury'):
     <p>
     <small>
         L'identifiant de cette notes de dépense est : ${ request.context.id }

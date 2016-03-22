@@ -65,7 +65,6 @@ from autonomie.models.workshop import (
 )
 from autonomie.models.treasury import (
     ExpenseSheet,
-    BaseExpenseLine,
 )
 from autonomie.models.user import (
     User,
@@ -126,7 +125,6 @@ class RootFactory(dict):
             ('customers', 'customer', Customer, ),
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),
-            ('expenselines', 'expenseline', BaseExpenseLine, ),
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
             ('jobs', 'job', Job, ),
@@ -256,6 +254,8 @@ def get_company_acl(self):
                 "view_files",
                 "list_activities",
                 "edit_commercial_handling",
+                "list_expenses",
+                "add_expense",
             )
         )for user in self.employees]
     )
@@ -410,32 +410,15 @@ def get_expensesheet_acl(self):
         Compute the expense Sheet acl
     """
     if self.status in ('draft', 'invalid'):
-        user_rights = ("view", "edit", "add")
+        user_rights = ("view_expense", "edit_expense",)
     else:
-        user_rights = ("view",)
+        user_rights = ("view_expense",)
+
     acl = DEFAULT_PERM[:]
     acl.extend(
         [
             (Allow, u"%s" % user.login, user_rights)
             for user in self.company.employees
-        ]
-    )
-    return acl
-
-
-def get_expense_acl(self):
-    """
-        Compute the acls for an expenseline
-    """
-    if self.sheet.status in ('draft', 'invalid'):
-        user_rights = ("view", "edit", "add")
-    else:
-        user_rights = ("view",)
-    acl = DEFAULT_PERM[:]
-    acl.extend(
-        [
-            (Allow, u"%s" % user.login, user_rights)
-            for user in self.sheet.company.employees
         ]
     )
     return acl
@@ -490,7 +473,6 @@ def set_models_acls():
     when different roles will be implemented
     """
     Activity.__default_acl__ = property(get_activity_acl)
-    BaseExpenseLine.__default_acl__ = property(get_expense_acl)
     CancelInvoice.__default_acl__ = property(get_cancelinvoice_acl)
     Company.__default_acl__ = property(get_company_acl)
     CompetenceGrid.__acl__ = property(get_competence_acl)

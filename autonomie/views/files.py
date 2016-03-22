@@ -209,7 +209,7 @@ class FileEditView(FileUploadView):
         self.request.session.flash(self.valid_msg)
 
 
-def get_add_file_link(request, label=u"Attacher un fichier", perm="edit"):
+def get_add_file_link(request, label=u"Attacher un fichier", perm="add_file"):
     """
         Add a button for file attachment
     """
@@ -233,7 +233,7 @@ def populate_actionmenu(context, request):
     request.actionmenu.add(
         ViewLink(
             label,
-            perm='view',
+            perm='view_file',
             path=context.parent.type_,
             id=context.parent.id
         )
@@ -241,7 +241,7 @@ def populate_actionmenu(context, request):
     request.actionmenu.add(
         ViewLink(
             u"Éditer",
-            perm=u'edit',
+            perm=u'edit_file',
             path="file",
             id=context.id,
             _query=dict(action='edit'),
@@ -250,7 +250,7 @@ def populate_actionmenu(context, request):
     request.actionmenu.add(
         ViewLink(
             u"Supprimer le fichier",
-            perm=u'edit',
+            perm=u'edit_file',
             path="file",
             confirm=u"Êtes-vous sûr de vouloir supprimer ce fichier ?",
             id=context.id,
@@ -287,12 +287,6 @@ def add_routes(config):
         "/public/{name}",
         traverse="/configfiles/{name}"
     )
-    config.add_view(
-        file_dl_view,
-        route_name='file',
-        permission='view',
-        request_param='action=download',
-    )
 
 
 def includeme(config):
@@ -301,9 +295,21 @@ def includeme(config):
     """
     add_routes(config)
     config.add_view(
+        file_view,
+        route_name="file",
+        permission='view_file',
+        renderer="file.mako",
+    )
+    config.add_view(
         file_dl_view,
         route_name='filepng',
-        permission='view',
+        permission='view_file',
+    )
+    config.add_view(
+        file_dl_view,
+        route_name='file',
+        permission='view_file',
+        request_param='action=download',
     )
     config.add_view(
         file_dl_view,
@@ -311,21 +317,15 @@ def includeme(config):
         permission=NO_PERMISSION_REQUIRED,
     )
     config.add_view(
-        file_view,
+        FileEditView,
         route_name="file",
-        permission='view',
-        renderer="file.mako",
+        permission='edit_file',
+        renderer="base/formpage.mako",
+        request_param='action=edit',
     )
     config.add_view(
         file_delete_view,
         route_name='file',
-        permission='edit',
+        permission='edit_file',
         request_param='action=delete',
-    )
-    config.add_view(
-        FileEditView,
-        route_name="file",
-        permission='edit',
-        renderer="base/formpage.mako",
-        request_param='action=edit',
     )

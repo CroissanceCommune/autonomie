@@ -208,7 +208,16 @@ def get_userdatas_acl(self):
     """
     acl = DEFAULT_PERM[:]
     if self.user is not None:
-        acl.append((Allow, self.user.login, 'view'))
+        acl.append(
+            (
+                Allow,
+                self.user.login,
+                (
+                    'view',
+                    'view_file',
+                )
+            ),
+        )
     return acl
 
 
@@ -256,6 +265,8 @@ def get_company_acl(self):
                 "edit_commercial_handling",
                 "list_expenses",
                 "add_expense",
+                # for logo and header
+                "view_file",
             )
         )for user in self.employees]
     )
@@ -294,7 +305,13 @@ def get_estimation_acl(self):
         acls.append((
             Allow,
             user.login,
-            ('view_estimation', 'edit_estimation', 'delete_estimation')
+            (
+                'view_estimation',
+                'edit_estimation',
+                'delete_estimation',
+                'view_file',
+                'add_file',
+            )
         ))
         if "estimation_validation" in user.groups:
             acls.append((Allow, user.login, ("valid.estimation")))
@@ -313,7 +330,13 @@ def get_invoice_acl(self):
         acls.append((
             Allow,
             user.login,
-            ('view_invoice', 'edit_invoice', 'delete_invoice')
+            (
+                'view_invoice',
+                'edit_invoice',
+                'delete_invoice',
+                'view_file',
+                'add_file',
+            )
         ))
         if "invoice_validation" in user.groups:
             acls.append((Allow, user.login, ("valid.invoice")))
@@ -331,7 +354,13 @@ def get_cancelinvoice_acl(self):
         acls.append((
             Allow,
             user.login,
-            ('view_cancelinvoice', 'edit_cancelinvoice', 'delete_cancelinvoice')
+            (
+                'view_cancelinvoice',
+                'edit_cancelinvoice',
+                'delete_cancelinvoice',
+                'view_file',
+                'add_file',
+            )
         ))
         if "invoice_validation" in user.groups:
             acls.append((Allow, user.login, ("valid.invoice")))
@@ -379,6 +408,8 @@ def get_project_acls(self):
                     'add_invoice',
                     'list_estimations',
                     'list_invoices',
+                    'view_file',
+                    'add_file',
                 )
             )
         )
@@ -413,6 +444,7 @@ def get_expensesheet_acl(self):
         user_rights = ("view_expense", "edit_expense",)
     else:
         user_rights = ("view_expense",)
+    user_rights += ('view_file', 'add_file',)
 
     acl = DEFAULT_PERM[:]
     acl.extend(
@@ -431,6 +463,8 @@ def get_file_acl(self):
     """
     if self.parent is not None:
         return self.parent.__acl__
+    # Exceptions: headers and logos are not attached throught the Node's parent
+    # rel
     elif self.company_header_backref is not None:
         return self.company_header_backref.__acl__
     elif self.company_logo_backref is not None:

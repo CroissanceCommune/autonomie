@@ -64,13 +64,15 @@ class PeriodSelectSchema(colander.MappingSchema):
 
 
 class ExpenseStatusSchema(colander.MappingSchema):
-    comment = colander.SchemaNode(colander.String(),
-            widget=deform.widget.TextAreaWidget(cols=80, rows=2),
-                                    title=u"Communication avec la CAE",
-            description=u"Message à destination des membres de la CAE qui \
-valideront votre feuille de notes de dépense",
-            missing=u"",
-            default=u"")
+    comment = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextAreaWidget(cols=80, rows=2),
+        title=u"Communication avec la CAE",
+        description=u"Message à destination des membres de la CAE qui \
+        valideront votre feuille de notes de dépense",
+        missing=colander.drop,
+        default=u"",
+    )
 
 
 class BaseLineSchema(colander.MappingSchema):
@@ -133,9 +135,9 @@ class BookMarkSchema(colander.MappingSchema):
         Schema for bookmarks
     """
     type_id = colander.SchemaNode(
-            colander.Integer(),
-            validator=deferred_type_id_validator
-            )
+        colander.Integer(),
+        validator=deferred_type_id_validator
+    )
     description = colander.SchemaNode(colander.String())
     ht = colander.SchemaNode(colander.Float())
     tva = colander.SchemaNode(colander.Float())

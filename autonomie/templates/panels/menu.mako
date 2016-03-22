@@ -74,7 +74,7 @@
 
         <nav class="navbar-collapse menu collapse ">
 
-    % if  menu is not UNDEFINED:
+     % if  menu is not UNDEFINED and menu is not None:
                <ul
                     % if hasattr(elem, "css"):
                         class="nav navbar-nav ${menu_css}"

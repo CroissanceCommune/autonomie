@@ -117,12 +117,12 @@ class StateMachine(object):
             adds a transition to the state machine
         """
         state_obj = State(
-            next_,
-            perm,
-            callback,
-            cae,
-            self.status_attr,
-            self.userid_attr,
+            name=next_,
+            permission=perm,
+            callback=callback,
+            model_state=cae,
+            status_attr=self.status_attr,
+            userid_attr=self.userid_attr,
         )
         self.transitions.setdefault(state, []).append(state_obj)
 

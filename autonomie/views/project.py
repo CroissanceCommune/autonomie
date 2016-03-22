@@ -152,8 +152,9 @@ def redirect_to_customerslist(request, company):
 des clients")
     request.session.flash(u"Vous devez créer des clients afin \
 de créer de nouveaux projets")
-    raise HTTPFound(request.route_path("company_customers",
-                                                id=company.id))
+    raise HTTPFound(
+        request.route_path("company_customers", id=company.id)
+    )
 
 
 class ProjectsList(BaseListView):
@@ -169,9 +170,10 @@ class ProjectsList(BaseListView):
     title = u"Liste des projets"
     schema = get_list_schema()
     default_sort = "name"
-    sort_columns = {'name':Project.name,
-                    "code":Project.code,
-                    }
+    sort_columns = {
+        'name': Project.name,
+        "code": Project.code,
+    }
 
     def query(self):
         company = self.request.context
@@ -190,11 +192,12 @@ class ProjectsList(BaseListView):
         search = appstruct['search']
         if search:
             query = query.filter(
-                or_(Project.name.like("%" + search + "%"),
+                or_(
+                    Project.name.like("%" + search + "%"),
                     Project.customers.any(
                         Customer.name.like("%" + search + "%")
                     )
-                   )
+                )
             )
         return query
 
@@ -238,8 +241,9 @@ class ProjectsList(BaseListView):
                 "view_project",
                 css='btn btn-default btn-sm',
                 path="project",
-                icon="search"
-        ))
+                icon="search",
+            )
+        )
         btns.append(
             ItemActionLink(
                 u"Devis",
@@ -248,7 +252,8 @@ class ProjectsList(BaseListView):
                 title=u"Nouveau devis",
                 path="project_estimations",
                 icon="file",
-        ))
+            )
+        )
         btns.append(
             ItemActionLink(
                 u"Facture",
@@ -326,9 +331,11 @@ def project_delete(request):
         Delete the current project
     """
     project = request.context
+    log.info(u"Project {0} deleted".format(project))
     request.dbsession.delete(project)
-    request.session.flash(u"Le projet '{0}' a bien été supprimé".format(
-                                                            project.name))
+    request.session.flash(
+        u"Le projet '{0}' a bien été supprimé".format(project.name)
+    )
     return HTTPFound(request.referer)
 
 
@@ -372,7 +379,7 @@ def project_view(request):
     all_tasks = []
     for phase in phases:
         all_tasks.extend(phase.tasks)
-    all_tasks.sort(key=lambda task:task.statusDate, reverse=True)
+    all_tasks.sort(key=lambda task: task.statusDate, reverse=True)
 
     if all_tasks:
         latest_phase = all_tasks[0].phase
@@ -400,8 +407,9 @@ class ProjectAdd(BaseFormView):
 
     @property
     def codes(self):
-        codes = [(project.code, project.name) \
-         for project in self.context.projects]
+        codes = [
+            (project.code, project.name) for project in self.context.projects
+        ]
         codes.sort()
         return codes
 
@@ -462,9 +470,11 @@ class ProjectEdit(ProjectAdd):
 
     @property
     def codes(self):
-        codes = [(project.code, project.name) \
-            for project in self.context.company.projects \
-                 if project.id != self.context.id]
+        codes = [
+            (project.code, project.name)
+            for project in self.context.company.projects
+            if project.id != self.context.id
+        ]
         codes.sort()
         return codes
 
@@ -480,7 +490,7 @@ def populate_actionmenu(request, project=None):
         request.actionmenu.add(get_edit_btn(project.id))
         request.actionmenu.add(get_detail_btn())
         request.actionmenu.add(get_phase_btn(project.id))
-        request.actionmenu.add(get_add_file_link(request))
+        request.actionmenu.add(get_add_file_link(request, perm='edit_project'))
 
 
 def get_list_view_btn(cid):

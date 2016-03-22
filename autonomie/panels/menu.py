@@ -385,7 +385,7 @@ def menu_panel(context, request):
     menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
 
     return {
-        'menu': None,
+        'menu': menu,
         'usermenu': usermenu,
     }
 

@@ -252,9 +252,9 @@ class RestProductGroups(BaseRestView):
         )
 
 
-def includeme(config):
+def add_routes(config):
     """
-    Pyramid's inclusion mechanism
+    Add module's related routes
     """
     url = "/companies/{id:\d+}/sale_categories"
     config.add_route(
@@ -298,17 +298,24 @@ def includeme(config):
         traverse="/sale_product_groups/{pid}",
     )
 
+
+def includeme(config):
+    """
+    Pyramid's inclusion mechanism
+    """
+    add_routes(config)
+
     config.add_view(
         company_products_view,
         route_name="sale_categories",
-        permission="edit",
+        permission="list_sale_products",
         renderer="/sale/products.mako",
     )
 
     add_json_view = functools.partial(
         config.add_view,
         renderer='json',
-        permission='edit',
+        permission='add_sale_products',
         xhr=True,
     )
 
@@ -316,18 +323,21 @@ def includeme(config):
         company_products_options_ajax_view,
         route_name="sale_categories",
         request_param='action=options',
+        permission="list_sale_products",
     )
 
     add_json_view(
         company_products_jstree_ajax_view,
         route_name="sale_categories",
         request_param='action=jstree',
+        permission="list_sale_products",
     )
 
     add_json_view(
         company_products_ajax_view,
         route_name="sale_categories",
         request_param='action=products',
+        permission="list_sale_products",
     )
 
     add_json_view(
@@ -335,24 +345,28 @@ def includeme(config):
         attr='collection_get',
         route_name='sale_categories',
         request_method="GET",
+        permission="list_sale_products",
     )
     add_json_view(
         RestCategories,
         attr='post',
         route_name='sale_categories',
-        request_method="POST"
+        request_method="POST",
+        permission="add_sale_product",
     )
     add_json_view(
         RestCategories,
         attr='put',
         route_name='sale_category',
-        request_method="PUT"
+        request_method="PUT",
+        permission="edit_sale_product"
     )
     add_json_view(
         RestCategories,
         attr='delete',
         route_name='sale_category',
-        request_method="DELETE"
+        request_method="DELETE",
+        permission="edit_sale_product"
     )
 
     add_json_view(
@@ -360,30 +374,35 @@ def includeme(config):
         attr='collection_get',
         route_name='sale_products',
         request_method="GET",
+        permission="view_sale_product",
     )
     add_json_view(
         RestProducts,
         attr='post',
         route_name='sale_products',
-        request_method="POST"
+        request_method="POST",
+        permission="edit_sale_product",
     )
     add_json_view(
         RestProducts,
         attr='get',
         route_name='sale_product',
         request_method="GET",
+        permission="view_sale_product",
     )
     add_json_view(
         RestProducts,
         attr='put',
         route_name='sale_product',
-        request_method="PUT"
+        request_method="PUT",
+        permission="edit_sale_product",
     )
     add_json_view(
         RestProducts,
         attr='delete',
         route_name='sale_product',
-        request_method="DELETE"
+        request_method="DELETE",
+        permission="edit_sale_product",
     )
 
     add_json_view(
@@ -391,28 +410,33 @@ def includeme(config):
         attr='collection_get',
         route_name='sale_product_groups',
         request_method="GET",
+        permission="view_sale_product",
     )
     add_json_view(
         RestProductGroups,
         attr='post',
         route_name='sale_product_groups',
-        request_method="POST"
+        request_method="POST",
+        permission="edit_sale_product",
     )
     add_json_view(
         RestProductGroups,
         attr='get',
         route_name='sale_product_group',
         request_method="GET",
+        permission="view_sale_product",
     )
     add_json_view(
         RestProductGroups,
         attr='put',
         route_name='sale_product_group',
-        request_method="PUT"
+        request_method="PUT",
+        permission="edit_sale_product",
     )
     add_json_view(
         RestProductGroups,
         attr='delete',
         route_name='sale_product_group',
-        request_method="DELETE"
+        request_method="DELETE",
+        permission="edit_sale_product",
     )

@@ -273,6 +273,8 @@ def get_company_acl(self):
                 "add_expense",
                 # for logo and header
                 "view_file",
+                "add_sale_product",
+                "list_sale_products",
             )
         )for user in self.employees]
     )
@@ -499,7 +501,20 @@ def get_product_acls(self):
     """
     Return the acls for a product : A product's acls is given by its category
     """
-    return get_customer_acls(self.category)
+    acl = DEFAULT_PERM[:]
+    for user in self.company.employees:
+        acl.append(
+            (
+                Allow,
+                user.login,
+                (
+                    'list_sale_products',
+                    'view_sale_product',
+                    'edit_sale_product',
+                )
+            )
+        )
+    return acl
 
 
 def get_competence_acl(self):
@@ -544,7 +559,7 @@ def set_models_acls():
     Payment.__default_acl__ = property(get_payment_acl)
     Phase.__acl__ = property(get_phase_acls)
     Project.__default_acl__ = property(get_project_acls)
-    SaleProductCategory.__acl__ = property(get_customer_acls)
+    SaleProductCategory.__acl__ = property(get_product_acls)
     SaleProduct.__acl__ = property(get_product_acls)
     SaleProductGroup.__acl__ = property(get_product_acls)
     StatisticSheet.__acl__ = property(get_base_acl)

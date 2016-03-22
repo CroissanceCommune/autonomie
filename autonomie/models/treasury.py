@@ -58,6 +58,7 @@ from autonomie.models.node import Node
 
 MANAGER_PERMS = "manage"
 
+
 class TurnoverProjection(DBBASE):
     """
         Turnover projection
@@ -156,8 +157,8 @@ def build_state_machine():
         Return a state machine that allows ExpenseSheet status handling
     """
     draft = ('draft', 'edit_expense',)
-    reset = ('reset', 'edit_expense', None, False,)
-    wait = ('wait', 'edit_expense', None, False,)
+    reset = ('reset', 'edit_expense', None, False)
+    wait = ('wait', 'edit_expense', )
     valid = ('valid', MANAGER_PERMS, )
     invalid = ('invalid', MANAGER_PERMS,)
     resulted = ('resulted', MANAGER_PERMS, )
@@ -235,14 +236,12 @@ class ExpenseSheet(Node):
 
     state_machine = ExpenseStates('draft', build_state_machine())
 
-
     def __json__(self, request):
         return dict(id=self.id,
                     lines=[line.__json__(request) for line in self.lines],
                     kmlines=[line.__json__(request) for line in self.kmlines],
                     month=self.month,
                     year=self.year)
-
 
     def set_status(self, status, request, user_id, **kw):
         """
@@ -267,8 +266,9 @@ class ExpenseSheet(Node):
         """
             return the total of the current expense
         """
-        return sum([line.total for line in self.lines]) \
-                + sum([line.total for line in self.kmlines])
+        return sum(
+            [line.total for line in self.lines]) \
+            + sum([line.total for line in self.kmlines])
 
     def get_lines_by_type(self):
         """
@@ -294,9 +294,11 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
     """
     __tablename__ = 'baseexpense_line'
     __table_args__ = default_table_args
-    __mapper_args__ = dict(polymorphic_on="type",
-            polymorphic_identity="line",
-            with_polymorphic='*')
+    __mapper_args__ = dict(
+        polymorphic_on="type",
+        polymorphic_identity="line",
+        with_polymorphic='*',
+    )
     id = Column(Integer, primary_key=True)
     type = Column(String(30), nullable=False)
     date = Column(Date(), default=date.today)
@@ -304,8 +306,10 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
     category = Column(Enum('1', '2'), default='1')
     valid = Column(Boolean(), default=True)
     type_id = Column(Integer)
-    sheet_id = Column(Integer,
-            ForeignKey("expense_sheet.id", ondelete="cascade"))
+    sheet_id = Column(
+        Integer,
+        ForeignKey("expense_sheet.id", ondelete="cascade")
+    )
     type_object = relationship(
         "ExpenseType",
         primaryjoin='BaseExpenseLine.type_id==ExpenseType.id',
@@ -335,14 +339,15 @@ class ExpenseLine(BaseExpenseLine):
 
     def __json__(self, request):
         return dict(
-                    id=self.id,
-                    date=self.date,
-                    valid=self.valid,
-                    category=self.category,
-                    description=self.description,
-                    ht=self.ht,
-                    tva=self.tva,
-                    type_id=self.type_id)
+            id=self.id,
+            date=self.date,
+            valid=self.valid,
+            category=self.category,
+            description=self.description,
+            ht=self.ht,
+            tva=self.tva,
+            type_id=self.type_id,
+        )
 
     def _compute_value(self, val):
         result = 0
@@ -479,8 +484,8 @@ def get_expense_years():
         """
         return distinct expense years available in the database
         """
-        query = DBSESSION().query(distinct(ExpenseSheet.year))\
-                .order_by(ExpenseSheet.year)
+        query = DBSESSION().query(distinct(ExpenseSheet.year))
+        query = query.order_by(ExpenseSheet.year)
         years = [year[0] for year in query]
         current = date.today().year
         if current not in years:
@@ -494,4 +499,3 @@ def get_expense_sheet_name(month, year):
     Return the name of an expensesheet
     """
     return u"expense_{0}_{1}".format(month, year)
-

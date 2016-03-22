@@ -24,7 +24,7 @@
 
 <%def name="render_item(elem)">
     <li
-    % if elem.get('href') == request.current_route_path():
+    % if elem.selected(request):
         class="active"
     % endif
     >

@@ -46,6 +46,18 @@ def mako_renderer(tmpl, **kw):
     return template.render(**kw)
 
 
+def cmp_urls(url1, url2):
+    """
+    Compare two urls
+
+    :param str url1:
+    :param str url2:
+    :result: True or False
+    :rtype: bool
+    """
+    return url1 == url2
+
+
 class Widget(object):
     """
         Base widget
@@ -111,6 +123,7 @@ class StaticWidget(PermWidget):
         else:
             return ""
 
+
 class ViewLink(Widget, PermWidget):
 
     template = "base/button.mako"
@@ -122,7 +135,8 @@ class ViewLink(Widget, PermWidget):
         self.path = path
         if confirm:
             self.js = u"return confirm('{0}')".format(
-                                        confirm.replace("'", "\\'"))
+                confirm.replace("'", "\\'")
+            )
         else:
             self.js = js
         if title:
@@ -155,8 +169,11 @@ class ViewLink(Widget, PermWidget):
             Return True if the button is active
         """
         request = self.request or request
-        cur_path = request.current_route_path()
-        return urllib.unquote(cur_path) == self.url(request)
+        cur_path = urllib.unquote(
+            request.current_route_path(_query={})
+        )
+        btn_path = self.url(request)
+        return cmp_urls(btn_path, cur_path)
 
 
 class ItemActionLink(ViewLink):
@@ -176,7 +193,6 @@ class ItemActionLink(ViewLink):
     def render(self, request, item):
         return render_html(request, self.template, {'elem': self,
                                                     'item': item})
-
 
 
 class Submit(Widget):
@@ -199,14 +215,14 @@ class Submit(Widget):
     disabled = False
 
     def __init__(self, label, value, title=None,
-                            request=None, confirm=None, name="submit"):
+                 request=None, confirm=None, name="submit"):
         self.label = label
         self.value = value
         self.name = name or "submit"
         self.title = title or self.label
         if confirm:
             self.js = u"return confirm('{0}')".format(
-                                        confirm.replace("'", "\\'"))
+                confirm.replace("'", "\\'"))
         if request:
             self.request = request
 
@@ -281,7 +297,10 @@ class ButtonLink(Widget):
         cur_path = request.current_route_path()
         if 'action' in request.GET:
             cur_path += "?action=%s" % request.GET['action']
-        return urllib.unquote(cur_path) == self.url(request)
+
+        cur_path = urllib.unquote(cur_path)
+        btn_path = self.url(request)
+        return cmp_urls(btn_path, cur_path)
 
 
 class ButtonJsLink(ButtonLink):
@@ -310,10 +329,11 @@ class PopUp(object):
     def open_btn(self, label=None, factory=ButtonJsLink, **kw):
         label = label or self.title
         return factory(
-                label,
-                js=self._get_js_link(),
-                path="popup-%s" % self.name,
-                **kw)
+            label,
+            js=self._get_js_link(),
+            path="popup-%s" % self.name,
+            **kw
+        )
 
     def _get_js_link(self):
         return u"$('#{0}').dialog('open');".format(self.name)

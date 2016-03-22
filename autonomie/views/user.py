@@ -574,7 +574,9 @@ class UserDatasEdit(UserDatasAdd):
 
     def populate_actionmenu(self):
         self.request.actionmenu.add(get_userdatas_list_btn())
-        self.request.actionmenu.add(get_add_file_link(self.request))
+        self.request.actionmenu.add(
+            get_add_file_link(self.request, perm="admin_userdatas")
+        )
 
     def ensure_doctypes_rel(self):
         """

@@ -566,8 +566,9 @@ def populate_actionmenu(request):
         project = request.context
     request.actionmenu.add(get_project_redirect_btn(request, project.id))
     if context_is_task(request.context):
+        edit_perm = "edit_%s" % request.context.__name__
         request.actionmenu.add(
-            get_add_file_link(request)
+            get_add_file_link(request, perm=edit_perm)
         )
 
 

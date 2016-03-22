@@ -552,7 +552,7 @@ perdues) ?")
         btn = get_add_file_link(
             self.request,
             label=u"Déposer des justificatifs",
-            perm="view",
+            perm="view_expense",
         )
         self.request.actionmenu.add(btn)
 

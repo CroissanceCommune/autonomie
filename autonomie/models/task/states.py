@@ -292,16 +292,16 @@ def get_cinv_state():
         valid
         invalid
     """
-    draft = ('draft', ('edit_invoice', 'add_invoice'))
-    wait = ('wait', 'wait.invoice',)
-    delete = ('delete', 'edit_invoice', None, False,)
+    draft = ('draft', ('edit_cancelinvoice', 'add_cancelinvoice'))
+    wait = ('wait', 'wait.cancelinvoice',)
+    delete = ('delete', 'edit_cancelinvoice', None, False,)
     edit_metadata = (
         "edit_metadata",
         "edit_invoice",
         edit_metadata_task,
         False,
     )
-    valid = ('valid', "admin_invoice", valid_callback,)
+    valid = ('valid', "valid.cancelinvoice", valid_callback,)
     invalid = ('invalid', "admin_invoice",)
     financial_year = (
         'set_financial_year', "admin_invoice", set_financial_year, False,
@@ -310,7 +310,7 @@ def get_cinv_state():
         "set_products", "admin_invoice", set_products, False,
     )
     result = {}
-    result['draft'] = (wait, delete, valid, )
+    result['draft'] = (draft, wait, delete, valid, )
     result['invalid'] = result['draft']
 
     result['wait'] = (

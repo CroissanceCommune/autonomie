@@ -493,11 +493,13 @@ class TaskFormView(BaseFormView):
         params = dict(self.request.POST)
         status = params['submit']
         task.set_status(status, self.request, self.request.user.id, **params)
-        self.request.registry.notify(StatusChanged(
-            self.request,
-            task,
-            status,
-            ))
+        self.request.registry.notify(
+            StatusChanged(
+                self.request,
+                task,
+                status,
+            )
+        )
         return task
 
     @property

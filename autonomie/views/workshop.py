@@ -391,11 +391,11 @@ class WorkshopXlsWriter(XlsExporter):
 
 class WorkshopOdsWriter(OdsExporter):
     headers = (
-        {'name': 'date', 'label': 'Date'},
-        {'name': 'label', 'label': "Intitulé"},
-        {'name': 'participant', 'label': "Participant"},
-        {'name': 'leaders', 'label': "Formateur(s)"},
-        {'name': 'duration', 'label': "Durée"},
+        {'name': 'date', 'label': u'Date'},
+        {'name': 'label', 'label': u"Intitulé"},
+        {'name': 'participant', 'label': u"Participant"},
+        {'name': 'leaders', 'label': u"Formateur(s)"},
+        {'name': 'duration', 'label': u"Durée"},
     )
 
 
@@ -619,11 +619,10 @@ def populate_actionmenu(request):
     request.actionmenu.add(link)
 
 
-def includeme(config):
+def add_routes(config):
     """
-    Add view to the pyramid registry
+    Add module's related routes
     """
-    # Routes declaration
     config.add_route(
         'workshop',
         "/workshops/{id:\d+}",
@@ -653,33 +652,38 @@ def includeme(config):
         traverse="/companies/{id}",
         )
 
-    # Views declaration
+
+def includeme(config):
+    """
+    Add view to the pyramid registry
+    """
+    add_routes(config)
     config.add_view(
         WorkshopAddView,
         route_name='workshops',
-        permission='manage',
+        permission='add_workshop',
         request_param='action=new',
         renderer="/base/formpage.mako",
-        )
+    )
 
     config.add_view(
         WorkshopListView,
         route_name='workshops',
-        permission='manage',
+        permission='admin_workshop',
         renderer="/accompagnement/workshops.mako",
-        )
+    )
 
     config.add_view(
         CompanyWorkshopListView,
         route_name='company_workshops',
-        permission='view',
+        permission='list_workshops',
         renderer="/accompagnement/workshops.mako",
     )
 
     config.add_view(
         WorkshopEditView,
         route_name='workshop',
-        permission='manage',
+        permission='edit_workshop',
         request_param='action=edit',
         renderer="/accompagnement/workshop_edit.mako",
     )
@@ -687,55 +691,57 @@ def includeme(config):
     config.add_view(
         record_attendances_view,
         route_name='workshop',
-        permission='manage',
+        permission='edit_workshop',
         request_param='action=record',
     )
 
     config.add_view(
         workshop_delete_view,
         route_name='workshop',
-        permission='manage',
+        permission='edit_workshop',
         request_param='action=delete',
     )
 
     config.add_view(
         WorkShopDuplicateView,
         route_name='workshop',
-        permission='manage',
+        permission='edit_workshop',
         request_param='action=duplicate',
     )
 
     config.add_view(
         workshop_view,
         route_name='workshop',
-        permission='view',
+        permission='view_workshop',
         renderer='/accompagnement/workshop_view.mako',
     )
 
     config.add_view(
         WorkshopCsvView,
         route_name='workshops.csv',
-        permission='manage',
+        permission='list_workshops',
     )
 
     config.add_view(
         WorkshopXlsView,
         route_name='workshops.xls',
-        permission='manage',
+        permission='list_workshops',
     )
 
     config.add_view(
         WorkshopOdsView,
         route_name='workshops.ods',
-        permission='manage',
+        permission='list_workshops',
     )
 
     config.add_view(
         timeslot_pdf_view,
         route_name='timeslot.pdf',
+        permission="view_workshop",
     )
 
     config.add_view(
         workshop_pdf_view,
         route_name='workshop.pdf',
+        permission="view_workshop",
     )

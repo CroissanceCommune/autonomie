@@ -27,7 +27,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    % if api.has_permission('manage'):
+    % if request.has_permission('add_workshop'):
         <a href="${request.route_path('workshops', _query=dict(action='new'))}">
             Nouvel Atelier
         </a>
@@ -41,6 +41,7 @@
         </div>
     </div>
     <div class='col-md-4'>
+            % if request.has_permission('admin_treasury'):
         <div class='well well-sm pull-right btn-group'>
         <%
             ## We build the link with the current search arguments
@@ -68,6 +69,7 @@
                 <i class='fa fa-file'></i>&nbsp;CSV
             </a>
         </div>
+        % endif
     </div>
 </div>
 </%block>
@@ -90,14 +92,14 @@
     </thead>
     <tbody>
         % for workshop in records:
-            % if api.has_permission('manage', workshop):
+            % if request.has_permission('edit_workshop', workshop):
                 <% _query=dict(action='edit') %>
             % else:
                 ## Route is company_workshops, the context is the company
                 <% _query=dict(company_id=request.context.id) %>
             % endif
             <% url = request.route_path('workshop', id=workshop.id, _query=_query) %>
-            % if api.has_permission('view', workshop):
+            % if request.has_permission('view_workshop', workshop):
                 <% onclick = "document.location='{url}'".format(url=url) %>
             % else :
                 <% onclick = u"alert(\"Vous n'avez pas accès aux données de cet atelier\");" %>
@@ -154,7 +156,7 @@
                     % endif
                 </td>
                 <td class="actions">
-                    % if api.has_permission('manage', workshop):
+                    % if request.has_permission('edit_workshop', workshop):
                         <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='pencil')}
 
@@ -165,7 +167,7 @@
                         icon='trash', \
                         onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')", \
                         css_class="btn-danger")}
-                    % elif api.has_permission("view", workshop):
+                    % elif request.has_permission("view_workshop", workshop):
                         ${table_btn(url, u"Voir", u"Voir l'atelier", icon='search')}
                     % endif
                 </td>

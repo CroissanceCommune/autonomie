@@ -268,13 +268,15 @@ def get_company_acl(self):
                 "add_project",
                 'list_estimations',
                 "list_invoices",
-                "list_activities",
                 "edit_commercial_handling",
                 "list_expenses",
                 "add_expense",
                 "list_sale_products",
                 "add_sale_product",
                 "list_treasury_files",
+                # Accompagnement
+                "list_activities",
+                "list_workshops",
             )
         )for user in self.employees]
     )

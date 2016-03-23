@@ -152,10 +152,10 @@ ${form|n}
 AppOptions = {};
 AppOptions['loadurl'] = "${load_options_url}";
 AppOptions['load_catalog_url'] = "${load_catalog_url}";
-% if api.has_permission('admin_treasury', request.context):
-    AppOptions['manager'] = false;
-% else:
+% if request.has_permission('admin_treasury'):
     AppOptions['manager'] = true;
+% else:
+    AppOptions['manager'] = false;
 % endif
 % if edit:
     AppOptions['edit'] = true;

@@ -260,21 +260,21 @@ def get_company_acl(self):
             (
                 "view_company",
                 "edit_company",
+                # for logo and header
+                "view_file",
                 "list_customers",
                 "add_customer",
-                'list_estimations',
-                "list_invoices",
                 "list_projects",
                 "add_project",
-                "view_files",
+                'list_estimations',
+                "list_invoices",
                 "list_activities",
                 "edit_commercial_handling",
                 "list_expenses",
                 "add_expense",
-                # for logo and header
-                "view_file",
-                "add_sale_product",
                 "list_sale_products",
+                "add_sale_product",
+                "list_treasury_files",
             )
         )for user in self.employees]
     )

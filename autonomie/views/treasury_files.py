@@ -70,7 +70,8 @@ DEFAULT_MAIL_OBJECT = {
 
 DEFAULT_MAIL_MESSAGE = {
     'salaire': u"""Bonjour {company.name},
-Vous trouverez ci-joint votre bulletin de salaire pour la période {month}/{year}.
+Vous trouverez ci-joint votre bulletin de salaire pour la période \
+{month}/{year}.
 """,
 }
 
@@ -125,7 +126,9 @@ def belongs_to_company(filename):
     """
     try:
         code_compta = get_code_compta(filename)
-        result = Company.query().filter(Company.code_compta==code_compta).count() > 0
+        result = Company.query().filter(
+            Company.code_compta == code_compta
+        ).count() > 0
     except:
         result = False
     return result
@@ -136,7 +139,7 @@ def get_company_by_code(code_compta):
     Return the company associated to this code_compta
     :param str code_compta: The analytic code of the company to find
     """
-    query = Company.query().filter(Company.code_compta==code_compta)
+    query = Company.query().filter(Company.code_compta == code_compta)
     return query.first()
 
 
@@ -204,7 +207,7 @@ def list_files(path, prefix='___'):
                 continue
             file_obj = AbstractFile(name, filepath)
             result.append(file_obj)
-    result.sort(key=lambda f:f.path)
+    result.sort(key=lambda f: f.path)
     return result
 
 
@@ -283,8 +286,8 @@ class AbstractFile(object):
         """
         request.response.content_type = self.mimetype
         request.response.headerlist.append(
-                ('Content-Disposition',
-                'attachment; filename={0}'.format(force_ascii(self.name))))
+            ('Content-Disposition',
+             'attachment; filename={0}'.format(force_ascii(self.name))))
         request.response.write(self.datas)
         return request
 
@@ -319,8 +322,10 @@ class DisplayDirectoryView(BaseView):
         """
             return the abspath of the root_directory
         """
-        return os.path.join(get_root_directory(self.request),
-                                            self._root_directory)
+        return os.path.join(
+            get_root_directory(self.request),
+            self._root_directory
+        )
 
     def collect_documents(self, prefix):
         """
@@ -344,10 +349,11 @@ class DisplayDirectoryView(BaseView):
             documents = self.collect_documents(company_code)
         else:
             documents = {}
-        return dict(title=self.title,
-                documents=documents,
-                current_years=current_years()
-                )
+        return dict(
+            title=self.title,
+            documents=documents,
+            current_years=current_years(),
+        )
 
 
 class TreasuryFilesView(DisplayDirectoryView):
@@ -379,7 +385,7 @@ class AdminTreasuryView(BaseView):
     Admin View for documents supervision (mailing ...)
     """
     title = u"Administration des fichiers"
-    filetypes = ('salaire', ) #'trésorerie', 'resultat')
+    filetypes = ('salaire', )  # 'trésorerie', 'resultat')
 
     def __init__(self, context, request):
         BaseView.__init__(self, context, request)
@@ -392,8 +398,10 @@ class AdminTreasuryView(BaseView):
         result = None
         label = month_name(month)
         if label:
-            all_files = [filename for filename in os.listdir(month_dir)\
-                            if belongs_to_company(filename)]
+            all_files = [
+                filename for filename in os.listdir(month_dir)
+                if belongs_to_company(filename)
+            ]
             if len(all_files) > 0:
                 url = self.request.route_path(
                     'admin_treasury_files',
@@ -523,7 +531,6 @@ class MailTreasuryFilesView(BaseView):
             mails.append(mail_dict)
         return mails
 
-
     def _prepare_attachment(self, root_path, mail):
         """
         Return the attachment absolute filepath
@@ -540,7 +547,6 @@ class MailTreasuryFilesView(BaseView):
         """
         return message_tmpl.format(company=company, year=year, month=month)
 
-
     def _send_mails(self, mails, force):
         """
         Launch the task for mail sending
@@ -555,9 +561,10 @@ class MailTreasuryFilesView(BaseView):
                 mails,
                 force,
             )
-            logger.info(u" * The Celery Task {0} has been delayed, its result \
+            logger.info(
+                u" * The Celery Task {0} has been delayed, its result \
 should be retrieved from the MailingJob : {1}".format(celery_job.id, job.id)
-                    )
+            )
         except redis.exceptions.ConnectionError:
             logger.exception(u"La connexion redis à la base de données n'est \
 pas possible")
@@ -722,7 +729,7 @@ class MailHistoryView(BaseListView):
     def filter_company_id(self, query, appstruct):
         search = appstruct.get('search')
         if search:
-            query = query.filter(MailHistory.company_id==search)
+            query = query.filter(MailHistory.company_id == search)
         return query
 
 
@@ -744,28 +751,18 @@ def mailagain(request):
     return HTTPFound(url)
 
 
-def includeme(config):
+def add_routes(config):
     """
-        View and route inclusions
+    add module's related routes
     """
     # traverse is the path in the resource tree we provide to add a context to
     # our view
     traverse = '/companies/{id}'
-
-    # Add the file listing route/views
-    for key, view in ("treasury", TreasuryFilesView), \
-                     ("incomestatement", IncomeStatementFilesView), \
-                     ("salarysheet", SalarySheetFilesView):
+    for key in ("treasury", "incomestatement", "salarysheet"):
         config.add_route(
             key,
             "/company/{id:\d+}/%s" % key,
             traverse=traverse
-        )
-        config.add_view(
-            view,
-            route_name=key,
-            renderer="treasury/documents.mako",
-            permission="edit",
         )
 
     # Add the file display view
@@ -774,29 +771,8 @@ def includeme(config):
         "/company/{id:\d+}/files/",
         traverse=traverse,
     )
-    config.add_view(
-        file_display,
-        route_name="treasury_files",
-        request_param='name',
-    )
-
-
-    # Add the mail history views
     config.add_route("mailhistory", '/mailhistory')
-    config.add_view(
-        MailHistoryView,
-        route_name='mailhistory',
-        renderer='mailhistory.mako',
-        permission="admin",
-    )
     config.add_route("mail", "/mail/{id:\d+}")
-    config.add_view(
-        mailagain,
-        route_name="mail",
-        permission="admin",
-    )
-
-    # Add the admin files view
     config.add_route(
         "admin_treasury_all",
         "/treasury_files/",
@@ -805,15 +781,58 @@ def includeme(config):
         "admin_treasury_files",
         "/treasury_files/{filetype}/{year}/{month}/",
     )
+
+
+def includeme(config):
+    """
+        View and route inclusions
+    """
+    add_routes(config)
+    for view_name, view in (
+        ("treasury", TreasuryFilesView),
+        ("incomestatement", IncomeStatementFilesView),
+        ("salarysheet", SalarySheetFilesView),
+    ):
+        # Add the file listing route/views
+        config.add_view(
+            view,
+            route_name=view_name,
+            renderer="treasury/documents.mako",
+            permission="list_treasury_files",
+        )
+
+    config.add_view(
+        file_display,
+        route_name="treasury_files",
+        request_param='name',
+        permission="list_treasury_files",
+    )
+
+    # Add the mail history views
+    config.add_view(
+        MailHistoryView,
+        route_name='mailhistory',
+        renderer='mailhistory.mako',
+        permission="admin_treasury",
+    )
+
+    config.add_view(
+        mailagain,
+        route_name="mail",
+        permission="admin_treasury",
+    )
+
+    # Add the admin files view
     config.add_view(
         AdminTreasuryView,
         route_name="admin_treasury_all",
         renderer="/treasury/admin_treasury_all.mako",
-        permission="admin",
+        permission="admin_treasury",
     )
+
     config.add_view(
         MailTreasuryFilesView,
         route_name="admin_treasury_files",
         renderer="/treasury/admin_treasury_files.mako",
-        permission="admin",
+        permission="admin_treasury",
     )

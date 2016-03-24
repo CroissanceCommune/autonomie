@@ -55,7 +55,11 @@ ${period_form.render()|n}
     <div class="well hidden-print">
         <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
 % if request.context.status == 'resulted':
-        Cette note de dépense a été payée.
+    Cette note de dépense a été intégralement payée.
+% elif request.context.status == 'paid':
+    Cette note de dépense a été partiellement payée.
+% elif request.context.status == "waiver":
+    Cette note de dépense est en abandon de créance.
 % elif request.context.status == 'valid':
         Cette note de dépense a été validée, elle est en attente de paiement.
 % elif request.context.status == 'wait':

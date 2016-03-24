@@ -51,7 +51,7 @@ from autonomie.export.sage import (
     SagePaymentCsvWriter,
 )
 from autonomie.export.utils import write_file_to_request
-from autonomie.models.treasury import (
+from autonomie.models.expense import (
     ExpenseSheet,
     ExpenseType,
 )

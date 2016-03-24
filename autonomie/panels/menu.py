@@ -137,6 +137,7 @@ def get_companies(request):
     """
     companies = []
     if request.has_permission('manage'):
+        print(u"Has the permission")
         companies = Company.query().all()
     else:
         companies = request.user.companies
@@ -410,7 +411,7 @@ def submenu_panel(context, request):
     if not request.has_permission('manage'):
         return {}
 
-    cid = get_cid(request)
+    cid = get_cid(request, submenu=True)
     if not cid:
         return {}
 

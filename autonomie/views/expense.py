@@ -47,7 +47,7 @@ from autonomie.forms.expense import (
     get_list_schema,
     STATUS_OPTIONS
 )
-from autonomie.models.treasury import (
+from autonomie.models.expense import (
     ExpenseType,
     ExpenseTelType,
     ExpenseKmType,

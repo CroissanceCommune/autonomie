@@ -52,25 +52,31 @@ ALLOWED_CSS_STYLES = [
 ]
 
 DEF_STATUS = u"Statut inconnu"
-STATUS = dict((
-            ("draft", u"Brouillon modifié",),
-            ("wait", u"Validation demandée",),
-            ("valid", u"Validé{genre}"),
-            ('invalid', u"Invalidé{genre}",),
-            ("abort", u"Annulé{genre}",),
-            ("geninv", u"Facture générée",),
-            ("aboinv", u"Facture annulée",),
-            ("aboest", u"Devis annulé",),
-            ("paid", u"Paiement partiel reçu",),
-            ("resulted", u"Paiement reçu",),
-            ))
-EXPENSE_STATUS = dict((
-    ("draft", u"Brouillon modifié",),
-    ("wait", u"Validation demandée",),
-    ("valid", u"Validé{genre}"),
-    ('invalid', u"Invalidé{genre}",),
-    ("resulted", u"Paiement notifié",),
-    ))
+STATUS = dict(
+    (
+        ("draft", u"Brouillon modifié",),
+        ("wait", u"Validation demandée",),
+        ("valid", u"Validé{genre}"),
+        ('invalid', u"Invalidé{genre}",),
+        ("abort", u"Annulé{genre}",),
+        ("geninv", u"Facture générée",),
+        ("aboinv", u"Facture annulée",),
+        ("aboest", u"Devis annulé",),
+        ("paid", u"Paiement partiel reçu",),
+        ("resulted", u"Paiement reçu",),
+    )
+)
+EXPENSE_STATUS = dict(
+    (
+        ("draft", u"Brouillon modifié",),
+        ("wait", u"Validation demandée",),
+        ("valid", u"Validé{genre}"),
+        ('invalid', u"Invalidé{genre}",),
+        ("paid", u"Paiement partiel notifié",),
+        ("resulted", u"Paiement intégral notifié",),
+        ("waiver", u"Abandon de créance",),
+    )
+)
 ACTIVITY_STATUS = dict((
     ("closed", u"Terminée",),
     ("planned", u"Planifiée",),
@@ -96,9 +102,10 @@ def format_status(task, full=True):
         genre = u""
 
     status_str = STATUS.get(status, DEF_STATUS).format(genre=genre)
-    suffix = u" par {0} le {1}"\
-            .format(format_account(task.statusPersonAccount),
-                                        format_date(task.statusDate))
+    suffix = u" par {0} le {1}".format(
+        format_account(task.statusPersonAccount),
+        format_date(task.statusDate)
+    )
     if full:
         status_str += suffix
 
@@ -109,8 +116,9 @@ def format_expense_status(expense, full=True):
     """
         Return a formatted status string for the expense
     """
-    status_str = EXPENSE_STATUS.get(expense.status, DEF_STATUS)\
-            .format(genre=u"e")
+    status_str = EXPENSE_STATUS.get(
+        expense.status, DEF_STATUS
+    ).format(genre=u"e")
     if expense.status_user:
         account = format_account(expense.status_user)
     else:
@@ -214,7 +222,7 @@ def month_name(index):
     if not isinstance(index, int):
         try:
             index = int(index)
-        except ValueError as e:
+        except ValueError:
             return u""
 
     if index in range(1, 13):
@@ -229,6 +237,7 @@ tags_to_check = (('<p>', '</p>'), ('<div>', '</div>'),)
 
 def remove_tag(text, tag):
     return text[0:-1*len(tag)].strip()
+
 
 def clean_linebreaks(text):
     """
@@ -295,22 +304,22 @@ class Api(object):
     """
         Api object passed to the templates hosting all commands we will use
     """
-    format_amount  = staticmethod(format_amount)
-    format_date  = staticmethod(format_date)
-    format_status  = staticmethod(format_status)
-    format_expense_status  = staticmethod(format_expense_status)
-    format_activity_status  = staticmethod(format_activity_status)
-    format_account  = staticmethod(format_account)
-    format_name  = staticmethod(format_name)
-    format_paymentmode  = staticmethod(format_paymentmode)
-    format_short_date  = staticmethod(format_short_date)
-    format_long_date  = staticmethod(format_long_date)
-    format_quantity  = staticmethod(format_quantity)
+    format_amount = staticmethod(format_amount)
+    format_date = staticmethod(format_date)
+    format_status = staticmethod(format_status)
+    format_expense_status = staticmethod(format_expense_status)
+    format_activity_status = staticmethod(format_activity_status)
+    format_account = staticmethod(format_account)
+    format_name = staticmethod(format_name)
+    format_paymentmode = staticmethod(format_paymentmode)
+    format_short_date = staticmethod(format_short_date)
+    format_long_date = staticmethod(format_long_date)
+    format_quantity = staticmethod(format_quantity)
     format_datetime = staticmethod(format_datetime)
     format_task_type = staticmethod(format_task_type)
-    human_readable_filesize  = staticmethod(human_readable_filesize)
-    month_name  = staticmethod(month_name)
-    clean_html  = staticmethod(clean_html)
+    human_readable_filesize = staticmethod(human_readable_filesize)
+    month_name = staticmethod(month_name)
+    clean_html = staticmethod(clean_html)
 
     def __init__(self, context, request):
         self.request = request
@@ -348,7 +357,6 @@ class Api(object):
             return self.request.route_path('file', id=fileobj.id)
         else:
             return ""
-
 
     def img_url(self, fileobj):
         """

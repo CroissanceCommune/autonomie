@@ -31,7 +31,7 @@ import logging
 from sqlalchemy import and_
 
 from autonomie.models.task.task import Task
-from autonomie.models.treasury import ExpenseSheet
+from autonomie.models.expense import ExpenseSheet
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.project import Phase
 from autonomie.models.activity import Activity

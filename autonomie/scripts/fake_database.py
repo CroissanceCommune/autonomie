@@ -38,7 +38,7 @@ from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.tva import Tva
 from autonomie.scripts.utils import command
 from autonomie.models.task.unity import WorkUnit
-from autonomie.models.treasury import (
+from autonomie.models.expense import (
     ExpenseKmType,
     ExpenseTelType,
     ExpenseType,

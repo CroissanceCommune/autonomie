@@ -31,7 +31,7 @@
 import colander
 import deform
 
-from autonomie.models.treasury import (
+from autonomie.models.expense import (
     ExpenseType,
     get_expense_years,
 )
@@ -43,9 +43,11 @@ from autonomie import forms
 
 STATUS_OPTIONS = (
     ("all", u"Toutes les notes de dépense", ),
-    ("valid", u'Validées', ),
-    ("resulted", u'Payées', ),
     ("wait", u'En attente de validation', ),
+    ("valid", u'Validées', ),
+    ("paid", u"Partiellement payées", ),
+    ("resulted", u'Payées', ),
+    ("waiver", u"Abandon de créance", ),
 )
 
 

@@ -63,7 +63,7 @@ from autonomie.models.workshop import (
     Workshop,
     Timeslot,
 )
-from autonomie.models.treasury import (
+from autonomie.models.expense import (
     ExpenseSheet,
 )
 from autonomie.models.user import (

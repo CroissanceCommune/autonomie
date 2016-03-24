@@ -214,7 +214,7 @@ d'écriture RG Client",
     "code_journal_ndf": {
         "title": u"Code journal utilisé pour les notes de dépense",
     },
-    "compte_cg_ndf":{
+    "compte_cg_ndf": {
         "title": u"Compte de tiers (classe 4) pour les dépenses dues aux \
 entrepreneurs",
         "description": u"Le compte général pour les notes de dépense",
@@ -258,7 +258,7 @@ def get_config_key_schemanode(key, ui_conf):
     """
     return colander.SchemaNode(
         colander.String(),
-        title=ui_conf['title'],
+        title=ui_conf.get('title', key),
         description=ui_conf.get('description'),
         missing=u"",
         name=key,
@@ -279,7 +279,7 @@ def get_config_schema(keys):
     schema = colander.Schema()
     mappings = {}
     for key in keys:
-        ui_conf = CONFIGURATION_KEYS[key]
+        ui_conf = CONFIGURATION_KEYS.get(key, {})
         node = get_config_key_schemanode(key, ui_conf)
 
         if "section" in ui_conf:  # This element should be shown in a mapping

@@ -713,6 +713,7 @@ class AdminCae(BaseConfigView):
         'sage_rgclient',
     )
     schema = get_config_schema(keys)
+    redirect_path = "admin_index"
 
 
 class TemplateUploadView(FileUploadView):

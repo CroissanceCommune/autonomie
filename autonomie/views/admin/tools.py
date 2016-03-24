@@ -55,6 +55,7 @@ class BaseConfigView(BaseAdminFormView):
     keys = ()
     validation_msg = u""
     schema = None
+    redirect_path = None
 
     def before(self, form):
         appstruct = build_config_appstruct(self.request, self.keys)
@@ -80,7 +81,10 @@ class BaseConfigView(BaseAdminFormView):
             logger.debug(u"{0} : {1}".format(key, value))
 
         self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path(self.redirect_path))
+        if self.redirect_path is not None:
+            return HTTPFound(self.request.route_path(self.redirect_path))
+        else:
+            return HTTPFound(self.request.current_route_path())
 
 
 class AdminOption(BaseAdminFormView):

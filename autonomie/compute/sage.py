@@ -1415,3 +1415,174 @@ class PaymentExport(object):
         for payment in payments:
             result.extend(list(self.get_book_entry(payment)))
         return result
+
+
+class SageExpensePaymentMain(BaseSageBookEntryFactory):
+    static_columns = (
+        'reference',
+        'code_journal',
+        'date',
+        'mode',
+        'libelle',
+        'type_',
+        "num_analytique",
+        'code_taxe',
+    )
+
+    variable_columns = (
+        'compte_cg',
+        'compte_tiers',
+        'debit',
+        'credit',
+    )
+
+    def set_payment(self, payment):
+        self.expense = payment.expense
+        self.payment = payment
+        self.company = self.expense.company
+        self.user = self.expense.user
+        # Ne sert à rien pour l'instant (si on déplace le compte tiers, si)
+        self.user = self.expense.user
+        self.set_static_cols()
+
+    def set_static_cols(self):
+        # set static fields values
+        self.reference = u"{0}".format(self.expense.id)
+        self.code_journal = self.config['code_journal_ndf']
+        self.date = format_sage_date(self.payment.date)
+        self.mode = self.payment.mode
+        self.libelle = u"remboursement dépenses {0} {1} {2}".format(
+            render_api.format_account(self.user),
+            render_api.month_name(self.expense.month),
+            self.expense.year,
+        )
+        self.num_analytique = self.company.code_compta
+        self.code_taxe = self.config['code_tva_ndf']
+
+    @double_lines
+    def credit_bank(self, val):
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.payment.bank.compte_cg,
+            credit=val,
+        )
+        return entry
+
+    @double_lines
+    def debit_user(self, val):
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.config['compte_cg_ndf'],
+            compte_tiers=self.company.compte_tiers,
+            debit=val,
+        )
+        return entry
+
+    def yield_entries(self):
+        yield self.credit_bank(self.payment.amount)
+        yield self.debit_user(self.payment.amount)
+
+
+class SageExpensePaymentWaiver(SageExpensePaymentMain):
+    """
+    Module d'export pour les paiements par abandon de créance
+    """
+    def set_static_cols(self):
+        SageExpensePaymentMain.set_static_cols(self)
+        self.mode = u"Abandon de créance"
+        self.code_taxe = ""
+        self.libelle = u"Abandon de créance {0} {1} {2}".format(
+            render_api.format_account(self.user),
+            render_api.month_name(self.expense.month),
+            self.expense.year,
+        )
+
+    @double_lines
+    def credit_bank(self, val):
+        """
+        Un compte CG spécifique aux abandons de créances est utilisé ici
+        """
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.config['compte_cg_waiver_ndf'],
+            credit=val,
+        )
+        return entry
+
+
+class ExpensePaymentExport(object):
+    _default_modules = (SageExpensePaymentMain,)
+    _available_modules = {
+    }
+
+    def __init__(self, config):
+        self.config = config
+        self.modules = []
+        self.main_module = SageExpensePaymentMain(self.config)
+        self.waiver_module = SageExpensePaymentWaiver(self.config)
+
+    def get_modules(self, expense_payment):
+        """
+        Retrieve the modules to use regarding the payment to export
+
+        :param obj expense_payment: A ExpensePayment object
+        :results: The module to use
+        :rtype: list
+        """
+        if expense_payment.waiver:
+            module = self.waiver_module
+        else:
+            module = self.main_module
+
+        return [module]
+
+    def get_book_entry(self, payment):
+        """
+        Return book entries for the given payment
+
+        :param obj payment: A ExpensePayment object
+
+        :results: An iterable with couples of G lines and A lines
+        """
+        for module in self.get_modules(payment):
+            module.set_payment(payment)
+            for entry in module.yield_entries():
+                gen_line, analytic_line = entry
+                yield gen_line
+                yield analytic_line
+
+    def get_expense_entries(self, expense):
+        """
+        Return book entries for the given expense
+
+        :param obj expense: ExpenseSheet object
+        """
+        result = []
+        for payment in expense.payments:
+            result.extend(list(self.get_book_entry(payment)))
+        return result
+
+    def get_expenses_entries(self, expenselist):
+        """
+        Return book entries for the given expenses
+
+        :param list expenselist: ExpenseSheet objects (resulting from a sqla
+        query)
+        :results: A list of book entries
+        """
+        result = []
+        for expense in expenselist:
+            result.extend(list(self.get_expense_entries(expense)))
+        return result
+
+    def get_book_entries(self, payments):
+        """
+        Return book entries for the given payments
+
+        :param list payments: ExpensePayment objects
+        :results: A list of book entries
+        """
+        result = []
+        for payment in payments:
+            result.extend(list(self.get_book_entry(payment)))
+        return result

@@ -45,6 +45,8 @@ from autonomie.compute.sage import (
     SageExpenseMain,
     SagePaymentMain,
     SagePaymentTva,
+    SageExpensePaymentMain,
+    SageExpensePaymentWaiver,
 )
 
 
@@ -59,6 +61,7 @@ class DummyLine(Dummy, LineCompute):
         Dummy line model
     """
     tva_object = None
+
     def get_tva(self):
         return self.tva_object
 
@@ -70,10 +73,11 @@ class DummyGroup(Dummy, GroupCompute):
 class DummyInvoice(Dummy, InvoiceCompute):
     pass
 
+
 def get_config():
     return {
         'code_journal': 'CODE_JOURNAL',
-        'compte_cg_contribution':'CG_CONTRIB',
+        'compte_cg_contribution': 'CG_CONTRIB',
         'compte_rrr': 'CG_RRR',
         'compte_frais_annexes': 'CG_FA',
         'compte_cg_assurance': 'CG_ASSUR',
@@ -95,10 +99,13 @@ def get_config():
         'taux_contribution_organic': "5",
         'contribution_cae': "10",
         'compte_cg_ndf': "CGNDF",
-        'code_journal_ndf':"JOURNALNDF",
+        'code_journal_ndf': "JOURNALNDF",
+        'code_tva_ndf': "TVANDF",
+        "compte_cg_waiver_ndf": "COMPTE_CG_WAIVER",
         'receipts_active_tva_module': True,
         'receipts_code_journal': "JOURNAL_RECEIPTS",
     }
+
 
 @pytest.fixture
 def def_tva():
@@ -165,7 +172,8 @@ def invoice(def_tva, tva):
     group = DummyGroup(lines=(line1, line2, line3,))
 
     company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
-    customer = Dummy(name="customer", compte_tiers="CUSTOMER", compte_cg='CG_CUSTOMER')
+    customer = Dummy(name="customer", compte_tiers="CUSTOMER",
+                     compte_cg='CG_CUSTOMER')
     invoice = TaskCompute()
     invoice.default_tva = def_tva.value
     invoice.expenses_tva = def_tva.value
@@ -206,6 +214,7 @@ def sageinvoice(def_tva, invoice):
         default_tva=def_tva,
     )
 
+
 @pytest.fixture
 def sageinvoice_discount(def_tva, invoice_discount):
     return SageInvoice(
@@ -229,9 +238,54 @@ def payment(invoice, def_tva):
     return p
 
 
+@pytest.fixture
+def expense():
+    company = MagicMock(
+        code_compta="COMP_ANA",
+        compte_tiers="TIERS_COMPANY",
+    )
+    user = MagicMock(
+        firstname="firstname",
+        lastname="lastname",
+        compte_tiers="COMP_TIERS",
+        )
+
+    return MagicMock(
+        id=1254,
+        company=company,
+        user=user,
+        month=5,
+        year=2014,
+        date=datetime.date.today(),
+    )
+
+
+@pytest.fixture
+def expense_type():
+    return MagicMock(
+        code='ETYPE1',
+        code_tva='CODETVA',
+        compte_tva='COMPTETVA',
+        contribution=True,
+    )
+
+
+@pytest.fixture
+def expense_payment(expense):
+    p = Dummy(
+        amount=10000,
+        mode=u"chèque",
+        date=datetime.date.today(),
+        bank=Dummy(compte_cg=u"COMPTE_CG_BANK"),
+        expense=expense,
+    )
+    return p
+
+
 def prepare(discount=False):
-    tva1 = MagicMock(name="tva1", value=1960, default=0,
-            compte_cg="TVA0001", code='CTVA0001')
+    tva1 = MagicMock(
+        name="tva1", value=1960, default=0,
+        compte_cg="TVA0001", code='CTVA0001')
     tva2 = MagicMock(
         name="tva2",
         value=700,
@@ -244,14 +298,15 @@ def prepare(discount=False):
     p2 = MagicMock(name="product 2", compte_cg="P0002", tva=tva2)
 
     line1 = DummyLine(cost=10000, quantity=1, tva=tva1.value, product=p1,
-            tva_object=tva1)
+                      tva_object=tva1)
     line2 = DummyLine(cost=10000, quantity=1, tva=tva1.value, product=p1,
-            tva_object=tva1)
+                      tva_object=tva1)
     line3 = DummyLine(cost=10000, quantity=1, tva=tva2.value, product=p2,
-            tva_object=tva2)
+                      tva_object=tva2)
 
     company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
-    customer = Dummy(name="customer", compte_tiers="CUSTOMER", compte_cg='CG_CUSTOMER')
+    customer = Dummy(name="customer", compte_tiers="CUSTOMER",
+                     compte_cg='CG_CUSTOMER')
     invoice = TaskCompute()
     invoice.default_tva = 1960
     invoice.expenses_tva = 1960
@@ -262,10 +317,17 @@ def prepare(discount=False):
     invoice.lines = [line1, line2, line3]
 
     if discount:
-        discount1 = DummyLine(cost=10000, quantity=1, tva=tva1.value,
-                tva_object=tva1)
-        discount2 = DummyLine(cost=10000, quantity=1, tva=tva2.value,
-                tva_object=tva2)
+        discount1 = DummyLine(
+            cost=10000,
+            quantity=1,
+            tva=tva1.value,
+            tva_object=tva1)
+        discount2 = DummyLine(
+            cost=10000,
+            quantity=1,
+            tva=tva2.value,
+            tva_object=tva2
+        )
         invoice.discounts = [discount1, discount2]
 
     invoice.expenses_ht = 10000
@@ -275,9 +337,12 @@ def prepare(discount=False):
 
 
 def test_get_products(sageinvoice):
-    sageinvoice.products['1'] = {'test_key':'test'}
-    assert sageinvoice.get_product('1', 'dontcare', 'dontcare').has_key('test_key')
-    assert len(sageinvoice.get_product('2', 'tva_compte_cg', 'tva_code').keys()) == 3
+    sageinvoice.products['1'] = {'test_key': 'test'}
+    assert "test_key" in sageinvoice.get_product('1', 'dontcare', 'dontcare')
+    assert len(
+        sageinvoice.get_product('2', 'tva_compte_cg', 'tva_code').keys()
+    ) == 3
+
 
 def test_populate_invoice_lines(sageinvoice):
     sageinvoice._populate_invoice_lines()
@@ -287,6 +352,7 @@ def test_populate_invoice_lines(sageinvoice):
     assert sageinvoice.products['P0001']['tva'] == 3920
     assert sageinvoice.products['P0002']['ht'] == 10000
     assert sageinvoice.products['P0002']['tva'] == 700
+
 
 def test_populate_discount_lines(sageinvoice_discount):
     sageinvoice_discount._populate_discounts()
@@ -859,40 +925,16 @@ class TestSageExpenseMain():
     """
     Main Expense export module testing
     """
-    def get_factory(self):
+    def get_factory(self, expense):
         """
         Return an instance of the book entry factory we are testing
         """
         factory = SageExpenseMain(get_config())
-        factory.set_expense(self.get_base_expense())
+        factory.set_expense(expense)
         return factory
 
-    def get_base_expense(self):
-        company = MagicMock(code_compta="COMP_ANA")
-        user = MagicMock(
-            firstname="firstname",
-            lastname="lastname",
-            compte_tiers="COMP_TIERS",
-            )
-
-        return MagicMock(
-            company=company,
-            user=user,
-            month=5,
-            year=2014,
-            date=datetime.date.today(),
-        )
-
-    def get_type_obj(self, contrib=True):
-        return MagicMock(
-            code='ETYPE1',
-            code_tva='CODETVA',
-            compte_tva='COMPTETVA',
-            contribution=contrib,
-        )
-
-    def test_base_entry(self):
-        factory = self.get_factory()
+    def test_base_entry(self, expense):
+        factory = self.get_factory(expense)
         assert factory.libelle == "Firstname LASTNAME/frais 5 2014"
         assert factory.num_feuille == "ndf52014"
         assert factory.code_journal == "JOURNALNDF"
@@ -901,8 +943,8 @@ class TestSageExpenseMain():
         for i in ('code_journal', 'date', 'libelle', 'num_feuille', 'type_'):
             assert i in base_entry
 
-    def test_credit(self):
-        factory = self.get_factory()
+    def test_credit(self, expense):
+        factory = self.get_factory(expense)
         general, analytic = factory._credit(2500)
         assert analytic['type_'] == 'A'
         assert analytic['credit'] == 2500
@@ -914,10 +956,9 @@ class TestSageExpenseMain():
         assert 'num_analytique' not in general.keys()
 
 
-    def test_debit_ht(self):
-        tobj = self.get_type_obj()
-        factory = self.get_factory()
-        general, analytic = factory._debit_ht(tobj, 150)
+    def test_debit_ht(self, expense, expense_type):
+        factory = self.get_factory(expense)
+        general, analytic = factory._debit_ht(expense_type, 150)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "ETYPE1"
@@ -928,10 +969,9 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_debit_tva(self):
-        tobj = self.get_type_obj()
-        factory = self.get_factory()
-        general, analytic = factory._debit_tva(tobj, 120)
+    def test_debit_tva(self, expense, expense_type):
+        factory = self.get_factory(expense)
+        general, analytic = factory._debit_tva(expense_type, 120)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "COMPTETVA"
@@ -942,9 +982,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_credit_entreprise(self):
-        tobj = self.get_type_obj()
-        factory = self.get_factory()
+    def test_credit_entreprise(self, expense):
+        factory = self.get_factory(expense)
         general, analytic = factory._credit_entreprise(120)
 
         assert analytic['type_'] == 'A'
@@ -955,9 +994,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_debit_entreprise(self):
-        tobj = self.get_type_obj()
-        factory = self.get_factory()
+    def test_debit_entreprise(self, expense):
+        factory = self.get_factory(expense)
         general, analytic = factory._debit_entreprise(120)
 
         assert analytic['type_'] == 'A'
@@ -968,9 +1006,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_credit_cae(self):
-        tobj = self.get_type_obj()
-        factory = self.get_factory()
+    def test_credit_cae(self, expense):
+        factory = self.get_factory(expense)
         general, analytic = factory._credit_cae(120)
 
         assert analytic['type_'] == 'A'
@@ -981,9 +1018,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_debit_cae(self):
-        tobj = self.get_type_obj()
-        factory = self.get_factory()
+    def test_debit_cae(self, expense):
+        factory = self.get_factory(expense)
         general, analytic = factory._debit_cae(120)
 
         assert analytic['type_'] == 'A'
@@ -993,3 +1029,71 @@ class TestSageExpenseMain():
 
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
+
+
+@pytest.mark.payment
+class TestSageExpensePaymentMain():
+    def get_factory(self, expense_payment):
+        factory = SageExpensePaymentMain(get_config())
+        factory.set_payment(expense_payment)
+        return factory
+
+    def test_base_entry(self, expense_payment):
+        today = datetime.date.today()
+        factory = self.get_factory(expense_payment)
+        assert factory.reference == "1254"
+        assert factory.code_journal == "JOURNALNDF"
+        assert factory.date == today.strftime("%d%m%y")
+        assert factory.mode == u"chèque"
+        libelle = u"remboursement dépenses LASTNAME Firstname mai 2014"
+        assert factory.libelle == libelle
+        assert factory.code_taxe == "TVANDF"
+        assert factory.num_analytique == "COMP_ANA"
+
+    def test_credit_bank(self, expense_payment):
+        factory = self.get_factory(expense_payment)
+        g_entry, entry = factory.credit_bank(10000)
+        assert entry['compte_cg'] == 'COMPTE_CG_BANK'
+        assert entry.get('compte_tiers', '') == ''
+        assert entry['credit'] == 10000
+
+    def test_debit_entrepreneur(self, expense_payment):
+        factory = self.get_factory(expense_payment)
+        g_entry, entry = factory.debit_user(10000)
+        assert entry['compte_cg'] == "CGNDF"
+        assert entry['compte_tiers'] == 'TIERS_COMPANY'
+        assert entry['debit'] == 10000
+
+
+@pytest.mark.payment
+class TestSageExpensePaymentWaiver():
+    def get_factory(self, expense_payment):
+        factory = SageExpensePaymentWaiver(get_config())
+        factory.set_payment(expense_payment)
+        return factory
+
+    def test_base_entry(self, expense_payment):
+        today = datetime.date.today()
+        factory = self.get_factory(expense_payment)
+        assert factory.reference == "1254"
+        assert factory.code_journal == "JOURNALNDF"
+        assert factory.date == today.strftime("%d%m%y")
+        assert factory.mode == u"Abandon de créance"
+        libelle = u"Abandon de créance LASTNAME Firstname mai 2014"
+        assert factory.libelle == libelle
+        assert factory.code_taxe == ""
+        assert factory.num_analytique == "COMP_ANA"
+
+    def test_credit_bank(self, expense_payment):
+        factory = self.get_factory(expense_payment)
+        g_entry, entry = factory.credit_bank(10000)
+        assert entry['compte_cg'] == 'COMPTE_CG_WAIVER'
+        assert entry.get('compte_tiers', '') == ''
+        assert entry['credit'] == 10000
+
+    def test_debit_entrepreneur(self, expense_payment):
+        factory = self.get_factory(expense_payment)
+        g_entry, entry = factory.debit_user(10000)
+        assert entry['compte_cg'] == "CGNDF"
+        assert entry['compte_tiers'] == 'TIERS_COMPANY'
+        assert entry['debit'] == 10000

@@ -74,7 +74,6 @@ EXPENSE_STATUS = dict(
         ('invalid', u"Invalidé{genre}",),
         ("paid", u"Paiement partiel notifié",),
         ("resulted", u"Paiement intégral notifié",),
-        ("waiver", u"Abandon de créance",),
     )
 )
 ACTIVITY_STATUS = dict((

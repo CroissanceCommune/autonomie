@@ -219,6 +219,13 @@ d'écriture RG Client",
 entrepreneurs",
         "description": u"Le compte général pour les notes de dépense",
     },
+    "compte_cg_waiver_ndf": {
+        "title": u"Compte abandons de créance",
+        "description": "Compte de comptabilité générale spécifique aux \
+abandons de créance dans les notes de dépense",
+        "description": u"Le code TVA utilisé pour l'export des paiements \
+des notes de dépense.",
+    },
     "code_tva_ndf": {
         "title": u"Code TVA spécifique aux notes de dépense",
         "description": u"Le code TVA utilisé pour l'export des paiements \

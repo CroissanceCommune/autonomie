@@ -35,11 +35,11 @@ Admin expenses list view
     <div class='col-md-4'>
         <table class='table table-bordered'>
             <tr>
-                <td class='grey_tr'><br /></td>
+                <td class='white_tr'><br /></td>
                 <td>Notes de dépense en attente de validation</td>
             </tr>
             <tr>
-                <td class='white_tr'><br /></td>
+                <td class='red_tr'><br /></td>
                 <td>Notes de dépense validées</td>
             </tr>
             <tr>
@@ -49,10 +49,6 @@ Admin expenses list view
             <tr>
                 <td class='green_tr'><br /></td>
                 <td>Notes de dépense payées</td>
-            </tr>
-            <tr>
-                <td class='red_tr'><br /></td>
-                <td>Notes de dépense en abandon de créance</td>
             </tr>
         </table>
     </div>
@@ -75,15 +71,13 @@ Admin expenses list view
             <% onclick = "document.location='{url}'".format(url=url) %>
             <%
 if expense.status == 'valid':
-    css = "white_"
+    css = "red_"
 elif expense.status == 'resulted':
     css = "green_"
 elif expense.status == 'paid':
     css = "orange_"
-elif expense.status == 'waiver':
-    css = "red_"
 else:
-    css = "grey_"
+    css = "white_"
 %>
             <tr class="${css}tr">
                 <td onclick="${onclick}" class="rowlink">

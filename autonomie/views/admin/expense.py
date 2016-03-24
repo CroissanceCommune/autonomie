@@ -60,7 +60,12 @@ from autonomie.models.expense import (
 
 class AdminTreasury(BaseConfigView):
     title = u"Export comptable des notes de dépense et de leur paiement"
-    keys = ("code_journal_ndf", "compte_cg_ndf", "code_tva_ndf")
+    keys = (
+        "code_journal_ndf",
+        "compte_cg_ndf",
+        "compte_cg_waiver_ndf",
+        "code_tva_ndf",
+    )
     schema = get_config_schema(keys)
     validation_msg = u"L'export comptable des notes de dépense a bien été \
 configuré"

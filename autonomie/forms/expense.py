@@ -47,7 +47,6 @@ STATUS_OPTIONS = (
     ("valid", u'Validées', ),
     ("paid", u"Partiellement payées", ),
     ("resulted", u'Payées', ),
-    ("waiver", u"Abandon de créance", ),
 )
 
 

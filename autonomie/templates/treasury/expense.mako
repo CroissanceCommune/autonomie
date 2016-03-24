@@ -58,8 +58,6 @@ ${period_form.render()|n}
     Cette note de dépense a été intégralement payée.
 % elif request.context.status == 'paid':
     Cette note de dépense a été partiellement payée.
-% elif request.context.status == "waiver":
-    Cette note de dépense est en abandon de créance.
 % elif request.context.status == 'valid':
         Cette note de dépense a été validée, elle est en attente de paiement.
 % elif request.context.status == 'wait':

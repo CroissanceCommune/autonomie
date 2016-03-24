@@ -252,13 +252,12 @@ def build_state_machine():
     invalid = ('invalid', "admin_expense",)
     paid = ('paid', "admin_expense", )  # Partiellement payé
     resulted = ('resulted', "admin_expense", )  # Soldé
-    waiver = ('waiver', "admin_expense", )  # Abandon de créance
     states = {}
     states['draft'] = (draft, wait, reset, valid,)
     states['invalid'] = (draft, wait,)
     states['wait'] = (valid, invalid,)
-    states['valid'] = (resulted, paid, waiver,)
-    states['paid'] = (resulted, waiver, )
+    states['valid'] = (resulted, paid,)
+    states['paid'] = (resulted, )
     return states
 
 
@@ -594,6 +593,8 @@ class ExpensePayment(DBBASE, PersistentACLMixin):
     mode = Column(String(50))
     amount = Column(Integer)
     date = Column(DateTime(), default=datetime.datetime.now)
+    # est-ce un abandon de créance
+    waiver = Column(Boolean(), default=False)
     exported = Column(Boolean(), default=False)
     expense_sheet_id = Column(
         Integer,

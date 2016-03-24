@@ -96,7 +96,28 @@ AUTONOMIE_REQUEST_SUBSCRIBERS = (
 AUTONOMIE_ADMIN_MODULES = (
     "autonomie.views.admin.main",
     "autonomie.views.admin.competence",
+    "autonomie.views.admin.expense",
 )
+
+
+# def add_menu(config, menu_object, menu_type, panel_name, rights=None):
+#     """
+#     Add a add_menu method to the configuration object
+#
+#     """
+#     registry = config.registry
+#     def callback():
+#         if not hasattr(registry, 'autonomie_menus'):
+#             registry.autonomie_menus = {}
+#         registry.autonomie_menus.setdefault(
+#             menu_type,
+#             {}
+#         ).setdefault(
+#             panel_name,
+#             {}
+#         )[name] = menu_object
+#
+#     config.action(
 
 
 def add_static_views(config, settings):

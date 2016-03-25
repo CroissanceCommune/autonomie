@@ -193,7 +193,7 @@ def base_configure(config, dbsession, **settings):
     # Adding some usefull properties to the request object
     config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
-    config.set_request_property(lambda _: get_config(), 'config')
+    config.set_request_property(lambda _: get_config(), 'config', reify=True)
 
     add_static_views(config, settings)
 

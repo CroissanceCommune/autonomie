@@ -626,7 +626,7 @@ class Payment(DBBASE, PersistentACLMixin):
     def get_amount(self):
         return self.amount
 
-    def __repr__(self):
+    def __unicode__(self):
         return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
  mode:{s.mode} date:{s.date}".format(s=self)
 

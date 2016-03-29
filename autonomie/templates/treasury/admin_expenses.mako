@@ -62,6 +62,7 @@ Admin expenses list view
             <th>Entrepreneur</th>
             <th>Période</th>
             <th>Montant</th>
+            <th>Paiements</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -91,6 +92,24 @@ else:
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     ${api.format_amount(expense.total, trim=True)|n}&nbsp;&euro;
+                </td>
+                <td onclick="${onclick}" class="rowlink">
+                    % for payment in expense.payments:
+                        % if loop.first:
+                            <ul>
+                        % endif
+                                <% url = request.route_path('expense_payment', id=payment.id) %>
+                                <li>
+                                <a href="${url}">
+                                    ${api.format_amount(payment.amount)|n}&nbsp;€
+                                    le ${api.format_date(payment.date)}
+                                    (${api.format_paymentmode(payment.mode)})
+                                </a>
+                                </li>
+                        % if loop.last:
+                            </ul>
+                        % endif
+                    % endfor
                 </td>
                 <td>
                     <% url = request.route_path('expensesheet', id=expense.id) %>

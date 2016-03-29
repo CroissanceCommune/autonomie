@@ -58,6 +58,7 @@
             <th>Période</th>
             <th>Statut</th>
             <th>Total</th>
+            <th>Paiements</th>
             <th>Actions</th>
         </thead>
         <tbody>
@@ -65,6 +66,24 @@
                 <tr><td>${api.month_name(expense.month)} ${expense.year}</td>
                     <td>${api.format_expense_status(expense)}</td>
                     <td>${api.format_amount(expense.total, trim=True)|n}</td>
+                    <td>
+                        % for payment in expense.payments:
+                            % if loop.first:
+                                <ul>
+                            % endif
+                                    <% url = request.route_path('expense_payment', id=payment.id) %>
+                                    <li>
+                                    <a href="${url}">
+                                        ${api.format_amount(payment.amount)|n}&nbsp;€
+                                        le ${api.format_date(payment.date)}
+                                        (${api.format_paymentmode(payment.mode)})
+                                    </a>
+                                    </li>
+                            % if loop.last:
+                                </ul>
+                            % endif
+                        % endfor
+                    </td>
                     <td style='text-align:right'>
                         ${table_btn(request.route_path('expensesheet', id=expense.id), u"Voir", u"Voir cette note de dépense", 'search')}
                         ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de dépense au format xslx", "file")}

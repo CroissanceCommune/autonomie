@@ -67,6 +67,8 @@
             Cette note de dépense est en attente de validation
     % elif expense.status == 'draft':
         Cette note de dépense est un brouillon
+    % elif expense.status == 'invalid':
+        Cette note de dépense est invalide
     % endif
         </strong>
         <ul>

@@ -28,6 +28,7 @@ from autonomie.compute import math_utils
 class ExpenseCompute(object):
     lines = ()
     kmlines = ()
+    payments = ()
 
     def get_lines_by_type(self):
         """
@@ -48,6 +49,12 @@ class ExpenseCompute(object):
         ) + sum(
             [line.total for line in self.kmlines]
         )
+
+    def paid(self):
+        return sum([payment.get_amount() for payment in self.payments])
+
+    def topay(self):
+        return self.total - self.paid()
 
 
 class ExpenseLineCompute(object):

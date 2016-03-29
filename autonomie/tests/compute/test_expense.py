@@ -23,6 +23,7 @@ import pytest
 
 from mock import MagicMock
 from autonomie.compute.expense import (
+    ExpenseCompute,
     ExpenseLineCompute,
     ExpenseKmLineCompute,
 )
@@ -41,6 +42,24 @@ def teltype():
 @pytest.fixture
 def kmtype():
     return MagicMock(amount=0.38888, label="", code="")
+
+
+class DummyAmount(object):
+    def __init__(self, amount):
+        self.amount = amount
+
+    def get_amount(self):
+        return self.amount
+
+
+def test_expense_compute():
+    sheet = ExpenseCompute()
+    sheet.lines = (MagicMock(total=10), MagicMock(total=20))
+    sheet.kmlines = (MagicMock(total=10), MagicMock(total=60))
+    assert sheet.total == 100
+    sheet.payments = (DummyAmount(amount=15), DummyAmount(amount=15),)
+    assert sheet.topay() == 70
+    assert sheet.paid() == 30
 
 
 def test_expense_line_compute(teltype):

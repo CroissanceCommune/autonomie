@@ -40,10 +40,10 @@ log = logging.getLogger(__name__)
 
 # Events for which a mail will be sended
 EVENTS = {
-          "valid":u"validée",
-          "invalid": u"invalidée",
-          "resulted": u"payée",
-          }
+    "valid": u"validée",
+    "invalid": u"invalidée",
+    "resulted": u"payée",
+}
 
 MAIL_TMPL = u"""
 Bonjour {owner},
@@ -61,7 +61,7 @@ class StatusChanged(object):
     """
         Event fired when an expense changes its status
     """
-    def __init__(self, request, expense, status, comment):
+    def __init__(self, request, expense, status, comment=None):
         self.request = request
         self.expense = expense
         self.new_status = status
@@ -87,8 +87,11 @@ class StatusChanged(object):
         if 'mail.default_sender' in self.settings:
             mail = self.settings['mail.default_sender']
         else:
-            log.info(u"'{0}' has not set his email".format(
-                                                    self.request.user.login))
+            log.info(
+                u"'{0}' has not set his email".format(
+                    self.request.user.login
+                )
+            )
             mail = "Unknown"
         return mail
 
@@ -98,9 +101,9 @@ class StatusChanged(object):
             return the subject of the email
         """
         subject = u"Notes de dépense de {0} : {1}".format(
-                format_account(self.expense.user),
-                format_expense_status(self.expense),
-                )
+            format_account(self.expense.user),
+            format_expense_status(self.expense),
+        )
         return subject
 
     @property
@@ -115,12 +118,12 @@ class StatusChanged(object):
         addr = format_link(self.settings, addr)
 
         return MAIL_TMPL.format(
-                owner=owner,
-                addr=addr,
-                date=date,
-                status_verb=status_verb,
-                comment=self.comment,
-                )
+            owner=owner,
+            addr=addr,
+            date=date,
+            status_verb=status_verb,
+            comment=self.comment,
+        )
 
     @staticmethod
     def get_attachment():
@@ -128,7 +131,6 @@ class StatusChanged(object):
             Return the file data to be sent with the email
         """
         return None
-
 
     def is_key_event(self):
         """

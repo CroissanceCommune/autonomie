@@ -47,29 +47,46 @@
 <br />
 <div class="row">
     <div id="header-container">
-    </div>
-</div>
 <a class='btn btn-default pull-right' href='#print'><i class='glyphicon glyphicon-print'></i>Imprimer</a>
 <a class='btn btn-default pull-right' href='${request.route_path("expensexlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i>Export</a>
-${period_form.render()|n}
-<hr />
-    <div class="well hidden-print">
-        <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
-% if expense.status == 'resulted':
-    Cette note de dépense a été intégralement payée.
-% elif expense.status == 'paid':
-    Cette note de dépense a été partiellement payée.
-% elif expense.status == 'valid':
-        Cette note de dépense a été validée, elle est en attente de paiement.
-% elif expense.status == 'wait':
-        Cette note de dépense est en attente de validation
-% endif
-        <p>
-            <small>
+    </div>
+</div>
+<br/>
+<div class='row well'>
+    <div class="col-md-6">
+        <div class="hidden-print">
+        <i class='glyphicon glyphicon-play'></i>
+        <strong>
+    % if expense.status == 'resulted':
+        Cette note de dépense a été intégralement payée.
+    % elif expense.status == 'paid':
+        Cette note de dépense a été partiellement payée.
+    % elif expense.status == 'valid':
+            Cette note de dépense a été validée, elle est en attente de paiement.
+    % elif expense.status == 'wait':
+            Cette note de dépense est en attente de validation
+    % elif expense.status == 'draft':
+        Cette note de dépense est un brouillon
+    % endif
+        </strong>
+        <ul>
+            <li>
                 ${api.format_expense_status(expense)}<br />
-            </small>
-        </p>
+            </li>
+        % if request.has_permission('admin_treasury'):
+            <li>
+                L'identifiant de cette notes de dépense est : <strong>${ expense.id }</strong>
+            </li>
+            <li>
+                % if expense.exported:
+                    Ce document a déjà été exporté vers le logiciel de comptabilité
+                %else:
+                    Ce document n'a pas encore été exporté vers le logiciel de comptabilité
+                % endif
+            </li>
+        % endif
         % if expense.payments:
+            <li>
             Paiement(s) recu(s):
             <ul>
                 % for payment in expense.payments:
@@ -87,52 +104,47 @@ ${period_form.render()|n}
                     </li>
                 % endfor
             </ul>
+            </li>
         % endif
 
-% if request.has_permission('admin_treasury'):
-    <p>
-    <small>
-        L'identifiant de cette notes de dépense est : ${ expense.id }
-    </small>
-</p>
-<p>
-    <small>
-        % if expense.exported:
-            Ce document a déjà été exporté vers le logiciel de comptabilité
-        %else:
-            Ce document n'a pas encore été exporté vers le logiciel de comptabilité
+        </ul>
+    </div>
+    <div class="hidden-print">
+        <i class='glyphicon glyphicon-play'></i>
+        <strong>Justificatifs</strong>
+        <br />
+        ${format_filelist(expense)}
+        % if not expense.children:
+            <small>
+                Aucun justificatif n'a été déposé
+            </small>
         % endif
-    </small>
-</p>
-% endif
+    </div>
 </div>
-<div class="well hidden-print">
-    <h5>Justificatifs</h5>
-    ${format_filelist(expense)}
-    % if not expense.children:
-        <small>
-            Aucun justificatif n'a été déposé
-        </small>
-    % endif
+<div class="col-md-6">
+    <div class="hidden-print">
+    % for com in communication_history:
+        % if loop.first:
+            <div class="">
+                <i class='glyphicon glyphicon-play'></i>
+                <strong>Historique des Communications Entrepreneurs-CAE</strong>
+        % endif
+        % if com.content.strip():
+            <blockquote>
+                <p style="font-size: 14px">
+                ${format_text(com.content)}
+            </p>
+            <footer>${api.format_account(com.user)} le ${api.format_date(com.date)}</footer>
+            </blockquote>
+        % endif
+        % if loop.last:
+            </div>
+        % endif
+    % endfor
+    </div>
 </div>
-<div class="hidden-print">
-% for com in communication_history:
-    % if loop.first:
-        <div class="well">
-            <b>Historique des Communications Entrepreneurs-CAE</b>
-    % endif
-    % if com.content.strip():
-        <hr />
-        <p>
-            ${format_text(com.content)}
-        </p>
-        <small>${api.format_account(com.user)} le ${api.format_date(com.date)}</small>
-    % endif
-    % if loop.last:
-        </div>
-    % endif
-% endfor
 </div>
+<hr />
 <div class='row'>
     <div class='col-md-12' id="expenses"></div>
 </div>
@@ -142,10 +154,8 @@ ${period_form.render()|n}
 </div>
 <hr />
 <p class='lead' id='total' style='text-align:right'></p>
-% if edit:
 <hr />
     ${form|n}
-% endif
 <div id='messageboxes'>
 </div>
 </%block>

@@ -29,14 +29,17 @@ import logging
 import colander
 import datetime
 import traceback
+import deform
 
-from deform import Form
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPTemporaryRedirect,
 )
 
 from autonomie.exception import Forbidden
+from autonomie.forms.payments import (
+    ExpensePaymentSchema,
+)
 from autonomie.forms.expense import (
     ExpenseStatusSchema,
     PeriodSelectSchema,
@@ -57,7 +60,7 @@ from autonomie.models.expense import (
     Communication,
     get_expense_sheet_name,
 )
-from autonomie.events.expense import StatusChanged
+from autonomie.events.expense import StatusChanged as ExpenseStatusChanged
 from autonomie.utils.rest import (
     RestError,
     RestJsonRepr,
@@ -83,6 +86,7 @@ from autonomie.views import (
     BaseFormView,
     submit_btn,
 )
+from autonomie.views.taskaction import StatusView
 from autonomie.views.render_api import (
     month_name,
     format_account,
@@ -255,7 +259,7 @@ def get_period_form(request, action_url=""):
         Return a form to select the period of the expense sheet
     """
     schema = PeriodSelectSchema().bind(request=request)
-    form = Form(
+    form = deform.Form(
         schema=schema,
         buttons=(submit_btn,),
         method='GET',
@@ -421,6 +425,32 @@ def get_expense_history(expensesheet):
     return expensesheet.communications
 
 
+def get_payment_form(request, counter=None):
+    """
+    Return a payment form object
+    """
+    valid_btn = deform.Button(
+        name='submit',
+        value="paid",
+        type='submit',
+        title=u"Valider",
+    )
+    schema = ExpensePaymentSchema().bind(request=request)
+    action = request.route_path(
+        "expensesheet",
+        id=request.context.id,
+        _query=dict(action='status')
+    )
+    form = deform.Form(
+        schema=schema,
+        buttons=(valid_btn,),
+        formid="paymentform",
+        action=action,
+        counter=counter,
+    )
+    return form
+
+
 class ExpenseSheetView(BaseFormView):
     """
         ExpenseSheet view
@@ -435,6 +465,7 @@ class ExpenseSheetView(BaseFormView):
         self.month = self.request.context.month
         self.year = self.request.context.year
         self.period_form = self.get_period_form()
+        self.formcounter = None
 
     def get_period_form(self):
         """
@@ -511,11 +542,26 @@ perdues) ?")
         """
         return Submit(u"Invalider le document", "invalid", request=self.request)
 
-    def _resulted_btn(self):
+    def _paid_form(self):
         """
-            Return a button to set the expense as resulted
+        Return the form for payment registration
         """
-        return Submit(u"Notifier le paiement", "resulted", request=self.request)
+        form = get_payment_form(self.request, self.formcounter)
+        appstruct = {'amount': self.context.topay()}
+        form.set_appstruct(appstruct)
+        self.formcounter = form.counter
+        return form
+
+    def _paid_btn(self):
+        """
+            Return a button to set a paid btn and a select to choose
+            the payment mode
+        """
+        form = self._paid_form()
+        title = u"Notifier un paiement"
+        popup = PopUp("paidform", title, form.render())
+        self.request.popups[popup.name] = popup
+        return popup.open_btn(css='btn btn-primary')
 
     @property
     def edit(self):
@@ -561,7 +607,8 @@ perdues) ?")
             Handle submission of the expense page, only on state change
             validation
         """
-        logger.debug("Submitting expense sheet status form")
+        logger.debug("#  Submitting expense sheet status form  #")
+        logger.debug(appstruct)
 
         # Comment is now stored in a specific table
         comment = None
@@ -576,12 +623,12 @@ perdues) ?")
             logger.exception(u"Trying !!!")
             expense, status = self.set_expense_status(self.request.context)
             self._store_communication(comment)
-            self.request.registry.notify(StatusChanged(
+            self.request.registry.notify(ExpenseStatusChanged(
                 self.request,
                 expense,
                 status,
                 comment,
-                ))
+            ))
         except Forbidden, err:
             logger.exception(u"An access has been forbidden")
             self.request.session.flash(err.message, queue='error')
@@ -636,6 +683,54 @@ cette feuille de notes de dépense")
             _query=dict(year=self.year, month=self.month)
         )
         return HTTPFound(url)
+
+
+class ExpenseStatusView(StatusView):
+    """
+    Expense status view
+    """
+    def notify(self, item, status):
+        """
+        Notify a status change
+        """
+        self.request.registry.notify(
+            ExpenseStatusChanged(
+                self.request,
+                self.request.context,
+                status,
+            )
+        )
+
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                "expensesheet", id=self.request.context.id
+            )
+        )
+
+    def pre_paid_process(self, item, status, params):
+        """
+        Validate the payment's form datas
+        """
+        form = get_payment_form(self.request)
+        # Exception handling is done one level higher, we don't care about it
+        # here
+        appstruct = form.validate(params.items())
+        logger.debug(u"In pre paid process")
+        logger.debug(u"Returning : {0}".format(appstruct))
+        return appstruct
+
+    def __call__(self):
+        try:
+            result = StatusView.__call__(self)
+        except deform.ValidationFailure, err:
+            logger.exception(u"An error has been detected")
+            logger.error(err.error)
+            result = dict(
+                form=err.render(),
+                title=u"Erreur de saisie",
+            )
+        return result
 
 
 def expensesheet_json_view(request):
@@ -953,6 +1048,14 @@ def includeme(config):
         route_name="expensesheet",
         renderer="treasury/expense.mako",
         permission="view_expense",
+    )
+
+    config.add_view(
+        ExpenseStatusView,
+        route_name="expensesheet",
+        request_param='action=status',
+        permission="edit_expense",
+        renderer="base/formpage.mako",
     )
 
     config.add_view(

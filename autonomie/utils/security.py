@@ -65,6 +65,7 @@ from autonomie.models.workshop import (
 )
 from autonomie.models.expense import (
     ExpenseSheet,
+    ExpensePayment,
 )
 from autonomie.models.user import (
     User,
@@ -125,6 +126,7 @@ class RootFactory(dict):
             ('customers', 'customer', Customer, ),
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),
+            ('expense_payments', 'expense_payment', ExpensePayment, ),
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
             ('jobs', 'job', Job, ),
@@ -464,7 +466,7 @@ def get_project_acls(self):
 
 def get_expensesheet_acl(self):
     """
-        Compute the expense Sheet acl
+    Compute the expense Sheet acl
     """
     if self.status in ('draft', 'invalid'):
         user_rights = ("view_expense", "edit_expense",)
@@ -477,6 +479,21 @@ def get_expensesheet_acl(self):
         [
             (Allow, u"%s" % user.login, user_rights)
             for user in self.company.employees
+        ]
+    )
+    return acl
+
+
+def get_expense_payment_acl(self):
+    """
+    Compute the ExpensePayment acls
+    """
+    acl = DEFAULT_PERM[:]
+    user_rights = ('view_expense_payment',)
+    acl.extend(
+        [
+            (Allow, u"%s" % user.login, user_rights)
+            for user in self.parent.company.employees
         ]
     )
     return acl
@@ -555,6 +572,7 @@ def set_models_acls():
     Customer.__default_acl__ = property(get_customer_acls)
     Estimation.__default_acl__ = property(get_estimation_acl)
     ExpenseSheet.__default_acl__ = property(get_expensesheet_acl)
+    ExpensePayment.__default_acl__ = property(get_expense_payment_acl)
     File.__default_acl__ = property(get_file_acl)
     Invoice.__default_acl__ = property(get_invoice_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]

@@ -26,6 +26,7 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
+<% expense = request.context %>
 <style>
     #period_form label{
         width:0px;
@@ -49,34 +50,54 @@
     </div>
 </div>
 <a class='btn btn-default pull-right' href='#print'><i class='glyphicon glyphicon-print'></i>Imprimer</a>
-<a class='btn btn-default pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>Export</a>
+<a class='btn btn-default pull-right' href='${request.route_path("expensexlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i>Export</a>
 ${period_form.render()|n}
 <hr />
     <div class="well hidden-print">
         <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
-% if request.context.status == 'resulted':
+% if expense.status == 'resulted':
     Cette note de dépense a été intégralement payée.
-% elif request.context.status == 'paid':
+% elif expense.status == 'paid':
     Cette note de dépense a été partiellement payée.
-% elif request.context.status == 'valid':
+% elif expense.status == 'valid':
         Cette note de dépense a été validée, elle est en attente de paiement.
-% elif request.context.status == 'wait':
+% elif expense.status == 'wait':
         Cette note de dépense est en attente de validation
 % endif
         <p>
             <small>
-                ${api.format_expense_status(request.context)}<br />
+                ${api.format_expense_status(expense)}<br />
             </small>
         </p>
+        % if expense.payments:
+            Paiement(s) recu(s):
+            <ul>
+                % for payment in expense.payments:
+                    <% url = request.route_path('expense_payment', id=payment.id) %>
+                    <li>
+                    <a href="${url}">
+                        ${api.format_amount(payment.amount)|n}&nbsp;€
+                        le ${api.format_date(payment.date)}
+                        (${api.format_paymentmode(payment.mode)}
+                        % if payment.bank:
+                            &nbsp;${payment.bank.label}
+                        % endif
+                        )
+                    </a>
+                    </li>
+                % endfor
+            </ul>
+        % endif
+
 % if request.has_permission('admin_treasury'):
     <p>
     <small>
-        L'identifiant de cette notes de dépense est : ${ request.context.id }
+        L'identifiant de cette notes de dépense est : ${ expense.id }
     </small>
 </p>
 <p>
     <small>
-        % if request.context.exported:
+        % if expense.exported:
             Ce document a déjà été exporté vers le logiciel de comptabilité
         %else:
             Ce document n'a pas encore été exporté vers le logiciel de comptabilité
@@ -87,24 +108,26 @@ ${period_form.render()|n}
 </div>
 <div class="well hidden-print">
     <h5>Justificatifs</h5>
-    ${format_filelist(request.context)}
-    % if not request.context.children:
+    ${format_filelist(expense)}
+    % if not expense.children:
         <small>
             Aucun justificatif n'a été déposé
         </small>
     % endif
 </div>
-<div class="row hidden-print">
+<div class="hidden-print">
 % for com in communication_history:
     % if loop.first:
         <div class="well">
             <b>Historique des Communications Entrepreneurs-CAE</b>
     % endif
+    % if com.content.strip():
         <hr />
         <p>
             ${format_text(com.content)}
         </p>
         <small>${api.format_account(com.user)} le ${api.format_date(com.date)}</small>
+    % endif
     % if loop.last:
         </div>
     % endif

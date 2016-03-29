@@ -241,6 +241,20 @@ dépense, une ligne sera automatiquement ajouté au Frais de l'entrepreneur."
         return res
 
 
+def record_expense_payment(expense, **kw):
+    """
+    Record an expense payment using the datas provided in kw
+
+    Caution : The kw args should be validated before being transmitted here
+
+    :param obj expense: An ExpenseSheet instance
+    :param dict kw: Form validated datas used to init an ExpensePayment object
+
+    :returns: The ExpensePayment object
+    """
+    return expense.record_payment(**kw)
+
+
 def build_state_machine():
     """
         Return a state machine that allows ExpenseSheet status handling
@@ -250,14 +264,15 @@ def build_state_machine():
     wait = ('wait', 'edit_expense', )
     valid = ('valid', "admin_expense", )
     invalid = ('invalid', "admin_expense",)
-    paid = ('paid', "admin_expense", )  # Partiellement payé
+    # Partiellement payé
+    paid = ('paid', "admin_expense", record_expense_payment, )
     resulted = ('resulted', "admin_expense", )  # Soldé
     states = {}
     states['draft'] = (draft, wait, reset, valid,)
     states['invalid'] = (draft, wait,)
     states['wait'] = (valid, invalid,)
     states['valid'] = (resulted, paid,)
-    states['paid'] = (resulted, )
+    states['paid'] = (paid, )
     return states
 
 
@@ -375,14 +390,14 @@ class ExpenseSheet(Node, ExpenseCompute):
         old_status = self.status
         logger.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() == 0 or force_resulted:
-            self.CAEStatus = 'resulted'
+            self.status = 'resulted'
         elif len(self.payments) > 0:
-            self.CAEStatus = 'paid'
+            self.status = 'paid'
         else:
-            self.CAEStatus = 'valid'
+            self.status = 'valid'
         # If the status has changed, we update the statusPerson
-        if user_id is not None and old_status != self.CAEStatus:
-            self.statusPerson = user_id
+        if user_id is not None and old_status != self.status:
+            self.status_user_id = user_id
         return self
 
 
@@ -620,6 +635,10 @@ class ExpensePayment(DBBASE, PersistentACLMixin):
 
     def get_amount(self):
         return self.amount
+
+    @property
+    def parent(self):
+        return self.expense
 
     def __repr__(self):
         return u"<ExpensePayment id:{s.id} \

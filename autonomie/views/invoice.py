@@ -58,8 +58,10 @@ from autonomie.forms import (
 )
 from autonomie.forms.invoices import (
     FinancialYearSchema,
-    get_payment_schema,
     SetProductsSchema,
+)
+from autonomie.forms.payments import (
+    get_payment_schema,
 )
 from autonomie.views import (
     submit_btn,
@@ -93,7 +95,6 @@ def get_paid_form(request, counter=None):
         title=u"Valider",
     )
     schema = get_payment_schema(request).bind(request=request)
-    logger.debug(schema)
     action = request.route_path(
         "invoice",
         id=request.context.id,

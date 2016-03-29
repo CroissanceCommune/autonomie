@@ -619,10 +619,16 @@ class Payment(DBBASE, PersistentACLMixin):
         ),
     )
 
+    # Usefull aliases
     @property
     def invoice(self):
         return self.task
 
+    @property
+    def parent(self):
+        return self.task
+
+    # Simple function
     def get_amount(self):
         return self.amount
 

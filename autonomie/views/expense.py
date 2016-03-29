@@ -456,7 +456,7 @@ class ExpenseSheetView(BaseFormView):
         ExpenseSheet view
     """
     schema = ExpenseStatusSchema()
-    add_template_vars = ('title', 'loadurl', 'period_form', "edit",
+    add_template_vars = ('title', 'loadurl', "edit",
                          "communication_history")
 
     def __init__(self, request):
@@ -464,17 +464,7 @@ class ExpenseSheetView(BaseFormView):
         expense_js.need()
         self.month = self.request.context.month
         self.year = self.request.context.year
-        self.period_form = self.get_period_form()
         self.formcounter = None
-
-    def get_period_form(self):
-        """
-            Return the form used to ask a period
-        """
-        cid = self.request.context.company_id
-        uid = self.request.context.user_id
-        url = self.request.route_url("user_expenses", id=cid, uid=uid)
-        return get_period_form(self.request, url)
 
     @property
     def communication_history(self):
@@ -509,6 +499,7 @@ class ExpenseSheetView(BaseFormView):
                 if hasattr(self, "_%s_btn" % action.name):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.append(func())
+                    print(btns)
         return btns
 
     def _reset_btn(self):
@@ -523,6 +514,17 @@ class ExpenseSheetView(BaseFormView):
             confirm=u"Êtes-vous sûr de vouloir réinitialiser \
 cette feuille de notes de dépense (toutes les modifications apportées seront \
 perdues) ?")
+
+    def _draft_btn(self):
+        """
+        Return a button to set the expense to draft again
+        """
+        msg = u"Annuler la mise en validation et repasser en brouillon"
+        return Submit(
+            msg,
+            "draft",
+            request=self.request,
+        )
 
     def _wait_btn(self):
         """
@@ -584,16 +586,21 @@ perdues) ?")
         """
             Prepopulate the form
         """
-        self.period_form.set_appstruct(self.request.context.appstruct())
         # Here we override the form counter to avoid field ids conflict
-        form.counter = self.period_form.counter
         form.set_appstruct(self.request.context.appstruct())
-        btn = ViewLink(
-            u"Revenir à la liste",
-            "view_espense",
-            path="company_expenses",
-            id=self.request.context.company.id
-        )
+        if self.request.has_permission('admin_expense'):
+            btn = ViewLink(
+                u"Revenir à la liste",
+                "admin_expense",
+                path="expenses",
+            )
+        else:
+            btn = ViewLink(
+                u"Revenir à la liste",
+                "view_expense",
+                path="company_expenses",
+                id=self.request.context.company.id
+            )
         self.request.actionmenu.add(btn)
         btn = get_add_file_link(
             self.request,
@@ -667,15 +674,15 @@ perdues) ?")
             Reset an expense
         """
         logger.debug(u"Resetting the expense")
-        if self.request.context.status == 'draft':
-            self.dbsession.delete(self.request.context)
+        if self.context.status == 'draft':
+            self.dbsession.delete(self.context)
             self.session.flash(u"Votre feuille de notes de dépense de {0} {1} a \
 bien été réinitialisée".format(month_name(self.month), self.year))
         else:
             self.session.flash(u"Vous n'êtes pas autorisé à réinitialiser \
 cette feuille de notes de dépense")
-        cid = self.request.context.company_id
-        uid = self.request.context.user_id
+        cid = self.context.company_id
+        uid = self.context.user_id
         url = self.request.route_url(
             "user_expenses",
             id=cid,

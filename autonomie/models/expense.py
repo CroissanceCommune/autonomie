@@ -257,9 +257,9 @@ def record_expense_payment(expense, **kw):
 
 def build_state_machine():
     """
-        Return a state machine that allows ExpenseSheet status handling
+    Return a state machine that allows ExpenseSheet status handling
     """
-    draft = ('draft', 'edit_expense',)
+    draft = ('draft', 'view_expense',)
     reset = ('reset', 'edit_expense', None, False)
     wait = ('wait', 'edit_expense', )
     valid = ('valid', "admin_expense", )
@@ -268,9 +268,9 @@ def build_state_machine():
     paid = ('paid', "admin_expense", record_expense_payment, )
     resulted = ('resulted', "admin_expense", )  # Soldé
     states = {}
-    states['draft'] = (draft, wait, reset, valid,)
+    states['draft'] = (wait, reset, valid,)
     states['invalid'] = (draft, wait,)
-    states['wait'] = (valid, invalid,)
+    states['wait'] = (valid, invalid, draft)
     states['valid'] = (resulted, paid,)
     states['paid'] = (paid, )
     return states

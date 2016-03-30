@@ -22,6 +22,7 @@ GROUPS = (
 
 
 def upgrade():
+    op.execute("alter table groups modify label VARCHAR(255);")
     from autonomie.models.user import User, Group
     from autonomie.models.base import DBSESSION
 

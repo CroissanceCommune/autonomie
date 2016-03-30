@@ -76,7 +76,11 @@
                                     <a href="${url}">
                                         ${api.format_amount(payment.amount)|n}&nbsp;€
                                         le ${api.format_date(payment.date)}
-                                        (${api.format_paymentmode(payment.mode)})
+                                        % if payment.waiver:
+                                            (par abandon de créances)
+                                        % else:
+                                            (${api.format_paymentmode(payment.mode)})
+                                        % endif
                                     </a>
                                     </li>
                             % if loop.last:

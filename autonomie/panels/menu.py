@@ -283,6 +283,13 @@ def get_admin_menus(request):
             href=href
         )
 
+        href = request.route_path("sage_expense_payment_export")
+        treasury.add_item(
+            u"Export des paiements de notes de dépense",
+            icon="fa fa-bank",
+            href=href
+        )
+
         href = request.route_path("admin_treasury_all")
         treasury.add_item(
             u"Bulletins de salaire",

@@ -60,7 +60,7 @@ def populate_invoice_payment_actionmenu(context, request):
         path="payment",
         confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
         id=context.id,
-        _query=dict(action="delete")
+        _query=dict(action="delete", come_from=request.referer)
     )
     request.actionmenu.add(link)
 
@@ -147,7 +147,7 @@ def populate_expense_payment_actionmenu(context, request):
         path="expense_payment",
         confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
         id=context.id,
-        _query=dict(action="delete")
+        _query=dict(action="delete", come_from=request.referer)
     )
     request.actionmenu.add(link)
 
@@ -190,8 +190,11 @@ def payment_delete(context, request):
 
     parent = parent.check_resulted(user_id=request.user.id)
     request.dbsession.merge(parent)
+    request.session.flash(u"Le paiement a bien été supprimé")
 
-    if isinstance(parent, Invoice):
+    if 'come_from' in request.GET:
+        redirect = request.GET['come_from']
+    elif isinstance(parent, Invoice):
         redirect = request.route_path("invoice", id=parent.id)
     elif isinstance(parent, ExpenseSheet):
         redirect = request.route_path("expensesheet", id=parent.id)

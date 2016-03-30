@@ -472,7 +472,7 @@ def get_expensesheet_acl(self):
         user_rights = ("view_expense", "edit_expense",)
     else:
         user_rights = ("view_expense",)
-    user_rights += ('view_file', 'add_file',)
+    user_rights += ('view_file', 'add_file', 'edit_file')
 
     acl = DEFAULT_PERM[:]
     acl.extend(

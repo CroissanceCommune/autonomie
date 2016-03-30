@@ -76,7 +76,10 @@ from autonomie.export.excel import (
     make_excel_view,
     XlsExpense,
 )
-from autonomie.resources import expense_js
+from autonomie.resources import (
+    expense_js,
+    admin_expense_js,
+)
 from autonomie.forms import (
     merge_session_with_post,
 )
@@ -436,11 +439,18 @@ def get_payment_form(request, counter=None):
         title=u"Valider",
     )
     schema = ExpensePaymentSchema().bind(request=request)
-    action = request.route_path(
-        "expensesheet",
-        id=request.context.id,
-        _query=dict(action='status')
-    )
+    if request.context.__name__ == 'expense':
+        action = request.route_path(
+            "expensesheet",
+            id=request.context.id,
+            _query=dict(action='status')
+        )
+    else:
+        action = request.route_path(
+            "expensesheet",
+            id=-1,
+            _query=dict(action='status')
+        )
     form = deform.Form(
         schema=schema,
         buttons=(valid_btn,),
@@ -549,7 +559,10 @@ perdues) ?")
         Return the form for payment registration
         """
         form = get_payment_form(self.request, self.formcounter)
-        appstruct = {'amount': self.context.topay()}
+        appstruct = {
+            'amount': self.context.topay(),
+            'come_from': self.request.current_route_path(),
+        }
         form.set_appstruct(appstruct)
         self.formcounter = form.counter
         return form
@@ -709,11 +722,15 @@ class ExpenseStatusView(StatusView):
         )
 
     def redirect(self):
-        return HTTPFound(
-            self.request.route_path(
-                "expensesheet", id=self.request.context.id
+        come_from = getattr(self, 'come_from', None)
+        if come_from is not None:
+            return HTTPFound(come_from)
+        else:
+            return HTTPFound(
+                self.request.route_path(
+                    "expensesheet", id=self.request.context.id
+                )
             )
-        )
 
     def pre_paid_process(self, item, status, params):
         """
@@ -723,6 +740,7 @@ class ExpenseStatusView(StatusView):
         # Exception handling is done one level higher, we don't care about it
         # here
         appstruct = form.validate(params.items())
+        self.come_from = appstruct.get('come_from')
         logger.debug(u"In pre paid process")
         logger.debug(u"Returning : {0}".format(appstruct))
         return appstruct
@@ -744,8 +762,10 @@ def expensesheet_json_view(request):
     """
         Return an json encoded expensesheet
     """
-    return dict(expense=ExpenseSheetJson(request.context),
-                options=expense_options(request))
+    return dict(
+        expense=ExpenseSheetJson(request.context),
+        options=expense_options(request),
+    )
 
 
 class RestExpenseLine(BaseView):
@@ -923,11 +943,33 @@ class RestBookMarks(BaseView):
 
 
 class ExpenseList(BaseListView):
+    """
+    expenses list
+
+        payment_form
+
+            The payment form is added as a popup and handled through javascript
+            to set the expense id
+    """
     title = u"Liste des notes de dépense de la CAE"
     schema = get_list_schema()
     sort_columns = dict(month=ExpenseSheet.month)
     default_sort = 'month'
     default_direction = 'desc'
+    add_template_vars = ('title', 'payment_formname',)
+
+    @property
+    def payment_formname(self):
+        """
+        Return a payment form name, add the form to the page popups as well
+        """
+        admin_expense_js.need()
+        form_name = "payment_form"
+        form = get_payment_form(self.request)
+        form.set_appstruct({'come_from': self.request.current_route_path()})
+        popup = PopUp(form_name, u"Saisir un paiement", form.render())
+        self.request.popups[popup.name] = popup
+        return form_name
 
     def query(self):
         return ExpenseSheet.query()
@@ -1084,7 +1126,7 @@ def includeme(config):
         FileUploadView,
         route_name="expensesheet",
         renderer='base/formpage.mako',
-        permission='view',
+        permission='add_file',
         request_param='action=attach_file',
     )
 

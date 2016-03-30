@@ -58,17 +58,17 @@
         <i class='glyphicon glyphicon-play'></i>
         <strong>
     % if expense.status == 'resulted':
-        Cette note de dépense a été intégralement payée.
+        Cette feuille de notes de dépense a été intégralement payée.
     % elif expense.status == 'paid':
-        Cette note de dépense a été partiellement payée.
+        Cette feuille de notes de dépense a été partiellement payée.
     % elif expense.status == 'valid':
-            Cette note de dépense a été validée, elle est en attente de paiement.
+            Cette feuille de notes de dépense a été validée, elle est en attente de paiement.
     % elif expense.status == 'wait':
-            Cette note de dépense est en attente de validation
+            Cette feuille de notes de dépense est en attente de validation
     % elif expense.status == 'draft':
-        Cette note de dépense est un brouillon
+        Cette feuille de notes de dépense est un brouillon
     % elif expense.status == 'invalid':
-        Cette note de dépense est invalide
+        Cette feuille de notes de dépense est invalide
     % endif
         </strong>
         <ul>
@@ -77,7 +77,7 @@
             </li>
         % if request.has_permission('admin_treasury'):
             <li>
-                L'identifiant de cette notes de dépense est : <strong>${ expense.id }</strong>
+            L'identifiant de cette feuille de notes de dépense est : <strong>${ expense.id }</strong>
             </li>
             <li>
                 % if expense.exported:
@@ -97,11 +97,15 @@
                     <a href="${url}">
                         ${api.format_amount(payment.amount)|n}&nbsp;€
                         le ${api.format_date(payment.date)}
-                        (${api.format_paymentmode(payment.mode)}
-                        % if payment.bank:
-                            &nbsp;${payment.bank.label}
+                        % if payment.waiver:
+                            (par abandon de créances)
+                        % else:
+                            (${api.format_paymentmode(payment.mode)}
+                            % if payment.bank:
+                                &nbsp;${payment.bank.label}
+                            % endif
+                            )
                         % endif
-                        )
                     </a>
                     </li>
                 % endfor

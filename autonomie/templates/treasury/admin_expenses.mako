@@ -103,7 +103,11 @@ else:
                                 <a href="${url}">
                                     ${api.format_amount(payment.amount)|n}&nbsp;€
                                     le ${api.format_date(payment.date)}
-                                    (${api.format_paymentmode(payment.mode)})
+                                    % if payment.waiver:
+                                        (par abandon de créances)
+                                    % else:
+                                        (${api.format_paymentmode(payment.mode)})
+                                    % endif
                                 </a>
                                 </li>
                         % if loop.last:
@@ -116,6 +120,14 @@ else:
                     ${table_btn(url, u'Modifier', u"Voir la note de dépense", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
                     ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="file" )}
+                    % if expense.is_allowed(request, 'paid'):
+                        <% onclick = "ExpenseList.payment_form(%s, '%s');" % (expense.id, api.format_amount(expense.topay())) %>
+                        ${table_btn('#popup-payment_form',
+                            u"Paiement",
+                            u"Saisir un paiement pour cette feuille",
+                            icon='plus',
+                            onclick=onclick)}
+                    % endif
                 </td>
             </tr>
         % endfor
@@ -124,6 +136,7 @@ else:
 ${pager(records)}
 </%block>
 <%block name='footerjs'>
+ExpenseList.popup_selector = "#${payment_formname}";
 % for i in 'year', 'month', 'status', 'owner', 'items':
     $('#${i}-select').chosen({allow_single_deselect: true});
     $('#${i}-select').change(function(){$(this).closest('form').submit()});

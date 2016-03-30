@@ -1,4 +1,4 @@
-<div>
+<div >
     <input type="hidden" name="__start__" value="${field.name}:sequence"/>
     <div class='row linesblockheader'>
         <div class='col-md-5'>Libellé</div>
@@ -21,13 +21,15 @@
     function initPaymentRows(){
       var description = "";
       <!-- We format the lines to display them correctly in the text area -->
-      <tal:for
-          tal:repeat="line solde.get('description', 'Solde').splitlines()">
-        description += "${line}";
-        <tal:if tal:condition='not repeat.line.end'>
-        description += "\n";
-        </tal:if>
-      </tal:for>
+          <tal:for
+              tal:define="solde_description solde.get('description', 'Solde');"
+              tal:condition="hasattr(solde_description, 'splilines')"
+              tal:repeat="line solde_description.splitlines()">
+            description += "${line}";
+            <tal:if tal:condition='not repeat.line.end'>
+            description += "\n";
+            </tal:if>
+          </tal:for>
           var solde = {
               amount:formatAmount("${solde.get('amount')}"),
               description:description,
@@ -38,7 +40,7 @@
         <!-- Display errors if needed -->
         <tal:if tal:condition="soldefield.error">
           <tal:for tal:repeat="pair soldefield.error.asdict().items()">
-            solde["${pair[0]}_error"] = "${pair[1]}";
+            solde["${pair[0].split('.')[1]}_error"] = "${pair[1]}";
           </tal:for>
         </tal:if>
         addPaymentRow(solde, "#paymentcontainer");
@@ -46,7 +48,10 @@
         <!-- We go through the other payment rows and we add them in readonly mode (js code further checks if we need to make them editable-->
         <tal:for tal:repeat="sub intermediary_payments">
           var description = "";
-          <tal:for tal:repeat="line sub[0]['description'].splitlines()">
+          <tal:for
+            tal:define="description sub[0].get('description', ''),"
+            tal:condition="hasattr(description, 'splilines')"
+            tal:repeat="line description.splitlines()">
             description += "${line}";
             <tal:if tal:condition='not repeat.line.end'>
             description += "\n";
@@ -61,7 +66,7 @@
           <!-- Display errors if needed -->
           <tal:if tal:condition="sub[1].error">
             <tal:for tal:repeat="pair sub[1].error.asdict().items()">
-              row["${pair[0]}_error"] = "${pair[1]}";
+              row["${pair[0].split('.')[1]}_error"] = "${pair[1]}";
             </tal:for>
           </tal:if>
           addPaymentRow(row);

@@ -27,7 +27,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    % if api.has_permission('manage'):
+    % if api.has_permission('add_activity'):
         <a href="${request.route_path('activities', _query=dict(action='new'))}">
             Nouveau rendez-vous
         </a>
@@ -35,34 +35,36 @@
     </li>
 </ul>
 <div class='row'>
-<div class='col-md-8'>
-    <div class='row'>
-        ${form|n}
-    </div>
-</div>
-        <div class='col-md-4'>
-            <div class='well well-sm pull-right btn-group' role='group'>
-            <%
-        args = request.GET
-        url = request.route_path('activities.xls', _query=args)
-        %>
-        <a
-            class='btn btn-default'
-            href='${url}'
-            title="Exporter les éléments de la liste au format xls">
-            <i class='fa fa-file-excel-o'></i>&nbsp;Excel
-        </a>
-            <%
-        args = request.GET
-        url = request.route_path('activities.ods', _query=args)
-        %>
-        <a
-            class='btn btn-default'
-            href='${url}'
-            title="Exporter les éléments de la liste au format ods">
-            <i class='fa fa-file'></i>&nbsp;ODS
-        </a>
+    <div class='col-md-8'>
+        <div class='row'>
+            ${form|n}
         </div>
+    </div>
+    <div class='col-md-4'>
+    % if request.has_permission('admin_activities'):
+        <div class='well well-sm pull-right btn-group' role='group'>
+                <%
+            args = request.GET
+            url = request.route_path('activities.xls', _query=args)
+            %>
+            <a
+                class='btn btn-default'
+                href='${url}'
+                title="Exporter les éléments de la liste au format xls">
+                <i class='fa fa-file-excel-o'></i>&nbsp;Excel
+            </a>
+                <%
+            args = request.GET
+            url = request.route_path('activities.ods', _query=args)
+            %>
+            <a
+                class='btn btn-default'
+                href='${url}'
+                title="Exporter les éléments de la liste au format ods">
+                <i class='fa fa-file'></i>&nbsp;ODS
+            </a>
+        </div>
+    % endif
         <table class='table table-bordered'>
             <tr>
                 <td class='white_tr'><br /></td>
@@ -96,7 +98,7 @@
     <tbody>
         % for activity in records:
             <% url = request.route_path('activity', id=activity.id) %>
-            % if api.has_permission('view', activity):
+            % if request.has_permission('view_activity', activity):
                 <% onclick = "document.location='{url}'".format(url=url) %>
             % else :
                 <% onclick = u"alert(\"Vous n'avez pas accès aux données de ce rendez-vous\");" %>
@@ -136,7 +138,7 @@ elif activity.status == 'closed':
                     ${activity.mode}
                 </td>
                 <td class="actions">
-                    % if api.has_permission('edit', activity):
+                    % if api.has_permission('edit_activity', activity):
                         <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                         ${table_btn(edit_url, \
                         u"Voir/éditer", \

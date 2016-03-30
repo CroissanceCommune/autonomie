@@ -184,7 +184,7 @@ def get_csv_file_upload_schema(request):
     Return an import csv file upload schema regarding the current user's rights
     """
     schema = CsvFileUploadSchema().clone()
-    if not request.user.is_admin():
+    if not request.has_permission('admin', request.context):
         del schema['association']
     return schema
 
@@ -307,7 +307,7 @@ def get_association_schema(request):
     """
     schema = AssociationSchema(validator=check_record_name).clone()
 
-    if not request.user.is_admin():
+    if request.has_permission('admin', request.context):
         del schema['force_rel_creation']
         del schema['record_association']
         del schema['record_name']

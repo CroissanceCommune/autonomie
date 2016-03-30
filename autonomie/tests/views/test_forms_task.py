@@ -36,7 +36,7 @@ from autonomie.forms.task import (
     add_payment_block_appstruct,
     TASK_MATCHING_MAP,
 )
-from autonomie.forms.invoices import (
+from autonomie.forms.payments import (
     deferred_total_validator,
     deferred_payment_mode_validator,
 )
@@ -310,7 +310,7 @@ class TestTaskForms:
         return MagicMock(context=task)
 
     def test_paymentform_schema_ok(self, dbsession):
-        from autonomie.forms.invoices import PaymentSchema
+        from autonomie.forms.payments import PaymentSchema
         schema = PaymentSchema().bind(request=self.request())
         form = deform.Form(schema)
         ok_values = [(u'action', u'payment'), (u'_charset_', u'UTF-8'),

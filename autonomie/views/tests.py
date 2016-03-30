@@ -42,7 +42,9 @@ def includeme(config):
         Adding route and view for js tests usefull to test browser problems
     """
     config.add_route("testjs", "/testjs")
-    config.add_view(testjs,
-                    route_name='testjs',
-                    permission="admin",
-                    renderer='/tests/base.mako')
+    config.add_view(
+        testjs,
+        route_name='testjs',
+        permission="admin",
+        renderer='/tests/base.mako',
+    )

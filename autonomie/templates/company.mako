@@ -53,7 +53,7 @@
         %endif
 
         % for user in company.employees:
-            % if getattr(user, 'userdatas', None) and not request.user.is_contractor():
+            % if getattr(user, 'userdatas', None) and api.has_permission('view_userdatas', request.context):
                 <% url = request.route_path('userdata', id=user.userdatas.id) %>
             % else:
                 <% url = request.route_path('user', id=user.id) %>

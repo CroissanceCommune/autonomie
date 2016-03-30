@@ -26,6 +26,7 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="content">
+<% expense = request.context %>
 <style>
     #period_form label{
         width:0px;
@@ -46,68 +47,110 @@
 <br />
 <div class="row">
     <div id="header-container">
+<a class='btn btn-default pull-right' href='#print'><i class='glyphicon glyphicon-print'></i>Imprimer</a>
+<a class='btn btn-default pull-right' href='${request.route_path("expensexlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i>Export</a>
     </div>
 </div>
-<a class='btn btn-default pull-right' href='#print'><i class='glyphicon glyphicon-print'></i>Imprimer</a>
-<a class='btn btn-default pull-right' href='${request.route_path("expensexlsx", id=request.context.id)}' ><i class='glyphicon glyphicon-file'></i>Export</a>
-${period_form.render()|n}
-<hr />
-    <div class="well hidden-print">
-        <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
-% if request.context.status == 'resulted':
-        Cette note de dépense a été payée.
-% elif request.context.status == 'valid':
-        Cette note de dépense a été validée, elle est en attente de paiement.
-% elif request.context.status == 'wait':
-        Cette note de dépense est en attente de validation
-% endif
-        <p>
-            <small>
-                ${api.format_expense_status(request.context)}<br />
-            </small>
-        </p>
-% if request.user.is_admin():
-    <p>
-    <small>
-        L'identifiant de cette notes de dépense est : ${ request.context.id }
-    </small>
-</p>
-<p>
-    <small>
-        % if request.context.exported:
-            Ce document a déjà été exporté vers le logiciel de comptabilité
-        %else:
-            Ce document n'a pas encore été exporté vers le logiciel de comptabilité
+<br/>
+<div class='row well'>
+    <div class="col-md-6">
+        <div class="hidden-print">
+        <i class='glyphicon glyphicon-play'></i>
+        <strong>
+    % if expense.status == 'resulted':
+        Cette feuille de notes de dépense a été intégralement payée.
+    % elif expense.status == 'paid':
+        Cette feuille de notes de dépense a été partiellement payée.
+    % elif expense.status == 'valid':
+            Cette feuille de notes de dépense a été validée, elle est en attente de paiement.
+    % elif expense.status == 'wait':
+            Cette feuille de notes de dépense est en attente de validation
+    % elif expense.status == 'draft':
+        Cette feuille de notes de dépense est un brouillon
+    % elif expense.status == 'invalid':
+        Cette feuille de notes de dépense est invalide
+    % endif
+        </strong>
+        <ul>
+            <li>
+                ${api.format_expense_status(expense)}<br />
+            </li>
+        % if request.has_permission('admin_treasury'):
+            <li>
+            L'identifiant de cette feuille de notes de dépense est : <strong>${ expense.id }</strong>
+            </li>
+            <li>
+                % if expense.exported:
+                    Ce document a déjà été exporté vers le logiciel de comptabilité
+                %else:
+                    Ce document n'a pas encore été exporté vers le logiciel de comptabilité
+                % endif
+            </li>
         % endif
-    </small>
-</p>
-% endif
+        % if expense.payments:
+            <li>
+            Paiement(s) recu(s):
+            <ul>
+                % for payment in expense.payments:
+                    <% url = request.route_path('expense_payment', id=payment.id) %>
+                    <li>
+                    <a href="${url}">
+                        ${api.format_amount(payment.amount)|n}&nbsp;€
+                        le ${api.format_date(payment.date)}
+                        % if payment.waiver:
+                            (par abandon de créances)
+                        % else:
+                            (${api.format_paymentmode(payment.mode)}
+                            % if payment.bank:
+                                &nbsp;${payment.bank.label}
+                            % endif
+                            )
+                        % endif
+                    </a>
+                    </li>
+                % endfor
+            </ul>
+            </li>
+        % endif
+
+        </ul>
+    </div>
+    <div class="hidden-print">
+        <i class='glyphicon glyphicon-play'></i>
+        <strong>Justificatifs</strong>
+        <br />
+        ${format_filelist(expense)}
+        % if not expense.children:
+            <small>
+                Aucun justificatif n'a été déposé
+            </small>
+        % endif
+    </div>
 </div>
-<div class="well hidden-print">
-    <h5>Justificatifs</h5>
-    ${format_filelist(request.context)}
-    % if not request.context.children:
-        <small>
-            Aucun justificatif n'a été déposé
-        </small>
-    % endif
+<div class="col-md-6">
+    <div class="hidden-print">
+    % for com in communication_history:
+        % if loop.first:
+            <div class="">
+                <i class='glyphicon glyphicon-play'></i>
+                <strong>Historique des Communications Entrepreneurs-CAE</strong>
+        % endif
+        % if com.content.strip():
+            <blockquote>
+                <p style="font-size: 14px">
+                ${format_text(com.content)}
+            </p>
+            <footer>${api.format_account(com.user)} le ${api.format_date(com.date)}</footer>
+            </blockquote>
+        % endif
+        % if loop.last:
+            </div>
+        % endif
+    % endfor
+    </div>
 </div>
-<div class="row hidden-print">
-% for com in communication_history:
-    % if loop.first:
-        <div class="well">
-            <b>Historique des Communications Entrepreneurs-CAE</b>
-    % endif
-        <hr />
-        <p>
-            ${format_text(com.content)}
-        </p>
-        <small>${api.format_account(com.user)} le ${api.format_date(com.date)}</small>
-    % if loop.last:
-        </div>
-    % endif
-% endfor
 </div>
+<hr />
 <div class='row'>
     <div class='col-md-12' id="expenses"></div>
 </div>
@@ -117,10 +160,8 @@ ${period_form.render()|n}
 </div>
 <hr />
 <p class='lead' id='total' style='text-align:right'></p>
-% if edit:
 <hr />
     ${form|n}
-% endif
 <div id='messageboxes'>
 </div>
 </%block>

@@ -55,6 +55,7 @@ class BaseConfigView(BaseAdminFormView):
     keys = ()
     validation_msg = u""
     schema = None
+    redirect_path = None
 
     def before(self, form):
         appstruct = build_config_appstruct(self.request, self.keys)
@@ -80,7 +81,10 @@ class BaseConfigView(BaseAdminFormView):
             logger.debug(u"{0} : {1}".format(key, value))
 
         self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path(self.redirect_path))
+        if self.redirect_path is not None:
+            return HTTPFound(self.request.route_path(self.redirect_path))
+        else:
+            return HTTPFound(self.request.current_route_path())
 
 
 class AdminOption(BaseAdminFormView):
@@ -94,8 +98,9 @@ class AdminOption(BaseAdminFormView):
 
         disable
 
-            If the model has an "active" column, it can be used to
-            enable/disable elements
+            True : If the model has an "active" column, it can be used to
+            enable/disable elements  (default)
+            False : Elements are deleted
 
         validation_msg
 
@@ -104,6 +109,10 @@ class AdminOption(BaseAdminFormView):
         redirect_path
 
             The route we're redirecting to after successfull validation
+
+        js_resources
+
+            specific fanstatic javascript resources we want to add to the page
     """
     title = u""
     add_template_vars = ('message', 'menus',)
@@ -146,8 +155,22 @@ class AdminOption(BaseAdminFormView):
 
         form.set_appstruct(self.get_appstruct())
 
+    def query_items(self):
+        """
+        the query used to retrieve items in the database
+        :results: a list of element we want to display as default in the form
+        :rtype: list
+        """
+        return self.factory.query().all()
+
     def get_appstruct(self):
-        return self.schema.dictify(self.factory.query().all())
+        """
+        Return the appstruct used to generate default form entries
+        :results: A data structure (list or dict) representing the existing
+        datas
+        :rtype: dict or list
+        """
+        return self.schema.dictify(self.query_items())
 
     def _get_edited_elements(self, appstruct):
         """
@@ -161,7 +184,9 @@ class AdminOption(BaseAdminFormView):
 
     def _disable_or_remove_elements(self, appstruct):
         """
-        Disable existing elements that are no more in the results
+        Disable or delete existing elements that are no more in the results
+
+        :param appstruct: The validated form datas
         """
         edited = self._get_edited_elements(appstruct)
 

@@ -189,6 +189,12 @@ textarea{
 .red_text{
   color: #f9aaaa;
 }
+.grey_tr{
+  background-color: #bdbdbd;
+}
+.grey_text {
+  color: #888;
+}
 .invoice_cancelled_tr, {
   background-color:#eeeeee;
 }

@@ -42,16 +42,20 @@ def test_context_is_not_task(config):
 
 def test_context_is_editable(config, pyramid_request):
     from autonomie.views.taskaction import context_is_editable
+
     context = MagicMock()
     context.__name__ = "invoice"
     context.is_editable = lambda :True
-    assert(context_is_editable(None, context))
+    pyramid_request.context = context
+    assert(context_is_editable(pyramid_request))
+
     context = MagicMock()
     context.__name__ = "notinvoice"
-    assert(context_is_editable(None, context))
+    pyramid_request.context = context
+    assert(context_is_editable(pyramid_request))
     context = MagicMock()
     context.__name__ = 'invoice'
     context.is_editable = lambda :False
     context.is_waiting = lambda :True
     pyramid_request.context = context
-    assert(context_is_editable(pyramid_request, context))
+    assert(context_is_editable(pyramid_request))

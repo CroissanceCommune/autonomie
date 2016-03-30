@@ -206,7 +206,7 @@ path = request.current_route_path(_query=get_args)
                     <dd>${format_phone(getattr(company, attr))}</dd>
                 % endif
             % endfor
-            % if request.user.is_manager() or request.user.is_admin():
+            % if request.has_permission('admin_treasury'):
                 % for label, key in ((u'Code comptable', 'code_compta'),\
                                      (u'Contribution à la CAE (en %)', 'contribution'),\
                                      ):

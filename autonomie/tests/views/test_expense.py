@@ -30,7 +30,7 @@ import pytest
 from datetime import date
 from autonomie.models.user import User
 from autonomie.models.company import Company
-from autonomie.models.treasury import (ExpenseType, ExpenseKmType,
+from autonomie.models.expense import (ExpenseType, ExpenseKmType,
                 ExpenseSheet, ExpenseLine, ExpenseKmLine)
 from autonomie.utils.rest import RestError
 from autonomie.views.expense import (

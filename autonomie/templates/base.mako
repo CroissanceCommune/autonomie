@@ -100,7 +100,6 @@
     </div>
     <div id='login_form' style='display:none'></div>
     <script type='text/javascript'>
-      <%block name='footerjs' />
       $('#company-select-menu').change(function(){window.location = $(this).val();});
       % if request.popups is not UNDEFINED:
         $( function() {
@@ -109,6 +108,7 @@
           % endfor
         });
       % endif
+      <%block name='footerjs' />
     </script>
   </body>
 </html>

@@ -119,7 +119,7 @@ class CustomersListView(CustomersListTools, BaseListView):
         Populate the actionmenu regarding the user's rights
         """
         populate_actionmenu(self.request, self.context)
-        if has_permission('add', self.request.context, self.request):
+        if self.request.has_permission('add_customer', self.request.context):
             form = get_customer_form(self.request)
             popup = PopUp("addform", u'Ajouter un client', form.render())
             self.request.popups = {popup.name: popup}
@@ -139,12 +139,19 @@ class CustomersListView(CustomersListTools, BaseListView):
             return the show archived button
         """
         archived = appstruct['archived']
+        args = self.request.GET.copy()
+
+        args.pop('archived', None)
+
         if not archived:
-            url = self.request.current_route_path(_query=dict(archived="true"))
-            link = HTML.a(u"Afficher les clients archivés",  href=url)
+            msg = u"Afficher les clients archivés"
+            args['archived'] = 'true'
         else:
-            url = self.request.current_route_path(_query=dict(archived="false"))
-            link = HTML.a(u"Afficher les clients actifs", href=url)
+            msg = u"Afficher les clients actifs"
+
+        url = self.request.current_route_path(_query=args)
+        link = HTML.a(msg, href=url)
+
         return StaticWidget(link)
 
     @property
@@ -162,7 +169,7 @@ class CustomersListView(CustomersListTools, BaseListView):
         btns.append(
             ItemActionLink(
                 u"Voir",
-                "view",
+                "view_customer",
                 css='btn btn-default btn-sm',
                 path="customer",
                 icon="search"
@@ -171,7 +178,7 @@ class CustomersListView(CustomersListTools, BaseListView):
             btns.append(
                 ItemActionLink(
                     u"Archiver",
-                    "edit",
+                    "edit_customer",
                     css="btn btn-default btn-sm",
                     confirm=u'Êtes-vous sûr de vouloir archiver ce client ?',
                     path="customer",
@@ -184,7 +191,7 @@ class CustomersListView(CustomersListTools, BaseListView):
             btns.append(
                 ItemActionLink(
                     u"Désarchiver",
-                    "edit",
+                    "edit_customer",
                     css="btn btn-default btn-sm",
                     path="customer",
                     title=u"Désarchiver le client",
@@ -194,7 +201,7 @@ class CustomersListView(CustomersListTools, BaseListView):
             )
             del_link = ItemActionLink(
                 u"Supprimer",
-                "edit",
+                "edit_customer",
                 css="btn btn-danger",
                 confirm=u'Êtes-vous sûr de vouloir supprimer ce client ?',
                 path="customer",
@@ -364,22 +371,30 @@ def populate_actionmenu(request, context):
     request.actionmenu.add(get_list_view_btn(company_id))
     if context.__name__ == 'customer':
         request.actionmenu.add(get_view_btn(context.id))
-        if has_permission('edit', request.context, request):
+        if has_permission('edit_customer', request.context, request):
             request.actionmenu.add(get_edit_btn(context.id))
 
 
 def get_list_view_btn(id_):
-    return ViewLink(u"Liste des clients", "edit", path="company_customers",
-                                                                    id=id_)
+    return ViewLink(
+        u"Liste des clients",
+        "list_customers",
+        path="company_customers",
+        id=id_)
 
 
 def get_view_btn(customer_id):
-    return ViewLink(u"Voir", "view", path="customer", id=customer_id)
+    return ViewLink(u"Voir", "view_customer", path="customer", id=customer_id)
 
 
 def get_edit_btn(customer_id):
-    return ViewLink(u"Modifier", "edit", path="customer", id=customer_id,
-                                        _query=dict(action="edit"))
+    return ViewLink(
+        u"Modifier",
+        "edit_customer",
+        path="customer",
+        id=customer_id,
+        _query=dict(action="edit")
+    )
 
 
 class CustomerImportStep1(CsvFileUploadView):
@@ -412,10 +427,7 @@ class CustomerImportStep2(ConfigFieldAssociationView):
         return dict(company_id=self.context.id)
 
 
-def includeme(config):
-    """
-        Add module's views
-    """
+def add_routes(config):
     config.add_route(
         'customer',
         '/customers/{id}',
@@ -435,6 +447,13 @@ def includeme(config):
     )
 
 
+
+def includeme(config):
+    """
+        Add module's views
+    """
+    add_routes(config)
+
     for i in range(2):
         index = i + 1
         route_name = 'company_customers_import_step%d' % index
@@ -446,7 +465,7 @@ def includeme(config):
         route_name='company_customers',
         renderer='customer.mako',
         request_method='POST',
-        permission='edit',
+        permission='add_customer',
     )
 
     config.add_view(
@@ -454,15 +473,7 @@ def includeme(config):
         route_name='company_customers',
         renderer='customer.mako',
         request_param='action=add',
-        permission='edit',
-    )
-
-    config.add_view(
-        CustomerEdit,
-        route_name='customer',
-        renderer='customer.mako',
-        request_param='action=edit',
-        permission='edit',
+        permission='add_customer',
     )
 
     config.add_view(
@@ -470,14 +481,22 @@ def includeme(config):
         route_name='company_customers',
         renderer='company_customers.mako',
         request_method='GET',
-        permission='edit',
+        permission='list_customers',
     )
 
     config.add_view(
         CustomersCsv,
         route_name='customers.csv',
         request_method='GET',
-        permission='edit',
+        permission='list_customers',
+    )
+
+    config.add_view(
+        CustomerEdit,
+        route_name='customer',
+        renderer='customer.mako',
+        request_param='action=edit',
+        permission='edit_customer',
     )
 
     config.add_view(
@@ -485,31 +504,31 @@ def includeme(config):
         route_name='customer',
         renderer='customer_view.mako',
         request_method='GET',
-        permission='view',
+        permission='view_customer',
     )
     config.add_view(
         customer_delete,
         route_name="customer",
         request_param="action=delete",
-        permission='edit',
+        permission='edit_customer',
     )
     config.add_view(
         customer_archive,
         route_name="customer",
         request_param="action=archive",
-        permission='edit',
+        permission='edit_customer',
     )
 
     config.add_view(
         CustomerImportStep1,
         route_name="company_customers_import_step1",
-        permission="edit",
+        permission="add_customer",
         renderer="base/formpage.mako",
     )
 
     config.add_view(
         CustomerImportStep2,
         route_name="company_customers_import_step2",
-        permission="edit",
+        permission="add_customer",
         renderer="base/formpage.mako",
     )

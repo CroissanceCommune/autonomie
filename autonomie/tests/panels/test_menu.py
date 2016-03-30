@@ -71,13 +71,13 @@ def test_get_cid():
     assert get_cid(request) == 200
     # ref bug :#522
     request.user = get_manager()
-    assert get_cid(request) == 200
+    assert get_cid(request, submenu=True) == 200
     request.user = get_admin()
-    assert get_cid(request) == 200
+    assert get_cid(request, submenu=True) == 200
 
-def test_get_companies():
-    request = MagicMock()
-    request.user = get_user()
-    request.context = get_context()
-    assert get_companies(request) == request.user.companies
+def test_get_companies(config, pyramid_request):
+    config.testing_securitypolicy(userid="test", permissive=False)
+    pyramid_request.user = get_user()
+    pyramid_request.context = get_context()
+    assert get_companies(pyramid_request) == pyramid_request.user.companies
 

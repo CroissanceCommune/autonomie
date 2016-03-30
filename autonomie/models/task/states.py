@@ -152,16 +152,6 @@ def set_products(task, **kw):
     return task
 
 
-def get_base_state():
-    """
-        return the task states
-    """
-    result = {}
-    result['draft'] = ('draft', 'wait', )
-    result['invalid'] = ('draft', 'wait',)
-    return result
-
-
 def get_est_state():
     """
         return the estimation state workflow
@@ -171,34 +161,41 @@ def get_est_state():
         invalid
         aboest
     """
+    draft = ('draft', ('edit_estimation', 'add_estimation'))
     wait = ('wait', 'wait.estimation')
-    manager_wait = ('wait', MANAGER_PERMS,)
-    duplicate = ('duplicate', 'view', duplicate_task, False,)
-    edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
+    manager_wait = ('wait', 'admin_estimation',)
+    duplicate = ('duplicate', 'edit_estimation', duplicate_task, False,)
+    edit_metadata = (
+        "edit_metadata",
+        "edit_estimation",
+        edit_metadata_task,
+        False,
+    )
     valid = ('valid', 'valid.estimation', set_date,)
-    invalid = ('invalid', MANAGER_PERMS,)
-    geninv = ('geninv', None, gen_invoices,)
-    delete = ('delete', None, None, False,)
+    invalid = ('invalid', 'admin_estimation',)
+    geninv = ('geninv', "edit_estimation", gen_invoices,)
+    delete = ('delete', "edit_estimation", None, False,)
+    aboest = ('aboest', 'edit_estimation', )
     result = {}
 
-    result['draft'] = ('draft', wait, delete, valid, duplicate,)
+    result['draft'] = (draft, wait, delete, valid, duplicate,)
     result['invalid'] = result['draft']
 
     result['wait'] = (
-        'draft',
+        draft,
         manager_wait,
         valid,
         invalid,
         duplicate,
-        'delete',
+        delete,
         edit_metadata,
     )
     result['valid'] = (
-        'aboest',
+        aboest,
         geninv,
         duplicate,
-        delete,
-        edit_metadata, )
+        edit_metadata,
+    )
     result['aboest'] = (delete, edit_metadata)
     result['geninv'] = (duplicate, edit_metadata, geninv)
     return result
@@ -215,30 +212,46 @@ def get_inv_state():
         resulted
         aboinv
     """
+    draft = ('draft', ('edit_invoice', 'add_invoice'))
     wait = ('wait', 'wait.invoice')
-    manager_wait = ('wait', MANAGER_PERMS,)
-    duplicate = ('duplicate', 'view', duplicate_task, False,)
-    edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
+    manager_wait = ('wait', 'admin_invoice',)
+    duplicate = (
+        'duplicate',
+        ('edit_invoice', 'add_invoice'),
+        duplicate_task,
+        False,
+    )
+    edit_metadata = (
+        "edit_metadata",
+        ('edit_invoice', 'add_invoice'),
+        edit_metadata_task,
+        False,
+    )
     valid = ('valid', "valid.invoice", valid_callback,)
-    invalid = ('invalid', MANAGER_PERMS,)
-    paid = ('paid', MANAGER_PERMS, record_payment,)
-    gencinv = ('gencinv', None, gen_cancelinvoice, False,)
-    delete = ('delete', None, None, False,)
-    resulted = ('resulted', MANAGER_PERMS,)
+    invalid = ('invalid', "admin_invoice",)
+    paid = ('paid', "add_payment", record_payment,)
+    gencinv = (
+        'gencinv',
+        'edit_invoice',
+        gen_cancelinvoice,
+        False,
+    )
+    delete = ('delete', 'edit_invoice', None, False,)
+    resulted = ('resulted', "add_payment",)
     financial_year = (
-        'set_financial_year', MANAGER_PERMS, set_financial_year, False,
+        'set_financial_year', "admin_invoice", set_financial_year, False,
     )
     products = (
-        "set_products", MANAGER_PERMS, set_products, False,
+        "set_products", "admin_invoice", set_products, False,
     )
 
     result = {}
 
-    result['draft'] = ('draft', wait, delete, valid, duplicate)
+    result['draft'] = (draft, wait, delete, valid, duplicate)
     result['invalid'] = result['draft']
 
     result['wait'] = (
-        "draft",
+        draft,
         manager_wait,
         valid,
         invalid,
@@ -279,22 +292,29 @@ def get_cinv_state():
         valid
         invalid
     """
-    delete = ('delete', None, None, False,)
-    edit_metadata = ("edit_metadata", "view", edit_metadata_task, False,)
-    valid = ('valid', MANAGER_PERMS, valid_callback,)
-    invalid = ('invalid', MANAGER_PERMS,)
+    draft = ('draft', ('edit_cancelinvoice', 'add_cancelinvoice'))
+    wait = ('wait', 'wait.cancelinvoice',)
+    delete = ('delete', 'edit_cancelinvoice', None, False,)
+    edit_metadata = (
+        "edit_metadata",
+        "edit_invoice",
+        edit_metadata_task,
+        False,
+    )
+    valid = ('valid', "valid.cancelinvoice", valid_callback,)
+    invalid = ('invalid', "admin_invoice",)
     financial_year = (
-        'set_financial_year', MANAGER_PERMS, set_financial_year, False,
+        'set_financial_year', "admin_invoice", set_financial_year, False,
     )
     products = (
-        "set_products", MANAGER_PERMS, set_products, False,
+        "set_products", "admin_invoice", set_products, False,
     )
     result = {}
-    result['draft'] = ('wait', delete, valid, )
+    result['draft'] = (draft, wait, delete, valid, )
     result['invalid'] = result['draft']
 
     result['wait'] = (
-        "draft",
+        draft,
         valid,
         invalid,
         delete,
@@ -311,11 +331,11 @@ def get_maninv_state():
     """
         Return the states for manual invoices
     """
-    return dict(valid=('resulted',))
+    return {}
 
 
 DEFAULT_STATE_MACHINES = {
-    "base": TaskStates('draft', get_base_state()),
+    "base": TaskStates('draft', {}),
     "estimation": TaskStates('draft', get_est_state()),
     "invoice": TaskStates('draft', get_inv_state()),
     "cancelinvoice": TaskStates('draft', get_cinv_state()),

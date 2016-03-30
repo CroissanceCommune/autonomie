@@ -22,11 +22,9 @@
 """
 Job related pages
 """
-import csv
 import cStringIO as StringIO
 from pyramid.httpexceptions import HTTPNotFound
 
-from autonomie.utils.ascii import force_utf8
 from autonomie.export.utils import write_file_to_request
 from autonomie.models.job import (
     Job,
@@ -74,13 +72,13 @@ class JobList(BaseListView):
     def filter_type(self, query, appstruct):
         type_ = appstruct.get('type_')
         if type_ is not None:
-            query = query.filter(Job.type_==type_)
+            query = query.filter(Job.type_ == type_)
         return query
 
     def filter_status(self, query, appstruct):
         status = appstruct.get('status')
         if status is not None:
-            query = query.filter(Job.status=='status')
+            query = query.filter(Job.status == 'status')
         return query
 
 
@@ -115,8 +113,15 @@ def make_stream_csv_by_key(job_key, filename):
 
 
 def includeme(config):
-    config.add_route('job', '/jobs/{id:\d+}', traverse="/jobs/{id}")
-    config.add_route("jobs", "/jobs")
+    config.add_route(
+        'job',
+        '/jobs/{id:\d+}',
+        traverse="/jobs/{id}",
+    )
+    config.add_route(
+        "jobs",
+        "/jobs",
+    )
     config.add_view(
         job_view,
         route_name='job',
@@ -144,4 +149,3 @@ def includeme(config):
         request_param='action=unhandled.csv',
         permission='view',
     )
-

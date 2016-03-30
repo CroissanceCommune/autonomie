@@ -66,7 +66,7 @@ def get_customer_schema(request):
     """
     return the schema for user add/edit regarding the current user's role
     """
-    if request.user.is_contractor():
+    if not request.has_permission('admin_treasury', request.context):
         schema = get_contractor_customer_schema()
     else:
         schema = get_manager_customer_schema()

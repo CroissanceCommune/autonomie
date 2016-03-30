@@ -281,3 +281,5 @@ radar_chart_css = get_resource(
 competence_radar_js = get_module_resource(
     "competence_radar", extra_depends=(radar_chart_js, radar_chart_css,)
 )
+
+admin_expense_js = get_module_resource("admin_expense")

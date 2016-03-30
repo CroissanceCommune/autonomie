@@ -67,17 +67,16 @@ NODE_TYPE_LABEL = {
     }
 
 
-
 def file_dl_view(context, request):
     """
     download view for a given file
     """
     write_file_to_request(
-            request,
-            context.name,
-            context,
-            context.mimetype,
-            )
+        request,
+        context.name,
+        context,
+        context.mimetype,
+    )
     return request.response
 
 
@@ -87,9 +86,9 @@ def file_view(context, request):
     """
     populate_actionmenu(context, request)
     return dict(
-            title=u"Fichier {0}".format(context.name),
-            file=context,
-            )
+        title=u"Fichier {0}".format(context.name),
+        file=context,
+    )
 
 
 class FileUploadView(BaseFormView):
@@ -121,11 +120,10 @@ class FileUploadView(BaseFormView):
         parent_id = self._parent_id()
 
         appstruct = {
-                'parent_id': parent_id,
-                'come_from': come_from,
-                }
+            'parent_id': parent_id,
+            'come_from': come_from,
+        }
         form.set_appstruct(appstruct)
-
 
     def persist_to_database(self, appstruct):
         """
@@ -148,7 +146,6 @@ class FileUploadView(BaseFormView):
         appstruct.pop("filetype", '')
 
         appstruct = forms.flatten_appstruct(appstruct)
-
 
         self.persist_to_database(appstruct)
 
@@ -202,10 +199,7 @@ class FileEditView(FileUploadView):
 
         come_from = self.request.referrer
 
-
-        appstruct = {
-                'come_from': come_from
-                }
+        appstruct = {'come_from': come_from}
         appstruct.update(self.format_dbdatas())
         form.set_appstruct(appstruct)
 
@@ -215,19 +209,19 @@ class FileEditView(FileUploadView):
         self.request.session.flash(self.valid_msg)
 
 
-def get_add_file_link(request, label=u"Attacher un fichier", perm="edit"):
+def get_add_file_link(request, label=u"Attacher un fichier", perm="add_file"):
     """
         Add a button for file attachment
     """
     context = request.context
     route_name = context.type_
     return ViewLink(
-            label,
-            perm,
-            path=route_name,
-            id=context.id,
-            _query=dict(action="attach_file")
-        )
+        label,
+        perm,
+        path=route_name,
+        id=context.id,
+        _query=dict(action="attach_file")
+    )
 
 
 def populate_actionmenu(context, request):
@@ -239,29 +233,30 @@ def populate_actionmenu(context, request):
     request.actionmenu.add(
         ViewLink(
             label,
-            perm='view',
+            perm='view_file',
             path=context.parent.type_,
-            id=context.parent.id)
+            id=context.parent.id
         )
+    )
     request.actionmenu.add(
         ViewLink(
             u"Éditer",
-            perm=u'edit',
+            perm=u'edit_file',
             path="file",
             id=context.id,
             _query=dict(action='edit'),
-            )
         )
+    )
     request.actionmenu.add(
         ViewLink(
             u"Supprimer le fichier",
-            perm=u'edit',
+            perm=u'edit_file',
             path="file",
             confirm=u"Êtes-vous sûr de vouloir supprimer ce fichier ?",
             id=context.id,
             _query=dict(action='delete')
-            )
         )
+    )
 
 
 def file_delete_view(context, request):
@@ -273,23 +268,48 @@ def file_delete_view(context, request):
     return HTTPFound(request.route_path(parent.type_, id=parent.id))
 
 
+def add_routes(config):
+    """
+    Add module's related routes
+    """
+    config.add_route(
+        "file",
+        "/files/{id:\d+}",
+        traverse="/files/{id}"
+    )
+    config.add_route(
+        "filepng",
+        "/files/{id:\d+}.png",
+        traverse="/files/{id}"
+    )
+    config.add_route(
+        "public",
+        "/public/{name}",
+        traverse="/configfiles/{name}"
+    )
+
+
 def includeme(config):
     """
     Configure views
     """
-    config.add_route("file", "/files/{id:\d+}", traverse="/files/{id}")
-    config.add_route("filepng", "/files/{id:\d+}.png", traverse="/files/{id}")
-    config.add_route("public", "/public/{name}", traverse="/configfiles/{name}")
+    add_routes(config)
     config.add_view(
-        file_dl_view,
-        route_name='file',
-        permission='view',
-        request_param='action=download',
+        file_view,
+        route_name="file",
+        permission='view_file',
+        renderer="file.mako",
     )
     config.add_view(
         file_dl_view,
         route_name='filepng',
-        permission='view',
+        permission='view_file',
+    )
+    config.add_view(
+        file_dl_view,
+        route_name='file',
+        permission='view_file',
+        request_param='action=download',
     )
     config.add_view(
         file_dl_view,
@@ -297,21 +317,15 @@ def includeme(config):
         permission=NO_PERMISSION_REQUIRED,
     )
     config.add_view(
-        file_view,
+        FileEditView,
         route_name="file",
-        permission='view',
-        renderer="file.mako",
+        permission='edit_file',
+        renderer="base/formpage.mako",
+        request_param='action=edit',
     )
     config.add_view(
         file_delete_view,
         route_name='file',
-        permission='edit',
+        permission='edit_file',
         request_param='action=delete',
-    )
-    config.add_view(
-        FileEditView,
-        route_name="file",
-        permission='edit',
-        renderer="base/formpage.mako",
-        request_param='action=edit',
     )

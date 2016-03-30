@@ -66,7 +66,7 @@ def get_holidays(start_date=None, end_date=None, user_id=None):
             or_(Holiday.start_date.between(start_date, end_date),
                 Holiday.end_date.between(start_date, end_date)))
     if user_id:
-        holidays = holidays.filter(Holiday.user_id==user_id)
+        holidays = holidays.filter(Holiday.user_id == user_id)
     holidays.order_by("start_date")
     return holidays
 
@@ -161,10 +161,12 @@ def holidays_json(request):
     """
         json view for holidays
     """
-    holidays = [HolidayJson(holiday) for holiday in Holiday.query()\
-            .filter(Holiday.user_id==request.context.id)]
-    return dict(holidays=holidays,
-            user_id=str(request.context.id))
+    holidays = [HolidayJson(holiday) for holiday in Holiday.query()
+                .filter(Holiday.user_id == request.context.id)]
+    return dict(
+        holidays=holidays,
+        user_id=str(request.context.id)
+    )
 
 
 def user_holidays_index(request):
@@ -194,46 +196,66 @@ class AdminHolidayView(BaseFormView):
         end_date = appstruct.get('end_date')
         user_id = appstruct.get('user_id')
         search_result = get_holidays(start_date, end_date, user_id)
-        result = dict(holidays=search_result,
-                    start_date=start_date,
-                    end_date=end_date)
+        result = dict(
+            holidays=search_result,
+            start_date=start_date,
+            end_date=end_date,
+        )
         form = self.form_class(self.schema, buttons=self.buttons)
         result['form'] = form.render(appstruct)
         return result
 
 
-def includeme(config):
-    # Manager View
-    config.add_route(
-            'holidays',
-            '/holidays')
-    config.add_view(AdminHolidayView,
-                    route_name="holidays",
-                    renderer="holidays.mako",
-                    permission="manage")
-    # User views
+def add_routes(config):
+    """
+    Add module's related routes
+    """
+    config.add_route('holidays', '/holidays')
     # Here we use the users traversal to provide acl checks
     config.add_route(
-            'user_holidays',
-            '/user/{id:\d+}/holidays',
-            traverse="/users/{id}")
+        'user_holidays',
+        '/users/{id:\d+}/holidays',
+        traverse="/users/{id}",
+    )
     config.add_route(
-            'user_holiday',
-            '/user/{id:\d+}/holidays/{lid:\d+}',
-            traverse="/users/{id}")
+        'user_holiday',
+        '/users/{id:\d+}/holidays/{lid:\d+}',
+        traverse="/users/{id}",
+    )
 
-    config.add_view(user_holidays_index,
-                    route_name="user_holidays",
-                    renderer="user_holidays.mako",
-                    permission="edit")
 
-    config.add_view(holidays_json,
-                    route_name='user_holidays',
-                    xhr=True,
-                    renderer="json")
-    add_rest_views(config, "user_holiday", RestHoliday,
-            view_rights='add',
-            add_rights='add')
+def includeme(config):
+    add_routes(config)
+    # Manager View
     config.add_view(
-            make_redirect_view("user_holidays"),
-            route_name="user_holiday")
+        AdminHolidayView,
+        route_name="holidays",
+        renderer="holidays.mako",
+        permission="admin_holidays",
+    )
+    # User views
+    config.add_view(
+        user_holidays_index,
+        route_name="user_holidays",
+        renderer="user_holidays.mako",
+        permission="list_holidays",
+    )
+
+    config.add_view(
+        holidays_json,
+        route_name='user_holidays',
+        xhr=True,
+        renderer="json",
+        permission='list_holidays',
+    )
+    add_rest_views(
+        config,
+        "user_holiday",
+        RestHoliday,
+        view_rights='list_holidays',
+        add_rights='add_holiday',
+    )
+    config.add_view(
+        make_redirect_view("user_holidays"),
+        route_name="user_holiday",
+    )

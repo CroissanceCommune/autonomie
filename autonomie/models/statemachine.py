@@ -41,15 +41,13 @@ class State(object):
     def __init__(
         self,
         name,
-        permission=None,
+        permission,
         callback=None,
         model_state=True,
         status_attr="status",
         userid_attr="user_id"
     ):
         self.name = name
-        if permission is None:
-            permission = ["edit"]
         if not hasattr(permission, "__iter__"):
             permission = [permission]
         self.permissions = permission
@@ -60,8 +58,13 @@ class State(object):
 
     def allowed(self, context, request):
         """
-            return True if this state assignement is allowed
-            in the current request
+        return True if this state assignement on context is allowed
+        in the current request
+
+        :param obj context: An object with acls
+        :param obj request: The Pyramid request object
+        :returns: True/False
+        :rtype: bool
         """
         res = False
         for permission in self.permissions:
@@ -114,17 +117,17 @@ class StateMachine(object):
                     new_state = [new_state]
                 self.add_transition(state, *new_state)
 
-    def add_transition(self, state, next_, perm=None, callback=None, cae=True):
+    def add_transition(self, state, next_, perm, callback=None, cae=True):
         """
             adds a transition to the state machine
         """
         state_obj = State(
-            next_,
-            perm,
-            callback,
-            cae,
-            self.status_attr,
-            self.userid_attr,
+            name=next_,
+            permission=perm,
+            callback=callback,
+            model_state=cae,
+            status_attr=self.status_attr,
+            userid_attr=self.userid_attr,
         )
         self.transitions.setdefault(state, []).append(state_obj)
 
@@ -170,3 +173,21 @@ class StateMachine(object):
             return self.transitions.get(self.default_state, [])
         else:
             return self.transitions.get(state, [])
+
+    def get_state(self, current_state, statename):
+        """
+        Return the state object with the given name that is in the next_actions
+        of the current object
+
+        :param str current_state: The actual state of the object
+        :param str statename: The name of the state ('draft', 'wait', ...)
+        :returns: The Associated state or None
+        :rtype: State obj
+        """
+        next_states = self.get_next_states(current_state)
+        result = None
+        for state in next_states:
+            if state.name == statename:
+                result = state
+                break
+        return result

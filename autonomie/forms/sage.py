@@ -27,7 +27,7 @@
 """
 import colander
 
-from autonomie.models.treasury import get_expense_years
+from autonomie.models.expense import get_expense_years
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie.models import user
 

@@ -26,8 +26,11 @@ from autonomie.models.competence import CompetenceDeadline
 
 
 def restrict_user_id(form, kw):
-    current_user = kw['request'].user
-    if current_user.is_contractor():
+    """
+    Restrict the user selection to the current user
+    """
+    if not kw['request'].has_permission('admin_competence'):
+        current_user = kw['request'].user
         form['contractor_id'].validator = colander.OneOf((current_user.id,))
 
 

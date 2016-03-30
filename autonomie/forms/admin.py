@@ -210,6 +210,27 @@ d'écriture RG Client",
         ),
         "section": u"Activation des modules d'export Sage",
     },
+    # NDF
+    "code_journal_ndf": {
+        "title": u"Code journal utilisé pour les notes de dépense",
+    },
+    "compte_cg_ndf": {
+        "title": u"Compte de tiers (classe 4) pour les dépenses dues aux \
+entrepreneurs",
+        "description": u"Le compte général pour les notes de dépense",
+    },
+    "compte_cg_waiver_ndf": {
+        "title": u"Compte abandons de créance",
+        "description": "Compte de comptabilité générale spécifique aux \
+abandons de créance dans les notes de dépense",
+        "description": u"Le code TVA utilisé pour l'export des paiements \
+des notes de dépense.",
+    },
+    "code_tva_ndf": {
+        "title": u"Code TVA spécifique aux notes de dépense",
+        "description": u"Le code TVA utilisé pour l'export des paiements \
+des notes de dépense.",
+    }
 }
 
 
@@ -244,7 +265,7 @@ def get_config_key_schemanode(key, ui_conf):
     """
     return colander.SchemaNode(
         colander.String(),
-        title=ui_conf['title'],
+        title=ui_conf.get('title', key),
         description=ui_conf.get('description'),
         missing=u"",
         name=key,
@@ -254,12 +275,18 @@ def get_config_key_schemanode(key, ui_conf):
 
 def get_config_schema(keys):
     """
-    Returns a schema to configure the given keys
+    Returns a schema to configure Config objects
+
+    :param list keys: The list of keys we want to configure (ui informations
+    should be provided in the CONFIGURATION_KEYS dict
+
+    :results: A colander Schema to configure the given keys
+    :rtype: object colander Schema
     """
     schema = colander.Schema()
     mappings = {}
     for key in keys:
-        ui_conf = CONFIGURATION_KEYS[key]
+        ui_conf = CONFIGURATION_KEYS.get(key, {})
         node = get_config_key_schemanode(key, ui_conf)
 
         if "section" in ui_conf:  # This element should be shown in a mapping
@@ -572,151 +599,6 @@ class WorkUnitConfig(colander.MappingSchema):
         widget=deform.widget.SequenceWidget(
             orderable=True,
             template=TEMPLATES_URL + "clean_sequence.pt",
-        )
-    )
-
-
-class ExpenseConfig(colander.MappingSchema):
-    """
-        Schema for the configuration of different expense types
-    """
-    id = forms.id_node()
-    active = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Actif",
-        default=True,
-        description=u"En décochant cette entrée, elle n'apparaîtra plus dans \
-l'interface, mais restera associée aux notes de dépense existantes."
-    )
-
-    label = colander.SchemaNode(
-        colander.String(),
-        title=u"Libellé",
-        validator=colander.Length(max=50))
-
-    code = colander.SchemaNode(
-        colander.String(),
-        title=u"Compte de charge de la dépense",
-        validator=colander.Length(max=15))
-
-    code_tva = colander.SchemaNode(
-        colander.String(),
-        title=u"Code TVA (si nécessaire)",
-        missing="",
-        validator=colander.Length(max=15))
-
-    compte_tva = colander.SchemaNode(
-        colander.String(),
-        title=u"Compte de TVA déductible",
-        missing="",
-        validator=colander.Length(max=15))
-
-    contribution = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Contribution",
-        description=u"Ce type de dépense est-il intégré dans la contribution \
-à la CAE ?",
-        )
-
-
-class ExpenseKmConfig(ExpenseConfig):
-    """
-        Schema for the configuration of vehicle related expenses
-    """
-    amount = colander.SchemaNode(
-        colander.Float(),
-        title=u"Tarif",
-        description=u"Tarif au km")
-
-
-class ExpenseTelConfig(ExpenseConfig):
-    """
-        Schema for telefonic expenses
-    """
-    percentage = colander.SchemaNode(
-        colander.Integer(),
-        title=u"Pourcentage remboursé",
-        validator=colander.Range(1, 100))
-    initialize = colander.SchemaNode(
-        colander.Boolean(),
-        title=u"Créer une entrée par défaut ?",
-        description=u"Une ligne sera automatiquement ajoutée à la feuille \
-de notes de dépense",
-        default=True)
-
-
-class ExpensesConfig(colander.SequenceSchema):
-    """
-        The sequence Schema associated with the ExpenseConfig
-    """
-    expense = ExpenseConfig(
-        title=u"",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        ),
-    )
-
-
-class ExpensesKmConfig(colander.SequenceSchema):
-    """
-        The sequence Schema associated with the ExpenseKmConfig
-    """
-    expense = ExpenseKmConfig(
-        title=u"",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        ),
-    )
-
-
-class ExpensesTelConfig(colander.SequenceSchema):
-    """
-        The sequence Schema associated with the ExpenseTelConfig
-    """
-    expense = ExpenseTelConfig(
-        title=u"",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        ),
-    )
-
-
-class ExpenseTypesConfig(colander.MappingSchema):
-    """
-        Expense Configuration form schema
-    """
-    code_journal = colander.SchemaNode(
-        colander.String(),
-        title=u"Code journal utilisés pour notes de dépenses",
-        description=u"Le code journal pour les notes de dépense",
-        missing="",
-    )
-    compte_cg = colander.SchemaNode(
-        colander.String(),
-        title=u"Compte de tiers (classe 4) pour dépenses dues aux \
-entrepreneurs",
-        description=u"Le compte général pour les notes de dépense",
-        missing="",
-        )
-    expenses = ExpensesConfig(
-        title=u'Dépenses',
-        widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + "clean_sequence.pt",
-            add_subitem_text_template=u"Ajouter une dépense",
-        )
-    )
-    expenseskm = ExpensesKmConfig(
-        title=u"Frais kilométriques",
-        widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + "clean_sequence.pt",
-            add_subitem_text_template=u"Ajouter des dépenses kilométriques",
-        )
-    )
-    expensestel = ExpensesTelConfig(
-        title=u"Frais téléphoniques",
-        widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + "clean_sequence.pt",
-            add_subitem_text_template=u"Ajouter des dépenses téléphoniques",
         )
     )
 

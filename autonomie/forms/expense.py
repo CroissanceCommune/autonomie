@@ -31,7 +31,7 @@
 import colander
 import deform
 
-from autonomie.models.treasury import (
+from autonomie.models.expense import (
     ExpenseType,
     get_expense_years,
 )
@@ -43,9 +43,10 @@ from autonomie import forms
 
 STATUS_OPTIONS = (
     ("all", u"Toutes les notes de dépense", ),
-    ("valid", u'Validées', ),
-    ("resulted", u'Payées', ),
     ("wait", u'En attente de validation', ),
+    ("valid", u'Validées', ),
+    ("paid", u"Partiellement payées", ),
+    ("resulted", u'Payées', ),
 )
 
 
@@ -64,13 +65,15 @@ class PeriodSelectSchema(colander.MappingSchema):
 
 
 class ExpenseStatusSchema(colander.MappingSchema):
-    comment = colander.SchemaNode(colander.String(),
-            widget=deform.widget.TextAreaWidget(cols=80, rows=2),
-                                    title=u"Communication avec la CAE",
-            description=u"Message à destination des membres de la CAE qui \
-valideront votre feuille de notes de dépense",
-            missing=u"",
-            default=u"")
+    comment = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextAreaWidget(cols=80, rows=2),
+        title=u"Communication avec la CAE",
+        description=u"Message à destination des membres de la CAE qui \
+        valideront votre feuille de notes de dépense",
+        missing=colander.drop,
+        default=u"",
+    )
 
 
 class BaseLineSchema(colander.MappingSchema):
@@ -133,9 +136,9 @@ class BookMarkSchema(colander.MappingSchema):
         Schema for bookmarks
     """
     type_id = colander.SchemaNode(
-            colander.Integer(),
-            validator=deferred_type_id_validator
-            )
+        colander.Integer(),
+        validator=deferred_type_id_validator
+    )
     description = colander.SchemaNode(colander.String())
     ht = colander.SchemaNode(colander.Float())
     tva = colander.SchemaNode(colander.Float())

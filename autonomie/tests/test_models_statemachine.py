@@ -63,7 +63,7 @@ class DummyStates(StateMachine):
 
 
 def test_add_transition(state_machine):
-    state_machine.add_transition('wait', "valid")
+    state_machine.add_transition('wait', "valid", ("manage",))
     assert state_machine.get_transition('wait', 'valid').name == 'valid'
 
 

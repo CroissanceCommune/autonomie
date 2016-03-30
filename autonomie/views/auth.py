@@ -263,8 +263,6 @@ class LoginView(BaseView):
                 remember(self.request, login)
                 remember_me = datas.get('remember_me', False)
                 if remember_me:
-                    print(self.request.session._headers)
-                    print(dir(self.request.session._headers))
                     log.info("  * The user wants to be remembered")
                     longtimeout = get_longtimeout()
                     self.request.response.set_cookie(

@@ -34,7 +34,6 @@ from js.deform import auto_need
 from js.jquery_timepicker_addon import timepicker_fr
 
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 from sqlalchemy.orm import aliased
 from sqlalchemy import asc
 from sqlalchemy import func
@@ -225,29 +224,35 @@ def _get_appstruct_from_activity(activity):
 
 
 def populate_actionmenu(request):
-    if has_permission('manage', request.context, request):
-        link = ViewLink(u"Liste des rendez-vous", "manage", path="activities")
-        request.actionmenu.add(link)
-        link = ViewLink(
-            u"Attacher un fichier",
-            "manage",
-            path="activity",
-            id=request.context.id,
-            _query=dict(action="attach_file")
-        )
-        request.actionmenu.add(link)
-    else:
+    link = ViewLink(
+        u"Liste des rendez-vous",
+        "admin_activities",
+        path="activities",
+    )
+    request.actionmenu.add(link)
+
+    link = ViewLink(
+        u"Attacher un fichier",
+        "admin_activity",
+        path="activity",
+        id=request.context.id,
+        _query=dict(action="attach_file")
+    )
+    request.actionmenu.add(link)
+
+    if not request.has_permission('admin_activities'):
         # On doit rediriger l'utilisateur vers la liste des activités de son
         # entreprise, le problème c'est qu'on a pas l'id de celle-ci, on prend
         # donc le premier id d'entreprise qu'on trouve (c'est pas génial, mais
         # ça a le mérite de marcher)
-        link = ViewLink(
-            u"Liste des rendez-vous",
-            "view",
-            path="company_activities",
-            id=request.user.companies[0].id
-        )
-        request.actionmenu.add(link)
+        company = request.user.companies[0]
+        if request.has_permission('list_activities', company):
+            link = ViewLink(
+                u"Liste des rendez-vous",
+                path="company_activities",
+                id=company.id
+            )
+            request.actionmenu.add(link)
 
 
 class NewActivityView(BaseFormView):
@@ -728,18 +733,19 @@ def activity_view_only_view(context, request):
     """
     Single Activity view-only view
     """
-    if has_permission('manage', context, request):
+    if request.has_permission('admin_activity'):
         url = request.route_path(
             'activity',
             id=context.id,
             _query=dict(action='edit'),
         )
         return HTTPFound(url)
-    title = u"Rendez-vous du %s" % (
-        render_api.format_datetime(request.context.datetime),
-    )
-    populate_actionmenu(request)
-    return dict(title=title, activity=request.context)
+    else:
+        title = u"Rendez-vous du %s" % (
+            render_api.format_datetime(request.context.datetime),
+        )
+        populate_actionmenu(request)
+        return dict(title=title, activity=request.context)
 
 
 def activity_delete_view(context, request):
@@ -783,9 +789,9 @@ def activity_html_view(activity, request):
     return dict(activity=activity)
 
 
-def includeme(config):
+def add_routes(config):
     """
-    Add view to the pyramid registry
+    Add module related routes
     """
     config.add_route(
         'activity',
@@ -811,10 +817,16 @@ def includeme(config):
         traverse="/companies/{id}",
     )
 
+
+def includeme(config):
+    """
+    Add view to the pyramid registry
+    """
+    add_routes(config)
     config.add_view(
         NewActivityView,
         route_name='activities',
-        permission='manage',
+        permission='add_activity',
         request_param='action=new',
         renderer="/base/formpage.mako",
     )
@@ -822,69 +834,23 @@ def includeme(config):
     config.add_view(
         NewActivityAjaxView,
         route_name='activities',
-        permission='manage',
+        permission='add_activity',
         request_param='action=new',
         xhr=True,
         renderer="/base/formajax.mako",
     )
 
     config.add_view(
-        ActivityList,
-        route_name='activities',
-        permission='manage',
-        renderer="/accompagnement/activities.mako",
-    )
-
-    config.add_view(
-        ActivityReportXlsView,
-        route_name='activities.xls',
-        permission='manage',
-    )
-
-    config.add_view(
-        ActivityReportOdsView,
-        route_name='activities.ods',
-        permission='manage',
-    )
-
-    config.add_view(
-        ActivityListContractor,
-        route_name='company_activities',
-        permission='edit',
-        renderer="/accompagnement/activities.mako",
-    )
-
-    config.add_view(
-        activity_view_only_view,
-        route_name='activity',
-        permission='view',
-        renderer="/accompagnement/activity.mako",
-    )
-
-    config.add_view(
-        activity_pdf_view,
-        route_name='activity.pdf',
-        permission='view',
-    )
-
-    config.add_view(
-        activity_html_view,
-        route_name='activity.html',
-        permission='view',
-        renderer='/accompagnement/activity_pdf.mako',
-    )
-
-    config.add_view(
         activity_delete_view,
         route_name='activity',
-        permission='manage',
+        permission='admin_activity',
         request_param='action=delete',
     )
 
     config.add_view(
         ActivityEditView,
         route_name='activity',
-        permission='manage',
+        permission='edit_activity',
         request_param='action=edit',
         renderer="/accompagnement/activity_edit.mako",
     )
@@ -892,15 +858,61 @@ def includeme(config):
     config.add_view(
         ActivityRecordView,
         route_name='activity',
-        permission='manage',
+        permission='edit_activity',
         request_param='action=record',
         renderer="/base/formajax.mako",
+    )
+
+    config.add_view(
+        ActivityList,
+        route_name='activities',
+        permission='admin_activities',
+        renderer="/accompagnement/activities.mako",
+    )
+
+    config.add_view(
+        ActivityListContractor,
+        route_name='company_activities',
+        permission='list_activities',
+        renderer="/accompagnement/activities.mako",
+    )
+
+    config.add_view(
+        activity_view_only_view,
+        route_name='activity',
+        permission='view_activity',
+        renderer="/accompagnement/activity.mako",
+    )
+
+    config.add_view(
+        activity_pdf_view,
+        route_name='activity.pdf',
+        permission='view_activity',
+    )
+
+    config.add_view(
+        activity_html_view,
+        route_name='activity.html',
+        permission='view_activity',
+        renderer='/accompagnement/activity_pdf.mako',
+    )
+
+    config.add_view(
+        ActivityReportXlsView,
+        route_name='activities.xls',
+        permission='admin_activity',
+    )
+
+    config.add_view(
+        ActivityReportOdsView,
+        route_name='activities.ods',
+        permission='admin_activity',
     )
 
     config.add_view(
         FileUploadView,
         route_name="activity",
         renderer='/base/formpage.mako',
-        permission='manage',
+        permission='admin_activity',
         request_param='action=attach_file',
     )

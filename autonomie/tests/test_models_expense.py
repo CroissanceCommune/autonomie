@@ -19,7 +19,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
-from autonomie.models.treasury import (
+from autonomie.models.expense import (
     ExpenseLine,
     ExpenseKmLine,
     ExpenseKmType,

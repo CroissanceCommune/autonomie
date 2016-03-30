@@ -45,7 +45,7 @@
     <tbody>
         % if records:
             % for id, user in records:
-                % if not request.user.is_contractor() and user.userdatas is not None:
+                % if api.has_permission('view_userdatas', request.context) and user.userdatas is not None:
                     <% url = request.route_path('userdata', id=user.userdatas.id) %>
                 % else:
                     <% url = request.route_path('user', id=user.id) %>

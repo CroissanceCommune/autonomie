@@ -46,11 +46,6 @@ from autonomie.models.task import (
     PaymentMode,
     BankAccount,
 )
-from autonomie.models.treasury import (
-    ExpenseType,
-    ExpenseKmType,
-    ExpenseTelType,
-)
 from autonomie.models.activity import (
     ActivityType,
     ActivityMode,
@@ -83,7 +78,6 @@ from autonomie.forms.admin import (
     get_tva_config_schema,
     PaymentModeConfig,
     WorkUnitConfig,
-    ExpenseTypesConfig,
     WorkshopConfigSchema,
     ActivityConfigSchema,
     get_config_appstruct,
@@ -424,110 +418,6 @@ class AdminWorkUnit(BaseAdminFormView):
         return HTTPFound(self.request.route_path("admin_workunit"))
 
 
-class AdminExpense(BaseAdminFormView):
-    """
-        Expense administration view
-        Allows to configure expense types and codes
-    """
-    title = u"Configuration des notes de dépense"
-    validation_msg = u"Les différents paramètres des notes de dépense \
-ont été configurés"
-    schema = ExpenseTypesConfig()
-    buttons = (submit_btn,)
-    factories = {'expenses': (ExpenseType, 'expense'),
-                 'expenseskm': (ExpenseKmType, 'expensekm'),
-                 'expensestel': (ExpenseTelType, 'expensetel')}
-
-    def _get_config_key(self, rel_keyname):
-        return rel_keyname + "_ndf"
-
-    def before(self, form):
-        """
-        Add appstruct to the current form object
-        """
-        appstruct = {}
-
-        for key in ('code_journal', 'compte_cg'):
-            cfg_key = self._get_config_key(key)
-            appstruct[key] = self.request.config.get(cfg_key, '')
-
-        for key, (factory, polytype) in self.factories.items():
-            query = factory.query().filter(factory.type == polytype)
-            query = query.filter(factory.active == True)
-            appstruct[key] = [e.appstruct() for e in query]
-
-        form.set_appstruct(appstruct)
-
-    def get_all_ids(self, appstruct):
-        """
-        Return the ids of the options still present in the submitted form
-        """
-        ids = []
-        for key in self.factories:
-            ids.extend([data['id'] for data in appstruct[key] if 'id' in data])
-        return ids
-
-    def _get_actual_config_obj(self, config_key):
-        """
-        Return the actual configured compte_cg object
-        """
-        return Config.get(config_key)
-
-    def _set_config_value(self, appstruct, config_key, appstruct_key):
-        """
-        Set a config value
-        :param appstruct: the form submitted values
-        :param config_key: The name of the configuration key
-        :param appstruct_key: The name of the key in the appstruct
-        """
-        cfg_obj = self._get_actual_config_obj(config_key)
-        value = appstruct.pop(appstruct_key, None)
-
-        if value:
-            if cfg_obj is None:
-                cfg_obj = Config(name=config_key, value=value)
-                self.dbsession.add(cfg_obj)
-
-            else:
-                cfg_obj.value = value
-                self.dbsession.merge(cfg_obj)
-
-        log.debug(u"Setting the new {0} : {1}".format(config_key, value))
-
-    def submit_success(self, appstruct):
-        """
-        Handle successfull expense configuration
-        :param appstruct: submitted datas
-        """
-        all_ids = self.get_all_ids(appstruct)
-
-        # We delete the elements that are no longer in the appstruct
-        for (factory, polytype) in self.factories.values():
-            for element in factory.query().filter(factory.type == polytype):
-                if element.id not in all_ids:
-                    element.active = False
-                    self.dbsession.merge(element)
-        self.dbsession.flush()
-
-        for key in ('code_journal', 'compte_cg'):
-            cfg_key = self._get_config_key(key)
-            self._set_config_value(appstruct, cfg_key, key)
-
-        for key, (factory, polytype) in self.factories.items():
-            for data in appstruct[key]:
-                if data.get('id') is not None:
-                    type_ = factory.get(data['id'])
-                    merge_session_with_post(type_, data)
-                    self.dbsession.merge(type_)
-                else:
-                    type_ = factory()
-                    merge_session_with_post(type_, data)
-                    self.dbsession.add(type_)
-
-        self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path("admin_expense"))
-
-
 class BaseAdminActivities(BaseAdminFormView):
     """
         Activity types config
@@ -726,7 +616,7 @@ class AdminActivities(BaseAdminActivities):
 
     def submit_success(self, activity_appstruct):
         """
-            Handle successfull expense configuration
+            Handle successfull activity configuration
         """
         self.store_pdf_conf(activity_appstruct, 'activity')
         # We delete the elements that are no longer in the appstruct
@@ -770,7 +660,7 @@ class AdminWorkshop(BaseAdminActivities):
 
     def submit_success(self, workshop_appstruct):
         """
-            Handle successfull expense configuration
+            Handle successfull workshop configuration
         """
 
         self.store_pdf_conf(workshop_appstruct, 'workshop')
@@ -823,6 +713,7 @@ class AdminCae(BaseConfigView):
         'sage_rgclient',
     )
     schema = get_config_schema(keys)
+    redirect_path = "admin_index"
 
 
 class TemplateUploadView(FileUploadView):
@@ -1058,7 +949,6 @@ def includeme(config):
     config.add_route("admin_tva", "/admin/tva")
     config.add_route("admin_paymentmode", "admin/paymentmode")
     config.add_route("admin_workunit", "admin/workunit")
-    config.add_route("admin_expense", "admin/expense")
     config.add_route("admin_accompagnement", "admin/accompagnement")
     config.add_route("admin_activity", "admin/activity")
     config.add_route("admin_workshop", "admin/workshop")
@@ -1115,11 +1005,6 @@ def includeme(config):
     config.add_admin_view(
         AdminWorkUnit,
         route_name='admin_workunit',
-    )
-
-    config.add_admin_view(
-        AdminExpense,
-        route_name='admin_expense',
     )
 
     config.add_admin_view(

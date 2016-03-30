@@ -251,7 +251,7 @@ AutonomieApp.module("Holiday", function(Holiday, AutonomieApp,  Backbone, Marion
     var options = Holiday.datas;
     Holiday.router = new router();
     Holiday.holidays = new HolidaysCollection(options['holidays']);
-    Holiday.holidays.url = "/user/" + options['user_id'] + "/holidays";
+    Holiday.holidays.url = "/users/" + options['user_id'] + "/holidays";
     Holiday.router.controller.index();
   });
 });

@@ -148,6 +148,10 @@ class SaleProduct(DBBASE):
             category=self.category.title,
         )
 
+    @property
+    def company(self):
+        return self.category.company
+
 
 class SaleProductGroup(DBBASE):
     """
@@ -193,3 +197,7 @@ class SaleProductGroup(DBBASE):
             products=[product.__json__(request) for product in self.products],
             category_id=self.category_id,
         )
+
+    @property
+    def company(self):
+        return self.category.company

@@ -49,9 +49,13 @@ def make_root_static_view(filename, ctype):
 def includeme(config):
     config.add_route('favicon.ico', '/favicon.ico')
     config.add_route('robots.txt', '/robots.txt')
-    config.add_view(make_root_static_view("robots.txt", 'text/plain'),
-                        route_name="robots.txt",
-                        permission=NO_PERMISSION_REQUIRED)
-    config.add_view(make_root_static_view("favicon.ico", "image/x-icon"),
-                        route_name="favicon.ico",
-                        permission=NO_PERMISSION_REQUIRED)
+    config.add_view(
+        make_root_static_view("robots.txt", 'text/plain'),
+        route_name="robots.txt",
+        permission=NO_PERMISSION_REQUIRED,
+    )
+    config.add_view(
+        make_root_static_view("favicon.ico", "image/x-icon"),
+        route_name="favicon.ico",
+        permission=NO_PERMISSION_REQUIRED,
+    )

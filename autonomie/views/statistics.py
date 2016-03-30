@@ -158,7 +158,7 @@ def statistic_sheet_view(context, request):
     request.actionmenu.add(
         widgets.ViewLink(
             u"Retour à la liste",
-            "manage",
+            "list_statistics",
             path="statistics",
         )
     )
@@ -406,9 +406,9 @@ class CsvSheetView(BaseView):
         return self.request.response
 
 
-def includeme(config):
+def add_routes(config):
     """
-    Include views in the app's configuration
+    Add module's related routes
     """
     # Routes for statistic sheet view/add/edit/delete
     config.add_route(
@@ -443,24 +443,31 @@ def includeme(config):
         traverse='/statistic_criteria/{cid}',
     )
 
+
+def includeme(config):
+    """
+    Include views in the app's configuration
+    """
+    add_routes(config)
+
     config.add_view(
         StatisticSheetList,
         route_name='statistics',
         renderer="statistics/list.mako",
-        permission='manage',
+        permission='list_statistics',
     )
 
     config.add_view(
         statistic_sheet_add_edit_view,
         route_name="statistics",
         request_param="action=add",
-        permission='manage',
+        permission='add_statistic',
     )
     config.add_view(
         statistic_sheet_add_edit_view,
         route_name="statistic",
         request_param="action=edit",
-        permission='manage',
+        permission='edit_statistic',
     )
 
     config.add_view(
@@ -470,47 +477,50 @@ def includeme(config):
         xhr=True,
         request_method='GET',
         request_param="action=options",
-        permission='manage',
+        permission='edit_statistic',
     )
 
     config.add_view(
         statistic_sheet_view,
         route_name='statistic',
         renderer='statistics/edit.mako',
+        permission="view_statistic",
     )
 
     config.add_view(
         StatisticDisableView,
         route_name="statistic",
         request_param="action=disable",
-        permission='manage',
+        permission='edit_statistic',
     )
 
     config.add_view(
         StatisticDuplicateView,
         route_name="statistic",
         request_param="action=duplicate",
-        permission='manage',
+        permission='edit_statistic',
     )
 
-    for attr in ('put', 'get'):
+    for attr, perm in (('put', 'edit',), ('get', 'view',)):
         config.add_view(
             RestStatisticSheet,
             attr=attr,
             route_name='statistic',
             request_method=attr.upper(),
-            permission='manage',
+            permission='%s_statistic' % perm,
             renderer='json',
             xhr=True,
         )
 
-    for attr in ('put', 'get', 'delete'):
+    for attr, perm in (
+        ('put', 'edit',), ('get', 'view',), ('delete', 'edit',)
+    ):
         config.add_view(
             RestStatisticEntry,
             attr=attr,
             route_name='statistic_entry',
             request_method=attr.upper(),
-            permission='manage',
+            permission='%s_statistic' % perm,
             renderer='json',
             xhr=True,
         )
@@ -519,18 +529,21 @@ def includeme(config):
             attr=attr,
             route_name='statistic_criterion',
             request_method=attr.upper(),
-            permission='manage',
+            permission='%s_statistic' % perm,
             renderer='json',
             xhr=True,
         )
 
-    for attr, method in (('post', 'post'), ('collection_get', 'get')):
+    for attr, method, perm in (
+        ('post', 'post', 'edit'),
+        ('collection_get', 'get', 'view')
+    ):
         config.add_view(
             RestStatisticEntry,
             attr=attr,
             route_name='statistic_entries',
             request_method=method.upper(),
-            permission='manage',
+            permission='%s_statistic' % perm,
             renderer='json',
             xhr=True,
         )
@@ -539,7 +552,7 @@ def includeme(config):
             attr=attr,
             route_name='statistic_criteria',
             request_method=method.upper(),
-            permission='manage',
+            permission='%s_statistic' % perm,
             renderer='json',
             xhr=True,
         )
@@ -548,13 +561,13 @@ def includeme(config):
     config.add_view(
         CsvEntryView,
         route_name='statistic_entry',
-        permission='manage',
+        permission='view_statistic',
         request_param="format=csv",
     )
 
     config.add_view(
         CsvSheetView,
         route_name='statistic',
-        permission='manage',
+        permission='view_statistic',
         request_param="format=csv",
     )

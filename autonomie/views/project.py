@@ -39,7 +39,6 @@ from deform import Form
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 
 from autonomie.models.base import DBSESSION
 from autonomie.models.project import (
@@ -152,8 +151,9 @@ def redirect_to_customerslist(request, company):
 des clients")
     request.session.flash(u"Vous devez créer des clients afin \
 de créer de nouveaux projets")
-    raise HTTPFound(request.route_path("company_customers",
-                                                id=company.id))
+    raise HTTPFound(
+        request.route_path("company_customers", id=company.id)
+    )
 
 
 class ProjectsList(BaseListView):
@@ -169,9 +169,10 @@ class ProjectsList(BaseListView):
     title = u"Liste des projets"
     schema = get_list_schema()
     default_sort = "name"
-    sort_columns = {'name':Project.name,
-                    "code":Project.code,
-                    }
+    sort_columns = {
+        'name': Project.name,
+        "code": Project.code,
+    }
 
     def query(self):
         company = self.request.context
@@ -190,17 +191,18 @@ class ProjectsList(BaseListView):
         search = appstruct['search']
         if search:
             query = query.filter(
-                or_(Project.name.like("%" + search + "%"),
+                or_(
+                    Project.name.like("%" + search + "%"),
                     Project.customers.any(
                         Customer.name.like("%" + search + "%")
                     )
-                   )
+                )
             )
         return query
 
     def populate_actionmenu(self, appstruct):
         populate_actionmenu(self.request)
-        if has_permission('add', self.request.context, self.request):
+        if self.request.has_permission('add_project'):
             form = get_project_form(self.request)
             popup = PopUp('add', u"Ajouter un projet", form.render())
             self.request.popups = {popup.name: popup}
@@ -212,12 +214,16 @@ class ProjectsList(BaseListView):
             return the show archived button
         """
         archived = appstruct['archived']
+        args = self.request.GET.copy()
+        args.pop('archived', None)
         if not archived:
-            url = self.request.current_route_path(_query=dict(archived="true"))
-            link = HTML.a(u"Afficher les projets archivés",  href=url)
+            args['archived'] = 'true'
+            msg = u"Afficher les projets archivés"
         else:
-            url = self.request.current_route_path(_query=dict(archived="false"))
-            link = HTML.a(u"Afficher les projets actifs", href=url)
+            msg = u"Afficher les projets actifs"
+
+        url = self.request.current_route_path(_query=args)
+        link = HTML.a(msg, href=url)
         return StaticWidget(link)
 
     @property
@@ -235,24 +241,26 @@ class ProjectsList(BaseListView):
         btns.append(
             ItemActionLink(
                 u"Voir",
-                "view",
+                "view_project",
                 css='btn btn-default btn-sm',
                 path="project",
-                icon="search"
-        ))
+                icon="search",
+            )
+        )
         btns.append(
             ItemActionLink(
                 u"Devis",
-                "edit",
+                "add_estimation",
                 css="btn btn-default btn-sm",
                 title=u"Nouveau devis",
                 path="project_estimations",
                 icon="file",
-        ))
+            )
+        )
         btns.append(
             ItemActionLink(
                 u"Facture",
-                "edit",
+                "add_invoice",
                 css="btn btn-default btn-sm",
                 title=u"Nouvelle facture",
                 path="project_invoices",
@@ -263,7 +271,7 @@ class ProjectsList(BaseListView):
             btns.append(
                 ItemActionLink(
                     u"Archiver",
-                    "edit",
+                    "edit_project",
                     css="btn btn-default btn-sm",
                     confirm=u'Êtes-vous sûr de vouloir archiver ce projet ?',
                     path="project",
@@ -276,7 +284,7 @@ class ProjectsList(BaseListView):
             btns.append(
                 ItemActionLink(
                     u"Désarchiver",
-                    "edit",
+                    "edit_project",
                     css="btn btn-default btn-sm",
                     path="project",
                     title=u"Désarchiver le projet",
@@ -286,7 +294,7 @@ class ProjectsList(BaseListView):
             )
             del_link = ItemActionLink(
                 u"Supprimer",
-                "edit",
+                "edit_project",
                 css="btn btn-danger",
                 confirm=u'Êtes-vous sûr de vouloir supprimer ce projet ?',
                 path="project",
@@ -326,9 +334,11 @@ def project_delete(request):
         Delete the current project
     """
     project = request.context
+    log.info(u"Project {0} deleted".format(project))
     request.dbsession.delete(project)
-    request.session.flash(u"Le projet '{0}' a bien été supprimé".format(
-                                                            project.name))
+    request.session.flash(
+        u"Le projet '{0}' a bien été supprimé".format(project.name)
+    )
     return HTTPFound(request.referer)
 
 
@@ -372,7 +382,7 @@ def project_view(request):
     all_tasks = []
     for phase in phases:
         all_tasks.extend(phase.tasks)
-    all_tasks.sort(key=lambda task:task.statusDate, reverse=True)
+    all_tasks.sort(key=lambda task: task.statusDate, reverse=True)
 
     if all_tasks:
         latest_phase = all_tasks[0].phase
@@ -400,8 +410,9 @@ class ProjectAdd(BaseFormView):
 
     @property
     def codes(self):
-        codes = [(project.code, project.name) \
-         for project in self.context.projects]
+        codes = [
+            (project.code, project.name) for project in self.context.projects
+        ]
         codes.sort()
         return codes
 
@@ -462,9 +473,11 @@ class ProjectEdit(ProjectAdd):
 
     @property
     def codes(self):
-        codes = [(project.code, project.name) \
-            for project in self.context.company.projects \
-                 if project.id != self.context.id]
+        codes = [
+            (project.code, project.name)
+            for project in self.context.company.projects
+            if project.id != self.context.id
+        ]
         codes.sort()
         return codes
 
@@ -477,29 +490,34 @@ def populate_actionmenu(request, project=None):
     request.actionmenu.add(get_list_view_btn(company_id))
     if project is not None:
         request.actionmenu.add(get_view_btn(project.id))
-        if has_permission("edit", project, request):
-            request.actionmenu.add(get_edit_btn(project.id))
-            request.actionmenu.add(get_detail_btn())
-            request.actionmenu.add(get_phase_btn(project.id))
-            request.actionmenu.add(get_add_file_link(request))
+        request.actionmenu.add(get_edit_btn(project.id))
+        request.actionmenu.add(get_detail_btn())
+        request.actionmenu.add(get_phase_btn(project.id))
+        request.actionmenu.add(get_add_file_link(request, perm='edit_project'))
 
 
 def get_list_view_btn(cid):
     return ViewLink(
         u"Liste des projets",
-        "edit",
+        "list_projects",
         path="company_projects",
         id=cid,
     )
 
 
 def get_view_btn(id_):
-    return ViewLink(u"Voir", path="project", id=id_)
+    return ViewLink(
+        u"Voir",
+        "view_project",
+        path="project",
+        id=id_
+    )
 
 
 def get_edit_btn(id_):
     return ViewLink(
         u"Modifier",
+        "edit_project",
         path="project",
         id=id_,
         _query=dict(action="edit"),
@@ -507,12 +525,16 @@ def get_edit_btn(id_):
 
 
 def get_detail_btn():
-    return ToggleLink(u"Afficher les détails", target="project-description")
+    return ToggleLink(
+        u"Afficher les détails",
+        'view_project',
+        target="project-description")
 
 
 def get_phase_btn(id_):
     return ViewLink(
         u"Ajouter une phase (sous-dossier)",
+        'add_phase',
         path="project",
         id=id_,
         _query=dict(action="addphase"),
@@ -540,58 +562,58 @@ def includeme(config):
         route_name='company_projects',
         renderer='project.mako',
         request_method='POST',
-        permission='edit',
+        permission='list_projects',
     )
     config.add_view(
         ProjectAdd,
         route_name='company_projects',
         renderer='project.mako',
         request_param='action=add',
-        permission='edit',
+        permission='add_project',
     )
     config.add_view(
         ProjectEdit,
         route_name='project',
         renderer='project.mako',
         request_param='action=edit',
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         project_view,
         route_name='project',
         renderer='project_view.mako',
-        permission='view',
+        permission='view_project',
     )
     config.add_view(
         project_delete,
         route_name="project",
         request_param="action=delete",
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         project_archive,
         route_name="project",
         request_param="action=archive",
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         PhaseAddFormView,
         route_name="project",
         request_param="action=addphase",
         renderer="base/formpage.mako",
-        permission='edit',
+        permission='edit_project',
     )
     config.add_view(
         PhaseEditFormView,
         route_name="phase",
         renderer="base/formpage.mako",
-        permission='edit',
+        permission='edit_phase',
     )
     config.add_view(
         phase_delete_view,
         route_name="phase",
         renderer="base/formpage.mako",
-        permission='edit',
+        permission='edit_phase',
         request_param="action=delete",
     )
     config.add_view(
@@ -599,12 +621,12 @@ def includeme(config):
         route_name='company_projects',
         renderer='company_projects.mako',
         request_method='GET',
-        permission='edit',
+        permission='list_projects',
     )
     config.add_view(
         FileUploadView,
         route_name="project",
         renderer='base/formpage.mako',
-        permission='edit',
+        permission='edit_project',
         request_param='action=attach_file',
     )

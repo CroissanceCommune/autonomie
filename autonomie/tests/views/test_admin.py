@@ -28,25 +28,19 @@ pytest.mark.usefixtures("config")
 from autonomie.models import tva
 from autonomie.models.task.invoice import PaymentMode
 from autonomie.models.task import WorkUnit
-from autonomie.models.treasury import ExpenseType
 from autonomie.models.config import (
-        get_config,
-        Config,
-        )
-
-#from autonomie.views.admin.main import (
-#    AdminWorkUnit,
-#    AdminExpense,
-#    AdminCae,
-#    AdminActivities,
-#    )
+    get_config,
+    Config,
+)
 
 
-def test_success(config, get_csrf_request_with_db, dbsession):
+def test_main_config_success(config, get_csrf_request_with_db, dbsession):
     from autonomie.views.admin.main import AdminMain
     config.add_route('admin_main', '/')
-    appstruct = {"site":{'welcome':'testvalue'},
-                    "document":{'footertitle':'testvalue2'}}
+    appstruct = {
+        "site": {'welcome': 'testvalue'},
+        "document": {'footertitle': 'testvalue2'}
+    }
     view = AdminMain(get_csrf_request_with_db())
     view.submit_success(appstruct)
     assert get_config()['welcome'] == u'testvalue'
@@ -57,7 +51,7 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
     from autonomie.views.admin.main import AdminTva
     config.add_route('admin_tva', '/')
 
-    appstruct = {'tvas':[
+    appstruct = {'tvas': [
         {'name':"19,6%", 'value':1960, "default":1, "products":[]},
         {'name':"7%", "value":700, "default":0, "products":[]}
         ]}
@@ -99,67 +93,31 @@ class DummyForm(object):
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 
-def test_expense_config_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.main import AdminExpense
-    config.add_route('admin_expense', '/')
-    appstruct = {
-            "code_journal": "JOURNAL01",
-            'compte_cg': "DOE548",
-            'expenses':[
-{'label':u"Restauration", "code":u"0001", "id":None, 'compte_tva':"CTVA" },
+def test_base_config_view(config, dbsession, get_csrf_request_with_db):
+    from autonomie.views.admin.tools import BaseConfigView
+    from autonomie.forms.admin import get_config_schema
 
-{'label':u"Déplacement", "code":u"0002", "id":None, 'code_tva':"TVA"}
-        ],
-                'expenseskm':[
-{'label':u"Scooter", "code":u"0003", "amount":"0.852", "id":None,
-    'code_tva':"TVA1"}],
-                'expensestel':[
-{'label':u"Adsl-Téléphone", "code":u"0004", "percentage":"80",
-    "id":None, "code_tva": "TVA2", 'contribution': True}]}
-    view = AdminExpense(get_csrf_request_with_db())
+    class TestView(BaseConfigView):
+        title = u"Test",
+        keys = ('test_key1', 'test_key2')
+        schema = get_config_schema(keys)
+        validation_msg = u"Ok"
+        redirect_path = "test"
+
+    config.add_route(TestView.redirect_path, '/')
+
+    appstruct = {'test_key1': 'test1', 'test_wrong_key': 'test error'}
+
+    view = TestView(get_csrf_request_with_db())
     view.submit_success(appstruct)
 
-    assert "DOE548" == Config.get('compte_cg_ndf').value
-    assert "JOURNAL01" == Config.get('code_journal_ndf').value
-
-    form = DummyForm()
-    view.before(form)
-    assert len(form.appstruct['expenses']) == 2
-    assert form.appstruct['expenses'][0]['label'] == u"Restauration"
-    assert form.appstruct['expenses'][0]['code'] == u"0001"
-    assert form.appstruct['expenses'][0]['compte_tva'] == "CTVA"
-    assert form.appstruct['expenses'][1]['code_tva'] == "TVA"
-
-    assert form.appstruct['expenseskm'][0]['label'] == u"Scooter"
-    assert form.appstruct['expenseskm'][0]['amount'] == 0.852
-    assert form.appstruct['expenseskm'][0]['code_tva'] == 'TVA1'
-    assert form.appstruct['expensestel'][0]['percentage'] == 80
-    assert form.appstruct['expensestel'][0]['code_tva'] == 'TVA2'
-    assert form.appstruct['expensestel'][0]['contribution'] == True
-
-def test_success_id_preservation(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.main import AdminExpense
-    config.add_route('admin_expense', '/')
-    appstruct = {'expenses':[
-        {'label':u"Restauration", "code":u"0001", "id":None}],
-                'expenseskm':[],
-                'expensestel':[]}
-    view = AdminExpense(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-
-    expense = ExpenseType.query().filter(ExpenseType.code=="0001").first()
-
-    appstruct['expenses'][0]['id'] = expense.id
-    appstruct['expenses'][0]['code'] = u"00002"
-    view = AdminExpense(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-    expense = ExpenseType.query().filter(ExpenseType.id==expense.id).first()
-    assert expense.code == u"00002"
+    assert Config.get('test_key1').value == 'test1'
+    assert Config.get('test_wrong_key') == None
 
 
 def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
     from autonomie.views.admin.main import AdminCae
-    config.add_route("admin_index", "/")
+    config.add_route(AdminCae.redirect_path, "/")
     appstruct = {'compte_cg_contribution':"00000668",
             'compte_rrr':"000009558"}
     view = AdminCae(get_csrf_request_with_db())

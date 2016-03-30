@@ -96,7 +96,28 @@ AUTONOMIE_REQUEST_SUBSCRIBERS = (
 AUTONOMIE_ADMIN_MODULES = (
     "autonomie.views.admin.main",
     "autonomie.views.admin.competence",
+    "autonomie.views.admin.expense",
 )
+
+
+# def add_menu(config, menu_object, menu_type, panel_name, rights=None):
+#     """
+#     Add a add_menu method to the configuration object
+#
+#     """
+#     registry = config.registry
+#     def callback():
+#         if not hasattr(registry, 'autonomie_menus'):
+#             registry.autonomie_menus = {}
+#         registry.autonomie_menus.setdefault(
+#             menu_type,
+#             {}
+#         ).setdefault(
+#             panel_name,
+#             {}
+#         )[name] = menu_object
+#
+#     config.action(
 
 
 def add_static_views(config, settings):
@@ -130,6 +151,10 @@ def main(global_config, **settings):
     )
     configure_filedepot(settings)
     config.configure_celery(global_config['__file__'])
+
+    config.commit()
+    # for i in config.introspector.get_category('permissions'):
+    #     print(i['introspectable'].discriminator)
 
     return config.make_wsgi_app()
 
@@ -168,7 +193,7 @@ def base_configure(config, dbsession, **settings):
     # Adding some usefull properties to the request object
     config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
-    config.set_request_property(lambda _: get_config(), 'config')
+    config.set_request_property(lambda _: get_config(), 'config', reify=True)
 
     add_static_views(config, settings)
 

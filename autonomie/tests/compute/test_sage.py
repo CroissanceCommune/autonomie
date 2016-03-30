@@ -242,7 +242,6 @@ def payment(invoice, def_tva):
 def expense():
     company = MagicMock(
         code_compta="COMP_ANA",
-        compte_tiers="TIERS_COMPANY",
     )
     user = MagicMock(
         firstname="firstname",
@@ -1061,7 +1060,7 @@ class TestSageExpensePaymentMain():
         factory = self.get_factory(expense_payment)
         g_entry, entry = factory.debit_user(10000)
         assert entry['compte_cg'] == "CGNDF"
-        assert entry['compte_tiers'] == 'TIERS_COMPANY'
+        assert entry['compte_tiers'] == 'COMP_TIERS'
         assert entry['debit'] == 10000
 
 
@@ -1095,5 +1094,5 @@ class TestSageExpensePaymentWaiver():
         factory = self.get_factory(expense_payment)
         g_entry, entry = factory.debit_user(10000)
         assert entry['compte_cg'] == "CGNDF"
-        assert entry['compte_tiers'] == 'TIERS_COMPANY'
+        assert entry['compte_tiers'] == 'COMP_TIERS'
         assert entry['debit'] == 10000

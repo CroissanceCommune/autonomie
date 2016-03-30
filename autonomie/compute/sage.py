@@ -1473,7 +1473,7 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
         entry = self.get_base_entry()
         entry.update(
             compte_cg=self.config['compte_cg_ndf'],
-            compte_tiers=self.company.compte_tiers,
+            compte_tiers=self.user.compte_tiers,
             debit=val,
         )
         return entry

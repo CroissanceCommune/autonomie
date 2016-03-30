@@ -40,13 +40,17 @@ def get_amount_topay(kw):
     """
     Retrieve the amount to be paid regarding the context
     """
+    topay = 0
     context = kw['request'].context
     if context.__name__ in ('invoice', 'expense'):
         topay = context.topay()
     else:
-        document = context.parent
-        topay = document.topay()
-        topay += context.get_amount()
+        if hasattr(context, 'parent'):
+            document = context.parent
+            if hasattr(document, 'topay'):
+                topay = document.topay()
+                if hasattr(context, 'get_amount'):
+                    topay += context.get_amount()
     return topay
 
 
@@ -301,11 +305,19 @@ class ExpensePaymentSchema(colander.MappingSchema):
         widget=deferred_bank_widget,
         default=forms.get_deferred_default(BankAccount),
     )
+    waiver = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Abandon de créance",
+        description="""Indique que ce paiement correspond à un abandon de
+créance à la hauteur du montant indiqué (le Mode de paiement et la Banque sont
+alors ignorés)""",
+        default=False,
+    )
     resulted = colander.SchemaNode(
         colander.Boolean(),
         title=u"Soldé",
         description="""Indique que le document est soldé (
 ne recevra plus de paiement), si le montant indiqué correspond au
-montant de la facture celle-ci est soldée automatiquement""",
+montant de feuille de notes de dépense celle-ci est soldée automatiquement""",
         default=False,
     )

@@ -363,6 +363,21 @@ class ExpenseSheet(Node, ExpenseCompute):
         """
         return self.state_machine.get_next_states(self.status)
 
+    def is_allowed(self, request, statename):
+        """
+        Return True if the given state is allowed for the current request
+
+        :param obj request: The pyramid request object
+        :param str statename: The name of the state we want ('draft' ...)
+        :returns: True if the given state is allowed
+        :rtype: bool
+        """
+        result = False
+        state_obj = self.state_machine.get_state(self.status, statename)
+        if state_obj is not None:
+            result = state_obj.allowed(self, request)
+        return result
+
     def get_company_id(self):
         """
             Return the if of the company associated to this model

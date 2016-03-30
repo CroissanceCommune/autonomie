@@ -58,8 +58,13 @@ class State(object):
 
     def allowed(self, context, request):
         """
-            return True if this state assignement is allowed
-            in the current request
+        return True if this state assignement on context is allowed
+        in the current request
+
+        :param obj context: An object with acls
+        :param obj request: The Pyramid request object
+        :returns: True/False
+        :rtype: bool
         """
         res = False
         for permission in self.permissions:
@@ -168,3 +173,21 @@ class StateMachine(object):
             return self.transitions.get(self.default_state, [])
         else:
             return self.transitions.get(state, [])
+
+    def get_state(self, current_state, statename):
+        """
+        Return the state object with the given name that is in the next_actions
+        of the current object
+
+        :param str current_state: The actual state of the object
+        :param str statename: The name of the state ('draft', 'wait', ...)
+        :returns: The Associated state or None
+        :rtype: State obj
+        """
+        next_states = self.get_next_states(current_state)
+        result = None
+        for state in next_states:
+            if state.name == statename:
+                result = state
+                break
+        return result

@@ -230,7 +230,7 @@ class BaseListView(BaseListClass):
     @param add_template_vars: list of attributes (or properties)
                                 that will be automatically added
     """
-    add_template_vars = ('title',)
+    add_template_vars = ()
 
     def _paginate(self, query, appstruct):
         """
@@ -250,7 +250,7 @@ class BaseListView(BaseListClass):
         form = self.get_form(schema)
         return form.render(appstruct)
 
-    def more_template_vars(self):
+    def more_template_vars(self, response_dict):
         """
             Add template vars to the response dict
             List the attributes configured in the add_template_vars attribute
@@ -279,7 +279,9 @@ class BaseListView(BaseListClass):
             result['form'] = self.error.render()
         else:
             result['form'] = self.get_rendered_form(schema, appstruct)
-        result.update(self.more_template_vars())
+
+        result['title'] = self.title
+        result.update(self.more_template_vars(result))
         self.populate_actionmenu(appstruct)
         return result
 

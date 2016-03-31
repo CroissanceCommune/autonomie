@@ -196,7 +196,7 @@ class Invoice(Task, InvoiceCompute):
         """
             Return True is the invoice has been cancelled
         """
-        return self.CAEStatus == 'aboinv'
+        return False
 
     def is_tolate(self):
         """

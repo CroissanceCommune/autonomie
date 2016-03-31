@@ -43,7 +43,6 @@ from autonomie.models.tva import (
 )
 from autonomie.models.task import (
     WorkUnit,
-    PaymentMode,
     BankAccount,
 )
 from autonomie.models.activity import (
@@ -70,14 +69,10 @@ from autonomie.models.user import (
     CaeSituationOption,
     TypeSortieOption,
 )
-from autonomie.models.task import PaymentConditions
-
 from autonomie.models import files
 from autonomie.forms.admin import (
     MainConfig,
     get_tva_config_schema,
-    PaymentModeConfig,
-    WorkUnitConfig,
     WorkshopConfigSchema,
     ActivityConfigSchema,
     get_config_appstruct,
@@ -130,17 +125,16 @@ devis, factures / avoir)"
     )
     menus.append(
         dict(
-            label=u"Configuration comptable des produits et TVA collectés",
-            path='admin_tva',
-            title=u"Taux de TVA, codes produit et codes analytiques associés"
+            label=u"Configuration du module vente",
+            path="admin_vente",
+            title=u"Mentions des devis et factures, unité de prestation ...",
         )
     )
     menus.append(
         dict(
-            label=u"Configuration comptable du module ventes",
-            path="admin_cae",
-            title=u"Configuration des différents comptes analytiques liés \
-au module vente"
+            label=u"Configuration comptable des produits et TVA collectés",
+            path='admin_tva',
+            title=u"Taux de TVA, codes produit et codes analytiques associés"
         )
     )
     menus.append(
@@ -157,27 +151,6 @@ aux encaissements"
             path="admin_expense",
             title=u"Configuration des types de dépense et des \
 différents comptes analytiques liés au module notes de dépense"
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration des modes de paiement",
-            path="admin_paymentmode",
-            title=u"Configuration des modes de paiement des factures"
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration des conditions de paiement",
-            path="admin_payment_conditions",
-            title=u"Conditions de paiement prédéfinies à l'échelle de la CAE"
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration des unités de prestation",
-            path="admin_workunit",
-            title=u"Unités de prestation des devis/factures/avoirs"
         )
     )
     menus.append(
@@ -356,66 +329,6 @@ class AdminTva(BaseAdminFormView):
                     self.dbsession.add(product)
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_tva"))
-
-
-class AdminPaymentMode(BaseAdminFormView):
-    """
-        Payment Mode administration view
-        Allows to set different payment mode
-    """
-    title = u"Configuration des modes de paiement"
-    validation_msg = u"Les modes de paiement ont bien été modifiés"
-    schema = PaymentModeConfig()
-    buttons = (submit_btn,)
-
-    def before(self, form):
-        """
-            Add appstruct to the current form object
-        """
-        appstruct = [mode.label for mode in PaymentMode.query()]
-        form.set_appstruct({'paymentmodes': appstruct})
-
-    def submit_success(self, appstruct):
-        """
-            handle successfull payment mode configuration
-        """
-        for mode in PaymentMode.query():
-            self.dbsession.delete(mode)
-        for data in appstruct['paymentmodes']:
-            mode = PaymentMode(label=data)
-            self.dbsession.add(mode)
-        self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path("admin_paymentmode"))
-
-
-class AdminWorkUnit(BaseAdminFormView):
-    """
-        Work Unit administration view
-        Allows to configure custom unities
-    """
-    title = u"Configuration des unités de prestation"
-    validation_msg = u"Les unités de prestation ont bien été modifiées"
-    schema = WorkUnitConfig()
-    buttons = (submit_btn,)
-
-    def before(self, form):
-        """
-            Add appstruct to the current form object
-        """
-        appstruct = [mode.label for mode in WorkUnit.query()]
-        form.set_appstruct({'workunits': appstruct})
-
-    def submit_success(self, appstruct):
-        """
-            Handle successfull work unit configuration
-        """
-        for unit in WorkUnit.query():
-            self.dbsession.delete(unit)
-        for data in appstruct['workunits']:
-            unit = WorkUnit(label=data)
-            self.dbsession.add(unit)
-        self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path("admin_workunit"))
 
 
 class BaseAdminActivities(BaseAdminFormView):
@@ -676,46 +589,6 @@ class AdminWorkshop(BaseAdminActivities):
         )
 
 
-class AdminCae(BaseConfigView):
-    """
-        Cae information configuration
-    """
-    title = u"Configuration comptable du module ventes"
-    validation_msg = u"Les informations ont bien été enregistrées"
-    keys = (
-        'code_journal',
-        'numero_analytique',
-        'compte_cg_contribution',
-        'compte_rrr',
-        'compte_frais_annexes',
-        'compte_cg_banque',
-        'compte_cg_assurance',
-        'compte_cgscop',
-        'compte_cg_debiteur',
-        'compte_cg_organic',
-        'compte_cg_debiteur_organic',
-        'compte_rg_interne',
-        'compte_rg_externe',
-        'compte_cg_tva_rrr',
-        'code_tva_rrr',
-        "contribution_cae",
-        "taux_assurance",
-        "taux_cgscop",
-        "taux_contribution_organic",
-        "taux_rg_interne",
-        "taux_rg_client",
-        'sage_facturation_not_used',
-        "sage_contribution",
-        'sage_assurance',
-        'sage_cgscop',
-        'sage_organic',
-        'sage_rginterne',
-        'sage_rgclient',
-    )
-    schema = get_config_schema(keys)
-    redirect_path = "admin_index"
-
-
 class TemplateUploadView(FileUploadView):
     title = u"Administrer les modèles de documents"
     factory = files.Template
@@ -947,12 +820,9 @@ def includeme(config):
     config.add_route("admin_index", "/admin")
     config.add_route("admin_main", "/admin/main")
     config.add_route("admin_tva", "/admin/tva")
-    config.add_route("admin_paymentmode", "admin/paymentmode")
-    config.add_route("admin_workunit", "admin/workunit")
     config.add_route("admin_accompagnement", "admin/accompagnement")
     config.add_route("admin_activity", "admin/activity")
     config.add_route("admin_workshop", "admin/workshop")
-    config.add_route("admin_cae", "admin/cae")
     config.add_route("admin_userdatas", "admin/userdatas")
     config.add_route("admin_console", "admin_console/")
     config.add_route(
@@ -982,12 +852,7 @@ def includeme(config):
         route_name='admin_tva',
     )
 
-    config.add_admin_view(
-        AdminPaymentMode,
-        route_name='admin_paymentmode',
-    )
-
-    for model in (PaymentConditions, CompanyActivity):
+    for model in (CompanyActivity, ):
         view, route_name, tmpl = get_model_admin_view(
             model,
             r_path="admin_index",
@@ -1003,11 +868,6 @@ def includeme(config):
     include_userdatas_views(config)
 
     config.add_admin_view(
-        AdminWorkUnit,
-        route_name='admin_workunit',
-    )
-
-    config.add_admin_view(
         admin_accompagnement_index_view,
         route_name='admin_accompagnement',
     )
@@ -1020,11 +880,6 @@ def includeme(config):
     config.add_admin_view(
         AdminWorkshop,
         route_name='admin_workshop',
-    )
-
-    config.add_admin_view(
-        AdminCae,
-        route_name='admin_cae',
     )
     # Hidden console view
     config.add_admin_view(

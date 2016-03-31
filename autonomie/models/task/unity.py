@@ -31,16 +31,33 @@ from sqlalchemy import Integer
 
 from autonomie.models.base import default_table_args
 from autonomie.models.base import DBBASE
+from autonomie.forms import (
+    get_hidden_field_conf,
+    EXCLUDED,
+)
 
 
 class WorkUnit(DBBASE):
     """
         Work unit, used to build the price list
     """
+    __colanderalchemy_config__ = {
+        "title": u"unité de prestation",
+        "help_msg": u"Configurer les unités de prestation proposées dans les \
+formulaires d'édition des devis/factures",
+        "validation_msg": u"Les unités de prestation ont bien été configurées"
+    }
     __tablename__ = "workunity"
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    label = Column(String(100))
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': get_hidden_field_conf()},
+    )
+    label = Column(
+        String(100),
+        info={'colanderalchemy': {'title': u"Intitulé"}}
+    )
 
     def __json__(self, request):
         return dict(id=self.id, label=self.label, value=self.label)

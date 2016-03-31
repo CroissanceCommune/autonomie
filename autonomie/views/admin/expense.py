@@ -116,7 +116,7 @@ def admin_expense_index_view(request):
         ),
     ):
         menus.append(dict(label=label, path=route, icon=icon))
-    return dict(title=u"Configuration du module Ventes", menus=menus)
+    return dict(title=u"Configuration du module Notes de dépense", menus=menus)
 
 
 def includeme(config):

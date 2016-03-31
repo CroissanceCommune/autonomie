@@ -646,10 +646,23 @@ class PaymentMode(DBBASE):
     """
         Payment mode entry
     """
+    __colanderalchemy_config__ = {
+        "title": u"mode de paiement",
+        "help_msg": u"Configurer les modes de paiement pour la saisie des \
+encaissements des factures",
+        "validation_msg": u"Les modes de paiement ont bien été configurés"
+    }
     __tablename__ = "paymentmode"
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    label = Column(String(120))
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': forms.get_hidden_field_conf()},
+    )
+    label = Column(
+        String(120),
+        info={'colanderalchemy': {'title': u"Intitulé"}}
+    )
 
 
 class BankAccount(ConfigurableOption):

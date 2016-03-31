@@ -196,7 +196,7 @@ def get_est_state():
         duplicate,
         edit_metadata,
     )
-    result['aboest'] = (delete, edit_metadata)
+    result['aboest'] = (edit_metadata, )
     result['geninv'] = (duplicate, edit_metadata, geninv)
     return result
 
@@ -210,7 +210,6 @@ def get_inv_state():
         invalid
         paid
         resulted
-        aboinv
     """
     draft = ('draft', ('edit_invoice', 'add_invoice'))
     wait = ('wait', 'wait.invoice')
@@ -280,7 +279,6 @@ def get_inv_state():
         products,
     )
 
-    result['aboinv'] = (delete, edit_metadata)
     return result
 
 

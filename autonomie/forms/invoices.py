@@ -344,7 +344,8 @@ def get_list_schema(is_admin=False):
             widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
             validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
             missing='both',
-            ))
+        )
+    )
 
     schema.insert(0, company.customer_node(is_admin))
 

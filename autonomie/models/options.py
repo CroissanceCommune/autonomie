@@ -43,7 +43,6 @@ from autonomie.models.base import (
 )
 
 
-
 class ConfigurableOption(DBBASE):
     """
     Base class for options
@@ -82,7 +81,7 @@ class ConfigurableOption(DBBASE):
         if name == 'ConfigurableOption':
             return {
                 'polymorphic_on': 'type_',
-                'polymorphic_identity':'configurable_option'
+                'polymorphic_identity': 'configurable_option'
             }
         else:
             return {'polymorphic_identity': camel_case_to_name(name)}
@@ -90,9 +89,15 @@ class ConfigurableOption(DBBASE):
     @classmethod
     def query(cls, *args):
         query = super(ConfigurableOption, cls).query(*args)
-        query = query.filter(ConfigurableOption.active==True)
+        query = query.filter(ConfigurableOption.active == True)
         query = query.order_by(ConfigurableOption.order)
         return query
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            label=self.label,
+        )
 
 
 def get_id_foreignkey_col(foreignkey_str):
@@ -111,5 +116,3 @@ def get_id_foreignkey_col(foreignkey_str):
         info={'colanderalchemy': get_hidden_field_conf()},
     )
     return column
-
-

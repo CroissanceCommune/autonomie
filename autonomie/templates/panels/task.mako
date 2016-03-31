@@ -226,6 +226,14 @@
     <%block name="notes_and_conditions">
     ## All infos beetween document lines and footer text (notes, payment conditions ...)
     </%block>
+    % for mention in task.mentions:
+        <div class="title">
+            ${mention.title}
+        </div>
+        <div class='content'>
+            ${format_text(mention.full_text)}
+        </div>
+    % endfor
 
 </div>
 ## end of content

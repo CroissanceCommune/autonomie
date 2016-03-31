@@ -70,6 +70,7 @@ from autonomie import forms
 from autonomie.models.task import (
     WorkUnit,
     PaymentConditions,
+    TaskMention,
 )
 from autonomie.models.tva import (
     Tva,
@@ -526,6 +527,20 @@ class TaskLinesBlock(colander.MappingSchema):
     )
 
 
+@colander.deferred
+def deferred_mention_select_widget(node, kw):
+    """
+    Deffered returning a Checkbox select widget for mention selection
+    """
+    query = kw['request'].dbsession.query(
+        TaskMention.id, TaskMention.label
+    )
+    query.filter(TaskMention.active == True)
+    query.order_by(TaskMention.order)
+
+    return deform.widget.CheckboxChoiceWidget(values=query.all())
+
+
 class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
@@ -568,6 +583,14 @@ class TaskConfiguration(colander.MappingSchema):
         label=u"Afficher le détail des prestations dans la sortie PDF ?",
         widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
         missing=0,
+    )
+    mention_ids = colander.SchemaNode(
+        colander.Set(),
+        title=u"Mentions facultatives",
+        description=u"Choisissez les mentions à ajouter au document dans \
+la liste",
+        widget=deferred_mention_select_widget,
+        missing=colander.drop,
     )
 
 
@@ -765,6 +788,10 @@ def dbdatas_to_appstruct(dbdatas, matching_map=TASK_MATCHING_MAP):
         value = dbdatas.get(field)
         if value is not None:
             appstruct.setdefault(section, {})[field] = value
+
+    appstruct.setdefault('common', {})['mention_ids'] = [
+        str(a['id']) for a in dbdatas['mentions']
+    ]
     return appstruct
 
 
@@ -778,6 +805,10 @@ def appstruct_to_dbdatas(appstruct, matching_map=TASK_MATCHING_MAP):
         value = appstruct.get(section, {}).get(field, None)
         if value not in (None, colander.null):
             task_datas[field] = value
+
+    task_datas['mentions'] = [
+        TaskMention.get(id) for id in appstruct['common']['mention_ids']
+    ]
     return dbdatas
 
 

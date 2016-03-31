@@ -122,10 +122,10 @@ class Task(Node):
         default=get_current_timestamp,
         info={'colanderalchemy': {'typ': colander.Date}}
     )
-    #taskDate = Column(
-    #    CustomDateType2,
-    #    info={'colanderalchemy': {'typ': colander.Date}}
-    #)
+    taskDate = Column(
+        CustomDateType2,
+        info={'colanderalchemy': {'typ': colander.Date}}
+    )
     date = Column(Date())
     owner_id = Column(
         ForeignKey('accounts.id'),
@@ -390,6 +390,10 @@ class Task(Node):
             payment_conditions=self.payment_conditions,
             description=self.description,
             prefix=self.prefix,
+            mentions=[
+                mention.__json__(request)
+                for mention in self.mentions
+            ],
             lines=[
                 line.__json__(request)
                 for line in self.default_line_group.lines

@@ -51,11 +51,21 @@ class TaskMention(ConfigurableOption):
 factures, celles-ci sont proposées aux entrepreneurs dans les formulaires et \
 insérées dans les sorties PDF.<br /> \
 <b>Libellé</b>: Libellé dans le formulaire<br />\
+<b>Titre</b>: Le titre du bloc contenant les mentions dans le PDF <br />\
 <b>Texte à afficher dans les PDF</b>: Texte affiché dans la sortie PDF \
-si l'entrepreneur a ajouté cette mention à son devis/sa facture",
+si l'entrepreneur a ajouté cette mention à son devis/sa facture<br />."
         "validation_msg": u"Les mentions facultatives ont bien été configurées"
     }
     id = get_id_foreignkey_col('configurable_option.id')
+    title = sa.Column(
+        sa.String(255),
+        info={
+            'colanderalchemy': {
+                "title": u"Titre",
+                "description": u"Titre du bloc contenant les mentions dans \
+la sortie pdf",
+            }
+        }
     full_text = sa.Column(
         sa.Text(),
         info={

@@ -41,6 +41,7 @@ from sqlalchemy import (
     DateTime,
     func,
     distinct,
+    extract,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -99,6 +100,22 @@ def get_next_official_number(year=None):
     if last:
         next_ = last + 1
     return next_
+
+
+def invoice_tolate(invoicedate, status):
+    """
+        Return True if a payment is expected since more than
+        45 days
+    """
+    res = False
+    if status in ('valid', 'paid'):
+        today = datetime.date.today()
+        elapsed = today - invoicedate
+        if elapsed > datetime.timedelta(days=45):
+            res = True
+        else:
+            res = False
+    return res
 
 
 def translate_invoices(invoicequery, from_point):
@@ -200,16 +217,9 @@ class Invoice(Task, InvoiceCompute):
 
     def is_tolate(self):
         """
-            Return True if a payment is expected since more than
-            45 days
+        Return True if the invoice should have been paid already
         """
-        today = datetime.date.today()
-        elapsed = today - self.date
-        if elapsed > datetime.timedelta(days=45):
-            tolate = True
-        else:
-            tolate = False
-        return self.CAEStatus in ('valid', 'paid', ) and tolate
+        return invoice_tolate(self.date, self.CAEStatus)
 
     def is_viewable(self):
         return True

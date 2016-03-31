@@ -56,67 +56,87 @@
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
         % if records:
             % for document in records:
-                % if document.is_tolate():
-        <tr class='invoice_tolate_tr'>
-            <td class='invoice_tolate'>
-                <br />
-                % elif document.is_paid():
-        <tr class='invoice_paid_tr'>
-            <td class='invoice_paid'>
-                % elif document.is_resulted():
-        <tr class='invoice_resulted_tr'>
-            <td class='invoice_resulted'>
-                % else:
-        <tr>
-            <td class='invoice_notpaid'>
-                <br />
+                <% id_ = document.id %>
+                <% description = document.description %>
+                <% number = document._number %>
+                <% ht = document.ht %>
+                <% tva = document.tva %>
+                <% ttc = document.ttc %>
+                <% status = document.CAEStatus %>
+                <% date = document.date %>
+                <% type_ = document.type_ %>
+                <% prefix = document.prefix %>
+                <% official_number = document.official_number %>
+                % if is_admin_view:
+                    <% company = document.get_company() %>
+                    <% company_id = company.id %>
+                    <% company_name = company.name %>
                 % endif
-        %if document.statusComment:
-            <span class="ui-icon ui-icon-comment" title="${document.statusComment}"></span>
-        %endif
-            </td>
+                <% project_code = document.project.code %>
+                <% customer_code = document.customer.code %>
+                <% customer_id = document.customer.id %>
+                <% customer_name = document.customer.name %>
+
+                % if type_ == 'cancelinvoice' or status == 'resulted':
+                    <tr class='invoice_resulted_tr'>
+                        <td class='invoice_resulted'>
+                        </td>
+                % elif invoice_tolate(date, status):
+                    <tr class='invoice_tolate_tr'>
+                        <td class='invoice_tolate'>
+                        </td>
+                % elif status == 'paid':
+                    <tr class='invoice_paid_tr'>
+                        <td class='invoice_paid'>
+                        </td>
+                % else:
+                    <tr>
+                        <td class='invoice_notpaid'>
+                            <br />
+                        </td>
+                % endif
             <td>
-                ${document.prefix}${document.official_number}
+                ${prefix}${official_number}
             </td>
             % if is_admin_view:
-            <td>
-                <% company = document.get_company() %>
-                % if company:
-                    <a href="${request.route_path('company', id=company.id)}"
-                        title="Voir l'entreprise">${company.name}</a>
-                % endif
-            </td>
+                <td>
+                    <a
+                        href="${request.route_path('company', id=company_id)}"
+                        title="Voir l'entreprise">
+                        ${company_name}
+                    </a>
+                </td>
             % endif
             <td>
-                ${api.format_date(document.date)}
+                ${api.format_date(date)}
             </td>
             <td>
-                %if document.is_viewable():
-                    <a href="${request.route_path(document.type_, id=document.id)}"
-                        title='Voir le document'>${document.number}</a>
-                %else:
-                    ${document.number}
-                %endif
+                <a href="${request.route_path(document.type_, id=id_)}"
+                    title='Voir le document'>
+                    ${project_code.upper()}_${customer_code.upper()}_${number}
+                </a>
                 % if not is_admin_view:
                 <small>
-                    ${format_text(document.description)}
+                    ${format_text(description)}
                 </small>
                 % endif
             </td>
             <td class='invoice_company_name'>
-                ${format_customer(document.get_customer())}
+                <a href="${request.route_path("customer", id=customer_id)}">
+                    ${customer_name}
+                </a>
             </td>
             <td>
-                <strong>${api.format_amount(document.ht)|n}&nbsp;€</strong>
+                <strong>${api.format_amount(ht)|n}&nbsp;€</strong>
             </td>
             <td>
-                ${api.format_amount(document.tva)|n}&nbsp;€
+                ${api.format_amount(tva)|n}&nbsp;€
             </td>
             <td>
-                ${api.format_amount(document.ttc)|n}&nbsp;€
+                ${api.format_amount(ttc)|n}&nbsp;€
             </td>
             <td>
-                % if len(document.payments) == 1 and document.is_resulted():
+                % if len(document.payments) == 1 and status == 'resulted':
                     <% payment = document.payments[0] %>
                     <% url = request.route_path('payment', id=payment.id) %>
                     <a href="${url}">
@@ -139,19 +159,17 @@
                 % endif
             </td>
             <td>
-                % if document.is_viewable():
-                    <a class='btn btn-default'
-                        href='${request.route_path(document.type_, id=document.id, _query=dict(view="pdf"))}'
-                        title="Télécharger la version PDF">
-                        <i class='glyphicon glyphicon-file'></i>
-                    </a>
-                %endif
+                <a class='btn btn-default'
+                    href='${request.route_path(document.type_, id=document.id, _query=dict(view="pdf"))}'
+                    title="Télécharger la version PDF">
+                    <i class='glyphicon glyphicon-file'></i>
+                </a>
             </td>
               <td>
                   ${format_filelist(document)}
                   % if hasattr(document, 'estimation'):
                     ${format_filelist(document.estimation)}
-                % elif hasattr(document, 'invoice'):
+                  % elif hasattr(document, 'invoice'):
                     ${format_filelist(document.invoice)}
                   % endif
                   <a class='btn btn-default'

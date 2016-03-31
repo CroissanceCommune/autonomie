@@ -25,21 +25,14 @@
 <%namespace file="/base/utils.mako" import="format_customer"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
 
-<%
-totalht = sum([invoice.ht for invoice in records])
-totaltva = sum([invoice.tva for invoice in records])
-totalttc = sum([invoice.ttc for invoice in records])
-if is_admin_view:
-    columns = 12
-else:
-    columns = 11
-%>
 
 <table class="table table-condensed table-bordered">
     <thead>
+        <% num_columns = 11 %>
         <th><span class="glyphicon glyphicon-comment"></span></th>
         <th>${sortable(u"Identifiant", "official_number")}</th>
     % if is_admin_view:
+        <% num_columns += 1 %>
         <th>${sortable(u"Entrepreneur", 'company')}</th>
     % endif
         <th>${sortable(u"Émise le", 'date')}</th>
@@ -54,7 +47,7 @@ else:
     </thead>
     <tbody>
         <tr>
-            <td colspan='${columns - 6}'><strong>Total</strong></td>
+            <td colspan='${num_columns - 6}'><strong>Total</strong></td>
             <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
             <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
             <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
@@ -63,13 +56,7 @@ else:
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
         % if records:
             % for document in records:
-                %if document.is_cancelled():
-        <tr class='invoice_cancelled_tr'>
-            <td class='invoice_cancelled'>
-                <span class="label label-important">
-                    <i class="glyphicon glyphicon-white icon-remove"></i>
-                </span>
-                % elif document.is_tolate():
+                % if document.is_tolate():
         <tr class='invoice_tolate_tr'>
             <td class='invoice_tolate'>
                 <br />
@@ -177,7 +164,7 @@ else:
         % endfor
     % else:
         <tr>
-            <td colspan='${columns}'>
+            <td colspan='${num_columns}'>
                 Aucune facture n'a pu être retrouvée
             </td>
         </tr>
@@ -185,7 +172,7 @@ else:
     </tbody>
     <tfoot>
         <tr>
-            <td colspan='${columns - 6}'><strong>Total</strong></td>
+            <td colspan='${num_columns - 6}'><strong>Total</strong></td>
             <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
             <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
             <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>

@@ -25,16 +25,22 @@ def invoicetable_panel(context, request, records, is_admin_view=False):
     """
         Return datas for the invoicetable panel
     """
-    return dict(
-            records=records,
-            is_admin_view=is_admin_view,
+    ret_dict = dict(
+        records=records,
+        is_admin_view=is_admin_view,
     )
+    ret_dict['totalht'] = sum(r.ht for r in records)
+    ret_dict['totaltva'] = sum(r.tva for r in records)
+    ret_dict['totalttc'] = sum(r.ttc for r in records)
+    return ret_dict
+
 
 def includeme(config):
     """
         Pyramid's inclusion mechanism
     """
     config.add_panel(
-            invoicetable_panel,
-            'invoicetable',
-            renderer='panels/invoicetable.mako')
+        invoicetable_panel,
+        'invoicetable',
+        renderer='panels/invoicetable.mako',
+    )

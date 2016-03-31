@@ -125,7 +125,7 @@ class GlobalInvoicesList(BaseListView):
     add_template_vars = (u'title', u'pdf_export_btn', 'is_admin',)
     schema = get_list_schema(is_admin=True)
     sort_columns = dict(
-        taskDate=Task.taskDate,
+        date=Task.date,
         number=Task._number,
         customer=Customer.name,
         company=Company.name,
@@ -182,10 +182,15 @@ class GlobalInvoicesList(BaseListView):
         return query
 
     def filter_ttc(self, query, appstruct):
-        ttc = appstruct.get('ttc')
-        if ttc is not None:
+        ttc = appstruct.get('ttc', {})
+        if ttc.get('start') is not None:
             log.info(u"Filtering by ttc amount : %s" % ttc)
-            query = query.filter(Task.ttc == ttc)
+            start = ttc.get('start')
+            end = ttc.get('end')
+            if end is None:
+                query = query.filter(Task.ttc >= start)
+            else:
+                query = query.filter(Task.ttc.between(start, end))
         return query
 
     def filter_customer(self, query, appstruct):
@@ -194,14 +199,22 @@ class GlobalInvoicesList(BaseListView):
             query = query.filter(Task.customer_id == customer_id)
         return query
 
-    def filter_taskDate(self, query, appstruct):
-        year = appstruct['year']
-        query = query.filter(
-            or_(
-                Invoice.financial_year == year,
-                CancelInvoice.financial_year == year,
+    def filter_date(self, query, appstruct):
+        period = appstruct.get('period', {})
+        if period.get('start'):
+            start = period.get('start')
+            end = period.get('end')
+            if end is None:
+                end = datetime.date.today()
+            query = query.filter(Task.date.between(start, end))
+        else:
+            year = appstruct['year']
+            query = query.filter(
+                or_(
+                    Invoice.financial_year == year,
+                    CancelInvoice.financial_year == year,
+                )
             )
-        )
         return query
 
     def filter_status(self, query, appstruct):

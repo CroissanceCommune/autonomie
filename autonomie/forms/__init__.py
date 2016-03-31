@@ -229,6 +229,22 @@ def get_month_options():
             for index in range(1, 13)]
 
 
+def range_validator(appstruct):
+    """
+    Validate that start and end keys are in the good order (dates, amounts ...)
+
+    :param dict appstruct: The validated datas containing a start and a
+    end key
+    """
+    start = appstruct.get('start')
+    if start is not None:
+        end = appstruct.get('end')
+        if end is not None:
+            if end < start:
+                return False
+    return True
+
+
 def get_month_select_widget(widget_options):
     """
     Return a select widget for month selection

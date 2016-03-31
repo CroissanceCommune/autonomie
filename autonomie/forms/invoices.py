@@ -110,7 +110,6 @@ FINANCIAL_YEAR = colander.SchemaNode(
     name="financial_year",
     title=u"Année comptable de référence",
     widget=deferred_financial_year_widget,
-
     default=forms.default_year,
 )
 
@@ -156,7 +155,7 @@ def get_invoice_schema():
     schema['common'].add_before('description', PREFIX)
 
     title = u"Date de la facture"
-    schema['common']['taskDate'].title = title
+    schema['common']['date'].title = title
 
     title = u"Objet de la facture"
     schema['common']['description'].title = title
@@ -198,7 +197,7 @@ def get_cancel_invoice_schema():
     schema['common'].add_before('description', PREFIX)
 
     title = u"Date de l'avoir"
-    schema['common']['taskDate'].title = title
+    schema['common']['date'].title = title
 
     title = u"Objet de l'avoir"
     schema['common']['description'].title = title
@@ -289,6 +288,42 @@ class SetProductsSchema(colander.MappingSchema):
     )
 
 
+class AmountRangeSchema(colander.MappingSchema):
+    """
+    Used to filter on a range of amount
+    """
+    start = colander.SchemaNode(
+        custom_types.AmountType(),
+        title="",
+        missing=colander.drop,
+        description=u"TTC entre",
+    )
+    end = colander.SchemaNode(
+        custom_types.AmountType(),
+        title="",
+        missing=colander.drop,
+        description=u"et",
+    )
+
+
+class PeriodSchema(colander.MappingSchema):
+    """
+        A form used to select a period
+    """
+    start = colander.SchemaNode(
+        colander.Date(),
+        title="",
+        description=u"Émises entre le",
+        missing=colander.drop,
+    )
+    end = colander.SchemaNode(
+        colander.Date(),
+        title="",
+        description=u"et le",
+        missing=colander.drop,
+    )
+
+
 # INVOICE LIST RELATED SCHEMAS
 def get_list_schema(is_admin=False):
     """
@@ -316,20 +351,42 @@ def get_list_schema(is_admin=False):
     if is_admin:
         schema.insert(
             0,
-            colander.SchemaNode(
-                custom_types.AmountType(),
-                name='ttc',
+            company.company_node(
+                name='company_id',
                 missing=colander.drop,
-                description=u"Montant TTC",
+                widget_options={'default': ('', u'Toutes les entreprises')}
             )
         )
 
         schema.insert(
             0,
-            company.company_node(
-                name='company_id',
+            PeriodSchema(
+                name='period',
+                title="",
+                validator=colander.Function(
+                    forms.range_validator,
+                    msg=u"La date de début doit précéder la date de début"
+                ),
+                widget=deform.widget.MappingWidget(
+                    template=TEMPLATES_URL + 'clean_mapping.pt',
+                ),
                 missing=colander.drop,
-                widget_options={'default': ('', u'Toutes les entreprises')}
+            )
+        )
+        schema.insert(
+            0,
+            AmountRangeSchema(
+                name='ttc',
+                title="",
+                validator=colander.Function(
+                    forms.range_validator,
+                    msg=u"Le montant de départ doit être inférieur ou égale \
+à celui de la fin"
+                ),
+                widget=deform.widget.MappingWidget(
+                    template=TEMPLATES_URL + 'clean_mapping.pt',
+                ),
+                missing=colander.drop,
             )
         )
 

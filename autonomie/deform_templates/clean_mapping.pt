@@ -6,11 +6,8 @@
 
 
       <div tal:condition="errormsg"
-           class="clearfix alert alert-message error">
-        <p i18n:translate="">
-           There was a problem with this section
-        </p>
-        <p>${errormsg}</p>
+           class="clearfix alert alert-danger error">
+        <small>${errormsg}</small>
       </div>
 
       <div tal:condition="description">

@@ -28,6 +28,7 @@
 import inspect
 import logging
 import colander
+import deform
 import itertools
 
 from deform import Form
@@ -95,6 +96,10 @@ class BaseListClass(BaseView):
     sort_columns = {'name': 'name'}
     default_direction = 'asc'
 
+    def __init__(self, request):
+        BaseView.__init__(self, request)
+        self.error = None
+
     def _get_bind_params(self):
         """
         return the params passed to the form schema's bind method
@@ -146,6 +151,12 @@ class BaseListClass(BaseView):
             query = query.order_by(func(sort_column))
         return query
 
+    def get_form(self, schema):
+        # counter is used to avoid field name conflicts
+        form = Form(schema, counter=itertools.count(15000))
+        form.widget.template = "autonomie:deform_templates/searchform.pt"
+        return form
+
     def _collect_appstruct(self):
         """
         collect the filter options from the current url
@@ -160,15 +171,17 @@ class BaseListClass(BaseView):
             try:
                 submitted = self.request.GET.items()
                 self.logger.debug(submitted)
-                form = Form(schema)
+                form = self.get_form(schema)
                 appstruct = form.validate(submitted)
                 self.logger.debug(appstruct)
-            except colander.Invalid as e:
+            except deform.ValidationFailure as e:
+                print(u"COLANDER INVALID ::::: ")
                 # If values are not valid, we want the default ones to be
                 # provided see the schema definition
                 self.logger.error("CURRENT SEARCH VALUES ARE NOT VALID")
                 self.logger.error(e)
                 appstruct = schema.deserialize({})
+                self.error = e
 
         return schema, appstruct
 
@@ -216,10 +229,8 @@ class BaseListView(BaseListClass):
                              url=page_url,
                              items_per_page=items_per_page)
 
-    def get_form(self, schema, appstruct):
-        # counter is used to avoid field name conflicts
-        form = Form(schema, counter=itertools.count(15000))
-        form.widget.template = "autonomie:deform_templates/searchform.pt"
+    def get_rendered_form(self, schema, appstruct):
+        form = self.get_form(schema)
         return form.render(appstruct)
 
     def more_template_vars(self):
@@ -247,7 +258,10 @@ class BaseListView(BaseListClass):
         """
         records = self._paginate(query, appstruct)
         result = dict(records=records)
-        result['form'] = self.get_form(schema, appstruct)
+        if self.error is not None:
+            result['form'] = self.error.render()
+        else:
+            result['form'] = self.get_rendered_form(schema, appstruct)
         result.update(self.more_template_vars())
         self.populate_actionmenu(appstruct)
         return result

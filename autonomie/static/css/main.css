@@ -322,6 +322,7 @@ header .navbar .nav > li > a{
 }
 .form-inline .form-group{
   vertical-align: top;
+  margin-bottom: 3px;
 }
 input[name=altdate], input[name=date]{
   z-index: 1100;

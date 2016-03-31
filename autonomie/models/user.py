@@ -169,7 +169,7 @@ class Group(DBBASE):
         info={'colanderalchemy': {'title': u"Nom du groupe"}}
     )
     label = Column(
-        String(50),
+        String(255),
         nullable=False,
         info={'colanderalchemy': {'title': u"Libellé"}},
     )

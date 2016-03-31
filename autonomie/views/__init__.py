@@ -201,6 +201,19 @@ class BaseListClass(BaseView):
         return {}
 
 
+def get_page_url(request, page):
+    """
+    Page url generator to be used with webob.paginate's tool
+
+    Note : default Webob pagination tool doesn't respect query_params order and
+    breaks mapping order, so we can't preserve search params in list views
+
+    """
+    get_args = request.GET.copy()
+    get_args['page'] = str(page)
+    return request.current_route_path(_query=get_args)
+
+
 class BaseListView(BaseListClass):
     """
     A base list view used to provide an easy way to build list views
@@ -221,7 +234,8 @@ class BaseListView(BaseListClass):
             wraps the current SQLA query with pagination
         """
         # Url builder for page links
-        page_url = paginate.PageURL_WebOb(self.request)
+        from functools import partial
+        page_url = partial(get_page_url, request=self.request)
         current_page = appstruct['page']
         items_per_page = appstruct['items_per_page']
         return paginate.Page(query,
@@ -231,6 +245,7 @@ class BaseListView(BaseListClass):
 
     def get_rendered_form(self, schema, appstruct):
         form = self.get_form(schema)
+        # values = self.request.params
         return form.render(appstruct)
 
     def more_template_vars(self):

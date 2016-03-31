@@ -170,15 +170,12 @@ class BaseListClass(BaseView):
             schema = self.schema.bind(**self._get_bind_params())
             try:
                 submitted = self.request.GET.items()
-                self.logger.debug(submitted)
                 form = self.get_form(schema)
                 appstruct = form.validate(submitted)
-                self.logger.debug(appstruct)
             except deform.ValidationFailure as e:
-                print(u"COLANDER INVALID ::::: ")
                 # If values are not valid, we want the default ones to be
                 # provided see the schema definition
-                self.logger.error("CURRENT SEARCH VALUES ARE NOT VALID")
+                self.logger.error("  - Current search values are not valid")
                 self.logger.error(e)
                 appstruct = schema.deserialize({})
                 self.error = e
@@ -186,12 +183,18 @@ class BaseListClass(BaseView):
         return schema, appstruct
 
     def __call__(self):
+        self.logger.debug(u"# Calling the list view #")
+        self.logger.debug(u" + Collecting the appstruct from submitted datas")
         schema, appstruct = self._collect_appstruct()
-
+        self.logger.debug(appstruct)
+        self.logger.debug(u" + Launching query")
         query = self.query()
+        self.logger.debug(u" + Filtering query")
         query = self._filter(query, appstruct)
+        self.logger.debug(u" + Sorting query")
         query = self._sort(query, appstruct)
 
+        self.logger.debug(u" + Building the return values")
         return self._build_return_value(schema, appstruct, query)
 
     def _build_return_value(self, schema, appstruct, query):
@@ -245,7 +248,6 @@ class BaseListView(BaseListClass):
 
     def get_rendered_form(self, schema, appstruct):
         form = self.get_form(schema)
-        # values = self.request.params
         return form.render(appstruct)
 
     def more_template_vars(self):

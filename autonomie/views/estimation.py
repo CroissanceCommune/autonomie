@@ -27,10 +27,14 @@
 """
 import logging
 import deform
+import datetime
 
 from pyramid.httpexceptions import HTTPFound
 
-from sqlalchemy import extract
+from sqlalchemy import (
+    extract,
+    distinct,
+)
 from beaker.cache import cache_region
 
 from autonomie.exception import Forbidden
@@ -44,6 +48,7 @@ from autonomie.models.task import (
 from autonomie.models.task.task import DiscountLine
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
+from autonomie.models.company import Company
 from autonomie.utils.widgets import (
     Submit,
 )
@@ -332,28 +337,60 @@ def get_years(dbsession):
     return years()
 
 
-class EstimationList(BaseListView):
+class GlobalEstimationList(BaseListView):
     title = u""
-    schema = get_list_schema()
+    add_template_vars = (u'title', 'is_admin',)
+    schema = get_list_schema(is_global=True)
     sort_columns = dict(
         date=Estimation.date,
         customer=Customer.name,
+        company=Company.name,
     )
     default_sort = 'date'
     default_direction = 'desc'
+    is_admin = True
 
     def query(self):
-        query = Estimation.query().join(Task.project).join(Task.customer)
-        company_id = self.request.context.id
-        query = query.filter(Project.company_id == company_id)
+        query = self.request.dbsession.query(
+            distinct(Estimation.id),
+            Estimation.name,
+            Estimation.CAEStatus,
+            Estimation.date,
+            Estimation.description,
+            Estimation.ht,
+            Estimation.tva,
+            Estimation.ttc,
+            Customer.id,
+            Customer.name,
+            Company.id,
+            Company.name
+        )
+        query = query.outerjoin(Task.project)
+        query = query.outerjoin(Task.customer)
+        query = query.outerjoin(Project.company)
         return query
 
-    def filter_year(self, query, appstruct):
-        """
-            filter estimations by year
-        """
-        year = appstruct['year']
-        query = query.filter(extract('year', Estimation.date) == year)
+    def filter_date(self, query, appstruct):
+        period = appstruct.get('period', {})
+        if period.get('start'):
+            start = period.get('start')
+            end = period.get('end')
+            if end is None:
+                end = datetime.date.today()
+            query = query.filter(Task.date.between(start, end))
+        else:
+            year = appstruct.get('year')
+            if year is not None:
+                query = query.filter(extract('year', Estimation.date) == year)
+        return query
+
+    def _get_company_id(self, appstruct):
+        return appstruct.get('company_id')
+
+    def filter_company(self, query, appstruct):
+        company_id = self._get_company_id(appstruct)
+        if company_id is not None:
+            query = query.filter(Project.company_id == company_id)
         return query
 
     def filter_customer(self, query, appstruct):
@@ -377,6 +414,32 @@ class EstimationList(BaseListView):
             query = query.filter(Estimation.CAEStatus == status)
         return query
 
+    def more_template_vars(self, response_dict):
+        """
+        Add template vars to the response dict
+
+        :param obj result: A Sqla Query
+        :returns: vars to pass to the template
+        :rtype: dict
+        """
+        ret_dict = BaseListView.more_template_vars(self, response_dict)
+        records = response_dict['records']
+        ret_dict['totalht'] = sum(r[5] for r in records)
+        ret_dict['totaltva'] = sum(r[6] for r in records)
+        ret_dict['totalttc'] = sum(r[7] for r in records)
+        return ret_dict
+
+
+class EstimationList(GlobalEstimationList):
+    schema = get_list_schema(is_global=False)
+    is_admin = False
+
+    def _get_company_id(self, appstruct):
+        """
+        Return the current context's company id
+        """
+        return self.request.context.id
+
 
 def add_routes(config):
     """
@@ -393,9 +456,13 @@ def add_routes(config):
         traverse='/estimations/{id}'
     )
     config.add_route(
-        "estimations",
+        "company_estimations",
         "/company/{id:\d+}/estimations",
         traverse="/companies/{id}"
+    )
+    config.add_route(
+        "estimations",
+        "/estimations",
     )
 
 
@@ -418,10 +485,18 @@ def includeme(config):
 
     config.add_view(
         EstimationList,
-        route_name="estimations",
+        route_name="company_estimations",
         renderer="estimations.mako",
         permission="list_estimations",
     )
+
+    config.add_view(
+        GlobalEstimationList,
+        route_name="estimations",
+        renderer="estimations.mako",
+        permission="admin_tasks",
+    )
+
 
     delete_msg = u"Le devis {task.number} a bien été supprimé."
     config.add_view(

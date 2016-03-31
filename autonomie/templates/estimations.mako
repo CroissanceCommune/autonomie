@@ -27,7 +27,6 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="format_text" />
-<%namespace file="/base/utils.mako" import="format_customer" />
 <%block name='actionmenu'>
 <div class='row'>
     <div class='col-md-7'>
@@ -51,9 +50,15 @@
     </div>
 </%block>
 <%block name='content'>
+<% columns = 8 %>
+
 <table class="table table-condensed table-bordered">
     <thead>
         <th><span class="ui-icon ui-icon-comment"></span></th>
+        % if is_admin:
+            <% columns += 1 %>
+            <th>${sortable(u"Entrepreneur", 'company')}</th>
+        % endif
         <th>${sortable(u"Émis le", 'date')}</th>
         <th>Description</th>
         <th>${sortable(u"Client", 'customer')}</th>
@@ -63,42 +68,62 @@
         <th class="actions">PDF</th>
     </thead>
     <tbody>
+        <tr>
+            <td colspan='${columns - 4}'><strong>Total</strong></td>
+            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+            <td colspan='1'></td>
+        </tr>
         % if records:
-            % for document in records:
-                <tr class="estimation_${document.CAEStatus}_tr">
-                    <td class="estimation_${document.CAEStatus}">
-                %if document.statusComment:
-                    <span class="ui-icon ui-icon-comment" title="${document.statusComment}"></span>
-                %endif
-            </td>
-            <td>${api.format_date(document.date)}</td>
+            % for id_, name, CAEStatus, date, description, ht, tva, ttc, customer_id, customer_name, company_id, company_name in records:
+                <tr class="estimation_${CAEStatus}_tr">
+                    <td class="estimation_${CAEStatus}">
+                    </td>
+            % if is_admin:
+                <td class='invoice_company_name'>
+                    <a href="${request.route_path("company", id=company_id)}">
+                        ${company_name}
+                    </a>
+                </td>
+            % endif
+            <td>${api.format_date(date)}</td>
             <td>
-                <a href="${request.route_path("estimation", id=document.id)}" title="Voir le document">${document.name}</a>
-                <small>${format_text(document.description)}</small>
+                <a href="${request.route_path("estimation", id=id_)}" title="Voir le document">${name}</a>
+                <small>${format_text(description)}</small>
             </td>
-            <td class='invoice_company_name'>
-                ${format_customer(document.get_customer())}
+            <td>
+                <a href="${request.route_path("customer", id=customer_id)}">
+                    ${customer_name}
+                </a>
             </td>
              <td>
                  <strong>
-                    ${api.format_amount(document.total_ht())|n}&nbsp;€
+                    ${api.format_amount(ht) | n}&nbsp;€
                  </strong>
              </td>
              <td>
-                 ${api.format_amount(document.tva_amount())|n}&nbsp;€
+                 ${api.format_amount(tva) | n}&nbsp;€
              </td>
              <td>
-                 ${api.format_amount(document.total())|n}&nbsp;€
+                 ${api.format_amount(ttc) | n}&nbsp;€
              </td>
              <td class="actions">
-                      <a class='btn btn-default'
-                          href='${request.route_path("estimation", id=document.id, _query=dict(view="pdf"))}'
-                          title="Télécharger la version PDF">
-                          <i class='glyphicon glyphicon-file'></i>
-                      </a>
+                 <a class='btn btn-default'
+                     href='${request.route_path("estimation", id=id_, _query=dict(view="pdf"))}'
+                     title="Télécharger la version PDF">
+                     <i class='glyphicon glyphicon-file'></i>
+                 </a>
               </td>
           </tr>
       % endfor
+        <tr>
+            <td colspan='${columns - 4}'><strong>Total</strong></td>
+            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+            <td colspan='1'></td>
+        </tr>
   % else:
       <tr>
           <td colspan='7'>

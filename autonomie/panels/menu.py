@@ -171,7 +171,7 @@ def get_company_menu(request, cid, css=None):
     href = request.route_path("company_invoices", id=cid)
     gestion.add_item(u"Factures", icon="fa fa-file", href=href)
 
-    href = request.route_path("estimations", id=cid)
+    href = request.route_path("company_estimations", id=cid)
     gestion.add_item(u"Devis", icon="fa fa-file-o", href=href)
 
     href = request.route_path("commercial_handling", id=cid)
@@ -252,10 +252,15 @@ def get_admin_menus(request):
         menu.add_item(u"Configuration", icon="fa fa-cogs", href=href)
 
     documents = DropDown(label=u"Documents")
+
     href = request.route_path("invoices")
     documents.add_item(u"Factures", icon="fa fa-file", href=href)
+
     href = request.route_path('expenses')
     documents.add_item(u'Notes de dépense', icon='fa fa-file-o', href=href)
+
+    href = request.route_path("estimations")
+    documents.add_item(u"Devis", icon="fa fa-file-o", href=href)
 
     menu.add(documents)
 

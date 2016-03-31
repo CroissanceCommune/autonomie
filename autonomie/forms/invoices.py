@@ -359,37 +359,37 @@ def get_list_schema(is_admin=False):
             )
         )
 
-        schema.insert(
-            0,
-            PeriodSchema(
-                name='period',
-                title="",
-                validator=colander.Function(
-                    forms.range_validator,
-                    msg=u"La date de début doit précéder la date de début"
-                ),
-                widget=deform.widget.MappingWidget(
-                    template=TEMPLATES_URL + 'clean_mapping.pt',
-                ),
-                missing=colander.drop,
-            )
+    schema.insert(
+        0,
+        PeriodSchema(
+            name='period',
+            title="",
+            validator=colander.Function(
+                forms.range_validator,
+                msg=u"La date de début doit précéder la date de début"
+            ),
+            widget=deform.widget.MappingWidget(
+                template=TEMPLATES_URL + 'clean_mapping.pt',
+            ),
+            missing=colander.drop,
         )
-        schema.insert(
-            0,
-            AmountRangeSchema(
-                name='ttc',
-                title="",
-                validator=colander.Function(
-                    forms.range_validator,
-                    msg=u"Le montant de départ doit être inférieur ou égale \
+    )
+    schema.insert(
+        0,
+        AmountRangeSchema(
+            name='ttc',
+            title="",
+            validator=colander.Function(
+                forms.range_validator,
+                msg=u"Le montant de départ doit être inférieur ou égale \
 à celui de la fin"
-                ),
-                widget=deform.widget.MappingWidget(
-                    template=TEMPLATES_URL + 'clean_mapping.pt',
-                ),
-                missing=colander.drop,
-            )
+            ),
+            widget=deform.widget.MappingWidget(
+                template=TEMPLATES_URL + 'clean_mapping.pt',
+            ),
+            missing=colander.drop,
         )
+    )
 
     node = forms.year_select_node(
         name='year',

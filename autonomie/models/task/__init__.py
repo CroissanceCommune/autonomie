@@ -43,6 +43,9 @@ from .task import (
     TaskLineGroup,
     TaskStatus,
 )
+from .mentions import (
+    TaskMention,
+)
 
 from .unity import WorkUnit
 from .options import PaymentConditions

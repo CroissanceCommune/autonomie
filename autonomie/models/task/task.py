@@ -69,6 +69,8 @@ from autonomie.compute.task import (
     GroupCompute,
 )
 from autonomie.models.node import Node
+from autonomie.models.task.mentions import TASK_MENTION
+
 
 log = logging.getLogger(__name__)
 
@@ -345,6 +347,15 @@ class Task(Node):
         ),
         order_by='Payment.date',
         cascade="all, delete-orphan"
+    )
+    mentions = relationship(
+        "TaskMention",
+        secondary=TASK_MENTION,
+        order_by="TaskMention.order",
+        back_populates="tasks",
+        info={
+            "colanderalchemy": {'title': "Mentions facultatives"},
+        }
     )
 
     state_machine = DEFAULT_STATE_MACHINES['base']

@@ -157,13 +157,13 @@ class GlobalInvoicesList(BaseListView):
         query = query.outerjoin(Project.company)
         query = query.outerjoin(Task.customer)
         query = query.outerjoin(Task.payments)
-
-        if self.request.context == 'company':
-            company_id = self.request.context.id
-            query = query.filter(Project.company_id == company_id)
         return query
 
     def _get_company_id(self, appstruct):
+        """
+        Return the company_id found in the appstruct
+        Should be overriden if we want a company specific list view
+        """
         return appstruct.get('company_id')
 
     def filter_company(self, query, appstruct):

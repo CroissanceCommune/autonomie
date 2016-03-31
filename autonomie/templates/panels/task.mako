@@ -40,6 +40,10 @@
         <br />
         <%block name='information'>
         </%block>
+        % if task.customer.intraTVA:
+            <b>Numéro de TVA Intracommunautaire</b> : ${task.customer.intraTVA}
+            <br />
+        % endif
     </div>
     <div class='row'>
         <% groups = task.get_groups() %>

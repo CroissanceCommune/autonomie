@@ -20,15 +20,28 @@ GROUPS = (
     (1, 'admin', u"Administre l'application", ),
 )
 
+def disable_listeners():
+    from autonomie.models.task.task import Task, cache_amounts
+    sa.event.remove(Task, "before_insert", cache_amounts)
+    sa.event.remove(Task, "before_update", cache_amounts)
+
 
 def upgrade():
-    op.execute("alter table groups modify label VARCHAR(255);")
-    from autonomie.models.user import User, Group
+    disable_listeners()
+    op.add_column('task', sa.Column('date', sa.Date()))
+    from autonomie.models.task import Task
     from autonomie.models.base import DBSESSION
 
     session = DBSESSION()
+    for task in Task.query().filter(Task.type_!='manualinvoice'):
+        task.date = task.taskDate
+        session.merge(task)
+    session.flush()
+
+    op.execute("alter table groups modify label VARCHAR(255);")
+    from autonomie.models.user import User, Group
     for group_id, group_name, group_label in GROUPS:
-        group = session.query(Group.id).filter(Group.name==group_name).first()
+        group = session.query(Group).filter(Group.name==group_name).first()
         if group is None:
             group = Group(name=group_name, label=group_label)
             session.add(group)

@@ -165,7 +165,7 @@ class EditMetadataSchema(colander.MappingSchema):
         validator=colander.Length(max=255),
         missing="",
         )
-    taskDate = forms.today_node(title=u"Date")
+    date = forms.today_node(title=u"Date")
     phase_id = colander.SchemaNode(
         colander.Integer(),
         title=u"Phase",
@@ -180,7 +180,7 @@ def remove_some_fields(schema, kw):
         del(schema['phase_id'])
 
     if not request.has_permission('admin_task'):
-        del(schema['taskDate'])
+        del(schema['date'])
 
     return schema
 

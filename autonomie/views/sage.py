@@ -203,7 +203,7 @@ class SageInvoiceExportPage(BaseView):
         )
 
     def _filter_date(self, query, start_date, end_date):
-        return query.filter(Task.taskDate.between(start_date, end_date))
+        return query.filter(Task.date.between(start_date, end_date))
 
     def _filter_number(self, query, number, year, strict=False):
         prefix = self.request.config.get('invoiceprefix', '')

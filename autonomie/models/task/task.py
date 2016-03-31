@@ -39,6 +39,7 @@ from sqlalchemy import (
     Text,
     Boolean,
     Float,
+    Date,
 )
 from sqlalchemy.event import listen
 
@@ -119,10 +120,11 @@ class Task(Node):
         default=get_current_timestamp,
         info={'colanderalchemy': {'typ': colander.Date}}
     )
-    taskDate = Column(
-        CustomDateType2,
-        info={'colanderalchemy': {'typ': colander.Date}}
-    )
+    #taskDate = Column(
+    #    CustomDateType2,
+    #    info={'colanderalchemy': {'typ': colander.Date}}
+    #)
+    date = Column(Date())
     owner_id = Column(
         ForeignKey('accounts.id'),
         info={
@@ -282,7 +284,7 @@ class Task(Node):
         primaryjoin="Task.phase_id==Phase.id",
         backref=backref(
             "tasks",
-            order_by='Task.taskDate',
+            order_by='Task.date',
             info={
                 'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
@@ -307,7 +309,7 @@ class Task(Node):
         primaryjoin="Task.project_id==Project.id",
         backref=backref(
             'tasks',
-            order_by='Task.taskDate',
+            order_by='Task.date',
             info={
                 'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
@@ -324,7 +326,7 @@ class Task(Node):
         primaryjoin="Customer.id==Task.customer_id",
         backref=backref(
             'tasks',
-            order_by='Task.taskDate',
+            order_by='Task.date',
             info={
                 'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
@@ -368,7 +370,7 @@ class Task(Node):
         return dict(
             phase_id=self.phase_id,
             status=self.CAEStatus,
-            date=self.taskDate,
+            date=self.date,
             owner_id=self.owner_id,
             customer_id=self.customer_id,
             display_units=self.display_units,
@@ -766,16 +768,19 @@ class TaskLine(DBBASE, LineCompute):
         return result
 
 
-def _cache_amounts(mapper, connection, target):
+def cache_amounts(mapper, connection, target):
     """
     Set amounts in the cached amount vars to be able to provide advanced search
     ... options in the invoice list page
     """
     log.info("Caching the task amounts")
-    target.ht = target.total_ht()
-    target.ttc = target.total()
-    target.tva = target.tva_amount()
+    if hasattr(target, 'total_ht'):
+        target.ht = target.total_ht()
+    if hasattr(target, 'total'):
+        target.ttc = target.total()
+    if hasattr(target, 'tva_amount'):
+        target.tva = target.tva_amount()
 
 
-listen(Task, "before_insert", _cache_amounts, propagate=True)
-listen(Task, "before_update", _cache_amounts, propagate=True)
+listen(Task, "before_insert", cache_amounts, propagate=True)
+listen(Task, "before_update", cache_amounts, propagate=True)

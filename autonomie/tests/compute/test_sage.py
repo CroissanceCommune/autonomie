@@ -177,7 +177,7 @@ def invoice(def_tva, tva):
     invoice = TaskCompute()
     invoice.default_tva = def_tva.value
     invoice.expenses_tva = def_tva.value
-    invoice.taskDate = datetime.date(2013, 02, 02)
+    invoice.date = datetime.date(2013, 02, 02)
     invoice.customer = customer
     invoice.company = company
     invoice.official_number = "INV_001"
@@ -309,7 +309,7 @@ def prepare(discount=False):
     invoice = TaskCompute()
     invoice.default_tva = 1960
     invoice.expenses_tva = 1960
-    invoice.taskDate = datetime.date(2013, 02, 02)
+    invoice.date = datetime.date(2013, 02, 02)
     invoice.customer = customer
     invoice.company = company
     invoice.official_number = "INV_001"

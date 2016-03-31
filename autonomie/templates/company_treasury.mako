@@ -67,7 +67,7 @@
                     ${invoice.get_customer().name} - ${invoice.number}
                 </td>
                 <td>
-                    ${print_date(invoice.taskDate)}
+                    ${print_date(invoice.date)}
                 </td>
                 <td>
                     ${api.format_amount(invoice.total_ht())|n}

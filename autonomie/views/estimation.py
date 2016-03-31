@@ -317,31 +317,18 @@ def duplicate(request):
     return ret_dict
 
 
-def get_taskdates(dbsession):
-    """
-        Return all taskdates
-    """
-    @cache_region("long_term", "taskdates")
-    def taskdates():
-        """
-            Cached version
-        """
-        return dbsession.query(Estimation.taskDate)
-    return taskdates()
-
-
 def get_years(dbsession):
     """
         We consider that all documents should be dated after 2000
     """
-    estimations = get_taskdates(dbsession)
-
     @cache_region("long_term", "taskyears")
     def years():
         """
             cached version
         """
-        return sorted(set([est.taskDate.year for est in estimations.all()]))
+        query = dbsession.query(extract('year', Estimation.date)).distinct()
+        years = list(query)
+        return sorted(years)
     return years()
 
 
@@ -349,10 +336,10 @@ class EstimationList(BaseListView):
     title = u""
     schema = get_list_schema()
     sort_columns = dict(
-        taskDate=Estimation.taskDate,
+        date=Estimation.date,
         customer=Customer.name,
     )
-    default_sort = 'taskDate'
+    default_sort = 'date'
     default_direction = 'desc'
 
     def query(self):
@@ -366,7 +353,7 @@ class EstimationList(BaseListView):
             filter estimations by year
         """
         year = appstruct['year']
-        query = query.filter(extract('year', Estimation.taskDate) == year)
+        query = query.filter(extract('year', Estimation.date) == year)
         return query
 
     def filter_customer(self, query, appstruct):

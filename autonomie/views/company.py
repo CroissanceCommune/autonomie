@@ -90,7 +90,7 @@ def company_index(request):
     elapsed_invoices = [invoice
                         for invoice in all_invoices if invoice.is_tolate()]
     elapsed_invoices = sorted(elapsed_invoices,
-                              key=lambda a: a.taskDate,
+                              key=lambda a: a.date,
                               reverse=True)
     ret_val['elapsed_invoices'] = elapsed_invoices
     return ret_val

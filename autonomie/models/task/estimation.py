@@ -133,7 +133,7 @@ class Estimation(Task, EstimationCompute):
         estimation.owner = user
         estimation.customer = customer
         estimation.project = project
-        estimation.taskDate = date
+        estimation.date = date
         estimation.set_sequence_number(seq_number)
         estimation.set_number()
         estimation.set_name()
@@ -173,8 +173,8 @@ class Estimation(Task, EstimationCompute):
         """
             Return a deposit invoice
         """
-        invoice.taskDate = datetime.date.today()
-        invoice.financial_year = invoice.taskDate.year
+        invoice.date = datetime.date.today()
+        invoice.financial_year = invoice.date.year
         invoice.display_units = 0
         invoice.set_name(deposit=True)
         invoice.set_number(deposit=True)
@@ -190,7 +190,7 @@ class Estimation(Task, EstimationCompute):
         """
             return an intermediary invoice described by "paymentline"
         """
-        invoice.taskDate = paymentline.paymentDate
+        invoice.date = paymentline.paymentDate
         invoice.financial_year = paymentline.paymentDate.year
         invoice.display_units = 0
         invoice.set_name()
@@ -222,7 +222,7 @@ class Estimation(Task, EstimationCompute):
         """
             Return the sold invoice
         """
-        invoice.taskDate = paymentline.paymentDate
+        invoice.date = paymentline.paymentDate
         invoice.financial_year = paymentline.paymentDate.year
         invoice.set_name(sold=is_sold)
         invoice.set_number()
@@ -309,7 +309,7 @@ class Estimation(Task, EstimationCompute):
             self.name = taskname_tmpl.format(self.sequence_number)
 
     def set_number(self):
-        tasknumber_tmpl = u"D{s.sequence_number}_{s.taskDate:%m%y}"
+        tasknumber_tmpl = u"D{s.sequence_number}_{s.date:%m%y}"
         self._number = tasknumber_tmpl.format(s=self)
 
     def set_sequence_number(self, snumber):

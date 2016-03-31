@@ -54,7 +54,7 @@
 <table class="table table-condensed table-bordered">
     <thead>
         <th><span class="ui-icon ui-icon-comment"></span></th>
-        <th>${sortable(u"Émis le", 'taskDate')}</th>
+        <th>${sortable(u"Émis le", 'date')}</th>
         <th>Description</th>
         <th>${sortable(u"Client", 'customer')}</th>
         <th>Montant HT</th>
@@ -71,7 +71,7 @@
                     <span class="ui-icon ui-icon-comment" title="${document.statusComment}"></span>
                 %endif
             </td>
-            <td>${api.format_date(document.taskDate)}</td>
+            <td>${api.format_date(document.date)}</td>
             <td>
                 <a href="${request.route_path("estimation", id=document.id)}" title="Voir le document">${document.name}</a>
                 <small>${format_text(document.description)}</small>

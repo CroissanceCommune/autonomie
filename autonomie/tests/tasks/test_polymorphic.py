@@ -32,7 +32,7 @@ from autonomie.models.task.invoice import Invoice, Payment, CancelInvoice
 
 INVOICE = dict( name=u"Facture 2",
                 sequence_number=2,
-                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+                date=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 _number=u"invoicenumber",
                 expenses=0,

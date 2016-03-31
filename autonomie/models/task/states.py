@@ -116,7 +116,7 @@ def set_date(task, **kw):
     """
         set the date of the current task
     """
-    task.taskDate = datetime.date.today()
+    task.date = datetime.date.today()
     return task
 
 

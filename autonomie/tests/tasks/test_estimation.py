@@ -46,7 +46,7 @@ ESTIMATION = dict(name=u"Devis 2",
                 exclusions=u"Notes",
                 paymentDisplay=u"ALL",
                 payment_conditions=u"Conditions de paiement",
-                taskDate=datetime.date(2012, 12, 10),
+                date=datetime.date(2012, 12, 10),
                 description=u"Description du devis",
                 manualDeliverables=1)
 
@@ -123,7 +123,7 @@ def test_set_number():
     est = Estimation()
     est.project = MagicMock(code="PRO1")
     est.customer = MagicMock(code="CLI1")
-    est.taskDate = datetime.date(1969, 07, 31)
+    est.date = datetime.date(1969, 07, 31)
     est.set_sequence_number(15)
     est.set_number()
     assert est.number == u"PRO1_CLI1_D15_0769"
@@ -211,7 +211,7 @@ def test_light_gen_invoice(dbsession, estimation):
     ).all()
     #deposit :
     deposit = invoices[0]
-    assert deposit.taskDate == datetime.date.today()
+    assert deposit.date == datetime.date.today()
     assert deposit.financial_year == datetime.date.today().year
     assert deposit.total() == estimation.deposit_amount_ttc()
     #intermediate invoices:
@@ -238,7 +238,7 @@ def test_gen_invoice(dbsession, estimation):
     ).all()
     #deposit :
     deposit = invoices[0]
-    assert deposit.taskDate == datetime.date.today()
+    assert deposit.date == datetime.date.today()
     assert deposit.financial_year == datetime.date.today().year
     assert deposit.total() == estimation.deposit_amount_ttc()
     #intermediate invoices:
@@ -247,7 +247,7 @@ def test_gen_invoice(dbsession, estimation):
         inv = intermediate_invoices[index]
         # Here, the rounding strategy should be reviewed
         assert inv.total() - line['amount'] <= 1
-        assert inv.taskDate == line['paymentDate']
+        assert inv.date == line['paymentDate']
         assert inv.financial_year == line['paymentDate'].year
 
     total = sum([inv.total() for inv in invoices])

@@ -94,7 +94,7 @@ def get_next_official_number(year=None):
     # we check dates with year * 10000 : 20150000
     year = year * 10000
     next_year = (year + 1) * 10000
-    query = query.filter(Task.taskDate.between(year, next_year))
+    query = query.filter(Task.date.between(year, next_year))
     last = query.first()[0]
     if last:
         next_ = last + 1
@@ -204,7 +204,7 @@ class Invoice(Task, InvoiceCompute):
             45 days
         """
         today = datetime.date.today()
-        elapsed = today - self.taskDate
+        elapsed = today - self.date
         if elapsed > datetime.timedelta(days=45):
             tolate = True
         else:
@@ -237,9 +237,9 @@ class Invoice(Task, InvoiceCompute):
 
     def set_number(self, deposit=False):
         if deposit:
-            tasknumber_tmpl = u"FA{s.sequence_number}_{s.taskDate:%m%y}"
+            tasknumber_tmpl = u"FA{s.sequence_number}_{s.date:%m%y}"
         else:
-            tasknumber_tmpl = u"F{s.sequence_number}_{s.taskDate:%m%y}"
+            tasknumber_tmpl = u"F{s.sequence_number}_{s.date:%m%y}"
         self._number = tasknumber_tmpl.format(s=self)
 
     def set_sequence_number(self, snumber):
@@ -265,18 +265,13 @@ class Invoice(Task, InvoiceCompute):
         """
             Return the next official_number available in the Invoice's table
             Take the max of official Number
-            when taskDate startswith the current year
+            when date startswith the current year
             taskdate is a string (YYYYMMDD)
         """
         current_year = datetime.date.today().year
-        return DBSESSION().query(
-            func.max(Invoice.official_number)
-        ).filter(
-            Invoice.taskDate.between(
-                current_year * 10000,
-                (current_year + 1) * 10000
-            )
-        )
+        query = DBSESSION().query(func.max(Invoice.official_number))
+        query = query.filter(extract('year', Invoice.date) == current_year)
+        return query
 
     def gen_cancelinvoice(self, user):
         """
@@ -284,7 +279,7 @@ class Invoice(Task, InvoiceCompute):
         """
         seq_number = self.project.get_next_cancelinvoice_number()
         cancelinvoice = CancelInvoice()
-        cancelinvoice.taskDate = datetime.date.today()
+        cancelinvoice.date = datetime.date.today()
         cancelinvoice.set_sequence_number(seq_number)
         cancelinvoice.set_name()
         cancelinvoice.set_number()
@@ -344,7 +339,7 @@ class Invoice(Task, InvoiceCompute):
             Validate an invoice
         """
         self.official_number = get_next_official_number()
-        self.taskDate = datetime.date.today()
+        self.date = datetime.date.today()
 
     def record_payment(self, **kw):
         """
@@ -389,7 +384,7 @@ class Invoice(Task, InvoiceCompute):
         invoice.owner = user
         invoice.customer = customer
         invoice.project = project
-        invoice.taskDate = date
+        invoice.date = date
         invoice.set_sequence_number(seq_number)
         invoice.set_number()
         invoice.set_name()
@@ -516,7 +511,7 @@ class CancelInvoice(Task, TaskCompute):
         return DBSESSION().query(
             func.max(CancelInvoice.official_number)
         ).filter(
-            func.year(CancelInvoice.taskDate) == current_year
+            func.year(CancelInvoice.date) == current_year
         )
 
     def is_tolate(self):
@@ -534,7 +529,7 @@ class CancelInvoice(Task, TaskCompute):
         self.sequence_number = snumber
 
     def set_number(self):
-        tasknumber_tmpl = u"A{s.sequence_number}_{s.taskDate:%m%y}"
+        tasknumber_tmpl = u"A{s.sequence_number}_{s.date:%m%y}"
         self._number = tasknumber_tmpl.format(s=self)
 
     @property
@@ -548,7 +543,7 @@ class CancelInvoice(Task, TaskCompute):
             Generates an official number
         """
         self.official_number = get_next_official_number()
-        self.taskDate = datetime.date.today()
+        self.date = datetime.date.today()
 
     def __repr__(self):
         return u"<CancelInvoice id:{s.id}>".format(s=self)

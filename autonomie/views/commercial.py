@@ -138,7 +138,7 @@ class DisplayCommercialHandling(BaseView):
         """
         return Estimation.query().join(Task.project)\
                     .filter(Project.company_id==self.request.context.id)\
-                    .filter(extract('year', Estimation.taskDate)==self.year)
+                    .filter(extract('year', Estimation.date)==self.year)
 
     def validated_estimations(self):
         """
@@ -175,8 +175,8 @@ class DisplayCommercialHandling(BaseView):
                 Project.company_id==self.request.context.id
                 )
             date_condition = and_(
-                    extract('year', Invoice.taskDate)==self.year,
-                    extract('month', Invoice.taskDate)==month,
+                    extract('year', Invoice.date)==self.year,
+                    extract('month', Invoice.date)==month,
                     Invoice.financial_year==self.year,
                     )
             if month != 12:
@@ -186,7 +186,7 @@ class DisplayCommercialHandling(BaseView):
                 # and reported to the previous comptability year
                 reported_condition = and_(
                         Invoice.financial_year==self.year,
-                        extract('year', Invoice.taskDate)!=self.year,
+                        extract('year', Invoice.date)!=self.year,
                     )
                 invoices = invoices.filter(
                         or_(date_condition, reported_condition)
@@ -202,8 +202,8 @@ class DisplayCommercialHandling(BaseView):
                     Project.company_id==self.request.context.id
                     )
             date_condition = and_(
-                    extract('year', CancelInvoice.taskDate)==self.year,
-                    extract('month', CancelInvoice.taskDate)==month,
+                    extract('year', CancelInvoice.date)==self.year,
+                    extract('month', CancelInvoice.date)==month,
                     CancelInvoice.financial_year==self.year,
                     )
             if month != 12:
@@ -211,7 +211,7 @@ class DisplayCommercialHandling(BaseView):
             else:
                 reported_condition = and_(
                     CancelInvoice.financial_year==self.year,
-                    extract('year', CancelInvoice.taskDate)!=self.year,
+                    extract('year', CancelInvoice.date)!=self.year,
                     )
                 cinvoices = cinvoices.filter(
                         or_(date_condition, reported_condition)

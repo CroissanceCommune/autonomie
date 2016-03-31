@@ -285,7 +285,7 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
         """
             Return the date field
         """
-        return format_sage_date(self.invoice.taskDate)
+        return format_sage_date(self.invoice.date)
 
     @property
     def num_facture(self):
@@ -403,7 +403,7 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             Return a debit TTC entry
         """
         entry = self.get_base_entry()
-        echeance = self.invoice.taskDate + datetime.timedelta(days=30)
+        echeance = self.invoice.date + datetime.timedelta(days=30)
         entry.update(
             compte_cg=self.invoice.customer.compte_cg,
             num_analytique=self.num_analytique,
@@ -901,7 +901,7 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
         """
             Return the value for the "echeance" column now + 365 days
         """
-        echeance = self.invoice.taskDate + datetime.timedelta(days=365)
+        echeance = self.invoice.date + datetime.timedelta(days=365)
         return format_sage_date(echeance)
 
     @double_lines

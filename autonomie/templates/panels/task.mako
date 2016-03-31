@@ -36,7 +36,7 @@
         </div>
     </div>
     <div class="informationblock">
-        Le ${api.format_date(task.taskDate, False)},
+        Le ${api.format_date(task.date, False)},
         <br />
         <%block name='information'>
         </%block>

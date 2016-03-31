@@ -51,7 +51,7 @@ from autonomie.exception import Forbidden
 
 TASK = dict(name=u"Test task",
                  CAEStatus="draft",
-                 taskDate=datetime.date.today(),
+                 date=datetime.date.today(),
                  statusDate=datetime.date.today(),
                  description=u"Test task description")
 
@@ -79,7 +79,7 @@ ESTIMATION = dict(
                 exclusions=u"Notes",
                 paymentDisplay=u"ALL",
                 payment_conditions=u"Conditions de paiement",
-                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+                date=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description du devis",
                 manualDeliverables=1,
                 statusComment=u"Aucun commentaire",
@@ -96,7 +96,7 @@ INVOICE = dict(phase_id=1,
                 expenses=1500,
                 deposit=20,
                 payment_conditions=u"Conditions de paiement",
-                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+                date=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 statusComment=u"Aucun commentaire",
                 _number=u"invoicenumber")
@@ -111,7 +111,7 @@ CANCELINVOICE = dict(phase_id=1,
                 display_units="1",
                 expenses=1500,
                 payment_conditions=u"Conditions de paiement",
-                taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+                date=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de l'avoir",
                 statusComment=u"Aucun commentaire",
                 _number=u"cancelinvoicenumber")

@@ -112,7 +112,7 @@ TEMPLATES_URL = 'autonomie:deform_templates/'
 
 MAIN_INFOS_GRID = (
     (('name', 6), ('phase_id', 6),),
-    (('taskDate', 6), ('financial_year', 3), ('prefix', 3), ),
+    (('date', 6), ('financial_year', 3), ('prefix', 3), ),
     (('customer_id', 6), ('address', 6),),
     (('description', 12),),
     (('course', 12),),
@@ -553,7 +553,7 @@ class TaskConfiguration(colander.MappingSchema):
         widget=deferred_phases_widget,
         default=deferred_default_phase
         )
-    taskDate = forms.today_node(title=u"Date du devis")
+    date = forms.today_node(title=u"Date du devis")
     description = forms.textarea_node(title=u"Objet du devis")
     course = colander.SchemaNode(
         colander.Integer(),
@@ -739,7 +739,7 @@ def get_estimation_schema():
 TASK_MATCHING_MAP = (
     ('name', 'common'),
     ('phase_id', 'common'),
-    ('taskDate', 'common'),
+    ('date', 'common'),
     ('financial_year', 'common'),
     ('prefix', 'common'),
     ('description', 'common'),

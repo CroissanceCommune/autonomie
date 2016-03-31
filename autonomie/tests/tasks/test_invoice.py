@@ -54,7 +54,7 @@ DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 INVOICE = dict(
     name=u"Facture 2",
     sequence_number=2,
-    taskDate=datetime.date(2012, 12, 10), #u"10-12-2012",
+    date=datetime.date(2012, 12, 10), #u"10-12-2012",
     description=u"Description de la facture",
     _number=u"invoicenumber",
     expenses=0,
@@ -84,7 +84,7 @@ def test_get_number():
     cinv = CancelInvoice()
     cinv.project = MagicMock(code="PRO1")
     cinv.customer = MagicMock(code="CLI1")
-    cinv.taskDate = datetime.date(1969, 07, 31)
+    cinv.date = datetime.date(1969, 07, 31)
     cinv.set_sequence_number(15)
     cinv.set_number()
     assert cinv.number == u"PRO1_CLI1_A15_0769"
@@ -110,7 +110,7 @@ def test_set_number():
     invoice.set_sequence_number(15)
     invoice.set_name()
     date = datetime.date(1969, 07, 31)
-    invoice.taskDate = date
+    invoice.date = date
     invoice.set_number()
     assert invoice.number == u"PRO1_CLI1_F15_0769"
     invoice.set_number(deposit=True)
@@ -132,7 +132,7 @@ def test_gen_cancelinvoice(dbsession, invoice):
     assert cinv.name == "Avoir 1"
     assert cinv.total_ht() == -1 * invoice.total_ht()
     today = datetime.date.today()
-    assert cinv.taskDate == today
+    assert cinv.date == today
     assert cinv.prefix == invoice.prefix
     assert cinv.financial_year == invoice.financial_year
 
@@ -216,7 +216,7 @@ def test_valid_invoice(config, dbsession, invoice):
     dbsession.flush()
     invoice.set_status('valid', request, 1)
     today = datetime.date.today()
-    assert invoice.taskDate == today
+    assert invoice.date == today
     assert invoice.official_number == 1
 
 def test_valid_payment(config, dbsession, invoice):

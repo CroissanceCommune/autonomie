@@ -42,7 +42,7 @@ else:
     % if is_admin_view:
         <th>${sortable(u"Entrepreneur", 'company')}</th>
     % endif
-        <th>${sortable(u"Émise le", 'taskDate')}</th>
+        <th>${sortable(u"Émise le", 'date')}</th>
         <th>${sortable(u"Nom de la facture", 'number')}</th>
         <th>${sortable(u"Client", 'customer')}</th>
         <th>${sortable(u"Montant HT", "ht")}</th>
@@ -101,7 +101,7 @@ else:
             </td>
             % endif
             <td>
-                ${api.format_date(document.taskDate)}
+                ${api.format_date(document.date)}
             </td>
             <td>
                 %if document.is_viewable():

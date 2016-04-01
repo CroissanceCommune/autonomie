@@ -28,6 +28,7 @@
     write_pdf(request, filename, html)
 
 """
+import logging
 import base64
 import re
 import pkg_resources
@@ -40,6 +41,9 @@ from pyramid.renderers import render
 from pyramid.threadlocal import get_current_request
 
 from autonomie.export.utils import write_file_to_request
+
+
+logger = logging.getLogger(__name__)
 
 
 def render_html(request, template, datas):
@@ -74,6 +78,7 @@ DATAURI_TMPL = u"data:{0};base64,{1}"
 FILEPATH_REGX = re.compile("^/files/(?P<fileid>[0-9]+).png")
 PUBLIC_FILES_REGX = re.compile("^/public/(?P<filekey>.+)")
 
+
 def get_db_file_resource(fileobj):
     """
     Return a resource string usable by Pisa for dynamically db loaded resources
@@ -84,7 +89,11 @@ def get_db_file_resource(fileobj):
     :returns: a resource string (default : with a void png)
     """
     if fileobj is not None:
-        b64_str = base64.encodestring(fileobj.getvalue())
+        try:
+            b64_str = base64.encodestring(fileobj.getvalue())
+        except IOError:  # In case the file isn't on disk anymore
+            logger.exception(u"File does not exist")
+            b64_str = base64.encodestring('')
         mimetype = fileobj.mimetype
     else:
         b64_str = ""
@@ -131,6 +140,9 @@ def fetch_resource(uri, rel):
                 resource = join(basepath, relative_filepath).encode('utf-8')
                 if ':' in resource:
                     package, filename = resource.split(':')
-                    resource = pkg_resources.resource_filename(package, filename)
+                    resource = pkg_resources.resource_filename(
+                        package,
+                        filename,
+                    )
                 break
     return resource

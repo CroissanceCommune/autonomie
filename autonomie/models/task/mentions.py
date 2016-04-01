@@ -53,7 +53,13 @@ insérées dans les sorties PDF.<br /> \
 <b>Libellé</b>: Libellé dans le formulaire<br />\
 <b>Titre</b>: Le titre du bloc contenant les mentions dans le PDF <br />\
 <b>Texte à afficher dans les PDF</b>: Texte affiché dans la sortie PDF \
-si l'entrepreneur a ajouté cette mention à son devis/sa facture<br />."
+si l'entrepreneur a ajouté cette mention à son devis/sa facture<br />.\
+<br />\
+<b>Note</b> : La suppression d'une mention depuis l'interface entraine sa \
+désactivation<br />\
+<b>Attention</b> : La modification des textes entrainent la modification \
+des documents (devis/factures) associés, préférez la suppression \
+(désactivation) et l'ajout de nouvelle mention",
         "validation_msg": u"Les mentions facultatives ont bien été configurées"
     }
     id = get_id_foreignkey_col('configurable_option.id')
@@ -66,6 +72,7 @@ si l'entrepreneur a ajouté cette mention à son devis/sa facture<br />."
 la sortie pdf",
             }
         }
+    )
     full_text = sa.Column(
         sa.Text(),
         info={
@@ -73,12 +80,7 @@ la sortie pdf",
                 "title": u"Texte à afficher dans les PDF",
                 "description": u"Si l'entrepreneur a ajouté cette mention à \
 son devis/sa facture, ce texte apparaitra dans la sortie PDF",
-                'widget': deform.widget.RichTextWidget(
-                    options={
-                        'language': "fr_FR",
-                        'content_css': "/fanstatic/fanstatic/css/richtext.css",
-                    },
-                )
+                'widget': deform.widget.TextAreaWidget(cols=80, rows=4)
             }
         },
     )

@@ -339,6 +339,7 @@ class Invoice(Task, InvoiceCompute):
             )
             order += 1
             cancelinvoice.default_line_group.lines.append(paid_line)
+        cancelinvoice.mentions = self.mentions
         return cancelinvoice
 
     def get_next_row_index(self):
@@ -420,6 +421,8 @@ class Invoice(Task, InvoiceCompute):
 
         for line in self.discounts:
             invoice.discounts.append(line.duplicate())
+
+        invoice.mentions = self.mentions
         return invoice
 
     def __repr__(self):

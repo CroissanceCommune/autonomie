@@ -161,6 +161,7 @@ class Estimation(Task, EstimationCompute):
             estimation.payment_lines.append(line.duplicate())
         for line in self.discounts:
             estimation.discounts.append(line.duplicate())
+        estimation.mentions = self.mentions
         return estimation
 
     def _account_invoiceline(self, amount, description, tva=1960):
@@ -259,6 +260,7 @@ class Estimation(Task, EstimationCompute):
         inv.address = self.address
         inv.CAEStatus = "draft"
         inv.set_sequence_number(seq_number)
+        inv.mentions = self.mentions
         return inv
 
     def gen_invoices(self, user):

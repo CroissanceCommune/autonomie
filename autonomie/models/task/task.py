@@ -66,6 +66,7 @@ from .interfaces import ITask
 from .states import DEFAULT_STATE_MACHINES
 from autonomie.compute.task import (
     LineCompute,
+    DiscountLineCompute,
     GroupCompute,
 )
 from autonomie.models.node import Node
@@ -506,7 +507,7 @@ class Task(Node):
         return result
 
 
-class DiscountLine(DBBASE, LineCompute):
+class DiscountLine(DBBASE, DiscountLineCompute):
     """
          A discount line
     """
@@ -553,23 +554,6 @@ class DiscountLine(DBBASE, LineCompute):
         line.amount = self.amount
         line.description = self.description
         return line
-
-    def total_ht(self):
-        """
-            Compute the line's total
-        """
-        return float(self.amount)
-
-    def tva_amount(self):
-        """
-            compute the tva amount of a line
-        """
-        totalht = self.total_ht()
-        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
-        return result
-
-    def total(self):
-        return self.tva_amount() + self.total_ht()
 
     def __repr__(self):
         return u"<DiscountLine amount : {s.amount} tva:{s.tva} id:{s.id}>"\

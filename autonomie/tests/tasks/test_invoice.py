@@ -31,6 +31,7 @@ from autonomie.models.task import (
     Invoice,
     TaskLine,
     DiscountLine,
+    TaskMention,
 )
 from autonomie.models.user import User
 from autonomie.models.customer import Customer
@@ -71,6 +72,7 @@ def invoice():
         inv.default_line_group.lines.append(TaskLine(**line))
     for discount in DISCOUNTS:
         inv.discounts.append(DiscountLine(**discount))
+    inv.mentions = [TaskMention(label='1', title='t1', full_text='text')]
     return inv
 
 
@@ -135,6 +137,7 @@ def test_gen_cancelinvoice(dbsession, invoice):
     assert cinv.date == today
     assert cinv.prefix == invoice.prefix
     assert cinv.financial_year == invoice.financial_year
+    assert cinv.mentions == invoice.mentions
 
 def test_gen_cancelinvoice_payment(dbsession, invoice):
     user = User.query().first()
@@ -165,6 +168,7 @@ def test_duplicate_invoice(dbsession, invoice):
     assert invoice.project == newinvoice.project
     assert newinvoice.statusPersonAccount == user
     assert newinvoice.phase == phase
+    assert newinvoice.mentions == invoice.mentions
     for key in "customer", "address", "expenses", "expenses_ht":
         assert getattr(newinvoice, key) == getattr(invoice, key)
 

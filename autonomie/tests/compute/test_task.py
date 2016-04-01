@@ -24,6 +24,7 @@
 import math
 from autonomie.compute.task import (
     LineCompute,
+    DiscountLineCompute,
     GroupCompute,
     TaskCompute,
     EstimationCompute,
@@ -96,6 +97,10 @@ class DummyTask(Dummy, TaskCompute):
     pass
 
 
+class DummyDiscountLine(Dummy, DiscountLineCompute):
+    pass
+
+
 class DummyInvoice(Dummy, InvoiceCompute):
     cancelinvoices = []
     pass
@@ -110,7 +115,7 @@ class DummyEstimation(Dummy, EstimationCompute):
     pass
 
 
-def get_lines(datas):
+def get_lines(datas, factory=DummyLine):
     lines = []
     for line in datas:
         lines.append(DummyLine(**line))
@@ -129,7 +134,7 @@ def get_groups():
 def get_task(factory=DummyTask):
     t = factory(**TASK)
     t.line_groups = get_groups()
-    t.discounts = get_lines(DISCOUNTS)
+    t.discounts = get_lines(DISCOUNTS, factory=DummyDiscountLine)
     return t
 
 
@@ -154,8 +159,8 @@ class TestTaskCompute():
                 DummyLine(cost=40000, quantity=1, tva=550)
             ]
         )]
-        task.discounts = [DummyLine(amount=1200, tva=550),
-                          DummyLine(amount=15000, tva=1960)]
+        task.discounts = [DummyDiscountLine(amount=1200, tva=550),
+                          DummyDiscountLine(amount=15000, tva=1960)]
         tvas = task.get_tvas()
         assert tvas.keys() == [1960, 550]
         assert tvas[1960] == 3920

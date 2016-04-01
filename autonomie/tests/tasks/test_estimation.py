@@ -30,6 +30,7 @@ from autonomie.models.task import (
     DiscountLine,
     PaymentLine,
     TaskLine,
+    TaskMention,
 )
 
 from autonomie.models.customer import Customer
@@ -117,6 +118,9 @@ def estimation():
         est.discounts.append(DiscountLine(**line))
     for line in PAYMENT_LINES:
         est.payment_lines.append(PaymentLine(**line))
+    est.mentions = [
+        TaskMention(label='mention1', title='title1', full_text='text1')
+    ]
     return est
 
 def test_set_number():
@@ -152,6 +156,7 @@ def test_duplicate_estimation(dbsession, estimation):
     assert newestimation.statusPersonAccount == user
     assert newestimation.number.startswith("P001_C001_D2_")
     assert newestimation.phase
+    assert newestimation.mentions == estimation.mentions
     assert phase
     assert len(estimation.default_line_group.lines) == len(newestimation.default_line_group.lines)
     assert len(estimation.payment_lines) == len(newestimation.payment_lines)
@@ -214,6 +219,7 @@ def test_light_gen_invoice(dbsession, estimation):
     assert deposit.date == datetime.date.today()
     assert deposit.financial_year == datetime.date.today().year
     assert deposit.total() == estimation.deposit_amount_ttc()
+    assert deposit.mentions == estimation.mentions
     #intermediate invoices:
     intermediate_invoices = invoices[1:-1]
 
@@ -241,6 +247,7 @@ def test_gen_invoice(dbsession, estimation):
     assert deposit.date == datetime.date.today()
     assert deposit.financial_year == datetime.date.today().year
     assert deposit.total() == estimation.deposit_amount_ttc()
+    assert deposit.mentions == estimation.mentions
     #intermediate invoices:
     intermediate_invoices = invoices[1:-1]
     for index, line in enumerate(PAYMENT_LINES[:-1]):
@@ -249,6 +256,7 @@ def test_gen_invoice(dbsession, estimation):
         assert inv.total() - line['amount'] <= 1
         assert inv.date == line['paymentDate']
         assert inv.financial_year == line['paymentDate'].year
+        assert inv.mentions == estimation.mentions
 
     total = sum([inv.total() for inv in invoices])
     assert total == estimation.total()

@@ -533,3 +533,22 @@ class LineCompute(object):
             Compute the ttc amount of the line
         """
         return self.tva_amount() + self.total_ht()
+
+
+class DiscountLineCompute(object):
+    amount = 0
+    tva = 0
+
+    def total_ht(self):
+        return float(self.amount)
+
+    def tva_amount(self):
+        """
+            compute the tva amount of a line
+        """
+        totalht = self.total_ht()
+        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
+        return result
+
+    def total(self):
+        return self.tva_amount() + self.total_ht()

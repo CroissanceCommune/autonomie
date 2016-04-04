@@ -39,6 +39,7 @@ def upgrade():
     session.flush()
 
     op.execute("alter table groups modify label VARCHAR(255);")
+    op.execute("alter table payment modify remittance_amount VARCHAR(255);")
     from autonomie.models.user import User, Group
     for group_id, group_name, group_label in GROUPS:
         group = session.query(Group).filter(Group.name==group_name).first()

@@ -604,7 +604,7 @@ class Payment(DBBASE, PersistentACLMixin):
 
     mode = Column(String(50))
     amount = Column(Integer)
-    remittance_amount = Column(Integer)
+    remittance_amount = Column(String(255))
     date = Column(DateTime(), default=datetime.datetime.now)
     exported = Column(Boolean(), default=False)
     task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))

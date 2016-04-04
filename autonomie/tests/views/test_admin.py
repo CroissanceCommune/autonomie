@@ -66,25 +66,35 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
 
 
 def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.main import AdminPaymentMode
-    config.add_route('admin_paymentmode', '/')
-    appstruct = {'paymentmodes':[u"Chèque", u"Expèce"]}
-    view = AdminPaymentMode(get_csrf_request_with_db())
+    from autonomie.views.admin.vente import PaymentModeAdmin
+    config.add_route('admin_vente', '/')
+    appstruct = {'datas': [
+        {'label': u"Chèque"},
+        {'label': u"Expèce"},
+    ]}
+    view = PaymentModeAdmin(get_csrf_request_with_db())
     view.submit_success(appstruct)
     assert dbsession.query(PaymentMode).count() == 2
-    appstruct = {'paymentmodes':[u"Chèque"]}
+    appstruct = {'datas': [
+        {'label': u"Chèque"},
+    ]}
     view.submit_success(appstruct)
     assert dbsession.query(PaymentMode).count() == 1
 
 
 def test_workunit_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.main import AdminWorkUnit
-    config.add_route('admin_workunit', '/')
-    appstruct = {'workunits':[u"Jours", u"Semaines"]}
-    view = AdminWorkUnit(get_csrf_request_with_db())
+    from autonomie.views.admin.vente import WorkUnitAdmin
+    config.add_route('admin_vente', '/')
+    appstruct = {'datas': [
+        {'label': u"Semaines"},
+        {'label': u"Jours",}
+    ]}
+    view = WorkUnitAdmin(get_csrf_request_with_db())
     view.submit_success(appstruct)
     assert dbsession.query(WorkUnit).count() == 2
-    appstruct = {'workunits':[u"Jours"]}
+    appstruct = {'datas': [
+        {'label': u"Semaines"},
+    ]}
     view.submit_success(appstruct)
     assert dbsession.query(WorkUnit).count() == 1
 
@@ -116,11 +126,11 @@ def test_base_config_view(config, dbsession, get_csrf_request_with_db):
 
 
 def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.main import AdminCae
-    config.add_route(AdminCae.redirect_path, "/")
+    from autonomie.views.admin.vente import AdminVenteTreasury
+    config.add_route('admin_vente', '/')
     appstruct = {'compte_cg_contribution':"00000668",
             'compte_rrr':"000009558"}
-    view = AdminCae(get_csrf_request_with_db())
+    view = AdminVenteTreasury(get_csrf_request_with_db())
     view.submit_success(appstruct)
     config = get_config()
     for key, value in appstruct.items():

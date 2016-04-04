@@ -58,6 +58,7 @@ EST_DBDATAS = dict(
     statusComment=u"Aucun commentaire",
     customer_id=15,
     address="address",
+    mentions=[{'id':"1"}, {'id': "2"}],
 )
 
 INV_DBDATAS = dict(
@@ -72,7 +73,8 @@ INV_DBDATAS = dict(
     description="Facture pour le customer test",
     statusComment=u"Aucun commentaire",
     customer_id=15,
-    address="address"
+    address="address",
+    mentions=[{'id':"1"}, {'id': "2"}],
 )
 
 LINES_DBDATAS = dict(

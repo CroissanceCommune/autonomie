@@ -26,13 +26,12 @@
 Template for holidays search
 </%doc>
 <%inherit file="base.mako"></%inherit>
-<%namespace file="/base/utils.mako" import="print_date" />
 <%block name='content'>
 <div class='row' style="padding-top:10px;">
     <div class='col-md-6 col-md-offset-3'>
         ${form|n}
         %if start_date and end_date:
-            <h3>Congés entre le ${print_date(start_date)} et le ${print_date(end_date)}</h3>
+            <h3>Congés entre le ${api.format_date(start_date)} et le ${api.format_date(end_date)}</h3>
         % endif
     </div>
 </div>
@@ -41,7 +40,7 @@ Template for holidays search
         % if holidays:
         % for holiday in holidays:
             %if holiday.user:
-                ${api.format_account(holiday.user)} : du ${print_date(max(holiday.start_date, start_date))} au ${print_date(min(holiday.end_date, end_date))}
+                ${api.format_account(holiday.user)} : du ${api.format_date(max(holiday.start_date, start_date))} au ${api.format_date(min(holiday.end_date, end_date))}
                 <br />
             % endif
         % endfor

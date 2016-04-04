@@ -23,7 +23,6 @@
 </%doc>
 
 <%inherit file="base.mako"></%inherit>
-<%namespace file="base/utils.mako" import="print_date" />
 <%namespace file="base/utils.mako" import="table_btn" />
 <%namespace file="base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />

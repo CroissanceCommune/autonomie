@@ -23,7 +23,6 @@
 </%doc>
 
 <%inherit file="base.mako"></%inherit>
-<%namespace file="/base/utils.mako" import="print_date" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
@@ -51,7 +50,7 @@
     <thead>
         <tr>
             <th colspan='3'>
-                ${company.name} Solde de trésorerie au ${print_date(today)}
+                ${company.name} Solde de trésorerie au ${api.format_date(today)}
             </th>
         </tr>
         <tr>
@@ -67,10 +66,10 @@
                     ${invoice.get_customer().name} - ${invoice.number}
                 </td>
                 <td>
-                    ${print_date(invoice.date)}
+                    ${api.format_date(invoice.date)}
                 </td>
                 <td>
-                    ${api.format_amount(invoice.total_ht())|n}
+                    ${api.format_amount(invoice.total_ht(), precision=5)|n}
                 </td>
             </tr>
         %endfor
@@ -80,7 +79,7 @@
             <strong>Solde de trésorerie</strong>
         </td>
         <td>
-            <strong>${api.format_amount(sum([invoice.total_ht() for invoice in invoices]))|n}&nbsp;€</strong>
+            <strong>${api.format_amount(sum([invoice.total_ht() for invoice in invoices]), precision=5)|n}&nbsp;€</strong>
         </td>
     </tfoot>
 </table>

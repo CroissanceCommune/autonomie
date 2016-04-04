@@ -25,7 +25,6 @@
 <%doc>
 pager template
 </%doc>
-<%namespace file='/base/utils.mako' import='urlbuild' />
 <%def name="pager(items)">
 <div class="pager">
   <% link_attr={"class": "btn small"} %>

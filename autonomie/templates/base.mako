@@ -23,7 +23,6 @@
 </%doc>
 <!DOCTYPE html>
 <html lang="fr">
-<%namespace file="/base/utils.mako" import="searchform"/>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <%block name="header">

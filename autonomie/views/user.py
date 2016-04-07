@@ -953,7 +953,11 @@ def add_custom_headers_to_writer(writer, query):
                 count = DBSESSION().query(
                     label("nb", func.count(class_.id))
                 ).group_by(class_.userdatas_id).order_by(
-                    desc("nb")).first()[0]
+                    desc("nb")).first()
+                if count!= None:
+                    count = count[0]
+                else:
+                    count = 0
 
                 # Pour les relations O2M qui ont un attribut flatten de
                 # configuré, On rajoute des colonnes "date 1" "date 2" dans

@@ -121,29 +121,33 @@ USER_GROUPS = Table(
 
 
 SEX_OPTIONS = (
+    ('', '', ),
     ('M', 'Homme', ),
     ('F', 'Femme', ),
 )
 
 
 CIVILITE_OPTIONS = (
+    ('Non renseigné', u'Non renseigné', ),
     ('Monsieur', u'Monsieur',),
     ('Madame', u'Madame',),
 )
 
 
 STATUS_OPTIONS = (
+    ('', '',),
     ('single', u"Célibataire", ),
     ('maried', u'Marié(e)', ),
     #  ('divorced', u"Divorcé(e)", ),
     ('pacsed', u"Pacsé(e)", ),
     #  ('widow', u"Veuf(ve)", ),
+    ("free_union", u"Vie maritale", ),
     ('isolated', u"Parent isolé", ),
-    ("free_union", u"Union libre", ),
 )
 
 
 CONTRACT_OPTIONS = (
+    ('', '',),
     ('cdd', u'CDD',),
     ('cdi', u'CDI',),
 )

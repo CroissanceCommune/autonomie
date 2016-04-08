@@ -43,7 +43,7 @@ Afficher <select id='number_of_tasks'>
 éléments à la fois
 <table class='table table-stripped tasklist'>
     <thead>
-        <th class="visible-lg col-xs-4">
+        <th class="visible-lg col-xs-3">
             Nom du document
         </th>
         <th class='col-xs-3'>
@@ -52,7 +52,7 @@ Afficher <select id='number_of_tasks'>
         <th class="visible-lg col-xs-3">
             Dernière modification
         </th>
-        <th class="visible-lg col-xs-2 text-right">
+        <th class="visible-lg col-md-3 col-xs-6 text-right">
             Actions
         </th>
     </thead>

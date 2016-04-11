@@ -26,7 +26,10 @@
     Custom colander types
 """
 import colander
-from autonomie.compute.math_utils import amount
+from autonomie.compute.math_utils import (
+    amount,
+    integer_to_amount,
+)
 
 
 def specialfloat(self, value):
@@ -52,12 +55,16 @@ class AmountType(colander.Number):
     """
     num = specialfloat
 
+    def __init__(self, precision=2):
+        colander.Number.__init__(self)
+        self.precision = precision
+
     def serialize(self, node, appstruct):
         if appstruct is colander.null:
             return colander.null
 
         try:
-            return str(self.num(appstruct) / 100.0)
+            return str(integer_to_amount(self.num(appstruct), self.precision))
         except Exception:
             raise colander.Invalid(node,
                           u"\"{val}\" n'est pas un montant valide".format(
@@ -69,7 +76,7 @@ class AmountType(colander.Number):
             return colander.null
 
         try:
-            return amount(self.num(cstruct))
+            return amount(self.num(cstruct), self.precision)
         except Exception:
             raise colander.Invalid(node,
                           u"\"{val}\" n'est pas un montant valide".format(

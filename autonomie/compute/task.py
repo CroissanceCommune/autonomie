@@ -65,7 +65,7 @@ class TaskCompute(object):
     prefix = ""
 
     def floor(self, amount):
-        return math_utils.floor(amount, self.round_floor)
+        return math_utils.floor_to_thousands(amount, self.round_floor)
 
     def groups_total_ht(self):
         """
@@ -323,7 +323,9 @@ class EstimationCompute(TaskCompute):
         """
         ret_dict = {}
         for tva, total_ht in self.tva_ht_parts().items():
-            ret_dict[tva] = self.floor(total_ht * int(self.deposit) / 100.0)
+            ret_dict[tva] = self.floor(
+                math_utils.percentage(total_ht, self.deposit)
+            )
         return ret_dict
 
     def deposit_amount(self):
@@ -547,8 +549,7 @@ class DiscountLineCompute(object):
             compute the tva amount of a line
         """
         totalht = self.total_ht()
-        result = float(totalht) * (max(int(self.tva), 0) / 10000.0)
-        return result
+        return math_utils.compute_tva(totalht, self.tva)
 
     def total(self):
         return self.tva_amount() + self.total_ht()

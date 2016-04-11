@@ -21,7 +21,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-import math
 from autonomie.compute.task import (
     LineCompute,
     DiscountLineCompute,
@@ -32,45 +31,55 @@ from autonomie.compute.task import (
 )
 from autonomie.compute import math_utils
 
-TASK = {"expenses":1500, "expenses_ht":1000}
+TASK = {"expenses":1500000, "expenses_ht":1000000}
 LINES = [
     [
-        {'cost':10025, 'tva':1960, 'quantity':1.25},
-        {'cost':7500,  'tva':1960, 'quantity':3},
-        {'cost':-5200, 'tva':1960, 'quantity':1}
+        {'cost':10025000, 'tva': 1960, 'quantity': 1.25},
+        {'cost':7500000,  'tva': 1960, 'quantity': 3},
+        {'cost':-5200000, 'tva': 1960, 'quantity': 1},
+#        {'cost':2, 'tva':1960, 'quantity': 1},
+#        {'cost':100000, 'tva':1960, 'quantity': 0.00003},
     ],
     [
-        {'cost':10025, 'tva':1960, 'quantity':1.25},
-        {'cost':7500,  'tva':1960, 'quantity':3},
-        {'cost':-5200, 'tva':1960, 'quantity':1}
+        {'cost':10025000, 'tva':1960, 'quantity':1.25},
+        {'cost':7500000,  'tva':1960, 'quantity':3},
+        {'cost':-5200000, 'tva':1960, 'quantity':1},
+#        {'cost':2, 'tva':1960, 'quantity': 1},
+#        {'cost':100000, 'tva':1960, 'quantity': 0.00003},
     ],
 ]
-DISCOUNTS = [{'amount':2000, 'tva':1960}]
+DISCOUNTS = [{'amount': 2000000, 'tva':1960}]
 
 # Values:
-#         the money values are represented *100
+#         the money values are represented *100000
 #
 # Rounding rules:
 #         TVA, total_ttc and deposit are rounded (total_ht is not)
 
-# Lines total should accept until 4 elements after the '.'(here they are *100)
-# so it fits the limit case
+# Lines total should be integers (here they are
+# *100000) so it fits the limit case
 #
-# Line totals should be floats (here they are *100)
+# Line totals should be integers (here they are *100000)
 from autonomie.tests.base import Dummy
-TASK_LINES_TOTAL_HT = (12531.25, 22500, -5200)
-TASK_LINES_TVAS = (2456.125, 4410, -1019.2)
+TASK_LINES_TOTAL_HT = (12531250.0, 22500000, -5200000, ) # 2, 3 )
+TASK_LINES_TVAS = (2456125, 4410000, -1019200, )  # 0.392, 0.588)
 
 LINES_TOTAL_HT = sum(TASK_LINES_TOTAL_HT) * 2
 LINES_TOTAL_TVAS = sum(TASK_LINES_TVAS) * 2
-EXPENSE_TVA = 196
+EXPENSE_TVA = 196000
 
 DISCOUNT_TOTAL_HT = sum([d['amount']for d in DISCOUNTS])
-DISCOUNT_TVAS = (392,)
+DISCOUNT_TVAS = (392000,)
 DISCOUNT_TOTAL_TVAS = sum(DISCOUNT_TVAS)
 
-HT_TOTAL =  math_utils.floor(LINES_TOTAL_HT - DISCOUNT_TOTAL_HT + TASK['expenses_ht'])
-TVA = math_utils.floor(LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS + EXPENSE_TVA)
+# Totals should be multiple of 1000 (ending to be floats with 2 numbers after
+# the comma
+HT_TOTAL =  math_utils.floor_to_thousands(
+    LINES_TOTAL_HT - DISCOUNT_TOTAL_HT + TASK['expenses_ht']
+)
+TVA = math_utils.floor_to_thousands(
+    LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS + EXPENSE_TVA
+)
 
 # TASK_TOTAL = lines + tva + expenses rounded
 TASK_TOTAL = HT_TOTAL + TVA + TASK['expenses']
@@ -152,68 +161,72 @@ class TestTaskCompute():
         assert est.total_ht() == HT_TOTAL
 
     def test_get_tvas(self):
+        task = get_task()
+        tvas = task.get_tvas()
+        assert tvas[1960] == TVA
+
+    def test_get_tvas_multiple(self):
         task = TaskCompute()
         task.line_groups = [DummyGroup(
             lines=[
-                DummyLine(cost=35000, quantity=1, tva=1960),
-                DummyLine(cost=40000, quantity=1, tva=550)
+                DummyLine(cost=35000000, quantity=1, tva=1960),
+                DummyLine(cost=40000000, quantity=1, tva=550)
             ]
         )]
-        task.discounts = [DummyDiscountLine(amount=1200, tva=550),
-                          DummyDiscountLine(amount=15000, tva=1960)]
+        task.discounts = [DummyDiscountLine(amount=1200000, tva=550),
+                          DummyDiscountLine(amount=15000000, tva=1960)]
         tvas = task.get_tvas()
         assert tvas.keys() == [1960, 550]
-        assert tvas[1960] == 3920
-        assert tvas[550] == 2134
+        assert tvas[1960] == 3920000
+        assert tvas[550] == 2134000
 
-    def test_multiple_tvas(self):
+    def test_get_tvas_multiple_rounding(self):
         task = TaskCompute()
         task.line_groups = [DummyGroup(
             lines=[
-                DummyLine(cost=10004, quantity=1, tva=1000),
-                DummyLine(cost=5002, quantity=1, tva=2000),
+                DummyLine(cost=10004000, quantity=1, tva=1000),
+                DummyLine(cost=5002000, quantity=1, tva=2000),
             ]
         )]
         # Ref https://github.com/CroissanceCommune/autonomie/issues/305
         tvas = task.get_tvas()
-        assert tvas[1000] == 1000
-        assert task.tva_amount() == 2000
+        assert tvas[1000] == 1000000
+        assert task.tva_amount() == 2000000
 
     def test_tva_amount(self):
         # cf #501
-        line = DummyLine(cost=5010, quantity=1, tva=1960)
-        assert line.tva_amount() == 981.96
+        line = DummyLine(cost=5010000, quantity=1, tva=1960)
+        assert line.tva_amount() == 981960
         task = get_task()
         assert task.tva_amount() == TVA
 
     def test_total_ttc(self):
         task = TaskCompute()
         task.line_groups = [DummyGroup(
-            lines=[DummyLine(cost=1030, quantity=1.25, tva=1960)]
+            lines=[DummyLine(cost=1030000, quantity=1.25, tva=1960)]
         )]
         # cf ticket #501
         # line total : 12.875
         # tva : 2.5235 -> 2.52
-        # A confirmer :l'arrondi ici HALF UP
         # => total : 15.40 (au lieu de 15.395)
-        assert task.total_ttc() == 1540
+        assert task.total_ttc() == 1540000
 
     def test_total(self):
         est = get_task()
         assert est.total() == TASK_TOTAL
 
     def test_no_tva(self):
-        line = DummyLine(cost=3500, tva=-100)
+        line = DummyLine(cost=3500000, tva=-100)
         group = DummyGroup(lines=[line])
         task = DummyTask(line_groups=[group])
         assert task.no_tva()
 
-        line = DummyLine(cost=3500, tva=0)
+        line = DummyLine(cost=3500000, tva=0)
         group = DummyGroup(lines=[line])
         task = DummyTask(line_groups=[group])
         assert not task.no_tva()
 
-        line = DummyLine(cost=3500, tva=100)
+        line = DummyLine(cost=3500000, tva=100)
         group = DummyGroup(lines=[line])
         task = DummyTask(line_groups=[group])
         assert not task.no_tva()
@@ -223,57 +236,61 @@ class TestInvoiceCompute():
     def getOne(self):
         task = DummyInvoice()
         task.expenses = 0
-        task.payments = [Dummy(amount=1500), Dummy(amount=1000)]
+        task.payments = [Dummy(amount=1500000), Dummy(amount=1000000)]
         task.line_groups =  [DummyGroup(
-            lines=[DummyLine(cost=6000, quantity=1, tva=0)]
+            lines=[DummyLine(cost=6000000, quantity=1, tva=0)]
         )]
         task.discounts = []
         return task
 
     def test_paid(self):
         task = self.getOne()
-        assert task.paid() == 2500
+        assert task.paid() == 2500000
 
     def test_topay(self):
         task = self.getOne()
-        assert task.topay() == 3500
+        assert task.topay() == 3500000
 
     def test_topay_with_cancelinvoice(self):
         task = self.getOne()
         cinv1 = DummyCancelInvoice()
         cinv1.line_groups = [DummyGroup(
-            lines=[DummyLine(cost=-500, quantity=1, tva=0)]
+            lines=[DummyLine(cost=-500000, quantity=1, tva=0)]
         )]
         cinv2 = DummyCancelInvoice()
         cinv2.line_groups = [DummyGroup(
-            lines=[DummyLine(cost=-600, quantity=1, tva=0)]
+            lines=[DummyLine(cost=-600000, quantity=1, tva=0)]
         )]
         task.cancelinvoices = [cinv1, cinv2]
-        assert task.cancelinvoice_amount() == 1100
-        assert task.topay() == 2400
+        assert task.cancelinvoice_amount() == 1100000
+        assert task.topay() == 2400000
 
 
 class TestEstimationCompute():
     def getOne(self):
         task = DummyEstimation()
-        task.expenses_ht = 20
+        task.expenses_ht = 20000
         task.deposit = 20
         task.manualDeliverables = 0
-        task.line_groups = [DummyGroup(
-            lines=[DummyLine(cost=5000, quantity=1, tva=1960),
-                      DummyLine(cost=5000, quantity=1, tva=1960),
-                      DummyLine(cost=1000, quantity=1, tva=500)]
-        )]
+        task.line_groups = [
+            DummyGroup(
+                lines=[
+                    DummyLine(cost=5000000, quantity=1, tva=1960),
+                    DummyLine(cost=5000000, quantity=1, tva=1960),
+                    DummyLine(cost=1000000, quantity=1, tva=500),
+                ]
+            )
+        ]
         task.discounts = []
-        task.payment_lines = [Dummy(amount=4000),
-                              Dummy(amount=6000),
+        task.payment_lines = [Dummy(amount=4000000),
+                              Dummy(amount=6000000),
         # le dernier montant ne compte pas (le solde est calculé)
-                              Dummy(amount=50)]
+                              Dummy(amount=50000)]
         return task
 
     def test_add_ht_by_tva(self):
-        lines = [DummyLine(cost=5000, quantity=1, tva=1960),
-                DummyLine(cost=1000, quantity=1, tva=500)]
+        lines = [DummyLine(cost=5000000, quantity=1, tva=1960),
+                DummyLine(cost=1000000, quantity=1, tva=500)]
         task = self.getOne()
         dico = {}
         task.add_ht_by_tva(dico, lines)
@@ -284,13 +301,13 @@ class TestEstimationCompute():
         task = self.getOne()
         amounts = task.deposit_amounts()
         assert amounts.keys() == [1960, 500]
-        assert amounts[1960] == 2004
-        assert amounts[500] == 200
+        assert amounts[1960] == 2004000
+        assert amounts[500] == 200000
 
     def test_deposit_amount_ttc(self):
         task = self.getOne()
-        # 2606.78 = 2004 * 119.6 / 100 + 200 * 105/100
-        assert task.deposit_amount_ttc() == 2607
+        # 2606780 = 2004000 * 119.6 / 100 + 200000 * 105/100
+        assert task.deposit_amount_ttc() == 2607000
 
     # Payment lines (with equal repartition)
     def test_get_nb_payment_lines(self):
@@ -301,13 +318,13 @@ class TestEstimationCompute():
         task = self.getOne()
         amounts = task.paymentline_amounts()
         assert amounts.keys() == [1960, 500]
-        assert int(amounts[1960]) == 2672
-        assert int(amounts[500]) == 266
+        assert int(amounts[1960]) == 2672000
+        assert int(amounts[500]) == 266666
 
     def test_paymentline_amount_ttc(self):
         task = self.getOne()
         # 3475.712 = 2672 * 119.6/100 + 266 * 105/100.0
-        assert task.paymentline_amount_ttc() == 3476
+        assert task.paymentline_amount_ttc() == 3476000
 
     def test_sold(self):
         task = self.getOne()
@@ -335,9 +352,10 @@ class TestEstimationCompute():
         deposit = task.deposit_amount_ttc()
         amount1 = compute_payment_ttc(payments[0])
         amount2 = compute_payment_ttc(payments[1])
-        assert int(amount1) == 4000
-        assert int(amount2) == 6000
-        assert int(task.sold() + deposit + amount1 + amount2) == task.total()
+        assert int(amount1) == 4000000
+        assert int(amount2) == 6000000
+        total = task.sold() + deposit + amount1 + amount2
+        assert math_utils.floor_to_thousands(total) == task.total()
 
 
 class TestLineCompute():

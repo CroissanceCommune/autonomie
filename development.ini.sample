@@ -102,6 +102,11 @@ use = egg:waitress#main
 host = 0.0.0.0
 port = 8080
 
+[pshell]
+models = autonomie.models
+db=autonomie.models.base.DBSESSION
+transaction=transaction
+
 # Begin logging configuration
 [loggers]
 keys = root, sqlalchemy, alembic, celery

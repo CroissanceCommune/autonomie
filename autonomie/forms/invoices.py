@@ -293,13 +293,13 @@ class AmountRangeSchema(colander.MappingSchema):
     Used to filter on a range of amount
     """
     start = colander.SchemaNode(
-        custom_types.AmountType(),
+        custom_types.AmountType(5),
         title="",
         missing=colander.drop,
         description=u"TTC entre",
     )
     end = colander.SchemaNode(
-        custom_types.AmountType(),
+        custom_types.AmountType(5),
         title="",
         missing=colander.drop,
         description=u"et",

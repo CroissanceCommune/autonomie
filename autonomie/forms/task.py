@@ -372,7 +372,7 @@ class TaskLine(colander.MappingSchema):
         css_class='col-md-3',
     )
     cost = colander.SchemaNode(
-        AmountType(),
+        AmountType(5),
         title=u"Prix/unité",
         widget=deform.widget.TextInputWidget(),
         css_class='col-md-1')
@@ -410,7 +410,7 @@ class DiscountLine(colander.MappingSchema):
         css_class='col-md-4',
     )
     amount = colander.SchemaNode(
-        AmountType(),
+        AmountType(5),
         title=u"Montant",
         widget=deform.widget.TextInputWidget(),
         css_class='col-md-1',
@@ -508,7 +508,7 @@ class TaskLinesBlock(colander.MappingSchema):
         title=u'',
     )
     expenses_ht = colander.SchemaNode(
-        AmountType(),
+        AmountType(5),
         widget=deform.widget.TextInputWidget(
             template=TEMPLATES_URL + 'wrappable_input.pt',
             after=TEMPLATES_URL + 'tvalist.pt',
@@ -672,7 +672,7 @@ class EstimationPaymentLine(colander.MappingSchema):
         default=u"Solde",
     )
     paymentDate = forms.today_node()
-    amount = colander.SchemaNode(AmountType(), default=0)
+    amount = colander.SchemaNode(AmountType(5), default=0)
 
 
 class EstimationPaymentLines(colander.SequenceSchema):
@@ -790,7 +790,7 @@ def dbdatas_to_appstruct(dbdatas, matching_map=TASK_MATCHING_MAP):
             appstruct.setdefault(section, {})[field] = value
 
     appstruct.setdefault('common', {})['mention_ids'] = [
-        str(a['id']) for a in dbdatas['mentions']
+        str(a['id']) for a in dbdatas.get('mentions', [])
     ]
     return appstruct
 
@@ -807,7 +807,7 @@ def appstruct_to_dbdatas(appstruct, matching_map=TASK_MATCHING_MAP):
             task_datas[field] = value
 
     task_datas['mentions'] = [
-        TaskMention.get(id) for id in appstruct['common']['mention_ids']
+        TaskMention.get(id) for id in appstruct['common'].get('mention_ids', [])
     ]
     return dbdatas
 

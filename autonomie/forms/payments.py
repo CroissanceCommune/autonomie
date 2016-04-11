@@ -113,7 +113,7 @@ retrouver la remise en banque à laquelle cet encaissement est associé",
         default=deferred_amount_default,
     )
     amount = colander.SchemaNode(
-        AmountType(),
+        AmountType(5),
         title=u"Montant de l'encaissement",
         validator=deferred_total_validator,
         default=deferred_amount_default,
@@ -144,7 +144,7 @@ montant de la facture celle-ci est soldée automatiquement""",
 
 class TvaPayment(colander.MappingSchema):
     amount = colander.SchemaNode(
-        AmountType(),
+        AmountType(5),
         title=u"Montant de l'encaissement",
     )
     tva_id = colander.SchemaNode(
@@ -204,12 +204,12 @@ class MultiplePaymentSchema(colander.MappingSchema):
     """
     come_from = forms.come_from_node()
     remittance_amount = colander.SchemaNode(
-        AmountType(),
-        title=u"Montant de la remise en banque",
+        colander.String(),
+        title=u"Identifiant de la remise en banque",
         default=deferred_amount_default,
     )
     payment_amount = colander.SchemaNode(
-        AmountType(),
+        AmountType(5),
         title=u"Montant du paiement",
         description=u"Ce champ permet de contrôler que la somme des \
 encaissements saisis dans ce formulaire correspondent bien au montant du \

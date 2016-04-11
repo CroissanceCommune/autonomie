@@ -174,21 +174,26 @@ def format_name(firstname, lastname, reverse=True, upper=True):
         return u"{0} {1}".format(firstname, lastname)
 
 
-def format_amount(amount, trim=True, grouping=True):
+def format_amount(amount, trim=True, grouping=True, precision=2):
     """
         return a pretty printable amount
     """
     resp = u""
     if amount is not None:
+        dividor = 10.0 ** precision
         if isinstance(amount, float) or isinstance(amount, int):
             if amount == int(amount):
                 # On a 2 chiffres après la virgule (pas plus)
                 trim = True
+
         if trim:
-            amount = int(amount) / 100.0
-            resp = locale.format("%.2f", amount, grouping=grouping)
+            formatter = "%.2f"
+            amount = int(amount) / dividor
+            resp = locale.format(formatter, amount, grouping=grouping)
         else:
-            resp = locale.format("%g", amount / 100.0, grouping=grouping)
+            formatter = "%.{0}f".format(precision)
+            amount = amount / dividor
+            resp = locale.format(formatter, amount, grouping=grouping)
     if grouping:
         resp = resp.replace(' ', '&nbsp;')
     return resp

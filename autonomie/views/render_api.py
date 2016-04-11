@@ -188,7 +188,7 @@ def format_amount(amount, trim=True, grouping=True, precision=2):
         if isinstance(amount, float):
             if amount == int(amount):
                 trim = True
-        elif isinstance(amount, int) and precision > 2:
+        elif precision > 2:
             if math_utils.floor_to_precision(
                 amount,
                 precision=2,

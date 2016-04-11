@@ -60,6 +60,11 @@ class TestIt(unittest.TestCase):
             render_api.format_amount(c, trim=True, precision=5),
             "210,00"
         )
+        c = 21012000
+        self.assertEqual(
+            render_api.format_amount(c, trim=False, precision=5),
+            "210,12"
+        )
 
     def test_format_name(self):
         self.assertEqual(render_api.format_name(None, u"LastName"),

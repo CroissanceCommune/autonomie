@@ -20,6 +20,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import logging
+import datetime
+
+from sqlalchemy import extract
+
 from autonomie.scripts.utils import (
     command,
     get_value,
@@ -43,15 +47,17 @@ def refresh_cache(arguments, env):
     if types is None:
         types = ['invoice', 'estimation', 'cancelinvoice']
 
+    this_year = datetime.date.today().year
+
     for task in Task.query().filter(
         Task.type_.in_(types)
-    ):
+    ).filter(extract('year', Task.date) == this_year):
         try:
             cache_amounts(None, None, task)
             session.merge(task)
             index += 1
-            if index % 50 == 0:
-                print('flushing')
+            if index % 200 == 0:
+                logger.debug('flushing')
                 session.flush()
         except:
             logger.exception(u"Error while caching total : {0}".format(task.id))
@@ -74,4 +80,3 @@ def cache_cmd():
         return command(refresh_cache, cache_cmd.__doc__)
     finally:
         pass
-

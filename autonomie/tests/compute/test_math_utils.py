@@ -24,6 +24,7 @@
 import unittest
 
 from autonomie.compute.math_utils import (
+    floor_to_thousands,
     floor,
     amount,
     percent,
@@ -41,8 +42,17 @@ class TestMathUtils(unittest.TestCase):
         self.assertEqual(floor(a), 29265)
         a = 29264.91
         self.assertEqual(floor(a), 29265)
+        self.assertEqual(floor(a, round_floor=True), 29264)
         a = 29264.5
         self.assertEqual(floor(a), 29265)
+
+    def test_floor_to_thousands(self):
+        a = 299999
+        self.assertEqual(floor_to_thousands(a), 300000)
+        a = 299455
+        self.assertEqual(floor_to_thousands(a), 299000)
+        a = 299999
+        self.assertEqual(floor_to_thousands(a, round_floor=True), 299000)
 
     def test_amount(self):
         # Ref #727

@@ -35,6 +35,24 @@ from decimal import (
 PRECISION_LEVEL = 2
 
 
+def floor_to_thousands(value, round_floor=False):
+    """
+    floor a value to the thousand :
+        >>> floor_to_thousand(296999)
+        297000
+
+        amounts are of the form : value * 10000
+        it allows to store 5 numbers after comma for intermediary amounts
+        for totals we want 2 numbers => value * 10000 should be a multiple of
+        1000
+    """
+    if not isinstance(value, Decimal):
+        value = Decimal(str(value))
+
+    value = value / Decimal(1000.0)
+    return floor(value, round_floor) * 1000
+
+
 def floor(value, round_floor=False):
     """
         floor a float value
@@ -44,8 +62,6 @@ def floor(value, round_floor=False):
 
         >>> floor(296.9999999)
         297
-        >>> floor(296.9985265)
-        296
     """
     if not isinstance(value, Decimal):
         value = Decimal(str(value))

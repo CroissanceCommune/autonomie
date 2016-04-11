@@ -34,6 +34,7 @@ from zope.interface import implementer
 from sqlalchemy import (
     Column,
     Integer,
+    BigInteger,
     String,
     ForeignKey,
     Text,
@@ -402,7 +403,7 @@ class PaymentLine(DBBASE):
     task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
     order = Column(Integer)
     description = Column(Text)
-    amount = Column(Integer)
+    amount = Column(BigInteger())
     creationDate = deferred(
         Column(
             CustomDateType,

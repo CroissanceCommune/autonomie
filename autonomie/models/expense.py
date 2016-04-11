@@ -647,6 +647,8 @@ class ExpensePayment(DBBASE, PersistentACLMixin):
             info={'colanderalchemy': {'exclude': True}},
         ),
     )
+    # formatting precision
+    precision = 2
 
     def get_amount(self):
         return self.amount

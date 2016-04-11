@@ -70,13 +70,13 @@ autonomie.static=static
 # Assets (logo ...) storage path
 autonomie.assets=/tmp/
 # treasury related docs upload
-autonomie.ftpdir=/home/gas/Developpement/git/autonomie/autonomie/filesystem
+autonomie.ftpdir=~/tmp/filesystem
 # Max filesize for file attachment (in Bytes)
 autonomie.maxfilesize=2000000
 # The instance name
 autonomie.instance_name=intranet.local.fr
 # The depot path for storing files locally
-autonomie.depot_path =/home/gas/autonomie/local/filedepot
+autonomie.depot_path =~/tmp/filedepot
 # Tempdir for file upload (should exist)
 pyramid_deform.tempdir=/tmp/tempdir
 

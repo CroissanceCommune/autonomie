@@ -48,9 +48,9 @@
 
 module("Computing tools");
 test("Transformations des strings en centimes", function(){
-  equal(transformToCents(), 0.0);
-  equal(transformToCents("15,25"), 15.25);
-  equal(transformToCents("15,25658"), 15.25658);
+  equal(strToFloat(), 0.0);
+  equal(strToFloat("15,25"), 15.25);
+  equal(strToFloat("15,25658"), 15.25658);
   equal(round(583.06), 583.06);
   equal(round(1.009), 1.01);
   equal(round(1.001), 1);
@@ -66,6 +66,7 @@ test("Transformations des strings en centimes", function(){
   equal(trailingZeros("15", false), "15");
   equal(trailingZeros("1500", false), "15");
   equal(trailingZeros("1550", false), "155");
+  equal(trailingZeros("01550", false), "0155");
   equal(getTvaPart(100, 1960), 19.6);
   equal(getPercent(1.07, 5), 0.05);
 });

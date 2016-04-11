@@ -37,12 +37,12 @@ INVOICE = dict( name=u"Facture 2",
                 expenses=0,
                 expenses_ht=0)
 
-LINE = {'description':u'text1', 'cost':10000, 'tva':1960,
+LINE = {'description':u'text1', 'cost':10000000, 'tva':1960,
               'unity':'DAY', 'quantity':1, 'order':1}
 
 PAYMENTS = [
-            {'amount':1500, 'mode':'CHEQUE'},
-            {'amount':1895, 'mode':'CHEQUE'},
+            {'amount':1500000, 'mode':'CHEQUE'},
+            {'amount':1895000, 'mode':'CHEQUE'},
             ]
 
 @pytest.fixture
@@ -55,20 +55,20 @@ def invoice():
 
 
 def test_record_payment(invoice):
-    request_params = {'amount':1500, 'mode':'cheque'}
+    request_params = {'amount':1500000, 'mode':'cheque'}
     record_payment(invoice, **request_params)
     assert len(invoice.payments) == 3
-    assert invoice.payments[2].amount == 1500
+    assert invoice.payments[2].amount == 1500000
 
 
 def test_payment_get_amount():
     payment = Payment(**PAYMENTS[1])
-    assert payment.get_amount() == 1895
+    assert payment.get_amount() == 1895000
 
 
 def test_invoice_topay(invoice):
-    assert invoice.paid() == 3395
-    assert invoice.topay() == 11960 - 3395
+    assert invoice.paid() == 3395000
+    assert invoice.topay() == 11960000 - 3395000
 
 
 def test_resulted_manual(invoice):

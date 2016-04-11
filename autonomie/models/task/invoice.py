@@ -626,6 +626,8 @@ class Payment(DBBASE, PersistentACLMixin):
             info={'colanderalchemy': {'exclude': True}},
         ),
     )
+    # Formatting precision
+    precision = 5
 
     # Usefull aliases
     @property

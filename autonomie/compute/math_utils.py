@@ -35,22 +35,34 @@ from decimal import (
 PRECISION_LEVEL = 2
 
 
-def floor_to_thousands(value, round_floor=False):
+def floor_to_precision(
+    value,
+    round_floor=False,
+    precision=2,
+    dialect_precision=5
+):
     """
-    floor a value to the thousand :
+    floor a value in its int representation:
         >>> floor_to_thousand(296999)
         297000
 
-        amounts are of the form : value * 10000
-        it allows to store 5 numbers after comma for intermediary amounts
-        for totals we want 2 numbers => value * 10000 should be a multiple of
-        1000
+        amounts are of the form : value * 10 ** dialect_precision it allows to
+        store dialect_precision numbers after comma for intermediary amounts for
+        totals we want precision numbers
+
+    :param int value: The value to floor
+    :param bool round_floor: Should be rounded down ?
+    :param int precision: How much significant numbers we want ?
+    :param int dialect_precision: The number of zeros that are concerning the
+    floatting part of our value
     """
     if not isinstance(value, Decimal):
         value = Decimal(str(value))
 
-    value = value / Decimal(1000.0)
-    return floor(value, round_floor) * 1000
+    dividor = 10 ** (dialect_precision - precision)
+
+    value = value / Decimal(dividor)
+    return floor(value, round_floor) * dividor
 
 
 def floor(value, round_floor=False):

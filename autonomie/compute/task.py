@@ -65,7 +65,7 @@ class TaskCompute(object):
     prefix = ""
 
     def floor(self, amount):
-        return math_utils.floor_to_thousands(amount, self.round_floor)
+        return math_utils.floor_to_precision(amount, self.round_floor)
 
     def groups_total_ht(self):
         """

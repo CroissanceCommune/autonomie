@@ -74,10 +74,10 @@ DISCOUNT_TOTAL_TVAS = sum(DISCOUNT_TVAS)
 
 # Totals should be multiple of 1000 (ending to be floats with 2 numbers after
 # the comma
-HT_TOTAL =  math_utils.floor_to_thousands(
+HT_TOTAL =  math_utils.floor_to_precision(
     LINES_TOTAL_HT - DISCOUNT_TOTAL_HT + TASK['expenses_ht']
 )
-TVA = math_utils.floor_to_thousands(
+TVA = math_utils.floor_to_precision(
     LINES_TOTAL_TVAS - DISCOUNT_TOTAL_TVAS + EXPENSE_TVA
 )
 
@@ -355,7 +355,7 @@ class TestEstimationCompute():
         assert int(amount1) == 4000000
         assert int(amount2) == 6000000
         total = task.sold() + deposit + amount1 + amount2
-        assert math_utils.floor_to_thousands(total) == task.total()
+        assert math_utils.floor_to_precision(total) == task.total()
 
 
 class TestLineCompute():

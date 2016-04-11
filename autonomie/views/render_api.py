@@ -32,6 +32,8 @@ import bleach
 from copy import deepcopy
 from pyramid.security import has_permission as base_has_permission
 
+from autonomie.compute import math_utils
+
 from autonomie.utils.date import (
     format_date,
     format_short_date,
@@ -181,9 +183,17 @@ def format_amount(amount, trim=True, grouping=True, precision=2):
     resp = u""
     if amount is not None:
         dividor = 10.0 ** precision
-        if isinstance(amount, float) or isinstance(amount, int):
+
+        # Limit to 2 trailing zeros
+        if isinstance(amount, float):
             if amount == int(amount):
-                # On a 2 chiffres après la virgule (pas plus)
+                trim = True
+        elif isinstance(amount, int) and precision > 2:
+            if math_utils.floor_to_precision(
+                amount,
+                precision=2,
+                dialect_precision=precision
+            ) == amount:
                 trim = True
 
         if trim:
@@ -194,6 +204,7 @@ def format_amount(amount, trim=True, grouping=True, precision=2):
             formatter = "%.{0}f".format(precision)
             amount = amount / dividor
             resp = locale.format(formatter, amount, grouping=grouping)
+
     if grouping:
         resp = resp.replace(' ', '&nbsp;')
     return resp

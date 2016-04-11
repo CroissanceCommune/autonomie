@@ -158,8 +158,6 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       'click button.remove':'_remove'
     },
     showForm: function(){
-      console.log("Showform");
-      console.log(this.ui);
       this.ui.form.toggle();
     },
     updateDatas: function(){

@@ -34,6 +34,7 @@ from zope.interface import implementer
 from sqlalchemy import (
     Column,
     Integer,
+    BigInteger,
     String,
     ForeignKey,
     Text,
@@ -158,9 +159,9 @@ class Task(Node):
         Text,
         info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
     )
-    ht = Column(Integer, default=0)
-    tva = Column(Integer, default=0)
-    ttc = Column(Integer, default=0)
+    ht = Column(BigInteger(), default=0)
+    tva = Column(BigInteger(), default=0)
+    ttc = Column(BigInteger(), default=0)
     project_id = Column(
         Integer,
         ForeignKey('project.id'),
@@ -195,12 +196,12 @@ class Task(Node):
     )
     # Not used in latest invoices
     expenses = deferred(
-        Column(Integer, default=0),
+        Column(BigInteger(), default=0),
         group='edit'
     )
     expenses_ht = deferred(
         Column(
-            Integer,
+            BigInteger(),
             default=0
         ),
         group='edit',
@@ -532,7 +533,7 @@ class DiscountLine(DBBASE, DiscountLineCompute):
         nullable=False,
         default=196
     )
-    amount = Column(Integer)
+    amount = Column(BigInteger())
     description = Column(
         Text,
         info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}}
@@ -703,7 +704,7 @@ class TaskLine(DBBASE, LineCompute):
             }
         },
     )
-    cost = Column(Integer, default=0,)
+    cost = Column(BigInteger(), default=0,)
     tva = Column(Integer, nullable=False, default=196)
     quantity = Column(Float(), default=1)
     unity = Column(String(100),)

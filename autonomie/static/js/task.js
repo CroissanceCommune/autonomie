@@ -615,12 +615,16 @@ function fetchFormContext(){
     }
   });
 }
-function fireAmountChange(){
+function fireAmountChange(input_tag){
   /*
    * Fire an amount change on the line containing the current form_element
+   *
+   * :param obj input_tag: The jquery object of an input which changed
    */
-  var input_tag = $(this);
-  var row = $(this).parent().parent().parent();
+  if (_.isUndefined(input_tag)){
+    input_tag = $(this);
+  }
+  var row = input_tag.parent().parent().parent();
   $(Facade).trigger("linechange", row);
   $(Facade).trigger("totalchange", row);
 }

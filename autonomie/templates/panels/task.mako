@@ -143,18 +143,18 @@
                         % endif
                     </tr>
                 % endif
-                <tr>
-                    <td colspan='${colspan}' class='rightalign'>
-                        Total HT
-                    </td>
-                    <td class='price'>
-                        ${api.format_amount(task.groups_total_ht() + task.expenses_ht, trim=False, precision=5)|n}&nbsp;€
-                    </td>
-                    % if display_tvas_column:
-                        <td></td>
-                    % endif
-                </tr>
                 %if hasattr(task, "discounts") and task.discounts:
+                    <tr>
+                        <td colspan='${colspan}' class='rightalign'>
+                            Total HT
+                        </td>
+                        <td class='price'>
+                            ${api.format_amount(task.groups_total_ht() + task.expenses_ht, trim=False, precision=5)|n}&nbsp;€
+                        </td>
+                        % if display_tvas_column:
+                            <td></td>
+                        % endif
+                    </tr>
                     % for discount in task.discounts:
                         <tr>
                             <td colspan='${colspan}' class='description'>
@@ -176,6 +176,18 @@
                         </td>
                         <td class='price'>
                             ${api.format_amount(task.total_ht(), precision=5)|n}&nbsp;€
+                        </td>
+                        % if display_tvas_column:
+                            <td></td>
+                        % endif
+                    </tr>
+                % else:
+                    <tr>
+                        <td colspan='${colspan}' class='rightalign'>
+                            Total HT
+                        </td>
+                        <td class='price'>
+                            ${api.format_amount(task.groups_total_ht() + task.expenses_ht, precision=5)|n}&nbsp;€
                         </td>
                         % if display_tvas_column:
                             <td></td>

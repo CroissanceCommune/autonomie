@@ -185,7 +185,7 @@ def format_amount(amount, trim=True, grouping=True, precision=2):
         dividor = 10.0 ** precision
 
         # Limit to 2 trailing zeros
-        if isinstance(amount, float):
+        if isinstance(amount, float) and precision <= 2:
             if amount == int(amount):
                 trim = True
         elif precision > 2:

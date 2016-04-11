@@ -21,6 +21,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
+import pytest
 from autonomie.compute.task import (
     LineCompute,
     DiscountLineCompute,
@@ -122,6 +123,13 @@ class DummyCancelInvoice(Dummy, TaskCompute):
 
 class DummyEstimation(Dummy, EstimationCompute):
     pass
+
+
+@pytest.fixture
+def group():
+    group = DummyGroup()
+    group.lines = [DummyLine(cost=0.001, quantity=0.1)]
+    return group
 
 
 def get_lines(datas, factory=DummyLine):
@@ -370,3 +378,8 @@ class TestLineCompute():
             assert line_obj.total_ht() == DISCOUNTS[index]['amount']
             assert line_obj.total() == DISCOUNTS[index]['amount'] \
                     + DISCOUNT_TVAS[index]
+
+
+class TestGroupCompute():
+    def test_cents(self, group):
+        assert group.total_ht() == 0.0001

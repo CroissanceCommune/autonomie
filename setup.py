@@ -9,6 +9,7 @@ entry_points = {
         "autonomie-admin = autonomie.scripts:add_admin_cmd",
         "autonomie-mail = autonomie.scripts.mail_files:mail_cmd",
         "autonomie-fake = autonomie.scripts:populate_fake",
+        "autonomie-cache = autonomie.scripts:cache_cmd",
     ],
     "fanstatic.libraries": ["autonomie = autonomie.resources:lib_autonomie"]
 }

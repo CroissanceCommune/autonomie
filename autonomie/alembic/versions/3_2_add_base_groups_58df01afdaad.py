@@ -53,6 +53,13 @@ def upgrade():
             user._groups.append(group)
             session.merge(user)
 
+    label = u"Peut saisir/modifier/supprimer les paiements de ses factures"
+    group_name = "payment_admin"
+    group = Group.query().filter(Group.name==group_name).first()
+    if group is not None:
+        group.label = label
+        session.merge(group)
+
 
 def downgrade():
     pass

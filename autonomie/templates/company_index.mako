@@ -39,26 +39,22 @@
                 </div>
                 <table class='table table-stripped'>
                     <thead>
-                        <th class="col-xs-2 visible-lg">Numéro</th>
                         <th class='col-xs-4'>Client</th>
                         <th class="col-xs-3">Total</th>
-                        <th class="visible-lg col-xs-3">Actions</th>
+                        <th class="col-md-4 col-xs-5">Actions</th>
                     </thead>
                     <tbody>
                         % for invoice in elapsed_invoices[:5]:
                             <tr>
                                 <% url = request.route_path("invoice", id=invoice.id) %>
                                 <% onclick = "document.location='{url}'".format(url=url) %>
-                                <td class="visible-lg rowlink" onclick="${onclick}">
-                                    ${invoice.prefix}${invoice.official_number}
-                                </td>
                                 <td class="rowlink" onclick="${onclick}">
                                     ${format_customer(invoice.customer, False)}
                                 </td>
                                 <td class="rowlink" onclick="${onclick}">
-                                    ${api.format_amount(invoice.total())|n}&nbsp;€
+                                    ${api.format_amount(invoice.total(), precision=5)|n}&nbsp;€
                                 </td>
-                                <td class="visible-lg" style="text-align:right">
+                                <td style="text-align:right">
                                     <div class='btn-group'>
                                     ${table_btn(\
                                     request.route_path("invoice", id=invoice.id), \

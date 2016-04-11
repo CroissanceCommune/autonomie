@@ -70,9 +70,9 @@
     <tbody>
         <tr>
             <td colspan='${columns - 4}'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalttc, precision=5)|n}&nbsp;€</strong></td>
             <td colspan='1'></td>
         </tr>
         % if records:
@@ -99,14 +99,14 @@
             </td>
              <td>
                  <strong>
-                    ${api.format_amount(ht) | n}&nbsp;€
+                    ${api.format_amount(ht, precision=5) | n}&nbsp;€
                  </strong>
              </td>
              <td>
-                 ${api.format_amount(tva) | n}&nbsp;€
+                 ${api.format_amount(tva, precision=5) | n}&nbsp;€
              </td>
              <td>
-                 ${api.format_amount(ttc) | n}&nbsp;€
+                 ${api.format_amount(ttc, precision=5) | n}&nbsp;€
              </td>
              <td class="actions">
                  <a class='btn btn-default'
@@ -119,9 +119,9 @@
       % endfor
         <tr>
             <td colspan='${columns - 4}'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalttc, precision=5)|n}&nbsp;€</strong></td>
             <td colspan='1'></td>
         </tr>
   % else:

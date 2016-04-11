@@ -140,7 +140,7 @@
                                 ${payment.bank.label}
                             % endif
                             ):
-                            ${api.format_amount(payment.amount)|n}&nbsp;€
+                            ${api.format_amount(payment.amount, precision=5)|n}&nbsp;€
                             (${payment.tva.name})
                         </a>
                     </li>
@@ -149,7 +149,7 @@
             % endif
         % endif
         % if hasattr(task, 'topay') and not task.is_resulted():
-            Il reste ${api.format_amount(task.topay())|n}&nbsp;€ à régler.
+            Il reste ${api.format_amount(task.topay(), precision=5)|n}&nbsp;€ à régler.
         % endif
     </div>
             % if task.is_estimation():

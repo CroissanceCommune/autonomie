@@ -26,7 +26,7 @@
 <dl class="dl-horizontal">
     <dt>Date</dt><dd>${api.format_date(request.context.date)}</dd>
     <dt>Mode de paiement</dt><dd>${request.context.mode}</dd>
-    <dt>Montant</dt><dd>${api.format_amount(request.context.amount)|n}&nbsp;&euro;</dd>
+    <dt>Montant</dt><dd>${api.format_amount(request.context.amount, precision=request.context.precision)|n}&nbsp;&euro;</dd>
     <dt>Banque</dt><dd>
         % if request.context.bank:
             ${request.context.bank.label} (${request.context.bank.compte_cg})

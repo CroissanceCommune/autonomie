@@ -48,9 +48,9 @@
     <tbody>
         <tr>
             <td colspan='${num_columns - 6}'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalttc, precision=5)|n}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
         ## invoices are : Invoices, ManualInvoices or CancelInvoices
@@ -127,13 +127,13 @@
                 </a>
             </td>
             <td>
-                <strong>${api.format_amount(ht)|n}&nbsp;€</strong>
+                <strong>${api.format_amount(ht, precision=5)|n}&nbsp;€</strong>
             </td>
             <td>
-                ${api.format_amount(tva)|n}&nbsp;€
+                ${api.format_amount(tva, precision=5)|n}&nbsp;€
             </td>
             <td>
-                ${api.format_amount(ttc)|n}&nbsp;€
+                ${api.format_amount(ttc, precision=5)|n}&nbsp;€
             </td>
             <td>
                 % if len(document.payments) == 1 and status == 'resulted':
@@ -149,9 +149,9 @@
                     <% url = request.route_path('payment', id=payment.id) %>
                             <li>
                                 <a href="${url}">
-                            ${api.format_amount(payment.amount)|n}&nbsp;€
-                            le ${api.format_date(payment.date)}
-                            (${api.format_paymentmode(payment.mode)})
+                                    ${api.format_amount(payment.amount, precision=5)|n}&nbsp;€
+                                    le ${api.format_date(payment.date)}
+                                    (${api.format_paymentmode(payment.mode)})
                                 </a>
                             </li>
                         % endfor
@@ -191,9 +191,9 @@
     <tfoot>
         <tr>
             <td colspan='${num_columns - 6}'><strong>Total</strong></td>
-            <td><strong>${api.format_amount(totalht)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totaltva)|n}&nbsp;€</strong></td>
-            <td><strong>${api.format_amount(totalttc)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalht, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totaltva, precision=5)|n}&nbsp;€</strong></td>
+            <td><strong>${api.format_amount(totalttc, precision=5)|n}&nbsp;€</strong></td>
             <td colspan='3'></td>
         </tr>
     </tfoot>

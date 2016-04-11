@@ -91,14 +91,14 @@
                         <tr>
                             <td class="description">${format_text(line.description, False)}</td>
                             %if task.display_units == 1:
-                                <td class="unity">${api.format_amount(line.cost)|n}&nbsp;€</td>
+                                <td class="unity">${api.format_amount(line.cost, trim=False, precision=5)|n}&nbsp;€</td>
                                 <td class="quantity">${api.format_quantity(line.quantity)} ${line.unity}</td>
                             % endif
-                            <td class="price">${api.format_amount(line.total_ht(), trim=False)|n}&nbsp;€</td>
+                            <td class="price">${api.format_amount(line.total_ht(), trim=False, precision=5)|n}&nbsp;€</td>
                             % if display_tvas_column:
                                 <td class='tva'>
                                     % if line.tva>=0:
-                                        ${api.format_amount(line.tva)|n}&nbsp;%
+                                        ${api.format_amount(line.tva, precision=5)|n}&nbsp;%
                                     % endif
                                 </td>
                             % endif
@@ -110,7 +110,7 @@
                                 Sous-total HT
                             </td>
                             <td class='price'>
-                                ${api.format_amount(group.total_ht(), trim=False)|n}&nbsp;€
+                                ${api.format_amount(group.total_ht(), trim=False, precision=5)|n}&nbsp;€
                             </td>
                             % if display_tvas_column:
                                 <td></td>
@@ -134,11 +134,11 @@
                             Frais forfaitaires
                         </td>
                         <td class="price">
-                            ${api.format_amount(task.expenses_ht)|n}&nbsp;€
+                            ${api.format_amount(task.expenses_ht, precision=5)|n}&nbsp;€
                         </td>
                         % if display_tvas_column:
                             <td class='tva'>
-                                ${api.format_amount(task.expenses_tva)|n}&nbsp;%
+                                ${api.format_amount(task.expenses_tva, precision=5)|n}&nbsp;%
                             </td>
                         % endif
                     </tr>
@@ -148,7 +148,7 @@
                         Total HT
                     </td>
                     <td class='price'>
-                        ${api.format_amount(task.groups_total_ht() + task.expenses_ht, trim=False)|n}&nbsp;€
+                        ${api.format_amount(task.groups_total_ht() + task.expenses_ht, trim=False, precision=5)|n}&nbsp;€
                     </td>
                     % if display_tvas_column:
                         <td></td>
@@ -161,11 +161,11 @@
                                 ${format_text(discount.description)}
                             </td>
                             <td class='price'>
-                                ${api.format_amount(discount.amount)|n}&nbsp;€
+                                ${api.format_amount(discount.amount, precision=5)|n}&nbsp;€
                             </td>
                             % if display_tvas_column:
                                 <td class='tva'>
-                                    ${api.format_amount(discount.tva)|n}&nbsp;%
+                                    ${api.format_amount(discount.tva, precision=5)|n}&nbsp;%
                                 </td>
                             % endif
                         </tr>
@@ -175,7 +175,7 @@
                             Total HT après remise
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.total_ht())|n}&nbsp;€
+                            ${api.format_amount(task.total_ht(), precision=5)|n}&nbsp;€
                         </td>
                         % if display_tvas_column:
                             <td></td>
@@ -193,10 +193,10 @@
                         <tr>
                             % if tva>0:
                             <td colspan='${colspan}' class='rightalign'>
-                                    TVA (${api.format_amount(tva)|n} %)
+                                TVA (${api.format_amount(tva, precision=5)|n} %)
                             </td>
                             <td class='price'>
-                                ${api.format_amount(tva_amount)|n}&nbsp;€
+                                ${api.format_amount(tva_amount, precision=5)|n}&nbsp;€
                             </td>
                             % endif
                         </tr>
@@ -208,7 +208,7 @@
                             Frais réels
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.expenses_amount())|n}&nbsp;€
+                            ${api.format_amount(task.expenses_amount(), precision=5)|n}&nbsp;€
                         </td>
                     </tr>
                 %endif
@@ -217,7 +217,7 @@
                         Total TTC
                     </td>
                     <td class='price'>
-                        ${api.format_amount(task.total())|n}&nbsp;€
+                        ${api.format_amount(task.total(), precision=5)|n}&nbsp;€
                     </td>
                 </tr>
             </tbody>

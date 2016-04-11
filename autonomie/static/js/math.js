@@ -24,9 +24,11 @@
 
 
 
-function transformToCents(value) {
+function strToFloat(value) {
   /*
    * Transform the value to a float
+   *
+   * :param str value: A string value representing a number
    */
   var result;
 
@@ -44,11 +46,14 @@ function transformToCents(value) {
 function round(price){
   /*
    *  Round the price (in our comptability model, round_half_up, 1.5->2)
+   *
+   *  :param float price: The price to round
    */
   var passed_to_cents = price * 100;
   passed_to_cents = Math.round(passed_to_cents);
   return passed_to_cents / 100;
 }
+
 function formatPrice(price, rounded) {
   /*
    * Return a formatted price for display
@@ -100,20 +105,21 @@ function formatAmount( amount, rounded ){
 }
 function trailingZeros(cents, rounded) {
   /*
-   * Handle the trailing zeros needed for an amount
+   * Remove trailing zeros in an amount
+   *
+   * :param str cents: A string value representing cents (14010)
+   * :param bool rounded: Should we round the value ?
    */
    if (cents.length === 1){
     cents += 0;
    }
+   var last_value;
    if ( ! rounded ){
-    if ( cents.length > 2 ){
-      if (cents.charAt(3) == "0"){
-        cents = cents.substr(0,3);
-      }
-      if (cents.charAt(2) == "0"){
-        cents = cents.substr(0,2);
-      }
-    }
+     last_value = cents.substr(cents.length - 1);
+     while ((cents.length > 2) && (last_value == '0')) {
+       cents = cents.substr(0, cents.length -1);
+       last_value = cents.substr(cents.length - 1);
+     }
    }
    return cents;
 }

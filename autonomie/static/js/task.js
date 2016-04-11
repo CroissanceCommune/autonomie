@@ -107,7 +107,7 @@ var TaskRow = Row.extend({
   HT:function(){
     var q = this.getQuantity();
     var c = this.getCost();
-    return transformToCents(c) * transformToCents(q);
+    return strToFloat(c) * strToFloat(q);
   }
 });
 var DiscountRow = Row.extend({
@@ -117,7 +117,7 @@ var DiscountRow = Row.extend({
   type:"discount",
   getAmount:function(){
     var amount = this.row.find(Selectors.amount).val();
-    return transformToCents(amount);
+    return strToFloat(amount);
   },
   HT:function(){
   console.log(this.getAmount());
@@ -135,14 +135,14 @@ var ExpenseRow = Row.extend({
       AppOptions['tvas'], function(val){return val['default'];}
     );
     if (_.isUndefined(tva_object)){
-      return transformToCents("0");
+      return strToFloat("0");
     }else{
       var tva = tva_object.value.toString();
-      return transformToCents(tva);
+      return strToFloat(tva);
     }
   },
   HT:function(){
-    return transformToCents(this.row.val());
+    return strToFloat(this.row.val());
   }
 });
 var RowCollection = Backbone.Collection.extend({
@@ -257,7 +257,7 @@ function getExpensesHT() {
   /*
    * Return the current HT expenses configured
    */
-  return transformToCents( $(Selectors.expenses_ht).val() );
+  return strToFloat( $(Selectors.expenses_ht).val() );
 }
 function getCollection(){
   /*
@@ -314,7 +314,7 @@ function computePaymentRows(){
    */
   var sum = 0;
   $(".paymentline input:text[name=amount]").each(function(){
-    sum += transformToCents($(this).val());
+    sum += strToFloat($(this).val());
   });
   return sum;
 }
@@ -471,13 +471,13 @@ function getDepositPercent(tag){
       tag = 'select[name=deposit]';
     }
     var deposit =  $(tag).val();
-    return transformToCents(deposit);
+    return strToFloat(deposit);
 }
 function getTotal(){
   /*
    * Return the current total
    */
-  return transformToCents($(Selectors.total_ttc).text());
+  return strToFloat($(Selectors.total_ttc).text());
 }
 function setDeposit(){
   /*

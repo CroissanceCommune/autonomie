@@ -615,18 +615,23 @@ function fetchFormContext(){
     }
   });
 }
-function fireAmountChange(input_tag){
+function fireAmountChange(event){
   /*
    * Fire an amount change on the line containing the current form_element
    *
-   * :param obj input_tag: The jquery object of an input which changed
+   * :param obj event: The jquery event object or the input which changed
    */
-  if (_.isUndefined(input_tag)){
-    input_tag = $(this);
+  var input_tag;
+  if (event.target){
+    input_tag = $(event.target);
+  }else {
+    console.log("Not an event");
+    return;
   }
   var row = input_tag.parent().parent().parent();
   $(Facade).trigger("linechange", row);
   $(Facade).trigger("totalchange", row);
+  return;
 }
 function fireTvaChange(){
   onTvaSelect(this);

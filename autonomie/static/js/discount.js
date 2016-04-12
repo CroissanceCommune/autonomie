@@ -334,7 +334,7 @@ var catalog = {
     line.children().find("select[name=tva]").val(node_datas.tva);
     line.children().find("select[name=unity]").val(node_datas.unity);
     setTaskLinesBehaviours();
-    fireAmountChange(line.children().find("input[name=cost]"));
+    line.children().find("input[name=cost]").blur();
     highlight(line);
     return line;
   },

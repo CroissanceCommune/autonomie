@@ -205,7 +205,7 @@
                         <tr>
                             % if tva>0:
                             <td colspan='${colspan}' class='rightalign'>
-                                TVA (${api.format_amount(tva, precision=5)|n} %)
+                                TVA (${api.format_amount(tva, precision=2)|n} %)
                             </td>
                             <td class='price'>
                                 ${api.format_amount(tva_amount, precision=5)|n}&nbsp;€

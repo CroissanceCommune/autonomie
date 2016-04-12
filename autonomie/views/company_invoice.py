@@ -267,6 +267,15 @@ class GlobalInvoicesList(BaseListView):
             )
         )
 
+    def filter_doctype(self, query, appstruct):
+        """
+        Filter invocies by type (invoice/cancelinvoice)
+        """
+        type_ = appstruct.get('doctype')
+        if type_ in ('invoice', 'cancelinvoice'):
+            query = query.filter(Task.type_ == type_)
+        return query
+
 
 class CompanyInvoicesList(GlobalInvoicesList):
     """

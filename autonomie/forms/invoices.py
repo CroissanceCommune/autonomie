@@ -56,6 +56,13 @@ STATUS_OPTIONS = (("both", u"Toutes les factures", ),
                   ("paid", u"Les factures payées", ),
                   ("notpaid", u"Seulement les impayés", ))
 
+TYPE_OPTIONS = (
+    ("both", u"Toutes les factures", ),
+    ('invoice', u"Seulement les factures", ),
+    ('cancelinvoice', u"Seulement les avoirs",),
+)
+
+
 
 def get_product_choices():
     """
@@ -343,6 +350,17 @@ def get_list_schema(is_admin=False):
             name='status',
             widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
             validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+            missing='both',
+        )
+    )
+
+    schema.insert(
+        0,
+        colander.SchemaNode(
+            colander.String(),
+            name='doctype',
+            widget=deform.widget.SelectWidget(values=TYPE_OPTIONS),
+            validator=colander.OneOf([s[0] for s in TYPE_OPTIONS]),
             missing='both',
         )
     )

@@ -21,13 +21,15 @@ def upgrade():
         Task,
         PaymentLine,
     )
+    from autonomie.models.treasury import TurnoverProjection
     from autonomie.models.base import DBSESSION as db
     models = (
         (DiscountLine, ("amount",),),
-         (TaskLine, ("cost",),),
-          (Task, ('ht', 'tva', 'ttc', 'expenses_ht', 'expenses', ),),
-           (PaymentLine, ('amount',),)
-           )
+        (TaskLine, ("cost",),),
+        (Task, ('ht', 'tva', 'ttc', 'expenses_ht', 'expenses', ),),
+        (PaymentLine, ('amount',),),
+        (TurnoverProjection, ('value',),),
+    )
     for model, keys in models:
         for key in keys:
             op.execute(
@@ -48,7 +50,7 @@ def upgrade():
             id_ = entry[0]
             vals = entry[1:]
             f_keys = ["%s=%s" % (keys[index], 1000 * value)
-                      for index,value in enumerate(vals)
+                      for index, value in enumerate(vals)
                       if value is not None]
             key_query = ','.join(f_keys)
             if key_query.strip():

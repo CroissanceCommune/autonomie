@@ -30,6 +30,7 @@ from sqlalchemy import (
     Integer,
     Text,
     ForeignKey,
+    BigInteger,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -40,6 +41,7 @@ from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
+
 
 class TurnoverProjection(DBBASE):
     """
@@ -55,7 +57,7 @@ class TurnoverProjection(DBBASE):
     month = Column(Integer)
     year = Column(Integer)
     comment = Column(Text, default="")
-    value = Column(Integer)
+    value = Column(BigInteger)
     company = relationship(
         "Company",
         backref=backref(
@@ -67,5 +69,3 @@ class TurnoverProjection(DBBASE):
             },
         )
     )
-
-

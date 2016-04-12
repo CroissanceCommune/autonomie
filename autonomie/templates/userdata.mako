@@ -109,9 +109,14 @@
     % endif
     % if user is not None:
         <li>
-        <a href="#tab5" data-toggle='tab'>
-            Entreprise(s)
-        </a>
+            <a href="#tab5" data-toggle='tab'>
+                Entreprise(s)
+            </a>
+        </li>
+        <li role="presentation">
+            <a href="#tab-accompagnement" data-toggle="tab" aria-controls="accompagnement" role="tab">
+                Accompagnement
+            </a>
         </li>
     % endif
 </ul>
@@ -359,6 +364,14 @@
                 <i class="glyphicon glyphicon-link"></i>
                 Associer à une entreprise existante
             </a>
+        </div>
+
+        <div role="tabpanel" class="tab-pane row" id="tab-accompagnement">
+            <% url = request.route_path('activities', _query={'action':'new', 'user_id': user.id}) %>
+                <a href='${url}' class='btn btn-info'>
+                    <i class="glyphicon glyphicon-plus"></i>
+                    Prendre un rendez-vous
+                </a>
         </div>
     % endif
 </div>

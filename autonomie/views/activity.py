@@ -275,6 +275,9 @@ class NewActivityView(BaseFormView):
             'conseillers': [current_user.id],
             'come_from': come_from,
         }
+        if 'user_id' in self.request.GET:
+            appstruct['participants'] = [self.request.GET['user_id']]
+
         form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):

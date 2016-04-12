@@ -297,7 +297,7 @@ def compute_turnover_difference(index, projections, turnovers):
     projection = projections.get(index)
     if projection:
         turnover = turnovers.get(index, 0)
-        return turnover - projection.value * 1000
+        return turnover - projection.value
     else:
         return None
 
@@ -307,11 +307,11 @@ def compute_turnover_percent(index, projections, turnovers):
         Compute the percent the difference represents
     """
     turnover = turnovers.get(index)
-    if turnover:
+    if turnover is not None:
         projection = projections.get(index)
-        if projection:
-            if projection.value:
-                return percent(turnover, projection.value * 1000)
+        if projection is not None:
+            if projection.value is not None:
+                return percent(turnover, projection.value)
     return None
 
 

@@ -53,7 +53,7 @@
                     <% turnover = turnover_projections.get(i) %>
                         % if turnover:
                             <td id='ca_prev_${i}' title='${turnover.comment}'>
-                                 ${api.format_amount(turnover.value)|n}
+                                ${api.format_amount(turnover.value, trim=True, precision=5)|n}
                         % else:
                             <td id='ca_prev_${i}'>
                         % endif
@@ -68,25 +68,25 @@
                     </td>
                 % endfor
                 <td>
-                    ${api.format_amount(turnover_projections['year_total'])|n}
+                    ${api.format_amount(turnover_projections['year_total'], trim=True, precision=5)|n}
                 </td>
             </tr>
             <tr><td>CA réalisé</td>
                 % for i in range(1, 13):
-                    <td>${api.format_amount(turnovers[i])|n}</td>
+                    <td>${api.format_amount(turnovers[i], trim=True, precision=5)|n}</td>
                 % endfor
                 <td>
-                    ${api.format_amount(turnovers['year_total'])|n}
+                    ${api.format_amount(turnovers['year_total'], trim=True, precision=5)|n}
                 </td>
             </tr>
             <tr><td>Écart</td>
                 % for i in range(1, 13):
                     <td id='gap_${i}'>
-                        ${api.format_amount(compute_turnover_difference(i, turnover_projections, turnovers))|n}
+                        ${api.format_amount(compute_turnover_difference(i, turnover_projections, turnovers), trim=True, precision=5)|n}
                     </td>
                 % endfor
                 <td>
-                    ${api.format_amount(turnovers['year_total'] - turnover_projections['year_total'])|n}
+                    ${api.format_amount(turnovers['year_total'] - turnover_projections['year_total'], trim=True, precision=5)|n}
                 </td>
             </tr>
             <tr><td>Pourcentage</td>

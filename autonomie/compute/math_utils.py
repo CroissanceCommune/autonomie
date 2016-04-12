@@ -102,6 +102,7 @@ def dec_round(dec, precision, round_floor=False):
 def round(float_, precision, round_floor=False):
     """
     Return a float object rounded to precision
+    :param float float_: the object to round
     :param int precision: the number of decimals we want after the comma
     :param bool round_floor: Should the data be floor rounded ?
     """
@@ -125,7 +126,7 @@ def amount(value, precision=2):
 
 def integer_to_amount(value, precision=2):
     """
-        Convert an integer value to a float with precision numbers after comma
+    Convert an integer value to a float with precision numbers after comma
     """
     flat_point = Decimal(str(math.pow(10, -precision)))
     val = Decimal(str(value)) * flat_point
@@ -179,20 +180,30 @@ def convert_to_float(value, default=None):
 
 
 # TVA related functions
-def reverse_tva(total_ttc, tva):
+def reverse_tva(total_ttc, tva, float_format=True):
     """
     Compute total_ht from total_ttc
-    :param float total_ttc: ttc value in float format (real ttc value)
-    :param integer tva: the tva value in integer format (10*4)
+
+    :param float total_ttc: ttc value in float format (by default)
+    :param integer tva: the tva value in integer format (tva * 100)
+    :param bool float_format: Is total_ttc in the float format (real ttc value)
 
     :returns: the value in integer format
     """
-    # tva_value = tva * 10 000
-    tva_dividor = max(int(tva), 0) + 10000.0
-    # ttc value should be converted to an 'amount' object
-    total_ttc = amount(total_ttc)
+    # e.g : tva = 19.6 * 100 = 1960
+    tva_dividor = max(int(tva), 0) + 100 * 100.0
 
-    result = math.ceil(total_ttc * 100 / tva_dividor)
+    # First we translate the float value to an integer representation
+    if float_format:
+        total_ttc = amount(total_ttc, precision=5)
+
+    # Representation in the integer representation
+    result = floor(total_ttc * 10000 / tva_dividor)
+
+    # We translate the result back to a float value
+    if float_format:
+        result = integer_to_amount(result, precision=5)
+
     return result
 
 

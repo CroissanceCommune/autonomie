@@ -32,6 +32,10 @@ from autonomie.models.task import (
     TaskLine,
     DiscountLine,
     TaskMention,
+    Payment,
+)
+from autonomie.models.tva import (
+    Tva,
 )
 from autonomie.models.user import User
 from autonomie.models.customer import Customer
@@ -74,6 +78,14 @@ def invoice():
         inv.discounts.append(DiscountLine(**discount))
     inv.mentions = [TaskMention(label='1', title='t1', full_text='text')]
     return inv
+
+
+@pytest.fixture
+def tva(dbsession):
+    tva = Tva(name='TVA 20%', value=2000, default=1)
+    dbsession.add(tva)
+    dbsession.flush()
+    return tva
 
 
 def test_set_name():
@@ -139,16 +151,19 @@ def test_gen_cancelinvoice(dbsession, invoice):
     assert cinv.financial_year == invoice.financial_year
     assert cinv.mentions == invoice.mentions
 
-def test_gen_cancelinvoice_payment(dbsession, invoice):
+def test_gen_cancelinvoice_payment(dbsession, invoice, tva):
     user = User.query().first()
     project = Project.query().first()
     invoice.project = project
     invoice.owner = user
     invoice.statusPersonAccount = user
-    invoice.record_payment(mode="c", amount=1500)
+    invoice.payments = [
+        Payment(mode="c", amount=120000000, tva=tva)
+    ]
     cinv = invoice.gen_cancelinvoice(user)
     assert len(cinv.default_line_group.lines) ==  len(invoice.default_line_group.lines) + len(invoice.discounts) + 1
-    assert cinv.default_line_group.lines[-1].cost == 1500
+    assert cinv.default_line_group.lines[-1].cost == 100000000
+    assert cinv.default_line_group.lines[-1].tva == 2000
 
 def test_duplicate_invoice(dbsession, invoice):
     user = dbsession.query(User).first()

@@ -360,8 +360,8 @@ class TestEstimationCompute():
         deposit = task.deposit_amount_ttc()
         amount1 = compute_payment_ttc(payments[0])
         amount2 = compute_payment_ttc(payments[1])
-        assert int(amount1) == 4000000
-        assert int(amount2) == 6000000
+        assert math_utils.floor(amount1) == 4000000
+        assert math_utils.floor(amount2) == 6000000
         total = task.sold() + deposit + amount1 + amount2
         assert math_utils.floor_to_precision(total) == task.total()
 

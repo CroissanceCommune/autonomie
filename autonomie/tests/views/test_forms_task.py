@@ -324,7 +324,10 @@ class TestTaskForms:
                      (u"__end__", "date:mapping"),
                      ('bank_id', ''),
                      (u'mode', u'par chèque'), (u'submit', u'paid')]
-        form.validate(ok_values)
+        try:
+            form.validate(ok_values)
+        except Exception, e:
+            print(e.render())
 
     def test_total_validator(self):
         c = colander.SchemaNode(colander.Integer())

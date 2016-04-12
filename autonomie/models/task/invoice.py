@@ -58,7 +58,7 @@ from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
-
+from autonomie.compute import math_utils
 from autonomie.compute.task import (
     TaskCompute,
     InvoiceCompute,
@@ -330,8 +330,12 @@ class Invoice(Task, InvoiceCompute):
 
         for index, payment in enumerate(self.payments):
             paid_line = TaskLine(
-                cost=payment.amount,
-                tva=0,
+                cost=math_utils.reverse_tva(
+                    payment.amount,
+                    payment.tva.value,
+                    False,
+                ),
+                tva=payment.tva.value,
                 quantity=1,
                 description=u"Paiement {0}".format(index + 1),
                 order=order,

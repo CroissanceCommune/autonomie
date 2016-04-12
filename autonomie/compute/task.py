@@ -387,7 +387,11 @@ class EstimationCompute(TaskCompute):
             payment_lines = {}
 
             for tva, total_ht in parts.items():
-                payment_ht = math_utils.reverse_tva(payment_ttc, tva)
+                payment_ht = math_utils.reverse_tva(
+                    payment_ttc,
+                    tva,
+                    False,
+                )
                 if total_ht >= payment_ht:
                     # Le total ht de cette tranche de tva est suffisant pour
                     # recouvrir notre paiement

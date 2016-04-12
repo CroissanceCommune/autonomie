@@ -61,6 +61,7 @@ class TestMathUtils(unittest.TestCase):
         a = 192.6555
         self.assertEqual(amount(a), 19266)
         self.assertEqual(amount(a, 4), 1926555)
+        self.assertEqual(amount(a, 5), 19265550)
 
     def test_percent(self):
         self.assertEqual(percent(30, 10), 300.0)
@@ -85,7 +86,18 @@ def test_compute_tva():
 
 
 def test_reverse_tva():
-    total_ttc = 1100.0
-    tva = 10 * 100
+    total_ttc = 1196.0
+    tva = 1960
     result = 1000
+    assert reverse_tva(total_ttc, tva) == result
+
+    total_ttc = 1200000
+    tva = 2000
+    result = 1000000
+    assert reverse_tva(total_ttc, tva, False) == result
+
+
+    total_ttc = 1000.0
+    tva = 1960
+    result = 836.12040
     assert reverse_tva(total_ttc, tva) == result

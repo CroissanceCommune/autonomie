@@ -128,7 +128,7 @@
         % endif
         <% display_tvas_column = multiple_tvas and len(groups) == 1 and group.title == '' %>
 
-                % if task.expenses_ht > 0:
+                % if task.expenses_ht not in (0, None):
                     <tr>
                         <td class='description' colspan='${colspan}'>
                             Frais forfaitaires

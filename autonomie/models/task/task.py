@@ -55,6 +55,7 @@ from autonomie.models.types import (
     CustomDateType,
     CustomDateType2,
 )
+from autonomie.models.tva import Tva
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,
@@ -506,6 +507,17 @@ class Task(Node):
         for group in self.line_groups:
             result.extend(group.lines)
         return result
+
+    def get_tva_objects(self):
+        """
+        Return the list of tva object used in this document
+        """
+        tva_values = set()
+        for group in self.line_groups:
+            for line in group.lines:
+                tva_values.add(line.tva)
+
+        return Tva.query().filter(Tva.value.in_(list(tva_values))).all()
 
 
 class DiscountLine(DBBASE, DiscountLineCompute):

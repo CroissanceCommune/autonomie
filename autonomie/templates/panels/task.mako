@@ -238,6 +238,13 @@
     <%block name="notes_and_conditions">
     ## All infos beetween document lines and footer text (notes, payment conditions ...)
     </%block>
+    % for tva in task.get_tva_objects():
+        % if tva.mention:
+            <div class='content'>
+                ${format_text(tva.mention)}
+            </div>
+        % endif
+    % endfor
     % for mention in task.mentions:
         <div class="title">
             ${mention.title}

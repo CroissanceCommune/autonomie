@@ -487,6 +487,13 @@ class TvaItem(colander.MappingSchema):
         title=u"Compte de Tva à payer",
         description=u"Utilisé dans les exports comptables des encaissements",
     )
+    mention = forms.textarea_node(
+        title=u"Mentions spécifiques à cette TVA",
+        description=u"""Si cette Tva est utilisée dans un devis/une facture,
+la mention apparaitra dans la sortie PDF (ex: Mention pour les formations
+...)""",
+        missing=colander.drop
+    )
     default = colander.SchemaNode(
         colander.Integer(),
         title=u"Valeur par défaut ?",

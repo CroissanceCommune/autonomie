@@ -31,6 +31,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Boolean,
+    Text,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -58,6 +59,7 @@ class Tva(DBBASE):
     compte_a_payer = Column(String(125), default='')
     code = Column("code", String(125), default="")
     active = Column(Boolean(), default=True)
+    mention = Column(Text, default='')
 
     @classmethod
     def query(cls, include_inactive=False):

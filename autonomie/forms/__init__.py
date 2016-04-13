@@ -117,6 +117,58 @@ def come_from_node(**kw):
     )
 
 
+def strip_whitespace(value):
+    """
+    Strip whitespace and tabs at the beginning/end of a string
+    """
+    if hasattr(value, 'strip'):
+        value = value.strip(' \t')
+    return value
+
+
+tags_to_check = (('<p>', '</p>'), ('<div>', '</div>'),)
+
+
+def remove_tag(text, tag):
+    return text[0:-1*len(tag)].strip()
+
+
+def strip_linebreaks(value):
+    """
+    Strip linebreaks
+    """
+    # we don't use rstrip since it's used for character stripping
+    # (not chain)
+    if hasattr(value, 'strip'):
+        value = value.strip('\n\r')
+        for tag in '<br />', '<br>', '<br/>':
+            if value.endswith(tag):
+                print("value : %s" % value)
+                value = remove_tag(value, tag)
+                return strip_linebreaks(value)
+
+    return value
+
+
+def strip_void_lines(value):
+    """
+    RStrip value ending with void html tags
+    """
+    if hasattr(value, 'strip'):
+        for tag, close_tag in tags_to_check:
+            if value.endswith(close_tag):
+                prec_value = remove_tag(value, close_tag)
+                prec_value = strip_whitespace(prec_value)
+                prec_value = strip_linebreaks(prec_value)
+                if prec_value.endswith(tag):
+                    value = remove_tag(prec_value, tag)
+                    value = strip_whitespace(value)
+                    value = strip_linebreaks(value)
+                    return strip_void_lines(value)
+
+    return value
+
+
 def textarea_node(**kw):
     """
     Return a node for storing Text objects
@@ -168,6 +220,11 @@ def textarea_node(**kw):
     else:
         widget_options.setdefault("rows", 4)
         wid = deform.widget.TextAreaWidget(**widget_options)
+
+    kw.setdefault(
+        'preparer',
+        (strip_whitespace, strip_linebreaks, strip_void_lines)
+    )
     return colander.SchemaNode(
         colander.String(),
         widget=wid,

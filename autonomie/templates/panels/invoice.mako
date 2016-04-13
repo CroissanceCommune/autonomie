@@ -42,6 +42,12 @@
     <strong>Cette facture est associée au devis : </strong>${task.estimation.number}<br />
 % endif
 <strong>Objet : </strong>${format_text(task.description)}<br />
+% if task.workplace:
+    <strong>Lieu d'éxécution des travaux : </strong>
+    <br />
+    ${format_text(task.workplace)}
+    <br />
+% endif
 % if config.has_key('coop_invoiceheader'):
     ${format_text(config['coop_invoiceheader'])}
 % endif

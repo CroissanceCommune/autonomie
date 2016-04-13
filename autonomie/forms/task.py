@@ -116,6 +116,7 @@ MAIN_INFOS_GRID = (
     (('date', 6), ('financial_year', 3), ('prefix', 3), ),
     (('customer_id', 6), ('address', 6),),
     (('description', 12),),
+    (('workplace', 6), (('mention_ids', 6)),),
     (('course', 12),),
     (('display_units', 12),),
 )
@@ -562,6 +563,19 @@ class TaskConfiguration(colander.MappingSchema):
         title=u"Nom et adresse du client",
         widget_options={'rows': 4}
     )
+    workplace = forms.textarea_node(
+        title=u"Lieu d'éxécution des travaux",
+        widget_options={'rows': 3},
+        missing=colander.drop,
+    )
+    mention_ids = colander.SchemaNode(
+        colander.Set(),
+        title=u"Mentions facultatives",
+        description=u"Choisissez les mentions à ajouter au document dans \
+la liste",
+        widget=deferred_mention_select_widget,
+        missing=colander.drop,
+    )
     phase_id = colander.SchemaNode(
         colander.String(),
         title=u"Phase où insérer le devis",
@@ -583,14 +597,6 @@ class TaskConfiguration(colander.MappingSchema):
         label=u"Afficher le détail des prestations dans la sortie PDF ?",
         widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
         missing=0,
-    )
-    mention_ids = colander.SchemaNode(
-        colander.Set(),
-        title=u"Mentions facultatives",
-        description=u"Choisissez les mentions à ajouter au document dans \
-la liste",
-        widget=deferred_mention_select_widget,
-        missing=colander.drop,
     )
 
 
@@ -658,6 +664,11 @@ def remove_admin_fields(schema, kw):
             else:
                 schema_node['taskline']['description'].css_class = 'col-md-4'
                 schema_node['taskline']['tva'].css_class = 'col-md-2'
+
+    # Check mentions_ids have values if not remove this node from the form
+    node = schema['common']['mention_ids']
+    if len(node.widget.values) == 0:
+        del schema['common']['mention_ids']
 
 
 TASKSCHEMA = TaskSchema(after_bind=remove_admin_fields)
@@ -768,6 +779,7 @@ TASK_MATCHING_MAP = (
     ('description', 'common'),
     ('customer_id', 'common'),
     ('address', 'common'),
+    ('workplace', 'common'),
     ('course', 'common'),
     ('display_units', 'common'),
     ('expenses_ht', 'lines'),

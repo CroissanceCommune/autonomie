@@ -38,6 +38,12 @@
 <%block name="information">
 <strong>DEVIS N° </strong>${task.number}<br />
 <strong>Objet : </strong>${format_text(task.description)}<br />
+% if task.workplace:
+    <strong>Lieu d'éxécution des travaux : </strong>
+    <br />
+    ${format_text(task.workplace)}
+    <br />
+% endif
 % if config.has_key('coop_estimationheader'):
     ${format_text(config['coop_estimationheader'])}
 % endif

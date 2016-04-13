@@ -38,18 +38,22 @@ from autonomie.models.project import Project, Phase
 from autonomie.models.user import User
 
 
-ESTIMATION = dict(name=u"Devis 2",
-                sequence_number=2,
-                _number=u"estnumber",
-                display_units="1",
-                expenses=1500,
-                deposit=20,
-                exclusions=u"Notes",
-                paymentDisplay=u"ALL",
-                payment_conditions=u"Conditions de paiement",
-                date=datetime.date(2012, 12, 10),
-                description=u"Description du devis",
-                manualDeliverables=1)
+ESTIMATION = dict(
+    name=u"Devis 2",
+    sequence_number=2,
+    _number=u"estnumber",
+    display_units="1",
+    expenses=1500,
+    deposit=20,
+    address=u"Adresse",
+    workplace=u"Lieu des travaux",
+    exclusions=u"Notes",
+    paymentDisplay=u"ALL",
+    payment_conditions=u"Conditions de paiement",
+    date=datetime.date(2012, 12, 10),
+    description=u"Description du devis",
+    manualDeliverables=1,
+)
 
 LINES = [{'description':u'text1',
           'cost':10025,
@@ -149,7 +153,7 @@ def test_duplicate_estimation(dbsession, estimation):
     estimation.customer = customer
     estimation.statusPersonAccount = user
     newestimation = estimation.duplicate(user, project, phase, customer)
-    for key in "customer", "address", "expenses", "expenses_ht":
+    for key in "customer", "address", "expenses", "expenses_ht", "workplace":
         assert getattr(newestimation, key) == getattr(estimation, key)
     assert newestimation.CAEStatus == 'draft'
     assert newestimation.project == project
@@ -217,6 +221,8 @@ def test_light_gen_invoice(dbsession, estimation):
     #deposit :
     deposit = invoices[0]
     assert deposit.date == datetime.date.today()
+    assert deposit.address == estimation.address
+    assert deposit.workplace == estimation.workplace
     assert deposit.financial_year == datetime.date.today().year
     assert deposit.total() == estimation.deposit_amount_ttc()
     assert deposit.mentions == estimation.mentions

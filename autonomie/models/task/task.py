@@ -219,6 +219,17 @@ class Task(Node):
         ),
         group='edit',
     )
+    workplace = deferred(
+        Column(
+            Text,
+            default='',
+            info={
+                'colanderalchemy': {
+                    'widget': deform.widget.TextAreaWidget(),
+                }
+            }
+        )
+    )
     payment_conditions = deferred(
         Column(
             Text,
@@ -390,6 +401,7 @@ class Task(Node):
             display_units=self.display_units,
             expenses_ht=self.expenses_ht,
             address=self.address,
+            workplace=self.workplace,
             payment_conditions=self.payment_conditions,
             description=self.description,
             prefix=self.prefix,

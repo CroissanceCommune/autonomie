@@ -294,6 +294,7 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.set_name()
         cancelinvoice.set_number()
         cancelinvoice.address = self.address
+        cancelinvoice.workplace = self.workplace
         cancelinvoice.CAEStatus = 'draft'
         cancelinvoice.description = self.description
 
@@ -407,6 +408,8 @@ class Invoice(Task, InvoiceCompute):
             invoice.address = self.address
         else:
             invoice.address = customer.full_address
+
+        invoice.workplace = self.workplace
 
         invoice.CAEStatus = 'draft'
         invoice.description = self.description

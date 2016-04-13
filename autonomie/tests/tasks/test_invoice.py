@@ -66,6 +66,8 @@ INVOICE = dict(
     expenses_ht=0,
     prefix="prefix",
     financial_year=2015,
+    address=u"Adresse",
+    workplace=u"Lieu d'éxécution des travaux",
 )
 
 
@@ -150,6 +152,8 @@ def test_gen_cancelinvoice(dbsession, invoice):
     assert cinv.prefix == invoice.prefix
     assert cinv.financial_year == invoice.financial_year
     assert cinv.mentions == invoice.mentions
+    assert cinv.address == invoice.address
+    assert cinv.workplace == invoice.workplace
 
 def test_gen_cancelinvoice_payment(dbsession, invoice, tva):
     user = User.query().first()
@@ -184,7 +188,7 @@ def test_duplicate_invoice(dbsession, invoice):
     assert newinvoice.statusPersonAccount == user
     assert newinvoice.phase == phase
     assert newinvoice.mentions == invoice.mentions
-    for key in "customer", "address", "expenses", "expenses_ht":
+    for key in "customer", "address", "expenses", "expenses_ht", "workplace":
         assert getattr(newinvoice, key) == getattr(invoice, key)
 
 def test_duplicate_invoice_financial_year(dbsession, invoice):

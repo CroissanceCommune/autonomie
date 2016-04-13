@@ -143,6 +143,8 @@ class Estimation(Task, EstimationCompute):
         else:
             estimation.address = customer.full_address
 
+        estimation.workplace = self.workplace
+
         estimation.description = self.description
         estimation.CAEStatus = "draft"
 
@@ -259,6 +261,7 @@ class Estimation(Task, EstimationCompute):
         inv.description = self.description
         inv.course = self.course
         inv.address = self.address
+        inv.workplace = self.workplace
         inv.CAEStatus = "draft"
         inv.set_sequence_number(seq_number)
         inv.mentions = self.mentions

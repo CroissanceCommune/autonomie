@@ -32,6 +32,8 @@ from autonomie.views.admin.tools import (
 )
 from autonomie.forms.admin import (
     get_config_schema,
+    tva_form_validator,
+    get_sequence_model_admin,
 )
 
 from autonomie.models.task import (
@@ -39,6 +41,9 @@ from autonomie.models.task import (
     WorkUnit,
     PaymentMode,
     PaymentConditions,
+)
+from autonomie.models.tva import (
+    Tva,
 )
 
 (
@@ -74,6 +79,15 @@ from autonomie.models.task import (
     payment_condition_tmpl,
 ) = get_model_admin_view(
     PaymentConditions,
+    r_path="admin_vente",
+)
+
+(
+    tva_admin_class,
+    tva_admin_route,
+    tva_admin_tmpl,
+) = get_model_admin_view(
+    Tva,
     r_path="admin_vente",
 )
 
@@ -134,42 +148,68 @@ class AdminVenteTreasury(BaseConfigView):
     schema = get_config_schema(keys)
 
 
+class AdminTva(tva_admin_class):
+    @property
+    def schema(self):
+        if self._schema is None:
+            self._schema = get_sequence_model_admin(
+                self.factory,
+                self.title,
+            )
+            self._schema.title = u"Configuration des taux de TVA"
+            self._schema.validator = tva_form_validator
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        self._schema = value
+
+
 def admin_vente_index_view(request):
     """
     vue d'index pour la configuration du module vente
     """
     menus = []
-    for label, route, icon in (
-        (u"Retour", "admin_index", "fa fa-step-backward"),
+    for label, route, title, icon in (
+        (u"Retour", "admin_index", "", "fa fa-step-backward"),
         (
             u"Configuration des unités de prestation",
             "admin_vente_workunit",
-            "",
+            u"Les unités de prestation proposées lors de la création d'un \
+devis/d'une facture", ""
         ),
         (
             u"Configuration des mentions facultatives des devis/factures",
             "admin_vente_mention",
-            "",
+            u"Des mentions facultatives que les entrepreneurs peuvent faire \
+figurer dans leurs devis/factures", ""
         ),
         (
             u"Configuration des conditions de paiement",
             "admin_vente_payment_condition",
-            "",
+            u"Les conditions que les entrepreneurs peuvent sélectionner lors \
+de la création d'un devis/d'une facture", ""
         ),
         (
             u"Configuration des modes de paiement",
             "admin_vente_payment_mode",
-            "",
+            u"Les modes de paiement que l'on peut sélectionner pour \
+enregistrer le paiement d'un devis/ d'une facture", ""
         ),
         (
             u"Configuration comptable du module ventes",
             "admin_vente_treasury",
-            "",
+            u"Code journal, activation des modules d'export ...", ""
         ),
+        (
+            u"Configuration comptable des produits et TVA collectés",
+            'admin_vente_tva',
+            u"Taux de TVA, codes produit et codes analytiques associés",
+            ""
+        )
     ):
-        menus.append(dict(label=label, path=route, icon=icon))
+        menus.append(dict(label=label, path=route, title=title, icon=icon))
     return dict(title=u"Configuration du module Ventes", menus=menus)
-
 
 
 def includeme(config):
@@ -179,6 +219,7 @@ def includeme(config):
     config.add_route("admin_vente_workunit", "admin/vente/workunit")
     config.add_route("admin_vente_payment_mode", "admin/vente/payment_mode")
     config.add_route("admin_vente_treasury", "admin/vente/treasury")
+    config.add_route("admin_vente_tva", "admin/vente/tva")
     config.add_route(
         "admin_vente_payment_condition",
         "admin/vente/payment_condition"
@@ -197,22 +238,21 @@ def includeme(config):
     config.add_admin_view(
         TaskMentionAdmin,
         route_name="admin_vente_mention",
-        renderer="admin/main.mako",
-        permission="admin",
     )
 
     config.add_admin_view(
         WorkUnitAdmin,
         route_name="admin_vente_workunit",
-        renderer="admin/main.mako",
-        permission="admin",
     )
 
     config.add_admin_view(
         PaymentModeAdmin,
         route_name="admin_vente_payment_mode",
-        renderer="admin/main.mako",
-        permission="admin",
+    )
+
+    config.add_admin_view(
+        PaymentConditionAdmin,
+        route_name='admin_vente_payment_condition',
     )
 
     config.add_admin_view(
@@ -221,6 +261,6 @@ def includeme(config):
     )
 
     config.add_admin_view(
-        PaymentConditionAdmin,
-        route_name='admin_vente_payment_condition',
+        AdminTva,
+        route_name='admin_vente_tva',
     )

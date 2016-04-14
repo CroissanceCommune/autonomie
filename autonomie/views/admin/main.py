@@ -37,12 +37,7 @@ from autonomie.models.config import (
     Config,
     ConfigFiles,
 )
-from autonomie.models.tva import (
-    Tva,
-    Product,
-)
 from autonomie.models.task import (
-    WorkUnit,
     BankAccount,
 )
 from autonomie.models.activity import (
@@ -72,7 +67,6 @@ from autonomie.models.user import (
 from autonomie.models import files
 from autonomie.forms.admin import (
     MainConfig,
-    get_tva_config_schema,
     WorkshopConfigSchema,
     ActivityConfigSchema,
     get_config_appstruct,
@@ -128,13 +122,6 @@ devis, factures / avoir)"
             label=u"Configuration du module vente",
             path="admin_vente",
             title=u"Mentions des devis et factures, unité de prestation ...",
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration comptable des produits et TVA collectés",
-            path='admin_tva',
-            title=u"Taux de TVA, codes produit et codes analytiques associés"
         )
     )
     menus.append(
@@ -240,95 +227,6 @@ class AdminMain(BaseAdminFormView):
         self.dbsession.flush()
         self.request.session.flash(self.validation_msg)
         return HTTPFound(self.request.route_path("admin_main"))
-
-
-class AdminTva(BaseAdminFormView):
-    """
-        Tva administration view
-        Set tvas used in invoices, estimations and cancelinvoices
-    """
-    title = u"Configuration des taux de TVA"
-    validation_msg = u"Les taux de TVA ont bien été modifiés"
-    schema = get_tva_config_schema()
-    buttons = (submit_btn,)
-
-    def before(self, form):
-        """
-            Add appstruct to the current form object
-        """
-        appstruct = []
-        for tva in Tva.query().all():
-            struct = tva.appstruct()
-            struct['products'] = [
-                product.appstruct() for product in tva.products
-            ]
-            appstruct.append(struct)
-
-        form.set_appstruct({'tvas': appstruct})
-        log.debug("AdminTva struct: %s", appstruct)
-
-    @staticmethod
-    def get_remaining_prod_ids(appstruct):
-        """
-            return id of products remaining in the submitted config
-        """
-        ids = []
-        for tva in appstruct['tvas']:
-            ids.extend([
-                product['id'] for product in tva['products'] if 'id' in product
-            ])
-        return ids
-
-    @staticmethod
-    def get_remaining_tva_ids(appstruct):
-        """
-            Return ids of tva remaining in the submitted config
-        """
-        return [tva['id'] for tva in appstruct['tvas'] if 'id' in tva]
-
-    def disable_elements(self, factory, ids):
-        """
-            Disable elements of type "factory" that are not in the ids list
-        """
-        for element in factory.query(include_inactive=True).all():
-            if element.id not in ids:
-                element.active = False
-                self.dbsession.merge(element)
-
-    def submit_success(self, appstruct):
-        """
-            fired on submit success, set Tvas
-        """
-        # First we disable the elements that are no longer part of the
-        # configuration
-        self.disable_elements(Product, self.get_remaining_prod_ids(appstruct))
-        self.disable_elements(Tva, self.get_remaining_tva_ids(appstruct))
-        self.dbsession.flush()
-
-        for data in appstruct['tvas']:
-            products = data.pop('products')
-            if 'id' in data:
-                tva = Tva.get(data['id'])
-                merge_session_with_post(tva, data)
-                tva = self.dbsession.merge(tva)
-            else:
-                tva = Tva()
-                merge_session_with_post(tva, data)
-                self.dbsession.add(tva)
-
-            for prod in products:
-                if 'id' in prod:
-                    product = Product.get(prod['id'])
-                    product.tva = tva
-                    merge_session_with_post(product, prod)
-                    self.dbsession.merge(product)
-                else:
-                    product = Product()
-                    merge_session_with_post(product, prod)
-                    product.tva = tva
-                    self.dbsession.add(product)
-        self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path("admin_tva"))
 
 
 class BaseAdminActivities(BaseAdminFormView):
@@ -819,7 +717,6 @@ def includeme(config):
     # Administration routes
     config.add_route("admin_index", "/admin")
     config.add_route("admin_main", "/admin/main")
-    config.add_route("admin_tva", "/admin/tva")
     config.add_route("admin_accompagnement", "admin/accompagnement")
     config.add_route("admin_activity", "admin/activity")
     config.add_route("admin_workshop", "admin/workshop")
@@ -845,11 +742,6 @@ def includeme(config):
     config.add_admin_view(
         AdminMain,
         route_name="admin_main",
-    )
-
-    config.add_admin_view(
-        AdminTva,
-        route_name='admin_tva',
     )
 
     for model in (CompanyActivity, ):

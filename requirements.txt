@@ -62,5 +62,5 @@ pyramid-celery==2.0.0
 redis==2.10.3
 sqla_inspect==0.3.2
 Unidecode==0.04.17
-deform_extensions==0.2.1
+deform_extensions==0.2.2
 filedepot==0.1.2

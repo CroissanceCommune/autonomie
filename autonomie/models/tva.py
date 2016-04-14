@@ -25,6 +25,9 @@
 """
     Model for tva amounts
 """
+import colander
+import deform
+import deform_extensions
 from sqlalchemy import (
     Column,
     Integer,
@@ -38,8 +41,19 @@ from sqlalchemy.orm import (
     backref,
 )
 
+from autonomie import forms
+from autonomie.forms.custom_types import AmountType
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
+
+
+TVA_GRID = (
+    (('name', 6,), ('value', 6),),
+    (('mention', 12),),
+    (('compte_cg', 3), ('code', 3), ('compte_a_payer', 3)),
+    (('default', 6),),
+    (('products', 12),),
+)
 
 
 class Tva(DBBASE):
@@ -49,17 +63,114 @@ class Tva(DBBASE):
         `value` int(5)
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
+    __colanderalchemy_config__ = {
+        "title": u"un taux de tva",
+        "validation_msg": u"Les taux de Tva ont bien été configurés",
+        "help_msg": u"""Configurez les taux de Tva disponibles utilisés dans \
+Autonomie, ainsi que les produits associés.<br /> \
+        Une Tva est composée :<ul><li>D'un libellé (ex : TVA 20%)</li> \
+        <li>D'un montant (ex : 20)</li> \
+        <li>D'un ensemble d'informations comptables</li> \
+        <li>D'un ensemble de produits associés</li> \
+        <li> D'une mention : si elle est renseignée, celle-ci viendra se placer
+        en lieu et place du libellé (ex : Tva non applicable en vertu ...)
+        </ul><br /> \
+        <b>Note : les montants doivent tous être distincts, si vous utilisez \
+        plusieurs Tva à 0%, utilisez des montants négatifs pour les \
+        différencier. \
+        """,
+        'widget': deform_extensions.GridMappingWidget(named_grid=TVA_GRID)
+    }
     __tablename__ = 'tva'
     __table_args__ = default_table_args
-    id = Column('id', Integer, primary_key=True)
-    name = Column("name", String(8), nullable=False)
-    value = Column("value", Integer)
-    default = Column("default", Integer)
-    compte_cg = Column("compte_cg", String(125), default="")
-    compte_a_payer = Column(String(125), default='')
-    code = Column("code", String(125), default="")
-    active = Column(Boolean(), default=True)
-    mention = Column(Text, default='')
+    id = Column(
+        'id',
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
+    )
+    name = Column(
+        "name",
+        String(15),
+        nullable=False,
+        info={
+            'colanderalchemy': {
+                'title': u'Libellé du taux de TVA',
+                }
+        },
+    )
+    value = Column(
+        "value",
+        Integer,
+        info={
+            "colanderalchemy": {
+                'title': u'Montant',
+                'typ': AmountType(),
+            }
+        },
+    )
+    compte_cg = Column(
+        "compte_cg",
+        String(125),
+        default="",
+        info={'colanderalchemy': dict(title=u"Compte CG de Tva")}
+    )
+    code = Column(
+        "code",
+        String(125),
+        default="",
+        info={'colanderalchemy': dict(title=u"Code de Tva")}
+    )
+    compte_a_payer = Column(
+        String(125),
+        default='',
+        info={'colanderalchemy': dict(
+            title=u"Compte de Tva à payer",
+            description=u"Utilisé dans les exports comptables des \
+encaissements",
+        )}
+    )
+    active = Column(
+        Boolean(),
+        default=True,
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    mention = Column(
+        Text,
+        info={
+            'colanderalchemy': {
+                'title': u"Mentions spécifiques à cette TVA",
+                'description': u"""Si cette Tva est utilisée dans un
+devis/une facture,la mention apparaitra dans la sortie PDF
+(ex: Mention pour la tva liée aux formations ...)""",
+                'widget': deform.widget.TextAreaWidget(rows=1),
+                'preparer': forms.get_default_textarea_preparer(),
+                'missing': colander.drop,
+            }
+        }
+    )
+    default = Column(
+        "default",
+        Boolean(),
+        info={
+            "colanderalchemy": {
+                'title': u'Cette tva doit-elle être proposée par défaut ?'
+            }
+        },
+    )
+    products = relationship(
+        "Product",
+        cascade="all, delete-orphan",
+        info={
+            'colanderalchemy': {
+                'title': u"Comptes produit associés",
+                "widget": deform.widget.SequenceWidget(
+                    add_subitem_text_template=u"Ajouter un compte produit",
+                )
+            },
+        },
+        back_populates='tva',
+    )
 
     @classmethod
     def query(cls, include_inactive=False):
@@ -90,16 +201,43 @@ class Tva(DBBASE):
 
 
 class Product(DBBASE):
+    __colanderalchemy_config__ = {
+        'title': u"Compte produit",
+        'widget': deform_extensions.InlineMappingWidget(),
+    }
     __tablename__ = 'product'
     __table_args__ = default_table_args
-    id = Column('id', Integer, primary_key=True)
-    name = Column("name", String(125), nullable=False)
-    compte_cg = Column("compte_cg", String(125))
-    active = Column(Boolean(), default=True)
-    tva_id = Column(Integer, ForeignKey("tva.id", ondelete="cascade"))
+    id = Column(
+        'id',
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
+    )
+    name = Column(
+        "name",
+        String(125),
+        nullable=False,
+        info={'colanderalchemy': {'title': u'Libellé', 'width': 6}}
+    )
+    compte_cg = Column(
+        "compte_cg",
+        String(125),
+        info={'colanderalchemy': {'title': u'Compte CG', 'width': 6}}
+    )
+    active = Column(
+        Boolean(),
+        default=True,
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    tva_id = Column(
+        Integer,
+        ForeignKey("tva.id", ondelete="cascade"),
+        info={'colanderalchemy': {'exclude': True}}
+    )
     tva = relationship(
         "Tva",
-        backref=backref("products", cascade="all, delete-orphan")
+        back_populates="products",
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     def __json__(self, request):

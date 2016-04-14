@@ -15,6 +15,8 @@ import sqlalchemy as sa
 
 
 def upgrade():
+    op.execute(u"Alter table tva modify name VARCHAR(15)")
+    op.execute(u"Alter table tva modify active tinyint(1)")
     op.add_column('tva', sa.Column('mention', sa.Text(), default=''))
 
 

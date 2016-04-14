@@ -169,6 +169,13 @@ def strip_void_lines(value):
     return value
 
 
+def get_default_textarea_preparer():
+    """
+    Return a list of preparer to be used for textareas stripping
+    """
+    return (strip_whitespace, strip_linebreaks, strip_void_lines)
+
+
 def textarea_node(**kw):
     """
     Return a node for storing Text objects
@@ -223,7 +230,7 @@ def textarea_node(**kw):
 
     kw.setdefault(
         'preparer',
-        (strip_whitespace, strip_linebreaks, strip_void_lines)
+        get_default_textarea_preparer(),
     )
     return colander.SchemaNode(
         colander.String(),

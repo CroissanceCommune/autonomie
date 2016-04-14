@@ -194,26 +194,34 @@
                         % endif
                     </tr>
                 % endif
-                % if task.no_tva():
+                <% tva_objects_dict = task.get_tva_objects() %>
+                %for tva, tva_amount in task.get_tvas().items():
+                    <% tva_object = tva_objects_dict.get(tva) %>
                     <tr>
-                        <td colspan='${colspan + 1}'class='rightalign'>
-                            TVA non applicable selon l'article 259b du CGI.
-                        </td>
-                    </tr>
-                % else:
-                    %for tva, tva_amount in task.get_tvas().items():
-                        <tr>
-                            % if tva>0:
-                            <td colspan='${colspan}' class='rightalign'>
-                                TVA (${api.format_amount(tva, precision=2)|n} %)
-                            </td>
-                            <td class='price'>
-                                ${api.format_amount(tva_amount, precision=5)|n}&nbsp;€
-                            </td>
+                        % if tva > 0:
+                            <td colspan='${colspan}'
+                                class='rightalign'>
+                        % else:
+                            <td colspan='${colspan +1}'
+                                class='rightalign'>
+                        % endif
+                        % if tva_object:
+                            % if tva_object.mention:
+                                ${format_text(tva_object.mention)}
+                            % else:
+                                ${tva_object.name}
                             % endif
-                        </tr>
-                    % endfor
-                % endif
+                        % else:
+                           TVA (${api.format_amount(tva, precision=2)|n} %)
+                        % endif
+                       </td>
+                       % if tva > 0:
+                        <td class='price'>
+                            ${api.format_amount(tva_amount, precision=5)|n}&nbsp;€
+                        </td>
+                        % endif
+                    </tr>
+                % endfor
                 %if task.expenses:
                     <tr>
                         <td colspan='${colspan}' class='rightalign'>
@@ -238,13 +246,6 @@
     <%block name="notes_and_conditions">
     ## All infos beetween document lines and footer text (notes, payment conditions ...)
     </%block>
-    % for tva in task.get_tva_objects():
-        % if tva.mention:
-            <div class='content'>
-                ${format_text(tva.mention)}
-            </div>
-        % endif
-    % endfor
     % for mention in task.mentions:
         <div class="title">
             ${mention.title}

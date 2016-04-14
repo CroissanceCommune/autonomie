@@ -85,6 +85,7 @@
         </div>
       % endfor
       </%block>
+      <%block name='beforecontent' />
       <%block name='content' />
       % if request.popups is not UNDEFINED:
           % for name, popup in request.popups.items():

@@ -117,6 +117,21 @@ composées: <ul><li>D'un libellé</li>\
         default=0,
         info={'colanderalchemy': {"exclude": True}}
     )
+    children = relationship(
+        "CompetenceSubOption",
+        primaryjoin="CompetenceOption.id==CompetenceSubOption.parent_id",
+        info={
+            'colanderalchemy': {
+                'title': u"Sous-compétences associées",
+                "widget": deform.widget.SequenceWidget(
+                    add_subitem_text_template=u"Ajouter une \
+sous-compétence",
+                    min_len=1,
+                )
+            },
+        },
+        back_populates='parent',
+    )
 
     @classmethod
     def query(cls, active=True, *args):
@@ -164,23 +179,11 @@ class CompetenceSubOption(ConfigurableOption):
     parent = relationship(
         "CompetenceOption",
         primaryjoin="CompetenceOption.id==CompetenceSubOption.parent_id",
-        backref=backref(
-            "children",
-            info={
-                'colanderalchemy': {
-                    'title': u"Sous-compétences associées",
-                    "widget": deform.widget.SequenceWidget(
-                        add_subitem_text_template=u"Ajouter une \
-sous-compétence",
-                        min_len=1,
-                    )
-                },
-            }
-        ),
         cascade="all",
         info={
             'colanderalchemy': EXCLUDED
-        }
+        },
+        back_populates='children',
     )
 
     def __json__(self, request):

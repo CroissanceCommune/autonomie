@@ -100,3 +100,32 @@ DBBASE.appstruct = record_to_appstruct
 
 
 default_table_args = {'mysql_engine': 'InnoDB', "mysql_charset": 'utf8'}
+
+
+class ModelProxy(object):
+    """
+    A model proxy attached to model services
+    """
+    pass
+
+
+def model_services_init():
+    """
+    Bound model services to the associated models
+    Also bind a model proxy to be able to access models from inside the service
+    class
+    """
+    from autonomie.models.task import Task
+    from autonomie.models.tva import Tva
+
+    klasses = (Task, Tva)
+    models_proxy = ModelProxy()
+
+    for cls in klasses:
+        setattr(models_proxy, cls.__name__, cls)
+
+    for cls in klasses:
+        setattr(cls, '_autonomie_models', models_proxy)
+        if hasattr(cls, '_autonomie_service'):
+            setattr(cls._autonomie_service, 'model', cls)
+            setattr(cls._autonomie_service, 'models', models_proxy)

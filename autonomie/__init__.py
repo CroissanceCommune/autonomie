@@ -34,9 +34,11 @@ from sqlalchemy import engine_from_config
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from autonomie.utils.security import RootFactory
-from autonomie.utils.security import TraversalDbAccess
-from autonomie.utils.security import set_models_acls
+from autonomie.utils.security import (
+    RootFactory,
+    TraversalDbAccess,
+    set_models_acls,
+)
 
 from autonomie.models.initialize import initialize_sql
 from autonomie.models.config import get_config
@@ -185,6 +187,8 @@ def base_configure(config, dbsession, **settings):
     All plugin and others configuration stuff
     """
     set_models_acls()
+    from autonomie.models.base import model_services_init
+    model_services_init()
     TraversalDbAccess.dbsession = dbsession
 
     # Application main configuration
@@ -217,6 +221,7 @@ def base_configure(config, dbsession, **settings):
         customize_renderers,
     )
     customize_renderers(config)
+
     return config
 
 

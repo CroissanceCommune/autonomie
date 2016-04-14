@@ -82,6 +82,27 @@ ALL_STATES = ('draft', 'wait', 'valid', 'invalid', 'geninv',
               'aboest', 'gencinv', 'resulted', 'paid', )
 
 
+class TaskService(object):
+    models = None
+
+    @classmethod
+    def get_tva_objects(cls, task_obj):
+        """
+        :param task_obj: The Task object we want to collect tvas for
+        :returns: tva stored by amount
+        :rtype: dict
+        """
+        tva_values = set()
+        for group in task_obj.line_groups:
+            for line in group.lines:
+                tva_values.add(line.tva)
+
+        tvas = cls.models.Tva.query().filter(
+            Tva.value.in_(list(tva_values))
+        ).all()
+        return dict([(tva.value, tva) for tva in tvas])
+
+
 @implementer(ITask)
 class Task(Node):
     """
@@ -90,6 +111,7 @@ class Task(Node):
     __tablename__ = 'task'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'task'}
+    _autonomie_service = TaskService
 
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     phase_id = Column(
@@ -521,15 +543,7 @@ class Task(Node):
         return result
 
     def get_tva_objects(self):
-        """
-        Return the list of tva object used in this document
-        """
-        tva_values = set()
-        for group in self.line_groups:
-            for line in group.lines:
-                tva_values.add(line.tva)
-
-        return Tva.query().filter(Tva.value.in_(list(tva_values))).all()
+        return self._autonomie_service.get_tva_objects(self)
 
 
 class DiscountLine(DBBASE, DiscountLineCompute):

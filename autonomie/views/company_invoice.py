@@ -37,8 +37,6 @@ from sqlalchemy import (
     and_,
     distinct,
 )
-from sqlalchemy.orm import aliased
-
 from beaker.cache import cache_region
 
 from autonomie.models.task import (
@@ -69,12 +67,6 @@ from autonomie.views import (
 )
 
 log = logging.getLogger(__name__)
-
-# Aliases needed to outerjoin tables properly
-p1 = aliased(Project)
-p2 = aliased(Project)
-c1 = aliased(Customer)
-c2 = aliased(Customer)
 
 
 # Here we do some multiple function stuff to allow caching to work

@@ -188,6 +188,13 @@ def get_list_schema(company=False):
                 'default_option': ('', u"- Sélectionner un participant -"),
                 }
         ))
+        notfilled_node = colander.SchemaNode(
+            colander.Boolean(),
+            name='notfilled',
+            title="",
+            description=u"N'afficher que les ateliers non renseignés",
+        )
+        schema.insert(1, notfilled_node)
     year = forms.year_select_node(get_invoice_years)
     year.name = 'year'
     schema.insert(0, year)

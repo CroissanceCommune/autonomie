@@ -34,6 +34,8 @@ from pyramid.httpexceptions import (
 from sqlalchemy import (
     or_,
     func,
+    distinct,
+    not_,
 )
 from pyramid.security import has_permission
 
@@ -43,6 +45,7 @@ from js.jquery_timepicker_addon import timepicker_fr
 from autonomie.models import workshop as models
 from autonomie.models.activity import Attendance
 from autonomie.models import user
+from autonomie.models.base import DBSESSION
 from autonomie.utils.pdf import (
     render_html,
     write_pdf,
@@ -73,7 +76,7 @@ from autonomie.views.render_api import (
 )
 
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 
 WORKSHOP_SUCCESS_MSG = u"L'atelier a bien été programmée : \
@@ -359,6 +362,29 @@ class WorkshopListTools(object):
                 )
             )
 
+        return query
+
+    def filter_notfilled(self, query, appstruct):
+        """
+        Filter the workshops for which timeslots have not been filled
+        """
+        notfilled = appstruct.get('notfilled')
+        if notfilled:
+            logger.debug(u"Filtering the workshop that where not filled")
+            attendance_query = DBSESSION().query(distinct(Attendance.event_id))
+            attendance_query = attendance_query.filter(
+                Attendance.status != 'registered'
+            )
+
+            timeslot_ids = [item[0] for item in attendance_query]
+
+            query = query.filter(
+                not_(
+                    models.Workshop.timeslots.any(
+                        models.Timeslot.id.in_(timeslot_ids)
+                    )
+                )
+            )
         return query
 
 

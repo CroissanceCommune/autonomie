@@ -193,6 +193,7 @@ def get_list_schema(company=False):
             name='notfilled',
             title="",
             description=u"N'afficher que les ateliers non renseignés",
+            missing=colander.drop,
         )
         schema.insert(1, notfilled_node)
     year = forms.year_select_node(get_invoice_years)

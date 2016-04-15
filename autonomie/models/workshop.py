@@ -105,6 +105,12 @@ class Workshop(Event):
 
         return new_item
 
+    def __str__(self):
+        return "<Workshop : %s>" % (self.id,)
+
+    def __unicode__(self):
+        return u"<Workshop : %s (%s)>" % (self.id, self.title)
+
 
 class Timeslot(Event):
     """

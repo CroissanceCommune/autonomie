@@ -103,6 +103,23 @@ ACTIVITY_PDF_BUTTON = deform.Button(
 )
 
 
+SEARCH_GRID_FORM = (
+    (('year', 2,), ('conseiller_id', 4), ('participant_id', 4)),
+    (('status', 3, ), ('user_status', 3), ('type_id', 3)),
+    (
+        ('date_range_start', 3), ('date_range_end', 3), ('items_per_page', 3),
+        ('direction', 1), ('sort', 1), ('page', 1),
+    ),
+)
+USER_SEARCH_GRID_FORM = (
+    (('year', 3,), ('status', 3, ), ('user_status', 3), ('type_id', 3)),
+    (
+        ('date_range_start', 3), ('date_range_end', 3), ('items_per_page', 3),
+        ('direction', 1), ('sort', 1), ('page', 1),
+    ),
+)
+
+
 def handle_rel_in_appstruct(appstruct):
     """
     Change related element ids in associated elements for further merge
@@ -492,6 +509,7 @@ class ActivityList(BaseListView):
     )
     default_sort = 'datetime'
     default_direction = 'desc'
+    grid = SEARCH_GRID_FORM
 
     def query(self):
         query = Activity.query()
@@ -578,6 +596,7 @@ class ActivityListContractor(ActivityList):
     Activity list but for contractors
     """
     schema = get_list_schema(is_admin=False)
+    grid = USER_SEARCH_GRID_FORM
 
     def _get_conseiller_id(self, appstruct):
         return None

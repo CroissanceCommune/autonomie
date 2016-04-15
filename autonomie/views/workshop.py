@@ -83,6 +83,19 @@ WORKSHOP_SUCCESS_MSG = u"L'atelier a bien été programmée : \
 <a href='{0}'>Voir</a>"
 
 
+SEARCH_FORM_GRID = (
+    (('year', 3,), ('date', 3), ('participant_id', 6),),
+    (
+        ('notfilled', 3), ('search', 3), ('items_per_page', 3),
+        ('direction', 1), ('sort', 1), ('page', 1),
+    ),
+)
+USER_SEARCH_FORM_GRID = (
+    (('year', 3,), ('date', 3), ('search', 3), ('items_per_page', 3),),
+    (('direction', 1), ('sort', 1), ('page', 1),),
+)
+
+
 def get_new_datetime(now, hour, minute=0):
     """
     Return a new datetime object based on the 'now' element
@@ -392,7 +405,7 @@ class WorkshopListView(WorkshopListTools, BaseListView):
     """
     Workshop listing view
     """
-    pass
+    grid = SEARCH_FORM_GRID
 
 
 class WorkshopCsvWriter(CsvExporter):
@@ -497,6 +510,7 @@ class CompanyWorkshopListView(WorkshopListView):
     View for listing company's workshops
     """
     schema = get_list_schema(company=True)
+    grid = USER_SEARCH_FORM_GRID
 
     def filter_participant(self, query, appstruct):
         company = self.context

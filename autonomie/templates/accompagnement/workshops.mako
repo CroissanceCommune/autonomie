@@ -36,8 +36,10 @@
 </ul>
 <div class="row">
     <div class="col-md-8">
-        <div class="row">
-            ${form|n}
+        <div class='container-fluid'>
+            <div class="row">
+                ${form|n}
+            </div>
         </div>
     </div>
     <div class='col-md-4'>

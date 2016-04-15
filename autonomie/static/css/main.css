@@ -144,6 +144,12 @@ textarea{
   padding: 4px 9px;
   margin-top:6px;
 }
+#grid_search_form .form-group{
+    margin-bottom: 0px;
+}
+#grid_search_form  label.control-label{
+    display: none;
+}
 .section-header{
   padding: 12px 2px;
   font-weight:bold;

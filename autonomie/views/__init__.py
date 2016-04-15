@@ -29,6 +29,7 @@ import inspect
 import logging
 import colander
 import deform
+import deform_extensions
 import itertools
 
 from deform import Form
@@ -95,6 +96,7 @@ class BaseListClass(BaseView):
     default_sort = 'name'
     sort_columns = {'name': 'name'}
     default_direction = 'asc'
+    grid = None
 
     def __init__(self, request):
         BaseView.__init__(self, request)
@@ -154,7 +156,21 @@ class BaseListClass(BaseView):
     def get_form(self, schema):
         # counter is used to avoid field name conflicts
         form = Form(schema, counter=itertools.count(15000))
-        form.widget.template = "autonomie:deform_templates/searchform.pt"
+        if self.grid is not None:
+            form.formid = 'grid_search_form'
+            form.widget = deform_extensions.GridFormWidget(
+                named_grid=self.grid
+            )
+            form.buttons = (
+                deform.Button(
+                    title='Filtrer',
+                    name='submit',
+                    type='submit',
+                    css_class='btn btn-primary'
+                ),
+            )
+        else:
+            form.widget.template = "autonomie:deform_templates/searchform.pt"
         return form
 
     def _collect_appstruct(self):
@@ -231,6 +247,7 @@ class BaseListView(BaseListClass):
                                 that will be automatically added
     """
     add_template_vars = ()
+    grid = None
 
     def _paginate(self, query, appstruct):
         """

@@ -48,18 +48,24 @@ def test_main_config_success(config, get_csrf_request_with_db, dbsession):
 
 
 def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin.main import AdminTva
-    config.add_route('admin_tva', '/')
+    from autonomie.views.admin.vente import AdminTva
+    config.add_route('admin_vente', '/')
 
-    appstruct = {'tvas': [
-        {'name':"19,6%", 'value':1960, "default":1, "products":[]},
+    appstruct = {'datas': [
+        {
+            'name':"19,6%",
+            'value':1960,
+            "default":1,
+            "mention" : "Test",
+            "products":[]
+        },
         {'name':"7%", "value":700, "default":0, "products":[]}
         ]}
     view = AdminTva(get_csrf_request_with_db())
     view.submit_success(appstruct)
     assert dbsession.query(tva.Tva).filter(tva.Tva.active==True).count() == 2
 
-    appstruct = {'tvas':[{'name':"19,6%", 'value':1960, "default":1,
+    appstruct = {'datas':[{'name':"19,6%", 'value':1960, "default":1,
         "products":[]}]}
     view.submit_success(appstruct)
     assert dbsession.query(tva.Tva).filter(tva.Tva.active==True).count() == 1

@@ -74,7 +74,7 @@ MODELS_CONFIGURATION = {
             'parent',
         ),
         'label': u"Données de gestion sociale",
-        'permission': 'admin',
+        'permission': 'admin_userdatas',
     },
     'customers': {
         'factory': Customer,
@@ -85,7 +85,7 @@ MODELS_CONFIGURATION = {
             'company',
         ),
         'label': u"Clients",
-        'permission': 'edit',
+        'permission': 'add_customer',
     }
 }
 

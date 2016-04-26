@@ -98,7 +98,7 @@
                             % if display_tvas_column:
                                 <td class='tva'>
                                     % if line.tva>=0:
-                                        ${api.format_amount(line.tva, precision=5)|n}&nbsp;%
+                                        ${api.format_amount(line.tva, precision=2)|n}&nbsp;%
                                     % endif
                                 </td>
                             % endif

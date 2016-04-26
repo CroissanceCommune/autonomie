@@ -41,12 +41,12 @@ class SageCsvWriter(CsvExporter):
     """
     delimiter = ";"
     headers = ()
+    amount_precision = 2
 
     def __init__(self):
         CsvExporter.__init__(self, encoding=SAGE_COMPATIBLE_ENCODING)
 
-    @staticmethod
-    def format_debit(debit):
+    def format_debit(self, debit):
         """
             Format the debit entry to get a clean float in our export
             12000 => 120,00
@@ -54,7 +54,11 @@ class SageCsvWriter(CsvExporter):
         if debit == '':
             return 0
         else:
-            return format_amount(debit, grouping=False)
+            return format_amount(
+                debit,
+                grouping=False,
+                precision=self.amount_precision
+            )
 
     def format_credit(self, credit):
         """
@@ -68,6 +72,7 @@ class SageInvoiceCsvWriter(SageCsvWriter):
     Sage invoice csv writer
     Add the handling of the invoice prefix in invoice number formatting
     """
+    amount_precision = 5
     headers = (
         {'name': 'num_facture', 'label': "Numéro de pièce", },
         {'name': 'code_journal', 'label': "Code Journal"},

@@ -90,15 +90,13 @@ def get_next_official_number(year=None):
     next_ = 1
     if year is None:
         year = datetime.date.today().year
+
     query = DBSESSION().query(func.max(Task.official_number))
-    # Task date has a silly format : 20150205
-    # we check dates with year * 10000 : 20150000
-    year = year * 10000
-    next_year = (year + 1) * 10000
-    query = query.filter(Task.date.between(year, next_year))
+    query = query.filter(extract('year', Task.date) == year)
     last = query.first()[0]
     if last:
         next_ = last + 1
+
     return next_
 
 
@@ -269,19 +267,6 @@ class Invoice(Task, InvoiceCompute):
             else:
                 taskname_tmpl = u"Facture {0}"
             self.name = taskname_tmpl.format(self.sequence_number)
-
-    @classmethod
-    def get_official_number(cls):
-        """
-            Return the next official_number available in the Invoice's table
-            Take the max of official Number
-            when date startswith the current year
-            taskdate is a string (YYYYMMDD)
-        """
-        current_year = datetime.date.today().year
-        query = DBSESSION().query(func.max(Invoice.official_number))
-        query = query.filter(extract('year', Invoice.date) == current_year)
-        return query
 
     def gen_cancelinvoice(self, user):
         """
@@ -520,19 +505,6 @@ class CancelInvoice(Task, TaskCompute):
         if self.name in [None, ""]:
             taskname_tmpl = u"Avoir {0}"
             self.name = taskname_tmpl.format(self.sequence_number)
-
-    @classmethod
-    def get_official_number(cls):
-        """
-            Return the greatest official_number actually used in the
-            ManualInvoice table
-        """
-        current_year = datetime.date.today().year
-        return DBSESSION().query(
-            func.max(CancelInvoice.official_number)
-        ).filter(
-            func.year(CancelInvoice.date) == current_year
-        )
 
     def is_tolate(self):
         """

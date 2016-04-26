@@ -1247,10 +1247,7 @@ class SagePaymentBase(BaseSageBookEntryFactory):
     def reference(self):
         return u"{0}/{1}".format(
             self.invoice.official_number,
-            render_api.format_amount(
-                self.payment.remittance_amount,
-                grouping=False
-            ),
+            self.payment.remittance_amount,
         )
 
     @property

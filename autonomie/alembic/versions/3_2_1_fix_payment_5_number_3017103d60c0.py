@@ -14,6 +14,14 @@ from alembic import op
 import sqlalchemy as sa
 
 
+def format_remittance(value):
+    try:
+        value = int(value) / 100.0
+    except:
+        value = value
+    return str(value)
+
+
 def upgrade():
     from autonomie.models.task import Payment
     from autonomie.models.base import DBSESSION as db
@@ -25,11 +33,12 @@ def upgrade():
         )
     )
 
-    for entry in db().query(Payment.id, Payment.amount):
-        id_, amount = entry
-        query = "update {table} set amount={amount} where id={id}".format(
+    for entry in db().query(Payment.id, Payment.amount, Payment.remittance_amount):
+        id_, amount, remittance = entry
+        query = "update {table} set amount={amount}, remittance_amount={remittance} where id={id}".format(
             table=table,
             amount=amount*1000,
+            remittance=format_remittance(remittance),
             id=id_,
         )
         op.execute(query)

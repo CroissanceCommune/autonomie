@@ -56,7 +56,7 @@ def populate_invoice_payment_actionmenu(context, request):
     request.actionmenu.add(link)
     link = ViewLink(
         u"Supprimer",
-        "edit_payment",
+        "delete_payment",
         path="payment",
         confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
         id=context.id,
@@ -235,7 +235,7 @@ def includeme(config):
     config.add_view(
         payment_delete,
         route_name="payment",
-        permission="edit_payment",
+        permission="delete_payment",
         request_param="action=delete",
     )
 

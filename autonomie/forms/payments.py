@@ -63,6 +63,15 @@ def deferred_amount_default(node, kw):
 
 
 @colander.deferred
+def deferred_remittance_amount_default(node, kw):
+    """
+        default value for the payment amount
+    """
+    from autonomie.views.render_api import format_amount
+    return format_amount(get_amount_topay(kw), precision=5)
+
+
+@colander.deferred
 def deferred_total_validator(node, kw):
     """
         validate the amount to keep the sum under the total
@@ -110,7 +119,7 @@ class PaymentSchema(colander.MappingSchema):
         title=u"Identifiant de la remise en banque",
         description=u"Ce champ est un indicateur permettant de \
 retrouver la remise en banque à laquelle cet encaissement est associé",
-        default=deferred_amount_default,
+        default=deferred_remittance_amount_default,
     )
     amount = colander.SchemaNode(
         AmountType(5),
@@ -206,7 +215,7 @@ class MultiplePaymentSchema(colander.MappingSchema):
     remittance_amount = colander.SchemaNode(
         colander.String(),
         title=u"Identifiant de la remise en banque",
-        default=deferred_amount_default,
+        default=deferred_remittance_amount_default,
     )
     payment_amount = colander.SchemaNode(
         AmountType(5),

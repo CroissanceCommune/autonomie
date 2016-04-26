@@ -22,10 +22,10 @@ def upgrade():
 
     for payment in db().query(Payment).filter(cast(Payment.created_at, Date) == date.today()):
         try:
-            payment.remittance_amount = int(payment.remittance_amount) / 1000.0
+            payment.remittance_amount = float(payment.remittance_amount) / 100000.0
             db().merge(payment)
         except:
-            print(u"Erreur payment : %s (%s)" % payment.id, payment.amount)
+            print(u"Erreur payment : %s (%s)" % (payment.id, payment.remittance_amount))
 
     from zope.sqlalchemy import mark_changed
     mark_changed(db())

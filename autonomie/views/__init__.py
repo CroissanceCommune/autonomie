@@ -155,7 +155,11 @@ class BaseListClass(BaseView):
 
     def get_form(self, schema):
         # counter is used to avoid field name conflicts
-        form = Form(schema, counter=itertools.count(15000))
+        form = Form(
+            schema,
+            counter=itertools.count(15000),
+            method='GET'
+        )
         if self.grid is not None:
             form.formid = 'grid_search_form'
             form.widget = deform_extensions.GridFormWidget(

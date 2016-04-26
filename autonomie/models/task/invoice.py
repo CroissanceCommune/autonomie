@@ -35,6 +35,7 @@ from beaker.cache import cache_region
 from sqlalchemy import (
     Column,
     Integer,
+    BigInteger,
     Boolean,
     String,
     ForeignKey,
@@ -582,7 +583,7 @@ class Payment(DBBASE, PersistentACLMixin):
     )
 
     mode = Column(String(50))
-    amount = Column(Integer)
+    amount = Column(BigInteger())
     remittance_amount = Column(String(255))
     date = Column(DateTime(), default=datetime.datetime.now)
     exported = Column(Boolean(), default=False)

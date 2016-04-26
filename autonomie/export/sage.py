@@ -115,6 +115,7 @@ class SagePaymentCsvWriter(SageCsvWriter):
     """
     Payment csv writer
     """
+    amount_precision = 5
     headers = (
         {'name': 'reference', 'label': "Référence"},
         {'name': 'code_journal', 'label': "Code Journal"},

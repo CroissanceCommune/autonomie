@@ -53,7 +53,7 @@ def deferred_edit_adminonly_widget(node, kw):
         return a deferred adminonly edit widget
     """
     request = kw['request']
-    if request.has_permission('admin_company', request.context):
+    if not request.has_permission('admin_company', request.context):
         return deform_extensions.DisabledInput()
     else:
         return deform.widget.TextInputWidget()

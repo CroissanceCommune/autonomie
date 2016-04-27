@@ -865,7 +865,6 @@ class TestSagePaymentMain():
         assert factory.code_journal == "JOURNAL_RECEIPTS"
         assert factory.date == today.strftime("%d%m%y")
         assert factory.mode == u"chèque"
-        assert factory.montant_remise == u"100,00"
         assert factory.libelle == u"company / Rgt customer"
 
     def test_credit_client(self, payment):

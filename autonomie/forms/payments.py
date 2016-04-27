@@ -68,7 +68,7 @@ def deferred_remittance_amount_default(node, kw):
         default value for the payment amount
     """
     from autonomie.views.render_api import format_amount
-    return format_amount(get_amount_topay(kw), precision=5)
+    return format_amount(get_amount_topay(kw), precision=5, grouping=False)
 
 
 @colander.deferred

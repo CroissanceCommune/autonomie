@@ -141,7 +141,9 @@
                             % endif
                             ):
                             ${api.format_amount(payment.amount, precision=5)|n}&nbsp;€
-                            (${payment.tva.name})
+                            % if payment.tva is not None:
+                                (${payment.tva.name})
+                            % endif
                         </a>
                     </li>
                 % endfor

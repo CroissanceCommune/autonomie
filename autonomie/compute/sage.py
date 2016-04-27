@@ -1223,7 +1223,6 @@ class SagePaymentBase(BaseSageBookEntryFactory):
         'code_journal',
         'date',
         'mode',
-        'montant_remise',
         'libelle',
         'type_',
         "num_analytique",
@@ -1261,13 +1260,6 @@ class SagePaymentBase(BaseSageBookEntryFactory):
     @property
     def mode(self):
         return self.payment.mode
-
-    @property
-    def montant_remise(self):
-        return render_api.format_amount(
-            self.payment.remittance_amount,
-            grouping=False,
-        )
 
     @property
     def libelle(self):

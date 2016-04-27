@@ -26,24 +26,22 @@
 <%block name='content'>
 <div class='row'>
 % if companies:
-    <ul class="thumbnails">
-        % for company in companies:
-        <li class="col-md-4">
-        <div class="thumbnail">
-            <img src="${api.img_url(company.logo_file)}" title="${company.name}" alt="" style="max-height:200px;"/>
-            <div class="caption">
-                <h3>${company.name}</h3>
-                <p>
-                    ${company.goal}
-                </p>
-                <a class="btn btn-primary" href="${company.url}" title="Accéder au gestionnaire de ${company.name}">
-                    Accéder au gestionnaire de ${company.name} >>>
-                </a>
+    % for company in companies:
+        <div class="col-sm-6 col-md-4">
+            <div class="thumbnail">
+                <img src="${api.img_url(company.logo_file)}" title="${company.name}" alt="" style="max-height:200px;"/>
+                <div class="caption">
+                    <h3>${company.name}</h3>
+                    <p>
+                        ${company.goal}
+                    </p>
+                    <a class="btn btn-primary" href="${company.url}" title="Accéder au gestionnaire de ${company.name}">
+                        Accéder au gestionnaire de ${company.name} >>>
+                    </a>
+                </div>
             </div>
         </div>
-        </li>
     % endfor
-</ul>
 %else:
     <strong>Aucune entreprise n'a été configurée pour ce compte</strong>
 % endif

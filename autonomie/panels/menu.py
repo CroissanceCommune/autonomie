@@ -402,8 +402,9 @@ def menu_panel(context, request):
         if len(companies) > 1:
             menu.insert(company_choice(request, companies, cid))
 
-    href = request.route_path("users")
-    menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
+    if menu is not None:
+        href = request.route_path("users")
+        menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
 
     return {
         'menu': menu,

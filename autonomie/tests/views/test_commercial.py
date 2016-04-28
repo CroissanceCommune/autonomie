@@ -28,11 +28,19 @@
 import pytest
 from datetime import date
 from mock import Mock
-from autonomie.views.commercial import compute_turnover_difference
+from autonomie.views.commercial import (
+    compute_turnover_difference,
+    compute_turnover_percent,
+)
 from autonomie.views.commercial import DisplayCommercialHandling
 from autonomie.models.treasury import TurnoverProjection
 
 APPSTRUCT = {'month':11, 'value':'1500', 'comment':"Some comments go here"}
+
+
+class DummyProjection(object):
+    def __init__(self, value):
+        self.value = value
 
 
 def getOne():
@@ -95,3 +103,11 @@ def test_edit(proj, get_csrf_request_with_db):
     view.submit_success(appstruct)
     proj = getOne()
     assert proj.value == 10
+
+
+def test_compute_turnover_percent():
+    proj = DummyProjection(0)
+    assert compute_turnover_percent(0, {0: proj}, {0: 50}) == 0
+    proj = DummyProjection(100)
+    assert compute_turnover_percent(0, {0: proj}, {0: 50}) == 50.0
+

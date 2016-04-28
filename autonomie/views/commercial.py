@@ -311,7 +311,7 @@ def compute_turnover_percent(index, projections, turnovers):
         projection = projections.get(index)
         if projection is not None:
             if projection.value is not None:
-                return percent(turnover, projection.value)
+                return percent(turnover, projection.value, 0)
     return None
 
 

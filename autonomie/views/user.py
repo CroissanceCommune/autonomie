@@ -271,6 +271,8 @@ class PermanentUserEditView(PermanentUserAddView):
         appstruct = self.schema.dictify(self.context)
         appstruct.pop('pwd')
 
+        appstruct['groups'] = self.context.groups
+
         appstruct['companies'] = [c.name for c in self.context.companies]
         form.set_appstruct(appstruct)
         populate_actionmenu(self.request, self.context)

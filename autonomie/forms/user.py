@@ -393,17 +393,17 @@ def get_user_schema(edit=False, permanent=True):
     else:
         schema = SQLAlchemySchemaNode(user.User)
 
-    if permanent:
-        schema.insert(
-            0,
-            colander.SchemaNode(
-                colander.Integer(),
-                name='primary_group',
-                validator=deferred_primary_group_validator,
-                widget=deferred_primary_group_widget,
-                title=u"Rôle de l'utilisateur",
-            )
+    schema.insert(
+        0,
+        colander.SchemaNode(
+            colander.Set(),
+            name="groups",
+            validator=deferred_group_validator,
+            widget=deferred_group_widget,
+            title=u"Groupes de l'utilisateur",
         )
+    )
+    if permanent:
         schema.add(
             CompanySchema(
                 name='companies',
@@ -411,16 +411,6 @@ def get_user_schema(edit=False, permanent=True):
                 widget=deform.widget.SequenceWidget(
                     add_subitem_text_template=u"Ajouter une entreprise"
                 )
-            )
-        )
-    else:
-        schema.add(
-            colander.SchemaNode(
-                colander.Set(),
-                name="groups",
-                validator=deferred_group_validator,
-                widget=deferred_group_widget,
-                title=u"Groupes de l'utilisateur",
             )
         )
 

@@ -533,10 +533,10 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     onRender: function(collectionView){
       this.setTotal();
     },
-    onItemRemoved: function(){
+    onRemoveChild: function(){
       this.setTotal();
     },
-    onAfterItemAdded: function(){
+    onAddChild: function(){
       this.setTotal();
     },
     setTotal: function(){

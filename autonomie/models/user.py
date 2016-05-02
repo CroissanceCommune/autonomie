@@ -436,7 +436,15 @@ def get_user_by_roles(roles):
     """
     Return user by primary roles
     """
-    return User.query().filter(User.groups.contains(roles))
+    if len(roles) > 1:
+        from sqlalchemy import or_
+        clauses = []
+        for role in roles:
+            clauses.append(User.groups.contains(role))
+
+        return User.query().filter(or_(*clauses))
+    else:
+        return User.query().filter(User.groups.contains(roles))
 
 
 def get_users_options(roles=None):

@@ -360,24 +360,6 @@ class User(DBBASE, PersistentACLMixin):
                 return company
         raise KeyError
 
-    def is_admin(self):
-        """
-            return true if the user is and administrator
-        """
-        return self.primary_group == ADMIN_PRIMARY_GROUP
-
-    def is_manager(self):
-        """
-            return True if the user is a manager
-        """
-        return self.primary_group == MANAGER_PRIMARY_GROUP
-
-    def is_contractor(self):
-        """
-            return True if the user is a contractor
-        """
-        return self.primary_group == CONTRACTOR_PRIMARY_GROUP
-
     def has_userdatas(self):
         """
         Return True if the current object has userdatas associated to it

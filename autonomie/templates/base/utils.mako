@@ -174,7 +174,7 @@
                           <i class='glyphicon glyphicon-trash'></i>
                       </a>
                   % endif
-                  <a class='' href="${request.route_path('file', id=file.id, _query=dict(action='download'))}"><i class='glyphicon glyphicon-download'></i>Télécharger le fichier</a>
+                  <a class='' href="${request.route_path('file', id=child.id, _query=dict(action='download'))}"><i class='glyphicon glyphicon-download'></i></a>
                   </li>
               % endif
           % if loop.last:

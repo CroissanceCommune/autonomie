@@ -86,16 +86,6 @@ MANAGER_PRIMARY_GROUP = 2
 CONTRACTOR_PRIMARY_GROUP = 3
 
 
-ROLES = {
-    'admin': {'id': ADMIN_PRIMARY_GROUP, 'label': u"Administrateur", },
-    'manager': {
-        'id': MANAGER_PRIMARY_GROUP,
-        'label': u"Membre de l'équipe d'appui"
-    },
-    'contractor': {'id': CONTRACTOR_PRIMARY_GROUP, 'label': u"Entrepreneur"},
-}
-
-
 # We need to store this datas here (before we find a solution to place a
 # hashbang in an alembic migratino script)
 
@@ -446,8 +436,7 @@ def get_user_by_roles(roles):
     """
     Return user by primary roles
     """
-    ids = set([ROLES[role]['id'] for role in roles if role in ROLES])
-    return User.query().filter(User.primary_group.in_(ids))
+    return User.query().filter(User.groups.contains(roles))
 
 
 def get_users_options(roles=None):

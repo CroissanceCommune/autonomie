@@ -35,7 +35,7 @@ from autonomie.models import user
 from autonomie.models.company import Company
 from autonomie import forms
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 
 def get_unique_login_validator(user_id=None):
@@ -103,42 +103,6 @@ def deferred_company_input(node, kw):
 #        template="autonomie:deform_templates/autocomple_input.pt"
     )
     return wid
-
-
-def get_user_admin_roles(user_obj):
-    """
-    Return the list of roles a user can administrate
-
-    :param obj user_obj: a User model instance
-
-    :returns: A list of duples (id, label)
-    """
-    res = []
-    for role in user.ROLES.values():
-        if role['id'] >= user_obj.primary_group:
-            res.append( (role['id'], role['label'],) )
-    return res
-
-
-@colander.deferred
-def deferred_primary_group_widget(node, kw):
-    """
-        Return the primary group widget regarding the current user
-    """
-    user = kw['request'].user
-    roles = get_user_admin_roles(user)
-    return deform.widget.RadioChoiceWidget(values=roles)
-
-
-@colander.deferred
-def deferred_primary_group_validator(node, kw):
-    """
-        return the validator for primary group configuration
-        regarding the current user
-    """
-    user = kw['request'].user
-    roles = get_user_admin_roles(user)
-    return colander.OneOf([x[0] for x in roles])
 
 
 @colander.deferred
@@ -350,12 +314,17 @@ def get_password_schema():
     return schema
 
 
-def get_groups():
+def get_groups(request):
     """
     Return the available groups as a list of 2-uples (id, label)
     """
     groups = user.Group.query().all()
-    return [(group.name, group.label) for group in groups]
+    for group in groups:
+        logger.debug("%s : %s" % (group.name, request.has_permission(group.name)))
+    return [
+        (group.name, group.label) for group in groups
+        if request.has_permission(group.name)
+    ]
 
 @colander.deferred
 def deferred_group_validator(node, kw):
@@ -363,7 +332,8 @@ def deferred_group_validator(node, kw):
     Return a validator that checks that the validated datas matches the existing
     groups
     """
-    groups = get_groups()
+    request = kw['request']
+    groups = get_groups(request)
     return colander.ContainsOnly([group[0] for group in groups])
 
 
@@ -372,7 +342,8 @@ def deferred_group_widget(node, kw):
     """
     Return a widget for group selection
     """
-    groups = get_groups()
+    request = kw['request']
+    groups = get_groups(request)
     return deform.widget.CheckboxChoiceWidget(values=groups)
 
 

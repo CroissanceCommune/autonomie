@@ -240,7 +240,7 @@ def populate_actionmenu(context, request):
     )
     request.actionmenu.add(
         ViewLink(
-            u"Éditer",
+            u"Modifier",
             perm=u'edit_file',
             path="file",
             id=context.id,

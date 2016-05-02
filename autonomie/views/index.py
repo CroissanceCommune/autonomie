@@ -39,7 +39,7 @@ def index(request):
     """
     user = request.user
     companies = user.companies
-    if user.is_admin() or user.is_manager():
+    if request.has_permission('manage')
         return HTTPFound(request.route_path('manage'))
     elif len(companies) == 1:
         company = companies[0]

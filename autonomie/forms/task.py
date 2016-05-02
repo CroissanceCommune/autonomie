@@ -564,7 +564,7 @@ class TaskConfiguration(colander.MappingSchema):
         widget_options={'rows': 4}
     )
     workplace = forms.textarea_node(
-        title=u"Lieu d'éxécution des travaux",
+        title=u"Lieu d'exécution des travaux",
         widget_options={'rows': 3},
         missing=colander.drop,
     )

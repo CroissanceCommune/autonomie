@@ -33,21 +33,18 @@ TEST1 = dict(
     firstname="user1_firstname",
     lastname="user1_lastname",
     email="user1@test.fr",
-    primary_group=1,
 )
 TEST2 = dict(
     login="user2_login",
     firstname="user2_firstname",
     lastname="user2_lastname",
     email="user2@test.fr",
-    primary_group=2,
 )
 TEST3 = dict(
     login="user3_login",
     firstname="user3_firstname",
     lastname="user3_lastname",
     email="user3@test.fr",
-    primary_group=3,
 )
 
 def get_userdatas():
@@ -87,17 +84,6 @@ def test_get_company(dbsession):
     assert company.name == u'company1'
     with pytest.raises(KeyError):
         user1.get_company(3000)
-
-def test_role(dbsession):
-    a = User(**TEST1)
-    assert a.is_admin()
-    assert not a.is_manager()
-    a = User(**TEST2)
-    assert a.is_manager()
-    assert not a.is_admin()
-    a = User(**TEST3)
-    assert a.is_contractor()
-    assert not a.is_admin()
 
 def test_gen_account_with_duplicate_login(dbsession, userdatas):
     # First add a user account

@@ -59,7 +59,7 @@
                         % endif
                         <a href='#setform'
                             % if turnover:
-                                title='${turnover.comment}' onclick='setTurnoverProjectionForm("${i}", "${turnover.value/100.0}", this);'>
+                                title='${turnover.comment}' onclick='setTurnoverProjectionForm("${i}", "${api.format_amount(turnover.value, grouping=False, precision=5)}", this);'>
                             % else:
                                 onclick='setTurnoverProjectionForm("${i}");'>
                             % endif

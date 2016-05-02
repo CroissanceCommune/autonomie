@@ -52,7 +52,10 @@ class CommercialSetFormSchema(colander.MappingSchema):
         title=u'',
         validator=colander.Range(1,12),
     )
-    value = colander.SchemaNode(AmountType(), title=u"CA prévisionnel")
+    value = colander.SchemaNode(
+        AmountType(5),
+        title=u"CA prévisionnel"
+    )
     comment = forms.textarea_node(
         title=u"Commentaire",
         missing=u""

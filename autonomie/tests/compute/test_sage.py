@@ -861,7 +861,7 @@ class TestSagePaymentMain():
     def test_base_entry(self, payment):
         today = datetime.date.today()
         factory = self.get_factory(payment)
-        assert factory.reference == "INV_001/100,00"
+        assert factory.reference == "INV_001/10000"
         assert factory.code_journal == "JOURNAL_RECEIPTS"
         assert factory.date == today.strftime("%d%m%y")
         assert factory.mode == u"chèque"

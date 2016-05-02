@@ -35,25 +35,16 @@ def get_company(id):
 def get_user():
     user =  MagicMock()
     user.companies = [get_company(1)]
-    user.is_contractor = lambda :True
-    user.is_manager = lambda :False
-    user.is_admin = lambda :False
     return user
 
 def get_manager():
     user =  MagicMock()
     user.companies = [get_company(1)]
-    user.is_contractor = lambda :False
-    user.is_manager = lambda :True
-    user.is_admin = lambda :False
     return user
 
 def get_admin():
     user =  MagicMock()
     user.companies = [get_company(1)]
-    user.is_contractor = lambda :False
-    user.is_manager = lambda :False
-    user.is_admin = lambda :True
     return user
 
 def get_context():

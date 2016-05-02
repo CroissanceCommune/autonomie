@@ -49,16 +49,12 @@ def test_check_login(app, config):
 
 #def get_avatar():
 #    user = MagicMock(name=u'test', companies=[])
-#    user.is_admin = lambda :False
-#    user.is_manager = lambda :False
 #    user.companies = [MagicMock(name=u'Test', id=100), MagicMock(name=u'Test2', id=101)]
 #    return user
 #
 #
 #def get_avatar2():
 #    user = MagicMock(name=u'test2')
-#    user.is_admin = lambda :False
-#    user.is_manager = lambda :False
 #    user.companies = [MagicMock(name=u'Test', id=100)]
 #    return user
 #

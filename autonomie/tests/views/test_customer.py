@@ -38,9 +38,6 @@ APPSTRUCT = {'name':'Company', 'contactLastName':u'Lastname',
              'compte_tiers':"Compte Tiers", 'code': 'CODE'}
 
 
-def get_user(contractor=True):
-    return Dummy(is_contractor=lambda :contractor)
-
 @pytest.fixture
 def customer(config, content, get_csrf_request_with_db):
     config.add_route('customer', '/')
@@ -48,7 +45,7 @@ def customer(config, content, get_csrf_request_with_db):
     comp = Company.query().first()
     comp.__name__ = 'company'
     request.context = comp
-    request.user = get_user()
+    request.user = Dummy()
     view = CustomerAdd(request)
     view.submit_success(APPSTRUCT)
     return getOne()
@@ -64,7 +61,7 @@ def test_customer_edit(customer, get_csrf_request_with_db):
     customer.__name__ = 'customer'
     req = get_csrf_request_with_db()
     req.context = customer
-    req.user = get_user(contractor=False)
+    req.user = Dummy()
     appstruct = APPSTRUCT.copy()
     appstruct['contactLastName'] = u"Changed Lastname"
     appstruct['compte_cg'] = "1"

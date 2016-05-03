@@ -680,12 +680,12 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     },
     getCategoryOptions:function(){
       var category_options = AppOptions['categories'];
-      var category = this.model.get('category');
+      var category = "" + this.model.get('category');
       return this.updateSelectOptions(category_options, category);
     },
     getTypeOptions: function(){
       var type_options = _.where(AppOptions['expense_types'], {active: true});
-      var type_id = this.model.get('type_id');
+      var type_id = "" + this.model.get('type_id');
       return this.updateSelectOptions(type_options, type_id);
     }
   });
@@ -699,13 +699,13 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     },
     getCategoryOptions:function(){
       var category_options = AppOptions['categories'];
-      var category = this.model.get('category');
+      var category = "" + this.model.get('category');
       return this.updateSelectOptions(category_options, category);
 
     },
     getTypeOptions: function(){
       var type_options = _.where(AppOptions['expensekm_types'], {active: true});
-      var type_id = this.model.get('type_id');
+      var type_id = "" + this.model.get('type_id');
       return this.updateSelectOptions(type_options, type_id);
     }
   });
@@ -826,7 +826,6 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
         destCollection:Expense.expense.lines,
         model: model
       });
-      console.log(expensetel_form);
       AutonomieApp.formContainer.show(expensetel_form);
     },
     addkm: function(category){

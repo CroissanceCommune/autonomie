@@ -179,7 +179,8 @@ class AuthSchema(BaseAuthSchema):
     remember_me = colander.SchemaNode(
         colander.Boolean(),
         widget=deform.widget.CheckboxWidget(),
-        title="Rester connecté",
+        label=u"Rester connecté",
+        title="",
         missing=False,
     )
 
@@ -188,7 +189,7 @@ def get_auth_schema():
     """
         return the authentication form schema
     """
-    return AuthSchema(title=u"Authentification", validator=auth)
+    return AuthSchema(title=u"", validator=auth)
 
 
 def get_json_auth_schema():

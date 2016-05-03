@@ -27,30 +27,13 @@
 </%block>
 <%block name='content'>
 <style>
-    .loginbox{
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        margin-top:15px;
-    }
-    .loginbox legend{
-        text-align:center;
-    }
-    .loginbox img-div{
-        margin-bottom:15px;
-        text-align:center;
-    }
-    .loginbox h1{
-        text-align:center;
-    }
+
 </style>
-<div class='container'>
-<div class='row'>
-    <div class='col-md-6 col-md-offset-3 loginbox'>
-        <div style='text-align:center; margin-bottom:15px;'>
+    <div class='loginbox'>
+        <div class='img-div'>
             <img src="/public/logo.png" alt='Votre CAE' />
         </div>
+        <hr />
         ${html_form|n}
     </div>
-</div>
-</div>
 </%block>

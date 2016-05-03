@@ -49,6 +49,47 @@ input[type=password]{
 .authentication-form .form-actions button{
   font-size: 16px;
 }
+/* Login box related css */
+.loginbox{
+  margin-top:10%;
+  height: 80%;
+  text-align:center;
+  max-width: 350px;
+  margin: 0 auto;
+}
+.loginbox img-div{
+  margin-bottom:15px;
+  text-align:center;
+}
+.loginbox img{
+  max-height: 250px;
+}
+.loginbox h1{
+  text-align:center;
+}
+#authentication{
+  max-width: 350px;
+  text-align:center;
+}
+#authentication label{
+  font-weight: normal;
+  font-size: 15px;
+}
+#authentication button{
+  display: block;
+  width: 100%;
+  font-size: 16px;
+}
+#authentication .checkbox{
+  margin-top: 0px;
+}
+#authentication #req-deformField4{
+  height: 0px;
+  margin: 0;
+  padding: 0;
+  visible: false;
+  display:none;
+}
 .loginbox img{
   max-width:100%;
   height: auto;

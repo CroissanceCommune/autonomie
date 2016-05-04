@@ -22,6 +22,8 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 import pytest
+import datetime
+from mock import MagicMock
 from autonomie.compute.task import (
     LineCompute,
     DiscountLineCompute,
@@ -155,6 +157,72 @@ def get_task(factory=DummyTask):
     return t
 
 
+@pytest.fixture
+def def_tva():
+    return MagicMock(
+        name="tva1",
+        value=1960,
+        default=0,
+        compte_cg="TVA0001",
+        compte_a_payer="TVAAPAYER0001",
+        code='CTVA0001'
+    )
+
+
+@pytest.fixture
+def tva10():
+    return MagicMock(
+        name="tva 10%",
+        value=1000,
+        default=0,
+        compte_cg="TVA10",
+        code='CTVA10'
+    )
+
+
+@pytest.fixture
+def invoice_bug363(def_tva, tva10):
+    prod = MagicMock(name="product 2", compte_cg="P0002", tva=tva10)
+    lines = []
+
+    for cost, qtity in (
+        (15000000, 1),
+        (2000000, 86),
+        (-173010000, 1),
+        (10000000, 1),
+        (-201845000, 1),
+        (4500000, 33),
+        (1800000, 74),
+        (3500000, 28),
+    ):
+        lines.append(
+            DummyLine(
+                cost=cost,
+                quantity=qtity,
+                tva=tva10.value,
+                product=prod,
+                tva_object=tva10
+            )
+        )
+
+    group = DummyGroup(lines=lines)
+    company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
+    customer = Dummy(name="customer", compte_tiers="CUSTOMER",
+                     compte_cg='CG_CUSTOMER')
+    invoice = TaskCompute()
+    invoice.default_tva = def_tva.value
+    invoice.expenses_tva = def_tva.value
+    invoice.date = datetime.date(2016, 05, 04)
+    invoice.customer = customer
+    invoice.company = company
+    invoice.official_number = "INV_002"
+    invoice.line_groups = [group]
+    invoice.all_lines = group.lines
+    invoice.expenses_ht = 0
+    invoice.expenses = 0
+    return invoice
+
+
 class TestTaskCompute():
     def test_lines_total_ht(self):
         task = get_task()
@@ -238,6 +306,9 @@ class TestTaskCompute():
         group = DummyGroup(lines=[line])
         task = DummyTask(line_groups=[group])
         assert not task.no_tva()
+
+    def test_get_tvas_by_product(self, invoice_bug363):
+        assert invoice_bug363.get_tvas_by_product()['P0002'] == 20185000
 
 
 class TestInvoiceCompute():

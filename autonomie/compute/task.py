@@ -118,6 +118,34 @@ class TaskCompute(object):
             ret_dict[key] = self.floor(ret_dict[key])
         return ret_dict
 
+    def get_tvas_by_product(self):
+        """
+        Return tvas stored by product type
+        """
+        ret_dict = {}
+        for group in self.line_groups:
+            for key, value in group.get_tvas_by_product().items():
+                val = ret_dict.get(key, 0)
+                val += value
+                ret_dict[key] = val
+
+        for discount in self.discounts:
+            val = ret_dict.get("rrr", 0)
+            val += discount.tva_amount()
+            ret_dict["rrr"] = val
+
+        expense = self.get_expense_ht()
+        tva_amount = expense.tva_amount()
+        if tva_amount > 0:
+            val = ret_dict.get("expense", 0)
+            val += tva_amount
+            ret_dict["expense"] = val
+
+        for key in ret_dict:
+            ret_dict[key] = self.floor(ret_dict[key])
+        return ret_dict
+
+
     def tva_amount(self):
         """
             Compute the sum of the TVAs amount of TVA
@@ -484,6 +512,18 @@ class GroupCompute(object):
             val = ret_dict.get(line.tva, 0)
             val += line.tva_amount()
             ret_dict[line.tva] = val
+        return ret_dict
+
+    def get_tvas_by_product(self):
+        """
+            return a dict with the tvas amounts stored by product
+            {1960:450.56, 700:45}
+        """
+        ret_dict = {}
+        for line in self.lines:
+            val = ret_dict.get(line.product.compte_cg, 0)
+            val += line.tva_amount()
+            ret_dict[line.product.compte_cg] = val
         return ret_dict
 
     def tva_amount(self):

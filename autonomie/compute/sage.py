@@ -112,8 +112,9 @@ class SageInvoice(object):
         self.invoice = invoice
         self.config = config or {}
         self.default_tva = default_tva or Tva.get_default()
+        self.tvas = self.invoice.get_tvas_by_product()
 
-    def get_product(self, compte_cg_produit, compte_cg_tva, code_tva):
+    def get_product(self, compte_cg_produit, compte_cg_tva, code_tva, tva_val):
         """
             Return the product dict belonging to the key "compte_cg_produit"
         """
@@ -122,6 +123,7 @@ class SageInvoice(object):
             prod['compte_cg_produit'] = compte_cg_produit
             prod['compte_cg_tva'] = compte_cg_tva
             prod['code_tva'] = code_tva
+            prod['tva'] = tva_val
         return prod
 
     def _populate_invoice_lines(self):
@@ -136,8 +138,8 @@ class SageInvoice(object):
                 line.product.compte_cg,
                 line.product.tva.compte_cg,
                 line.product.tva.code,
+                self.tvas[line.product.compte_cg],
             )
-            prod['tva'] = prod.get('tva', 0) + line.tva_amount()
             prod['ht'] = prod.get('ht', 0) + line.total_ht()
 
     def _populate_discounts(self):
@@ -155,8 +157,8 @@ class SageInvoice(object):
                     self.config.get('compte_rrr'),
                     compte_cg_tva,
                     code_tva,
+                    self.tvas.get('rrr', 0)
                 )
-                prod['tva'] = prod.get('tva', 0) + line.tva_amount()
                 prod['ht'] = prod.get('ht', 0) + line.total_ht()
 
     def _populate_expenses(self):
@@ -168,14 +170,20 @@ class SageInvoice(object):
                 self.expense_tva_compte_cg = self.default_tva.compte_cg
                 self.expense_tva_code = self.default_tva.code
 
+            compte_cg = self.config.get("compte_frais_annexes")
+            tva_val = self.tvas.get('expense', 0)
+            # Au cas où le compte_cg de frais annexes servent aussi pour des
+            # produits
+            tva_val += self.tvas.get(compte_cg, 0)
+
             prod = self.get_product(
-                self.config.get("compte_frais_annexes"),
+                compte_cg,
                 self.expense_tva_compte_cg,
-                self.expense_tva_code
+                self.expense_tva_code,
+                tva_val,
             )
             ht_expense = self.invoice.get_expense_ht()
             ttc_expense = self.invoice.expenses_amount()
-            prod['tva'] = ht_expense.tva_amount()
             prod['ht'] = ttc_expense + ht_expense.total_ht()
 
     def _round_products(self):

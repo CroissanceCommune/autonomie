@@ -105,7 +105,8 @@ input[type=password]{
   font-size:1em;
 }
 .deform label{
-  font-size:1em;
+  font-weight: normal;
+  font-size: 16px;
 }
 .deform legend{
   font-size:1.4em;

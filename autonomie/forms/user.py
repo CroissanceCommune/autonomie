@@ -320,10 +320,6 @@ def get_groups(request):
     Return the available groups as a list of 2-uples (id, label)
     """
     groups = user.Group.query().all()
-    for group in groups:
-        logger.debug(
-            u"%s : %s" % (group.name, request.has_permission(group.name))
-        )
     return [
         (group.name, group.label) for group in groups
         if request.has_permission(group.name)

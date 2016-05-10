@@ -321,7 +321,9 @@ def get_groups(request):
     """
     groups = user.Group.query().all()
     for group in groups:
-        logger.debug("%s : %s" % (group.name, request.has_permission(group.name)))
+        logger.debug(
+            u"%s : %s" % (group.name, request.has_permission(group.name))
+        )
     return [
         (group.name, group.label) for group in groups
         if request.has_permission(group.name)

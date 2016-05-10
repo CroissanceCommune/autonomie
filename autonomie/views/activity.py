@@ -882,7 +882,7 @@ def includeme(config):
         route_name='activity',
         permission='edit_activity',
         request_param='action=record',
-        renderer="/base/formajax.mako",
+        renderer="/base/formpage.mako",
     )
 
     config.add_view(

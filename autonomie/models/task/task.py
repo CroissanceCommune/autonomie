@@ -201,7 +201,6 @@ class Task(Node):
     )
     _number = Column(
         String(100),
-        nullable=False,
     )
     official_number = deferred(
         Column(

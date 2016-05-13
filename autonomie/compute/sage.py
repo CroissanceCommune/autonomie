@@ -1259,7 +1259,7 @@ class SagePaymentBase(BaseSageBookEntryFactory):
 
     @property
     def code_journal(self):
-        return self.config['receipts_code_journal']
+        return self.payment.bank.code_journal
 
     @property
     def date(self):
@@ -1445,13 +1445,13 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
     def set_static_cols(self):
         # set static fields values
         self.reference = u"{0}".format(self.expense.id)
-        self.code_journal = self.config['code_journal_ndf']
+        self.code_journal = self.payment.bank.code_journal
         self.date = format_sage_date(self.payment.date)
         self.mode = self.payment.mode
-        self.libelle = u"remboursement dépenses {0} {1} {2}".format(
-            render_api.format_account(self.user),
-            render_api.month_name(self.expense.month),
-            self.expense.year,
+        self.libelle = u"{nom} / REMB FRAIS {mois}/{annee}".format(
+            nom=self.user.lastname.upper(),
+            mois=render_api.month_name(self.expense.month),
+            annee=self.expense.year,
         )
         self.num_analytique = self.company.code_compta
         self.code_taxe = self.config['code_tva_ndf']
@@ -1486,12 +1486,15 @@ class SageExpensePaymentWaiver(SageExpensePaymentMain):
     """
     def set_static_cols(self):
         SageExpensePaymentMain.set_static_cols(self)
+        self.code_journal = self.config.get('code_journal_waiver_ndf')
+        if not self.code_journal:
+            self.code_journal = self.config['code_journal_ndf']
         self.mode = u"Abandon de créance"
         self.code_taxe = ""
-        self.libelle = u"Abandon de créance {0} {1} {2}".format(
-            render_api.format_account(self.user),
-            render_api.month_name(self.expense.month),
-            self.expense.year,
+        self.libelle = u"Abandon de créance {name} {month}/{year}".format(
+            name=self.user.lastname.upper(),
+            month=render_api.month_name(self.expense.month),
+            year=self.expense.year,
         )
 
     @double_lines

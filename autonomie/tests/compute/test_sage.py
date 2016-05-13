@@ -288,14 +288,22 @@ def sageinvoice_discount(def_tva, invoice_discount):
 
 
 @pytest.fixture
-def payment(invoice, def_tva):
+def bank():
+    return Dummy(
+        compte_cg=u"COMPTE_CG_BANK",
+        code_journal="CODE_JOURNAL_BANK"
+    )
+
+
+@pytest.fixture
+def payment(invoice, def_tva, bank):
     p = Dummy(
         remittance_amount=10000,
         amount=10000000,
         mode=u"chèque",
         date=datetime.date.today(),
         tva=def_tva,
-        bank=Dummy(compte_cg=u"COMPTE_CG_BANK"),
+        bank=bank,
         invoice=invoice,
     )
     return p
@@ -333,13 +341,13 @@ def expense_type():
 
 
 @pytest.fixture
-def expense_payment(expense):
+def expense_payment(expense, bank):
     p = Dummy(
         amount=10000000,
         mode=u"chèque",
         date=datetime.date.today(),
-        bank=Dummy(compte_cg=u"COMPTE_CG_BANK"),
         expense=expense,
+        bank=bank,
     )
     return p
 
@@ -379,11 +387,13 @@ def test_populate_discount_lines_without_compte_cg_tva(sageinvoice_discount):
     sageinvoice_discount._populate_discounts()
     assert sageinvoice_discount.products.keys() == []
 
+
 def test_populate_discount_lines_without_code_tva(sageinvoice_discount):
     # If the code tva is not def, it should work
     sageinvoice_discount.config.pop("code_tva_rrr")
     sageinvoice_discount._populate_discounts()
     assert sageinvoice_discount.products.keys() != []
+
 
 def test_populate_expenses(sageinvoice):
     sageinvoice.expense_tva_compte_cg = "TVA0001"
@@ -449,14 +459,14 @@ class BaseBookEntryTest():
 
 
 def decoratorfunc(a, b):
-    return {'type_': 'A', 'key': 'value', 'num_analytique':'NUM'}
+    return {'type_': 'A', 'key': 'value', 'num_analytique': 'NUM'}
 
 
 def test_double_lines():
     res = list(double_lines(decoratorfunc)(None, None))
     assert res == [
         {'type_': 'G', 'key': 'value'},
-        {'type_': 'A', 'key': 'value', 'num_analytique':'NUM'}
+        {'type_': 'A', 'key': 'value', 'num_analytique': 'NUM'}
         ]
 
 
@@ -472,11 +482,13 @@ class TestSageFacturation(BaseBookEntryTest):
         assert SageFacturation._has_tva_value(product)
 
     def test_credit_totalht(self, sageinvoice):
-        res = {'libelle': 'customer company',
+        res = {
+            'libelle': 'customer company',
             'compte_cg': 'P0001',
             'num_analytique': 'COMP_CG',
             'code_tva': 'CTVA0001',
-            'credit': 20000000}
+            'credit': 20000000,
+        }
         method = "credit_totalht"
         self._test_product_book_entry(sageinvoice, method, res)
 
@@ -880,7 +892,7 @@ class TestSagePaymentMain():
         today = datetime.date.today()
         factory = self.get_factory(payment)
         assert factory.reference == "INV_001/10000"
-        assert factory.code_journal == "JOURNAL_RECEIPTS"
+        assert factory.code_journal == "CODE_JOURNAL_BANK"
         assert factory.date == today.strftime("%d%m%y")
         assert factory.mode == u"chèque"
         assert factory.libelle == u"company / Rgt customer"
@@ -1057,10 +1069,10 @@ class TestSageExpensePaymentMain():
         today = datetime.date.today()
         factory = self.get_factory(expense_payment)
         assert factory.reference == "1254"
-        assert factory.code_journal == "JOURNALNDF"
+        assert factory.code_journal == "CODE_JOURNAL_BANK"
         assert factory.date == today.strftime("%d%m%y")
         assert factory.mode == u"chèque"
-        libelle = u"remboursement dépenses LASTNAME Firstname mai 2014"
+        libelle = u"LASTNAME / REMB FRAIS mai/2014"
         assert factory.libelle == libelle
         assert factory.code_taxe == "TVANDF"
         assert factory.num_analytique == "COMP_ANA"
@@ -1087,6 +1099,13 @@ class TestSageExpensePaymentWaiver():
         factory.set_payment(expense_payment)
         return factory
 
+    def test_code_journal(self, expense_payment):
+        config = get_config()
+        config['code_journal_waiver_ndf'] = 'JOURNAL_ABANDON'
+        factory = SageExpensePaymentWaiver(config)
+        factory.set_payment(expense_payment)
+        assert factory.code_journal == "JOURNAL_ABANDON"
+
     def test_base_entry(self, expense_payment):
         today = datetime.date.today()
         factory = self.get_factory(expense_payment)
@@ -1094,7 +1113,7 @@ class TestSageExpensePaymentWaiver():
         assert factory.code_journal == "JOURNALNDF"
         assert factory.date == today.strftime("%d%m%y")
         assert factory.mode == u"Abandon de créance"
-        libelle = u"Abandon de créance LASTNAME Firstname mai 2014"
+        libelle = u"Abandon de créance LASTNAME mai/2014"
         assert factory.libelle == libelle
         assert factory.code_taxe == ""
         assert factory.num_analytique == "COMP_ANA"

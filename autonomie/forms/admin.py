@@ -207,10 +207,6 @@ d'écriture RG Client",
     "code_journal_ndf": {
         "title": u"Code journal utilisé pour les notes de dépense",
     },
-    "code_journal_payment_ndf": {
-        "title": u"Code journal utilisé pour les remboursements des \
-notes de dépense",
-    },
     "compte_cg_ndf": {
         "title": u"Compte de tiers (classe 4) pour les dépenses dues aux \
 entrepreneurs",
@@ -219,7 +215,8 @@ entrepreneurs",
     "code_journal_waiver_ndf": {
         "title": u"Code journal spécifique aux abandons de créance",
         "description": u"Code journal utilisé pour l'export des abandons \
-de créance. Les autres exports de décaissement utilisent \
+de créance, si ce champ n'est pas rempli, le code journal d'export des notes \
+de dépense est utilisé. Les autres exports de décaissement utilisent \
 le code journal de la banque concernée."
     },
     "compte_cg_waiver_ndf": {

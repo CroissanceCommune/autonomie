@@ -43,8 +43,6 @@ from autonomie.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
 
 
-from .custom_types import AmountType
-
 log = logging.getLogger(__name__)
 
 
@@ -55,11 +53,6 @@ TEMPLATES_URL = 'autonomie:deform_templates/'
 
 
 CONFIGURATION_KEYS = {
-    'receipts_code_journal': {
-        "title": u"Code journal encaissements",
-        "description": u"Le code journal pour l'export des encaissements \
-vers votre logiciel de comptabilité",
-    },
     'receipts_active_tva_module': {
         "title": u"Activer le module TVA pour les encaissements",
         "description": u"Inclue les écritures pour le paiement de la TVA \
@@ -214,22 +207,29 @@ d'écriture RG Client",
     "code_journal_ndf": {
         "title": u"Code journal utilisé pour les notes de dépense",
     },
+    "code_journal_payment_ndf": {
+        "title": u"Code journal utilisé pour les remboursements des \
+notes de dépense",
+    },
     "compte_cg_ndf": {
         "title": u"Compte de tiers (classe 4) pour les dépenses dues aux \
 entrepreneurs",
         "description": u"Le compte général pour les notes de dépense",
     },
+    "code_journal_waiver_ndf": {
+        "title": u"Code journal spécifique aux abandons de créance",
+        "description": u"Code journal utilisé pour l'export des abandons \
+de créance. Les autres exports de décaissement utilisent \
+le code journal de la banque concernée."
+    },
     "compte_cg_waiver_ndf": {
         "title": u"Compte abandons de créance",
-        "description": "Compte de comptabilité générale spécifique aux \
+        "description": u"Compte de comptabilité générale spécifique aux \
 abandons de créance dans les notes de dépense",
-        "description": u"Le code TVA utilisé pour l'export des paiements \
-des notes de dépense.",
     },
     "code_tva_ndf": {
-        "title": u"Code TVA spécifique aux notes de dépense",
-        "description": u"Le code TVA utilisé pour l'export des paiements \
-des notes de dépense.",
+        "title": u"Code TVA utilisé pour les décaissements",
+        "description": u"Le code TVA utilisé pour l'export des décaissements"
     }
 }
 
@@ -468,7 +468,6 @@ def tva_form_validator(form, values):
     if not default:
         message = TVA_NO_DEFAULT_SET_MSG
         raise colander.Invalid(form, message)
-
 
 
 class ActivityTypeConfig(colander.MappingSchema):

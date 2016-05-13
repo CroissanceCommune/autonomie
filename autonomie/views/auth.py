@@ -241,6 +241,9 @@ class LoginView(BaseView):
         return result
 
     def __call__(self):
+        if self.request.user is not None:
+            return self.success_response()
+
         form = _get_login_form(self.request, use_ajax=self.request.is_xhr)
 
         if 'submit' in self.request.params:

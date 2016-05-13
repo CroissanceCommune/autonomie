@@ -29,6 +29,7 @@ import functools
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseConfigView,
+    make_enter_point_view,
 )
 from autonomie.forms.admin import (
     get_config_schema,
@@ -41,6 +42,7 @@ from autonomie.models.task import (
     WorkUnit,
     PaymentMode,
     PaymentConditions,
+    BankAccount,
 )
 from autonomie.models.tva import (
     Tva,
@@ -148,6 +150,19 @@ class AdminVenteTreasury(BaseConfigView):
     schema = get_config_schema(keys)
 
 
+class MainReceiptsConfig(BaseConfigView):
+    title = u"Informations générales"
+    keys = (
+        'receipts_active_tva_module',
+    )
+    schema = get_config_schema(keys)
+    validation_msg = u"L'export comptable des encaissement a bien été \
+configuré"
+    message = u"Configurer l'export des encaissements (le code journal \
+utilisé est celui de la banque associé à chaque encaissement)"
+    redirect_path = "admin_receipts"
+
+
 class AdminTva(tva_admin_class):
     @property
     def schema(self):
@@ -206,10 +221,50 @@ enregistrer le paiement d'un devis/ d'une facture", ""
             'admin_vente_tva',
             u"Taux de TVA, codes produit et codes analytiques associés",
             ""
+        ),
+        (
+            u"Configuration comptable des encaissements",
+            "admin_receipts",
+            u"Configuration des différents comptes analytiques liés \
+aux encaissements",
+            "",
         )
     ):
         menus.append(dict(label=label, path=route, title=title, icon=icon))
     return dict(title=u"Configuration du module Ventes", menus=menus)
+
+
+def include_receipts_views(config):
+    """
+    Add views for payments configuration
+    """
+    config.add_route("admin_receipts", "admin/receipts")
+
+    all_views = [
+        (
+            MainReceiptsConfig,
+            "admin_main_receipts",
+            "/admin/main.mako",
+        ),
+        get_model_admin_view(BankAccount, r_path="admin_receipts"),
+    ]
+
+    for view, route_name, tmpl in all_views:
+        config.add_route(route_name, "admin/" + route_name)
+        config.add_admin_view(
+            view,
+            route_name=route_name,
+            renderer=tmpl,
+        )
+
+    config.add_admin_view(
+        make_enter_point_view(
+            "admin_vente",
+            all_views,
+            u"Configuration comptables du module encaissements",
+        ),
+        route_name='admin_receipts'
+    )
 
 
 def includeme(config):
@@ -230,6 +285,9 @@ def includeme(config):
         permission='admin',
         renderer="admin/main.mako",
     )
+
+    include_receipts_views(config)
+
     config.add_admin_view(
         admin_vente_index_view,
         route_name="admin_vente",

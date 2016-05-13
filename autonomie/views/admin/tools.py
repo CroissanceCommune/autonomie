@@ -244,3 +244,28 @@ def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
         u"admin_%s" % camel_case_to_name(model.__name__),
         '/admin/main.mako',
     )
+
+
+def make_enter_point_view(parent_route, views_to_link_to, title=u""):
+    """
+    Builds a view with links to the views passed as argument
+
+        views_to_link_to
+
+            list of 2-uples (view_obj, route_name) we'd like to link to
+
+        parent_route
+
+            route of the parent page
+    """
+    def myview(request):
+        """
+        The dinamycally built view
+        """
+        menus = []
+        menus.append(dict(label=u"Retour", path=parent_route,
+                          icon="fa fa-step-backward"))
+        for view, route_name, tmpl in views_to_link_to:
+            menus.append(dict(label=view.title, path=route_name,))
+        return dict(title=title, menus=menus)
+    return myview

@@ -37,9 +37,6 @@ from autonomie.models.config import (
     Config,
     ConfigFiles,
 )
-from autonomie.models.task import (
-    BankAccount,
-)
 from autonomie.models.activity import (
     ActivityType,
     ActivityMode,
@@ -72,7 +69,6 @@ from autonomie.forms.admin import (
     get_config_appstruct,
     get_config_dbdatas,
     merge_config_datas,
-    get_config_schema,
 )
 from autonomie.forms.files import get_template_upload_schema
 from js.tinymce import tinymce
@@ -85,7 +81,7 @@ from autonomie.views import (
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseAdminFormView,
-    BaseConfigView,
+    make_enter_point_view,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -119,73 +115,41 @@ devis, factures / avoir)"
     )
     menus.append(
         dict(
-            label=u"Configuration du module vente",
+            label=u"Configuration du module Vente",
             path="admin_vente",
             title=u"Mentions des devis et factures, unité de prestation ...",
         )
     )
     menus.append(
         dict(
-            label=u"Configuration comptable des encaissements",
-            path="admin_receipts",
-            title=u"Configuration des différents comptes analytiques liés \
-aux encaissements"
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration comptable des notes de dépense",
+            label=u"Configuration du module Notes de dépense",
             path="admin_expense",
-            title=u"Configuration des types de dépense et des \
-différents comptes analytiques liés au module notes de dépense"
+            title=u"Configuration des types de dépense, des \
+différents comptes analytiques liés au module notes de dépense et à leur export"
         )
     )
     menus.append(
         dict(
-            label=u"Configuration du module accompagnement",
+            label=u"Configuration du module Accompagnement",
             path="admin_accompagnement",
             title=u"Ateliers, Rendez-vous, Compétences"
         )
     )
     menus.append(
         dict(
-            label=u"Configuration de la gestion sociale",
+            label=u"Configuration du module Gestion Sociale",
             path='admin_userdatas',
             title=u"Typologie des données, modèles de documents",
         )
     )
     menus.append(
         dict(
-            label=u"Configuration des domaines d'activité des entreprises",
+            label=u"Configuration des domaines d'activité des entreprises \
+de la CAE",
             path="admin_company_activity",
         )
     )
     return dict(title=u"Administration du site", menus=menus)
-
-
-def make_enter_point_view(parent_route, views_to_link_to, title=u""):
-    """
-    Builds a view with links to the views passed as argument
-
-        views_to_link_to
-
-            list of 2-uples (view_obj, route_name) we'd like to link to
-
-        parent_route
-
-            route of the parent page
-    """
-    def myview(request):
-        """
-        The dinamycally built view
-        """
-        menus = []
-        menus.append(dict(label=u"Retour", path=parent_route,
-                          icon="fa fa-step-backward"))
-        for view, route_name, tmpl in views_to_link_to:
-            menus.append(dict(label=view.title, path=route_name,))
-        return dict(title=title, menus=menus)
-    return myview
 
 
 class AdminMain(BaseAdminFormView):
@@ -604,48 +568,6 @@ def admin_accompagnement_index_view(request):
     return dict(title=u"Administration du module accompagnement", menus=menus)
 
 
-class MainReceiptsConfig(BaseConfigView):
-    title = u"Informations générales"
-    keys = ('receipts_code_journal', 'receipts_active_tva_module')
-    schema = get_config_schema(keys)
-    validation_msg = u"L'export comptable des encaissement a bien été \
-configuré"
-    redirect_path = "admin_receipts"
-
-
-def include_receipts_views(config):
-    """
-    Add views for payments configuration
-    """
-    config.add_route("admin_receipts", "admin/receipts")
-
-    all_views = [
-        (
-            MainReceiptsConfig,
-            "admin_main_receipts",
-            "/admin/main.mako",
-        ),
-        get_model_admin_view(BankAccount, r_path="admin_receipts"),
-    ]
-
-    for view, route_name, tmpl in all_views:
-        config.add_route(route_name, "admin/" + route_name)
-        config.add_admin_view(
-            view,
-            route_name=route_name,
-            renderer=tmpl,
-        )
-
-    config.add_admin_view(
-        make_enter_point_view(
-            "admin_index",
-            all_views,
-            u"Configuration comptables du module encaissements",
-        ),
-        route_name='admin_receipts'
-    )
-
-
 def include_userdatas_views(config):
     """
     Include views related to userdatas configuration
@@ -756,7 +678,6 @@ def includeme(config):
             renderer=tmpl,
         )
 
-    include_receipts_views(config)
     include_userdatas_views(config)
 
     config.add_admin_view(

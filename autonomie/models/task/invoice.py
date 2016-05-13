@@ -659,6 +659,18 @@ class BankAccount(ConfigurableOption):
         'validation_msg': u"Les comptes banques ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')
+    code_journal = Column(
+        String(120),
+        info={
+            "colanderalchemy": {
+                'title': u"Code journal Banque",
+                'description': u"""Code journal utilisé pour les exports
+                des encaissements et des règlements des notes de dépense""",
+            }
+        },
+        nullable=False,
+    )
+
     compte_cg = Column(
         String(120),
         info={

@@ -57,6 +57,9 @@ test("Transformations des strings en centimes", function(){
   equal(formatPrice(1), "1,00");
   equal(formatPrice(1.256, true), "1,26");
   equal(formatPrice(1.255555, false), "1,2555...");
+  equal(formatPrice(13.2 * 58, false), "765,60");
+  equal(formatPrice(13.2 * 58, false), "765,60");
+  equal(formatPrice("1.255555", false), "1,2555...");
   equal(formatPrice(1.2555, false), "1,2555");
   equal(formatPrice(583.06), formatPrice(583.06, false));
   equal(isNotFormattable("150 €"), true);

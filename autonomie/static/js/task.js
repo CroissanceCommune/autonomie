@@ -622,10 +622,9 @@ function fireAmountChange(event){
    * :param obj event: The jquery event object or the input which changed
    */
   var input_tag;
-  if (event.target){
+  try{
     input_tag = $(event.target);
-  }else {
-    console.log("Not an event");
+  } catch(error){
     return;
   }
   var row = input_tag.parent().parent().parent();

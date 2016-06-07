@@ -23,6 +23,44 @@
  */
 
 
+function getEpsilon(){
+  /*
+   * Return the epsilon needed to test if the value is a float error
+   * computation result
+   */
+   if ("EPSILON" in Number) {
+     return Number.EPSILON;
+    }
+    var eps = 1.0;
+    do {
+      eps /= 2.0;
+    }
+    while (1.0 + (eps / 2.0) != 1.0);
+    return eps;
+}
+
+function removeEpsilon(value){
+  /*
+   * Remove epsilons (75.599999999 -> 75.6 )from the value if needed
+   *
+   * :param int value: The value to test if it's a string, we convert it to
+   * float before
+   */
+  if (_.isUndefined(value.toPrecision)){
+    return value;
+  }
+  var epsilon = getEpsilon();
+  var delta = value.toPrecision(6) - value;
+  delta = delta * delta;
+  if (delta === 0){
+    return value;
+  }
+  if (delta < epsilon){
+    return value.toPrecision(6);
+  } else {
+    return value;
+  }
+}
 
 function strToFloat(value) {
   /*
@@ -59,6 +97,7 @@ function formatPrice(price, rounded) {
    * Return a formatted price for display
    * @price : compute-formatted price
    */
+  price = removeEpsilon(price);
   var dots, splitted, cents, ret_string;
   if (rounded){
     price = round(price);

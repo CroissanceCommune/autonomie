@@ -22,8 +22,8 @@
       var description = "";
       <!-- We format the lines to display them correctly in the text area -->
           <tal:for
-              tal:define="solde_description solde.get('description', 'Solde');"
-              tal:condition="hasattr(solde_description, 'splilines')"
+              tal:define="solde_description solde.get('description', 'Solde')"
+              tal:condition="hasattr(solde_description, 'splitlines')"
               tal:repeat="line solde_description.splitlines()">
             description += "${line}";
             <tal:if tal:condition='not repeat.line.end'>
@@ -48,9 +48,11 @@
         <!-- We go through the other payment rows and we add them in readonly mode (js code further checks if we need to make them editable-->
         <tal:for tal:repeat="sub intermediary_payments">
           var description = "";
+          var toto="${sub[0].get('description').splitlines()}";
+
           <tal:for
-            tal:define="description sub[0].get('description', ''),"
-            tal:condition="hasattr(description, 'splilines')"
+            tal:define="description sub[0].get('description', '')"
+            tal:condition="hasattr(description, 'splitlines')"
             tal:repeat="line description.splitlines()">
             description += "${line}";
             <tal:if tal:condition='not repeat.line.end'>

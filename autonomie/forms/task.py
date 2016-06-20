@@ -548,7 +548,8 @@ class TaskConfiguration(colander.MappingSchema):
     """
     name = colander.SchemaNode(
         colander.String(),
-        title=u"Libellé du document",
+        title=u"Nom du document",
+        description=u"Ce nom n'apparaît pas dans le document final",
         validator=colander.Length(max=255),
         default=deferred_default_name,
         missing="",

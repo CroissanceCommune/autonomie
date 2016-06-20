@@ -161,7 +161,7 @@ class EditMetadataSchema(colander.MappingSchema):
     """
     name = colander.SchemaNode(
         colander.String(),
-        title=u"Libellé du document",
+        title=u"Nom du document",
         validator=colander.Length(max=255),
         missing="",
         )

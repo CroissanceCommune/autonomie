@@ -190,7 +190,7 @@ class AdminOption(BaseAdminFormView):
         """
         edited = self._get_edited_elements(appstruct)
 
-        for element in self.factory.query():
+        for element in self.query_items():
             if element.id not in edited.keys():
                 if self.disable:
                     element.active = False

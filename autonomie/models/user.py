@@ -1606,7 +1606,7 @@ class UserDatas(Node):
         info={
             'colanderalchemy':
             {
-                'title': u"Statut",
+                'title': u"Aptitude",
                 'section': u'Parcours',
                 'widget': get_deferred_select(ParcoursStatusOption),
             }

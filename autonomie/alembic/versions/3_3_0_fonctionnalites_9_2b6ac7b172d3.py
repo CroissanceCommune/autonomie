@@ -23,7 +23,19 @@ def upgrade():
             sa.ForeignKey('social_status_option.id'),
         )
     )
+    op.add_column(
+        "user_datas",
+        sa.Column(
+            "parcours_employee_quality_id",
+            sa.Integer,
+            sa.ForeignKey('employee_quality_option.id'),
+        )
+    )
 
 
 def downgrade():
+    op.execute("SET FOREIGN_KEY_CHECKS=0;")
+    op.drop_table('employee_quality_option')
     op.drop_column('user_datas', 'statut_social_today_id',)
+    op.drop_column('user_datas', 'parcours_employee_quality_id',)
+    op.execute("SET FOREIGN_KEY_CHECKS=1;")

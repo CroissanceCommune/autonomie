@@ -546,6 +546,19 @@ class SocialStatusOption(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
+class EmployeeQualityOption(ConfigurableOption):
+    """
+    Different values for employee quality
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Qualité du salarié",
+        'validation_msg': u"Les qualité du salarié ont bien été configurées",
+        "help_msg": u"Configurer les options possibles pour définir la qualité\
+ d'un salarié (cadre, employé ...)",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+
 class ActivityTypeOption(ConfigurableOption):
     """
     Different possible values for activity type
@@ -1196,7 +1209,7 @@ class UserDatas(Node):
 
     statut_social_status = relationship(
         'SocialStatusOption',
-        primaryjoin='UserDatas.statut_social_id==SocialStatusOption.id',
+        primaryjoin='UserDatas.statut_social_status_id==SocialStatusOption.id',
         info={
             'colanderalchemy': EXCLUDED,
             'export': {'related_key': 'label'},
@@ -1214,7 +1227,7 @@ class UserDatas(Node):
             }
         }
     )
-    statut_social_status = relationship(
+    statut_social_status_today = relationship(
         'SocialStatusOption',
         primaryjoin='UserDatas.statut_social_today_id==SocialStatusOption.id',
         info={
@@ -1589,6 +1602,25 @@ class UserDatas(Node):
         }
     )
 
+    parcours_employee_quality_id = Column(
+        ForeignKey('employee_quality_option.id'),
+        info={
+            'colanderalchemy':
+            {
+                'title': u"Qualité du salarié",
+                'section': u'Parcours',
+                'widget': get_deferred_select(EmployeeQualityOption),
+            }
+        }
+    )
+    parcours_employee_quality = relationship(
+        'EmployeeQualityOption',
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        }
+    )
+
     parcours_goals = Column(
         Text(),
         info={
@@ -1612,7 +1644,6 @@ class UserDatas(Node):
             }
         }
     )
-
     parcours_status = relationship(
         "ParcoursStatusOption",
         info={

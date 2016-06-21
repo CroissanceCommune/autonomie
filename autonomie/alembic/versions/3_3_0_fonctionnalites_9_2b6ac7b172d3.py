@@ -18,7 +18,7 @@ def upgrade():
     op.add_column(
         "user_datas",
         sa.Column(
-            'statut_social_today_id',
+            'statut_social_status_today_id',
             sa.Integer,
             sa.ForeignKey('social_status_option.id'),
         )

@@ -801,7 +801,14 @@ class UserDatas(Node):
     )
 
     # INFORMATIONS GÉNÉRALES : CF CAHIER DES CHARGES #
-
+    situation_history = relationship(
+        "CaeSituationChange",
+        order_by="CaeSituationChange.date",
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'exclude': True},
+        },
+    )
     situation_situation_id = Column(
         ForeignKey("cae_situation_option.id"),
         nullable=False,
@@ -1216,7 +1223,7 @@ class UserDatas(Node):
         },
     )
 
-    statut_social_today_id = Column(
+    statut_social_status_today_id = Column(
         ForeignKey('social_status_option.id'),
         info={
             'colanderalchemy':
@@ -1224,15 +1231,17 @@ class UserDatas(Node):
                 'title': u"Statut social actuel",
                 'section': u'Statut',
                 'widget': get_deferred_select(SocialStatusOption),
-            }
+            },
         }
     )
     statut_social_status_today = relationship(
         'SocialStatusOption',
-        primaryjoin='UserDatas.statut_social_today_id==SocialStatusOption.id',
+        primaryjoin='UserDatas.statut_social_status_today_id==SocialStatusOption.id',
         info={
             'colanderalchemy': EXCLUDED,
-            'export': {'related_key': 'label'},
+            'export': {
+                'related_key': 'label',
+            },
         },
     )
 
@@ -2070,35 +2079,86 @@ class DateDPAEDatas(DBBASE):
     )
 
 
+class CaeSituationChange(DBBASE):
+    """
+    Used to store cae status change
+    """
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        }
+    )
+    date = Column(
+        Date(),
+        info={
+            'colanderalchemy': {
+                "title": u'Date du changement de statut',
+            }
+        }
+    )
+    userdatas_id = Column(
+        ForeignKey("user_datas.id"),
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {
+                'label': u"Identifiant autonomie",
+                'stats': EXCLUDED,
+            }
+        }
+    )
+    situation_id = Column(
+        ForeignKey("cae_situation_option.id"),
+        nullable=False,
+        info={
+            'colanderalchemy':
+            {
+                'title': u"Situation actuelle dans la CAE",
+                'section': u'Synthèse',
+                'widget': get_deferred_select(CaeSituationOption),
+            }
+        }
+    )
+    situation = relationship(
+        "CaeSituationOption",
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
+    )
+
+
 USERDATAS_FORM_GRIDS = {
     u"Synthèse": (
-        ((2, True), (2, True)),
-        ((2, True),)
+        ((6, True), (6, True)),
+        ((6, True),)
     ),
     u"Coordonnées": (
-        ((2, True), (2, True), (2, True), (2, True)),
-        ((2, True), (2, True)),
-        ((2, True), (2, True)),
-        ((2, True), (2, True), (3, True)),
-        ((2, True), (2, True)),
-        ((2, True), (2, True), (2, True), (2, True)),
-        ((2, True), (2, True)),
+        ((3, True), (3, True), (3, True), (3, True)),
+        ((3, True), (3, True)),
+        ((3, True), (3, True)),
+        ((3, True), (3, True), (3, True)),
+        ((3, True), (3, True)),
+        ((3, True), (3, True), (3, True), (3, True)),
+        ((3, True), (3, True)),
         ((3, True), ),
-        ((2, True), (2, True), (2, True)),
-        ((2, True), (2, True)),
+        ((3, True), (3, True), (3, True)),
+        ((3, True), (3, True)),
     ),
     u"Parcours": (
-        ((2, True), (2, True)),
-        ((2, True), ),
-        ((2, True), ),
-        ((2, True), ),
-        ((2, True), ),
-        ((2, True), ),
-        ((2, True), (2, True), (2, True), (2, True)),
-        ((2, True), (2, True), (2, True)),
-        ((2, True), (2, True), ),
+        ((3, True), (3, True)),
+        ((3, True), ),
+        ((12, True), ),
+        ((3, True), ),
+        ((6, True), (6, True)),
+        ((3, True), (3, True), (3, True), (3, True)),
+        ((3, True), (3, True), (3, True)),
+        ((3, True), (3, True), (3, True)),
         ((4, True), ),
-        ((2, True), (2, True), (2, True)),
+        ((3, True), (3, True), (3, True)),
     )
 }
 
@@ -2141,3 +2201,19 @@ def sync_userdatas_to_user(key):
 listen(User.firstname, 'set', sync_user_to_userdatas('coordonnees_firstname'))
 listen(User.lastname, 'set', sync_user_to_userdatas('coordonnees_lastname'))
 listen(User.email, 'set', sync_user_to_userdatas('coordonnees_email1'))
+
+
+def add_situation_change_handler(target, value, oldvalue, initiator):
+    """
+    Handler for the situation Change handling
+    """
+    if isinstance(value, int):
+        change = CaeSituationChange(
+            userdatas_id=target.id,
+            date=datetime.date.today(),
+            situation_id=value,
+        )
+        DBSESSION().add(change)
+
+
+listen(UserDatas.situation_situation_id, "set", add_situation_change_handler)

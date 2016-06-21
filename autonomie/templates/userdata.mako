@@ -121,7 +121,9 @@
     % endif
 </ul>
 <div class='tab-content'>
-    <div class='tab-pane row active' id='tab1'>
+    <div class='tab-pane container-fluid active' id='tab1'>
+        <div class='row'>
+            <div class='col-md-9 col-sm-12'>
             % if request.context.__name__ == 'userdatas':
                 <button
                     type="button"
@@ -130,9 +132,31 @@
                     style="margin-bottom: 15px"
                     >
                     Dégeler le formulaire
-                </button>
+               </button>
             % endif
-        ${form|n}
+            ${form|n}
+            </div>
+            <div class='col-md-3 col-sm-12'>
+                % if request.context.__name__ == 'userdatas':
+                    <h3>Historique</h3>
+                    <hr/>
+                    % if request.context.situation_history:
+                        <h4>Changements de situation</h4>
+                        <table class='table table-condensed'>
+                            <thead><tr><th>Date</th><th>Situation</th></tr></thead>
+                            <tbody>
+                            % for situation in request.context.situation_history:
+                                <tr>
+                                    <td>${api.format_date(situation.date)}</td>
+                                    <td>${situation.situation.label}</td>
+                                </tr>
+                            % endfor
+                            </tbody>
+                        </table>
+                    % endif
+                % endif
+            </div>
+        </div>
     </div>
     % if doctypes_form is not UNDEFINED:
     <div class='tab-pane row' id='tab2'>

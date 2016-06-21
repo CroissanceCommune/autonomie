@@ -1196,11 +1196,33 @@ class UserDatas(Node):
 
     statut_social_status = relationship(
         'SocialStatusOption',
+        primaryjoin='UserDatas.statut_social_id==SocialStatusOption.id',
         info={
             'colanderalchemy': EXCLUDED,
             'export': {'related_key': 'label'},
         },
     )
+
+    statut_social_today_id = Column(
+        ForeignKey('social_status_option.id'),
+        info={
+            'colanderalchemy':
+            {
+                'title': u"Statut social actuel",
+                'section': u'Statut',
+                'widget': get_deferred_select(SocialStatusOption),
+            }
+        }
+    )
+    statut_social_status = relationship(
+        'SocialStatusOption',
+        primaryjoin='UserDatas.statut_social_today_id==SocialStatusOption.id',
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
+    )
+
     statut_handicap_allocation_expiration = Column(
         Date(),
         default=None,

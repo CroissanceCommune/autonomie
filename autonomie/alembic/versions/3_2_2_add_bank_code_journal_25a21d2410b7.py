@@ -1,7 +1,7 @@
 """3.2.2 : Add bank code journal
 
 Revision ID: 25a21d2410b7
-Revises: 18504ec02955
+Revises: 658e0f23ee2
 Create Date: 2016-05-13 10:26:13.049549
 
 """

@@ -150,7 +150,7 @@ de la CAE",
             path="admin_company_activity",
         )
     )
-    return dict(title=u"Administration du site", menus=menus)
+    return dict(title=u"Configuration du site", menus=menus)
 
 
 class AdminMain(BaseAdminFormView):
@@ -415,7 +415,7 @@ class AdminWorkshop(BaseAdminActivities):
     """
     Workshops administration views
     """
-    title = u"Administration du module Atelier"
+    title = u"Configuration du module Atelier"
     schema = WorkshopConfigSchema(title=u"")
     redirect_path = "admin_accompagnement"
 
@@ -453,7 +453,7 @@ class AdminWorkshop(BaseAdminActivities):
 
 
 class TemplateUploadView(FileUploadView):
-    title = u"Administrer les modèles de documents"
+    title = u"Configurer les modèles de documents"
     factory = files.Template
     schema = get_template_upload_schema()
     valid_msg = UPLOAD_OK_MSG
@@ -567,7 +567,7 @@ def admin_accompagnement_index_view(request):
         menus.append(
             dict(label=label, path=route, icon=icon)
         )
-    return dict(title=u"Administration du module accompagnement", menus=menus)
+    return dict(title=u"Configuration du module accompagnement", menus=menus)
 
 
 def include_userdatas_views(config):
@@ -618,7 +618,7 @@ def include_userdatas_views(config):
         make_enter_point_view(
             'admin_index',
             all_option_views,
-            u"Administration de la gestion sociale"
+            u"Configuration de la gestion sociale"
         ),
         route_name="admin_userdatas",
     )
@@ -638,7 +638,7 @@ def includeme(config):
     """
         Add module's views
     """
-    # Administration routes
+    # Configuration routes
     config.add_route("admin_index", "/admin")
     config.add_route("admin_main", "/admin/main")
     config.add_route("admin_accompagnement", "admin/accompagnement")

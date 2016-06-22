@@ -454,7 +454,7 @@ def tva_form_validator(form, values):
     """
     vals = []
     default = False
-    for tva in values['tvas']:
+    for tva in values['datas']:
         if tva['value'] in vals:
             message = TVA_UNIQUE_VALUE_MSG
             raise colander.Invalid(form, message)

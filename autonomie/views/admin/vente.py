@@ -25,7 +25,11 @@ Configuration générale du module vente:
     Mise en forme des PDFs
     Unité de prestation
 """
+import logging
 import functools
+from sqlalchemy import desc
+
+from autonomie.models.base import DBSESSION
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseConfigView,
@@ -47,6 +51,8 @@ from autonomie.models.task import (
 from autonomie.models.tva import (
     Tva,
 )
+
+logger = logging.getLogger(__name__)
 
 (
     mention_admin_class,
@@ -164,12 +170,15 @@ utilisé est celui de la banque associé à chaque encaissement)"
 
 
 class AdminTva(tva_admin_class):
+    def query_items(self):
+        return DBSESSION().query(Tva).order_by(desc(Tva.active)).all()
+
     @property
     def schema(self):
         if self._schema is None:
             self._schema = get_sequence_model_admin(
                 self.factory,
-                self.title,
+                ""
             )
             self._schema.title = u"Configuration des taux de TVA"
             self._schema.validator = tva_form_validator

@@ -38,7 +38,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import (
     relationship,
-    backref,
 )
 
 from autonomie import forms
@@ -48,6 +47,7 @@ from autonomie.models.base import default_table_args
 
 
 TVA_GRID = (
+    (('active', 6,),),
     (('name', 6,), ('value', 6),),
     (('mention', 12),),
     (('compte_cg', 3), ('code', 3), ('compte_a_payer', 3)),
@@ -89,6 +89,16 @@ Autonomie, ainsi que les produits associés.<br /> \
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
+    active = Column(
+        Boolean(),
+        default=True,
+        info={
+            'colanderalchemy': {
+                'title': u"Cette tva est-elle active ?",
+                'description': u"Proposer cette Tva dans les formulaires",
+            }
+        },
+    )
     name = Column(
         "name",
         String(15),
@@ -129,11 +139,6 @@ Autonomie, ainsi que les produits associés.<br /> \
             description=u"Utilisé dans les exports comptables des \
 encaissements",
         )}
-    )
-    active = Column(
-        Boolean(),
-        default=True,
-        info={'colanderalchemy': {'exclude': True}},
     )
     mention = Column(
         Text,

@@ -536,14 +536,15 @@ déjà été créées : <ul>".format(query_count)
 
             self.request.session.flash(msg)
         else:
-            user.enable()
-            msg = u"Le compte : login : {0} a été réactivé avec le même \
-mot de passe".format(user.login)
-            self.request.session.flash(msg)
-            for company in user.companies:
-                company.enable()
-                msg = u"L'entreprise {0} a été réactivée".format(company.name)
+            if not user.active:
+                user.enable()
+                msg = u"Le compte : login : {0} a été réactivé avec le même \
+    mot de passe".format(user.login)
                 self.request.session.flash(msg)
+                for company in user.companies:
+                    company.enable()
+                    msg = u"L'entreprise {0} a été réactivée".format(company.name)
+                    self.request.session.flash(msg)
 
         model = self.dbsession.merge(model)
         self.dbsession.flush()

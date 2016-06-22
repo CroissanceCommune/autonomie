@@ -118,7 +118,7 @@ SEX_OPTIONS = (
 
 
 CIVILITE_OPTIONS = (
-    ('Non renseigne', u'Non renseigné', ),
+    ('', u'Non renseigné', ),
     ('Monsieur', u'Monsieur',),
     ('Madame', u'Madame',),
 )

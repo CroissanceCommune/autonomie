@@ -21,6 +21,7 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import logging
+import colander
 
 from beaker.cache import cache_region
 from sqlalchemy import (
@@ -220,6 +221,7 @@ utilisables dans les notes de dépense",
         info={
             'colanderalchemy': {
                 'title': u"Pourcentage remboursé",
+                'missing': colander.required
             }
         }
     )

@@ -127,7 +127,7 @@ class AdminOption(BaseAdminFormView):
         if self._schema is None:
             self._schema = get_sequence_model_admin(
                 self.factory,
-                self.title,
+                "",
             )
         return self._schema
 
@@ -236,7 +236,6 @@ def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
         title = view_title
         validation_msg = infos.get('validation_msg', u'')
         factory = model
-        _schema = get_sequence_model_admin(model, u"")
         redirect_path = r_path
         js_resources = js_requirements
     return (

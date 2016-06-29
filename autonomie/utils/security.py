@@ -356,7 +356,7 @@ def get_invoice_acl(self):
         else:
             acls.append((Allow, user.login, ("wait.invoice",)))
 
-        if "payment_validation" in user.groups:
+        if "payment_admin" in user.groups:
             acls.append((Allow, user.login, ("add_payment",)))
 
     return acls

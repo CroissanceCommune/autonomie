@@ -47,6 +47,7 @@
     </div>
     <div class='row'>
         <% groups = task.get_groups() %>
+        <% colspan = 1 %>
         % for group in groups:
             <% display_tvas_column = multiple_tvas and len(groups) == 1 and group.title == '' %>
 

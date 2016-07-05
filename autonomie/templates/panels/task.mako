@@ -255,6 +255,9 @@
             ${format_text(mention.full_text)}
         </div>
     % endfor
+    <%block name="end_document">
+    ## Add infos at the end of the document
+    </%block>
 
 </div>
 ## end of content

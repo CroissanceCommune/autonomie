@@ -123,6 +123,8 @@
         ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
     </div>
 %endif
+</%block>
+<%block name="end_document">
 <table style='width:100%; margin-bottom: 5px;'>
     <thead>
         <th style="width:65%">

@@ -119,7 +119,7 @@ else:
                     <% url = request.route_path('expensesheet', id=expense.id) %>
                     ${table_btn(url, u'Modifier', u"Voir la note de dépense", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
-                    ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="file" )}
+                    ${table_btn(url, u'Excel', u"Télécharger au format Excel", icon="file" )}
                     % if expense.is_allowed(request, 'paid'):
                         <% onclick = "ExpenseList.payment_form(%s, '%s');" % (expense.id, api.format_amount(expense.topay())) %>
                         ${table_btn('#popup-payment_form',

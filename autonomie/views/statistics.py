@@ -66,6 +66,7 @@ from autonomie.views import (
     BaseCsvView,
     BaseRestView,
 )
+from autonomie.views.user import add_custom_headers_to_writer
 from autonomie.export.utils import write_file_to_request
 
 
@@ -361,6 +362,18 @@ class CsvEntryView(BaseCsvView):
     The view used to stream a the items matching a statistic entry
     """
     model = UserDatas
+
+    def _build_return_value(self, schema, appstruct, query):
+        """
+        Return the streamed file object
+        """
+        writer = self._init_writer()
+        writer = add_custom_headers_to_writer(writer, query)
+        for item in self._stream_rows(query):
+            writer.add_row(item)
+
+        write_file_to_request(self.request, self.filename, writer.render())
+        return self.request.response
 
     def query(self):
         inspector = get_inspector()

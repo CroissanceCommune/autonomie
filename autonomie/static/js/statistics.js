@@ -186,15 +186,22 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       }
     },
     get_full_label: function(app_options){
+      var label;
       if (this.get('type') == 'or'){
-        return "Clause OU";
+        label = "Clause OU (";
+        _.each(this.get('criteria'), function(elem){
+          var m = new CriterionModel(elem);
+          label += m.get_full_label(AppOptions);
+          label += ' - ';
+        });
+        label += ')';
+        return label;
       }
       var title = app_options.columns[this.get('key')].label;
       var type = this.get('type');
       var labels;
       var key;
       var options;
-      var label;
       if(type == 'date'){
         labels = [this.get('altdate1'), this.get('altdate2')];
       } else if (type == 'optrel') {
@@ -231,7 +238,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         method_label = "Erreur";
       }
 
-      return title + " (" + label + " : " + method_label + ")";
+      return title + " (" + method_label + " : " + label + ")";
     }
   });
 

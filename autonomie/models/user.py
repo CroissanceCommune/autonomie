@@ -806,7 +806,12 @@ class UserDatas(Node):
         order_by="CaeSituationChange.date",
         info={
             'colanderalchemy': EXCLUDED,
-            'export': {'exclude': True},
+            'export': {
+                "flatten": [
+                    ('date', u'Date'),
+                ],
+                'label': u"Changement de situation",
+            },
         },
     )
     situation_situation_id = Column(

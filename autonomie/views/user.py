@@ -957,7 +957,7 @@ def add_custom_headers_to_writer(writer, query):
                     label("nb", func.count(class_.id))
                 ).group_by(class_.userdatas_id).order_by(
                     desc("nb")).first()
-                if count!= None:
+                if count != None:
                     count = count[0]
                 else:
                     count = 0
@@ -967,17 +967,27 @@ def add_custom_headers_to_writer(writer, query):
                 # notre sheet principale
                 for index in range(0, count):
                     if 'flatten' in header:
-                        new_header = {
-                            '__col__': header['__col__'],
-                            'label': u"%s %s" % (
-                                header['label'],
-                                index + 1),
-                            'key': header['key'],
-                            'name': u"%s_%s" % (header['name'], index + 1),
-                            'related_key': header['flatten'],
-                            'index': index
-                        }
-                        new_headers.append(new_header)
+                        flatten_keys = header['flatten']
+                        if not hasattr(flatten_keys, '__iter__'):
+                            flatten_keys = [flatten_keys]
+
+                        for flatten_key, flatten_label in flatten_keys:
+                            new_header = {
+                                '__col__': header['__col__'],
+                                'label': u"%s %s %s" % (
+                                    header['label'],
+                                    flatten_label,
+                                    index + 1),
+                                'key': header['key'],
+                                'name': u"%s_%s_%s" % (
+                                    header['name'],
+                                    flatten_key,
+                                    index + 1
+                                ),
+                                'related_key': flatten_key,
+                                'index': index
+                            }
+                            new_headers.append(new_header)
 
     writer.headers.extend(new_headers)
     return writer

@@ -1087,7 +1087,7 @@ class UserDatas(Node):
         String(7),
         info={
             'colanderalchemy': {
-                'title': u'Code postale',
+                'title': u'Code postal',
                 'section': u'Coordonnées',
             }
         }
@@ -1266,6 +1266,14 @@ class UserDatas(Node):
                 'title': u'Activité externe',
                 'section': u'Statut',
             },
+            'export': {
+                'flatten': [
+                    ('type', u"Type de contrat"),
+                    ('hours', u'Heures'),
+                    ('brut_salary', u"Salaire brut"),
+                    ('employer_visited', u"Visite employeur"),
+                ],
+            }
         },
         backref=backref(
             'userdatas',
@@ -1277,7 +1285,7 @@ class UserDatas(Node):
                     "stats": EXCLUDED,
                 }
             }
-        )
+        ),
     )
 
     statut_end_rights_date = Column(
@@ -1349,6 +1357,14 @@ class UserDatas(Node):
             {
                 'title': u'Activité',
                 'section': u'Activité',
+            },
+            'export': {
+                'flatten': [
+                    ('title', u"Titre de l'activité"),
+                    ('name', u"Nom commercial"),
+                    ('website', u"Site internet"),
+                    # ('activity', u"Domaine d'activité"),
+                ]
             }
         }
     )
@@ -1420,7 +1436,7 @@ class UserDatas(Node):
                 "formatter": str_to_date
             },
             'export': {
-                'flatten': 'date',
+                'flatten': [('date', u"Date")],
             }
         }
     )
@@ -1469,7 +1485,7 @@ class UserDatas(Node):
                 "formatter": str_to_date
             },
             'export': {
-                'flatten': 'date',
+                'flatten': [('date', u"Date")],
             }
         }
     )
@@ -1498,7 +1514,7 @@ class UserDatas(Node):
                 "formatter": str_to_date
             },
             'export': {
-                'flatten': 'date',
+                'flatten': [('date', u"Date")],
             }
         }
     )

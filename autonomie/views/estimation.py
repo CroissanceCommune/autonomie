@@ -79,7 +79,7 @@ from autonomie.views.taskaction import (
     make_task_delete_view,
 )
 
-log = logging.getLogger(__name__)
+log = logger = logging.getLogger(__name__)
 
 
 def add_lines_to_estimation(task, appstruct):
@@ -280,7 +280,9 @@ class EstimationStatus(TaskStatusView):
         return params
 
     def post_geninv_process(self, task, status, params):
+        prefix = self.request.config.get('invoiceprefix', '')
         for invoice in params:
+            invoice.prefix = prefix
             self.request.dbsession.merge(invoice)
         msg = u"Vos factures ont bien été générées"
         self.session.flash(msg)

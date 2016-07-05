@@ -1363,7 +1363,6 @@ class UserDatas(Node):
                     ('title', u"Titre de l'activité"),
                     ('name', u"Nom commercial"),
                     ('website', u"Site internet"),
-                    # ('activity', u"Domaine d'activité"),
                 ]
             }
         }

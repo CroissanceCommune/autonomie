@@ -64,7 +64,8 @@ def write_file_to_request(request, filename, buf, headers=None):
         :param headers: Headers to pass to the request
             (automatic detection is provided for many types)
     """
-    if headers is None:
+    # Ref #384 : 'text/plain' is the default stored in the db
+    if headers is None or headers == 'text/plain':
         headers = detect_file_headers(filename)
     request = write_headers(request, filename, headers)
     request.response.write(buf.getvalue())

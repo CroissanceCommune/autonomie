@@ -27,7 +27,7 @@
 import hashlib
 import os
 
-from cStringIO import StringIO
+import cStringIO
 from datetime import datetime
 from sqlalchemy import (
     Integer,
@@ -90,7 +90,7 @@ class File(Node):
 
     @property
     def data_obj(self):
-        return StringIO(self.data.file.read())
+        return cStringIO.StringIO(self.data.file.read())
 
     @classmethod
     def __declare_last__(cls):
@@ -106,13 +106,23 @@ class File(Node):
 
     @classmethod
     def _set_data(cls, target, value, oldvalue, initiator):
-        if isinstance(value, bytes):
-            value = _to_fieldstorage(fp=StringIO(value),
-                                     filename=target.filename,
-                                     size=len(value))
+        # Ref #384 : enforce this method
+        if isinstance(value, (cStringIO.InputType, file)):
+            value.seek(0)
+            value = value.read()
 
+        if isinstance(value, bytes):
+            value = _to_fieldstorage(
+                fp=cStringIO.StringIO(value),
+                filename=target.name,
+                size=len(value)
+            )
         newvalue = _SQLAMutationTracker._field_set(
-            target, value, oldvalue, initiator)
+            target,
+            value,
+            oldvalue,
+            initiator
+        )
 
         if newvalue is None:
             return

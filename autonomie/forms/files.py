@@ -50,7 +50,7 @@ class CustomFileUploadWidget(deform.widget.FileUploadWidget):
         data = deform.widget.FileUploadWidget.deserialize(self, field, pstruct)
         # We're returning the datas in the appstruct dict, we format the file if
         # needed
-        if hasattr(data, 'has_key') and data.has_key('fp'):
+        if hasattr(data, 'has_key') and 'fp' in data:
 
             data['fp'].seek(0)
             if hasattr(self.tmpstore, 'filter_data'):
@@ -127,7 +127,7 @@ def get_max_allowedfilesize():
     """
     Return the max allowed filesize configured in autonomie
     """
-    default = 1048576 # 1MB
+    default = 1048576  # 1MB
     settings = get_current_registry().settings
     size = settings.get("autonomie.maxfilesize", default)
     return convert_to_int(size, default)

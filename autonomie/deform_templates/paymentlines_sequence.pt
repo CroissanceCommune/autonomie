@@ -48,7 +48,6 @@
         <!-- We go through the other payment rows and we add them in readonly mode (js code further checks if we need to make them editable-->
         <tal:for tal:repeat="sub intermediary_payments">
           var description = "";
-          var toto="${sub[0].get('description').splitlines()}";
 
           <tal:for
             tal:define="description sub[0].get('description', '')"

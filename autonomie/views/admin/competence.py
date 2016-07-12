@@ -153,7 +153,7 @@ class AdminCompetencePrintOutput(BaseAdminFormView):
     title = u"Configuration de la sortie imprimable"
     validation_msg = u"Vos données ont bien été enregistrées"
     schema = CompetencePrintConfigSchema(title=u"")
-    redirect_path = "admin_competences",
+    redirect_path = "admin_competences"
 
     def before(self, form):
         appstruct = {}

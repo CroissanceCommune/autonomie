@@ -333,10 +333,13 @@ class EstimationConfig(colander.MappingSchema):
     header = forms.textarea_node(
         title=u"Cadre d'information spécifique (en entête des devis)",
         missing=u"",
+        description=u"Permet d'afficher un texte avant la description des \
+prestations ex : <font color='red'>Le RIB a changé</font>"
     )
     footer = forms.textarea_node(
         title=u"Informations sur l'acceptation des devis",
         missing=u"",
+        description=u"Contenu du cadre 'Acceptation du devis'"
     )
 
 
@@ -347,18 +350,26 @@ class InvoiceConfig(colander.MappingSchema):
     prefix = colander.SchemaNode(
         colander.String(),
         title=u"Préfixer les numéros de facture",
-        missing=u"")
+        missing=u"",
+        description=u"Permet d'associer un préfixe aux numéros des factures \
+nouvellement créées (ex : F_2016_)"
+    )
     header = forms.textarea_node(
         title=u"Cadre d'information spécifique (en entête des factures)",
         missing=u"",
+        description=u"Permet d'afficher un texte avant la description des \
+prestations ex : <font color='red'>Le RIB a changé</font>"
     )
     payment = forms.textarea_node(
         title=u"Information de paiement pour les factures",
         missing=u"",
+        description=u"Utilisez '%ENTREPRENEUR%' pour voir figurer le nom de \
+l'entrepreneur dans les factures PDF"
     )
     late = forms.textarea_node(
-        title=u"Informations sur les délais de paiement",
+        title=u"Informations sur les retards de paiement",
         missing=u"",
+        description=u"Le contenu du cadre 'Retard de paiement'"
     )
 
 
@@ -380,6 +391,8 @@ page des documents (devis/factures/avoirs)",
     footercourse = forms.textarea_node(
         title=u"Pied de page des documents liées aux formations",
         missing=u"",
+        description=u"Ce contenu ne s'affiche que sur les documents liés à \
+des formations"
     )
     footercontent = forms.textarea_node(
         title=u"Contenu du pied de page",

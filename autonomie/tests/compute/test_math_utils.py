@@ -32,6 +32,7 @@ from autonomie.compute.math_utils import (
     convert_to_int,
     reverse_tva,
     compute_tva,
+    convert_to_float,
 )
 
 
@@ -101,3 +102,9 @@ def test_reverse_tva():
     tva = 1960
     result = 836.12040
     assert reverse_tva(total_ttc, tva) == result
+
+
+def test_convert_to_float():
+    assert convert_to_float('33,35') == 33.35
+    assert convert_to_float(33.35) == 33.35
+    assert convert_to_float('33.35') == 33.35

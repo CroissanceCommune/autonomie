@@ -56,6 +56,12 @@ class TestIt(unittest.TestCase):
             render_api.format_amount(c, trim=False,precision=5),
             "210,00004"
         )
+        c = 21000040.0
+        self.assertEqual(
+            render_api.format_amount(c, trim=False,precision=5),
+            "210,0004"
+        )
+
         self.assertEqual(
             render_api.format_amount(c, trim=True, precision=5),
             "210,00"

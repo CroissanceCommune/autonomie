@@ -270,10 +270,10 @@
         % endif
         >
         ## The common footer
-    % if config.has_key('coop_pdffootertitle'):
+    % if config.get('coop_pdffootertitle'):
         <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
     %endif
-    % if config.has_key('coop_pdffootertext'):
+    % if config.get('coop_pdffootertext'):
         ${format_text(config.get('coop_pdffootertext'))}
     % endif
 </div>
@@ -286,13 +286,13 @@
     % endif
     >
     ## The footer specific to courses (contains the additionnal text infos)
-    % if config.has_key('coop_pdffootertitle'):
+    % if config.get('coop_pdffootertitle'):
         <b>${format_text(config.get('coop_pdffootertitle'))}</b><br />
     %endif
-    % if config.has_key('coop_pdffootercourse'):
+    % if config.get('coop_pdffootercourse'):
         ${format_text(config.get('coop_pdffootercourse'))}<br />
     % endif
-    % if config.has_key('coop_pdffootertext'):
+    % if config.get('coop_pdffootertext'):
         ${format_text(config.get('coop_pdffootertext'))}
     % endif
 </div>
@@ -302,7 +302,7 @@
 </div>
 % endif
 % if bulk is UNDEFINED or not bulk:
-    % if config.has_key('coop_cgv') and config['coop_cgv']:
+    % if config.get('coop_cgv'):
         <pdf:nextpage />
         <div id="cgv">
             ${format_text(config['coop_cgv'], False)}

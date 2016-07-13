@@ -73,7 +73,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
         msg: "est requis"
       },
       value: function(value){
-        if (isNaN(value) || ! ( parseInt(value, 10) >= 0)){
+        if (_.isNaN(value) || (! ( strToFloat(value) >= 0))){
           return "doit être un nombre positif";
         }
       }

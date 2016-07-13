@@ -169,6 +169,8 @@ def convert_to_float(value, default=None):
     """
     Try to convert the given value object to a float
     """
+    if isinstance(value, (str, unicode)):
+        value = value.replace(',', '.')
     try:
         val = float(value)
     except ValueError as err:

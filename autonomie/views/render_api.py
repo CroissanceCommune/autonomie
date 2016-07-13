@@ -176,6 +176,18 @@ def format_name(firstname, lastname, reverse=True, upper=True):
         return u"{0} {1}".format(firstname, lastname)
 
 
+def add_trailing_zeros(amount):
+    """
+    Ensure an amount has sufficient trailing zeros
+    """
+    if ',' in amount:
+        dec = len(amount) - amount.index(',')
+        if dec <= 2:
+            for i in range(0, 2 - dec):
+                amount += '0'
+    return amount
+
+
 def format_amount(amount, trim=True, grouping=True, precision=2):
     """
         return a pretty printable amount
@@ -204,6 +216,8 @@ def format_amount(amount, trim=True, grouping=True, precision=2):
             formatter = "%.{0}f".format(precision)
             amount = amount / dividor
             resp = locale.format(formatter, amount, grouping=grouping)
+            resp = resp.rstrip('0')
+            resp = add_trailing_zeros(resp)
 
     if grouping:
         resp = resp.replace(' ', '&nbsp;')

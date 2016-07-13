@@ -48,7 +48,7 @@
     ${format_text(task.workplace)}
     <br />
 % endif
-% if config.has_key('coop_invoiceheader'):
+% if config.get('coop_invoiceheader'):
     ${format_text(config['coop_invoiceheader'])}
 % endif
 </%block>
@@ -56,7 +56,7 @@
 %if task.payment_conditions:
     ${table(u"Conditions de paiement", task.payment_conditions)}
 % endif
-% if config.has_key('coop_invoicepayment'):
+% if config.get('coop_invoicepayment'):
     <% paymentinfo = config.get('coop_invoicepayment')%>
     % if company.IBAN is not None:
         <% paymentinfo = paymentinfo.replace(u"%IBAN%", company.IBAN) %>
@@ -69,7 +69,7 @@
     % endif
     ${table(u"Mode de paiement", paymentinfo)}
 %endif
-% if config.has_key('coop_invoicelate'):
+% if config.get('coop_invoicelate'):
     <% tolate = config.get('coop_invoicelate').replace(u"%ENTREPRENEUR%", company.name) %>
     ${table(u"Retard de paiement", tolate)}
 % endif

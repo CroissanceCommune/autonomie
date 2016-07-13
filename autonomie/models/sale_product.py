@@ -40,6 +40,7 @@ from autonomie.models.base import (
     default_table_args,
 )
 from autonomie import forms
+from autonomie.compute import math_utils
 
 
 PRODUCT_TO_GROUP_REL_TABLE = Table(
@@ -122,7 +123,13 @@ class SaleProduct(DBBASE):
     ref = Column(String(100), nullable=True)
     description = Column(Text(), default='')
     tva = Column(Integer, default=0)
-    value = Column(Float(), default=0)
+    value = Column(
+        Float(),
+        default=0,
+        info={
+            'colanderalchemy': {'preparer': math_utils.convert_to_float}
+        }
+    )
     unity = Column(String(100), default='')
 
     category_id = Column(ForeignKey('sale_product_category.id'))

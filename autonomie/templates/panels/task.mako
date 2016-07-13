@@ -52,8 +52,8 @@
 
             <% num_cols = 2 %>
             %if task.display_units == 1:
-                <% colspan = 3 %>
-                <% num_cols += 2 %>
+                <% colspan = 4 %>
+                <% num_cols += 3 %>
             %else:
                 <% colspan = 1 %>
             % endif
@@ -77,8 +77,9 @@
                     <tr>
                         <th class="description">Intitulé des postes</th>
                         %if task.display_units == 1:
-                            <th class="unity">P.U.</th>
-                            <th class="quantity">Qté</th>
+                            <th class="unity">Prix unitaire HT</th>
+                            <th class="quantity">Quantité</th>
+                            <th class="quantity">Unité</th>
                         % endif
                         <th class="price">Prix</th>
                         % if display_tvas_column:
@@ -92,9 +93,11 @@
                             <td class="description">${format_text(line.description, False)}</td>
                             %if task.display_units == 1:
                                 <td class="unity">${api.format_amount(line.cost, trim=False, precision=5)|n}&nbsp;€</td>
-                                <td class="quantity">${api.format_quantity(line.quantity)} ${line.unity}</td>
+                                <td class="quantity">${api.format_quantity(line.quantity)}</td>
+                                <td class="quantity">${line.unity}</td>
                             % endif
-                            <td class="price">${api.format_amount(line.total_ht(), trim=False, precision=5)|n}&nbsp;€</td>
+                            <td class="price">
+                                ${api.format_amount(line.total_ht(), trim=False, precision=5)|n}&nbsp;€</td>
                             % if display_tvas_column:
                                 <td class='tva'>
                                     % if line.tva>=0:

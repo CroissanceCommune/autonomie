@@ -44,7 +44,7 @@
     ${format_text(task.workplace)}
     <br />
 % endif
-% if config.has_key('coop_estimationheader'):
+% if config.get('coop_estimationheader'):
     ${format_text(config['coop_estimationheader'])}
 % endif
 </%block>
@@ -118,7 +118,7 @@
         ${table(u"Conditions de paiement", task.payment_conditions)}
     % endif
 % endif
-% if config.has_key('coop_estimationfooter'):
+% if config.get('coop_estimationfooter'):
     <div class='row keep_with_next'>
         ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
     </div>

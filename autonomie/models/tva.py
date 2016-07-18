@@ -145,7 +145,7 @@ devis/une facture,la mention apparaitra dans la sortie PDF
 (ex: Mention pour la tva liée aux formations ...)""",
                 'widget': deform.widget.TextAreaWidget(rows=1),
                 'preparer': forms.get_default_textarea_preparer(),
-                'missing': colander.drop,
+                'missing': "",
             }
         }
     )

@@ -460,7 +460,9 @@ class SageExpenseExportPage(BaseView):
         :param query_params_dict: params passed in the query for expense export
         """
         query = ExpenseSheet.query()
-        query = query.filter(ExpenseSheet.status.in_(['valid', 'resulted']))
+        query = query.filter(
+            ExpenseSheet.status.in_(ExpenseSheet.valid_states)
+        )
 
         if query_params_dict.get("sheet_id", 0) != 0:
             sheet_id = query_params_dict['sheet_id']

@@ -341,6 +341,7 @@ class ExpenseSheet(Node, ExpenseCompute):
     )
 
     state_machine = ExpenseStates('draft', build_state_machine())
+    valid_states = ('valid', 'resulted', 'paid')
 
     def __json__(self, request):
         return dict(

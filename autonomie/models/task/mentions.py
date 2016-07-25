@@ -46,7 +46,7 @@ TASK_MENTION = sa.Table(
 
 class TaskMention(ConfigurableOption):
     __colanderalchemy_config__ = {
-        "title": u"mention facultative",
+        "title": u"une mention facultative",
         "help_msg": u"Configurer des mentions facultatives pour les devis et \
 factures, celles-ci sont proposées aux entrepreneurs dans les formulaires et \
 insérées dans les sorties PDF.<br /> \

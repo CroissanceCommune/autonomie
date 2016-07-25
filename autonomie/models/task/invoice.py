@@ -632,7 +632,7 @@ class PaymentMode(DBBASE):
         Payment mode entry
     """
     __colanderalchemy_config__ = {
-        "title": u"mode de paiement",
+        "title": u"un mode de paiement",
         "help_msg": u"Configurer les modes de paiement pour la saisie des \
 encaissements des factures",
         "validation_msg": u"Les modes de paiement ont bien été configurés"
@@ -646,7 +646,7 @@ encaissements des factures",
     )
     label = Column(
         String(120),
-        info={'colanderalchemy': {'title': u"Intitulé"}}
+        info={'colanderalchemy': {'title': u"Libellé"}}
     )
 
 
@@ -655,7 +655,7 @@ class BankAccount(ConfigurableOption):
     Bank accounts used for payment registry
     """
     __colanderalchemy_config__ = {
-        "title": u"Comptes banques",
+        "title": u"un compte banque",
         'validation_msg': u"Les comptes banques ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')

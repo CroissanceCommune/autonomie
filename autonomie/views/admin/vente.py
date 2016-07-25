@@ -100,28 +100,39 @@ logger = logging.getLogger(__name__)
 )
 
 
-class TaskMentionAdmin(mention_admin_class):
-    pass
-
-
 class WorkUnitAdmin(work_unit_admin_class):
+    title = u"Configuration des unités de prestation"
     disable = False
+    description = u"Les unités de prestation proposées lors de la création \
+d'un devis/d'une facture"
+
+
+class TaskMentionAdmin(mention_admin_class):
+    title = u"Configuration des mentions facultatives des devis/factures"
+    description = u"Des mentions facultatives que les entrepreneurs peuvent \
+faire figurer dans leurs devis/factures"
 
 
 class PaymentModeAdmin(payment_mode_admin_class):
+    title = u"Configuration des modes de paiement"
     disable = False
+    description = u"Les conditions que les entrepreneurs peuvent sélectionner \
+lors de la création d'un devis/d'une facture"
 
 
 class PaymentConditionAdmin(payment_condition_admin_class):
-    pass
+    title = u"Configuration des conditions de paiement"
+    description = u"Les modes de paiement que l'on peut sélectionner pour \
+enregistrer le paiement d'un devis/ d'une facture"
 
 
 class AdminVenteTreasury(BaseConfigView):
     """
         Cae information configuration
     """
+    title = u"Configuration comptable du module Ventes"
+    description = u"Code journal, activation des modules d'export ..."
     redirect_path = "admin_vente"
-    title = u"Configuration comptable du module ventes"
     validation_msg = u"Les informations ont bien été enregistrées"
     keys = (
         'code_journal',
@@ -170,6 +181,9 @@ utilisé est celui de la banque associé à chaque encaissement)"
 
 
 class AdminTva(tva_admin_class):
+    title = u"Configuration comptable des produits et TVA collectés"
+    description = u"Taux de TVA, codes produit et codes analytiques associés"
+
     def query_items(self):
         return DBSESSION().query(Tva).order_by(desc(Tva.active)).all()
 
@@ -178,7 +192,10 @@ class AdminTva(tva_admin_class):
         if self._schema is None:
             self._schema = get_sequence_model_admin(
                 self.factory,
-                ""
+                "",
+                widget_options={
+                    'add_subitem_text_template': u"Ajouter un taux de TVA"
+                }
             )
             self._schema.title = u"Configuration des taux de TVA"
             self._schema.validator = tva_form_validator
@@ -197,38 +214,39 @@ def admin_vente_index_view(request):
     for label, route, title, icon in (
         (u"Retour", "admin_index", "", "fa fa-step-backward"),
         (
-            u"Configuration des unités de prestation",
+            WorkUnitAdmin.title,
             "admin_vente_workunit",
-            u"Les unités de prestation proposées lors de la création d'un \
-devis/d'une facture", ""
+            WorkUnitAdmin.description,
+            ""
         ),
         (
-            u"Configuration des mentions facultatives des devis/factures",
+            TaskMentionAdmin.title,
             "admin_vente_mention",
-            u"Des mentions facultatives que les entrepreneurs peuvent faire \
-figurer dans leurs devis/factures", ""
+            TaskMentionAdmin.description,
+            ""
         ),
         (
-            u"Configuration des conditions de paiement",
-            "admin_vente_payment_condition",
-            u"Les conditions que les entrepreneurs peuvent sélectionner lors \
-de la création d'un devis/d'une facture", ""
-        ),
-        (
-            u"Configuration des modes de paiement",
+            PaymentModeAdmin.title,
             "admin_vente_payment_mode",
-            u"Les modes de paiement que l'on peut sélectionner pour \
-enregistrer le paiement d'un devis/ d'une facture", ""
+            PaymentModeAdmin.description,
+            ""
         ),
         (
-            u"Configuration comptable du module ventes",
+            PaymentConditionAdmin.title,
+            "admin_vente_payment_condition",
+            PaymentConditionAdmin.description,
+            ""
+        ),
+        (
+            AdminVenteTreasury.title,
             "admin_vente_treasury",
-            u"Code journal, activation des modules d'export ...", ""
+            AdminVenteTreasury.description,
+            ""
         ),
         (
-            u"Configuration comptable des produits et TVA collectés",
+            AdminTva.title,
             'admin_vente_tva',
-            u"Taux de TVA, codes produit et codes analytiques associés",
+            AdminTva.description,
             ""
         ),
         (

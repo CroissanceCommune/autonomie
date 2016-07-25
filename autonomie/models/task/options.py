@@ -31,7 +31,7 @@ from autonomie.models.options import (
 
 class PaymentConditions(ConfigurableOption):
     __colanderalchemy_config__ = {
-        'title': u"Conditions de paiement",
+        'title': u"des conditions de paiement",
         'help_msg': u"Configurer les conditions de paiement prédéfinies que \
 les entrepreneurs pourront sélectionner lors de la création de leur devis.",
         'validation_msg': u"Les conditions de paiement ont bien \

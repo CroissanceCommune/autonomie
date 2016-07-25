@@ -42,7 +42,7 @@ class WorkUnit(DBBASE):
         Work unit, used to build the price list
     """
     __colanderalchemy_config__ = {
-        "title": u"unité de prestation",
+        "title": u"une unité de prestation",
         "help_msg": u"Configurer les unités de prestation proposées dans les \
 formulaires d'édition des devis/factures",
         "validation_msg": u"Les unités de prestation ont bien été configurées"

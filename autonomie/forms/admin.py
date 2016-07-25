@@ -888,7 +888,7 @@ def merge_config_datas(dbdatas, appstruct):
     return dbdatas
 
 
-def get_sequence_model_admin(model, title=u"", excludes=()):
+def get_sequence_model_admin(model, title=u"", excludes=(), **kw):
     """
     Return a schema for configuring sequence of models
 
@@ -905,15 +905,22 @@ def get_sequence_model_admin(model, title=u"", excludes=()):
     )
     node_schema.name = 'data'
 
+    default_widget_options = dict(
+        orderable=True,
+        template=TEMPLATES_URL + "clean_sequence.pt",
+        min_len=1,
+    )
+    widget_options = kw.get('widget_options', {})
+    for key, value in widget_options.items():
+        default_widget_options[key] = value
+
     schema = colander.SchemaNode(colander.Mapping())
     schema.add(
         colander.SchemaNode(
             colander.Sequence(),
             node_schema,
             widget=deform.widget.SequenceWidget(
-                orderable=True,
-                template=TEMPLATES_URL + "clean_sequence.pt",
-                min_len=1,
+                **default_widget_options
             ),
             title=title,
             name='datas')

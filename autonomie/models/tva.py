@@ -64,7 +64,7 @@ class Tva(DBBASE):
         `default` int(2) default 0 #rajouté par mise à jour 1.2
     """
     __colanderalchemy_config__ = {
-        "title": u"un taux de tva",
+        "title": u"un taux de TVA",
         "validation_msg": u"Les taux de Tva ont bien été configurés",
         "help_msg": u"""Configurez les taux de Tva disponibles utilisés dans \
 Autonomie, ainsi que les produits associés.<br /> \

@@ -168,13 +168,21 @@
           % endif
               % if child.type_ == 'file':
                   <li>
-                  <a href="${request.route_path('file', id=child.id)}">${child.label}</a>
-                    % if delete:
-                        <a class='btn btn-small btn-danger' href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}">
-                          <i class='glyphicon glyphicon-trash'></i>
+                  % if api.has_permission('edit_file', child):
+                      <a href="${request.route_path('file', id=child.id)}">${child.label}</a>
+                        % if delete:
+                            <a class='btn btn-small btn-danger' href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}">
+                            <i class='glyphicon glyphicon-trash'></i>
+                          </a>
+                      % endif
+                      <a class='' href="${request.route_path('file', id=child.id, _query=dict(action='download'))}"><i class='glyphicon glyphicon-download'></i></a>
+
+                  % elif api.has_permission('view_file', child):
+                      <a href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
+                          ${child.label} <i class='glyphicon glyphicon-download'></i>
                       </a>
                   % endif
-                  <a class='' href="${request.route_path('file', id=child.id, _query=dict(action='download'))}"><i class='glyphicon glyphicon-download'></i></a>
+
                   </li>
               % endif
           % if loop.last:

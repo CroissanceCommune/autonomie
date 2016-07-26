@@ -235,7 +235,13 @@ def get_event_acl(self):
     """
     acl = DEFAULT_PERM[:]
     for user in self.participants:
-        acl.append((Allow, user.login, ("view_activity", "view_workshop")))
+        acl.append(
+            (
+                Allow,
+                user.login,
+                ("view_activity", "view_workshop", "view_file")
+            )
+        )
     return acl
 
 
@@ -246,7 +252,13 @@ def get_activity_acl(self):
     acl = get_event_acl(self)
     for companies in self.companies:
         for user in companies.employees:
-            acl.append((Allow, u"%s" % user.login, "view_activity",))
+            acl.append(
+                (
+                    Allow,
+                    user.login,
+                    ("view_activity", "view_file")
+                )
+            )
     return acl
 
 

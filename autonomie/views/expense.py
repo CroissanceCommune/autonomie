@@ -680,6 +680,7 @@ perdues) ?")
         status = params['submit']
         logger.debug(u"Setting a new status : %s" % status)
         expense.set_status(status, self.request, self.request.user.id, **params)
+        expense.status_date = datetime.date.today()
         return expense, status
 
     def reset_success(self, appstruct):

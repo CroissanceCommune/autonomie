@@ -58,9 +58,9 @@ Admin expenses list view
 <table class="table table-condensed">
     <thead>
         <tr>
-            <th>Identifiant</th>
-            <th>Entrepreneur</th>
-            <th>Période</th>
+            <th>${sortable(u"Identifiant", "id_")}</th>
+            <th> ${sortable(u"Entrepreneur", "name")}</th>
+            <th>${sortable(u"Période", "month")}</th>
             <th>Montant</th>
             <th>Paiements</th>
             <th>Actions</th>

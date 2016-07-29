@@ -67,6 +67,7 @@ from autonomie.utils.rest import (
     add_rest_views,
     make_redirect_view,
 )
+from autonomie.models.user import User
 from autonomie.utils.widgets import (
     Submit,
     PopUp,
@@ -953,7 +954,11 @@ class ExpenseList(BaseListView):
     """
     title = u"Liste des notes de dépense de la CAE"
     schema = get_list_schema()
-    sort_columns = dict(month=ExpenseSheet.month)
+    sort_columns = dict(
+        id_=ExpenseSheet.id,
+        month=ExpenseSheet.month,
+        name=User.lastname,
+    )
     default_sort = 'month'
     default_direction = 'desc'
     add_template_vars = ('title', 'payment_formname',)
@@ -972,7 +977,7 @@ class ExpenseList(BaseListView):
         return form_name
 
     def query(self):
-        return ExpenseSheet.query()
+        return ExpenseSheet.query().outerjoin(ExpenseSheet.user)
 
     def filter_search(self, query, appstruct):
         search = appstruct['search']

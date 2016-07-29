@@ -33,7 +33,7 @@ js.tinymce==4.1.5
 openpyxl==2.0.4
 paramiko==1.7.7.1
 peppercorn==0.4
-py3o.template==0.6
+py3o.template==0.9.9
 pyramid==1.5.4
 pyramid-beaker==0.7
 pyramid-chameleon==0.3

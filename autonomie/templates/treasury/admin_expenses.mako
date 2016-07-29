@@ -121,7 +121,7 @@ else:
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
                     ${table_btn(url, u'Export', u"Télécharger au format Excel", icon="file" )}
                     % if expense.is_allowed(request, 'paid'):
-                        <% onclick = "ExpenseList.payment_form(%s, '%s');" % (expense.id, api.format_amount(expense.topay())) %>
+                        <% onclick = "ExpenseList.payment_form(%s, '%s');" % (expense.id, api.format_amount(expense.topay(), grouping=False)) %>
                         ${table_btn('#popup-payment_form',
                             u"Paiement",
                             u"Saisir un paiement pour cette feuille",

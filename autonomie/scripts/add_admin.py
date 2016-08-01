@@ -41,7 +41,7 @@ def get_pwd():
     """
         Return a random password
     """
-    return os.urandom(PWD_LENGTH)
+    return os.urandom(PWD_LENGTH).encode('base-64')
 
 
 def add_admin(arguments, env):
@@ -49,21 +49,26 @@ def add_admin(arguments, env):
         Add an admin user to the database
     """
     login = get_value(arguments, 'user', 'admin.majerti')
+    login = login.decode('utf-8')
+
     password = get_value(arguments, 'pwd', get_pwd())
+    password = password.decode('utf-8')
+
     firstname = get_value(arguments, 'firstname', 'Admin')
     lastname = get_value(arguments, 'lastname', 'Majerti')
     email = get_value(arguments, 'email', 'admin@example.com')
-    user = User(login=login,
-                firstname=firstname,
-                primary_group=1,  #is an admin
-                lastname=lastname,
-                email=email
-            )
+    user = User(
+        login=login,
+        firstname=firstname,
+        lastname=lastname,
+        email=email
+    )
+    user.groups.append('admin')
     user.set_password(password)
     db = DBSESSION()
     db.add(user)
     db.flush()
-    print u"Creating account %s with password %s" % (login, unicode(password))
+    print u"Creating account %s with password %s" % (login, password)
     return user
 
 

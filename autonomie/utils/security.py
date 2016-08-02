@@ -312,6 +312,7 @@ def get_user_acl(self):
                     "edit_user",
                     'list_holidays',
                     'add_holiday',
+                    'edit_holiday',
                     'list_competences',
                 )
             )

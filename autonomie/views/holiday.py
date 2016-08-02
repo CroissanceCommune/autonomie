@@ -252,6 +252,7 @@ def includeme(config):
         config,
         "user_holiday",
         RestHoliday,
+        edit_rights="edit_holiday",
         view_rights='list_holidays',
         add_rights='add_holiday',
     )

@@ -307,7 +307,7 @@ def get_association_schema(request):
     """
     schema = AssociationSchema(validator=check_record_name).clone()
 
-    if request.has_permission('admin', request.context):
+    if not request.has_permission('admin', request.context):
         del schema['force_rel_creation']
         del schema['record_association']
         del schema['record_name']

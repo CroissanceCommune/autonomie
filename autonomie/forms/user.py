@@ -358,10 +358,7 @@ def get_user_schema(edit=False, permanent=True):
 
             Is this form related to permanent edition (managers or admins)
     """
-    if permanent:
-        schema = SQLAlchemySchemaNode(user.User, excludes=('compte_tiers',))
-    else:
-        schema = SQLAlchemySchemaNode(user.User)
+    schema = SQLAlchemySchemaNode(user.User)
 
     schema.insert(
         0,

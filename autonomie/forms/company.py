@@ -133,8 +133,8 @@ class CompanySchema(colander.MappingSchema):
     )
 
     goal = colander.SchemaNode(
-            colander.String(),
-            title=u"Descriptif de l'activité")
+        colander.String(),
+        title=u"Descriptif de l'activité")
 
     activities = CompanyActivitySchema(
         title=u"Domaines d'activité",
@@ -191,9 +191,9 @@ comptabilité",
                 min_err=u"Veuillez fournir un nombre supérieur à 0",
                 max_err=u"Veuillez fournir un nombre inférieur à 100"),
             title=u"Contribution à la CAE",
-            default=deferred_default_contribution,
-            missing=deferred_default_contribution,
-            description=u"Pourcentage que cette entreprise contribue à la CAE")
+            missing=colander.drop,
+            description=u"Pourcentage que cette entreprise contribue à la CAE",
+    )
 
     cgv = forms.textarea_node(
         title=u"Conditions générales complémentaires",

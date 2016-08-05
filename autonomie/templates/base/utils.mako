@@ -141,12 +141,18 @@
                 % endif
             % endfor
             % if request.has_permission('admin_treasury'):
-                % for label, key in ((u'Code comptable', 'code_compta'),\
-                                     (u'Contribution à la CAE (en %)', 'contribution'),\
-                                     ):
-                    <dt>${label}</dt>
-                    <dd>${getattr(company, key) or u"Non renseigné"}</dd>
-                % endfor
+                <dt>Code comptable</dt>
+                <dd>${company.code_compta or u"Non renseigné"}</dd>
+                <dt>Contribution à la CAE (en %)</dt>
+                <dd>
+                    % if company.contribution:
+                        ${company.contribution}
+                    % elif request.config.get('contribution_cae'):
+                        ${request.config.get('contribution_cae')} (par défaut)
+                    % else:
+                        Non renseigné
+                    % endif
+                </dd>
             % endif
             % if company.activities:
                 <dt>Domaine(s) d'activité</dt>

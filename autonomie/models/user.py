@@ -321,6 +321,18 @@ class User(DBBASE, PersistentACLMixin):
         group="edit"
     )
 
+    userdatas = relationship(
+        "UserDatas",
+        primaryjoin='User.id==UserDatas.user_id',
+        back_populates='user',
+        uselist=False,
+        cascade='all, delete-orphan',
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'exclude': True},
+        }
+    )
+
     @staticmethod
     def _encode_pass(password):
         """
@@ -791,15 +803,6 @@ class UserDatas(Node):
     user = relationship(
         "User",
         primaryjoin='User.id==UserDatas.user_id',
-        backref=backref(
-            "userdatas",
-            uselist=False,
-            cascade='all, delete-orphan',
-            info={
-                'colanderalchemy': EXCLUDED,
-                'export': {'exclude': True},
-            },
-        ),
         info={
             'colanderalchemy': EXCLUDED,
             'export': {'exclude': True},

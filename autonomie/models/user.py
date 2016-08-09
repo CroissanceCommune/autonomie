@@ -146,6 +146,12 @@ CONTRACT_OPTIONS = (
 log = logging.getLogger(__name__)
 
 
+TEMPLATES_URL = 'autonomie:deform_templates/'
+CLEAN_MAPPING_WIDGET = deform.widget.MappingWidget(
+    template=TEMPLATES_URL + 'clean_mapping.pt'
+)
+
+
 class Group(DBBASE):
     """
     Available groups used in autonomie
@@ -1360,7 +1366,7 @@ class UserDatas(Node):
         info={
             'colanderalchemy':
             {
-                'title': u'Activité',
+                'title': u'Activités',
                 'section': u'Activité',
             },
             'export': {
@@ -1878,6 +1884,10 @@ class ExternalActivityDatas(DBBASE):
     """
     Datas related to external activities
     """
+    __colanderalchemy_config__ = {
+        'title': u"une activité Externe à la CAE",
+        'widget': CLEAN_MAPPING_WIDGET,
+    }
     __tablename__ = 'external_activity_datas'
     __table_args__ = default_table_args
     id = Column(
@@ -1936,6 +1946,10 @@ class ExternalActivityDatas(DBBASE):
 
 
 class CompanyDatas(DBBASE):
+    __colanderalchemy_config__ = {
+        'title': u"une activité",
+        'widget': CLEAN_MAPPING_WIDGET,
+    }
     __tablename__ = 'company_datas'
     __table_args__ = default_table_args
     id = Column(
@@ -2007,6 +2021,10 @@ class CompanyDatas(DBBASE):
 
 
 class DateDiagnosticDatas(DBBASE):
+    __colanderalchemy_config__ = {
+        'title': u"une date de diagnostic",
+        'widget': CLEAN_MAPPING_WIDGET,
+    }
     __tablename__ = 'date_diagnostic_datas'
     __table_args__ = default_table_args
     id = Column(
@@ -2038,6 +2056,10 @@ class DateDiagnosticDatas(DBBASE):
 
 
 class DateConventionCAPEDatas(DBBASE):
+    __colanderalchemy_config__ = {
+        'title': u"une date de convention CAPE",
+        'widget': CLEAN_MAPPING_WIDGET,
+    }
     __tablename__ = 'date_convention_cape_datas'
     __table_args__ = default_table_args
     id = Column(
@@ -2069,6 +2091,10 @@ class DateConventionCAPEDatas(DBBASE):
 
 
 class DateDPAEDatas(DBBASE):
+    __colanderalchemy_config__ = {
+        'title': u"une date de DPAE",
+        'widget': CLEAN_MAPPING_WIDGET,
+    }
     __tablename__ = 'date_dpae_datas'
     __table_args__ = default_table_args
     id = Column(

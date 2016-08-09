@@ -333,7 +333,8 @@ def deferred_group_validator(node, kw):
     """
     request = kw['request']
     groups = get_groups(request)
-    return colander.ContainsOnly([group[0] for group in groups])
+    validator = colander.ContainsOnly([group[0] for group in groups])
+    return colander.All(colander.Length(min=1), validator)
 
 
 @colander.deferred

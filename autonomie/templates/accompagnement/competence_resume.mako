@@ -28,7 +28,7 @@
 </a>
 <div class='row'>
     <div class='col-xs-12'>
-        <img src="/public/competence_header.png" style="width:auto;max-height:50vh"/>
+        <img src="/public/competence_header.png" style="width:auto;max-height:200px;"/>
     </div>
 </div>
 <div class='row' style="margin-bottom: 40px">

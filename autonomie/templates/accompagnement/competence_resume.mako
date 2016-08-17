@@ -28,7 +28,7 @@
 </a>
 <div class='row'>
     <div class='col-xs-12'>
-        <img src="/public/competence_header.png" />
+        <img src="/public/competence_header.png" style="width:auto;max-height:50vh"/>
     </div>
 </div>
 <div class='row' style="margin-bottom: 40px">
@@ -52,7 +52,9 @@
 </div>
 <div class='row' style='page-break-after:always;'>
     <div class='col-xs-12'>
-        <b>Référent </b>: ${api.format_account(request.context.contractor.userdatas.situation_follower)}
+        % if request.context.contractor.userdatas is not None and request.context.contractor.userdatas.situation_follower is not None:
+            <b>Référent </b>: ${api.format_account(request.context.contractor.userdatas.situation_follower)}
+        % endif
     </div>
 </div>
 <div class='row'>

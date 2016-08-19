@@ -36,6 +36,7 @@ from autonomie.models.task import (
 from autonomie.models.customer import Customer
 from autonomie.models.project import Project, Phase
 from autonomie.models.user import User
+from autonomie.models.company import Company
 
 
 ESTIMATION = dict(
@@ -147,8 +148,10 @@ def test_duplicate_estimation(dbsession, estimation):
     customer = dbsession.query(Customer).first()
     project = dbsession.query(Project).first()
     phase = dbsession.query(Phase).first()
+    company = dbsession.query(Company).first()
     estimation.phase = phase
     estimation.project = project
+    estimation.company = company
     estimation.owner = user
     estimation.customer = customer
     estimation.statusPersonAccount = user
@@ -178,10 +181,12 @@ def test_duplicate_estimation_integration(dbsession, estimation):
     customer = dbsession.query(Customer).first()
     project = dbsession.query(Project).first()
     phase = dbsession.query(Phase).first()
+    company = dbsession.query(Company).first()
     estimation.phase = phase
     estimation.project = project
     estimation.owner = user
     estimation.customer = customer
+    estimation.company = company
     estimation.statusPersonAccount = user
 
     assert estimation.statusPersonAccount == user

@@ -35,7 +35,7 @@ from autonomie.views.commercial import (
 from autonomie.views.commercial import DisplayCommercialHandling
 from autonomie.models.treasury import TurnoverProjection
 
-APPSTRUCT = {'month':11, 'value':'1500', 'comment':"Some comments go here"}
+APPSTRUCT = {'month': 11, 'value': '1500', 'comment': "Some comments go here"}
 
 
 class DummyProjection(object):
@@ -111,3 +111,12 @@ def test_compute_turnover_percent():
     proj = DummyProjection(100)
     assert compute_turnover_percent(0, {0: proj}, {0: 50}) == 50.0
 
+def test_get_range():
+    from autonomie.views.commercial import (
+        get_year_range,
+        get_month_range,
+    )
+    import datetime
+    assert get_year_range(2012) == (datetime.date(2012, 1,1), datetime.date(2013, 1, 1))
+    assert get_month_range(3, 2012) == (datetime.date(2012, 3,1), datetime.date(2012, 4, 1))
+    assert get_month_range(12, 2012) == (datetime.date(2012, 12,1), datetime.date(2013, 1, 1))

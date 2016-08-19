@@ -33,20 +33,19 @@ from sqlalchemy import (
     and_,
     or_,
 )
+from sqlalchemy.orm import (
+    load_only,
+)
 from deform import Form
 from deform.exception import ValidationFailure
-from fanstatic import Resource
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.compute.math_utils import percent
 from autonomie.models.task import (
-    Task,
     Estimation,
     Invoice,
     CancelInvoice,
 )
-from autonomie.models.customer import Customer
-from autonomie.models.project import Project
 from autonomie.models.treasury import TurnoverProjection
 from autonomie.forms import (
     merge_session_with_post,
@@ -78,7 +77,7 @@ def get_month_range(month, year):
         nxt_month = 1
     else:
         nxt_year = year
-        nxt_month = month +1
+        nxt_month = month + 1
     return datetime.date(year, month, 1), datetime.date(nxt_year, nxt_month, 1)
 
 
@@ -96,6 +95,7 @@ def get_form(counter):
     schema = CommercialSetFormSchema()
     return Form(schema=schema, buttons=(submit_btn,), formid='setform',
                 counter=counter)
+
 
 class DisplayCommercialHandling(BaseView):
     """
@@ -136,32 +136,22 @@ class DisplayCommercialHandling(BaseView):
         """
             Query for estimations
         """
-        return Estimation.query().join(Task.project)\
-                    .filter(Project.company_id==self.request.context.id)\
-                    .filter(extract('year', Estimation.date)==self.year)
+        return self.request.context.get_estimations(valid=True).filter(
+            extract('year', Estimation.date) == self.year
+        )
 
     def validated_estimations(self):
         """
             Query for estimations where an invoice has been generated
         """
-        return self.estimations()\
-                .filter(Estimation.CAEStatus=='geninv')
+        return self.estimations().filter(Estimation.CAEStatus == 'geninv')
 
     def customers(self):
         """
             Return the number of real customers (with invoices)
             for the current year
         """
-        company_id = self.request.context.id
-        result = 0
-        customers = Customer.query().filter(Customer.company_id==company_id)
-        for customer in customers:
-            for invoice in customer.invoices:
-                if invoice.financial_year == self.year:
-                    if invoice.CAEStatus in Invoice.valid_states:
-                        result += 1
-                        break
-        return result
+        return self.request.context.get_real_customers(self.year).count()
 
     def turnovers(self):
         """
@@ -170,57 +160,51 @@ class DisplayCommercialHandling(BaseView):
         result = dict(year_total=0)
         for month in range(1, 13):
 
-            invoices = Invoice.query().join(Task.project)
-            invoices = invoices.filter(
-                Project.company_id==self.request.context.id
-                )
+            invoices = self.request.context.get_invoices(valid=True).options(
+                load_only('ht')
+            )
+
             date_condition = and_(
-                    extract('year', Invoice.date)==self.year,
-                    extract('month', Invoice.date)==month,
-                    Invoice.financial_year==self.year,
-                    )
+                extract('year', Invoice.date) == self.year,
+                extract('month', Invoice.date) == month,
+                Invoice.financial_year == self.year,
+            )
             if month != 12:
                 invoices = invoices.filter(date_condition)
             else:
                 # for december, we also like to have invoices edited in january
                 # and reported to the previous comptability year
                 reported_condition = and_(
-                        Invoice.financial_year==self.year,
-                        extract('year', Invoice.date)!=self.year,
-                    )
-                invoices = invoices.filter(
-                        or_(date_condition, reported_condition)
-                    )
-
-            invoices = invoices.filter(
-                Invoice.CAEStatus.in_(Invoice.valid_states)
+                    Invoice.financial_year == self.year,
+                    extract('year', Invoice.date) != self.year,
                 )
-            invoice_sum = sum([invoice.total_ht() for invoice in invoices])
+                invoices = invoices.filter(
+                    or_(date_condition, reported_condition)
+                )
 
-            cinvoices = CancelInvoice.query().join(Task.project)
-            cinvoices = cinvoices.filter(
-                    Project.company_id==self.request.context.id
-                    )
+            invoice_sum = sum([invoice.ht for invoice in invoices])
+
+            cinvoices = self.request.context.get_cancelinvoices(valid=True).options(
+                load_only('ht')
+            )
+
             date_condition = and_(
-                    extract('year', CancelInvoice.date)==self.year,
-                    extract('month', CancelInvoice.date)==month,
-                    CancelInvoice.financial_year==self.year,
-                    )
+                extract('year', CancelInvoice.date) == self.year,
+                extract('month', CancelInvoice.date) == month,
+                CancelInvoice.financial_year == self.year,
+            )
             if month != 12:
                 cinvoices = cinvoices.filter(date_condition)
             else:
                 reported_condition = and_(
-                    CancelInvoice.financial_year==self.year,
-                    extract('year', CancelInvoice.date)!=self.year,
-                    )
+                    CancelInvoice.financial_year == self.year,
+                    extract('year', CancelInvoice.date) != self.year,
+                )
                 cinvoices = cinvoices.filter(
-                        or_(date_condition, reported_condition)
-                        )
+                    or_(date_condition, reported_condition)
+                )
 
-            cinvoices = cinvoices.filter(
-                    CancelInvoice.CAEStatus.in_(CancelInvoice.valid_states)
-                    )
-            cinvoice_sum = sum([cinvoice.total_ht() for cinvoice in cinvoices])
+            cinvoice_sum = sum([cinvoice.ht for cinvoice in cinvoices])
 
             result[month] = invoice_sum + cinvoice_sum
             result['year_total'] += result[month]
@@ -232,9 +216,9 @@ class DisplayCommercialHandling(BaseView):
         """
         query = TurnoverProjection.query()
         query = query.filter(
-            TurnoverProjection.company_id==self.request.context.id
+            TurnoverProjection.company_id == self.request.context.id
             )
-        result = query.filter(TurnoverProjection.year==self.year)
+        result = query.filter(TurnoverProjection.year == self.year)
 
         return result
 
@@ -246,7 +230,7 @@ class DisplayCommercialHandling(BaseView):
         appstruct['company_id'] = self.request.context.id
 
         query = self.turnover_projections()
-        query = query.filter(TurnoverProjection.month==appstruct['month'])
+        query = query.filter(TurnoverProjection.month == appstruct['month'])
         result = query.first()
 
         projection = result or TurnoverProjection()
@@ -276,18 +260,18 @@ class DisplayCommercialHandling(BaseView):
             turnover_projections['year_total'] += projection.value
 
         return dict(
-                    title=self.title,
-                    estimations=self.estimations().count(),
-                    validated_estimations=self.validated_estimations().count(),
-                    customers=self.customers(),
-                    turnovers=self.turnovers(),
-                    turnover_projections=turnover_projections,
-                    year_form=year_form,
-                    form=form,
-                    compute_turnover_difference=compute_turnover_difference,
-                    compute_percent=percent,
-                    compute_turnover_percent=compute_turnover_percent,
-                    )
+            title=self.title,
+            estimations=self.estimations().count(),
+            validated_estimations=self.validated_estimations().count(),
+            customers=self.customers(),
+            turnovers=self.turnovers(),
+            turnover_projections=turnover_projections,
+            year_form=year_form,
+            form=form,
+            compute_turnover_difference=compute_turnover_difference,
+            compute_percent=percent,
+            compute_turnover_percent=compute_turnover_percent,
+        )
 
 
 def compute_turnover_difference(index, projections, turnovers):

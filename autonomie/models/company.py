@@ -28,7 +28,6 @@
 import logging
 import colander
 import deform
-import deform_extensions
 
 from sqlalchemy import (
     Table,
@@ -166,17 +165,13 @@ class Company(DBBASE, PersistentACLMixin):
         ),
         group='edit'
     )
+
     customers = relationship(
         "Customer",
         order_by="Customer.code",
-        backref=backref(
-            'company',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        )
+        back_populates="company",
     )
+
     projects = relationship(
         "Project",
         order_by="Project.id",
@@ -188,6 +183,17 @@ class Company(DBBASE, PersistentACLMixin):
             }
         ),
     )
+    tasks = relationship(
+        "Task",
+        primaryjoin="Task.company_id==Company.id",
+        order_by='Task.date',
+        back_populates="company",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        },
+    )
+
     code_compta = deferred(
         Column(
             String(30),

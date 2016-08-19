@@ -49,6 +49,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import (
     deferred,
+    relationship,
 )
 
 from autonomie import forms
@@ -70,7 +71,7 @@ def get_customers_from_request(request):
     if request.context.__name__ == 'company':
         return request.context.customers
     elif request.context.__name__ == 'customer':
-        return [customer for customer in request.context.company.customers \
+        return [customer for customer in request.context.company.customers
                 if customer is not request.context]
     else:
         return []
@@ -128,7 +129,7 @@ class Customer(DBBASE, PersistentACLMixin):
             CustomDateType,
             default=get_current_timestamp,
             info={
-                'export':{'exclude':True},
+                'export': {'exclude': True},
                 'colanderalchemy': forms.EXCLUDED,
             },
         ),
@@ -142,7 +143,7 @@ class Customer(DBBASE, PersistentACLMixin):
             default=get_current_timestamp,
             onupdate=get_current_timestamp,
             info={
-                'export':{'exclude':True},
+                'export': {'exclude': True},
                 'colanderalchemy': forms.EXCLUDED,
             },
         ),
@@ -154,7 +155,7 @@ class Customer(DBBASE, PersistentACLMixin):
         Integer,
         ForeignKey('company.id'),
         info={
-            'export':{'exclude':True},
+            'export': {'exclude': True},
             'colanderalchemy': forms.EXCLUDED,
         }
     )
@@ -174,7 +175,7 @@ class Customer(DBBASE, PersistentACLMixin):
         'code',
         String(4),
         info={
-            'colanderalchemy':{
+            'colanderalchemy': {
                 'title': u"Code",
                 'widget': deform.widget.TextInputWidget(mask='****'),
                 'validator': deferred_ccode_valid,
@@ -189,7 +190,7 @@ class Customer(DBBASE, PersistentACLMixin):
             String(255),
             info={
                 "colanderalchemy": {
-                    'title':u"Nom du contact principal",
+                    'title': u"Nom du contact principal",
                 }
             },
             nullable=False,
@@ -248,7 +249,7 @@ class Customer(DBBASE, PersistentACLMixin):
             "zipCode",
             String(20),
             info={
-                'colanderalchemy':{
+                'colanderalchemy': {
                     'title': u'Code postal',
                 },
             },
@@ -288,7 +289,7 @@ class Customer(DBBASE, PersistentACLMixin):
             "email",
             String(255),
             info={
-                'colanderalchemy':{
+                'colanderalchemy': {
                     'title': u"E-mail",
                     'validator': forms.mail_validator(),
                 },
@@ -342,12 +343,12 @@ class Customer(DBBASE, PersistentACLMixin):
             "comments",
             Text,
             info={
-                  'colanderalchemy':{
-                      'title': u"Commentaires",
-                      'widget': deform.widget.TextAreaWidget(
-                          css_class="col-md-10"
-                      ),
-                  }
+                'colanderalchemy': {
+                    'title': u"Commentaires",
+                    'widget': deform.widget.TextAreaWidget(
+                        css_class="col-md-10"
+                    ),
+                }
             },
         ),
         group='edit',
@@ -386,6 +387,31 @@ class Customer(DBBASE, PersistentACLMixin):
         info={'colanderalchemy': forms.EXCLUDED},
     )
 
+    company = relationship(
+        "Company",
+        primaryjoin="Company.id==Customer.company_id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        }
+    )
+
+    estimations = relationship(
+        "Estimation",
+        primaryjoin="Estimation.customer_id==Customer.id"
+    )
+
+    invoices = relationship(
+        "Invoice",
+        primaryjoin="Invoice.customer_id==Customer.id"
+    )
+
+    cancelinvoices = relationship(
+        "CancelInvoice",
+        primaryjoin="CancelInvoice.customer_id==Customer.id"
+    )
+
+    _autonomie_service = CustomerService
 
     def get_company_id(self):
         """
@@ -473,5 +499,3 @@ FORM_GRID = (
     ((10, True,), ),
     ((3, True,), (3, True), ),
     )
-
-

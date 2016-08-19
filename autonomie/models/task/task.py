@@ -185,6 +185,11 @@ class Task(Node):
     ht = Column(BigInteger(), default=0)
     tva = Column(BigInteger(), default=0)
     ttc = Column(BigInteger(), default=0)
+    company_id = Column(
+        Integer,
+        ForeignKey('company.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
     project_id = Column(
         Integer,
         ForeignKey('project.id'),
@@ -341,17 +346,18 @@ class Task(Node):
         backref=backref('task'),
     )
 
+    company = relationship(
+        "Company",
+        primaryjoin="Task.company_id==Company.id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        },
+    )
+
     project = relationship(
         "Project",
         primaryjoin="Task.project_id==Project.id",
-        backref=backref(
-            'tasks',
-            order_by='Task.date',
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
-            },
-        ),
         info={
             'colanderalchemy': forms.EXCLUDED,
             'export': {'exclude': True},
@@ -494,14 +500,7 @@ class Task(Node):
         """
             Return the company owning this task
         """
-        if self.project:
-            return self.project.company
-        else:
-            return None
-
-    @property
-    def company(self):
-        return self.get_company()
+        return self.company
 
     def get_customer(self):
         """
@@ -513,7 +512,7 @@ class Task(Node):
         """
             Return the id of the company owning this task
         """
-        return self.project.company.id
+        return self.company.id
 
     def is_deletable(self, request):
         """

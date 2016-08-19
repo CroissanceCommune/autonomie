@@ -57,11 +57,14 @@ from autonomie.models.base import (
 from autonomie.models.node import Node
 
 
-ProjectCustomer = Table('project_customer', DBBASE.metadata,
-        Column("project_id", Integer, ForeignKey('project.id')),
-        Column("customer_id", Integer, ForeignKey('customer.id')),
-        mysql_charset=default_table_args['mysql_charset'],
-        mysql_engine=default_table_args['mysql_engine'])
+ProjectCustomer = Table(
+    'project_customer',
+    DBBASE.metadata,
+    Column("project_id", Integer, ForeignKey('project.id')),
+    Column("customer_id", Integer, ForeignKey('customer.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine']
+)
 
 
 def build_customer_value(customer=None):
@@ -80,9 +83,11 @@ def build_customer_values(customers):
         allowing efficient discrimination
     """
     options = [build_customer_value()]
-    options.extend([build_customer_value(customer)
-                            for customer in customers])
+    options.extend(
+        [build_customer_value(customer) for customer in customers]
+    )
     return options
+
 
 def get_customers_from_request(request):
     if request.context.__name__ == 'project':
@@ -92,6 +97,7 @@ def get_customers_from_request(request):
     else:
         customers = []
     return customers
+
 
 @colander.deferred
 def deferred_customer_select(node, kw):
@@ -122,6 +128,7 @@ def deferred_customer_validator(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
     customer_ids = [customer.id for customer in customers]
+
     def customer_oneof(value):
         if value in ("0", 0):
             return u"Veuillez choisir un client"
@@ -155,7 +162,7 @@ def get_projects_from_request(request):
     """
     if request.context.__name__ == 'project':
         # Edition (we don't want the current project)
-        projects = [project for project in request.context.company.projects \
+        projects = [project for project in request.context.company.projects
                     if project.id != request.context.id]
     elif request.context.__name__ == 'company':
         projects = request.context.projects
@@ -166,19 +173,19 @@ not a a project itself or a company")
     return projects
 
 
-#@colander.deferred
-#def deferred_project_code_validator(node, kw):
-#    request = kw['request']
-#    projects = get_projects_from_request(request)
+# @colander.deferred
+# def deferred_project_code_validator(node, kw):
+#     request = kw['request']
+#     projects = get_projects_from_request(request)
 #
-#    def unique_pcode(node, code):
-#        if code.upper() in [project.code.upper() for project in projects]:
-#            raise colander.Invalid(
-#                node,
-#                u"Ce code est déjà utilisé pour identifier un autre projet"
-#            )
+#     def unique_pcode(node, code):
+#         if code.upper() in [project.code.upper() for project in projects]:
+#             raise colander.Invalid(
+#                 node,
+#                 u"Ce code est déjà utilisé pour identifier un autre projet"
+#             )
 #
-#    return colander.All(colander.Length(min=4, max=4), unique_pcode)
+#     return colander.All(colander.Length(min=4, max=4), unique_pcode)
 
 
 class Project(Node):
@@ -221,7 +228,7 @@ class Project(Node):
         Integer,
         ForeignKey('company.id'),
         info={
-            'options':{'csv_exclude':True},
+            'options': {'csv_exclude': True},
             'colanderalchemy': forms.EXCLUDED,
         }
     )
@@ -230,7 +237,7 @@ class Project(Node):
         Column(
             CustomDateType,
             info={
-                "colanderalchemy":{
+                "colanderalchemy": {
                     "title": u"Date de début",
                     "typ": colander.Date(),
                 }
@@ -244,7 +251,7 @@ class Project(Node):
         Column(
             CustomDateType,
             info={
-                "colanderalchemy":{
+                "colanderalchemy": {
                     "title": u"Date de fin",
                     "typ": colander.Date(),
                 }
@@ -258,13 +265,13 @@ class Project(Node):
         Column(
             Text,
             info={
-                'label':u"Définition",
-                  'colanderalchemy':{
-                      'title': u"Définition",
-                      'widget': deform.widget.TextAreaWidget(
-                          css_class="col-md-10"
-                      ),
-                  }
+                'label': u"Définition",
+                'colanderalchemy': {
+                    'title': u"Définition",
+                    'widget': deform.widget.TextAreaWidget(
+                        css_class="col-md-10"
+                    ),
+                }
             },
 
         ),
@@ -289,6 +296,17 @@ class Project(Node):
                 "title": u"Client",
                 "exclude": True,
             },
+            'export': {'exclude': True},
+        }
+    )
+
+    tasks = relationship(
+        "Task",
+        primaryjoin="Task.project_id==Project.id",
+        back_populates="project",
+        order_by='Task.date',
+        info={
+            'colanderalchemy': forms.EXCLUDED,
             'export': {'exclude': True},
         }
     )

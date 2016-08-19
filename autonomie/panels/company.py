@@ -27,12 +27,9 @@
 import logging
 
 from webhelpers import paginate
-from sqlalchemy import desc, or_
+from sqlalchemy import desc
 from sqlalchemy.orm import aliased
 from autonomie.models.task import (
-    CancelInvoice,
-    Estimation,
-    Invoice,
     Task,
 )
 from autonomie.models.project import Project
@@ -70,6 +67,7 @@ def _make_get_list_url(listname):
         :param listname: the name of the list
     """
     tmpl = "#{listname}/{option}".format(listname=listname, option="{0}")
+
     def _get_list_url(page):
         """
             Return a js url for a list pagination
@@ -122,24 +120,12 @@ def _get_items_per_page(request, cookie_name):
     return default
 
 
-def _company_tasks_query(company_id):
+def _company_tasks_query(company):
     """
     Build sqlalchemy query to all tasks of a company, in reverse statusDate
     order.
     """
-    query = Task.query()
-    query = query.with_polymorphic([Invoice, Estimation, CancelInvoice])
-    query = query.order_by(desc(Task.statusDate))
-
-    query = query.outerjoin(_p1, Invoice.project)
-    query = query.outerjoin(_p2, Estimation.project)
-    query = query.outerjoin(_p3, CancelInvoice.project)
-
-    return query.filter(or_(
-                _p1.company_id==company_id,
-                _p2.company_id==company_id,
-                _p3.company_id==company_id
-                ))
+    return company.get_tasks().order_by(desc(Task.statusDate))
 
 
 def recent_tasks_panel(context, request):
@@ -154,16 +140,16 @@ def recent_tasks_panel(context, request):
         # javascript engine for the panel
         resources.task_list_js.need()
 
-    query = _company_tasks_query(context.id)
+    query = _company_tasks_query(context)
     page_nb = _get_page_number(request, "tasks_page_nb")
     items_per_page = _get_items_per_page(request, 'tasks_per_page')
 
     paginated_tasks = paginate.Page(
-            query,
-            page_nb,
-            items_per_page=items_per_page,
-            url=_make_get_list_url('tasklist'),
-            )
+        query,
+        page_nb,
+        items_per_page=items_per_page,
+        url=_make_get_list_url('tasklist'),
+    )
 
     result_data = {'tasks': paginated_tasks}
 
@@ -177,7 +163,7 @@ def _user_events_query(user_id):
     query = Event.query().with_polymorphic([Timeslot, Activity])
     query = query.filter(Event.type_.in_(['timeslot', 'activity']))
     query = query.filter(
-        Event.attendances.any(Attendance.account_id==user_id)
+        Event.attendances.any(Attendance.account_id == user_id)
     )
     query = query.order_by(desc(Event.datetime))
     return query
@@ -195,11 +181,11 @@ def next_events_panel(context, request):
     items_per_page = _get_items_per_page(request, 'events_per_page')
 
     paginated_events = paginate.Page(
-            query,
-            page_nb,
-            items_per_page=items_per_page,
-            url=_make_get_list_url('events'),
-            )
+        query,
+        page_nb,
+        items_per_page=items_per_page,
+        url=_make_get_list_url('events'),
+    )
 
     result_data = {'events': paginated_events}
     return result_data
@@ -209,9 +195,13 @@ def includeme(config):
     """
         Add all panels to our main config object
     """
-    config.add_panel(recent_tasks_panel,
-                    'company_tasks',
-                    renderer='panels/tasklist.mako')
-    config.add_panel(next_events_panel,
-                    'company_events',
-                    renderer='panels/eventlist.mako')
+    config.add_panel(
+        recent_tasks_panel,
+        'company_tasks',
+        renderer='panels/tasklist.mako',
+    )
+    config.add_panel(
+        next_events_panel,
+        'company_events',
+        renderer='panels/eventlist.mako',
+    )

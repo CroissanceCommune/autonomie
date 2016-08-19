@@ -44,7 +44,7 @@
                         <th class="col-md-4 col-xs-5">Actions</th>
                     </thead>
                     <tbody>
-                        % for invoice in elapsed_invoices[:5]:
+                        % for invoice in elapsed_invoices.limit(5):
                             <tr>
                                 <% url = request.route_path("invoice", id=invoice.id) %>
                                 <% onclick = "document.location='{url}'".format(url=url) %>
@@ -73,7 +73,7 @@
                         % endfor
                     </tbody>
                 </table>
-                % if len(elapsed_invoices) > 5:
+                % if elapsed_invoices.count() > 5:
                     <b>...</b>
                     <a class='btn btn-primary btn-sm'
                         href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">

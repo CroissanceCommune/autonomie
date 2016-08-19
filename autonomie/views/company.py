@@ -81,18 +81,8 @@ def company_index(request):
     ret_val = dict(
         title=company.name.title(),
         company=company,
+        elapsed_invoices=request.context.get_late_invoices()
     )
-    all_invoices = []
-    for project in company.projects:
-        all_invoices.extend(project.invoices)
-
-    # recovering elapsed invoices for warning
-    elapsed_invoices = [invoice
-                        for invoice in all_invoices if invoice.is_tolate()]
-    elapsed_invoices = sorted(elapsed_invoices,
-                              key=lambda a: a.date,
-                              reverse=True)
-    ret_val['elapsed_invoices'] = elapsed_invoices
     return ret_val
 
 

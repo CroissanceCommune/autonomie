@@ -31,7 +31,7 @@
 """
 import logging
 import datetime
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 from deform import (
     Button,
@@ -188,27 +188,15 @@ class SageInvoiceExportPage(BaseView):
         today = datetime.date.today()
         return u"export_facture_{0}.txt".format(today.strftime("%d%m%Y"))
 
-    def _filter_valid(self, query):
-        inv_validated = Invoice.valid_states
-        cinv_valid = CancelInvoice.valid_states
-        return query.filter(
-            or_(
-                and_(
-                    Task.CAEStatus.in_(inv_validated),
-                    Task.type_ == 'invoice'),
-                and_(
-                    Task.CAEStatus.in_(cinv_valid),
-                    Task.type_ == 'cancelinvoice')
-            )
-        )
-
     def _filter_date(self, query, start_date, end_date):
         return query.filter(Task.date.between(start_date, end_date))
 
     def _filter_number(self, query, number, year, strict=False):
         prefix = self.request.config.get('invoiceprefix', '')
+
         if prefix and number.startswith(prefix):
             number = number[len(prefix):]
+
         if strict:
             query = query.filter(
                 or_(Invoice.official_number == number,
@@ -229,19 +217,20 @@ class SageInvoiceExportPage(BaseView):
         """
             Retrieve the exports we want to export
         """
-        query = Task.query().with_polymorphic([Invoice, CancelInvoice])
-        query = self._filter_valid(query)
+        query = Task.get_valid_tasks()
 
         if 'start_date' in query_params_dict:
             start_date = query_params_dict['start_date']
             end_date = query_params_dict['end_date']
             query = self._filter_date(query, start_date, end_date)
+
         elif 'official_number' in query_params_dict:
             official_number = query_params_dict['official_number']
             financial_year = query_params_dict['financial_year']
             query = self._filter_number(
                 query, official_number, financial_year, strict=True,
             )
+
         elif 'start_official_number' in query_params_dict:
             official_number = query_params_dict['start_official_number']
             financial_year = query_params_dict['financial_year']
@@ -251,8 +240,12 @@ class SageInvoiceExportPage(BaseView):
 
         if 'exported' not in query_params_dict or \
                 not query_params_dict.get('exported'):
-            query = query.filter(or_(Invoice.exported == False,
-                                     CancelInvoice.exported == False))
+            query = query.filter(
+                or_(
+                    Invoice.exported == False,
+                    CancelInvoice.exported == False,
+                )
+            )
         return query
 
     def check_invoice_line(self, line):

@@ -323,6 +323,7 @@ class InvoiceAdd(TaskFormView):
 
         invoice = Invoice()
         invoice.project = self.context
+        invoice.company = self.context.company
         invoice.owner = self.request.user
         invoice = merge_session_with_post(
             invoice,
@@ -412,8 +413,12 @@ class InvoiceEdit(TaskFormView):
             self.session.flash(u"La facture a bien été modifiée.")
         except Forbidden, err:
             self.request.session.flash(err.message, queue='error')
-        return HTTPFound(self.request.route_path("project",
-                                                 id=self.context.project.id))
+        return HTTPFound(
+            self.request.route_path(
+                "project",
+                id=self.context.project.id
+            )
+        )
 
 
 class CommonInvoiceStatusView(TaskStatusView):

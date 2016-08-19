@@ -28,12 +28,9 @@
 """
 import logging
 
-from sqlalchemy import and_
 
 from autonomie.models.task.task import Task
 from autonomie.models.expense import ExpenseSheet
-from autonomie.models.task.estimation import Estimation
-from autonomie.models.project import Phase
 from autonomie.models.activity import Activity
 from autonomie.models.user import User
 
@@ -44,25 +41,12 @@ def manage(request):
     """
     The manage view
     """
-    query = Estimation.query()
-    query = query.join(Estimation.phase)
-    query = query.filter(
-        and_(
-            Estimation.CAEStatus == 'wait',
-            Phase.name is not None
-        )
-    )
-    estimations = query.order_by(Task.statusDate).all()
+    estimations = Task.get_waiting_estimations().all()
+
+    invoices = Task.get_waiting_invoices().all()
+
     for item in estimations:
         item.url = request.route_path(item.type_, id=item.id)
-
-    invoices = Task.query().filter(
-        Task.type_.in_(('invoice', 'cancelinvoice',))
-    )
-    invoices = invoices.join(Task.phase).filter(
-        and_(Task.CAEStatus == 'wait', Phase.name is not None)
-    )
-    invoices = invoices.order_by(Task.type_).order_by(Task.statusDate).all()
 
     for item in invoices:
         item.url = request.route_path(item.type_, id=item.id)

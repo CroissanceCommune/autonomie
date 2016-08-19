@@ -46,7 +46,6 @@ from autonomie.models.task import (
     PaymentLine,
 )
 from autonomie.models.task.task import DiscountLine
-from autonomie.models.project import Project
 from autonomie.models.customer import Customer
 from autonomie.models.company import Company
 from autonomie.utils.widgets import (
@@ -173,6 +172,7 @@ class EstimationAdd(TaskFormView):
 
         estimation = Estimation()
         estimation.project = self.context
+        estimation.company = self.context.company
         estimation.owner = self.request.user
         estimation = merge_session_with_post(
             estimation,
@@ -367,9 +367,8 @@ class GlobalEstimationList(BaseListView):
             Company.id,
             Company.name
         )
-        query = query.outerjoin(Task.project)
+        query = query.outerjoin(Task.company)
         query = query.outerjoin(Task.customer)
-        query = query.outerjoin(Project.company)
         return query
 
     def filter_date(self, query, appstruct):
@@ -392,7 +391,7 @@ class GlobalEstimationList(BaseListView):
     def filter_company(self, query, appstruct):
         company_id = self._get_company_id(appstruct)
         if company_id is not None:
-            query = query.filter(Project.company_id == company_id)
+            query = query.filter(Task.company_id == company_id)
         return query
 
     def filter_customer(self, query, appstruct):
@@ -498,7 +497,6 @@ def includeme(config):
         renderer="estimations.mako",
         permission="admin_tasks",
     )
-
 
     delete_msg = u"Le devis {task.number} a bien été supprimé."
     config.add_view(

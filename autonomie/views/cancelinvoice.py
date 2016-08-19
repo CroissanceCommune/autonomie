@@ -118,6 +118,7 @@ class CancelInvoiceAdd(TaskFormView):
 
         cinvoice = CancelInvoice()
         cinvoice.project = self.context
+        cinvoice.company = self.context.company
         cinvoice.owner = self.request.user
         cinvoice = merge_session_with_post(
             cinvoice,

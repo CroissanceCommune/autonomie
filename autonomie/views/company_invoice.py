@@ -39,13 +39,15 @@ from sqlalchemy import (
 )
 from beaker.cache import cache_region
 
+from autonomie.models.base import (
+    DBSESSION,
+)
 from autonomie.models.task import (
     Task,
     Invoice,
     CancelInvoice,
     Payment,
 )
-from autonomie.models.project import Project
 from autonomie.models.customer import Customer
 from autonomie.models.company import Company
 
@@ -143,12 +145,11 @@ class GlobalInvoicesList(BaseListView):
         return popup.open_btn()
 
     def query(self):
-        query = Task.query()
+        query = DBSESSION().query(Task)
         query = query.with_polymorphic([Invoice, CancelInvoice])
-        query = query.outerjoin(Task.project)
-        query = query.outerjoin(Project.company)
-        query = query.outerjoin(Task.customer)
-        query = query.outerjoin(Task.payments)
+        from sqlalchemy.orm import joinedload
+        query = query.options(joinedload(Invoice.payments).load_only(Payment.id, Payment.date, Payment.mode))
+        query = query.options(joinedload(Task.customer).load_only(Customer.name, Customer.code, Customer.id))
         return query
 
     def _get_company_id(self, appstruct):
@@ -161,7 +162,7 @@ class GlobalInvoicesList(BaseListView):
     def filter_company(self, query, appstruct):
         company_id = self._get_company_id(appstruct)
         if company_id is not None:
-            query = query.filter(Project.company_id == company_id)
+            query = query.filter(Task.company_id == company_id)
         return query
 
     def filter_official_number(self, query, appstruct):

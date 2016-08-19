@@ -167,9 +167,9 @@
             </td>
               <td>
                   ${format_filelist(document)}
-                  % if hasattr(document, 'estimation'):
+                  % if hasattr(document, 'estimation') and document.estimation_id is not None:
                     ${format_filelist(document.estimation)}
-                  % elif hasattr(document, 'invoice'):
+                % elif hasattr(document, 'invoice') and document.invoice_id is not None:
                     ${format_filelist(document.invoice)}
                   % endif
                   <a class='btn btn-default'

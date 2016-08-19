@@ -133,11 +133,6 @@ class IPaidTask(Interface):
     """
         Task interface for task needing to be paid
     """
-    def is_tolate():
-        """
-            Is the payment of the current task to late ?
-        """
-
     def is_paid():
         """
             Has the current task been paid
@@ -172,11 +167,6 @@ class IInvoice(Interface):
             Has the current document been cancelled
         """
 
-    def is_tolate():
-        """
-            Is it too late
-        """
-
     def is_paid():
         """
             Has the current task been paid
@@ -195,9 +185,4 @@ class IInvoice(Interface):
     def get_customer():
         """
             Return the customer this document is related to
-        """
-
-    def is_viewable():
-        """
-            Return True if the document has associated views
         """

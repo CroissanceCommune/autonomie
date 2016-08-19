@@ -41,6 +41,8 @@ from sqlalchemy import (
     Boolean,
     Float,
     Date,
+    or_,
+    and_
 )
 from sqlalchemy.event import listen
 
@@ -101,6 +103,45 @@ class TaskService(object):
             Tva.value.in_(list(tva_values))
         ).all()
         return dict([(tva.value, tva) for tva in tvas])
+
+    @classmethod
+    def get_valid_tasks(cls, task_cls, *args):
+        from autonomie.models.task import Invoice, CancelInvoice
+        query = super(task_cls, task_cls).query(*args)
+        query = query.with_polymorphic([Invoice, CancelInvoice])
+        query = query.filter(
+            or_(
+                and_(
+                    task_cls.CAEStatus.in_(Invoice.valid_states),
+                    task_cls.type_ == 'invoice'
+                ),
+                and_(
+                    task_cls.CAEStatus.in_(CancelInvoice.valid_states),
+                    task_cls.type_ == 'cancelinvoice'
+                )
+            )
+        )
+        return query
+
+    @classmethod
+    def get_waiting_estimations(cls, *args):
+        from autonomie.models.task import Estimation
+        query = Estimation.query(*args)
+        query = query.filter(Estimation.CAEStatus == 'wait')
+        query = query.order_by(Estimation.statusDate)
+        return query
+
+    @classmethod
+    def get_waiting_invoices(cls, task_cls, *args):
+        from autonomie.models.task import Invoice, CancelInvoice
+        query = super(task_cls, task_cls).query(*args)
+        query = query.with_polymorphic([Invoice, CancelInvoice])
+        query = query.filter(
+            task_cls.type_.in_(('invoice', 'cancelinvoice'))
+        )
+        query = query.filter(task_cls.CAEStatus == 'wait')
+        query = query.order_by(task_cls.type_).order_by(task_cls.statusDate)
+        return query
 
 
 @implementer(ITask)
@@ -204,16 +245,18 @@ class Task(Node):
         Column(Integer),
         group='edit',
     )
-    _number = Column(
-        String(100),
-    )
-    official_number = deferred(
+    # TODO : remove in version > 3.3.0
+    _number = Column(String(100))
+    official_number = Column(Integer, default=None)
+
+    internal_number = deferred(
         Column(
             Integer,
             default=None,
         ),
         group='edit'
     )
+
     display_units = deferred(
         Column(
             Integer,
@@ -542,6 +585,18 @@ class Task(Node):
 
     def get_tva_objects(self):
         return self._autonomie_service.get_tva_objects(self)
+
+    @classmethod
+    def get_valid_tasks(cls, *args):
+        return cls._autonomie_service.get_valid_tasks(cls, *args)
+
+    @classmethod
+    def get_waiting_estimations(cls, *args):
+        return cls._autonomie_service.get_waiting_estimations(*args)
+
+    @classmethod
+    def get_waiting_invoices(cls, *args):
+        return cls._autonomie_service.get_waiting_invoices(cls, *args)
 
 
 class DiscountLine(DBBASE, DiscountLineCompute):

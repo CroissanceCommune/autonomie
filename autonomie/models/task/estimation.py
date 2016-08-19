@@ -100,6 +100,8 @@ class Estimation(Task, EstimationCompute):
 
     state_machine = DEFAULT_STATE_MACHINES['estimation']
 
+    valid_states = ('valid', 'geninv')
+
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
 
@@ -134,6 +136,7 @@ class Estimation(Task, EstimationCompute):
         estimation.owner = user
         estimation.customer = customer
         estimation.project = project
+        estimation.company = self.company
         estimation.date = date
         estimation.set_sequence_number(seq_number)
         estimation.set_number()
@@ -251,6 +254,7 @@ class Estimation(Task, EstimationCompute):
         # Relationship
         inv.customer = self.customer
         inv.project = self.project
+        inv.company = self.company
         inv.phase = self.phase
         inv.owner = user
         inv.statusPersonAccount = user

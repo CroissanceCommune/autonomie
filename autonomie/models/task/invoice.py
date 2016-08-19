@@ -214,15 +214,6 @@ class Invoice(Task, InvoiceCompute):
         """
         return False
 
-    def is_tolate(self):
-        """
-        Return True if the invoice should have been paid already
-        """
-        return invoice_tolate(self.date, self.CAEStatus)
-
-    def is_viewable(self):
-        return True
-
     @classmethod
     def get_name(cls, seq_number, account=False, sold=False):
         """
@@ -292,6 +283,7 @@ class Invoice(Task, InvoiceCompute):
         cancelinvoice.display_units = self.display_units
         cancelinvoice.statusPersonAccount = user
         cancelinvoice.project = self.project
+        cancelinvoice.company = self.company
         cancelinvoice.owner = user
         cancelinvoice.phase = self.phase
         cancelinvoice.customer_id = self.customer_id
@@ -386,6 +378,7 @@ class Invoice(Task, InvoiceCompute):
         invoice.owner = user
         invoice.customer = customer
         invoice.project = project
+        invoice.company = self.company
         invoice.date = date
         invoice.set_sequence_number(seq_number)
         invoice.set_number()
@@ -497,9 +490,6 @@ class CancelInvoice(Task, TaskCompute):
         return self.CAEStatus == 'wait'
 
     def is_cancelinvoice(self):
-        return True
-
-    def is_viewable(self):
         return True
 
     def set_name(self):

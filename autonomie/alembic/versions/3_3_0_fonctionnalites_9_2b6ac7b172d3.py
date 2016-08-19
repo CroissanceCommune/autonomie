@@ -32,6 +32,36 @@ def upgrade():
         )
     )
 
+    op.add_column(
+        "task",
+        sa.Column(
+            "company_id",
+            sa.Integer,
+            sa.ForeignKey('company.id'),
+        )
+    )
+    from autonomie.models.base import (
+        DBSESSION,
+    )
+    from alembic.context import get_bind
+    conn = get_bind()
+
+    session = DBSESSION()
+    query = "select t.id, p.company_id from task t, project p where t.project_id = p.id"
+
+    for id, company_id in conn.execute(query):
+        req = "update task set company_id={0} where id={1}".format(company_id, id)
+        session.execute(req)
+
+    from autonomie.models.task import Task
+    for task in Task.query():
+        if task.phase is None:
+            session.delete(task)
+
+
+    from zope.sqlalchemy import mark_changed
+    mark_changed(session)
+
 
 def downgrade():
     op.execute("SET FOREIGN_KEY_CHECKS=0;")

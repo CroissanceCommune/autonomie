@@ -61,8 +61,8 @@ from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,
     default_table_args,
-    DBSESSION,
 )
+from autonomie.models.services.customer import CustomerService
 
 log = logging.getLogger(__name__)
 
@@ -451,37 +451,18 @@ class Customer(DBBASE, PersistentACLMixin):
         """
             :returns: the customer address formatted in french format
         """
-        address = u"{name}\n{address}\n{zipCode} {city}".format(name=self.name,
-                address=self.address, zipCode=self.zipCode, city=self.city)
-        if self.country not in ("France", "france"):
+        address = u"{name}\n{address}\n{zipCode} {city}".format(
+            name=self.name,
+            address=self.address,
+            zipCode=self.zipCode,
+            city=self.city,
+        )
+        if self.country is not None and self.country.lower() != "france":
             address += u"\n{0}".format(self.country)
         return address
 
-    def get_associated_tasks_by_type(self, type_str):
-        """
-        Return the tasks of type type_str associated to the current object
-        """
-        from autonomie.models.task import Task
-        return DBSESSION().query(Task).filter_by(
-            customer_id=self.id, type_=type_str
-        ).all()
-
-    @property
-    def invoices(self):
-        return self.get_associated_tasks_by_type('invoice')
-
-    @property
-    def estimations(self):
-        return self.get_associated_tasks_by_type('estimation')
-
-    @property
-    def cancelinvoices(self):
-        return self.get_associated_tasks_by_type('cancelinvoice')
-
     def has_tasks(self):
-        from autonomie.models.task import Task
-        num = DBSESSION().query(Task.id).filter_by(customer_id=self.id).count()
-        return num > 0
+        return self._autonomie_service.get_task_count(self) > 0
 
     def is_deletable(self):
         """

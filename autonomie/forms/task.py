@@ -559,7 +559,7 @@ class TaskConfiguration(colander.MappingSchema):
         title=u"Choix du client",
         widget=deferred_customer_list,
         validator=deferred_customer_validator
-        )
+    )
     address = forms.textarea_node(
         title=u"Nom et adresse du client",
         widget_options={'rows': 4}

@@ -53,6 +53,7 @@ from autonomie.models.options import (
     ConfigurableOption,
     get_id_foreignkey_col,
 )
+from autonomie.models.services.company import CompanyService
 
 from autonomie.models.base import (
     DBBASE,
@@ -245,6 +246,8 @@ class Company(DBBASE, PersistentACLMixin):
         },
     )
 
+    _autonomie_service = CompanyService
+
     def get_company_id(self):
         """
             Return the current company id
@@ -284,7 +287,6 @@ class Company(DBBASE, PersistentACLMixin):
             self.logo_file.name = 'logo.png'
         self.logo_file.description = 'Logo'
 
-
     @classmethod
     def query(cls, keys=None, active=True):
         """
@@ -313,16 +315,6 @@ class Company(DBBASE, PersistentACLMixin):
     def enabled(self):
         return self.active == 'Y'
 
-    def has_invoices(self):
-        """
-            return True if this company owns invoices
-        """
-        for project in self.projects:
-            for invoice in project.invoices:
-                if invoice.has_been_validated():
-                    return True
-        return False
-
     def todict(self):
         """
             return a dict representation
@@ -348,11 +340,7 @@ class Company(DBBASE, PersistentACLMixin):
         """
         Get all tasks for this company, as a list
         """
-        tasks = []
-        for project in self.projects:
-            tasks.extend(project.estimations)
-            tasks.extend(project.invoices)
-        return tasks
+        return self._autonomie_service.get_tasks(self)
 
     def get_recent_tasks(self, page_nb, nb_per_page):
         """
@@ -363,11 +351,49 @@ class Company(DBBASE, PersistentACLMixin):
 
         :return: pagination for wanted tasks, total nb of tasks
         """
-        all_tasks = sorted(self.get_tasks(),
-                        key=lambda t: t.statusDate,
-                        reverse=True)
+        count = self.get_tasks().count()
         offset = page_nb * nb_per_page
-        return all_tasks[offset:offset + nb_per_page], len(all_tasks)
+        items = self._autonomie_service.get_tasks(
+            self, offset=offset, limit=nb_per_page
+        )
+        return items, count
+
+    def get_estimations(self, valid=False):
+        """
+        Return the estimations of the current company
+        """
+        return self._autonomie_service.get_estimations(self, valid)
+
+    def get_invoices(self, valid=False):
+        """
+        Return the invoices of the current company
+        """
+        return self._autonomie_service.get_invoices(self, valid)
+
+    def get_cancelinvoices(self, valid=False):
+        """
+        Return the cancelinvoices of the current company
+        """
+        return self._autonomie_service.get_cancelinvoices(self, valid)
+
+    def has_invoices(self):
+        """
+            return True if this company owns invoices
+        """
+        return self.get_invoices(self, valid=True).count() > 0 or \
+            self.get_cancelinvoices(self, valid=True).count() > 0
+
+    def get_real_customers(self, year):
+        """
+        Return the real customers (with invoices)
+        """
+        return self._autonomie_service.get_customers(self, year)
+
+    def get_late_invoices(self):
+        """
+        Return invoices waiting for more than 45 days
+        """
+        return self._autonomie_service.get_late_invoices(self)
 
 
 # Company node related tools
@@ -376,6 +402,7 @@ def get_deferred_company_choices(widget_options):
     Build a deferred for company selection widget
     """
     default_entry = widget_options.pop('default', None)
+
     @colander.deferred
     def deferred_company_choices(node, kw):
         """
@@ -459,9 +486,9 @@ def customer_node(is_admin=False):
         deferred_customer_validator = deferred_company_customer_validator
 
     return colander.SchemaNode(
-            colander.Integer(),
-            name='customer_id',
-            widget=deferred_customer_widget,
-            validator=deferred_customer_validator,
-            missing=-1,
-        )
+        colander.Integer(),
+        name='customer_id',
+        widget=deferred_customer_widget,
+        validator=deferred_customer_validator,
+        missing=-1,
+    )

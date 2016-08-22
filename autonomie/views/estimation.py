@@ -167,20 +167,21 @@ class EstimationAdd(TaskFormView):
     def submit_success(self, appstruct):
         log.debug("Submitting estimation add")
         appstruct = get_estimation_dbdatas(appstruct)
-        # Next estimation number for current project
-        snumber = self.context.get_next_estimation_number()
 
-        estimation = Estimation()
-        estimation.project = self.context
-        estimation.company = self.context.company
-        estimation.owner = self.request.user
+        customer_id = appstruct["task"]['customer_id']
+        customer = Customer.get(customer_id)
+
+        estimation = Estimation(
+            self.context.company,
+            customer,
+            self.context,
+            self.context.phases[0],
+            self.request.user,
+        )
         estimation = merge_session_with_post(
             estimation,
             appstruct['task']
         )
-        estimation.set_sequence_number(snumber)
-        estimation.set_number()
-        estimation.set_name()
         try:
             # Line handling
             estimation = add_lines_to_estimation(estimation, appstruct)
@@ -213,7 +214,7 @@ class EstimationEdit(TaskFormView):
 
     @property
     def title(self):
-        return u"Édition du devis {task.number}".format(task=self.context)
+        return u"Édition du devis {task.name}".format(task=self.context)
 
     def before(self, form):
         if not context_is_editable(self.request):
@@ -289,13 +290,13 @@ class EstimationStatus(TaskStatusView):
 
     def post_aboest_process(self, task, status, params):
         msg = u"Le devis {0} a été annulé (indiqué sans suite)."
-        self.session.flash(msg.format(task.number))
+        self.session.flash(msg.format(task.name))
 
     def post_delete_process(self, task, status, params):
         msg = u"Le devis {0} a été supprimé"
         self.request.dbsession.delete(task)
         self.request.dbsession.flush()
-        self.session.flash(msg.format(task.number))
+        self.session.flash(msg.format(task.name))
         # Here we force redirection, nothing has to be merged
         raise self.redirect()
 
@@ -498,7 +499,7 @@ def includeme(config):
         permission="admin_tasks",
     )
 
-    delete_msg = u"Le devis {task.number} a bien été supprimé."
+    delete_msg = u"Le devis {task.name} a bien été supprimé."
     config.add_view(
         make_task_delete_view(delete_msg),
         route_name='estimation',

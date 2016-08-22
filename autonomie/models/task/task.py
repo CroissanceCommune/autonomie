@@ -29,6 +29,7 @@
 import logging
 import colander
 import deform
+import datetime
 
 from zope.interface import implementer
 from sqlalchemy import (
@@ -192,7 +193,7 @@ class Task(Node):
         CustomDateType2,
         info={'colanderalchemy': {'typ': colander.Date}}
     )
-    date = Column(Date())
+    date = Column(Date(), default=datetime.date.today)
     owner_id = Column(
         ForeignKey('accounts.id'),
         info={
@@ -251,7 +252,7 @@ class Task(Node):
 
     internal_number = deferred(
         Column(
-            Integer,
+            String(40),
             default=None,
         ),
         group='edit'
@@ -264,11 +265,13 @@ class Task(Node):
         ),
         group='edit'
     )
+
     # Not used in latest invoices
     expenses = deferred(
         Column(BigInteger(), default=0),
         group='edit'
     )
+
     expenses_ht = deferred(
         Column(
             BigInteger(),
@@ -442,17 +445,48 @@ class Task(Node):
         }
     )
 
+    _name_tmpl = u"Task {}"
+    _number_tmpl = u"{s.project.code}_{s.customer.code}_T{s.sequence_number}\
+_{s.date:%m%y}"
+
     state_machine = DEFAULT_STATE_MACHINES['base']
 
-    def __init__(self, **kwargs):
-        if 'CAEStatus' not in kwargs:
-            self.CAEStatus = self.state_machine.default_state
+    def __init__(self, company, customer, project, phase, user):
+        sequence_number = self._get_number(project)
 
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.CAEStatus = self.state_machine.default_state
+        self.company = company
+        self.customer = customer
+        self.project = project
+        self.phase = phase
+        self.owner = user
+        self.statusPersonAccount = user
+        self.date = datetime.date.today()
+        self.set_numbers(sequence_number)
 
         # We add a default task line group
         self.line_groups.append(TaskLineGroup(order=0))
+
+    def _get_number(self, project):
+        """
+        Return the sequence number for the current object
+        :param obj project: A Project instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        raise NotImplemented("Implement this _get_number method please")
+
+    def set_numbers(self, number):
+        """
+        Handle all attributes related to the given number
+        """
+        if number is None:
+            raise Exception("Number should not be None")
+
+        self.sequence_number = number
+        self.internal_number = self._number_tmpl.format(s=self)
+        self.name = self._name_tmpl.format(number)
 
     @property
     def default_line_group(self):

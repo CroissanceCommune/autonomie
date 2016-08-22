@@ -28,12 +28,15 @@ import pytest
 from autonomie.models.task.states import record_payment
 from autonomie.models.task import Payment
 from autonomie.models.task import Invoice, TaskLineGroup, TaskLine
+from autonomie.models.user import User
+from autonomie.models.customer import Customer
+from autonomie.models.project import Phase, Project
+from autonomie.models.company import Company
 
 INVOICE = dict( name=u"Facture 2",
                 sequence_number=2,
                 date=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
-                _number=u"invoicenumber",
                 expenses=0,
                 expenses_ht=0)
 
@@ -45,13 +48,49 @@ PAYMENTS = [
             {'amount':1895000, 'mode':'CHEQUE'},
             ]
 
+
 @pytest.fixture
-def invoice():
-    inv = Invoice(**INVOICE)
-    inv.line_groups = [TaskLineGroup(lines=[TaskLine(**LINE)])]
+def phase(content):
+    return Phase.query().first()
+
+
+@pytest.fixture
+def project(content):
+    proj = Project.query().first()
+    proj.code = "PRO1"
+    return proj
+
+
+@pytest.fixture
+def user(content):
+    return User.query().first()
+
+
+@pytest.fixture
+def company(content):
+    return Company.query().first()
+
+
+@pytest.fixture
+def customer(content):
+    res = Customer.query().first()
+    res.code = "CLI1"
+    return res
+
+
+@pytest.fixture
+def invoice(project, user, customer, company, phase):
+    invoice = Invoice(
+        company,
+        customer,
+        project,
+        phase,
+        user,
+    )
+    invoice.line_groups = [TaskLineGroup(lines=[TaskLine(**LINE)])]
     for i in PAYMENTS:
-        inv.payments.append(Payment(**i))
-    return inv
+        invoice.payments.append(Payment(**i))
+    return invoice
 
 
 def test_record_payment(invoice):

@@ -120,7 +120,7 @@ class GlobalInvoicesList(BaseListView):
     schema = get_list_schema(is_admin=True)
     sort_columns = dict(
         date=Task.date,
-        number=Task._number,
+        internal_number=Task.internal_number,
         customer=Customer.name,
         company=Company.name,
         official_number=Task.official_number,

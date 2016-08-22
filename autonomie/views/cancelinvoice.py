@@ -43,6 +43,7 @@ from autonomie.models.task import (
     TaskLine,
     TaskLineGroup,
 )
+from autonomie.models.customer import Customer
 from autonomie.forms import (
     merge_session_with_post,
 )
@@ -111,22 +112,20 @@ class CancelInvoiceAdd(TaskFormView):
         log.debug("Submitting cancelinvoice add")
         appstruct = get_cancel_invoice_dbdatas(appstruct)
 
-        # Since the call to get_next_cancelinvoice_number commits the current
-        # transaction, it needs to be called before creating our cancelinvoice,
-        # to avoid missing arguments errors
-        snumber = self.context.get_next_cancelinvoice_number()
+        customer_id = appstruct["task"]['customer_id']
+        customer = Customer.get(customer_id)
 
-        cinvoice = CancelInvoice()
-        cinvoice.project = self.context
-        cinvoice.company = self.context.company
-        cinvoice.owner = self.request.user
+        cinvoice = CancelInvoice(
+            self.context.company,
+            customer,
+            self.context,
+            self.context.phases[0],
+            self.request.user,
+        )
         cinvoice = merge_session_with_post(
             cinvoice,
             appstruct["task"]
         )
-        cinvoice.set_sequence_number(snumber)
-        cinvoice.set_number()
-        cinvoice.set_name()
         try:
             cinvoice = self.set_task_status(cinvoice)
             cinvoice.invoice.check_resulted(user_id=self.request.user.id)
@@ -165,7 +164,7 @@ class CancelInvoiceEdit(TaskFormView):
 
     @property
     def title(self):
-        return u"Édition de l'avoir {task.number}".format(task=self.context)
+        return u"Édition de l'avoir {task.name}".format(task=self.context)
 
     def before(self, form):
         if not context_is_editable(self.request):
@@ -316,7 +315,7 @@ def includeme(config):
         request_param="token=admin",
     )
 
-    delete_msg = u"L'avoir {task.number} a bien été supprimé."
+    delete_msg = u"L'avoir {task.name} a bien été supprimé."
     config.add_view(
         make_task_delete_view(delete_msg),
         route_name='cancelinvoice',

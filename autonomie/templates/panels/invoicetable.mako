@@ -36,7 +36,7 @@
         <th>${sortable(u"Entrepreneur", 'company')}</th>
     % endif
         <th>${sortable(u"Émise le", 'date')}</th>
-        <th>${sortable(u"Nom de la facture", 'number')}</th>
+        <th>${sortable(u"Nom de la facture", 'internal_number')}</th>
         <th>${sortable(u"Client", 'customer')}</th>
         <th>${sortable(u"Montant HT", "ht")}</th>
         <th>${sortable(u"TVA", "ht")}</th>
@@ -58,7 +58,7 @@
             % for document in records:
                 <% id_ = document.id %>
                 <% description = document.description %>
-                <% number = document._number %>
+                <% internal_number = document.internal_number %>
                 <% ht = document.ht %>
                 <% tva = document.tva %>
                 <% ttc = document.ttc %>
@@ -72,8 +72,6 @@
                     <% company_id = company.id %>
                     <% company_name = company.name %>
                 % endif
-                <% project_code = document.project.code %>
-                <% customer_code = document.customer.code %>
                 <% customer_id = document.customer.id %>
                 <% customer_name = document.customer.name %>
 
@@ -113,7 +111,7 @@
             <td>
                 <a href="${request.route_path(document.type_, id=id_)}"
                     title='Voir le document'>
-                    ${project_code.upper()}_${customer_code.upper()}_${number}
+                    ${internal_number}
                 </a>
                 % if not is_admin_view:
                 <small>

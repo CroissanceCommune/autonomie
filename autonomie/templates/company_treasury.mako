@@ -63,7 +63,7 @@
         %for invoice in invoices:
             <tr>
                 <td>
-                    ${invoice.get_customer().name} - ${invoice.number}
+                    ${invoice.get_customer().name} - ${invoice.internal_number}
                 </td>
                 <td>
                     ${api.format_date(invoice.date)}

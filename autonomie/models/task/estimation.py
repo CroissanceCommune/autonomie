@@ -102,6 +102,21 @@ class Estimation(Task, EstimationCompute):
 
     valid_states = ('valid', 'geninv')
 
+    _number_tmpl = u"{s.project.code}_{s.customer.code}_D{s.sequence_number}\
+_{s.date:%m%y}"
+
+    _name_tmpl = u"Devis {0}"
+
+    def _get_number(self, project):
+        """
+        Return the sequence number for the current object
+        :param obj project: A Project instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        return project.get_next_estimation_number()
+
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
 
@@ -127,20 +142,14 @@ class Estimation(Task, EstimationCompute):
         """
             returns a duplicate estimation object
         """
-        seq_number = project.get_next_estimation_number()
-        date = datetime.date.today()
+        estimation = Estimation(
+            self.company,
+            customer,
+            project,
+            phase,
+            user,
+        )
 
-        estimation = Estimation()
-        estimation.statusPersonAccount = user
-        estimation.phase = phase
-        estimation.owner = user
-        estimation.customer = customer
-        estimation.project = project
-        estimation.company = self.company
-        estimation.date = date
-        estimation.set_sequence_number(seq_number)
-        estimation.set_number()
-        estimation.set_name()
         if customer.id == self.customer_id:
             estimation.address = self.address
         else:
@@ -157,7 +166,6 @@ class Estimation(Task, EstimationCompute):
         estimation.manualDeliverables = self.manualDeliverables
         estimation.course = self.course
         estimation.display_units = self.display_units
-        estimation.expenses = self.expenses
         estimation.expenses_ht = self.expenses_ht
         estimation.paymentDisplay = self.paymentDisplay
         estimation.line_groups = []
@@ -180,11 +188,8 @@ class Estimation(Task, EstimationCompute):
         """
             Return a deposit invoice
         """
-        invoice.date = datetime.date.today()
         invoice.financial_year = invoice.date.year
         invoice.display_units = 0
-        invoice.set_name(deposit=True)
-        invoice.set_number(deposit=True)
 
         for tva, amount in self.deposit_amounts().items():
             description = u"Facture d'acompte"
@@ -200,8 +205,6 @@ class Estimation(Task, EstimationCompute):
         invoice.date = paymentline.paymentDate
         invoice.financial_year = paymentline.paymentDate.year
         invoice.display_units = 0
-        invoice.set_name()
-        invoice.set_number()
         for tva, amount in amounts.items():
             description = paymentline.description
             line = self._account_invoiceline(amount, description, tva)
@@ -225,17 +228,14 @@ class Estimation(Task, EstimationCompute):
             sold_groups[0].lines.append(line)
         return sold_groups
 
-    def _make_sold(self, invoice, paymentline, paid_lines, is_sold):
+    def _make_sold(self, invoice, paymentline, paid_lines):
         """
             Return the sold invoice
         """
         invoice.date = paymentline.paymentDate
         invoice.financial_year = paymentline.paymentDate.year
-        invoice.set_name(sold=is_sold)
-        invoice.set_number()
 
         invoice.display_units = self.display_units
-        invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
         # On supprimer le default_task_line group car insère ceux du devis
         invoice.line_groups = []
@@ -245,19 +245,18 @@ class Estimation(Task, EstimationCompute):
             invoice.discounts.append(line.duplicate())
         return invoice
 
-    def _get_common_invoice(self, seq_number, user):
+    def _get_common_invoice(self, user):
         """
             Return an invoice object with common args for
             all the generated invoices
         """
-        inv = Invoice()
-        # Relationship
-        inv.customer = self.customer
-        inv.project = self.project
-        inv.company = self.company
-        inv.phase = self.phase
-        inv.owner = user
-        inv.statusPersonAccount = user
+        inv = Invoice(
+            self.company,
+            self.customer,
+            self.project,
+            self.phase,
+            user
+        )
         inv.estimation = self
 
         # Common args
@@ -267,7 +266,6 @@ class Estimation(Task, EstimationCompute):
         inv.address = self.address
         inv.workplace = self.workplace
         inv.CAEStatus = "draft"
-        inv.set_sequence_number(seq_number)
         inv.mentions = self.mentions
         return inv
 
@@ -276,59 +274,82 @@ class Estimation(Task, EstimationCompute):
             Return the invoices based on the current estimation
         """
         invoices = []
-        # Used to mark the existence of intermediary invoices
-        is_sold = len(self.payment_lines) > 1
         # Used to store the amount of the intermediary invoices
         paid_lines = []
+
+        current_seq_number = None
+
         # Sequence number that will be incremented by hand
-        seq_number = self.project.get_next_invoice_number()
         if self.deposit > 0:
-            invoice = self._get_common_invoice(seq_number, user)
+            invoice = self._get_common_invoice(user)
             deposit, lines = self._make_deposit(invoice)
             invoices.append(deposit)
             # We remember the lines to display them in the last invoice
             paid_lines.extend(lines)
-            seq_number += 1
+
+            current_seq_number = invoice.sequence_number
+
+            # We need to update the invoice name
+            invoice.set_deposit_label()
 
         if self.manualDeliverables == 1:
             payments = self.manual_payment_line_amounts()
+
             # all payment lines specified (less the last one)
             for index, amounts in enumerate(payments[:-1]):
+                invoice = self._get_common_invoice(user)
                 line = self.payment_lines[index]
-                invoice = self._get_common_invoice(seq_number, user)
-                invoice, lines = self._make_intermediary(invoice, line, amounts)
+                invoice, lines = self._make_intermediary(
+                    invoice,
+                    line,
+                    amounts,
+                )
+                if current_seq_number is None:
+                    # Label and numbers remains unchanged, no need to update
+                    # numbers
+                    current_seq_number = invoice.sequence_number
+                else:
+                    current_seq_number += 1
+                    invoice.set_numbers(current_seq_number)
+
                 paid_lines.extend(lines)
-                seq_number += 1
         else:
             amounts = self.paymentline_amounts()
-            for line in self.payment_lines[:-1]:
-                invoice = self._get_common_invoice(seq_number, user)
-                invoice, lines = self._make_intermediary(invoice, line, amounts)
-                paid_lines.extend(lines)
-                seq_number += 1
 
-        invoice = self._get_common_invoice(seq_number, user)
+            # All amounts are equal
+            for line in self.payment_lines[:-1]:
+                invoice = self._get_common_invoice(user)
+
+                invoice, lines = self._make_intermediary(
+                    invoice,
+                    line,
+                    amounts,
+                )
+                if current_seq_number is None:
+                    # Label and numbers remains unchanged, no need to update
+                    # numbers
+                    current_seq_number = invoice.sequence_number
+                else:
+                    current_seq_number += 1
+                    invoice.set_numbers(current_seq_number)
+                paid_lines.extend(lines)
+
+        invoice = self._get_common_invoice(user)
         pline = self.payment_lines[-1]
-        invoice = self._make_sold(invoice, pline, paid_lines, is_sold)
+        invoice = self._make_sold(
+            invoice,
+            pline,
+            paid_lines,
+        )
+
+        if current_seq_number is not None:
+            # here we already have some invoices set
+            current_seq_number += 1
+            invoice.set_numbers(current_seq_number)
+            invoice.set_sold_label()
+
         invoices.append(invoice)
         return invoices
-
-    def set_name(self):
-        if self.name in [None, ""]:
-            taskname_tmpl = u"Devis {0}"
-            self.name = taskname_tmpl.format(self.sequence_number)
-
-    def set_number(self):
-        tasknumber_tmpl = u"D{s.sequence_number}_{s.date:%m%y}"
-        self._number = tasknumber_tmpl.format(s=self)
-
-    def set_sequence_number(self, snumber):
-        self.sequence_number = snumber
-
-    @property
-    def number(self):
-        tasknumber_tmpl = u"{s.project.code}_{s.customer.code}_{s._number}"
-        return tasknumber_tmpl.format(s=self)
 
     def is_cancelled(self):
         """

@@ -132,7 +132,7 @@ class StatusChanged(object):
                     )
         addr = format_link(self.settings, addr)
 
-        docnumber = self.document.number.lower()
+        docnumber = self.document.internal_number.lower()
         customer = self.document.customer.name.capitalize()
         project = self.document.project.name.capitalize()
         if self.document.is_invoice():

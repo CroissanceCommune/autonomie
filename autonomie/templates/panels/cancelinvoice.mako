@@ -37,9 +37,9 @@
 </%def>
 <%block name='information'>
 <strong>Avoir N°</strong>${task.prefix}${task.official_number}<br />
-    <strong>Libellé : </strong>${task.number}<br />
+<strong>Libellé : </strong>${task.internal_number}<br />
     % if task.invoice:
-        <span  style='color:#999'> <strong style='color:#999'>Référence facture N°</strong>${task.invoice.prefix}${task.invoice.official_number} (${task.invoice.number})</span> <br />
+        <span  style='color:#999'> <strong style='color:#999'>Référence facture N°</strong>${task.invoice.prefix}${task.invoice.official_number} (${task.invoice.internal_number})</span> <br />
         <br />
     % endif
     <strong>Objet : </strong>${format_text(task.description)}<br />

@@ -181,6 +181,31 @@ class Invoice(Task, InvoiceCompute):
     not_paid_states = ('valid', 'paid', )
     valid_states = paid_states + not_paid_states
 
+    _number_tmpl = u"{s.project.code}_{s.customer.code}_F{s.sequence_number}\
+_{s.date:%m%y}"
+    _name_tmpl = u"Facture {0}"
+    _deposit_name_tmpl = u"Facture d'acompte {0}"
+    _sold_name_tmpl = u"Facture de solde {0}"
+
+    def _get_number(self, project):
+        """
+        Return the sequence number for the current object
+        :param obj project: A Project instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        return project.get_next_invoice_number()
+
+    def set_numbers(self, number, sold=False):
+        Task.set_numbers(self, number)
+
+    def set_deposit_label(self):
+        self.name = self._deposit_name_tmpl.format(self.sequence_number)
+
+    def set_sold_label(self):
+        self.name = self._sold_name_tmpl.format(self.sequence_number)
+
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
 
@@ -214,79 +239,30 @@ class Invoice(Task, InvoiceCompute):
         """
         return False
 
-    @classmethod
-    def get_name(cls, seq_number, account=False, sold=False):
-        """
-            return an invoice name
-        """
-        if account:
-            taskname_tmpl = u"Facture d'acompte {0}"
-        elif sold:
-            taskname_tmpl = u"Facture de solde"
-        else:
-            taskname_tmpl = u"Facture {0}"
-        return taskname_tmpl.format(seq_number)
-
-    @property
-    def number(self):
-        tasknumber_tmpl = u"{s.project.code}_{s.customer.code}_{s._number}"
-        return tasknumber_tmpl.format(s=self)
-
     def set_project(self, project):
         self.project = project
-
-    def set_number(self, deposit=False):
-        if deposit:
-            tasknumber_tmpl = u"FA{s.sequence_number}_{s.date:%m%y}"
-        else:
-            tasknumber_tmpl = u"F{s.sequence_number}_{s.date:%m%y}"
-        self._number = tasknumber_tmpl.format(s=self)
-
-    def set_sequence_number(self, snumber):
-        """
-            Set the sequencenumber of an invoice
-            :param snumber: sequence number get through
-                project.get_next_invoice_number()
-        """
-        self.sequence_number = snumber
-
-    def set_name(self, deposit=False, sold=False):
-        if self.name in [None, ""]:
-            if deposit:
-                taskname_tmpl = u"Facture d'acompte {0}"
-            elif sold:
-                taskname_tmpl = u"Facture de solde"
-            else:
-                taskname_tmpl = u"Facture {0}"
-            self.name = taskname_tmpl.format(self.sequence_number)
 
     def gen_cancelinvoice(self, user):
         """
             Return a cancel invoice with self's informations
         """
-        seq_number = self.project.get_next_cancelinvoice_number()
-        cancelinvoice = CancelInvoice()
-        cancelinvoice.date = datetime.date.today()
-        cancelinvoice.set_sequence_number(seq_number)
-        cancelinvoice.set_name()
-        cancelinvoice.set_number()
+        cancelinvoice = CancelInvoice(
+            company=self.company,
+            project=self.project,
+            customer=self.customer,
+            phase=self.phase,
+            user=user,
+        )
         cancelinvoice.address = self.address
         cancelinvoice.workplace = self.workplace
         cancelinvoice.CAEStatus = 'draft'
         cancelinvoice.description = self.description
 
         cancelinvoice.invoice = self
-        cancelinvoice.expenses = -1 * self.expenses
         cancelinvoice.expenses_ht = -1 * self.expenses_ht
         cancelinvoice.financial_year = self.financial_year
         cancelinvoice.prefix = self.prefix
         cancelinvoice.display_units = self.display_units
-        cancelinvoice.statusPersonAccount = user
-        cancelinvoice.project = self.project
-        cancelinvoice.company = self.company
-        cancelinvoice.owner = user
-        cancelinvoice.phase = self.phase
-        cancelinvoice.customer_id = self.customer_id
 
         cancelinvoice.line_groups = []
         for group in self.line_groups:
@@ -369,20 +345,14 @@ class Invoice(Task, InvoiceCompute):
         """
             Duplicate the current invoice
         """
-        seq_number = project.get_next_invoice_number()
-        date = datetime.date.today()
+        invoice = Invoice(
+            self.company,
+            customer,
+            project,
+            phase,
+            user,
+        )
 
-        invoice = Invoice()
-        invoice.statusPersonAccount = user
-        invoice.phase = phase
-        invoice.owner = user
-        invoice.customer = customer
-        invoice.project = project
-        invoice.company = self.company
-        invoice.date = date
-        invoice.set_sequence_number(seq_number)
-        invoice.set_number()
-        invoice.set_name()
         if customer.id == self.customer_id:
             invoice.address = self.address
         else:
@@ -397,9 +367,8 @@ class Invoice(Task, InvoiceCompute):
         invoice.deposit = self.deposit
         invoice.course = self.course
         invoice.display_units = self.display_units
-        invoice.expenses = self.expenses
         invoice.expenses_ht = self.expenses_ht
-        invoice.financial_year = date.year
+        invoice.financial_year = datetime.date.today().year
 
         invoice.line_groups = []
         for group in self.line_groups:
@@ -462,6 +431,20 @@ class CancelInvoice(Task, TaskCompute):
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
 
+    _number_tmpl = u"{s.project.code}_{s.customer.code}_A{s.sequence_number}\
+_{s.date:%m%y}"
+    _name_tmpl = u"Avoir {0}"
+
+    def _get_number(self, project):
+        """
+        Return the sequence number for the current object
+        :param obj project: A Project instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        return project.get_next_cancelinvoice_number()
+
     def is_editable(self, manage=False):
         if manage:
             return self.CAEStatus in ('draft', 'invalid', 'wait', None,)
@@ -492,33 +475,11 @@ class CancelInvoice(Task, TaskCompute):
     def is_cancelinvoice(self):
         return True
 
-    def set_name(self):
-        if self.name in [None, ""]:
-            taskname_tmpl = u"Avoir {0}"
-            self.name = taskname_tmpl.format(self.sequence_number)
-
     def is_tolate(self):
         """
             Return False
         """
         return False
-
-    def set_sequence_number(self, snumber):
-        """
-            Set the sequencenumber of an invoice
-            :param snumber: sequence number get through
-                project.get_next_invoice_number()
-        """
-        self.sequence_number = snumber
-
-    def set_number(self):
-        tasknumber_tmpl = u"A{s.sequence_number}_{s.date:%m%y}"
-        self._number = tasknumber_tmpl.format(s=self)
-
-    @property
-    def number(self):
-        tasknumber_tmpl = u"{s.project.code}_{s.customer.code}_{s._number}"
-        return tasknumber_tmpl.format(s=self)
 
     def valid_callback(self):
         """

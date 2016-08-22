@@ -610,7 +610,7 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         else:
             label = u"Objet"
 
-        title = u"{0} numéro : {1}".format(label, request.context.number)
+        title = u"{0} numéro : {1}".format(label, request.context.internal_number)
         populate_actionmenu(request)
 
         # We use the task's class to retrieve the available actions
@@ -632,7 +632,7 @@ def task_pdf_view(request):
     """
     from autonomie.resources import pdf_css
     pdf_css.need()
-    filename = u"{0}.pdf".format(request.context.number)
+    filename = u"{0}.pdf".format(request.context.internal_number)
 
     html_string = html(request)
     write_pdf(request, filename, html_string)
@@ -652,7 +652,7 @@ def make_task_delete_view(valid_msg):
         task = request.context
         user = request.user
         project = task.project
-        logger.info(u"# {user.login} deletes {s.__name__} {s.number}".format(
+        logger.info(u"# {user.login} deletes {s.__name__} {s.internal_number}".format(
                     user=user, s=task))
         try:
             task.set_status("delete", request, request.user.id)

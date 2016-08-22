@@ -37,9 +37,9 @@
 </%def>
 <%block name='information'>
 <strong>Facture N°</strong>${task.prefix}${task.official_number}<br />
-<strong>Libellé : </strong>${task.number}<br />
+<strong>Libellé : </strong>${task.internal_number}<br />
 % if task.estimation is not None:
-    <strong>Cette facture est associée au devis : </strong>${task.estimation.number}<br />
+    <strong>Cette facture est associée au devis : </strong>${task.estimation.internal_number}<br />
 % endif
 <strong>Objet : </strong>${format_text(task.description)}<br />
 % if task.workplace:

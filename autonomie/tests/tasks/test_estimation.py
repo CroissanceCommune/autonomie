@@ -24,7 +24,6 @@
 
 import pytest
 import datetime
-from mock import MagicMock
 from autonomie.models.task import (
     Estimation,
     DiscountLine,
@@ -40,9 +39,6 @@ from autonomie.models.company import Company
 
 
 ESTIMATION = dict(
-    name=u"Devis 2",
-    sequence_number=2,
-    _number=u"estnumber",
     display_units="1",
     expenses=1500,
     deposit=20,
@@ -51,7 +47,7 @@ ESTIMATION = dict(
     exclusions=u"Notes",
     paymentDisplay=u"ALL",
     payment_conditions=u"Conditions de paiement",
-    date=datetime.date(2012, 12, 10),
+    date=datetime.date(1969, 7, 31),
     description=u"Description du devis",
     manualDeliverables=1,
 )
@@ -115,8 +111,45 @@ EST_SOLD = EST_TOTAL - EST_DEPOSIT - PAYMENTSSUM
 
 
 @pytest.fixture
-def estimation():
-    est = Estimation(**ESTIMATION)
+def phase(content):
+    return Phase.query().first()
+
+
+@pytest.fixture
+def project(content):
+    proj = Project.query().first()
+    proj.code = "PRO1"
+    return proj
+
+
+@pytest.fixture
+def user(content):
+    return User.query().first()
+
+
+@pytest.fixture
+def company(content):
+    return Company.query().first()
+
+
+@pytest.fixture
+def customer(content):
+    res = Customer.query().first()
+    res.code = "CLI1"
+    return res
+
+
+@pytest.fixture
+def estimation(project, user, customer, company, phase):
+    est = Estimation(
+        company,
+        customer,
+        project,
+        phase,
+        user,
+    )
+    for key, value in ESTIMATION.items():
+        setattr(est, key, value)
     for line in LINES:
         est.add_line(TaskLine(**line))
     for line in DISCOUNTS:
@@ -128,40 +161,27 @@ def estimation():
     ]
     return est
 
-def test_set_number():
-    est = Estimation()
-    est.project = MagicMock(code="PRO1")
-    est.customer = MagicMock(code="CLI1")
-    est.date = datetime.date(1969, 07, 31)
-    est.set_sequence_number(15)
-    est.set_number()
-    assert est.number == u"PRO1_CLI1_D15_0769"
+def test_set_numbers(estimation):
+    # We don't care about dates (we will remove dates in the future)
+    estimation.set_numbers(5)
+    assert estimation.internal_number.startswith(u"PRO1_CLI1_D5")
+    assert estimation.name == u"Devis 5"
+    assert estimation.sequence_number == 5
 
-def test_set_name():
-    est = Estimation()
-    est.set_sequence_number(5)
-    est.set_name()
-    assert est.name == u"Devis 5"
 
 def test_duplicate_estimation(dbsession, estimation):
-    user = dbsession.query(User).first()
-    customer = dbsession.query(Customer).first()
-    project = dbsession.query(Project).first()
-    phase = dbsession.query(Phase).first()
-    company = dbsession.query(Company).first()
-    estimation.phase = phase
-    estimation.project = project
-    estimation.company = company
-    estimation.owner = user
-    estimation.customer = customer
-    estimation.statusPersonAccount = user
-    newestimation = estimation.duplicate(user, project, phase, customer)
-    for key in "customer", "address", "expenses", "expenses_ht", "workplace":
+    newestimation = estimation.duplicate(
+        estimation.owner,
+        estimation.project,
+        estimation.phase,
+        estimation.customer,
+    )
+    for key in "customer", "address", "expenses_ht", "workplace":
         assert getattr(newestimation, key) == getattr(estimation, key)
     assert newestimation.CAEStatus == 'draft'
-    assert newestimation.project == project
-    assert newestimation.statusPersonAccount == user
-    assert newestimation.number.startswith("P001_C001_D2_")
+    assert newestimation.project == estimation.project
+    assert newestimation.statusPersonAccount == estimation.owner
+    assert newestimation.internal_number.startswith("PRO1_CLI1_")
     assert newestimation.phase
     assert newestimation.mentions == estimation.mentions
     assert phase
@@ -169,60 +189,40 @@ def test_duplicate_estimation(dbsession, estimation):
     assert len(estimation.payment_lines) == len(newestimation.payment_lines)
     assert len(estimation.discounts) == len(newestimation.discounts)
 
-##### WORK IN PROGRESS
-
 def test_duplicate_estimation_integration(dbsession, estimation):
     """
         Here we test the duplication on a real world case
         specifically, the customer is not loaded in the session
         causing the insert statement to be fired during duplication
     """
-    user = dbsession.query(User).first()
-    customer = dbsession.query(Customer).first()
-    project = dbsession.query(Project).first()
-    phase = dbsession.query(Phase).first()
-    company = dbsession.query(Company).first()
-    estimation.phase = phase
-    estimation.project = project
-    estimation.owner = user
-    estimation.customer = customer
-    estimation.company = company
-    estimation.statusPersonAccount = user
-
-    assert estimation.statusPersonAccount == user
-    assert estimation.project == project
     estimation = dbsession.merge(estimation)
     dbsession.flush()
 
-    newestimation = estimation.duplicate(user, project, phase, customer)
+    newestimation = estimation.duplicate(
+        estimation.owner,
+        estimation.project,
+        estimation.phase,
+        estimation.customer,
+
+    )
+
     dbsession.merge(newestimation)
     dbsession.flush()
-    assert newestimation.phase == phase
+    assert newestimation.phase == estimation.phase
+    assert newestimation.project == estimation.project
 
-def assertPresqueEqual(val1, val2):
-    """
-    A custom assert
-    """
-    assert val1-val2 <= 1
 
 def test_light_gen_invoice(dbsession, estimation):
     from autonomie.models.task import Invoice
-    user = dbsession.query(User).first()
-    customer = dbsession.query(Customer).first()
-    project = dbsession.query(Project).first()
-    phase = dbsession.query(Phase).first()
-    estimation.phase = phase
-    estimation.project = project
-    estimation.owner = user
-    estimation.customer = customer
-    estimation.statusPersonAccount = user
-    invoices = estimation.gen_invoices(user)
+    invoices = estimation.gen_invoices(estimation.owner)
     for inv in invoices:
         dbsession.add(inv)
         dbsession.flush()
+
     invoices = Invoice.query().filter(
         Invoice.estimation_id==estimation.id
     ).all()
+
     #deposit :
     deposit = invoices[0]
     assert deposit.date == datetime.date.today()
@@ -231,21 +231,11 @@ def test_light_gen_invoice(dbsession, estimation):
     assert deposit.financial_year == datetime.date.today().year
     assert deposit.total() == estimation.deposit_amount_ttc()
     assert deposit.mentions == estimation.mentions
-    #intermediate invoices:
-    intermediate_invoices = invoices[1:-1]
+
 
 @pytest.mark.xfail(reason=u"Le calcul de TVA inversé conduit irrémediablement à ce pb")
 def test_gen_invoice(dbsession, estimation):
     from autonomie.models.task import Invoice
-    user = dbsession.query(User).first()
-    customer = dbsession.query(Customer).first()
-    project = dbsession.query(Project).first()
-    phase = dbsession.query(Phase).first()
-    estimation.phase = phase
-    estimation.project = project
-    estimation.owner = user
-    estimation.customer = customer
-    estimation.statusPersonAccount = user
     invoices = estimation.gen_invoices(user)
     for inv in invoices:
         dbsession.add(inv)
@@ -269,5 +259,5 @@ def test_gen_invoice(dbsession, estimation):
         assert inv.financial_year == line['paymentDate'].year
         assert inv.mentions == estimation.mentions
 
-    total = sum([inv.total() for inv in invoices])
+    total = sum([i.total() for i in invoices])
     assert total == estimation.total()

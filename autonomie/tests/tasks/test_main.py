@@ -36,157 +36,156 @@ import pytest
 from zope.interface.verify import verifyObject
 from pyramid import testing
 
-from autonomie.models.task import Task
+from autonomie.models.customer import Customer
+from autonomie.models.project import Project, Phase
+from autonomie.models.user import User
+from autonomie.models.company import Company
 from autonomie.models.task import Estimation
 from autonomie.models.task import Invoice
 from autonomie.models.task import CancelInvoice
-from autonomie.models.task.interfaces import ITask
 from autonomie.models.task.interfaces import IValidatedTask
 from autonomie.models.task.interfaces import IPaidTask
 from autonomie.models.task.interfaces import IInvoice
 
-from autonomie.models.user import User
 
 from autonomie.exception import Forbidden
 
-TASK = dict(name=u"Test task",
-                 CAEStatus="draft",
-                 date=datetime.date.today(),
-                 statusDate=datetime.date.today(),
-                 description=u"Test task description")
+TASK = dict(
+    name=u"Test task",
+    CAEStatus="draft",
+    date=datetime.date.today(),
+    statusDate=datetime.date.today(),
+    description=u"Test task description"
+)
 
-USER = dict(id=2,
-            login=u"test_user1",
-            firstname=u"user1_firstname",
-            lastname=u"user1_lastname")
 
-USER2 = dict(login=u"test_user2")
+@pytest.fixture
+def phase(content):
+    return Phase.query().first()
 
-PROJECT = dict(id=1, name=u'project1', code=u"PRO1", company_id=1,
-        customer_id=1)
-CUSTOMER = dict(id=1, name=u"customer1", code=u"CLI1", company_id=1)
 
-ESTIMATION = dict(
-                phase_id=1,
-                project_id=1,
-                name=u"Devis 2",
-                sequence_number=2,
-                CAEStatus="draft",
-                course="0",
-                display_units="1",
-                expenses=1500,
-                deposit=20,
-                exclusions=u"Notes",
-                paymentDisplay=u"ALL",
-                payment_conditions=u"Conditions de paiement",
-                date=datetime.date(2012, 12, 10), #u"10-12-2012",
-                description=u"Description du devis",
-                manualDeliverables=1,
-                statusComment=u"Aucun commentaire",
-                _number=u"estnumber")
-INVOICE = dict(phase_id=1,
-                project_id=1,
-                owner_id=2,
-                statusPerson=2,
-                name=u"Facture 2",
-                sequence_number=2,
-                CAEStatus="draft",
-                course="0",
-                display_units="1",
-                expenses=1500,
-                deposit=20,
-                payment_conditions=u"Conditions de paiement",
-                date=datetime.date(2012, 12, 10), #u"10-12-2012",
-                description=u"Description de la facture",
-                statusComment=u"Aucun commentaire",
-                _number=u"invoicenumber")
-CANCELINVOICE = dict(phase_id=1,
-                project_id=1,
-                owner_id=2,
-                statusPerson=2,
-                name=u"Avoir 2",
-                sequence_number=2,
-                CAEStatus="draft",
-                course="0",
-                display_units="1",
-                expenses=1500,
-                payment_conditions=u"Conditions de paiement",
-                date=datetime.date(2012, 12, 10), #u"10-12-2012",
-                description=u"Description de l'avoir",
-                statusComment=u"Aucun commentaire",
-                _number=u"cancelinvoicenumber")
+@pytest.fixture
+def user(content):
+    return User.query().first()
 
-def get_user(datas=USER):
-    user = User(**datas)
-    return user
 
-def get_task(factory):
-    user = get_user()
-    task = factory(**TASK)
-    task.statusPersonAccount = user
-    task.owner = user
+@pytest.fixture
+def company(content):
+    return Company.query().first()
+
+
+@pytest.fixture
+def customer(content):
+    res = Customer.query().first()
+    return res
+
+
+@pytest.fixture
+def project(content):
+    return Project.query().first()
+
+
+@pytest.fixture
+def invoice(project, user, customer, company, phase):
+    task = Invoice(
+        company,
+        customer,
+        project,
+        phase,
+        user,
+    )
+    for key, value in TASK.items():
+        setattr(task, key, value)
     return task
 
-class TestTaskModels(unittest.TestCase):
-    def test_interfaces(self):
-        self.assertTrue(verifyObject(ITask, Task()))
-        self.assertTrue(verifyObject(IValidatedTask, Estimation()))
-        self.assertTrue(verifyObject(IPaidTask, Invoice()))
-        self.assertTrue(verifyObject(IPaidTask, CancelInvoice()))
-        self.assertTrue(verifyObject(IInvoice, Invoice()))
-        self.assertTrue(verifyObject(IInvoice, CancelInvoice()))
 
-    def test_task_status(self):
-        task = get_task(factory=Task)
-        #Estimations
-        task = get_task(factory=Estimation)
-        self.assertTrue(task.is_draft())
-        self.assertTrue(task.is_editable())
-        self.assertFalse(task.is_valid())
-        self.assertFalse(task.has_been_validated())
-        self.assertFalse(task.is_waiting())
-        task.CAEStatus = "wait"
-        self.assertTrue(task.is_waiting())
-        self.assertFalse(task.is_valid())
-        self.assertFalse(task.is_editable())
-        self.assertTrue(task.is_editable(manage=True))
-        for i in ("valid", "geninv"):
-            task.CAEStatus = i
-            self.assertTrue(task.has_been_validated())
-            self.assertFalse(task.is_editable())
-        # Invoices
-        task = get_task(factory=Invoice)
-        self.assertTrue(task.is_draft())
-        self.assertTrue(task.is_editable())
-        self.assertFalse(task.is_valid())
-        self.assertFalse(task.has_been_validated())
-        self.assertFalse(task.is_waiting())
-        task.CAEStatus = "wait"
-        self.assertTrue(task.is_waiting())
-        self.assertFalse(task.is_valid())
-        self.assertFalse(task.is_editable())
-        self.assertTrue(task.is_editable(manage=True))
-        for i in ("valid", ):
-            task.CAEStatus = i
-            self.assertTrue(task.has_been_validated())
-            self.assertFalse(task.is_editable())
-        task.CAEStatus = "paid"
-        self.assertTrue(task.is_paid())
-        # CancelInvoice
-        task = get_task(factory=CancelInvoice)
-        self.assertTrue(task.is_draft())
-        self.assertTrue(task.is_editable())
-        self.assertFalse(task.is_valid())
-        self.assertFalse(task.has_been_validated())
-        self.assertFalse(task.is_waiting())
-        task.CAEStatus = "wait"
-        self.assertTrue(task.is_waiting())
-        self.assertFalse(task.is_valid())
-        self.assertFalse(task.is_editable())
-        self.assertTrue(task.is_editable(manage=True))
-        task.CAEStatus = "valid"
-        self.assertTrue(task.is_valid())
-        self.assertFalse(task.is_editable())
+@pytest.fixture
+def cancelinvoice(project, user, customer, company, phase):
+    task = CancelInvoice(
+        company,
+        customer,
+        project,
+        phase,
+        user,
+    )
+    for key, value in TASK.items():
+        setattr(task, key, value)
+    return task
+
+
+@pytest.fixture
+def estimation(project, user, customer, company, phase):
+    est = Estimation(
+        company,
+        customer,
+        project,
+        phase,
+        user,
+    )
+    for key, value in TASK.items():
+        setattr(est, key, value)
+    return est
+
+
+def test_interfaces(estimation, invoice, cancelinvoice):
+    assert(verifyObject(IValidatedTask, estimation))
+    assert(verifyObject(IPaidTask, invoice))
+    assert(verifyObject(IPaidTask, cancelinvoice))
+    assert(verifyObject(IInvoice, invoice))
+    assert(verifyObject(IInvoice, invoice))
+
+
+def test_task_status(estimation, invoice, cancelinvoice):
+    #Estimations
+    task = estimation
+    assert(task.is_draft())
+    assert(task.is_editable())
+    assert(not(task.is_valid()))
+    assert(not(task.has_been_validated()))
+    assert(not(task.is_waiting()))
+    task.CAEStatus = "wait"
+    assert(task.is_waiting())
+    assert(not(task.is_valid()))
+    assert(not(task.is_editable()))
+    assert(task.is_editable(manage=True))
+    for i in ("valid", "geninv"):
+        task.CAEStatus = i
+        assert(task.has_been_validated())
+        assert(not(task.is_editable()))
+    # Invoices
+    task = invoice
+    assert(task.is_draft())
+    assert(task.is_editable())
+    assert(not(task.is_valid()))
+    assert(not(task.has_been_validated()))
+    assert(not(task.is_waiting()))
+    task.CAEStatus = "wait"
+    assert(task.is_waiting())
+    assert(not(task.is_valid()))
+    assert(not(task.is_editable()))
+    assert(task.is_editable(manage=True))
+    for i in ("valid", ):
+        task.CAEStatus = i
+        assert(task.has_been_validated())
+        assert(not(task.is_editable()))
+    task.CAEStatus = "paid"
+    assert(task.is_paid())
+    # CancelInvoice
+    task = cancelinvoice
+    assert(task.is_draft())
+    assert(task.is_editable())
+    assert(not(task.is_valid()))
+    assert(not(task.has_been_validated()))
+    assert(not(task.is_waiting()))
+    task.CAEStatus = "wait"
+    assert(task.is_waiting())
+    assert(not(task.is_valid()))
+    assert(not(task.is_editable()))
+    assert(task.is_editable(manage=True))
+    task.CAEStatus = "valid"
+    assert(task.is_valid())
+    assert(not(task.is_editable()))
+
 
 class TestStatusChange:
     def _forbidden_state_change(self, config, task, from_state, to_states):
@@ -195,19 +194,19 @@ class TestStatusChange:
         for st in to_states:
             task.CAEStatus = from_state
             with pytest.raises(Forbidden):
-                task.set_status(st, request, 'test')
+                task.set_status(st, request, task.owner)
 
     def _allowed_state_change(self, config, task, from_state, to_states):
         request = testing.DummyRequest()
         for st in to_states:
             task.CAEStatus = from_state
-            task.set_status(st, request, 'test')
+            task.set_status(st, request, task.owner.id)
             assert task.CAEStatus == st
 
-    def test_status_change(self, config):
+    def test_status_change(self, config, estimation, invoice, cancelinvoice):
         config.testing_securitypolicy(userid='test', permissive=True)
         # Estimation
-        task = get_task(factory=Estimation)
+        task = estimation
         status = 'draft'
         self._forbidden_state_change(
             config,
@@ -247,7 +246,7 @@ class TestStatusChange:
             )
 
 #        # Invoice
-        task = get_task(factory=Invoice)
+        task = invoice
         status = 'draft'
         self._forbidden_state_change(
             config,
@@ -278,7 +277,7 @@ class TestStatusChange:
             ("draft", "invalid", "valid", "aboinv", )
             )
 
-        task = get_task(factory=CancelInvoice)
+        task = cancelinvoice
         request = testing.DummyRequest()
         task.CAEStatus = 'draft'
         task.set_status("delete", request, 'test')
@@ -288,6 +287,3 @@ class TestStatusChange:
             config,
             task, status,
             ("draft", ))
-
-
-

@@ -36,7 +36,7 @@
     </div>
 </%def>
 <%block name="information">
-<strong>DEVIS N° </strong>${task.number}<br />
+<strong>DEVIS N° </strong>${task.internal_number}<br />
 <strong>Objet : </strong>${format_text(task.description)}<br />
 % if task.workplace:
     <strong>Lieu d'éxécution des travaux : </strong>

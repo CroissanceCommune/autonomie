@@ -42,6 +42,7 @@ from autonomie.models.task import (
     DiscountLine,
     Invoice,
 )
+from autonomie.models.customer import Customer
 from autonomie.utils.widgets import (
     Submit,
     PopUp,
@@ -316,22 +317,20 @@ class InvoiceAdd(TaskFormView):
         log.debug("Submitting invoice add")
         appstruct = get_invoice_dbdatas(appstruct)
 
-        # Since the call to get_next_invoice_number commits the current
-        # transaction, it needs to be called before creating our invoice, to
-        # avoid missing arguments errors
-        snumber = self.context.get_next_invoice_number()
+        customer_id = appstruct["task"]['customer_id']
+        customer = Customer.get(customer_id)
 
-        invoice = Invoice()
-        invoice.project = self.context
-        invoice.company = self.context.company
-        invoice.owner = self.request.user
+        invoice = Invoice(
+            self.context.company,
+            customer,
+            self.context,
+            self.context.phases[0],
+            self.request.user,
+        )
         invoice = merge_session_with_post(
             invoice,
             appstruct["task"]
         )
-        invoice.set_sequence_number(snumber)
-        invoice.set_number()
-        invoice.set_name()
         try:
             invoice = self.set_task_status(invoice)
             # Line handling
@@ -368,7 +367,7 @@ class InvoiceEdit(TaskFormView):
 
     @property
     def title(self):
-        return u"Édition de la facture {task.number}".format(task=self.context)
+        return u"Édition de la facture {task.name}".format(task=self.context)
 
     def before(self, form):
         if not context_is_editable(self.request):
@@ -647,7 +646,7 @@ def includeme(config):
         permission='edit_invoice',
     )
 
-    delete_msg = u"La facture {task.number} a bien été supprimée."
+    delete_msg = u"La facture {task.name} a bien été supprimée."
     config.add_view(
         make_task_delete_view(delete_msg),
         route_name='invoice',

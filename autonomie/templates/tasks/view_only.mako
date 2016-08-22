@@ -46,7 +46,7 @@
                     Vous ne pouvez plus modifier ce document car il est en attente de validation.
                 % else:
                     Vous ne pouvez plus modifier ce document car il a déjà été validé.
-                    % if hasattr(task, 'official_number'):
+                    % if hasattr(task, 'official_number') and task.official_number:
                         Il porte le numéro <b>${task.prefix}${task.official_number}</b>.
                     % endif
                 % endif
@@ -63,7 +63,7 @@
             % if hasattr(task, 'estimation') and task.estimation:
                 <li>
                 <p>
-                    Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.number}</a>
+                    Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.internal_number}</a>
                 </p>
                 </li>
             % endif
@@ -73,7 +73,7 @@
                         <p>
                             L'avoir : \
                             <a href="${request.route_path('cancelinvoice', id=cancelinvoice.id)}">
-                                ${cancelinvoice.number}
+                                ${cancelinvoice.internal_number}
                             </a> a été généré depuis cette facture.
                         </p>
                     </li>
@@ -100,7 +100,7 @@
                     <ul class='list-unstyled'>
                         % for invoice in task.invoices:
                             <li>
-                                <a href="${request.route_path('invoice', id=invoice.id)}">${invoice.number}</a>
+                            <a href="${request.route_path('invoice', id=invoice.id)}">${invoice.internal_number}</a>
                             </li>
                         % endfor
                     </ul>

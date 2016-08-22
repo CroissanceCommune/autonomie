@@ -40,6 +40,13 @@ def upgrade():
             sa.ForeignKey('company.id'),
         )
     )
+    op.add_column(
+        "task",
+        sa.Column(
+            "internal_number",
+            sa.String(40),
+        )
+    )
     from autonomie.models.base import (
         DBSESSION,
     )
@@ -54,9 +61,15 @@ def upgrade():
         session.execute(req)
 
     from autonomie.models.task import Task
-    for task in Task.query():
+
+    for task in Task.query().filter(
+        Task.type_.in_(['invoice', 'estimation', 'cancelinvoice'])
+    ):
         if task.phase is None:
             session.delete(task)
+        else:
+            task.internal_number = task.number
+            session.merge(task)
 
 
     from zope.sqlalchemy import mark_changed

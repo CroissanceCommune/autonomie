@@ -52,9 +52,9 @@ from autonomie.models.types import (
 from autonomie.models.base import (
     default_table_args,
     DBBASE,
-    DBSESSION,
 )
 from autonomie.models.node import Node
+from autonomie.models.services.project import ProjectService
 
 
 ProjectCustomer = Table(
@@ -171,21 +171,6 @@ def get_projects_from_request(request):
 not a a project itself or a company")
 
     return projects
-
-
-# @colander.deferred
-# def deferred_project_code_validator(node, kw):
-#     request = kw['request']
-#     projects = get_projects_from_request(request)
-#
-#     def unique_pcode(node, code):
-#         if code.upper() in [project.code.upper() for project in projects]:
-#             raise colander.Invalid(
-#                 node,
-#                 u"Ce code est déjà utilisé pour identifier un autre projet"
-#             )
-#
-#     return colander.All(colander.Length(min=4, max=4), unique_pcode)
 
 
 class Project(Node):
@@ -310,50 +295,38 @@ class Project(Node):
             'export': {'exclude': True},
         }
     )
+    estimations = relationship(
+        "Estimation",
+        primaryjoin="Estimation.project_id==Project.id",
+        order_by='Estimation.date',
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        }
+    )
+    invoices = relationship(
+        "Invoice",
+        primaryjoin="Invoice.project_id==Project.id",
+        order_by='Invoice.date',
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        }
+    )
+    cancelinvoices = relationship(
+        "CancelInvoice",
+        primaryjoin="CancelInvoice.project_id==Project.id",
+        order_by='Invoice.date',
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        }
+    )
 
-    def get_estimation(self, taskid):
-        """
-            Returns the estimation with id taskid
-        """
-        for estimation in self.estimations:
-            if estimation.id == int(taskid):
-                return estimation
-        raise KeyError("No such task in this project")
-
-    def get_invoice(self, taskid):
-        """
-            Returns the estimation with id taskid
-        """
-        for invoice in self.invoices:
-            if invoice.id == int(taskid):
-                return invoice
-        raise KeyError("No such task in this project")
-
-    def get_associated_tasks_by_type(self, type_str):
-        """
-        Return the tasks of type type_str associated to the current object
-        """
-        from autonomie.models.task import Task
-        return DBSESSION().query(Task).filter_by(
-            project_id=self.id, type_=type_str
-        ).all()
-
-    @property
-    def invoices(self):
-        return self.get_associated_tasks_by_type('invoice')
-
-    @property
-    def estimations(self):
-        return self.get_associated_tasks_by_type('estimation')
-
-    @property
-    def cancelinvoices(self):
-        return self.get_associated_tasks_by_type('cancelinvoice')
+    _autonomie_service = ProjectService
 
     def has_tasks(self):
-        from autonomie.models.task import Task
-        num = DBSESSION().query(Task.id).filter_by(project_id=self.id).count()
-        return num > 0
+        return self._autonomie_service.count_tasks(self) > 0
 
     def is_deletable(self):
         """
@@ -364,42 +337,14 @@ class Project(Node):
     def get_company_id(self):
         return self.company.id
 
-    @staticmethod
-    def get_number(task_number, root_str):
-        """
-            return the number of the given doc
-        """
-        num = task_number[len(root_str):]
-        try:
-            return int(num)
-        except:
-            return 0
-
     def get_next_estimation_number(self):
-        all_nums = [
-            self.get_number(est.number, "Devis ")
-            for est in self.estimations
-        ]
-        all_nums.append(
-            len(self.estimations)
-        )
-        return max(all_nums) + 1
+        return self._autonomie_service.get_next_estimation_number(self)
 
     def get_next_invoice_number(self):
-        all_nums = [
-            self.get_number(inv.number, "Facture ")
-            for inv in self.invoices
-        ]
-        all_nums.append(len(self.invoices))
-        return max(all_nums) + 1
+        return self._autonomie_service.get_next_invoice_number(self)
 
     def get_next_cancelinvoice_number(self):
-        all_nums = [
-            self.get_number(cinv.number, "Avoir ")
-            for cinv in self.cancelinvoices
-        ]
-        all_nums.append(len(self.cancelinvoices))
-        return max(all_nums) + 1
+        return self._autonomie_service.get_next_cancelinvoice_number(self)
 
     def todict(self):
         """

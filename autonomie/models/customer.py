@@ -398,17 +398,32 @@ class Customer(DBBASE, PersistentACLMixin):
 
     estimations = relationship(
         "Estimation",
-        primaryjoin="Estimation.customer_id==Customer.id"
+        primaryjoin="Estimation.customer_id==Customer.id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        }
+
     )
 
     invoices = relationship(
         "Invoice",
-        primaryjoin="Invoice.customer_id==Customer.id"
+        primaryjoin="Invoice.customer_id==Customer.id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        }
+
     )
 
     cancelinvoices = relationship(
         "CancelInvoice",
-        primaryjoin="CancelInvoice.customer_id==Customer.id"
+        primaryjoin="CancelInvoice.customer_id==Customer.id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        }
+
     )
 
     _autonomie_service = CustomerService
@@ -462,7 +477,7 @@ class Customer(DBBASE, PersistentACLMixin):
         return address
 
     def has_tasks(self):
-        return self._autonomie_service.get_task_count(self) > 0
+        return self._autonomie_service.count_tasks(self) > 0
 
     def is_deletable(self):
         """

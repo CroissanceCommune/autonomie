@@ -33,24 +33,12 @@ class CustomerService(object):
         query = query.filter_by(customer_id=instance.id)
 
         if type_str is not None:
-            query = query.filter_by(type_=type_str)
+            query = query.filter(Task.type_ == type_str)
         else:
-            query = query.filter_by(
-                type_.in_(('invoice', 'cancelinvoice', 'estimation'))
+            query = query.filter(
+                Task.type_.in_(('invoice', 'cancelinvoice', 'estimation'))
             )
         return query
-
-    @classmethod
-    def get_invoices(cls, instance):
-        return cls.get_tasks(instance, 'invoice')
-
-    @classmethod
-    def get_estimations(cls, instance):
-        return cls.get_tasks(instance, 'estimation')
-
-    @classmethod
-    def get_cancelinvoices(cls, instance):
-        return cls.get_tasks(instance, 'cancelinvoice')
 
     @classmethod
     def count_tasks(cls, instance):

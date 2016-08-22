@@ -161,8 +161,8 @@ def estimation(project, user, customer, company, phase):
     ]
     return est
 
+
 def test_set_numbers(estimation):
-    # We don't care about dates (we will remove dates in the future)
     estimation.set_numbers(5)
     assert estimation.internal_number.startswith(u"PRO1_CLI1_D5")
     assert estimation.name == u"Devis 5"
@@ -188,6 +188,7 @@ def test_duplicate_estimation(dbsession, estimation):
     assert len(estimation.default_line_group.lines) == len(newestimation.default_line_group.lines)
     assert len(estimation.payment_lines) == len(newestimation.payment_lines)
     assert len(estimation.discounts) == len(newestimation.discounts)
+
 
 def test_duplicate_estimation_integration(dbsession, estimation):
     """

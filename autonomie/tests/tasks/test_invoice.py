@@ -166,35 +166,6 @@ def test_set_sold_label(invoice):
     invoice.set_sold_label()
     assert invoice.name == u"Facture de solde 5"
 
-
-def test_gen_cancelinvoice(dbsession, invoice):
-    dbsession.add(invoice)
-    dbsession.flush()
-    cinv = invoice.gen_cancelinvoice(invoice.owner)
-    dbsession.add(cinv)
-    dbsession.flush()
-
-    assert cinv.total_ht() == -1 * invoice.total_ht()
-    today = datetime.date.today()
-    assert cinv.date == today
-    assert cinv.prefix == invoice.prefix
-    assert cinv.financial_year == invoice.financial_year
-    assert cinv.mentions == invoice.mentions
-    assert cinv.address == invoice.address
-    assert cinv.workplace == invoice.workplace
-    assert cinv.project == invoice.project
-    assert cinv.company == invoice.company
-    assert cinv.phase == invoice.phase
-
-def test_gen_cancelinvoice_payment(dbsession, invoice, tva):
-    invoice.payments = [
-        Payment(mode="c", amount=120000000, tva=tva)
-    ]
-    cinv = invoice.gen_cancelinvoice(invoice.owner)
-    assert len(cinv.default_line_group.lines) ==  len(invoice.default_line_group.lines) + len(invoice.discounts) + 1
-    assert cinv.default_line_group.lines[-1].cost == 100000000
-    assert cinv.default_line_group.lines[-1].tva == 2000
-
 def test_duplicate_invoice(dbsession, invoice):
     newinvoice = invoice.duplicate(
         invoice.owner,
@@ -253,6 +224,35 @@ def test_valid_invoice(config, dbsession, invoice):
     today = datetime.date.today()
     assert invoice.date == today
     assert invoice.official_number == 1
+
+
+def test_gen_cancelinvoice(dbsession, invoice):
+    dbsession.add(invoice)
+    dbsession.flush()
+    cinv = invoice.gen_cancelinvoice(invoice.owner)
+    dbsession.add(cinv)
+    dbsession.flush()
+
+    assert cinv.total_ht() == -1 * invoice.total_ht()
+    today = datetime.date.today()
+    assert cinv.date == today
+    assert cinv.prefix == invoice.prefix
+    assert cinv.financial_year == invoice.financial_year
+    assert cinv.mentions == invoice.mentions
+    assert cinv.address == invoice.address
+    assert cinv.workplace == invoice.workplace
+    assert cinv.project == invoice.project
+    assert cinv.company == invoice.company
+    assert cinv.phase == invoice.phase
+
+def test_gen_cancelinvoice_payment(dbsession, invoice, tva):
+    invoice.payments = [
+        Payment(mode="c", amount=120000000, tva=tva)
+    ]
+    cinv = invoice.gen_cancelinvoice(invoice.owner)
+    assert len(cinv.default_line_group.lines) ==  len(invoice.default_line_group.lines) + len(invoice.discounts) + 1
+    assert cinv.default_line_group.lines[-1].cost == 100000000
+    assert cinv.default_line_group.lines[-1].tva == 2000
 
 def test_valid_payment(config, dbsession, invoice):
     dbsession.add(invoice)

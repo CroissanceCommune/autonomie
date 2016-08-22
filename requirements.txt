@@ -57,7 +57,7 @@ zope.deprecation==4.1.2
 zope.event==4.0.1
 zope.interface==4.1.2
 zope.sqlalchemy==0.7.1
-celery==3.1.17
+celery==3.1.22
 pyramid-celery==2.0.0
 redis==2.10.3
 sqla_inspect==0.3.2

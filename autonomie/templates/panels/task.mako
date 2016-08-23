@@ -191,7 +191,7 @@
                             Total HT
                         </td>
                         <td class='price'>
-                            ${api.format_amount(task.groups_total_ht() + task.expenses_ht, precision=5)|n}&nbsp;€
+                            ${api.format_amount(task.total_ht(), precision=5)|n}&nbsp;€
                         </td>
                         % if display_tvas_column:
                             <td></td>

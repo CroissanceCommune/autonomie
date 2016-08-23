@@ -42,6 +42,7 @@ import datetime
 from autonomie.models.tva import Tva
 from autonomie.compute.math_utils import (
     floor,
+    floor_to_precision,
     percentage,
     reverse_tva,
     compute_tva,
@@ -191,8 +192,8 @@ class SageInvoice(object):
             Round the products ht and tva
         """
         for value in self.products.values():
-            value['ht'] = floor(value['ht'])
-            value['tva'] = floor(value['tva'])
+            value['ht'] = floor_to_precision(value['ht'])
+            value['tva'] = floor_to_precision(value['tva'])
 
     def populate(self):
         """

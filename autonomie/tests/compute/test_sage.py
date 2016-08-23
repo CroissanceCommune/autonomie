@@ -154,6 +154,17 @@ def tva10():
 
 
 @pytest.fixture
+def tva20():
+    return MagicMock(
+        name="tva 20%",
+        value=2000,
+        default=0,
+        compte_cg="TVA20",
+        code='CTVA20'
+    )
+
+
+@pytest.fixture
 def invoice(def_tva, tva):
 
     p1 = MagicMock(name="product 1", compte_cg="P0001", tva=def_tva)
@@ -243,6 +254,42 @@ def invoice_bug363(def_tva, tva10):
 
 
 @pytest.fixture
+def invoice_bug400(def_tva, tva20):
+    prod = MagicMock(name="product 2", compte_cg="P0002", tva=tva20)
+    lines = []
+
+    for cost, qtity in (
+        (22112500, 1),
+    ):
+        lines.append(
+            DummyLine(
+                cost=cost,
+                quantity=qtity,
+                tva=tva20.value,
+                product=prod,
+                tva_object=tva20
+            )
+        )
+
+    group = DummyGroup(lines=lines)
+    company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
+    customer = Dummy(name="customer", compte_tiers="CUSTOMER",
+                     compte_cg='CG_CUSTOMER')
+    invoice = TaskCompute()
+    invoice.default_tva = def_tva.value
+    invoice.expenses_tva = def_tva.value
+    invoice.date = datetime.date(2013, 02, 02)
+    invoice.customer = customer
+    invoice.company = company
+    invoice.official_number = "INV_001"
+    invoice.line_groups = [group]
+    invoice.all_lines = group.lines
+    invoice.expenses_ht = 0
+    invoice.expenses = 0
+    return invoice
+
+
+@pytest.fixture
 def invoice_discount(def_tva, tva, invoice):
     discount1 = DummyLine(
         cost=10000000,
@@ -273,6 +320,15 @@ def sageinvoice(def_tva, invoice):
 def sageinvoice_bug363(def_tva, invoice_bug363):
     return SageInvoice(
         invoice=invoice_bug363,
+        config=get_config(),
+        default_tva=def_tva,
+    )
+
+
+@pytest.fixture
+def sageinvoice_bug400(def_tva, invoice_bug400):
+    return SageInvoice(
+        invoice=invoice_bug400,
         config=get_config(),
         default_tva=def_tva,
     )
@@ -393,6 +449,13 @@ def test_populate_discount_lines_without_code_tva(sageinvoice_discount):
     sageinvoice_discount.config.pop("code_tva_rrr")
     sageinvoice_discount._populate_discounts()
     assert sageinvoice_discount.products.keys() != []
+
+
+def test_round_products(sageinvoice_bug400):
+    sageinvoice_bug400._populate_invoice_lines()
+    sageinvoice_bug400._round_products()
+    print sageinvoice_bug400.products
+    assert sageinvoice_bug400.products.values()[0]['ht'] == 22113000
 
 
 def test_populate_expenses(sageinvoice):

@@ -134,10 +134,6 @@ def add_static_views(config, settings):
         cache_max_age=3600,
     )
 
-    # Adding a static view to the configured assets
-    assets = settings.get('autonomie.assets', '/var/intranet_files')
-    config.add_static_view('assets', assets, cache_max_age=3600)
-
 
 def main(global_config, **settings):
     """

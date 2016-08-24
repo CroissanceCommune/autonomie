@@ -231,30 +231,6 @@ abandons de créance dans les notes de dépense",
 }
 
 
-def get_deferred_upload_widget(filename, filters=None):
-    @colander.deferred
-    def deferred_upload_widget(node, kw):
-        """
-            Returns a fileupload widget to allow logo upload
-        """
-        request = kw['request']
-
-        root_url = "/assets/"
-        store_url = os.path.join(root_url, "main")
-
-        root_path = request.registry.settings.get('autonomie.assets')
-        store_path = os.path.join(root_path, "main")
-
-        return forms.get_fileupload_widget(
-            store_url,
-            store_path,
-            request.session,
-            default_filename=filename,
-            filters=filters)
-
-    return deferred_upload_widget
-
-
 def get_config_key_schemanode(key, ui_conf):
     """
     Returns a schema node to configure the config 'key'

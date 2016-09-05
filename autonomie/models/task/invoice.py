@@ -348,12 +348,12 @@ class Invoice(Task, InvoiceCompute):
         Record a payment for the current invoice
         """
         resulted = kw.pop('resulted', False)
-
-        payment = Payment()
-        for key, value in kw.iteritems():
-            setattr(payment, key, value)
-        log.info(u"Amount : {0}".format(payment.amount))
-        self.payments.append(payment)
+        if kw['amount'] != 0:
+            payment = Payment()
+            for key, value in kw.iteritems():
+                setattr(payment, key, value)
+            log.info(u"Amount : {0}".format(payment.amount))
+            self.payments.append(payment)
         return self.check_resulted(force_resulted=resulted)
 
     def check_resulted(self, force_resulted=False, user_id=None):

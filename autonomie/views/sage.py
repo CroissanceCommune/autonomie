@@ -674,7 +674,7 @@ class SagePaymentExportPage(BaseView):
 
     def _filter_date(self, query, start_date, end_date):
         return query.filter(
-            Payment.created_at.between(start_date, end_date)
+            Payment.date.between(start_date, end_date)
         )
 
     def _filter_number(self, query, number, year):

@@ -348,7 +348,7 @@ class Invoice(Task, InvoiceCompute):
         Record a payment for the current invoice
         """
         resulted = kw.pop('resulted', False)
-        if kw['amount'] <= 0:
+        if kw['amount'] > 0:
             payment = Payment()
             for key, value in kw.iteritems():
                 setattr(payment, key, value)

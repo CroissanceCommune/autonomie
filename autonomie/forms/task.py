@@ -536,8 +536,8 @@ def deferred_mention_select_widget(node, kw):
     query = kw['request'].dbsession.query(
         TaskMention.id, TaskMention.label
     )
-    query.filter(TaskMention.active == True)
-    query.order_by(TaskMention.order)
+    query = query.filter(TaskMention.active == True)
+    query = query.order_by(TaskMention.order)
 
     return deform.widget.CheckboxChoiceWidget(values=query.all())
 

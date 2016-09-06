@@ -1573,31 +1573,10 @@ SocialStatusOption.id',
         }
     )
 
+    # To be removed in version > 3.3.0
     parcours_last_avenant = Column(
         Date(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Dernier avenant',
-                'section': u'Parcours',
-            }
-        }
-    )
-    parcours_contract_history = relationship(
-        "ContractHistory",
-        cascade='all, delete-orphan',
-        info={
-            'colanderalchemy': {
-                "title": u"Avenants au contrat de travail",
-                'section': u'Parcours',
-            },
-            'export': {
-                'flatten': [
-                    ('date', u"Date"),
-                    ('number', u"Numéro d'avenant"),
-                ],
-            }
-        }
+        info={'colanderalchemy': EXCLUDED},
     )
 
     parcours_taux_horaire = Column(
@@ -1618,6 +1597,23 @@ SocialStatusOption.id',
             {
                 'title': u'Taux horaire (en lettres)',
                 'section': u'Parcours',
+            }
+        }
+    )
+
+    parcours_contract_history = relationship(
+        "ContractHistory",
+        cascade='all, delete-orphan',
+        info={
+            'colanderalchemy': {
+                "title": u"Avenants au contrat de travail",
+                'section': u'Parcours',
+            },
+            'export': {
+                'flatten': [
+                    ('date', u"Date"),
+                    ('number', u"Numéro d'avenant"),
+                ],
             }
         }
     )
@@ -2218,7 +2214,7 @@ class ContractHistory(DBBASE):
         Date(),
         info={
             'colanderalchemy': {
-                "title": u'Date du changement de statut',
+                "title": u"Date d'effet",
             }
         },
         nullable=False,
@@ -2227,7 +2223,7 @@ class ContractHistory(DBBASE):
         Integer,
         info={
             'colanderalchemy': {
-                "title": u"Numéro de l'avenant",
+                "title": u"Numéro",
             }
         },
         nullable=False,
@@ -2280,8 +2276,9 @@ USERDATAS_FORM_GRIDS = {
         ((12, True), ),
         ((3, True), ),
         ((6, True), (6, True)),
-        ((3, True), (3, True), (3, True), (3, True)),
-        ((3, True), (3, True), (3, True)),
+        ((3, True), (3, True), (3, True),),
+        ((6, True),),
+        ((3, True), (3, True)),
         ((3, True), (3, True), (3, True)),
         ((4, True), ),
         ((3, True), (3, True), (3, True)),

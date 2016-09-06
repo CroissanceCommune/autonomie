@@ -29,15 +29,15 @@ from sqlalchemy.sql.expression import func
 class ProjectService(object):
 
     @classmethod
-    def get_tasks(cls, instance, type_str):
+    def get_tasks(cls, instance, type_str=None):
         from autonomie.models.task import Task
         query = DBSESSION().query(Task)
         query = query.filter_by(project_id=instance.id)
 
         if type_str is not None:
-            query = query.filter_by(Task.type_ == type_str)
+            query = query.filter(Task.type_ == type_str)
         else:
-            query = query.filter_by(
+            query = query.filter(
                 Task.type_.in_(('invoice', 'cancelinvoice', 'estimation'))
             )
         return query
@@ -100,4 +100,3 @@ class ProjectService(object):
         """
         from autonomie.models.task import CancelInvoice
         return cls.get_next_number(project, CancelInvoice)
-

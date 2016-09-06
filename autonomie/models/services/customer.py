@@ -27,7 +27,7 @@ from autonomie.models.base import DBSESSION
 
 class CustomerService(object):
     @classmethod
-    def get_tasks(cls, instance, type_str):
+    def get_tasks(cls, instance, type_str=None):
         from autonomie.models.task import Task
         query = DBSESSION().query(Task)
         query = query.filter_by(customer_id=instance.id)

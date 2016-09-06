@@ -15,6 +15,8 @@ import sqlalchemy as sa
 
 
 def upgrade():
+    import logging
+    logger = logging.getLogger('alembic.here')
     op.add_column(
         "user_datas",
         sa.Column(
@@ -47,6 +49,7 @@ def upgrade():
             sa.String(40),
         )
     )
+    logger.warn("######################## Company stuff")
     from autonomie.models.base import (
         DBSESSION,
     )
@@ -60,17 +63,42 @@ def upgrade():
         req = "update task set company_id={0} where id={1}".format(company_id, id)
         session.execute(req)
 
+    logger.warn("######################## Task stuff")
     from autonomie.models.task import Task
+    from autonomie.models.customer import Customer
+    from autonomie.models.project import Project
+    from autonomie.models.project import Phase
 
-    for task in Task.query().filter(
+    from sqlalchemy.orm import joinedload
+    from sqlalchemy.orm import load_only
+
+    query = Task.query().options(
+        load_only("sequence_number", "date", "phase_id")
+    )
+    query = query.filter(
         Task.type_.in_(['invoice', 'estimation', 'cancelinvoice'])
-    ):
-        if task.phase is None:
+    )
+    query = query.options(joinedload(Task.customer).load_only(Customer.code))
+    query = query.options(joinedload(Task.project).load_only(Project.code))
+
+    for task in query:
+        if Phase.get(task.phase_id) is None:
             session.delete(task)
         else:
-            task.internal_number = task.number
+            task.internal_number = task._number_tmpl.format(s=task)
             session.merge(task)
 
+    logger.warn("######################## Contract stuff")
+    from autonomie.models.user import UserDatas, ContractHistory
+    for id_, last_avenant in UserDatas.query('id', 'parcours_last_avenant'):
+        if last_avenant:
+            session.add(
+                ContractHistory(
+                    userdatas_id=id_,
+                    date=last_avenant,
+                    number=-1
+                )
+            )
 
     from zope.sqlalchemy import mark_changed
     mark_changed(session)

@@ -1250,7 +1250,8 @@ class UserDatas(Node):
     )
     statut_social_status_today = relationship(
         'SocialStatusOption',
-        primaryjoin='UserDatas.statut_social_status_today_id==SocialStatusOption.id',
+        primaryjoin='UserDatas.statut_social_status_today_id==\
+SocialStatusOption.id',
         info={
             'colanderalchemy': EXCLUDED,
             'export': {
@@ -1579,6 +1580,22 @@ class UserDatas(Node):
             {
                 'title': u'Dernier avenant',
                 'section': u'Parcours',
+            }
+        }
+    )
+    parcours_contract_history = relationship(
+        "ContractHistory",
+        cascade='all, delete-orphan',
+        info={
+            'colanderalchemy': {
+                "title": u"Avenants au contrat de travail",
+                'section': u'Parcours',
+            },
+            'export': {
+                'flatten': [
+                    ('date', u"Date"),
+                    ('number', u"Numéro d'avenant"),
+                ],
             }
         }
     )
@@ -2177,6 +2194,66 @@ class CaeSituationChange(DBBASE):
             'colanderalchemy': EXCLUDED,
             'export': {'related_key': 'label'},
         },
+    )
+
+
+class ContractHistory(DBBASE):
+    """
+    Used to store history of contract updates
+    """
+    __colanderalchemy_config__ = {
+        'title': u"un avenant",
+        'widget': CLEAN_MAPPING_WIDGET,
+    }
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': get_hidden_field_conf(),
+            'export': {'exclude': True},
+        }
+    )
+    date = Column(
+        Date(),
+        info={
+            'colanderalchemy': {
+                "title": u'Date du changement de statut',
+            }
+        },
+        nullable=False,
+    )
+    number = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                "title": u"Numéro de l'avenant",
+            }
+        },
+        nullable=False,
+    )
+    userdatas_id = Column(
+        ForeignKey("user_datas.id"),
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {
+                'label': u"Identifiant autonomie",
+                'stats': EXCLUDED,
+            }
+        }
+    )
+    userdatas = relationship(
+        "UserDatas",
+        back_populates='parcours_contract_history',
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {
+                'related_key': u"export_label",
+                "keep_key": True,
+                "label": u"Historique des avenants",
+                "stats": EXCLUDED,
+            }
+        }
     )
 
 

@@ -111,6 +111,7 @@ class TaskMentionAdmin(mention_admin_class):
     title = u"Configuration des mentions facultatives des devis/factures"
     description = u"Des mentions facultatives que les entrepreneurs peuvent \
 faire figurer dans leurs devis/factures"
+    widget_options = {'min_len': 0}
 
 
 class PaymentModeAdmin(payment_mode_admin_class):

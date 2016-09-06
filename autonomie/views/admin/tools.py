@@ -90,7 +90,7 @@ class BaseConfigView(BaseAdminFormView):
 class AdminOption(BaseAdminFormView):
     """
     Main view for option configuration
-    It allows to configure a set of models
+    It allows to configure a sequence of models
 
         factory
 
@@ -113,6 +113,10 @@ class AdminOption(BaseAdminFormView):
         js_resources
 
             specific fanstatic javascript resources we want to add to the page
+
+        widget_options
+
+            Options passed to the sequence widget used here
     """
     title = u""
     add_template_vars = ('message', 'menus',)
@@ -121,6 +125,7 @@ class AdminOption(BaseAdminFormView):
     disable = True
     _schema = None
     js_resources = []
+    widget_options = {}
 
     @property
     def schema(self):
@@ -128,6 +133,7 @@ class AdminOption(BaseAdminFormView):
             self._schema = get_sequence_model_admin(
                 self.factory,
                 "",
+                widget_options=self.widget_options,
             )
         return self._schema
 

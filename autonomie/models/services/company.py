@@ -28,6 +28,7 @@ from sqlalchemy import (
     and_,
 )
 from sqlalchemy.orm import load_only
+from sqlalchemy.sql.expression import func
 
 from autonomie.models.base import DBSESSION
 
@@ -139,3 +140,37 @@ class CompanyService(object):
         query = query.filter(Project.code != None)
         query = query.filter(Project.company_id == company.id)
         return query.order_by(Project.code)
+
+    @classmethod
+    def get_next_number(cls, company, factory):
+        query = DBSESSION.query(func.max(factory.company_index))
+        query = query.filter(factory.company_id == company.id)
+        max_num = query.first()[0]
+        if max_num is None:
+            max_num = 0
+
+        return max_num + 1
+
+    @classmethod
+    def get_next_estimation_number(cls, company):
+        """
+        Return the next available sequence number in the given company
+        """
+        from autonomie.models.task import Estimation
+        return cls.get_next_number(company, Estimation)
+
+    @classmethod
+    def get_next_invoice_number(cls, company):
+        """
+        Return the next available sequence number in the given company
+        """
+        from autonomie.models.task import Invoice
+        return cls.get_next_number(company, Invoice)
+
+    @classmethod
+    def get_next_cancelinvoice_number(cls, company):
+        """
+        Return the next available sequence number in the given company
+        """
+        from autonomie.models.task import CancelInvoice
+        return cls.get_next_number(company, CancelInvoice)

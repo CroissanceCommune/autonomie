@@ -14,8 +14,18 @@ from alembic import op
 import sqlalchemy as sa
 ${imports if imports else ""}
 
-def upgrade():
+def update_database_structure():
     ${upgrades if upgrades else "pass"}
+
+def migrate_datas():
+    from autonomie.models.base import DBSESSION
+    session = DBSESSION()
+    from alembic.context import get_bind
+    conn = get_bind()
+
+def upgrade():
+    update_database_structure()
+    migrate_datas()
 
 
 def downgrade():

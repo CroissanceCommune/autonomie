@@ -330,14 +330,14 @@ class Project(Node):
     def get_company_id(self):
         return self.company.id
 
-    def get_next_estimation_number(self):
-        return self._autonomie_service.get_next_estimation_number(self)
+    def get_next_estimation_index(self):
+        return self._autonomie_service.get_next_estimation_index(self)
 
-    def get_next_invoice_number(self):
-        return self._autonomie_service.get_next_invoice_number(self)
+    def get_next_invoice_index(self):
+        return self._autonomie_service.get_next_invoice_index(self)
 
-    def get_next_cancelinvoice_number(self):
-        return self._autonomie_service.get_next_cancelinvoice_number(self)
+    def get_next_cancelinvoice_index(self):
+        return self._autonomie_service.get_next_cancelinvoice_index(self)
 
     def todict(self):
         """

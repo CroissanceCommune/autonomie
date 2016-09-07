@@ -93,7 +93,7 @@ class Company(DBBASE, PersistentACLMixin):
     __tablename__ = 'company'
     __table_args__ = default_table_args
     id = Column("id", Integer, primary_key=True)
-    name = Column("name", String(150))
+    name = Column("name", String(150), nullable=False)
     goal = deferred(
         Column(
             "object",
@@ -107,7 +107,7 @@ class Company(DBBASE, PersistentACLMixin):
             "email",
             String(255)
         ),
-        group='edit'
+        group='edit',
     )
     phone = deferred(
         Column(
@@ -135,15 +135,17 @@ class Company(DBBASE, PersistentACLMixin):
         Column(
             "creationDate",
             CustomDateType,
-            default=get_current_timestamp
-        )
+            default=get_current_timestamp,
+            nullable=False,
+        ),
     )
     updateDate = deferred(
         Column(
             "updateDate",
             CustomDateType,
             default=get_current_timestamp,
-            onupdate=get_current_timestamp
+            onupdate=get_current_timestamp,
+            nullable=False,
         )
     )
     active = deferred(
@@ -406,6 +408,24 @@ class Company(DBBASE, PersistentACLMixin):
         Return current company's project codes and names
         """
         return self._autonomie_service.get_project_codes_and_names(self)
+
+    def get_next_estimation_index(self):
+        """
+        Return the next estimation index
+        """
+        return self._autonomie_service.get_next_estimation_index(self)
+
+    def get_next_invoice_index(self):
+        """
+        Return the next invoice index
+        """
+        return self._autonomie_service.get_next_invoice_index(self)
+
+    def get_next_cancelinvoice_index(self):
+        """
+        Return the next cancelinvoice index
+        """
+        return self._autonomie_service.get_next_cancelinvoice_index(self)
 
 
 # Company node related tools

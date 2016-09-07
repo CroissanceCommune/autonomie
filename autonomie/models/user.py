@@ -2094,6 +2094,14 @@ class DateConventionCAPEDatas(DBBASE):
             }
         }
     )
+    end_date = Column(
+        Date(),
+        info={
+            "colanderalchemy": {
+                "title": u'Date de fin de la convention',
+            }
+        }
+    )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
         info={

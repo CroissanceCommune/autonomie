@@ -93,8 +93,8 @@ CONTRACTOR_PRIMARY_GROUP = 3
 COMPANY_EMPLOYEE = Table(
     'company_employee',
     DBBASE.metadata,
-    Column("company_id", Integer, ForeignKey('company.id')),
-    Column("account_id", Integer, ForeignKey('accounts.id')),
+    Column("company_id", Integer, ForeignKey('company.id'), nullable=False),
+    Column("account_id", Integer, ForeignKey('accounts.id'), nullable=False),
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine'],
 )
@@ -224,20 +224,12 @@ class User(DBBASE, PersistentACLMixin):
         nullable=False,
     )
 
-    primary_group = deferred(
-        Column(
-            Integer,
-            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
-            default=3,
-        ),
-        group='edit',
-    )
-
     active = deferred(
         Column(
             String(1),
             info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
-            default='Y'
+            default='Y',
+            nullable=False,
         ),
         group='edit',
     )

@@ -36,7 +36,6 @@
 
 """
 import logging
-import colander
 import deform
 
 from sqlalchemy import (
@@ -117,6 +116,7 @@ class Customer(DBBASE, PersistentACLMixin):
                 'export': {'exclude': True},
                 'colanderalchemy': forms.EXCLUDED,
             },
+            nullable=False,
         ),
         group='all',
     )
@@ -131,6 +131,7 @@ class Customer(DBBASE, PersistentACLMixin):
                 'export': {'exclude': True},
                 'colanderalchemy': forms.EXCLUDED,
             },
+            nullable=False,
         ),
         group='all',
     )
@@ -142,7 +143,8 @@ class Customer(DBBASE, PersistentACLMixin):
         info={
             'export': {'exclude': True},
             'colanderalchemy': forms.EXCLUDED,
-        }
+        },
+        nullable=False,
     )
 
     name = Column(
@@ -159,7 +161,7 @@ class Customer(DBBASE, PersistentACLMixin):
     code = Column(
         'code',
         String(4),
-        info={'colanderalchemy': {'title': u"Code",}},
+        info={'colanderalchemy': {'title': u"Code"}},
     )
 
     contactLastName = deferred(

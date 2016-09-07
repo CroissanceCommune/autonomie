@@ -63,7 +63,7 @@ def add_user(login, password, group, firstname="", lastname="", email=""):
                 email=email)
     user.set_password(password)
 
-    user.primary_group = group
+    user.groups.append(GROUPS[group])
 
     session = DBSESSION()
     session.add(user)

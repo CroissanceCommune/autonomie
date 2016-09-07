@@ -2330,7 +2330,7 @@ def add_situation_change_handler(target, value, oldvalue, initiator):
     """
     Handler for the situation Change handling
     """
-    if isinstance(value, int):
+    if isinstance(value, int) and value != oldvalue:
         change = CaeSituationChange(
             userdatas_id=target.id,
             date=datetime.date.today(),

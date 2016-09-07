@@ -288,7 +288,7 @@ class CustomerAdd(BaseFormView):
 
     @property
     def customers(self):
-        codes = self.context.get_customer.codes_and_names()
+        codes = self.context.get_customer_codes_and_names()
         return codes
 
     # Schema is here a property since we need to build it dynamically regarding

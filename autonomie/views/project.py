@@ -395,26 +395,24 @@ def project_view(request):
         ", ".join(customer_names)
     )
 
-    return dict(title=title,
-                project=request.context,
-                company=request.context.company,
-                latest_phase=latest_phase)
+    return dict(
+        title=title,
+        project=request.context,
+        company=request.context.company,
+        latest_phase=latest_phase
+    )
 
 
 class ProjectAdd(BaseFormView):
-    add_template_vars = ('title', 'codes', )
+    add_template_vars = ('title', 'projects', )
     title = u"Ajout d'un nouveau projet"
     schema = get_project_schema()
     buttons = (submit_btn,)
     validation_msg = u"Le projet a été ajouté avec succès"
 
     @property
-    def codes(self):
-        codes = [
-            (project.code, project.name) for project in self.context.projects
-        ]
-        codes.sort()
-        return codes
+    def projects(self):
+        return self.context.get_project_codes_and_names()
 
     def before(self, form):
         populate_actionmenu(self.request)
@@ -454,7 +452,7 @@ class ProjectAdd(BaseFormView):
 
 
 class ProjectEdit(ProjectAdd):
-    add_template_vars = ('title', 'project', 'codes',)
+    add_template_vars = ('title', 'project', 'projects',)
     validation_msg = u"Le projet a été modifié avec succès"
 
     def appstruct(self):
@@ -469,17 +467,12 @@ class ProjectEdit(ProjectAdd):
 
     @reify
     def project(self):
-        return self.request.context
+        return self.context
 
     @property
-    def codes(self):
-        codes = [
-            (project.code, project.name)
-            for project in self.context.company.projects
-            if project.id != self.context.id
-        ]
-        codes.sort()
-        return codes
+    def projects(self):
+        query = self.context.company.get_project_codes_and_names()
+        return query.filter(Project.id != self.context.id)
 
 
 def populate_actionmenu(request, project=None):

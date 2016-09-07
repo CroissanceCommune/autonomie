@@ -108,13 +108,34 @@ class CompanyService(object):
         return query
 
     @classmethod
-    def get_customer_codes_and_names(cls, instance):
+    def get_customer_codes_and_names(cls, company):
         """
-        Return a query for code and names of customers related to instance
+        Return a query for code and names of customers related to company
+        :param company: the company we're working on
+        :returns: an orm query loading Customer instances with only the columns
+        we want
+        :rtype: A Sqlalchemy query object
         """
         from autonomie.models.customer import Customer
         query = DBSESSION().query(Customer)
         query = query.options(load_only('code', 'name'))
         query = query.filter(Customer.code != None)
-        query = query.filter(Customer.company_id == instance.id)
+        query = query.filter(Customer.company_id == company.id)
         return query.order_by(Customer.code)
+
+    @classmethod
+    def get_project_codes_and_names(cls, company):
+        """
+        Return a query for code and names of projects related to company
+
+        :param company: the company we're working on
+        :returns: an orm query loading Project instances with only the columns
+        we want
+        :rtype: A Sqlalchemy query object
+        """
+        from autonomie.models.project import Project
+        query = DBSESSION().query(Project)
+        query = query.options(load_only('code', 'name'))
+        query = query.filter(Project.code != None)
+        query = query.filter(Project.company_id == company.id)
+        return query.order_by(Project.code)

@@ -80,30 +80,6 @@ def get_customers_from_request(request):
     return customers
 
 
-@colander.deferred
-def deferred_ccode_valid(node, kw):
-    request = kw['request']
-    customers = get_customers_from_request(request)
-
-    def unique_ccode(node, value):
-        """
-            Test customer code unicity
-        """
-        if value is not None:
-            if len(value) != 4:
-                raise colander.Invalid(
-                    node,
-                    u"Le code doit être composé de 4 caractères",
-                )
-            if value.upper() in [c.code.upper() for c in customers]:
-                raise colander.Invalid(
-                    node,
-                    u"Ce code est déjà utilisé pour identifier un autre client",
-                )
-
-    return unique_ccode
-
-
 class Customer(DBBASE, PersistentACLMixin):
     """
         Customer model
@@ -183,14 +159,7 @@ class Customer(DBBASE, PersistentACLMixin):
     code = Column(
         'code',
         String(4),
-        info={
-            'colanderalchemy': {
-                'title': u"Code",
-                'widget': deform.widget.TextInputWidget(mask='****'),
-                'validator': deferred_ccode_valid,
-            }
-        },
-        nullable=True,
+        info={'colanderalchemy': {'title': u"Code",}},
     )
 
     contactLastName = deferred(

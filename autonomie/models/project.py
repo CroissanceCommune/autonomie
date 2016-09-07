@@ -191,14 +191,7 @@ class Project(Node):
 
     code = Column(
         String(4),
-        info={
-            'colanderalchemy': {
-                'title': u"Code",
-                'widget': deform.widget.TextInputWidget(mask='****'),
-                'validator': colander.Length(min=4, max=4),
-            },
-        },
-        nullable=False,
+        info={'colanderalchemy': {'title': u"Code"}},
     )
 
     type = deferred(

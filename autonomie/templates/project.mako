@@ -32,9 +32,9 @@
     <div class='col-md-3'>
         <h4>Codes projet utilisés</h4>
         <ul>
-            % for code, name in codes:
+            % for project in projects:
                 <li>
-                ${code.upper()} (${name})
+                ${project.code.upper()} (${project.name})
                 </li>
             % endfor
         </ul>

@@ -19,7 +19,11 @@ def upgrade():
         "date_convention_cape_datas",
         sa.Column('end_date', sa.Date())
     )
+    op.execute("alter table customer MODIFY code VARCHAR(4);")
+    op.execute("alter table project MODIFY code VARCHAR(4);")
 
 
 def downgrade():
     op.drop_column("date_convention_cape_datas", 'end_date')
+    op.execute("alter table customer MODIFY code VARCHAR(4) DEFAULT NULL;")
+    op.execute("alter table project MODIFY code VARCHAR(4) DEFAULT NULL;")

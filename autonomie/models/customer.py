@@ -68,13 +68,16 @@ log = logging.getLogger(__name__)
 
 
 def get_customers_from_request(request):
+    """
+    Return a query for getting customer codes from request
+    """
+    customers = []
     if request.context.__name__ == 'company':
-        return request.context.customers
+        customers = request.context.get_customer_codes_and_names()
     elif request.context.__name__ == 'customer':
-        return [customer for customer in request.context.company.customers
-                if customer is not request.context]
-    else:
-        return []
+        customers = request.context.company.get_customer_codes_and_names()
+        customers.filter(Customer.id != request.context.id)
+    return customers
 
 
 @colander.deferred
@@ -86,13 +89,19 @@ def deferred_ccode_valid(node, kw):
         """
             Test customer code unicity
         """
-        if value.upper() in [customer.code.upper() for customer in customers]:
-            raise colander.Invalid(
-                node,
-                u"Ce code est déjà utilisé pour identifier un autre client",
-            )
+        if value is not None:
+            if len(value) != 4:
+                raise colander.Invalid(
+                    node,
+                    u"Le code doit être composé de 4 caractères",
+                )
+            if value.upper() in [c.code.upper() for c in customers]:
+                raise colander.Invalid(
+                    node,
+                    u"Ce code est déjà utilisé pour identifier un autre client",
+                )
 
-    return colander.All(colander.Length(min=4, max=4), unique_ccode)
+    return unique_ccode
 
 
 class Customer(DBBASE, PersistentACLMixin):
@@ -181,7 +190,7 @@ class Customer(DBBASE, PersistentACLMixin):
                 'validator': deferred_ccode_valid,
             }
         },
-        nullable=False,
+        nullable=True,
     )
 
     contactLastName = deferred(

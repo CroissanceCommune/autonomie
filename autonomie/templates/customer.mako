@@ -31,9 +31,9 @@
     <div class='col-md-3'>
         <h4>Codes client utilisés</h4>
         <ul>
-            % for code, name in codes:
+            % for customer in customers:
                 <li>
-                ${code.upper()} (${name})
+                ${customer.code.upper()} (${customer.name})
                 </li>
             % endfor
         </ul>

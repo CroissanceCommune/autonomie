@@ -395,6 +395,12 @@ class Company(DBBASE, PersistentACLMixin):
         """
         return self._autonomie_service.get_late_invoices(self)
 
+    def get_customer_codes_and_names(self):
+        """
+        Return current company's customer codes and names
+        """
+        return self._autonomie_service.get_customer_codes_and_names(self)
+
 
 # Company node related tools
 def get_deferred_company_choices(widget_options):

@@ -63,7 +63,8 @@ from autonomie.views.csv_import import (
     ConfigFieldAssociationView,
 )
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
+
 
 def get_customer_form(request):
     """
@@ -83,9 +84,9 @@ class CustomersListTools(object):
     title = u"Liste des clients"
     schema = get_list_schema()
     sort_columns = {
-        'name':Customer.name,
-        "code":Customer.code,
-        "contactLastName":Customer.contactLastName,
+        'name': Customer.name,
+        "code": Customer.code,
+        "contactLastName": Customer.contactLastName,
     }
 
     def query(self):
@@ -114,6 +115,7 @@ class CustomersListView(CustomersListTools, BaseListView):
     Customer listing view
     """
     add_template_vars = ('item_actions', 'title', )
+
     def populate_actionmenu(self, appstruct):
         """
         Populate the actionmenu regarding the user's rights
@@ -173,7 +175,8 @@ class CustomersListView(CustomersListTools, BaseListView):
                 css='btn btn-default btn-sm',
                 path="customer",
                 icon="search"
-        ))
+            )
+        )
         if self.request.params.get('archived', '0') in ('0', 'false'):
             btns.append(
                 ItemActionLink(
@@ -232,8 +235,8 @@ class CustomersCsv(CustomersListTools, BaseCsvView):
 
     def query(self):
         company = self.request.context
-        return Customer.query().options(undefer_group('edit'))\
-                .filter(Customer.company_id == company.id)
+        query = Customer.query().options(undefer_group('edit'))
+        return query.filter(Customer.company_id == company.id)
 
 
 def customer_archive(request):
@@ -258,8 +261,9 @@ def customer_delete(request):
     """
     customer = request.context
     request.dbsession.delete(customer)
-    request.session.flash(u"Le client '{0}' a bien été supprimé".format(
-                                                            customer.name))
+    request.session.flash(
+        u"Le client '{0}' a bien été supprimé".format(customer.name)
+    )
     return HTTPFound(request.referer)
 
 
@@ -276,16 +280,15 @@ class CustomerAdd(BaseFormView):
     """
     Customer add form
     """
-    add_template_vars = ('title', 'codes', )
+    add_template_vars = ('title', 'customers', )
     title = u"Ajouter un client"
     _schema = None
     buttons = (submit_btn,)
     validation_msg = u"Le client a bien été ajouté"
 
     @property
-    def codes(self):
-        codes = [(model.code, model.name) for model in self.context.customers]
-        codes.sort()
+    def customers(self):
+        codes = self.context.get_customer.codes_and_names()
         return codes
 
     # Schema is here a property since we need to build it dynamically regarding
@@ -296,7 +299,7 @@ class CustomerAdd(BaseFormView):
         """
         The getter for our schema property
         """
-        if self._schema == None:
+        if self._schema is None:
             self._schema = get_customer_schema(self.request)
         return self._schema
 
@@ -340,7 +343,7 @@ class CustomerEdit(CustomerAdd):
     """
     Customer edition form
     """
-    add_template_vars = ('title', 'codes',)
+    add_template_vars = ('title', 'customers',)
     validation_msg = u"Le client a été modifié avec succès"
 
     def appstruct(self):
@@ -356,10 +359,11 @@ class CustomerEdit(CustomerAdd):
         )
 
     @property
-    def codes(self):
-        codes = [(model.code, model.name) for model in self.context.company.customers \
-                if model is not self.context]
-        codes.sort()
+    def customers(self):
+        company = self.context.company
+        codes = company.get_customer_codes_and_names()
+        codes.filter(Customer.id != self.context.id)
+        logger.debug(codes.all())
         return codes
 
 
@@ -447,7 +451,6 @@ def add_routes(config):
     )
 
 
-
 def includeme(config):
     """
         Add module's views
@@ -457,7 +460,7 @@ def includeme(config):
     for i in range(2):
         index = i + 1
         route_name = 'company_customers_import_step%d' % index
-        path = '/company/{id:\d+}/customers/import/%d' %index
+        path = '/company/{id:\d+}/customers/import/%d' % index
         config.add_route(route_name, path, traverse='/companies/{id}')
 
     config.add_view(

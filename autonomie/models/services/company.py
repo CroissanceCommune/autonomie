@@ -27,6 +27,7 @@ from sqlalchemy import (
     desc,
     and_,
 )
+from sqlalchemy.orm import load_only
 
 from autonomie.models.base import DBSESSION
 
@@ -105,3 +106,15 @@ class CompanyService(object):
         query = query.filter(Invoice.date < key_day)
         query = query.order_by(desc(Invoice.date))
         return query
+
+    @classmethod
+    def get_customer_codes_and_names(cls, instance):
+        """
+        Return a query for code and names of customers related to instance
+        """
+        from autonomie.models.customer import Customer
+        query = DBSESSION().query(Customer)
+        query = query.options(load_only('code', 'name'))
+        query = query.filter(Customer.code != None)
+        query = query.filter(Customer.company_id == instance.id)
+        return query.order_by(Customer.code)

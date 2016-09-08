@@ -142,6 +142,13 @@ def upgrade():
                 )
             )
 
+    op.add_column(
+        "date_convention_cape_datas",
+        sa.Column('end_date', sa.Date(), nullable=True)
+    )
+    op.execute("alter table customer MODIFY code VARCHAR(4);")
+    op.execute("alter table project MODIFY code VARCHAR(4);")
+
     from zope.sqlalchemy import mark_changed
     mark_changed(session)
 

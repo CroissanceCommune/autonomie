@@ -102,20 +102,29 @@ class Estimation(Task, EstimationCompute):
 
     valid_states = ('valid', 'geninv')
 
-    _number_tmpl = u"{s.project.code}_{s.customer.code}_D{s.sequence_number}\
-_{s.date:%m%y}"
+    _number_tmpl = u"{s.company.name} {s.date:%Y-%m} D{s.company_index}"
 
     _name_tmpl = u"Devis {0}"
 
-    def _get_number(self, project):
+    def _get_project_index(self, project):
         """
-        Return the sequence number for the current object
+        Return the index of the current object in the associated project
         :param obj project: A Project instance in which we will look to get the
         current doc index
         :returns: The next number
         :rtype: int
         """
-        return project.get_next_estimation_number()
+        return project.get_next_estimation_index()
+
+    def _get_company_index(self, company):
+        """
+        Return the index of the current object in the associated company
+        :param obj company: A Company instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        return company.get_next_estimation_index()
 
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
@@ -277,7 +286,8 @@ _{s.date:%m%y}"
         # Used to store the amount of the intermediary invoices
         paid_lines = []
 
-        current_seq_number = None
+        current_project_index = None
+        current_company_index = None
 
         # Sequence number that will be incremented by hand
         if self.deposit > 0:
@@ -287,7 +297,8 @@ _{s.date:%m%y}"
             # We remember the lines to display them in the last invoice
             paid_lines.extend(lines)
 
-            current_seq_number = invoice.sequence_number
+            current_project_index = invoice.project_index
+            current_company_index = invoice.company_index
 
             # We need to update the invoice name
             invoice.set_deposit_label()
@@ -304,13 +315,18 @@ _{s.date:%m%y}"
                     line,
                     amounts,
                 )
-                if current_seq_number is None:
+                if current_project_index is None:
                     # Label and numbers remains unchanged, no need to update
                     # numbers
-                    current_seq_number = invoice.sequence_number
+                    current_project_index = invoice.project_index
+                    current_company_index = invoice.company_index
                 else:
-                    current_seq_number += 1
-                    invoice.set_numbers(current_seq_number)
+                    current_project_index += 1
+                    current_company_index += 1
+                    invoice.set_numbers(
+                        current_company_index,
+                        current_project_index,
+                    )
 
                 paid_lines.extend(lines)
         else:
@@ -325,13 +341,18 @@ _{s.date:%m%y}"
                     line,
                     amounts,
                 )
-                if current_seq_number is None:
+                if current_project_index is None:
                     # Label and numbers remains unchanged, no need to update
                     # numbers
-                    current_seq_number = invoice.sequence_number
+                    current_project_index = invoice.project_index
+                    current_company_index = invoice.company_index
                 else:
-                    current_seq_number += 1
-                    invoice.set_numbers(current_seq_number)
+                    current_project_index += 1
+                    current_company_index += 1
+                    invoice.set_numbers(
+                        current_company_index,
+                        current_project_index,
+                    )
                 paid_lines.extend(lines)
 
         invoice = self._get_common_invoice(user)
@@ -342,10 +363,11 @@ _{s.date:%m%y}"
             paid_lines,
         )
 
-        if current_seq_number is not None:
+        if current_project_index is not None:
             # here we already have some invoices set
-            current_seq_number += 1
-            invoice.set_numbers(current_seq_number)
+            current_project_index += 1
+            current_company_index += 1
+            invoice.set_numbers(current_company_index, current_project_index)
             invoice.set_sold_label()
 
         invoices.append(invoice)

@@ -181,30 +181,39 @@ class Invoice(Task, InvoiceCompute):
     not_paid_states = ('valid', 'paid', )
     valid_states = paid_states + not_paid_states
 
-    _number_tmpl = u"{s.project.code}_{s.customer.code}_F{s.sequence_number}\
-_{s.date:%m%y}"
+    _number_tmpl = u"{s.company.name} {s.date:%Y-%m} F{s.company_index}"
+
     _name_tmpl = u"Facture {0}"
+
     _deposit_name_tmpl = u"Facture d'acompte {0}"
+
     _sold_name_tmpl = u"Facture de solde {0}"
 
-    def _get_number(self, project):
+    def _get_project_index(self, project):
         """
-        Return the sequence number for the current object
+        Return the index of the current object in the associated project
         :param obj project: A Project instance in which we will look to get the
         current doc index
         :returns: The next number
         :rtype: int
         """
-        return project.get_next_invoice_number()
+        return project.get_next_invoice_index()
 
-    def set_numbers(self, number, sold=False):
-        Task.set_numbers(self, number)
+    def _get_company_index(self, company):
+        """
+        Return the index of the current object in the associated company
+        :param obj company: A Company instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        return company.get_next_invoice_index()
 
     def set_deposit_label(self):
-        self.name = self._deposit_name_tmpl.format(self.sequence_number)
+        self.name = self._deposit_name_tmpl.format(self.project_index)
 
     def set_sold_label(self):
-        self.name = self._sold_name_tmpl.format(self.sequence_number)
+        self.name = self._sold_name_tmpl.format(self.project_index)
 
     def is_draft(self):
         return self.CAEStatus in ('draft', 'invalid',)
@@ -431,19 +440,29 @@ class CancelInvoice(Task, TaskCompute):
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )
 
-    _number_tmpl = u"{s.project.code}_{s.customer.code}_A{s.sequence_number}\
-_{s.date:%m%y}"
+    _number_tmpl = u"{s.company.name} {s.date:%Y-%m} A{s.company_index}"
+
     _name_tmpl = u"Avoir {0}"
 
-    def _get_number(self, project):
+    def _get_project_index(self, project):
         """
-        Return the sequence number for the current object
+        Return the index of the current object in the associated project
         :param obj project: A Project instance in which we will look to get the
         current doc index
         :returns: The next number
         :rtype: int
         """
-        return project.get_next_cancelinvoice_number()
+        return project.get_next_invoice_index()
+
+    def _get_company_index(self, company):
+        """
+        Return the index of the current object in the associated company
+        :param obj company: A Company instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        return company.get_next_invoice_index()
 
     def is_editable(self, manage=False):
         if manage:

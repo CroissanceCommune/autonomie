@@ -58,7 +58,7 @@ DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 
 INVOICE = dict(
     name=u"Facture 2",
-    sequence_number=2,
+    project_index=2,
     date=datetime.date(2012, 12, 10), #u"10-12-2012",
     description=u"Description de la facture",
     _number=u"invoicenumber",
@@ -133,6 +133,7 @@ def cancelinvoice(project, user, customer, company, phase):
         user,
     )
     cancelinvoice.address = customer.address
+    cancelinvoice.date = datetime.date(2012, 12, 10)
 
     return cancelinvoice
 
@@ -146,25 +147,25 @@ def tva(dbsession):
 
 
 def test_set_numbers(invoice, cancelinvoice):
-    invoice.set_numbers(15)
-    assert invoice.internal_number.startswith(u"PRO1_CLI1_F15_")
-    assert invoice.name == u"Facture 15"
+    invoice.set_numbers(15, 1)
+    assert invoice.internal_number == u"company1 2012-12 F15"
+    assert invoice.name == u"Facture 1"
 
-    cancelinvoice.set_numbers(5)
+    cancelinvoice.set_numbers(15, 5)
     assert cancelinvoice.name == u"Avoir 5"
-    assert cancelinvoice.internal_number.startswith(u"PRO1_CLI1_A5")
+    assert cancelinvoice.internal_number == u"company1 2012-12 A15"
 
 
 def test_set_deposit_label(invoice):
-    invoice.set_numbers(5)
+    invoice.set_numbers(5, 8)
     invoice.set_deposit_label()
-    assert invoice.name == u"Facture d'acompte 5"
+    assert invoice.name == u"Facture d'acompte 8"
 
 
 def test_set_sold_label(invoice):
-    invoice.set_numbers(5)
+    invoice.set_numbers(5, 8)
     invoice.set_sold_label()
-    assert invoice.name == u"Facture de solde 5"
+    assert invoice.name == u"Facture de solde 8"
 
 def test_duplicate_invoice(dbsession, invoice):
     newinvoice = invoice.duplicate(

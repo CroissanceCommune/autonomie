@@ -189,10 +189,6 @@ class Task(Node):
         default=get_current_timestamp,
         info={'colanderalchemy': {'typ': colander.Date}}
     )
-    taskDate = Column(
-        CustomDateType2,
-        info={'colanderalchemy': {'typ': colander.Date}}
-    )
     date = Column(Date(), default=datetime.date.today)
     owner_id = Column(
         ForeignKey('accounts.id'),
@@ -242,7 +238,11 @@ class Task(Node):
         ForeignKey('customer.id'),
         info={'colanderalchemy': {'exclude': True}},
     )
-    sequence_number = deferred(
+    project_index = deferred(
+        Column(Integer),
+        group='edit',
+    )
+    company_index = deferred(
         Column(Integer),
         group='edit',
     )
@@ -446,13 +446,14 @@ class Task(Node):
     )
 
     _name_tmpl = u"Task {}"
-    _number_tmpl = u"{s.project.code}_{s.customer.code}_T{s.sequence_number}\
+    _number_tmpl = u"{s.project.code}_{s.customer.code}_T{s.project_index}\
 _{s.date:%m%y}"
 
     state_machine = DEFAULT_STATE_MACHINES['base']
 
     def __init__(self, company, customer, project, phase, user):
-        sequence_number = self._get_number(project)
+        company_index = self._get_company_index(company)
+        project_index = self._get_project_index(project)
 
         self.CAEStatus = self.state_machine.default_state
         self.company = company
@@ -462,31 +463,46 @@ _{s.date:%m%y}"
         self.owner = user
         self.statusPersonAccount = user
         self.date = datetime.date.today()
-        self.set_numbers(sequence_number)
+        self.set_numbers(company_index, project_index)
 
         # We add a default task line group
         self.line_groups.append(TaskLineGroup(order=0))
 
-    def _get_number(self, project):
+    def _get_project_index(self, project):
         """
-        Return the sequence number for the current object
+        Return the index of the current object in the associated project
         :param obj project: A Project instance in which we will look to get the
         current doc index
         :returns: The next number
         :rtype: int
         """
-        raise NotImplemented("Implement this _get_number method please")
+        raise NotImplemented("Implement this method please")
 
-    def set_numbers(self, number):
+    def _get_company_index(self, company):
+        """
+        Return the index of the current object in the associated company
+        :param obj company: A Company instance in which we will look to get the
+        current doc index
+        :returns: The next number
+        :rtype: int
+        """
+        raise NotImplemented("Implement this method please")
+
+    def set_numbers(self, company_index, project_index):
         """
         Handle all attributes related to the given number
-        """
-        if number is None:
-            raise Exception("Number should not be None")
 
-        self.sequence_number = number
+        :param int company_index: The index of the task in the company
+        :param int project_index: The index of the task in its project
+        """
+        if company_index is None or project_index is None:
+            raise Exception("Indexes should not be None")
+
+        self.company_index = company_index
+        self.project_index = project_index
+
         self.internal_number = self._number_tmpl.format(s=self)
-        self.name = self._name_tmpl.format(number)
+        self.name = self._name_tmpl.format(project_index)
 
     @property
     def default_line_group(self):

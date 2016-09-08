@@ -52,13 +52,16 @@ def getone():
 @pytest.fixture
 def customer(dbsession):
     from autonomie.models.customer import Customer
-    datas = {'name':'Company', 'contactLastName':u'Lastname',
-             'contactFirstName':u'FirstName',
-             'address':'Address should be multiline',
-             'zipCode': "21000",
-             "city": "Dijon",
-             'compte_cg':"Compte CG1515",
-             'compte_tiers':"Compte Tiers", 'code': 'CODE'}
+    datas = {
+        'name':'Company', 'contactLastName':u'Lastname',
+        'contactFirstName':u'FirstName',
+        'address':'Address should be multiline',
+        'zipCode': "21000",
+        "city": "Dijon",
+        'compte_cg':"Compte CG1515",
+        'compte_tiers':"Compte Tiers", 'code': 'CODE',
+        'company_id': 1
+    }
     c = Customer(**datas)
     dbsession.add(c)
     dbsession.flush()

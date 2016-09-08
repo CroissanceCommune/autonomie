@@ -163,10 +163,10 @@ def estimation(project, user, customer, company, phase):
 
 
 def test_set_numbers(estimation):
-    estimation.set_numbers(5)
-    assert estimation.internal_number.startswith(u"PRO1_CLI1_D5")
-    assert estimation.name == u"Devis 5"
-    assert estimation.sequence_number == 5
+    estimation.set_numbers(5, 18)
+    assert estimation.internal_number == u"company1 1969-07 D5"
+    assert estimation.name == u"Devis 18"
+    assert estimation.project_index == 18
 
 
 def test_duplicate_estimation(dbsession, estimation):
@@ -181,7 +181,9 @@ def test_duplicate_estimation(dbsession, estimation):
     assert newestimation.CAEStatus == 'draft'
     assert newestimation.project == estimation.project
     assert newestimation.statusPersonAccount == estimation.owner
-    assert newestimation.internal_number.startswith("PRO1_CLI1_")
+    assert newestimation.internal_number.startswith("company1 {0:%Y-%m}".format(
+        datetime.date.today()
+    ))
     assert newestimation.phase
     assert newestimation.mentions == estimation.mentions
     assert phase

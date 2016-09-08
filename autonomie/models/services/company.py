@@ -142,7 +142,7 @@ class CompanyService(object):
         return query.order_by(Project.code)
 
     @classmethod
-    def get_next_number(cls, company, factory):
+    def get_next_index(cls, company, factory):
         query = DBSESSION.query(func.max(factory.company_index))
         query = query.filter(factory.company_id == company.id)
         max_num = query.first()[0]
@@ -152,25 +152,25 @@ class CompanyService(object):
         return max_num + 1
 
     @classmethod
-    def get_next_estimation_number(cls, company):
+    def get_next_estimation_index(cls, company):
         """
-        Return the next available sequence number in the given company
+        Return the next available sequence index in the given company
         """
         from autonomie.models.task import Estimation
-        return cls.get_next_number(company, Estimation)
+        return cls.get_next_index(company, Estimation)
 
     @classmethod
-    def get_next_invoice_number(cls, company):
+    def get_next_invoice_index(cls, company):
         """
-        Return the next available sequence number in the given company
+        Return the next available sequence index in the given company
         """
         from autonomie.models.task import Invoice
-        return cls.get_next_number(company, Invoice)
+        return cls.get_next_index(company, Invoice)
 
     @classmethod
-    def get_next_cancelinvoice_number(cls, company):
+    def get_next_cancelinvoice_index(cls, company):
         """
-        Return the next available sequence number in the given company
+        Return the next available sequence index in the given company
         """
         from autonomie.models.task import CancelInvoice
-        return cls.get_next_number(company, CancelInvoice)
+        return cls.get_next_index(company, CancelInvoice)

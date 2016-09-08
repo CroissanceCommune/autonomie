@@ -34,7 +34,7 @@ from autonomie.models.project import Phase, Project
 from autonomie.models.company import Company
 
 INVOICE = dict( name=u"Facture 2",
-                sequence_number=2,
+                project_index=2,
                 date=datetime.date(2012, 12, 10), #u"10-12-2012",
                 description=u"Description de la facture",
                 expenses=0,

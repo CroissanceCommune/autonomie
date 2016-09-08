@@ -59,6 +59,7 @@
                 <% id_ = document.id %>
                 <% description = document.description %>
                 <% internal_number = document.internal_number %>
+                <% name = document.name %>
                 <% ht = document.ht %>
                 <% tva = document.tva %>
                 <% ttc = document.ttc %>
@@ -109,14 +110,15 @@
                 ${api.format_date(date)}
             </td>
             <td>
-                <a href="${request.route_path(document.type_, id=id_)}"
-                    title='Voir le document'>
-                    ${internal_number}
-                </a>
-                % if not is_admin_view:
-                <small>
-                    ${format_text(description)}
-                </small>
+                % if is_admin_view:
+                    <a href="${request.route_path(document.type_, id=id_)}"
+                        title='Voir le document'>
+                        ${internal_number} (<small>${name}</small>)
+                    </a>
+                % else:
+                    <small>
+                        ${format_text(description)}
+                    </small>
                 % endif
             </td>
             <td class='invoice_company_name'>

@@ -357,6 +357,7 @@ class GlobalEstimationList(BaseListView):
         query = self.request.dbsession.query(
             distinct(Estimation.id),
             Estimation.name,
+            Estimation.internal_number,
             Estimation.CAEStatus,
             Estimation.date,
             Estimation.description,
@@ -426,9 +427,9 @@ class GlobalEstimationList(BaseListView):
         """
         ret_dict = BaseListView.more_template_vars(self, response_dict)
         records = response_dict['records']
-        ret_dict['totalht'] = sum(r[5] for r in records)
-        ret_dict['totaltva'] = sum(r[6] for r in records)
-        ret_dict['totalttc'] = sum(r[7] for r in records)
+        ret_dict['totalht'] = sum(r[6] for r in records)
+        ret_dict['totaltva'] = sum(r[7] for r in records)
+        ret_dict['totalttc'] = sum(r[8] for r in records)
         return ret_dict
 
 

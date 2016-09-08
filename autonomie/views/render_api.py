@@ -62,8 +62,8 @@ STATUS = dict(
         ('invalid', u"Invalidé{genre}",),
         ("abort", u"Annulé{genre}",),
         ("geninv", u"Facture générée",),
-        ("aboinv", u"Facture annulée",),
-        ("aboest", u"Devis annulé",),
+        ("aboinv", u"Facture indiquée sans suite",),
+        ("aboest", u"Devis indiqué sans suite",),
         ("paid", u"Paiement partiel reçu",),
         ("resulted", u"Paiement reçu",),
     )

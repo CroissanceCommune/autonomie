@@ -76,7 +76,7 @@
             <td colspan='1'></td>
         </tr>
         % if records:
-            % for id_, name, CAEStatus, date, description, ht, tva, ttc, customer_id, customer_name, company_id, company_name in records:
+            % for id_, name, internal_number, CAEStatus, date, description, ht, tva, ttc, customer_id, customer_name, company_id, company_name in records:
                 <tr class="estimation_${CAEStatus}_tr">
                     <td class="estimation_${CAEStatus}">
                     </td>
@@ -89,7 +89,7 @@
             % endif
             <td>${api.format_date(date)}</td>
             <td>
-                <a href="${request.route_path("estimation", id=id_)}" title="Voir le document">${name}</a>
+                <a href="${request.route_path("estimation", id=id_)}" title="Voir le document">${name} (<small>${internal_number}</small>)</a>
                 <small>${format_text(description)}</small>
             </td>
             <td>

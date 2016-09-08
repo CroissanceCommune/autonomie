@@ -325,7 +325,7 @@ def deferred_default_name(node, kw):
     """
     request = kw['request']
     tasktype = get_tasktype_from_request(request)
-    method = "get_next_{0}_number".format(tasktype)
+    method = "get_next_{0}_index".format(tasktype)
 
     if request.context.__name__ == 'project':
         # e.g : project.get_next_invoice_number()

@@ -40,14 +40,12 @@ from deform import (
 from deform.exception import ValidationFailure
 
 from autonomie.compute.sage import (
-    InvoiceExport,
     ExpenseExport,
     PaymentExport,
     ExpensePaymentExport,
     MissingData,
 )
 from autonomie.export.sage import (
-    SageInvoiceCsvWriter,
     SageExpenseCsvWriter,
     SagePaymentCsvWriter,
     SageExpensePaymentCsvWriter
@@ -265,6 +263,7 @@ class SageInvoiceExportPage(BaseView):
     def check_customer(self, customer):
         """
             Check the invoice's customer is configured for exports
+
         """
         if not customer.compte_cg:
             return False
@@ -351,8 +350,12 @@ target='_blank'>Voir l'entreprise</a>"""
         """
             Write the exported csv file to the request
         """
-        exporter = InvoiceExport(self.request.config)
-        writer = SageInvoiceCsvWriter()
+        from autonomie.interfaces import ITreasuryInvoiceProducer
+        exporter = self.request.find_service(ITreasuryInvoiceProducer)
+        from autonomie.interfaces import ITreasuryInvoiceWriter
+        writer = self.request.find_service(ITreasuryInvoiceWriter)
+
+#        writer = SageInvoiceCsvWriter()
         writer.set_datas(exporter.get_book_entries(invoices))
         write_file_to_request(
             self.request,

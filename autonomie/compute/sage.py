@@ -48,6 +48,7 @@ from autonomie.compute.math_utils import (
     compute_tva,
 )
 from autonomie.views import render_api
+from autonomie import interfaces
 
 log = logging.getLogger(__name__)
 
@@ -318,6 +319,7 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
 class SageFacturation(BaseInvoiceBookEntryFactory):
     """
         Facturation treasury export module
+        implements IMainInvoiceTreasury
 
         For each product exports exportsthree types of treasury lines
             * Crédit TotalHT
@@ -348,6 +350,9 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             * Libellés
             * Montant
     """
+    def __init__(self, context, request):
+        self.config = request.config
+        self.company = None
 
     @property
     def libelle(self):
@@ -957,7 +962,6 @@ class InvoiceExport(object):
         @param config: application configuration dict, contains all the CAE wide
         account configurations
     """
-    _default_modules = (SageFacturation,)
     _available_modules = {
         "sage_contribution": SageContribution,
         "sage_assurance": SageAssurance,
@@ -967,11 +971,11 @@ class InvoiceExport(object):
         "sage_rgclient": SageRGClient,
         }
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, context, request):
+        self.config = request.config
         self.modules = []
-        for module in self._default_modules:
-            self.modules.append(module(self.config))
+        default_module = request.find_service(interfaces.ITreasuryMainInvoice)
+        self.modules.append(default_module)
         for config_key, module in self._available_modules.items():
             if self.config.get(config_key) == '1':
                 self.modules.append(module(self.config))

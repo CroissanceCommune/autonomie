@@ -43,7 +43,7 @@ class SageCsvWriter(CsvExporter):
     headers = ()
     amount_precision = 2
 
-    def __init__(self):
+    def __init__(self, *args):
         CsvExporter.__init__(self, encoding=SAGE_COMPATIBLE_ENCODING)
 
     def format_debit(self, debit):

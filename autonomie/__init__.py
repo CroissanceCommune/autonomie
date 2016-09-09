@@ -27,12 +27,15 @@
 import locale
 locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
 locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
-from pyramid.config import Configurator
-from pyramid_beaker import set_cache_regions_from_settings
+
 from sqlalchemy import engine_from_config
 
+from pyramid.config import Configurator
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.path import DottedNameResolver
+
+from pyramid_beaker import set_cache_regions_from_settings
 
 from autonomie.utils.security import (
     RootFactory,
@@ -102,25 +105,32 @@ AUTONOMIE_ADMIN_MODULES = (
     "autonomie.views.admin.vente",
 )
 
+AUTONOMIE_SERVICE_FACTORIES = (
+    (
+        "services.treasury_main_invoice",
+        "autonomie.compute.sage.SageFacturation",
+        "autonomie.interfaces.ITreasuryMainInvoice",
+    ),
+    (
+        "services.treasury_invoice_producer",
+        "autonomie.compute.sage.InvoiceExport",
+        "autonomie.interfaces.ITreasuryInvoiceProducer",
+    ),
+    (
+        "services.treasury_invoice_writer",
+        "autonomie.export.sage.SageInvoiceCsvWriter",
+        "autonomie.interfaces.ITreasuryInvoiceWriter",
+    ),
+)
+AUTONOMIE_SERVICES = (
+)
 
-# def add_menu(config, menu_object, menu_type, panel_name, rights=None):
-#     """
-#     Add a add_menu method to the configuration object
-#
-#     """
-#     registry = config.registry
-#     def callback():
-#         if not hasattr(registry, 'autonomie_menus'):
-#             registry.autonomie_menus = {}
-#         registry.autonomie_menus.setdefault(
-#             menu_type,
-#             {}
-#         ).setdefault(
-#             panel_name,
-#             {}
-#         )[name] = menu_object
-#
-#     config.action(
+
+def resolve(dotted_path):
+    """
+    Return the module or the python variable matching the dotted_path
+    """
+    return DottedNameResolver().resolve(dotted_path)
 
 
 def add_static_views(config, settings):
@@ -212,6 +222,18 @@ def base_configure(config, dbsession, **settings):
 
     for module in AUTONOMIE_ADMIN_MODULES:
         config.include(module)
+
+    for service_name, default, interface_path in AUTONOMIE_SERVICES:
+        module_path = settings.get("autonomie." + service_name, default)
+        interface = resolve(interface_path)
+        module = resolve(module_path)
+        config.register_service(module(), interface)
+
+    for service_name, default, interface_path in AUTONOMIE_SERVICE_FACTORIES:
+        module_path = settings.get("autonomie." + service_name, default)
+        interface = resolve(interface_path)
+        module = resolve(module_path)
+        config.register_service_factory(module, interface)
 
     from autonomie.utils.renderer import (
         customize_renderers,

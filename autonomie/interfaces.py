@@ -23,23 +23,6 @@
 from zope.interface import Interface
 
 
-class ITreasuryMainInvoice(Interface):
-    """
-    Service producing the main export lines from a given invoice
-    """
-    def set_invoice(self):
-        """
-        Set the current invoice
-        """
-        pass
-
-    def yield_entries(self):
-        """
-        yield lines that need to be outputed
-        """
-        pass
-
-
 class ITreasuryInvoiceProducer(Interface):
     """
     Interface for the class that will produce treasury invoice export lines

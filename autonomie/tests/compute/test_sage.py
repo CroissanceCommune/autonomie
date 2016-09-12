@@ -74,7 +74,8 @@ class DummyInvoice(Dummy, InvoiceCompute):
     pass
 
 
-def get_config():
+@pytest.fixture
+def app_config():
     return {
         'code_journal': 'CODE_JOURNAL',
         'compte_cg_contribution': 'CG_CONTRIB',
@@ -105,6 +106,13 @@ def get_config():
         'receipts_active_tva_module': True,
         'receipts_code_journal': "JOURNAL_RECEIPTS",
     }
+
+
+@pytest.fixture
+def config_request(pyramid_request, app_config, config):
+    pyramid_request.config = app_config
+    print(dir(pyramid_request))
+    return pyramid_request
 
 
 @pytest.fixture
@@ -308,37 +316,37 @@ def invoice_discount(def_tva, tva, invoice):
 
 
 @pytest.fixture
-def sageinvoice(def_tva, invoice):
+def sageinvoice(def_tva, invoice, app_config):
     return SageInvoice(
         invoice=invoice,
-        config=get_config(),
+        config=app_config,
         default_tva=def_tva,
     )
 
 
 @pytest.fixture
-def sageinvoice_bug363(def_tva, invoice_bug363):
+def sageinvoice_bug363(def_tva, invoice_bug363, app_config):
     return SageInvoice(
         invoice=invoice_bug363,
-        config=get_config(),
+        config=app_config,
         default_tva=def_tva,
     )
 
 
 @pytest.fixture
-def sageinvoice_bug400(def_tva, invoice_bug400):
+def sageinvoice_bug400(def_tva, invoice_bug400, app_config):
     return SageInvoice(
         invoice=invoice_bug400,
-        config=get_config(),
+        config=app_config,
         default_tva=def_tva,
     )
 
 
 @pytest.fixture
-def sageinvoice_discount(def_tva, invoice_discount):
+def sageinvoice_discount(def_tva, invoice_discount, app_config):
     return SageInvoice(
         invoice=invoice_discount,
-        config=get_config(),
+        config=app_config,
         default_tva=def_tva
     )
 
@@ -363,6 +371,20 @@ def payment(invoice, def_tva, bank):
         invoice=invoice,
     )
     return p
+
+
+@pytest.fixture
+def sagepayment(payment, config_request):
+    factory = SagePaymentMain(None, config_request)
+    factory.set_payment(payment)
+    return factory
+
+
+@pytest.fixture
+def sagepayment_tva(payment, config_request):
+    factory = SagePaymentTva(None, config_request)
+    factory.set_payment(payment)
+    return factory
 
 
 @pytest.fixture
@@ -406,6 +428,27 @@ def expense_payment(expense, bank):
         bank=bank,
     )
     return p
+
+
+@pytest.fixture
+def sage_expense(config_request, expense):
+    factory = SageExpenseMain(None, config_request)
+    factory.set_expense(expense)
+    return factory
+
+
+@pytest.fixture
+def sage_expense_payment(config_request, expense_payment):
+    factory = SageExpensePaymentMain(None, config_request)
+    factory.set_payment(expense_payment)
+    return factory
+
+
+@pytest.fixture
+def sage_expense_payment_waiver(config_request, expense_payment):
+    factory = SageExpensePaymentWaiver(None, config_request)
+    factory.set_payment(expense_payment)
+    return factory
 
 
 def test_get_products(sageinvoice):
@@ -472,6 +515,7 @@ class BaseBookEntryTest():
 
     def _test_product_book_entry(
             self,
+            config_request,
             wrapped_invoice,
             method,
             exp_analytic_line,
@@ -479,9 +523,8 @@ class BaseBookEntryTest():
         """
         test a book_entry output (one of a product)
         """
-        config = get_config()
         wrapped_invoice.populate()
-        book_entry_factory = self.factory(config)
+        book_entry_factory = self.factory(None, config_request)
         book_entry_factory.set_invoice(wrapped_invoice)
         product = wrapped_invoice.products[prod_cg]
 
@@ -498,13 +541,12 @@ class BaseBookEntryTest():
         assert general_line == exp_general_line
         assert analytic_line == exp_analytic_line
 
-    def _test_invoice_book_entry(self, wrapped_invoice, method, exp_analytic_line):
+    def _test_invoice_book_entry(self, config_request, wrapped_invoice, method, exp_analytic_line):
         """
         test a book_entry output (one of a product)
         """
-        config = get_config()
         wrapped_invoice.populate()
-        book_entry_factory = self.factory(config)
+        book_entry_factory = self.factory(None, config_request)
         book_entry_factory.set_invoice(wrapped_invoice)
 
         general_line, analytic_line = getattr(book_entry_factory, method)()
@@ -544,7 +586,7 @@ class TestSageFacturation(BaseBookEntryTest):
         product = {'tva': -0.5}
         assert SageFacturation._has_tva_value(product)
 
-    def test_credit_totalht(self, sageinvoice):
+    def test_credit_totalht(self, sageinvoice, config_request):
         res = {
             'libelle': 'customer company',
             'compte_cg': 'P0001',
@@ -553,18 +595,18 @@ class TestSageFacturation(BaseBookEntryTest):
             'credit': 20000000,
         }
         method = "credit_totalht"
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request, sageinvoice, method, res)
 
-    def test_credit_tva(self, sageinvoice):
+    def test_credit_tva(self, sageinvoice, config_request):
         res = {'libelle': 'customer company',
             'compte_cg': 'TVA0001',
             'num_analytique': 'COMP_CG',
             'code_tva': 'CTVA0001',
             'credit': 3920000}
         method = "credit_tva"
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request, sageinvoice, method, res)
 
-    def test_debit_ttc(self, sageinvoice):
+    def test_debit_ttc(self, config_request, sageinvoice):
         method = "debit_ttc"
         res = {'libelle': 'customer company',
             'compte_cg': 'CG_CUSTOMER',
@@ -572,9 +614,9 @@ class TestSageFacturation(BaseBookEntryTest):
             'compte_tiers': 'CUSTOMER',
             'debit': 23920000,
             'echeance': '040313'}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request, sageinvoice, method, res)
 
-    def test_discount_ht(self, sageinvoice_discount):
+    def test_discount_ht(self, sageinvoice_discount, config_request):
         # REF #307 : https://github.com/CroissanceCommune/autonomie/issues/307
         method = "credit_totalht"
         res = {
@@ -585,13 +627,14 @@ class TestSageFacturation(BaseBookEntryTest):
             'debit': 20000000,
         }
         self._test_product_book_entry(
+            config_request,
             sageinvoice_discount,
             method,
             res,
             'CG_RRR',
         )
 
-    def test_discount_tva(self, sageinvoice_discount):
+    def test_discount_tva(self, sageinvoice_discount, config_request):
         # REF #307 : https://github.com/CroissanceCommune/autonomie/issues/307
         res = {
             'libelle': 'customer company',
@@ -602,13 +645,14 @@ class TestSageFacturation(BaseBookEntryTest):
         }
         method = "credit_tva"
         self._test_product_book_entry(
+            config_request,
             sageinvoice_discount,
             method,
             res,
             'CG_RRR',
         )
 
-    def test_discount_ttc(self, sageinvoice_discount):
+    def test_discount_ttc(self, config_request, sageinvoice_discount):
         # REF #307 : https://github.com/CroissanceCommune/autonomie/issues/307
         method = "debit_ttc"
         res = {
@@ -620,59 +664,63 @@ class TestSageFacturation(BaseBookEntryTest):
             'echeance': '040313',
         }
         self._test_product_book_entry(
+            config_request,
             sageinvoice_discount,
             method,
             res,
             'CG_RRR',
         )
 
-    def test_bug363(self, sageinvoice_bug363):
+    def test_bug363(self, config_request, sageinvoice_bug363):
         res = {'libelle': 'customer company',
             'compte_cg': 'TVA10',
             'num_analytique': 'COMP_CG',
             'code_tva': 'CTVA10',
             'credit': 20185000}
         method = "credit_tva"
-        self._test_product_book_entry(sageinvoice_bug363, method, res, "P0002")
+        self._test_product_book_entry(
+            config_request,
+            sageinvoice_bug363, method, res, "P0002")
 
 
 
 class TestSageContribution(BaseBookEntryTest):
     factory = SageContribution
 
-    def test_debit_entreprise(self, sageinvoice):
+    def test_debit_entreprise(self, config_request, sageinvoice):
         method = "debit_entreprise"
         res = {'libelle': 'customer company',
             'compte_cg': 'CG_CONTRIB',
             'num_analytique': 'COMP_CG',
             'debit':2000000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(
+            config_request, sageinvoice, method, res)
 
-    def test_credit_entreprise(self, sageinvoice):
+    def test_credit_entreprise(self, config_request, sageinvoice):
         method = "credit_entreprise"
         res = {'libelle': 'customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'COMP_CG',
             'credit':2000000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request, sageinvoice, method, res)
 
-    def test_debit_cae(self, sageinvoice):
+    def test_debit_cae(self, config_request, sageinvoice):
         method = "debit_cae"
         res = {'libelle': 'customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'NUM_ANA',
             'debit':2000000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
-    def test_credit_cae(self, sageinvoice):
+    def test_credit_cae(self, config_request, sageinvoice):
         method = "credit_cae"
         res = {'libelle': 'customer company',
             'compte_cg': 'CG_CONTRIB',
             'num_analytique': 'NUM_ANA',
             'credit':2000000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
-    def test_discount_line_inversion_debit_entr(self, sageinvoice_discount):
+    def test_discount_line_inversion_debit_entr(self, config_request, sageinvoice_discount):
         # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
         # Débit et crédit vont dans le sens inverse pour les remises (logique)
         method = "debit_entreprise"
@@ -680,14 +728,14 @@ class TestSageContribution(BaseBookEntryTest):
             'compte_cg': 'BANK_CG',
             'num_analytique': 'COMP_CG',
             'debit': 2000000}
-        self._test_product_book_entry(
+        self._test_product_book_entry(config_request,
             sageinvoice_discount,
             method,
             res,
             'CG_RRR',
         )
 
-    def test_discount_line_inversion_credit_entr(self, sageinvoice_discount):
+    def test_discount_line_inversion_credit_entr(self, config_request, sageinvoice_discount):
         # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
         # Débit et crédit vont dans le sens inverse pour les remises (logique)
         method = "credit_entreprise"
@@ -695,14 +743,14 @@ class TestSageContribution(BaseBookEntryTest):
             'compte_cg': 'CG_CONTRIB',
             'num_analytique': 'COMP_CG',
             'credit':2000000}
-        self._test_product_book_entry(
+        self._test_product_book_entry(config_request,
             sageinvoice_discount,
             method,
             res,
             'CG_RRR',
         )
 
-    def test_discount_line_inversion_debit_cae(self, sageinvoice_discount):
+    def test_discount_line_inversion_debit_cae(self, config_request, sageinvoice_discount):
         # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
         # Débit et crédit vont dans le sens inverse pour les remises (logique)
         method = "debit_cae"
@@ -710,14 +758,14 @@ class TestSageContribution(BaseBookEntryTest):
             'compte_cg': 'CG_CONTRIB',
             'num_analytique': 'NUM_ANA',
             'debit':2000000}
-        self._test_product_book_entry(
+        self._test_product_book_entry(config_request,
             sageinvoice_discount,
             method,
             res,
             'CG_RRR',
         )
 
-    def test_discount_line_inversion_credit_cae(self, sageinvoice_discount):
+    def test_discount_line_inversion_credit_cae(self, config_request, sageinvoice_discount):
         # REF #333 : https://github.com/CroissanceCommune/autonomie/issues/333
         # Débit et crédit vont dans le sens inverse pour les remises (logique)
         method = "credit_cae"
@@ -725,7 +773,7 @@ class TestSageContribution(BaseBookEntryTest):
             'compte_cg': 'BANK_CG',
             'num_analytique': 'NUM_ANA',
             'credit':2000000}
-        self._test_product_book_entry(
+        self._test_product_book_entry(config_request,
             sageinvoice_discount,
             method,
             res,
@@ -737,7 +785,7 @@ class TestSageAssurance(BaseBookEntryTest):
     # Amount = 2000 0.05 * somme des ht des lignes + expense_ht
     factory = SageAssurance
 
-    def test_debit_entreprise(self, sageinvoice):
+    def test_debit_entreprise(self, config_request, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -745,9 +793,9 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'debit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_credit_entreprise(self, sageinvoice):
+    def test_credit_entreprise(self, config_request, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -755,9 +803,9 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'credit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_debit_cae(self, sageinvoice):
+    def test_debit_cae(self, config_request, sageinvoice):
         method = 'debit_cae'
         res = {
                 'libelle': 'customer company',
@@ -765,9 +813,9 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_credit_cae(self, sageinvoice):
+    def test_credit_cae(self, config_request, sageinvoice):
         method = 'credit_cae'
         res = {
                 'libelle': 'customer company',
@@ -775,13 +823,13 @@ class TestSageAssurance(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'credit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
 
 class TestSageCGScop(BaseBookEntryTest):
     factory = SageCGScop
 
-    def test_debit_entreprise(self, sageinvoice):
+    def test_debit_entreprise(self, config_request, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -789,9 +837,9 @@ class TestSageCGScop(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'debit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_credit_entreprise(self, sageinvoice):
+    def test_credit_entreprise(self, config_request, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': 'customer company',
@@ -799,9 +847,9 @@ class TestSageCGScop(BaseBookEntryTest):
                 'compte_cg': 'BANK_CG',
                 'credit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_debit_cae(self, sageinvoice):
+    def test_debit_cae(self, config_request, sageinvoice):
         method = 'debit_cae'
         res = {
                 'libelle': 'customer company',
@@ -809,9 +857,9 @@ class TestSageCGScop(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_credit_cae(self, sageinvoice):
+    def test_credit_cae(self, config_request, sageinvoice):
         method = 'credit_cae'
         res = {
                 'libelle': 'customer company',
@@ -819,7 +867,7 @@ class TestSageCGScop(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'credit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
 
 class TestSageContributionOrganic(BaseBookEntryTest):
@@ -827,7 +875,7 @@ class TestSageContributionOrganic(BaseBookEntryTest):
 
     libelle = 'Contribution Organic customer company'
 
-    def test_debit_entreprise(self, sageinvoice):
+    def test_debit_entreprise(self, config_request, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': self.libelle,
@@ -835,9 +883,9 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'num_analytique': 'COMP_CG',
                 'debit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_credit_entreprise(self, sageinvoice):
+    def test_credit_entreprise(self, config_request, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': self.libelle,
@@ -845,9 +893,9 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'compte_cg': 'BANK_CG',
                 'credit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_debit_cae(self, sageinvoice):
+    def test_debit_cae(self, config_request, sageinvoice):
         method = 'debit_cae'
         res = {
                 'libelle': self.libelle,
@@ -855,9 +903,9 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'debit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
-    def test_credit_cae(self, sageinvoice):
+    def test_credit_cae(self, config_request, sageinvoice):
         method = 'credit_cae'
         res = {
                 'libelle': self.libelle,
@@ -865,49 +913,49 @@ class TestSageContributionOrganic(BaseBookEntryTest):
                 'num_analytique': 'NUM_ANA',
                 'credit': 2000000,
                 }
-        self._test_invoice_book_entry(sageinvoice, method, res)
+        self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
 
 class TestSageRGInterne(BaseBookEntryTest):
     factory = SageRGInterne
 
-    def test_debit_entreprise(self, sageinvoice):
+    def test_debit_entreprise(self, config_request, sageinvoice):
         method = "debit_entreprise"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'CG_RG_INT',
             'num_analytique': 'COMP_CG',
             'debit':1196000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
-    def test_credit_entreprise(self, sageinvoice):
+    def test_credit_entreprise(self, config_request, sageinvoice):
         method = "credit_entreprise"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'COMP_CG',
             'credit':1196000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
-    def test_debit_cae(self, sageinvoice):
+    def test_debit_cae(self, config_request, sageinvoice):
         method = "debit_cae"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'BANK_CG',
             'num_analytique': 'NUM_ANA',
             'debit':1196000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
-    def test_credit_cae(self, sageinvoice):
+    def test_credit_cae(self, config_request, sageinvoice):
         method = "credit_cae"
         res = {'libelle': 'RG COOP customer company',
             'compte_cg': 'CG_RG_INT',
             'num_analytique': 'NUM_ANA',
             'credit':1196000}
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
 
 class TestSageRGClient(BaseBookEntryTest):
     factory = SageRGClient
 
-    def test_debit_entreprise(self, sageinvoice):
+    def test_debit_entreprise(self, config_request, sageinvoice):
         method = 'debit_entreprise'
         res = {
                 'libelle': 'RG customer company',
@@ -916,9 +964,9 @@ class TestSageRGClient(BaseBookEntryTest):
                 'echeance':'020214',
                 'debit': 1196000,
                 }
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
-    def test_credit_entreprise(self, sageinvoice):
+    def test_credit_entreprise(self, config_request, sageinvoice):
         method = 'credit_entreprise'
         res = {
                 'libelle': 'RG customer company',
@@ -928,15 +976,19 @@ class TestSageRGClient(BaseBookEntryTest):
                 'echeance':'020214',
                 'credit': 1196000,
                 }
-        self._test_product_book_entry(sageinvoice, method, res)
+        self._test_product_book_entry(config_request,sageinvoice, method, res)
 
 
+@pytest.mark.custom33
 class TestSageExport():
-    def test_modules(self):
-        config = {'sage_contribution':'1',
-                'sage_assurance':'1',
-                'sage_cgscop':'0'}
-        exporter = InvoiceExport(config)
+    def test_modules(self, config_request):
+        config = {
+            'sage_contribution':'1',
+            'sage_assurance':'1',
+            'sage_cgscop':'0'
+        }
+        config_request.config = config
+        exporter = InvoiceExport(None, config_request)
         assert len(exporter.modules) == 3
         sage_factories = [SageFacturation, SageContribution, SageAssurance]
         for fact in sage_factories:
@@ -946,64 +998,50 @@ class TestSageExport():
 
 @pytest.mark.payment
 class TestSagePaymentMain():
-    def get_factory(self, payment):
-        factory = SagePaymentMain(get_config())
-        factory.set_payment(payment)
-        return factory
-
-    def test_base_entry(self, payment):
+    def test_base_entry(self, sagepayment):
         today = datetime.date.today()
-        factory = self.get_factory(payment)
-        assert factory.reference == "INV_001/10000"
-        assert factory.code_journal == "CODE_JOURNAL_BANK"
-        assert factory.date == today.strftime("%d%m%y")
-        assert factory.mode == u"chèque"
-        assert factory.libelle == u"company / Rgt customer"
+        assert sagepayment.reference == "INV_001/10000"
+        assert sagepayment.code_journal == "CODE_JOURNAL_BANK"
+        assert sagepayment.date == today.strftime("%d%m%y")
+        assert sagepayment.mode == u"chèque"
+        assert sagepayment.libelle == u"company / Rgt customer"
 
-    def test_credit_client(self, payment):
-        factory = self.get_factory(payment)
-        g_entry, entry = factory.credit_client(10000000)
+    def test_credit_client(self, sagepayment):
+        g_entry, entry = sagepayment.credit_client(10000000)
         assert entry['compte_cg'] == 'CG_CUSTOMER'
         assert entry['compte_tiers'] == 'CUSTOMER'
         assert entry['credit'] == 10000000
 
-    def test_debit_banque(self, payment):
-        factory = self.get_factory(payment)
-        g_entry, entry = factory.debit_banque(10000000)
+    def test_debit_banque(self, sagepayment):
+        g_entry, entry = sagepayment.debit_banque(10000000)
         assert entry['compte_cg'] == "COMPTE_CG_BANK"
         assert entry['debit'] == 10000000
 
 
 @pytest.mark.payment
 class TestSagePaymentTva():
-    def get_factory(self, payment):
-        factory = SagePaymentTva(get_config())
-        factory.set_payment(payment)
-        return factory
-
-    def test_get_amount(self, payment, tva_sans_code):
+    def test_get_amount(self, sagepayment_tva, tva_sans_code, payment):
         payment.tva = tva_sans_code
-        factory = self.get_factory(payment)
-        amount = factory.get_amount()
+        sagepayment_tva.set_payment(payment)
+        amount = sagepayment_tva.get_amount()
         # tva inversée d'un paiement de 10000000 à 20%
         assert amount == 1666667
 
-    def test_credit_tva(self, payment, tva_sans_code):
-        factory = self.get_factory(payment)
-        g_entry, entry = factory.credit_tva(10000000)
+    def test_credit_tva(self, sagepayment_tva, tva_sans_code, payment):
+        g_entry, entry = sagepayment_tva.credit_tva(10000000)
         assert entry['credit'] == 10000000
         assert entry['compte_cg'] == 'TVAAPAYER0001'
         assert entry['code_taxe'] == 'CTVA0001'
 
+        # Test if there is no tva code
         payment.tva = tva_sans_code
-        factory = self.get_factory(payment)
-        g_entry, entry = factory.credit_tva(10000000)
+        sagepayment_tva.set_payment(payment)
+        g_entry, entry = sagepayment_tva.credit_tva(10000000)
         assert 'code_taxe' not in entry
 
 
-    def test_debit_tva(self, payment):
-        factory = self.get_factory(payment)
-        g_entry, entry = factory.debit_tva(10000000)
+    def test_debit_tva(self, sagepayment_tva):
+        g_entry, entry = sagepayment_tva.debit_tva(10000000)
         assert entry['debit'] == 10000000
         assert entry['compte_cg'] == 'TVA0001'
         assert entry['code_taxe'] == 'CTVA0001'
@@ -1015,27 +1053,17 @@ class TestSageExpenseMain():
     """
     Main Expense export module testing
     """
-    def get_factory(self, expense):
-        """
-        Return an instance of the book entry factory we are testing
-        """
-        factory = SageExpenseMain(get_config())
-        factory.set_expense(expense)
-        return factory
+    def test_base_entry(self, sage_expense):
+        assert sage_expense.libelle == "Firstname LASTNAME/frais 5 2014"
+        assert sage_expense.num_feuille == "ndf52014"
+        assert sage_expense.code_journal == "JOURNALNDF"
 
-    def test_base_entry(self, expense):
-        factory = self.get_factory(expense)
-        assert factory.libelle == "Firstname LASTNAME/frais 5 2014"
-        assert factory.num_feuille == "ndf52014"
-        assert factory.code_journal == "JOURNALNDF"
-
-        base_entry = factory.get_base_entry()
+        base_entry = sage_expense.get_base_entry()
         for i in ('code_journal', 'date', 'libelle', 'num_feuille', 'type_'):
             assert i in base_entry
 
-    def test_credit(self, expense):
-        factory = self.get_factory(expense)
-        general, analytic = factory._credit(2500000)
+    def test_credit(self, sage_expense):
+        general, analytic = sage_expense._credit(2500000)
         assert analytic['type_'] == 'A'
         assert analytic['credit'] == 2500000
         assert analytic['compte_cg'] == "CGNDF"
@@ -1046,9 +1074,8 @@ class TestSageExpenseMain():
         assert 'num_analytique' not in general.keys()
 
 
-    def test_debit_ht(self, expense, expense_type):
-        factory = self.get_factory(expense)
-        general, analytic = factory._debit_ht(expense_type, 150000)
+    def test_debit_ht(self, sage_expense, expense_type):
+        general, analytic = sage_expense._debit_ht(expense_type, 150000)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "ETYPE1"
@@ -1059,9 +1086,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_debit_tva(self, expense, expense_type):
-        factory = self.get_factory(expense)
-        general, analytic = factory._debit_tva(expense_type, 120000)
+    def test_debit_tva(self, sage_expense, expense_type):
+        general, analytic = sage_expense._debit_tva(expense_type, 120000)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "COMPTETVA"
@@ -1072,9 +1098,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_credit_entreprise(self, expense):
-        factory = self.get_factory(expense)
-        general, analytic = factory._credit_entreprise(120000)
+    def test_credit_entreprise(self, sage_expense):
+        general, analytic = sage_expense._credit_entreprise(120000)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "CG_CONTRIB"
@@ -1084,9 +1109,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_debit_entreprise(self, expense):
-        factory = self.get_factory(expense)
-        general, analytic = factory._debit_entreprise(120000)
+    def test_debit_entreprise(self, sage_expense):
+        general, analytic = sage_expense._debit_entreprise(120000)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "BANK_CG"
@@ -1096,9 +1120,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_credit_cae(self, expense):
-        factory = self.get_factory(expense)
-        general, analytic = factory._credit_cae(120000)
+    def test_credit_cae(self, sage_expense):
+        general, analytic = sage_expense._credit_cae(120000)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "BANK_CG"
@@ -1108,9 +1131,8 @@ class TestSageExpenseMain():
         assert general['type_'] == 'G'
         assert 'num_analytique' not in general.keys()
 
-    def test_debit_cae(self, expense):
-        factory = self.get_factory(expense)
-        general, analytic = factory._debit_cae(120000)
+    def test_debit_cae(self, sage_expense):
+        general, analytic = sage_expense._debit_cae(120000)
 
         assert analytic['type_'] == 'A'
         assert analytic['compte_cg'] == "CG_CONTRIB"
@@ -1123,33 +1145,25 @@ class TestSageExpenseMain():
 
 @pytest.mark.payment
 class TestSageExpensePaymentMain():
-    def get_factory(self, expense_payment):
-        factory = SageExpensePaymentMain(get_config())
-        factory.set_payment(expense_payment)
-        return factory
-
-    def test_base_entry(self, expense_payment):
+    def test_base_entry(self, sage_expense_payment):
         today = datetime.date.today()
-        factory = self.get_factory(expense_payment)
-        assert factory.reference == "1254"
-        assert factory.code_journal == "CODE_JOURNAL_BANK"
-        assert factory.date == today.strftime("%d%m%y")
-        assert factory.mode == u"chèque"
+        assert sage_expense_payment.reference == "1254"
+        assert sage_expense_payment.code_journal == "CODE_JOURNAL_BANK"
+        assert sage_expense_payment.date == today.strftime("%d%m%y")
+        assert sage_expense_payment.mode == u"chèque"
         libelle = u"LASTNAME / REMB FRAIS mai/2014"
-        assert factory.libelle == libelle
-        assert factory.code_taxe == "TVANDF"
-        assert factory.num_analytique == "COMP_ANA"
+        assert sage_expense_payment.libelle == libelle
+        assert sage_expense_payment.code_taxe == "TVANDF"
+        assert sage_expense_payment.num_analytique == "COMP_ANA"
 
-    def test_credit_bank(self, expense_payment):
-        factory = self.get_factory(expense_payment)
-        g_entry, entry = factory.credit_bank(10000000)
+    def test_credit_bank(self, sage_expense_payment):
+        g_entry, entry = sage_expense_payment.credit_bank(10000000)
         assert entry['compte_cg'] == 'COMPTE_CG_BANK'
         assert entry.get('compte_tiers', '') == ''
         assert entry['credit'] == 10000000
 
-    def test_debit_entrepreneur(self, expense_payment):
-        factory = self.get_factory(expense_payment)
-        g_entry, entry = factory.debit_user(10000000)
+    def test_debit_entrepreneur(self, sage_expense_payment):
+        g_entry, entry = sage_expense_payment.debit_user(10000000)
         assert entry['compte_cg'] == "CGNDF"
         assert entry['compte_tiers'] == 'COMP_TIERS'
         assert entry['debit'] == 10000000
@@ -1157,40 +1171,32 @@ class TestSageExpensePaymentMain():
 
 @pytest.mark.payment
 class TestSageExpensePaymentWaiver():
-    def get_factory(self, expense_payment):
-        factory = SageExpensePaymentWaiver(get_config())
-        factory.set_payment(expense_payment)
-        return factory
+    def test_code_journal(self, expense_payment, config_request):
+        config_request.config['code_journal_waiver_ndf'] = 'JOURNAL_ABANDON'
 
-    def test_code_journal(self, expense_payment):
-        config = get_config()
-        config['code_journal_waiver_ndf'] = 'JOURNAL_ABANDON'
-        factory = SageExpensePaymentWaiver(config)
-        factory.set_payment(expense_payment)
-        assert factory.code_journal == "JOURNAL_ABANDON"
+        sage_expense_payment_waiver = SageExpensePaymentWaiver(None, config_request)
+        sage_expense_payment_waiver.set_payment(expense_payment)
+        assert sage_expense_payment_waiver.code_journal == "JOURNAL_ABANDON"
 
-    def test_base_entry(self, expense_payment):
+    def test_base_entry(self, sage_expense_payment_waiver):
         today = datetime.date.today()
-        factory = self.get_factory(expense_payment)
-        assert factory.reference == "1254"
-        assert factory.code_journal == "JOURNALNDF"
-        assert factory.date == today.strftime("%d%m%y")
-        assert factory.mode == u"Abandon de créance"
+        assert sage_expense_payment_waiver.reference == "1254"
+        assert sage_expense_payment_waiver.code_journal == "JOURNALNDF"
+        assert sage_expense_payment_waiver.date == today.strftime("%d%m%y")
+        assert sage_expense_payment_waiver.mode == u"Abandon de créance"
         libelle = u"Abandon de créance LASTNAME mai/2014"
-        assert factory.libelle == libelle
-        assert factory.code_taxe == ""
-        assert factory.num_analytique == "COMP_ANA"
+        assert sage_expense_payment_waiver.libelle == libelle
+        assert sage_expense_payment_waiver.code_taxe == ""
+        assert sage_expense_payment_waiver.num_analytique == "COMP_ANA"
 
-    def test_credit_bank(self, expense_payment):
-        factory = self.get_factory(expense_payment)
-        g_entry, entry = factory.credit_bank(10000000)
+    def test_credit_bank(self, sage_expense_payment_waiver):
+        g_entry, entry = sage_expense_payment_waiver.credit_bank(10000000)
         assert entry['compte_cg'] == 'COMPTE_CG_WAIVER'
         assert entry.get('compte_tiers', '') == ''
         assert entry['credit'] == 10000000
 
-    def test_debit_entrepreneur(self, expense_payment):
-        factory = self.get_factory(expense_payment)
-        g_entry, entry = factory.debit_user(10000000)
+    def test_debit_entrepreneur(self, sage_expense_payment_waiver):
+        g_entry, entry = sage_expense_payment_waiver.debit_user(10000000)
         assert entry['compte_cg'] == "CGNDF"
         assert entry['compte_tiers'] == 'COMP_TIERS'
         assert entry['debit'] == 10000000

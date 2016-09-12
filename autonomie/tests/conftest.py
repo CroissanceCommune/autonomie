@@ -146,11 +146,22 @@ def registry(settings):
     registry.settings = settings
     return registry
 
+
 @fixture
 def pyramid_request(registry, settings):
+    from pyramid_services import (
+        find_service,
+        find_service_factory,
+        AdapterRegistry,
+    )
+    from functools import partial
     request = testing.DummyRequest()
     request.registry = registry
+    request.find_service = partial(find_service, request)
+    request.find_service_factory = partial(find_service_factory, request)
+    request.service_cache = AdapterRegistry()
     return request
+
 
 @fixture
 def config(request, pyramid_request, settings, registry):
@@ -164,6 +175,7 @@ def config(request, pyramid_request, settings, registry):
         settings=settings,
         request=pyramid_request
     )
+    config.include('pyramid_services')
     config.include('pyramid_mako')
     config.include('pyramid_chameleon')
     set_cache_regions_from_settings(settings)

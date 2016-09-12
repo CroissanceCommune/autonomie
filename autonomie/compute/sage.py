@@ -48,7 +48,6 @@ from autonomie.compute.math_utils import (
     compute_tva,
 )
 from autonomie.views import render_api
-from autonomie import interfaces
 
 log = logging.getLogger(__name__)
 
@@ -960,6 +959,7 @@ class InvoiceExport(object):
         account configurations
     """
     use_analytic = True
+    _default_modules = (SageFacturation,)
     _available_modules = {
         "sage_contribution": SageContribution,
         "sage_assurance": SageAssurance,
@@ -967,13 +967,14 @@ class InvoiceExport(object):
         "sage_organic": SageContributionOrganic,
         "sage_rginterne": SageRGInterne,
         "sage_rgclient": SageRGClient,
-        }
+    }
 
     def __init__(self, context, request):
         self.config = request.config
         self.modules = []
-        default_module = request.find_service(interfaces.ITreasuryMainInvoice)
-        self.modules.append(default_module)
+        for module in self._default_modules:
+            self.modules.append(module(context, request))
+
         for config_key, module in self._available_modules.items():
             if self.config.get(config_key) == '1':
                 self.modules.append(module(context, request))

@@ -107,11 +107,6 @@ AUTONOMIE_ADMIN_MODULES = (
 
 AUTONOMIE_SERVICE_FACTORIES = (
     (
-        "services.treasury_main_invoice",
-        "autonomie.compute.sage.SageFacturation",
-        "autonomie.interfaces.ITreasuryMainInvoice",
-    ),
-    (
         "services.treasury_invoice_producer",
         "autonomie.compute.sage.InvoiceExport",
         "autonomie.interfaces.ITreasuryInvoiceProducer",

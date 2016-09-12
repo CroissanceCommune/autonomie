@@ -215,8 +215,8 @@ class BaseSageBookEntryFactory(object):
     static_columns = ()
     _part_key = None
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, context, request):
+        self.config = request.config
         self.company = None
 
     def get_base_entry(self):
@@ -351,10 +351,6 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             * Libellés
             * Montant
     """
-    def __init__(self, context, request):
-        self.config = request.config
-        self.company = None
-
     @property
     def libelle(self):
         """
@@ -980,7 +976,7 @@ class InvoiceExport(object):
         self.modules.append(default_module)
         for config_key, module in self._available_modules.items():
             if self.config.get(config_key) == '1':
-                self.modules.append(module(self.config))
+                self.modules.append(module(context, request))
 
     def get_invoice_book_entries(self, invoice):
         """
@@ -1210,7 +1206,7 @@ class ExpenseExport(object):
         self.config = request.config
         self.modules = []
         for module in self._default_modules:
-            self.modules.append(module(self.config))
+            self.modules.append(module(context, request))
 
     def get_book_entry(self, expense):
         """
@@ -1377,14 +1373,14 @@ class PaymentExport(object):
         "receipts_active_tva_module": SagePaymentTva,
     }
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, context, request):
+        self.config = request.config
         self.modules = []
         for module in self._default_modules:
-            self.modules.append(module(self.config))
+            self.modules.append(module(context, request))
         for config_key, module in self._available_modules.items():
             if self.config.get(config_key) == '1':
-                self.modules.append(module(self.config))
+                self.modules.append(module(context, request))
 
     def get_invoice_entries(self, invoice):
         """
@@ -1523,11 +1519,11 @@ class ExpensePaymentExport(object):
     _available_modules = {
     }
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, context, request):
+        self.config = request.config
         self.modules = []
-        self.main_module = SageExpensePaymentMain(self.config)
-        self.waiver_module = SageExpensePaymentWaiver(self.config)
+        self.main_module = SageExpensePaymentMain(context, request)
+        self.waiver_module = SageExpensePaymentWaiver(context, request)
 
     def get_modules(self, expense_payment):
         """

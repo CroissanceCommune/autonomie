@@ -59,3 +59,22 @@ class ITreasuryExpenseWriter(Interface):
         Set the tabular datas that will be written in the output file
         """
         pass
+
+
+class ITreasuryPaymentProducer(Interface):
+    """
+    Interface for the class that will produce treasury payment export lines
+    """
+    def get_book_entries(self, paymentlist):
+        pass
+
+
+class ITreasuryPaymentWriter(Interface):
+    """
+    Interface for the module handling the generation of the tabular export file
+    """
+    def set_datas(self, lines):
+        """
+        Set the tabular datas that will be written in the output file
+        """
+        pass

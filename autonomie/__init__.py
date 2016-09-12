@@ -126,6 +126,16 @@ AUTONOMIE_SERVICE_FACTORIES = (
         "autonomie.export.sage.SageExpenseCsvWriter",
         "autonomie.interfaces.ITreasuryExpenseWriter",
     ),
+    (
+        "services.treasury_payment_producer",
+        "autonomie.compute.sage.PaymentExport",
+        "autonomie.interfaces.ITreasuryPaymentProducer",
+    ),
+    (
+        "services.treasury_payment_writer",
+        "autonomie.export.sage.SagePaymentCsvWriter",
+        "autonomie.interfaces.ITreasuryPaymentWriter",
+    ),
 )
 AUTONOMIE_SERVICES = (
 )

@@ -797,8 +797,11 @@ target='_blank'>Voir l'encaissement</a>"""
         """
             Write the exported csv file to the request
         """
-        exporter = PaymentExport(self.request.config)
-        writer = SagePaymentCsvWriter()
+        from autonomie.interfaces import ITreasuryPaymentProducer
+        exporter = self.request.find_service(ITreasuryPaymentProducer)
+        from autonomie.interfaces import ITreasuryPaymentWriter
+        writer = self.request.find_service(ITreasuryPaymentWriter)
+
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(
             self.request,

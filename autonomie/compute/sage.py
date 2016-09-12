@@ -1371,6 +1371,7 @@ class SagePaymentTva(SagePaymentBase):
 
 
 class PaymentExport(object):
+    use_analytic = True
     _default_modules = (SagePaymentMain,)
     _available_modules = {
         "receipts_active_tva_module": SagePaymentTva,
@@ -1403,7 +1404,8 @@ class PaymentExport(object):
             for entry in module.yield_entries():
                 gen_line, analytic_line = entry
                 yield gen_line
-                yield analytic_line
+                if self.use_analytic:
+                    yield analytic_line
 
     def get_invoices_entries(self, invoicelist):
         """

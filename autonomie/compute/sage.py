@@ -211,6 +211,7 @@ class BaseSageBookEntryFactory(object):
     Base Sage Book Entry factory : we find the main function used by export
     modules
     """
+    # Tells us if we need to add analytic entries to our output (double_lines)
     static_columns = ()
     _part_key = None
 
@@ -962,6 +963,7 @@ class InvoiceExport(object):
         @param config: application configuration dict, contains all the CAE wide
         account configurations
     """
+    use_analytic = True
     _available_modules = {
         "sage_contribution": SageContribution,
         "sage_assurance": SageAssurance,
@@ -992,7 +994,8 @@ class InvoiceExport(object):
             for entry in module.yield_entries():
                 gen_line, analytic_line = entry
                 yield gen_line
-                yield analytic_line
+                if self.use_analytic:
+                    yield analytic_line
 
     def get_book_entries(self, invoicelist):
         """
@@ -1203,8 +1206,8 @@ class ExpenseExport(object):
     """
     _default_modules = (SageExpenseMain, )
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, context, request):
+        self.config = request.config
         self.modules = []
         for module in self._default_modules:
             self.modules.append(module(self.config))

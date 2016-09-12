@@ -40,13 +40,11 @@ from deform import (
 from deform.exception import ValidationFailure
 
 from autonomie.compute.sage import (
-    ExpenseExport,
     PaymentExport,
     ExpensePaymentExport,
     MissingData,
 )
 from autonomie.export.sage import (
-    SageExpenseCsvWriter,
     SagePaymentCsvWriter,
     SageExpensePaymentCsvWriter
 )
@@ -355,7 +353,6 @@ target='_blank'>Voir l'entreprise</a>"""
         from autonomie.interfaces import ITreasuryInvoiceWriter
         writer = self.request.find_service(ITreasuryInvoiceWriter)
 
-#        writer = SageInvoiceCsvWriter()
         writer.set_datas(exporter.get_book_entries(invoices))
         write_file_to_request(
             self.request,
@@ -574,8 +571,14 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
         """
         Write the exported csv file to the request
         """
-        exporter = ExpenseExport(self.request.config)
-        writer = SageExpenseCsvWriter()
+        from autonomie.interfaces import ITreasuryExpenseProducer
+        exporter = self.request.find_service(ITreasuryExpenseProducer)
+
+        from autonomie.interfaces import ITreasuryExpenseWriter
+        writer = self.request.find_service(ITreasuryExpenseWriter)
+
+        print(exporter)
+        print(writer)
         writer.set_datas(exporter.get_book_entries(expenses))
         write_file_to_request(
             self.request,

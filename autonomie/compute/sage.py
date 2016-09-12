@@ -1202,6 +1202,7 @@ class ExpenseExport(object):
         Export an expense to a Sage
     """
     _default_modules = (SageExpenseMain, )
+    use_analytic = True
 
     def __init__(self, context, request):
         self.config = request.config
@@ -1218,7 +1219,8 @@ class ExpenseExport(object):
             for entry in module.yield_entries():
                 gen_line, analytic_line = entry
                 yield gen_line
-                yield analytic_line
+                if self.use_analytic:
+                    yield analytic_line
 
     def get_book_entries(self, expenses):
         """

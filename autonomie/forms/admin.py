@@ -25,7 +25,6 @@
 """
     Form schemes for administration
 """
-import os
 import colander
 import logging
 import simplejson as json
@@ -71,6 +70,7 @@ comptabilité",
         'title': u"Compte CG contribution",
         'description': u"Compte CG correspondant à la contribution des \
 entrepreneurs à la CAE",
+        "section": u"Module Contribution",
     },
     "compte_frais_annexes": {
         "title": u"Compte de frais annexes",
@@ -81,17 +81,17 @@ entrepreneurs à la CAE",
     'compte_rrr': {
         "title": u"Compte RRR",
         "description": u"Compte Rabais, Remises et Ristournes",
-        "section": u"Module RRR"
+        "section": u"Configuration des comptes RRR"
     },
     'compte_cg_tva_rrr': {
         "title": u"Compte CG de TVA spécifique aux RRR",
         "description": u"",
-        "section": u"Module RRR"
+        "section": u"Configuration des comptes RRR"
     },
     'code_tva_rrr': {
         "title": u"Code de TVA spécifique aux RRR",
         "description": u"",
-        "section": u"Module RRR"
+        "section": u"Configuration des comptes RRR"
     },
     "compte_cg_assurance": {
         "title": u"Compte de charge assurance",
@@ -258,6 +258,7 @@ def get_config_schema(keys):
     """
     schema = colander.Schema()
     mappings = {}
+    index = 0
     for key in keys:
         ui_conf = CONFIGURATION_KEYS.get(key, {})
         node = get_config_key_schemanode(key, ui_conf)
@@ -269,14 +270,16 @@ def get_config_schema(keys):
                     title=section_name,
                     name=section_name,
                 )
+                schema.add(mapping)
             else:
                 mapping = mappings[section_name]
             mapping.add(node)
         else:
-            schema.add(node)
+            schema.insert(index, node)
+            index += 1
 
-    for mapping in mappings.values():
-        schema.add(mapping)
+#    for mapping in mappings.values():
+#        schema.add(mapping)
     return schema
 
 

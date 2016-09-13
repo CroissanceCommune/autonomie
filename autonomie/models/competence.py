@@ -68,6 +68,12 @@ entrepreneurs seront évaluées",
             label=self.label,
         )
 
+    @classmethod
+    def query(cls, *args):
+        query = super(CompetenceDeadline, cls).query(*args)
+        query = query.order_by(CompetenceDeadline.order)
+        return query
+
 
 class CompetenceScale(ConfigurableOption):
     __colanderalchemy_config__ = {

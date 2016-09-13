@@ -95,6 +95,12 @@ les graphiques",
             label=self.label,
         )
 
+    @classmethod
+    def query(cls, *args):
+        query = super(CompetenceScale, cls).query(*args)
+        query = query.order_by(CompetenceScale.value)
+        return query
+
 
 class CompetenceOption(ConfigurableOption):
     """

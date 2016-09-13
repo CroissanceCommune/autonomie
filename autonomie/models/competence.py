@@ -51,6 +51,7 @@ from autonomie.models.options import (
     ConfigurableOption,
     get_id_foreignkey_col,
 )
+from autonomie.models.base import DBSESSION
 
 
 class CompetenceDeadline(ConfigurableOption):
@@ -71,7 +72,6 @@ entrepreneurs seront évaluées",
     @classmethod
     def query(cls, *args):
         query = super(CompetenceDeadline, cls).query(*args)
-        query = query.order_by(CompetenceDeadline.order)
         return query
 
 
@@ -103,7 +103,7 @@ les graphiques",
 
     @classmethod
     def query(cls, *args):
-        query = super(CompetenceScale, cls).query(*args)
+        query = DBSESSION().query(CompetenceScale)
         query = query.order_by(CompetenceScale.value)
         return query
 

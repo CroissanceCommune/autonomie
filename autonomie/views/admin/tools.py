@@ -117,6 +117,11 @@ class AdminOption(BaseAdminFormView):
         widget_options
 
             Options passed to the sequence widget used here
+
+        customize_schema
+
+            Method taking schema as parameter that allows to customize the given
+            schema by, for example, adding a global validator
     """
     title = u""
     add_template_vars = ('message', 'menus',)
@@ -127,6 +132,9 @@ class AdminOption(BaseAdminFormView):
     js_resources = []
     widget_options = {}
 
+    def customize_schema(self, schema):
+        return schema
+
     @property
     def schema(self):
         if self._schema is None:
@@ -135,6 +143,8 @@ class AdminOption(BaseAdminFormView):
                 "",
                 widget_options=self.widget_options,
             )
+            self._schema.title = self.title
+            self.customize_schema(self._schema)
         return self._schema
 
     @schema.setter

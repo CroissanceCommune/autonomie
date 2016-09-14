@@ -33,7 +33,7 @@ from autonomie.views.commercial import (
     compute_turnover_percent,
 )
 from autonomie.views.commercial import DisplayCommercialHandling
-from autonomie.models.treasury import TurnoverProjection
+from autonomie.models.commercial import TurnoverProjection
 
 APPSTRUCT = {'month': 11, 'value': '1500', 'comment': "Some comments go here"}
 

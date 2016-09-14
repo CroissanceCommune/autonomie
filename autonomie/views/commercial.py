@@ -46,7 +46,7 @@ from autonomie.models.task import (
     Invoice,
     CancelInvoice,
 )
-from autonomie.models.treasury import TurnoverProjection
+from autonomie.models.commercial import TurnoverProjection
 from autonomie.forms import (
     merge_session_with_post,
 )

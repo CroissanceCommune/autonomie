@@ -51,6 +51,7 @@ from autonomie.models.task import (
 from autonomie.models.tva import (
     Tva,
 )
+from autonomie.models.treasury import InvoiceExportModule
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,15 @@ logger = logging.getLogger(__name__)
     r_path="admin_vente",
 )
 
+(
+    custom_treasury_admin_class,
+    custom_treasury_admin_route,
+    custom_treasury_admin_tmpl,
+) = get_model_admin_view(
+    InvoiceExportModule,
+    r_path='admin_vente_treasury',
+)
+
 
 class WorkUnitAdmin(work_unit_admin_class):
     title = u"Configuration des unités de prestation"
@@ -127,13 +137,14 @@ class PaymentConditionAdmin(payment_condition_admin_class):
 enregistrer le paiement d'un devis/ d'une facture"
 
 
-class AdminVenteTreasury(BaseConfigView):
+class AdminVenteTreasuryMain(BaseConfigView):
     """
         Cae information configuration
     """
-    title = u"Configuration comptable du module Ventes"
-    description = u"Code journal, activation des modules d'export ..."
-    redirect_path = "admin_vente"
+    title = u"Configuration des informations générales et des modules génériques"
+    description = u"Configuration du code journal et des modules génériques \
+(Export des factures, module contribution à la CAE, CGSCOP, RG, RG Interne)"
+    redirect_path = "admin_vente_treasury"
     validation_msg = u"Les informations ont bien été enregistrées"
     keys = (
         'code_journal',
@@ -168,6 +179,20 @@ class AdminVenteTreasury(BaseConfigView):
     schema = get_config_schema(keys)
 
 
+class AdminVenteTreasuryCustom(custom_treasury_admin_class):
+    title = u"Configuration des modules de contribution personnalisés"
+    description = u"Ajouter des modules de contribution personnalisés aux \
+exports de factures"
+    widget_options = {
+        'add_subitem_text_template': u"Ajouter un module de contribution \
+personnalisé",
+        "orderable": False,
+    }
+
+    def query_items(self):
+        return self.factory.query().filter(self.factory.active == True).all()
+
+
 class MainReceiptsConfig(BaseConfigView):
     title = u"Informations générales"
     keys = (
@@ -184,27 +209,13 @@ utilisé est celui de la banque associé à chaque encaissement)"
 class AdminTva(tva_admin_class):
     title = u"Configuration comptable des produits et TVA collectés"
     description = u"Taux de TVA, codes produit et codes analytiques associés"
+    widget_options = {'add_subitem_text_template': u"Ajouter un taux de TVA"}
 
     def query_items(self):
         return DBSESSION().query(Tva).order_by(desc(Tva.active)).all()
 
-    @property
-    def schema(self):
-        if self._schema is None:
-            self._schema = get_sequence_model_admin(
-                self.factory,
-                "",
-                widget_options={
-                    'add_subitem_text_template': u"Ajouter un taux de TVA"
-                }
-            )
-            self._schema.title = u"Configuration des taux de TVA"
-            self._schema.validator = tva_form_validator
-        return self._schema
-
-    @schema.setter
-    def schema(self, value):
-        self._schema = value
+    def customize_schema(self, schema):
+        schema.validator = tva_form_validator
 
 
 def admin_vente_index_view(request):
@@ -239,9 +250,9 @@ def admin_vente_index_view(request):
             ""
         ),
         (
-            AdminVenteTreasury.title,
+            u"Configuration comptable du module Ventes",
             "admin_vente_treasury",
-            AdminVenteTreasury.description,
+            u"Configueation des modules d'exports génériques et personnalisés",
             ""
         ),
         (
@@ -260,6 +271,28 @@ aux encaissements",
     ):
         menus.append(dict(label=label, path=route, title=title, icon=icon))
     return dict(title=u"Configuration du module Ventes", menus=menus)
+
+
+def admin_vente_treasury_index_view(request):
+    menus = []
+    for label, route, title, icon in (
+        (u"Retour", "admin_vente", "", "fa fa-step-backward"),
+        (
+            AdminVenteTreasuryMain.title,
+            "admin_vente_treasury_main",
+            AdminVenteTreasuryMain.description,
+            ""
+        ),
+        (
+            AdminVenteTreasuryCustom.title,
+            "admin_vente_treasury_custom",
+            AdminVenteTreasuryCustom.description,
+            ""
+        ),
+    ):
+        menus.append(dict(label=label, path=route, title=title, icon=icon))
+    return dict(title=u"Configuration comptable du module Ventes", menus=menus)
+
 
 
 def include_receipts_views(config):
@@ -302,6 +335,11 @@ def includeme(config):
     config.add_route("admin_vente_workunit", "admin/vente/workunit")
     config.add_route("admin_vente_payment_mode", "admin/vente/payment_mode")
     config.add_route("admin_vente_treasury", "admin/vente/treasury")
+    config.add_route("admin_vente_treasury_main", "admin/vente/treasury/main")
+    config.add_route(
+        "admin_vente_treasury_custom",
+        "admin/vente/treasury/custom"
+    )
     config.add_route("admin_vente_tva", "admin/vente/tva")
     config.add_route(
         "admin_vente_payment_condition",
@@ -319,6 +357,11 @@ def includeme(config):
     config.add_admin_view(
         admin_vente_index_view,
         route_name="admin_vente",
+    )
+
+    config.add_admin_view(
+        admin_vente_treasury_index_view,
+        route_name="admin_vente_treasury",
     )
 
     config.add_admin_view(
@@ -342,8 +385,13 @@ def includeme(config):
     )
 
     config.add_admin_view(
-        AdminVenteTreasury,
-        route_name='admin_vente_treasury',
+        AdminVenteTreasuryMain,
+        route_name='admin_vente_treasury_main',
+    )
+
+    config.add_admin_view(
+        AdminVenteTreasuryCustom,
+        route_name='admin_vente_treasury_custom',
     )
 
     config.add_admin_view(

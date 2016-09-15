@@ -120,14 +120,14 @@ l'Organic",
         "section": u"Module Contribution à l'Organic",
     },
     'compte_rg_interne': {
-        "title": u"Compte RG Interne",
+        "title": u"Compte CG RG Interne",
         "description": u"",
         "section": u"Module RG Interne",
     },
     'compte_rg_externe': {
-        "title": u"Compte RG Externe",
+        "title": u"Compte CG RG Client",
         "description": u"",
-        "section": u"Module RG Externe",
+        "section": u"Module RG Client",
     },
     'contribution_cae': {
         "title": u"Pourcentage de la contribution",

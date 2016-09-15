@@ -15,6 +15,8 @@ import sqlalchemy as sa
 from autonomie.alembic.utils import (
     column_exists,
     table_exists,
+    disable_constraints,
+    enable_constraints,
 )
 from sqlalchemy.dialects import mysql
 
@@ -69,6 +71,7 @@ OLD_COLUMNS = (
 
 
 def upgrade():
+    disable_constraints()
     for table in OLD_TABLES:
         if table_exists(table):
             op.drop_table(table)
@@ -146,6 +149,8 @@ def upgrade():
     for (table, column) in OLD_COLUMNS:
         if column_exists(table, column):
             op.drop_column(table, column)
+
+    enable_constraints()
 
 
 def downgrade():

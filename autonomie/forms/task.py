@@ -104,7 +104,14 @@ TASKTYPES_LABELS = {
 PAYMENTDISPLAYCHOICES = (
     ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
     ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
-    ('ALL', u"Le détail des paiements apparaît dans le PDF",),
+    (
+        'ALL',
+        u"Le détail des paiements apparaît dans le PDF",
+    ),
+    (
+        'ALL_NO_DATE',
+        u"Le détail des paiements, sans les dates, apparaît dans le PDF",
+    ),
 )
 
 

@@ -55,6 +55,8 @@
 % if task.paymentDisplay != u"NONE":
     % if task.paymentDisplay == u"ALL":
         <% colspan = 3 %>
+    % elif task.paymentDisplay == u"ALL_NO_DATE":
+        <% colspan = 2 %>
     %else:
         <% colspan = 1 %>
     % endif
@@ -75,20 +77,25 @@
                         %endif
                     </td>
                 </tr>
-                % if task.paymentDisplay == u"ALL":
+                % if task.paymentDisplay in (u"ALL", "ALL_NO_DATE"):
                     ## l'utilisateur a demandé le détail du paiement
                     ## L'acompte à la commande
                     % if task.deposit > 0 :
                         <tr>
-                            <td>Acompte</td>
-                            <td>à la commande</td>
+                            <td
+                                % if task.paymentDisplay == u"ALL":
+                                    colspan=2
+                                % endif
+                                >Acompte à la commande</td>
                             <td class='price'>${api.format_amount(task.deposit_amount_ttc(), precision=5)|n}&nbsp;€</td>
                         </tr>
                     % endif
                     ## Les paiements intermédiaires
                     % for line in task.payment_lines[:-1]:
                         <tr>
-                            <td>${api.format_date(line.paymentDate)}</td>
+                            % if task.paymentDisplay == u"ALL":
+                                <td>${api.format_date(line.paymentDate)}</td>
+                            % endif
                             <td>${line.description}</td>
                             %if task.manualDeliverables == 1:
                                 <td>${api.format_amount(line.amount, precision=5)|n}&nbsp;€</td>
@@ -99,9 +106,11 @@
                     % endfor
                     ## On affiche le solde qui doit être calculé séparément pour être sûr de tomber juste
                     <tr>
-                        <td>
-                            ${api.format_date(task.payment_lines[-1].paymentDate)}
-                        </td>
+                        % if task.paymentDisplay == u"ALL":
+                            <td>
+                                ${api.format_date(task.payment_lines[-1].paymentDate)}
+                            </td>
+                        % endif
                         <td>
                             ${format_text(task.payment_lines[-1].description)}
                         </td>

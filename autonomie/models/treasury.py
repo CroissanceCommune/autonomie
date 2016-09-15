@@ -64,7 +64,7 @@ exports des factures.
         <li>Le compte de contrepartie</li>\
         <li>Un gabarit pour la génération des libellés (voir ci-dessous pour \
 les variables associées)</li>\
-        <li>Un taux de contribution (pourcentage prélevé sur le HT)</li>\
+        <li>Un taux de contribution (pourcentage prélevé sur le <b>HT</b>)</li>\
         </ul>\
         Pour chaque module, 8 lignes seront générées (4 lignes \
 analytiques et 4 lignes générales).

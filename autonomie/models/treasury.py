@@ -34,13 +34,14 @@ from autonomie.models.base import (
 
 
 GRID = (
-    (('compte_cg_credit', 6), ('compte_cg_debit', 6),),
+    (('title', 6),),
+    (('compte_cg_debit', 6), ('compte_cg_credit', 6),),
     (('label_template', 6), ('percentage', 6),),
     (('enabled', 6),),
 )
 
 
-class InvoiceExportModule(DBBASE):
+class CustomInvoiceBookEntryModule(DBBASE):
     """
     An Invoice Export module configuration
 
@@ -50,26 +51,35 @@ class InvoiceExportModule(DBBASE):
     :param int percentage: The percentage that should be used in this module
     """
     __colanderalchemy_config__ = {
-        "title": u"un module de comptabilité personnalisé",
+        "title": u"un module de contribution personnalisé",
         "validation_msg": u"Vos modules de contribution ont bien été \
 configurés",
         "help_msg": u"""Configurez des modules de contribution personnalisés.
 Ceux-ci viennent apporter de nouvelles lignes de contribution dans les \
 exports des factures.
-        Configurez :
-        <ul><li>Le compte général auquel la contribution est associé</li>\
-        <li>Le compte de contrpartie</li>\
+        <h4>Configuration</h4>\
+        <ul> \
+        <li>Un titre</li>\
+        <li>Le compte général auquel la contribution est associé</li>\
+        <li>Le compte de contrepartie</li>\
         <li>Un gabarit pour la génération des libellés (voir ci-dessous pour \
 les variables associées)</li>\
         <li>Un taux de contribution (pourcentage prélevé sur le HT)</li>\
         </ul>\
-        Pour chaque module, quatre lignes seront générées (deux lignes \
-analytiques et deux lignes générales).
+        Pour chaque module, 8 lignes seront générées (4 lignes \
+analytiques et 4 lignes générales).
         Le montant du débit et du crédit seront calculés selon le pourcentage \
-indiqué (du taux de contribution).
-Le compte général servira de compte CG pour les lignes de crédit.
-Le compte de contrepartie servira de compte CG pour les lignes de débit.
-        <br /> \
+indiqué (taux de contribution).
+        <h4>Variable utilisable dans les gabarits de libellés</h4>\
+        <ul>\
+        <li>client.name</li>\
+        <li>entreprise.name</li>\
+        <li>numero_facture</li>\
+        </ul>
+        <h4>Utilisation des variables</h4>\
+        Les variables s'utilise au sein des gabarits de libellés en les \
+entourant par des accolades {}.
+        ex : "Contribution {entreprise.name} {client.name} {numero_facture}"
         """,
         'widget': deform_extensions.GridMappingWidget(named_grid=GRID)
     }
@@ -78,6 +88,14 @@ Le compte de contrepartie servira de compte CG pour les lignes de débit.
         Integer,
         primary_key=True,
         info={'colanderalchemy': {'exclude': True}}
+    )
+    title = Column(
+        String(100),
+        info={
+            'colanderalchemy': {
+                'title': u"Nom du module",
+            }
+        }
     )
     active = Column(
         Boolean(),
@@ -105,7 +123,7 @@ produites dans les prochains exports de facture."
         nullable=False,
         info={
             'colanderalchemy': {
-                'title': u"Compte de charge",
+                'title': u"Compte de contrepartie",
                 "description": u"Compte utilisé pour les lignes de crédit",
             }
         },
@@ -115,7 +133,7 @@ produites dans les prochains exports de facture."
         nullable=False,
         info={
             'colanderalchemy': {
-                'title': u"Compte de contrepartie",
+                'title': u"Compte de charge",
                 "description": u"Compte utilisé pour les lignes de débit",
             }
         },
@@ -142,3 +160,10 @@ pourcentage du montant HT prélevé par le biais de ce module"
             }
         },
     )
+
+    @classmethod
+    def query(cls, include_inactive=False, *args):
+        q = super(CustomInvoiceBookEntryModule, cls).query(*args)
+        if not include_inactive:
+            q = q.filter(CustomInvoiceBookEntryModule.active == True)
+        return q

@@ -1,3 +1,4 @@
+#-*-coding:utf-8-*-
 """3.3.0 : fonctionnalites_9
 
 Revision ID: 2b6ac7b172d3
@@ -81,6 +82,63 @@ def add_internal_number(session, logger):
             task.internal_number = tmpl.format(s=task).upper()
             session.merge(task)
 
+def create_custom_treasury_modules(session, logger):
+    logger.warn("Adding custom treasury modules")
+    from autonomie.models.config import Config
+    from autonomie.models.treasury import CustomInvoiceBookEntryModule
+
+    organic_keys = (
+        u"Contribution à l'organic",
+        'compte_cg_organic',
+        'compte_cg_debiteur_organic',
+        'taux_contribution_organic',
+        'sage_organic',
+        u'Contribution Organic {client.name} {entreprise.name}'
+    )
+
+    cgscop_keys = (
+        u"Contribution à la CGSCOP",
+        'compte_cgscop',
+        'compte_cg_debiteur',
+        'taux_cgscop',
+        'sage_cgscop',
+        u'{client.name} {entreprise.name}'
+    )
+
+    assurance_keys = (
+        u"Assurance",
+        'compte_cg_assurance',
+        'compte_cg_assurance',
+        'taux_assurance',
+        'sage_assurance',
+        u'{client.name} {entreprise.name}',
+    )
+
+    for keys in (organic_keys, cgscop_keys, assurance_keys, ):
+        (
+            title,
+            cg_debit,
+            cg_credit,
+            percentage_key,
+            active_key,
+            label_template
+        ) = keys
+
+        compte_cg_debit = Config.get(cg_debit)
+        compte_cg_credit = Config.get(cg_credit)
+        percentage = Config.get(percentage_key)
+        enabled = Config.get(active_key, False)
+        if compte_cg_debit and compte_cg_debit.value and compte_cg_credit and compte_cg_credit.value and percentage is not None:
+            module = CustomInvoiceBookEntryModule(
+                title=title,
+                compte_cg_debit=compte_cg_debit.value,
+                compte_cg_credit=compte_cg_credit.value,
+                percentage=percentage.value,
+                enabled=enabled.value,
+                label_template=label_template,
+            )
+            session.add(module)
+
 
 def upgrade():
     import logging
@@ -148,6 +206,8 @@ def upgrade():
     )
     op.execute("alter table customer MODIFY code VARCHAR(4);")
     op.execute("alter table project MODIFY code VARCHAR(4);")
+
+    create_custom_treasury_modules(session, logger)
 
     from zope.sqlalchemy import mark_changed
     mark_changed(session)

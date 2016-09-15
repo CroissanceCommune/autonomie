@@ -61,6 +61,7 @@ from autonomie.models.user import (
     SocialDocTypeOption,
     CaeSituationOption,
     TypeSortieOption,
+    AntenneOption,
 )
 from autonomie.models import files
 from autonomie.forms.admin import (
@@ -513,6 +514,7 @@ def get_all_userdatas_views():
     """
     for model in (
         CaeSituationOption,
+        AntenneOption,
         ZoneOption,
         ZoneQualificationOption,
         StudyLevelOption,

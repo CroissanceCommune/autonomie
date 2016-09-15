@@ -160,6 +160,14 @@ def upgrade():
         )
     )
     op.add_column(
+        "user_datas",
+        sa.Column(
+            "situation_antenne_id",
+            sa.Integer,
+            sa.ForeignKey('antenne_option.id')
+        )
+    )
+    op.add_column(
         "task",
         sa.Column(
             "internal_number",

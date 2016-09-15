@@ -683,6 +683,17 @@ bien été configurés",
     id = get_id_foreignkey_col('configurable_option.id')
 
 
+class AntenneOption(ConfigurableOption):
+    """
+    Different antenne
+    """
+    __colanderalchemy_config__ = {
+        "title": u"Antennes de la CAE",
+        'validation_msg': u"Les antennes ont bien été configurées",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+
 class UserDatasSocialDocTypes(DBBASE):
     """
     relationship table used between social document types and user datas set
@@ -830,6 +841,24 @@ class UserDatas(Node):
 
     situation_situation = relationship(
         "CaeSituationOption",
+        info={
+            'colanderalchemy': EXCLUDED,
+            'export': {'related_key': 'label'},
+        },
+    )
+
+    situation_antenne_id = Column(
+        ForeignKey('antenne_option.id'),
+        info={
+            'colanderalchemy': {
+                'title': u"Antenne de rattachement",
+                "section": u"Synthèse",
+                'widget': get_deferred_select(AntenneOption),
+            }
+        }
+    )
+    situation_antenne = relationship(
+        "AntenneOption",
         info={
             'colanderalchemy': EXCLUDED,
             'export': {'related_key': 'label'},
@@ -2255,8 +2284,9 @@ class ContractHistory(DBBASE):
 
 USERDATAS_FORM_GRIDS = {
     u"Synthèse": (
+        ((6, True),),
         ((6, True), (6, True)),
-        ((6, True),)
+        ((6, True),),
     ),
     u"Coordonnées": (
         ((3, True), (3, True), (3, True), (3, True)),

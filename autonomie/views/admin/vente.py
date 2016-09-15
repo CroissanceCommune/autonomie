@@ -51,7 +51,7 @@ from autonomie.models.task import (
 from autonomie.models.tva import (
     Tva,
 )
-from autonomie.models.treasury import InvoiceExportModule
+from autonomie.models.treasury import CustomInvoiceBookEntryModule
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ logger = logging.getLogger(__name__)
     custom_treasury_admin_route,
     custom_treasury_admin_tmpl,
 ) = get_model_admin_view(
-    InvoiceExportModule,
+    CustomInvoiceBookEntryModule,
     r_path='admin_vente_treasury',
 )
 

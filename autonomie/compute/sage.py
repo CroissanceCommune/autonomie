@@ -40,6 +40,7 @@ import logging
 import datetime
 
 from autonomie.models.tva import Tva
+from autonomie.models.treasury import CustomInvoiceBookEntryModule
 from autonomie.compute.math_utils import (
     floor,
     floor_to_precision,
@@ -952,6 +953,97 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
             yield self.credit_entreprise(product)
 
 
+class CustomBookEntryFactory(BaseInvoiceBookEntryFactory):
+    """
+    A custom book entry module used to produce entries
+    """
+    def __init__(self, context, request, module_config):
+        BaseInvoiceBookEntryFactory.__init__(self, context, request)
+        self.cg_debit = module_config.compte_cg_debit
+        self.cg_credit = module_config.compte_cg_credit
+        self.label_template = module_config.label_template
+        self.percentage = module_config.percentage
+
+    def get_part(self):
+        return self.percentage
+
+    def get_amount(self):
+        """
+            Return the amount for the current module
+            (the same for credit or debit)
+        """
+        return self._amount_method(self.invoice.total_ht(), self.get_part())
+
+    @property
+    def libelle(self):
+        return self.label_template.format(
+            client=self.invoice.customer,
+            entreprise=self.company,
+            num_facture=self.invoice.official_number,
+        )
+
+    @double_lines
+    def debit_entreprise(self):
+        """
+            Debit entreprise book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.cg_debit,
+            num_analytique=self.company.code_compta,
+            debit=self.get_amount(),
+        )
+        return entry
+
+    @double_lines
+    def credit_entreprise(self):
+        """
+            Credit entreprise book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.company.code_compta,
+            credit=self.get_amount(),
+        )
+        return entry
+
+    @double_lines
+    def debit_cae(self):
+        """
+            Debit cae book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.config['compte_cg_banque'],
+            num_analytique=self.config['numero_analytique'],
+            debit=self.get_amount(),
+        )
+        return entry
+
+    @double_lines
+    def credit_cae(self):
+        """
+            Credit CAE book entry
+        """
+        entry = self.get_base_entry()
+        entry.update(
+            compte_cg=self.cg_credit,
+            num_analytique=self.config['numero_analytique'],
+            credit=self.get_amount(),
+        )
+        return entry
+
+    def yield_entries(self):
+        """
+            yield book entries
+        """
+        yield self.debit_entreprise()
+        yield self.credit_entreprise()
+        yield self.debit_cae()
+        yield self.credit_cae()
+
+
 class InvoiceExport(object):
     """
         base module for treasury export
@@ -968,6 +1060,7 @@ class InvoiceExport(object):
         "sage_rginterne": SageRGInterne,
         "sage_rgclient": SageRGClient,
     }
+    _custom_factory = CustomBookEntryFactory
 
     def __init__(self, context, request):
         self.config = request.config
@@ -978,6 +1071,19 @@ class InvoiceExport(object):
         for config_key, module in self._available_modules.items():
             if self.config.get(config_key) == '1':
                 self.modules.append(module(context, request))
+
+        if self._custom_factory is not None and hasattr(request, 'dbsession'):
+            self._load_custom_modules(context, request)
+
+    def _load_custom_modules(self, context, request):
+        """
+        Load custom modules configuration and initialize them
+        """
+        query = CustomInvoiceBookEntryModule.query()
+        for module in query.filter_by(enabled=True):
+            self.modules.append(
+                self._custom_factory(context, request, module)
+            )
 
     def get_invoice_book_entries(self, invoice):
         """

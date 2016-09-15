@@ -73,3 +73,11 @@ def column_exists(tbl, column_name):
 def add_column(tbl, column):
     if not column_exists(tbl, column.name):
         op.add_column(tbl, column)
+
+
+def disable_constraints():
+    op.execute("SET FOREIGN_KEY_CHECKS=0;")
+
+
+def enable_constraints():
+    op.execute("SET FOREIGN_KEY_CHECKS=1;")

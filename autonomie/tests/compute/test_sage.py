@@ -37,10 +37,9 @@ from autonomie.compute.sage import (
     SageFacturation,
     SageContribution,
     SageAssurance,
-    SageCGScop,
-    SageContributionOrganic,
     SageRGInterne,
     SageRGClient,
+    CustomBookEntryFactory,
     InvoiceExport,
     SageExpenseMain,
     SagePaymentMain,
@@ -81,11 +80,6 @@ def app_config():
         'compte_cg_contribution': 'CG_CONTRIB',
         'compte_rrr': 'CG_RRR',
         'compte_frais_annexes': 'CG_FA',
-        'compte_cg_assurance': 'CG_ASSUR',
-        'compte_cg_debiteur': 'CG_DEB',
-        'compte_cgscop': 'CG_SCOP',
-        'compte_cg_organic': "CG_ORGA",
-        'compte_cg_debiteur_organic': "CG_DEB_ORGA",
         'compte_rg_externe': 'CG_RG_EXT',
         'compte_rg_interne': 'CG_RG_INT',
         'compte_cg_banque': 'BANK_CG',
@@ -93,11 +87,8 @@ def app_config():
         "code_tva_rrr": "CODE_TVA_RRR",
         'numero_analytique': 'NUM_ANA',
         'rg_coop': 'CG_RG_COOP',
-        'taux_assurance': "5",
-        'taux_cgscop': "5",
         'taux_rg_interne': "5",
         'taux_rg_client': "5",
-        'taux_contribution_organic': "5",
         'contribution_cae': "10",
         'compte_cg_ndf': "CGNDF",
         'code_journal_ndf': "JOURNALNDF",
@@ -111,7 +102,6 @@ def app_config():
 @pytest.fixture
 def config_request(pyramid_request, app_config, config):
     pyramid_request.config = app_config
-    print(dir(pyramid_request))
     return pyramid_request
 
 
@@ -513,6 +503,9 @@ def test_populate_expenses(sageinvoice):
 class BaseBookEntryTest():
     factory = None
 
+    def build_factory(self, config_request):
+        return self.factory(None, config_request)
+
     def _test_product_book_entry(
             self,
             config_request,
@@ -524,7 +517,7 @@ class BaseBookEntryTest():
         test a book_entry output (one of a product)
         """
         wrapped_invoice.populate()
-        book_entry_factory = self.factory(None, config_request)
+        book_entry_factory = self.build_factory(config_request)
         book_entry_factory.set_invoice(wrapped_invoice)
         product = wrapped_invoice.products[prod_cg]
 
@@ -546,7 +539,7 @@ class BaseBookEntryTest():
         test a book_entry output (one of a product)
         """
         wrapped_invoice.populate()
-        book_entry_factory = self.factory(None, config_request)
+        book_entry_factory = self.build_factory(config_request)
         book_entry_factory.set_invoice(wrapped_invoice)
 
         general_line, analytic_line = getattr(book_entry_factory, method)()
@@ -781,9 +774,22 @@ class TestSageContribution(BaseBookEntryTest):
         )
 
 
-class TestSageAssurance(BaseBookEntryTest):
+class TestCustomAssurance(BaseBookEntryTest):
     # Amount = 2000 0.05 * somme des ht des lignes + expense_ht
-    factory = SageAssurance
+    # Migrate the export module Assurance to a custom module
+    def build_factory(self, config_request):
+        return CustomBookEntryFactory(
+            None,
+            config_request,
+            Dummy(
+                compte_cg_debit='CG_ASSUR',
+                compte_cg_credit='CG_ASSUR',
+                percentage=5,
+                label_template=u"{client.name} {entreprise.name}"
+            )
+        )
+
+
 
     def test_debit_entreprise(self, config_request, sageinvoice):
         method = 'debit_entreprise'
@@ -826,8 +832,20 @@ class TestSageAssurance(BaseBookEntryTest):
         self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
 
-class TestSageCGScop(BaseBookEntryTest):
-    factory = SageCGScop
+class TestCustomCGScop(BaseBookEntryTest):
+    # Migrate the export module CGScop to a custom module
+    def build_factory(self, config_request):
+        return CustomBookEntryFactory(
+            None,
+            config_request,
+            Dummy(
+                compte_cg_debit='CG_SCOP',
+                compte_cg_credit='CG_DEB',
+                percentage=5,
+                label_template=u"{client.name} {entreprise.name}"
+            )
+        )
+
 
     def test_debit_entreprise(self, config_request, sageinvoice):
         method = 'debit_entreprise'
@@ -870,10 +888,23 @@ class TestSageCGScop(BaseBookEntryTest):
         self._test_invoice_book_entry(config_request, sageinvoice, method, res)
 
 
-class TestSageContributionOrganic(BaseBookEntryTest):
-    factory = SageContributionOrganic
-
+class TestCustomBookEntryFactory(BaseBookEntryTest):
+    # Replaced SageContributionOrganic
     libelle = 'Contribution Organic customer company'
+
+    def build_factory(self, config_request):
+        return CustomBookEntryFactory(
+            None,
+            config_request,
+            Dummy(
+                compte_cg_debit='CG_ORGA',
+                compte_cg_credit='CG_DEB_ORGA',
+                percentage=5,
+                label_template=u"Contribution Organic {client.name} \
+{entreprise.name}"
+            )
+        )
+
 
     def test_debit_entreprise(self, config_request, sageinvoice):
         method = 'debit_entreprise'
@@ -979,7 +1010,6 @@ class TestSageRGClient(BaseBookEntryTest):
         self._test_product_book_entry(config_request,sageinvoice, method, res)
 
 
-@pytest.mark.custom33
 class TestSageExport():
     def test_modules(self, config_request):
         config = {

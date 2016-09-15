@@ -132,11 +132,11 @@ def test_base_config_view(config, dbsession, get_csrf_request_with_db):
 
 
 def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.vente import AdminVenteTreasury
-    config.add_route('admin_vente', '/')
+    from autonomie.views.admin.vente import AdminVenteTreasuryMain
+    config.add_route('admin_vente_treasury', '/')
     appstruct = {'compte_cg_contribution':"00000668",
             'compte_rrr':"000009558"}
-    view = AdminVenteTreasury(get_csrf_request_with_db())
+    view = AdminVenteTreasuryMain(get_csrf_request_with_db())
     view.submit_success(appstruct)
     config = get_config()
     for key, value in appstruct.items():

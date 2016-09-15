@@ -141,7 +141,8 @@ class AdminVenteTreasuryMain(BaseConfigView):
     """
         Cae information configuration
     """
-    title = u"Configuration des informations générales et des modules génériques"
+    title = u"Configuration des informations générales et des \
+modules prédéfinis"
     description = u"Configuration du code journal et des modules génériques \
 (Export des factures, module contribution à la CAE, CGSCOP, RG, RG Interne)"
     redirect_path = "admin_vente_treasury"
@@ -241,7 +242,7 @@ def admin_vente_index_view(request):
         (
             u"Configuration comptable du module Ventes",
             "admin_vente_treasury",
-            u"Configueation des modules d'exports génériques et personnalisés",
+            u"Configuration des modules d'exports prédéfinis et personnalisés",
             ""
         ),
         (

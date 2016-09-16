@@ -1008,18 +1008,10 @@ def add_custom_datas_headers(writer, query):
         for index in range(0, code_compta_count):
             new_header = {
                 'label': "Compte_analytique {0}".format(index + 1),
-                # 'name': "code_compta_{0}".format(index + 1),
+                'name': "code_compta_{0}".format(index + 1),
             }
             writer.add_extra_header(new_header)
 
-    return writer
-
-
-def add_code_compta(writer, userdatas):
-    user_account = userdatas.user
-    if user_account:
-        for index, company in enumerate(user_account.companies):
-            writer._datas[-1].append(company.code_compta)
     return writer
 
 
@@ -1034,6 +1026,15 @@ class UserDatasXlsView(UserDatasListClass, BaseXlsView):
     def filename(self):
         return "gestion_social.xls"
 
+    def add_code_compta(self, writer, userdatas):
+        user_account = userdatas.user
+        if user_account:
+            datas = []
+            for company in user_account.companies:
+                datas.append(company.code_compta)
+            writer.add_extra_datas(datas)
+        return writer
+
     def _build_return_value(self, schema, appstruct, query):
         """
         Return the streamed file object
@@ -1043,7 +1044,7 @@ class UserDatasXlsView(UserDatasListClass, BaseXlsView):
         writer = add_custom_datas_headers(writer, query)
         for item in self._stream_rows(query):
             writer.add_row(item)
-            add_code_compta(writer, item)
+            self.add_code_compta(writer, item)
 
         write_file_to_request(self.request, self.filename, writer.render())
         return self.request.response
@@ -1069,6 +1070,17 @@ class UserDatasCsvView(UserDatasListClass, BaseCsvView):
     def filename(self):
         return "gestion_social.csv"
 
+    def add_code_compta(self, writer, userdatas):
+        user_account = userdatas.user
+        if user_account:
+            datas = {}
+            for index, company in enumerate(user_account.companies):
+                header_label = 'Compte_analytique {0}'.format(index + 1)
+
+                datas[header_label] = company.code_compta
+            writer.add_extra_datas(datas)
+        return writer
+
     def _build_return_value(self, schema, appstruct, query):
         """
         Return the streamed file object
@@ -1078,7 +1090,7 @@ class UserDatasCsvView(UserDatasListClass, BaseCsvView):
         writer = add_custom_datas_headers(writer, query)
         for item in self._stream_rows(query):
             writer.add_row(item)
-            add_code_compta(writer, item)
+            self.add_code_compta(writer, item)
 
         write_file_to_request(self.request, self.filename, writer.render())
         return self.request.response

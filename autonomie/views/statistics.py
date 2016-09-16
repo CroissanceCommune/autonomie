@@ -66,7 +66,7 @@ from autonomie.views import (
     BaseCsvView,
     BaseRestView,
 )
-from autonomie.views.user import add_custom_headers_to_writer
+from autonomie.views.user import add_o2m_headers_to_writer
 from autonomie.export.utils import write_file_to_request
 
 
@@ -368,7 +368,7 @@ class CsvEntryView(BaseCsvView):
         Return the streamed file object
         """
         writer = self._init_writer()
-        writer = add_custom_headers_to_writer(writer, query)
+        writer = add_o2m_headers_to_writer(writer, query)
         for item in self._stream_rows(query):
             writer.add_row(item)
 

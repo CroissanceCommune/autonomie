@@ -6,7 +6,7 @@ entry_points = {
     "paste.app_factory": ["main=autonomie:main",],
     "console_scripts": [
         "autonomie-migrate = autonomie.scripts:migrate",
-        "autonomie-admin = autonomie.scripts:add_admin_cmd",
+        "autonomie-admin = autonomie.scripts:autonomie_admin_cmd",
         "autonomie-mail = autonomie.scripts.mail_files:mail_cmd",
         "autonomie-fake = autonomie.scripts:populate_fake",
         "autonomie-cache = autonomie.scripts:cache_cmd",

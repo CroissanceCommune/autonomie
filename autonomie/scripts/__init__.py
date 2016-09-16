@@ -23,6 +23,6 @@
 #
 
 from .migrate import migrate
-from .add_admin import add_admin_cmd
+from .autonomie_admin import autonomie_admin_cmd
 from .fake_database import populate_fake
 from .cache import cache_cmd

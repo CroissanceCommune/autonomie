@@ -59,6 +59,7 @@ from autonomie.models.user import (
     SocialDocTypeOption,
     CompanyDatas,
     USERDATAS_FORM_GRIDS,
+    COMPANY_EMPLOYEE,
 )
 from autonomie.models.files import (
     File,
@@ -768,7 +769,6 @@ def py3o_view(context, request):
         context for templating
     """
     logger.debug(u"Asking for a template compilation")
-    print(context)
     doctemplate_id = request.GET.get('template_id')
 
     if doctemplate_id:
@@ -929,7 +929,7 @@ class UserDatasListView(UserDatasListClass, BaseListView):
     pass
 
 
-def add_custom_headers_to_writer(writer, query):
+def add_o2m_headers_to_writer(writer, query):
     """
     Add column headers in the form "label 1",  "label 2" ... to be able to
     insert the o2m related elements to a main model's table export (allow to
@@ -993,6 +993,36 @@ def add_custom_headers_to_writer(writer, query):
     return writer
 
 
+def add_custom_datas_headers(writer, query):
+    """
+    Add custom headers that are not added through automation
+    """
+    # Compte analytique
+    query = DBSESSION().query(
+        func.count(COMPANY_EMPLOYEE.c.company_id).label('nb')
+    )
+    query = query.group_by(COMPANY_EMPLOYEE.c.account_id)
+    code_compta_count = query.order_by(desc("nb")).first()
+    if code_compta_count:
+        code_compta_count = code_compta_count[0]
+        for index in range(0, code_compta_count):
+            new_header = {
+                'label': "Compte_analytique {0}".format(index + 1),
+                # 'name': "code_compta_{0}".format(index + 1),
+            }
+            writer.add_extra_header(new_header)
+
+    return writer
+
+
+def add_code_compta(writer, userdatas):
+    user_account = userdatas.user
+    if user_account:
+        for index, company in enumerate(user_account.companies):
+            writer._datas[-1].append(company.code_compta)
+    return writer
+
+
 class UserDatasXlsView(UserDatasListClass, BaseXlsView):
     """
         Userdatas excel view
@@ -1009,9 +1039,11 @@ class UserDatasXlsView(UserDatasListClass, BaseXlsView):
         Return the streamed file object
         """
         writer = self._init_writer()
-        writer = add_custom_headers_to_writer(writer, query)
+        writer = add_o2m_headers_to_writer(writer, query)
+        writer = add_custom_datas_headers(writer, query)
         for item in self._stream_rows(query):
             writer.add_row(item)
+            add_code_compta(writer, item)
 
         write_file_to_request(self.request, self.filename, writer.render())
         return self.request.response
@@ -1042,9 +1074,11 @@ class UserDatasCsvView(UserDatasListClass, BaseCsvView):
         Return the streamed file object
         """
         writer = self._init_writer()
-        writer = add_custom_headers_to_writer(writer, query)
+        writer = add_o2m_headers_to_writer(writer, query)
+        writer = add_custom_datas_headers(writer, query)
         for item in self._stream_rows(query):
             writer.add_row(item)
+            add_code_compta(writer, item)
 
         write_file_to_request(self.request, self.filename, writer.render())
         return self.request.response

@@ -31,6 +31,7 @@ from docopt import docopt
 from pyramid.paster import bootstrap
 from transaction import commit
 from pyramid.paster import setup_logging
+from autonomie.utils import ascii
 
 
 def command(func, doc):
@@ -56,4 +57,5 @@ def get_value(arguments, key, default=None):
     val = arguments.get('--%s' % key)
     if not val:
         val = default
-    return val
+
+    return ascii.force_unicode(val)

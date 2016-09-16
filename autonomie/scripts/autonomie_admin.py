@@ -44,9 +44,9 @@ def get_pwd():
     return os.urandom(PWD_LENGTH).encode('base-64')
 
 
-def add_admin(arguments, env):
+def user_add(arguments, env):
     """
-        Add an admin user to the database
+        Add a user in the database
     """
     login = get_value(arguments, 'user', 'admin.majerti')
     login = login.decode('utf-8')
@@ -57,30 +57,78 @@ def add_admin(arguments, env):
     firstname = get_value(arguments, 'firstname', 'Admin')
     lastname = get_value(arguments, 'lastname', 'Majerti')
     email = get_value(arguments, 'email', 'admin@example.com')
+    group = get_value(arguments, 'group', None)
     user = User(
         login=login,
         firstname=firstname,
         lastname=lastname,
         email=email
     )
-    user.groups.append('admin')
+
+    if group:
+        user.groups.append(group)
+
     user.set_password(password)
     db = DBSESSION()
     db.add(user)
     db.flush()
-    print u"Creating account %s with password %s" % (login, password)
+    print(u"""
+    Account created :
+          ID        : {0.id}
+          Login     : {0.login}
+          Firstname : {0.firstname}
+          Lastname  : {0.lastname}
+          Email     : {0.email}
+          Groups    : {0.groups}
+          """.format(user))
+
+    if 'pwd' not in arguments:
+        print(u"""
+          Password  : {0}""".format(password))
     return user
 
 
-def add_admin_cmd():
-    """Create an admin account in Autonomie
+def test_mail(arguments, env):
+    """
+    Test tool for mail sending
+    """
+    from autonomie.mail import send_mail
+    dest = get_value(arguments, 'to', 'autonomie@majerti.fr')
+    request = env['request']
+    subject = u"Test d'envoi de mail"
+    body = u"""Il semble que le test d'envoi de mail a réussi.
+    Ce test a été réalisé depuis le script autonomie-admin
+
+Bonne et belle journée !!!"""
+    send_mail(
+        request,
+        [dest],
+        body,
+        subject
+    )
+
+
+def autonomie_admin_cmd():
+    """Autonomie administration tool
     Usage:
-        autonomie-admin <config_uri> add [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--email=<email>]
+        autonomie-admin <config_uri> useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--email=<email>] [--group=<group>]
+        autonomie-admin <config_uri> testmail [--to=<mailadress>]
+
+    o useradd : Add a user in the database
+    o testmail : Send a test mail to autonomie@majerti.fr
 
     Options:
+
         -h --help     Show this screen.
     """
+    def callback(arguments, env):
+        args = ()
+        if arguments['useradd']:
+            func = user_add
+        elif arguments['testmail']:
+            func = test_mail
+        return func(arguments, env)
     try:
-        return command(add_admin, add_admin_cmd.__doc__)
+        return command(callback, autonomie_admin_cmd.__doc__)
     finally:
         pass

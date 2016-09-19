@@ -110,12 +110,11 @@
                 ${api.format_date(date)}
             </td>
             <td>
-                % if is_admin_view:
-                    <a href="${request.route_path(document.type_, id=id_)}"
-                        title='Voir le document'>
-                        ${internal_number} (<small>${name}</small>)
-                    </a>
-                % else:
+                <a href="${request.route_path(document.type_, id=id_)}"
+                    title='Voir le document'>
+                    ${internal_number} (<small>${name}</small>)
+                </a>
+                % if not is_admin_view:
                     <small>
                         ${format_text(description)}
                     </small>

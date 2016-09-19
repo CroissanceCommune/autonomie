@@ -39,6 +39,7 @@ class SageCsvWriter(CsvExporter):
         :param headers: The translation tuple between input and output column
         names
     """
+    extension = "csv"
     delimiter = ";"
     headers = ()
     amount_precision = 2

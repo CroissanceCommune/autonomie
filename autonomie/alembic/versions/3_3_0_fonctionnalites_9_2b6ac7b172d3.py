@@ -50,11 +50,11 @@ def add_internal_number(session, logger):
     logger.warn("Adding internal_number to Task")
     NUMBER_TMPLS = {
         'estimation': u"{s.project.code}_{s.customer.code}_D{s.project_index}\
-        _{s.date:%m%y}",
+_{s.date:%m%y}",
         'invoice': u"{s.project.code}_{s.customer.code}_F{s.project_index}\
-        _{s.date:%m%y}",
+_{s.date:%m%y}",
         'cancelinvoice': u"{s.project.code}_{s.customer.code}_A{s.project_index}\
-        _{s.date:%m%y}"
+_{s.date:%m%y}"
     }
     from autonomie.models.task import Task
     from autonomie.models.customer import Customer

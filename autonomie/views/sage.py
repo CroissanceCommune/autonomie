@@ -800,7 +800,7 @@ target='_blank'>Voir l'encaissement</a>"""
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(
             self.request,
-            get_filename(u"export_encaissement_", writer.file_extension),
+            get_filename(u"export_encaissement_", writer.extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(payments)

@@ -363,7 +363,7 @@ target='_blank'>Voir l'entreprise</a>"""
         writer.set_datas(exporter.get_book_entries(invoices))
         write_file_to_request(
             self.request,
-            get_filename(u"export_facture_", writer.extension),
+            get_filename(u"export_facture", writer.extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(invoices)
@@ -582,7 +582,7 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
         writer.set_datas(exporter.get_book_entries(expenses))
         write_file_to_request(
             self.request,
-            get_filename(u"export_ndf_", writer.extension),
+            get_filename(u"export_ndf", writer.extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(expenses)
@@ -800,7 +800,7 @@ target='_blank'>Voir l'encaissement</a>"""
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(
             self.request,
-            get_filename(u"export_encaissement_", writer.extension),
+            get_filename(u"export_encaissement", writer.extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(payments)
@@ -1055,7 +1055,7 @@ class SageExpensePaymentExportPage(BaseView):
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(
             self.request,
-            get_filename(u"export_paiement_ndf_", writer.extension),
+            get_filename(u"export_paiement_ndf", writer.extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(payments)

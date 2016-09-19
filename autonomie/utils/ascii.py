@@ -27,7 +27,7 @@
 """
 import re
 import random
-from string import lowercase
+import string
 from unidecode import unidecode
 
 
@@ -80,7 +80,7 @@ def gen_random_string(size=15):
 
             size of the resulting string
     """
-    return ''.join(random.choice(lowercase) for _ in range(size))
+    return ''.join(random.choice(string.lowercase) for _ in range(size))
 
 
 def random_tag_id(size=15):
@@ -126,3 +126,16 @@ def isint(val):
         res = True
 
     return res
+
+
+def force_filename(val):
+    """
+    Transform a string to a valid filename
+    """
+    result = force_ascii(val)
+    result = result.replace(' ', '_')
+
+    valid_chars = "-_.%s%s" % (string.ascii_letters, string.digits)
+    result = "".join((char for char in result if char in valid_chars))
+
+    return result

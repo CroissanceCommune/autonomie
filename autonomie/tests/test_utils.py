@@ -40,6 +40,7 @@ from autonomie.utils.rest import (
 )
 from autonomie.utils.ascii import (
     force_ascii,
+    force_filename,
 )
 from autonomie.utils import date
 
@@ -96,6 +97,10 @@ def test_force_ascii():
     assert force_ascii("éco") == u"eco"
     assert force_ascii(5) == "5"
     assert force_ascii(u"éco") == "eco"
+
+
+def test_force_filename():
+    assert force_filename(u"é' ';^") == u"e_"
 
 
 class DummyModel(dict):

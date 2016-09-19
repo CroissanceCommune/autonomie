@@ -88,7 +88,7 @@ def get_filename(root_name, extension):
     Return a filename with a date
     """
     today = datetime.date.today()
-    return u"{0]_{1}.{2}".format(
+    return u"{0}_{1}.{2}".format(
         root_name,
         today.strftime("%d%m%Y"),
         extension,

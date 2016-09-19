@@ -83,6 +83,18 @@ comptables du module vente</a>"
 EXPORT_BTN = Button(name="submit", type="submit", title=u"Exporter")
 
 
+def get_filename(root_name, extension):
+    """
+    Return a filename with a date
+    """
+    today = datetime.date.today()
+    return u"{0]_{1}.{2}".format(
+        root_name,
+        today.strftime("%d%m%Y"),
+        extension,
+    )
+
+
 def get_period_form(title=u"Exporter les factures sur une période donnée"):
     """
         Return the period search form
@@ -178,11 +190,6 @@ class SageInvoiceExportPage(BaseView):
             * a form for number to number invoice export
     """
     title = u"Export des factures au format CSV pour Sage"
-
-    @property
-    def filename(self):
-        today = datetime.date.today()
-        return u"export_facture_{0}.txt".format(today.strftime("%d%m%Y"))
 
     def _filter_date(self, query, start_date, end_date):
         return query.filter(Task.date.between(start_date, end_date))
@@ -356,7 +363,7 @@ target='_blank'>Voir l'entreprise</a>"""
         writer.set_datas(exporter.get_book_entries(invoices))
         write_file_to_request(
             self.request,
-            self.filename,
+            get_filename(u"export_facture_", writer.file_extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(invoices)
@@ -441,11 +448,6 @@ class SageExpenseExportPage(BaseView):
     contribution_config_keys = (
         'compte_cg_contribution', 'contribution_cae', 'numero_analytique',
     )
-
-    @property
-    def filename(self):
-        today = datetime.date.today()
-        return u"export_ndf_{0}.txt".format(today.strftime("%d%m%Y"))
 
     def query(self, query_params_dict):
         """
@@ -577,12 +579,10 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
         from autonomie.interfaces import ITreasuryExpenseWriter
         writer = self.request.find_service(ITreasuryExpenseWriter)
 
-        print(exporter)
-        print(writer)
         writer.set_datas(exporter.get_book_entries(expenses))
         write_file_to_request(
             self.request,
-            self.filename,
+            get_filename(u"export_ndf_", writer.extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(expenses)
@@ -665,11 +665,6 @@ class SagePaymentExportPage(BaseView):
     Provide a sage export view compound of multiple forms for payment exports
     """
     title = u"Export des encaissements au format CSV pour Sage"
-
-    @property
-    def filename(self):
-        today = datetime.date.today()
-        return u"export_encaissement_{0}.txt".format(today.strftime("%d%m%Y"))
 
     def _filter_date(self, query, start_date, end_date):
         return query.filter(
@@ -805,7 +800,7 @@ target='_blank'>Voir l'encaissement</a>"""
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(
             self.request,
-            self.filename,
+            get_filename(u"export_encaissement_", writer.file_extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(payments)
@@ -907,11 +902,6 @@ class SageExpensePaymentExportPage(BaseView):
     Provide an expense payment export page
     """
     title = u"Export des règlements de notes de frais au format CSV pour Sage"
-
-    @property
-    def filename(self):
-        today = datetime.date.today()
-        return u"export_paiement_ndf_{0}.txt".format(today.strftime("%d%m%Y"))
 
     def _filter_date(self, query, start_date, end_date):
         return query.filter(
@@ -1065,7 +1055,7 @@ class SageExpensePaymentExportPage(BaseView):
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(
             self.request,
-            self.filename,
+            get_filename(u"export_paiement_ndf_", writer.extension),
             writer.render(),
             headers="application/csv")
         self.record_exported(payments)

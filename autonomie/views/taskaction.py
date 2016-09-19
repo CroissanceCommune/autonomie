@@ -632,7 +632,10 @@ def task_pdf_view(request):
     """
     from autonomie.resources import pdf_css
     pdf_css.need()
-    filename = u"{0}.pdf".format(request.context.internal_number)
+
+    label = request.context.internal_number
+
+    filename = u"{0}.pdf".format(label)
 
     html_string = html(request)
     write_pdf(request, filename, html_string)

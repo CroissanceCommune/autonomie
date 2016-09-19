@@ -46,6 +46,7 @@ from autonomie.resources import (
     duplicate as duplicate_js,
 )
 
+from autonomie.utils.ascii import force_filename
 from autonomie.utils.widgets import (
     Submit,
     ViewLink,
@@ -633,7 +634,8 @@ def task_pdf_view(request):
     from autonomie.resources import pdf_css
     pdf_css.need()
 
-    label = request.context.internal_number
+    number = request.context.internal_number
+    label = force_filename(number)
 
     filename = u"{0}.pdf".format(label)
 

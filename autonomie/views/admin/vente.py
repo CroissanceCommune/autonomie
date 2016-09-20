@@ -143,8 +143,8 @@ class AdminVenteTreasuryMain(BaseConfigView):
     """
     title = u"Configuration des informations générales et des \
 modules prédéfinis"
-    description = u"Configuration du code journal et des modules génériques \
-(Export des factures, module contribution à la CAE, CGSCOP, RG, RG Interne)"
+    description = u"Configuration du code journal et des modules prédéfinis \
+(Export des factures, contribution à la CAE, RG Externe, RG Interne)"
     redirect_path = "admin_vente_treasury"
     validation_msg = u"Les informations ont bien été enregistrées"
     keys = (
@@ -167,6 +167,26 @@ modules prédéfinis"
         'sage_rgclient',
     )
     schema = get_config_schema(keys)
+    info_message = u"""
+Configurez les exports comptables de votre CAE.
+Configurez les champs indispensables aux exports :\
+    <ul>\
+        <li>Code journal</li>\
+        <li>Numéro analytique de la CAE</li>\
+        <li>Compte banque de l'entrepreneur</li>\
+    </ul>\
+Configurez les champs relatifs aux frais et remises:\
+    <ul>\
+<li>Compte de frais annexes</li>\
+<li>Compte RRR (Rabais, Remises et Ristournes)</li>\
+    </ul>\
+    Configurez et activez des modules de retenues optionnels :\
+        <ul>\
+    <li>Module de contribution à la CAE</li>\
+    <li>Module RG Externe (spécifique bâtiment)</li>\
+    <li>Module RG Interne (spécifique bâtiment)</li>\
+    </ul>
+    """
 
 
 class AdminVenteTreasuryCustom(custom_treasury_admin_class):

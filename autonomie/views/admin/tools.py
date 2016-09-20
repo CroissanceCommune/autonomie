@@ -39,8 +39,13 @@ logger = logging.getLogger(__name__)
 
 
 class BaseAdminFormView(BaseFormView):
-    add_template_vars = ('menus',)
+    add_template_vars = ('menus', 'message')
     redirect_path = "admin_index"
+    info_message = ""
+
+    @property
+    def message(self):
+        return self.info_message
 
     @property
     def menus(self):

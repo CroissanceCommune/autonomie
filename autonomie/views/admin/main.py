@@ -117,7 +117,7 @@ devis, factures / avoir)"
     )
     menus.append(
         dict(
-            label=u"Configuration du module Vente",
+            label=u"Configuration du module Ventes",
             path="admin_vente",
             title=u"Mentions des devis et factures, unité de prestation ...",
         )

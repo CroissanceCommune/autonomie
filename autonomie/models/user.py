@@ -2078,7 +2078,8 @@ class DateDiagnosticDatas(DBBASE):
             'colanderalchemy': {
                 "title": u'Date du diagnostic',
             }
-        }
+        },
+        nullable=False
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
@@ -2113,7 +2114,8 @@ class DateConventionCAPEDatas(DBBASE):
             "colanderalchemy": {
                 "title": u'Date de la convention',
             }
-        }
+        },
+        nullable=False,
     )
     end_date = Column(
         Date(),
@@ -2156,7 +2158,8 @@ class DateDPAEDatas(DBBASE):
             'colanderalchemy': {
                 "title": u'Date de la DPAE',
             }
-        }
+        },
+        nullable=False,
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),
@@ -2189,7 +2192,9 @@ class CaeSituationChange(DBBASE):
             'colanderalchemy': {
                 "title": u'Date du changement de statut',
             }
-        }
+        },
+        nullable=False,
+
     )
     userdatas_id = Column(
         ForeignKey("user_datas.id"),

@@ -51,6 +51,7 @@ venusian==1.0
 waitress==0.8.2
 wsgiref==0.1.2
 xhtml2pdf==0.0.6
+html5lib==1.0b8
 zope.component==4.0.1
 zope.deprecation==4.1.2
 zope.event==4.0.1

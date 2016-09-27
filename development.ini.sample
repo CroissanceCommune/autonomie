@@ -10,6 +10,7 @@ pyramid.debug_routematch = false
 pyramid.debug_templates = true
 pyramid.default_locale_name = fr_FR
 pyramid.includes =   pyramid_tm
+                    pyrmaid_services
                     pyramid_mailer
                     pyramid_layout
                     pyramid_mako

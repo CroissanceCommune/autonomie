@@ -65,3 +65,4 @@ Unidecode==0.04.17
 deform_extensions==0.2.2
 filedepot==0.1.2
 pyramid_services
+Genshi==0.7

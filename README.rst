@@ -20,7 +20,8 @@ Nouvelles fonctionnalités/Anomalies
 
 Site officiel : http://autonomie.coop
 
-L'essentiel du développement est réalisé sur financement de Croissance Commune.
+L'essentiel du développement est réalisé sur financement de Coopérer pour
+entreprendre.
 
 Si vous rencontrez un bogue, ou avez une idée de fonctionnalité, il est possible
 de signaler cela aux développeurs directement ou en utilisant le système de
@@ -84,4 +85,4 @@ Puis créer un compte administrateur
 
 .. code-block:: console
 
-    autonomie-admin development.ini add [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>]
+    autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]

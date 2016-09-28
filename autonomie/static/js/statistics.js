@@ -173,7 +173,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       }
     },
     initialize: function(options){
-      if (this.get('type') == 'date'){
+      if ((this.get('type') == 'date') || (this.get('type') == 'multidate')){
         this.setDateAttributes(options);
       }
     },
@@ -202,7 +202,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       var labels;
       var key;
       var options;
-      if(type == 'date'){
+      if((type == 'date') || (type == 'multidate')){
         labels = [this.get('altdate1'), this.get('altdate2')];
       } else if (type == 'optrel') {
         key = this.get('key');
@@ -657,6 +657,10 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       var criterionForm;
       var this_ = this;
       if (model.get('type') == 'date'){
+        criterionForm = new DateCriterionFormView(
+          {model: model, destCollection: this.criteria_collection}
+        );
+      } else if (model.get('type') == 'multidate'){
         criterionForm = new DateCriterionFormView(
           {model: model, destCollection: this.criteria_collection}
         );

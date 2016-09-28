@@ -821,6 +821,7 @@ class UserDatas(Node):
             'export': {
                 "flatten": [
                     ('date', u'Date'),
+                    ('situation.label', u"Situation"),
                 ],
                 'label': u"Changement de situation",
             },

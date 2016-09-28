@@ -65,7 +65,9 @@ templates['datecriterion_form.mustache'] = template({"1":function(depth0,helpers
 },"2":function(depth0,helpers,partials,data) {
   return "selected";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<form name='criterion'>\n<button type=\"button\" class=\"close\"><span aria-hidden=\"true\">&times;</span></button>\n    <input type='hidden' name='type' value='date' />\n    <input type='hidden' name='key' value='"
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<form name='criterion'>\n<button type=\"button\" class=\"close\"><span aria-hidden=\"true\">&times;</span></button>\n    <input type='hidden' name='type' value='"
+    + escapeExpression(((helper = (helper = helpers.type || (depth0 != null ? depth0.type : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"type","hash":{},"data":data}) : helper)))
+    + "' />\n    <input type='hidden' name='key' value='"
     + escapeExpression(((helper = (helper = helpers.key || (depth0 != null ? depth0.key : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"key","hash":{},"data":data}) : helper)))
     + "' />\n    <fieldset><legend>"
     + escapeExpression(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper)))

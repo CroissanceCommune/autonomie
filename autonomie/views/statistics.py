@@ -53,6 +53,7 @@ from autonomie.statistics import (
     NUMERIC_OPTIONS,
     OPTREL_OPTIONS,
     DATE_OPTIONS,
+    MULTIDATE_OPTIONS,
 )
 from autonomie.utils import (
     ascii,
@@ -72,6 +73,7 @@ from autonomie.export.utils import write_file_to_request
 
 CRITERION_MODELS = {
     "date": DateStatisticCriterion,
+    "multidate": DateStatisticCriterion,
     "bool": BoolStatisticCriterion,
     "number": CommonStatisticCriterion,
     "optrel": OptListStatisticCriterion,
@@ -201,6 +203,7 @@ def statistic_form_options(context, request):
             'optrel': convert_duple_to_dict(OPTREL_OPTIONS),
             'static_opt': convert_duple_to_dict(OPTREL_OPTIONS),
             'bool': convert_duple_to_dict(BOOL_OPTIONS),
+            'multidate': convert_duple_to_dict(MULTIDATE_OPTIONS),
         }
     )
 

@@ -2190,7 +2190,7 @@ class CaeSituationChange(DBBASE):
         Date(),
         info={
             'colanderalchemy': {
-                "title": u'Date du changement de statut',
+                "title": u'Date du changement de situation',
             }
         },
         nullable=False,
@@ -2212,8 +2212,7 @@ class CaeSituationChange(DBBASE):
         info={
             'colanderalchemy':
             {
-                'title': u"Situation actuelle dans la CAE",
-                'section': u'Synthèse',
+                'title': u"Situation dans la CAE",
                 'widget': get_deferred_select(CaeSituationOption),
             }
         }

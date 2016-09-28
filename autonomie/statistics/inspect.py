@@ -193,7 +193,12 @@ class StatisticInspector(BaseSqlaInspector):
                         # On a besoin de la classe pour les outerjoin et
                         res[new_key]['join_class'] = prop.class_attribute
                         res[new_key]['key'] = new_key
-                        res[new_key]['type'] = 'multi%s' % res[new_key]['type']
+
+                        # On propose le filtre sur premier/dernier seulement
+                        # dans le cas des relation portant sur une seulement une
+                        # date
+                        if len(keys) == 1 and res[new_key]['type'] == 'date':
+                            res[new_key]['type'] = 'multi%s' % res[new_key]['type']
                     result.update(res)
 
                 else:

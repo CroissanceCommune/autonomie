@@ -600,6 +600,7 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
             ),
             'all_form': get_all_form(
                 expense_form.counter,
+                title=u"Exporter les notes de dépense non exportées",
             )
         }
 

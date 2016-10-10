@@ -805,6 +805,12 @@ class QueryFactory(object):
         """
         return set([item[0] for item in self.query()])
 
+    def count(self):
+        """
+        Return the number of entries matching this query
+        """
+        return self.query().count()
+
 
 class OrQueryFactory(QueryFactory):
     """

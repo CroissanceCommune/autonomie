@@ -316,7 +316,7 @@ class RestStatisticCriterion(BaseRestView):
             model,
             excludes=('type_', 'id'),
         )
-        if model_type == 'or':
+        if model_type in ('or', 'and'):
             schema['criteria'] = colander.SchemaNode(
                 colander.Sequence(),
                 forms.get_sequence_child_item(BaseStatisticCriterion)[0],
@@ -331,8 +331,10 @@ class RestStatisticCriterion(BaseRestView):
         clauses
         context is the current entry
         """
-        return [criterion for criterion in self.context.criteria
-                if not criterion.has_parent()]  # only top level
+        # Top level is handled on view side
+        return self.context.criteria
+        # return [criterion for criterion in self.context.criteria
+        #         if not criterion.has_parent()]  # only top level
 
     def pre_format(self, values):
         """

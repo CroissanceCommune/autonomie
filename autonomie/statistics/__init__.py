@@ -253,7 +253,7 @@ class EntryQueryFactory(object):
         return {
             "label": self.entry.title,
             "count": self.query_object.count(),
-            "description": self.entry.description,
+            "description": self.entry.description or '',
         }
 
 

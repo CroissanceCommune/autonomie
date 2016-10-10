@@ -195,10 +195,9 @@ class StatisticInspector(BaseSqlaInspector):
                         res[new_key]['key'] = new_key
 
                         # On propose le filtre sur premier/dernier seulement
-                        # dans le cas des relation portant sur une seulement une
-                        # date
-                        if len(keys) == 1 and res[new_key]['type'] == 'date':
-                            res[new_key]['type'] = 'multi%s' % res[new_key]['type']
+                        # dans le cas des relation portant sur une date
+                        if res[new_key]['type'] == 'date':
+                            res[new_key]['type'] = 'multidate'
                     result.update(res)
 
                 else:

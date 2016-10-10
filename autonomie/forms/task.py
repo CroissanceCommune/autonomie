@@ -579,8 +579,7 @@ class TaskConfiguration(colander.MappingSchema):
     mention_ids = colander.SchemaNode(
         colander.Set(),
         title=u"Mentions facultatives",
-        description=u"Choisissez les mentions à ajouter au document dans \
-la liste",
+        description=u"Choisissez les mentions à ajouter au document",
         widget=deferred_mention_select_widget,
         missing=colander.drop,
     )

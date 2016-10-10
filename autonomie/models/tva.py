@@ -114,8 +114,9 @@ Autonomie, ainsi que les produits associés.<br /> \
         Integer,
         info={
             "colanderalchemy": {
-                'title': u'Montant',
+                'title': u'Valeur',
                 'typ': AmountType(),
+                'description': u"Le pourcentage associé (ex : 19.6)",
             }
         },
     )

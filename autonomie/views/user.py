@@ -453,7 +453,7 @@ class UserDatasAdd(BaseFormView):
 
     def before(self, form):
         auto_need(form)
-        form.widget = AccordionFormWidget(grids=USERDATAS_FORM_GRIDS)
+        form.widget = AccordionFormWidget(named_grids=USERDATAS_FORM_GRIDS)
         self.populate_actionmenu()
 
     def populate_actionmenu(self):

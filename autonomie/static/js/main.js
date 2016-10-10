@@ -301,7 +301,7 @@ function showLoader(){
 // Important point : handle redirection by json dict for ajax calls
 // Expects a redirect value to be returned with the 302 code
 function setupJsonRedirect() {
-  $('body').ajaxComplete(
+  $(document).ajaxComplete(
     function( data, xhr, settings ) {
       json_resp = jQuery.parseJSON( xhr.responseText );
       if ( json_resp.redirect ){

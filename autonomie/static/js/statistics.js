@@ -865,10 +865,7 @@ function StatisticsPageInit(options){
           url: AppOptions['submiturl'],
           method: 'POST',
           dataType: 'json',
-          data: {title: title},
-          success: function(result){
-            window.location.href = window.location.href;
-          }
+          data: {title: title}
         });
       }
     });

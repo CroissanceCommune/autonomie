@@ -139,7 +139,7 @@ statistiques")
                 request.dbsession.add(sheet)
             request.dbsession.flush()
             url = request.route_path('statistic', id=sheet.id)
-            return HTTPFound(url)
+            return dict(redirect=url)
         logger.debug(u"Invalid datas have been passed")
         raise HTTPClientError()
     logger.debug(u"Missing datas in the request")
@@ -478,12 +478,14 @@ def includeme(config):
         route_name="statistics",
         request_param="action=add",
         permission='add_statistic',
+        renderer='json',
     )
     config.add_view(
         statistic_sheet_add_edit_view,
         route_name="statistic",
         request_param="action=edit",
         permission='edit_statistic',
+        renderer='json',
     )
 
     config.add_view(

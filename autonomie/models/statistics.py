@@ -181,16 +181,18 @@ class BaseStatisticCriterion(DBBASE):
         'BaseStatisticCriterion',
         primaryjoin='BaseStatisticCriterion.id==\
 BaseStatisticCriterion.parent_id',
-        backref=backref(
-            'parent',
-            remote_side=[id],
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-            },
-        ),
         cascade='all',
         info={'colanderalchemy': forms.EXCLUDED},
     )
+    parent = relationship(
+        'BaseStatisticCriterion',
+        remote_side=[id],
+        back_populates='criteria',
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+        },
+    )
+
 
     def __json__(self, request):
         return dict(

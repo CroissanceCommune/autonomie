@@ -24,7 +24,6 @@ import colander
 
 from sqlalchemy import desc
 from pyramid.httpexceptions import (
-    HTTPFound,
     HTTPClientError,
 )
 from colanderalchemy import SQLAlchemySchemaNode
@@ -64,10 +63,9 @@ from autonomie.views import (
     BaseView,
     DisableView,
     DuplicateView,
-    BaseCsvView,
     BaseRestView,
 )
-from autonomie.views.user import add_o2m_headers_to_writer
+from autonomie.views.user import UserDatasCsvView
 from autonomie.export.utils import write_file_to_request
 
 
@@ -362,23 +360,11 @@ class RestStatisticCriterion(BaseRestView):
         return criterion
 
 
-class CsvEntryView(BaseCsvView):
+class CsvEntryView(UserDatasCsvView):
     """
     The view used to stream a the items matching a statistic entry
     """
     model = UserDatas
-
-    def _build_return_value(self, schema, appstruct, query):
-        """
-        Return the streamed file object
-        """
-        writer = self._init_writer()
-        writer = add_o2m_headers_to_writer(writer, query)
-        for item in self._stream_rows(query):
-            writer.add_row(item)
-
-        write_file_to_request(self.request, self.filename, writer.render())
-        return self.request.response
 
     def query(self):
         inspector = get_inspector()

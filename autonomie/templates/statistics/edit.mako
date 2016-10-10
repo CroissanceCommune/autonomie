@@ -26,11 +26,11 @@
     <div class='col-xs-12' id='sheet'>
     </div>
 </div>
-<div class='row'>
+<div class='row' style="margin-bottom: 30px">
     <div class='col-xs-12' id='entrylist'>
     </div>
 </div>
-<div class='row'>
+<div class='row' style="background-color: #f4f5f7; padding-top: 30px;min-height: 100vh;">
     <div id='entry_edit' class='col-xs-10 col-xs-offset-1' ></div>
 </div>
 <div id='messageboxes'></div>

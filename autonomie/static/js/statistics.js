@@ -72,7 +72,8 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
   var EntryFormLayout = Marionette.LayoutView.extend({
     template: "full_entry_form",
     events: {
-      'click #entry_list_header button.close': "closeView",
+      'click #entry_list_header button.close': "toggleForm",
+      'click #entry_list_header button.back-btn': "closeView",
       'click #entry_list_header button.edit': "toggleForm",
       "click #entry_edit_form button[name=submit]": "changeDatas",
       "submit form": "changeDatas",
@@ -272,7 +273,13 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         method_label = "Erreur";
       }
 
-      return title + " (" + method_label + " : " + label + ")";
+      final_label = title + " ( " + method_label;
+      if (label !== ''){
+        final_label += ' : ' + label;
+      }
+      final_label += ' )';
+
+      return final_label;
     }
   });
 

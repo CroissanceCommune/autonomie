@@ -1595,6 +1595,23 @@ SocialStatusOption.id',
         }
     )
 
+    parcours_contract_history = relationship(
+        "ContractHistory",
+        cascade='all, delete-orphan',
+        info={
+            'colanderalchemy': {
+                "title": u"Avenants au contrat de travail",
+                'section': u'Parcours',
+            },
+            'export': {
+                'flatten': [
+                    ('date', u"Date"),
+                    ('number', u"Numéro d'avenant"),
+                ],
+            }
+        }
+    )
+
     # To be removed in version > 3.3.0
     parcours_last_avenant = Column(
         Date(),
@@ -1619,23 +1636,6 @@ SocialStatusOption.id',
             {
                 'title': u'Taux horaire (en lettres)',
                 'section': u'Parcours',
-            }
-        }
-    )
-
-    parcours_contract_history = relationship(
-        "ContractHistory",
-        cascade='all, delete-orphan',
-        info={
-            'colanderalchemy': {
-                "title": u"Avenants au contrat de travail",
-                'section': u'Parcours',
-            },
-            'export': {
-                'flatten': [
-                    ('date', u"Date"),
-                    ('number', u"Numéro d'avenant"),
-                ],
             }
         }
     )
@@ -2289,35 +2289,108 @@ class ContractHistory(DBBASE):
 
 USERDATAS_FORM_GRIDS = {
     u"Synthèse": (
-        ((6, True),),
-        ((6, True), (6, True)),
-        ((6, True),),
+        (('situation_situation_id', 6),),
+        (('situation_follower_id', 6), ('situation_antenne_id', 6)),
+        (('situation_societariat_entrance', 6),),
     ),
     u"Coordonnées": (
-        ((3, True), (3, True), (3, True), (3, True)),
-        ((3, True), (3, True)),
-        ((3, True), (3, True)),
-        ((3, True), (3, True), (3, True)),
-        ((3, True), (3, True)),
-        ((3, True), (3, True), (3, True), (3, True)),
-        ((3, True), (3, True)),
-        ((3, True), ),
-        ((3, True), (3, True), (3, True)),
-        ((3, True), (3, True)),
+        (
+            ('coordonnees_civilite', 3),
+            ('coordonnees_lastname', 3),
+            ('coordonnees_firstname', 3),
+            ('coordonnees_ladies_lastname', 3)
+        ),
+        (
+            ('coordonnees_email1', 3),
+            ('coordonnees_email2', 3),
+        ),
+        (
+            ('coordonnees_tel', 3),
+            ('coordonnees_mobile', 3),
+        ),
+        (
+            ('coordonnees_address', 3),
+            ('coordonnees_zipcode', 3),
+            ('coordonnees_city', 3),
+        ),
+        (
+            ('coordonnees_zone_id', 3),
+            ('coordonnees_zone_qual_id', 3),
+        ),
+        (
+            ('coordonnees_sex', 3),
+            ('coordonnees_birthday', 3),
+            ('coordonnees_birthplace', 3),
+            ('coordonnees_birthplace_zipcode', 3),
+        ),
+        (
+            ('coordonnees_nationality', 3),
+            ('coordonnees_resident', 3),
+        ),
+        (
+            ('coordonnees_secu', 3),
+        ),
+        (
+            ('coordonnees_family_status', 3),
+            ('coordonnees_children', 3),
+            ('coordonnees_study_level_id', 3),
+        ),
+        (
+            ('coordonnees_emergency_name', 3),
+            ('coordonnees_emergency_phone', 3),
+        ),
+        (
+            ('coordonnees_identifiant_interne', 3),
+        ),
     ),
     u"Parcours": (
-        ((3, True), (3, True)),
-        ((3, True), ),
-        ((12, True), ),
-        ((3, True), ),
-        ((6, True), (6, True)),
-        ((3, True), (3, True), (3, True),),
-        ((6, True),),
-        ((3, True), (3, True)),
-        ((3, True), (3, True), (3, True)),
-        ((4, True), ),
-        ((3, True), (3, True), (3, True)),
-    )
+        (
+            ('parcours_prescripteur_id', 3),
+            ('parcours_prescripteur_name', 3),
+        ),
+        (
+            ('parcours_date_info_coll', 3),
+        ),
+        (
+            ('parcours_date_diagnostic', 12),
+        ),
+        (
+            ('parcours_non_admission_id', 3),
+        ),
+        (
+            ('parcours_convention_cape', 6),
+            ('parcours_dpae', 6),
+        ),
+        (
+            ('parcours_contract_type', 3),
+            ('parcours_start_date', 3),
+            ('parcours_end_date', 3),
+        ),
+        (
+            ('parcours_taux_horaire', 3),
+            ('parcours_taux_horaire_letters', 3),
+            ('parcours_num_hours', 3),
+            ('parcours_salary', 3),
+        ),
+        (
+            ('parcours_salary_letters', 6),
+            ('parcours_employee_quality_id', 3),
+        ),
+        (
+            ('parcours_contract_history', 6),
+        ),
+        (
+            ('parcours_goals', 6),
+        ),
+        (
+            ('parcours_status_id', 6),
+        ),
+        (
+            ('parcours_medical_visit', 3),
+            ('parcours_medical_visit_limit', 3),
+        ),
+    ),
+
 }
 
 

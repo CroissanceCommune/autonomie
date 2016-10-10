@@ -40,12 +40,10 @@ from deform import (
 from deform.exception import ValidationFailure
 
 from autonomie.compute.sage import (
-    PaymentExport,
     ExpensePaymentExport,
     MissingData,
 )
 from autonomie.export.sage import (
-    SagePaymentCsvWriter,
     SageExpensePaymentCsvWriter
 )
 from autonomie.export.utils import write_file_to_request
@@ -421,7 +419,7 @@ target='_blank'>Voir l'entreprise</a>"""
                         log.exception("Exception occured while writing CSV \
 file")
                         config_help_msg = _HELPMSG_CONFIG.format(
-                            self.request.route_url("admin_cae")
+                            self.request.route_url("admin_vente")
                         )
                         check_messages['errors'] = [config_help_msg]
 
@@ -544,7 +542,7 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
 
         if not self.check_config(self.request.config):
             url1 = self.request.route_path('admin_expense')
-            url2 = self.request.route_path('admin_cae')
+            url2 = self.request.route_path('admin_vente')
             errors.append(EXPENSE_CONFIG_ERROR_MSG.format(url1, url2))
 
         for expense in expenses:

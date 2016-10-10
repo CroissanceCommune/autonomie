@@ -1,0 +1,30 @@
+<form name='criterion'>
+    <button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+    <input type='hidden' name='type' value='{{ type }}' />
+    <fieldset>
+        <legend>
+            {{ label }}
+        </legend>
+        <div class='alert alert-info'>
+            <ul>
+            <li>1- Configurer vos critères</li>
+            <li>2- Créer une clause 'ET'</li>
+            <li>3- Sélectionner les critères à utiliser dans la clause 'ET'</li>
+            </ul>
+        </div>
+        <div class='row'>
+            <div class="form-group col-sm-6">
+                <label for="criteria">Combiner les critères</label>
+                <select multiple name='criteria' class='form-control'>
+                    {{#criteria_options }}
+                    <option value='{{value}}' {{#selected}}selected{{/selected}}>{{label}}</option>
+                    {{/criteria_options }}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+            <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+        </div>
+    </fieldset>
+</form>

@@ -54,6 +54,21 @@ AutonomieApp.addRegions({
 
 AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, $, _){
 
+  var get_edit_url = function(model){
+    /*
+     * Returns the edit url for a given model
+     */
+    var entry_id = model.get('entry_id');
+    if (_.isUndefined(entry_id)){
+      entry_id = model.collection.entry_id;
+    }
+    return "entries/" +
+      entry_id +
+      "/criteria/" +
+      model.get('id') +
+      "/edit";
+  };
+
   var EntryFormLayout = Marionette.LayoutView.extend({
     template: "full_entry_form",
     events: {
@@ -165,7 +180,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     validation: {
       criteria: function(value){
-        if (this.get('type') == 'or'){
+        if ((this.get('type') == 'or') || (this.get('type') == 'and')){
           if (value.length === 0){
             return "Sélectionnez au moins une entrée";
           }
@@ -185,17 +200,36 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         this.set('altdate2', formatPaymentDate(options['search2']));
       }
     },
+    get_subcriteria_label: function(criteria, app_options){
+      var label = '';
+      _.each(criteria, function(model_dict){
+        var m = new CriterionModel(model_dict);
+        label += "<li>";
+        label += m.get_full_label(AppOptions);
+        label += "<a href='#" + get_edit_url(m) + "'>Modifier</a>";
+        label += "</li>";
+      });
+      return label;
+    },
+    get_or_label: function(app_options){
+      var label = "Clause OU <ul>";
+      label += this.get_subcriteria_label(this.get('criteria'));
+      label += '</ul>';
+      return label;
+    },
+    get_and_label: function(app_options){
+      var label = "Clause ET <ul>";
+      label += this.get_subcriteria_label(this.get('criteria'));
+      label += "</ul>";
+      return label;
+    },
     get_full_label: function(app_options){
       var label;
       if (this.get('type') == 'or'){
-        label = "Clause OU (";
-        _.each(this.get('criteria'), function(elem){
-          var m = new CriterionModel(elem);
-          label += m.get_full_label(AppOptions);
-          label += ' - ';
-        });
-        label += ')';
-        return label;
+        return this.get_or_label(app_options);
+      }
+      if (this.get('type') == 'and'){
+        return this.get_and_label(app_options);
       }
       var title = app_options.columns[this.get('key')].label;
       var type = this.get('type');
@@ -389,13 +423,11 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       }
     },
     templateHelpers: function(){
-      var result = {model_label: this.model.get_full_label(AppOptions)};
+      var result = {
+        model_label: this.model.get_full_label(AppOptions),
+        edit_url: get_edit_url(this.model)
+      };
 
-      result.edit_url = "entries/" +
-        this.model.collection.entry_id +
-        "/criteria/" +
-        this.model.get('id') +
-        "/edit";
       return result;
     }
   });
@@ -406,7 +438,8 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     childViewContainer: 'tbody',
     events: {
       "click a.add": "dialogCriterionType",
-      "click a.add-or": "addOrCriterion"
+      "click a.add-or": "addOrCriterion",
+      "click a.add-and": "addAndCriterion"
     },
     dialogCriterionType: function(){
       var add_url = "entries/" + this.collection.entry_id + "/criteria/add/";
@@ -418,6 +451,13 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     addOrCriterion: function(){
       var url = "entries/" + this.collection.entry_id + "/orcriteria/add";
       Statistic.router.navigate(url, {trigger: true});
+    },
+    addAndCriterion: function(){
+      var url = "entries/" + this.collection.entry_id + "/andcriteria/add";
+      Statistic.router.navigate(url, {trigger: true});
+    },
+    filter: function(child, index, collection){
+      return child.get('parent_id') === null;
     }
   });
 
@@ -544,13 +584,13 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     }
   });
 
-  var OrCriterionForm = BaseCriterionFormView.extend({
-    template: "orcriterion_form",
+  var CombinedCriterionForm = BaseCriterionFormView.extend({
     ui:{
       "form": "form[name=criterion]",
       "select": "form[name=criterion] select"
     },
     templateHelpers: function(){
+      console.log(this.template);
       var type = this.model.get('type');
       var criteria_options = [];
       _.each(this.destCollection.models, function(model){
@@ -577,7 +617,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       });
       return {
         type: type,
-        label: "Configuration d'une clause 'OU'",
+        label: this.label,
         criteria_options: criteria_options
         };
     },
@@ -594,6 +634,14 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       }
       return result;
     }
+  });
+  var OrCriterionForm = CombinedCriterionForm.extend({
+    template: "orcriterion_form",
+    label: "Configuration d'une clause 'OU'"
+  });
+  var AndCriterionForm = CombinedCriterionForm.extend({
+    template: "andcriterion_form",
+    label: "Configuration d'une clause 'ET'"
   });
 
   var controller = {
@@ -694,6 +742,10 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         criterionForm = this.criterionForm = new OrCriterionForm(
           {model: model, destCollection: this.criteria_collection}
         );
+      } else if (model.get('type') == 'and'){
+        criterionForm = this.criterionForm = new AndCriterionForm(
+          {model: model, destCollection: this.criteria_collection}
+        );
       }
       this.entry_form.getRegion('form').show(criterionForm);
     },
@@ -726,6 +778,20 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
         var model = this_.criteria_collection.get(criterion_id);
         this_._buildCriterionForm(model);
       });
+    },
+    criteria_and_add: function(entry_id){
+      var this_ = this;
+      this.entry_edit(entry_id).then(function(){
+        var model = new CriterionModel({key: "", type:"and"});
+        this_._buildCriterionForm(model);
+      });
+    },
+    criteria_and_edit: function(entry_id, criterion_id){
+      var this_ = this;
+      this.entry_edit(entry_id).then(function(){
+        var model = this_.criteria_collection.get(criterion_id);
+        this_._buildCriterionForm(model);
+      });
     }
   };
   router = Backbone.Marionette.AppRouter.extend({
@@ -736,6 +802,8 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       "entries/add": "entry_add",
       "entries/:id/orcriteria/add": "criteria_or_add",
       "entries/:id/orcriteria/edit": "criteria_or_edit",
+      "entries/:id/andcriteria/add": "criteria_and_add",
+      "entries/:id/andcriteria/edit": "criteria_and_edit",
       "entries/:id/criteria/add/:key": "criteria_add",
       "entries/:id/criteria/:cid/edit": "criteria_edit"
     }

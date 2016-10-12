@@ -51,7 +51,6 @@ from autonomie.models.options import (
     ConfigurableOption,
     get_id_foreignkey_col,
 )
-from autonomie.models.base import DBSESSION
 
 
 class CompetenceDeadline(ConfigurableOption):
@@ -103,7 +102,7 @@ les graphiques",
 
     @classmethod
     def query(cls, *args):
-        query = DBSESSION().query(CompetenceScale)
+        query = super(CompetenceScale, cls).query(*args)
         query = query.order_by(CompetenceScale.value)
         return query
 

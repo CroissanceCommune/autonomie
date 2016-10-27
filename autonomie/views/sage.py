@@ -1049,7 +1049,7 @@ class SageExpensePaymentExportPage(BaseView):
         """
         Write the exported csv file to the request
         """
-        exporter = ExpensePaymentExport(self.context, self.request.config)
+        exporter = ExpensePaymentExport(self.context, self.request)
         writer = SageExpensePaymentCsvWriter()
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(

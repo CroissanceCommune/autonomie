@@ -126,15 +126,15 @@ faire figurer dans leurs devis/factures"
 
 class PaymentModeAdmin(payment_mode_admin_class):
     title = u"Configuration des modes de paiement"
+    description = u"Les modes de paiement que l'on peut sélectionner pour \
+enregistrer le paiement d'un devis/ d'une facture"
     disable = False
-    description = u"Les conditions que les entrepreneurs peuvent sélectionner \
-lors de la création d'un devis/d'une facture"
 
 
 class PaymentConditionAdmin(payment_condition_admin_class):
     title = u"Configuration des conditions de paiement"
-    description = u"Les modes de paiement que l'on peut sélectionner pour \
-enregistrer le paiement d'un devis/ d'une facture"
+    description = u"Les conditions que les entrepreneurs peuvent sélectionner \
+lors de la création d'un devis/d'une facture"
 
 
 class AdminVenteTreasuryMain(BaseConfigView):

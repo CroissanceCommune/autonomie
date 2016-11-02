@@ -24,6 +24,7 @@ import deform_extensions
 from sqlalchemy import (
     Column,
     Integer,
+    Float,
     Boolean,
     String,
 )
@@ -150,7 +151,7 @@ pour la génération des écritures sont décrites en haut de page"
         },
     )
     percentage = Column(
-        Integer,
+        Float(),
         nullable=False,
         info={
             'colanderalchemy': {

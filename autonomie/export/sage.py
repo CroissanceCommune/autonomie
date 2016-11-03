@@ -96,7 +96,7 @@ class SageExpenseCsvWriter(SageCsvWriter):
     Expense CsvWriter
     """
     headers = (
-        {'name': 'num_feuille', 'label': "Numéro de pièce"},
+        {'name': 'num_autonomie', 'label': "Numéro de pièce"},
         {'name': 'code_journal', 'label': "Code Journal"},
         {'name': 'date', 'label': "Date de pièce"},
         {'name': 'compte_cg', 'label': "N° compte général"},

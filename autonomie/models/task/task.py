@@ -252,7 +252,7 @@ class Task(Node):
 
     internal_number = deferred(
         Column(
-            String(40),
+            String(255),
             default=None,
         ),
         group='edit'

@@ -29,6 +29,12 @@ def migrate_datas():
         type_=sa.Float(),
         nullable=False,
     )
+    op.alter_column(
+        "task",
+        "internal_number",
+        type_=sa.String(255),
+        nullable=False,
+    )
 
 def upgrade():
     update_database_structure()

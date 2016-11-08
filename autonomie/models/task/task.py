@@ -444,6 +444,14 @@ class Task(Node):
             "colanderalchemy": {'title': "Mentions facultatives"},
         }
     )
+    line_groups = relationship(
+        "TaskLineGroup",
+        order_by='TaskLineGroup.order',
+        cascade="all, delete-orphan",
+        info={'colanderalchemy': {'title': u"Unités d'oeuvre"}},
+        primaryjoin="TaskLineGroup.task_id==Task.id",
+        back_populates='task',
+    )
 
     _name_tmpl = u"Task {}"
     _number_tmpl = u"{s.project.code}_{s.customer.code}_T{s.project_index}\
@@ -769,12 +777,6 @@ class TaskLineGroup(DBBASE, GroupCompute):
     task = relationship(
         "Task",
         primaryjoin="TaskLineGroup.task_id==Task.id",
-        backref=backref(
-            "line_groups",
-            order_by='TaskLineGroup.order',
-            cascade="all, delete-orphan",
-            info={'colanderalchemy': {'title': u"Unités d'oeuvre"}}
-        ),
         info={'colanderalchemy': forms.EXCLUDED}
     )
     description = Column(Text(), default="")

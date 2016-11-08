@@ -796,6 +796,7 @@ class TaskLineGroup(DBBASE, GroupCompute):
             description=self.description,
             task_id=self.task_id,
             lines=[line.duplicate() for line in self.lines],
+            order=self.order,
         )
         return group
 

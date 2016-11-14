@@ -1054,9 +1054,6 @@ class InvoiceExport(object):
     _default_modules = (SageFacturation,)
     _available_modules = {
         "sage_contribution": SageContribution,
-        "sage_assurance": SageAssurance,
-        "sage_cgscop": SageCGScop,
-        "sage_organic": SageContributionOrganic,
         "sage_rginterne": SageRGInterne,
         "sage_rgclient": SageRGClient,
     }

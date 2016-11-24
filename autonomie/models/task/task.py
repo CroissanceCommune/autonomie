@@ -56,7 +56,6 @@ from sqlalchemy.orm import (
 
 from autonomie.models.types import (
     CustomDateType,
-    CustomDateType2,
 )
 from autonomie.models.tva import Tva
 from autonomie.models.utils import get_current_timestamp
@@ -382,7 +381,6 @@ class Task(Node):
             'colanderalchemy': forms.EXCLUDED,
             'export': {'exclude': True},
         },
-        lazy="joined"
     )
 
     discounts = relationship(

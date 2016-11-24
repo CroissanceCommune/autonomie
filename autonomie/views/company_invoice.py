@@ -37,6 +37,7 @@ from sqlalchemy import (
     and_,
     distinct,
 )
+from sqlalchemy.orm import contains_eager
 from beaker.cache import cache_region
 
 from autonomie.models.base import (
@@ -147,9 +148,18 @@ class GlobalInvoicesList(BaseListView):
     def query(self):
         query = DBSESSION().query(Task)
         query = query.with_polymorphic([Invoice, CancelInvoice])
-        from sqlalchemy.orm import joinedload
-        query = query.options(joinedload(Invoice.payments).load_only(Payment.id, Payment.date, Payment.mode))
-        query = query.options(joinedload(Task.customer).load_only(Customer.name, Customer.code, Customer.id))
+        query = query.outerjoin(Invoice.payments)
+        query = query.outerjoin(Task.customer)
+        query = query.options(
+            contains_eager(Invoice.payments).load_only(
+                Payment.id, Payment.date, Payment.mode
+            )
+        )
+        query = query.options(
+            contains_eager(Task.customer).load_only(
+                Customer.name, Customer.code, Customer.id
+            )
+        )
         return query
 
     def _get_company_id(self, appstruct):

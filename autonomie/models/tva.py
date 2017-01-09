@@ -257,5 +257,7 @@ class Product(DBBASE):
     def query(cls, include_inactive=False):
         q = super(Product, cls).query()
         if not include_inactive:
-            q.filter(Product.active == True)
+            q = q.join(cls.tva)
+            q = q.filter(Product.active == True)
+            q = q.filter(Tva.active == True)
         return q.order_by('name')

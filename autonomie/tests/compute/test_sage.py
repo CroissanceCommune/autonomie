@@ -1014,13 +1014,12 @@ class TestSageExport():
     def test_modules(self, config_request):
         config = {
             'sage_contribution':'1',
-            'sage_assurance':'1',
-            'sage_cgscop':'0'
+            'sage_rginterne':'1',
         }
         config_request.config = config
         exporter = InvoiceExport(None, config_request)
         assert len(exporter.modules) == 3
-        sage_factories = [SageFacturation, SageContribution, SageAssurance]
+        sage_factories = [SageFacturation, SageContribution, SageRGInterne]
         for fact in sage_factories:
             assert True in [isinstance(module, fact)
                 for module in exporter.modules]

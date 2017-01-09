@@ -153,6 +153,7 @@ def pyramid_request(registry, settings):
         find_service,
         find_service_factory,
         AdapterRegistry,
+        register_service
     )
     from functools import partial
     request = testing.DummyRequest()
@@ -181,9 +182,16 @@ def config(request, pyramid_request, settings, registry):
     set_cache_regions_from_settings(settings)
     request.addfinalizer(testing.tearDown)
 
+    from autonomie import setup_services
+    setup_services(config, settings)
     from autonomie.utils.renderer import customize_renderers
     customize_renderers(config)
     return config
+
+
+@fixture
+def request_with_config(config, pyramid_request):
+    return pyramid_request
 
 
 @fixture(scope='session')

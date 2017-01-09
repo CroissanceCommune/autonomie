@@ -37,9 +37,10 @@ import pytest
 def state_machine():
     state_machine = StateMachine()
     state_machine.add_transition(
-            'draft', 'wait', "edit", lambda model, user_id:(model, 2))
+            'draft', 'wait', "edit", lambda req, model, user_id:(model, 2))
     state_machine.add_transition(
-        "wait", "invalid", ("edit", "manage"), lambda model, user_id:(model, 2)
+        "wait", "invalid", ("edit", "manage"),
+        lambda req, model, user_id:(model, 2)
     )
     return state_machine
 
@@ -98,7 +99,7 @@ def test_process_caestate(config, state_machine, model):
         'draft',
         'delete',
         'edit',
-        lambda model, user_id:(model, user_id),
+        lambda r, mode, user_id: (model, user_id),
         cae=False,
     )
     config.testing_securitypolicy(

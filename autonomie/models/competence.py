@@ -358,7 +358,10 @@ class CompetenceGridItem(DBBASE):
     progress = Column(Text(), default='')
 
     option_id = Column(ForeignKey("competence_option.id"))
-    option = relationship("CompetenceOption")
+    option = relationship(
+        "CompetenceOption",
+        primaryjoin="and_(CompetenceOption.id==CompetenceGridItem.option_id, CompetenceOption.active==True)"
+    )
 
     grid_id = Column(ForeignKey("competence_grid.id"))
     grid = relationship(

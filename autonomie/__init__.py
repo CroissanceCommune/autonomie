@@ -208,6 +208,23 @@ def prepare_config(**settings):
     return config
 
 
+def setup_services(config, settings):
+    """
+    Setup the services (pyramid_services) used in Autonomie
+    """
+    for service_name, default, interface_path in AUTONOMIE_SERVICES:
+        module_path = settings.get("autonomie." + service_name, default)
+        interface = resolve(interface_path)
+        module = resolve(module_path)
+        config.register_service(module(), interface)
+
+    for service_name, default, interface_path in AUTONOMIE_SERVICE_FACTORIES:
+        module_path = settings.get("autonomie." + service_name, default)
+        interface = resolve(interface_path)
+        module = resolve(module_path)
+        config.register_service_factory(module, interface)
+
+
 def base_configure(config, dbsession, **settings):
     """
     All plugin and others configuration stuff
@@ -243,17 +260,7 @@ def base_configure(config, dbsession, **settings):
     for module in AUTONOMIE_ADMIN_MODULES:
         config.include(module)
 
-    for service_name, default, interface_path in AUTONOMIE_SERVICES:
-        module_path = settings.get("autonomie." + service_name, default)
-        interface = resolve(interface_path)
-        module = resolve(module_path)
-        config.register_service(module(), interface)
-
-    for service_name, default, interface_path in AUTONOMIE_SERVICE_FACTORIES:
-        module_path = settings.get("autonomie." + service_name, default)
-        interface = resolve(interface_path)
-        module = resolve(module_path)
-        config.register_service_factory(module, interface)
+    setup_services(config, settings)
 
     from autonomie.utils.renderer import (
         customize_renderers,

@@ -24,7 +24,6 @@
 
 import datetime
 import pytest
-from pyramid import testing
 from autonomie.models.task import (
     CancelInvoice,
     Invoice,
@@ -33,6 +32,7 @@ from autonomie.models.task import (
     TaskMention,
     Payment,
 )
+
 from autonomie.models.tva import (
     Tva,
 )
@@ -146,6 +146,11 @@ def tva(dbsession):
     return tva
 
 
+@pytest.fixture
+def service_request(pyramid_request, config):
+    return pyramid_request
+
+
 def test_set_numbers(invoice, cancelinvoice):
     invoice.set_numbers(15, 1)
     assert invoice.internal_number == u"company1 2012-12 F15"
@@ -212,16 +217,15 @@ def test_duplicate_invoice_integration(dbsession, invoice):
     assert newest.company_id == invoice.company_id
 
 
-def test_valid_invoice(config, dbsession, invoice):
+def test_valid_invoice(config, dbsession, invoice, service_request):
     dbsession.add(invoice)
     dbsession.flush()
     config.testing_securitypolicy(userid='test', permissive=True)
 
-    request = testing.DummyRequest()
-    invoice.set_status('wait', request, 1)
+    invoice.set_status('wait', service_request, 1)
     dbsession.merge(invoice)
     dbsession.flush()
-    invoice.set_status('valid', request, 1)
+    invoice.set_status('valid', service_request, 1)
     today = datetime.date.today()
     assert invoice.date == today
     assert invoice.official_number == 1
@@ -255,19 +259,18 @@ def test_gen_cancelinvoice_payment(dbsession, invoice, tva):
     assert cinv.default_line_group.lines[-1].cost == 100000000
     assert cinv.default_line_group.lines[-1].tva == 2000
 
-def test_valid_payment(config, dbsession, invoice):
+def test_valid_payment(config, dbsession, invoice, service_request):
     dbsession.add(invoice)
     dbsession.flush()
     config.testing_securitypolicy(userid='test', permissive=True)
 
-    request = testing.DummyRequest()
-    invoice.set_status('wait', request, 1)
+    invoice.set_status('wait', service_request, 1)
     dbsession.merge(invoice)
     dbsession.flush()
-    invoice.set_status('valid', request, 1)
+    invoice.set_status('valid', service_request, 1)
     dbsession.merge(invoice)
     dbsession.flush()
-    invoice.set_status("paid", request, 1, amount=150, mode="CHEQUE")
+    invoice.set_status("paid", service_request, 1, amount=150, mode="CHEQUE")
     invoice = dbsession.merge(invoice)
     dbsession.flush()
     invoice = dbsession.query(Invoice)\

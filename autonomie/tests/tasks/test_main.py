@@ -188,22 +188,20 @@ def test_task_status(estimation, invoice, cancelinvoice):
 
 
 class TestStatusChange:
-    def _forbidden_state_change(self, config, task, from_state, to_states):
-        request = testing.DummyRequest()
-
+    def _forbidden_state_change(self, config, task, from_state, to_states, request):
         for st in to_states:
             task.CAEStatus = from_state
             with pytest.raises(Forbidden):
                 task.set_status(st, request, task.owner)
 
-    def _allowed_state_change(self, config, task, from_state, to_states):
-        request = testing.DummyRequest()
+    def _allowed_state_change(self, config, task, from_state, to_states, request):
         for st in to_states:
             task.CAEStatus = from_state
             task.set_status(st, request, task.owner.id)
             assert task.CAEStatus == st
 
-    def test_status_change(self, config, estimation, invoice, cancelinvoice):
+    def test_status_change(self, config, estimation, invoice, cancelinvoice,
+                           request_with_config):
         config.testing_securitypolicy(userid='test', permissive=True)
         # Estimation
         task = estimation
@@ -211,39 +209,51 @@ class TestStatusChange:
         self._forbidden_state_change(
             config,
             task, status,
-            ("geninv", "aboest", "invalid"))
+            ("geninv", "aboest", "invalid"),
+            request_with_config,
+        )
         self._allowed_state_change(
             config,
             task, status,
-            ('wait',))
+            ('wait',),
+            request_with_config,
+        )
 
         status = 'wait'
         self._forbidden_state_change(
             config,
             task, status,
-            ("geninv", ))
+            ("geninv", ),
+            request_with_config,
+        )
         self._allowed_state_change(
             config,
             task, status,
-            ("draft", 'invalid', 'valid',))
+            ("draft", 'invalid', 'valid',),
+            request_with_config,
+        )
 
         status = 'valid'
         self._forbidden_state_change(
             config,
             task, status,
-            ("draft", "invalid", )
-            )
+            ("draft", "invalid", ),
+            request_with_config
+        )
         self._allowed_state_change(
             config,
             task, status,
-            ("aboest", ))
+            ("aboest", ),
+            request_with_config,
+        )
 
         status = 'geninv'
         self._forbidden_state_change(
             config,
             task, status,
-            ("draft", "invalid", "valid", "aboest")
-            )
+            ("draft", "invalid", "valid", "aboest"),
+            request_with_config,
+        )
 
 #        # Invoice
         task = invoice
@@ -251,31 +261,39 @@ class TestStatusChange:
         self._forbidden_state_change(
             config,
             task, status,
-            ("aboinv", "invalid"))
+            ("aboinv", "invalid"),
+            request_with_config,
+        )
         self._allowed_state_change(
             config,
             task, status,
-            ('wait',))
+            ('wait',),
+            request_with_config,
+        )
 
         status = 'wait'
         self._allowed_state_change(
             config,
             task, status,
-            ("draft", 'invalid', 'valid',))
+            ("draft", 'invalid', 'valid',),
+            request_with_config,
+        )
 
         status = 'valid'
         self._forbidden_state_change(
             config,
             task, status,
-            ("draft", "invalid", )
-            )
+            ("draft", "invalid", ),
+            request_with_config,
+        )
 
         status = "paid"
         self._forbidden_state_change(
             config,
             task, status,
-            ("draft", "invalid", "valid", "aboinv", )
-            )
+            ("draft", "invalid", "valid", "aboinv", ),
+            request_with_config,
+        )
 
         task = cancelinvoice
         request = testing.DummyRequest()
@@ -286,4 +304,6 @@ class TestStatusChange:
         self._forbidden_state_change(
             config,
             task, status,
-            ("draft", ))
+            ("draft", ),
+            request_with_config,
+        )

@@ -93,9 +93,9 @@ def invoice(project, user, customer, company, phase):
     return invoice
 
 
-def test_record_payment(invoice):
+def test_record_payment(invoice, request_with_config):
     request_params = {'amount':1500000, 'mode':'cheque'}
-    record_payment(invoice, **request_params)
+    record_payment(request_with_config, invoice, **request_params)
     assert len(invoice.payments) == 3
     assert invoice.payments[2].amount == 1500000
 
@@ -110,19 +110,19 @@ def test_invoice_topay(invoice):
     assert invoice.topay() == 11960000 - 3395000
 
 
-def test_resulted_manual(invoice):
+def test_resulted_manual(invoice, request_with_config):
     invoice.CAEStatus = 'wait'
     invoice.CAEStatus = 'valid'
     invoice.CAEStatus = 'paid'
     request_params = {'amount':0, 'mode':'cheque', 'resulted':True}
-    record_payment(invoice, **request_params)
+    record_payment(request_with_config, invoice, **request_params)
     assert invoice.CAEStatus == 'resulted'
 
 
-def test_resulted_auto(invoice):
+def test_resulted_auto(invoice, request_with_config):
     invoice.CAEStatus = 'wait'
     invoice.CAEStatus = 'valid'
     invoice.CAEStatus = 'paid'
     request_params = {'amount':int(invoice.topay()), 'mode':'cheque'}
-    record_payment(invoice, **request_params)
+    record_payment(request_with_config, invoice, **request_params)
     assert invoice.CAEStatus == 'resulted'

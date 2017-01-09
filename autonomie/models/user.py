@@ -64,6 +64,7 @@ from autonomie.models.node import Node
 from autonomie.models.company import CompanyActivity
 from autonomie.forms import (
     get_hidden_field_conf,
+    get_excluded,
     EXCLUDED,
     get_select,
     get_select_validator,
@@ -271,9 +272,15 @@ class User(DBBASE, PersistentACLMixin):
         secondary=COMPANY_EMPLOYEE,
         backref=backref(
             "employees",
-            info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+            info={
+                'colanderalchemy': get_excluded(u'Employés'),
+                'export': EXCLUDED
+            },
         ),
-        info={'colanderalchemy': EXCLUDED, 'export': EXCLUDED},
+        info={
+            'colanderalchemy': get_excluded(u'Entreprises'),
+            'export': EXCLUDED
+        },
     )
     _groups = relationship(
         "Group",
@@ -807,7 +814,7 @@ class UserDatas(Node):
         "User",
         primaryjoin='User.id==UserDatas.user_id',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u'Compte utilisateur'),
             'export': {'exclude': True},
         }
     )
@@ -843,7 +850,7 @@ class UserDatas(Node):
     situation_situation = relationship(
         "CaeSituationOption",
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u'Situation dans la CAE'),
             'export': {'related_key': 'label'},
         },
     )
@@ -861,7 +868,7 @@ class UserDatas(Node):
     situation_antenne = relationship(
         "AntenneOption",
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Antenne de rattachement"),
             'export': {'related_key': 'label'},
         },
     )
@@ -894,7 +901,7 @@ class UserDatas(Node):
             },
         ),
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u'Conseiller'),
             'export': {
                 'related_key': 'lastname',
                 'label': u"Conseiller",
@@ -1059,7 +1066,7 @@ class UserDatas(Node):
     coordonnees_zone = relationship(
         'ZoneOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Zone d'habitation"),
             'export': {'related_key': 'label'},
         },
     )
@@ -1080,7 +1087,9 @@ class UserDatas(Node):
     coordonnees_zone_qual = relationship(
         'ZoneQualificationOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(
+                u"Qualification de la zone d'habitation"
+            ),
             'export': {'related_key': 'label'},
         },
     )
@@ -1201,7 +1210,7 @@ class UserDatas(Node):
     coordonnees_study_level = relationship(
         'StudyLevelOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Niveau d'études"),
             'export': {'related_key': 'label'},
         },
     )
@@ -1254,7 +1263,7 @@ class UserDatas(Node):
         'SocialStatusOption',
         primaryjoin='UserDatas.statut_social_status_id==SocialStatusOption.id',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Statut social à l'entrée"),
             'export': {'related_key': 'label'},
         },
     )
@@ -1275,7 +1284,7 @@ class UserDatas(Node):
         primaryjoin='UserDatas.statut_social_status_today_id==\
 SocialStatusOption.id',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Statut social actuel"),
             'export': {
                 'related_key': 'label',
             },
@@ -1352,7 +1361,9 @@ SocialStatusOption.id',
     activity_typologie = relationship(
         'ActivityTypeOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(
+                u"Typologie des métiers/secteurs d'activités"
+            ),
             'export': {'related_key': 'label'},
         },
     )
@@ -1371,7 +1382,7 @@ SocialStatusOption.id',
     activity_pcs = relationship(
         'PcsOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"PCS"),
             'export': {'related_key': 'label'},
         },
     )
@@ -1421,7 +1432,7 @@ SocialStatusOption.id',
     parcours_prescripteur = relationship(
         "PrescripteurOption",
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Prescripteur"),
             'export': {'related_key': 'label'},
         },
     )
@@ -1492,7 +1503,9 @@ SocialStatusOption.id',
     parcours_non_admission = relationship(
         "NonAdmissionOption",
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(
+                u'Motif de non admission en CAE'
+            ),
             'export': {'related_key': 'label'},
         },
     )
@@ -1689,7 +1702,7 @@ SocialStatusOption.id',
     parcours_employee_quality = relationship(
         'EmployeeQualityOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Qualité du salarié"),
             'export': {'related_key': 'label'},
         }
     )
@@ -1720,7 +1733,7 @@ SocialStatusOption.id',
     parcours_status = relationship(
         "ParcoursStatusOption",
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Aptitude"),
             'export': {'related_key': 'label'},
         },
     )
@@ -1773,7 +1786,7 @@ SocialStatusOption.id',
     sortie_motif = relationship(
         'MotifSortieOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Motif de sortie"),
             'export': {'related_key': 'label'},
         },
     )
@@ -1793,7 +1806,7 @@ SocialStatusOption.id',
     sortie_type = relationship(
         'TypeSortieOption',
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Type de sortie"),
             'export': {'related_key': 'label'},
         },
     )
@@ -2221,7 +2234,7 @@ class CaeSituationChange(DBBASE):
     situation = relationship(
         "CaeSituationOption",
         info={
-            'colanderalchemy': EXCLUDED,
+            'colanderalchemy': get_excluded(u"Situation dans la CAE"),
             'export': {'related_key': 'label'},
         },
     )

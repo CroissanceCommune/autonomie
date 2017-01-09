@@ -78,3 +78,11 @@ class ITreasuryPaymentWriter(Interface):
         Set the tabular datas that will be written in the output file
         """
         pass
+
+
+class IInvoiceService(Interface):
+    def valid_callback(task):
+        """
+        Callback launched after invoice validation
+        """
+        pass

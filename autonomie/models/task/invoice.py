@@ -82,23 +82,41 @@ from .states import DEFAULT_STATE_MACHINES
 log = logging.getLogger(__name__)
 
 
-def get_next_official_number(year=None):
+class InvoiceService(object):
     """
-    Return the next available official number
-
-    :param int year: The year we'd like to query a number for
+    Service for invoice and cancelinvoice management
     """
-    next_ = 1
-    if year is None:
-        year = datetime.date.today().year
+    def _get_next_official_number(year=None):
+        """
+        Return the next available official number
 
-    query = DBSESSION().query(func.max(Task.official_number))
-    query = query.filter(extract('year', Task.date) == year)
-    last = query.first()[0]
-    if last:
-        next_ = last + 1
+        :param int year: The year we'd like to query a number for
+        """
+        next_ = 1
+        if year is None:
+            year = datetime.date.today().year
 
-    return next_
+        query = DBSESSION().query(func.max(Task.official_number))
+        query = query.filter(extract('year', Task.date) == year)
+        last = query.first()[0]
+        if last:
+            next_ = last + 1
+
+        return next_
+
+    def valid_callback(self, task):
+        """
+        Validation callback (launched after task validation)
+
+        Set the date to current
+        Set the official number
+
+        :param obj task: The task object
+        """
+        if task.official_number is None:
+            task.official_number = self._get_next_official_number()
+
+        task.date = datetime.date.today()
 
 
 def invoice_tolate(invoicedate, status):
@@ -313,13 +331,6 @@ class Invoice(Task, InvoiceCompute):
     def get_next_row_index(self):
         return len(self.default_line_group.lines) + 1
 
-    def valid_callback(self):
-        """
-            Validate an invoice
-        """
-        self.official_number = get_next_official_number()
-        self.date = datetime.date.today()
-
     def record_payment(self, **kw):
         """
         Record a payment for the current invoice
@@ -499,14 +510,6 @@ class CancelInvoice(Task, TaskCompute):
             Return False
         """
         return False
-
-    def valid_callback(self):
-        """
-            Validate a cancelinvoice
-            Generates an official number
-        """
-        self.official_number = get_next_official_number()
-        self.date = datetime.date.today()
 
     def __repr__(self):
         return u"<CancelInvoice id:{s.id}>".format(s=self)

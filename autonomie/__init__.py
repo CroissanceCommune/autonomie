@@ -138,6 +138,11 @@ AUTONOMIE_SERVICE_FACTORIES = (
     ),
 )
 AUTONOMIE_SERVICES = (
+    (
+        "services.IInvoiceService",
+        "autonomie.models.task.invoice.InvoiceService",
+        "autonomie.interfaces.IInvoiceService",
+    ),
 )
 
 

@@ -421,14 +421,28 @@ def merge_session_with_post(model, app_struct):
     return model
 
 
-def get_hidden_field_conf():
+def get_excluded(title=None):
+    """
+    Return a colanderalchemy info dict for excluded columns (includes a title
+    for other sqla inspection tools like sqla_inspect library)
+    """
+    res = {'exclude': True}
+    if title is not None:
+        res['title'] = title
+    return res
+
+
+def get_hidden_field_conf(title=None):
     """
     Return the model's info conf to get a colanderalchemy hidden widget
     """
-    return {
+    res = {
         'widget': deform.widget.HiddenWidget(),
         'missing': None
     }
+    if title is not None:
+        res['title'] = title
+    return res
 
 
 def get_deferred_select_validator(model):

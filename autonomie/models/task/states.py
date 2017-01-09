@@ -31,6 +31,7 @@ import datetime
 from autonomie.models.statemachine import StateMachine
 from autonomie.exception import Forbidden
 from autonomie.exception import SignatureError
+from autonomie import interfaces
 
 log = logging.getLogger(__name__)
 
@@ -45,16 +46,17 @@ class TaskStates(StateMachine):
     userid_attr = "statusPerson"
 
 
-def valid_callback(task, **kw):
+def valid_callback(request, task, **kw):
     """
         callback for the task validation
     """
-    task = set_date(task)
-    task.valid_callback()
+    task = set_date(request, task)
+    invoice_service = request.find_service(interfaces.IInvoiceService)
+    invoice_service.valid_callback(task)
     return task
 
 
-def record_payment(invoice, **kw):
+def record_payment(request, invoice, **kw):
     """
     record a payment for the given task
     """
@@ -69,7 +71,7 @@ def record_payment(invoice, **kw):
     return invoice
 
 
-def duplicate_task(task, **kw):
+def duplicate_task(request, task, **kw):
     """
         Duplicates a task
     """
@@ -82,7 +84,7 @@ def duplicate_task(task, **kw):
         raise Forbidden(u"Missing mandatory arguments")
 
 
-def edit_metadata_task(task, **kw):
+def edit_metadata_task(request, task, **kw):
     """
         Change a task's phase
     """
@@ -92,7 +94,7 @@ def edit_metadata_task(task, **kw):
     return task
 
 
-def gen_cancelinvoice(task, **kw):
+def gen_cancelinvoice(request, task, **kw):
     """
         gen the cancelinvoice for the given task
     """
@@ -102,7 +104,7 @@ def gen_cancelinvoice(task, **kw):
         raise SignatureError()
 
 
-def gen_invoices(task, **kw):
+def gen_invoices(request, task, **kw):
     """
         gen_invoices for the given task
     """
@@ -112,7 +114,7 @@ def gen_invoices(task, **kw):
         raise SignatureError()
 
 
-def set_date(task, **kw):
+def set_date(request, task, **kw):
     """
         set the date of the current task
     """
@@ -120,7 +122,7 @@ def set_date(task, **kw):
     return task
 
 
-def set_financial_year(task, **kw):
+def set_financial_year(request, task, **kw):
     """
         Set the financial year of the current task
     """
@@ -131,7 +133,7 @@ def set_financial_year(task, **kw):
     return task
 
 
-def set_products(task, **kw):
+def set_products(request, task, **kw):
     """
         Set the products to the lines of the current task
     """

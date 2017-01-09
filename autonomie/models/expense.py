@@ -243,7 +243,7 @@ dépense, une ligne sera automatiquement ajouté au Frais de l'entrepreneur."
         return res
 
 
-def record_expense_payment(expense, **kw):
+def record_expense_payment(request, expense, **kw):
     """
     Record an expense payment using the datas provided in kw
 
@@ -254,6 +254,7 @@ def record_expense_payment(expense, **kw):
 
     :returns: The ExpensePayment object
     """
+    # Here we could register a service
     return expense.record_payment(**kw)
 
 

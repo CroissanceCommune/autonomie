@@ -74,7 +74,7 @@ class State(object):
 
         return res
 
-    def process(self, model, user_id, **kw):
+    def process(self, request, model, user_id, **kw):
         """
             process the expected actions after status change
         """
@@ -82,7 +82,7 @@ class State(object):
             setattr(model, self.userid_attr, user_id)
             setattr(model, self.status_attr, self.name)
         if self.callback:
-            return self.callback(model, user_id=user_id, **kw)
+            return self.callback(request, model, user_id=user_id, **kw)
         else:
             return model
 
@@ -147,7 +147,7 @@ class StateMachine(object):
                 u"Current user is not allowed to set the %s state" % new_state
             )
         else:
-            return state_obj.process(model, user_id=user_id, **kw)
+            return state_obj.process(request, model, user_id=user_id, **kw)
 
     def get_transition(self, state, new_state):
         """

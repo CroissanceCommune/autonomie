@@ -109,7 +109,7 @@ class TaskCompute(object):
         expense = self.get_expense_ht()
         tva_amount = expense.tva_amount()
 
-        if tva_amount > 0:
+        if tva_amount != 0:
             val = ret_dict.get(expense.tva, 0)
             val += expense.tva_amount()
             ret_dict[expense.tva] = val

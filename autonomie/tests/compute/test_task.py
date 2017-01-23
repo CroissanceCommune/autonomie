@@ -310,6 +310,18 @@ class TestTaskCompute():
     def test_get_tvas_by_product(self, invoice_bug363):
         assert invoice_bug363.get_tvas_by_product()['P0002'] == 20185000
 
+    def test_get_tva_ht_parts(self):
+        task = TaskCompute()
+        task.expenses_tva = 2000
+        task.line_groups = [DummyGroup(
+            lines=[
+                DummyLine(cost=-120000000, quantity=1, tva=2000),
+                DummyLine(cost=-120000000, quantity=0.5, tva=2000),
+            ]
+        )]
+        task.expenses_ht = -36000000
+        assert task.tva_ht_parts()[2000] == -216000000.0
+
 
 class TestInvoiceCompute():
     def getOne(self):

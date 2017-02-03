@@ -609,6 +609,7 @@ class AdminInvoice(BaseEditView):
 
     Vue accessible aux utilisateurs admin
     """
+    factory = Invoice
     schema = SQLAlchemySchemaNode(Invoice)
 
 

@@ -263,6 +263,7 @@ def set_products(request):
 
 
 class AdminCancelInvoice(BaseEditView):
+    factory = CancelInvoice
     schema = SQLAlchemySchemaNode(CancelInvoice)
 
 

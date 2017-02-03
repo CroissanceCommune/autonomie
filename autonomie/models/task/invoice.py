@@ -167,17 +167,38 @@ class Invoice(Task, InvoiceCompute):
     )
     # seems it's not used anymore
     deposit = deferred(
-        Column(Integer, nullable=False, default=0),
+        Column(
+            Integer,
+            nullable=False,
+            info={'colanderalchemy': {'exclude': True}},
+            default=0
+        ),
         group='edit',
     )
     # Common with only estimations
     course = deferred(
-        Column(Integer, nullable=False, default=0),
+        Column(
+            Integer,
+            info={'colanderalchemy': {'title': u"Concerne une formation"}},
+            nullable=False,
+            default=0
+        ),
         group='edit'
     )
     # Common with only cancelinvoices
-    financial_year = deferred(Column(Integer, default=0), group='edit')
-    exported = deferred(Column(Boolean(), default=False), group="edit")
+    financial_year = deferred(
+        Column(
+            Integer,
+            info={'colanderalchemy': {'title': u"Année fiscale de référence"}},
+            default=0
+        ),
+        group='edit'
+    )
+    exported = deferred(
+        Column(
+            Boolean(),
+            info={'colanderalchemy': {'title': u"A déjà été exportée ?"}},
+            default=False), group="edit")
 
     estimation_id = Column(
         ForeignKey('estimation.id'),
@@ -186,7 +207,6 @@ class Invoice(Task, InvoiceCompute):
 
     estimation = relationship(
         "Estimation",
-        backref="invoices",
         primaryjoin="Invoice.estimation_id==Estimation.id",
         info={
             'colanderalchemy': forms.EXCLUDED,
@@ -427,16 +447,47 @@ class CancelInvoice(Task, TaskCompute):
     __tablename__ = 'cancelinvoice'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
-    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+    id = Column(
+        Integer,
+        ForeignKey('task.id'),
+        info={'colanderalchemy': forms.get_hidden_field_conf()},
+        primary_key=True)
 
     invoice_id = Column(
         Integer,
         ForeignKey('invoice.id'),
+        info={
+            'colanderalchemy': {
+                'title': u"Identifiant de la facture associée"
+            }
+        },
         default=None
     )
 
-    financial_year = deferred(Column(Integer, default=0), group='edit')
-    exported = deferred(Column(Boolean(), default=False), group="edit")
+    financial_year = deferred(
+        Column(
+            Integer,
+            info={
+                'colanderalchemy': {
+                    'title': u"Année fiscale de référence",
+                }
+            },
+            default=0
+        ),
+        group='edit'
+    )
+    exported = deferred(
+        Column(
+            Boolean(),
+            info={
+                'colanderalchemy': {
+                    "title": "A déjà été exportée ?",
+                }
+            },
+            default=False
+        ),
+        group="edit"
+    )
 
     invoice = relationship(
         "Invoice",
@@ -533,7 +584,10 @@ class Payment(DBBASE, PersistentACLMixin):
     """
     __tablename__ = 'payment'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        primary_key=True
+    )
     created_at = Column(
         DateTime(),
         info={

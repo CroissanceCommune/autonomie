@@ -31,6 +31,7 @@ import datetime
 
 from pyramid.httpexceptions import HTTPFound
 
+from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import (
     extract,
     distinct,
@@ -65,6 +66,7 @@ from autonomie.forms import (
 from autonomie.views import (
     submit_btn,
     BaseListView,
+    BaseEditView,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
@@ -312,6 +314,11 @@ class EstimationStatus(TaskStatusView):
         self.session.flash(msg)
 
 
+class AdminEstimation(BaseEditView):
+    factory = Estimation
+    schema = SQLAlchemySchemaNode(Estimation)
+
+
 def duplicate(request):
     """
         duplicate an estimation
@@ -498,6 +505,13 @@ def includeme(config):
         route_name="estimations",
         renderer="estimations.mako",
         permission="admin_tasks",
+    )
+    config.add_view(
+        AdminEstimation,
+        route_name='estimation',
+        renderer="base/formpage.mako",
+        permission="admin",
+        request_param="token=admin",
     )
 
     delete_msg = u"Le devis {task.name} a bien été supprimé."

@@ -517,7 +517,17 @@ class BaseEditView(BaseFormView):
     class AdminModel(BaseEditView):
         schema = SQLAlchemySchemaNode(MyModel)
     """
+    add_template_vars = ('title', 'help_message')
     msg = u"Vos modifications ont bien été enregistrées"
+
+    @property
+    def help_message(self):
+        factory = getattr(self, 'factory', None)
+        if factory is not None:
+            calchemy_dict = getattr(factory, '__colanderalchemy_config__', {})
+        else:
+            calchemy_dict = {}
+        return calchemy_dict.get('help_msg', '')
 
     def before(self, form):
         form.set_appstruct(self.schema.dictify(self.context))

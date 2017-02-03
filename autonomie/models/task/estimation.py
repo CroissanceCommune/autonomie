@@ -28,6 +28,7 @@
 import datetime
 import logging
 import deform
+import colander
 
 from zope.interface import implementer
 
@@ -42,7 +43,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import (
     relationship,
     deferred,
-    backref,
 )
 from autonomie.models.types import (
     CustomDateType,
@@ -53,7 +53,8 @@ from autonomie.models.base import (
     DBBASE,
     default_table_args,
 )
-
+from autonomie import forms
+from autonomie.forms.custom_types import AmountType
 from autonomie.compute.task import (
     EstimationCompute,
 )
@@ -74,6 +75,20 @@ from .states import DEFAULT_STATE_MACHINES
 log = logging.getLogger(__name__)
 
 
+PAYMENTDISPLAYCHOICES = (
+    ('NONE', u"Les paiments ne sont pas affichés dans le PDF",),
+    ('SUMMARY', u"Le résumé des paiements apparaît dans le PDF",),
+    (
+        'ALL',
+        u"Le détail des paiements apparaît dans le PDF",
+    ),
+    (
+        'ALL_NO_DATE',
+        u"Le détail des paiements, sans les dates, apparaît dans le PDF",
+    ),
+)
+
+
 @implementer(IValidatedTask, IMoneyTask)
 class Estimation(Task, EstimationCompute):
     """
@@ -88,15 +103,57 @@ class Estimation(Task, EstimationCompute):
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
     # common with only invoices
-    deposit = Column(Integer, default=0)
-    course = deferred(Column(Integer, nullable=False, default=0), group='edit')
+    deposit = Column(
+        Integer,
+        info={'colanderalchemy': {'title': u'Accompte (en %)'}},
+        default=0)
+    course = deferred(
+        Column(
+            Integer,
+            nullable=False,
+            info={'colanderalchemy': {'title': u"Concerne une formation ?"}},
+            default=0),
+        group='edit')
 
     # Specific to estimations
-    exclusions = deferred(Column(Text), group='edit')
-    manualDeliverables = deferred(Column(Integer), group='edit')
+    exclusions = deferred(
+        Column(
+            Text,
+            info={'colanderalchemy': {'title': u"Notes"}}
+        ), group='edit')
+    manualDeliverables = deferred(
+        Column(
+            Integer,
+            info={'colanderalchemy': {'exclude': True}}
+        ), group='edit')
     paymentDisplay = deferred(
-        Column(String(20), default="SUMMARY"),
+        Column(
+            String(20),
+            info={
+                'colanderalchemy': {
+                    'title': u"Affichage des paiements",
+                    'widget': deform.widget.SelectWidget(
+                        values=PAYMENTDISPLAYCHOICES)
+                }
+            },
+            default=PAYMENTDISPLAYCHOICES[0][0]
+        ),
         group='edit')
+    payment_lines = relationship(
+        "PaymentLine",
+        order_by='PaymentLine.order',
+        cascade="all, delete-orphan",
+        back_populates='task'
+    )
+    invoices = relationship(
+        "Invoice",
+        primaryjoin="Estimation.id==Invoice.estimation_id",
+        order_by="Invoice.date",
+        back_populates="estimation",
+        info={
+            'colanderalchemy': {'exclude': True},
+        }
+    )
 
     state_machine = DEFAULT_STATE_MACHINES['estimation']
 
@@ -449,28 +506,60 @@ class PaymentLine(DBBASE):
     """
     __tablename__ = 'estimation_payment'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, nullable=False)
-    task_id = Column(Integer, ForeignKey('estimation.id', ondelete="cascade"))
-    order = Column(Integer)
-    description = Column(Text)
-    amount = Column(BigInteger())
+    id = Column(
+        Integer,
+        primary_key=True,
+        nullable=False,
+        info={'colanderalchemy': forms.get_hidden_field_conf()},
+    )
+    task_id = Column(
+        Integer,
+        ForeignKey('estimation.id', ondelete="cascade"),
+        info={'colanderalchemy': forms.get_hidden_field_conf()},
+    )
+    order = Column(
+        Integer,
+        info={'colanderalchemy': {'title': u"Ordre"}},
+    )
+    description = Column(
+        Text,
+        info={'colanderalchemy': {'title': u"Description"}},
+    )
+    amount = Column(
+        BigInteger(),
+        info={
+            'colanderalchemy': {
+                'title': u"Montant",
+                'typ': AmountType(5),
+            }
+        },
+    )
     creationDate = deferred(
         Column(
             CustomDateType,
-            default=get_current_timestamp))
+            info={'colanderalchemy': {'exclude': True}},
+            default=get_current_timestamp
+        )
+    )
     updateDate = deferred(
         Column(
             CustomDateType,
             default=get_current_timestamp,
-            onupdate=get_current_timestamp))
-    paymentDate = Column(CustomDateType2)
+            onupdate=get_current_timestamp,
+            info={'colanderalchemy': {'exclude': True}},
+        ))
+    paymentDate = Column(
+        CustomDateType2,
+        info={
+            'colanderalchemy': {
+                "title": u"Date",
+                'typ': colander.Date
+            }
+        }
+    )
     task = relationship(
         "Estimation",
-        backref=backref(
-            'payment_lines',
-            order_by='PaymentLine.order',
-            cascade="all, delete-orphan"
-        )
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     def duplicate(self):

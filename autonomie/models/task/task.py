@@ -61,9 +61,11 @@ from autonomie.models.tva import Tva
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,
+    DBSESSION,
     default_table_args,
 )
 from autonomie import forms
+from autonomie.forms.custom_types import (AmountType, QuantityType,)
 from autonomie.models.user import get_deferred_user_choice
 
 from .interfaces import ITask
@@ -153,8 +155,17 @@ class Task(Node):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'task'}
     _autonomie_service = TaskService
+    __colanderalchemy_config__ = {
+        'title': u"Formulaire d'édition forcée de devis/factures/avoirs",
+        'help_msg': u"Les montants sont *10^5   10 000==1€",
+    }
 
-    id = Column(Integer, ForeignKey('node.id'), primary_key=True)
+    id = Column(
+        Integer,
+        ForeignKey('node.id'),
+        info={'colanderalchemy': {'exclude': deform.widget.HiddenWidget()}},
+        primary_key=True,
+    )
     phase_id = Column(
         ForeignKey('phase.id'),
         info={
@@ -166,6 +177,7 @@ class Task(Node):
         String(10),
         info={
             'colanderalchemy': {
+                'title': u"Statut",
                 'widget': deform.widget.SelectWidget(
                     values=zip(ALL_STATES, ALL_STATES)
                 )
@@ -174,21 +186,42 @@ class Task(Node):
     )
     statusComment = Column(
         Text,
-        info={"colanderalchemy": {'widget': deform.widget.TextAreaWidget()}},
+        info={
+            "colanderalchemy": {
+                "title": u"Commentaires",
+                'widget': deform.widget.TextAreaWidget()
+            }
+        },
     )
     statusPerson = Column(
         ForeignKey('accounts.id'),
         info={
-            'colanderalchemy': {'widget': get_deferred_user_choice()},
+            'colanderalchemy': {
+                "title": u"Dernier utilisateur à avoir modifié le document",
+                'widget': get_deferred_user_choice()
+            },
             "export": {'exclude': True},
         },
     )
     statusDate = Column(
         CustomDateType,
         default=get_current_timestamp,
-        info={'colanderalchemy': {'typ': colander.Date}}
+        info={
+            'colanderalchemy': {
+                "title": u"Date du dernier changement de statut",
+                'typ': colander.Date
+            }
+        }
     )
-    date = Column(Date(), default=datetime.date.today)
+    date = Column(
+        Date(),
+        info={
+            "colanderalchemy": {
+                "title": u"Date du document",
+            }
+        },
+        default=datetime.date.today
+    )
     owner_id = Column(
         ForeignKey('accounts.id'),
         info={
@@ -217,11 +250,41 @@ class Task(Node):
     )
     description = Column(
         Text,
-        info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}},
+        info={
+            'colanderalchemy': {
+                "title": u"Objet",
+                'widget': deform.widget.TextAreaWidget()
+            }
+        },
     )
-    ht = Column(BigInteger(), default=0)
-    tva = Column(BigInteger(), default=0)
-    ttc = Column(BigInteger(), default=0)
+    ht = Column(
+        BigInteger(),
+        info={
+            'colanderalchemy': {
+                "title": u"Montant HT (cache)",
+                "typ": AmountType(5),
+            }
+        },
+        default=0)
+    tva = Column(
+        BigInteger(),
+        info={
+            'colanderalchemy': {
+                "title": u"Montant TVA (cache)",
+                "typ": AmountType(5),
+            }
+        },
+        default=0)
+    ttc = Column(
+        BigInteger(),
+        info={
+            'colanderalchemy': {
+                "title": u"Montant TTC (cache)",
+                "typ": AmountType(5),
+            }
+        },
+        default=0
+    )
     company_id = Column(
         Integer,
         ForeignKey('company.id'),
@@ -238,21 +301,52 @@ class Task(Node):
         info={'colanderalchemy': {'exclude': True}},
     )
     project_index = deferred(
-        Column(Integer),
+        Column(
+            Integer,
+            info={
+                'colanderalchemy': {
+                    "title": u"Index dans le projet",
+                }
+            },
+        ),
         group='edit',
     )
     company_index = deferred(
-        Column(Integer),
+        Column(
+            Integer,
+            info={
+                'colanderalchemy': {
+                    "title": u"Index du document à l'échelle de l'entreprise",
+                }
+            },
+        ),
         group='edit',
     )
     # TODO : remove in version > 3.3.0
-    _number = Column(String(100))
-    official_number = Column(Integer, default=None)
+    _number = Column(
+        String(100),
+        info={
+            'colanderalchemy': {'exclude': True}
+        },
+    )
+    official_number = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                "title": u"Identifiant du document (facture/avoir)"
+            }
+        },
+        default=None)
 
     internal_number = deferred(
         Column(
             String(255),
             default=None,
+            info={
+                'colanderalchemy': {
+                    "title": u"Identifiant du document dans la CAE",
+                }
+            }
         ),
         group='edit'
     )
@@ -260,6 +354,11 @@ class Task(Node):
     display_units = deferred(
         Column(
             Integer,
+            info={
+                'colanderalchemy': {
+                    "title": u"Afficher le détail ?",
+                }
+            },
             default=0
         ),
         group='edit'
@@ -267,13 +366,22 @@ class Task(Node):
 
     # Not used in latest invoices
     expenses = deferred(
-        Column(BigInteger(), default=0),
+        Column(
+            BigInteger(),
+            info={
+                'colanderalchemy': {'exclude': True}
+            },
+            default=0
+        ),
         group='edit'
     )
 
     expenses_ht = deferred(
         Column(
             BigInteger(),
+            info={
+                'colanderalchemy': {'title': u'Frais'}
+            },
             default=0
         ),
         group='edit',
@@ -284,6 +392,7 @@ class Task(Node):
             default="",
             info={
                 'colanderalchemy': {
+                    'title': u'Adresse',
                     'widget': deform.widget.TextAreaWidget()
                 }
             },
@@ -296,6 +405,7 @@ class Task(Node):
             default='',
             info={
                 'colanderalchemy': {
+                    'title': u"Lieu d'éxécution des travaux",
                     'widget': deform.widget.TextAreaWidget(),
                 }
             }
@@ -306,6 +416,7 @@ class Task(Node):
             Text,
             info={
                 'colanderalchemy': {
+                    "title": u"Conditions de paiement",
                     'widget': deform.widget.TextAreaWidget()
                 }
             },
@@ -318,7 +429,8 @@ class Task(Node):
             default=False,
             info={
                 'colanderalchemy': {
-                    'title': u"Méthode d'arrondi 'à l'ancienne' ?"
+                    'exlude': True,
+                    'title': u"Méthode d'arrondi 'à l'ancienne' ? (floor)"
                 }
             }
         ),
@@ -385,9 +497,10 @@ class Task(Node):
 
     discounts = relationship(
         "DiscountLine",
+        info={'colanderalchemy': {'title': u"Remises"}},
         order_by='DiscountLine.tva',
         cascade="all, delete-orphan",
-        backref=backref('task'),
+        back_populates='task',
     )
 
     company = relationship(
@@ -427,6 +540,7 @@ class Task(Node):
     payments = relationship(
         "Payment",
         primaryjoin="Task.id==Payment.task_id",
+        info={'colanderalchemy': {'exclude': True}},
         backref=backref(
             'task',
         ),
@@ -439,8 +553,8 @@ class Task(Node):
         order_by="TaskMention.order",
         back_populates="tasks",
         info={
-            "colanderalchemy": {'title': "Mentions facultatives"},
-        }
+            "colanderalchemy": {'exclude': True}
+        },
     )
     line_groups = relationship(
         "TaskLineGroup",
@@ -680,10 +794,18 @@ class DiscountLine(DBBASE, DiscountLineCompute):
         nullable=False,
         default=196
     )
-    amount = Column(BigInteger())
+    amount = Column(
+        BigInteger(),
+        info={'colanderalchemy': {'typ': AmountType(5), 'title': 'Montant'}},
+    )
     description = Column(
         Text,
         info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}}
+    )
+    task = relationship(
+        "Task",
+        uselist=False,
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     def __json__(self, request):
@@ -846,9 +968,21 @@ class TaskLine(DBBASE, LineCompute):
             }
         },
     )
-    cost = Column(BigInteger(), default=0,)
-    tva = Column(Integer, nullable=False, default=196)
-    quantity = Column(Float(), default=1)
+    cost = Column(
+        BigInteger(),
+        info={'colanderalchemy': {'typ': AmountType(5), 'title': 'Montant'}},
+        default=0,
+    )
+    tva = Column(
+        Integer,
+        info={'colanderalchemy': {'typ': AmountType(2), 'title': 'Tva (en %)'}},
+        nullable=False,
+        default=196
+    )
+    quantity = Column(
+        Float(),
+        info={'colanderalchemy': {'typ': QuantityType()}},
+        default=1)
     unity = Column(String(100),)
     product_id = Column(
         Integer,
@@ -909,6 +1043,10 @@ class TaskLine(DBBASE, LineCompute):
             result['product_id'] = self.product_id
         return result
 
+    @property
+    def task(self):
+        return self.group.task
+
 
 def cache_amounts(mapper, connection, target):
     """
@@ -924,5 +1062,29 @@ def cache_amounts(mapper, connection, target):
         target.tva = target.tva_amount()
 
 
+def cache_parent_amounts(mapper, connection, target):
+    """
+    Set amounts in the cached amount vars to be able to provide advanced search
+    ... options in the invoice list page
+    """
+    log.info("Caching the parent task amounts")
+    print(target)
+    if hasattr(target, 'task'):
+        print("target has a task")
+        task = target.task
+        print(task)
+        if hasattr(task, 'total_ht'):
+            task.ht = task.total_ht()
+        if hasattr(task, 'total'):
+            task.ttc = task.total()
+        if hasattr(task, 'tva_amount'):
+            task.tva = task.tva_amount()
+        DBSESSION().merge(task)
+
+
 listen(Task, "before_insert", cache_amounts, propagate=True)
 listen(Task, "before_update", cache_amounts, propagate=True)
+listen(TaskLine, "before_insert", cache_parent_amounts, propagate=True)
+listen(TaskLine, "before_update", cache_parent_amounts, propagate=True)
+listen(DiscountLine, "before_insert", cache_parent_amounts, propagate=True)
+listen(DiscountLine, "before_update", cache_parent_amounts, propagate=True)

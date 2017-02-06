@@ -336,6 +336,7 @@ def get_estimation_acl(self):
                 'delete_estimation',
                 'view_file',
                 'add_file',
+                'edit_file',
             )
         ))
         if "estimation_validation" in user.groups:
@@ -361,6 +362,7 @@ def get_invoice_acl(self):
                 'delete_invoice',
                 'view_file',
                 'add_file',
+                'edit_file',
                 'view_payment',
             )
         ))
@@ -387,6 +389,7 @@ def get_cancelinvoice_acl(self):
             'delete_cancelinvoice',
             'view_file',
             'add_file',
+            'edit_file',
         )
         if "invoice_validation" in user.groups:
             rights += ("valid.cancelinvoice",)
@@ -451,6 +454,7 @@ def get_project_acls(self):
                     'list_invoices',
                     'view_file',
                     'add_file',
+                    'edit_file',
                 )
             )
         )

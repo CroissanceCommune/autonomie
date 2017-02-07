@@ -1132,7 +1132,7 @@ class UserDatas(Node):
         String(7),
         info={
             'colanderalchemy': {
-                'title': u'Code postal',
+                'title': u'Code postal de naissance',
                 'section': u'Coordonnées',
             }
         }

@@ -319,7 +319,7 @@ class Invoice(Task, InvoiceCompute):
         """
         if self.official_number is None:
             self.official_number = get_next_official_number()
-        self.date = datetime.date.today()
+            self.date = datetime.date.today()
 
     def record_payment(self, **kw):
         """

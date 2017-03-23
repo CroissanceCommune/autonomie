@@ -980,6 +980,7 @@ class CustomBookEntryFactory(BaseInvoiceBookEntryFactory):
             client=self.invoice.customer,
             entreprise=self.company,
             num_facture=self.invoice.official_number,
+            numero_facture=self.invoice.official_number,
         )
 
     @double_lines

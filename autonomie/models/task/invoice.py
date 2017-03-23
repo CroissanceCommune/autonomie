@@ -317,7 +317,8 @@ class Invoice(Task, InvoiceCompute):
         """
             Validate an invoice
         """
-        self.official_number = get_next_official_number()
+        if self.official_number is None:
+            self.official_number = get_next_official_number()
         self.date = datetime.date.today()
 
     def record_payment(self, **kw):

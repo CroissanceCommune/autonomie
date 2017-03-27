@@ -35,6 +35,8 @@ from .custom_types import (
     AmountType,
 )
 
+AMOUNT_PRECISION = 5
+
 
 def get_amount_topay(kw):
     """
@@ -176,7 +178,9 @@ def deferred_amount_by_tva_validation(node, kw):
         if tva is None:
             return u"Tva inconnue"
         amount = values.get('amount')
-        if amount > tva_parts[tva.value]:
+        # Fix #433 : encaissement et tva multiples
+        # Add a tolerance for 1 € of difference
+        if amount > tva_parts[tva.value] + 10**AMOUNT_PRECISION:
             return u"Le montant de l'encaissement doit être inférieur à la \
 part de cette Tva dans la facture"
         return True

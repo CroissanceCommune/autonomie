@@ -68,6 +68,7 @@ INVOICE = dict(
     financial_year=2015,
     address=u"Adresse",
     workplace=u"Lieu d'éxécution des travaux",
+    payment_conditions="OOO"
 )
 
 

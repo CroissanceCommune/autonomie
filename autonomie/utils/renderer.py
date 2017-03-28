@@ -157,13 +157,6 @@ def set_xls_formats():
     FORMAT_REGISTRY.add_item(DateTime, "dd/mm/yyyy hh:mm")
 
 
-def set_custom_deform_js():
-    from js import deform
-    from autonomie.resources import custom_deform_js
-    deform.deform_js = custom_deform_js
-    deform.resource_mapping['deform'] = [custom_deform_js]
-
-
 def customize_renderers(config):
     """
     Customize the different renderers
@@ -177,4 +170,3 @@ def customize_renderers(config):
     set_export_formatters()
     set_export_blacklist()
     set_xls_formats()
-    set_custom_deform_js()

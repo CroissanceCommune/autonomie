@@ -5,7 +5,7 @@
                  title title|field.title;
                  oid oid|field.oid"
      title="${description}"
-     class="form-group row deformSeqItem ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
+     class="form-group row deform-seq-item ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
      i18n:domain="deform">
     <span tal:replace="structure field.serialize(cstruct)"/>
     <tal:errors condition="field.error and not hidden"
@@ -18,7 +18,7 @@
     </tal:errors>
     <!--<div class="col-xs-1" style="padding:0">-->
     <!-- sequence_item -->
-    <!--    <span class="deformOrderbutton close glyphicon glyphicon-resize-vertical"
+    <!--    <span class="deform-order-button close glyphicon glyphicon-resize-vertical"
           id="${oid}-order"
           tal:condition="not hidden"
           title="Reorder (via drag and drop)"

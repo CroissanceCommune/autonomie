@@ -1,4 +1,4 @@
-<div tal:attributes="class 'deformSeqItem ' + str(field.error and field.widget.error_class or '')"
+<div tal:attributes="class 'deform-seq-item ' + str(field.error and field.widget.error_class or '')"
     tal:omit-tag="field.widget.hidden"
     tal:define="
 		hidden hidden|field.widget.hidden;

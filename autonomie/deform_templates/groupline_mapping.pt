@@ -9,7 +9,7 @@ i18n:domain="deform">
     <a
       onclick="javascript:deform.removeSequenceItem(this.parentNode.parentNode);"
       title="Enlever"
-      class="deformClosebutton close">
+      class="deform-close-button close">
       ×
     </a>
   </div>

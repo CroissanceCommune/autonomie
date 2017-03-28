@@ -300,9 +300,9 @@ var catalog = {
      *
      * :param add_button: The Add button
      */
-    var seq = $(add_button).closest('.deformSeq');
-    var seq_container = seq.children('.deformSeqContainer').first();
-    var item = seq_container.children('.deformSeqItem').last();
+    var seq = $(add_button).closest('.deform-seq');
+    var seq_container = seq.children('.deform-seq-container').first();
+    var item = seq_container.children('.deform-seq-item').last();
     return item;
   },
   scrollToElement: function(element){

@@ -1,4 +1,4 @@
-<div class="deformSeq"
+<div class="deform-seq"
      id="${field.oid}"
      tal:define="item_tmpl item_template|field.widget.item_template;
 		 oid oid|field.oid;
@@ -13,15 +13,15 @@
   <!-- sequence -->
   <input type="hidden" name="__start__"
          value="${field.name}:sequence"
-         class="deformProto"
+         class="deform-proto"
          tal:attributes="prototype prototype"/>
 
-  <div class="deformSeqContainer"
+  <div class="deform-seq-container"
        id="${oid}-orderable">
     <div tal:repeat="tup subfields"
          tal:replace="structure rndr(item_tmpl, field=tup[1], cstruct=tup[0],
                       parent=field)"/>
-    <span class="deformInsertBefore"
+    <span class="deform-insert-before"
           tal:attributes="min_len min_len;
                           max_len max_len;
                           now_len now_len;

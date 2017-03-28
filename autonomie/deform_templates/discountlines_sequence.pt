@@ -10,7 +10,7 @@
                  orderable orderable and 1 or 0;
                  prototype field.widget.prototype(field);
                  title title|field.title;"
-     class="deformSeq"
+     class="deform-seq"
      id="${oid}">
 
   <!-- Custom datas insertion -->
@@ -27,7 +27,7 @@
 
   <input type="hidden" name="__start__"
          value="${field.name}:sequence"
-         class="deformProto"
+         class="deform-proto"
          tal:attributes="prototype prototype"/>
   <!-- Custom datas insertion -->
     <div
@@ -42,12 +42,12 @@
       </div>
     </div>
   <!-- end custom -->
-    <div class="deformSeqContainer" id="${oid}-orderable">
+    <div class="deform-seq-container" id="${oid}-orderable">
         <div tal:define="subfields [ x[1] for x in subfields ]"
              tal:repeat="subfield subfields"
              tal:replace="structure subfield.render_template(item_tmpl,
                                                           parent=field)" />
-        <span class="deformInsertBefore"
+        <span class="deform-insert-before"
               tal:attributes="
                  min_len min_len;
                  max_len max_len;
@@ -76,9 +76,9 @@
          )
          <tal:block condition="orderable">
              $( "#${oid}-orderable" ).sortable({
-               handle: ".deformOrderbutton, .panel-heading",
+               handle: ".deform-order-button, .panel-heading",
                containerSelector: "#${oid}-orderable",
-               itemSelector: ".deformSeqItem",
+               itemSelector: ".deform-seq-item",
                placeholder: '<span class="glyphicon glyphicon-arrow-right placeholder"></span>',
                onDragStart: function ($item, container, _super) {
                  var offset = $item.offset(),

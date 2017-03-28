@@ -107,6 +107,8 @@ port = 8080
 models = autonomie.models
 db=autonomie.models.base.DBSESSION
 transaction=transaction
+default_shell = ipython
+
 
 # Begin logging configuration
 [loggers]

@@ -58,14 +58,6 @@ def get_resource(filepath, minified=None, depends=None):
     )
 
 
-# ui_dialog.depends.add(bootstrap_js)
-# To fix https://github.com/Pylons/deform/issues/276
-# https://github.com/Pylons/deform/issues/275 (only in the case of task forms
-# because we use custom templates)
-# We use a custom deform js
-custom_deform_js = get_resource("js/custom_deform.js")
-
-
 def get_main_group():
     """
     Return the main resource Group that will be used on all pages

@@ -44,7 +44,7 @@ var Selectors = {
   total_ht: "#total_ht .input",
   total_ttc: "#total_ttc .input",
   total: '#total .input',
-  deform_close: ".deformClosebutton"
+  deform_close: ".deform-close-button"
 };
 
 function delRow(id){

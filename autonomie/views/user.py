@@ -513,7 +513,6 @@ déjà été créées : <ul>".format(query_count)
         datas.update(self._more_template_vars())
         return datas
 
-
     def submit_success(self, appstruct):
         """
         Launched on submission success
@@ -529,14 +528,12 @@ déjà été créées : <ul>".format(query_count)
 
             if confirmation == '0':  # Check homonyms
                 query = self.query_homonym(lastname, email)
-                query_count = query.count()
-                if query_count > 0:
+                count = query.count()
+                if count > 0:
                     # We need to ask confirmation
-                    return self._confirmation_form(query, appstruct, query_count)
+                    return self._confirmation_form(query, appstruct, count)
 
-            print("Objectifying")
             model = self.schema.objectify(appstruct)
-            print("Done")
 
         if model.id is None:
             self.dbsession.add(model)
@@ -591,7 +588,9 @@ déjà été créées : <ul>".format(query_count)
                 self.request.session.flash(msg)
                 for company in user.companies:
                     company.enable()
-                    msg = u"L'entreprise {0} a été réactivée".format(company.name)
+                    msg = u"L'entreprise {0} a été réactivée".format(
+                        company.name
+                    )
                     self.request.session.flash(msg)
 
         model = self.dbsession.merge(model)

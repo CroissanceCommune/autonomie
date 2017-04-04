@@ -2452,12 +2452,12 @@ def add_situation_change_handler(target, value, oldvalue, initiator):
     Handler for the situation Change handling
     """
     if isinstance(value, int) and value != oldvalue:
-        change = CaeSituationChange(
-            userdatas_id=target.id,
-            date=datetime.date.today(),
-            situation_id=value,
+        target.situation_history.append(
+            CaeSituationChange(
+                date=datetime.date.today(),
+                situation_id=value,
+            )
         )
-        DBSESSION().add(change)
 
 
 listen(UserDatas.situation_situation_id, "set", add_situation_change_handler)

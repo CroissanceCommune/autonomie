@@ -52,7 +52,14 @@ def command(func, doc):
 
 def get_value(arguments, key, default=None):
     """
-        Return the value for key in arguments or default
+    Return the value for a key in arguments or default
+
+    :param dict arguments: The cmd line arguments returned by docopt
+    :param str key: The key we look for (type => --type)
+    :param str default: The default value (default None)
+
+    :returns: The value or default
+    :rtype: str
     """
     val = arguments.get('--%s' % key)
     if not val:

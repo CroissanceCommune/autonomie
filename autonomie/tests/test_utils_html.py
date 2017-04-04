@@ -23,7 +23,7 @@
 Test for the forms package
 """
 import colander
-from autonomie.forms import (
+from autonomie.utils.html import (
     strip_whitespace,
     strip_linebreaks,
     strip_void_lines,

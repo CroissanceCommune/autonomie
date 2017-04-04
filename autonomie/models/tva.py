@@ -40,7 +40,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-from autonomie import forms
+from autonomie.utils.html import clean_html
 from autonomie.forms.custom_types import AmountType
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
@@ -150,7 +150,7 @@ encaissements",
 devis/une facture,la mention apparaitra dans la sortie PDF
 (ex: Mention pour la tva liée aux formations ...)""",
                 'widget': deform.widget.TextAreaWidget(rows=1),
-                'preparer': forms.get_default_textarea_preparer(),
+                'preparer': clean_html,
                 'missing': colander.drop,
             }
         }

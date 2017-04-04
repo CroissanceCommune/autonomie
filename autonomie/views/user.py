@@ -459,53 +459,89 @@ class UserDatasAdd(BaseFormView):
     def populate_actionmenu(self):
         self.request.actionmenu.add(get_userdatas_list_btn())
 
+    def query_homonym(self, lastname, email):
+        """
+        collect the accounts with same name or email
+
+        :param str lastname: The lastname to check
+        :param str email: the email to check
+        :returns: The SQLAlchemy query object
+        :rtype: obj
+        """
+        query = UserDatas.query().filter(
+            or_(
+                UserDatas.coordonnees_lastname == lastname,
+                UserDatas.coordonnees_email1 == email,
+            )
+        )
+        return query
+
+    def _confirmation_form(self, query, appstruct, query_count):
+        """
+        Return datas used to display a confirmation form
+
+        :param obj query: homonym SQLAlchemy query object
+        :param dict appstruct: Preserved form datas
+        :param int query_count: The number of homonyms
+        :returns: template vars
+        :rtype: dict
+        """
+        if query_count == 1:
+            msg = u"Une entrée de gestion sociale similaire \
+a déjà été créée: <ul>"
+        else:
+            msg = u"{0} entrées de gestion sociale similaires ont \
+déjà été créées : <ul>".format(query_count)
+
+        for entry in query:
+            msg += u"<li><a href='%s'>%s (%s)</a></li>" % (
+                self.request.route_path('userdata', id=entry.id),
+                format_account(entry),
+                entry.coordonnees_email1,
+            )
+        msg += u"</ul>"
+        form = self._get_form()
+        form.action = self.request.current_route_path(
+            _query={'action': 'new', 'confirmation': '1'}
+        )
+        form.set_appstruct(appstruct)
+        datas = dict(
+            form=form.render(),
+            confirmation_message=msg,
+            confirm_form_id=form.formid,
+        )
+        datas.update(self._more_template_vars())
+        return datas
+
+
     def submit_success(self, appstruct):
+        """
+        Launched on submission success
+
+        :param dict appstruct: The validated appstruct
+        """
         if self.context.__name__ == 'userdatas':
             model = self.schema.objectify(appstruct, self.context)
         else:
-            from autonomie.views import render_api
             confirmation = self.request.GET.get('confirmation', '0')
             lastname = appstruct['coordonnees_lastname']
             email = appstruct['coordonnees_email1']
-            if lastname and confirmation == '0':
-                query = UserDatas.query().filter(
-                    or_(
-                        UserDatas.coordonnees_lastname == lastname,
-                        UserDatas.coordonnees_email1 == email,
-                    )
-                )
+
+            if confirmation == '0':  # Check homonyms
+                query = self.query_homonym(lastname, email)
                 query_count = query.count()
                 if query_count > 0:
-                    if query_count == 1:
-                        msg = u"Une entrée de gestion sociale similaire \
-a déjà été créée: <ul>"
-                    else:
-                        msg = u"{0} entrées de gestion sociale similaires ont \
-déjà été créées : <ul>".format(query_count)
+                    # We need to ask confirmation
+                    return self._confirmation_form(query, appstruct, query_count)
 
-                    for entry in query:
-                        msg += u"<li><a href='%s'>%s (%s)</a></li>" % (
-                            self.request.route_path('userdata', id=entry.id),
-                            render_api.format_account(entry),
-                            entry.coordonnees_email1,
-                        )
-                    msg += u"</ul>"
-                    form = self._get_form()
-                    form.action = self.request.current_route_path(
-                        _query={'action': 'new', 'confirmation': '1'}
-                    )
-                    form.set_appstruct(appstruct)
-                    datas = dict(
-                        form=form.render(),
-                        confirmation_message=msg,
-                        confirm_form_id=form.formid,
-                    )
-                    datas.update(self._more_template_vars())
-                    return datas
-
+            print("Objectifying")
             model = self.schema.objectify(appstruct)
+            print("Done")
 
-        model = self.dbsession.merge(model)
+        if model.id is None:
+            self.dbsession.add(model)
+        else:
+            model = self.dbsession.merge(model)
         self.dbsession.flush()
 
         self.post_integration(model)
@@ -515,12 +551,23 @@ déjà été créées : <ul>".format(query_count)
 
     def post_integration(self, model):
         """
-        Handle actions after a user is integrated
+        Handle actions after userdatas is added/edited
+
+        :param obj model: The current model
+        :returns: False if nothin has been done
+        :rtype: bool
         """
         user, login, password = model.gen_user_account()
         if user is None:
             return False
+        else:
+            return self._handle_account_generation(model, user, login, password)
 
+    def _handle_account_generation(self, model, user, login, password):
+        """
+        Handle the account and company generation after userdatas is set to an
+        integrated status
+        """
         # A new user has been added
         if password is not None:
             companies = model.gen_companies()

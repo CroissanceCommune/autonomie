@@ -25,6 +25,7 @@
 """
     Command to add an admin to autonomie
 """
+import logging
 import os
 from autonomie.scripts.utils import (
     command,
@@ -48,8 +49,11 @@ def user_add(arguments, env):
     """
         Add a user in the database
     """
+    logger = logging.getLogger(__name__)
+
     login = get_value(arguments, 'user', 'admin.majerti')
     login = login.decode('utf-8')
+    logger.debug(u"Adding a user {0}".format(login))
 
     password = get_value(arguments, 'pwd', get_pwd())
     password = password.decode('utf-8')
@@ -85,6 +89,8 @@ def user_add(arguments, env):
     if 'pwd' not in arguments:
         print(u"""
           Password  : {0}""".format(password))
+
+    logger.debug(u"-> Done")
     return user
 
 

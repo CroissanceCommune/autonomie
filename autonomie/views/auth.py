@@ -189,6 +189,28 @@ def api_login_get_view(request):
     return result
 
 
+def connect_user(request, form_datas):
+    """
+    Effectively connect the user
+
+    :param obj request: The pyramid Request object
+    :pram dict form_datas: Validated form_datas
+    """
+    login = form_datas['login']
+    log.info(u" + '{0}' has been authenticated".format(login))
+    # Storing the form_datas in the request object
+    remember(request, login)
+    remember_me = form_datas.get('remember_me', False)
+    if remember_me:
+        log.info("  * The user wants to be remembered")
+        longtimeout = get_longtimeout()
+        request.response.set_cookie(
+            'remember_me',
+            "ok",
+            max_age=longtimeout,
+        )
+
+
 class LoginView(BaseView):
     """
     the login view
@@ -251,28 +273,14 @@ class LoginView(BaseView):
             log.info(u"Authenticating : '{0}'".format(
                 self.request.params.get('login'))
             )
-
             try:
-                datas = form.validate(controls)
+                form_datas = form.validate(controls)
             except ValidationFailure, err:
                 log.exception(u" - Authentication error")
                 err_form = err.render()
                 result = self.response(err_form, failed=True)
-
             else:
-                login = datas['login']
-                log.info(u" + '{0}' has been authenticated".format(login))
-                # Storing the datas in the request object
-                remember(self.request, login)
-                remember_me = datas.get('remember_me', False)
-                if remember_me:
-                    log.info("  * The user wants to be remembered")
-                    longtimeout = get_longtimeout()
-                    self.request.response.set_cookie(
-                        'remember_me',
-                        "ok",
-                        max_age=longtimeout,
-                    )
+                connect_user(self.request, form_datas)
                 result = self.success_response()
         else:
             if not self.request.is_xhr:

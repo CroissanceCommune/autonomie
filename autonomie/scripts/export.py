@@ -4,14 +4,12 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import logging
-import datetime
 import json
 
 from autonomie.scripts.utils import (
     command,
     get_value,
 )
-from autonomie.models.base import DBSESSION as db
 
 
 def _get_query(model, where):
@@ -76,7 +74,14 @@ def _export_user_datas(args, env):
 
     Streams the output in stdout
 
-    autonomie-export app.ini userdatas --fields=coordonnees_address,coordonnees_zipcode,coordonnees_city,coordonnees_sex,coordonnees_birthday,statut_social_status,coordonnees_study_level,parcours_date_info_coll,parcours_prescripteur,parcours_convention_cape,activity_typologie,sortie_date,sortie_motif --where='[{"key":"created_at","method":"dr","type":"date","search1":"1999-01-01","search2":"2016-12-31"}]' > /tmp/toto.csv
+    autonomie-export app.ini userdatas \
+    --fields=coordonnees_address,coordonnees_zipcode,coordonnees_city,\
+        coordonnees_sex,coordonnees_birthday,statut_social_status,\
+        coordonnees_study_level,parcours_date_info_coll,parcours_prescripteur,\
+        parcours_convention_cape,activity_typologie,sortie_date,sortie_motif \
+    --where='[{"key":"created_at","method":"dr","type":"date",\
+        "search1":"1999-01-01","search2":"2016-12-31"}]'\
+    > /tmp/toto.csv
 
     :param dict args: The arguments coming from the command line
     :param dict env: The environment bootstraped when setting up the pyramid app
@@ -119,7 +124,6 @@ def export_cmd():
         --where=<where>       Query parameters in json format
     """
     def callback(arguments, env):
-        args = ()
         if arguments['userdatas']:
             func = _export_user_datas
         return func(arguments, env)

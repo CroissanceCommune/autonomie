@@ -84,7 +84,7 @@ pyramid_deform.tempdir=/tmp/tempdir
 [celery]
 BROKER_URL = redis://localhost:6379/0
 CELERY_IMPORTS =
-    autonomie.task
+    autonomie.celery.tasks.task
 CELERY_TASK_SERIALIZER = json
 CELERYD_HIJACK_ROOT_LOGGER = False
 

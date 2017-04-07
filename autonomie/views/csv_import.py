@@ -48,7 +48,7 @@ from autonomie.csv_import import (
 from autonomie.models.config import Config
 from autonomie.models.job import CsvImportJob
 from autonomie.models.base import DBSESSION
-from autonomie.task import async_import_datas
+from autonomie.celery.tasks.task import async_import_datas
 from autonomie.forms.csv_import import (
     get_csv_file_upload_schema,
     get_association_schema,

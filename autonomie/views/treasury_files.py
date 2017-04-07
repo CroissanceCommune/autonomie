@@ -54,7 +54,7 @@ from autonomie.models.company import Company
 from autonomie.models.job import MailingJob
 from autonomie.views.render_api import month_name
 from autonomie.mail import send_salary_sheet
-from autonomie.task import async_mail_salarysheets
+from autonomie.celery.tasks.task import async_mail_salarysheets
 from autonomie.utils.ascii import force_ascii
 from autonomie.utils.files import (
     encode_path,

@@ -61,7 +61,6 @@ from autonomie.models.tva import Tva
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
     DBBASE,
-    DBSESSION,
     default_table_args,
 )
 from autonomie import forms
@@ -1079,7 +1078,6 @@ def cache_parent_amounts(mapper, connection, target):
             task.ttc = task.total()
         if hasattr(task, 'tva_amount'):
             task.tva = task.tva_amount()
-        DBSESSION().merge(task)
 
 
 listen(Task, "before_insert", cache_amounts, propagate=True)

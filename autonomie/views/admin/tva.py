@@ -136,6 +136,7 @@ class TvaEditView(BaseEditView):
     add_template_vars = ('menus', 'help_msg')
     schema = get_tva_edit_schema()
     factory = Tva
+    redirect_route = "/admin/vente/tvas"
 
     menus = [
         dict(
@@ -154,6 +155,7 @@ class TvaAddView(BaseAddView):
     add_template_vars = ('menus', 'help_msg')
     schema = get_tva_edit_schema()
     factory = Tva
+    redirect_route = "/admin/vente/tvas"
     menus = [
         dict(
             label=u"Retour",

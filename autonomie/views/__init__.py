@@ -519,6 +519,7 @@ class BaseEditView(BaseFormView):
     """
     add_template_vars = ('title', 'help_msg')
     msg = u"Vos modifications ont bien été enregistrées"
+    redirect_route = None
 
     @property
     def help_msg(self):
@@ -535,7 +536,10 @@ class BaseEditView(BaseFormView):
     def submit_success(self, appstruct):
         model = self.schema.objectify(appstruct, self.context)
         self.dbsession.merge(model)
+        self.dbsession.flush()
         self.request.session.flash(self.msg)
+        if self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
 
 
 class BaseAddView(BaseFormView):
@@ -549,6 +553,7 @@ class BaseAddView(BaseFormView):
     add_template_vars = ('title', 'help_msg')
     msg = u"Vos modifications ont bien été enregistrées"
     factory = None
+    redirect_route = None
 
     @property
     def help_msg(self):
@@ -572,6 +577,8 @@ class BaseAddView(BaseFormView):
         new_model = self.schema.objectify(appstruct, new_model)
         self.dbsession.add(new_model)
         self.request.session.flash(self.msg)
+        if self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
 
 
 class DisableView(BaseView):

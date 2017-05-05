@@ -35,6 +35,7 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     Text,
+    not_,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -79,7 +80,7 @@ Autonomie, ainsi que les produits associés.<br /> \
         plusieurs Tva à 0%, utilisez des montants négatifs pour les \
         différencier. \
         """,
-        'widget': deform_extensions.GridMappingWidget(named_grid=TVA_GRID)
+        'widget': deform_extensions.GridFormWidget(named_grid=TVA_GRID)
     }
     __tablename__ = 'tva'
     __table_args__ = default_table_args
@@ -93,10 +94,7 @@ Autonomie, ainsi que les produits associés.<br /> \
         Boolean(),
         default=True,
         info={
-            'colanderalchemy': {
-                'title': u"Cette tva est-elle active ?",
-                'description': u"Proposer cette Tva dans les formulaires",
-            }
+            'colanderalchemy': {'exclude': True}
         },
     )
     name = Column(
@@ -194,7 +192,7 @@ devis/une facture,la mention apparaitra dans la sortie PDF
 
     @classmethod
     def get_default(cls):
-        return super(Tva, cls).query().filter(cls.default == 1).first()
+        return cls.query().filter_by(default=True).first()
 
     def __json__(self, request):
         return dict(
@@ -204,6 +202,24 @@ devis/une facture,la mention apparaitra dans la sortie PDF
             default=self.default == 1,
             products=[product.__json__(request) for product in self.products],
         )
+
+    @classmethod
+    def unique_value(cls, value, tva_id=None):
+        """
+        Check that the given value has not already been attributed to a tva
+        entry
+
+        :param int value: The value currently configured
+        :param int tva_id: The optionnal id of the current tva object (edition
+        mode)
+        :returns: True/False
+        :rtype: bool
+        """
+        query = cls.query(include_inactive=True)
+        if tva_id:
+            query = query.filter(not_(cls.id == tva_id))
+
+        return query.filter_by(value=value).count() == 0
 
 
 class Product(DBBASE):

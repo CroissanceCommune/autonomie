@@ -27,9 +27,7 @@ Configuration générale du module vente:
 """
 import logging
 import functools
-from sqlalchemy import desc
 
-from autonomie.models.base import DBSESSION
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseConfigView,
@@ -37,8 +35,6 @@ from autonomie.views.admin.tools import (
 )
 from autonomie.forms.admin import (
     get_config_schema,
-    tva_form_validator,
-    get_sequence_model_admin,
 )
 
 from autonomie.models.task import (
@@ -47,9 +43,6 @@ from autonomie.models.task import (
     PaymentMode,
     PaymentConditions,
     BankAccount,
-)
-from autonomie.models.tva import (
-    Tva,
 )
 from autonomie.models.treasury import CustomInvoiceBookEntryModule
 
@@ -91,14 +84,6 @@ logger = logging.getLogger(__name__)
     r_path="admin_vente",
 )
 
-(
-    tva_admin_class,
-    tva_admin_route,
-    tva_admin_tmpl,
-) = get_model_admin_view(
-    Tva,
-    r_path="admin_vente",
-)
 
 (
     custom_treasury_admin_class,
@@ -200,7 +185,7 @@ personnalisé",
     }
 
     def query_items(self):
-        return self.factory.query().filter(self.factory.active == True).all()
+        return self.factory.query().filter_by(active=True).all()
 
 
 class MainReceiptsConfig(BaseConfigView):
@@ -214,18 +199,6 @@ configuré"
     message = u"Configurer l'export des encaissements (le code journal \
 utilisé est celui de la banque associé à chaque encaissement)"
     redirect_path = "admin_receipts"
-
-
-class AdminTva(tva_admin_class):
-    title = u"Configuration comptable des produits et TVA collectés"
-    description = u"Taux de TVA, codes produit et codes analytiques associés"
-    widget_options = {'add_subitem_text_template': u"Ajouter un taux de TVA"}
-
-    def query_items(self):
-        return DBSESSION().query(Tva).order_by(desc(Tva.active)).all()
-
-    def customize_schema(self, schema):
-        schema.validator = tva_form_validator
 
 
 def admin_vente_index_view(request):
@@ -266,9 +239,9 @@ def admin_vente_index_view(request):
             ""
         ),
         (
-            AdminTva.title,
-            'admin_vente_tva',
-            AdminTva.description,
+            u"Configuration comptable des produits et TVA collectés",
+            '/admin/vente/tvas',
+            u"Taux de TVA, codes produit et codes analytiques associés",
             ""
         ),
         (
@@ -302,7 +275,6 @@ def admin_vente_treasury_index_view(request):
     ):
         menus.append(dict(label=label, path=route, title=title, icon=icon))
     return dict(title=u"Configuration comptable du module Ventes", menus=menus)
-
 
 
 def include_receipts_views(config):
@@ -350,7 +322,6 @@ def includeme(config):
         "admin_vente_treasury_custom",
         "admin/vente/treasury/custom"
     )
-    config.add_route("admin_vente_tva", "admin/vente/tva")
     config.add_route(
         "admin_vente_payment_condition",
         "admin/vente/payment_condition"
@@ -402,9 +373,4 @@ def includeme(config):
     config.add_admin_view(
         AdminVenteTreasuryCustom,
         route_name='admin_vente_treasury_custom',
-    )
-
-    config.add_admin_view(
-        AdminTva,
-        route_name='admin_vente_tva',
     )

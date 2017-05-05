@@ -119,6 +119,31 @@
         </span>
     </a>
 </%def>
+<%def name="dropdown_item(href, label, title, icon=None, onclick=None, icotext=None, disable=False)">
+    <li
+    % if disable:
+        class='disabled'
+    % endif
+    >
+    <a href='${href}' title="${title}"
+        % if onclick:
+            onclick="${onclick}"
+        % endif
+        >
+        %if icotext:
+            <span>${api.clean_html(icotext)|n}</span>
+        % endif
+        %if icon:
+            % if not icon.startswith('glyph') and not icon.startswith('fa'):
+                <i class='glyphicon glyphicon-${icon}'></i>
+            % else:
+                <i class='${icon}'></i>
+            % endif
+        %endif
+            ${label}
+        </a>
+    </li>
+</%def>
 <%def name="format_company(company)">
     <h3>
         <a href="${request.route_path('company', id=company.id)}">Entreprise ${company.name}</a>

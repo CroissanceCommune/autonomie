@@ -84,6 +84,7 @@ from autonomie.models.sale_product import (
     SaleProductGroup,
     SaleProductCategory,
 )
+from autonomie.models.tva import Tva
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +144,7 @@ class RootFactory(dict):
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('timeslots', 'timeslot', Timeslot, ),
+            ('tvas', 'tva', Tva,),
             ('users', 'user', User, ),
             ('userdatas', 'userdatas', UserDatas, ),
             ('workshops', 'workshop', Workshop, ),
@@ -608,3 +610,4 @@ def set_models_acls():
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)
     Workshop.__default_acl__ = property(get_event_acl)
+    Tva.__acl__ = property(get_base_acl)

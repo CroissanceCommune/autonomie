@@ -517,11 +517,11 @@ class BaseEditView(BaseFormView):
     class AdminModel(BaseEditView):
         schema = SQLAlchemySchemaNode(MyModel)
     """
-    add_template_vars = ('title', 'help_message')
+    add_template_vars = ('title', 'help_msg')
     msg = u"Vos modifications ont bien été enregistrées"
 
     @property
-    def help_message(self):
+    def help_msg(self):
         factory = getattr(self, 'factory', None)
         if factory is not None:
             calchemy_dict = getattr(factory, '__colanderalchemy_config__', {})
@@ -535,6 +535,42 @@ class BaseEditView(BaseFormView):
     def submit_success(self, appstruct):
         model = self.schema.objectify(appstruct, self.context)
         self.dbsession.merge(model)
+        self.request.session.flash(self.msg)
+
+
+class BaseAddView(BaseFormView):
+    """
+    Admin view that should be subclassed adding a colanderalchemy schema
+
+    class AdminModel(BaseAddView):
+        schema = SQLAlchemySchemaNode(MyModel)
+        model = MyModel
+    """
+    add_template_vars = ('title', 'help_msg')
+    msg = u"Vos modifications ont bien été enregistrées"
+    factory = None
+
+    @property
+    def help_msg(self):
+        factory = getattr(self, 'factory', None)
+        if factory is not None:
+            calchemy_dict = getattr(factory, '__colanderalchemy_config__', {})
+        else:
+            calchemy_dict = {}
+        return calchemy_dict.get('help_msg', '')
+
+    def create_instance(self):
+        """
+        Initiate a new instance
+        """
+        if self.factory is None:
+            raise Exception("Missing mandatory 'factory' attribute")
+        return self.factory()
+
+    def submit_success(self, appstruct):
+        new_model = self.create_instance()
+        new_model = self.schema.objectify(appstruct, new_model)
+        self.dbsession.add(new_model)
         self.request.session.flash(self.msg)
 
 
@@ -559,7 +595,7 @@ class DisableView(BaseView):
 
     def __call__(self):
         if self.context.active:
-            if self.enable_msg is None:
+            if self.disable_msg is None:
                 raise Exception("Add a disable_msg attribute")
             self.context.active = False
             self.request.dbsession.merge(self.context)

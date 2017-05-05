@@ -437,26 +437,60 @@ valeurs négatives pour les distinguer (-1, -2...), elles seront ramenées à 0 
 pour toutes les opérations de calcul."
 
 
-TVA_NO_DEFAULT_SET_MSG = u"Veuillez définir au moins une tva par défaut."
+TVA_NO_DEFAULT_SET_MSG = u"Veuillez définir au moins une tva par défaut \
+(aucune TVA par défaut n'a été configurée)."
 
 
-def tva_form_validator(form, values):
+def get_tva_value_validator(current):
     """
-    Ensure we've got a unique tva value and at least one default tva in our form
-    """
-    vals = []
-    default = False
-    for tva in values['datas']:
-        if tva['value'] in vals:
-            message = TVA_UNIQUE_VALUE_MSG
-            raise colander.Invalid(form, message)
-        vals.append(tva['value'])
+    Return a validator for tva entries
 
-        if tva['default'] == 1:
-            default = True
-    if not default:
-        message = TVA_NO_DEFAULT_SET_MSG
-        raise colander.Invalid(form, message)
+    :param int tva_id: The current configured tva
+    :rtype: func
+    """
+    from autonomie.models.tva import Tva
+    if isinstance(current, Tva):
+        current_id = current.id
+    else:
+        current_id = None
+
+    def validator(node, value):
+        if not Tva.unique_value(value, current_id):
+            raise colander.Invalid(node, TVA_UNIQUE_VALUE_MSG)
+    return validator
+
+
+@colander.deferred
+def deferred_tva_value_validator(node, kw):
+    """
+    Ensure we've got a unique tva value and at least one default tva
+
+    :param obj form: The deform.Form object
+    :param dict tva_value: The value configured
+    """
+    context_id = kw['request'].context
+    return get_tva_value_validator(context_id)
+
+
+def has_tva_default_validator(node, value):
+    """
+    Validator for tva uniqueness
+    """
+    from autonomie.models.tva import Tva
+    if Tva.get_default() is None and not value:
+        raise colander.Invalid(node, TVA_NO_DEFAULT_SET_MSG)
+
+
+def get_tva_edit_schema():
+    """
+    Add a custom validation schema to the tva edition form
+    :returns: :class:`colander.Schema` schema for single tva admin
+    """
+    from autonomie.models.tva import Tva
+    schema = SQLAlchemySchemaNode(Tva)
+    schema['value'].validator = deferred_tva_value_validator
+    schema['default'].validator = has_tva_default_validator
+    return schema
 
 
 class ActivityTypeConfig(colander.MappingSchema):

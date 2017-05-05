@@ -103,6 +103,7 @@ AUTONOMIE_ADMIN_MODULES = (
     "autonomie.views.admin.competence",
     "autonomie.views.admin.expense",
     "autonomie.views.admin.vente",
+    "autonomie.views.admin.tva",
 )
 
 AUTONOMIE_SERVICE_FACTORIES = (

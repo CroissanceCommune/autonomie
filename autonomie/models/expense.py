@@ -73,10 +73,10 @@ class ExpenseType(DBBASE):
         :param type: Column for polymorphic discrimination
     """
     __colanderalchemy_config__ = {
-        'title': u"type de frais",
-        'validation_msg': u"Les types de frais ont bien été configurés",
-        "help_msg": u"Configurer les types de frais utilisables dans \
-les notes de dépense",
+        'title': u"Configuration des types de dépenses",
+        'validation_msg': u"Les types de dépenses ont bien été configurés",
+        "help_msg": u"Configurer les types de dépenses utilisables dans \
+les formulaires de saisie",
     }
     __tablename__ = 'expense_type'
     __table_args__ = default_table_args
@@ -106,7 +106,8 @@ les notes de dépense",
             'colanderalchemy': {
                 'title': u"Libellé",
             }
-        }
+        },
+        nullable=False,
     )
     code = Column(
         String(15),
@@ -114,7 +115,8 @@ les notes de dépense",
             'colanderalchemy': {
                 'title': u"Compte de charge de la dépense",
             }
-        }
+        },
+        nullable=False,
     )
 
     code_tva = Column(
@@ -185,7 +187,8 @@ utilisables dans les notes de dépense",
             'colanderalchemy': {
                 'title': u"Tarif au km",
             }
-        }
+        },
+        nullable=False,
     )
 
     def __json__(self, request=None):
@@ -223,7 +226,8 @@ utilisables dans les notes de dépense",
                 'title': u"Pourcentage remboursé",
                 'missing': colander.required
             }
-        }
+        },
+        nullable=False,
     )
     initialize = Column(
         Boolean,

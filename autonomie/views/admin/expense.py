@@ -84,22 +84,6 @@ configuré"
     redirect_path = "admin_expense"
 
 
-class AdminType(type_admin_class):
-    def query_items(self):
-        return self.factory.query().filter(
-            self.factory.type == 'expense'
-        ).filter(self.factory.active == True).all()
-
-
-class AdminKmType(kmtype_admin_class):
-    def query_items(self):
-        return self.factory.query().filter(self.factory.active == True).all()
-
-
-class AdminTelType(teltype_admin_class):
-    def query_items(self):
-        return self.factory.query().filter(self.factory.active == True).all()
-
 
 def admin_expense_index_view(request):
     menus = []
@@ -107,21 +91,21 @@ def admin_expense_index_view(request):
         (u"Retour", "admin_index", "fa fa-step-backward", ''),
         (
             u"Configuration des types de dépenses",
-            "admin_expense_type",
+            "/admin/expenses/expense",
             "",
             u"Configuration des types de dépenses proposés dans l'interface \
 ainsi que des informations comptables associées",
         ),
         (
             u"Configuration des types de dépénses kilométriques",
-            "admin_expense_km_type",
+            "/admin/expenses/expensekm",
             "",
             u"Configuration des types de dépenses liées aux déplacements \
 proposés dans l'interface ainsi que des informations comptables associées",
         ),
         (
             u"Configuration des types de dépenses téléphoniques",
-            "admin_expense_tel_type",
+            "/admin/expenses/expensetel",
             "",
             u"Configuration des types de dépenses téléphoniques \
 proposés dans l'interface ainsi que des informations comptables associées",
@@ -170,15 +154,3 @@ def includeme(config):
         renderer="admin/main.mako",
         permission="admin",
     )
-    for route, tmpl, view_class in (
-        (TYPE_ROUTE, TYPE_TMPL, AdminType,),
-        (KMTYPE_ROUTE, TYPE_TMPL, AdminKmType,),
-        (TELTYPE_ROUTE, TYPE_TMPL, AdminTelType,),
-    ):
-        config.add_route(route, "admin/expenses/" + route)
-        config.add_view(
-            view_class,
-            route_name=route,
-            renderer=tmpl,
-            permission="admin",
-        )

@@ -457,6 +457,7 @@ def get_tva_value_validator(current):
     def validator(node, value):
         if not Tva.unique_value(value, current_id):
             raise colander.Invalid(node, TVA_UNIQUE_VALUE_MSG)
+
     return validator
 
 
@@ -468,8 +469,8 @@ def deferred_tva_value_validator(node, kw):
     :param obj form: The deform.Form object
     :param dict tva_value: The value configured
     """
-    context_id = kw['request'].context
-    return get_tva_value_validator(context_id)
+    context = kw['request'].context
+    return get_tva_value_validator(context)
 
 
 def has_tva_default_validator(node, value):
@@ -1019,3 +1020,15 @@ def deferred_deadlines_default(node, kw):
 
 class CompetencePrintConfigSchema(colander.Schema):
     header_img = get_file_dl_node(title=u'En-tête de la sortie imprimable')
+
+
+def get_admin_schema(factory):
+    """
+    Return an edit schema for the given factory
+
+    :param obj factory: A SQLAlchemy model
+    :returns: A SQLAlchemySchemaNode schema
+    :rtype: class:`SQLAlchemySchemaNode`
+    """
+    schema = SQLAlchemySchemaNode(factory)
+    return schema

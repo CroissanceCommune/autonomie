@@ -66,6 +66,9 @@ from autonomie.models.workshop import (
 from autonomie.models.expense import (
     ExpenseSheet,
     ExpensePayment,
+    ExpenseType,
+    ExpenseKmType,
+    ExpenseTelType,
 )
 from autonomie.models.user import (
     User,
@@ -127,6 +130,21 @@ class RootFactory(dict):
             ('customers', 'customer', Customer, ),
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),
+            (
+                'expense_types_expenses',
+                'expense_types_expense',
+                ExpenseType
+            ),
+            (
+                'expense_types_expensekms',
+                'expense_types_expensekm',
+                ExpenseKmType
+            ),
+            (
+                'expense_types_expensetels',
+                'expense_types_expensetel',
+                ExpenseTelType
+            ),
             ('expense_payments', 'expense_payment', ExpensePayment, ),
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
@@ -610,4 +628,8 @@ def set_models_acls():
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)
     Workshop.__default_acl__ = property(get_event_acl)
+
     Tva.__acl__ = property(get_base_acl)
+    ExpenseType.__acl__ = property(get_base_acl)
+    ExpenseKmType.__acl__ = property(get_base_acl)
+    ExpenseTelType.__acl__ = property(get_base_acl)

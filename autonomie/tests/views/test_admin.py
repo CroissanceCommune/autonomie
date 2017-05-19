@@ -48,27 +48,37 @@ def test_main_config_success(config, get_csrf_request_with_db, dbsession):
 
 
 def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin.vente import AdminTva
-    config.add_route('admin_vente', '/')
+    from autonomie.views.admin.tva import (
+        TvaDisableView,
+        TvaEditView,
+        TvaAddView,
+    )
+    config.add_route('/admin/vente/tvas', '/')
 
-    appstruct = {'datas': [
-        {
-            'name':"19,6%",
-            'value':1960,
-            "default":1,
-            "mention" : "Test",
-            "products":[]
-        },
-        {'name':"7%", "value":700, "default":0, "products":[]}
-        ]}
-    view = AdminTva(get_csrf_request_with_db())
+    appstruct = {
+        'name':"test",
+        'value':0,
+        "default":1,
+        "mention" : "Test",
+        "products":[]
+    }
+    view = TvaAddView(get_csrf_request_with_db())
     view.submit_success(appstruct)
-    assert dbsession.query(tva.Tva).filter(tva.Tva.active==True).count() == 2
 
-    appstruct = {'datas':[{'name':"19,6%", 'value':1960, "default":1,
-        "products":[]}]}
+    assert dbsession.query(tva.Tva).filter(tva.Tva.name=='test').count() == 1
+
+    appstruct = {
+        'id': 1, 'name':"21%", 'value':2100, "default":1, 'products': []
+    }
+    view = TvaEditView(get_csrf_request_with_db())
     view.submit_success(appstruct)
-    assert dbsession.query(tva.Tva).filter(tva.Tva.active==True).count() == 1
+    assert dbsession.query(tva.Tva).filter(tva.Tva.id==1).first().value == 2100
+
+    request = get_csrf_request_with_db()
+    request.context = dbsession.query(tva.Tva).filter(tva.Tva.id==1).first()
+    view = TvaDisableView(request)
+    view.__call__()
+    assert dbsession.query(tva.Tva).filter(tva.Tva.id==1).first().active == False
 
 
 def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):

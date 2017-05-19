@@ -54,14 +54,14 @@ def launch_sql_cmd(settings, cmd):
     """
         Main entry to launch sql commands
     """
-    return launch_cmd(settings, "echo \"%s\"|{mysql_cmd}" % cmd)
+    return launch_cmd(settings, "echo \"%s\"|{sql_cmd}" % cmd)
 
 
 def test_connect(settings):
     """
         test the db connection
     """
-    cmd = "echo 'quit' | {mysql_cmd}"
+    cmd = "echo 'quit' | {sql_cmd}"
     ret_code = launch_cmd(settings, cmd)
 
     if ret_code != 0:
@@ -73,11 +73,11 @@ def test_connect(settings):
     to the Mysql database:
 
         ...\n
-        testdb.mysql_cmd=mysql --defaults-file=/etc/mysql/debian.cnf\n
+        testdb.sql_cmd=mysql --defaults-file=/etc/mysql/debian.cnf\n
         ...\n
     or\n
         ...\n
-        testdb.mysql_cmd=mysql -uroot -p<password>\n
+        testdb.sql_cmd=mysql -uroot -p<password>\n
         ...\n
 
 
@@ -153,7 +153,6 @@ def pyramid_request(registry, settings):
         find_service,
         find_service_factory,
         AdapterRegistry,
-        register_service
     )
     from functools import partial
     request = testing.DummyRequest()
@@ -221,7 +220,7 @@ def connection(request, settings):
         if __current_test_ini_file().endswith('travis.ini'):
             return
         options = get_test_options_from_settings(settings)
-        cmd = "echo \"echo 'drop database {db};' | {mysql_cmd}\" | at now"
+        cmd = "echo \"echo 'drop database {db};' | {sql_cmd}\" | at now"
         launch_cmd(options, cmd)
 
     request.addfinalizer(drop_db)

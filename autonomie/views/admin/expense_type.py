@@ -257,7 +257,6 @@ def includeme(config):
         ExpenseKmTypeListView,
         ExpenseTelTypeListView,
     ):
-        print(list_class.get_type())
         config.add_view(
             list_class,
             route_name="/admin/expenses/%s" % list_class.get_type(),

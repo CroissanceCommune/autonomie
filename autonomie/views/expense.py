@@ -510,7 +510,6 @@ class ExpenseSheetView(BaseFormView):
                 if hasattr(self, "_%s_btn" % action.name):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.append(func())
-                    print(btns)
         return btns
 
     def _reset_btn(self):

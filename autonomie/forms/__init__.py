@@ -195,8 +195,9 @@ def get_year_select_deferred(query_func, default_val=None):
     def deferred_widget(node, kw):
         years = query_func()
         values = zip(years, years)
-        if default_val is not None:
+        if default_val is not None and default_val not in years:
             values.insert(0, default_val)
+
         return deform.widget.SelectWidget(
             values=values,
             css_class='input-small',
@@ -222,7 +223,7 @@ def year_select_node(query_func, **kw):
         missing=missing,
         title=title,
         **kw
-        )
+    )
 
 
 @colander.deferred

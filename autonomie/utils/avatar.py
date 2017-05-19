@@ -26,7 +26,6 @@
     avatar related utilities
 """
 import logging
-from pyramid.security import unauthenticated_userid
 
 from sqlalchemy.orm import undefer_group
 
@@ -54,10 +53,9 @@ def get_avatar(request):
         Returns the current User object
     """
     log.info("Get avatar")
-    login = unauthenticated_userid(request)
+    login = request.unauthenticated_userid
     if login is not None:
         log.info("  + Returning the user")
         query = request.dbsession.query(User).options(undefer_group('edit'))
-        user = query.filter_by(login=login).first()
-
+        user = query.filter_by(login=login).one()
         return user

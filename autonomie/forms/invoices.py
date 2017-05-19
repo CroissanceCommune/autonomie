@@ -409,9 +409,16 @@ def get_list_schema(is_admin=False):
         )
     )
 
+    def get_year_options():
+        values = invoice.get_invoice_years()
+        values.insert(0, u'')
+        return values
+
     node = forms.year_select_node(
         name='year',
-        query_func=invoice.get_invoice_years,
+        query_func=get_year_options,
+        missing=-1,
+        description=u"Année fiscale"
     )
 
     schema.insert(0, node)

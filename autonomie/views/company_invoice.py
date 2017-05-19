@@ -210,8 +210,9 @@ class GlobalInvoicesList(BaseListView):
             if end is None:
                 end = datetime.date.today()
             query = query.filter(Task.date.between(start, end))
-        else:
-            year = appstruct['year']
+
+        year = appstruct['year']
+        if year != -1:
             query = query.filter(
                 or_(
                     Invoice.financial_year == year,

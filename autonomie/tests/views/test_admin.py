@@ -58,7 +58,7 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
     appstruct = {
         'name': "test",
         'value': 0,
-        "default": 1,
+        "default": True,
         "mention" : "Test",
         "products": []
     }
@@ -68,7 +68,7 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
     assert dbsession.query(tva.Tva).filter(tva.Tva.name == 'test').count() == 1
 
     appstruct = {
-        'id': 1, 'name':"21%", 'value':2100, "default":1, 'products': []
+        'id': 1, 'name':"21%", 'value':2100, "default": True, 'products': []
     }
     view = TvaEditView(get_csrf_request_with_db())
     view.submit_success(appstruct)

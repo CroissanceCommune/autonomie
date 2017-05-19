@@ -147,6 +147,12 @@ class Config(DBBASE):
     name = Column("config_name", String(255), primary_key=True)
     value = Column("config_value", Text())
 
+    def __init__(self, **kwargs):
+        kwargs['app'] = 'autonomie'
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(self, key, value)
+
     @classmethod
     def get(cls, keyname, default=None):
         query = super(Config, cls).query()

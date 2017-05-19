@@ -45,7 +45,7 @@ def user(dbsession):
 
 def test_unique_login(user):
     assert User.unique_login("test_forms_user") == False
-    User.unique_login("nutt", "other unused login")
+    assert User.unique_login("Test_forms_user") == True
 
 def test_auth(user):
     form = get_password_schema()

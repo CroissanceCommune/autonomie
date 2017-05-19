@@ -141,7 +141,7 @@ def cancelinvoice(project, user, customer, company, phase):
 
 @pytest.fixture
 def tva(dbsession):
-    tva = Tva(name='TVA 20%', value=2000, default=1)
+    tva = Tva(name='TVA 20%', value=2000, default=True)
     dbsession.add(tva)
     dbsession.flush()
     return tva

@@ -157,7 +157,7 @@ def add_payment_mode(label):
     session.flush()
 
 
-def add_tva(value, default=0):
+def add_tva(value, default=False):
     t = Tva(name="%s %%" % (value/100.0), value=value, default=default)
     session = DBSESSION()
     session.add(t)
@@ -205,7 +205,7 @@ def set_configuration():
 
     add_tva(0)
     add_tva(700)
-    add_tva(1960, 1)
+    add_tva(1960, True)
 
     add_unity(u"heure(s)")
     add_unity(u"jour(s)")

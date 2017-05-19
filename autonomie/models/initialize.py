@@ -94,6 +94,12 @@ def populate_config(session):
     commit()
 
 
+def _adjust_for_engine(engine):
+    if engine.dialect.name == 'mysql':
+        from autonomie.models.user import User
+        User.__table__.c.login.type.collation = 'utf8_bin'
+
+
 def initialize_sql(engine):
     """
         Initialize the database engine
@@ -103,6 +109,7 @@ def initialize_sql(engine):
     if not engine.table_names():
         fetch_head()
 
+    _adjust_for_engine(engine)
     import logging
     logger = logging.getLogger(__name__)
     logger.debug("Setting the metadatas")

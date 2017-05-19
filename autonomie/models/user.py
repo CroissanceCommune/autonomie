@@ -205,7 +205,7 @@ class User(DBBASE, PersistentACLMixin):
 
     login = deferred(
         Column(
-            String(64, collation="utf8_bin"),
+            String(64),
             unique=True,
             nullable=False,
             info={'colanderalchemy': {'title': u'Identifiant'}}

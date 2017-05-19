@@ -114,6 +114,7 @@ def initialize_test_database(settings):
     os.putenv('SHELL', '/bin/bash')
     test_connect(options)
     create_sql_user(options)
+    launch_cmd(options['drop'])
     create_test_db(options)
 
 
@@ -261,7 +262,6 @@ def populate_db(session):
     fake_database.set_configuration()
 
 
-
 @fixture(scope='session')
 def content(connection, settings):
     """
@@ -272,6 +272,8 @@ def content(connection, settings):
     metadata = DBBASE.metadata
 
     metadata.drop_all(connection.engine)
+    from autonomie.models.initialize import _adjust_for_engine
+    _adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
 
     populate_db(DBSESSION())

@@ -42,27 +42,20 @@ def __current_test_ini_file():
     return os.path.join(HERE, '../../travis.ini')
 
 
-def launch_cmd(settings, cmd):
+def launch_cmd(cmd):
     """
         Main entry to launch os commands
     """
-    command_line = cmd.format(**settings)
-    return os.system(command_line)
-
-
-def launch_sql_cmd(settings, cmd):
-    """
-        Main entry to launch sql commands
-    """
-    return launch_cmd(settings, "echo \"%s\"|{sql_cmd}" % cmd)
+    print("Launching : %s" % cmd)
+    return os.system(cmd)
 
 
 def test_connect(settings):
     """
         test the db connection
     """
-    cmd = "echo 'quit' | {sql_cmd}"
-    ret_code = launch_cmd(settings, cmd)
+    cmd = settings['connect']
+    ret_code = launch_cmd(cmd)
 
     if ret_code != 0:
 
@@ -92,22 +85,14 @@ def create_sql_user(settings):
     """
         Create the sql test user
     """
-    launch_sql_cmd(settings, 'CREATE USER {user}@localhost;')
+    launch_cmd(settings['adduser'])
 
 
 def create_test_db(settings):
     """
         Create the test database and grant rights
     """
-    launch_sql_cmd(settings, 'CREATE DATABASE IF NOT EXISTS "{db}" CHARACTER SET utf8 COLLATE utf8_bin;')
-
-
-def grant_user(settings):
-    """
-        grant privileges on the test db to the test user
-    """
-    launch_sql_cmd(settings, "GRANT ALL PRIVILEGES on {db}.* to {user}@localhost "
-                   "identified by '{password}'; FLUSH PRIVILEGES;")
+    launch_cmd(settings['adddb'])
 
 
 def get_test_options_from_settings(settings):
@@ -130,7 +115,6 @@ def initialize_test_database(settings):
     test_connect(options)
     create_sql_user(options)
     create_test_db(options)
-    grant_user(options)
 
 
 @fixture(scope='session')
@@ -219,9 +203,8 @@ def connection(request, settings):
         """
         if __current_test_ini_file().endswith('travis.ini'):
             return
-        options = get_test_options_from_settings(settings)
-        cmd = "echo \"echo 'drop database {db};' | {sql_cmd}\" | at now"
-        launch_cmd(options, cmd)
+        db_settings = get_test_options_from_settings(settings)
+        launch_cmd(db_settings['drop'])
 
     request.addfinalizer(drop_db)
     return _connection

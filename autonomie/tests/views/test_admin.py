@@ -56,29 +56,31 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
     config.add_route('/admin/vente/tvas', '/')
 
     appstruct = {
-        'name':"test",
-        'value':0,
-        "default":1,
+        'name': "test",
+        'value': 0,
+        "default": 1,
         "mention" : "Test",
-        "products":[]
+        "products": []
     }
     view = TvaAddView(get_csrf_request_with_db())
     view.submit_success(appstruct)
 
-    assert dbsession.query(tva.Tva).filter(tva.Tva.name=='test').count() == 1
+    assert dbsession.query(tva.Tva).filter(tva.Tva.name == 'test').count() == 1
 
     appstruct = {
         'id': 1, 'name':"21%", 'value':2100, "default":1, 'products': []
     }
     view = TvaEditView(get_csrf_request_with_db())
     view.submit_success(appstruct)
-    assert dbsession.query(tva.Tva).filter(tva.Tva.id==1).first().value == 2100
+    assert dbsession.query(tva.Tva).filter(tva.Tva.id == 1).first().value == 2100
 
     request = get_csrf_request_with_db()
-    request.context = dbsession.query(tva.Tva).filter(tva.Tva.id==1).first()
+    request.context = dbsession.query(
+        tva.Tva).filter(tva.Tva.id == 1).first()
     view = TvaDisableView(request)
     view.__call__()
-    assert dbsession.query(tva.Tva).filter(tva.Tva.id==1).first().active == False
+    assert dbsession.query(tva.Tva).filter(
+        tva.Tva.id == 1).first().active == False
 
 
 def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):

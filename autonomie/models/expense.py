@@ -445,7 +445,7 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
     type = Column(String(30), nullable=False)
     date = Column(Date(), default=datetime.date.today)
     description = Column(String(255))
-    category = Column(Enum('1', '2'), default='1')
+    category = Column(Enum('1', '2', name='category'), default='1')
     valid = Column(Boolean(), default=True)
     type_id = Column(Integer)
     sheet_id = Column(

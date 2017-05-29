@@ -169,22 +169,32 @@ class DisplayCommercialHandling(BaseView):
                 extract('month', Invoice.date) == month,
                 Invoice.financial_year == self.year,
             )
-            if month != 12:
+            if month not in (1, 12):
                 invoices = invoices.filter(date_condition)
             else:
-                # for december, we also like to have invoices edited in january
-                # and reported to the previous comptability year
-                reported_condition = and_(
-                    Invoice.financial_year == self.year,
-                    extract('year', Invoice.date) != self.year,
-                )
+                if month == 12:
+                    # for december, we also like to have invoices edited in
+                    # january and reported to the previous comptability year
+                    reported_condition = and_(
+                        Invoice.financial_year == self.year,
+                        extract('year', Invoice.date) > self.year,
+                    )
+                else:  # month=1
+                    # for january, we also like to have invoices edited in
+                    # december and reported to the next comptability year
+                    reported_condition = and_(
+                        Invoice.financial_year == self.year,
+                        extract('year', Invoice.date) < self.year,
+                    )
                 invoices = invoices.filter(
                     or_(date_condition, reported_condition)
                 )
 
             invoice_sum = sum([invoice.ht for invoice in invoices])
 
-            cinvoices = self.request.context.get_cancelinvoices(valid=True).options(
+            cinvoices = self.request.context.get_cancelinvoices(
+                valid=True
+            ).options(
                 load_only('ht')
             )
 
@@ -193,13 +203,20 @@ class DisplayCommercialHandling(BaseView):
                 extract('month', CancelInvoice.date) == month,
                 CancelInvoice.financial_year == self.year,
             )
-            if month != 12:
+            if month not in (1, 12):
                 cinvoices = cinvoices.filter(date_condition)
             else:
-                reported_condition = and_(
-                    CancelInvoice.financial_year == self.year,
-                    extract('year', CancelInvoice.date) != self.year,
-                )
+                if month == 12:
+                    reported_condition = and_(
+                        CancelInvoice.financial_year == self.year,
+                        extract('year', CancelInvoice.date) > self.year,
+                    )
+                else:  # month=1
+                    reported_condition = and_(
+                        CancelInvoice.financial_year == self.year,
+                        extract('year', CancelInvoice.date) < self.year,
+                    )
+
                 cinvoices = cinvoices.filter(
                     or_(date_condition, reported_condition)
                 )

@@ -65,7 +65,14 @@
                 ${table_btn(url, u"Dupliquer", u"Dupliquer cette feuille", icon=u"tags")}
                 <% url = request.route_path('statistic', id=sheet.id, _query=dict(action='disable')) %>
                 <% label = sheet.active and u"Désactiver" or u"Activer" %>
-                ${table_btn(url, label, u"Ce modèle est-il toujours utilisé ?", icon=u"remove", css_class="btn-danger")}
+                <% icon = sheet.active and u'remove' or '' %>
+                <% css_class = sheet.active and u'btn-danger' or 'btn-success' %>
+                ${table_btn(url, label, u"Ce modèle est-il toujours utilisé ?", icon=icon, css_class=css_class)}
+                % if not sheet.active:
+                    <% url = request.route_path('statistic', id=sheet.id, _query=dict(action='delete')) %>
+                    <% label = u"Supprimer" %>
+                    ${table_btn(url, label, u"Définitivement supprimer ce modèle ?", icon=u"remove", css_class="btn-danger")}
+                % endif
             </td>
         </tr>
     % endfor

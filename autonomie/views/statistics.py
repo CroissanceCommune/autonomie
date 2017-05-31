@@ -62,6 +62,7 @@ from autonomie import forms
 from autonomie.views import (
     BaseView,
     DisableView,
+    DeleteView,
     DuplicateView,
     BaseRestView,
 )
@@ -244,6 +245,9 @@ def load_static_options(inspector):
 
 
 class StatisticDisableView(DisableView):
+    """
+    Sheet Disable view
+    """
     enable_msg = u"La feuille de statistiques a été activée"
     disable_msg = u"La feuille de statistiques a été désactivée"
     redirect_route = "statistics"
@@ -256,6 +260,14 @@ class StatisticDuplicateView(DuplicateView):
     message = u"La feuille de statistique a bien été dupliquée, vous pouvez \
 la modifier <a href='{0}'>Ici</a>"
     route_name = "statistic"
+
+
+class StatisticDeleteView(DeleteView):
+    """
+    Sheet Deletion view
+    """
+    delete_msg = u"La feuille de statistiques a bien été supprimée"
+    redirect_route = "statistics"
 
 
 class RestStatisticSheet(BaseRestView):
@@ -497,6 +509,12 @@ def includeme(config):
         StatisticDisableView,
         route_name="statistic",
         request_param="action=disable",
+        permission='edit_statistic',
+    )
+    config.add_view(
+        StatisticDeleteView,
+        route_name="statistic",
+        request_param="action=delete",
         permission='edit_statistic',
     )
 

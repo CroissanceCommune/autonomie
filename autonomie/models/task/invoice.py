@@ -86,7 +86,7 @@ class InvoiceService(object):
     """
     Service for invoice and cancelinvoice management
     """
-    def _get_next_official_number(year=None):
+    def _get_next_official_number(self, year=None):
         """
         Return the next available official number
 

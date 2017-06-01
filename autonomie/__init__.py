@@ -43,11 +43,16 @@ from autonomie.utils.security import (
     set_models_acls,
 )
 
-from autonomie.models.initialize import initialize_sql
+from autonomie_base.models.initialize import initialize_sql
+from autonomie.models import adjust_for_engine
+from autonomie.models.populate import populate_database
 from autonomie.models.config import get_config
 from autonomie.utils.avatar import get_groups
 from autonomie.utils.avatar import get_avatar
 from autonomie.utils.session import get_session_factory
+from autonomie.utils.filedepot import (
+    configure_filedepot,
+)
 
 
 AUTONOMIE_MODULES = (
@@ -155,41 +160,6 @@ def resolve(dotted_path):
     return DottedNameResolver().resolve(dotted_path)
 
 
-def add_static_views(config, settings):
-    """
-        Add the static views used in Autonomie
-    """
-    statics = settings.get('autonomie.statics', 'static')
-    config.add_static_view(
-        statics,
-        "autonomie:static",
-        cache_max_age=3600,
-    )
-
-
-def main(global_config, **settings):
-    """
-        Main function : returns a Pyramid WSGI application.
-    """
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    config = prepare_config(**settings)
-
-    dbsession = initialize_sql(engine)
-
-    config = base_configure(config, dbsession, **settings)
-    from autonomie.utils.filedepot import (
-        configure_filedepot,
-    )
-    configure_filedepot(settings)
-    config.configure_celery(global_config['__file__'])
-
-    config.commit()
-    # for i in config.introspector.get_category('permissions'):
-    #     print(i['introspectable'].discriminator)
-
-    return config.make_wsgi_app()
-
-
 def prepare_config(**settings):
     """
     Prepare the configuration object to setup the main application elements
@@ -210,6 +180,24 @@ def prepare_config(**settings):
     return config
 
 
+def setup_bdd(settings):
+    """
+    Configure the database:
+
+        - Intialize tables
+        - populate database with default values
+
+    :param obj settings: The ConfigParser object
+    :returns: The dbsession
+    :rtype: obj
+    """
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    adjust_for_engine(engine)
+    dbsession = initialize_sql(engine)
+    populate_database()
+    return dbsession
+
+
 def setup_services(config, settings):
     """
     Setup the services (pyramid_services) used in Autonomie
@@ -227,13 +215,27 @@ def setup_services(config, settings):
         config.register_service_factory(module, interface)
 
 
+def add_static_views(config, settings):
+    """
+        Add the static views used in Autonomie
+    """
+    statics = settings.get('autonomie.statics', 'static')
+    config.add_static_view(
+        statics,
+        "autonomie:static",
+        cache_max_age=3600,
+    )
+
+    # Static path for generated files (exports / pdfs ...)
+    tmp_static = settings.get('autonomie.tmp_static', 'autonomie:tmp')
+    config.add_static_view('cooked', tmp_static)
+
+
 def base_configure(config, dbsession, **settings):
     """
     All plugin and others configuration stuff
     """
     set_models_acls()
-    from autonomie.models.base import model_services_init
-    model_services_init()
     TraversalDbAccess.dbsession = dbsession
 
     # Application main configuration
@@ -282,6 +284,27 @@ def version():
     import pkg_resources
     version = pkg_resources.require(__name__)[0].version
     return version
+
+
+def main(global_config, **settings):
+    """
+    Main entry function
+
+    :returns: a Pyramid WSGI application.
+    """
+    config = prepare_config(**settings)
+
+    dbsession = setup_bdd(settings)
+
+    config = base_configure(config, dbsession, **settings)
+
+    configure_filedepot(settings)
+
+    config.configure_celery(global_config['__file__'])
+
+    config.commit()
+
+    return config.make_wsgi_app()
 
 
 __author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"

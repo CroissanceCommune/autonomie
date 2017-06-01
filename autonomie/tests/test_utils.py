@@ -38,11 +38,6 @@ from autonomie.utils.rest import (
     RestJsonRepr,
     RestError,
 )
-from autonomie.utils.ascii import (
-    force_ascii,
-    force_filename,
-)
-from autonomie.utils import date
 
 
 def test_merge_session_with_post():
@@ -52,6 +47,7 @@ def test_merge_session_with_post():
     merge_session_with_post(session, post)
     assert session.name == 'Dupont'
     assert "admin" in session.accounts
+
 
 def test_flatten_appstruct():
     appstruct = {'key1':'value1', 'key2': {'key3': 'value3'}}
@@ -91,16 +87,6 @@ def test_filesizeformat():
     assert(filesizeformat(1024, 1) == "1.0ko")
     assert(filesizeformat(1024*1024, 0) == "1Mo")
     assert(filesizeformat(1024*1024, 1) == "1.0Mo")
-
-
-def test_force_ascii():
-    assert force_ascii("éco") == u"eco"
-    assert force_ascii(5) == "5"
-    assert force_ascii(u"éco") == "eco"
-
-
-def test_force_filename():
-    assert force_filename(u"é' ';^") == u"e_"
 
 
 class DummyModel(dict):
@@ -147,10 +133,3 @@ def test_script_utils():
     args = {'--test': 'toto', '--': 'titi'}
     assert get_value(args, 'test', '') == 'toto'
     assert get_value(args, 'test1', 'test') == 'test'
-
-def test_str_to_date():
-    import datetime
-    assert date.str_to_date("12/11/2014") == datetime.datetime(2014, 11, 12)
-    assert date.str_to_date("12-11-2014") == datetime.datetime(2014, 11, 12)
-    assert date.str_to_date(None) == ""
-

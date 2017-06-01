@@ -26,7 +26,7 @@ import cStringIO as StringIO
 from pyramid.httpexceptions import HTTPNotFound
 
 from autonomie.export.utils import write_file_to_request
-from autonomie.models.job import (
+from autonomie_celery.models import (
     Job,
 )
 from autonomie.resources import job_js
@@ -125,13 +125,13 @@ def includeme(config):
     config.add_view(
         job_view,
         route_name='job',
-        renderer="/job.mako",
+        renderer="/celery/job.mako",
         permission='view',
     )
     config.add_view(
         JobList,
         route_name="jobs",
-        renderer="/jobs.mako",
+        renderer="/celery/jobs.mako",
         permission="admin",
     )
     config.add_view(

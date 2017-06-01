@@ -38,20 +38,15 @@ from webhelpers.html.builder import HTML
 from sqlalchemy import (
     or_,
     distinct,
-    func,
-    desc
-)
-from sqlalchemy.sql.expression import label
-from sqlalchemy.orm import (
-    RelationshipProperty,
 )
 from pyramid.httpexceptions import HTTPFound
 from pyramid.decorator import reify
 from genshi.template.eval import UndefinedError
-from sqla_inspect.ods import SqlaOdsExporter
+# from sqla_inspect.ods import SqlaOdsExporter
+from autonomie_celery.tasks.export import export_to_file
 
 from autonomie.models import files
-from autonomie.models.base import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.user import (
     User,
     UserDatas,
@@ -59,8 +54,8 @@ from autonomie.models.user import (
     SocialDocTypeOption,
     CompanyDatas,
     USERDATAS_FORM_GRIDS,
-    COMPANY_EMPLOYEE,
 )
+from autonomie_celery.models import FileGenerationJob
 from autonomie.models.files import (
     File,
 )
@@ -91,7 +86,7 @@ from autonomie.forms.user import (
 )
 from autonomie.views import (
     BaseListView,
-    BaseXlsView,
+    #   BaseXlsView,
     BaseCsvView,
     submit_btn,
     cancel_btn,
@@ -975,135 +970,46 @@ class UserDatasListView(UserDatasListClass, BaseListView):
     pass
 
 
-def add_o2m_headers_to_writer(writer, query):
-    """
-    Add column headers in the form "label 1",  "label 2" ... to be able to
-    insert the o2m related elements to a main model's table export (allow to
-    have 3 dimensionnal datas in a 2d array)
-
-    E.g : Userdatas objects have got a o2m relationship on DateDatas objects
-
-    Here we would add date 1, date 2... columns regarding the max number of
-    configured datas (if a userdatas has 5 dates, we will have 5 columns)
-    We fill the column with the value of an attribute of the DateDatas model
-    (that is handled by sqla_inspect thanks to the couple index + related_key
-    configuration)
-
-    The name of the attribute is configured using the "flatten" key in the
-    relationship's export configuration
-    """
-    new_headers = []
-    for header in writer.headers:
-        if isinstance(header['__col__'], RelationshipProperty):
-            if header['__col__'].uselist:
-                class_ = header['__col__'].mapper.class_
-                # On compte le nombre maximum d'objet lié que l'on rencontre
-                # dans la base
-                count = DBSESSION().query(
-                    label("nb", func.count(class_.id))
-                ).group_by(class_.userdatas_id).order_by(
-                    desc("nb")).first()
-                if count != None:
-                    count = count[0]
-                else:
-                    count = 0
-
-                # Pour les relations O2M qui ont un attribut flatten de
-                # configuré, On rajoute des colonnes "date 1" "date 2" dans
-                # notre sheet principale
-                for index in range(0, count):
-                    if 'flatten' in header:
-                        flatten_keys = header['flatten']
-                        if not hasattr(flatten_keys, '__iter__'):
-                            flatten_keys = [flatten_keys]
-
-                        for flatten_key, flatten_label in flatten_keys:
-                            new_header = {
-                                '__col__': header['__col__'],
-                                'label': u"%s %s %s" % (
-                                    header['label'],
-                                    flatten_label,
-                                    index + 1),
-                                'key': header['key'],
-                                'name': u"%s_%s_%s" % (
-                                    header['name'],
-                                    flatten_key,
-                                    index + 1
-                                ),
-                                'related_key': flatten_key,
-                                'index': index
-                            }
-                            new_headers.append(new_header)
-
-    writer.headers.extend(new_headers)
-    return writer
-
-
-def add_custom_datas_headers(writer, query):
-    """
-    Add custom headers that are not added through automation
-    """
-    # Compte analytique
-    query = DBSESSION().query(
-        func.count(COMPANY_EMPLOYEE.c.company_id).label('nb')
-    )
-    query = query.group_by(COMPANY_EMPLOYEE.c.account_id)
-    code_compta_count = query.order_by(desc("nb")).first()
-    if code_compta_count:
-        code_compta_count = code_compta_count[0]
-        for index in range(0, code_compta_count):
-            new_header = {
-                'label': "Compte_analytique {0}".format(index + 1),
-                'name': "code_compta_{0}".format(index + 1),
-            }
-            writer.add_extra_header(new_header)
-
-    return writer
-
-
-class UserDatasXlsView(UserDatasListClass, BaseXlsView):
-    """
-        Userdatas excel view
-    """
-    sheet_title = u"Gestion sociale"
+class UserDatasXlsView(UserDatasListClass, BaseListView):
+    """Userdatas excel view"""
     model = UserDatas
+    file_format = "xls"
+    filename = "gestion_sociale_"
 
-    @property
-    def filename(self):
-        return "gestion_social.xls"
-
-    def add_code_compta(self, writer, userdatas):
-        user_account = userdatas.user
-        if user_account:
-            datas = []
-            for company in user_account.companies:
-                datas.append(company.code_compta)
-            writer.add_extra_datas(datas)
-        return writer
+    def query(self):
+        return self.request.dbsession.query(distinct(UserDatas.id))
 
     def _build_return_value(self, schema, appstruct, query):
         """
         Return the streamed file object
         """
-        writer = self._init_writer()
-        writer = add_o2m_headers_to_writer(writer, query)
-        writer = add_custom_datas_headers(writer, query)
-        for item in self._stream_rows(query):
-            writer.add_row(item)
-            self.add_code_compta(writer, item)
+        job = FileGenerationJob()
+        job.set_owner(self.request.user.login)
+        self.request.dbsession.add(job)
+        self.request.dbsession.flush()
+        all_ids = [elem[0] for elem in query]
+        celery_job = export_to_file.delay(
+            job.id,
+            'userdatas',
+            all_ids,
+            self.filename,
+            self.file_format
+        )
 
-        write_file_to_request(self.request, self.filename, writer.render())
-        return self.request.response
+        logger.info(
+            u"The Celery Task {0} has been delayed, its result "
+            "sould be retrieved from the FileGenerationJob {1}".format(
+                celery_job.id, job.id
+            )
+        )
+
+        return HTTPFound(
+            self.request.route_path('job', id=job.id)
+        )
 
 
 class UserDatasOdsView(UserDatasXlsView):
-    writer = SqlaOdsExporter
-    sheet_title = u"Gestion sociale"
-    model = UserDatas
-
-    @property
-    def filename(self):
-        return "gestion_social.ods"
+    file_format = 'ods'
 
 
 class UserDatasCsvView(UserDatasListClass, BaseCsvView):
@@ -1132,11 +1038,11 @@ class UserDatasCsvView(UserDatasListClass, BaseCsvView):
         Return the streamed file object
         """
         writer = self._init_writer()
-        writer = add_o2m_headers_to_writer(writer, query)
-        writer = add_custom_datas_headers(writer, query)
+#        writer = add_o2m_headers_to_writer(writer, query)
+#        writer = add_custom_datas_headers(writer, query)
         for item in self._stream_rows(query):
             writer.add_row(item)
-            self.add_code_compta(writer, item)
+#            self.add_code_compta(writer, item)
 
         write_file_to_request(self.request, self.filename, writer.render())
         return self.request.response

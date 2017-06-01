@@ -29,8 +29,8 @@ from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import Integer
 
-from autonomie.models.base import default_table_args
-from autonomie.models.base import DBBASE
+from autonomie_base.models.base import default_table_args
+from autonomie_base.models.base import DBBASE
 from autonomie.forms import (
     get_hidden_field_conf,
     EXCLUDED,

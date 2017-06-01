@@ -29,7 +29,7 @@ from autonomie.forms.admin import (
     get_sequence_model_admin,
     build_config_appstruct,
 )
-from autonomie.utils.ascii import (
+from autonomie_base.utils.ascii import (
     camel_case_to_name,
 )
 from autonomie.views import (

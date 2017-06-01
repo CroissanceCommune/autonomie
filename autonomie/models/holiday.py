@@ -32,7 +32,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )

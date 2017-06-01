@@ -87,7 +87,7 @@ def upgrade():
     # Migration des donnees vers la nouvelle structure
     from alembic.context import get_bind
     conn = get_bind()
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     session = DBSESSION()
 
     # Expenses will be nodes

@@ -34,11 +34,11 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     default_table_args,
     DBBASE,
 )
-from autonomie.models.types import JsonEncodedList
+from autonomie_base.models.types import JsonEncodedList
 from autonomie.models.activity import Event
 
 

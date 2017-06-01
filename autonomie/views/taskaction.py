@@ -46,7 +46,7 @@ from autonomie.resources import (
     duplicate as duplicate_js,
 )
 
-from autonomie.utils.ascii import force_filename
+from autonomie_base.utils.ascii import force_filename
 from autonomie.utils.widgets import (
     Submit,
     ViewLink,

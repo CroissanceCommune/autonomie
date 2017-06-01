@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     from autonomie.models.activity import Attendance, Activity
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     from alembic.context import get_bind
 
     session = DBSESSION()

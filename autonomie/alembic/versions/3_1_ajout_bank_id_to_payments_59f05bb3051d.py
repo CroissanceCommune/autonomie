@@ -33,7 +33,7 @@ def upgrade():
         'tva',
         sa.Column('compte_a_payer', sa.String(125), default='')
     )
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     from autonomie.models.task import Payment
 
     session = DBSESSION()

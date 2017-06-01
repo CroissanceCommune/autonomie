@@ -40,7 +40,7 @@ def upgrade():
     from autonomie.models.task.estimation import EstimationLine
     from autonomie.models.task.invoice import InvoiceLine
     from autonomie.models.task.invoice import CancelInvoiceLine
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     # Adding some characters to the Lines
     for table in "estimation_line", "invoice_line", "cancelinvoice_line":
         op.alter_column(table, "unity", type_=sa.String(100))
@@ -58,7 +58,7 @@ def downgrade():
     from autonomie.models.task.estimation import EstimationLine
     from autonomie.models.task.invoice import InvoiceLine
     from autonomie.models.task.invoice import CancelInvoiceLine
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     for factory in (EstimationLine, InvoiceLine, CancelInvoiceLine):
         for line in factory.query():
             line.unity = translate_inverse(line.unity)

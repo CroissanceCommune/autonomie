@@ -13,7 +13,7 @@ down_revision = '3f746e901aa6'
 import logging
 from alembic import op
 import sqlalchemy as sa
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.task import (
         Invoice,
         CancelInvoice,

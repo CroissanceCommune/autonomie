@@ -41,8 +41,8 @@ from depot.fields.sqlalchemy import (
     _SQLAMutationTracker,
 )
 
-from autonomie.models.base import DBBASE, DBSESSION
-from autonomie.models.base import default_table_args
+from autonomie_base.models.base import DBBASE, DBSESSION
+from autonomie_base.models.base import default_table_args
 from autonomie.export.utils import detect_file_headers
 from autonomie.utils.filedepot import _to_fieldstorage
 

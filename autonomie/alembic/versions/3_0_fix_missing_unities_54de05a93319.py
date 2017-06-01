@@ -23,7 +23,7 @@ def upgrade():
         CancelInvoice,
         Invoice,
     )
-    from autonomie.models.base import (
+    from autonomie_base.models.base import (
         DBSESSION,
     )
 

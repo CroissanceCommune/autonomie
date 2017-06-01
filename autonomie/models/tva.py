@@ -43,8 +43,8 @@ from sqlalchemy.orm import (
 
 from autonomie.utils.html import clean_html
 from autonomie.forms.custom_types import AmountType
-from autonomie.models.base import DBBASE
-from autonomie.models.base import default_table_args
+from autonomie_base.models.base import DBBASE
+from autonomie_base.models.base import default_table_args
 
 
 TVA_GRID = (

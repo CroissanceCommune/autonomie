@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     from autonomie.models.workshop import WorkshopAction
     from alembic.context import get_bind
     session = DBSESSION()

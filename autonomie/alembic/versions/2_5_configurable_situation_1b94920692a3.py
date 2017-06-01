@@ -45,7 +45,7 @@ def upgrade():
     from autonomie.models.user import (
         CaeSituationOption,
     )
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     temp_dict = {}
     for key, value in SITUATION_OPTIONS:
         if key == "integre":

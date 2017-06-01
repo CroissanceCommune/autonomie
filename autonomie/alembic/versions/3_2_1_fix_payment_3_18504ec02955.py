@@ -18,7 +18,7 @@ def upgrade():
     from sqlalchemy import Date, cast
     from datetime import date
     from autonomie.models.task.invoice import Payment
-    from autonomie.models.base import DBSESSION as db
+    from autonomie_base.models.base import DBSESSION as db
 
     for payment in db().query(Payment).filter(cast(Payment.created_at, Date) == date.today()):
         try:

@@ -19,27 +19,16 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
-"""
-Customer query service
-"""
+
 from autonomie_base.models.base import DBSESSION
 
 
-class CustomerService(object):
+class UserService(object):
     @classmethod
-    def get_tasks(cls, instance, type_str=None):
-        from autonomie.models.task import Task
-        query = DBSESSION().query(Task)
-        query = query.filter_by(customer_id=instance.id)
-
-        if type_str is not None:
-            query = query.filter(Task.type_ == type_str)
-        else:
-            query = query.filter(
-                Task.type_.in_(('invoice', 'cancelinvoice', 'estimation'))
-            )
-        return query
-
-    @classmethod
-    def count_tasks(cls, instance):
-        return cls.get_tasks(instance).count()
+    def authenticate(cls, user_cls, login, password):
+        result = DBSESSION().query(user_cls).filter(
+            user_cls.login == login
+        ).first()
+        if result is not None and result.auth(password):
+            return result.id
+        return None

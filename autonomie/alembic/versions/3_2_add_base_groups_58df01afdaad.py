@@ -30,7 +30,7 @@ def upgrade():
     disable_listeners()
     op.add_column('task', sa.Column('date', sa.Date()))
     from autonomie.models.task import Task
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
 
     session = DBSESSION()
     for task in Task.query().filter(Task.type_!='manualinvoice'):

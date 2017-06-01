@@ -32,12 +32,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.util import classproperty
 
-from autonomie.utils.ascii import camel_case_to_name
+from autonomie_base.utils.ascii import camel_case_to_name
 from autonomie.forms import (
     get_hidden_field_conf,
     EXCLUDED,
 )
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )

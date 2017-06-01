@@ -42,7 +42,7 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     DBSESSION,
     default_table_args,
@@ -57,7 +57,7 @@ from autonomie.compute.expense import (
     ExpenseKmLineCompute,
 )
 
-from autonomie.models.types import PersistentACLMixin
+from autonomie_base.models.types import PersistentACLMixin
 from autonomie.models.statemachine import StateMachine
 from autonomie.models.node import Node
 

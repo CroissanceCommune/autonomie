@@ -28,7 +28,7 @@ from sqlalchemy import (
     Boolean,
     String,
 )
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )

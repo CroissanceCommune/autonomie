@@ -54,12 +54,12 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie.models.types import (
+from autonomie_base.models.types import (
     CustomDateType,
 )
 from autonomie.models.tva import Tva
-from autonomie.models.utils import get_current_timestamp
-from autonomie.models.base import (
+from autonomie_base.models.utils import get_current_timestamp
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
@@ -100,7 +100,7 @@ class TaskService(object):
             for line in group.lines:
                 tva_values.add(line.tva)
 
-        tvas = cls.models.Tva.query().filter(
+        tvas = Tva.query().filter(
             Tva.value.in_(list(tva_values))
         ).all()
         return dict([(tva.value, tva) for tva in tvas])

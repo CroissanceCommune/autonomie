@@ -37,7 +37,7 @@ def load_file_struct(filepath, filename):
 def upgrade():
     from autonomie.models.company import Company
     from autonomie.models.files import File
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     from alembic.context import get_bind
     from autonomie.models.config import ConfigFiles
 

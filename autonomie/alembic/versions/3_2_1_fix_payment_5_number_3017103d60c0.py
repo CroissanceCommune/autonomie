@@ -24,7 +24,7 @@ def format_remittance(value):
 
 def upgrade():
     from autonomie.models.task import Payment
-    from autonomie.models.base import DBSESSION as db
+    from autonomie_base.models.base import DBSESSION as db
 
     table = Payment.__tablename__
     op.execute(

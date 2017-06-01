@@ -26,8 +26,8 @@
     Regouping all models imports is necessary
     to allow the metadata.create_all function to work well
 """
-from base import DBBASE
-from base import DBSESSION
+from autonomie_base.models.base import DBBASE
+from autonomie_base.models.base import DBSESSION
 
 import activity
 import company
@@ -39,11 +39,22 @@ import tva
 import user
 import task
 import workshop
-import job
 import statistics
 import competence
 import sale_product
 import treasury
+
+
+def adjust_for_engine(engine):
+    """
+    Ajust the models definitions to fit the current database engine
+    :param obj engine: The current engine to be used
+    """
+    if engine.dialect.name == 'mysql':
+        # Mysql does case unsensitive comparison by default
+        user.User.__table__.c.login.type.collation = 'utf8_bin'
+
+
 __author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"
 __copyright__ = "Copyright 2012-2013, Croissance Commune"
 __license__ = "GPL"

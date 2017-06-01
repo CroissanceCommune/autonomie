@@ -24,7 +24,7 @@ def format_date(value):
 
 def upgrade():
 
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
 
 
     session = DBSESSION()

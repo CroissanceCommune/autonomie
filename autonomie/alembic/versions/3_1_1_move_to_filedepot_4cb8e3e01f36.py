@@ -25,7 +25,7 @@ def upgrade():
     from depot.fields.upload import UploadedFile
     from sqlalchemy import bindparam
 
-    from autonomie.models.base import DBSESSION, METADATA
+    from autonomie_base.models.base import DBSESSION, METADATA
 
     session = DBSESSION()
 

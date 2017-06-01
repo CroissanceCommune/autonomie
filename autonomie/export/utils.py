@@ -27,7 +27,7 @@ Export utilities:
 
     * Tools to build file responses (pdf, xls ...)
 """
-from autonomie.utils.ascii import (
+from autonomie_base.utils.ascii import (
         force_ascii,
         )
 import mimetypes

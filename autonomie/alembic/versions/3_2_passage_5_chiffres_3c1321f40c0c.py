@@ -22,7 +22,7 @@ def upgrade():
         PaymentLine,
     )
     from autonomie.models.treasury import TurnoverProjection
-    from autonomie.models.base import DBSESSION as db
+    from autonomie_base.models.base import DBSESSION as db
     models = (
         (DiscountLine, ("amount",),),
         (TaskLine, ("cost",),),

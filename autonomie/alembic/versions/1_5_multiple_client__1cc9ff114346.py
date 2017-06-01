@@ -20,7 +20,7 @@ def migrate_projects_to_multiple_clients():
     """
         move project's client to the manytomany relationship
     """
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     from autonomie.models.project import Project
     from autonomie.models.client import Client
     for proj in DBSESSION().query(Project):
@@ -37,7 +37,7 @@ def purge_line_type(factory):
     """
         Supprimer les lignes orphelines pour le type factory
     """
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     for line in factory.query():
         if line.task is None:
             DBSESSION().delete(line)

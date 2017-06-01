@@ -38,12 +38,12 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, backref
 
 from autonomie import forms
-from autonomie.models.types import (
+from autonomie_base.models.types import (
     ACLType,
     PersistentACLMixin,
     MutableList,
 )
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
@@ -95,7 +95,10 @@ class Node(DBBASE, PersistentACLMixin):
 
     parent_id = Column(
         ForeignKey('node.id'),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        },
     )
 
     children = relationship(
@@ -106,10 +109,14 @@ class Node(DBBASE, PersistentACLMixin):
             remote_side=[id],
             info={
                 'colanderalchemy': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
         ),
         cascade='all',
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': {'exclude': True},
+        },
     )
 
     type_ = Column(

@@ -45,7 +45,7 @@ from sqlalchemy.orm import (
 
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
     )

@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     from autonomie.models import user
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
 
     db = DBSESSION()
 

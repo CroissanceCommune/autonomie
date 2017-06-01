@@ -27,7 +27,7 @@ import sqlalchemy as sa
 
 
 def force_rename_table(old, new):
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     conn = DBSESSION.connection()
     if table_exists(old):
         if table_exists(new):
@@ -36,7 +36,7 @@ def force_rename_table(old, new):
 
 
 def table_exists(tbl):
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     conn = DBSESSION.connection()
     ret = False
     try:
@@ -59,7 +59,7 @@ def rename_column(tbl, column_name, name, type_=sa.Integer, nullable=False,
 
 
 def column_exists(tbl, column_name):
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     conn = DBSESSION.connection()
     ret = False
     try:

@@ -14,7 +14,7 @@ down_revision = '1cc9ff114346'
 from alembic import op
 import sqlalchemy as sa
 from autonomie.models.task.invoice import PaymentMode, Payment
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 
 
 def upgrade():

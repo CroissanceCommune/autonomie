@@ -26,7 +26,7 @@ from alembic import context
 import traceback
 import transaction
 
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models import DBBASE
 
 

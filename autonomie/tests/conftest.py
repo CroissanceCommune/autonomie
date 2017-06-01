@@ -192,7 +192,7 @@ def connection(request, settings):
     # to `rollback` after using `transaction.commit`...
     initialize_test_database(settings)
 
-    from autonomie.models.base import DBSESSION, DBBASE
+    from autonomie_base.models.base import DBSESSION, DBBASE
     engine = engine_from_config(settings, prefix='sqlalchemy.')
     _connection = engine.connect()
     DBSESSION.registry.clear()
@@ -268,7 +268,7 @@ def content(connection, settings):
     sets up some default content
     """
     from transaction import commit
-    from autonomie.models.base import DBBASE, DBSESSION
+    from autonomie_base.models.base import DBBASE, DBSESSION
     metadata = DBBASE.metadata
 
     metadata.drop_all(connection.engine)
@@ -292,7 +292,7 @@ def dbsession(config, content, connection, request):
     trans = connection.begin()          # begin a non-orm transaction
     request.addfinalizer(trans.rollback)
     request.addfinalizer(abort)
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     return DBSESSION()
 
 

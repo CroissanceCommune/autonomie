@@ -27,7 +27,7 @@
 """
 import sys
 
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.user import User, ADMIN_PRIMARY_GROUP, \
         MANAGER_PRIMARY_GROUP, CONTRACTOR_PRIMARY_GROUP
 from autonomie.models.company import Company

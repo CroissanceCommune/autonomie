@@ -52,12 +52,12 @@ from sqlalchemy.orm import (
 )
 
 from autonomie import forms
-from autonomie.models.types import (
+from autonomie_base.models.types import (
     CustomDateType,
     PersistentACLMixin,
 )
-from autonomie.models.utils import get_current_timestamp
-from autonomie.models.base import (
+from autonomie_base.models.utils import get_current_timestamp
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )

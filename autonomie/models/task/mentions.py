@@ -25,7 +25,7 @@ Modèle pour les mentions dans les devis et factures
 import deform
 import sqlalchemy as sa
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )

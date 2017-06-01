@@ -18,7 +18,7 @@ def update_database_structure():
     pass
 
 def migrate_datas():
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     session = DBSESSION()
     from alembic.context import get_bind
     conn = get_bind()

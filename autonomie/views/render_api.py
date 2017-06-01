@@ -32,7 +32,7 @@ from pyramid.security import has_permission as base_has_permission
 
 from autonomie.compute import math_utils
 
-from autonomie.utils.date import (
+from autonomie_base.utils.date import (
     format_date,
     format_short_date,
     format_long_date,

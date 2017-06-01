@@ -187,7 +187,7 @@ def upgrade():
             sa.ForeignKey('company.id'),
         )
     )
-    from autonomie.models.base import (
+    from autonomie_base.models.base import (
         DBSESSION,
     )
     session = DBSESSION()

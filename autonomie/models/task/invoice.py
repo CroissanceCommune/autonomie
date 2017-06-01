@@ -51,10 +51,10 @@ from sqlalchemy.orm import (
 )
 
 from autonomie import forms
-from autonomie.models.types import (
+from autonomie_base.models.types import (
     PersistentACLMixin,
 )
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBSESSION,
     DBBASE,
     default_table_args,

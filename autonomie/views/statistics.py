@@ -55,9 +55,9 @@ from autonomie.statistics import (
     MULTIDATE_OPTIONS,
 )
 from autonomie.utils import (
-    ascii,
     widgets,
 )
+from autonomie_base.utils import ascii
 from autonomie import forms
 from autonomie.views import (
     BaseView,

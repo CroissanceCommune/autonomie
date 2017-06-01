@@ -48,7 +48,7 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.schema import ColumnDefault
 
-from autonomie.utils import (
+from autonomie_base.utils import (
     ascii,
     date as date_utils,
 )

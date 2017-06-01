@@ -44,8 +44,8 @@ from sqlalchemy.orm import (
 )
 
 from autonomie import forms
-from autonomie.models.utils import get_current_timestamp
-from autonomie.models.types import (
+from autonomie_base.models.utils import get_current_timestamp
+from autonomie_base.models.types import (
     CustomDateType,
     PersistentACLMixin,
 )
@@ -55,7 +55,7 @@ from autonomie.models.options import (
 )
 from autonomie.models.services.company import CompanyService
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     DBSESSION,
     default_table_args,

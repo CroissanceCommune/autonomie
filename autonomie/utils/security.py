@@ -74,7 +74,7 @@ from autonomie.models.user import (
     User,
     UserDatas,
 )
-from autonomie.models.job import (
+from autonomie_celery.models import (
     Job,
 )
 from autonomie.models.statistics import (

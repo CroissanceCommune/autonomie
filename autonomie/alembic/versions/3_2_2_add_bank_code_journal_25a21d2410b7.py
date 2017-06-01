@@ -21,7 +21,7 @@ def upgrade():
     )
     req = "select config_value from config where config_name='receipts_code_journal';"
     from alembic.context import get_bind
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     conn = get_bind()
     res = conn.execute(req).scalar()
     if res is not None:

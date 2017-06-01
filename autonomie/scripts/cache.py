@@ -31,7 +31,7 @@ from autonomie.scripts.utils import (
 from autonomie.models.task import (
     Task,
 )
-from autonomie.models.base import DBSESSION as db
+from autonomie_base.models.base import DBSESSION as db
 from autonomie.models.task.task import cache_amounts
 
 

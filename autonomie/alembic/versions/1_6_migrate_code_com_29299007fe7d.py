@@ -14,7 +14,7 @@ import logging
 from alembic import op
 import sqlalchemy as sa
 
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.user import User
 
 

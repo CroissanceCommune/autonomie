@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     from autonomie.models import competence
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
 
     for comp in competence.CompetenceOption.query():
         req = comp.requirement

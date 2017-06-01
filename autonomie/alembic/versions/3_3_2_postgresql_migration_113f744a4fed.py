@@ -89,7 +89,7 @@ def update_database_structure():
             op.execute(line)
 
     from zope.sqlalchemy import mark_changed
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     session = DBSESSION()
     mark_changed(session)
 

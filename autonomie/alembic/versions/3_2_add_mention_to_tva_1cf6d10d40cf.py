@@ -20,7 +20,7 @@ def upgrade():
     op.add_column('tva', sa.Column('mention', sa.Text(), default=''))
 
     from autonomie.models.tva import Tva
-    from autonomie.models.base import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     session = DBSESSION()
     for tva in session.query(Tva):
         if tva.value <= 0:

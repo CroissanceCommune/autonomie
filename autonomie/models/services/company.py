@@ -30,7 +30,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import load_only
 from sqlalchemy.sql.expression import func
 
-from autonomie.models.base import DBSESSION
+from autonomie_base.models.base import DBSESSION
 
 
 class CompanyService(object):

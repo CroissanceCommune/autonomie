@@ -37,7 +37,7 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils.widgets import ViewLink
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.files import File
 from autonomie import forms
 from autonomie.forms.files import FileUploadSchema

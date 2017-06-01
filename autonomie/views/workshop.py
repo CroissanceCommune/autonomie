@@ -42,10 +42,10 @@ from pyramid.security import has_permission
 from js.deform import auto_need
 from js.jquery_timepicker_addon import timepicker_fr
 
+from autonomie_base.models.base import DBSESSION
 from autonomie.models import workshop as models
 from autonomie.models.activity import Attendance
 from autonomie.models import user
-from autonomie.models.base import DBSESSION
 from autonomie.utils.pdf import (
     render_html,
     write_pdf,

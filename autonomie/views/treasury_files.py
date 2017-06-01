@@ -51,11 +51,11 @@ from autonomie.views import (
     BaseListView,
 )
 from autonomie.models.company import Company
-from autonomie.models.job import MailingJob
+from autonomie_celery.models import MailingJob
 from autonomie.views.render_api import month_name
 from autonomie.mail import send_salary_sheet
-from autonomie.celery.tasks.task import async_mail_salarysheets
-from autonomie.utils.ascii import force_ascii
+from autonomie_celery.tasks.task import async_mail_salarysheets
+from autonomie_base.utils.ascii import force_ascii
 from autonomie.utils.files import (
     encode_path,
     decode_path,

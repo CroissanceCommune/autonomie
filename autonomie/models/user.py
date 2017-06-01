@@ -55,7 +55,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from autonomie.views import render_api
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBBASE,
     DBSESSION,
     default_table_args,
@@ -71,7 +71,7 @@ from autonomie.forms import (
     get_deferred_select,
     mail_validator,
 )
-from autonomie.models.types import (
+from autonomie_base.models.types import (
     JsonEncodedDict,
     PersistentACLMixin,
 )
@@ -79,7 +79,7 @@ from autonomie.models.options import (
     ConfigurableOption,
     get_id_foreignkey_col,
 )
-from autonomie.utils.date import str_to_date
+from autonomie_base.utils.date import str_to_date
 
 
 ADMIN_PRIMARY_GROUP = 1
@@ -1840,7 +1840,7 @@ SocialStatusOption.id',
         """
         Generate a user account for the given model
         """
-        from autonomie.utils.ascii import gen_random_string
+        from autonomie_base.utils.ascii import gen_random_string
         if self.situation_situation.is_integration:
             if self.user_id is None:
                 login = self.coordonnees_email1

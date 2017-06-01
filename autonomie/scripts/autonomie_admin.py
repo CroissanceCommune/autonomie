@@ -31,7 +31,7 @@ from autonomie.scripts.utils import (
     command,
     get_value,
 )
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.user import User
 
 

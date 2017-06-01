@@ -40,7 +40,7 @@ from deform import Form
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.models.base import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.project import (
     Project,
     Phase,

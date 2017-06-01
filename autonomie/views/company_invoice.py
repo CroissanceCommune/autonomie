@@ -40,7 +40,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import contains_eager
 from beaker.cache import cache_region
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     DBSESSION,
 )
 from autonomie.models.task import (

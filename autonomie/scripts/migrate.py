@@ -38,7 +38,7 @@ from alembic.environment import EnvironmentContext
 from alembic.util import load_python_file
 from alembic import autogenerate as autogen
 
-from autonomie.models import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from autonomie.scripts.utils import command
 
 SCRIPT_DIR = pkg_resources.resource_filename('autonomie', 'alembic')

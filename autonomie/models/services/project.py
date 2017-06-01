@@ -22,7 +22,7 @@
 """
 Query service related to projects
 """
-from autonomie.models.base import DBSESSION
+from autonomie_base.models.base import DBSESSION
 from sqlalchemy.sql.expression import func
 
 

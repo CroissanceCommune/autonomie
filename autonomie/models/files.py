@@ -49,12 +49,12 @@ from depot.fields.sqlalchemy import (
     _SQLAMutationTracker,
 )
 
-from autonomie.models.base import (
+from autonomie_base.models.base import (
     default_table_args,
     DBBASE,
     DBSESSION,
 )
-from autonomie.models.types import PersistentACLMixin
+from autonomie_base.models.types import PersistentACLMixin
 from autonomie.models.node import Node
 from autonomie.utils.filedepot import _to_fieldstorage
 from autonomie.export.utils import detect_file_headers

@@ -58,7 +58,7 @@ def upgrade():
 
     if not table_exists("manualinvoice"):
         force_rename_table('manual_invoice', 'manualinvoice')
-    from autonomie.models import DBSESSION
+    from autonomie_base.models.base import DBSESSION
     for manualinv in OldManualInvoice.query().all():
         m = ManualInvoice()
         m.montant_ht = manualinv.montant_ht

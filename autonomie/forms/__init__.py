@@ -530,7 +530,7 @@ class CustomSchemaNode(colander.SchemaNode):
         """
         Return the related object that have been configured
         """
-        from autonomie.models.base import DBSESSION
+        from autonomie_base.models.base import DBSESSION
         return DBSESSION().query(self.model).get(id)
 
 

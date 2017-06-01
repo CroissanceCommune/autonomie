@@ -73,7 +73,7 @@ from sqlalchemy import (
     func,
 )
 
-from autonomie.models.base import DBSESSION
+from autonomie_base.models.base import DBSESSION
 
 
 STRING_OPTIONS = (

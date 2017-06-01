@@ -66,3 +66,4 @@ deform_extensions==0.2.3
 filedepot==0.1.2
 pyramid_services
 Genshi==0.7
+autonomie_base

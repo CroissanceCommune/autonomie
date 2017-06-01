@@ -40,7 +40,7 @@ def get_groups(login, request):
     """
     user = request.user
     if user is None:
-        return []
+        return None
     res = []
     for group in user.groups:
         res.append('group:{0}'.format(group))
@@ -57,5 +57,5 @@ def get_avatar(request):
     if login is not None:
         log.info("  + Returning the user")
         query = request.dbsession.query(User).options(undefer_group('edit'))
-        user = query.filter_by(login=login).one()
+        user = query.filter_by(login=login).first()
         return user

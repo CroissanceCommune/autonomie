@@ -1012,40 +1012,8 @@ class UserDatasOdsView(UserDatasXlsView):
     file_format = 'ods'
 
 
-class UserDatasCsvView(UserDatasListClass, BaseCsvView):
-    """
-        Userdatas excel view
-    """
-    model = UserDatas
-
-    @property
-    def filename(self):
-        return "gestion_social.csv"
-
-    def add_code_compta(self, writer, userdatas):
-        user_account = userdatas.user
-        if user_account:
-            datas = {}
-            for index, company in enumerate(user_account.companies):
-                header_label = 'Compte_analytique {0}'.format(index + 1)
-
-                datas[header_label] = company.code_compta
-            writer.add_extra_datas(datas)
-        return writer
-
-    def _build_return_value(self, schema, appstruct, query):
-        """
-        Return the streamed file object
-        """
-        writer = self._init_writer()
-#        writer = add_o2m_headers_to_writer(writer, query)
-#        writer = add_custom_datas_headers(writer, query)
-        for item in self._stream_rows(query):
-            writer.add_row(item)
-#            self.add_code_compta(writer, item)
-
-        write_file_to_request(self.request, self.filename, writer.render())
-        return self.request.response
+class UserDatasCsvView(UserDatasXlsView):
+    file_format = 'csv'
 
 
 def user_view(request):

@@ -272,8 +272,8 @@ def content(connection, settings):
     metadata = DBBASE.metadata
 
     metadata.drop_all(connection.engine)
-    from autonomie.models.initialize import _adjust_for_engine
-    _adjust_for_engine(connection.engine)
+    from autonomie.models import adjust_for_engine
+    adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
 
     populate_db(DBSESSION())

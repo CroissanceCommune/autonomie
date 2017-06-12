@@ -59,4 +59,6 @@ def test_clean_html():
     "style=\"font-family: 'AGaramondPro'; color: rgb(0.217500%, "
     "0.530000%, 0.950000%);\">Test</span>")
 
-    assert clean_html(value) == "<span>Test</span>"
+    assert clean_html(value) == (
+        "<span style=\"font-family:"
+        " 'AGaramondPro';\">Test</span>")

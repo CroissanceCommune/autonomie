@@ -32,7 +32,7 @@ ALLOWED_HTML_ATTRS['font'] = ['color']
 ALLOWED_HTML_ATTRS['*'] = ['class', 'style']
 ALLOWED_HTML_ATTRS['img'] = ['src', 'width', 'height', 'alt']
 ALLOWED_CSS_STYLES = [
-    'color', 'text-align', 'font-weight', 'font-family', 'text-decoration',
+    'text-align', 'font-weight', 'font-family', 'text-decoration',
 ]
 
 

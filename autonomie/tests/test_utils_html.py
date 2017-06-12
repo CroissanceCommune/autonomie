@@ -27,6 +27,7 @@ from autonomie.utils.html import (
     strip_whitespace,
     strip_linebreaks,
     strip_void_lines,
+    clean_html,
 )
 
 
@@ -51,3 +52,11 @@ def test_strip_linebreaks():
 def test_strip_void_lines():
     value = "<div></div><p>toto</p><p> </p>"
     assert strip_void_lines(value) == "<div></div><p>toto</p>"
+
+
+def test_clean_html():
+    value = ("<span "
+    "style=\"font-family: 'AGaramondPro'; color: rgb(0.217500%, "
+    "0.530000%, 0.950000%);\">Test</span>")
+
+    assert clean_html(value) == "<span>Test</span>"

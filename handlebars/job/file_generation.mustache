@@ -1,6 +1,6 @@
 <div class='row'>
 <div class='col-md-6'>
-<h2>Import de données</h2>
+<h2>Génération de fichier</h2>
 <ul>
 <li>Identifiant de la tâche : {{ jobid }} </li>
 <li>Initialisée le : {{ created_at }} </li>
@@ -16,49 +16,45 @@
 </div>
 {{else}}
 
-{{#if failed}}
-<div class="text-center btn btn-danger">
-<i class="fa fa-warning fa-4x"></i>
-<br />
-<b>La génération de fichier a échoué</b>
-</div>
-{{else}}
-<script type='text/javascript'>
-window.open('/cooked/{{ filename }}' );
-window.history.back();
-</script>
-
+    {{#if failed}}
+    <div class="text-center btn btn-danger">
+        <i class="fa fa-warning fa-4x"></i>
+        <br />
+        <b>La génération de fichier a échoué</b>
+    </div>
+    {{else}}
+    <div class="text-center btn btn-success">
+        <i class="fa fa-check fa-4x"></i>
+        <br />
+        <b>L'import s'est déroulé avec succès</b>
+    </div>
+    {{/if}}
 {{/if}}
-{{/if}}
-</div>
+    </div>
 </div>
 <hr />
 {{^running}}
 <div class='row'>
-<div class='col-md-6'>
-<h4>Messages</h4>
-{{ message }}
-{{^has_message}}
-Aucun message n'a été retourné
-{{/has_message}}
-<h4>Erreurs</h4>
-{{ err_message }}
-{{^has_err_message }}
-Aucune erreur n'a été retournée
-{{/has_err_message }}
-</div>
-<div class='col-md-6'>
-<h4>Télécharger des données</h4>
-{{#has_unhandled_datas}}
-Télécharger les données du fichier qui n'ont pas été importées :
-<a class='btn btn-warning' href="{{url}}?action=unhandled.csv">Télécharger</a>
-{{/has_unhandled_datas}}
-<hr>
-{{#has_errors}}
-Télécharger les lignes du fichier contenant des erreurs :
-<a class='btn btn-danger' href="{{url}}?action=errors.csv">Télécharger</a>
-{{/has_errors}}
-</div>
+    <div class='col-md-6'>
+        <h4>Télécharger votre fichier</h4>
+        <a href="/cooked/{{ filename }}" target="_blank" class="btn btn-success btn-large">
+        <i class='glyphicon glyphicon-download'></i> Télécharger
+        </a>
+        <br />
+        <button class="btn btn-default" onclick="window.history.back();">Revenir en arrière</button>
+    </div>
+    <div class='col-md-6'>
+    <h4>Messages</h4>
+    {{ message }}
+    {{^has_message}}
+    Aucun message n'a été retourné
+    {{/has_message}}
+    <h4>Erreurs</h4>
+    {{ err_message }}
+    {{^has_err_message }}
+    Aucune erreur n'a été retournée
+    {{/has_err_message }}
+    </div>
 </div>
 {{/running}}
 

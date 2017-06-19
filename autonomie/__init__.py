@@ -227,7 +227,7 @@ def add_static_views(config, settings):
     )
 
     # Static path for generated files (exports / pdfs ...)
-    tmp_static = settings.get('autonomie.tmp_static', 'autonomie:tmp')
+    tmp_static = settings.get('autonomie.static_tmp', 'autonomie:tmp')
     config.add_static_view('cooked', tmp_static)
 
 

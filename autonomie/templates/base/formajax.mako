@@ -22,7 +22,7 @@
 </%doc>
 % if not message is UNDEFINED:
     <div class='text-center'>
-        <div class="alert alert-success">
+        <div id='msg-div' class="alert alert-success" tabindex='1'>
           <button class="close" data-dismiss="alert" type="button">×</button>
           ${api.clean_html(message)|n}
         </div>
@@ -31,3 +31,6 @@
 % if not form is UNDEFINED:
     ${form|n}
 % endif
+<script type='text/javascript'>
+    $('#msg-div').focus();
+</script>

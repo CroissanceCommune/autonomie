@@ -52,7 +52,7 @@ def job_view(context, request):
 
 def populate_actionmenu(request):
     request.actionmenu.add(
-        ViewLink(u"Liste des tâches", path="jobs", perm='admin')
+        ViewLink(u"Revenir en arrière", js="window.history.back()")
     )
 
 

@@ -443,3 +443,6 @@ input[name=altdate], input[name=date]{
   margin-bottom: 10px;
   padding-bottom: 10px;
 }
+.large-btn{
+  padding: 4px 50px;
+}

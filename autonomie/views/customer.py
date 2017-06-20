@@ -305,8 +305,13 @@ def customer_view(request):
         Return the view of a customer
     """
     populate_actionmenu(request, request.context)
-    return dict(title=u"Client : {0}".format(request.context.name),
-                customer=request.context)
+    return dict(
+        title=u"Client : {0} {1}".format(
+            request.context.get_label(),
+            request.context.code
+        ),
+        customer=request.context
+    )
 
 
 class CustomerAdd(BaseFormView):
@@ -378,6 +383,10 @@ class CustomerAdd(BaseFormView):
             # It's an add form
             model = self.schema.objectify(appstruct)
             model.company = self.context
+            if self.is_company_form():
+                model.type_ = "company"
+            else:
+                model.type_ = "individual"
             self.dbsession.add(model)
         else:
             # It's an edition one
@@ -529,7 +538,7 @@ def includeme(config):
     config.add_view(
         CustomerAdd,
         route_name='company_customers',
-        renderer='customer.mako',
+        renderer='customer_edit.mako',
         request_method='POST',
         permission='add_customer',
     )
@@ -537,7 +546,7 @@ def includeme(config):
     config.add_view(
         CustomerAdd,
         route_name='company_customers',
-        renderer='customer.mako',
+        renderer='customer_edit.mako',
         request_param='action=add',
         permission='add_customer',
     )
@@ -545,7 +554,7 @@ def includeme(config):
     config.add_view(
         CustomersListView,
         route_name='company_customers',
-        renderer='company_customers.mako',
+        renderer='customers.mako',
         request_method='GET',
         permission='list_customers',
     )
@@ -560,7 +569,7 @@ def includeme(config):
     config.add_view(
         CustomerEdit,
         route_name='customer',
-        renderer='customer.mako',
+        renderer='customer_edit.mako',
         request_param='action=edit',
         permission='edit_customer',
     )
@@ -568,7 +577,7 @@ def includeme(config):
     config.add_view(
         customer_view,
         route_name='customer',
-        renderer='customer_view.mako',
+        renderer='customer.mako',
         request_method='GET',
         permission='view_customer',
     )

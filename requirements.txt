@@ -62,7 +62,7 @@ pyramid-celery==3.0.0
 redis==2.10.5
 sqla_inspect==0.4
 Unidecode==0.04.17
-deform_extensions==0.2.3
+deform_extensions==0.2.4
 filedepot==0.1.2
 pyramid_services
 Genshi==0.7

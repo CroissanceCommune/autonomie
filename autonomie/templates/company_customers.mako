@@ -38,12 +38,53 @@ args = request.GET
 url = request.route_path('customers.csv', id=request.context.id, _query=args)
 %>
 <a class='btn btn-default pull-right' href='${url}' title="Export au formt csv"><i class='fa fa-file'></i>CSV</a>
+
+% if api.has_permission('add_customer'):
+        <button class='btn btn-success' data-target="#customer-forms" aria-expanded="false" aria-controls="customer-forms" data-toggle='collapse'>
+            <i class='glyphicon glyphicon-plus'></i>
+            Ajouter un client
+        </button>
+        <a class='btn btn-default' href="${request.route_path('company_customers_import_step1', id=request.context.id)}">
+            Importer des clients
+        </a>
+
+        <div class='collapse' id="customer-forms">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#companyForm" aria-controls="company" role="tab" data-toggle="tab">Client institutionnel</a>
+                </li>
+                <li role="presentation">
+                    <a href="#individualForm" aria-controls="individual" role="tab" data-toggle="tab">Client particulier</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+
+                <div role="tabpanel" class="tab-pane active row" id="companyForm">
+                    <div class='col-xs-12 col-lg-6'>
+                        <div class='container'>
+                            <h2>${forms[0][0]}</h2>
+                            ${forms[0][1].render()|n}
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane row" id="individualForm">
+                    <div class='col-xs-12'>
+                        <div class='container'>
+                            <h2>${forms[1][0]}</h2>
+                            ${forms[1][1].render()|n}
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    <hr />
+% endif
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>
             <th class="visible-lg">${sortable("Code", "code")}</th>
             <th>${sortable("Entreprise", "name")}</th>
-            <th class="visible-lg">${sortable("Nom du contact principal", "contactLastName")}</th>
+            <th class="visible-lg">${sortable("Nom du contact principal", "lastname")}</th>
             <th class="actions">Actions</th>
         </tr>
     </thead>
@@ -55,7 +96,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                     <% onclick = "document.location='{url}'".format(url=url) %>
                     <td onclick="${onclick}" class="visible-lg rowlink" >${customer.code}</td>
                     <td onclick="${onclick}" class="rowlink" >${customer.name}</td>
-                    <td onclick="${onclick}" class="visible-lg rowlink" >${customer.contactLastName} ${customer.contactFirstName}</td>
+                    <td onclick="${onclick}" class="visible-lg rowlink" >${customer.lastname} ${customer.firstname}</td>
                     <td class="actions">
                         % for btn in item_actions:
                             ${btn.render(request, customer)|n}

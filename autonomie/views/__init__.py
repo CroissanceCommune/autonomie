@@ -490,7 +490,8 @@ class BaseFormView(FormView):
         form = self.form_class(
             self.schema,
             buttons=self.buttons,
-            use_ajax=use_ajax, ajax_options=ajax_options,
+            use_ajax=use_ajax,
+            ajax_options=ajax_options,
             **dict(self.form_options)
         )
         self.before(form)

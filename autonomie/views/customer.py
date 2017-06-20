@@ -39,17 +39,18 @@ from pyramid.security import has_permission
 
 from autonomie.models.customer import (
     Customer,
-    FORM_GRID,
+    COMPANY_FORM_GRID,
+    INDIVIDUAL_FORM_GRID,
 )
 from autonomie.utils.widgets import (
     ViewLink,
     StaticWidget,
-    PopUp,
     ItemActionLink,
 )
 from autonomie.forms.customer import (
     get_list_schema,
-    get_customer_schema,
+    get_company_customer_schema,
+    get_individual_customer_schema,
 )
 from deform_extensions import GridFormWidget
 from autonomie.views import (
@@ -66,14 +67,42 @@ from autonomie.views.csv_import import (
 logger = log = logging.getLogger(__name__)
 
 
-def get_customer_form(request):
+def get_company_customer_form(request, counter=None):
     """
-        Returns the customer add/edit form
+    Returns the customer add/edit form
+    :param obj request: Pyramid's request object
+    :param obj counter: An iterator for field number generation
+    :returns: a deform.Form instance
     """
-    schema = get_customer_schema(request)
+    schema = get_company_customer_schema(request)
     schema = schema.bind(request=request)
-    form = Form(schema, buttons=(submit_btn,))
-    form.widget = GridFormWidget(grid=FORM_GRID)
+    form = Form(
+        schema,
+        buttons=(submit_btn,),
+        counter=counter,
+        formid='company',
+    )
+    form.widget = GridFormWidget(named_grid=COMPANY_FORM_GRID)
+    return form
+
+
+def get_individual_customer_form(request, counter=None):
+    """
+    Return a form for an individual customer
+    :param obj request: Pyramid's request object
+    :param obj counter: An iterator for field number generation
+    :returns: a deform.Form instance
+    """
+    schema = get_individual_customer_schema(request)
+
+    schema = schema.bind(request=request)
+    form = Form(
+        schema,
+        buttons=(submit_btn,),
+        counter=counter,
+        formid='individual'
+    )
+    form.widget = GridFormWidget(named_grid=INDIVIDUAL_FORM_GRID)
     return form
 
 
@@ -86,7 +115,7 @@ class CustomersListTools(object):
     sort_columns = {
         'name': Customer.name,
         "code": Customer.code,
-        "contactLastName": Customer.contactLastName,
+        "lastname": Customer.lastname,
     }
 
     def query(self):
@@ -106,7 +135,7 @@ class CustomersListTools(object):
         if search:
             records = records.filter(
                 or_(Customer.name.like("%" + search + "%"),
-                    Customer.contactLastName.like("%" + search + "%")))
+                    Customer.lastname.like("%" + search + "%")))
         return records
 
 
@@ -114,25 +143,29 @@ class CustomersListView(CustomersListTools, BaseListView):
     """
     Customer listing view
     """
-    add_template_vars = ('item_actions', 'title', )
+    add_template_vars = (
+        'item_actions',
+        'title',
+        'forms',
+    )
+
+    @property
+    def forms(self):
+        res = []
+        form_title = u"Ajouter un client institutionnel"
+        form = get_company_customer_form(self.request)
+        res.append((form_title, form))
+        field_counter = form.counter
+        form_title = u"Ajouter un client particulier"
+        form = get_individual_customer_form(self.request, field_counter)
+        res.append((form_title, form))
+        return res
 
     def populate_actionmenu(self, appstruct):
         """
         Populate the actionmenu regarding the user's rights
         """
         populate_actionmenu(self.request, self.context)
-        if self.request.has_permission('add_customer', self.request.context):
-            form = get_customer_form(self.request)
-            popup = PopUp("addform", u'Ajouter un client', form.render())
-            self.request.popups = {popup.name: popup}
-            self.request.actionmenu.add(popup.open_btn())
-
-            link = ViewLink(
-                u"Importer des clients",
-                path='company_customers_import_step1',
-                id=self.context.id,
-            )
-            self.request.actionmenu.add(link)
 
         self.request.actionmenu.add(self._get_archived_btn(appstruct))
 
@@ -287,9 +320,20 @@ class CustomerAdd(BaseFormView):
     validation_msg = u"Le client a bien été ajouté"
 
     @property
+    def form_options(self):
+        return (('formid', self.request.POST.get('__formid__')),)
+
+    @property
     def customers(self):
         codes = self.context.get_customer_codes_and_names()
         return codes
+
+    def is_company_form(self):
+        """
+        :returns: True if it's a company customer add
+        :rtype: bool
+        """
+        return self.request.POST.get('__formid__') == 'company'
 
     # Schema is here a property since we need to build it dynamically regarding
     # the current request (the same should have been built using the after_bind
@@ -300,7 +344,10 @@ class CustomerAdd(BaseFormView):
         The getter for our schema property
         """
         if self._schema is None:
-            self._schema = get_customer_schema(self.request)
+            if self.is_company_form():
+                self._schema = get_company_customer_schema(self.request)
+            else:
+                self._schema = get_individual_customer_schema(self.request)
         return self._schema
 
     @schema.setter
@@ -314,10 +361,14 @@ class CustomerAdd(BaseFormView):
 
     def before(self, form):
         populate_actionmenu(self.request, self.context)
-        form.widget = GridFormWidget(grid=FORM_GRID)
+
+        if self.is_company_form():
+            grid = COMPANY_FORM_GRID
+        else:
+            grid = INDIVIDUAL_FORM_GRID
+        form.widget = GridFormWidget(named_grid=grid)
 
     def submit_success(self, appstruct):
-
         if self.context.__name__ == 'company':
             # It's an add form
             model = self.schema.objectify(appstruct)

@@ -25,7 +25,6 @@
 """
     Customer handling forms schemas
 """
-import deform
 import colander
 from colanderalchemy import SQLAlchemySchemaNode
 
@@ -43,8 +42,26 @@ def get_list_schema():
         colander.SchemaNode(
             colander.Boolean(),
             name='archived',
+            label=u"Inclure les clients archivés",
             missing=False,
-            widget=deform.widget.HiddenWidget())
+        )
+    )
+    schema.add(
+        colander.SchemaNode(
+            colander.Boolean(),
+            name='individual',
+            label=u"Inclure les particuliers",
+            default=True,
+        )
+    )
+    schema.add(
+        colander.SchemaNode(
+            colander.Boolean(),
+            name='company',
+            label=u"Inclure les personnes morales \
+(entreprises, association ...)",
+            default=True,
+        )
     )
     return schema
 

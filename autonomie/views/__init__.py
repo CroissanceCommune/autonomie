@@ -48,6 +48,7 @@ from webhelpers import paginate
 from sqla_inspect.csv import SqlaCsvExporter
 from sqla_inspect.excel import SqlaXlsExporter
 from sqla_inspect.ods import SqlaOdsExporter
+from autonomie.compute.math_utils import convert_to_int
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils import rest
 
@@ -191,7 +192,10 @@ class BaseListClass(BaseView):
             try:
                 submitted = self.request.GET.items()
                 form = self.get_form(schema)
-                appstruct = form.validate(submitted)
+                if submitted:
+                    appstruct = form.validate(submitted)
+                else:
+                    appstruct = form.cstruct
             except deform.ValidationFailure as e:
                 # If values are not valid, we want the default ones to be
                 # provided see the schema definition
@@ -260,16 +264,12 @@ class BaseListView(BaseListClass):
         # Url builder for page links
         from functools import partial
         page_url = partial(get_page_url, request=self.request)
-        current_page = appstruct['page']
-        items_per_page = appstruct['items_per_page']
+        current_page = convert_to_int(appstruct['page'])
+        items_per_page = convert_to_int(appstruct['items_per_page'])
         return paginate.Page(query,
                              current_page,
                              url=page_url,
                              items_per_page=items_per_page)
-
-    def get_rendered_form(self, schema, appstruct):
-        form = self.get_form(schema)
-        return form.render(appstruct)
 
     def more_template_vars(self, response_dict):
         """
@@ -297,9 +297,14 @@ class BaseListView(BaseListClass):
         records = self._paginate(query, appstruct)
         result = dict(records=records)
         if self.error is not None:
+            result['form_object'] = self.error
             result['form'] = self.error.render()
         else:
-            result['form'] = self.get_rendered_form(schema, appstruct)
+            form = self.get_form(schema)
+            if appstruct:
+                form.set_appstruct(appstruct)
+            result['form_object'] = form
+            result['form'] = form.render()
 
         result['title'] = self.title
         result.update(self.more_template_vars(result))

@@ -113,15 +113,21 @@ class PhaseSchema(colander.MappingSchema):
 
 
 def get_list_schema():
+    """
+    Return the schema for the project search form
+    :rtype: colander.Schema
+    """
     schema = forms.lists.BaseListsSchema().clone()
 
     schema['search'].description = u"Projet ou nom du client"
 
-    schema.add(colander.SchemaNode(
-        colander.Boolean(),
-        name='archived',
-        missing=False,
-        widget=deform.widget.HiddenWidget())
+    schema.add(
+        colander.SchemaNode(
+            colander.Boolean(),
+            name='archived',
+            label=u"Inclure les projets archivés",
+            missing=False,
+        )
     )
 
     return schema

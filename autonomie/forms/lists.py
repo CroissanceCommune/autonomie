@@ -68,6 +68,7 @@ def deferred_items_per_page_validator(node, kw):
         Return a fake validator that only set a cookie in the session
     """
     req = kw['request']
+
     def set_cookie(node, value):
         req.response.set_cookie("items_per_page", str(value))
         req.cookies['items_per_page'] = str(value)
@@ -85,31 +86,37 @@ class BaseListsSchema(colander.Schema):
         colander.String(),
         missing=u'',
         widget=deform.widget.TextInputWidget(
-        css_class='input-medium search-query')
-        )
+            css_class='input-medium search-query'
+        ),
+        default=u'',
+    )
     items_per_page = colander.SchemaNode(
         colander.Integer(),
-        missing=deferred_items_per_page,
         widget=deform.widget.SelectWidget(
             values=ITEMS_PER_PAGE_OPTIONS,
             css_class="input-small",
         ),
         validator=deferred_items_per_page_validator,
-        )
+        missing=deferred_items_per_page,
+        default=deferred_items_per_page,
+    )
     page = colander.SchemaNode(
         colander.Integer(),
         widget=deform.widget.HiddenWidget(),
         missing=0,
-        )
+        default=0,
+    )
     sort = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.HiddenWidget(),
         missing=deferred_default_sort,
+        default=deferred_default_sort,
         validator=deferred_sort_validator,
-        )
+    )
     direction = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.HiddenWidget(),
         missing=deferred_default_direction,
         validator=colander.OneOf(['asc', 'desc']),
-        )
+        default='asc',
+    )

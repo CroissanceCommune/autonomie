@@ -46,7 +46,7 @@ class CustomerService(object):
         return cls.get_tasks(instance).count()
 
     @classmethod
-    def format_customer_name(cls, instance):
+    def format_name(cls, instance):
         """
         Format the name of a customer regarding the available datas
         :param obj customer: A Customer instance
@@ -54,10 +54,11 @@ class CustomerService(object):
         """
         res = u""
         if instance.civilite:
+            print("civilite is not none")
             res += u"{0} ".format(format_civilite(instance.civilite))
-        res += instance.lastname
-        if instance.firstname:
-            res += u" {0}".format(instance.firstname)
+            res += instance.lastname
+            if instance.firstname:
+                res += u" {0}".format(instance.firstname)
         return res
 
     @classmethod
@@ -71,7 +72,7 @@ class CustomerService(object):
         if instance.type_ == 'company':
             return instance.name
         else:
-            return cls.format_customer_name(instance)
+            return cls.format_name(instance)
 
     @classmethod
     def get_address(cls, instance):
@@ -83,9 +84,14 @@ class CustomerService(object):
         """
         address = u""
         if instance.type_ == 'company':
-            address += "{0}\n".format(instance.name)
-        address += "{0}\n".format(cls.format_customer_name(instance))
-        address += "{0} {city}".format(instance.zip_code, instance.city)
+            address += u"{0}\n".format(instance.name)
+        name = cls.format_name(instance)
+        print("We've got a name")
+        if name:
+            address += u"{0}\n".format(name)
+
+        address += u"{0}\n".format(instance.address)
+        address += u"{0} {1}".format(instance.zip_code, instance.city)
 
         country = instance.country
         if country is not None and country.lower() != "france":

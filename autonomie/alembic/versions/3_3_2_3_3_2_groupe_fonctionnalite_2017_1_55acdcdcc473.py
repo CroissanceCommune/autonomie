@@ -53,6 +53,11 @@ def migrate_datas():
     session = DBSESSION()
     from alembic.context import get_bind
     conn = get_bind()
+    from autonomie.models.customer import Customer
+    for cust in Customer.query():
+        cust.type_ = 'company'
+        DBSESSION().merge(cust)
+
 
 def upgrade():
     update_database_structure()
@@ -60,7 +65,7 @@ def upgrade():
 
 
 def downgrade():
-    for col in ('civilite', 'mobile', ): #'type_'):
+    for col in ('civilite', 'mobile', 'type_'):
         op.drop_column('customer', col)
     rename_column(
         "customer",

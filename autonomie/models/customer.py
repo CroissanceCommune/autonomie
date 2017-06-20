@@ -353,6 +353,7 @@ class Customer(DBBASE, PersistentACLMixin):
             info={
                 'colanderalchemy': {'title': u"TVA intracommunautaire"},
             },
+            default='',
         ),
         group='edit',
     )
@@ -462,7 +463,7 @@ class Customer(DBBASE, PersistentACLMixin):
             id=self.id,
             code=self.code,
             comments=self.comments,
-            intraTVA=self.intraTVA,
+            tva_intracomm=self.tva_intracomm,
             address=self.address,
             zip_code=self.zip_code,
             city=self.city,
@@ -497,10 +498,13 @@ class Customer(DBBASE, PersistentACLMixin):
         return self.archived and not self.has_tasks()
 
     def is_company(self):
-        return self._autonomie_service.is_company(self)
+        return self.type_ == 'company'
 
     def get_label(self):
         return self._autonomie_service.get_label(self)
+
+    def get_name(self):
+        return self._autonomie_service.format_name(self)
 
 
 COMPANY_FORM_GRID = (

@@ -27,6 +27,7 @@
 """
 import logging
 import datetime
+import colander
 from deform import (
     Form,
     ValidationFailure,
@@ -69,7 +70,7 @@ from autonomie.views import (
     submit_btn,
 )
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 
 # Here we do some multiple function stuff to allow caching to work
@@ -167,11 +168,13 @@ class GlobalInvoicesList(BaseListView):
         Return the company_id found in the appstruct
         Should be overriden if we want a company specific list view
         """
-        return appstruct.get('company_id')
+        res = appstruct.get('company_id')
+        logger.debug("Company id : %s" % res)
+        return res
 
     def filter_company(self, query, appstruct):
         company_id = self._get_company_id(appstruct)
-        if company_id is not None:
+        if company_id not in (None, colander.null):
             query = query.filter(Task.company_id == company_id)
         return query
 
@@ -186,11 +189,11 @@ class GlobalInvoicesList(BaseListView):
 
     def filter_ttc(self, query, appstruct):
         ttc = appstruct.get('ttc', {})
-        if ttc.get('start') is not None:
+        if ttc.get('start') not in (None, colander.null):
             log.info(u"Filtering by ttc amount : %s" % ttc)
             start = ttc.get('start')
             end = ttc.get('end')
-            if end is None:
+            if end in (None, colander.null):
                 query = query.filter(Task.ttc >= start)
             else:
                 query = query.filter(Task.ttc.between(start, end))
@@ -198,16 +201,16 @@ class GlobalInvoicesList(BaseListView):
 
     def filter_customer(self, query, appstruct):
         customer_id = appstruct['customer_id']
-        if customer_id != -1:
+        if customer_id not in (-1, colander.null, '-1'):
             query = query.filter(Task.customer_id == customer_id)
         return query
 
     def filter_date(self, query, appstruct):
         period = appstruct.get('period', {})
-        if period.get('start'):
+        if period.get('start') not in (None, colander.null):
             start = period.get('start')
             end = period.get('end')
-            if end is None:
+            if end in (None, colander.null):
                 end = datetime.date.today()
             query = query.filter(Task.date.between(start, end))
 

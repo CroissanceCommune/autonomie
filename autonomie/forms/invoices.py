@@ -351,6 +351,7 @@ def get_list_schema(is_admin=False):
             widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
             validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
             missing='both',
+            default='both',
         )
     )
 
@@ -362,6 +363,7 @@ def get_list_schema(is_admin=False):
             widget=deform.widget.SelectWidget(values=TYPE_OPTIONS),
             validator=colander.OneOf([s[0] for s in TYPE_OPTIONS]),
             missing='both',
+            default='both',
         )
     )
 
@@ -373,7 +375,7 @@ def get_list_schema(is_admin=False):
             company.company_node(
                 name='company_id',
                 missing=colander.drop,
-                widget_options={'default': ('', u'Toutes les entreprises')}
+                widget_options={'default': ('', u'Toutes les entreprises')},
             )
         )
 

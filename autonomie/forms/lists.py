@@ -118,5 +118,5 @@ class BaseListsSchema(colander.Schema):
         widget=deform.widget.HiddenWidget(),
         missing=deferred_default_direction,
         validator=colander.OneOf(['asc', 'desc']),
-        default='asc',
+        default=deferred_default_direction,
     )

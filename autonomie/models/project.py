@@ -80,12 +80,14 @@ def build_customer_value(customer=None):
         return ("0", u"Sélectionnez")
 
 
-def build_customer_values(customers):
+def build_customer_values(customers, default=True):
     """
         Build human understandable customer labels
         allowing efficient discrimination
     """
-    options = [build_customer_value()]
+    options = []
+    if default:
+        options.append(build_customer_value())
     options.extend(
         [build_customer_value(customer) for customer in customers]
     )

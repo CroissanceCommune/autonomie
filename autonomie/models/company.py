@@ -466,18 +466,19 @@ def company_node(**kw):
 # Customer node related tools
 @colander.deferred
 def deferred_fullcustomer_list_widget(node, kw):
+    from autonomie.models.project import build_customer_values
     values = [('', u"Tous les clients")]
     for comp in Company.query():
         values.append(
             deform.widget.OptGroup(
                 comp.name,
-                *[(cust.id, cust.name) for cust in comp.customers]
+                *build_customer_values(comp.customers, default=False)
             )
         )
     return deform.widget.Select2Widget(
         values=values,
         placeholder=u"Sélectionner un client"
-        )
+    )
 
 
 @colander.deferred
@@ -523,4 +524,5 @@ def customer_node(is_admin=False):
         widget=deferred_customer_widget,
         validator=deferred_customer_validator,
         missing=-1,
+        default=-1
     )

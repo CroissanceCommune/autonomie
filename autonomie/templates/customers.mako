@@ -28,8 +28,6 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='actionmenu'>
 ## We place the search form in the actionmenu since there are a few fields
-    <% request.actionmenu.add(form) %>
-    ${request.actionmenu.render(request)|n}
 </%block>
 <%block name='content'>
 <%
@@ -49,12 +47,13 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
         </a>
 
         <div class='collapse' id="customer-forms">
+            <h2>Ajouter un client</h2>
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active">
-                    <a href="#companyForm" aria-controls="company" role="tab" data-toggle="tab">Client institutionnel</a>
+                <a href="#companyForm" aria-controls="company" role="tab" data-toggle="tab">Personne morale</a>
                 </li>
                 <li role="presentation">
-                    <a href="#individualForm" aria-controls="individual" role="tab" data-toggle="tab">Client particulier</a>
+                <a href="#individualForm" aria-controls="individual" role="tab" data-toggle="tab">Personne physique</a>
                 </li>
             </ul>
             <div class="tab-content">
@@ -62,15 +61,15 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                 <div role="tabpanel" class="tab-pane active row" id="companyForm">
                     <div class='col-xs-12 col-lg-6'>
                         <div class='container'>
-                            <h2>${forms[0][0]}</h2>
+                            <h3>${forms[0][0]|n}</h3>
                             ${forms[0][1].render()|n}
                         </div>
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane row" id="individualForm">
-                    <div class='col-xs-12'>
+                    <div class='col-xs-12 col-lg-6'>
                         <div class='container'>
-                            <h2>${forms[1][0]}</h2>
+                            <h3>${forms[1][0]|n}</h3>
                             ${forms[1][1].render()|n}
                         </div>
                     </div>
@@ -79,6 +78,34 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
     </div>
     <hr />
 % endif
+<a class="btn btn-default large-btn
+    % if '__formid__' in request.GET:
+        btn-primary
+    % endif
+    " href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
+    <i class='glyphicon glyphicon-filter'></i>&nbsp;
+    Filtres&nbsp;
+    <i class='glyphicon glyphicon-chevron-down'></i>
+</a>
+% if '__formid__' in request.GET:
+    <span class='help-text'>
+        <small><i>Des filtres sont actifs</i></small>
+    </span>
+% endif
+<hr/>
+    <div class='collapse' id='filter-form'>
+        <div class='row'>
+            <div class='col-xs-12'>
+            % if '__formid__' in request.GET:
+                <a href="${request.current_route_path(_query={})}">Supprimer tous les filtres</a>
+                <br />
+                <br />
+            %endif
+                ${form|n}
+            </div>
+        </div>
+<hr/>
+    </div>
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>

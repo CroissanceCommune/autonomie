@@ -27,7 +27,10 @@
 """
 import logging
 
-from sqlalchemy import or_
+from sqlalchemy import (
+    or_,
+    not_,
+)
 from sqlalchemy.orm import undefer_group
 from webhelpers.html.builder import HTML
 
@@ -123,15 +126,25 @@ class CustomersListTools(object):
         return Customer.query().filter_by(company_id=company.id)
 
     def filter_archived(self, query, appstruct):
-        archived = appstruct['archived']
-        query = query.filter_by(archived=archived)
+        archived = appstruct.get('archived')
+        if archived is False:
+            query = query.filter_by(archived=False)
+        return query
+
+    def filter_type(self, query, appstruct):
+        individual = appstruct.get('individual')
+        company = appstruct.get('company')
+        if not individual:
+            query = query.filter(not_(Customer.type_ == 'individual'))
+        if not company:
+            query = query.filter(not_(Customer.type_ == 'company'))
         return query
 
     def filter_name_or_contact(self, records, appstruct):
         """
         Filter the records by customer name or contact lastname
         """
-        search = appstruct['search']
+        search = appstruct.get('search')
         if search:
             records = records.filter(
                 or_(Customer.name.like("%" + search + "%"),
@@ -148,26 +161,30 @@ class CustomersListView(CustomersListTools, BaseListView):
         'title',
         'forms',
     )
+    grid = (
+        (
+            ('search', 3),
+        ),
+        (
+            ('archived', 3), ('individual', 2), ('company', 2),
+        ),
+        (
+            ('items_per_page', 2),
+        ),
+    )
 
     @property
     def forms(self):
         res = []
-        form_title = u"Ajouter un client institutionnel"
+        form_title = u"Personne morale \
+<small>(entreprise, administration, association ...)</small>"
         form = get_company_customer_form(self.request)
         res.append((form_title, form))
         field_counter = form.counter
-        form_title = u"Ajouter un client particulier"
+        form_title = u"Personne physique <small>(particulier)</small>"
         form = get_individual_customer_form(self.request, field_counter)
         res.append((form_title, form))
         return res
-
-    def populate_actionmenu(self, appstruct):
-        """
-        Populate the actionmenu regarding the user's rights
-        """
-        populate_actionmenu(self.request, self.context)
-
-        self.request.actionmenu.add(self._get_archived_btn(appstruct))
 
     def _get_archived_btn(self, appstruct):
         """

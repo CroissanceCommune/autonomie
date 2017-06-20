@@ -321,7 +321,12 @@ class CustomerAdd(BaseFormView):
 
     @property
     def form_options(self):
-        return (('formid', self.request.POST.get('__formid__')),)
+        if self.is_company_form():
+            formid = 'company'
+        else:
+            formid = 'individual'
+
+        return (('formid', formid),)
 
     @property
     def customers(self):
@@ -396,6 +401,13 @@ class CustomerEdit(CustomerAdd):
     """
     add_template_vars = ('title', 'customers',)
     validation_msg = u"Le client a été modifié avec succès"
+
+    def is_company_form(self):
+        """
+        :returns: True if it's a company customer add
+        :rtype: bool
+        """
+        return self.context.is_company()
 
     def appstruct(self):
         """

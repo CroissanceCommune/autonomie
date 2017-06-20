@@ -23,6 +23,7 @@
 Customer query service
 """
 from autonomie_base.models.base import DBSESSION
+from autonomie.utils.formatters import format_civilite
 
 
 class CustomerService(object):
@@ -43,3 +44,50 @@ class CustomerService(object):
     @classmethod
     def count_tasks(cls, instance):
         return cls.get_tasks(instance).count()
+
+    @classmethod
+    def format_customer_name(cls, instance):
+        """
+        Format the name of a customer regarding the available datas
+        :param obj customer: A Customer instance
+        :rtype: str
+        """
+        res = u""
+        if instance.civilite:
+            res += u"{0} ".format(format_civilite(instance.civilite))
+        res += instance.lastname
+        if instance.firstname:
+            res += u" {0}".format(instance.firstname)
+        return res
+
+    @classmethod
+    def get_label(cls, instance):
+        """
+        Return the label suitable for the given instance
+        :param obj instance: A Customer instance
+        :returns: The label
+        :rtype: str
+        """
+        if instance.type_ == 'company':
+            return instance.name
+        else:
+            return cls.format_customer_name(instance)
+
+    @classmethod
+    def get_address(cls, instance):
+        """
+        Return the address suitable for the given instance
+        :param obj instance: A Customer instance
+        :returns: The address
+        :rtype: str
+        """
+        address = u""
+        if instance.type_ == 'company':
+            address += "{0}\n".format(instance.name)
+        address += "{0}\n".format(cls.format_customer_name(instance))
+        address += "{0} {city}".format(instance.zip_code, instance.city)
+
+        country = instance.country
+        if country is not None and country.lower() != "france":
+            address += u"\n{0}".format(country)
+        return address

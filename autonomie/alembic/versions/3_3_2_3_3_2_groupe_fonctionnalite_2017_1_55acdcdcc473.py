@@ -24,6 +24,10 @@ def update_database_structure():
         'customer',
         sa.Column('mobile', sa.String(20), default=''),
     )
+    op.add_column(
+        'customer',
+        sa.Column('type_', sa.String(10), default='company'),
+    )
     rename_column(
         "customer",
         'contactLastName',
@@ -56,4 +60,23 @@ def upgrade():
 
 
 def downgrade():
-    pass
+    for col in ('civilite', 'mobile', ): #'type_'):
+        op.drop_column('customer', col)
+    rename_column(
+        "customer",
+        'lastname',
+        'contactLastName',
+        sa.String(255)
+    )
+    rename_column(
+        "customer",
+        'firstname',
+        'contactFirstName',
+        sa.String(255)
+    )
+    rename_column(
+        "customer",
+        'tva_intracomm',
+        'intraTVA',
+        sa.String(50)
+    )

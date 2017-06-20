@@ -106,6 +106,15 @@ class Customer(DBBASE, PersistentACLMixin):
             }
         },
     )
+    type_ = Column(
+        'type_',
+        String(10),
+        default='company',
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
+        }
+    )
 
     created_at = deferred(
         Column(
@@ -476,15 +485,7 @@ class Customer(DBBASE, PersistentACLMixin):
         """
             :returns: the customer address formatted in french format
         """
-        address = u"{name}\n{address}\n{zip_code} {city}".format(
-            name=self.name,
-            address=self.address,
-            zip_code=self.zip_code,
-            city=self.city,
-        )
-        if self.country is not None and self.country.lower() != "france":
-            address += u"\n{0}".format(self.country)
-        return address
+        return self._autonomie_service.get_address(self)
 
     def has_tasks(self):
         return self._autonomie_service.count_tasks(self) > 0
@@ -494,6 +495,12 @@ class Customer(DBBASE, PersistentACLMixin):
             Return True if this project could be deleted
         """
         return self.archived and not self.has_tasks()
+
+    def is_company(self):
+        return self._autonomie_service.is_company(self)
+
+    def get_label(self):
+        return self._autonomie_service.get_label(self)
 
 
 COMPANY_FORM_GRID = (

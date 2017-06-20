@@ -446,8 +446,21 @@ class Phase(DBBASE, PersistentACLMixin):
 
 
 FORM_GRID = (
-    ((4, True, ), (2, True, ), (4, True, ), ),
-    ((6, True, ), ),
-    ((3, True, ), (3, True, ), ),
-    ((10, True, ), ),
+    (
+        ('code', 6),
+    ),
+    (
+        ('name', 4),
+        ('type', 4),
+    ),
+    (
+        ('customers', 8),
+    ),
+    (
+        ('startingDate', 4),
+        ('endingDate', 4),
+    ),
+    (
+        ('definition', 10),
+    )
 )

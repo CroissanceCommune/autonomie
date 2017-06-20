@@ -139,7 +139,7 @@ def get_project_form(request):
     """
     schema = get_project_schema().bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
-    form.widget = GridFormWidget(grid=FORM_GRID)
+    form.widget = GridFormWidget(named_grid=FORM_GRID)
     return form
 
 
@@ -165,7 +165,7 @@ class ProjectsList(BaseListView):
             * an add projectform popup
             * a searchform
     """
-    add_template_vars = ('title', 'item_actions',)
+    add_template_vars = ('title', 'item_actions', 'addform')
     title = u"Liste des projets"
     schema = get_list_schema()
     default_sort = "name"
@@ -184,8 +184,10 @@ class ProjectsList(BaseListView):
         return main_query.filter(Project.company_id == company.id)
 
     def filter_archived(self, query, appstruct):
-        archived = appstruct['archived']
-        return query.filter(Project.archived == archived)
+        archived = appstruct.get('archived', False)
+        if archived is False:
+            query = query.filter(Project.archived == archived)
+        return query
 
     def filter_name_or_customer(self, query, appstruct):
         search = appstruct['search']
@@ -200,31 +202,13 @@ class ProjectsList(BaseListView):
             )
         return query
 
-    def populate_actionmenu(self, appstruct):
-        populate_actionmenu(self.request)
+    @property
+    def addform(self):
+        res = None
         if self.request.has_permission('add_project'):
             form = get_project_form(self.request)
-            popup = PopUp('add', u"Ajouter un projet", form.render())
-            self.request.popups = {popup.name: popup}
-            self.request.actionmenu.add(popup.open_btn())
-        self.request.actionmenu.add(self._get_archived_btn(appstruct))
-
-    def _get_archived_btn(self, appstruct):
-        """
-            return the show archived button
-        """
-        archived = appstruct['archived']
-        args = self.request.GET.copy()
-        args.pop('archived', None)
-        if not archived:
-            args['archived'] = 'true'
-            msg = u"Afficher les projets archivés"
-        else:
-            msg = u"Afficher les projets actifs"
-
-        url = self.request.current_route_path(_query=args)
-        link = HTML.a(msg, href=url)
-        return StaticWidget(link)
+            res = form.render()
+        return res
 
     @property
     def item_actions(self):
@@ -416,7 +400,7 @@ class ProjectAdd(BaseFormView):
 
     def before(self, form):
         populate_actionmenu(self.request)
-        form.widget = GridFormWidget(grid=FORM_GRID)
+        form.widget = GridFormWidget(named_grid=FORM_GRID)
         # If there's no customer, redirect to customer view
         if len(self.request.context.customers) == 0:
             redirect_to_customerslist(self.request, self.request.context)
@@ -612,7 +596,7 @@ def includeme(config):
     config.add_view(
         ProjectsList,
         route_name='company_projects',
-        renderer='company_projects.mako',
+        renderer='projects.mako',
         request_method='GET',
         permission='list_projects',
     )

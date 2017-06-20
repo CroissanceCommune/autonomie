@@ -25,12 +25,48 @@
 <%inherit file="base.mako"></%inherit>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='actionmenu'>
-## We place the search form in the actionmenu since there are a few fields
-    <% request.actionmenu.add(form) %>
-    ${request.actionmenu.render(request)|n}
-</%block>
 <%block name='content'>
+% if addform is not None:
+        <button class='btn btn-success' data-target="#project-forms" aria-expanded="false" aria-controls="project-forms" data-toggle='collapse'>
+            <i class='glyphicon glyphicon-plus'></i>
+            Ajouter un projet
+        </button>
+        <div class='collapse row' id="project-forms">
+            <div class='col-xs-12 col-lg-6'>
+                <h2>Ajouter un projet</h2>
+                ${addform|n}
+            </div>
+        </div>
+    <hr />
+% endif
+<a class="btn btn-default large-btn
+    % if '__formid__' in request.GET:
+        btn-primary
+    % endif
+    " href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
+    <i class='glyphicon glyphicon-filter'></i>&nbsp;
+    Filtres&nbsp;
+    <i class='glyphicon glyphicon-chevron-down'></i>
+</a>
+% if '__formid__' in request.GET:
+    <span class='help-text'>
+        <small><i>Des filtres sont actifs</i></small>
+    </span>
+% endif
+<hr/>
+    <div class='collapse' id='filter-form'>
+        <div class='row'>
+            <div class='col-xs-12'>
+            % if '__formid__' in request.GET:
+                <a href="${request.current_route_path(_query={})}">Supprimer tous les filtres</a>
+                <br />
+                <br />
+            %endif
+                ${form|n}
+            </div>
+        </div>
+<hr/>
+    </div>
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>

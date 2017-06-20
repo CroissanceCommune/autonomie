@@ -499,6 +499,22 @@ def get_select_validator(options):
     return colander.OneOf([o[0] for o in options])
 
 
+def get_radio(values, mandatory=True, **kw):
+    """
+    Return a radio widget with the provided options
+
+         values
+
+            options as expected by the deform select widget (a sequence of
+            2-uples: (id, label))
+    """
+    if not isinstance(values, list):
+        values = list(values)
+    if not mandatory:
+        values.insert(0, ('', ''))
+    return deform.widget.RadioChoiceWidget(values=values, **kw)
+
+
 positive_validator = colander.Range(
     min=0,
     min_err=u"Doit être positif",

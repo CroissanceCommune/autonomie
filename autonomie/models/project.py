@@ -72,7 +72,10 @@ def build_customer_value(customer=None):
         return the tuple for building customer select
     """
     if customer:
-        return (str(customer.id), customer.name)
+        label = customer.get_label()
+        if customer.code:
+            label += u" ({0})".format(customer.code)
+        return (str(customer.id), label)
     else:
         return ("0", u"Sélectionnez")
 

@@ -72,6 +72,9 @@ from autonomie.models.task import (
     PaymentConditions,
     TaskMention,
 )
+from autonomie.models.project import (
+    build_customer_values,
+)
 from autonomie.models.task.estimation import (
     PAYMENTDISPLAYCHOICES
 )
@@ -136,27 +139,6 @@ def get_payment_times():
     for i in range(1, 12):
         payment_times.append((i, '%d fois' % i))
     return payment_times
-
-
-def build_customer_value(customer=None):
-    """
-        return the tuple for building customer select
-    """
-    if customer:
-        return (str(customer.id), customer.name)
-    else:
-        return ("", u"Sélectionner un client")
-
-
-def build_customer_values(customers):
-    """
-        Build human understandable customer labels
-        allowing efficient discrimination
-    """
-    options = [build_customer_value()]
-    options.extend([build_customer_value(customer)
-                    for customer in customers])
-    return options
 
 
 def get_customers_from_request(request):

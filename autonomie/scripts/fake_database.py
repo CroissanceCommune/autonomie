@@ -260,9 +260,9 @@ def fake_database_fill():
         company=company,
         name=u"Institut médical Dupont & Dupond",
         code="IMDD",
-        contactLastName="Dupont",
+        lastname="Dupont",
         address=u"Avenue Victor Hugo",
-        zipCode=u"21000",
+        zip_code=u"21000",
         city=u"Dijon"
     )
     project = add_project(customer, company, u"Vitrine rue Neuve", "VRND")

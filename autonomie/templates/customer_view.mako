@@ -35,7 +35,7 @@
             <dl>
                 <% datas = ((u"Nom de l'entreprise", customer.name),
                             (u"Code", customer.code),
-                            (u"TVA intracommunautaire", customer.intraTVA),
+                            (u"TVA intracommunautaire", customer.tva_intracomm),
                             (u"Compte CG", customer.compte_cg),
                             (u"Compte Tiers", customer.compte_tiers),) %>
                  % for label, value in datas :
@@ -46,7 +46,7 @@
                 % endfor
             </dl>
             <h3>Contact principal</h3>
-            <strong>${api.format_name(customer.contactFirstName, customer.contactLastName)}</strong>
+            <strong>${api.format_name(customer.firstname, customer.lastname)}</strong>
             % if customer.function:
                 <div>Fonction: ${format_text(customer.function)}</div>
             % endif

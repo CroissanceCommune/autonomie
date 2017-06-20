@@ -29,7 +29,7 @@
             <address>
                 <b>${datas.name}</b><br />
                 ${datas.address}<br />
-                ${datas.zipCode} ${datas.city}
+                ${datas.zip_code} ${datas.city}
                 % if datas.country and datas.country!= 'France':
                     <br />${datas.country}
                 % endif

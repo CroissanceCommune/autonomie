@@ -234,9 +234,9 @@ def populate_db(session):
     cust = Customer(
         code='C001',
         name='Client1',
-        contactLastName=u'Client Lastname',
+        lastname=u'Client Lastname',
         address=u'15 rue Victore Hugo',
-        zipCode='69003',
+        zip_code='69003',
         city='Lyon',
     )
     cust.projects.append(project)

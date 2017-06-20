@@ -29,10 +29,10 @@ from autonomie.models.company import Company
 from autonomie.views.customer import CustomerAdd, CustomerEdit
 from autonomie.tests.base import Dummy
 
-APPSTRUCT = {'name':'Company', 'contactLastName':u'Lastname',
-             'contactFirstName':u'FirstName',
+APPSTRUCT = {'name':'Company', 'lastname':u'Lastname',
+             'firstname':u'FirstName',
              'address':'Address should be multiline',
-             'zipCode': "21000",
+             'zip_code': "21000",
              "city": "Dijon",
              'compte_cg':"Compte CG1515",
              'compte_tiers':"Compte Tiers", 'code': 'CODE'}
@@ -63,12 +63,12 @@ def test_customer_edit(customer, get_csrf_request_with_db):
     req.context = customer
     req.user = Dummy()
     appstruct = APPSTRUCT.copy()
-    appstruct['contactLastName'] = u"Changed Lastname"
+    appstruct['lastname'] = u"Changed Lastname"
     appstruct['compte_cg'] = "1"
     appstruct['compte_tiers'] = "2"
     view = CustomerEdit(req)
     view.submit_success(appstruct)
     customer = getOne()
-    assert customer.contactLastName == u'Changed Lastname'
+    assert customer.lastname == u'Changed Lastname'
     assert customer.compte_cg == "1"
     assert customer.compte_tiers == "2"

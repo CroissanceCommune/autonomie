@@ -40,8 +40,8 @@
         <br />
         <%block name='information'>
         </%block>
-        % if task.customer.intraTVA:
-            <b>Numéro de TVA Intracommunautaire</b> : ${task.customer.intraTVA}
+        % if task.customer.tva_intracomm:
+            <b>Numéro de TVA Intracommunautaire</b> : ${task.customer.tva_intracomm}
             <br />
         % endif
     </div>

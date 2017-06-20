@@ -53,10 +53,10 @@ def getone():
 def customer(dbsession):
     from autonomie.models.customer import Customer
     datas = {
-        'name':'Company', 'contactLastName':u'Lastname',
-        'contactFirstName':u'FirstName',
+        'name':'Company', 'lastname':u'Lastname',
+        'firstname':u'FirstName',
         'address':'Address should be multiline',
-        'zipCode': "21000",
+        'zip_code': "21000",
         "city": "Dijon",
         'compte_cg':"Compte CG1515",
         'compte_tiers':"Compte Tiers", 'code': 'CODE',

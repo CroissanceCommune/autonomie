@@ -32,37 +32,41 @@ from colanderalchemy import SQLAlchemySchemaNode
 from autonomie.models.customer import Customer
 from autonomie.forms.lists import BaseListsSchema
 
+
 def get_list_schema():
+    """
+    Return the schema for the customer search list
+    """
     schema = BaseListsSchema().clone()
     schema['search'].description = u"Entreprise ou contact principal"
-    schema.add(colander.SchemaNode(
-        colander.Boolean(),
-        name='archived',
-        missing=False,
-        widget=deform.widget.HiddenWidget())
+    schema.add(
+        colander.SchemaNode(
+            colander.Boolean(),
+            name='archived',
+            missing=False,
+            widget=deform.widget.HiddenWidget())
     )
-
     return schema
 
 
-def get_contractor_customer_schema():
+def get_contractor_customer_schema(excludes=()):
     """
     Rerturn the contractor customer form
     """
     return SQLAlchemySchemaNode(
         Customer,
-        excludes=('compte_tiers', 'compte_cg'),
+        excludes=('compte_tiers', 'compte_cg') + excludes,
     )
 
 
-def get_manager_customer_schema():
+def get_manager_customer_schema(excludes=()):
     """
     Return the manager customer form
     """
-    return SQLAlchemySchemaNode(Customer)
+    return SQLAlchemySchemaNode(Customer, excludes=excludes)
 
 
-def get_customer_schema(request):
+def get_company_customer_schema(request):
     """
     return the schema for user add/edit regarding the current user's role
     """
@@ -70,4 +74,22 @@ def get_customer_schema(request):
         schema = get_contractor_customer_schema()
     else:
         schema = get_manager_customer_schema()
+    schema['name'].missing = colander.required
+    return schema
+
+
+def get_individual_customer_schema(request):
+    """
+    return the schema for user add/edit regarding the current user's role
+    """
+    excludes = ('name', 'tva_intracomm', 'function',)
+    if not request.has_permission('admin_treasury', request.context):
+        schema = get_contractor_customer_schema(excludes)
+    else:
+        schema = get_manager_customer_schema(excludes)
+
+    schema['firstname'].title = u"Prénom"
+    schema['firstname'].missing = colander.required
+    schema['lastname'].title = u'Nom'
+    schema['civilite'].missing = colander.required
     return schema

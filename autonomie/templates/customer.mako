@@ -30,61 +30,106 @@
 <%block name='content'>
 <div class="row">
     <div class='col-md-4'>
-        <div class='well'>
-            <h3>Entreprise ${customer.name.upper()}</h3>
-            <dl>
-                <% datas = ((u"Nom de l'entreprise", customer.name),
-                            (u"Code", customer.code),
-                            (u"TVA intracommunautaire", customer.tva_intracomm),
-                            (u"Compte CG", customer.compte_cg),
-                            (u"Compte Tiers", customer.compte_tiers),) %>
-                 % for label, value in datas :
-                    %if value:
-                        <dt>${label}</dt>
-                        <dd>${value}</dd>
-                    % endif
-                % endfor
-            </dl>
-            <h3>Contact principal</h3>
-            <strong>${api.format_name(customer.firstname, customer.lastname)}</strong>
-            % if customer.function:
-                <div>Fonction: ${format_text(customer.function)}</div>
+        <div class=''>
+            % if customer.is_company():
+                <h2>Entreprise ${customer.name.upper()}</h2>
+            % else:
+                <h2>${customer.get_label()}</h2>
             % endif
-            <br />
-            % if customer.address:
-                <address>
-                    ${format_text(customer.full_address)}
-                </address>
-            %else:
-                Aucun adresse connue
-                <br />
-            %endif
-            <dl>
-                <dt>E-mail</dt>
-                <dd>
+            % if customer.is_company():
+                <h3>Contact principal : ${customer.get_name()}</h3>
+                % if customer.function:
+                <div class='row'>
+                    <div class='col-xs-6'>
+                        <b>Fonction</b>
+                    </div>
+                    <div class='col-xs-6'>
+                        ${format_text(customer.function)}
+                    </div>
+                </div>
+                % endif
+            % else:
+                <h3>Contact</h3>
+            % endif
+            <div class="row">
+                <div class='col-xs-6'>
+                    <b>Adresse Postale</b>
+                </div>
+                <div class='col-xs-6'>
+                    <address>${format_text(customer.full_address)}</address>
+                </div>
+            </div>
+            <div class="row">
+                <div class='col-xs-6'>
+                    <b>Addresse électronique</b>
+                </div>
+                <div class='col-xs-6'>
                     %if customer.email:
                         ${format_mail(customer.email)}
                     % else:
-                        Aucune adresse connue
+                        <i>Non renseigné</i>
                     % endif
-                </dd>
-                <dt>Téléphone</dt>
-                <dd>
+                </div>
+            </div>
+            <div class="row">
+                <div class='col-xs-6'>
+                    <b>Téléphone portable</b>
+                </div>
+                <div class='col-xs-6'>
+                    %if customer.mobile:
+                        ${format_phone(customer.mobile)}
+                    %else:
+                        <i>Non renseigné</i>
+                    %endif
+                </div>
+            </div>
+            <div class="row">
+                <div class='col-xs-6'>
+                    <b>Téléphone</b>
+                </div>
+                <div class='col-xs-6'>
                     %if customer.phone:
                         ${format_phone(customer.phone)}
                     %else:
-                        Aucun numéro connu
+                        <i>Non renseigné</i>
                     %endif
-                </dd>
-                <dt>Fax</dt>
-                <dd>
+                </div>
+            </div>
+            <div class="row">
+                <div class='col-xs-6'>
+                    <b>Fax</b>
+                </div>
+                <div class='col-xs-6'>
                     %if customer.fax:
                         ${format_phone(customer.fax)}
                     % else:
-                        Aucun numéro de fax connu
+                        <i>Non renseigné</i>
                     % endif
-                </dd>
-            </dl>
+                </div>
+            </div>
+            <h3>Informations comptables</h3>
+                % if customer.is_company():
+                    <% datas = (
+                    (u"TVA intracommunautaire", customer.tva_intracomm),
+                    (u"Compte CG", customer.compte_cg),
+                    (u"Compte Tiers", customer.compte_tiers),) %>
+                %else:
+                    <% datas = (
+                    (u"Compte CG", customer.compte_cg),
+                    (u"Compte Tiers", customer.compte_tiers),) %>
+                % endif
+                % for label, value in datas :
+                <div class='row'>
+                    <div class='col-xs-6'><b>${label}</b></div>
+                        <div class='col-xs-6'>
+                            % if value:
+                                ${value}
+                            % else:
+                                <i>Non renseigné</i>
+                            % endif
+                        </div>
+                </div>
+                % endfor
         </div>
     </div>
     <div class='col-md-8'>
@@ -145,7 +190,8 @@
 </div>
 <div class='row'>
     <div class='col-md-12'>
-        <div class='well'>
+        <hr />
+        <div class=''>
             % if customer.comments:
                 <h3>Commentaires</h3>
                 ${format_text(customer.comments)}

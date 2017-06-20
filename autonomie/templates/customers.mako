@@ -95,8 +95,20 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                     <% url = request.route_path("customer", id=customer.id) %>
                     <% onclick = "document.location='{url}'".format(url=url) %>
                     <td onclick="${onclick}" class="visible-lg rowlink" >${customer.code}</td>
-                    <td onclick="${onclick}" class="rowlink" >${customer.name}</td>
-                    <td onclick="${onclick}" class="visible-lg rowlink" >${customer.lastname} ${customer.firstname}</td>
+                    <td onclick="${onclick}" class="rowlink" >
+                        % if customer.is_company():
+                            ${customer.name}
+                        % else:
+                            Client particulier
+                        % endif
+                    </td>
+                    <td onclick="${onclick}" class="visible-lg rowlink" >
+                        % if customer.is_company():
+                            ${customer.lastname} ${customer.firstname}
+                        % else:
+                            ${customer.get_name()}
+                        % endif
+                    </td>
                     <td class="actions">
                         % for btn in item_actions:
                             ${btn.render(request, customer)|n}

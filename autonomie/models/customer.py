@@ -28,8 +28,8 @@
 
     >>> from autonomie.models.customer import Customer
     >>> c = Customer()
-    >>> c.contactLastName = u"Dupont"
-    >>> c.contactFirstName = u"Jean"
+    >>> c.lastname = u"Dupont"
+    >>> c.firstname = u"Jean"
     >>> c.name = u"Compagnie Dupont avec un t"
     >>> c.code = u"DUPT"
     >>> DBSESSION.add(c)
@@ -50,7 +50,7 @@ from sqlalchemy.orm import (
     deferred,
     relationship,
 )
-
+from autonomie_base.consts import CIVILITE_OPTIONS
 from autonomie import forms
 from autonomie_base.models.types import (
     CustomDateType,
@@ -86,11 +86,11 @@ class Customer(DBBASE, PersistentACLMixin):
         :param name: name of the company
         :param code: internal code of the customer (unique regarding the owner)
         :param multiline address: address of the company
-        :param zipCode: zipcode of the company
+        :param zip_code: zipcode of the company
         :param city: city
         :param country: country, default France
-        :param contactLastName: lastname of the contact
-        :param contactFirstName: firstname of the contact
+        :param lastname: lastname of the contact
+        :param firstname: firstname of the contact
         :param function: function of the contact
     """
     __tablename__ = 'customer'
@@ -152,21 +152,38 @@ class Customer(DBBASE, PersistentACLMixin):
         String(255),
         info={
             "colanderalchemy": {
-                'title': u'Nom',
+                'title': u'Nom de la structure',
             },
         },
-        nullable=False,
+        default='',
     )
 
     code = Column(
         'code',
         String(4),
-        info={'colanderalchemy': {'title': u"Code"}},
+        info={'colanderalchemy': {'title': u"Code client"}},
     )
 
-    contactLastName = deferred(
+    civilite = deferred(
         Column(
-            "contactLastName",
+            'civilite',
+            String(10),
+            info={
+                'colanderalchemy': {
+                    'title': u"Civilité",
+                    'widget': forms.get_radio(
+                        CIVILITE_OPTIONS[1:],
+                        inline=True
+                    ),
+                }
+            }
+        ),
+        group='edit',
+    )
+
+    lastname = deferred(
+        Column(
+            "lastname",
             String(255),
             info={
                 "colanderalchemy": {
@@ -178,9 +195,9 @@ class Customer(DBBASE, PersistentACLMixin):
         group='edit',
     )
 
-    contactFirstName = deferred(
+    firstname = deferred(
         Column(
-            "contactFirstName",
+            "firstname",
             String(255),
             info={
                 'colanderalchemy': {
@@ -224,9 +241,9 @@ class Customer(DBBASE, PersistentACLMixin):
         group='edit'
     )
 
-    zipCode = deferred(
+    zip_code = deferred(
         Column(
-            "zipCode",
+            "zip_code",
             String(20),
             info={
                 'colanderalchemy': {
@@ -270,8 +287,21 @@ class Customer(DBBASE, PersistentACLMixin):
             String(255),
             info={
                 'colanderalchemy': {
-                    'title': u"E-mail",
+                    'title': u"Adresse de messagerie",
                     'validator': forms.mail_validator(),
+                },
+            },
+            default='',
+        ),
+        group='edit',
+    )
+    mobile = deferred(
+        Column(
+            "mobile",
+            String(20),
+            info={
+                'colanderalchemy': {
+                    'title': u"Téléphone portable",
                 },
             },
             default='',
@@ -285,7 +315,7 @@ class Customer(DBBASE, PersistentACLMixin):
             String(50),
             info={
                 'colanderalchemy': {
-                    'title': u'Téléphone',
+                    'title': u'Téléphone fixe',
                 },
             },
             default='',
@@ -307,9 +337,9 @@ class Customer(DBBASE, PersistentACLMixin):
         group="edit"
     )
 
-    intraTVA = deferred(
+    tva_intracomm = deferred(
         Column(
-            "intraTVA",
+            "tva_intracomm",
             String(50),
             info={
                 'colanderalchemy': {'title': u"TVA intracommunautaire"},
@@ -425,13 +455,13 @@ class Customer(DBBASE, PersistentACLMixin):
             comments=self.comments,
             intraTVA=self.intraTVA,
             address=self.address,
-            zipCode=self.zipCode,
+            zip_code=self.zip_code,
             city=self.city,
             country=self.country,
             phone=self.phone,
             email=self.email,
-            contactLastName=self.contactLastName,
-            contactFirstName=self.contactFirstName,
+            lastname=self.lastname,
+            firstname=self.firstname,
             name=self.name,
             projects=projects,
             full_address=self.full_address,
@@ -446,10 +476,10 @@ class Customer(DBBASE, PersistentACLMixin):
         """
             :returns: the customer address formatted in french format
         """
-        address = u"{name}\n{address}\n{zipCode} {city}".format(
+        address = u"{name}\n{address}\n{zip_code} {city}".format(
             name=self.name,
             address=self.address,
-            zipCode=self.zipCode,
+            zip_code=self.zip_code,
             city=self.city,
         )
         if self.country is not None and self.country.lower() != "france":
@@ -466,12 +496,90 @@ class Customer(DBBASE, PersistentACLMixin):
         return self.archived and not self.has_tasks()
 
 
-FORM_GRID = (
-    ((4, True,), (2, True), ),
-    ((4, True,), (4, True),  (4, True), ),
-    ((4, True,), (2, True), (3, True), (3, True), ),
-    ((4, True,), (4, True),  (4, True), ),
-    ((3, True,), ),
-    ((10, True,), ),
-    ((3, True,), (3, True), ),
+COMPANY_FORM_GRID = (
+    (
+        ('name', 4,), ('code', 4),
+    ),
+    (
+        ('civilite', 12),
+    ),
+    (
+        ('lastname', 4),
+        ('firstname', 4),),
+    (
+        ('function', 4),
+    ),
+    (
+        ('address', 6),
+    ),
+    (
+        ('zip_code', 2), ('city', 4),
+    ),
+    (
+        ('country', 4),
+    ),
+    (
+        ('tva_intracomm', 4),
+    ),
+    (
+        ('email', 4),
+    ),
+    (
+        ('mobile', 4),
+    ),
+    (
+        ('phone', 4),
+    ),
+    (
+        ('fax', 4),
+    ),
+    (
+        ('comments', 10),
+    ),
+    (
+        ('compte_cg', 4),
+        ('compte_tiers', 4),
     )
+)
+
+
+INDIVIDUAL_FORM_GRID = (
+    (
+        ('code', 6),
+    ),
+    (
+        ('civilite', 12),
+    ),
+    (
+        ('lastname', 4),
+        ('firstname', 4),
+    ),
+    (
+        ('address', 6),
+    ),
+    (
+        ('zip_code', 2), ('city', 4),
+    ),
+    (
+        ('country', 4),
+    ),
+    (
+        ('email', 4),
+    ),
+    (
+        ('mobile', 4),
+    ),
+    (
+        ('phone', 4),
+    ),
+    (
+        ('fax', 4),
+    ),
+    (
+        ('comments', 10),
+    ),
+    (
+        ('compte_cg', 4),
+        ('compte_tiers', 4),
+    )
+)

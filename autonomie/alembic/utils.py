@@ -54,7 +54,7 @@ def rename_column(tbl, column_name, name, type_=sa.Integer, nullable=False,
             op.execute("Alter table `%s` change `%s` `%s` int(11) NOT NULL "
                        "AUTO_INCREMENT;" % (tbl, column_name, name))
         else:
-            op.alter_column(tbl, column_name, name=name, type_=type_,
+            op.alter_column(tbl, column_name, new_column_name=name, type_=type_,
                             nullable=nullable, **kw)
 
 

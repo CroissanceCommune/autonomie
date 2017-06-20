@@ -53,13 +53,17 @@ from sqlalchemy.orm import (
 from sqlalchemy.event import listen
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from autonomie.views import render_api
-
+from autonomie_base.consts import (
+    SEX_OPTIONS,
+    CIVILITE_OPTIONS,
+)
 from autonomie_base.models.base import (
     DBBASE,
     DBSESSION,
     default_table_args,
 )
+from autonomie.views import render_api
+
 from autonomie.models.node import Node
 from autonomie.models.company import CompanyActivity
 from autonomie.forms import (
@@ -111,18 +115,6 @@ USER_GROUPS = Table(
 )
 
 
-SEX_OPTIONS = (
-    ('', '', ),
-    ('M', 'Homme', ),
-    ('F', 'Femme', ),
-)
-
-
-CIVILITE_OPTIONS = (
-    ('', u'Non renseigné', ),
-    ('Monsieur', u'Monsieur',),
-    ('Madame', u'Madame',),
-)
 # (célibataire, marié, veuf, divorcé, séparé, vie maritale, pacsé) .
 
 STATUS_OPTIONS = (

@@ -1,0 +1,478 @@
+/*
+ * File Name : main.css
+ *
+ * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+ * Company : Majerti ( http://www.majerti.fr )
+ *
+ * This software is distributed under GPLV3
+ * License: http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ */
+
+$add-color-primary: #43cf52;
+$add-color-secondary: #989999;
+$add-color-tertiary: #e3e3e3;
+
+
+.btn.primary{
+  text-shadow: 0px  -1px 0px rgba(0,0,0,.5);
+  -webkit-box-shadow: 0px 1px 0px #2b638f;
+  -moz-box-shadow: 0px 1px 0px #2b638f;
+  box-shadow: 0px 1px 0px #2b638f;
+  font-weight: bold;
+}
+.btn.secondary{
+}
+.btn.tertiary{
+  padding: 2px 4px;
+}
+
+.add-btn.primary{
+//  background-color: $add-color-primary;
+}
+.add-btn.secondary{
+//  background-color: $add-color-secondary;
+}
+.add-btn.tertiary{
+//  background-color: $add-color-secondary;
+}
+
+
+body{
+  padding:0px;
+}
+td.actions, th.actions{
+  text-align: right;
+}
+.pagetitle{
+  padding:10px 0 5px 15%;
+  border-bottom:1px solid #ddd;
+  text-align:left;
+  background-color:#f5f5f5;
+  overflow:hidden;
+  margin-bottom: 7px;
+}
+.pagetitle h2{
+  float:left;
+  font-size:18px;
+  line-height:15px;
+  margin:3px 50px 3px 0px;
+}
+.headmenu{
+  border-radius: 0px;
+  margin-bottom:0px;
+}
+/* Le formulaire d'authentification */
+.authentication-form fieldset{
+  width:90%;
+  padding-left:5%;
+}
+form.authentication-form input[type=text], form.authentication-form input[type=password]{
+  width: 100%;
+}
+input[type=password]{
+  margin-bottom: 4px;
+}
+.authentication-form .form-actions{
+  padding: 20px 0 20px 0;
+}
+.authentication-form .form-actions button{
+  font-size: 16px;
+}
+/* Login box related css */
+.loginbox{
+  margin-top:10%;
+  height: 80%;
+  text-align:center;
+  max-width: 350px;
+  margin: 0 auto;
+}
+.loginbox img-div{
+  margin-bottom:15px;
+  text-align:center;
+}
+.loginbox img{
+  max-height: 250px;
+}
+.loginbox h1{
+  text-align:center;
+}
+#authentication{
+  max-width: 350px;
+  text-align:center;
+}
+#authentication label{
+  font-weight: normal;
+  font-size: 15px;
+}
+#authentication button{
+  display: block;
+  width: 100%;
+  font-size: 16px;
+}
+#authentication .checkbox{
+  margin-top: 0px;
+}
+#authentication #req-deformField4{
+  height: 0px;
+  margin: 0;
+  padding: 0;
+  visible: false;
+  display:none;
+}
+.loginbox img{
+  max-width:100%;
+  height: auto;
+}
+.ui-icon{
+  float:left;
+  margin-right:3px;
+}
+.ui-button-primary .ui-icon, .btn-primary .ui-icon{
+  background-image:url('theme/images/ui-icons_f6cf3b_256x240.png');
+}
+.btn{
+  font-size:1em;
+}
+.deform label{
+  font-weight: normal;
+  font-size: 16px;
+}
+.deform legend{
+  font-size:1.4em;
+  font-weight:bold;
+}
+.deform fieldset{
+  border:none;
+  padding:0px;
+}
+.deform fieldset:hover{
+  border:none;
+}
+.deform .errorMsgLbl{
+  background-color:transparent;
+}
+/* Class used to set a max width to forms */
+.medium-form-container{
+  max-width: 600px;
+  margin: auto;
+}
+#actionmenu{
+  padding-left:5%;
+}
+.message{
+  left: 35%;
+  max-width: 30%;
+  position: relative;
+  text-align: center;
+}
+.breadcrumb {
+  padding: 7px 14px;
+  margin: 0 0 18px;
+  background-color: #fbfbfb;
+  background-image: -moz-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -ms-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f5f5f5));
+  background-image: -webkit-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -o-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: linear-gradient(to bottom, #ffffff, #f5f5f5);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f5f5f5', GradientType=0);
+  border: 1px solid #ddd;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px 0 #ffffff;
+  -moz-box-shadow: inset 0 1px 0 #ffffff;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+.breadcrumb li {
+  display: inline-block;
+  text-shadow: 0 1px 0 #ffffff;
+}
+.breadcrumb .divider {
+  padding: 0 5px;
+  color: #999999;
+}
+.breadcrumb .active a {
+  color: #333333;
+}
+textarea{
+  width:auto;
+}
+.rowlink{
+  cursor:pointer;
+}
+.help-block{
+  font-size:11px;
+  font-style:italic;
+}
+.company-search, .company-search option{
+  color: #CCCCCC;
+  background-color: #626262;
+}
+.company-search{
+  border: 1px solid #151515;
+  padding: 4px 9px;
+  margin-top:6px;
+}
+#grid_search_form .form-group{
+    margin-bottom: 0px;
+}
+#grid_search_form  label.control-label{
+    display: none;
+}
+/* Invoice list */
+.invoice_resulted, .estimation_geninv, .green_td{
+  background-color:#baff87;
+  width:36px;
+}
+.invoice_paid, .orange_td{
+  background-color:#ffb266;
+  width:36px;
+}
+.invoice_notpaid, .estimation_valid, .white_td{
+  background-color:#ffffff;
+  width:36px;
+}
+.invoice_tolate, .estimation_aboest, .red_td{
+  background-color:#C43C35;
+  width:36px;
+}
+.invoice_tolate a{
+  color:#fff;
+  text-transform:uppercase;
+  text-decoration:underline;
+}
+.invoice_resulted_tr, .estimation_geninv_tr, .green_tr{
+  background-color:#c4ffaa;
+}
+.green_text{
+  color: #c4ffaa;
+}
+.invoice_paid_tr, .orange_tr{
+  background-color:#ffb266;
+}
+.orange_text{
+  color: #ffb266;
+}
+.invoice_tolate_tr, .estimation_aboest_tr, .red_tr{
+  background-color:#f9aaaa;
+}
+.red_text{
+  color: #f9aaaa;
+}
+.grey_tr{
+  background-color: #bdbdbd;
+}
+.grey_text {
+  color: #888;
+}
+.invoice_cancelled_tr, {
+  background-color:#eeeeee;
+}
+.section-header{
+  padding: 6px 2px;
+  font-size: 12px;
+}
+.section-header a{
+    padding-left:10px;
+    padding-bottom:2px;
+    padding-top:2px;
+    color:#111;
+    font-weight:normal;
+    vertical-align:middle;
+    font-size:16px;
+    text-transform:capitalize;
+}
+.section-header a:hover{
+    text-decoration:none;
+    color:#333;
+    font-weight:bold;
+    background-color:#f5f5f5;
+}
+h3.floatted{
+    font-size:16px;
+    font-weight:100;
+}
+.section-content{
+    margin:4px;
+    margin-left:27px;
+    padding-left:10px;
+    border-left:2px solid #d1d1d1;
+}
+form.deform{
+  margin-bottom:0px;
+}
+.table-disable-hover.table tbody tr:hover td,
+.table-disable-hover.table tbody tr:hover th {
+    background-color: inherit;
+}
+.table-disable-hover.table-striped tbody tr:nth-child(odd):hover td,
+.table-disable-hover.table-striped tbody tr:nth-child(odd):hover th {
+  background-color: #f9f9f9;
+}
+table caption{
+  font-weight:bold;
+  font-size:17px;
+  text-align:left;
+  padding:15px;
+}
+/* Box used to display ajax calls success or errors */
+#messageboxes{
+    position:fixed;
+    bottom:0px;
+    left:50px;
+    z-index:2000;
+}
+table.opa thead th{
+  background-color:#D9EDF7;
+}
+table.opa tfoot td{
+  background-color:#FCF8E3;
+}
+.inline-element{
+  display:inline-block;
+}
+
+textarea.tinymce {
+  height: 400px;
+}
+
+ul.form-tabs li.error a {
+  color: #b94a48;
+}
+
+.form-row{
+  padding-bottom: 4px;
+}
+.form-row select, .form-row input{
+  width: 100%;
+}
+.form-row input[type=radio], .form-row input[type=checkbox]{
+  width: 15px;
+}
+.accordion-heading a{
+  color: #555;
+}
+.accordion-body.in:hover { overflow:visible; }
+/* Bootstrap overrides */
+.input-group input:focus{
+  z-index:auto;
+}
+.navbar-form button, .navbar-form input, .navbar-form select{
+  margin-top: 5px;
+  float:left;
+  margin-right:3px;
+}
+.nav-tabs > li.active > a{
+  font-weight: bold;
+  text-decoration: underline;
+}
+header .navbar{
+  margin-bottom:0px;
+}
+header .navbar li:hover{
+  background-color:#3c3c3c;
+}
+header .navbar{
+  padding-left:15%;
+}
+header .navbar .nav > li > a{
+  padding:10px 5px;
+  margin: 0px 10px;
+}
+.tab-content{
+  padding: 0px 10px;
+}
+.tab-pane{
+  padding: 10px 10px;
+}
+.panel-body{
+  padding: 0px 15px;
+}
+.panel-heading{
+  border-color: #111;
+}
+.clickable-row{
+  cursor: pointer;
+}
+.form-inline .form-group{
+  vertical-align: top;
+  margin-bottom: 3px;
+}
+input[name=altdate], input[name=date]{
+  z-index: 1100;
+  position: relative;
+}
+/* Affichage html de la sortie pdf des documents */
+.task_view img{
+  max-width: 100%;
+  height: auto;
+}
+/* Affichage d'un select2 */
+.form-control.select2-container {
+  height: auto !important;
+  padding: 0;
+}
+/* Affichage d'un loader */
+#loading-box{
+  position: fixed;
+  top: 0px;
+  left:0px;
+  display: none;
+  z-index: 1500;
+  opacity: 0.5;
+  background-color: #81f2ff;
+  font-size: 280px;
+  text-shadow:  2px 2px 2px rgba(0,0,0,0.5);
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+/* Jstree */
+.jstree{
+  display: inline-block;
+}
+/* Custom close button class */
+.large-close{
+  font-size: 40px;
+  opacity: 0.4;
+}
+/* Project view */
+.project-view .panel-body{
+  padding: 0;
+}
+.project-view .header{
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  background-color: #FFF;
+}
+.project-view .header h3{
+  padding-right: 10px;
+  font-weight:100;
+  margin: 10px 0px 5px 0px;
+}
+.project-view .header a{
+  margin-top: 5px;
+}
+/* Rendez-vous */
+.activity-view #edition_form, .activity-view #next_activity_form_container{
+  background-color: #fff;
+  padding: 10px 15px;
+}
+.activity-view p{
+  margin-bottom: 2px;
+}
+.activity-view h3{
+  border-bottom: 1px solid #dcdcdc;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+}
+
+/* Responsive tags handling */
+.nav-tabs { min-width: 600px; }
+.nav-tabs-responsive { overflow: auto; }

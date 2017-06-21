@@ -198,7 +198,7 @@
 <div class='tab-content'>
     <!-- Documents tab -->
     <div role="tabpanel" class="tab-pane active row" id="documents">
-        <button class='btn btn-default large-btn'
+        <button class='btn btn-default add-btn secondary'
             data-target="#phase-form"
             aria-expanded="false"
             aria-controls="phase-form"
@@ -271,10 +271,10 @@
         <div class='header'>
             <h3 class='pull-left'>Devis</h3>
             <a
-                class='btn btn-success large-btn'
+                class='btn btn-success large-btn primary'
                 href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'
                 >
-                <span class='fa fa-plus'></span>&nbsp;Nouveau devis
+                <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer un devis
             </a>
         </div>
         % if  phase.estimations:
@@ -297,12 +297,12 @@
             <h3 class='pull-left'>
                 Facture(s), Avoir(s)
             </h3>
-            <a class='btn btn-success large-btn'
+            <a class='btn btn-success large-btn primary'
                 href='${request.route_path(\
                 "project_invoices", \
                 id=project.id, \
                 _query=dict(phase=phase.id))}'>
-                <span class='fa fa-plus'></span>&nbsp;Nouvelle facture
+                <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer une facture
             </a>
         </div>
         %if phase.invoices:

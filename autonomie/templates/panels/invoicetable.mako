@@ -74,7 +74,7 @@
                     <% company_name = company.name %>
                 % endif
                 <% customer_id = document.customer.id %>
-                <% customer_name = document.customer.name %>
+                <% customer_name = document.customer.get_label() %>
 
                 % if type_ == 'cancelinvoice' or status == 'resulted':
                     <tr class='invoice_resulted_tr'>

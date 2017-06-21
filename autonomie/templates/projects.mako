@@ -53,10 +53,14 @@
         <small><i>Des filtres sont actifs</i></small>
     </span>
 % endif
-<hr/>
+% if '__formid__' in request.GET:
     <div class='collapse' id='filter-form'>
+% else:
+    <div class='in collapse' id='filter-form'>
+% endif
         <div class='row'>
             <div class='col-xs-12'>
+<hr/>
             % if '__formid__' in request.GET:
                 <a href="${request.current_route_path(_query={})}">Supprimer tous les filtres</a>
                 <br />
@@ -70,6 +74,7 @@
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>
+            <th class="visible-lg">${sortable(u"Créé le", "created_at")}</th>
             <th>${sortable(u"Code", "code")}</th>
             <th>${sortable(u"Nom", "name")}</th>
             <th>Clients</th>
@@ -80,13 +85,16 @@
         % if records:
             % for id, project in records:
                 <tr class='tableelement' id="${project.id}">
-                    <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.code}</td>
-                    <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>${project.name}</td>
-                    <td onclick="document.location='${request.route_path("project", id=project.id)}'" class='rowlink'>
+                    <% url = request.route_path("project", id=project.id) %>
+                    <% onclick = "document.location='{url}'".format(url=url) %>
+                    <td onclick="${onclick}" class="visible-lg rowlink" >${api.format_date(project.created_at)}</td>
+                    <td onclick="${onclick}" class='rowlink'>${project.code}</td>
+                    <td onclick="${onclick}" class='rowlink'>${project.name}</td>
+                    <td onclick="${onclick}" class='rowlink'>
                         <ul>
                             % for customer in project.customers:
                                 <li>
-                                ${customer.name}
+                                ${customer.get_label()}
                                 </li>
                             % endfor
                         </ul>

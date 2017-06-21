@@ -168,10 +168,12 @@ class ProjectsList(BaseListView):
     add_template_vars = ('title', 'item_actions', 'addform')
     title = u"Liste des projets"
     schema = get_list_schema()
-    default_sort = "name"
+    default_sort = "created_at"
+    default_direction = "desc"
     sort_columns = {
         'name': Project.name,
         "code": Project.code,
+        "created_at": Project.created_at,
     }
 
     def query(self):

@@ -154,28 +154,46 @@ class BaseListClass(BaseView):
             query = query.order_by(func(sort_column))
         return query
 
+    def set_form_widget(self, form):
+        """
+        Attach a custom widget to the given form
+
+        :param obj form: The deform.Form instance
+        :returns: The deform.Form instance
+        :rtype: obj
+        """
+        if self.grid is not None:
+            form.formid = 'grid_search_form'
+            form.widget = deform_extensions.GridFormWidget(
+                named_grid=self.grid
+            )
+        else:
+            form.widget.template = "autonomie:deform_templates/searchform.pt"
+        return form
+
     def get_form(self, schema):
+        """
+        Return the search form that should be used for this view
+
+        :param obj schema: The form's colander.Schema
+        :returns: The form object
+        :rtype: obj
+        """
         # counter is used to avoid field name conflicts
         form = Form(
             schema,
             counter=itertools.count(15000),
             method='GET'
         )
-        if self.grid is not None:
-            form.formid = 'grid_search_form'
-            form.widget = deform_extensions.GridFormWidget(
-                named_grid=self.grid
-            )
-            form.buttons = (
-                deform.Button(
-                    title='Filtrer',
-                    name='submit',
-                    type='submit',
-                    css_class='btn btn-primary'
-                ),
-            )
-        else:
-            form.widget.template = "autonomie:deform_templates/searchform.pt"
+        form = self.set_form_widget(form)
+        form.buttons = (
+            deform.Button(
+                title='Filtrer',
+                name='submit',
+                type='submit',
+                css_class='btn btn-primary'
+            ),
+        )
         return form
 
     def _collect_appstruct(self):

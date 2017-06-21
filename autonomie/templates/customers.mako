@@ -92,10 +92,14 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
         <small><i>Des filtres sont actifs</i></small>
     </span>
 % endif
-<hr/>
+% if '__formid__' in request.GET:
     <div class='collapse' id='filter-form'>
+% else:
+    <div class='in collapse' id='filter-form'>
+% endif
         <div class='row'>
             <div class='col-xs-12'>
+<hr/>
             % if '__formid__' in request.GET:
                 <a href="${request.current_route_path(_query={})}">Supprimer tous les filtres</a>
                 <br />
@@ -109,9 +113,10 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>
-            <th class="visible-lg">${sortable("Code", "code")}</th>
-            <th>${sortable("Entreprise", "name")}</th>
-            <th class="visible-lg">${sortable("Nom du contact principal", "lastname")}</th>
+            <th class="visible-lg">${sortable(u"Créé le", "created_at")}</th>
+            <th class="visible-lg">${sortable(u"Code", "code")}</th>
+            <th>${sortable(u"Entreprise", "name")}</th>
+            <th class="visible-lg">${sortable(u"Nom du contact principal", "lastname")}</th>
             <th class="actions">Actions</th>
         </tr>
     </thead>
@@ -121,6 +126,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                 <tr class='tableelement' id="${customer.id}">
                     <% url = request.route_path("customer", id=customer.id) %>
                     <% onclick = "document.location='{url}'".format(url=url) %>
+                    <td onclick="${onclick}" class="visible-lg rowlink" >${api.format_date(customer.created_at)}</td>
                     <td onclick="${onclick}" class="visible-lg rowlink" >${customer.code}</td>
                     <td onclick="${onclick}" class="rowlink" >
                         % if customer.is_company():

@@ -119,7 +119,10 @@ class CustomersListTools(object):
         'name': Customer.name,
         "code": Customer.code,
         "lastname": Customer.lastname,
+        "created_at": Customer.created_at,
     }
+    default_sort = "created_at"
+    default_direction = "desc"
 
     def query(self):
         company = self.request.context

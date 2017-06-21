@@ -201,12 +201,17 @@
                   <li>
                   % if api.has_permission('edit_file', child):
                       <a href="${request.route_path('file', id=child.id)}">${child.label}</a>
+                      <a class='btn btn-default btn-small'
+                          href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
+                          <i class='glyphicon glyphicon-download'></i>
+                      </a>
                         % if delete:
-                            <a class='btn btn-small btn-danger' href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}">
+                            <a class='btn btn-small btn-danger'
+                                href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}"
+                                onclick="return confirm('Supprimer ce fichier ?');">
                             <i class='glyphicon glyphicon-trash'></i>
                           </a>
                       % endif
-                      <a class='' href="${request.route_path('file', id=child.id, _query=dict(action='download'))}"><i class='glyphicon glyphicon-download'></i></a>
 
                   % elif api.has_permission('view_file', child):
                       <a href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">

@@ -75,7 +75,7 @@ log = logger = logging.getLogger(__name__)
 
 
 class PhaseAddFormView(BaseFormView):
-    title = u"Ajouter une phase au projet"
+    title = u"Ajouter un dossier au projet"
     schema = PhaseSchema()
 
     def submit_success(self, appstruct):
@@ -83,15 +83,17 @@ class PhaseAddFormView(BaseFormView):
         model.project_id = self.context.id
         merge_session_with_post(model, appstruct)
         self.dbsession.add(model)
+        self.dbsession.flush()
         redirect = self.request.route_path(
             "project",
             id=model.project_id,
+            _query={'phase': model.id}
         )
         return HTTPFound(redirect)
 
 
 class PhaseEditFormView(BaseFormView):
-    title = u"Édition de la phase"
+    title = u"Édition du dossier"
     schema = PhaseSchema()
 
     def before(self, form):
@@ -120,11 +122,11 @@ def phase_delete_view(context, request):
         id=context.project_id,
     )
     if len(context.tasks) == 0:
-        msg = u"La phase {0} a été supprimée".format(context.name)
+        msg = u"Le dossier {0} a été supprimé".format(context.name)
         request.dbsession.delete(context)
         request.session.flash(msg)
     else:
-        msg = u"Impossible de supprimer la phase {0}, elle contient \
+        msg = u"Impossible de supprimer le dossier {0}, il contient \
 des documents".format(context.name)
         request.session.flash(msg, 'error')
     return HTTPFound(redirect)
@@ -319,12 +321,29 @@ def get_color(index):
     return COLORS_SET[index % len(COLORS_SET)]
 
 
-def project_view(request):
+def get_phase_add_form(request):
     """
-        Return datas for displaying one project
+    Return a form object for phase add
+    :param obj request: The pyramid request object
+    :returns: A form
+    :rtype: class:`deform.Form`
     """
-    populate_actionmenu(request, request.context)
-    phases = request.context.phases
+    schema = PhaseSchema().bind(request=request)
+    form = Form(
+        schema,
+        buttons=(submit_btn,),
+        action=request.current_route_path(_query={'action': 'addphase'}),
+    )
+    return form
+
+
+def set_task_colors(phases):
+    """
+    Set colors on the estimation/invoice/cancelinvoice objects so that we can
+    visually identify related objects
+
+    :param list phases: The list of phases of this project
+    """
     index = 0
 
     for phase in phases:
@@ -348,18 +367,40 @@ def project_view(request):
                 cancelinvoice.color = get_color(index)
                 index += 1
 
-    # We get the latest used task and so we get the latest used phase
-    all_tasks = []
-    for phase in phases:
-        all_tasks.extend(phase.tasks)
-    all_tasks.sort(key=lambda task: task.statusDate, reverse=True)
 
-    if all_tasks:
-        latest_phase = all_tasks[0].phase
+def get_latest_phase(request, phases):
+    """
+    Return the phase where we can identify the last modification
+    :param list phases: The list of phases of the given project
+    """
+    result = 0
+    if 'phase' in request.GET:
+        result = Phase.get(request.GET['phase'])
+
     else:
-        latest_phase = 0
+        # We get the latest used task and so we get the latest used phase
+        all_tasks = []
+        for phase in phases:
+            all_tasks.extend(phase.tasks)
+        all_tasks.sort(key=lambda task: task.statusDate, reverse=True)
 
-    customer_names = (customer.name for customer in request.context.customers)
+        if all_tasks:
+            result = all_tasks[0].phase
+    return result
+
+
+def project_view(request):
+    """
+        Return datas for displaying one project
+    """
+    populate_actionmenu(request, request.context)
+    phases = request.context.phases
+
+    set_task_colors(phases)
+
+    customer_names = (
+        customer.get_label() for customer in request.context.customers
+    )
     title = u"Projet : {0} ({1})".format(
         request.context.name,
         ", ".join(customer_names)
@@ -369,7 +410,8 @@ def project_view(request):
         title=title,
         project=request.context,
         company=request.context.company,
-        latest_phase=latest_phase
+        latest_phase=get_latest_phase(request, phases),
+        phase_form=get_phase_add_form(request),
     )
 
 
@@ -451,56 +493,20 @@ def populate_actionmenu(request, project=None):
     """
     company_id = request.context.get_company_id()
     request.actionmenu.add(get_list_view_btn(company_id))
-    if project is not None:
-        request.actionmenu.add(get_view_btn(project.id))
-        request.actionmenu.add(get_edit_btn(project.id))
-        request.actionmenu.add(get_detail_btn())
-        request.actionmenu.add(get_phase_btn(project.id))
-        request.actionmenu.add(get_add_file_link(request, perm='edit_project'))
 
 
 def get_list_view_btn(cid):
+    """
+    Build a button returning the user to the project list
+
+    :param int cid: The company id we're working on
+    :returns: A Link object
+    """
     return ViewLink(
         u"Liste des projets",
         "list_projects",
         path="company_projects",
         id=cid,
-    )
-
-
-def get_view_btn(id_):
-    return ViewLink(
-        u"Voir",
-        "view_project",
-        path="project",
-        id=id_
-    )
-
-
-def get_edit_btn(id_):
-    return ViewLink(
-        u"Modifier",
-        "edit_project",
-        path="project",
-        id=id_,
-        _query=dict(action="edit"),
-    )
-
-
-def get_detail_btn():
-    return ToggleLink(
-        u"Afficher les détails",
-        'view_project',
-        target="project-description")
-
-
-def get_phase_btn(id_):
-    return ViewLink(
-        u"Ajouter une phase (sous-dossier)",
-        'add_phase',
-        path="project",
-        id=id_,
-        _query=dict(action="addphase"),
     )
 
 

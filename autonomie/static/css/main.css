@@ -192,11 +192,6 @@ textarea{
 #grid_search_form  label.control-label{
     display: none;
 }
-.section-header{
-  padding: 12px 2px;
-  font-weight:bold;
-  font-size:14px;
-}
 /* Invoice list */
 .invoice_resulted, .estimation_geninv, .green_td{
   background-color:#baff87;
@@ -246,12 +241,16 @@ textarea{
 .invoice_cancelled_tr, {
   background-color:#eeeeee;
 }
+.section-header{
+  padding: 6px 2px;
+  font-size: 12px;
+}
 .section-header a{
     padding-left:10px;
-    padding-bottom:5px;
-    padding-top:5px;
+    padding-bottom:2px;
+    padding-top:2px;
     color:#111;
-    font-weight:bold;
+    font-weight:normal;
     vertical-align:middle;
     font-size:16px;
     text-transform:capitalize;
@@ -446,3 +445,6 @@ input[name=altdate], input[name=date]{
 .large-btn{
   padding: 4px 50px;
 }
+/* Responsive tags handling */
+.nav-tabs { min-width: 600px; }
+.nav-tabs-responsive { overflow: auto; }

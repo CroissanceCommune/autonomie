@@ -27,7 +27,7 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='content'>
 % if addform is not None:
-        <button class='btn btn-success' data-target="#project-forms" aria-expanded="false" aria-controls="project-forms" data-toggle='collapse'>
+    <button class='btn btn-primary primary-action' data-target="#project-forms" aria-expanded="false" aria-controls="project-forms" data-toggle='collapse'>
             <i class='glyphicon glyphicon-plus'></i>
             Ajouter un projet
         </button>

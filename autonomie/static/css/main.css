@@ -8,14 +8,17 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
-.btn.primary {
-  text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.5);
+.btn.primary-action {
   -webkit-box-shadow: 0px 1px 0px #2b638f;
   -moz-box-shadow: 0px 1px 0px #2b638f;
   box-shadow: 0px 1px 0px #2b638f;
-  font-weight: bold; }
+  padding: 6px 18px;
+  font-size: 16px; }
 
-.btn.tertiary {
+.btn.secondary-action {
+  padding: 4px 8px; }
+
+.btn.tertiary-action {
   padding: 2px 4px; }
 
 body {

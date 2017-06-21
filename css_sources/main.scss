@@ -14,27 +14,18 @@ $add-color-secondary: #989999;
 $add-color-tertiary: #e3e3e3;
 
 
-.btn.primary{
-  text-shadow: 0px  -1px 0px rgba(0,0,0,.5);
+.btn.primary-action{
   -webkit-box-shadow: 0px 1px 0px #2b638f;
   -moz-box-shadow: 0px 1px 0px #2b638f;
   box-shadow: 0px 1px 0px #2b638f;
-  font-weight: bold;
+  padding: 6px 18px;
+  font-size: 16px;
 }
-.btn.secondary{
+.btn.secondary-action{
+  padding: 4px 8px;
 }
-.btn.tertiary{
+.btn.tertiary-action{
   padding: 2px 4px;
-}
-
-.add-btn.primary{
-//  background-color: $add-color-primary;
-}
-.add-btn.secondary{
-//  background-color: $add-color-secondary;
-}
-.add-btn.tertiary{
-//  background-color: $add-color-secondary;
 }
 
 

@@ -38,8 +38,8 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
 <a class='btn btn-default pull-right' href='${url}' title="Export au formt csv"><i class='fa fa-file'></i>CSV</a>
 
 % if api.has_permission('add_customer'):
-        <button class='btn btn-success' data-target="#customer-forms" aria-expanded="false" aria-controls="customer-forms" data-toggle='collapse'>
-            <i class='glyphicon glyphicon-plus'></i>
+    <button class='btn btn-primary primary-action' data-target="#customer-forms" aria-expanded="false" aria-controls="customer-forms" data-toggle='collapse'>
+            <i class='glyphicon glyphicon-plus-sign'></i>
             Ajouter un client
         </button>
         <a class='btn btn-default' href="${request.route_path('company_customers_import_step1', id=request.context.id)}">

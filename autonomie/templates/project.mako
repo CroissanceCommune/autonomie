@@ -198,7 +198,7 @@
 <div class='tab-content'>
     <!-- Documents tab -->
     <div role="tabpanel" class="tab-pane active row" id="documents">
-        <button class='btn btn-default add-btn secondary'
+        <button class='btn btn-default secondary-action'
             data-target="#phase-form"
             aria-expanded="false"
             aria-controls="phase-form"
@@ -271,7 +271,7 @@
         <div class='header'>
             <h3 class='pull-left'>Devis</h3>
             <a
-                class='btn btn-success large-btn primary'
+                class='btn btn-primary primary-action'
                 href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'
                 >
                 <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer un devis
@@ -297,7 +297,7 @@
             <h3 class='pull-left'>
                 Facture(s), Avoir(s)
             </h3>
-            <a class='btn btn-success large-btn primary'
+            <a class='btn btn-primary primary-action'
                 href='${request.route_path(\
                 "project_invoices", \
                 id=project.id, \
@@ -338,7 +338,7 @@
     <!-- General information tab -->
     <div role="tabpanel" class="tab-pane row" id="general_information">
         <div class="col-md-10 col-md-offset-1 col-xs-12">
-            <a class='btn btn-primary large-btn'
+            <a class='btn btn-primary primary-action'
                 href="${request.route_path('project', id=request.context.id, _query={'action': 'edit'})}"
                 title="Modifier le projet">
                 <i class='glyphicon glyphicon-pencil'></i>
@@ -383,7 +383,7 @@
     <!-- attached files tab -->
     <div role="tabpanel" class="tab-pane row" id="attached_files">
         <div class="col-md-10 col-md-offset-1 col-xs-12">
-            <a class='btn btn-primary large-btn'
+            <a class='btn btn-primary primary-action'
                 href="${request.route_path('project', id=project.id, _query={'action': 'attach_file'})}"
                 title="Attacher un fichier">
                 <i class='glyphicon glyphicon-plus-sign'></i>

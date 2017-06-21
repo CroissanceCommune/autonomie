@@ -129,6 +129,9 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                     <td onclick="${onclick}" class="visible-lg rowlink" >${api.format_date(customer.created_at)}</td>
                     <td onclick="${onclick}" class="visible-lg rowlink" >${customer.code}</td>
                     <td onclick="${onclick}" class="rowlink" >
+                        % if customer.archived:
+                            <span class='label label-warning'>Ce client a été archivé</span>
+                        % endif
                         % if customer.is_company():
                             ${customer.name}
                         % else:

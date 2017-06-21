@@ -21,8 +21,8 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
 <%inherit file="base.mako"></%inherit>
+<%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='content'>
@@ -89,7 +89,12 @@
                     <% onclick = "document.location='{url}'".format(url=url) %>
                     <td onclick="${onclick}" class="visible-lg rowlink" >${api.format_date(project.created_at)}</td>
                     <td onclick="${onclick}" class='rowlink'>${project.code}</td>
-                    <td onclick="${onclick}" class='rowlink'>${project.name}</td>
+                    <td onclick="${onclick}" class='rowlink'>
+                        % if project.archived:
+                            <span class='label label-warning'>Ce projet est archivé</span>
+                        % endif
+                        ${project.name}
+                    </td>
                     <td onclick="${onclick}" class='rowlink'>
                         <ul>
                             % for customer in project.customers:
@@ -99,10 +104,22 @@
                             % endfor
                         </ul>
                     </td>
-                    <td class="actions">
-                        % for btn in item_actions:
-                            ${btn.render(request, project)|n}
-                        % endfor
+                    <td class='text-right'>
+		                <div class='btn-group'>
+		                    <button
+                                type="button"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                Actions <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                % for url, label, title, icon, options in stream_actions(project):
+                                    ${dropdown_item(url, label, title, icon=icon, **options)}
+                                % endfor
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             % endfor

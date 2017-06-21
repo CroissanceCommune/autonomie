@@ -30,11 +30,11 @@
         simple view, add_phase, edit, ...
 """
 import logging
+import colander
 from sqlalchemy import (
     or_,
     distinct,
 )
-from webhelpers.html.builder import HTML
 from deform import Form
 
 from pyramid.decorator import reify
@@ -51,9 +51,6 @@ from autonomie.utils.colors import COLORS_SET
 from autonomie.utils.widgets import (
     ViewLink,
     ToggleLink,
-    ItemActionLink,
-    StaticWidget,
-    PopUp,
 )
 from autonomie.forms.project import (
     get_list_schema,
@@ -74,7 +71,7 @@ from autonomie.views.files import (
     get_add_file_link,
 )
 
-log = logging.getLogger(__name__)
+log = logger = logging.getLogger(__name__)
 
 
 class PhaseAddFormView(BaseFormView):
@@ -165,7 +162,7 @@ class ProjectsList(BaseListView):
             * an add projectform popup
             * a searchform
     """
-    add_template_vars = ('title', 'item_actions', 'addform')
+    add_template_vars = ('title', 'stream_actions', 'addform')
     title = u"Liste des projets"
     schema = get_list_schema()
     default_sort = "created_at"
@@ -187,8 +184,8 @@ class ProjectsList(BaseListView):
 
     def filter_archived(self, query, appstruct):
         archived = appstruct.get('archived', False)
-        if archived is False:
-            query = query.filter(Project.archived == archived)
+        if archived in (False, colander.null):
+            query = query.filter(Project.archived == False)
         return query
 
     def filter_name_or_customer(self, query, appstruct):
@@ -212,91 +209,78 @@ class ProjectsList(BaseListView):
             res = form.render()
         return res
 
-    @property
-    def item_actions(self):
+    def stream_actions(self, project):
         """
-            return action buttons builder
-        """
-        return self._get_actions()
+        Stream actions available for the given project
 
-    def _get_actions(self):
+        :param obj project: A Project instance
+        :rtype: generator
         """
-            Return action buttons with permission handling
-        """
-        btns = []
-        btns.append(
-            ItemActionLink(
-                u"Voir",
-                "view_project",
-                css='btn btn-default btn-sm',
-                path="project",
-                icon="search",
-            )
+        yield (
+            self.request.route_path("project", id=project.id),
+            u"Voir/Modifier",
+            u"Voir/Modifier",
+            u"pencil",
+            {}
         )
-        btns.append(
-            ItemActionLink(
-                u"Devis",
-                "add_estimation",
-                css="btn btn-default btn-sm",
-                title=u"Nouveau devis",
-                path="project_estimations",
-                icon="file",
+        if self.request.has_permission('add_estimation'):
+            yield (
+                self.request.route_path("project_estimations", id=project.id),
+                u"Nouveau devis",
+                u"Créer un devis",
+                u"file",
+                {}
             )
-        )
-        btns.append(
-            ItemActionLink(
-                u"Facture",
-                "add_invoice",
-                css="btn btn-default btn-sm",
-                title=u"Nouvelle facture",
-                path="project_invoices",
-                icon="file",
+        if self.request.has_permission('add_invoice'):
+            yield (
+                self.request.route_path("project_invoices", id=project.id),
+                u"Nouvelle facture",
+                u"Créer une facture",
+                u"file",
+                {}
             )
-        )
-        if self.request.params.get('archived', '0') in ('0', 'false'):
-            btns.append(
-                ItemActionLink(
-                    u"Archiver",
-                    "edit_project",
-                    css="btn btn-default btn-sm",
-                    confirm=u'Êtes-vous sûr de vouloir archiver ce projet ?',
-                    path="project",
-                    title=u"Archiver le projet",
-                    _query=dict(action="archive"),
-                    icon="book",
+        if self.request.has_permission('edit_project'):
+            if project.archived:
+                yield (
+                    self.request.route_path(
+                        "project",
+                        id=project.id,
+                        _query=dict(action="archive")
+                    ),
+                    u"Désarchiver le projet",
+                    u"Désarchiver le projet",
+                    u"book",
+                    {}
                 )
-            )
-        else:
-            btns.append(
-                ItemActionLink(
-                    u"Désarchiver",
-                    "edit_project",
-                    css="btn btn-default btn-sm",
-                    path="project",
-                    title=u"Désarchiver le projet",
-                    _query=dict(action="archive"),
-                    icon="book",
+                if not project.has_tasks():
+                    yield (
+                        self.request.route_path(
+                            "project",
+                            id=project.id,
+                            _query=dict(action="delete")
+                        ),
+                        u"Supprimer",
+                        u"Supprimer ce projet",
+                        u"trash",
+                        {
+                            "onclick": (
+                                u"return confirm('Êtes-vous sûr de "
+                                "vouloir supprimer ce projet ?')"
+                            )
+                        }
+                    )
+            else:
+                yield (
+                    self.request.route_path(
+                        "project",
+                        id=project.id,
+                        _query=dict(action="archive")
+                    ),
+                    u"Archiver le projet",
+                    u"Archiver le projet",
+                    u"book",
+                    {}
                 )
-            )
-            del_link = ItemActionLink(
-                u"Supprimer",
-                "edit_project",
-                css="btn btn-danger",
-                confirm=u'Êtes-vous sûr de vouloir supprimer ce projet ?',
-                path="project",
-                title=u"Supprimer le projet",
-                _query=dict(action="delete"),
-                icon="trash"
-            )
-
-            def is_deletable_perm(context, req):
-                """
-                    Return True if the current item (context) is deletable
-                """
-                return context.is_deletable()
-            del_link.set_special_perm_func(is_deletable_perm)
-            btns.append(del_link)
-        return btns
 
 
 def project_archive(request):
@@ -539,28 +523,28 @@ def includeme(config):
     config.add_view(
         ProjectAdd,
         route_name='company_projects',
-        renderer='project.mako',
+        renderer='project_edit.mako',
         request_method='POST',
         permission='list_projects',
     )
     config.add_view(
         ProjectAdd,
         route_name='company_projects',
-        renderer='project.mako',
+        renderer='project_edit.mako',
         request_param='action=add',
         permission='add_project',
     )
     config.add_view(
         ProjectEdit,
         route_name='project',
-        renderer='project.mako',
+        renderer='project_edit.mako',
         request_param='action=edit',
         permission='edit_project',
     )
     config.add_view(
         project_view,
         route_name='project',
-        renderer='project_view.mako',
+        renderer='project.mako',
         permission='view_project',
     )
     config.add_view(

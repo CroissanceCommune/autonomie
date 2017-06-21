@@ -43,7 +43,6 @@ def get_list_schema():
             colander.Boolean(),
             name='archived',
             label=u"Inclure les clients archivés",
-            missing=False,
         )
     )
     schema.add(

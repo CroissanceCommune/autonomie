@@ -26,6 +26,7 @@
     Customer views
 """
 import logging
+import colander
 
 from sqlalchemy import (
     or_,
@@ -129,8 +130,8 @@ class CustomersListTools(object):
         return Customer.query().filter_by(company_id=company.id)
 
     def filter_archived(self, query, appstruct):
-        archived = appstruct.get('archived')
-        if archived is False:
+        archived = appstruct.get('archived', False)
+        if archived in (False, colander.null):
             query = query.filter_by(archived=False)
         return query
 

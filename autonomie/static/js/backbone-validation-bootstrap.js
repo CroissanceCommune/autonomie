@@ -44,28 +44,32 @@ function hideFormError(form){
    */
     form.find(".alert").remove();
     var groups = form.find(".form-group");
-    groups.removeClass("error");
-    groups.find(".help-inline.error-message").remove();
-    groups.find(".help-inline .error").remove();
+    groups.removeClass("has-error");
+    groups.find(".error-message").remove();
     return form;
 }
 function hideFieldError(control){
   /*"""
    */
    var group = control.parents(".form-group");
-   group.removeClass("error");
-   group.find(".help-inline.error-message").remove();
+   group.removeClass("has-error");
+   group.find(".error-message").remove();
    return control;
 }
-_.extend(Backbone.Validation.callbacks, {
-  valid: function(view, attr, selector) {
+function BootstrapOnValidForm(view, attr, selector){
     var control, group;
     control = view.$('[' + selector + '=' + attr + ']');
     hideFieldError(control);
-  },
-  invalid: function(view, attr, error, selector) {
+}
+function BootstrapOnInvalidForm(view, attr, error, selector) {
     var control, group, position, target;
     control = view.$('[' + selector + '=' + attr + ']');
     showError(control, error);
-  }
-});
+}
+function setUpBbValidationCallbacks(bb_module){
+    _.extend(bb_module, {
+        valid: BootstrapOnValidForm,
+        invalid: BootstrapOnInvalidForm
+    });
+}
+setUpBbValidationCallbacks(Backbone.Validation.callbacks);

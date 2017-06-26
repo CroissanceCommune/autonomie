@@ -51,6 +51,7 @@ function formatPaymentDate(isoDate){
     return "";
   }
 }
+var formatDate = formatPaymentDate;
 function getDateFromIso(isoDateStr, dateFormat){
  var strdate = "";
  if (isoDateStr !== ''){

@@ -55,9 +55,7 @@ class CompanyService(object):
         query = DBSESSION().query(Estimation)
         query = query.filter(Estimation.company_id == instance.id)
         if valid:
-            query = query.filter(
-                Estimation.CAEStatus.in_(Estimation.valid_states)
-            )
+            query = query.filter(Estimation.status=='valid')
 
         return query
 
@@ -67,9 +65,10 @@ class CompanyService(object):
         query = DBSESSION().query(Invoice)
         query = query.filter(Invoice.company_id == instance.id)
         if valid:
-            query = query.filter(Invoice.CAEStatus.in_(Invoice.valid_states))
+            query = query.filter(Invoice.status == 'valid')
         elif not_paid:
-            query = query.filter(Invoice.CAEStatus.in_(Invoice.not_paid_states))
+            query = query.filter(Invoice.status == 'valid')
+            query = query.filter(Invoice.paid_status.in_(('paid', 'waiting')))
         return query
 
     @classmethod
@@ -78,9 +77,7 @@ class CompanyService(object):
         query = DBSESSION().query(CancelInvoice)
         query = query.filter(CancelInvoice.company_id == instance.id)
         if valid:
-            query = query.filter(
-                CancelInvoice.CAEStatus.in_(CancelInvoice.valid_states)
-            )
+            query = query.filter(CancelInvoice.status == 'valid')
         return query
 
     @classmethod
@@ -92,7 +89,7 @@ class CompanyService(object):
         query = query.filter(
             Customer.invoices.any(
                 and_(
-                    Invoice.CAEStatus.in_(Invoice.valid_states),
+                    Invoice.status == 'valid',
                     Invoice.financial_year == year
                 )
             )

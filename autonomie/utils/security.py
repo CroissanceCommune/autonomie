@@ -25,7 +25,6 @@
 """
     Root factory <=> Acl handling
 """
-import logging
 from pyramid.security import (
     Allow,
     Deny,
@@ -88,8 +87,6 @@ from autonomie.models.sale_product import (
     SaleProductCategory,
 )
 from autonomie.models.tva import Tva
-
-logger = logging.getLogger(__name__)
 
 
 DEFAULT_PERM = [
@@ -341,81 +338,110 @@ def get_user_acl(self):
     return acl
 
 
-def get_estimation_acl(self):
+def get_estimation_default_acls(self):
     """
-    Return the acls for estimations
-    """
-    acls = DEFAULT_PERM[:]
-    for user in self.project.company.employees:
-        acls.append((
-            Allow,
-            user.login,
-            (
-                'view_estimation',
-                'edit_estimation',
-                'delete_estimation',
-                'view_file',
-                'add_file',
-                'edit_file',
-            )
-        ))
-        if "estimation_validation" in user.groups:
-            acls.append((Allow, user.login, ("valid.estimation")))
-        else:
-            acls.append((Allow, user.login, ("wait.estimation")))
+    Return acls for the estimation handling
 
-    return acls
-
-
-def get_invoice_acl(self):
-    """
-    Return the acls for invoices
+    :returns: A pyramid acls list
+    :rtype: list
     """
     acls = DEFAULT_PERM[:]
+
+    if self.status == 'valid':
+        acls.insert(
+            0,
+            (Deny, Everyone, 'edit_estimation'),
+        )
     for user in self.project.company.employees:
-        acls.append((
-            Allow,
-            user.login,
-            (
-                'view_invoice',
-                'edit_invoice',
-                'delete_invoice',
-                'view_file',
-                'add_file',
-                'edit_file',
-                'view_payment',
-            )
-        ))
-        if "invoice_validation" in user.groups:
-            acls.append((Allow, user.login, ("valid.invoice",)))
-        else:
-            acls.append((Allow, user.login, ("wait.invoice",)))
-
-        if "payment_admin" in user.groups:
-            acls.append((Allow, user.login, ("add_payment",)))
-
-    return acls
-
-
-def get_cancelinvoice_acl(self):
-    """
-    Return the acls for cancelinvoices
-    """
-    acls = DEFAULT_PERM[:]
-    for user in self.project.company.employees:
-        rights = (
-            'view_cancelinvoice',
-            'edit_cancelinvoice',
-            'delete_cancelinvoice',
+        perms = (
+            'view_estimation',
+            'duplicate.estimation',
             'view_file',
             'add_file',
             'edit_file',
         )
-        if "invoice_validation" in user.groups:
-            rights += ("valid.cancelinvoice",)
+
+        if self.is_draft():
+            perms += ('edit_estimation', 'delete_estimation',)
+
+        if "estimation_validation" in user.groups:
+            perms += ("valid.estimation",)
         else:
-            rights += ("wait.cancelinvoice",)
-        acls.append((Allow, user.login, rights))
+            perms += ("wait.estimation",)
+
+        if self.is_valid():
+            perms += ('set_signed.estimation', 'set_aborted.estimation')
+            if not self.is_aborted():
+                perms += ('geninv.estimation',)
+
+        acls.append((Allow, user.login, perms))
+    return acls
+
+
+def get_invoice_default_acls(self):
+    """
+    Return the acls for invoices
+
+    :returns: A pyramid acls list
+    :rtype: list
+    """
+    acls = DEFAULT_PERM[:]
+    if self.status == 'valid':
+        acls.insert(
+            0,
+            (Deny, Everyone, 'edit_invoice'),
+        )
+    for user in self.project.company.employees:
+        perms = (
+            'view_invoice',
+            'duplicate.invoice',
+            'view_file',
+            'add_file',
+            'edit_file',
+            'view_payment',
+        )
+        if self.is_draft():
+            perms += ('edit_invoice', 'delete_invoice',)
+
+        if "invoice_validation" in user.groups:
+            perms += ("valid.invoice",)
+        else:
+            perms += ("wait.invoice",)
+
+        if "payment_admin" in user.groups:
+            perms += ('add_payment',)
+
+        acls.append((Allow, user.login, perms))
+
+    return acls
+
+
+def get_cancelinvoice_default_acls(self):
+    """
+    Return the acls for cancelinvoices
+    """
+    acls = DEFAULT_PERM[:]
+    if self.status == 'valid':
+        acls.insert(
+            0,
+            (Deny, Everyone, 'edit_cancelinvoice'),
+        )
+    for user in self.project.company.employees:
+        perms = (
+            'view_cancelinvoice',
+            'view_file',
+            'add_file',
+            'edit_file',
+        )
+        if self.is_draft():
+            perms += ('edit_cancelinvoice', 'delete_cancelinvoice')
+
+        if "invoice_validation" in user.groups:
+            perms += ("valid.cancelinvoice",)
+        else:
+            perms += ("wait.cancelinvoice",)
+
+        acls.append((Allow, user.login, perms))
     return acls
 
 

@@ -28,6 +28,7 @@
 import datetime
 import logging
 import deform
+import colander
 
 from zope.interface import implementer
 from beaker.cache import cache_region
@@ -82,6 +83,13 @@ from .states import DEFAULT_STATE_MACHINES
 log = logging.getLogger(__name__)
 
 
+INVOICE_STATES = (
+    ('waiting', u"En attente"),
+    ('paid', u'Partiellement payée'),
+    ('resulted', u'Soldée'),
+)
+
+
 class InvoiceService(object):
     """
     Service for invoice and cancelinvoice management
@@ -125,7 +133,7 @@ def invoice_tolate(invoicedate, status):
         45 days
     """
     res = False
-    if status in ('valid', 'paid'):
+    if status in ('waiting', 'paid'):
         today = datetime.date.today()
         elapsed = today - invoicedate
         if elapsed > datetime.timedelta(days=45):
@@ -165,6 +173,18 @@ class Invoice(Task, InvoiceCompute):
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
+    paid_status = Column(
+        String(10),
+        default='waiting',
+        info={
+            'colanderalchemy': {
+                'widget': deform.widget.SelectWidget(values=INVOICE_STATES),
+                'title': u'Statut de la facture',
+                "validator": colander.OneOf(dict(INVOICE_STATES).keys()),
+            }
+        }
+    )
+
     # seems it's not used anymore
     deposit = deferred(
         Column(
@@ -254,31 +274,25 @@ class Invoice(Task, InvoiceCompute):
         self.name = self._sold_name_tmpl.format(self.project_index)
 
     def is_draft(self):
-        return self.CAEStatus in ('draft', 'invalid',)
-
-    def is_editable(self, manage=False):
-        if manage:
-            return self.CAEStatus in ('draft', 'invalid', 'wait', None,)
-        else:
-            return self.CAEStatus in ('draft', 'invalid', None,)
+        return self.status in ('draft', 'invalid',)
 
     def is_valid(self):
-        return self.CAEStatus == 'valid'
+        return self.status == 'valid'
 
     def has_been_validated(self):
-        return self.CAEStatus in self.valid_states
+        return self.is_valid()
 
     def is_waiting(self):
-        return self.CAEStatus == "wait"
+        return self.status == "wait"
 
     def is_invoice(self):
         return True
 
     def is_paid(self):
-        return self.CAEStatus == 'paid'
+        return self.paid_status == 'paid'
 
     def is_resulted(self):
-        return self.CAEStatus == 'resulted'
+        return self.paid_status == 'resulted'
 
     def is_cancelled(self):
         """
@@ -302,7 +316,6 @@ class Invoice(Task, InvoiceCompute):
         )
         cancelinvoice.address = self.address
         cancelinvoice.workplace = self.workplace
-        cancelinvoice.CAEStatus = 'draft'
         cancelinvoice.description = self.description
 
         cancelinvoice.invoice = self
@@ -368,17 +381,13 @@ class Invoice(Task, InvoiceCompute):
         """
         Check if the invoice is resulted or not and set the appropriate status
         """
-        old_status = self.CAEStatus
         log.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() == 0 or force_resulted:
-            self.CAEStatus = 'resulted'
+            self.paid_status = 'resulted'
         elif len(self.payments) > 0:
-            self.CAEStatus = 'paid'
+            self.paid_status = 'paid'
         else:
-            self.CAEStatus = 'valid'
-        # If the status has changed, we update the statusPerson
-        if user_id is not None and old_status != self.CAEStatus:
-            self.statusPerson = user_id
+            self.paid_status = 'waiting'
         return self
 
     def duplicate(self, user, project, phase, customer):
@@ -400,7 +409,6 @@ class Invoice(Task, InvoiceCompute):
 
         invoice.workplace = self.workplace
 
-        invoice.CAEStatus = 'draft'
         invoice.description = self.description
 
         invoice.payment_conditions = self.payment_conditions
@@ -526,20 +534,14 @@ class CancelInvoice(Task, TaskCompute):
         """
         return company.get_next_invoice_index()
 
-    def is_editable(self, manage=False):
-        if manage:
-            return self.CAEStatus in ('draft', 'invalid', 'wait', None,)
-        else:
-            return self.CAEStatus in ('draft', 'invalid', None,)
-
     def is_draft(self):
-        return self.CAEStatus in ('draft', 'invalid')
+        return self.status in ('draft', 'invalid')
 
     def is_valid(self):
-        return self.CAEStatus == 'valid'
+        return self.status == 'valid'
 
     def has_been_validated(self):
-        return self.CAEStatus in self.valid_states
+        return self.is_valid()
 
     def is_paid(self):
         return False
@@ -551,7 +553,7 @@ class CancelInvoice(Task, TaskCompute):
         return False
 
     def is_waiting(self):
-        return self.CAEStatus == 'wait'
+        return self.status == 'wait'
 
     def is_cancelinvoice(self):
         return True
@@ -617,6 +619,11 @@ class Payment(DBBASE, PersistentACLMixin):
     task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
     bank_id = Column(ForeignKey('bank_account.id'))
     tva_id = Column(ForeignKey('tva.id'), nullable=True)
+
+    user_id = Column(ForeignKey('accounts.id'))
+
+    user = relationship("User")
+
     bank = relationship(
         "BankAccount",
         backref=backref(

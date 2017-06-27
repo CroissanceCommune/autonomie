@@ -89,7 +89,7 @@ def test_invoice(dbsession, invoice):
 
 def test_payment(dbsession, invoice):
     phase_id = invoice.phase.id
-    invoice.CAEStatus = "valid"
+    invoice.status = "valid"
     invoice.record_payment(amount=1500, mode="CHEQUE", resulted=True)
     dbsession.add(invoice)
     dbsession.flush()

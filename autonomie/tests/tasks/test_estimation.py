@@ -178,7 +178,7 @@ def test_duplicate_estimation(dbsession, estimation):
     )
     for key in "customer", "address", "expenses_ht", "workplace":
         assert getattr(newestimation, key) == getattr(estimation, key)
-    assert newestimation.CAEStatus == 'draft'
+    assert newestimation.status == 'draft'
     assert newestimation.project == estimation.project
     assert newestimation.statusPersonAccount == estimation.owner
     assert newestimation.internal_number.startswith("company1 {0:%Y-%m}".format(

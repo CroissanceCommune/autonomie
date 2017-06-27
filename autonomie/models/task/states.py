@@ -28,7 +28,10 @@
 import logging
 import datetime
 
-from autonomie.models.statemachine import StateMachine
+from autonomie.models.statemachine import (
+    StateMachine,
+    State,
+)
 from autonomie.exception import Forbidden
 from autonomie.exception import SignatureError
 from autonomie import interfaces
@@ -42,7 +45,7 @@ class TaskStates(StateMachine):
     """
         Task statemachine
     """
-    status_attr = "CAEStatus"
+    status_attr = "status"
     userid_attr = "statusPerson"
 
 
@@ -84,6 +87,28 @@ def duplicate_task(request, task, **kw):
         raise Forbidden(u"Missing mandatory arguments")
 
 
+def mark_estimation_signed(request, estimation, **kw):
+    """
+    mark an estimation as signed
+    :param obj request: The current request
+    :param obj estimation: The task to edit
+    :param dict kw: The keywords
+    """
+    estimation.estimation_status = 'signed'
+    return estimation
+
+
+def mark_estimation_aborted(request, estimation, **kw):
+    """
+    mark an estimation as aborted
+    :param obj request: The current request
+    :param obj estimation: The task to edit
+    :param dict kw: The keywords
+    """
+    estimation.estimation_status = 'aborted'
+    return estimation
+
+
 def edit_metadata_task(request, task, **kw):
     """
         Change a task's phase
@@ -91,6 +116,19 @@ def edit_metadata_task(request, task, **kw):
     for key, value in kw.items():
         if value not in (None, ''):
             setattr(task, key, value)
+    return task
+
+
+def edit_task_date(request, task, **kw):
+    """
+    Change a task's date
+    :param obj request: The current request
+    :param obj task: The task to edit
+    :param dict kw: The keywords
+    """
+    new_date = kw.get('date')
+    if new_date is not None:
+        task.date = new_date
     return task
 
 
@@ -334,10 +372,56 @@ def get_maninv_state():
     return {}
 
 
+def get_state_machine(data_type):
+    """
+    Return a state machine handling the basic states
+
+    :param str data_type: estimation/invoice/cancelinvoice
+
+    :returns: A state machine that can be used to perform state changes
+    :rtype: class:`autonomie.models.statemachine.StateMachine`
+    """
+    draft = State(
+        'draft',
+        'edit_%s' % data_type,
+        status_attr='status',
+        userid_attr='statusPerson',
+    )
+    wait = State(
+        'wait',
+        'wait.%s' % data_type,
+        status_attr='status',
+        userid_attr='statusPerson',
+    )
+    invalid = State(
+        'invalid',
+        'invalid.%s' % data_type,
+        status_attr='status',
+        userid_attr='statusPerson',
+    )
+    valid = State(
+        'valid',
+        'valid.%s' % data_type,
+        status_attr='status',
+        userid_attr='statusPerson',
+    )
+    machine = TaskStates()
+    machine.add_transition('draft', draft)
+    machine.add_transition('draft', wait)
+    machine.add_transition('draft', valid)
+
+    machine.add_transition('invalid', draft)
+    machine.add_transition('invalid', valid)
+    machine.add_transition('invalid', wait)
+
+    machine.add_transition('wait', valid)
+    machine.add_transition('wait', invalid)
+    return machine
+
+
 DEFAULT_STATE_MACHINES = {
-    "base": TaskStates('draft', {}),
-    "estimation": TaskStates('draft', get_est_state()),
-    "invoice": TaskStates('draft', get_inv_state()),
-    "cancelinvoice": TaskStates('draft', get_cinv_state()),
-    "manualinvoice": TaskStates("valid", get_maninv_state())
+    "base": get_state_machine('task'),
+    "estimation": get_state_machine('estimation'),
+    "invoice": get_state_machine('invoice'),
+    "cancelinvoice": get_state_machine('cancelinvoice'),
 }

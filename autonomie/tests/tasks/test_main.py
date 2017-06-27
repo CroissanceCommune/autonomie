@@ -31,28 +31,20 @@
 """
 
 import datetime
-import unittest
 import pytest
-from zope.interface.verify import verifyObject
-from pyramid import testing
 
 from autonomie.models.customer import Customer
 from autonomie.models.project import Project, Phase
 from autonomie.models.user import User
 from autonomie.models.company import Company
-from autonomie.models.task import Estimation
-from autonomie.models.task import Invoice
-from autonomie.models.task import CancelInvoice
-from autonomie.models.task.interfaces import IValidatedTask
-from autonomie.models.task.interfaces import IPaidTask
-from autonomie.models.task.interfaces import IInvoice
+from autonomie.models.task import Task
 
 
 from autonomie.exception import Forbidden
 
 TASK = dict(
     name=u"Test task",
-    CAEStatus="draft",
+    status="draft",
     date=datetime.date.today(),
     statusDate=datetime.date.today(),
     description=u"Test task description"
@@ -86,8 +78,8 @@ def project(content):
 
 
 @pytest.fixture
-def invoice(project, user, customer, company, phase):
-    task = Invoice(
+def task(project, user, customer, company, phase):
+    task = Task(
         company,
         customer,
         project,
@@ -97,119 +89,32 @@ def invoice(project, user, customer, company, phase):
     for key, value in TASK.items():
         setattr(task, key, value)
     return task
-
-
-@pytest.fixture
-def cancelinvoice(project, user, customer, company, phase):
-    task = CancelInvoice(
-        company,
-        customer,
-        project,
-        phase,
-        user,
-    )
-    for key, value in TASK.items():
-        setattr(task, key, value)
-    return task
-
-
-@pytest.fixture
-def estimation(project, user, customer, company, phase):
-    est = Estimation(
-        company,
-        customer,
-        project,
-        phase,
-        user,
-    )
-    for key, value in TASK.items():
-        setattr(est, key, value)
-    return est
-
-
-def test_interfaces(estimation, invoice, cancelinvoice):
-    assert(verifyObject(IValidatedTask, estimation))
-    assert(verifyObject(IPaidTask, invoice))
-    assert(verifyObject(IPaidTask, cancelinvoice))
-    assert(verifyObject(IInvoice, invoice))
-    assert(verifyObject(IInvoice, invoice))
-
-
-def test_task_status(estimation, invoice, cancelinvoice):
-    #Estimations
-    task = estimation
-    assert(task.is_draft())
-    assert(task.is_editable())
-    assert(not(task.is_valid()))
-    assert(not(task.has_been_validated()))
-    assert(not(task.is_waiting()))
-    task.CAEStatus = "wait"
-    assert(task.is_waiting())
-    assert(not(task.is_valid()))
-    assert(not(task.is_editable()))
-    assert(task.is_editable(manage=True))
-    for i in ("valid", "geninv"):
-        task.CAEStatus = i
-        assert(task.has_been_validated())
-        assert(not(task.is_editable()))
-    # Invoices
-    task = invoice
-    assert(task.is_draft())
-    assert(task.is_editable())
-    assert(not(task.is_valid()))
-    assert(not(task.has_been_validated()))
-    assert(not(task.is_waiting()))
-    task.CAEStatus = "wait"
-    assert(task.is_waiting())
-    assert(not(task.is_valid()))
-    assert(not(task.is_editable()))
-    assert(task.is_editable(manage=True))
-    for i in ("valid", ):
-        task.CAEStatus = i
-        assert(task.has_been_validated())
-        assert(not(task.is_editable()))
-    task.CAEStatus = "paid"
-    assert(task.is_paid())
-    # CancelInvoice
-    task = cancelinvoice
-    assert(task.is_draft())
-    assert(task.is_editable())
-    assert(not(task.is_valid()))
-    assert(not(task.has_been_validated()))
-    assert(not(task.is_waiting()))
-    task.CAEStatus = "wait"
-    assert(task.is_waiting())
-    assert(not(task.is_valid()))
-    assert(not(task.is_editable()))
-    assert(task.is_editable(manage=True))
-    task.CAEStatus = "valid"
-    assert(task.is_valid())
-    assert(not(task.is_editable()))
 
 
 class TestStatusChange:
-    def _forbidden_state_change(self, config, task, from_state, to_states, request):
+    def _forbidden_state_change(self, config, task, from_state, to_states,
+                                request):
         for st in to_states:
-            task.CAEStatus = from_state
+            task.status = from_state
             with pytest.raises(Forbidden):
                 task.set_status(st, request, task.owner)
 
-    def _allowed_state_change(self, config, task, from_state, to_states, request):
+    def _allowed_state_change(self, config, task, from_state, to_states,
+                              request):
         for st in to_states:
-            task.CAEStatus = from_state
+            task.status = from_state
             task.set_status(st, request, task.owner.id)
-            assert task.CAEStatus == st
+            assert task.status == st
 
-    def test_status_change(self, config, estimation, invoice, cancelinvoice,
-                           request_with_config):
+    def test_status_change(self, config, task, request_with_config):
         config.testing_securitypolicy(userid='test', permissive=True)
-        # Estimation
-        task = estimation
+
         status = 'draft'
         self._forbidden_state_change(
             config,
-            task, status,
-            ("geninv", "aboest", "invalid"),
+            task,
+            status,
+            ("invalid"),
             request_with_config,
         )
         self._allowed_state_change(
@@ -220,12 +125,6 @@ class TestStatusChange:
         )
 
         status = 'wait'
-        self._forbidden_state_change(
-            config,
-            task, status,
-            ("geninv", ),
-            request_with_config,
-        )
         self._allowed_state_change(
             config,
             task, status,
@@ -237,73 +136,10 @@ class TestStatusChange:
         self._forbidden_state_change(
             config,
             task, status,
-            ("draft", "invalid", ),
+            ("draft", "invalid", "wait"),
             request_with_config
         )
-        self._allowed_state_change(
-            config,
-            task, status,
-            ("aboest", ),
-            request_with_config,
-        )
 
-        status = 'geninv'
-        self._forbidden_state_change(
-            config,
-            task, status,
-            ("draft", "invalid", "valid", "aboest"),
-            request_with_config,
-        )
 
-#        # Invoice
-        task = invoice
-        status = 'draft'
-        self._forbidden_state_change(
-            config,
-            task, status,
-            ("aboinv", "invalid"),
-            request_with_config,
-        )
-        self._allowed_state_change(
-            config,
-            task, status,
-            ('wait',),
-            request_with_config,
-        )
-
-        status = 'wait'
-        self._allowed_state_change(
-            config,
-            task, status,
-            ("draft", 'invalid', 'valid',),
-            request_with_config,
-        )
-
-        status = 'valid'
-        self._forbidden_state_change(
-            config,
-            task, status,
-            ("draft", "invalid", ),
-            request_with_config,
-        )
-
-        status = "paid"
-        self._forbidden_state_change(
-            config,
-            task, status,
-            ("draft", "invalid", "valid", "aboinv", ),
-            request_with_config,
-        )
-
-        task = cancelinvoice
-        request = testing.DummyRequest()
-        task.CAEStatus = 'draft'
-        task.set_status("delete", request, 'test')
-
-        status = "valid"
-        self._forbidden_state_change(
-            config,
-            task, status,
-            ("draft", ),
-            request_with_config,
-        )
+class TaskAvailableAction:
+    pass

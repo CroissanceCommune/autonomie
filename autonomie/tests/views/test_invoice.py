@@ -134,7 +134,7 @@ def test_change_status(invoice, get_csrf_request_with_db):
     view = InvoiceStatusView(request)
     view()
     invoice = getone()
-    assert invoice.CAEStatus == "wait"
+    assert invoice.status == "wait"
 
 def test_duplicate(config, content, dbsession, invoice, get_csrf_request_with_db):
     from autonomie.views.invoice import duplicate
@@ -142,7 +142,7 @@ def test_duplicate(config, content, dbsession, invoice, get_csrf_request_with_db
                                   permissive=True)
     config.add_route('invoice', '/inv')
     #The invoice status need to be at least wait to be duplicated
-    invoice.CAEStatus = 'wait'
+    invoice.status = 'wait'
     request = get_csrf_request_with_db(
         post={'submit':'duplicate', 'phase':"1", 'project':"1", 'customer':"1"}
     )
@@ -155,7 +155,7 @@ def test_duplicate(config, content, dbsession, invoice, get_csrf_request_with_db
 
 def test_delete(invoice, get_csrf_request_with_db):
     from autonomie.views.taskaction import make_task_delete_view
-    invoice.CAEstatus = 'wait'
+    invoice.status = 'wait'
     request = get_csrf_request_with_db(post={'submit':'delete'})
     request.context = invoice
     request.matched_route = "invoice"

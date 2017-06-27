@@ -39,6 +39,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Text,
+    Boolean,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -88,6 +89,12 @@ PAYMENTDISPLAYCHOICES = (
     ),
 )
 
+ESTIMATION_STATES = (
+    ('waiting', u"En attente"),
+    ('aborted', u'Annulé'),
+    ('signed', u'Signé'),
+)
+
 
 @implementer(IValidatedTask, IMoneyTask)
 class Estimation(Task, EstimationCompute):
@@ -102,6 +109,26 @@ class Estimation(Task, EstimationCompute):
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
+    estimation_status = Column(
+        String(10),
+        default='waiting',
+        info={
+            'colanderalchemy': {
+                'widget': deform.widget.SelectWidget(values=ESTIMATION_STATES),
+                'title': u'Statut du devis'
+            }
+        }
+    )
+    geninv = Column(
+        Boolean(),
+        default=False,
+        info={
+            'colanderalchemy': {
+                "title": u"Factures générées ?"
+            }
+        }
+    )
+
     # common with only invoices
     deposit = Column(
         Integer,
@@ -184,22 +211,16 @@ class Estimation(Task, EstimationCompute):
         return company.get_next_estimation_index()
 
     def is_draft(self):
-        return self.CAEStatus in ('draft', 'invalid',)
-
-    def is_editable(self, manage=False):
-        if manage:
-            return self.CAEStatus in ('draft', 'invalid', 'wait', None)
-        else:
-            return self.CAEStatus in ('draft', 'invalid', None)
+        return self.status in ('draft', 'invalid',)
 
     def is_valid(self):
-        return self.CAEStatus == 'valid'
+        return self.status == 'valid'
 
     def has_been_validated(self):
-        return self.CAEStatus in ('valid', 'geninv',)
+        return self.is_valid()
 
     def is_waiting(self):
-        return self.CAEStatus == 'wait'
+        return self.status == 'wait'
 
     def is_estimation(self):
         return True
@@ -224,7 +245,6 @@ class Estimation(Task, EstimationCompute):
         estimation.workplace = self.workplace
 
         estimation.description = self.description
-        estimation.CAEStatus = "draft"
 
         estimation.deposit = self.deposit
         estimation.payment_conditions = self.payment_conditions
@@ -331,7 +351,6 @@ class Estimation(Task, EstimationCompute):
         inv.course = self.course
         inv.address = self.address
         inv.workplace = self.workplace
-        inv.CAEStatus = "draft"
         inv.mentions = self.mentions
         return inv
 
@@ -434,7 +453,7 @@ class Estimation(Task, EstimationCompute):
         """
             Return True if the invoice has been cancelled
         """
-        return self.CAEStatus == 'aboest'
+        return self.estimation_status == 'aborted'
 
     def add_line(self, line=None, **kwargs):
         """
@@ -479,7 +498,7 @@ class Estimation(Task, EstimationCompute):
         self.payments = lines
 
     def __repr__(self):
-        return u"<Estimation id:{s.id} ({s.CAEStatus}>".format(s=self)
+        return u"<Estimation id:{s.id} ({s.status}>".format(s=self)
 
     def __json__(self, request):
         result = Task.__json__(self, request)

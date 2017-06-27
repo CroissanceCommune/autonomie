@@ -39,8 +39,9 @@ from autonomie.forms.invoices import (
 STATUS_OPTIONS = (
     ('all', u"Tous les devis", ),
     ('geninv', u"Devis concrétisés (avec facture)", ),
-    ('aboest', u"Devis annulés", ),
-    ('valid', u"Devis en cours", ),
+    ('aborted', u"Devis annulés", ),
+    ('waiting', u"Devis en cours", ),
+    ('signed', u'Devis signé'),
 )
 
 

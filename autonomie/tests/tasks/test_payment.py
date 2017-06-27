@@ -111,18 +111,16 @@ def test_invoice_topay(invoice):
 
 
 def test_resulted_manual(invoice, request_with_config):
-    invoice.CAEStatus = 'wait'
-    invoice.CAEStatus = 'valid'
-    invoice.CAEStatus = 'paid'
+    invoice.status = 'valid'
+    invoice.paid_status = 'paid'
     request_params = {'amount':0, 'mode':'cheque', 'resulted':True}
     record_payment(request_with_config, invoice, **request_params)
-    assert invoice.CAEStatus == 'resulted'
+    assert invoice.paid_status == 'resulted'
 
 
 def test_resulted_auto(invoice, request_with_config):
-    invoice.CAEStatus = 'wait'
-    invoice.CAEStatus = 'valid'
-    invoice.CAEStatus = 'paid'
+    invoice.status = 'valid'
+    invoice.paid_status = 'paid'
     request_params = {'amount':int(invoice.topay()), 'mode':'cheque'}
     record_payment(request_with_config, invoice, **request_params)
-    assert invoice.CAEStatus == 'resulted'
+    assert invoice.paid_status == 'resulted'

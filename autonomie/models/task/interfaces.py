@@ -58,11 +58,6 @@ class IValidatedTask(ITask):
             Return the draft status of a document
         """
 
-    def is_editable(manage):
-        """
-            Is the current task editable ?
-        """
-
     def is_valid():
         """
             Is the current task valid

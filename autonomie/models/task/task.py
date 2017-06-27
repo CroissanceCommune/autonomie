@@ -75,14 +75,17 @@ from autonomie.compute.task import (
     GroupCompute,
 )
 from autonomie.models.node import Node
-from autonomie.models.task.mentions import TASK_MENTION
+from autonomie.models.task.mentions import (
+    TASK_MENTION,
+    TaskMention,
+)
 
 
 log = logging.getLogger(__name__)
 
 
-ALL_STATES = ('draft', 'wait', 'valid', 'invalid', 'geninv',
-              'aboest', 'gencinv', 'resulted', 'paid', )
+ALL_STATES = ('draft', 'wait', 'valid', 'invalid')
+# , 'geninv', 'aboest', 'gencinv', 'resulted', 'paid', )
 
 
 class TaskService(object):
@@ -110,25 +113,15 @@ class TaskService(object):
         from autonomie.models.task import Invoice, CancelInvoice
         query = super(task_cls, task_cls).query(*args)
         query = query.with_polymorphic([Invoice, CancelInvoice])
-        query = query.filter(
-            or_(
-                and_(
-                    task_cls.CAEStatus.in_(Invoice.valid_states),
-                    task_cls.type_ == 'invoice'
-                ),
-                and_(
-                    task_cls.CAEStatus.in_(CancelInvoice.valid_states),
-                    task_cls.type_ == 'cancelinvoice'
-                )
-            )
-        )
+        query = query.filter(task_cls.status == 'valid')
+        query = query.filter(task_cls.type_.in_(('invoice', 'cancelinvoice')))
         return query
 
     @classmethod
     def get_waiting_estimations(cls, *args):
         from autonomie.models.task import Estimation
         query = Estimation.query(*args)
-        query = query.filter(Estimation.CAEStatus == 'wait')
+        query = query.filter(Estimation.status == 'wait')
         query = query.order_by(Estimation.statusDate)
         return query
 
@@ -137,10 +130,8 @@ class TaskService(object):
         from autonomie.models.task import Invoice, CancelInvoice
         query = super(task_cls, task_cls).query(*args)
         query = query.with_polymorphic([Invoice, CancelInvoice])
-        query = query.filter(
-            task_cls.type_.in_(('invoice', 'cancelinvoice'))
-        )
-        query = query.filter(task_cls.CAEStatus == 'wait')
+        query = query.filter(task_cls.type_.in_(('invoice', 'cancelinvoice')))
+        query = query.filter(task_cls.status == 'wait')
         query = query.order_by(task_cls.type_).order_by(task_cls.statusDate)
         return query
 
@@ -172,14 +163,15 @@ class Task(Node):
             "export": {'exclude': True},
         },
     )
-    CAEStatus = Column(
+    status = Column(
         String(10),
         info={
             'colanderalchemy': {
                 'title': u"Statut",
                 'widget': deform.widget.SelectWidget(
                     values=zip(ALL_STATES, ALL_STATES)
-                )
+                ),
+                "validator": colander.OneOf(ALL_STATES),
             }
         }
     )
@@ -552,7 +544,9 @@ class Task(Node):
         order_by="TaskMention.order",
         back_populates="tasks",
         info={
-            "colanderalchemy": {'exclude': True}
+            'colanderalchemy': {
+                'children': forms.get_sequence_child_item(TaskMention)
+            }
         },
     )
     line_groups = relationship(
@@ -574,7 +568,7 @@ _{s.date:%m%y}"
         company_index = self._get_company_index(company)
         project_index = self._get_project_index(project)
 
-        self.CAEStatus = self.state_machine.default_state
+        self.status = self.state_machine.default_state
         self.company = company
         self.customer = customer
         self.project = project
@@ -595,7 +589,7 @@ _{s.date:%m%y}"
         :returns: The next number
         :rtype: int
         """
-        raise NotImplemented("Implement this method please")
+        return -1
 
     def _get_company_index(self, company):
         """
@@ -605,7 +599,7 @@ _{s.date:%m%y}"
         :returns: The next number
         :rtype: int
         """
-        raise NotImplemented("Implement this method please")
+        return -1
 
     def set_numbers(self, company_index, project_index):
         """
@@ -632,8 +626,9 @@ _{s.date:%m%y}"
         Return the datas used by the json renderer to represent this task
         """
         return dict(
+            id=self.id,
             phase_id=self.phase_id,
-            status=self.CAEStatus,
+            status=self.status,
             date=self.date,
             owner_id=self.owner_id,
             customer_id=self.customer_id,
@@ -669,6 +664,7 @@ _{s.date:%m%y}"
         """
             set the status of a task through the state machine
         """
+        print(self.state_machine.transitions.get('draft'))
         return self.state_machine.process(self, request, user_id, status, **kw)
 
     def is_invoice(self):
@@ -680,25 +676,27 @@ _{s.date:%m%y}"
     def is_cancelinvoice(self):
         return False
 
-    @validates('CAEStatus')
+    @validates('status')
     def change_status(self, key, status):
         """
         fired on status change, stores a new taskstatus for each status change
         """
-        log.debug(u"# CAEStatus change #")
+        log.debug(u"# Task status change #")
 
-        actual_status = self.CAEStatus
+        actual_status = self.status
         if actual_status is None and status == self.state_machine.default_state:
             return status
 
         self.statusDate = get_current_timestamp()
 
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
-        status_record = TaskStatus(
-            statusCode=status,
-            statusPerson=self.statusPerson,
+        if self.statusPersonAccount is not None:
+            # Can append in old dbs that are inconsistent
+            status_record = TaskStatus(
+                statusCode=status,
+                statusPerson=self.statusPersonAccount.id,
             )
-        self.statuses.append(status_record)
+            self.statuses.append(status_record)
 
         return status
 
@@ -706,7 +704,7 @@ _{s.date:%m%y}"
         """
             Return the next available actions regarding the current status
         """
-        return self.state_machine.get_next_states(self.CAEStatus)
+        return self.state_machine.get_next_states(self.status)
 
     def get_company(self):
         """
@@ -737,7 +735,7 @@ _{s.date:%m%y}"
         return False
 
     def __repr__(self):
-        return u"<Task status:{s.CAEStatus} id:{s.id}>".format(s=self)
+        return u"<Task status:{s.status} id:{s.id}>".format(s=self)
 
     def get_groups(self):
         return [group for group in self.line_groups if group.lines]

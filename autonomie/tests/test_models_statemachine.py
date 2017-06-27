@@ -35,13 +35,22 @@ import pytest
 
 @pytest.fixture(scope='function')
 def state_machine():
-    state_machine = StateMachine()
-    state_machine.add_transition(
-            'draft', 'wait', "edit", lambda req, model, user_id:(model, 2))
-    state_machine.add_transition(
-        "wait", "invalid", ("edit", "manage"),
-        lambda req, model, user_id:(model, 2)
+    wait = State(
+        'wait',
+        "edit",
+        status_attr='status',
+        callback=lambda req, model, user_id: (model, 2),
     )
+    invalid = State(
+        'invalid',
+        ('edit', 'manage'),
+        status_attr='status',
+        userid_attr='statusPerson',
+        callback=lambda req, model, user_id: (model, 2),
+    )
+    state_machine = StateMachine()
+    state_machine.add_transition('draft', wait)
+    state_machine.add_transition('wait', invalid)
     return state_machine
 
 
@@ -63,9 +72,9 @@ class DummyStates(StateMachine):
     userid_attr = "statusPerson"
 
 
-def test_add_transition(state_machine):
-    state_machine.add_transition('wait', "valid", ("manage",))
-    assert state_machine.get_transition('wait', 'valid').name == 'valid'
+def test_add_transition(state_machine, state):
+    state_machine.add_transition('wait', state)
+    assert state_machine.get_transition('wait', 'invalid').name == 'invalid'
 
 
 def test_process_failure(config, state_machine, model):
@@ -88,6 +97,7 @@ def test_allowed(config, state, model):
     request = testing.DummyRequest()
     assert state.allowed(model, request)
 
+
 def test_not_allowed(config, state, model):
     config.testing_securitypolicy(userid="test", permissive=False,)
     request = testing.DummyRequest()
@@ -95,17 +105,13 @@ def test_not_allowed(config, state, model):
 
 
 def test_process_caestate(config, state_machine, model):
-    state_machine.add_transition(
-        'draft',
+    delete = State(
         'delete',
         'edit',
-        lambda r, mode, user_id: (model, user_id),
-        cae=False,
+        callback=lambda r, mode, user_id: (model, user_id),
     )
-    config.testing_securitypolicy(
-        userid='test',
-        permissive=True,
-    )
+    state_machine.add_transition('draft', delete)
+    config.testing_securitypolicy(userid='test', permissive=True)
     request = testing.DummyRequest()
     process_result = state_machine.process(
         model,
@@ -125,11 +131,13 @@ def test_affected_attrs(config, state_machine, model):
         permissive=True,
     )
     request = testing.DummyRequest()
-    process_result = state_machine.process(
+    state_machine.process(
         model,
         request,
         5,
         'wait',
     )
+    # Should not have changed
     assert model.statusPerson == 'toto'
+    # Should have changed
     assert model.status == 'wait'

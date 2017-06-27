@@ -34,7 +34,6 @@ class State(object):
         :param name: The state name
         :param permission: The permission needed to set this state
         :param callback: A callback function to call on state process
-        :param model_state: True if this state is a CAE state
         :param status_attr: The attribute storing the model's status
         :param userid_attr: The attribute storing the status person's id
     """
@@ -43,16 +42,14 @@ class State(object):
         name,
         permission,
         callback=None,
-        model_state=True,
-        status_attr="status",
-        userid_attr="user_id"
+        status_attr=None,
+        userid_attr=None
     ):
         self.name = name
         if not hasattr(permission, "__iter__"):
             permission = [permission]
         self.permissions = permission
         self.callback = callback
-        self.model_state = model_state
         self.status_attr = status_attr
         self.userid_attr = userid_attr
 
@@ -78,17 +75,21 @@ class State(object):
         """
             process the expected actions after status change
         """
-        if self.model_state:
-            setattr(model, self.userid_attr, user_id)
+        if self.status_attr is not None:
             setattr(model, self.status_attr, self.name)
+        if self.userid_attr:
+            setattr(model, self.userid_attr, user_id)
         if self.callback:
             return self.callback(request, model, user_id=user_id, **kw)
         else:
             return model
 
     def __repr__(self):
-        return "< State %s allowed for %s (ModelState : %s)>" % (
-            self.name, self.permissions, self.model_state,
+        return (
+            "< State %s allowed for %s (status_attr : %s, "
+            "userid_attr : %s )>" % (
+                self.name, self.permissions, self.status_attr, self.userid_attr
+            )
         )
 
 
@@ -100,43 +101,32 @@ class StateMachine(object):
     status_attr = "status"
     userid_attr = "user_id"
 
-    def __init__(self, default_state='draft', transition_dict=None):
+    def __init__(self, default_state='draft'):
         self.default_state = default_state
         self.transitions = dict()
-        if transition_dict:
-            self.load_transitions_from_dict(transition_dict)
 
-    def load_transitions_from_dict(self, transition_dict):
+    def add_transition(self, src_state_name, next_state):
         """
-            allows to load a bulk of transitions from a dictionnary
-            {'state
-        """
-        for state, new_states in transition_dict.items():
-            for new_state in new_states:
-                if not hasattr(new_state, '__iter__'):
-                    new_state = [new_state]
-                self.add_transition(state, *new_state)
+        Add a transition object
 
-    def add_transition(self, state, next_, perm, callback=None, cae=True):
+        :param str src_state_name: The name of the source state
+        :param obj next_state: The next state object
         """
-            adds a transition to the state machine
-        """
-        state_obj = State(
-            name=next_,
-            permission=perm,
-            callback=callback,
-            model_state=cae,
-            status_attr=self.status_attr,
-            userid_attr=self.userid_attr,
-        )
-        self.transitions.setdefault(state, []).append(state_obj)
+        self.transitions.setdefault(src_state_name, []).append(next_state)
 
     def process(self, model, request, user_id, new_state, **kw):
         """
-            process the state change
+        process the state change
+
+        :param obj model: The model object
+        :param obj request: The pyramid request object
+        :param int user_id: The id of the user
+        :param str new_state: The new state
+        :param dict kw: params forwarded to the state's process function
         """
         state = getattr(model, self.status_attr)
 
+        print("Looking for a new object : %s -> %s" % (state, new_state))
         state_obj = self.get_transition(state, new_state)
         if state_obj is None:
             raise Forbidden(

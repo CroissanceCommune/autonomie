@@ -277,6 +277,6 @@ def test_valid_payment(config, dbsession, invoice, service_request):
     invoice = dbsession.query(Invoice)\
             .filter(Invoice.id==invoice.id).first()
 
-    assert invoice.CAEStatus == 'paid'
+    assert invoice.paid_status == 'paid'
     assert len(invoice.payments) == 1
     assert invoice.payments[0].amount == 150

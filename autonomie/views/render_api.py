@@ -107,14 +107,15 @@ def format_expense_status(expense, full=True):
     status_str = EXPENSE_STATUS.get(
         expense.status, DEF_STATUS
     ).format(genre=u"e")
-    if expense.status_user:
-        account = format_account(expense.status_user)
-    else:
-        account = format_account(expense.user)
-    date = format_date(expense.status_date)
-    suffix = u" par {0} le {1}".format(account, date)
 
     if full:
+        if expense.status_user:
+            account = format_account(expense.status_user)
+        else:
+            account = format_account(expense.user)
+        date = format_date(expense.status_date)
+        suffix = u" par {0} le {1}.".format(account, date)
+
         status_str += suffix
 
     return status_str

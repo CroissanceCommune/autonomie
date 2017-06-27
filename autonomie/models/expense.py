@@ -58,11 +58,22 @@ from autonomie.compute.expense import (
 )
 
 from autonomie_base.models.types import PersistentACLMixin
-from autonomie.models.statemachine import StateMachine
+from autonomie.models.statemachine import (
+    StateMachine,
+    State,
+)
 from autonomie.models.node import Node
 
 
 logger = logging.getLogger(__name__)
+
+
+PAID_STATES = (
+    ('waiting', u"En attente"),
+    ("paid", u"Partiellement payée"),
+    ('resulted', u"Payée"),
+)
+ALL_STATES = ('draft', 'wait', 'valid', 'invalid')
 
 
 class ExpenseType(DBBASE):
@@ -266,29 +277,58 @@ def build_state_machine():
     """
     Return a state machine that allows ExpenseSheet status handling
     """
-    draft = ('draft', 'view_expense',)
-    reset = ('reset', 'edit_expense', None, False)
-    wait = ('wait', 'edit_expense', )
-    valid = ('valid', "admin_expense", )
-    invalid = ('invalid', "admin_expense",)
-    # Partiellement payé
-    paid = ('paid', "admin_expense", record_expense_payment, )
-    resulted = ('resulted', "admin_expense", )  # Soldé
-    states = {}
-    states['draft'] = (wait, reset, valid,)
-    states['invalid'] = (draft, wait,)
-    states['wait'] = (valid, invalid, draft)
-    states['valid'] = (resulted, paid,)
-    states['paid'] = (paid, )
-    return states
+    machine = StateMachine()
+    draft = State(
+        'draft',
+        'view_expense',
+        status_attr='status',
+        userid_attr='status_user_id',
+    )
+    wait = State(
+        'wait',
+        'edit_expense',
+        status_attr='status',
+        userid_attr='status_user_id',
+    )
+    valid = State(
+        'valid',
+        "admin_expense",
+        status_attr='status',
+        userid_attr='status_user_id',
+    )
+    invalid = State(
+        'invalid',
+        "admin_expense",
+        status_attr='status',
+        userid_attr='status_user_id',
+    )
 
+    machine.add_transition('draft', wait)
+    machine.add_transition('draft', valid)
 
-class ExpenseStates(StateMachine):
-    """
-        Expense state machine
-    """
-    status_attr = "status"
-    userid_attr = "status_user_id"
+    machine.add_transition('invalid', wait)
+    machine.add_transition('invalid', valid)
+
+    machine.add_transition('wait', draft)
+    machine.add_transition('wait', valid)
+    machine.add_transition('wait', invalid)
+    return machine
+
+#    draft = ('draft', 'view_expense',)
+#    reset = ('reset', 'edit_expense', None, False)
+#    wait = ('wait', 'edit_expense', )
+#    valid = ('valid', "admin_expense", )
+#    invalid = ('invalid', "admin_expense",)
+#    # Partiellement payé
+#    paid = ('paid', "admin_expense", record_expense_payment, )
+#    resulted = ('resulted', "admin_expense", )  # Soldé
+#    states = {}
+#    states['draft'] = (wait, reset, valid,)
+#    states['invalid'] = (draft, wait,)
+#    states['wait'] = (valid, invalid, draft)
+#    states['valid'] = (resulted, paid,)
+#    states['paid'] = (paid, )
+#    return states
 
 
 class ExpenseSheet(Node, ExpenseCompute):
@@ -313,7 +353,28 @@ class ExpenseSheet(Node, ExpenseCompute):
     year = Column(Integer)
     company_id = Column(Integer, ForeignKey("company.id", ondelete="cascade"))
     user_id = Column(Integer, ForeignKey("accounts.id"))
-    status = Column(String(10), default='draft')
+
+    paid_status = Column(
+        String(10),
+        default='waiting',
+        info={
+            'colanderalchemy': {
+                'validator': colander.OneOf(dict(PAID_STATES).keys())
+            }
+        }
+    )
+
+    justified = Column(Boolean(), default=False)
+
+    status = Column(
+        String(10),
+        default='draft',
+        info={
+            'colanderalchemy': {
+                'validator': colander.OneOf(ALL_STATES)
+            }
+        }
+    )
     status_user_id = Column(Integer, ForeignKey("accounts.id"))
     status_date = Column(
         Date(),
@@ -346,9 +407,7 @@ class ExpenseSheet(Node, ExpenseCompute):
         "User",
         primaryjoin="ExpenseSheet.status_user_id==User.id",
     )
-
-    state_machine = ExpenseStates('draft', build_state_machine())
-    valid_states = ('valid', 'resulted', 'paid')
+    state_machine = build_state_machine()
 
     def __json__(self, request):
         return dict(
@@ -361,7 +420,7 @@ class ExpenseSheet(Node, ExpenseCompute):
 
     def set_status(self, status, request, user_id, **kw):
         """
-            Set the status of a task through a state machine
+        Set the status of a task through a state machine
         """
         return self.state_machine.process(self, request, user_id, status, **kw)
 
@@ -392,11 +451,18 @@ class ExpenseSheet(Node, ExpenseCompute):
         """
         return self.company_id
 
+    def is_draft(self):
+        """
+        Return True if this expensesheet has draft status
+        """
+        return self.status in ('draft', 'invalid',)
+
     # Payment stuff
     def record_payment(self, **kw):
         """
         Record a payment for the current expense
         """
+        logger.debug("Recording a payment")
         resulted = kw.pop('resulted', False)
 
         payment = ExpensePayment()
@@ -410,17 +476,12 @@ class ExpenseSheet(Node, ExpenseCompute):
         """
         Check if the expense is resulted or not and set the appropriate status
         """
-        old_status = self.status
         logger.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() == 0 or force_resulted:
-            self.status = 'resulted'
+            self.paid_status = 'resulted'
         elif len(self.payments) > 0:
-            self.status = 'paid'
-        else:
-            self.status = 'valid'
-        # If the status has changed, we update the statusPerson
-        if user_id is not None and old_status != self.status:
-            self.status_user_id = user_id
+            self.paid_status = 'paid'
+
         return self
 
 
@@ -638,6 +699,9 @@ class ExpensePayment(DBBASE, PersistentACLMixin):
         Integer,
         ForeignKey('expense_sheet.id', ondelete="cascade")
     )
+    user_id = Column(ForeignKey('accounts.id'))
+    user = relationship("User")
+
     bank_id = Column(ForeignKey('bank_account.id'))
     bank = relationship(
         "BankAccount",

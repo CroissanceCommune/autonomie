@@ -74,6 +74,7 @@
                                     <% url = request.route_path('expense_payment', id=payment.id) %>
                                     <li>
                                     <a href="${url}">
+                                        Par ${api.format_account(payment.user)} :&nbsp;
                                         ${api.format_amount(payment.amount)|n}&nbsp;€
                                         le ${api.format_date(payment.date)}
                                         % if payment.waiver:

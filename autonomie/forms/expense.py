@@ -47,6 +47,7 @@ STATUS_OPTIONS = (
     ("valid", u'Validées', ),
     ("paid", u"Partiellement payées", ),
     ("resulted", u'Payées', ),
+    ('justified', u"Justficatifs reçus"),
 )
 
 

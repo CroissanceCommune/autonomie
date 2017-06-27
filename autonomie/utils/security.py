@@ -501,24 +501,32 @@ def get_project_acls(self):
     return acl
 
 
-def get_expensesheet_acl(self):
+def get_expensesheet_default_acls(self):
     """
     Compute the expense Sheet acl
-    """
-    if self.status in ('draft', 'invalid'):
-        user_rights = ("view_expense", "edit_expense",)
-    else:
-        user_rights = ("view_expense",)
-    user_rights += ('view_file', 'add_file', 'edit_file')
 
-    acl = DEFAULT_PERM[:]
-    acl.extend(
-        [
-            (Allow, u"%s" % user.login, user_rights)
-            for user in self.company.employees
-        ]
-    )
-    return acl
+    :returns: Pyramid acls
+    :rtype: list
+    """
+    acls = DEFAULT_PERM[:]
+
+    if self.status == 'valid':
+        acls.insert(
+            0,
+            (Deny, Everyone, 'edit_expense'),
+        )
+    for user in self.company.employees:
+        perms = (
+            'view_expense',
+            'view_file',
+            'add_file',
+            'edit_file',
+        )
+
+        if self.is_draft():
+            perms += ("edit_expense",)
+        acls.append((Allow, user.login, perms,))
+    return acls
 
 
 def get_expense_payment_acl(self):
@@ -600,18 +608,18 @@ def set_models_acls():
     when different roles will be implemented
     """
     Activity.__default_acl__ = property(get_activity_acl)
-    CancelInvoice.__default_acl__ = property(get_cancelinvoice_acl)
+    CancelInvoice.__default_acl__ = property(get_cancelinvoice_default_acls)
     Company.__default_acl__ = property(get_company_acl)
     CompetenceGrid.__acl__ = property(get_competence_acl)
     CompetenceGridItem.__acl__ = property(get_competence_acl)
     CompetenceGridSubItem.__acl__ = property(get_competence_acl)
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'), ]
     Customer.__default_acl__ = property(get_customer_acls)
-    Estimation.__default_acl__ = property(get_estimation_acl)
-    ExpenseSheet.__default_acl__ = property(get_expensesheet_acl)
+    Estimation.__default_acl__ = property(get_estimation_default_acls)
+    ExpenseSheet.__default_acl__ = property(get_expensesheet_default_acls)
     ExpensePayment.__default_acl__ = property(get_expense_payment_acl)
     File.__default_acl__ = property(get_file_acl)
-    Invoice.__default_acl__ = property(get_invoice_acl)
+    Invoice.__default_acl__ = property(get_invoice_default_acls)
     Job.__default_acl__ = DEFAULT_PERM[:]
     Payment.__default_acl__ = property(get_payment_acl)
     Phase.__acl__ = property(get_phase_acls)

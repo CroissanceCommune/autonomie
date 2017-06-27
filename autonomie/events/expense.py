@@ -25,6 +25,7 @@ Events used while handling expenses :
     Send email
 
 """
+import datetime
 import logging
 
 from autonomie.mail import (
@@ -33,7 +34,7 @@ from autonomie.mail import (
 )
 from autonomie.views.render_api import (
     format_account,
-    format_expense_status,
+    format_date,
 )
 
 log = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ log = logging.getLogger(__name__)
 EVENTS = {
     "valid": u"validée",
     "invalid": u"invalidée",
+    "paid": u"partiellement payée",
     "resulted": u"payée",
 }
 
@@ -57,6 +59,15 @@ Commentaires associés au document :
     {comment}"""
 
 
+EXPENSE_NOTIFY_STATUS = dict(
+    (
+        ("valid", u"Validée par {0} le {1}"),
+        ('paid', u"Paiement partiel notifié par {0} le {1}"),
+        ('resulted', u"Paiement notifié par {0} le {1}")
+    )
+)
+
+
 class StatusChanged(object):
     """
         Event fired when an expense changes its status
@@ -67,6 +78,7 @@ class StatusChanged(object):
         self.new_status = status
         self.comment = comment
         self.settings = self.request.registry.settings
+        log.debug("Expense StatusChanged event new status : %s" % status)
 
     @property
     def recipients(self):
@@ -95,6 +107,15 @@ class StatusChanged(object):
             mail = "Unknown"
         return mail
 
+    def format_expense_notification(self):
+        """
+        Return a formatted string for expense status notification
+        """
+        status_str = EXPENSE_NOTIFY_STATUS.get(self.new_status)
+        account_label = format_account(self.request.user)
+        date_label = format_date(datetime.date.today())
+        return status_str.format(account_label, date_label)
+
     @property
     def subject(self):
         """
@@ -102,7 +123,7 @@ class StatusChanged(object):
         """
         subject = u"Notes de dépense de {0} : {1}".format(
             format_account(self.expense.user),
-            format_expense_status(self.expense),
+            self.format_expense_notification()
         )
         return subject
 

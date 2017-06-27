@@ -57,18 +57,18 @@
         <div class="hidden-print">
         <i class='glyphicon glyphicon-play'></i>
         <strong>
-    % if expense.status == 'resulted':
+    % if expense.paid_status == 'resulted':
         Cette feuille de notes de dépense a été intégralement payée.
-    % elif expense.status == 'paid':
+    % elif expense.paid_status == 'paid':
         Cette feuille de notes de dépense a été partiellement payée.
     % elif expense.status == 'valid':
             Cette feuille de notes de dépense a été validée, elle est en attente de paiement.
     % elif expense.status == 'wait':
-            Cette feuille de notes de dépense est en attente de validation
+            Cette feuille de notes de dépense est en attente de validation.
     % elif expense.status == 'draft':
-        Cette feuille de notes de dépense est un brouillon
+        Cette feuille de notes de dépense est un brouillon.
     % elif expense.status == 'invalid':
-        Cette feuille de notes de dépense est invalide
+        Cette feuille de notes de dépense est invalide.
     % endif
         </strong>
         <ul>
@@ -95,6 +95,7 @@
                     <% url = request.route_path('expense_payment', id=payment.id) %>
                     <li>
                     <a href="${url}">
+                        Par ${api.format_account(payment.user)} :&nbsp;
                         ${api.format_amount(payment.amount)|n}&nbsp;€
                         le ${api.format_date(payment.date)}
                         % if payment.waiver:

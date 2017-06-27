@@ -48,7 +48,6 @@ from autonomie.forms.expense import (
     ExpenseSheetSchema,
     BookMarkSchema,
     get_list_schema,
-    STATUS_OPTIONS
 )
 from autonomie.models.expense import (
     ExpenseType,
@@ -444,13 +443,13 @@ def get_payment_form(request, counter=None):
         action = request.route_path(
             "expensesheet",
             id=request.context.id,
-            _query=dict(action='status')
+            _query=dict(action='payment')
         )
     else:
         action = request.route_path(
             "expensesheet",
             id=-1,
-            _query=dict(action='status')
+            _query=dict(action='payment')
         )
     form = deform.Form(
         schema=schema,
@@ -460,6 +459,18 @@ def get_payment_form(request, counter=None):
         counter=counter,
     )
     return form
+
+
+def notify_status_changed(request, status):
+    """
+    Fire An ExpenseStatusChanged event
+
+    :param obj request: The Pyramid request object
+    :param str status: The new status
+    """
+    request.registry.notify(
+        ExpenseStatusChanged(request, request.context, status)
+    )
 
 
 class ExpenseSheetView(BaseFormView):
@@ -510,6 +521,14 @@ class ExpenseSheetView(BaseFormView):
                 if hasattr(self, "_%s_btn" % action.name):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.append(func())
+
+        for action in ('paid',):
+            if (
+                self.request.has_permission('set_paid.estimation') and
+                self.context.status == 'valid' and
+                self.context.paid_status != 'resulted'
+            ):
+                btns.append(self._paid_btn())
         return btns
 
     def _reset_btn(self):
@@ -597,7 +616,7 @@ perdues) ?")
 
     def before(self, form):
         """
-            Prepopulate the form
+        Prepopulate the form
         """
         # Here we override the form counter to avoid field ids conflict
         form.set_appstruct(self.request.context.appstruct())
@@ -612,7 +631,7 @@ perdues) ?")
                 u"Revenir à la liste",
                 "view_expense",
                 path="company_expenses",
-                id=self.request.context.company.id
+                id=self.request.context.company.id,
             )
         self.request.actionmenu.add(btn)
         btn = get_add_file_link(
@@ -640,7 +659,6 @@ perdues) ?")
 
         # We modifiy the expense status
         try:
-            logger.exception(u"Trying !!!")
             expense, status = self.set_expense_status(self.request.context)
             self._store_communication(comment)
             self.request.registry.notify(ExpenseStatusChanged(
@@ -714,16 +732,17 @@ class ExpenseStatusView(StatusView):
         """
         Notify a status change
         """
-        self.request.registry.notify(
-            ExpenseStatusChanged(
-                self.request,
-                self.request.context,
-                status,
-            )
-        )
+        notify_status_changed(self.request, status)
 
-    def redirect(self):
-        come_from = getattr(self, 'come_from', None)
+
+class ExpensePaymentView(BaseFormView):
+    """
+    Called for setting a payment on an expensesheet
+    """
+    schema = ExpensePaymentSchema()
+    title = u"Saisie d'un paiement"
+
+    def redirect(self, come_from):
         if come_from is not None:
             return HTTPFound(come_from)
         else:
@@ -733,30 +752,18 @@ class ExpenseStatusView(StatusView):
                 )
             )
 
-    def pre_paid_process(self, item, status, params):
+    def submit_success(self, appstruct):
         """
-        Validate the payment's form datas
+        Create the payment
         """
-        form = get_payment_form(self.request)
-        # Exception handling is done one level higher, we don't care about it
-        # here
-        appstruct = form.validate(params.items())
-        self.come_from = appstruct.get('come_from')
-        logger.debug(u"In pre paid process")
-        logger.debug(u"Returning : {0}".format(appstruct))
-        return appstruct
-
-    def __call__(self):
-        try:
-            result = StatusView.__call__(self)
-        except deform.ValidationFailure, err:
-            logger.exception(u"An error has been detected")
-            logger.error(err.error)
-            result = dict(
-                form=err.render(),
-                title=u"Erreur de saisie",
-            )
-        return result
+        logger.debug("+ Submitting an expense payment")
+        logger.debug(appstruct)
+        come_from = appstruct.pop('come_from', None)
+        self.context.record_payment(user_id=self.request.user.id, **appstruct)
+        self.dbsession.merge(self.context)
+        self.request.session.flash(u"Le paiement a bien été enregistré")
+        notify_status_changed(self.request, self.context.paid_status)
+        return self.redirect(come_from)
 
 
 def expensesheet_json_view(request):
@@ -977,39 +984,42 @@ class ExpenseList(BaseListView):
         return form_name
 
     def query(self):
-        return ExpenseSheet.query().outerjoin(ExpenseSheet.user)
+        query = ExpenseSheet.query().outerjoin(ExpenseSheet.user)
+        return query
 
     def filter_search(self, query, appstruct):
         search = appstruct['search']
-        if search:
+        if search and search != colander.null:
             query = query.filter(ExpenseSheet.id == search)
         return query
 
     def filter_year(self, query, appstruct):
         year = appstruct['year']
-        if year and year != -1:
+        if year and year not in (-1, colander.null):
             query = query.filter(ExpenseSheet.year == year)
         return query
 
     def filter_month(self, query, appstruct):
         month = appstruct['month']
-        if month and month != -1:
+        if month and month not in (-1, colander.null):
             query = query.filter(ExpenseSheet.month == month)
         return query
 
     def filter_owner(self, query, appstruct):
         user_id = appstruct['owner_id']
-        if user_id and user_id != -1:
+        if user_id and user_id not in (-1, colander.null):
             query = query.filter(ExpenseSheet.user_id == user_id)
         return query
 
     def filter_status(self, query, appstruct):
         status = appstruct['status']
-        if status != 'all':
+        if status in ('wait', 'valid'):
             query = query.filter(ExpenseSheet.status == status)
-        else:
-            interesting_status = [i[0] for i in STATUS_OPTIONS]
-            query = query.filter(ExpenseSheet.status.in_(interesting_status))
+        elif status in ('paid', 'resulted'):
+            query = query.filter(ExpenseSheet.status == 'valid')
+            query = query.filter(ExpenseSheet.paid_status == status)
+        elif status == 'justified':
+            query = query.filter(ExpenseSheet.justified == True)
         return query
 
 
@@ -1109,6 +1119,13 @@ def includeme(config):
         route_name="expensesheet",
         request_param='action=status',
         permission="edit_expense",
+        renderer="base/formpage.mako",
+    )
+    config.add_view(
+        ExpensePaymentView,
+        route_name="expensesheet",
+        request_param='action=payment',
+        permission="add_payment",
         renderer="base/formpage.mako",
     )
 

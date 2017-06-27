@@ -71,12 +71,12 @@ Admin expenses list view
             <% url = request.route_path('expensesheet', id=expense.id) %>
             <% onclick = "document.location='{url}'".format(url=url) %>
             <%
-if expense.status == 'valid':
-    css = "red_"
-elif expense.status == 'resulted':
-    css = "green_"
+if expense.paid_status == 'resulted':
+    css = 'green_'
 elif expense.status == 'paid':
     css = "orange_"
+elif expense.status == 'valid':
+    css = "red_"
 else:
     css = "white_"
 %>
@@ -101,6 +101,7 @@ else:
                                 <% url = request.route_path('expense_payment', id=payment.id) %>
                                 <li>
                                 <a href="${url}">
+                                    Par ${api.format_account(payment.user)} :
                                     ${api.format_amount(payment.amount)|n}&nbsp;€
                                     le ${api.format_date(payment.date)}
                                     % if payment.waiver:
@@ -120,7 +121,7 @@ else:
                     ${table_btn(url, u'Modifier', u"Voir la note de dépense", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
                     ${table_btn(url, u'Excel', u"Télécharger au format Excel", icon="file" )}
-                    % if expense.is_allowed(request, 'paid'):
+                    % if request.has_permission('add_payment', expense) and expense.status == 'valid' and expense.paid_status != 'resulted':
                         <% onclick = "ExpenseList.payment_form(%s, '%s');" % (expense.id, api.format_amount(expense.topay(), grouping=False)) %>
                         ${table_btn('#popup-payment_form',
                             u"Paiement",

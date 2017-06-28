@@ -147,7 +147,7 @@ def upgrade(sql_url=None):
         upgrade_func,
         starting_rev=None,
         destination_rev=revision,
-        )
+    )
 
     fetch(revision)
     print

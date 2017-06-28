@@ -49,6 +49,12 @@ def update_database_structure():
         nullable=True
     )
     rename_column(
+        "customer",
+        'zipCode',
+        'zip_code',
+        sa.String(20),
+    )
+    rename_column(
         'task',
         'CAEStatus',
         'status',
@@ -195,8 +201,11 @@ def migrate_datas():
         session.merge(cust)
 
     _upgrade_invoices(session)
+    session.flush()
     _upgrade_estimations(session)
+    session.flush()
     _upgrade_expenses(session)
+    session.flush()
 
 
 def upgrade():

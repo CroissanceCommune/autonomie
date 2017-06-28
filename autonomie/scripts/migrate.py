@@ -125,13 +125,15 @@ class PackageEnvironment(object):
         return script_dir
 
 
-def upgrade(sql_url=None):
+def upgrade(revision, sql_url=None):
     """
-        upgrade the content of DEFAULT_LOCATION
+    upgrade the content of DEFAULT_LOCATION
     """
     pkg_env = PackageEnvironment(DEFAULT_LOCATION, sql_url)
 
-    revision = pkg_env.script_dir.get_current_head()
+    if revision is None:
+        revision = pkg_env.script_dir.get_current_head()
+
     logger.info(u'Upgrading {0}:'.format(pkg_env.location))
 
     def upgrade_func(rev, context):
@@ -173,7 +175,7 @@ def downgrade(revision):
         downgrade_func,
         starting_rev=None,
         destination_rev=revision,
-        )
+    )
 
     fetch(revision)
     print
@@ -263,7 +265,7 @@ def migrate():
     """Migrate autonomie's database
     Usage:
         migrate <config_uri> list
-        migrate <config_uri> upgrade
+        migrate <config_uri> upgrade [--rev=<rev>]
         migrate <config_uri> fetch [--rev=<rev>]
         migrate <config_uri> revision [--m=<message>]
         migrate <config_uri> downgrade [--rev=<rev>]
@@ -282,6 +284,7 @@ def migrate():
         if arguments['list']:
             func = list_all
         elif arguments['upgrade']:
+            args = (arguments['--rev'],)
             func = upgrade
         elif arguments['fetch']:
             args = (arguments['--rev'],)

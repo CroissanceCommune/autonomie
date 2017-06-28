@@ -233,9 +233,9 @@ def set_configuration():
 commercial, économique et social", parent=a)
 
     session = DBSESSION()
-    from autonomie.models import initialize
-    initialize.populate_situation_options(session)
-    initialize.populate_groups(session)
+    from autonomie.models import populate
+    populate.populate_situation_options(session)
+    populate.populate_groups(session)
 
 
 

@@ -94,7 +94,7 @@ def mark_estimation_signed(request, estimation, **kw):
     :param obj estimation: The task to edit
     :param dict kw: The keywords
     """
-    estimation.estimation_status = 'signed'
+    estimation.signed_status = 'signed'
     return estimation
 
 
@@ -105,7 +105,7 @@ def mark_estimation_aborted(request, estimation, **kw):
     :param obj estimation: The task to edit
     :param dict kw: The keywords
     """
-    estimation.estimation_status = 'aborted'
+    estimation.signed_status = 'aborted'
     return estimation
 
 
@@ -201,21 +201,21 @@ def get_est_state():
         invalid
         aboest
     """
-    draft = ('draft', ('edit_estimation', 'add_estimation'))
+    draft = ('draft', ('edit.estimation', 'add_estimation'))
     wait = ('wait', 'wait.estimation')
     manager_wait = ('wait', 'admin_estimation',)
-    duplicate = ('duplicate', 'edit_estimation', duplicate_task, False,)
+    duplicate = ('duplicate', 'edit.estimation', duplicate_task, False,)
     edit_metadata = (
         "edit_metadata",
-        "edit_estimation",
+        "edit.estimation",
         edit_metadata_task,
         False,
     )
     valid = ('valid', 'valid.estimation', set_date,)
     invalid = ('invalid', 'admin_estimation',)
-    geninv = ('geninv', "edit_estimation", gen_invoices,)
-    delete = ('delete', "edit_estimation", None, False,)
-    aboest = ('aboest', 'edit_estimation', )
+    geninv = ('geninv', "edit.estimation", gen_invoices,)
+    delete = ('delete', "edit.estimation", None, False,)
+    aboest = ('aboest', 'edit.estimation', )
     result = {}
 
     result['draft'] = (draft, wait, delete, valid, duplicate,)
@@ -251,18 +251,18 @@ def get_inv_state():
         paid
         resulted
     """
-    draft = ('draft', ('edit_invoice', 'add_invoice'))
+    draft = ('draft', ('edit.invoice', 'add_invoice'))
     wait = ('wait', 'wait.invoice')
     manager_wait = ('wait', 'admin_invoice',)
     duplicate = (
         'duplicate',
-        ('edit_invoice', 'add_invoice'),
+        ('edit.invoice', 'add_invoice'),
         duplicate_task,
         False,
     )
     edit_metadata = (
         "edit_metadata",
-        ('edit_invoice', 'add_invoice'),
+        ('edit.invoice', 'add_invoice'),
         edit_metadata_task,
         False,
     )
@@ -271,11 +271,11 @@ def get_inv_state():
     paid = ('paid', "add_payment", record_payment,)
     gencinv = (
         'gencinv',
-        'edit_invoice',
+        'edit.invoice',
         gen_cancelinvoice,
         False,
     )
-    delete = ('delete', 'edit_invoice', None, False,)
+    delete = ('delete', 'edit.invoice', None, False,)
     resulted = ('resulted', "add_payment",)
     financial_year = (
         'set_financial_year', "admin_invoice", set_financial_year, False,
@@ -330,12 +330,12 @@ def get_cinv_state():
         valid
         invalid
     """
-    draft = ('draft', ('edit_cancelinvoice', 'add_cancelinvoice'))
+    draft = ('draft', ('edit.cancelinvoice', 'add.cancelinvoice'))
     wait = ('wait', 'wait.cancelinvoice',)
-    delete = ('delete', 'edit_cancelinvoice', None, False,)
+    delete = ('delete', 'edit.cancelinvoice', None, False,)
     edit_metadata = (
         "edit_metadata",
-        "edit_invoice",
+        "edit.invoice",
         edit_metadata_task,
         False,
     )

@@ -1,4 +1,4 @@
-"""3.3.2 : 3.3.2 groupe fonctionnalite 2017 1
+"""3.3.2 : groupe fonctionnalite 2017 1
 
 Revision ID: 55acdcdcc473
 Revises: 11219b4e619b
@@ -38,13 +38,15 @@ def update_database_structure():
         "customer",
         'contactFirstName',
         'firstname',
-        sa.String(255)
+        sa.String(255),
+        nullable=True,
     )
     rename_column(
         "customer",
         'intraTVA',
         'tva_intracomm',
-        sa.String(50)
+        sa.String(50),
+        nullable=True
     )
     rename_column(
         'task',
@@ -55,15 +57,15 @@ def update_database_structure():
 
     op.add_column(
         'estimation',
-        sa.Column('estimation_status', sa.String(10), default='waiting'),
+        sa.Column('signed_status', sa.String(10)),
     )
     op.add_column(
         'estimation',
-        sa.Column('geninv', sa.Boolean(), default=False),
+        sa.Column('geninv', sa.Boolean()),
     )
     op.add_column(
         'invoice',
-        sa.Column('paid_status', sa.String(10), default='waiting'),
+        sa.Column('paid_status', sa.String(10)),
     )
     op.add_column(
         'payment',
@@ -72,16 +74,116 @@ def update_database_structure():
 
     op.add_column(
         'expense_sheet',
-        sa.Column('paid_status', sa.String(10), default='waiting'),
+        sa.Column('paid_status', sa.String(10)),
     )
     op.add_column(
         'expense_sheet',
-        sa.Column('justified', sa.Boolean(), default=False),
+        sa.Column('justified', sa.Boolean()),
     )
     op.add_column(
         "expense_payment",
         sa.Column("user_id", sa.Integer, sa.ForeignKey('accounts.id'))
     )
+
+
+def _user_exists(session, user_id):
+    from autonomie.models.user import User
+    return session.query(User.id).filter_by(id=user_id).count()
+
+
+def _find_status(session, task_id, statusnames):
+    """
+    Return the statusPerson id and the date of the given status
+    """
+    from autonomie.models.task.task import TaskStatus
+    query = session.query(TaskStatus.statusPerson, TaskStatus.statusDate)
+    query = query.filter_by(task_id=task_id)
+    query = query.filter(TaskStatus.statusCode.in_(statusnames))
+    query = query.order_by(sa.desc(TaskStatus.statusDate))
+    all_items = query.all()
+    result = []
+    if all_items:
+        for record in all_items:
+            person_id, status_date = record
+            if _user_exists(session, person_id):
+                result.append((person_id, status_date))
+
+    return result
+
+
+def _update_payments(session, task_id, statuses):
+    """
+    Update the payments set on task_id
+    """
+    from autonomie.models.task import Payment
+    for person_id, statusdate in statuses:
+        payment = session.query(Payment).\
+            filter_by(id=task_id).\
+            filter_by(created_at=statusdate).first()
+        if payment is not None:
+            payment.user_id = person_id
+            session.merge(payment)
+
+
+def _upgrade_invoices(session):
+    from autonomie.models.task import Invoice
+    for invoice in Invoice.query():
+        if invoice.status in ('paid', 'resulted'):
+            invoice.paid_status = invoice.status
+            invoice.status = 'valid'
+            statuses = _find_status(session, invoice.id, ('valid'))
+            if statuses:
+                invoice.statusPerson = statuses[-1][0]
+                invoice.statusDate = statuses[-1][1]
+
+            statuses = _find_status(session, invoice.id, ('paid', 'resulted'))
+            if statuses:
+                _update_payments(session, invoice.id, statuses)
+        else:
+            if invoice.status == 'aboinv':
+                invoice.status = 'valid'
+
+            invoice.paid_status = 'waiting'
+
+        session.merge(invoice)
+
+
+def _upgrade_estimations(session):
+    from autonomie.models.task import Estimation
+
+    for estimation in Estimation.query():
+        if estimation.status in ('aboest',):
+            estimation.signed_status = 'aborted'
+            estimation.status = 'valid'
+
+            statuses = _find_status(session, estimation.id, ('valid'))
+            if statuses:
+                estimation.statusPerson = statuses[-1][0]
+                estimation.statusDate = statuses[-1][1]
+
+        else:
+            if estimation.status == 'geninv':
+                estimation.geninv = True
+                estimation.status = 'valid'
+            else:
+                estimation.geninv = False
+
+            estimation.signed_status = 'waiting'
+
+        session.merge(estimation)
+
+
+def _upgrade_expenses(session):
+    from autonomie.models.expense import ExpenseSheet
+    for expense in ExpenseSheet.query():
+        if expense.status in ('paid', 'resulted'):
+            expense.paid_status = expense.status
+            if _user_exists(session, expense.status_user_id):
+                for payment in expense.payments:
+                    payment.user_id = expense.status_user_id
+                    session.merge(payment)
+            expense.status = 'valid'
+        session.merge(expense)
 
 
 def migrate_datas():
@@ -92,40 +194,9 @@ def migrate_datas():
         cust.type_ = 'company'
         session.merge(cust)
 
-    from autonomie.models.task import Invoice, Estimation
-    for invoice in Invoice.query():
-        if invoice.status in ('paid', 'resulted'):
-            invoice.paid_status = invoice.status
-            invoice.status = 'valid'
-            if invoice.statusPersonAccount is not None:
-                for payment in invoice.payments:
-                    payment.user_id = invoice.statusPersonAccount.id
-                    session.merge(payment)
-
-        elif invoice.status == 'aboinv':
-            invoice.status = 'valid'
-        session.merge(invoice)
-
-    for estimation in Estimation.query():
-        if estimation.status in ('aboest',):
-            estimation.estimation_status = 'aborted'
-            estimation.status = 'valid'
-
-        elif estimation.status == 'geninv':
-            estimation.geninv = True
-            estimation.status = 'valid'
-        session.merge(estimation)
-
-    from autonomie.models.expense import ExpenseSheet
-    for expense in ExpenseSheet.query():
-        if expense.status in ('paid', 'resulted'):
-            expense.paid_status = expense.status
-            if expense.status_user is not None:
-                for payment in expense.payments:
-                    payment.user_id = expense.status_user.id
-                    session.merge(payment)
-            expense.status = 'valid'
-        session.merge(expense)
+    _upgrade_invoices(session)
+    _upgrade_estimations(session)
+    _upgrade_expenses(session)
 
 
 def upgrade():

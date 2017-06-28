@@ -109,7 +109,7 @@ class Estimation(Task, EstimationCompute):
         primary_key=True,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
-    estimation_status = Column(
+    signed_status = Column(
         String(10),
         default='waiting',
         info={
@@ -453,7 +453,7 @@ class Estimation(Task, EstimationCompute):
         """
             Return True if the invoice has been cancelled
         """
-        return self.estimation_status == 'aborted'
+        return self.signed_status == 'aborted'
 
     def add_line(self, line=None, **kwargs):
         """

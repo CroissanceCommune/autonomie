@@ -213,7 +213,7 @@ class TraversalDbAccess(object):
 
 def get_base_acl(self):
     """
-        return the base acls
+        return the base acl
     """
     acl = DEFAULT_PERM[:]
     acl.append(
@@ -228,7 +228,7 @@ def get_base_acl(self):
 
 def get_userdatas_acl(self):
     """
-    Return the acls for userdatas
+    Return the acl for userdatas
     only the related account has view rights
     """
     acl = DEFAULT_PERM[:]
@@ -239,7 +239,7 @@ def get_userdatas_acl(self):
                 self.user.login,
                 (
                     'view',
-                    'view_file',
+                    'view.file',
                 )
             ),
         )
@@ -248,7 +248,7 @@ def get_userdatas_acl(self):
 
 def get_event_acl(self):
     """
-    Return acls fr events participants can view
+    Return acl fr events participants can view
     """
     acl = DEFAULT_PERM[:]
     for user in self.participants:
@@ -256,7 +256,7 @@ def get_event_acl(self):
             (
                 Allow,
                 user.login,
-                ("view_activity", "view_workshop", "view_file")
+                ("view_activity", "view_workshop", "view.file")
             )
         )
     return acl
@@ -264,7 +264,7 @@ def get_event_acl(self):
 
 def get_activity_acl(self):
     """
-    Return acls for activities : companies can also view
+    Return acl for activities : companies can also view
     """
     acl = get_event_acl(self)
     for companies in self.companies:
@@ -273,7 +273,7 @@ def get_activity_acl(self):
                 (
                     Allow,
                     user.login,
-                    ("view_activity", "view_file")
+                    ("view_activity", "view.file")
                 )
             )
     return acl
@@ -281,7 +281,7 @@ def get_activity_acl(self):
 
 def get_company_acl(self):
     """
-        Compute the company's acls
+        Compute the company's acl
     """
     acl = DEFAULT_PERM[:]
     acl.extend(
@@ -292,7 +292,7 @@ def get_company_acl(self):
                 "view_company",
                 "edit_company",
                 # for logo and header
-                "view_file",
+                "view.file",
                 "list_customers",
                 "add_customer",
                 "list_projects",
@@ -301,7 +301,7 @@ def get_company_acl(self):
                 "list_invoices",
                 "edit_commercial_handling",
                 "list_expenses",
-                "add_expense",
+                "add.expense",
                 "list_sale_products",
                 "add_sale_product",
                 "list_treasury_files",
@@ -316,7 +316,7 @@ def get_company_acl(self):
 
 def get_user_acl(self):
     """
-        Get acls for user account edition
+        Get acl for user account edition
     """
     acl = DEFAULT_PERM[:]
     if self.enabled():
@@ -338,118 +338,162 @@ def get_user_acl(self):
     return acl
 
 
-def get_estimation_default_acls(self):
+def get_estimation_default_acl(self):
     """
-    Return acls for the estimation handling
+    Return acl for the estimation handling
 
-    :returns: A pyramid acls list
+    :returns: A pyramid acl list
     :rtype: list
-    """
-    acls = DEFAULT_PERM[:]
-
-    if self.status == 'valid':
-        acls.insert(
-            0,
-            (Deny, Everyone, 'edit_estimation'),
-        )
-    for user in self.project.company.employees:
-        perms = (
-            'view_estimation',
-            'duplicate.estimation',
-            'view_file',
-            'add_file',
-            'edit_file',
-        )
-
-        if self.is_draft():
-            perms += ('edit_estimation', 'delete_estimation',)
-
-        if "estimation_validation" in user.groups:
-            perms += ("valid.estimation",)
-        else:
-            perms += ("wait.estimation",)
-
-        if self.is_valid():
-            perms += ('set_signed.estimation', 'set_aborted.estimation')
-            if not self.is_aborted():
-                perms += ('geninv.estimation',)
-
-        acls.append((Allow, user.login, perms))
-    return acls
-
-
-def get_invoice_default_acls(self):
-    """
-    Return the acls for invoices
-
-    :returns: A pyramid acls list
-    :rtype: list
-    """
-    acls = DEFAULT_PERM[:]
-    if self.status == 'valid':
-        acls.insert(
-            0,
-            (Deny, Everyone, 'edit_invoice'),
-        )
-    for user in self.project.company.employees:
-        perms = (
-            'view_invoice',
-            'duplicate.invoice',
-            'view_file',
-            'add_file',
-            'edit_file',
-            'view_payment',
-        )
-        if self.is_draft():
-            perms += ('edit_invoice', 'delete_invoice',)
-
-        if "invoice_validation" in user.groups:
-            perms += ("valid.invoice",)
-        else:
-            perms += ("wait.invoice",)
-
-        if "payment_admin" in user.groups:
-            perms += ('add_payment',)
-
-        acls.append((Allow, user.login, perms))
-
-    return acls
-
-
-def get_cancelinvoice_default_acls(self):
-    """
-    Return the acls for cancelinvoices
-    """
-    acls = DEFAULT_PERM[:]
-    if self.status == 'valid':
-        acls.insert(
-            0,
-            (Deny, Everyone, 'edit_cancelinvoice'),
-        )
-    for user in self.project.company.employees:
-        perms = (
-            'view_cancelinvoice',
-            'view_file',
-            'add_file',
-            'edit_file',
-        )
-        if self.is_draft():
-            perms += ('edit_cancelinvoice', 'delete_cancelinvoice')
-
-        if "invoice_validation" in user.groups:
-            perms += ("valid.cancelinvoice",)
-        else:
-            perms += ("wait.cancelinvoice",)
-
-        acls.append((Allow, user.login, perms))
-    return acls
-
-
-def get_payment_acl(self):
-    """
-    Compute the acls for a Payment object
     """
     acl = DEFAULT_PERM[:]
+
+    # Perms denied for everyone including admins
+    forbidden_perms = ()
+
+    if self.status != 'valid' or self.signed_status == 'aborted':
+        forbidden_perms += ('geninv.estimation',)
+
+    if self.status != 'valid':
+        forbidden_perms += ('set_signed_status.estimation',)
+
+    if self.status != 'valid' or self.signed_status == 'signed' or \
+            self.geninv:
+        forbidden_perms += ('set_date.estimation',)
+
+    if self.status == 'valid':
+        forbidden_perms += ('edit.estimation', 'delete.estimation',)
+
+    if forbidden_perms:
+        acl.insert(
+            0,
+            (Deny, Everyone, forbidden_perms),
+        )
+
+    # Common estimation access acl
+    acl.append((Allow, "group:estimation_validation", ('valid.estimation',)))
+    acl.append((Deny, "group:estimation_validation", ('wait.estimation',)))
+
+    for user in self.company.employees:
+        perms = (
+            'view.estimation',
+            'wait.estimation',
+            'duplicate.estimation',
+            'view.file',
+            'add.file',
+            'edit.file',
+        )
+
+        if self.status == 'draft':
+            perms += ('edit.estimation', 'delete.estimation',)
+
+        if self.status == 'valid':
+            perms += ('set_signed_status.estimation', )
+            if not self.signed_status == 'aborted':
+                perms += ('geninv.estimation',)
+
+        acl.append((Allow, user.login, perms))
+    return acl
+
+
+def get_invoice_default_acl(self):
+    """
+    Return the acl for invoices
+
+    :returns: A pyramid acl list
+    :rtype: list
+    """
+    acl = DEFAULT_PERM[:]
+
+    # Perms denied for everyone including admins
+    forbidden_perms = ()
+
+    if self.status == 'valid':
+        forbidden_perms += ('edit.invoice', 'delete.invoice')
+
+    if self.status != 'valid' or self.paid_status == 'resulted':
+        forbidden_perms += ('gencinv.invoice', 'add_payment.invoice',)
+
+    if self.status != 'valid' or self.paid_status != 'waiting' or self.exported:
+        forbidden_perms += ('set_date.invoice',)
+
+    if self.exported:
+        forbidden_perms += ('set_treasury.invoice',)
+
+    if forbidden_perms:
+        acl.insert(
+            0,
+            (Deny, Everyone, forbidden_perms),
+        )
+
+    acl.append((Allow, "group:invoice_validation", ('valid.invoice',)))
+    acl.append((Deny, "group:invoice_validation", ('wait.invoice',)))
+
+    acl.append((Allow, "group:payment_admin", ('add_payment.invoice',)))
+
+    for user in self.company.employees:
+        perms = (
+            'view.invoice',
+            "wait.invoice",
+            'duplicate.invoice',
+            'view.file',
+            'add.file',
+            'edit.file',
+            'view_payment',
+        )
+        if self.status == 'draft':
+            perms += ('edit.invoice', 'delete.invoice', )
+        if self.status == 'valid':
+            perms += ('gencinv.invoice',)
+
+        acl.append((Allow, user.login, perms))
+
+    return acl
+
+
+def get_cancelinvoice_default_acl(self):
+    """
+    Return the acl for cancelinvoices
+    """
+    acl = DEFAULT_PERM[:]
+    if self.status == 'valid':
+        acl.insert(
+            0,
+            (Deny, Everyone, 'edit.cancelinvoice', 'delete.cancelinvoice'),
+        )
+
+    acl.append((Allow, "group:invoice_validation", ('valid.cancelinvoice',)))
+    acl.append((Deny, "group:invoice_validation", ('wait.cancelinvoice',)))
+    for user in self.company.employees:
+        perms = (
+            'view.cancelinvoice',
+            'wait.cancelinvoice',
+            'view.file',
+            'add.file',
+            'edit.file',
+        )
+        if self.status == 'draft':
+            perms += ('edit.cancelinvoice', 'delete_cancelinvoice',)
+
+        acl.append((Allow, user.login, perms))
+    return acl
+
+
+def get_payment_default_acl(self):
+    """
+    Compute the acl for a Payment object
+    """
+    acl = DEFAULT_PERM[:]
+
+    forbidden_perms = ()
+    if self.exported:
+        forbidden_perms += ('edit_payment',)
+
+    if forbidden_perms:
+        acl.insert(
+            0,
+            (Deny, Everyone, forbidden_perms),
+        )
+
     for user in self.task.company.employees:
         rights = ('view_payment',)
         if "payment_admin" in user.groups:
@@ -459,9 +503,9 @@ def get_payment_acl(self):
     return acl
 
 
-def get_customer_acls(self):
+def get_customer_acl(self):
     """
-    Compute the customer's acls
+    Compute the customer's acl
     """
     acl = DEFAULT_PERM[:]
     for user in self.company.employees:
@@ -471,16 +515,16 @@ def get_customer_acls(self):
     return acl
 
 
-def get_phase_acls(self):
+def get_phase_acl(self):
     """
-    Return acls for a phase
+    Return acl for a phase
     """
-    return get_project_acls(self.project)
+    return get_project_acl(self.project)
 
 
-def get_project_acls(self):
+def get_project_acl(self):
     """
-    Return acls for a project
+    Return acl for a project
     """
     acl = DEFAULT_PERM[:]
     for user in self.company.employees:
@@ -498,69 +542,57 @@ def get_project_acls(self):
                     'add_invoice',
                     'list_estimations',
                     'list_invoices',
-                    'view_file',
-                    'add_file',
-                    'edit_file',
+                    'view.file',
+                    'add.file',
+                    'edit.file',
                 )
             )
         )
-        if "estimation_validation" in user.groups:
-            # The user can validate its estimations
-            acl.append(
-                (Allow, user.login, ('valid.estimation',))
-            )
-        else:
-            # The user need to ask for validation process
-            acl.append(
-                (Allow, user.login, ('wait.estimation',))
-            )
-        if "invoice_validation" in user.groups:
-            acl.append(
-                (Allow, user.login, ('valid.invoice',))
-            )
-        else:
-            # The user need to ask for validation process
-            acl.append(
-                (Allow, user.login, ('wait.invoice',))
-            )
 
     return acl
 
 
-def get_expensesheet_default_acls(self):
+def get_expensesheet_default_acl(self):
     """
     Compute the expense Sheet acl
 
-    :returns: Pyramid acls
+    :returns: Pyramid acl
     :rtype: list
     """
-    acls = DEFAULT_PERM[:]
-
+    acl = DEFAULT_PERM[:]
+    forbidden_perms = ()
     if self.status == 'valid':
-        acls.insert(
+        forbidden_perms += ('edit.expense', 'reset.expense', 'move.expense')
+
+    if not self.status == 'valid' and self.paid_status == 'resulted':
+        forbidden_perms += ('add_payment.expense',)
+
+    if forbidden_perms:
+        acl.insert(
             0,
-            (Deny, Everyone, 'edit_expense'),
+            (Deny, Everyone, forbidden_perms),
         )
+
     for user in self.company.employees:
         perms = (
             'view_expense',
-            'view_file',
-            'add_file',
-            'edit_file',
+            'view.file',
+            'add.file',
+            'edit.file',
         )
 
-        if self.is_draft():
-            perms += ("edit_expense",)
-        acls.append((Allow, user.login, perms,))
-    return acls
+        if self.status == 'draft':
+            perms += ("edit.expense",)
+        acl.append((Allow, user.login, perms,))
+    return acl
 
 
 def get_expense_payment_acl(self):
     """
-    Compute the ExpensePayment acls
+    Compute the ExpensePayment acl
     """
     acl = DEFAULT_PERM[:]
-    user_rights = ('view_expense_payment',)
+    user_rights = ('view.expense_payment',)
     acl.extend(
         [
             (Allow, u"%s" % user.login, user_rights)
@@ -572,8 +604,8 @@ def get_expense_payment_acl(self):
 
 def get_file_acl(self):
     """
-    Compute the acls for a file object
-    a file object's acls are simply the parent's
+    Compute the acl for a file object
+    a file object's acl are simply the parent's
     """
     if self.parent is not None:
         return self.parent.__acl__
@@ -587,9 +619,9 @@ def get_file_acl(self):
         return []
 
 
-def get_product_acls(self):
+def get_product_acl(self):
     """
-    Return the acls for a product : A product's acls is given by its category
+    Return the acl for a product : A product's acl is given by its category
     """
     acl = DEFAULT_PERM[:]
     for user in self.company.employees:
@@ -609,11 +641,11 @@ def get_product_acls(self):
 
 def get_competence_acl(self):
     """
-    Return acls for the Competence Grids objects
+    Return acl for the Competence Grids objects
     """
-    acls = DEFAULT_PERM[:]
+    acl = DEFAULT_PERM[:]
     login = self.contractor.login
-    acls.append(
+    acl.append(
         (
             Allow,
             u'%s' % login,
@@ -623,36 +655,36 @@ def get_competence_acl(self):
             )
         )
     )
-    return acls
+    return acl
 
 
-def set_models_acls():
+def set_models_acl():
     """
-    Add acls to the db objects used as context
+    Add acl to the db objects used as context
 
-    Here acls are set globally, but we'd like to set things more dynamically
+    Here acl are set globally, but we'd like to set things more dynamically
     when different roles will be implemented
     """
     Activity.__default_acl__ = property(get_activity_acl)
-    CancelInvoice.__default_acl__ = property(get_cancelinvoice_default_acls)
+    CancelInvoice.__default_acl__ = property(get_cancelinvoice_default_acl)
     Company.__default_acl__ = property(get_company_acl)
     CompetenceGrid.__acl__ = property(get_competence_acl)
     CompetenceGridItem.__acl__ = property(get_competence_acl)
     CompetenceGridSubItem.__acl__ = property(get_competence_acl)
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'), ]
-    Customer.__default_acl__ = property(get_customer_acls)
-    Estimation.__default_acl__ = property(get_estimation_default_acls)
-    ExpenseSheet.__default_acl__ = property(get_expensesheet_default_acls)
+    Customer.__default_acl__ = property(get_customer_acl)
+    Estimation.__default_acl__ = property(get_estimation_default_acl)
+    ExpenseSheet.__default_acl__ = property(get_expensesheet_default_acl)
     ExpensePayment.__default_acl__ = property(get_expense_payment_acl)
     File.__default_acl__ = property(get_file_acl)
-    Invoice.__default_acl__ = property(get_invoice_default_acls)
+    Invoice.__default_acl__ = property(get_invoice_default_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]
-    Payment.__default_acl__ = property(get_payment_acl)
-    Phase.__acl__ = property(get_phase_acls)
-    Project.__default_acl__ = property(get_project_acls)
-    SaleProductCategory.__acl__ = property(get_product_acls)
-    SaleProduct.__acl__ = property(get_product_acls)
-    SaleProductGroup.__acl__ = property(get_product_acls)
+    Payment.__default_acl__ = property(get_payment_default_acl)
+    Phase.__acl__ = property(get_phase_acl)
+    Project.__default_acl__ = property(get_project_acl)
+    SaleProductCategory.__acl__ = property(get_product_acl)
+    SaleProduct.__acl__ = property(get_product_acl)
+    SaleProductGroup.__acl__ = property(get_product_acl)
     StatisticSheet.__acl__ = property(get_base_acl)
     StatisticEntry.__acl__ = property(get_base_acl)
     BaseStatisticCriterion.__acl__ = property(get_base_acl)

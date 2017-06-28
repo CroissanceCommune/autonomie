@@ -43,7 +43,7 @@ def run_migrations_online():
     context.configure(
         connection=connection,
         target_metadata=DBBASE.metadata,
-        )
+    )
 
     try:
         context.run_migrations()

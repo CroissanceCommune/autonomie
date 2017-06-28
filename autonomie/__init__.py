@@ -40,7 +40,7 @@ from pyramid_beaker import set_cache_regions_from_settings
 from autonomie.utils.security import (
     RootFactory,
     TraversalDbAccess,
-    set_models_acls,
+    set_models_acl,
 )
 
 from autonomie_base.models.initialize import initialize_sql
@@ -65,7 +65,8 @@ AUTONOMIE_MODULES = (
     "autonomie.views.competence",
     "autonomie.views.csv_import",
     "autonomie.views.customer",
-    "autonomie.views.estimation",
+    "autonomie.views.estimations.estimation",
+    "autonomie.views.estimations.rest_api",
     "autonomie.views.expense",
     "autonomie.views.files",
     "autonomie.views.holiday",
@@ -235,11 +236,11 @@ def base_configure(config, dbsession, **settings):
     """
     All plugin and others configuration stuff
     """
-    set_models_acls()
+    set_models_acl()
     TraversalDbAccess.dbsession = dbsession
 
     # Application main configuration
-    config._set_root_factory(RootFactory)
+    config.set_root_factory(RootFactory)
     config.set_default_permission('view')
 
     # Adding some usefull properties to the request object

@@ -33,21 +33,25 @@ Admin expenses list view
         ${form|n}
     </div>
     <div class='col-md-4'>
-        <table class='table table-bordered'>
+        <table class='table table-bordered status-table'>
             <tr>
-                <td class='white_tr'><br /></td>
+                <td class='status-wait'><br /></td>
                 <td>Notes de dépense en attente de validation</td>
             </tr>
             <tr>
-                <td class='red_tr'><br /></td>
+                <td class=''><br /></td>
                 <td>Notes de dépense validées</td>
             </tr>
             <tr>
-                <td class='orange_tr'><br /></td>
+                <td class='status justified-True'><br /></td>
+                <td>Justificatifs reçus</td>
+            </tr>
+            <tr>
+                <td class='paid-status-paid'><br /></td>
                 <td>Notes de dépense partiellement payées</td>
             </tr>
             <tr>
-                <td class='green_tr'><br /></td>
+                <td class='paid-status-resulted'><br /></td>
                 <td>Notes de dépense payées</td>
             </tr>
         </table>
@@ -55,9 +59,10 @@ Admin expenses list view
 </div>
 </%block>
 <%block name="content">
-<table class="table table-condensed">
+<table class="table table-condensed table-bordered status-table">
     <thead>
         <tr>
+        <th></th>
             <th>${sortable(u"Identifiant", "id_")}</th>
             <th> ${sortable(u"Entrepreneur", "name")}</th>
             <th>${sortable(u"Période", "month")}</th>
@@ -70,17 +75,10 @@ Admin expenses list view
         % for expense in records:
             <% url = request.route_path('expensesheet', id=expense.id) %>
             <% onclick = "document.location='{url}'".format(url=url) %>
-            <%
-if expense.paid_status == 'resulted':
-    css = 'green_'
-elif expense.status == 'paid':
-    css = "orange_"
-elif expense.status == 'valid':
-    css = "red_"
-else:
-    css = "white_"
-%>
-            <tr class="${css}tr">
+            <tr class="status status-${expense.status} paid-status-${expense.paid_status} justified-${expense.justified}">
+                <td class='status-td'>
+                    <br />
+                </td>
                 <td onclick="${onclick}" class="rowlink">
                     ${expense.id}
                 </td>
@@ -121,7 +119,7 @@ else:
                     ${table_btn(url, u'Modifier', u"Voir la note de dépense", icon="pencil" )}
                     <% url = request.route_path('expensexlsx', id=expense.id) %>
                     ${table_btn(url, u'Excel', u"Télécharger au format Excel", icon="file" )}
-                    % if request.has_permission('add_payment', expense) and expense.status == 'valid' and expense.paid_status != 'resulted':
+                    % if request.has_permission('add_payment.expensesheet', expense):
                         <% onclick = "ExpenseList.payment_form(%s, '%s');" % (expense.id, api.format_amount(expense.topay(), grouping=False)) %>
                         ${table_btn('#popup-payment_form',
                             u"Paiement",

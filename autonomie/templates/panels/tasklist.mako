@@ -67,7 +67,15 @@ Afficher <select id='number_of_tasks'>
                 <td onclick="${onclick}" class="rowlink">
                     ${format_customer(task.customer, False)}
                 </td>
-                <td class="visible-lg rowlink">${api.format_status(task, full=False)}</td>
+                <td class="visible-lg rowlink">
+                    % if task.type_ == 'estimation':
+                        ${api.format_estimation_status(task, full=False)}
+                    % elif task.type_ == 'invoice':
+                        ${api.format_invoice_status(task, full=False)}
+                    % else:
+                         ${api.format_cancelinvoice_status(task, full=False)}
+                    % endif
+                </td>
                 <td class="visible-lg" style="text-align:right">
                     <div class='btn-group'>
                     ${table_btn(request.route_path(task.type_, id=task.id), u"", u"Voir ce document", icon=u"search")}

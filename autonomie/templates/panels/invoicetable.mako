@@ -26,7 +26,7 @@
 <%namespace file="/base/utils.mako" import="format_filelist" />
 
 
-<table class="table table-condensed table-bordered">
+<table class="table table-condensed table-bordered status-table">
     <thead>
         <% num_columns = 11 %>
         <th><span class="glyphicon glyphicon-comment"></span></th>
@@ -63,6 +63,7 @@
                 <% ht = document.ht %>
                 <% tva = document.tva %>
                 <% ttc = document.ttc %>
+                <% status = document.status %>
                 <% paid_status = getattr(document, 'paid_status', 'resulted') %>
                 <% date = document.date %>
                 <% type_ = document.type_ %>
@@ -76,24 +77,10 @@
                 <% customer_id = document.customer.id %>
                 <% customer_name = document.customer.get_label() %>
 
-                % if paid_status == 'resulted':
-                    <tr class='invoice_resulted_tr'>
-                        <td class='invoice_resulted'>
+                <tr class='status tolate-${document.is_tolate()} paid-status-${paid_status} status-${document.status}'>
+                        <td class='status-td'>
+                        <br />
                         </td>
-                % elif document.is_tolate():
-                    <tr class='invoice_tolate_tr'>
-                        <td class='invoice_tolate'>
-                        </td>
-                % elif paid_status == 'paid':
-                    <tr class='invoice_paid_tr'>
-                        <td class='invoice_paid'>
-                        </td>
-                % else:
-                    <tr>
-                        <td class='invoice_notpaid'>
-                            <br />
-                        </td>
-                % endif
             <td>
                 ${prefix}${official_number}
             </td>

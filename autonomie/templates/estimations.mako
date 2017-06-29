@@ -33,17 +33,21 @@
         ${form|n}
     </div>
     <div class='col-md-4'>
-        <table class='table table-bordered'>
+        <table class='table table-bordered status-table'>
             <tr>
-                <td class='estimation_geninv'><br /></td>
+                <td class='geninv-True'><br /></td>
                 <td>Devis concrétisés en facture</td>
             </tr>
             <tr>
-                <td class='estimation_valid'><br /></td>
+                <td class='signed-status-signed'><br /></td>
+                <td>Devis signés</td>
+            </tr>
+            <tr>
+                <td class=''><br /></td>
                 <td>Devis en cours</td>
             </tr>
             <tr>
-                <td class='estimation_aboest'><br /></td>
+                <td class='signed-status-aborted'><br /></td>
                 <td>Devis annulés</td>
             </tr>
         </table>
@@ -52,7 +56,7 @@
 <%block name='content'>
 <% columns = 8 %>
 
-<table class="table table-condensed table-bordered">
+<table class="table table-condensed table-bordered status-table">
     <thead>
         <th><span class="ui-icon ui-icon-comment"></span></th>
         % if is_admin:
@@ -76,9 +80,9 @@
             <td colspan='1'></td>
         </tr>
         % if records:
-            % for id_, name, internal_number, CAEStatus, date, description, ht, tva, ttc, customer_id, customer_name, company_id, company_name in records:
-                <tr class="estimation_${CAEStatus}_tr">
-                    <td class="estimation_${CAEStatus}">
+            % for id_, name, internal_number, status, signed_status, geninv, date, description, ht, tva, ttc, customer_id, customer_name, company_id, company_name in records:
+                <tr class="status status-${status} signed-status-${signed_status}">
+                    <td class="status-td">
                     </td>
             % if is_admin:
                 <td class='invoice_company_name'>
@@ -89,7 +93,10 @@
             % endif
             <td>${api.format_date(date)}</td>
             <td>
-                <a href="${request.route_path("estimation", id=id_)}" title="Voir le document">${name} (<small>${internal_number}</small>)</a>
+                <a href="${request.route_path('estimation', id=id_, _query={'view':'html'})}"
+                title="Voir le document">
+                ${name} (<small>${internal_number}</small>)
+                </a>
                 <small>${format_text(description)}</small>
             </td>
             <td>

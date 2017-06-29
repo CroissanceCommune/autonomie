@@ -124,7 +124,8 @@ def _update_payments(session, task_id, statuses):
     from autonomie.models.task import Payment
     for person_id, statusdate in statuses:
         payment = session.query(Payment).\
-            filter_by(id=task_id).\
+            filter_by(task_id=task_id).\
+            filter_by(user_id=None).\
             filter_by(created_at=statusdate).first()
         if payment is not None:
             payment.user_id = person_id

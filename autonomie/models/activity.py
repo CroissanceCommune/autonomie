@@ -267,7 +267,7 @@ class Activity(Event):
         "ActivityAction",
         primaryjoin="Activity.subaction_id==ActivityAction.id",
     )
-    # PErmet de configurer des 'acls' pour permettre à d'autres personnes de
+    # PErmet de configurer des 'acl' pour permettre à d'autres personnes de
     # consulter les rendez-vous
     companies = relationship(
         "Company",

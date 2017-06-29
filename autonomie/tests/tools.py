@@ -7,6 +7,7 @@ from pyramid.compat import is_nonstr_iter
 from pyramid.security import (
     Allow,
     Everyone,
+    ALL_PERMISSIONS,
 )
 
 
@@ -34,7 +35,7 @@ def check_acl(acl, permission, principals=()):
         if ace_principal in principals or ace_principal == Everyone:
             if not is_nonstr_iter(ace_permissions):
                 ace_permissions = [ace_permissions]
-            if permission in ace_permissions:
+            if permission in ace_permissions or ALL_PERMISSIONS in ace_permissions:
                 if ace_action == Allow:
                     return True
                 else:

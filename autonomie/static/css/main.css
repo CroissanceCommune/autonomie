@@ -13,7 +13,8 @@
   -moz-box-shadow: 0px 1px 0px #2b638f;
   box-shadow: 0px 1px 0px #2b638f;
   padding: 6px 18px;
-  font-size: 16px; }
+  font-size: 16px;
+  margin-bottom: 2px; }
 
 .btn.secondary-action {
   padding: 4px 8px; }
@@ -435,25 +436,40 @@ input[name=altdate], input[name=date] {
 
 .status-table .signed-status-signed, .status-table .justified-True, .status-table .job-planned {
   background-color: #7db9fd; }
-  .status-table .signed-status-signed td.status-td, .status-table .justified-True td.status-td, .status-table .job-planned td.status-td {
+  .status-table .signed-status-signed .status-td, .status-table .justified-True .status-td, .status-table .job-planned .status-td {
     background-color: #238bff; }
 
 .status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait, .status-table .job-failed {
   background-color: #f9aaaa !important; }
-  .status-table .signed-status-aborted td.status-td, .status-table .tolate-True td.status-td, .status-table .status-wait td.status-td, .status-table .job-failed td.status-td {
+  .status-table .signed-status-aborted a, .status-table .tolate-True a, .status-table .status-wait a, .status-table .job-failed a {
+    color: #fff;
+    text-transform: uppercase;
+    text-decoration: underline; }
+  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait .status-td, .status-table .job-failed .status-td {
     background-color: #C43C35 !important; }
 
 .status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed {
   background-color: #c4ffaa; }
-  .status-table .geninv-True td.status-td, .status-table .paid-status-resulted td.status-td, .status-table .job-completed td.status-td {
+  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td {
     background-color: #baff87; }
 
 .status-table .paid-status-paid {
   background-color: #ffb266; }
-  .status-table .paid-status-paid td.status-td {
+  .status-table .paid-status-paid .status-td {
     background-color: #ffb266; }
 
-.invoice_tolate a {
-  color: #fff;
-  text-transform: uppercase;
-  text-decoration: underline; }
+.status-header.signed-status-signed, .status-header.justified-True, .status-header.job-planned {
+  background-color: #5bc0de;
+  color: #fff; }
+
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed {
+  background-color: #d9534f !important;
+  color: #fff; }
+
+.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed {
+  background-color: #5cb85c;
+  color: #fff; }
+
+.status-header.paid-status-paid {
+  background-color: #f0ad4e;
+  color: #fff; }

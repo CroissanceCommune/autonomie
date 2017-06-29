@@ -20,6 +20,7 @@ $add-color-tertiary: #e3e3e3;
   box-shadow: 0px 1px 0px #2b638f;
   padding: 6px 18px;
   font-size: 16px;
+  margin-bottom: 2px;
 }
 .btn.secondary-action{
   padding: 4px 8px;
@@ -444,44 +445,66 @@ input[name=altdate], input[name=date]{
 /* Task lists css */
 $green_status_hard: #baff87;
 $green_status_light: #c4ffaa;
+$green_status_label: #5cb85c;
 $red_status_hard: #C43C35;
 $red_status_light: #f9aaaa;
+$red_status_label:#d9534f;
 $orange_status_hard: #ffb266;
 $orange_status_light: #ffb266;
+$orange_status_label: #f0ad4e;
 $blue_status_hard: #238bff;
 $blue_status_light: #7db9fd;
-
+$blue_status_label: #5bc0de;
 .status-table{
   td.status-td{
     width: 16px;
   }
   .signed-status-signed, .justified-True, .job-planned{
     background-color: $blue_status_light;
-    td.status-td{
+    .status-td{
       background-color: $blue_status_hard;
     }
   }
   .signed-status-aborted, .tolate-True, .status-wait, .job-failed{
     background-color: $red_status_light!important;
-    td.status-td{
+    a{
+      color:#fff;
+      text-transform:uppercase;
+      text-decoration:underline;
+    }
+    .status-td{
       background-color: $red_status_hard!important;
     }
   }
   .geninv-True, .paid-status-resulted, .job-completed{
     background-color: $green_status_light;
-    td.status-td{
+    .status-td{
       background-color: $green_status_hard;
     }
   }
   .paid-status-paid{
     background-color: $orange_status_light;
-    td.status-td{
+    .status-td{
       background-color: $orange_status_hard;
     }
   }
 }
-.invoice_tolate a{
-  color:#fff;
-  text-transform:uppercase;
-  text-decoration:underline;
+.status-header.status-valid:not(.paid-status-resulted):not(.paid-status-paid):not(.signed-status-signed):not(.justified-True){
 }
+.status-header.signed-status-signed, .status-header.justified-True, .status-header.job-planned{
+  background-color: $blue_status-label;
+  color: #fff;
+}
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed{
+  background-color: $red_status-label!important;
+  color: #fff;
+}
+.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed{
+  background-color: $green_status-label;
+  color: #fff;
+}
+.status-header.paid-status-paid{
+  background-color: $orange_status-label;
+  color: #fff;
+}
+

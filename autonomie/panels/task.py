@@ -27,6 +27,7 @@
 
 """
 
+
 def task_panel(context, request, task, bulk=False):
     """
         Task panel
@@ -35,14 +36,65 @@ def task_panel(context, request, task, bulk=False):
     # Check if we've got multiple positive tvas in our task
     multiple_tvas = len([val for val in tvas if val > 0]) > 1
     return dict(
-            task=task,
-            project=task.project,
-            company=task.project.company,
-            multiple_tvas=multiple_tvas,
-            tvas=tvas,
-            config=request.config,
-            bulk=bulk,
-            )
+        task=task,
+        project=task.project,
+        company=task.project.company,
+        multiple_tvas=multiple_tvas,
+        tvas=tvas,
+        config=request.config,
+        bulk=bulk,
+    )
+
+
+STATUS_LABELS = {
+    "wait": u"En attente de validation",
+    "valid": {
+        "estimation": u"En cours",
+        "invoice": u"En attente de paiement",
+        "cancelinvoice": u"Soldé",
+        "expense": u"Validée",
+    },
+    "aborted": u"Annulé",
+    "signed": u"Signé par le client",
+    "geninv": u"Factures générées",
+    "paid": u"Payée partiellement",
+    "resulted": u"Soldée",
+    "justified": u"Justificatifs reçus",
+}
+
+
+def task_title_panel(context, request, title):
+    """
+    Panel returning a label for the given context's status
+    """
+    from autonomie.views import render_api
+    status = render_api.major_status(context)
+    status_label = STATUS_LABELS.get(status)
+    if isinstance(status_label, dict):
+        status_label = status_label[context.type_]
+
+    icon = render_api.status_icon(context)
+
+    css = u'status status-%s' % context.status
+    if hasattr(context, 'paid_status'):
+        css += u' paid-status-%s' % context.paid_status
+        if hasattr(context, 'is_tolate'):
+            css += u' tolate-%s' % context.is_tolate()
+        elif hasattr(context, 'justified'):
+            css += u' justified-%s' % context.justified
+    elif hasattr(context, 'signed_status'):
+        css += u' signed-status-%s geninv' % (
+            context.signed_status,
+            context.geninv,
+        )
+
+    return dict(
+        title=title,
+        item=context,
+        css=css,
+        icon=icon,
+        status_label=status_label
+    )
 
 
 def includeme(config):
@@ -53,3 +105,8 @@ def includeme(config):
         panel_name = "{0}_html".format(document_type)
         template = "panels/{0}.mako".format(document_type)
         config.add_panel(task_panel, panel_name, renderer=template)
+    config.add_panel(
+        task_title_panel,
+        "task_title_panel",
+        renderer="panels/task_title_panel.mako",
+    )

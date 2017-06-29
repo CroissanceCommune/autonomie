@@ -209,7 +209,7 @@ class FileEditView(FileUploadView):
         self.request.session.flash(self.valid_msg)
 
 
-def get_add_file_link(request, label=u"Attacher un fichier", perm="add_file"):
+def get_add_file_link(request, label=u"Attacher un fichier", perm="add.file"):
     """
         Add a button for file attachment
     """
@@ -233,7 +233,7 @@ def populate_actionmenu(context, request):
     request.actionmenu.add(
         ViewLink(
             label,
-            perm='view_file',
+            perm='view.file',
             path=context.parent.type_,
             id=context.parent.id
         )
@@ -241,7 +241,7 @@ def populate_actionmenu(context, request):
     request.actionmenu.add(
         ViewLink(
             u"Modifier",
-            perm=u'edit_file',
+            perm=u'edit.file',
             path="file",
             id=context.id,
             _query=dict(action='edit'),
@@ -250,7 +250,7 @@ def populate_actionmenu(context, request):
     request.actionmenu.add(
         ViewLink(
             u"Supprimer le fichier",
-            perm=u'edit_file',
+            perm=u'edit.file',
             path="file",
             confirm=u"Êtes-vous sûr de vouloir supprimer ce fichier ?",
             id=context.id,
@@ -297,18 +297,18 @@ def includeme(config):
     config.add_view(
         file_view,
         route_name="file",
-        permission='view_file',
+        permission='view.file',
         renderer="file.mako",
     )
     config.add_view(
         file_dl_view,
         route_name='filepng',
-        permission='view_file',
+        permission='view.file',
     )
     config.add_view(
         file_dl_view,
         route_name='file',
-        permission='view_file',
+        permission='view.file',
         request_param='action=download',
     )
     config.add_view(
@@ -319,13 +319,13 @@ def includeme(config):
     config.add_view(
         FileEditView,
         route_name="file",
-        permission='edit_file',
+        permission='edit.file',
         renderer="base/formpage.mako",
         request_param='action=edit',
     )
     config.add_view(
         file_delete_view,
         route_name='file',
-        permission='edit_file',
+        permission='edit.file',
         request_param='action=delete',
     )

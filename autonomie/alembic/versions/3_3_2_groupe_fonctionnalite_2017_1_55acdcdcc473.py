@@ -190,6 +190,9 @@ def _upgrade_expenses(session):
                     payment.user_id = expense.status_user_id
                     session.merge(payment)
             expense.status = 'valid'
+        else:
+            expense.paid_status = 'waiting'
+        expense.justified = False
         session.merge(expense)
 
 

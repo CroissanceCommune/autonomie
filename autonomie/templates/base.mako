@@ -42,7 +42,9 @@
 
     <%block name="css" />
   </head>
-  <body>
+  <body
+      class="${request.matched_route.name}-view"
+      >
     ${request.layout_manager.render_panel('menu')}
     ${request.layout_manager.render_panel('submenu')}
     <%block name="headtitle">
@@ -52,7 +54,7 @@
       </h2>
     </div>
     </%block>
-    <div class="container-fluid">
+    <div class="container-fluid page-content">
         <div class='subnav hidden-print'>
         <%block name="actionmenu">
         % if action_menu is not UNDEFINED and not action_menu.void():
@@ -110,5 +112,6 @@
       % endif
       <%block name='footerjs' />
     </script>
+    <%block name='footer' />
   </body>
 </html>

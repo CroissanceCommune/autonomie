@@ -42,21 +42,21 @@
         ${form|n}
     </div>
     <div class='col-md-4'>
-        <table class='table table-bordered'>
+        <table class='table table-bordered status-table'>
             <tr>
-                <td class='invoice_resulted'><br /></td>
+                <td class='paid-status-resulted'><br /></td>
                 <td>Factures payées</td>
             </tr>
             <tr>
-                <td class='invoice_paid'><br /></td>
+                <td class='paid-status-paid'><br /></td>
                 <td>Factures payées partiellement</td>
             </tr>
             <tr>
-                <td class='invoice_notpaid'><br /></td>
+                <td class=''><br /></td>
                 <td>Factures non payées depuis moins de 45 jours</td>
             </tr>
             <tr>
-                <td class='invoice_tolate'><br /></td>
+                <td class='tolate-True'><br /></td>
                 <td>Factures non payées depuis plus de 45 jours</td>
             </tr>
         </table>

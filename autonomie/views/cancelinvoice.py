@@ -59,7 +59,6 @@ from autonomie.views.invoice import (
 )
 from autonomie.views.taskaction import (
     TaskFormView,
-    context_is_editable,
     populate_actionmenu,
     task_pdf_view,
     get_task_html_view,
@@ -167,7 +166,7 @@ class CancelInvoiceEdit(TaskFormView):
         return u"Édition de l'avoir {task.name}".format(task=self.context)
 
     def before(self, form):
-        if not context_is_editable(self.request):
+        if not self.request.has_permission('edit.cancelinvoice'):
             raise HTTPFound(
                 self.request.route_path(
                     "cancelinvoice",
@@ -291,21 +290,21 @@ def includeme(config):
         CancelInvoiceAdd,
         route_name="project_cancelinvoices",
         renderer="tasks/edit.mako",
-        permission="add_cancelinvoice",
+        permission="add.cancelinvoice",
     )
 
     config.add_view(
         CancelInvoiceEdit,
         route_name='cancelinvoice',
         renderer="tasks/edit.mako",
-        permission='edit_cancelinvoice',
+        permission='edit.cancelinvoice',
     )
 
     config.add_view(
         CancelInvoiceStatusView,
         route_name='cancelinvoice',
         request_param='action=status',
-        permission='edit_cancelinvoice',
+        permission='edit.cancelinvoice',
     )
 
     config.add_view(
@@ -321,7 +320,7 @@ def includeme(config):
         make_task_delete_view(delete_msg),
         route_name='cancelinvoice',
         request_param='action=delete',
-        permission='delete_invoice',
+        permission='delete.invoice',
     )
 
     config.add_view(
@@ -344,7 +343,7 @@ def includeme(config):
         FileUploadView,
         route_name="cancelinvoice",
         renderer='base/formpage.mako',
-        permission='edit_cancelinvoice',
+        permission='edit.cancelinvoice',
         request_param='action=attach_file',
     )
 
@@ -352,13 +351,13 @@ def includeme(config):
         task_pdf_view,
         route_name='cancelinvoice',
         request_param='view=pdf',
-        permission='view_cancelinvoice',
+        permission='view.cancelinvoice',
     )
 
     config.add_view(
         get_task_html_view(InvoiceFormActions),
         route_name='cancelinvoice',
         renderer='tasks/view_only.mako',
-        permission='view_cancelinvoice',
+        permission='view.cancelinvoice',
         request_param='view=html',
     )

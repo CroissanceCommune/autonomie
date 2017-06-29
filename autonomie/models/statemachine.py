@@ -58,7 +58,7 @@ class State(object):
         return True if this state assignement on context is allowed
         in the current request
 
-        :param obj context: An object with acls
+        :param obj context: An object with acl
         :param obj request: The Pyramid request object
         :returns: True/False
         :rtype: bool

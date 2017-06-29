@@ -522,13 +522,8 @@ class ExpenseSheetView(BaseFormView):
                     func = getattr(self, "_%s_btn" % action.name)
                     btns.append(func())
 
-        for action in ('paid',):
-            if (
-                self.request.has_permission('set_paid.estimation') and
-                self.context.status == 'valid' and
-                self.context.paid_status != 'resulted'
-            ):
-                btns.append(self._paid_btn())
+        if self.request.has_permission('add_payment.expense'):
+            btns.append(self._paid_btn())
         return btns
 
     def _reset_btn(self):
@@ -602,7 +597,7 @@ perdues) ?")
         """
             return True if the current context is editable by the current user
         """
-        return self.request.has_permission("edit_expense")
+        return self.request.has_permission("edit.expensesheet")
 
     @property
     def loadurl(self):
@@ -620,16 +615,16 @@ perdues) ?")
         """
         # Here we override the form counter to avoid field ids conflict
         form.set_appstruct(self.request.context.appstruct())
-        if self.request.has_permission('admin_expense'):
+        if self.request.has_permission('admin.expensesheet'):
             btn = ViewLink(
                 u"Revenir à la liste",
-                "admin_expense",
+                "admin.expensesheet",
                 path="expenses",
             )
         else:
             btn = ViewLink(
                 u"Revenir à la liste",
-                "view_expense",
+                "view.expensesheet",
                 path="company_expenses",
                 id=self.request.context.company.id,
             )
@@ -637,7 +632,7 @@ perdues) ?")
         btn = get_add_file_link(
             self.request,
             label=u"Déposer des justificatifs",
-            perm="view_expense",
+            perm="add.file",
         )
         self.request.actionmenu.add(btn)
 
@@ -1090,7 +1085,7 @@ def includeme(config):
     config.add_view(
         ExpenseList,
         route_name="expenses",
-        permission="admin_expense",
+        permission="admin.expensesheet",
         renderer="treasury/admin_expenses.mako",
     )
 
@@ -1104,28 +1099,28 @@ def includeme(config):
     config.add_view(
         expenses_access_view,
         route_name="user_expenses",
-        permission="add_expense",
+        permission="add.expense",
     )
 
     config.add_view(
         ExpenseSheetView,
         route_name="expensesheet",
         renderer="treasury/expense.mako",
-        permission="view_expense",
+        permission="view.expensesheet",
     )
 
     config.add_view(
         ExpenseStatusView,
         route_name="expensesheet",
         request_param='action=status',
-        permission="edit_expense",
+        permission="edit.expensesheet",
         renderer="base/formpage.mako",
     )
     config.add_view(
         ExpensePaymentView,
         route_name="expensesheet",
         request_param='action=payment',
-        permission="add_payment",
+        permission="add_payment.expensesheet",
         renderer="base/formpage.mako",
     )
 
@@ -1134,21 +1129,21 @@ def includeme(config):
         route_name="expensejson",
         xhr=True,
         renderer="json",
-        permission="view_expense",
+        permission="view.expensesheet",
     )
 
     # Xls export
     config.add_view(
         make_excel_view(excel_filename, XlsExpense),
         route_name="expensexlsx",
-        permission="view_expense",
+        permission="view.expensesheet",
     )
     # File attachment
     config.add_view(
         FileUploadView,
         route_name="expensesheet",
         renderer='base/formpage.mako',
-        permission='add_file',
+        permission='add.file',
         request_param='action=attach_file',
     )
 
@@ -1158,9 +1153,9 @@ def includeme(config):
         config,
         "expenseline",
         RestExpenseLine,
-        view_rights="view_expense",
-        add_rights="edit_expense",
-        edit_rights="edit_expense",
+        view_rights="view.expensesheet",
+        add_rights="edit.expensesheet",
+        edit_rights="edit.expensesheet",
     )
     config.add_view(redirect_to_expense, route_name="expenseline")
     config.add_view(redirect_to_expense, route_name="expenselines")
@@ -1169,9 +1164,9 @@ def includeme(config):
         config,
         "expensekmline",
         RestExpenseKmLine,
-        view_rights="view_expense",
-        add_rights="edit_expense",
-        edit_rights="edit_expense",
+        view_rights="view.expensesheet",
+        add_rights="edit.expensesheet",
+        edit_rights="edit.expensesheet",
     )
     config.add_view(redirect_to_expense, route_name="expensekmline")
     config.add_view(redirect_to_expense, route_name="expensekmlines")
@@ -1181,6 +1176,6 @@ def includeme(config):
         "bookmark",
         RestBookMarks,
         view_rights="list_expenses",
-        add_rights="add_expense",
-        edit_rights='add_expense',
+        add_rights="add.expense",
+        edit_rights='add.expense',
     )

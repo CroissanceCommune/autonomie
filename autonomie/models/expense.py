@@ -280,25 +280,25 @@ def build_state_machine():
     machine = StateMachine()
     draft = State(
         'draft',
-        'view_expense',
+        'view.expensesheet',
         status_attr='status',
         userid_attr='status_user_id',
     )
     wait = State(
         'wait',
-        'edit_expense',
+        'wait.expensesheet',
         status_attr='status',
         userid_attr='status_user_id',
     )
     valid = State(
         'valid',
-        "admin_expense",
+        "valid.expensesheet",
         status_attr='status',
         userid_attr='status_user_id',
     )
     invalid = State(
         'invalid',
-        "admin_expense",
+        "invalid.expensesheet",
         status_attr='status',
         userid_attr='status_user_id',
     )
@@ -314,9 +314,9 @@ def build_state_machine():
     machine.add_transition('wait', invalid)
     return machine
 
-#    draft = ('draft', 'view_expense',)
-#    reset = ('reset', 'edit_expense', None, False)
-#    wait = ('wait', 'edit_expense', )
+#    draft = ('draft', 'view.expensesheet',)
+#    reset = ('reset', 'edit.expensesheet', None, False)
+#    wait = ('wait', 'edit.expensesheet', )
 #    valid = ('valid', "admin_expense", )
 #    invalid = ('invalid', "admin_expense",)
 #    # Partiellement payé

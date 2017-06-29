@@ -268,7 +268,7 @@ def get_inv_state():
     )
     valid = ('valid', "valid.invoice", valid_callback,)
     invalid = ('invalid', "admin_invoice",)
-    paid = ('paid', "add_payment", record_payment,)
+    paid = ('paid', "add_payment.invoice", record_payment,)
     gencinv = (
         'gencinv',
         'edit.invoice',
@@ -276,7 +276,7 @@ def get_inv_state():
         False,
     )
     delete = ('delete', 'edit.invoice', None, False,)
-    resulted = ('resulted', "add_payment",)
+    resulted = ('resulted', "add_payment.invoice",)
     financial_year = (
         'set_financial_year', "admin_invoice", set_financial_year, False,
     )

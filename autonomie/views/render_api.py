@@ -47,24 +47,59 @@ STATUS = dict(
         ("wait", u"Validation demandée",),
         ("valid", u"Validé{genre}"),
         ('invalid', u"Invalidé{genre}",),
-        ("abort", u"Annulé{genre}",),
-        ("geninv", u"Facture générée",),
-        ("aboinv", u"Facture indiquée sans suite",),
-        ("aboest", u"Devis indiqué sans suite",),
-        ("paid", u"Paiement partiel reçu",),
-        ("resulted", u"Paiement reçu",),
+    )
+)
+STATUS_ICON = dict(
+    (
+        ('draft', u"bold"),
+        ('wait', u'time'),
+        ('valid', u''),
+        ('invalid', u'remove'),
+    )
+)
+
+ESTIMATION_STATUS = dict(
+    (
+        ("aborted", u"Annulé",),
+        ('signed', u'Signé',),
+        ('geninv', u"Factures générées"),
+    )
+)
+ESTIMATION_STATUS_ICON = dict(
+    (
+        ('aborted', 'trash'),
+        ('signed', 'ok'),
+        ('geninv', 'tasks'),
+    )
+)
+
+INVOICE_STATUS = dict(
+    (
+        ('paid', u"Payée partiellement",),
+        ("resulted", u"Soldée",),
+    )
+)
+INVOICE_STATUS_ICON = dict(
+    (
+        ('paid', u""),
+        ("resulted", u"ok"),
     )
 )
 EXPENSE_STATUS = dict(
     (
-        ("draft", u"Brouillon modifié",),
-        ("wait", u"Validation demandée",),
-        ("valid", u"Validé{genre}"),
-        ('invalid', u"Invalidé{genre}",),
-        ("paid", u"Paiement partiel notifié",),
-        ("resulted", u"Paiement intégral notifié",),
+        ('paid', u"Payée partiellement"),
+        ('resulted', u"Payée intégralement"),
+        ("justified", u"Justificatifs reçus"),
     )
 )
+EXPENSE_STATUS_ICON = dict(
+    (
+        ('paid', u""),
+        ('resulted', u"ok"),
+        ("justified", u"tasks"),
+    )
+)
+
 ACTIVITY_STATUS = dict((
     ("closed", u"Terminée",),
     ("planned", u"Planifiée",),
@@ -78,11 +113,11 @@ TASKTYPES_LABEL = dict(
 )
 
 
-def format_status(task, full=True):
+def format_main_status(task, full=True):
     """
         return a formatted status string
     """
-    status = task.CAEStatus
+    status = task.status
 
     if task.type_ == 'invoice':
         genre = u"e"
@@ -90,35 +125,183 @@ def format_status(task, full=True):
         genre = u""
 
     status_str = STATUS.get(status, DEF_STATUS).format(genre=genre)
-    suffix = u" par {0} le {1}".format(
-        format_account(task.statusPersonAccount),
-        format_date(task.statusDate)
-    )
     if full:
+        suffix = u" par {0} le {1}".format(
+            format_account(task.statusPersonAccount),
+            format_date(task.statusDate)
+        )
         status_str += suffix
 
     return status_str
+
+
+def format_estimation_status(estimation, full=True):
+    """
+    Return a formatted string for estimation specific status
+    """
+    if estimation.geninv:
+        return ESTIMATION_STATUS.get('geninv')
+    elif estimation.signed_status in ('aborted', 'signed'):
+        return ESTIMATION_STATUS.get(estimation.signed_status)
+    else:
+        return format_main_status(estimation, full)
+
+
+def format_invoice_status(invoice, full=True):
+    """
+    Return a formatted string for invoice specific status
+
+    :param obj invoice: An invoice instance
+    """
+    if invoice.paid_status in ('paid', 'resulted'):
+        return INVOICE_STATUS.get(invoice.paid_status)
+    else:
+        return format_main_status(invoice, full)
+
+
+def format_cancelinvoice_status(cinvoice, full=True):
+    """
+    Return a string representing the state of this cancelinvoice
+
+    :param obj cinvoice: A CancelInvoice instance
+    """
+    return format_main_status(cinvoice, full)
 
 
 def format_expense_status(expense, full=True):
     """
         Return a formatted status string for the expense
     """
-    status_str = EXPENSE_STATUS.get(
-        expense.status, DEF_STATUS
-    ).format(genre=u"e")
+    if expense.paid_status in ('paid', 'resulted'):
+        status_str = EXPENSE_STATUS.get(expense.paid_status)
+    else:
+        status_str = STATUS.get(expense.status, DEF_STATUS).format(genre='e')
+        if full:
+            if expense.status_user:
+                account = format_account(expense.status_user)
+            else:
+                account = format_account(expense.user)
+            date = format_date(expense.status_date)
+            suffix = u" par {0} le {1}.".format(account, date)
 
-    if full:
-        if expense.status_user:
-            account = format_account(expense.status_user)
-        else:
-            account = format_account(expense.user)
-        date = format_date(expense.status_date)
-        suffix = u" par {0} le {1}.".format(account, date)
-
-        status_str += suffix
+            status_str += suffix
 
     return status_str
+
+
+def format_status(element):
+    if element.type_ == 'estimation':
+        return format_estimation_status(element)
+    elif element.type_ == 'invoice':
+        return format_invoice_status(element)
+    elif element.type_ == 'cancelinvoice':
+        return format_cancelinvoice_status(element)
+    elif element.type_ == 'expensesheet':
+        return format_expense_status(element)
+
+
+def estimation_status_icon(estimation):
+    """
+    Return the name of the bootstrap icon matching the status
+    """
+    if estimation.geninv:
+        return ESTIMATION_STATUS_ICON.get("geninv")
+    elif estimation.signed_status != 'waiting':
+        return ESTIMATION_STATUS_ICON.get(estimation.signed_status)
+    else:
+        return STATUS_ICON.get(estimation.status)
+
+
+def invoice_status_icon(invoice):
+    """
+    Return the name of the bootstrap icon matching the status
+    """
+    if invoice.paid_status != 'waiting':
+        return INVOICE_STATUS_ICON.get(invoice.paid_status)
+    else:
+        return STATUS_ICON.get(invoice.status)
+
+
+def cancelinvoice_status_icon(cinvoice):
+    """
+    Return the name of the bootstrap icon matching the status
+    """
+    return STATUS_ICON.get(cinvoice.status)
+
+
+def expense_status_icon(expense):
+    """
+    Return the name of the bootstrap icon matching the status
+    """
+    if expense.paid_status != 'waiting':
+        return EXPENSE_STATUS_ICON.get(expense.paid_status)
+    elif expense.justified:
+        return EXPENSE_STATUS_ICON.get("justified")
+    else:
+        return STATUS_ICON.get(expense.status)
+
+
+def status_icon(element):
+    if element.type_ == 'estimation':
+        return estimation_status_icon(element)
+    elif element.type_ == 'invoice':
+        return invoice_status_icon(element)
+    elif element.type_ == 'cancelinvoice':
+        return cancelinvoice_status_icon(element)
+    elif element.type_ == 'expensesheet':
+        return expense_status_icon(element)
+
+
+def estimation_get_major_status(estimation):
+    """
+    Return the most significant status for the given task
+    """
+    res = 'draft'
+    if estimation.geninv:
+        res = 'geninv'
+    elif estimation.signed_status != 'waiting':
+        res = estimation.signed_status
+    else:
+        res = estimation.status
+    return res
+
+
+def invoice_get_major_status(invoice):
+    """
+    Return the most significant status for the given task
+    """
+    res = 'draft'
+    if invoice.paid_status != 'waiting':
+        res = invoice.paid_status
+    else:
+        res = invoice.status
+    return res
+
+
+def cancelinvoice_get_major_status(cinvoice):
+    """
+    Return the most significant status for the given task
+    """
+    return cinvoice.status
+
+def expense_get_major_status(expense):
+    if expense.paid_status != 'waiting':
+        return expense.paid_status
+    elif expense.justified:
+        return 'justified'
+    else:
+        return expense.status
+
+
+def major_status(element):
+    if element.type_ == 'estimation':
+        return estimation_get_major_status(element)
+    elif element.type_ == 'invoice':
+        return invoice_get_major_status(element)
+    elif element.type_ == 'cancelinvoice':
+        return cancelinvoice_get_major_status(element)
+    elif element.type_ == 'expensesheet':
+        return expense_get_major_status(element)
 
 
 def format_activity_status(activity):
@@ -286,6 +469,20 @@ class Api(object):
     format_quantity = staticmethod(format_quantity)
     format_datetime = staticmethod(format_datetime)
     format_task_type = staticmethod(format_task_type)
+
+    format_estimation_status = staticmethod(format_estimation_status)
+    format_invoice_status = staticmethod(format_invoice_status)
+    format_cancelinvoice_status = staticmethod(format_cancelinvoice_status)
+    estimation_status_icon = staticmethod(estimation_status_icon)
+    estimation_get_major_status = staticmethod(estimation_get_major_status)
+    invoice_status_icon = staticmethod(invoice_status_icon)
+    invoice_get_major_status = staticmethod(invoice_get_major_status)
+    cancelinvoice_status_icon = staticmethod(cancelinvoice_status_icon)
+    cancelinvoice_get_major_status = staticmethod(
+        cancelinvoice_get_major_status)
+    major_status = staticmethod(major_status)
+    status_icon = staticmethod(status_icon)
+
     human_readable_filesize = staticmethod(human_readable_filesize)
     month_name = staticmethod(month_name)
     clean_html = staticmethod(clean_html)

@@ -25,6 +25,9 @@
 <%inherit file="/base.mako"></%inherit>
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
+<%block name="headtitle">
+${request.layout_manager.render_panel('task_title_panel', title=title)}
+</%block>
 <%block name="content">
 <% expense = request.context %>
 <style>

@@ -52,7 +52,7 @@ STATUS_LABELS = {
         "estimation": u"En cours",
         "invoice": u"En attente de paiement",
         "cancelinvoice": u"Soldé",
-        "expense": u"Validée",
+        "expensesheet": u"Validée",
     },
     "aborted": u"Annulé",
     "signed": u"Signé par le client",
@@ -83,10 +83,13 @@ def task_title_panel(context, request, title):
         elif hasattr(context, 'justified'):
             css += u' justified-%s' % context.justified
     elif hasattr(context, 'signed_status'):
-        css += u' signed-status-%s geninv' % (
+        css += u' signed-status-%s geninv-%s' % (
             context.signed_status,
             context.geninv,
         )
+    else:  # cancelinvoice
+        if status == 'valid':
+            css += ' paid-status-resulted'
 
     return dict(
         title=title,

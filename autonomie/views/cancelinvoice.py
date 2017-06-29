@@ -53,7 +53,7 @@ from autonomie.views import (
     BaseEditView,
 )
 from autonomie.exception import Forbidden
-from autonomie.views.invoice import (
+from autonomie.views.invoices.edit import (
     InvoiceFormActions,
     CommonInvoiceStatusView,
 )

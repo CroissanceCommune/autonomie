@@ -713,7 +713,7 @@ def includeme(config):
     config.add_view(
         get_task_html_view(InvoiceFormActions),
         route_name='invoice',
-        renderer='tasks/invoice_view_only.mako',
+        renderer='tasks/view_only.mako',
         permission='view.invoice',
         request_param='view=html',
     )

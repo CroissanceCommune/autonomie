@@ -127,22 +127,6 @@ class InvoiceService(object):
         task.date = datetime.date.today()
 
 
-def invoice_tolate(invoicedate, status):
-    """
-        Return True if a payment is expected since more than
-        45 days
-    """
-    res = False
-    if status in ('waiting', 'paid'):
-        today = datetime.date.today()
-        elapsed = today - invoicedate
-        if elapsed > datetime.timedelta(days=45):
-            res = True
-        else:
-            res = False
-    return res
-
-
 def translate_invoices(invoicequery, from_point):
     """
     Translate invoice numbers to 'from_point'
@@ -445,6 +429,21 @@ class Invoice(Task, InvoiceCompute):
         )
         return datas
 
+    def is_tolate(self):
+        """
+            Return True if a payment is expected since more than
+            45 days
+        """
+        res = False
+        if self.paid_status in ('waiting', 'paid'):
+            today = datetime.date.today()
+            elapsed = today - self.date
+            if elapsed > datetime.timedelta(days=45):
+                res = True
+            else:
+                res = False
+        return res
+
 
 @implementer(IPaidTask, IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
@@ -560,7 +559,7 @@ class CancelInvoice(Task, TaskCompute):
 
     def is_tolate(self):
         """
-            Return False
+        Return False
         """
         return False
 

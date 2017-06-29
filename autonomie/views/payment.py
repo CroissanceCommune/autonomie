@@ -48,7 +48,7 @@ def populate_invoice_payment_actionmenu(context, request):
     request.actionmenu.add(link)
     link = ViewLink(
         u"Modifier",
-        "edit_payment",
+        "edit.payment",
         path="payment",
         id=context.id,
         _query=dict(action="edit")
@@ -56,7 +56,7 @@ def populate_invoice_payment_actionmenu(context, request):
     request.actionmenu.add(link)
     link = ViewLink(
         u"Supprimer",
-        "delete_payment",
+        "delete.payment",
         path="payment",
         confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
         id=context.id,
@@ -135,7 +135,7 @@ def populate_expense_payment_actionmenu(context, request):
     request.actionmenu.add(link)
     link = ViewLink(
         u"Modifier",
-        "edit_expense_payment",
+        "edit.expensesheet_payment",
         path="expense_payment",
         id=context.id,
         _query=dict(action="edit")
@@ -143,7 +143,7 @@ def populate_expense_payment_actionmenu(context, request):
     request.actionmenu.add(link)
     link = ViewLink(
         u"Supprimer",
-        "edit_expense_payment",
+        "edit.expensesheet_payment",
         path="expense_payment",
         confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
         id=context.id,
@@ -222,39 +222,39 @@ def includeme(config):
     config.add_view(
         payment_view,
         route_name="payment",
-        permission="view_payment",
+        permission="view.payment",
         renderer="/payment.mako",
     )
     config.add_view(
         PaymentEdit,
         route_name="payment",
-        permission="edit_payment",
+        permission="edit.payment",
         request_param='action=edit',
         renderer="/base/formpage.mako",
     )
     config.add_view(
         payment_delete,
         route_name="payment",
-        permission="delete_payment",
+        permission="delete.payment",
         request_param="action=delete",
     )
 
     config.add_view(
         expense_payment_view,
         route_name="expense_payment",
-        permission="view_expense_payment",
+        permission="view.expensesheet_payment",
         renderer="/payment.mako",
     )
     config.add_view(
         ExpensePaymentEdit,
         route_name="expense_payment",
-        permission="edit_expense_payment",
+        permission="edit.expensesheet_payment",
         request_param='action=edit',
         renderer="/base/formpage.mako",
     )
     config.add_view(
         payment_delete,
         route_name="expense_payment",
-        permission="edit_payment",
+        permission="edit.payment",
         request_param="action=delete",
     )

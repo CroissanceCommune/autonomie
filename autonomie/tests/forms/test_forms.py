@@ -28,16 +28,6 @@ from autonomie.forms import (
     merge_session_with_post,
     flatten_appstruct,
 )
-from autonomie.utils.files import (
-    encode_path,
-    decode_path,
-    issubdir,
-    filesizeformat,
-)
-from autonomie.utils.rest import (
-    RestJsonRepr,
-    RestError,
-)
 
 
 def test_merge_session_with_post():
@@ -52,84 +42,3 @@ def test_merge_session_with_post():
 def test_flatten_appstruct():
     appstruct = {'key1':'value1', 'key2': {'key3': 'value3'}}
     assert flatten_appstruct(appstruct) == {'key1': 'value1', 'key3': 'value3'}
-
-
-def test_avatar(dbsession, config, get_csrf_request):
-    from autonomie.utils.avatar import get_avatar
-    config.testing_securitypolicy(userid="user1_login")
-    request = get_csrf_request()
-    request.dbsession = dbsession
-    avatar = get_avatar(request)
-    assert avatar.lastname == "user1_lastname"
-
-
-def test_load_value(dbsession):
-    from autonomie.models.config import get_config, Config
-    dbsession.add(Config(name="name", value="value"))
-    dbsession.flush()
-    all_ = get_config()
-    assert "name" in all_.keys()
-    assert all_["name"] == "value"
-
-
-def test_encode_decode():
-    st = u"$deù % ù$ùdeù % - /// //  \ \dekodok %spkoij  idje  ' kopk \""
-    encoded = encode_path(st)
-    assert decode_path(encoded) == st
-
-def test_issubdir():
-    assert(issubdir("/root/foo", "/root/foo/bar"))
-    assert(not issubdir("/root/foo", "/root/bar"))
-    assert(not issubdir("/root/foo", "/root/../../foo/bar"))
-
-def test_filesizeformat():
-    assert(filesizeformat(1024, 0) == "1ko")
-    assert(filesizeformat(1024, 1) == "1.0ko")
-    assert(filesizeformat(1024*1024, 0) == "1Mo")
-    assert(filesizeformat(1024*1024, 1) == "1.0Mo")
-
-
-class DummyModel(dict):
-    def appstruct(self):
-        return self
-
-
-class DummySchema:
-    def serialize(self, datadict):
-        return {'schemakey':datadict['schemakey']*2}
-
-    def bind(self, **params):
-        self.bind_params = params
-        return self
-
-
-class DummyJsonRepr(RestJsonRepr):
-    schema = DummySchema()
-
-
-def test_json():
-    datas = DummyModel(schemakey=10, otherkey="dummy")
-    jsonrepr = DummyJsonRepr(datas)
-    assert(set(jsonrepr.__json__('request').keys())\
-            .difference(datas.keys()) == set([]))
-
-def test_bind_params():
-    jsonrepr = DummyJsonRepr({}, bind_params=dict(test=5))
-    schema = jsonrepr.get_schema("request")
-    assert(schema.bind_params.keys() == ['test'])
-    jsonrepr = DummyJsonRepr({})
-    schema = jsonrepr.get_schema("request")
-    assert(schema.bind_params.keys() == ['request'])
-
-
-def test_it(config):
-    err = RestError({}, 151)
-    assert(err.status == u"151 Continue")
-    assert(err.content_type == 'application/json')
-
-
-def test_script_utils():
-    from autonomie.scripts.utils import get_value
-    args = {'--test': 'toto', '--': 'titi'}
-    assert get_value(args, 'test', '') == 'toto'
-    assert get_value(args, 'test1', 'test') == 'test'

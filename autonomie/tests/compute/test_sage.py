@@ -47,12 +47,7 @@ from autonomie.compute.sage import (
     SageExpensePaymentMain,
     SageExpensePaymentWaiver,
 )
-
-
-class Dummy(object):
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+from autonomie.test.tools import Dummy
 
 
 class DummyLine(Dummy, LineCompute):

@@ -63,7 +63,7 @@
                 <% ht = document.ht %>
                 <% tva = document.tva %>
                 <% ttc = document.ttc %>
-                <% status = document.CAEStatus %>
+                <% paid_status = getattr(document, 'paid_status', 'resulted') %>
                 <% date = document.date %>
                 <% type_ = document.type_ %>
                 <% prefix = document.prefix %>
@@ -76,15 +76,15 @@
                 <% customer_id = document.customer.id %>
                 <% customer_name = document.customer.get_label() %>
 
-                % if type_ == 'cancelinvoice' or status == 'resulted':
+                % if paid_status == 'resulted':
                     <tr class='invoice_resulted_tr'>
                         <td class='invoice_resulted'>
                         </td>
-                % elif invoice_tolate(date, status):
+                % elif document.is_tolate():
                     <tr class='invoice_tolate_tr'>
                         <td class='invoice_tolate'>
                         </td>
-                % elif status == 'paid':
+                % elif paid_status == 'paid':
                     <tr class='invoice_paid_tr'>
                         <td class='invoice_paid'>
                         </td>
@@ -110,7 +110,7 @@
                 ${api.format_date(date)}
             </td>
             <td>
-                <a href="${request.route_path(document.type_, id=id_)}"
+                <a href="${request.route_path(document.type_, id=id_, _query={'view':'html'})}"
                     title='Voir le document'>
                     ${internal_number} (<small>${name}</small>)
                 </a>
@@ -135,7 +135,7 @@
                 ${api.format_amount(ttc, precision=5)|n}&nbsp;€
             </td>
             <td>
-                % if len(document.payments) == 1 and status == 'resulted':
+                % if len(document.payments) == 1 and paid_status == 'resulted':
                     <% payment = document.payments[0] %>
                     <% url = request.route_path('payment', id=payment.id) %>
                     <a href="${url}">

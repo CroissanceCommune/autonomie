@@ -93,6 +93,8 @@ AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.task",
     "autonomie.panels.company",
     "autonomie.panels.invoicetable",
+    'autonomie.panels.files',
+
 )
 
 AUTONOMIE_EVENT_MODULES = (

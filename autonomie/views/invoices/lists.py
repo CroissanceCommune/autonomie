@@ -161,6 +161,7 @@ class GlobalInvoicesList(BaseListView):
                 Customer.name, Customer.code, Customer.id
             )
         )
+        query = query.filter(Task.status == 'valid')
         return query
 
     def _get_company_id(self, appstruct):
@@ -200,8 +201,8 @@ class GlobalInvoicesList(BaseListView):
         return query
 
     def filter_customer(self, query, appstruct):
-        customer_id = appstruct['customer_id']
-        if customer_id not in (-1, colander.null, '-1'):
+        customer_id = appstruct.get('customer_id')
+        if customer_id not in (None, colander.null):
             query = query.filter(Task.customer_id == customer_id)
         return query
 
@@ -230,48 +231,24 @@ class GlobalInvoicesList(BaseListView):
             query = self._filter_paid(query)
         elif status == 'notpaid':
             query = self._filter_not_paid(query)
-        else:
-            query = self._filter_valid(query)
         return query
 
     def _filter_paid(self, query):
-        inv_paid = Invoice.paid_states
-        cinv_valid = CancelInvoice.valid_states
         return query.filter(
             or_(
                 and_(
-                    Task.CAEStatus.in_(inv_paid),
+                    Task.paid_status == 'resulted',
                     Task.type_ == 'invoice'
                 ),
-                and_(
-                    Task.CAEStatus.in_(cinv_valid),
-                    Task.type_ == 'cancelinvoice',
-                ),
+                Task.type_ == 'cancelinvoice',
             )
         )
 
     def _filter_not_paid(self, query):
-        inv_notpaid = Invoice.not_paid_states
         return query.filter(
-            Task.CAEStatus.in_(inv_notpaid)
+            Task.paid_status.in_(('waiting', 'paid'))
         ).filter(
             Task.type_ == 'invoice'
-        )
-
-    def _filter_valid(self, query):
-        inv_validated = Invoice.valid_states
-        cinv_valid = CancelInvoice.valid_states
-        return query.filter(
-            or_(
-                and_(
-                    Task.CAEStatus.in_(inv_validated),
-                    Task.type_ == 'invoice'
-                ),
-                and_(
-                    Task.CAEStatus.in_(cinv_valid),
-                    Task.type_ == 'cancelinvoice'
-                ),
-            )
         )
 
     def filter_doctype(self, query, appstruct):

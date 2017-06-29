@@ -51,6 +51,7 @@ from autonomie.forms.invoices import (
     get_invoice_schema,
 )
 from autonomie.forms.task import (
+    get_new_task_schema,
     get_invoice_appstruct,
     get_invoice_dbdatas,
 )
@@ -67,12 +68,12 @@ from autonomie.forms.payments import (
 from autonomie.views import (
     submit_btn,
     BaseEditView,
+    BaseFormView,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
     TaskFormView,
     TaskFormActions,
-    context_is_editable,
     TaskStatusView,
     populate_actionmenu,
     task_pdf_view,
@@ -263,7 +264,7 @@ class InvoiceFormActions(TaskFormActions):
             the payment mode
         """
 
-        if self.request.has_permission("add_payment"):
+        if self.request.has_permission("add_payment.invoice"):
             form = self._paid_form()
             title = u"Notifier un paiement"
             popup = PopUp("paidform", title, form.render())
@@ -293,21 +294,13 @@ class InvoiceFormActions(TaskFormActions):
             )
 
 
-class InvoiceAdd(TaskFormView):
+class InvoiceAdd(BaseFormView):
     """
         Invoice Add view
     """
     title = "Nouvelle facture"
-    schema = get_invoice_schema()
+    schema = get_new_task_schema()
     buttons = (submit_btn,)
-    model = Invoice
-    add_template_vars = ('edit', )
-    form_actions_factory = InvoiceFormActions
-
-    @property
-    def company(self):
-        # Current context is a project
-        return self.context.company
 
     def before(self, form):
         super(InvoiceAdd, self).before(form)
@@ -370,7 +363,7 @@ class InvoiceEdit(TaskFormView):
         return u"Édition de la facture {task.name}".format(task=self.context)
 
     def before(self, form):
-        if not context_is_editable(self.request):
+        if not self.request.has_permission('edit.invoice'):
             raise HTTPFound(
                 self.request.route_path(
                     "invoice",
@@ -644,7 +637,7 @@ def includeme(config):
         InvoiceEdit,
         route_name="invoice",
         renderer='tasks/edit.mako',
-        permission='edit_invoice',
+        permission='edit.invoice',
     )
 
     delete_msg = u"La facture {task.name} a bien été supprimée."
@@ -652,21 +645,21 @@ def includeme(config):
         make_task_delete_view(delete_msg),
         route_name='invoice',
         request_param='action=delete',
-        permission='delete_invoice',
+        permission='delete.invoice',
     )
 
     config.add_view(
         InvoiceStatusView,
         route_name='invoice',
         request_param='action=status',
-        permission='edit_invoice'
+        permission='edit.invoice'
     )
 
     config.add_view(
         duplicate,
         route_name="invoice",
         request_param='action=duplicate',
-        permission="edit_invoice",
+        permission="edit.invoice",
         renderer='base/formpage.mako',
     )
 
@@ -690,7 +683,7 @@ def includeme(config):
         register_payment,
         route_name="invoice",
         request_param='action=payment',
-        permission="add_payment",
+        permission="add_payment.invoice",
         renderer='base/formpage.mako',
     )
 
@@ -698,7 +691,7 @@ def includeme(config):
         FileUploadView,
         route_name="invoice",
         renderer='base/formpage.mako',
-        permission='edit_invoice',
+        permission='add.file',
         request_param='action=attach_file',
     )
 
@@ -714,13 +707,13 @@ def includeme(config):
         task_pdf_view,
         route_name='invoice',
         request_param='view=pdf',
-        permission='view_invoice',
+        permission='view.invoice',
     )
 
     config.add_view(
         get_task_html_view(InvoiceFormActions),
         route_name='invoice',
-        renderer='tasks/view_only.mako',
-        permission='view_invoice',
+        renderer='tasks/invoice_view_only.mako',
+        permission='view.invoice',
         request_param='view=html',
     )

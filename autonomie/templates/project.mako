@@ -71,7 +71,11 @@
             </div>
         % endif
     </td>
+    % if api.has_permission('edit.estimation', task):
     <% view_url = request.route_path(task.type_, id=task.id) %>
+    % else:
+    <% view_url = request.route_path(task.type_, id=task.id, _query={'view': 'html'}) %>
+    % endif
 
         <td
             class='rowlink'
@@ -81,24 +85,20 @@
         <td
             class='rowlink hidden-xs'
             onclick="document.location='${view_url}'">
-        %if task.is_cancelled():
-            <span class="label label-important">
-                <i class="glyphicon glyphicon-white icon-remove"></i>
-            </span>
-        %elif task.is_draft():
-            <i class='glyphicon glyphicon-bold'></i>
-        %elif task.CAEStatus == 'geninv':
-            <i class='glyphicon glyphicon-tasks'></i>
-        %elif task.is_waiting():
-            <i class='glyphicon glyphicon-time'></i>
-        %endif
+        % if api.status_icon(task):
+            <i class='glyphicon glyphicon-${api.status_icon(task)}'></i>
+        % endif
         ${api.format_status(task)}
     </td>
     ${action_cell(task, view_url)}
 </tr>
 </%def>
 <%def name='invoice_row(task)'>
+    % if api.has_permission('edit.%s' % task.type_, task):
     <% view_url = request.route_path(task.type_, id=task.id) %>
+    % else:
+    <% view_url = request.route_path(task.type_, id=task.id, _query={'view': 'html'}) %>
+    % endif
 <tr>
     <td>
         % if task.cancelinvoices or task.estimation:
@@ -122,24 +122,20 @@
     <td
         onclick="document.location='${view_url}'"
         class='rowlink hidden-xs'>
-        %if task.is_cancelled():
-            <span class="label label-important">
-                <i class="glyphicon glyphicon-white icon-remove"></i>
-            </span>
-        %elif task.is_resulted():
-            <i class='glyphicon glyphicon-ok'></i>
-        %elif task.is_draft():
-            <i class='glyphicon glyphicon-bold'></i>
-        %elif task.is_waiting():
-            <i class='glyphicon glyphicon-time'></i>
-        %endif
+        % if api.status_icon(task):
+            <i class='glyphicon glyphicon-${api.status_icon(task)}'></i>
+        % endif
         ${api.format_status(task)}
     </td>
     ${action_cell(task, view_url)}
 </tr>
 </%def>
 <%def name='cancelinvoice_row(task)'>
+    % if api.has_permission('edit.%s' % task.type_, task):
     <% view_url = request.route_path(task.type_, id=task.id) %>
+    % else:
+    <% view_url = request.route_path(task.type_, id=task.id, _query={'view': 'html'}) %>
+    % endif
 <tr>
     <td>
         <div
@@ -164,11 +160,9 @@
     <td
         onclick="document.location='${view_url}'"
         class='rowlink hidden-xs'>
-        %if task.is_valid():
-            <i class='glyphicon glyphicon-ok'></i>
-        %elif task.is_draft():
-            <i class='glyphicon glyphicon-bold'></i>
-        %endif
+        % if api.status_icon(task):
+            <i class='glyphicon glyphicon-${api.cancelinvoice_status_icon(task)}'></i>
+        % endif
         ${api.format_status(task)}</td>
         ${action_cell(task, view_url)}
 </tr>
@@ -398,7 +392,7 @@
                             <dt>Taille du fichier</dt><dd>${api.human_readable_filesize(child.size)}</dd>
                             <dt>Dernière modification</dt><dd>${api.format_date(child.updated_at)}</dd>
                         </dl>
-                          % if api.has_permission('edit_file', child):
+                          % if api.has_permission('edit.file', child):
                               <a class='btn btn-default btn-small'
                                   href="${request.route_path('file', id=child.id)}">
                                   <i class='glyphicon glyphicon-pencil'></i> Voir/modifier
@@ -408,7 +402,7 @@
                                   href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
                                   <i class='glyphicon glyphicon-download'></i> Télécharger
                               </a>
-                          % if api.has_permission('edit_file', child):
+                          % if api.has_permission('edit.file', child):
                               <a class='btn btn-small btn-danger'
                                     href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}"
                                     onclick="return confirm('Supprimer ce fichier ?');">

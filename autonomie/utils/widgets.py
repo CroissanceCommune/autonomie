@@ -153,7 +153,10 @@ class ViewLink(Widget, PermWidget):
             Returns the button's url
         """
         request = self.request or request
-        if self.path:
+
+        if 'referer' in self.url_kw and request.referer is not None:
+            return request.referer
+        elif self.path:
             return request.route_path(self.path, **self.url_kw)
         else:
             return u"#{0}".format(self.perm)

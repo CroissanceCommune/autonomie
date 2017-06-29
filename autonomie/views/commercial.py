@@ -144,7 +144,7 @@ class DisplayCommercialHandling(BaseView):
         """
             Query for estimations where an invoice has been generated
         """
-        return self.estimations().filter(Estimation.CAEStatus == 'geninv')
+        return self.estimations().filter(Estimation.geninv == True)
 
     def customers(self):
         """

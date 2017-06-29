@@ -133,21 +133,6 @@ def context_is_task(context):
     return context.__name__ in DOCUMENT_TYPES
 
 
-def context_is_editable(request):
-    """
-       Return True if the current task can be edited by the current user
-    """
-    if not context_is_task(request.context):
-        return True
-    elif request.context.is_editable():
-        return True
-    elif request.has_permission('validate._%s' % request.context.__name__):
-        # MAnager has the right to manage waiting task
-        if request.context.is_waiting():
-            return True
-    return False
-
-
 class TaskFormActions(object):
     """
         Tool to build the form action buttons regarding the context and
@@ -394,7 +379,7 @@ class StatusView(BaseView):
 
     def notify(self, item, status):
         """
-            Notify the change to the registry
+        Notify the change to the registry
         """
         self.request.registry.notify(
             StatusChanged(
@@ -573,7 +558,7 @@ def populate_actionmenu(request):
         project = request.context
     request.actionmenu.add(get_project_redirect_btn(request, project.id))
     if context_is_task(request.context):
-        edit_perm = "edit_%s" % request.context.__name__
+        edit_perm = "edit.%s" % request.context.__name__
         request.actionmenu.add(
             get_add_file_link(request, perm=edit_perm)
         )
@@ -593,7 +578,7 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         from autonomie.resources import task_html_pdf_css
         task_html_pdf_css.need()
         # If the task is editable, we go the edit page
-        if context_is_editable(request):
+        if request.has_permission('edit.%s' % request.context.__name__):
             return HTTPFound(
                 request.route_path(
                     request.context.__name__,
@@ -672,7 +657,7 @@ def make_task_delete_view(valid_msg):
             )
         else:
             if task.type_ == 'invoice' and task.estimation is not None:
-                task.estimation.CAEStatus = 'valid'
+                task.estimation.status = 'valid'
                 request.dbsession.merge(task.estimation)
             request.dbsession.delete(task)
             message = valid_msg.format(task=task)

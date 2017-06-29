@@ -45,9 +45,9 @@ STATUS_OPTIONS = (
     ("all", u"Toutes les notes de dépense", ),
     ("wait", u'En attente de validation', ),
     ("valid", u'Validées', ),
+    ('justified', u"Justficatifs reçus"),
     ("paid", u"Partiellement payées", ),
     ("resulted", u'Payées', ),
-    ('justified', u"Justficatifs reçus"),
 )
 
 

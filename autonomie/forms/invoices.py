@@ -155,8 +155,8 @@ def get_invoice_schema():
     schema = TASKSCHEMA.clone()
     schema['lines']['lines'].doctype = "invoice"
 
-    title = u"Phase où insérer la facture"
-    schema['common']['phase_id'].title = title
+    # title = u"Phase où insérer la facture"
+    # schema['common']['phase_id'].title = title
     # Ref #689
     schema['common'].add_before('description', FINANCIAL_YEAR)
     schema['common'].add_before('description', PREFIX)
@@ -197,8 +197,8 @@ def get_cancel_invoice_schema():
     schema = TASKSCHEMA.clone()
     schema['lines']['lines'].doctype = "taskschema"
 
-    title = u"Phase où insérer l'avoir"
-    schema['common']['phase_id'].title = title
+    # title = u"Phase où insérer l'avoir"
+    # schema['common']['phase_id'].title = title
     # Ref #689
     schema['common'].add_before('description', FINANCIAL_YEAR)
     schema['common'].add_before('description', PREFIX)

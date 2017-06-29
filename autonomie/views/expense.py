@@ -1015,6 +1015,8 @@ class ExpenseList(BaseListView):
             query = query.filter(ExpenseSheet.paid_status == status)
         elif status == 'justified':
             query = query.filter(ExpenseSheet.justified == True)
+        else:
+            query = query.filter(ExpenseSheet.status.in_(('valid', 'wait')))
         return query
 
 

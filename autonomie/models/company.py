@@ -460,7 +460,7 @@ def company_node(**kw):
         colander.Integer(),
         widget=get_deferred_company_choices(widget_options),
         **kw
-        )
+    )
 
 
 # Customer node related tools
@@ -483,7 +483,7 @@ def deferred_fullcustomer_list_widget(node, kw):
 
 @colander.deferred
 def deferred_customer_list_widget(node, kw):
-    values = [(-1, u'Tous les clients'), ]
+    values = [('', u'Tous les clients'), ]
     company = kw['request'].context
     values.extend(((cust.id, cust.name) for cust in company.customers))
     return deform.widget.Select2Widget(
@@ -498,8 +498,7 @@ def deferred_company_customer_validator(node, kw):
     Ensure we don't query customers from other companies
     """
     company = kw['request'].context
-    values = [-1]
-    values.extend([customer.id for customer in company.customers])
+    values = [customer.id for customer in company.customers]
     return colander.OneOf(values)
 
 
@@ -523,6 +522,5 @@ def customer_node(is_admin=False):
         name='customer_id',
         widget=deferred_customer_widget,
         validator=deferred_customer_validator,
-        missing=-1,
-        default=-1
+        missing=colander.drop,
     )

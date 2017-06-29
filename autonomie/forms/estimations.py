@@ -38,10 +38,10 @@ from autonomie.forms.invoices import (
 
 STATUS_OPTIONS = (
     ('all', u"Tous les devis", ),
-    ('geninv', u"Devis concrétisés (avec facture)", ),
-    ('aborted', u"Devis annulés", ),
     ('waiting', u"Devis en cours", ),
     ('signed', u'Devis signé'),
+    ('geninv', u"Devis concrétisés (avec facture)", ),
+    ('aborted', u"Devis annulés", ),
 )
 
 
@@ -106,6 +106,7 @@ def get_list_schema(is_global=False):
         name='status',
         widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
         validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+        default='all',
         missing='all'
     ))
     node = forms.year_select_node(

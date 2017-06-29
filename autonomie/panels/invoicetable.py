@@ -20,7 +20,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 
-from autonomie.models.task.invoice import invoice_tolate
 
 def invoicetable_panel(context, request, records, is_admin_view=False):
     """
@@ -33,7 +32,6 @@ def invoicetable_panel(context, request, records, is_admin_view=False):
     ret_dict['totalht'] = sum(r.ht for r in records)
     ret_dict['totaltva'] = sum(r.tva for r in records)
     ret_dict['totalttc'] = sum(r.ttc for r in records)
-    ret_dict['invoice_tolate'] = invoice_tolate
     return ret_dict
 
 

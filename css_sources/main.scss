@@ -41,7 +41,6 @@ td.actions, th.actions{
   text-align:left;
   background-color:#f5f5f5;
   overflow:hidden;
-  margin-bottom: 7px;
 }
 .pagetitle h2{
   float:left;
@@ -52,6 +51,14 @@ td.actions, th.actions{
 .headmenu{
   border-radius: 0px;
   margin-bottom:0px;
+}
+.page-content{
+  padding-top: 7px;
+}
+.estimation-view{
+  .page-content{
+    background-color: #f8f8f8;
+  }
 }
 /* Le formulaire d'authentification */
 .authentication-form fieldset{
@@ -213,84 +220,36 @@ textarea{
 #grid_search_form  label.control-label{
     display: none;
 }
-/* Invoice list */
-.invoice_resulted, .estimation_geninv, .green_td{
-  background-color:#baff87;
-  width:36px;
-}
-.invoice_paid, .orange_td{
-  background-color:#ffb266;
-  width:36px;
-}
-.invoice_notpaid, .estimation_valid, .white_td{
-  background-color:#ffffff;
-  width:36px;
-}
-.invoice_tolate, .estimation_aboest, .red_td{
-  background-color:#C43C35;
-  width:36px;
-}
-.invoice_tolate a{
-  color:#fff;
-  text-transform:uppercase;
-  text-decoration:underline;
-}
-.invoice_resulted_tr, .estimation_geninv_tr, .green_tr{
-  background-color:#c4ffaa;
-}
-.green_text{
-  color: #c4ffaa;
-}
-.invoice_paid_tr, .orange_tr{
-  background-color:#ffb266;
-}
-.orange_text{
-  color: #ffb266;
-}
-.invoice_tolate_tr, .estimation_aboest_tr, .red_tr{
-  background-color:#f9aaaa;
-}
-.red_text{
-  color: #f9aaaa;
-}
-.grey_tr{
-  background-color: #bdbdbd;
-}
-.grey_text {
-  color: #888;
-}
-.invoice_cancelled_tr, {
-  background-color:#eeeeee;
-}
+/* Project page */
 .section-header{
   padding: 6px 2px;
   font-size: 12px;
-}
-.section-header a{
-    padding-left:10px;
-    padding-bottom:2px;
-    padding-top:2px;
-    color:#111;
-    font-weight:normal;
-    vertical-align:middle;
-    font-size:16px;
-    text-transform:capitalize;
-}
-.section-header a:hover{
-    text-decoration:none;
-    color:#333;
-    font-weight:bold;
-    background-color:#f5f5f5;
-}
-h3.floatted{
-    font-size:16px;
-    font-weight:100;
+  a{
+      padding-left:10px;
+      padding-bottom:2px;
+      padding-top:2px;
+      color:#111;
+      font-weight:normal;
+      vertical-align:middle;
+      font-size:16px;
+      text-transform:capitalize;
+  }
+  a:hover {
+      text-decoration:none;
+      color:#333;
+      font-weight:bold;
+      background-color:#f5f5f5;
+  }
 }
 .section-content{
     margin:4px;
     margin-left:27px;
     padding-left:10px;
     border-left:2px solid #d1d1d1;
+}
+h3.floatted{
+    font-size:16px;
+    font-weight:100;
 }
 form.deform{
   margin-bottom:0px;
@@ -467,3 +426,62 @@ input[name=altdate], input[name=date]{
 /* Responsive tags handling */
 .nav-tabs { min-width: 600px; }
 .nav-tabs-responsive { overflow: auto; }
+
+/* Task edition form */
+.task-edit{
+  background-color: #fff;
+  padding-bottom: 20vh;
+  min-height: 100vh;
+}
+.sticky-footer{
+  background-color: #f5f5f5;
+  position: fixed;
+  height: 15vh;
+  width: 100%;
+  bottom: 0px;
+}
+
+/* Task lists css */
+$green_status_hard: #baff87;
+$green_status_light: #c4ffaa;
+$red_status_hard: #C43C35;
+$red_status_light: #f9aaaa;
+$orange_status_hard: #ffb266;
+$orange_status_light: #ffb266;
+$blue_status_hard: #238bff;
+$blue_status_light: #7db9fd;
+
+.status-table{
+  td.status-td{
+    width: 16px;
+  }
+  .signed-status-signed, .justified-True, .job-planned{
+    background-color: $blue_status_light;
+    td.status-td{
+      background-color: $blue_status_hard;
+    }
+  }
+  .signed-status-aborted, .tolate-True, .status-wait, .job-failed{
+    background-color: $red_status_light!important;
+    td.status-td{
+      background-color: $red_status_hard!important;
+    }
+  }
+  .geninv-True, .paid-status-resulted, .job-completed{
+    background-color: $green_status_light;
+    td.status-td{
+      background-color: $green_status_hard;
+    }
+  }
+  .paid-status-paid{
+    background-color: $orange_status_light;
+    td.status-td{
+      background-color: $orange_status_hard;
+    }
+  }
+}
+.invoice_tolate a{
+  color:#fff;
+  text-transform:uppercase;
+  text-decoration:underline;
+}

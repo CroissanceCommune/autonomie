@@ -32,8 +32,7 @@ td.actions, th.actions {
   border-bottom: 1px solid #ddd;
   text-align: left;
   background-color: #f5f5f5;
-  overflow: hidden;
-  margin-bottom: 7px; }
+  overflow: hidden; }
 
 .pagetitle h2 {
   float: left;
@@ -44,6 +43,12 @@ td.actions, th.actions {
 .headmenu {
   border-radius: 0px;
   margin-bottom: 0px; }
+
+.page-content {
+  padding-top: 7px; }
+
+.estimation-view .page-content {
+  background-color: #f8f8f8; }
 
 /* Le formulaire d'authentification */
 .authentication-form fieldset {
@@ -205,84 +210,34 @@ textarea {
 #grid_search_form label.control-label {
   display: none; }
 
-/* Invoice list */
-.invoice_resulted, .estimation_geninv, .green_td {
-  background-color: #baff87;
-  width: 36px; }
-
-.invoice_paid, .orange_td {
-  background-color: #ffb266;
-  width: 36px; }
-
-.invoice_notpaid, .estimation_valid, .white_td {
-  background-color: #ffffff;
-  width: 36px; }
-
-.invoice_tolate, .estimation_aboest, .red_td {
-  background-color: #C43C35;
-  width: 36px; }
-
-.invoice_tolate a {
-  color: #fff;
-  text-transform: uppercase;
-  text-decoration: underline; }
-
-.invoice_resulted_tr, .estimation_geninv_tr, .green_tr {
-  background-color: #c4ffaa; }
-
-.green_text {
-  color: #c4ffaa; }
-
-.invoice_paid_tr, .orange_tr {
-  background-color: #ffb266; }
-
-.orange_text {
-  color: #ffb266; }
-
-.invoice_tolate_tr, .estimation_aboest_tr, .red_tr {
-  background-color: #f9aaaa; }
-
-.red_text {
-  color: #f9aaaa; }
-
-.grey_tr {
-  background-color: #bdbdbd; }
-
-.grey_text {
-  color: #888; }
-
-.invoice_cancelled_tr {
-  background-color: #eeeeee; }
-
+/* Project page */
 .section-header {
   padding: 6px 2px;
   font-size: 12px; }
-
-.section-header a {
-  padding-left: 10px;
-  padding-bottom: 2px;
-  padding-top: 2px;
-  color: #111;
-  font-weight: normal;
-  vertical-align: middle;
-  font-size: 16px;
-  text-transform: capitalize; }
-
-.section-header a:hover {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-  background-color: #f5f5f5; }
-
-h3.floatted {
-  font-size: 16px;
-  font-weight: 100; }
+  .section-header a {
+    padding-left: 10px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    color: #111;
+    font-weight: normal;
+    vertical-align: middle;
+    font-size: 16px;
+    text-transform: capitalize; }
+  .section-header a:hover {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    background-color: #f5f5f5; }
 
 .section-content {
   margin: 4px;
   margin-left: 27px;
   padding-left: 10px;
   border-left: 2px solid #d1d1d1; }
+
+h3.floatted {
+  font-size: 16px;
+  font-weight: 100; }
 
 form.deform {
   margin-bottom: 0px; }
@@ -460,3 +415,45 @@ input[name=altdate], input[name=date] {
 
 .nav-tabs-responsive {
   overflow: auto; }
+
+/* Task edition form */
+.task-edit {
+  background-color: #fff;
+  padding-bottom: 20vh;
+  min-height: 100vh; }
+
+.sticky-footer {
+  background-color: #f5f5f5;
+  position: fixed;
+  height: 15vh;
+  width: 100%;
+  bottom: 0px; }
+
+/* Task lists css */
+.status-table td.status-td {
+  width: 16px; }
+
+.status-table .signed-status-signed, .status-table .justified-True, .status-table .job-planned {
+  background-color: #7db9fd; }
+  .status-table .signed-status-signed td.status-td, .status-table .justified-True td.status-td, .status-table .job-planned td.status-td {
+    background-color: #238bff; }
+
+.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait, .status-table .job-failed {
+  background-color: #f9aaaa !important; }
+  .status-table .signed-status-aborted td.status-td, .status-table .tolate-True td.status-td, .status-table .status-wait td.status-td, .status-table .job-failed td.status-td {
+    background-color: #C43C35 !important; }
+
+.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed {
+  background-color: #c4ffaa; }
+  .status-table .geninv-True td.status-td, .status-table .paid-status-resulted td.status-td, .status-table .job-completed td.status-td {
+    background-color: #baff87; }
+
+.status-table .paid-status-paid {
+  background-color: #ffb266; }
+  .status-table .paid-status-paid td.status-td {
+    background-color: #ffb266; }
+
+.invoice_tolate a {
+  color: #fff;
+  text-transform: uppercase;
+  text-decoration: underline; }

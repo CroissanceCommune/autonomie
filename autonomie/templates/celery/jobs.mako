@@ -32,17 +32,17 @@
     </div>
 </div>
         <div class='col-md-4'>
-        <table class='table table-bordered'>
+        <table class='table table-bordered status-table'
             <tr>
-                <td class='white_tr'><br /></td>
+                <td class='job-planned'><br /></td>
                 <td>Tâches planifiées</td>
             </tr>
             <tr>
-                <td class='green_tr'><br /></td>
+                <td class='job-completed'><br /></td>
                 <td>Tâches terminées</td>
             </tr>
             <tr>
-                <td class='red_tr'><br /></td>
+                <td class='job-failed'><br /></td>
                 <td>Tâches échouées</td>
             </tr>
         </table>
@@ -51,7 +51,7 @@
 
 </%block>
 <%block name="content">
-<table class="table table-condensed table-hover">
+<table class="table table-condensed table-hover status-table">
     <thead>
         <tr>
             <th>${sortable(u"Date d'éxécution", "created_at")}</th>
@@ -65,14 +65,10 @@
             <% url = request.route_path('job', id=job.id) %>
             <% onclick = "document.location='{url}'".format(url=url) %>
             <%
-if job.status == 'planned':
-    css = "white_"
-elif job.status == 'failed':
-    css = "red_"
 elif job.status == 'completed':
     css = "green_"
 %>
-            <tr class='${css}tr'>
+            <tr class='job-${job.status}'>
                 <td onclick="${onclick}" class="rowlink">
                     ${api.format_datetime(job.created_at)}
                 </td>

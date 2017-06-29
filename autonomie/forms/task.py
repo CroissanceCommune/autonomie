@@ -111,9 +111,8 @@ TEMPLATES_URL = 'autonomie:deform_templates/'
 
 
 MAIN_INFOS_GRID = (
-    (('name', 6), ('phase_id', 6),),
     (('date', 6), ('financial_year', 3), ('prefix', 3), ),
-    (('customer_id', 6), ('address', 6),),
+    (('address', 6),),
     (('description', 12),),
     (('workplace', 6), (('mention_ids', 6)),),
     (('course', 12),),
@@ -149,6 +148,20 @@ def get_customers_from_request(request):
         if request.context.project is not None:
             customers = request.context.project.customers
     return customers
+
+
+@colander.deferred
+def deferred_default_customer(node, kw):
+    """
+    Return a default customer if there is one in the request GET params or if
+    there is only one in the project
+    """
+    request = kw['request']
+    customers = request.context.customers
+    if len(customers) == 1:
+        return customers[0].id
+    else:
+        return 0
 
 
 @colander.deferred
@@ -524,20 +537,6 @@ class TaskConfiguration(colander.MappingSchema):
     """
         Main fields to be configured
     """
-    name = colander.SchemaNode(
-        colander.String(),
-        title=u"Nom du document",
-        description=u"Ce nom n'apparaît pas dans le document final",
-        validator=colander.Length(max=255),
-        default=deferred_default_name,
-        missing="",
-        )
-    customer_id = colander.SchemaNode(
-        colander.Integer(),
-        title=u"Choix du client",
-        widget=deferred_customer_list,
-        validator=deferred_customer_validator
-    )
     address = forms.textarea_node(
         title=u"Nom et adresse du client",
         widget_options={'rows': 4}
@@ -554,12 +553,6 @@ class TaskConfiguration(colander.MappingSchema):
         widget=deferred_mention_select_widget,
         missing=colander.drop,
     )
-    phase_id = colander.SchemaNode(
-        colander.String(),
-        title=u"Phase où insérer le devis",
-        widget=deferred_phases_widget,
-        default=deferred_default_phase
-        )
     date = forms.today_node(title=u"Date du devis")
     description = forms.textarea_node(title=u"Objet du devis")
     course = colander.SchemaNode(
@@ -743,19 +736,55 @@ def get_estimation_schema():
     return schema
 
 
+class NewTaskSchema(colander.Schema):
+    """
+    schema used to initialize a new estimation
+    """
+    name = colander.SchemaNode(
+        colander.String(),
+        title=u"Nom du document",
+        description=u"Ce nom n'apparaît pas dans le document final",
+        validator=colander.Length(max=255),
+        default=deferred_default_name,
+        missing="",
+        )
+    phase_id = colander.SchemaNode(
+        colander.String(),
+        title=u"Dossier dans lequel insérer le document",
+        widget=deferred_phases_widget,
+        default=deferred_default_phase
+    )
+    customer_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Choix du client",
+        widget=deferred_customer_list,
+        validator=deferred_customer_validator,
+        default=deferred_default_customer,
+    )
+
+
+def get_new_task_schema():
+    """
+    Return the schema for adding tasks
+
+    :returns: The schema
+    """
+    return NewTaskSchema()
+
+
 #  Dans le formulaire de création de devis par exemple, on trouve
 #  aussi bien des TaskLine que des Estimation ou des DiscountLine et leur
 #  configuration est imbriquée. On a donc besoin de faire un mapping d'un
 #  dictionnaire contenant les modèles {'estimation':..., 'tasklines':...}
 #  vers un dictionnaire correspondant au formulaire en place.
 TASK_MATCHING_MAP = (
-    ('name', 'common'),
-    ('phase_id', 'common'),
+    # ('name', 'common'),
+    # ('phase_id', 'common'),
     ('date', 'common'),
     ('financial_year', 'common'),
     ('prefix', 'common'),
     ('description', 'common'),
-    ('customer_id', 'common'),
+    # ('customer_id', 'common'),
     ('address', 'common'),
     ('workplace', 'common'),
     ('course', 'common'),

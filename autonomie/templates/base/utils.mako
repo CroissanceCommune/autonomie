@@ -195,25 +195,24 @@
  % if parent_node is not None:
       % for child in parent_node.children:
           % if loop.first:
-              <ul class='list-unstyled'>
+              <ul>
           % endif
               % if child.type_ == 'file':
                   <li>
-                  % if api.has_permission('edit_file', child):
+                  % if api.has_permission('edit.file', child):
                       <a href="${request.route_path('file', id=child.id)}">${child.label}</a>
-                      <a class='btn btn-default btn-small'
-                          href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
+                      <a  href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
                           <i class='glyphicon glyphicon-download'></i>
                       </a>
                         % if delete:
-                            <a class='btn btn-small btn-danger'
+                            <a
                                 href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}"
                                 onclick="return confirm('Supprimer ce fichier ?');">
                             <i class='glyphicon glyphicon-trash'></i>
                           </a>
                       % endif
 
-                  % elif api.has_permission('view_file', child):
+                  % elif api.has_permission('view.file', child):
                       <a href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
                           ${child.label} <i class='glyphicon glyphicon-download'></i>
                       </a>

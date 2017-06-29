@@ -24,6 +24,7 @@
 <%namespace file="/base/utils.mako" import="definition_list" />
 <%block name="content">
 <dl class="dl-horizontal">
+    <dt>Enregistré par </dt><dd>${api.format_account(request.context.user)}</dd>
     <dt>Date</dt><dd>${api.format_date(request.context.date)}</dd>
     <dt>Mode de paiement</dt><dd>${request.context.mode}</dd>
     <dt>Montant</dt><dd>${api.format_amount(request.context.amount, precision=request.context.precision)|n}&nbsp;&euro;</dd>

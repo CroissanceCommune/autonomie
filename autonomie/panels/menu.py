@@ -352,7 +352,7 @@ def company_choice(request, companies, cid):
         )
         default = request.route_path("company", id=cid)
     html_attrs = {
-        'class': 'pull-left company-search',
+        'class': 'company-search',
         'id': "company-select-menu",
     }
     html_code = HTML.li(

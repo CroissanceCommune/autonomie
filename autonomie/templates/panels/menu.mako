@@ -58,6 +58,9 @@
     <div class="container-fluid">
 
         <div class="navbar-header">
+            <a class="navbar-brand" href='/'>
+                <i class='glyphicon glyphicon-white glyphicon-home'></i> Autonomie
+            </a>
             <button
                 type="button"
                 class="navbar-toggle collapsed"
@@ -69,7 +72,6 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href='/'><i class='glyphicon glyphicon-white icon-home'></i>Autonomie</a>
         </div>
 
         <nav class="navbar-collapse menu collapse ">
@@ -82,6 +84,9 @@
                       class="nav navbar-nav"
                     % endif
                     >
+                    <li>
+                    <a href='/'><i class='glyphicon glyphicon-white glyphicon-home'></i>Accueil</a>
+                    </li>
                     % for item in menu.items:
                         % if item.__type__ == 'item':
                             ${render_item(item)}

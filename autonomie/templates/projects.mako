@@ -32,7 +32,7 @@
             Ajouter un projet
         </button>
         <div class='collapse row' id="project-forms">
-            <div class='col-xs-12 col-lg-6'>
+            <div class='col-md-12 col-lg-6'>
                 <h2>Ajouter un projet</h2>
                 ${addform|n}
             </div>
@@ -133,4 +133,9 @@
     </tbody>
 </table>
 ${pager(records)}
+</%block>
+<%block name='footerjs'>
+$(function(){
+        $('input[name=search]').focus();
+});
 </%block>

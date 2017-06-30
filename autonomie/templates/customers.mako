@@ -26,9 +26,6 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<%block name='actionmenu'>
-## We place the search form in the actionmenu since there are a few fields
-</%block>
 <%block name='content'>
 <%
 ## We build the link with the current search arguments
@@ -59,7 +56,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
             <div class="tab-content">
 
                 <div role="tabpanel" class="tab-pane active row" id="companyForm">
-                    <div class='col-xs-12 col-lg-6'>
+                    <div class='col-md-12 col-lg-6'>
                         <div class='container'>
                             <h3>${forms[0][0]|n}</h3>
                             ${forms[0][1].render()|n}
@@ -67,7 +64,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane row" id="individualForm">
-                    <div class='col-xs-12 col-lg-6'>
+                    <div class='col-md-12 col-lg-6'>
                         <div class='container'>
                             <h3>${forms[1][0]|n}</h3>
                             ${forms[1][1].render()|n}
@@ -162,4 +159,9 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
     </tbody>
 </table>
 ${pager(records)}
+</%block>
+<%block name='footerjs'>
+$(function(){
+        $('input[name=search]').focus();
+});
 </%block>

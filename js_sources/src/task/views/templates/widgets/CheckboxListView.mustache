@@ -1,0 +1,30 @@
+<div class='form-group'>
+    {{#if title}}
+    <label>{{title}}</label>
+    {{/if}}
+    {{#if editable}}
+        {{#each options}}
+        <div class='checkbox'>
+            <label>
+            <input type='checkbox'
+                name='{{ ../field_name }}'
+                value='{{this.id}}'
+                {{#if this.selected}}checked{{/if}} /> {{this.label}}
+            </label>
+        </div>
+        {{#if ../description}}
+        <span class='help-block'>{{ ../description }}</span>
+        {{/if}}
+        {{else}}
+        <div></div>
+        {{/each }}
+    {{else}}
+        <ul>
+            {{#each options}}
+            {{#if this.selected}}
+            <li>{{this.label}}</li>
+            {{/if}}
+            {{/each }}
+        </ul>
+    {{/if}}
+</div>

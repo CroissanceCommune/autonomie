@@ -1,0 +1,17 @@
+{{#if editable}}
+    <div class='form-group date'>
+        <label for='altdate'>{{ title }}</label>
+        <input class="form-control" name="altdate" type="text" autocomplete="off" />
+        <input class="form-control" name="{{ field_name }}" type="hidden" />
+        {{#if description}}
+        <span class='help-block'>{{ description }}</span>
+        {{/if}}
+    </div>
+{{else}}
+    <div class='form-group date'>
+        <label>Date</label>
+        <div class='form-control'>
+            {{ date }}
+        </div>
+    </div>
+{{/if}}

@@ -21,6 +21,7 @@ class DefaultLayout(object):
 
 class OpaLayout(object):
     def __init__(self, context, request):
+        logger.debug("In the opa layout")
         opa_group.need()
 
 

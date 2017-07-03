@@ -1,0 +1,9 @@
+<div>
+{{#each buttons}}
+    <a class='btn btn-block {{this.css}}' href='{{ this.url }}'>
+    <i class='glyphicon glyphicon-{{this.icon}}'></i>
+    {{this.label}}
+    </a>
+    <br />
+{{/each}}
+</div>

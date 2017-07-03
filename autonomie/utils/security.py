@@ -96,7 +96,7 @@ DEFAULT_PERM = [
     (Allow, "group:contractor", ('visit',), ),
 ]
 DEFAULT_PERM_NEW = [
-    (Allow, "group:admin", 'admin'),
+    (Allow, "group:admin", ('admin', 'manage', 'admin_treasury')),
     (Allow, "group:manager", ('manage', 'admin_treasury')),
 ]
 

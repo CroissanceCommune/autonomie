@@ -25,7 +25,7 @@
 <%doc>
     Directory templates, list users and companies
 </%doc>
-<%inherit file="base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>

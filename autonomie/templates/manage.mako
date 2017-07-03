@@ -25,7 +25,7 @@
 <%doc>
     Template for the page showing the document waiting for approval
 </%doc>
-<%inherit file="/base.mako"></%inherit >
+<%inherit file="${context['main_template'].uri}" />
 <%block name="content">
 <br />
 <div class='row'>

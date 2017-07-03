@@ -20,7 +20,7 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%block name="content">
 <a class='pull-right btn btn-default'
     href="${request.route_path('competence_grid', id=request.context.id, _query={'action': 'radar'})}"

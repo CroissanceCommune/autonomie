@@ -25,7 +25,7 @@
     Include two forms, one for datas edition, the other for doctypes
     registration
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%namespace file="/base/utils.mako" import="format_filetable" />

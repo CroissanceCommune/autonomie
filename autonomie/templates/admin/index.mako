@@ -25,7 +25,7 @@
 <%doc>
     Admin index page template
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%block name='beforecontent'>
 ${request.layout_manager.render_panel('admin_nav', menus)}
 </%block>

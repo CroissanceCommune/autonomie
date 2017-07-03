@@ -25,7 +25,7 @@
 <%doc>
     Company index page shows last events and elapsed invoices
 </%doc>
-<%inherit file="base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="table_btn"/>

@@ -20,7 +20,7 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="autonomie:templates/base/utils.mako" import="format_text" />
 <%block name="content">
 <a class='btn btn-default pull-right hidden-print' href='#print' onclick="window.print()">

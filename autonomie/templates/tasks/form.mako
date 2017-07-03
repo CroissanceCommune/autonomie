@@ -1,9 +1,8 @@
 <%doc>
- * Copyright (C) 2012-2013 Croissance Commune
+    * Copyright (C) 2012-2016 Croissance Commune
  * Authors:
        * Arezki Feth <f.a@majerti.fr>;
        * Miotte Julien <j.m@majerti.fr>;
-       * Pettier Gabriel;
        * TJEBBES Gaston <g.t@majerti.fr>
 
  This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -21,32 +20,15 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
-<%doc>
-Template for holidays search
-</%doc>
 <%inherit file="${context['main_template'].uri}" />
-<%block name='content'>
-<div class='row' style="padding-top:10px;">
-    <div class='col-md-6 col-md-offset-3'>
-        ${form|n}
-        %if start_date and end_date:
-            <h3>Congés entre le ${api.format_date(start_date)} et le ${api.format_date(end_date)}</h3>
-        % endif
-    </div>
-</div>
-<div class='row'>
-    <div class='col-md-6 col-md-offset-3'>
-        % if holidays:
-        % for holiday in holidays:
-            %if holiday.user:
-                ${api.format_account(holiday.user)} : du ${api.format_date(max(holiday.start_date, start_date))} au ${api.format_date(min(holiday.end_date, end_date))}
-                <br />
-            % endif
-        % endfor
-    %else:
-        Aucun congés n'a été déclaré sur cette période
-    %endif
-    </div>
-</div>
+<%block name="content">
+<div id='js-main-area' class='task-edit'></div>
+</%block>
+<%block name='footer'>
+<script type='text/javascript'>
+var AppOption = {};
+AppOption['context_url'] = "${request.route_path('/api/v1/' + request.context.type_ + 's/{id}', id=request.context.id)}";
+AppOption['load_url'] = "${request.route_path('/api/v1/' + request.context.type_ + 's/{id}', id=request.context.id, _query={'form_options': '1'})}";
+</script>
+<script type='text/javascript' src="${request.static_url('autonomie:static/js/build/task.js')}" ></script>
 </%block>

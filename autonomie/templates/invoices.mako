@@ -25,7 +25,7 @@
 <%doc>
     Invoice List for a given company
 </%doc>
-<%inherit file="base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/pager.mako" import="pager"/>
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>

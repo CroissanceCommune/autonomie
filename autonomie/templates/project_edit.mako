@@ -22,7 +22,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 
-<%inherit file="base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="base/utils.mako" import="format_text" />
 <%block name='content'>
 <div class='row'>

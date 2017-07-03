@@ -25,7 +25,7 @@
 <%doc>
     company View page
 </%doc>
-<%inherit file="base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />
 <%namespace file="/base/utils.mako" import="format_company" />

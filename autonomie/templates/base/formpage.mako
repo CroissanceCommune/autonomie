@@ -25,7 +25,7 @@
 <%doc>
     Simple page for form rendering
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%block name="content">
 % if info_message != UNDEFINED:
 <div class="alert alert-success">

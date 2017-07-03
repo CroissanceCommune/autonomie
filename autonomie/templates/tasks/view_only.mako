@@ -24,7 +24,7 @@
 <%doc>
     Base template for task readonly display
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name="headtitle">
 ${request.layout_manager.render_panel('task_title_panel', title=title)}

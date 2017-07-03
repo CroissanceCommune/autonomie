@@ -23,7 +23,7 @@
 
     Estimation list page
 </%doc>
-<%inherit file="base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="format_text" />

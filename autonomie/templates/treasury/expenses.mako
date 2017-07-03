@@ -23,7 +23,7 @@
 </%doc>
 
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%block name="content">
 % if conf_msg is not UNDEFINED:
     <br /><br />

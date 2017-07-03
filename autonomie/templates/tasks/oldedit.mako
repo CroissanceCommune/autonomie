@@ -25,7 +25,7 @@
 <%doc>
     Template for estimation and invoice edition/creation
 </%doc>
-<%inherit file="/base.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="esc"/>
 <%namespace file="/base/utils.mako" import="address"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />

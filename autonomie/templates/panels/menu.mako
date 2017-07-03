@@ -58,7 +58,7 @@
     <div class="container-fluid">
 
         <div class="navbar-header">
-            <a class="navbar-brand" href='/'>
+            <a class="navbar-brand visible-xs" href='/'>
                 <i class='glyphicon glyphicon-white glyphicon-home'></i> Autonomie
             </a>
             <button

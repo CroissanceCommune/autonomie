@@ -252,6 +252,7 @@ def base_configure(config, dbsession, **settings):
 
     add_static_views(config, settings)
 
+    config.include('autonomie.layouts')
     for module in AUTONOMIE_REQUEST_SUBSCRIBERS:
         config.include(module)
 
@@ -260,6 +261,7 @@ def base_configure(config, dbsession, **settings):
 
     for module in AUTONOMIE_PANELS_MODULES:
         config.include(module)
+
 
     for module in AUTONOMIE_EVENT_MODULES:
         config.include(module)

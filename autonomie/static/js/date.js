@@ -79,3 +79,16 @@ function getDateTimeFromIso(isoStr, dateFormat, timeFormat){
   }
   return strdatetime;
 }
+function dateToIso(dateObject){
+    var year = dateObject.getFullYear();
+    var month = dateObject.getMonth()+1;
+    var dt = dateObject.getDate();
+
+    if (dt < 10) {
+        dt = '0' + dt;
+    }
+    if (month < 10) {
+        month = '0' + month;
+    }
+    return year + "-" + month + "-" + dt;
+}

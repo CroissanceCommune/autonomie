@@ -352,9 +352,11 @@ header .navbar .nav > li > a{
   vertical-align: top;
   margin-bottom: 3px;
 }
-input[name=altdate], input[name=date]{
-  z-index: 1100;
-  position: relative;
+.modal{
+  input[name=altdate], input[name=date]{
+    z-index: 1100;
+    position: relative;
+  }
 }
 /* Affichage html de la sortie pdf des documents */
 .task_view img{

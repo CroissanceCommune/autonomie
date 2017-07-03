@@ -339,7 +339,7 @@ header .navbar .nav > li > a {
   vertical-align: top;
   margin-bottom: 3px; }
 
-input[name=altdate], input[name=date] {
+.modal input[name=altdate], .modal input[name=date] {
   z-index: 1100;
   position: relative; }
 

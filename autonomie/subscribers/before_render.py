@@ -32,7 +32,6 @@ import logging
 from pyramid.events import BeforeRender
 from pyramid.threadlocal import get_current_request
 
-from autonomie.resources import main_group
 from autonomie.views.render_api import Api
 
 log = logging.getLogger(__name__)
@@ -60,16 +59,9 @@ def add_api(event):
         event['api'] = api
 
 
-def add_main_js(event):
-    """
-        Add the main required javascript dependency
-    """
-    main_group.need()
-
-
 def includeme(config):
     """
         Bind the subscribers to the pyramid events
     """
-    for before in (add_translation, add_api, add_main_js):
+    for before in (add_translation, add_api):
         config.add_subscriber(before, BeforeRender)

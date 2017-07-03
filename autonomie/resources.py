@@ -28,6 +28,7 @@ from fanstatic import Group
 from fanstatic import Library
 from fanstatic import Resource
 from js.bootstrap import (
+    bootstrap_css,
     bootstrap,
 )
 from js.jquery import jquery
@@ -58,12 +59,36 @@ def get_resource(filepath, minified=None, depends=None):
     )
 
 
+# Css resources
+font_awesome_css = get_resource("css/font-awesome.min.css")
+main_css = get_resource(
+    "css/main.css",
+    depends=[
+        bootstrap_css,
+        jqueryui_bootstrap_theme,
+        font_awesome_css,
+    ]
+)
+
+# Js static resources
+_date = get_resource("js/date.js")
+_math = get_resource("js/math.js")
+_dom = get_resource("js/dom.js", depends=[jquery])
+
+
+def get_opa_group():
+    """
+    Return the resources used on one page applications pages
+    """
+    js_tools = Group([_math, _date])
+    return Group([main_css, js_tools])
+
+
 def get_main_group():
     """
     Return the main resource Group that will be used on all pages
     """
     # UnPackaged external libraries
-    font_awesome_css = get_resource("css/font-awesome.min.css")
     underscore = get_resource(
         "js/vendors/underscore.js",
         minified="js/vendors/underscore-min.js"
@@ -71,24 +96,12 @@ def get_main_group():
 
     main_js = get_resource(
         "js/main.js",
-        depends=[ui_dialog, ui_sortable, underscore]
-    )
-    main_css = get_resource(
-        "css/main.css",
-        depends=[
-            bootstrap,
-            jqueryui_bootstrap_theme,
-            font_awesome_css,
-        ]
+        depends=[ui_dialog, ui_sortable, underscore, timepicker_js, bootstrap]
     )
 
-    _date = get_resource("js/date.js", depends=[timepicker_js])
-    _dom = get_resource("js/dom.js", depends=[jquery])
-    _math = get_resource("js/math.js")
-    js_tools = Group([_dom, _math, _date])
+    js_tools = Group([main_js, _dom, _math, _date])
 
     return Group([
-        main_js,
         main_css,
         js_tools,
         jquery_form,
@@ -97,6 +110,7 @@ def get_main_group():
 
 
 main_group = get_main_group()
+opa_group = get_opa_group()
 
 
 jstree_js = get_resource(
@@ -275,3 +289,5 @@ competence_radar_js = get_module_resource(
 )
 
 admin_expense_js = get_module_resource("admin_expense")
+
+task_js = get_resource('js/build/task.js')

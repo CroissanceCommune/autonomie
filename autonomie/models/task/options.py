@@ -49,3 +49,8 @@ le champ 'Conditions de paiement' du formulaire de création de devis ?",
             }
         }
     )
+
+    def __json__(self, request):
+        result = ConfigurableOption.__json__(self, request)
+        result['default'] = self.default
+        return result

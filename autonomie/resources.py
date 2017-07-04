@@ -212,7 +212,7 @@ def get_module_resource(module, tmpl=False, extra_depends=()):
     )
 
 
-duplicate = get_module_resource("duplicate")
+duplicate_js = get_module_resource("duplicate")
 discount = get_module_resource("discount", extra_depends=[jstree])
 address = get_module_resource("address")
 tva = get_module_resource("tva")
@@ -223,7 +223,7 @@ task = get_module_resource(
     extra_depends=[
         address,
         discount,
-        duplicate,
+        duplicate_js,
         tva,
     ]
 )

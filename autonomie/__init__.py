@@ -47,8 +47,11 @@ from autonomie_base.models.initialize import initialize_sql
 from autonomie.models import adjust_for_engine
 from autonomie.models.populate import populate_database
 from autonomie.models.config import get_config
-from autonomie.utils.avatar import get_groups
-from autonomie.utils.avatar import get_avatar
+from autonomie.utils.avatar import (
+    get_groups,
+    get_avatar,
+    get_current_company,
+)
 from autonomie.utils.session import get_session_factory
 from autonomie.utils.filedepot import (
     configure_filedepot,
@@ -58,20 +61,22 @@ from autonomie.utils.filedepot import (
 AUTONOMIE_MODULES = (
     "autonomie.views.activity",
     "autonomie.views.auth",
-    "autonomie.views.cancelinvoice",
     "autonomie.views.commercial",
     "autonomie.views.company",
     "autonomie.views.competence",
     "autonomie.views.csv_import",
     "autonomie.views.customer",
     "autonomie.views.estimations.estimation",
+    "autonomie.views.estimations.lists",
     "autonomie.views.estimations.rest_api",
     "autonomie.views.expense",
     "autonomie.views.files",
     "autonomie.views.holiday",
     "autonomie.views.index",
-    "autonomie.views.invoices.edit",
+    "autonomie.views.invoices.invoice",
+    "autonomie.views.invoices.cancelinvoice",
     "autonomie.views.invoices.lists",
+    "autonomie.views.invoices.rest_api",
     "autonomie.views.job",
     "autonomie.views.json",
     "autonomie.views.manage",
@@ -249,6 +254,11 @@ def base_configure(config, dbsession, **settings):
     config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
     config.set_request_property(get_avatar, 'user', reify=True)
     config.set_request_property(lambda _: get_config(), 'config', reify=True)
+    config.set_request_property(
+        get_current_company,
+        'current_company',
+        reify=True
+    )
 
     add_static_views(config, settings)
 

@@ -29,18 +29,12 @@
 <%block name='content'>
 <div class="project-view">
 <%def name="action_cell(task, view_url)">
-    <% pdf_url = request.route_path(\
-        task.type_,
-        id=task.id, \
-        _query=dict(view="pdf")) %>
-    <% del_url = request.route_path(\
-        task.type_,
-        id=task.id,
-        _query=dict(action="delete")) %>
+    <% pdf_url = request.route_path('/%ss/{id}.pdf' % task.type_, id=task.id) %>
+    <% del_url = request.route_path('/%ss/{id}/delete' % task.type_, id=task.id) %>
     <td class="actions">
         ${table_btn(view_url, \
         u"Voir/Modifier", \
-        u"Voir/éditer ce devis", \
+        u"Voir/éditer ce document", \
         u"glyphicon glyphicon-pencil")}
 
         ${table_btn( \
@@ -48,7 +42,7 @@
         u"PDF", \
         u"Télécharger la version PDF", \
         u"glyphicon glyphicon-file")}
-        %if task.is_deletable(request):
+        % if api.has_permission('delete', task):
             ${table_btn(\
             del_url,\
             u"Supprimer", \
@@ -56,7 +50,7 @@
             icon="glyphicon glyphicon-trash", \
             onclick=u"return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');",\
             css_class="btn-danger")}
-        %endif
+        % endif
     </td>
 </%def>
 
@@ -72,9 +66,9 @@
         % endif
     </td>
     % if api.has_permission('edit.estimation', task):
-    <% view_url = request.route_path(task.type_, id=task.id) %>
+    <% view_url = request.route_path('/estimations/{id}', id=task.id) %>
     % else:
-    <% view_url = request.route_path(task.type_, id=task.id, _query={'view': 'html'}) %>
+    <% view_url = request.route_path('/estimations/{id}.html', id=task.id) %>
     % endif
 
         <td
@@ -95,9 +89,9 @@
 </%def>
 <%def name='invoice_row(task)'>
     % if api.has_permission('edit.%s' % task.type_, task):
-    <% view_url = request.route_path(task.type_, id=task.id) %>
+    <% view_url = request.route_path('/invoices/{id}', id=task.id) %>
     % else:
-    <% view_url = request.route_path(task.type_, id=task.id, _query={'view': 'html'}) %>
+    <% view_url = request.route_path('/invoices/{id}.html', id=task.id) %>
     % endif
 <tr>
     <td>
@@ -132,9 +126,9 @@
 </%def>
 <%def name='cancelinvoice_row(task)'>
     % if api.has_permission('edit.%s' % task.type_, task):
-    <% view_url = request.route_path(task.type_, id=task.id) %>
+    <% view_url = request.route_path('/cancelinvoices/{id}', id=task.id) %>
     % else:
-    <% view_url = request.route_path(task.type_, id=task.id, _query={'view': 'html'}) %>
+    <% view_url = request.route_path('/cancelinvoices/{id}.html', id=task.id) %>
     % endif
 <tr>
     <td>

@@ -93,7 +93,7 @@
             % endif
             <td>${api.format_date(date)}</td>
             <td>
-                <a href="${request.route_path('estimation', id=id_, _query={'view':'html'})}"
+                <a href="${request.route_path('/estimations/{id}.html', id=id_)}"
                 title="Voir le document">
                 ${name} (<small>${internal_number}</small>)
                 </a>
@@ -117,7 +117,7 @@
              </td>
              <td class="actions">
                  <a class='btn btn-default'
-                     href='${request.route_path("estimation", id=id_, _query=dict(view="pdf"))}'
+                     href="${request.route_path('/estimations/{id}.pdf', id=id_)}"
                      title="Télécharger la version PDF">
                      <i class='glyphicon glyphicon-file'></i>
                  </a>

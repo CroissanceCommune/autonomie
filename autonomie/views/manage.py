@@ -46,10 +46,10 @@ def manage(request):
     invoices = Task.get_waiting_invoices().all()
 
     for item in estimations:
-        item.url = request.route_path(item.type_, id=item.id)
+        item.url = request.route_path('/estimations/{id}', id=item.id)
 
     for item in invoices:
-        item.url = request.route_path(item.type_, id=item.id)
+        item.url = request.route_path('/%ss/{id}' % item.type_, id=item.id)
 
     expenses = ExpenseSheet.query()\
         .filter(ExpenseSheet.status == 'wait')\

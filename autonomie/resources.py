@@ -223,7 +223,6 @@ task = get_module_resource(
     extra_depends=[
         address,
         discount,
-        duplicate_js,
         tva,
     ]
 )
